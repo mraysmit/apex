@@ -20,7 +20,7 @@ public class RecordMatcherTest {
     private TestRecordMatcher recordMatcher;
     private List<TestRecord> sourceRecords;
     private List<String> validatorNames;
-    private Map<String, Validator> validators;
+    private Map<String, Validator<Object>> validators;
 
     @BeforeEach
     public void setUp() {
@@ -29,10 +29,10 @@ public class RecordMatcherTest {
         validators.put("evenValidator", new EvenValidator("evenValidator"));
         validators.put("positiveValidator", new PositiveValidator("positiveValidator"));
         validators.put("greaterThanTenValidator", new GreaterThanTenValidator("greaterThanTenValidator"));
-        
+
         // Create record matcher
         recordMatcher = new TestRecordMatcher(validators);
-        
+
         // Create source records
         sourceRecords = Arrays.asList(
             new TestRecord(1),    // Odd, positive, not > 10
@@ -42,7 +42,7 @@ public class RecordMatcherTest {
             new TestRecord(-10),  // Even, negative, not > 10
             new TestRecord(15)    // Odd, positive, > 10
         );
-        
+
         // Create validator names
         validatorNames = Arrays.asList("evenValidator", "positiveValidator", "greaterThanTenValidator");
     }
@@ -51,7 +51,7 @@ public class RecordMatcherTest {
     public void testFindMatchingRecords() {
         // Test finding records that match any of the validators
         List<TestRecord> matchingRecords = recordMatcher.findMatchingRecords(sourceRecords, validatorNames);
-        
+
         // Verify the matching records
         assertNotNull(matchingRecords);
         assertEquals(5, matchingRecords.size());
@@ -60,7 +60,7 @@ public class RecordMatcherTest {
         assertTrue(matchingRecords.contains(new TestRecord(12)));   // Matches evenValidator, positiveValidator, and greaterThanTenValidator
         assertTrue(matchingRecords.contains(new TestRecord(-10)));  // Matches evenValidator
         assertTrue(matchingRecords.contains(new TestRecord(15)));   // Matches positiveValidator and greaterThanTenValidator
-        
+
         // Verify the non-matching record is not included
         assertFalse(matchingRecords.contains(new TestRecord(-5))); // Doesn't match any validator
     }
@@ -70,14 +70,14 @@ public class RecordMatcherTest {
         // Test finding records that match a subset of validators
         List<String> evenValidatorOnly = Collections.singletonList("evenValidator");
         List<TestRecord> matchingRecords = recordMatcher.findMatchingRecords(sourceRecords, evenValidatorOnly);
-        
+
         // Verify the matching records
         assertNotNull(matchingRecords);
         assertEquals(3, matchingRecords.size());
         assertTrue(matchingRecords.contains(new TestRecord(2)));    // Matches evenValidator
         assertTrue(matchingRecords.contains(new TestRecord(12)));   // Matches evenValidator
         assertTrue(matchingRecords.contains(new TestRecord(-10)));  // Matches evenValidator
-        
+
         // Verify the non-matching records are not included
         assertFalse(matchingRecords.contains(new TestRecord(1)));   // Doesn't match evenValidator
         assertFalse(matchingRecords.contains(new TestRecord(-5)));  // Doesn't match evenValidator
@@ -88,12 +88,12 @@ public class RecordMatcherTest {
     public void testFindNonMatchingRecords() {
         // Test finding records that don't match any of the validators
         List<TestRecord> nonMatchingRecords = recordMatcher.findNonMatchingRecords(sourceRecords, validatorNames);
-        
+
         // Verify the non-matching records
         assertNotNull(nonMatchingRecords);
         assertEquals(1, nonMatchingRecords.size());
         assertTrue(nonMatchingRecords.contains(new TestRecord(-5))); // Doesn't match any validator
-        
+
         // Verify the matching records are not included
         assertFalse(nonMatchingRecords.contains(new TestRecord(1)));    // Matches positiveValidator
         assertFalse(nonMatchingRecords.contains(new TestRecord(2)));    // Matches evenValidator and positiveValidator
@@ -107,14 +107,14 @@ public class RecordMatcherTest {
         // Test finding records that don't match a subset of validators
         List<String> evenValidatorOnly = Collections.singletonList("evenValidator");
         List<TestRecord> nonMatchingRecords = recordMatcher.findNonMatchingRecords(sourceRecords, evenValidatorOnly);
-        
+
         // Verify the non-matching records
         assertNotNull(nonMatchingRecords);
         assertEquals(3, nonMatchingRecords.size());
         assertTrue(nonMatchingRecords.contains(new TestRecord(1)));   // Doesn't match evenValidator
         assertTrue(nonMatchingRecords.contains(new TestRecord(-5)));  // Doesn't match evenValidator
         assertTrue(nonMatchingRecords.contains(new TestRecord(15)));  // Doesn't match evenValidator
-        
+
         // Verify the matching records are not included
         assertFalse(nonMatchingRecords.contains(new TestRecord(2)));    // Matches evenValidator
         assertFalse(nonMatchingRecords.contains(new TestRecord(12)));   // Matches evenValidator
@@ -125,7 +125,7 @@ public class RecordMatcherTest {
     public void testFindMatchingRecordsWithEmptySourceRecords() {
         // Test finding matching records with empty source records
         List<TestRecord> matchingRecords = recordMatcher.findMatchingRecords(Collections.emptyList(), validatorNames);
-        
+
         // Verify the result
         assertNotNull(matchingRecords);
         assertTrue(matchingRecords.isEmpty());
@@ -135,7 +135,7 @@ public class RecordMatcherTest {
     public void testFindNonMatchingRecordsWithEmptySourceRecords() {
         // Test finding non-matching records with empty source records
         List<TestRecord> nonMatchingRecords = recordMatcher.findNonMatchingRecords(Collections.emptyList(), validatorNames);
-        
+
         // Verify the result
         assertNotNull(nonMatchingRecords);
         assertTrue(nonMatchingRecords.isEmpty());
@@ -145,7 +145,7 @@ public class RecordMatcherTest {
     public void testFindMatchingRecordsWithEmptyValidatorNames() {
         // Test finding matching records with empty validator names
         List<TestRecord> matchingRecords = recordMatcher.findMatchingRecords(sourceRecords, Collections.emptyList());
-        
+
         // Verify the result
         assertNotNull(matchingRecords);
         assertTrue(matchingRecords.isEmpty());
@@ -155,7 +155,7 @@ public class RecordMatcherTest {
     public void testFindNonMatchingRecordsWithEmptyValidatorNames() {
         // Test finding non-matching records with empty validator names
         List<TestRecord> nonMatchingRecords = recordMatcher.findNonMatchingRecords(sourceRecords, Collections.emptyList());
-        
+
         // Verify the result
         assertNotNull(nonMatchingRecords);
         assertEquals(sourceRecords.size(), nonMatchingRecords.size());
@@ -166,7 +166,7 @@ public class RecordMatcherTest {
     public void testFindMatchingRecordsWithNullSourceRecords() {
         // Test finding matching records with null source records
         List<TestRecord> matchingRecords = recordMatcher.findMatchingRecords(null, validatorNames);
-        
+
         // Verify the result
         assertNotNull(matchingRecords);
         assertTrue(matchingRecords.isEmpty());
@@ -176,7 +176,7 @@ public class RecordMatcherTest {
     public void testFindNonMatchingRecordsWithNullSourceRecords() {
         // Test finding non-matching records with null source records
         List<TestRecord> nonMatchingRecords = recordMatcher.findNonMatchingRecords(null, validatorNames);
-        
+
         // Verify the result
         assertNotNull(nonMatchingRecords);
         assertTrue(nonMatchingRecords.isEmpty());
@@ -186,7 +186,7 @@ public class RecordMatcherTest {
     public void testFindMatchingRecordsWithNullValidatorNames() {
         // Test finding matching records with null validator names
         List<TestRecord> matchingRecords = recordMatcher.findMatchingRecords(sourceRecords, null);
-        
+
         // Verify the result
         assertNotNull(matchingRecords);
         assertTrue(matchingRecords.isEmpty());
@@ -196,7 +196,7 @@ public class RecordMatcherTest {
     public void testFindNonMatchingRecordsWithNullValidatorNames() {
         // Test finding non-matching records with null validator names
         List<TestRecord> nonMatchingRecords = recordMatcher.findNonMatchingRecords(sourceRecords, null);
-        
+
         // Verify the result
         assertNotNull(nonMatchingRecords);
         assertEquals(sourceRecords.size(), nonMatchingRecords.size());
@@ -208,7 +208,7 @@ public class RecordMatcherTest {
         // Test finding matching records with a non-existent validator
         List<String> nonExistentValidator = Collections.singletonList("nonExistentValidator");
         List<TestRecord> matchingRecords = recordMatcher.findMatchingRecords(sourceRecords, nonExistentValidator);
-        
+
         // Verify the result
         assertNotNull(matchingRecords);
         assertTrue(matchingRecords.isEmpty());
@@ -219,7 +219,7 @@ public class RecordMatcherTest {
         // Test finding non-matching records with a non-existent validator
         List<String> nonExistentValidator = Collections.singletonList("nonExistentValidator");
         List<TestRecord> nonMatchingRecords = recordMatcher.findNonMatchingRecords(sourceRecords, nonExistentValidator);
-        
+
         // Verify the result
         assertNotNull(nonMatchingRecords);
         assertEquals(sourceRecords.size(), nonMatchingRecords.size());
@@ -230,9 +230,9 @@ public class RecordMatcherTest {
      * Test implementation of RecordMatcher for testing.
      */
     private static class TestRecordMatcher implements RecordMatcher<TestRecord> {
-        private final Map<String, Validator> validators;
+        private final Map<String, Validator<Object>> validators;
 
-        public TestRecordMatcher(Map<String, Validator> validators) {
+        public TestRecordMatcher(Map<String, Validator<Object>> validators) {
             this.validators = validators;
         }
 
@@ -241,19 +241,19 @@ public class RecordMatcherTest {
             if (sourceRecords == null || validatorNames == null) {
                 return new ArrayList<>();
             }
-            
+
             List<TestRecord> matchingRecords = new ArrayList<>();
-            
+
             for (TestRecord record : sourceRecords) {
                 for (String validatorName : validatorNames) {
-                    Validator validator = validators.get(validatorName);
-                    if (validator != null && validator.validate(record.getValue())) {
+                    Validator<Object> validator = validators.get(validatorName);
+                    if (validator != null && validator.validate((Object) record.getValue())) {
                         matchingRecords.add(record);
                         break;
                     }
                 }
             }
-            
+
             return matchingRecords;
         }
 
@@ -262,29 +262,29 @@ public class RecordMatcherTest {
             if (sourceRecords == null) {
                 return new ArrayList<>();
             }
-            
+
             if (validatorNames == null || validatorNames.isEmpty()) {
                 return new ArrayList<>(sourceRecords);
             }
-            
+
             List<TestRecord> nonMatchingRecords = new ArrayList<>();
-            
+
             for (TestRecord record : sourceRecords) {
                 boolean matches = false;
-                
+
                 for (String validatorName : validatorNames) {
-                    Validator validator = validators.get(validatorName);
-                    if (validator != null && validator.validate(record.getValue())) {
+                    Validator<Object> validator = validators.get(validatorName);
+                    if (validator != null && validator.validate((Object) record.getValue())) {
                         matches = true;
                         break;
                     }
                 }
-                
+
                 if (!matches) {
                     nonMatchingRecords.add(record);
                 }
             }
-            
+
             return nonMatchingRecords;
         }
     }
@@ -325,7 +325,7 @@ public class RecordMatcherTest {
     /**
      * Validator that checks if a value is even.
      */
-    private static class EvenValidator implements Validator {
+    private static class EvenValidator implements Validator<Object> {
         private final String name;
 
         public EvenValidator(String name) {
@@ -346,12 +346,17 @@ public class RecordMatcherTest {
             }
             return false;
         }
+
+        @Override
+        public Class<Object> getType() {
+            return Object.class;
+        }
     }
 
     /**
      * Validator that checks if a value is positive.
      */
-    private static class PositiveValidator implements Validator {
+    private static class PositiveValidator implements Validator<Object> {
         private final String name;
 
         public PositiveValidator(String name) {
@@ -372,12 +377,17 @@ public class RecordMatcherTest {
             }
             return false;
         }
+
+        @Override
+        public Class<Object> getType() {
+            return Object.class;
+        }
     }
 
     /**
      * Validator that checks if a value is greater than 10.
      */
-    private static class GreaterThanTenValidator implements Validator {
+    private static class GreaterThanTenValidator implements Validator<Object> {
         private final String name;
 
         public GreaterThanTenValidator(String name) {
@@ -397,6 +407,11 @@ public class RecordMatcherTest {
                 return ((TestRecord) value).getValue() > 10;
             }
             return false;
+        }
+
+        @Override
+        public Class<Object> getType() {
+            return Object.class;
         }
     }
 }

@@ -10,45 +10,62 @@ import com.rulesengine.core.service.validation.Validator;
 public class CompositeLookup implements IDataLookup {
     private String name;
     private Validator validator;
-    private Enricher enricher;
+    private Enricher<?> enricher;
     private Transformer transformer;
-    
+
     public CompositeLookup(String name) {
         this.name = name;
     }
-    
+
     public CompositeLookup withValidator(Validator validator) {
         this.validator = validator;
         return this;
     }
-    
-    public CompositeLookup withEnricher(Enricher enricher) {
+
+    public CompositeLookup withEnricher(Enricher<?> enricher) {
         this.enricher = enricher;
         return this;
     }
-    
+
     public CompositeLookup withTransformer(Transformer transformer) {
         this.transformer = transformer;
         return this;
     }
-    
+
     @Override
     public String getName() {
         return name;
     }
-    
+
     @Override
     public boolean validate(Object value) {
         return validator != null ? validator.validate(value) : true;
     }
-    
+
     @Override
     public Object enrich(Object value) {
-        return enricher != null ? enricher.enrich(value) : value;
+        if (enricher == null) {
+            return value;
+        }
+
+        // We need to check if the enricher can handle this type
+        if (value != null && !enricher.getType().isInstance(value)) {
+            return value;
+        }
+
+        // Use raw type to avoid generic type issues
+        @SuppressWarnings("unchecked")
+        Enricher<Object> typedEnricher = (Enricher<Object>) enricher;
+        return typedEnricher.enrich(value);
     }
-    
+
     @Override
     public Object transform(Object value) {
         return transformer != null ? transformer.transform(value) : value;
+    }
+
+    @Override
+    public Class<Object> getType() {
+        return Object.class;
     }
 }

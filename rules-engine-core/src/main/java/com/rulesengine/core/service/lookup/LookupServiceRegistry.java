@@ -1,6 +1,6 @@
 package com.rulesengine.core.service.lookup;
 
-import com.rulesengine.core.service.NamedService;
+import com.rulesengine.core.service.common.NamedService;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -29,13 +29,13 @@ public class TransformationServiceTest {
     public void testTransformWithExistingTransformer() {
         // Set up the mock transformer to return a transformed value
         mockTransformer.setTransformedValue("transformedValue");
-        
+
         // Test the transformation
         Object result = transformationService.transform("testTransformer", "originalValue");
-        
+
         // Verify the result
         assertEquals("transformedValue", result);
-        
+
         // Verify the transformer was called with the correct value
         assertEquals("originalValue", mockTransformer.getLastTransformedValue());
     }
@@ -45,10 +45,10 @@ public class TransformationServiceTest {
         // Test with a transformer that doesn't exist
         Object originalValue = "originalValue";
         Object result = transformationService.transform("nonExistentTransformer", originalValue);
-        
+
         // Verify the original value is returned
         assertSame(originalValue, result);
-        
+
         // Verify the mock transformer wasn't called
         assertNull(mockTransformer.getLastTransformedValue());
     }
@@ -57,13 +57,13 @@ public class TransformationServiceTest {
     public void testTransformWithNullValue() {
         // Set up the mock transformer to return a transformed value
         mockTransformer.setTransformedValue("transformedValue");
-        
+
         // Test with a null value
         Object result = transformationService.transform("testTransformer", null);
-        
+
         // Verify the result
         assertEquals("transformedValue", result);
-        
+
         // Verify the transformer was called with null
         assertNull(mockTransformer.getLastTransformedValue());
     }
@@ -71,7 +71,7 @@ public class TransformationServiceTest {
     /**
      * Mock implementation of Transformer for testing.
      */
-    private static class MockTransformer implements Transformer {
+    private static class MockTransformer implements Transformer<Object> {
         private final String name;
         private Object transformedValue;
         private Object lastTransformedValue;
@@ -89,6 +89,11 @@ public class TransformationServiceTest {
         public Object transform(Object value) {
             lastTransformedValue = value;
             return transformedValue;
+        }
+
+        @Override
+        public Class<Object> getType() {
+            return Object.class;
         }
 
         public void setTransformedValue(Object transformedValue) {

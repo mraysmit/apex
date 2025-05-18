@@ -1,4 +1,4 @@
-package com.rulesengine.core.service;
+package com.rulesengine.core.service.common;
 
 /**
  * Base interface for all named services.

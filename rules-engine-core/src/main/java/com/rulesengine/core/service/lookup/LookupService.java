@@ -44,6 +44,11 @@ public class LookupService implements IDataLookup {
         return transformationFunction.apply(value);
     }
 
+    @Override
+    public Class<Object> getType() {
+        return Object.class;
+    }
+
     public void setEnrichmentData(Map<String, Object> enrichmentData) {
         this.enrichmentData = enrichmentData;
     }
