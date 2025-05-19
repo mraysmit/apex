@@ -1,5 +1,6 @@
 package com.rulesengine.core.service.lookup;
 
+import com.rulesengine.core.engine.model.RuleResult;
 import com.rulesengine.core.service.transform.Enricher;
 import com.rulesengine.core.service.transform.Transformer;
 import com.rulesengine.core.service.validation.Validator;
@@ -191,6 +192,7 @@ public class CompositeLookupTest {
         private final String name;
         private boolean validationResult;
         private Object lastValidatedValue;
+        private RuleResult customRuleResult;
 
         public MockValidator(String name) {
             this.name = name;
@@ -208,12 +210,33 @@ public class CompositeLookupTest {
         }
 
         @Override
+        public RuleResult validateWithResult(Object value) {
+            lastValidatedValue = value;
+
+            // If a custom RuleResult has been set, return it
+            if (customRuleResult != null) {
+                return customRuleResult;
+            }
+
+            // Otherwise, create a RuleResult based on the validation result
+            if (validationResult) {
+                return RuleResult.match(getName(), "Validation successful for " + getName());
+            } else {
+                return RuleResult.noMatch();
+            }
+        }
+
+        @Override
         public Class<Object> getType() {
             return Object.class;
         }
 
         public void setValidationResult(boolean validationResult) {
             this.validationResult = validationResult;
+        }
+
+        public void setCustomRuleResult(RuleResult customRuleResult) {
+            this.customRuleResult = customRuleResult;
         }
 
         public Object getLastValidatedValue() {

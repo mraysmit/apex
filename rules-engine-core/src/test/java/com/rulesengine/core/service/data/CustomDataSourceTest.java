@@ -43,12 +43,10 @@ public class CustomDataSourceTest {
     public void testSupportsDataType() {
         assertTrue(customDataSource.supportsDataType("testCustomData"));
         assertFalse(customDataSource.supportsDataType("unsupportedDataType"));
-        
-        // Test with null data type - this should throw NullPointerException
-        // because the implementation doesn't handle null values
-        assertThrows(NullPointerException.class, () -> {
-            customDataSource.supportsDataType(null);
-        });
+
+        // Test with null data type - this should return false
+        // because null is not a supported data type
+        assertFalse(customDataSource.supportsDataType(null));
     }
 
     @Test
@@ -64,10 +62,10 @@ public class CustomDataSourceTest {
         List<String> testData = new ArrayList<>();
         testData.add("Test Data 1");
         testData.add("Test Data 2");
-        
+
         // Add data
         customDataSource.addData("testCustomData", testData);
-        
+
         // Get data
         List<String> retrievedData = customDataSource.getData("testCustomData");
         assertNotNull(retrievedData);
@@ -81,10 +79,10 @@ public class CustomDataSourceTest {
         // Create test data
         List<String> testData = new ArrayList<>();
         testData.add("Test Data 1");
-        
+
         // Add data with unsupported data type
         customDataSource.addData("unsupportedDataType", testData);
-        
+
         // Verify data was not added
         Object retrievedData = customDataSource.getData("unsupportedDataType");
         assertNull(retrievedData);
@@ -96,14 +94,14 @@ public class CustomDataSourceTest {
         List<String> testData = new ArrayList<>();
         testData.add("Test Data 1");
         customDataSource.addData("testCustomData", testData);
-        
+
         // Verify data was added
         List<String> retrievedData = customDataSource.getData("testCustomData");
         assertNotNull(retrievedData);
-        
+
         // Remove data
         customDataSource.removeData("testCustomData");
-        
+
         // Verify data was removed
         Object removedData = customDataSource.getData("testCustomData");
         assertNull(removedData);
@@ -115,10 +113,10 @@ public class CustomDataSourceTest {
         List<String> testData = new ArrayList<>();
         testData.add("Test Data 1");
         customDataSource.addData("testCustomData", testData);
-        
+
         // Remove data with unsupported data type
         customDataSource.removeData("unsupportedDataType");
-        
+
         // Verify original data is still there
         List<String> retrievedData = customDataSource.getData("testCustomData");
         assertNotNull(retrievedData);
@@ -132,19 +130,19 @@ public class CustomDataSourceTest {
         List<String> testData1 = new ArrayList<>();
         testData1.add("Test Data 1");
         customDataSource.addData("testCustomData", testData1);
-        
+
         // Create and add another test data to another data source
         List<String> testData2 = new ArrayList<>();
         testData2.add("Test Data 2");
         anotherCustomDataSource.addData("anotherCustomData", testData2);
-        
+
         // Clear data from first data source
         customDataSource.clearData();
-        
+
         // Verify data was cleared from first data source
         Object clearedData = customDataSource.getData("testCustomData");
         assertNull(clearedData);
-        
+
         // Verify data in second data source is still there
         List<String> retrievedData = anotherCustomDataSource.getData("anotherCustomData");
         assertNotNull(retrievedData);
@@ -158,7 +156,7 @@ public class CustomDataSourceTest {
         List<String> testData = new ArrayList<>();
         testData.add("Test Data 1");
         customDataSource.addData("testCustomData", testData);
-        
+
         // Get data with unsupported data type
         Object unsupportedData = customDataSource.getData("unsupportedDataType");
         assertNull(unsupportedData);
@@ -170,18 +168,18 @@ public class CustomDataSourceTest {
         List<String> initialData = new ArrayList<>();
         initialData.add("Initial Data");
         customDataSource.addData("testCustomData", initialData);
-        
+
         // Verify initial data
         List<String> retrievedInitialData = customDataSource.getData("testCustomData");
         assertNotNull(retrievedInitialData);
         assertEquals(1, retrievedInitialData.size());
         assertEquals("Initial Data", retrievedInitialData.get(0));
-        
+
         // Create and add updated test data
         List<String> updatedData = new ArrayList<>();
         updatedData.add("Updated Data");
         customDataSource.addData("testCustomData", updatedData);
-        
+
         // Verify updated data
         List<String> retrievedUpdatedData = customDataSource.getData("testCustomData");
         assertNotNull(retrievedUpdatedData);

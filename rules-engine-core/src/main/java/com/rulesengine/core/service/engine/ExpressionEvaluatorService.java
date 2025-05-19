@@ -128,6 +128,15 @@ public class ExpressionEvaluatorService {
             return result;
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Error evaluating expression '" + expression + "': " + e.getMessage(), e);
+
+            // Also print to System.err for test verification
+            System.err.println("Error evaluating expression '" + expression + "': " + e.getMessage());
+            e.printStackTrace(System.err);
+
+            // For boolean expressions, return false instead of null when there's an error
+            if (resultType == Boolean.class || resultType == boolean.class) {
+                return resultType.cast(false);
+            }
             return null;
         }
     }

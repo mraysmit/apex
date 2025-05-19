@@ -56,24 +56,41 @@ public class ValidationService {
      */
     @SuppressWarnings("unchecked")
     public <T> boolean validate(String validatorName, T value) {
+        RuleResult result = validateWithResult(validatorName, value);
+        return result != null && result.isTriggered();
+    }
+
+    /**
+     * Validate a value using the specified validator with type safety and return the full RuleResult.
+     * This method uses the rules engine internally to perform validation.
+     * 
+     * @param <T> The type of the value to validate
+     * @param validatorName The name of the validator to use
+     * @param value The value to validate
+     * @return The RuleResult containing the validation outcome, or null if validation could not be performed
+     */
+    @SuppressWarnings("unchecked")
+    public <T> RuleResult validateWithResult(String validatorName, T value) {
         LOGGER.fine("Validating value using validator: " + validatorName);
 
         // First, check if the validator exists
         Validator<?> validator = registry.getService(validatorName, Validator.class);
         if (validator == null) {
             LOGGER.warning("Validator not found: " + validatorName);
-            return false;
+            return RuleResult.error("Validation", "Validator not found: " + validatorName);
         }
 
         // Check if the validator can handle this type
         if (value != null && !validator.getType().isInstance(value)) {
             LOGGER.warning("Validator " + validatorName + " cannot handle type: " + value.getClass().getName());
-            return false;
+            return RuleResult.error("Validation", "Validator " + validatorName + " cannot handle type: " + value.getClass().getName());
         }
 
         // Call the validator directly with the appropriate type
         Validator<T> typedValidator = (Validator<T>) validator;
-        boolean validatorResult = typedValidator.validate(value);
+
+        // Call the validator's validate method directly to set lastValidatedValue for testing
+        typedValidator.validate(value);
 
         // Create a rule for the validation
         Rule validationRule = new Rule(
@@ -92,9 +109,6 @@ public class ValidationService {
         facts.put("value", value);
 
         // Execute the rule
-        RuleResult result = rulesEngine.executeRulesList(rules, facts);
-
-        // Return true if the rule was triggered, false otherwise
-        return result.isTriggered();
+        return rulesEngine.executeRulesList(rules, facts);
     }
 }

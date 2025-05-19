@@ -17,6 +17,7 @@ import com.rulesengine.demo.model.Customer;
 import com.rulesengine.demo.model.Product;
 import com.rulesengine.demo.service.enrichers.CustomerEnricher;
 import com.rulesengine.demo.service.enrichers.ProductEnricher;
+import com.rulesengine.demo.service.enrichers.ProductEnricherFactory;
 import com.rulesengine.demo.service.validators.CustomerValidator;
 import com.rulesengine.demo.service.validators.ProductValidator;
 
@@ -106,7 +107,12 @@ public class IntegratedServicesDemo {
 
         // Register enrichers
         registry.registerService(new CustomerEnricher("customerEnricher"));
-        registry.registerService(new ProductEnricher("productEnricher"));
+
+        // Create a ProductEnricherFactory with the rulesEngine
+        ProductEnricherFactory productEnricherFactory = new ProductEnricherFactory(rulesEngine);
+
+        // Create and register a ProductEnricher with the factory
+        registry.registerService(new ProductEnricher("productEnricher", productEnricherFactory));
     }
 
     /**

@@ -35,7 +35,11 @@ public class CustomDataSource implements DataSource {
 
     @Override
     public boolean supportsDataType(String dataType) {
-        return this.dataType.equals(dataType);
+        // Handle null dataType gracefully
+        if (dataType == null) {
+            return false;
+        }
+        return dataType.equals(this.dataType);
     }
 
     @SuppressWarnings("unchecked")
@@ -44,7 +48,7 @@ public class CustomDataSource implements DataSource {
         if (!supportsDataType(dataType)) {
             return null;
         }
-        
+
         return (T) dataStore.get(dataType);
     }
 

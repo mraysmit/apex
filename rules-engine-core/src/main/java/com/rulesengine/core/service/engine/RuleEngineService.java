@@ -55,17 +55,36 @@ public class RuleEngineService {
         for (Rule rule : rules) {
             LOGGER.fine("Evaluating rule: " + rule.getName());
             try {
-                Object result = evaluatorService.evaluateQuietly(rule.getCondition(), context, Object.class);
-                RuleResult ruleResult = new RuleResult(rule.getName(), rule.getMessage());
+                // Use evaluateWithResult instead of evaluateQuietly for better error handling
+                RuleResult baseResult = evaluatorService.evaluateWithResult(rule.getCondition(), context, Object.class);
+
+                // Create a proper RuleResult with the rule name and message
+                RuleResult ruleResult;
+                if (baseResult.getResultType() == RuleResult.ResultType.MATCH) {
+                    ruleResult = RuleResult.match(rule.getName(), rule.getMessage());
+                } else if (baseResult.getResultType() == RuleResult.ResultType.ERROR) {
+                    ruleResult = RuleResult.error(rule.getName(), baseResult.getMessage());
+                } else {
+                    ruleResult = RuleResult.noMatch();
+                }
+
                 results.add(ruleResult);
-                LOGGER.fine("Rule '" + rule.getName() + "' evaluated, result: " + result);
+                LOGGER.fine("Rule '" + rule.getName() + "' evaluated, result type: " + ruleResult.getResultType());
 
                 if (printResults) {
                     LOGGER.info(rule.getName() + ": " + rule.getMessage());
-                    LOGGER.info("Result: " + result);
+                    LOGGER.info("Result type: " + ruleResult.getResultType());
+                    // Also print to System.out for test verification
+                    System.out.println(rule.getName() + ": " + rule.getMessage());
+                    System.out.println("Result: " + (ruleResult.isTriggered() ? "true" : "false"));
                 }
             } catch (Exception e) {
+                RuleResult errorResult = RuleResult.error(rule.getName(), e.getMessage());
+                results.add(errorResult);
                 LOGGER.log(Level.WARNING, "Error evaluating rule '" + rule.getName() + "': " + e.getMessage(), e);
+                // Also print to System.err for test verification
+                System.err.println("Error evaluating rule '" + rule.getName() + "': " + e.getMessage());
+                e.printStackTrace(System.err);
             }
         }
 

@@ -4,14 +4,26 @@
  */
 package com.rulesengine.demo.service.validators;
 
+import com.rulesengine.core.engine.RulesEngine;
+import com.rulesengine.core.engine.RulesEngineConfiguration;
+import com.rulesengine.core.engine.model.Rule;
+import com.rulesengine.core.engine.model.RuleResult;
 import com.rulesengine.core.service.validation.Validator;
 import com.rulesengine.demo.model.Product;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ProductValidator implements Validator<Product> {
     private final String name;
     private final double minPrice;
     private final double maxPrice;
     private final String requiredCategory;
+    private final RulesEngine rulesEngine;
+    private final List<Rule> validationRules;
 
     /**
      * Create a new ProductValidator with the specified criteria.
@@ -26,6 +38,37 @@ public class ProductValidator implements Validator<Product> {
         this.minPrice = minPrice;
         this.maxPrice = maxPrice;
         this.requiredCategory = requiredCategory;
+        this.rulesEngine = new RulesEngine(new RulesEngineConfiguration());
+        this.validationRules = createValidationRules();
+    }
+
+    private List<Rule> createValidationRules() {
+        List<Rule> rules = new ArrayList<>();
+
+        // Rule for null check
+        rules.add(new Rule(
+            "NullCheckRule",
+            "#product != null",
+            "Product must not be null"
+        ));
+
+        // Rule for price validation
+        rules.add(new Rule(
+            "PriceValidationRule",
+            "#product != null && #product.price >= #minPrice && #product.price <= #maxPrice",
+            "Product price must be between " + minPrice + " and " + maxPrice
+        ));
+
+        // Rule for category validation
+        if (requiredCategory != null) {
+            rules.add(new Rule(
+                "CategoryValidationRule",
+                "#product != null && (#requiredCategory == null || #requiredCategory.equals(#product.category))",
+                "Product category must be " + requiredCategory
+            ));
+        }
+
+        return rules;
     }
 
     @Override
@@ -35,25 +78,31 @@ public class ProductValidator implements Validator<Product> {
 
     @Override
     public boolean validate(Product product) {
-        if (product == null) {
-            return false;
-        }
-
-        // Check price range
-        if (product.getPrice() < minPrice || product.getPrice() > maxPrice) {
-            return false;
-        }
-
-        // Check category if required
-        if (requiredCategory != null && !requiredCategory.equals(product.getCategory())) {
-            return false;
-        }
-
-        return true;
+        RuleResult result = validateWithResult(product);
+        return result.isTriggered();
     }
 
     @Override
     public Class<Product> getType() {
         return Product.class;
+    }
+
+    @Override
+    public RuleResult validateWithResult(Product product) {
+        Map<String, Object> facts = new HashMap<>();
+        facts.put("product", product);
+        facts.put("minPrice", minPrice);
+        facts.put("maxPrice", maxPrice);
+        facts.put("requiredCategory", requiredCategory);
+
+        // Execute all rules and return the first failure or success if all pass
+        for (Rule rule : validationRules) {
+            RuleResult result = rulesEngine.executeRulesList(Collections.singletonList(rule), facts);
+            if (!result.isTriggered()) {
+                return RuleResult.noMatch();
+            }
+        }
+
+        return RuleResult.match(getName(), "Product validation successful");
     }
 }
