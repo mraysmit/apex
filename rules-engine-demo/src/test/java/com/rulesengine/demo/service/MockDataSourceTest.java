@@ -4,6 +4,7 @@ import com.rulesengine.core.service.lookup.LookupService;
 import com.rulesengine.demo.model.Customer;
 import com.rulesengine.demo.model.Product;
 import com.rulesengine.demo.model.Trade;
+import com.rulesengine.demo.service.providers.MockDataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

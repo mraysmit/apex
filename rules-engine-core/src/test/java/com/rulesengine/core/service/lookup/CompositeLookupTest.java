@@ -1,11 +1,14 @@
 package com.rulesengine.core.service.lookup;
 
+import com.rulesengine.core.engine.RulesEngine;
+import com.rulesengine.core.engine.RulesEngineConfiguration;
 import com.rulesengine.core.engine.model.RuleResult;
-import com.rulesengine.core.service.transform.Enricher;
-import com.rulesengine.core.service.transform.Transformer;
+import com.rulesengine.core.service.transform.GenericTransformer;
 import com.rulesengine.core.service.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,15 +18,15 @@ import static org.junit.jupiter.api.Assertions.*;
 public class CompositeLookupTest {
     private CompositeLookup compositeLookup;
     private MockValidator mockValidator;
-    private MockEnricher mockEnricher;
-    private MockTransformer mockTransformer;
+    private MockTransformer mockTransformer1;
+    private MockTransformer mockTransformer2;
 
     @BeforeEach
     public void setUp() {
         compositeLookup = new CompositeLookup("TestCompositeLookup");
         mockValidator = new MockValidator("TestValidator");
-        mockEnricher = new MockEnricher("TestEnricher");
-        mockTransformer = new MockTransformer("TestTransformer");
+        mockTransformer1 = new MockTransformer("TestTransformer1");
+        mockTransformer2 = new MockTransformer("TestTransformer2");
     }
 
     @Test
@@ -69,38 +72,6 @@ public class CompositeLookupTest {
     }
 
     @Test
-    public void testEnrichWithNoEnricher() {
-        // Test enrich with no enricher set
-        assertEquals("testValue", compositeLookup.enrich("testValue"));
-        assertNull(compositeLookup.enrich(null));
-        assertEquals(123, compositeLookup.enrich(123));
-    }
-
-    @Test
-    public void testEnrichWithEnricher() {
-        // Configure the mock enricher
-        mockEnricher.setEnrichmentResult("enrichedValue");
-
-        // Set the enricher
-        compositeLookup.withEnricher(mockEnricher);
-
-        // Test enrich with enricher set
-        assertEquals("enrichedValue", compositeLookup.enrich("testValue"));
-
-        // Verify the enricher was called with the correct value
-        assertEquals("testValue", mockEnricher.getLastEnrichedValue());
-
-        // Configure the mock enricher to return a different value
-        mockEnricher.setEnrichmentResult(456);
-
-        // Test enrich with enricher set
-        assertEquals(456, compositeLookup.enrich("testValue"));
-
-        // Verify the enricher was called with the correct value
-        assertEquals("testValue", mockEnricher.getLastEnrichedValue());
-    }
-
-    @Test
     public void testTransformWithNoTransformer() {
         // Test transform with no transformer set
         assertEquals("testValue", compositeLookup.transform("testValue"));
@@ -111,25 +82,40 @@ public class CompositeLookupTest {
     @Test
     public void testTransformWithTransformer() {
         // Configure the mock transformer
-        mockTransformer.setTransformationResult("transformedValue");
+        mockTransformer1.setTransformationResult("transformedValue");
 
         // Set the transformer
-        compositeLookup.withTransformer(mockTransformer);
+        compositeLookup.withTransformer(mockTransformer1);
 
         // Test transform with transformer set
         assertEquals("transformedValue", compositeLookup.transform("testValue"));
 
         // Verify the transformer was called with the correct value
-        assertEquals("testValue", mockTransformer.getLastTransformedValue());
+        assertEquals("testValue", mockTransformer1.getLastTransformedValue());
 
         // Configure the mock transformer to return a different value
-        mockTransformer.setTransformationResult(789);
+        mockTransformer1.setTransformationResult(789);
 
         // Test transform with transformer set
         assertEquals(789, compositeLookup.transform("testValue"));
 
         // Verify the transformer was called with the correct value
-        assertEquals("testValue", mockTransformer.getLastTransformedValue());
+        assertEquals("testValue", mockTransformer1.getLastTransformedValue());
+    }
+
+    @Test
+    public void testEnrichDeprecatedMethod() {
+        // Configure the mock transformer
+        mockTransformer1.setTransformationResult("transformedValue");
+
+        // Set the transformer
+        compositeLookup.withTransformer(mockTransformer1);
+
+        // Test enrich (deprecated method) with transformer set
+        assertEquals("transformedValue", compositeLookup.enrich("testValue"));
+
+        // Verify the transformer was called with the correct value
+        assertEquals("testValue", mockTransformer1.getLastTransformedValue());
     }
 
     @Test
@@ -137,8 +123,7 @@ public class CompositeLookupTest {
         // Test the fluent interface
         CompositeLookup result = compositeLookup
             .withValidator(mockValidator)
-            .withEnricher(mockEnricher)
-            .withTransformer(mockTransformer);
+            .withTransformer(mockTransformer1);
 
         // Verify the result is the same instance
         assertSame(compositeLookup, result);
@@ -148,41 +133,31 @@ public class CompositeLookupTest {
         assertTrue(compositeLookup.validate("testValue"));
         assertEquals("testValue", mockValidator.getLastValidatedValue());
 
-        mockEnricher.setEnrichmentResult("enrichedValue");
-        assertEquals("enrichedValue", compositeLookup.enrich("testValue"));
-        assertEquals("testValue", mockEnricher.getLastEnrichedValue());
-
-        mockTransformer.setTransformationResult("transformedValue");
+        mockTransformer1.setTransformationResult("transformedValue");
         assertEquals("transformedValue", compositeLookup.transform("testValue"));
-        assertEquals("testValue", mockTransformer.getLastTransformedValue());
+        assertEquals("testValue", mockTransformer1.getLastTransformedValue());
     }
 
     @Test
-    public void testIntegrationOfValidateEnrichTransform() {
+    public void testIntegrationOfValidateAndTransform() {
         // Configure the mock components
         mockValidator.setValidationResult(true);
-        mockEnricher.setEnrichmentResult("enrichedValue");
-        mockTransformer.setTransformationResult("transformedValue");
+        mockTransformer1.setTransformationResult("transformedValue");
 
         // Set the components
         compositeLookup
             .withValidator(mockValidator)
-            .withEnricher(mockEnricher)
-            .withTransformer(mockTransformer);
+            .withTransformer(mockTransformer1);
 
-        // Test the full pipeline: validate -> enrich -> transform
+        // Test the full pipeline: validate -> transform
 
         // For a valid value
         assertTrue(compositeLookup.validate("testValue"));
         assertEquals("testValue", mockValidator.getLastValidatedValue());
 
-        Object enriched = compositeLookup.enrich("testValue");
-        assertEquals("enrichedValue", enriched);
-        assertEquals("testValue", mockEnricher.getLastEnrichedValue());
-
-        Object transformed = compositeLookup.transform(enriched);
+        Object transformed = compositeLookup.transform("testValue");
         assertEquals("transformedValue", transformed);
-        assertEquals("enrichedValue", mockTransformer.getLastTransformedValue());
+        assertEquals("testValue", mockTransformer1.getLastTransformedValue());
     }
 
     /**
@@ -245,68 +220,20 @@ public class CompositeLookupTest {
     }
 
     /**
-     * Mock implementation of Enricher for testing.
+     * Mock implementation of GenericTransformer for testing.
      */
-    private static class MockEnricher implements Enricher<Object> {
-        private final String name;
-        private Object enrichmentResult;
-        private Object lastEnrichedValue;
-
-        public MockEnricher(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public Object enrich(Object value) {
-            lastEnrichedValue = value;
-            return enrichmentResult;
-        }
-
-        @Override
-        public Class<Object> getType() {
-            return Object.class;
-        }
-
-        public void setEnrichmentResult(Object enrichmentResult) {
-            this.enrichmentResult = enrichmentResult;
-        }
-
-        public Object getLastEnrichedValue() {
-            return lastEnrichedValue;
-        }
-    }
-
-    /**
-     * Mock implementation of Transformer for testing.
-     */
-    private static class MockTransformer implements Transformer<Object> {
-        private final String name;
+    private static class MockTransformer extends GenericTransformer<Object> {
         private Object transformationResult;
         private Object lastTransformedValue;
 
         public MockTransformer(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String getName() {
-            return name;
+            super(name, Object.class, new RulesEngine(new RulesEngineConfiguration()), new ArrayList<>());
         }
 
         @Override
         public Object transform(Object value) {
             lastTransformedValue = value;
             return transformationResult;
-        }
-
-        @Override
-        public Class<Object> getType() {
-            return Object.class;
         }
 
         public void setTransformationResult(Object transformationResult) {

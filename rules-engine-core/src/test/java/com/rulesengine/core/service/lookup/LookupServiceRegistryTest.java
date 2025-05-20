@@ -1,11 +1,13 @@
 package com.rulesengine.core.service.lookup;
 
-import com.rulesengine.core.service.transform.Enricher;
-import com.rulesengine.core.service.transform.Transformer;
+import com.rulesengine.core.engine.RulesEngine;
+import com.rulesengine.core.engine.RulesEngineConfiguration;
+import com.rulesengine.core.service.transform.GenericTransformer;
 import com.rulesengine.core.service.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,16 +18,16 @@ import static org.junit.jupiter.api.Assertions.*;
 public class LookupServiceRegistryTest {
     private LookupServiceRegistry registry;
     private MockValidator mockValidator;
-    private MockEnricher mockEnricher;
-    private MockTransformer mockTransformer;
+    private MockTransformer mockTransformer1;
+    private MockTransformer mockTransformer2;
     private LookupService lookupService;
 
     @BeforeEach
     public void setUp() {
         registry = new LookupServiceRegistry();
         mockValidator = new MockValidator("TestValidator");
-        mockEnricher = new MockEnricher("TestEnricher");
-        mockTransformer = new MockTransformer("TestTransformer");
+        mockTransformer1 = new MockTransformer("TestTransformer1");
+        mockTransformer2 = new MockTransformer("TestTransformer2");
         lookupService = new LookupService("TestLookupService", Arrays.asList("value1", "value2"));
     }
 
@@ -44,8 +46,8 @@ public class LookupServiceRegistryTest {
     public void testRegisterMultipleServices() {
         // Register multiple services
         registry.registerService(mockValidator);
-        registry.registerService(mockEnricher);
-        registry.registerService(mockTransformer);
+        registry.registerService(mockTransformer1);
+        registry.registerService(mockTransformer2);
         registry.registerService(lookupService);
 
         // Verify all services were registered
@@ -53,13 +55,13 @@ public class LookupServiceRegistryTest {
         assertNotNull(retrievedValidator);
         assertEquals("TestValidator", retrievedValidator.getName());
 
-        Enricher retrievedEnricher = registry.getService("TestEnricher", Enricher.class);
-        assertNotNull(retrievedEnricher);
-        assertEquals("TestEnricher", retrievedEnricher.getName());
+        GenericTransformer<?> retrievedTransformer1 = registry.getService("TestTransformer1", GenericTransformer.class);
+        assertNotNull(retrievedTransformer1);
+        assertEquals("TestTransformer1", retrievedTransformer1.getName());
 
-        Transformer retrievedTransformer = registry.getService("TestTransformer", Transformer.class);
-        assertNotNull(retrievedTransformer);
-        assertEquals("TestTransformer", retrievedTransformer.getName());
+        GenericTransformer<?> retrievedTransformer2 = registry.getService("TestTransformer2", GenericTransformer.class);
+        assertNotNull(retrievedTransformer2);
+        assertEquals("TestTransformer2", retrievedTransformer2.getName());
 
         LookupService retrievedLookupService = registry.getService("TestLookupService", LookupService.class);
         assertNotNull(retrievedLookupService);
@@ -101,9 +103,9 @@ public class LookupServiceRegistryTest {
         // Register a validator service
         registry.registerService(mockValidator);
 
-        // Try to get it as an enricher
-        Enricher retrievedEnricher = registry.getService("TestValidator", Enricher.class);
-        assertNull(retrievedEnricher);
+        // Try to get it as a transformer
+        GenericTransformer<?> retrievedTransformer = registry.getService("TestValidator", GenericTransformer.class);
+        assertNull(retrievedTransformer);
     }
 
     @Test
@@ -138,13 +140,9 @@ public class LookupServiceRegistryTest {
         assertNotNull(retrievedValidator);
         assertEquals("TestLookupService", retrievedValidator.getName());
 
-        Enricher retrievedEnricher = registry.getService("TestLookupService", Enricher.class);
-        assertNotNull(retrievedEnricher);
-        assertEquals("TestLookupService", retrievedEnricher.getName());
-
-        Transformer retrievedTransformer = registry.getService("TestLookupService", Transformer.class);
-        assertNotNull(retrievedTransformer);
-        assertEquals("TestLookupService", retrievedTransformer.getName());
+        // LookupService no longer implements GenericTransformer
+        GenericTransformer<?> retrievedTransformer = registry.getService("TestLookupService", GenericTransformer.class);
+        assertNull(retrievedTransformer);
 
         IDataLookup retrievedDataLookup = registry.getService("TestLookupService", IDataLookup.class);
         assertNotNull(retrievedDataLookup);
@@ -178,54 +176,16 @@ public class LookupServiceRegistryTest {
     }
 
     /**
-     * Mock implementation of Enricher for testing.
+     * Mock implementation of GenericTransformer for testing.
      */
-    private static class MockEnricher implements Enricher<Object> {
-        private final String name;
-
-        public MockEnricher(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public Object enrich(Object value) {
-            return value;
-        }
-
-        @Override
-        public Class<Object> getType() {
-            return Object.class;
-        }
-    }
-
-    /**
-     * Mock implementation of Transformer for testing.
-     */
-    private static class MockTransformer implements Transformer<Object> {
-        private final String name;
-
+    private static class MockTransformer extends GenericTransformer<Object> {
         public MockTransformer(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String getName() {
-            return name;
+            super(name, Object.class, new RulesEngine(new RulesEngineConfiguration()), new ArrayList<>());
         }
 
         @Override
         public Object transform(Object value) {
             return value;
-        }
-
-        @Override
-        public Class<Object> getType() {
-            return Object.class;
         }
     }
 }

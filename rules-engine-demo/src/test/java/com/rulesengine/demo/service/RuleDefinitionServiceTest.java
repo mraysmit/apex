@@ -1,6 +1,7 @@
 package com.rulesengine.demo.service;
 
 import com.rulesengine.core.engine.model.Rule;
+import com.rulesengine.demo.service.providers.RuleDefinitionServiceDemo;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

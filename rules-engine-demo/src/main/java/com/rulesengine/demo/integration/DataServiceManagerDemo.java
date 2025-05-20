@@ -8,6 +8,7 @@ import com.rulesengine.core.service.data.DataServiceManager;
 import com.rulesengine.core.service.lookup.LookupService;
 import com.rulesengine.core.service.lookup.LookupServiceRegistry;
 import com.rulesengine.core.service.lookup.RecordMatcher;
+import com.rulesengine.demo.service.providers.TradeRecordMatcherDemo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -135,7 +136,7 @@ public class DataServiceManagerDemo {
 
     /**
      * Demonstrates how to use the generic RecordMatcher with Trade objects.
-     * This shows how to use the DemoTradeRecordMatcher implementation directly,
+     * This shows how to use the TradeRecordMatcherDemo implementation directly,
      * which is a more flexible and extensible approach than using hard-coded
      * Trade-specific matching logic.
      */
@@ -172,8 +173,8 @@ public class DataServiceManagerDemo {
             new Trade("T009", "Rejected", "TradeStatus")
         );
 
-        // Create a DemoTradeRecordMatcher (implementation of RecordMatcher<Trade>)
-        RecordMatcher<Trade> matcher = new com.rulesengine.demo.service.DemoTradeRecordMatcher(registry);
+        // Create a TradeRecordMatcherDemo (implementation of RecordMatcher<Trade>)
+        RecordMatcher<Trade> matcher = new TradeRecordMatcherDemo(registry);
 
         // Find matching records
         List<Trade> matchingTrades = matcher.findMatchingRecords(sourceTrades, validatorNames);

@@ -1,17 +1,15 @@
 package com.rulesengine.core.service.lookup;
 
-import com.rulesengine.core.service.transform.Enricher;
-import com.rulesengine.core.service.transform.Transformer;
+import com.rulesengine.core.service.transform.GenericTransformer;
 import com.rulesengine.core.service.validation.Validator;
 
 /**
- * Implementation that combines validation, enrichment, and transformation.
+ * Implementation that combines validation and transformation.
  */
 public class CompositeLookup implements IDataLookup {
     private String name;
     private Validator validator;
-    private Enricher<?> enricher;
-    private Transformer transformer;
+    private GenericTransformer<Object> transformer;
 
     public CompositeLookup(String name) {
         this.name = name;
@@ -22,12 +20,7 @@ public class CompositeLookup implements IDataLookup {
         return this;
     }
 
-    public CompositeLookup withEnricher(Enricher<?> enricher) {
-        this.enricher = enricher;
-        return this;
-    }
-
-    public CompositeLookup withTransformer(Transformer transformer) {
+    public CompositeLookup withTransformer(GenericTransformer<Object> transformer) {
         this.transformer = transformer;
         return this;
     }
@@ -42,21 +35,14 @@ public class CompositeLookup implements IDataLookup {
         return validator != null ? validator.validate(value) : true;
     }
 
+    /**
+     * @deprecated Use {@link #transform(Object)} instead.
+     */
+    @Deprecated
     @Override
     public Object enrich(Object value) {
-        if (enricher == null) {
-            return value;
-        }
-
-        // We need to check if the enricher can handle this type
-        if (value != null && !enricher.getType().isInstance(value)) {
-            return value;
-        }
-
-        // Use raw type to avoid generic type issues
-        @SuppressWarnings("unchecked")
-        Enricher<Object> typedEnricher = (Enricher<Object>) enricher;
-        return typedEnricher.enrich(value);
+        // Delegate to transform method
+        return transform(value);
     }
 
     @Override

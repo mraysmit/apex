@@ -45,7 +45,7 @@ public class RuleConfigurationService {
     public Rule registerRule(String id, String category, String name, String condition, 
                           String message, String description, int priority) {
         Rule rule = createRule(id, category, name, condition, message, description, priority);
-        return rule;
+        return configuration.registerRule(rule);
     }
 
     /**

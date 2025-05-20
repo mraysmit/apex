@@ -94,7 +94,7 @@ public class ValidationService {
 
         // Create a rule for the validation
         Rule validationRule = new Rule(
-            "Validation Rule for " + validatorName,
+            validatorName,
             "#validator.validate(#value)",
             "Validation using " + validatorName
         );

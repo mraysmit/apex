@@ -6,6 +6,7 @@ import com.rulesengine.demo.model.Trade;
 import com.rulesengine.core.service.lookup.LookupService;
 import com.rulesengine.core.service.lookup.LookupServiceRegistry;
 import com.rulesengine.core.service.lookup.RecordMatcher;
+import com.rulesengine.demo.service.providers.TradeRecordMatcherDemo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,7 +61,7 @@ public class MockDataSources {
      * @return Customer object
      */
     public static Customer getTemplateCustomer() {
-        return new Customer("Bob Johnson", 42, "Silver", Arrays.asList("Equity", "ETF"));
+        return new Customer("Bob Johnson", 65, "Silver", Arrays.asList("Equity", "ETF"));
     }
 
     /**
@@ -112,8 +113,8 @@ public class MockDataSources {
             validatorNames.add(lookupService.getName());
         }
 
-        // Use the generic DemoTradeRecordMatcher to find matching records
-        RecordMatcher<Trade> matcher = new com.rulesengine.demo.service.DemoTradeRecordMatcher(registry);
+        // Use the generic TradeRecordMatcherDemo to find matching records
+        RecordMatcher<Trade> matcher = new TradeRecordMatcherDemo(registry);
         return matcher.findMatchingRecords(sourceTrades, validatorNames);
     }
 
@@ -134,8 +135,8 @@ public class MockDataSources {
             validatorNames.add(lookupService.getName());
         }
 
-        // Use the generic DemoTradeRecordMatcher to find non-matching records
-        RecordMatcher<Trade> matcher = new com.rulesengine.demo.service.DemoTradeRecordMatcher(registry);
+        // Use the generic TradeRecordMatcherDemo to find non-matching records
+        RecordMatcher<Trade> matcher = new TradeRecordMatcherDemo(registry);
         return matcher.findNonMatchingRecords(sourceTrades, validatorNames);
     }
 }

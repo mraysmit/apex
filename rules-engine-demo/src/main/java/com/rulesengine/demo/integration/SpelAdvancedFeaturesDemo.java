@@ -1,11 +1,12 @@
 package com.rulesengine.demo.integration;
 
+import com.rulesengine.core.engine.RulesEngine;
+import com.rulesengine.core.engine.RulesEngineConfiguration;
 import com.rulesengine.core.engine.model.Rule;
 import com.rulesengine.core.engine.model.RuleResult;
 import com.rulesengine.core.service.engine.ExpressionEvaluatorService;
 import com.rulesengine.core.service.engine.RuleEngineService;
 import com.rulesengine.core.service.engine.TemplateProcessorService;
-import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import java.util.Map;
 import com.rulesengine.demo.model.Customer;
 import com.rulesengine.demo.model.Product;
 import com.rulesengine.core.service.lookup.LookupService;
-import com.rulesengine.demo.service.PricingServiceDemo;
+import com.rulesengine.demo.service.providers.PricingServiceDemo;
 import com.rulesengine.core.service.data.DataServiceManager;
 
 /**
@@ -26,7 +27,8 @@ import com.rulesengine.core.service.data.DataServiceManager;
  * This is a test/demo class that uses test data to demonstrate the rules engine functionality.
  */
 public class SpelAdvancedFeaturesDemo {
-    // Services
+    // Config and services
+    private final SpelAdvancedFeaturesDemoConfig config;
     private final ExpressionEvaluatorService evaluatorService;
     private final RuleEngineService ruleEngineService;
     private final TemplateProcessorService templateProcessorService;
@@ -35,17 +37,13 @@ public class SpelAdvancedFeaturesDemo {
     /**
      * Constructor with dependency injection.
      * 
-     * @param evaluatorService The expression evaluator service
-     * @param ruleEngineService The rule engine service
-     * @param templateProcessorService The template processor service
+     * @param config The configuration for this demo
      */
-    public SpelAdvancedFeaturesDemo(
-            ExpressionEvaluatorService evaluatorService,
-            RuleEngineService ruleEngineService,
-            TemplateProcessorService templateProcessorService) {
-        this.evaluatorService = evaluatorService;
-        this.ruleEngineService = ruleEngineService;
-        this.templateProcessorService = templateProcessorService;
+    public SpelAdvancedFeaturesDemo(SpelAdvancedFeaturesDemoConfig config) {
+        this.config = config;
+        this.evaluatorService = config.getEvaluatorService();
+        this.ruleEngineService = config.getRuleEngineService();
+        this.templateProcessorService = config.getTemplateProcessorService();
 
         // Initialize DataServiceManager with mock data
         this.dataServiceManager = new DataServiceManager();
@@ -57,42 +55,29 @@ public class SpelAdvancedFeaturesDemo {
         ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
         RuleEngineService ruleEngineService = new RuleEngineService(evaluatorService);
         TemplateProcessorService templateProcessorService = new TemplateProcessorService(evaluatorService);
+        RulesEngine rulesEngine = new RulesEngine(new RulesEngineConfiguration());
         PricingServiceDemo pricingService = new PricingServiceDemo();
 
-        // Create main class with injected services
-        SpelAdvancedFeaturesDemo spelAdvancedFeaturesDemo = new SpelAdvancedFeaturesDemo(
+        // Create config with injected services
+        SpelAdvancedFeaturesDemoConfig config = new SpelAdvancedFeaturesDemoConfig(
+            rulesEngine,
             evaluatorService,
             ruleEngineService,
             templateProcessorService
         );
 
-        // Example 1: Collection and array operations
+        // Create main class with injected config
+        SpelAdvancedFeaturesDemo spelAdvancedFeaturesDemo = new SpelAdvancedFeaturesDemo(config);
+
+        // Run demonstrations
         spelAdvancedFeaturesDemo.demonstrateCollectionOperations();
-
-        // Example 2: Advanced rule engine with collection filtering
         spelAdvancedFeaturesDemo.demonstrateAdvancedRuleEngine();
-
-        // Example 3: Dynamic method resolution and execution
         spelAdvancedFeaturesDemo.demonstrateDynamicMethodExecution(pricingService);
-
-        // Example 4: Template expressions with placeholders
         spelAdvancedFeaturesDemo.demonstrateTemplateExpressions();
-
-        // Example 5: XML template expressions with placeholders
         spelAdvancedFeaturesDemo.demonstrateXmlTemplateExpressions();
-
-        // Example 6: JSON template expressions with placeholders
         spelAdvancedFeaturesDemo.demonstrateJsonTemplateExpressions();
-
-        // Example 7: Dynamic lookup service
         spelAdvancedFeaturesDemo.demonstrateDynamicLookupService();
-
-        // Example 8: RuleResult features and capabilities
         spelAdvancedFeaturesDemo.demonstrateRuleResultFeatures();
-
-        // Example 9: Comprehensive post-trade processing examples
-        DynamicMethodExecutionDemo dynamicMethodExecutionDemo = new DynamicMethodExecutionDemo(evaluatorService);
-        dynamicMethodExecutionDemo.demonstrateDynamicMethodExecution(pricingService);
     }
 
     /**
@@ -101,11 +86,11 @@ public class SpelAdvancedFeaturesDemo {
     private void demonstrateCollectionOperations() {
         System.out.println("\n=== Financial Instrument Collection Operations ===");
 
-        StandardEvaluationContext context = new StandardEvaluationContext();
+        // Get context from config
+        StandardEvaluationContext context = config.createContext();
 
-        // Get products from data service
-        List<Product> products = dataServiceManager.requestData("products");
-        context.setVariable("products", products);
+        // Add price threshold variable
+        context.setVariable("priceThreshold", 500.0);
 
         // Collection selection - filter fixed income products
         RuleResult result1 = evaluatorService.evaluateWithResult("#products.?[category == 'FixedIncome']", context, List.class);
@@ -120,7 +105,6 @@ public class SpelAdvancedFeaturesDemo {
         System.out.println("Rule result: " + (result3.isTriggered() ? "Triggered" : "Not triggered"));
 
         // First and last elements
-        context.setVariable("priceThreshold", 500.0);
         RuleResult result4 = evaluatorService.evaluateWithResult("#products.^[price > #priceThreshold].name", context, String.class);
         System.out.println("First expensive product: " + result4.getMessage());
 
@@ -134,20 +118,11 @@ public class SpelAdvancedFeaturesDemo {
     private void demonstrateAdvancedRuleEngine() {
         System.out.println("\n=== Advanced Rule Engine with Collection Filtering ===");
 
-        // Get data from service
-        List<Product> inventory = dataServiceManager.requestData("inventory");
-        Customer customer = dataServiceManager.requestData("customer");
+        // Get context from config
+        StandardEvaluationContext context = config.createContext();
 
-        // Create context with variables
-        StandardEvaluationContext context = new StandardEvaluationContext();
-        context.setVariable("inventory", inventory);
-        context.setVariable("customer", customer);
-
-        // Create rules using RuleConfigurationDemo
-        List<Rule> rules = new ArrayList<>();
-        rules.add(RuleConfigurationDemo.createInvestmentRecommendationsRule());
-        rules.add(RuleConfigurationDemo.createGoldTierInvestorOffersRule());
-        rules.add(RuleConfigurationDemo.createLowCostInvestmentOptionsRule());
+        // Get rules from config
+        List<Rule> rules = config.createInvestmentRules();
 
         // Evaluate rules
         ruleEngineService.evaluateRules(rules, context);
@@ -180,12 +155,8 @@ public class SpelAdvancedFeaturesDemo {
     private void demonstrateTemplateExpressions() {
         System.out.println("\n=== Template Expressions with Placeholders ===");
 
-        // Get customer from data service
-        Customer customer = dataServiceManager.requestData("templateCustomer");
-
-        // Create context with variables
-        StandardEvaluationContext context = new StandardEvaluationContext();
-        context.setVariable("customer", customer);
+        // Get context from config
+        StandardEvaluationContext context = config.createTemplateContext();
 
         // Process template with customer information
         String template = "Dear #{#customer.name},\n\n" +
@@ -205,14 +176,8 @@ public class SpelAdvancedFeaturesDemo {
     private void demonstrateXmlTemplateExpressions() {
         System.out.println("\n=== XML Template Expressions with Placeholders ===");
 
-        // Get customer and products from data service
-        Customer customer = dataServiceManager.requestData("templateCustomer");
-        List<Product> products = dataServiceManager.requestData("products");
-
-        // Create context with variables
-        StandardEvaluationContext context = new StandardEvaluationContext();
-        context.setVariable("customer", customer);
-        context.setVariable("products", products);
+        // Get context from config
+        StandardEvaluationContext context = config.createTemplateContext();
 
         // Process XML template with customer and product information
         String xmlTemplate = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
@@ -250,14 +215,8 @@ public class SpelAdvancedFeaturesDemo {
     private void demonstrateJsonTemplateExpressions() {
         System.out.println("\n=== JSON Template Expressions with Placeholders ===");
 
-        // Get customer and products from data service
-        Customer customer = dataServiceManager.requestData("templateCustomer");
-        List<Product> products = dataServiceManager.requestData("products");
-
-        // Create context with variables
-        StandardEvaluationContext context = new StandardEvaluationContext();
-        context.setVariable("customer", customer);
-        context.setVariable("products", products);
+        // Get context from config
+        StandardEvaluationContext context = config.createTemplateContext();
 
         // Process JSON template with customer and product information
         String jsonTemplate = "{\n" +
@@ -295,11 +254,11 @@ public class SpelAdvancedFeaturesDemo {
     private void demonstrateDynamicLookupService() {
         System.out.println("\n=== Dynamic Lookup Service ===");
 
+        // Get context from config
+        StandardEvaluationContext context = config.createContext();
+
         // Get lookup services from data service
         List<LookupService> lookupServices = dataServiceManager.requestData("lookupServices");
-
-        // Create context with variables
-        StandardEvaluationContext context = new StandardEvaluationContext();
         context.setVariable("lookupServices", lookupServices);
 
         // Dynamically find lookup service by name
@@ -340,12 +299,10 @@ public class SpelAdvancedFeaturesDemo {
     private void demonstrateRuleResultFeatures() {
         System.out.println("\n=== RuleResult Features and Capabilities ===");
 
-        // Create context with test data
-        StandardEvaluationContext context = new StandardEvaluationContext();
-        Customer customer = dataServiceManager.requestData("customer");
-        List<Product> products = dataServiceManager.requestData("products");
-        context.setVariable("customer", customer);
-        context.setVariable("products", products);
+        // Get context from config
+        StandardEvaluationContext context = config.createContext();
+
+        // Add additional variables for this demonstration
         context.setVariable("investmentAmount", 150000);
         context.setVariable("accountType", "retirement");
         context.setVariable("clientRiskScore", 8);
@@ -379,36 +336,54 @@ public class SpelAdvancedFeaturesDemo {
 
         System.out.println("\n2. Using RuleResult for Conditional Rule Execution:");
 
-        // Create a sequence of rules to demonstrate conditional execution
-        Rule highValueRule = new Rule(
-            "High-Value Investment",
-            "#investmentAmount > 100000",
-            "High-value investment detected"
-        );
+        // Get rules from config
+        List<Rule> ruleResultRules = config.createRuleResultRules();
 
-        Rule retirementAccountRule = new Rule(
-            "Retirement Account",
-            "#accountType == 'retirement'",
-            "Retirement account detected"
-        );
+        // Extract specific rules for demonstrations
+        Rule highValueRule = ruleResultRules.stream()
+            .filter(r -> r.getName().equals("HighValueCustomerRule"))
+            .findFirst()
+            .orElse(new Rule(
+                "High-Value Investment",
+                "#investmentAmount > 100000",
+                "High-value investment detected"
+            ));
 
-        Rule highRiskClientRule = new Rule(
-            "High-Risk Client",
-            "#clientRiskScore > 7",
-            "High-risk client detected"
-        );
+        Rule retirementAccountRule = ruleResultRules.stream()
+            .filter(r -> r.getName().equals("InitialAssessmentRule"))
+            .findFirst()
+            .orElse(new Rule(
+                "Retirement Account",
+                "#accountType == 'retirement'",
+                "Retirement account detected"
+            ));
 
-        Rule volatileMarketRule = new Rule(
-            "Volatile Market",
-            "#marketVolatility > 0.2",
-            "Volatile market conditions detected"
-        );
+        Rule highRiskClientRule = ruleResultRules.stream()
+            .filter(r -> r.getName().equals("CustomerCategoryRule"))
+            .findFirst()
+            .orElse(new Rule(
+                "High-Risk Client",
+                "#clientRiskScore > 7",
+                "High-risk client detected"
+            ));
 
-        Rule kycVerificationRule = new Rule(
-            "KYC Verification",
-            "!#kycVerified",
-            "KYC verification required"
-        );
+        Rule volatileMarketRule = ruleResultRules.stream()
+            .filter(r -> r.getName().equals("MidAgeInvestorRule"))
+            .findFirst()
+            .orElse(new Rule(
+                "Volatile Market",
+                "#marketVolatility > 0.2",
+                "Volatile market conditions detected"
+            ));
+
+        Rule kycVerificationRule = ruleResultRules.stream()
+            .filter(r -> r.getName().equals("SeniorInvestorRule"))
+            .findFirst()
+            .orElse(new Rule(
+                "KYC Verification",
+                "!#kycVerified",
+                "KYC verification required"
+            ));
 
         // Demonstrate conditional execution based on triggered status
         System.out.println("\nConditional Execution Based on Triggered Status:");
@@ -554,23 +529,54 @@ public class SpelAdvancedFeaturesDemo {
      * Demonstrates dynamic rule selection.
      */
     private void executeDynamicRuleSelection(StandardEvaluationContext context) {
+        // Get rules from config
+        List<Rule> ruleResultRules = config.createRuleResultRules();
+
         // Create a map of rules that can be selected dynamically
         Map<String, Rule> ruleRepository = new HashMap<>();
-        ruleRepository.put("Rule-HighValue", new Rule(
-            "High-Value Investment",
-            "#investmentAmount > 100000",
-            "High-value investment detected"
-        ));
-        ruleRepository.put("Rule-Retirement", new Rule(
-            "Retirement Account",
-            "#accountType == 'retirement'",
-            "Retirement account detected"
-        ));
-        ruleRepository.put("Rule-HighRisk", new Rule(
-            "High-Risk Client",
-            "#clientRiskScore > 7",
-            "High-risk client detected"
-        ));
+
+        // Extract rules from the config and add them to the repository
+        Rule youngInvestorRule = ruleResultRules.stream()
+            .filter(r -> r.getName().equals("YoungInvestorRule"))
+            .findFirst()
+            .orElse(null);
+        if (youngInvestorRule != null) {
+            ruleRepository.put("Rule-HighValue", youngInvestorRule);
+        } else {
+            ruleRepository.put("Rule-HighValue", new Rule(
+                "High-Value Investment",
+                "#investmentAmount > 100000",
+                "High-value investment detected"
+            ));
+        }
+
+        Rule midAgeInvestorRule = ruleResultRules.stream()
+            .filter(r -> r.getName().equals("MidAgeInvestorRule"))
+            .findFirst()
+            .orElse(null);
+        if (midAgeInvestorRule != null) {
+            ruleRepository.put("Rule-Retirement", midAgeInvestorRule);
+        } else {
+            ruleRepository.put("Rule-Retirement", new Rule(
+                "Retirement Account",
+                "#accountType == 'retirement'",
+                "Retirement account detected"
+            ));
+        }
+
+        Rule seniorInvestorRule = ruleResultRules.stream()
+            .filter(r -> r.getName().equals("SeniorInvestorRule"))
+            .findFirst()
+            .orElse(null);
+        if (seniorInvestorRule != null) {
+            ruleRepository.put("Rule-HighRisk", seniorInvestorRule);
+        } else {
+            ruleRepository.put("Rule-HighRisk", new Rule(
+                "High-Risk Client",
+                "#clientRiskScore > 7",
+                "High-risk client detected"
+            ));
+        }
 
         // Start with a rule to determine the investment type
         Rule investmentTypeRule = new Rule(

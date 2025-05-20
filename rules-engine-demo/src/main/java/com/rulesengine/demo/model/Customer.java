@@ -38,6 +38,18 @@ public class Customer {
     }
 
     /**
+     * Create a new customer as a copy of another customer.
+     *
+     * @param other The customer to copy
+     */
+    public Customer(Customer other) {
+        this.name = other.name;
+        this.age = other.age;
+        this.membershipLevel = other.membershipLevel;
+        this.preferredCategories = new ArrayList<>(other.getPreferredCategories());
+    }
+
+    /**
      * Get the name of the customer.
      *
      * @return The customer's name
