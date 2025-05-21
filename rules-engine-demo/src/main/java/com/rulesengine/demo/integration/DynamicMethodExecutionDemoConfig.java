@@ -1,6 +1,6 @@
 package com.rulesengine.demo.integration;
 
-import com.rulesengine.core.engine.RulesEngine;
+import com.rulesengine.core.engine.config.RulesEngine;
 import com.rulesengine.core.engine.model.Rule;
 import com.rulesengine.core.service.engine.ExpressionEvaluatorService;
 import com.rulesengine.demo.model.Trade;

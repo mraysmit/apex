@@ -1,4 +1,4 @@
-package com.rulesengine.core.engine;
+package com.rulesengine.core.engine.config;
 
 import com.rulesengine.core.engine.model.Category;
 import com.rulesengine.core.engine.model.Rule;
@@ -36,8 +36,8 @@ public class RulesEngineConfiguration {
      * 
      * @return A new rule builder
      */
-    public com.rulesengine.core.engine.RuleBuilder rule() {
-        return new com.rulesengine.core.engine.RuleBuilder();
+    public RuleBuilder rule() {
+        return new RuleBuilder();
     }
 
     /**
@@ -47,8 +47,8 @@ public class RulesEngineConfiguration {
      * @param id The unique identifier for the rule
      * @return A new rule builder
      */
-    public com.rulesengine.core.engine.RuleBuilder rule(String id) {
-        return new com.rulesengine.core.engine.RuleBuilder(id);
+    public RuleBuilder rule(String id) {
+        return new RuleBuilder(id);
     }
 
     /**

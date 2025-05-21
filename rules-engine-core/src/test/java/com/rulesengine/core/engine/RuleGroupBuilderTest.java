@@ -1,5 +1,6 @@
 package com.rulesengine.core.engine;
 
+import com.rulesengine.core.engine.config.RuleGroupBuilder;
 import com.rulesengine.core.engine.model.Category;
 import com.rulesengine.core.engine.model.RuleGroup;
 import org.junit.jupiter.api.Test;

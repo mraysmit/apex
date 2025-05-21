@@ -5,10 +5,9 @@
  */
 package com.rulesengine.demo.integration;
 
-import com.rulesengine.core.engine.RulesEngine;
-import com.rulesengine.core.engine.RulesEngineConfiguration;
+import com.rulesengine.core.engine.config.RulesEngine;
+import com.rulesengine.core.engine.config.RulesEngineConfiguration;
 import com.rulesengine.core.engine.model.RuleResult;
-import com.rulesengine.core.engine.model.RuleResult.ResultType;
 import com.rulesengine.core.service.lookup.LookupServiceRegistry;
 import com.rulesengine.core.service.validation.ValidationService;
 import com.rulesengine.demo.data.MockDataSources;
@@ -16,11 +15,11 @@ import com.rulesengine.demo.model.Customer;
 import com.rulesengine.demo.model.Product;
 import com.rulesengine.demo.model.Trade;
 import com.rulesengine.demo.service.validators.CustomerValidator;
+import com.rulesengine.demo.service.validators.DynamicCustomerValidatorDemoConfig;
 import com.rulesengine.demo.service.validators.ProductValidator;
 import com.rulesengine.demo.service.validators.TradeValidatorDemo;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class ValidationServiceDemo {
     // Services
@@ -75,11 +74,38 @@ public class ValidationServiceDemo {
         registry.registerService(new ProductValidator("fixedIncomeValidator", 0.0, Double.MAX_VALUE, "FixedIncome"));
         registry.registerService(new ProductValidator("etfValidator", 0.0, Double.MAX_VALUE, "ETF"));
 
-        // Register customer validators
-        registry.registerService(new CustomerValidator("adultValidator", 18, 120, "Gold", "Silver", "Bronze", "Basic"));
-        registry.registerService(new CustomerValidator("seniorValidator", 65, 120, "Gold", "Silver"));
-        registry.registerService(new CustomerValidator("goldMemberValidator", 0, 120, "Gold"));
-        registry.registerService(new CustomerValidator("silverMemberValidator", 0, 120, "Silver"));
+        // Create a DynamicCustomerValidatorDemoConfig
+        RulesEngine rulesEngine = new RulesEngine(new RulesEngineConfiguration());
+        DynamicCustomerValidatorDemoConfig config = new DynamicCustomerValidatorDemoConfig(rulesEngine);
+
+        // Register customer validators with parameter maps
+        // Adult validator (18-120, all membership levels)
+        Map<String, Object> adultParams = new HashMap<>();
+        adultParams.put("minAge", 18);
+        adultParams.put("maxAge", 120);
+        adultParams.put("allowedMembershipLevels", Arrays.asList("Gold", "Silver", "Bronze", "Basic"));
+        registry.registerService(new CustomerValidator("adultValidator", adultParams, config));
+
+        // Senior validator (65-120, Gold and Silver)
+        Map<String, Object> seniorParams = new HashMap<>();
+        seniorParams.put("minAge", 65);
+        seniorParams.put("maxAge", 120);
+        seniorParams.put("allowedMembershipLevels", Arrays.asList("Gold", "Silver"));
+        registry.registerService(new CustomerValidator("seniorValidator", seniorParams, config));
+
+        // Gold member validator (any age, Gold only)
+        Map<String, Object> goldParams = new HashMap<>();
+        goldParams.put("minAge", 0);
+        goldParams.put("maxAge", 120);
+        goldParams.put("allowedMembershipLevels", Collections.singletonList("Gold"));
+        registry.registerService(new CustomerValidator("goldMemberValidator", goldParams, config));
+
+        // Silver member validator (any age, Silver only)
+        Map<String, Object> silverParams = new HashMap<>();
+        silverParams.put("minAge", 0);
+        silverParams.put("maxAge", 120);
+        silverParams.put("allowedMembershipLevels", Collections.singletonList("Silver"));
+        registry.registerService(new CustomerValidator("silverMemberValidator", silverParams, config));
 
         // Register trade validators
         registry.registerService(new TradeValidatorDemo("equityTradeValidator", new String[]{"Equity"}, new String[]{"InstrumentType", "AssetClass"}));

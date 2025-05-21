@@ -1,16 +1,20 @@
 package com.rulesengine.demo.service.providers;
 
+import com.rulesengine.core.engine.model.Rule;
 import com.rulesengine.core.engine.model.RuleResult;
 import com.rulesengine.core.service.lookup.RecordMatcher;
 import com.rulesengine.demo.model.Trade;
 import com.rulesengine.core.service.lookup.LookupServiceRegistry;
 import com.rulesengine.core.service.validation.Validator;
-import com.rulesengine.core.engine.RulesEngine;
-import com.rulesengine.core.engine.RulesEngineConfiguration;
+import com.rulesengine.core.engine.config.RulesEngine;
+import com.rulesengine.core.engine.config.RulesEngineConfiguration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -168,11 +172,13 @@ public class TradeRecordMatcherDemo implements RecordMatcher<Trade> {
 
     /**
      * A validator for trade types.
-     * This validator checks if a trade's value matches a specific type.
+     * This validator checks if a trade's value matches a specific type using the RulesEngine.
      */
     private static class TradeTypeValidator implements Validator<String> {
         private final String name;
         private final String tradeType;
+        private final RulesEngine rulesEngine;
+        private final Rule validationRule;
 
         /**
          * Create a new TradeTypeValidator with the specified name and trade type.
@@ -183,6 +189,21 @@ public class TradeRecordMatcherDemo implements RecordMatcher<Trade> {
         public TradeTypeValidator(String name, String tradeType) {
             this.name = name;
             this.tradeType = tradeType;
+            this.rulesEngine = new RulesEngine(new RulesEngineConfiguration());
+            this.validationRule = createValidationRule();
+        }
+
+        /**
+         * Create a rule for validating trade types.
+         *
+         * @return The validation rule
+         */
+        private Rule createValidationRule() {
+            return new Rule(
+                "TradeTypeValidationRule",
+                "#value != null && #value.equals(#tradeType)",
+                "Trade type matches " + tradeType
+            );
         }
 
         @Override
@@ -192,17 +213,18 @@ public class TradeRecordMatcherDemo implements RecordMatcher<Trade> {
 
         @Override
         public boolean validate(String value) {
-            return tradeType.equals(value);
+            RuleResult result = validateWithResult(value);
+            return result.isTriggered();
         }
 
         @Override
         public RuleResult validateWithResult(String value) {
-            boolean isValid = validate(value);
-            if (isValid) {
-                return RuleResult.match(getName(), "Trade type matches " + tradeType);
-            } else {
-                return RuleResult.noMatch();
-            }
+            Map<String, Object> facts = new HashMap<>();
+            facts.put("value", value);
+            facts.put("tradeType", tradeType);
+
+            // Execute the rule using the rules engine
+            return rulesEngine.executeRulesList(Collections.singletonList(validationRule), facts);
         }
 
         @Override

@@ -1,7 +1,6 @@
 package com.rulesengine.core.service.transform;
 
-import com.rulesengine.core.engine.RulesEngine;
-import com.rulesengine.core.engine.RulesEngineConfiguration;
+import com.rulesengine.core.engine.config.RulesEngine;
 import com.rulesengine.core.engine.model.Rule;
 import com.rulesengine.core.engine.model.RuleResult;
 import com.rulesengine.core.engine.model.TransformerRule;

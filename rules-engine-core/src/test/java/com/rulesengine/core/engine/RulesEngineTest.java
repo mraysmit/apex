@@ -1,5 +1,9 @@
 package com.rulesengine.core.engine;
 
+import com.rulesengine.core.engine.config.RuleBuilder;
+import com.rulesengine.core.engine.config.RuleGroupBuilder;
+import com.rulesengine.core.engine.config.RulesEngine;
+import com.rulesengine.core.engine.config.RulesEngineConfiguration;
 import com.rulesengine.core.engine.model.Rule;
 import com.rulesengine.core.engine.model.RuleBase;
 import com.rulesengine.core.engine.model.RuleGroup;
@@ -407,5 +411,75 @@ public class RulesEngineTest {
     public void testGetConfiguration() {
         // Verify that the configuration is accessible
         assertSame(configuration, rulesEngine.getConfiguration());
+    }
+
+    @Test
+    public void testExecuteRuleWithNullRule() {
+        // Test executing a null rule
+        RuleResult result = rulesEngine.executeRule(null, facts);
+
+        // Verify the result
+        assertNotNull(result);
+        assertFalse(result.isTriggered());
+        assertEquals("no-rule", result.getRuleName());
+        assertEquals("No rules provided", result.getMessage());
+    }
+
+    @Test
+    public void testExecuteRuleWithMatchingRule() {
+        // Create a rule that will match the facts
+        Rule rule = new RuleBuilder()
+            .withName("Age Rule")
+            .withCondition("#age > 18")
+            .withMessage("Person is an adult")
+            .build();
+
+        // Execute the rule
+        RuleResult result = rulesEngine.executeRule(rule, facts);
+
+        // Verify the result
+        assertNotNull(result);
+        assertTrue(result.isTriggered());
+        assertEquals("Age Rule", result.getRuleName());
+        assertEquals("Person is an adult", result.getMessage());
+    }
+
+    @Test
+    public void testExecuteRuleWithNonMatchingRule() {
+        // Create a rule that will not match the facts
+        Rule rule = new RuleBuilder()
+            .withName("Age Rule")
+            .withCondition("#age < 18")
+            .withMessage("Person is a minor")
+            .build();
+
+        // Execute the rule
+        RuleResult result = rulesEngine.executeRule(rule, facts);
+
+        // Verify the result
+        assertNotNull(result);
+        assertFalse(result.isTriggered());
+        assertEquals("no-match", result.getRuleName());
+        assertEquals("No matching rules found", result.getMessage());
+    }
+
+    @Test
+    public void testExecuteRuleWithException() {
+        // Create a rule with an invalid condition that will throw an exception
+        Rule rule = new RuleBuilder()
+            .withName("Invalid Rule")
+            .withCondition("#nonExistentVariable > 10")
+            .withMessage("This rule will throw an exception")
+            .build();
+
+        // Execute the rule
+        RuleResult result = rulesEngine.executeRule(rule, facts);
+
+        // Verify the result
+        assertNotNull(result);
+        assertFalse(result.isTriggered());
+        assertEquals("Invalid Rule", result.getRuleName());
+        assertTrue(result.getMessage().contains("Missing parameters"));
+        assertTrue(result.getMessage().contains("nonExistentVariable"));
     }
 }

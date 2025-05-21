@@ -1,0 +1,6 @@
+create a new version of the TradeValidatorDemo called DynamicTradeValidatorDemo. This new version will implement the same validation rules but it will not implement or use the Validator<T> class. Instead it will use the dynamic evaluation capabilities of the rules engine. Examples of dynamic behaviour are present in the project, for example DynamicMethodExecutionTest. The claases of Rule, RuleGroup and RuleResult should of course be used.
+
+
+
+
+

@@ -146,9 +146,8 @@ public class DataServiceManager {
      * @return This manager for method chaining
      */
     public DataServiceManager initializeWithMockData() {
-        // This method is a placeholder for now
-        // The actual implementation would create and load mock data sources
-
+        // This method should be overridden by subclasses to provide specific mock data
+        // The default implementation does nothing
         return this;
     }
 }

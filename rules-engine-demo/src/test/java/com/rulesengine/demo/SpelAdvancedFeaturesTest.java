@@ -1,7 +1,7 @@
 package com.rulesengine.demo;
 
-import com.rulesengine.core.engine.RulesEngine;
-import com.rulesengine.core.engine.RulesEngineConfiguration;
+import com.rulesengine.core.engine.config.RulesEngine;
+import com.rulesengine.core.engine.config.RulesEngineConfiguration;
 import com.rulesengine.core.engine.model.Rule;
 import com.rulesengine.core.engine.model.RuleResult;
 import com.rulesengine.core.service.engine.ExpressionEvaluatorService;
@@ -9,10 +9,8 @@ import com.rulesengine.core.service.engine.RuleEngineService;
 import com.rulesengine.core.service.engine.TemplateProcessorService;
 import com.rulesengine.core.service.lookup.LookupService;
 import com.rulesengine.demo.data.MockDataSources;
-import com.rulesengine.demo.integration.RuleConfigurationDemo;
 import com.rulesengine.demo.integration.SpelAdvancedFeaturesDemo;
 import com.rulesengine.demo.integration.SpelAdvancedFeaturesDemoConfig;
-import com.rulesengine.demo.model.Customer;
 import com.rulesengine.demo.model.Product;
 import com.rulesengine.demo.model.Trade;
 import com.rulesengine.demo.service.providers.PricingServiceDemo;

@@ -1,16 +1,13 @@
 package com.rulesengine.demo.integration;
 
-import com.rulesengine.core.engine.RulesEngine;
-import com.rulesengine.core.engine.RulesEngineConfiguration;
+import com.rulesengine.core.engine.config.RulesEngine;
+import com.rulesengine.core.engine.config.RulesEngineConfiguration;
 import com.rulesengine.core.engine.model.RuleResult;
 import com.rulesengine.core.service.lookup.LookupServiceRegistry;
 import com.rulesengine.core.service.validation.ValidationService;
 import com.rulesengine.core.service.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 

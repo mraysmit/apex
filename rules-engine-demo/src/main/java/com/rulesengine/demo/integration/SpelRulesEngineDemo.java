@@ -1,6 +1,7 @@
 package com.rulesengine.demo.integration;
 
-import com.rulesengine.core.engine.*;
+import com.rulesengine.core.engine.config.RulesEngine;
+import com.rulesengine.core.engine.config.RulesEngineConfiguration;
 import com.rulesengine.core.engine.model.Rule;
 import com.rulesengine.core.engine.model.RuleGroup;
 import com.rulesengine.core.engine.model.RuleResult;

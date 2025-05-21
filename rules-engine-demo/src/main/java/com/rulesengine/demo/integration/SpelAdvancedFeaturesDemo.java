@@ -1,7 +1,7 @@
 package com.rulesengine.demo.integration;
 
-import com.rulesengine.core.engine.RulesEngine;
-import com.rulesengine.core.engine.RulesEngineConfiguration;
+import com.rulesengine.core.engine.config.RulesEngine;
+import com.rulesengine.core.engine.config.RulesEngineConfiguration;
 import com.rulesengine.core.engine.model.Rule;
 import com.rulesengine.core.engine.model.RuleResult;
 import com.rulesengine.core.service.engine.ExpressionEvaluatorService;
@@ -14,8 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.rulesengine.demo.model.Customer;
-import com.rulesengine.demo.model.Product;
 import com.rulesengine.core.service.lookup.LookupService;
 import com.rulesengine.demo.service.providers.PricingServiceDemo;
 import com.rulesengine.core.service.data.DataServiceManager;

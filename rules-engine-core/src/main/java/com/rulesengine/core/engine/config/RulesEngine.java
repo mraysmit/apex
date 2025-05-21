@@ -1,4 +1,4 @@
-package com.rulesengine.core.engine;
+package com.rulesengine.core.engine.config;
 
 import com.rulesengine.core.engine.model.Rule;
 import com.rulesengine.core.engine.model.RuleBase;
@@ -83,6 +83,51 @@ public class RulesEngine {
         }
 
         return context;
+    }
+
+    /**
+     * Execute a single Rule object against the provided facts.
+     *
+     * @param rule The Rule object to execute
+     * @param facts The facts to evaluate the rule against
+     * @return The result of the rule evaluation, indicating whether it matched or not
+     */
+    public RuleResult executeRule(Rule rule, Map<String, Object> facts) {
+        if (rule == null) {
+            LOGGER.info("No rule provided for execution");
+            return RuleResult.noRules();
+        }
+
+        LOGGER.info("Executing rule: " + rule.getName());
+        LOGGER.fine("Facts provided: " + (facts != null ? facts.keySet() : "none"));
+
+        // Check for missing parameters
+        Set<String> missingParameters = com.rulesengine.core.util.RuleParameterExtractor.validateParameters(rule, facts);
+        if (!missingParameters.isEmpty()) {
+            LOGGER.warning("Missing parameters for rule '" + rule.getName() + "': " + missingParameters);
+            return RuleResult.error(rule.getName(), "Missing parameters: " + missingParameters);
+        }
+
+        StandardEvaluationContext context = createContext(facts);
+
+        // Evaluate the rule
+        LOGGER.fine("Evaluating rule: " + rule.getName());
+        try {
+            Expression exp = parser.parseExpression(rule.getCondition());
+            Boolean result = exp.getValue(context, Boolean.class);
+            LOGGER.fine("Rule '" + rule.getName() + "' evaluated to: " + result);
+
+            if (result != null && result) {
+                LOGGER.info("Rule matched: " + rule.getName());
+                return RuleResult.match(rule.getName(), rule.getMessage());
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error evaluating rule '" + rule.getName() + "': " + e.getMessage(), e);
+            return RuleResult.error(rule.getName(), "Error evaluating rule: " + e.getMessage());
+        }
+
+        LOGGER.info("Rule did not match: " + rule.getName());
+        return RuleResult.noMatch();
     }
 
     /**

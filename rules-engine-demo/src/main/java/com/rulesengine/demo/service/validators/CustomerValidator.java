@@ -1,109 +1,116 @@
-/**
- * A validator for Customer objects.
- * This validator checks if a customer meets certain criteria.
- */
 package com.rulesengine.demo.service.validators;
 
-import com.rulesengine.core.engine.RulesEngine;
-import com.rulesengine.core.engine.RulesEngineConfiguration;
+import com.rulesengine.core.engine.config.RulesEngine;
 import com.rulesengine.core.engine.model.Rule;
+import com.rulesengine.core.engine.model.RuleGroup;
 import com.rulesengine.core.engine.model.RuleResult;
-import com.rulesengine.core.service.validation.Validator;
+import com.rulesengine.core.service.common.NamedService;
+import com.rulesengine.core.util.RuleParameterExtractor;
 import com.rulesengine.demo.model.Customer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-public class CustomerValidator implements Validator<Customer> {
+/**
+ * A validator for Customer objects using the RulesEngine.
+ * This class provides methods to validate customers against defined criteria.
+ */
+public class CustomerValidator implements NamedService {
     private final String name;
-    private final int minAge;
-    private final int maxAge;
-    private final List<String> allowedMembershipLevels;
+    private final Map<String, Object> parameters;
     private final RulesEngine rulesEngine;
-    private final List<Rule> validationRules;
+    private final RuleGroup validationRuleGroup;
+    private final StandardEvaluationContext context;
 
     /**
-     * Create a new CustomerValidator with the specified criteria.
+     * Create a new CustomerValidator with the specified parameters.
      *
      * @param name The name of the validator
-     * @param minAge The minimum age for a valid customer
-     * @param maxAge The maximum age for a valid customer
-     * @param allowedMembershipLevels The allowed membership levels for a valid customer
+     * @param parameters Map of validation parameters (minAge, maxAge, allowedMembershipLevels, etc.)
+     * @param config The configuration to use for creating validation rules
      */
-    public CustomerValidator(String name, int minAge, int maxAge, String... allowedMembershipLevels) {
+    public CustomerValidator(String name, Map<String, Object> parameters, DynamicCustomerValidatorDemoConfig config) {
         this.name = name;
-        this.minAge = minAge;
-        this.maxAge = maxAge;
-        this.allowedMembershipLevels = Arrays.asList(allowedMembershipLevels);
-        this.rulesEngine = new RulesEngine(new RulesEngineConfiguration());
-        this.validationRules = createValidationRules();
-    }
+        this.parameters = new HashMap<>(parameters);
+        this.rulesEngine = config.getRulesEngine();
+        this.context = new StandardEvaluationContext();
 
-    private List<Rule> createValidationRules() {
-        List<Rule> rules = new ArrayList<>();
-
-        // Rule for null check
-        rules.add(new Rule(
-            "NullCheckRule",
-            "#customer != null",
-            "Customer must not be null"
-        ));
-
-        // Rule for age validation
-        rules.add(new Rule(
-            "AgeValidationRule",
-            "#customer != null && #customer.age >= #minAge && #customer.age <= #maxAge",
-            "Customer age must be between " + minAge + " and " + maxAge
-        ));
-
-        // Rule for membership level validation
-        if (!allowedMembershipLevels.isEmpty()) {
-            rules.add(new Rule(
-                "MembershipLevelValidationRule",
-                "#customer != null && (#allowedMembershipLevels.isEmpty() || #allowedMembershipLevels.contains(#customer.membershipLevel))",
-                "Customer membership level must be in the allowed levels list"
-            ));
+        // Initialize context with validation parameters
+        for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+            context.setVariable(entry.getKey(), entry.getValue());
         }
 
-        return rules;
+        // Create validation rule group using the config
+        this.validationRuleGroup = config.createValidationRuleGroup(name, parameters);
     }
 
-    @Override
+    /**
+     * Get the name of this validator.
+     *
+     * @return The name
+     */
     public String getName() {
         return name;
     }
 
-    @Override
+    /**
+     * Validate a customer using dynamic evaluation.
+     *
+     * @param customer The customer to validate
+     * @return True if the customer is valid, false otherwise
+     */
     public boolean validate(Customer customer) {
         RuleResult result = validateWithResult(customer);
         return result.isTriggered();
     }
 
-    @Override
-    public Class<Customer> getType() {
-        return Customer.class;
+    /**
+     * Validate a customer and return a detailed result.
+     *
+     * @param customer The customer to validate
+     * @return The validation result
+     */
+    public RuleResult validateWithResult(Customer customer) {
+        // Set the customer in the context
+        context.setVariable("customer", customer);
+
+        // Create initial facts map with customer data and parameters
+        Map<String, Object> initialFacts = new HashMap<>(parameters);
+        initialFacts.put("customer", customer);
+
+        // Use RuleParameterExtractor to ensure all required parameters exist in the facts map
+        Map<String, Object> facts = RuleParameterExtractor.ensureParameters(validationRuleGroup, initialFacts);
+
+        // Execute the rule group using the rules engine
+        return rulesEngine.executeRuleGroupsList(Collections.singletonList(validationRuleGroup), facts);
     }
 
-    @Override
-    public RuleResult validateWithResult(Customer customer) {
-        Map<String, Object> facts = new HashMap<>();
-        facts.put("customer", customer);
-        facts.put("minAge", minAge);
-        facts.put("maxAge", maxAge);
-        facts.put("allowedMembershipLevels", allowedMembershipLevels);
+    /**
+     * Validate a customer using a dynamic expression.
+     *
+     * @param customer The customer to validate
+     * @param expression The expression to evaluate
+     * @param config The configuration to use for creating the dynamic rule
+     * @return True if the expression evaluates to true, false otherwise
+     */
+    public boolean validateWithExpression(Customer customer, String expression, DynamicCustomerValidatorDemoConfig config) {
+        // Set the customer in the context
+        context.setVariable("customer", customer);
 
-        // Execute all rules and return the first failure or success if all pass
-        for (Rule rule : validationRules) {
-            RuleResult result = rulesEngine.executeRulesList(Collections.singletonList(rule), facts);
-            if (!result.isTriggered()) {
-                return RuleResult.noMatch();
-            }
-        }
+        // Create a rule with the dynamic expression
+        Rule dynamicRule = config.createDynamicValidationRule(expression);
 
-        return RuleResult.match(getName(), "Customer validation successful");
+        // Create initial facts map with customer data and parameters
+        Map<String, Object> initialFacts = new HashMap<>(parameters);
+        initialFacts.put("customer", customer);
+
+        // Use RuleParameterExtractor to ensure all required parameters for the dynamic rule exist in the facts map
+        Map<String, Object> facts = RuleParameterExtractor.ensureParameters(dynamicRule, initialFacts);
+
+        // Execute the rule using the rules engine
+        RuleResult result = rulesEngine.executeRule(dynamicRule, facts);
+        return result.isTriggered();
     }
 }

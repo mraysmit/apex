@@ -1,4 +1,4 @@
-package com.rulesengine.core.engine;
+package com.rulesengine.core.engine.config;
 
 import com.rulesengine.core.engine.model.Category;
 import com.rulesengine.core.engine.model.RuleGroup;

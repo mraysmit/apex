@@ -1,20 +1,16 @@
 package com.rulesengine.demo.integration;
 
-import com.rulesengine.core.engine.RulesEngine;
+import com.rulesengine.core.engine.config.RulesEngine;
 import com.rulesengine.core.engine.model.Rule;
 import com.rulesengine.core.service.engine.ExpressionEvaluatorService;
 import com.rulesengine.core.service.engine.RuleEngineService;
 import com.rulesengine.core.service.engine.TemplateProcessorService;
-import com.rulesengine.core.service.data.DataServiceManager;
-import com.rulesengine.core.service.lookup.LookupService;
 import com.rulesengine.demo.model.Customer;
 import com.rulesengine.demo.model.Product;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**

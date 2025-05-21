@@ -2,7 +2,7 @@ package com.rulesengine.core.service.engine;
 
 import com.rulesengine.core.engine.model.Rule;
 import com.rulesengine.core.engine.model.RuleGroup;
-import com.rulesengine.core.engine.RulesEngineConfiguration;
+import com.rulesengine.core.engine.config.RulesEngineConfiguration;
 
 /**
  * Service for managing rule configurations.

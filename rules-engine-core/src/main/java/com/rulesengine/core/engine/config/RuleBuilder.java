@@ -1,4 +1,4 @@
-package com.rulesengine.core.engine;
+package com.rulesengine.core.engine.config;
 
 import com.rulesengine.core.engine.model.Category;
 import com.rulesengine.core.engine.model.Rule;
@@ -12,7 +12,8 @@ import java.util.stream.Collectors;
  * Builder class for creating Rule instances.
  * This provides a fluent API for constructing rules with various properties.
  */
-public class RuleBuilder {
+public class
+RuleBuilder {
     private String id;
     private Set<Category> categories = new HashSet<>();
     private String name;

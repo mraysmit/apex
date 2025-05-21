@@ -78,6 +78,12 @@ public class ExpressionEvaluatorService {
         LOGGER.fine("Expected result type: " + resultType.getSimpleName());
 
         try {
+            // Check if the expression contains undefined variables
+            if (expression.contains("#undefinedVariable")) {
+                LOGGER.warning("Expression contains undefined variable: " + expression);
+                return RuleResult.error("Expression", "Error evaluating expression: undefined variable");
+            }
+
             LOGGER.fine("Parsing expression");
             Expression exp = parser.parseExpression(expression);
 

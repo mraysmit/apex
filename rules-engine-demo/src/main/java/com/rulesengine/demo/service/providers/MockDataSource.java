@@ -81,6 +81,11 @@ public class MockDataSource implements DataSource {
      * Initialize the mock data for this data source.
      */
     private void initializeData() {
+        // Handle null dataType gracefully
+        if (dataType == null) {
+            return;
+        }
+
         switch (dataType) {
             case "products":
                 initializeProducts();
@@ -167,6 +172,8 @@ public class MockDataSource implements DataSource {
         sourceRecords.add(new Trade("T005", "FixedIncome", "AssetClass"));
         sourceRecords.add(new Trade("T006", "Currency", "AssetClass"));
         sourceRecords.add(new Trade("T007", "Commodity", "AssetClass"));
+        // Add a non-matching trade
+        sourceRecords.add(new Trade("T008", "NonMatchingValue", "NonMatchingCategory"));
 
         dataStore.put("sourceRecords", sourceRecords);
     }

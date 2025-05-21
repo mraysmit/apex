@@ -1,12 +1,11 @@
 package com.rulesengine.demo.integration;
 
-import com.rulesengine.core.engine.RulesEngine;
-import com.rulesengine.core.engine.RulesEngineConfiguration;
+import com.rulesengine.core.engine.config.RulesEngine;
+import com.rulesengine.core.engine.config.RulesEngineConfiguration;
 import com.rulesengine.core.service.engine.ExpressionEvaluatorService;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Demonstration of dynamic method execution using SpEL expressions.
@@ -16,7 +15,6 @@ import java.util.logging.Logger;
  * This is a demo class with no public constructors or methods except for the main method.
  */
 public class DynamicMethodExecutionDemo {
-    private static final Logger LOGGER = Logger.getLogger(DynamicMethodExecutionDemo.class.getName());
 
     /**
      * Private constructor to prevent instantiation.
@@ -41,45 +39,45 @@ public class DynamicMethodExecutionDemo {
      * This method shows the step-by-step process of creating and using dynamic method execution.
      */
     private static void runDynamicMethodExecutionDemo() {
-        LOGGER.info("Starting dynamic method execution demonstration");
+        System.out.println("Starting dynamic method execution demonstration");
 
         // Step 1: Create a RulesEngine
-        LOGGER.info("Step 1: Creating a RulesEngine");
+        System.out.println("Step 1: Creating a RulesEngine");
         RulesEngine rulesEngine = new RulesEngine(new RulesEngineConfiguration());
 
         // Step 2: Create an ExpressionEvaluatorService
-        LOGGER.info("Step 2: Creating an ExpressionEvaluatorService");
+        System.out.println("Step 2: Creating an ExpressionEvaluatorService");
         ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
 
         // Step 3: Create a DynamicMethodExecutionDemoConfig
-        LOGGER.info("Step 3: Creating a DynamicMethodExecutionDemoConfig");
+        System.out.println("Step 3: Creating a DynamicMethodExecutionDemoConfig");
         DynamicMethodExecutionDemoConfig config = new DynamicMethodExecutionDemoConfig(rulesEngine, evaluatorService);
 
         // Step 4: Create an evaluation context with self-contained services
-        LOGGER.info("Step 4: Creating an evaluation context");
+        System.out.println("Step 4: Creating an evaluation context");
         StandardEvaluationContext context = config.createContext();
 
         // Step 5: Demonstrate settlement processing
-        LOGGER.info("Step 5: Demonstrating settlement processing");
+        System.out.println("Step 5: Demonstrating settlement processing");
         demonstrateSettlementProcessing(config, context);
 
         // Step 6: Demonstrate risk management
-        LOGGER.info("Step 6: Demonstrating risk management");
+        System.out.println("Step 6: Demonstrating risk management");
         demonstrateRiskManagement(config, context);
 
         // Step 7: Demonstrate compliance and regulatory reporting
-        LOGGER.info("Step 7: Demonstrating compliance and regulatory reporting");
+        System.out.println("Step 7: Demonstrating compliance and regulatory reporting");
         demonstrateComplianceAndReporting(config, context);
 
         // Step 8: Demonstrate fee calculations
-        LOGGER.info("Step 8: Demonstrating fee calculations");
+        System.out.println("Step 8: Demonstrating fee calculations");
         demonstrateFeeCalculations(config, context);
 
         // Step 9: Demonstrate conditional processing
-        LOGGER.info("Step 9: Demonstrating conditional processing");
+        System.out.println("Step 9: Demonstrating conditional processing");
         demonstrateConditionalProcessing(config, context);
 
-        LOGGER.info("Dynamic method execution demonstration completed");
+        System.out.println("Dynamic method execution demonstration completed");
     }
 
     /**
@@ -206,4 +204,3 @@ public class DynamicMethodExecutionDemo {
         }
     }
 }
-

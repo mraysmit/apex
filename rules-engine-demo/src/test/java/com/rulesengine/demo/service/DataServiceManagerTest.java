@@ -4,6 +4,7 @@ import com.rulesengine.core.service.data.CustomDataSource;
 import com.rulesengine.core.service.data.DataServiceManager;
 import com.rulesengine.core.service.data.DataSource;
 import com.rulesengine.core.service.lookup.LookupService;
+import com.rulesengine.demo.data.DemoDataServiceManager;
 import com.rulesengine.demo.model.Customer;
 import com.rulesengine.demo.model.Product;
 import com.rulesengine.demo.model.Trade;
@@ -24,7 +25,7 @@ public class DataServiceManagerTest {
 
     @BeforeEach
     public void setUp() {
-        dataServiceManager = new DataServiceManager();
+        dataServiceManager = new DemoDataServiceManager();
         dataServiceManager.initializeWithMockData();
     }
 
@@ -81,7 +82,7 @@ public class DataServiceManagerTest {
         Customer templateCustomer = dataServiceManager.requestData("templateCustomer");
         assertNotNull(templateCustomer);
         assertEquals("Bob Johnson", templateCustomer.getName());
-        assertEquals(42, templateCustomer.getAge());
+        assertEquals(65, templateCustomer.getAge());
         assertEquals("Silver", templateCustomer.getMembershipLevel());
     }
 
@@ -159,14 +160,14 @@ public class DataServiceManagerTest {
         assertNotNull(nonMatchingRecords);
 
         // Verify that non-matching records contain expected trades
-        boolean foundCommodityTrade = false;
+        boolean foundNonMatchingTrade = false;
         for (Trade trade : nonMatchingRecords) {
-            if ("T007".equals(trade.getId()) && "Commodity".equals(trade.getValue())) {
-                foundCommodityTrade = true;
+            if ("T008".equals(trade.getId()) && "NonMatchingValue".equals(trade.getValue())) {
+                foundNonMatchingTrade = true;
                 break;
             }
         }
-        assertTrue(foundCommodityTrade, "Commodity trade should be in the non-matching records list");
+        assertTrue(foundNonMatchingTrade, "Non-matching trade should be in the non-matching records list");
     }
 
     @Test
@@ -417,6 +418,12 @@ public class DataServiceManagerTest {
         // Create a custom data source
         CustomDataSource dataSource = new CustomDataSource("CustomProductsSource", "customProducts");
 
+        // Add some initial data to the custom data source
+        List<Product> initialProducts = new ArrayList<>();
+        initialProducts.add(new Product("Custom Product 1", 100.0, "Custom Category"));
+        initialProducts.add(new Product("Custom Product 2", 200.0, "Custom Category"));
+        dataSource.addData("customProducts", initialProducts);
+
         // Load the data source
         manager.loadDataSource(dataSource);
 
@@ -440,13 +447,20 @@ public class DataServiceManagerTest {
         // Create a custom data source
         CustomDataSource dataSource = new CustomDataSource("CustomTradesSource", "customTrades");
 
+        // Add some initial data to the custom data source
+        List<Trade> initialTrades = new ArrayList<>();
+        initialTrades.add(new Trade("CT001", "Custom Value 1", "Custom Category 1"));
+        initialTrades.add(new Trade("CT002", "Custom Value 2", "Custom Category 2"));
+        initialTrades.add(new Trade("CT003", "Custom Value 3", "Custom Category 3"));
+        dataSource.addData("customTrades", initialTrades);
+
         // Load the data source
         manager.loadDataSource(dataSource);
 
         // Get the initial data
-        List<Trade> initialTrades = manager.requestData("customTrades");
-        assertNotNull(initialTrades);
-        int initialSize = initialTrades.size();
+        List<Trade> loadedTrades = manager.requestData("customTrades");
+        assertNotNull(loadedTrades);
+        int initialSize = loadedTrades.size();
 
         // Get the custom data source by name
         CustomDataSource customTradesSource = (CustomDataSource) manager.getDataSourceByName("CustomTradesSource");

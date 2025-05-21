@@ -1,7 +1,3 @@
-/**
- * A validator for Product objects.
- * This validator checks if a product meets certain criteria using the RulesEngine.
- */
 package com.rulesengine.demo.service.validators;
 
 import com.rulesengine.core.engine.config.RulesEngine;
@@ -11,18 +7,20 @@ import com.rulesengine.core.engine.model.RuleResult;
 import com.rulesengine.core.service.common.NamedService;
 import com.rulesengine.core.service.validation.Validator;
 import com.rulesengine.core.util.RuleParameterExtractor;
-import com.rulesengine.demo.model.Product;
+import com.rulesengine.demo.model.Trade;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
- * A validator for Product objects using the RulesEngine.
- * This class provides methods to validate products against defined criteria.
+ * A validator for Trade objects using the RulesEngine.
+ * This class provides methods to validate trades against defined criteria.
  */
-public class ProductValidator implements Validator<Product>, NamedService {
+public class TradeValidator implements Validator<Trade>, NamedService {
     private final String name;
     private final Map<String, Object> parameters;
     private final RulesEngine rulesEngine;
@@ -30,13 +28,13 @@ public class ProductValidator implements Validator<Product>, NamedService {
     private final StandardEvaluationContext context;
 
     /**
-     * Create a new ProductValidator with the specified parameters.
+     * Create a new TradeValidator with the specified parameters.
      *
      * @param name The name of the validator
-     * @param parameters Map of validation parameters (minPrice, maxPrice, requiredCategory, etc.)
+     * @param parameters Map of validation parameters (allowedValues, allowedCategories, etc.)
      * @param config The configuration to use for creating validation rules
      */
-    public ProductValidator(String name, Map<String, Object> parameters, DynamicProductValidatorDemoConfig config) {
+    public TradeValidator(String name, Map<String, Object> parameters, DynamicTradeValidatorDemoConfig config) {
         this.name = name;
         this.parameters = new HashMap<>(parameters);
         this.rulesEngine = config.getRulesEngine();
@@ -52,23 +50,19 @@ public class ProductValidator implements Validator<Product>, NamedService {
     }
 
     /**
-     * Create a new ProductValidator with the specified criteria.
+     * Create a new TradeValidator with the specified criteria.
      * This constructor is provided for backward compatibility.
      *
      * @param name The name of the validator
-     * @param minPrice The minimum price for a valid product
-     * @param maxPrice The maximum price for a valid product
-     * @param requiredCategory The required category for a valid product, or null if any category is valid
+     * @param allowedValues The allowed values for a valid trade
+     * @param allowedCategories The allowed categories for a valid trade
      */
-    public ProductValidator(String name, double minPrice, double maxPrice, String requiredCategory) {
+    public TradeValidator(String name, String[] allowedValues, String[] allowedCategories) {
         this.name = name;
         this.parameters = new HashMap<>();
-        parameters.put("minPrice", minPrice);
-        parameters.put("maxPrice", maxPrice);
-        if (requiredCategory != null) {
-            parameters.put("requiredCategory", requiredCategory);
-        }
-
+        parameters.put("allowedValues", Arrays.asList(allowedValues));
+        parameters.put("allowedCategories", Arrays.asList(allowedCategories));
+        
         this.rulesEngine = new com.rulesengine.core.engine.config.RulesEngine(
             new com.rulesengine.core.engine.config.RulesEngineConfiguration());
         this.context = new StandardEvaluationContext();
@@ -79,7 +73,35 @@ public class ProductValidator implements Validator<Product>, NamedService {
         }
 
         // Create validation rule group
-        DynamicProductValidatorDemoConfig config = new DynamicProductValidatorDemoConfig(rulesEngine);
+        DynamicTradeValidatorDemoConfig config = new DynamicTradeValidatorDemoConfig(rulesEngine);
+        this.validationRuleGroup = config.createValidationRuleGroup(name, parameters);
+    }
+
+    /**
+     * Create a new TradeValidator with the specified criteria.
+     * This constructor is provided for backward compatibility.
+     *
+     * @param name The name of the validator
+     * @param allowedValues The allowed values for a valid trade
+     * @param allowedCategories The allowed categories for a valid trade
+     */
+    public TradeValidator(String name, List<String> allowedValues, List<String> allowedCategories) {
+        this.name = name;
+        this.parameters = new HashMap<>();
+        parameters.put("allowedValues", allowedValues);
+        parameters.put("allowedCategories", allowedCategories);
+        
+        this.rulesEngine = new com.rulesengine.core.engine.config.RulesEngine(
+            new com.rulesengine.core.engine.config.RulesEngineConfiguration());
+        this.context = new StandardEvaluationContext();
+
+        // Initialize context with validation parameters
+        for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+            context.setVariable(entry.getKey(), entry.getValue());
+        }
+
+        // Create validation rule group
+        DynamicTradeValidatorDemoConfig config = new DynamicTradeValidatorDemoConfig(rulesEngine);
         this.validationRuleGroup = config.createValidationRuleGroup(name, parameters);
     }
 
@@ -89,24 +111,24 @@ public class ProductValidator implements Validator<Product>, NamedService {
     }
 
     @Override
-    public boolean validate(Product product) {
-        RuleResult result = validateWithResult(product);
+    public boolean validate(Trade trade) {
+        RuleResult result = validateWithResult(trade);
         return result.isTriggered();
     }
 
     @Override
-    public Class<Product> getType() {
-        return Product.class;
+    public Class<Trade> getType() {
+        return Trade.class;
     }
 
     @Override
-    public RuleResult validateWithResult(Product product) {
-        // Set the product in the context
-        context.setVariable("product", product);
+    public RuleResult validateWithResult(Trade trade) {
+        // Set the trade in the context
+        context.setVariable("trade", trade);
 
-        // Create initial facts map with product data and parameters
+        // Create initial facts map with trade data and parameters
         Map<String, Object> initialFacts = new HashMap<>(parameters);
-        initialFacts.put("product", product);
+        initialFacts.put("trade", trade);
 
         // Use RuleParameterExtractor to ensure all required parameters exist in the facts map
         Map<String, Object> facts = RuleParameterExtractor.ensureParameters(validationRuleGroup, initialFacts);
@@ -116,23 +138,23 @@ public class ProductValidator implements Validator<Product>, NamedService {
     }
 
     /**
-     * Validate a product using a dynamic expression.
+     * Validate a trade using a dynamic expression.
      *
-     * @param product The product to validate
+     * @param trade The trade to validate
      * @param expression The expression to evaluate
      * @param config The configuration to use for creating the dynamic rule
      * @return True if the expression evaluates to true, false otherwise
      */
-    public boolean validateWithExpression(Product product, String expression, DynamicProductValidatorDemoConfig config) {
-        // Set the product in the context
-        context.setVariable("product", product);
+    public boolean validateWithExpression(Trade trade, String expression, DynamicTradeValidatorDemoConfig config) {
+        // Set the trade in the context
+        context.setVariable("trade", trade);
 
         // Create a rule with the dynamic expression
         Rule dynamicRule = config.createDynamicValidationRule(expression);
 
-        // Create initial facts map with product data and parameters
+        // Create initial facts map with trade data and parameters
         Map<String, Object> initialFacts = new HashMap<>(parameters);
-        initialFacts.put("product", product);
+        initialFacts.put("trade", trade);
 
         // Use RuleParameterExtractor to ensure all required parameters for the dynamic rule exist in the facts map
         Map<String, Object> facts = RuleParameterExtractor.ensureParameters(dynamicRule, initialFacts);
