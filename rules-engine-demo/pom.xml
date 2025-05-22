@@ -60,7 +60,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.rulesengine.demo.integration.SpelAdvancedFeaturesDemo</mainClass>
+                            <mainClass>dev.mars.rulesengine.demo.integration.SpelAdvancedFeaturesDemo</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -75,7 +75,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>com.rulesengine.demo.integration.SpelAdvancedFeaturesDemo</mainClass>
+                            <mainClass>dev.mars.rulesengine.demo.integration.SpelAdvancedFeaturesDemo</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

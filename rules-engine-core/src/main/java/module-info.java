@@ -5,10 +5,10 @@ module com.rulesengine.core {
     requires java.logging;
     requires spring.expression;
 
-    exports com.rulesengine.core.service.validation;
-    exports com.rulesengine.core.service.common;
-    exports com.rulesengine.core.service.lookup;
-    exports com.rulesengine.core.engine.model;
-    exports com.rulesengine.core.engine.config;
+    exports dev.mars.rulesengine.core.service.validation;
+    exports dev.mars.rulesengine.core.service.common;
+    exports dev.mars.rulesengine.core.service.lookup;
+    exports dev.mars.rulesengine.core.engine.model;
+    exports dev.mars.rulesengine.core.engine.config;
 
 }

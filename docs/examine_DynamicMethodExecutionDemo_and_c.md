@@ -14,7 +14,7 @@ The class contains:
 Both methods only contain print statements and comments where the actual implementation code should be:
 
 ```java
-public void demonstrateDynamicMethodExecution(com.rulesengine.demo.service.providers.PricingServiceDemo pricingService) {
+public void demonstrateDynamicMethodExecution(providers.service.dev.mars.rulesengine.demo.PricingServiceDemo pricingService) {
     System.out.println("\n=== Demonstrating Dynamic Method Execution ===");
     // Dynamic method execution demonstration code
 }
