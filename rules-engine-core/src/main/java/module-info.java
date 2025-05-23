@@ -1,4 +1,4 @@
-module com.rulesengine.core {
+module dev.mars.rulesengine.core {
     // Existing dependencies (may vary for your project)
     requires java.base;
 
