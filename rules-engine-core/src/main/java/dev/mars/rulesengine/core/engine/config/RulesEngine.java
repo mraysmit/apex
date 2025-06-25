@@ -4,6 +4,10 @@ import dev.mars.rulesengine.core.engine.model.Rule;
 import dev.mars.rulesengine.core.engine.model.RuleBase;
 import dev.mars.rulesengine.core.engine.model.RuleGroup;
 import dev.mars.rulesengine.core.engine.model.RuleResult;
+import dev.mars.rulesengine.core.exception.RuleEvaluationException;
+import dev.mars.rulesengine.core.service.error.ErrorRecoveryService;
+import dev.mars.rulesengine.core.service.monitoring.RulePerformanceMetrics;
+import dev.mars.rulesengine.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.rulesengine.core.util.RuleParameterExtractor;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -26,6 +30,8 @@ public class RulesEngine {
     private static final Logger LOGGER = Logger.getLogger(RulesEngine.class.getName());
     private final ExpressionParser parser;
     private final RulesEngineConfiguration configuration;
+    private final ErrorRecoveryService errorRecoveryService;
+    private final RulePerformanceMonitor performanceMonitor;
 
 
     /**
@@ -34,7 +40,7 @@ public class RulesEngine {
      * @param configuration The configuration for this rules engine
      */
     public RulesEngine(RulesEngineConfiguration configuration) {
-        this(configuration, new SpelExpressionParser());
+        this(configuration, new SpelExpressionParser(), new ErrorRecoveryService(), new RulePerformanceMonitor());
     }
 
     /**
@@ -44,10 +50,38 @@ public class RulesEngine {
      * @param parser The expression parser to use
      */
     public RulesEngine(RulesEngineConfiguration configuration, ExpressionParser parser) {
+        this(configuration, parser, new ErrorRecoveryService(), new RulePerformanceMonitor());
+    }
+
+    /**
+     * Create a new RulesEngine with the given configuration, expression parser, and error recovery service.
+     *
+     * @param configuration The configuration for this rules engine
+     * @param parser The expression parser to use
+     * @param errorRecoveryService The error recovery service to use for handling evaluation errors
+     */
+    public RulesEngine(RulesEngineConfiguration configuration, ExpressionParser parser, ErrorRecoveryService errorRecoveryService) {
+        this(configuration, parser, errorRecoveryService, new RulePerformanceMonitor());
+    }
+
+    /**
+     * Create a new RulesEngine with the given configuration, expression parser, error recovery service, and performance monitor.
+     *
+     * @param configuration The configuration for this rules engine
+     * @param parser The expression parser to use
+     * @param errorRecoveryService The error recovery service to use for handling evaluation errors
+     * @param performanceMonitor The performance monitor to use for tracking rule evaluation metrics
+     */
+    public RulesEngine(RulesEngineConfiguration configuration, ExpressionParser parser,
+                      ErrorRecoveryService errorRecoveryService, RulePerformanceMonitor performanceMonitor) {
         this.configuration = configuration;
         this.parser = parser;
+        this.errorRecoveryService = errorRecoveryService;
+        this.performanceMonitor = performanceMonitor;
         LOGGER.info("RulesEngine initialized with configuration: " + configuration.getClass().getSimpleName());
         LOGGER.fine("Using parser: " + parser.getClass().getSimpleName());
+        LOGGER.fine("Using error recovery service: " + errorRecoveryService.getClass().getSimpleName());
+        LOGGER.fine("Using performance monitor: " + performanceMonitor.getClass().getSimpleName());
     }
 
     /**
@@ -57,6 +91,15 @@ public class RulesEngine {
      */
     public RulesEngineConfiguration getConfiguration() {
         return configuration;
+    }
+
+    /**
+     * Get the performance monitor for this rules engine.
+     *
+     * @return The performance monitor
+     */
+    public RulePerformanceMonitor getPerformanceMonitor() {
+        return performanceMonitor;
     }
 
     // Rule Execution Methods
@@ -111,6 +154,9 @@ public class RulesEngine {
 
         StandardEvaluationContext context = createContext(facts);
 
+        // Start performance monitoring
+        RulePerformanceMetrics.Builder metricsBuilder = performanceMonitor.startEvaluation(rule.getName());
+
         // Evaluate the rule
         LOGGER.fine("Evaluating rule: " + rule.getName());
         try {
@@ -118,17 +164,45 @@ public class RulesEngine {
             Boolean result = exp.getValue(context, Boolean.class);
             LOGGER.fine("Rule '" + rule.getName() + "' evaluated to: " + result);
 
+            // Complete performance monitoring for successful evaluation
+            RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition());
+
             if (result != null && result) {
                 LOGGER.info("Rule matched: " + rule.getName());
-                return RuleResult.match(rule.getName(), rule.getMessage());
+                return RuleResult.match(rule.getName(), rule.getMessage(), metrics);
+            } else {
+                return RuleResult.noMatch();
             }
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Error evaluating rule '" + rule.getName() + "': " + e.getMessage(), e);
-            return RuleResult.error(rule.getName(), "Error evaluating rule: " + e.getMessage());
-        }
 
-        LOGGER.info("Rule did not match: " + rule.getName());
-        return RuleResult.noMatch();
+            // Create detailed exception with context and suggestions
+            RuleEvaluationException ruleException = new RuleEvaluationException(
+                rule.getName(),
+                rule.getCondition(),
+                e.getMessage(),
+                e
+            );
+
+            // Complete performance monitoring for failed evaluation
+            RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition(), e);
+
+            // Attempt error recovery
+            ErrorRecoveryService.RecoveryResult recoveryResult = errorRecoveryService.attemptRecovery(
+                rule.getName(),
+                rule.getCondition(),
+                context,
+                e
+            );
+
+            if (recoveryResult.isSuccessful()) {
+                LOGGER.info("Error recovery successful for rule '" + rule.getName() + "': " + recoveryResult.getRecoveryMessage());
+                return recoveryResult.getRuleResult();
+            } else {
+                LOGGER.severe("Error recovery failed for rule '" + rule.getName() + "': " + recoveryResult.getRecoveryMessage());
+                return RuleResult.error(rule.getName(), ruleException.getDetailedMessage());
+            }
+        }
     }
 
     /**

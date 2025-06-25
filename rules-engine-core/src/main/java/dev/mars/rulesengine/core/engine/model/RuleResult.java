@@ -1,5 +1,7 @@
 package dev.mars.rulesengine.core.engine.model;
 
+import dev.mars.rulesengine.core.service.monitoring.RulePerformanceMetrics;
+
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
@@ -19,6 +21,7 @@ public class RuleResult implements Serializable {
     private final boolean triggered;
     private final Instant timestamp;
     private final ResultType resultType;
+    private final RulePerformanceMetrics performanceMetrics;
 
     /**
      * Enum representing the type of result.
@@ -36,7 +39,7 @@ public class RuleResult implements Serializable {
 
     /**
      * Create a new rule result with the specified parameters.
-     * 
+     *
      * @param ruleName The name of the rule that was evaluated
      * @param message The message associated with the rule
      * @param triggered Whether the rule was triggered (true) or not (false)
@@ -49,12 +52,32 @@ public class RuleResult implements Serializable {
         this.triggered = triggered;
         this.timestamp = Instant.now();
         this.resultType = resultType;
+        this.performanceMetrics = null; // No performance metrics for basic constructor
+    }
+
+    /**
+     * Create a new rule result with the specified parameters including performance metrics.
+     *
+     * @param ruleName The name of the rule that was evaluated
+     * @param message The message associated with the rule
+     * @param triggered Whether the rule was triggered (true) or not (false)
+     * @param resultType The type of result
+     * @param performanceMetrics The performance metrics for this rule evaluation
+     */
+    public RuleResult(String ruleName, String message, boolean triggered, ResultType resultType, RulePerformanceMetrics performanceMetrics) {
+        this.id = UUID.randomUUID();
+        this.ruleName = ruleName;
+        this.message = message;
+        this.triggered = triggered;
+        this.timestamp = Instant.now();
+        this.resultType = resultType;
+        this.performanceMetrics = performanceMetrics;
     }
 
     /**
      * Create a new rule result with the specified parameters.
      * The rule is considered triggered if resultType is MATCH.
-     * 
+     *
      * @param ruleName The name of the rule that was evaluated
      * @param message The message associated with the rule
      * @param resultType The type of result
@@ -64,14 +87,39 @@ public class RuleResult implements Serializable {
     }
 
     /**
+     * Create a new rule result with the specified parameters including performance metrics.
+     * The rule is considered triggered if resultType is MATCH.
+     *
+     * @param ruleName The name of the rule that was evaluated
+     * @param message The message associated with the rule
+     * @param resultType The type of result
+     * @param performanceMetrics The performance metrics for this rule evaluation
+     */
+    public RuleResult(String ruleName, String message, ResultType resultType, RulePerformanceMetrics performanceMetrics) {
+        this(ruleName, message, resultType == ResultType.MATCH, resultType, performanceMetrics);
+    }
+
+    /**
      * Create a new rule result for a rule that was triggered.
-     * 
+     *
      * @param ruleName The name of the rule that was triggered
      * @param message The message associated with the rule
      * @return A new RuleResult instance
      */
     public static RuleResult match(String ruleName, String message) {
         return new RuleResult(ruleName, message, true, ResultType.MATCH);
+    }
+
+    /**
+     * Create a new rule result for a rule that was triggered with performance metrics.
+     *
+     * @param ruleName The name of the rule that was triggered
+     * @param message The message associated with the rule
+     * @param performanceMetrics The performance metrics for this rule evaluation
+     * @return A new RuleResult instance
+     */
+    public static RuleResult match(String ruleName, String message, RulePerformanceMetrics performanceMetrics) {
+        return new RuleResult(ruleName, message, true, ResultType.MATCH, performanceMetrics);
     }
 
     /**
@@ -106,7 +154,7 @@ public class RuleResult implements Serializable {
     /**
      * Constructor for backward compatibility.
      * This constructor tries to determine the result type based on the ruleName.
-     * 
+     *
      * @param ruleName The name of the rule
      * @param message The message associated with the rule
      */
@@ -115,6 +163,7 @@ public class RuleResult implements Serializable {
         this.ruleName = ruleName;
         this.message = message;
         this.timestamp = Instant.now();
+        this.performanceMetrics = null; // No performance metrics for backward compatibility
 
         // Try to determine the result type based on the ruleName
         if ("no-rule".equals(ruleName)) {
@@ -176,11 +225,29 @@ public class RuleResult implements Serializable {
 
     /**
      * Get the type of this result.
-     * 
+     *
      * @return The result type
      */
     public ResultType getResultType() {
         return resultType;
+    }
+
+    /**
+     * Get the performance metrics for this rule evaluation.
+     *
+     * @return The performance metrics, or null if not available
+     */
+    public RulePerformanceMetrics getPerformanceMetrics() {
+        return performanceMetrics;
+    }
+
+    /**
+     * Check if performance metrics are available for this result.
+     *
+     * @return true if performance metrics are available, false otherwise
+     */
+    public boolean hasPerformanceMetrics() {
+        return performanceMetrics != null;
     }
 
     @Override
