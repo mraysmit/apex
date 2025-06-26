@@ -333,7 +333,7 @@ public class RulesEngineConfiguration {
 
     /**
      * Get a rule group by its ID.
-     * 
+     *
      * @param id The ID of the rule group
      * @return The rule group with the specified ID, or null if not found
      */
@@ -343,6 +343,37 @@ public class RulesEngineConfiguration {
             LOGGER.warning("Rule group with ID '" + id + "' not found");
         }
         return group;
+    }
+
+    /**
+     * Get all registered rules.
+     *
+     * @return A list of all registered rules
+     */
+    public List<Rule> getAllRules() {
+        return new ArrayList<>(rulesById.values());
+    }
+
+    /**
+     * Get all registered rule groups.
+     *
+     * @return A list of all registered rule groups
+     */
+    public List<RuleGroup> getAllRuleGroups() {
+        return new ArrayList<>(ruleGroupsById.values());
+    }
+
+    /**
+     * Get all rule bases (rules and rule groups) across all categories.
+     *
+     * @return A list of all rule bases
+     */
+    public List<RuleBase> getAllRuleBases() {
+        List<RuleBase> allRuleBases = new ArrayList<>();
+        for (List<RuleBase> categoryRules : rulesByCategory.values()) {
+            allRuleBases.addAll(categoryRules);
+        }
+        return allRuleBases;
     }
 
     /**

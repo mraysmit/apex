@@ -142,7 +142,7 @@ public class MockDataSource implements DataSource {
         List<String> preferredCategories = new ArrayList<>();
         preferredCategories.add("Equity");
         preferredCategories.add("FixedIncome");
-        Customer templateCustomer = new Customer("Bob Johnson", 42, "Silver", preferredCategories);
+        Customer templateCustomer = new Customer("Bob Johnson", 65, "Silver", preferredCategories);
         dataStore.put("templateCustomer", templateCustomer);
     }
 

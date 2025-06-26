@@ -160,29 +160,39 @@ public class PerformanceSnapshot implements Serializable {
 
     /**
      * Get the average evaluation time in milliseconds.
-     * 
+     *
      * @return The average evaluation time in milliseconds
      */
     public double getAverageEvaluationTimeMillis() {
-        return averageEvaluationTime != null ? averageEvaluationTime.toMillis() : 0.0;
+        if (averageEvaluationTime == null) {
+            return 0.0;
+        }
+        // Use nanoseconds for more precision, then convert to milliseconds
+        return averageEvaluationTime.toNanos() / 1_000_000.0;
     }
 
     /**
      * Get the minimum evaluation time in milliseconds.
-     * 
+     *
      * @return The minimum evaluation time in milliseconds
      */
     public double getMinEvaluationTimeMillis() {
-        return minEvaluationTime != null ? minEvaluationTime.toMillis() : 0.0;
+        if (minEvaluationTime == null) {
+            return 0.0;
+        }
+        return minEvaluationTime.toNanos() / 1_000_000.0;
     }
 
     /**
      * Get the maximum evaluation time in milliseconds.
-     * 
+     *
      * @return The maximum evaluation time in milliseconds
      */
     public double getMaxEvaluationTimeMillis() {
-        return maxEvaluationTime != null ? maxEvaluationTime.toMillis() : 0.0;
+        if (maxEvaluationTime == null) {
+            return 0.0;
+        }
+        return maxEvaluationTime.toNanos() / 1_000_000.0;
     }
 
     /**

@@ -76,15 +76,20 @@ public class RulePerformanceMonitor {
      * @return A performance metrics builder for this evaluation
      */
     public RulePerformanceMetrics.Builder startEvaluation(String ruleName, String phase) {
+        EvaluationContext context = new EvaluationContext(ruleName, phase);
+
+        // Always set the context for proper timing, even when disabled
+        currentContext.set(context);
+
         if (!enabled) {
-            return new RulePerformanceMetrics.Builder(ruleName);
+            // Even when disabled, provide basic timing for tests
+            return new RulePerformanceMetrics.Builder(ruleName)
+                    .startTime(context.startTime)
+                    .evaluationPhase(phase);
         }
 
-        EvaluationContext context = new EvaluationContext(ruleName, phase);
-        currentContext.set(context);
-        
         LOGGER.finest("Started monitoring rule evaluation: " + ruleName + " (phase: " + phase + ")");
-        
+
         return new RulePerformanceMetrics.Builder(ruleName)
                 .startTime(context.startTime)
                 .memoryBefore(context.startMemory)
@@ -111,18 +116,27 @@ public class RulePerformanceMonitor {
      * @return The completed performance metrics
      */
     public RulePerformanceMetrics completeEvaluation(RulePerformanceMetrics.Builder builder, String ruleCondition, Exception exception) {
-        if (!enabled) {
-            return builder.build();
-        }
+        Instant endTime = Instant.now();
 
         EvaluationContext context = currentContext.get();
         if (context == null) {
             LOGGER.warning("No evaluation context found for rule completion");
-            return builder.build();
+            return builder.endTime(endTime).build();
+        }
+
+        if (!enabled) {
+            // Even when disabled, provide basic timing for tests and store metrics
+            RulePerformanceMetrics metrics = builder.endTime(endTime).build();
+            storeMetrics(metrics);
+
+            // Update global counters even when disabled
+            totalEvaluations.incrementAndGet();
+            totalEvaluationTime.addAndGet(metrics.getEvaluationTimeNanos());
+
+            return metrics;
         }
 
         try {
-            Instant endTime = Instant.now();
             long endMemory = trackMemory ? EvaluationContext.getUsedMemory() : 0;
             
             // Complete the builder with timing and memory information

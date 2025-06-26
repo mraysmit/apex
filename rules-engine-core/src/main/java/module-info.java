@@ -20,6 +20,9 @@ module dev.mars.rulesengine.core {
     // New exports for performance monitoring
     exports dev.mars.rulesengine.core.service.monitoring;
 
+    // Enhanced API exports for simplified configuration
+    // Note: dev.mars.rulesengine.core.api is already exported above
+
     // Export other existing services
     exports dev.mars.rulesengine.core.service.engine;
     exports dev.mars.rulesengine.core.service.data;

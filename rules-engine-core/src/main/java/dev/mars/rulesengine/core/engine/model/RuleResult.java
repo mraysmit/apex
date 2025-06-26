@@ -124,11 +124,21 @@ public class RuleResult implements Serializable {
 
     /**
      * Create a new rule result for when no rule was matched.
-     * 
+     *
      * @return A new RuleResult instance
      */
     public static RuleResult noMatch() {
         return new RuleResult("no-match", "No matching rules found", false, ResultType.NO_MATCH);
+    }
+
+    /**
+     * Create a new rule result for when no rule was matched, with performance metrics.
+     *
+     * @param performanceMetrics The performance metrics for this rule evaluation
+     * @return A new RuleResult instance
+     */
+    public static RuleResult noMatch(RulePerformanceMetrics performanceMetrics) {
+        return new RuleResult("no-match", "No matching rules found", false, ResultType.NO_MATCH, performanceMetrics);
     }
 
     /**
@@ -142,13 +152,25 @@ public class RuleResult implements Serializable {
 
     /**
      * Create a new rule result for when an error occurred during rule evaluation.
-     * 
+     *
      * @param ruleName The name of the rule that caused the error
      * @param errorMessage The error message
      * @return A new RuleResult instance
      */
     public static RuleResult error(String ruleName, String errorMessage) {
         return new RuleResult(ruleName, errorMessage, false, ResultType.ERROR);
+    }
+
+    /**
+     * Create a new rule result for when an error occurred during rule evaluation, with performance metrics.
+     *
+     * @param ruleName The name of the rule that caused the error
+     * @param errorMessage The error message
+     * @param performanceMetrics The performance metrics for this rule evaluation
+     * @return A new RuleResult instance
+     */
+    public static RuleResult error(String ruleName, String errorMessage, RulePerformanceMetrics performanceMetrics) {
+        return new RuleResult(ruleName, errorMessage, false, ResultType.ERROR, performanceMetrics);
     }
 
     /**

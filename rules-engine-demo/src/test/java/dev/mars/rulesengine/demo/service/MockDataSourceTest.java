@@ -127,7 +127,7 @@ public class MockDataSourceTest {
         Customer templateCustomer = templateCustomerDataSource.getData("templateCustomer");
         assertNotNull(templateCustomer);
         assertEquals("Bob Johnson", templateCustomer.getName());
-        assertEquals(42, templateCustomer.getAge());
+        assertEquals(65, templateCustomer.getAge());
         assertEquals("Silver", templateCustomer.getMembershipLevel());
     }
 

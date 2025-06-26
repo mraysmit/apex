@@ -254,12 +254,12 @@ public class PerformanceMonitoringDemo {
         RulesEngine engine = new RulesEngine(config);
         
         // Create a rule for demonstration
-        Rule demoRule = config.rule("demo-scenario")
+        Rule demoRule = config.registerRule(config.rule("demo-scenario")
                 .withCategory("demo")
                 .withName("Demo Scenario Rule")
                 .withCondition("#amount > 1000 && #currency == 'USD' && #region != 'RESTRICTED'")
                 .withMessage("High value USD transaction in allowed region")
-                .build();
+                .build());
 
         // Execute with performance monitoring
         Map<String, Object> facts = new HashMap<>();

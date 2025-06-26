@@ -145,17 +145,18 @@ public class RulesEngine {
         LOGGER.info("Executing rule: " + rule.getName());
         LOGGER.fine("Facts provided: " + (facts != null ? facts.keySet() : "none"));
 
+        // Start performance monitoring early to capture all scenarios
+        RulePerformanceMetrics.Builder metricsBuilder = performanceMonitor.startEvaluation(rule.getName());
+
         // Check for missing parameters
         Set<String> missingParameters = RuleParameterExtractor.validateParameters(rule, facts);
         if (!missingParameters.isEmpty()) {
             LOGGER.warning("Missing parameters for rule '" + rule.getName() + "': " + missingParameters);
-            return RuleResult.error(rule.getName(), "Missing parameters: " + missingParameters);
+            RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition());
+            return RuleResult.error(rule.getName(), "Missing parameters: " + missingParameters, metrics);
         }
 
         StandardEvaluationContext context = createContext(facts);
-
-        // Start performance monitoring
-        RulePerformanceMetrics.Builder metricsBuilder = performanceMonitor.startEvaluation(rule.getName());
 
         // Evaluate the rule
         LOGGER.fine("Evaluating rule: " + rule.getName());
@@ -171,7 +172,7 @@ public class RulesEngine {
                 LOGGER.info("Rule matched: " + rule.getName());
                 return RuleResult.match(rule.getName(), rule.getMessage(), metrics);
             } else {
-                return RuleResult.noMatch();
+                return RuleResult.noMatch(metrics);
             }
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Error evaluating rule '" + rule.getName() + "': " + e.getMessage(), e);
@@ -197,10 +198,18 @@ public class RulesEngine {
 
             if (recoveryResult.isSuccessful()) {
                 LOGGER.info("Error recovery successful for rule '" + rule.getName() + "': " + recoveryResult.getRecoveryMessage());
-                return recoveryResult.getRuleResult();
+                // Preserve performance metrics in the recovered result
+                RuleResult originalResult = recoveryResult.getRuleResult();
+                if (originalResult.hasPerformanceMetrics()) {
+                    return originalResult;
+                } else {
+                    // Create a new result with the same properties but include performance metrics
+                    return new RuleResult(originalResult.getRuleName(), originalResult.getMessage(),
+                                        originalResult.isTriggered(), originalResult.getResultType(), metrics);
+                }
             } else {
                 LOGGER.severe("Error recovery failed for rule '" + rule.getName() + "': " + recoveryResult.getRecoveryMessage());
-                return RuleResult.error(rule.getName(), ruleException.getDetailedMessage());
+                return RuleResult.error(rule.getName(), ruleException.getDetailedMessage(), metrics);
             }
         }
     }
