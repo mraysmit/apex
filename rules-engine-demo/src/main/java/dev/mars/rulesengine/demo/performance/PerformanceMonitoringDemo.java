@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.logging.Logger;
+import dev.mars.rulesengine.core.util.RulesEngineLogger;
 
 /**
  * Demonstration of the Rule Engine Performance Monitoring capabilities.
@@ -21,15 +21,15 @@ import java.util.logging.Logger;
  * and generate performance insights and recommendations.
  */
 public class PerformanceMonitoringDemo {
-    private static final Logger LOGGER = Logger.getLogger(PerformanceMonitoringDemo.class.getName());
+    private static final RulesEngineLogger logger = new RulesEngineLogger(PerformanceMonitoringDemo.class);
 
     public static void main(String[] args) {
-        LOGGER.info("Starting Performance Monitoring Demo");
-        
+        logger.info("Starting Performance Monitoring Demo");
+
         PerformanceMonitoringDemo demo = new PerformanceMonitoringDemo();
         demo.runDemo();
-        
-        LOGGER.info("Performance Monitoring Demo completed");
+
+        logger.info("Performance Monitoring Demo completed");
     }
 
     public void runDemo() {

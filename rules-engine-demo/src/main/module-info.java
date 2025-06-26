@@ -6,4 +6,8 @@ module dev.mars.rulesengine.demo {
     // Add missing dependencies
     requires dev.mars.rulesengine.core;
     requires spring.expression;
+
+    // Logging dependencies
+    requires org.slf4j;
+    requires ch.qos.logback.classic;
 }

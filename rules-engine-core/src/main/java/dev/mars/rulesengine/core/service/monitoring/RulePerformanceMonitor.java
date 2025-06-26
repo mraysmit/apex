@@ -17,8 +17,8 @@ import java.util.regex.Pattern;
 public class RulePerformanceMonitor {
     private static final Logger LOGGER = Logger.getLogger(RulePerformanceMonitor.class.getName());
     
-    // Thread-local storage for current evaluation context
-    private static final ThreadLocal<EvaluationContext> currentContext = new ThreadLocal<>();
+    // Thread-local storage for current evaluation context (per instance)
+    private final ThreadLocal<EvaluationContext> currentContext = new ThreadLocal<>();
     
     // Global metrics storage
     private final Map<String, List<RulePerformanceMetrics>> ruleMetricsHistory = new ConcurrentHashMap<>();
@@ -121,7 +121,12 @@ public class RulePerformanceMonitor {
         EvaluationContext context = currentContext.get();
         if (context == null) {
             LOGGER.warning("No evaluation context found for rule completion");
-            return builder.endTime(endTime).build();
+            // Even without context, provide basic timing and update global counters
+            RulePerformanceMetrics metrics = builder.endTime(endTime).build();
+            storeMetrics(metrics);
+            totalEvaluations.incrementAndGet();
+            totalEvaluationTime.addAndGet(metrics.getEvaluationTimeNanos());
+            return metrics;
         }
 
         if (!enabled) {
@@ -349,6 +354,8 @@ public class RulePerformanceMonitor {
         ruleSnapshots.clear();
         totalEvaluations.set(0);
         totalEvaluationTime.set(0);
+        // Clear the thread-local context to ensure clean state
+        currentContext.remove();
         LOGGER.info("Performance metrics cleared");
     }
 

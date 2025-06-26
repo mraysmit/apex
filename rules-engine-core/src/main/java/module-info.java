@@ -5,6 +5,11 @@ module dev.mars.rulesengine.core {
     requires java.logging;
     requires spring.expression;
 
+    // Logging dependencies
+    requires org.slf4j;
+    requires ch.qos.logback.classic;
+    requires ch.qos.logback.core;
+
     // Existing exports
     exports dev.mars.rulesengine.core.service.validation;
     exports dev.mars.rulesengine.core.service.common;

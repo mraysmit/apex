@@ -1,0 +1,151 @@
+2025-06-26 20:43:07.166 [main] INFO  [5e99a0ad-4ef0-4012-bbd9-4cade06bee6c] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.197 [main] INFO  [5e99a0ad-4ef0-4012-bbd9-4cade06bee6c] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.206 [main] INFO  [5e99a0ad-4ef0-4012-bbd9-4cade06bee6c] d.m.r.core.engine.config.RulesEngine - Rule matched: Validation Rule for ageValidator
+2025-06-26 20:43:07.207 [main] INFO  [5e99a0ad-4ef0-4012-bbd9-4cade06bee6c] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.208 [main] INFO  [5e99a0ad-4ef0-4012-bbd9-4cade06bee6c] d.m.r.core.engine.config.RulesEngine - No rules matched
+2025-06-26 20:43:07.211 [main] INFO  [e8422d7f-206b-4f7a-9589-1ff2a2039f18] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.213 [main] INFO  [e8422d7f-206b-4f7a-9589-1ff2a2039f18] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.214 [main] INFO  [e8422d7f-206b-4f7a-9589-1ff2a2039f18] d.m.r.core.engine.config.RulesEngine - Rule matched: AgeRule
+2025-06-26 20:43:07.214 [main] INFO  [e8422d7f-206b-4f7a-9589-1ff2a2039f18] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.215 [main] INFO  [e8422d7f-206b-4f7a-9589-1ff2a2039f18] d.m.r.core.engine.config.RulesEngine - No rules matched
+2025-06-26 20:43:07.217 [main] INFO  [34cc35d1-883e-4fdf-983f-a233bd68d4f6] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.219 [main] INFO  [34cc35d1-883e-4fdf-983f-a233bd68d4f6] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.220 [main] INFO  [34cc35d1-883e-4fdf-983f-a233bd68d4f6] d.m.r.core.engine.config.RulesEngine - Rule matched: DiscountRule
+2025-06-26 20:43:07.259 [main] INFO  [a507028e-8639-4987-9e4f-6069dcca9c0b] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.260 [main] INFO  [a507028e-8639-4987-9e4f-6069dcca9c0b] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.261 [main] INFO  [a507028e-8639-4987-9e4f-6069dcca9c0b] d.m.r.core.engine.config.RulesEngine - Rule matched: AgeRule
+2025-06-26 20:43:07.261 [main] INFO  [a507028e-8639-4987-9e4f-6069dcca9c0b] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.261 [main] INFO  [a507028e-8639-4987-9e4f-6069dcca9c0b] d.m.r.core.engine.config.RulesEngine - No rules matched
+2025-06-26 20:43:07.262 [main] INFO  [20e82403-ed02-4606-8ade-b2c679fec311] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.268 [main] INFO  [812261cf-d7a7-40c1-995f-f01b37e633e2] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.273 [main] INFO  [50f8971b-2c58-4821-a229-c13befcc62bb] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.275 [main] INFO  [50f8971b-2c58-4821-a229-c13befcc62bb] d.m.r.core.engine.config.RulesEngine - Executing 1 rule groups
+2025-06-26 20:43:07.278 [main] INFO  [50f8971b-2c58-4821-a229-c13befcc62bb] d.m.r.core.engine.config.RulesEngine - Rule group matched: AdultWithSufficientIncome
+2025-06-26 20:43:07.279 [main] INFO  [50f8971b-2c58-4821-a229-c13befcc62bb] d.m.r.core.engine.config.RulesEngine - Executing 1 rule groups
+2025-06-26 20:43:07.279 [main] INFO  [50f8971b-2c58-4821-a229-c13befcc62bb] d.m.r.core.engine.config.RulesEngine - No rule groups matched
+2025-06-26 20:43:07.279 [main] INFO  [50f8971b-2c58-4821-a229-c13befcc62bb] d.m.r.core.engine.config.RulesEngine - Executing 1 rule groups
+2025-06-26 20:43:07.279 [main] INFO  [50f8971b-2c58-4821-a229-c13befcc62bb] d.m.r.core.engine.config.RulesEngine - No rule groups matched
+2025-06-26 20:43:07.281 [main] INFO  [fd85efdd-4eb6-42d4-8600-2c012482ea2b] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.283 [main] INFO  [fd85efdd-4eb6-42d4-8600-2c012482ea2b] d.m.r.core.engine.config.RulesEngine - Executing 1 rule groups
+2025-06-26 20:43:07.283 [main] INFO  [fd85efdd-4eb6-42d4-8600-2c012482ea2b] d.m.r.core.engine.config.RulesEngine - Rule group matched: SeniorOrLowIncome
+2025-06-26 20:43:07.283 [main] INFO  [fd85efdd-4eb6-42d4-8600-2c012482ea2b] d.m.r.core.engine.config.RulesEngine - Executing 1 rule groups
+2025-06-26 20:43:07.284 [main] INFO  [fd85efdd-4eb6-42d4-8600-2c012482ea2b] d.m.r.core.engine.config.RulesEngine - Rule group matched: SeniorOrLowIncome
+2025-06-26 20:43:07.284 [main] INFO  [fd85efdd-4eb6-42d4-8600-2c012482ea2b] d.m.r.core.engine.config.RulesEngine - Executing 1 rule groups
+2025-06-26 20:43:07.285 [main] INFO  [fd85efdd-4eb6-42d4-8600-2c012482ea2b] d.m.r.core.engine.config.RulesEngine - No rule groups matched
+2025-06-26 20:43:07.289 [main] INFO  [f1493a91-a996-433d-987b-885e65e0f279] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.290 [main] INFO  [f1493a91-a996-433d-987b-885e65e0f279] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.291 [main] INFO  [f1493a91-a996-433d-987b-885e65e0f279] d.m.r.core.engine.config.RulesEngine - Rule matched: VolatileMarket
+2025-06-26 20:43:07.291 [main] INFO  [f1493a91-a996-433d-987b-885e65e0f279] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.292 [main] INFO  [f1493a91-a996-433d-987b-885e65e0f279] d.m.r.core.engine.config.RulesEngine - Rule matched: KYCVerification
+2025-06-26 20:43:07.294 [main] INFO  [37bb035c-0326-4279-ad39-94e81b4ed72e] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.294 [main] INFO  [37bb035c-0326-4279-ad39-94e81b4ed72e] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.295 [main] INFO  [37bb035c-0326-4279-ad39-94e81b4ed72e] d.m.r.core.engine.config.RulesEngine - Rule matched: TestRule
+2025-06-26 20:43:07.297 [main] INFO  [42631cd5-ad51-4261-9668-97a17a89f9df] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.297 [main] INFO  [42631cd5-ad51-4261-9668-97a17a89f9df] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.297 [main] INFO  [42631cd5-ad51-4261-9668-97a17a89f9df] d.m.r.core.engine.config.RulesEngine - Rule matched: HighValueInvestment
+2025-06-26 20:43:07.297 [main] INFO  [42631cd5-ad51-4261-9668-97a17a89f9df] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.297 [main] INFO  [42631cd5-ad51-4261-9668-97a17a89f9df] d.m.r.core.engine.config.RulesEngine - Rule matched: RetirementAccount
+2025-06-26 20:43:07.300 [main] INFO  [e675595c-897b-4181-a595-453d56a608bc] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.302 [main] INFO  [e675595c-897b-4181-a595-453d56a608bc] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.303 [main] INFO  [e675595c-897b-4181-a595-453d56a608bc] d.m.r.core.engine.config.RulesEngine - Rule matched: HighValueInvestment
+2025-06-26 20:43:07.304 [main] INFO  [b54eef11-a573-4158-ad79-d8a8d0462c40] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.326 [main] INFO  [ef977189-b098-4107-ab77-5e12c88ea169] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.329 [main] INFO  [fa636da9-9e95-4ba2-b2d5-c762424c64e9] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.330 [main] INFO  [fa636da9-9e95-4ba2-b2d5-c762424c64e9] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.337 [main] INFO  [fa636da9-9e95-4ba2-b2d5-c762424c64e9] d.m.r.core.engine.config.RulesEngine - Rule matched: Validation Rule for adultValidator
+2025-06-26 20:43:07.338 [main] INFO  [fa636da9-9e95-4ba2-b2d5-c762424c64e9] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.338 [main] INFO  [fa636da9-9e95-4ba2-b2d5-c762424c64e9] d.m.r.core.engine.config.RulesEngine - No rules matched
+2025-06-26 20:43:07.351 [main] INFO  [d36dc31d-24e4-4cc9-aa96-7b0b31aa8464] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.355 [main] INFO  [f4aa2672-5e1d-463d-8d20-db8f068ee172] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.356 [main] INFO  [f4aa2672-5e1d-463d-8d20-db8f068ee172] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.356 [main] INFO  [f4aa2672-5e1d-463d-8d20-db8f068ee172] d.m.r.core.engine.config.RulesEngine - Rule matched: Validation Rule for adultValidator
+2025-06-26 20:43:07.357 [main] INFO  [f4aa2672-5e1d-463d-8d20-db8f068ee172] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.357 [main] INFO  [f4aa2672-5e1d-463d-8d20-db8f068ee172] d.m.r.core.engine.config.RulesEngine - Rule matched: Validation Rule for adultValidator
+2025-06-26 20:43:07.357 [main] INFO  [f4aa2672-5e1d-463d-8d20-db8f068ee172] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.358 [main] INFO  [f4aa2672-5e1d-463d-8d20-db8f068ee172] d.m.r.core.engine.config.RulesEngine - No rules matched
+2025-06-26 20:43:07.358 [main] INFO  [f4aa2672-5e1d-463d-8d20-db8f068ee172] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.358 [main] INFO  [f4aa2672-5e1d-463d-8d20-db8f068ee172] d.m.r.core.engine.config.RulesEngine - Rule matched: Validation Rule for seniorValidator
+2025-06-26 20:43:07.358 [main] INFO  [f4aa2672-5e1d-463d-8d20-db8f068ee172] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.359 [main] INFO  [f4aa2672-5e1d-463d-8d20-db8f068ee172] d.m.r.core.engine.config.RulesEngine - No rules matched
+2025-06-26 20:43:07.359 [main] INFO  [f4aa2672-5e1d-463d-8d20-db8f068ee172] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.359 [main] INFO  [f4aa2672-5e1d-463d-8d20-db8f068ee172] d.m.r.core.engine.config.RulesEngine - Rule matched: Validation Rule for childValidator
+2025-06-26 20:43:07.359 [main] INFO  [f4aa2672-5e1d-463d-8d20-db8f068ee172] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.359 [main] INFO  [f4aa2672-5e1d-463d-8d20-db8f068ee172] d.m.r.core.engine.config.RulesEngine - No rules matched
+2025-06-26 20:43:07.361 [main] INFO  [70de1d3a-d3f5-4e4d-820e-d87c9be9fea4] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.362 [main] INFO  [70de1d3a-d3f5-4e4d-820e-d87c9be9fea4] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.363 [main] INFO  [70de1d3a-d3f5-4e4d-820e-d87c9be9fea4] d.m.r.core.engine.config.RulesEngine - Rule matched: Validation Rule for premiumProductValidator
+2025-06-26 20:43:07.363 [main] INFO  [70de1d3a-d3f5-4e4d-820e-d87c9be9fea4] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.364 [main] INFO  [70de1d3a-d3f5-4e4d-820e-d87c9be9fea4] d.m.r.core.engine.config.RulesEngine - No rules matched
+2025-06-26 20:43:07.364 [main] INFO  [70de1d3a-d3f5-4e4d-820e-d87c9be9fea4] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.364 [main] INFO  [70de1d3a-d3f5-4e4d-820e-d87c9be9fea4] d.m.r.core.engine.config.RulesEngine - No rules matched
+2025-06-26 20:43:07.366 [main] INFO  [70de1d3a-d3f5-4e4d-820e-d87c9be9fea4] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.366 [main] INFO  [70de1d3a-d3f5-4e4d-820e-d87c9be9fea4] d.m.r.core.engine.config.RulesEngine - Rule matched: Validation Rule for midRangeProductValidator
+2025-06-26 20:43:07.366 [main] INFO  [70de1d3a-d3f5-4e4d-820e-d87c9be9fea4] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.366 [main] INFO  [70de1d3a-d3f5-4e4d-820e-d87c9be9fea4] d.m.r.core.engine.config.RulesEngine - No rules matched
+2025-06-26 20:43:07.367 [main] INFO  [70de1d3a-d3f5-4e4d-820e-d87c9be9fea4] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.367 [main] INFO  [70de1d3a-d3f5-4e4d-820e-d87c9be9fea4] d.m.r.core.engine.config.RulesEngine - No rules matched
+2025-06-26 20:43:07.367 [main] INFO  [70de1d3a-d3f5-4e4d-820e-d87c9be9fea4] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.368 [main] INFO  [70de1d3a-d3f5-4e4d-820e-d87c9be9fea4] d.m.r.core.engine.config.RulesEngine - Rule matched: Validation Rule for budgetProductValidator
+2025-06-26 20:43:07.368 [main] INFO  [70de1d3a-d3f5-4e4d-820e-d87c9be9fea4] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.368 [main] INFO  [70de1d3a-d3f5-4e4d-820e-d87c9be9fea4] d.m.r.core.engine.config.RulesEngine - No rules matched
+2025-06-26 20:43:07.368 [main] INFO  [70de1d3a-d3f5-4e4d-820e-d87c9be9fea4] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.369 [main] INFO  [70de1d3a-d3f5-4e4d-820e-d87c9be9fea4] d.m.r.core.engine.config.RulesEngine - No rules matched
+2025-06-26 20:43:07.370 [main] INFO  [b88d3a90-693d-4db3-b485-ea50f172a2b4] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.371 [main] INFO  [b88d3a90-693d-4db3-b485-ea50f172a2b4] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.372 [main] INFO  [b88d3a90-693d-4db3-b485-ea50f172a2b4] d.m.r.core.engine.config.RulesEngine - Rule matched: Validation Rule for adultValidator
+2025-06-26 20:43:07.372 [main] INFO  [b88d3a90-693d-4db3-b485-ea50f172a2b4] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.372 [main] INFO  [b88d3a90-693d-4db3-b485-ea50f172a2b4] d.m.r.core.engine.config.RulesEngine - Rule matched: Validation Rule for premiumProductValidator
+2025-06-26 20:43:07.373 [main] INFO  [b88d3a90-693d-4db3-b485-ea50f172a2b4] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.373 [main] INFO  [b88d3a90-693d-4db3-b485-ea50f172a2b4] d.m.r.core.engine.config.RulesEngine - Rule matched: Validation Rule for childValidator
+2025-06-26 20:43:07.373 [main] INFO  [b88d3a90-693d-4db3-b485-ea50f172a2b4] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.374 [main] INFO  [b88d3a90-693d-4db3-b485-ea50f172a2b4] d.m.r.core.engine.config.RulesEngine - Rule matched: Validation Rule for budgetProductValidator
+2025-06-26 20:43:07.374 [main] INFO  [b88d3a90-693d-4db3-b485-ea50f172a2b4] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.374 [main] INFO  [b88d3a90-693d-4db3-b485-ea50f172a2b4] d.m.r.core.engine.config.RulesEngine - Rule matched: Validation Rule for childValidator
+2025-06-26 20:43:07.374 [main] INFO  [b88d3a90-693d-4db3-b485-ea50f172a2b4] d.m.r.core.engine.config.RulesEngine - Executing 1 rules
+2025-06-26 20:43:07.375 [main] INFO  [b88d3a90-693d-4db3-b485-ea50f172a2b4] d.m.r.core.engine.config.RulesEngine - Rule matched: Validation Rule for premiumProductValidator
+2025-06-26 20:43:07.558 [main] INFO  [81c13f70-a514-4a39-bbe8-21a2f0d6f462] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.559 [main] INFO  [ba34a7d5-e8ea-4a04-bdc7-32bd5c3dcf6b] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.588 [main] INFO  [ce32562d-748f-493b-9bb2-8588f0e6c42b] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.588 [main] INFO  [3afe04d2-2174-4050-9749-805aa75f9ee4] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.602 [main] INFO  [a6457825-8174-41c8-836d-950baffadbdb] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.602 [main] INFO  [b670b743-01ed-4562-ab3c-3cd47d93237d] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.607 [main] INFO  [b4acde0d-f4a7-41a5-af13-63b71851fa17] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.607 [main] INFO  [bcc83879-31f8-42f8-89ad-d94e906829ee] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.614 [main] INFO  [dcff21e7-e8fe-4f3d-a983-ae0bc3b6f135] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.614 [main] INFO  [c6e166d7-7e27-478b-a72b-438958bf819c] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.635 [main] INFO  [a8f62457-e857-4a99-a2d9-bdf0b24aa8a1] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.635 [main] INFO  [40994a21-7161-4e07-be41-a30a5a654e77] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.639 [main] INFO  [08189b02-1c97-4316-ad69-2233c08315a8] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.639 [main] INFO  [53ab57fe-6ee7-4f07-8567-a8bd541c8546] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.640 [main] INFO  [ec76f632-3e86-4fde-83f1-6c25d5edcfba] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.640 [main] INFO  [828f573f-da20-42a2-849e-3f8921724657] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.694 [main] INFO  [4f04a11f-994a-4367-b7bb-580a45f99998] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.694 [main] INFO  [26853e89-155f-4a14-845a-ec914569afe2] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.735 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration
+2025-06-26 20:43:07.736 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Executing rules for category: investment-rules
+2025-06-26 20:43:07.736 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Executing 3 rules/rule groups
+2025-06-26 20:43:07.737 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - No rules or rule groups matched
+2025-06-26 20:43:07.737 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Executing rules for category: risk-assessment
+2025-06-26 20:43:07.737 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Executing 3 rules/rule groups
+2025-06-26 20:43:07.737 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Rule matched: high-risk-client
+2025-06-26 20:43:07.737 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Executing rules for category: compliance
+2025-06-26 20:43:07.737 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Executing 2 rules/rule groups
+2025-06-26 20:43:07.737 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - No rules or rule groups matched
+2025-06-26 20:43:07.737 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Executing rules for category: investment-rules
+2025-06-26 20:43:07.737 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Executing 3 rules/rule groups
+2025-06-26 20:43:07.737 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - No rules or rule groups matched
+2025-06-26 20:43:07.737 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Executing rules for category: risk-assessment
+2025-06-26 20:43:07.737 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Executing 3 rules/rule groups
+2025-06-26 20:43:07.737 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - No rules or rule groups matched
+2025-06-26 20:43:07.738 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Executing rules for category: compliance
+2025-06-26 20:43:07.738 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Executing 2 rules/rule groups
+2025-06-26 20:43:07.738 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Rule matched: kyc-verified
+2025-06-26 20:43:07.738 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Executing rules for category: investment-rules
+2025-06-26 20:43:07.738 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Executing 3 rules/rule groups
+2025-06-26 20:43:07.738 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Rule matched: high-value-investment
+2025-06-26 20:43:07.738 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Executing rules for category: risk-assessment
+2025-06-26 20:43:07.738 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Executing 3 rules/rule groups
+2025-06-26 20:43:07.738 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - No rules or rule groups matched
+2025-06-26 20:43:07.738 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Executing rules for category: compliance
+2025-06-26 20:43:07.738 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - Executing 2 rules/rule groups
+2025-06-26 20:43:07.738 [main] INFO  [38f87dd1-bc24-45dc-bbd1-5e572762285e] d.m.r.core.engine.config.RulesEngine - No rules or rule groups matched

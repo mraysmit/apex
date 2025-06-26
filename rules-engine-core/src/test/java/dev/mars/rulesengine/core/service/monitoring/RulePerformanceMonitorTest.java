@@ -4,6 +4,7 @@ import dev.mars.rulesengine.core.engine.config.RulesEngine;
 import dev.mars.rulesengine.core.engine.config.RulesEngineConfiguration;
 import dev.mars.rulesengine.core.engine.model.Rule;
 import dev.mars.rulesengine.core.engine.model.RuleResult;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +32,17 @@ public class RulePerformanceMonitorTest {
         monitor = engine.getPerformanceMonitor();
         // Ensure performance monitoring is enabled for tests
         monitor.setEnabled(true);
+        // Clear any existing metrics to ensure clean state
+        monitor.clearMetrics();
+    }
+
+    @AfterEach
+    void tearDown() {
+        // Ensure performance monitoring is enabled for next test
+        if (monitor != null) {
+            monitor.setEnabled(true);
+            monitor.clearMetrics();
+        }
     }
 
     @Test
@@ -52,7 +64,7 @@ public class RulePerformanceMonitorTest {
         RuleResult result = engine.executeRule(rule, facts);
 
         // Verify the result has performance metrics
-        assertTrue(result.hasPerformanceMetrics());
+        assertTrue(result.hasPerformanceMetrics(), "Result should have performance metrics");
         assertNotNull(result.getPerformanceMetrics());
 
         RulePerformanceMetrics metrics = result.getPerformanceMetrics();

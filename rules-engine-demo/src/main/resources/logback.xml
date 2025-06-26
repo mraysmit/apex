@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Define properties for log patterns -->
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId:-}] %logger{36} - %msg%n"/>
+    <property name="LOG_DIR" value="${LOG_DIR:-./logs}"/>
+
+    <!-- Console Appender with colored output for demo -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{HH:mm:ss.SSS} %highlight(%-5level) [%cyan(%X{correlationId:-})] %magenta(%logger{20}) - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- File Appender for demo logs -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/rules-engine-demo.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/rules-engine-demo.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>100MB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Logger configurations for demo -->
+    
+    <!-- Demo package loggers -->
+    <logger name="dev.mars.rulesengine.demo" level="DEBUG" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </logger>
+
+    <!-- Rules Engine Core (from dependency) -->
+    <logger name="dev.mars.rulesengine.core" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </logger>
+
+    <!-- Spring Framework (reduce verbosity) -->
+    <logger name="org.springframework" level="WARN"/>
+    
+    <!-- Root logger -->
+    <root level="${LOG_LEVEL:-INFO}">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+
+</configuration>

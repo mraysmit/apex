@@ -8,15 +8,15 @@ import dev.mars.rulesengine.core.exception.RuleEvaluationException;
 import dev.mars.rulesengine.core.service.error.ErrorRecoveryService;
 import dev.mars.rulesengine.core.service.monitoring.RulePerformanceMetrics;
 import dev.mars.rulesengine.core.service.monitoring.RulePerformanceMonitor;
+import dev.mars.rulesengine.core.util.LoggingContext;
 import dev.mars.rulesengine.core.util.RuleParameterExtractor;
+import dev.mars.rulesengine.core.util.RulesEngineLogger;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This class implements a business rules engine using SpEL.
@@ -27,7 +27,7 @@ import java.util.logging.Logger;
  * Configuration is handled by the RulesEngineConfiguration class.
  */
 public class RulesEngine {
-    private static final Logger LOGGER = Logger.getLogger(RulesEngine.class.getName());
+    private static final RulesEngineLogger logger = new RulesEngineLogger(RulesEngine.class);
     private final ExpressionParser parser;
     private final RulesEngineConfiguration configuration;
     private final ErrorRecoveryService errorRecoveryService;
@@ -78,10 +78,14 @@ public class RulesEngine {
         this.parser = parser;
         this.errorRecoveryService = errorRecoveryService;
         this.performanceMonitor = performanceMonitor;
-        LOGGER.info("RulesEngine initialized with configuration: " + configuration.getClass().getSimpleName());
-        LOGGER.fine("Using parser: " + parser.getClass().getSimpleName());
-        LOGGER.fine("Using error recovery service: " + errorRecoveryService.getClass().getSimpleName());
-        LOGGER.fine("Using performance monitor: " + performanceMonitor.getClass().getSimpleName());
+
+        // Initialize logging context
+        LoggingContext.initializeContext();
+
+        logger.configuration("RulesEngine", "Initialized with configuration: " + configuration.getClass().getSimpleName());
+        logger.debug("Using parser: {}", parser.getClass().getSimpleName());
+        logger.debug("Using error recovery service: {}", errorRecoveryService.getClass().getSimpleName());
+        logger.debug("Using performance monitor: {}", performanceMonitor.getClass().getSimpleName());
     }
 
     /**
@@ -111,19 +115,21 @@ public class RulesEngine {
      * @return A new StandardEvaluationContext with the facts added as variables
      */
     private StandardEvaluationContext createContext(Map<String, Object> facts) {
-        LOGGER.fine("Creating evaluation context");
+        logger.debug("Creating evaluation context");
         StandardEvaluationContext context = new StandardEvaluationContext();
 
         // Add all facts to the evaluation context
         if (facts != null) {
-            LOGGER.fine("Adding " + facts.size() + " facts to context");
+            logger.debug("Adding {} facts to context", facts.size());
             for (Map.Entry<String, Object> fact : facts.entrySet()) {
                 context.setVariable(fact.getKey(), fact.getValue());
-                LOGGER.finest("Added fact: " + fact.getKey() + " = " + 
-                    (fact.getValue() != null ? fact.getValue().getClass().getSimpleName() : "null"));
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Added fact: {} = {}", fact.getKey(),
+                        fact.getValue() != null ? fact.getValue().getClass().getSimpleName() : "null");
+                }
             }
         } else {
-            LOGGER.fine("No facts provided to context");
+            logger.debug("No facts provided to context");
         }
 
         return context;
@@ -138,12 +144,16 @@ public class RulesEngine {
      */
     public RuleResult executeRule(Rule rule, Map<String, Object> facts) {
         if (rule == null) {
-            LOGGER.info("No rule provided for execution");
+            logger.info("No rule provided for execution");
             return RuleResult.noRules();
         }
 
-        LOGGER.info("Executing rule: " + rule.getName());
-        LOGGER.fine("Facts provided: " + (facts != null ? facts.keySet() : "none"));
+        // Set up logging context for this rule evaluation
+        LoggingContext.setRuleName(rule.getName());
+        LoggingContext.setRulePhase("evaluation");
+
+        logger.ruleEvaluationStart(rule.getName());
+        logger.debug("Facts provided: {}", facts != null ? facts.keySet() : "none");
 
         // Start performance monitoring early to capture all scenarios
         RulePerformanceMetrics.Builder metricsBuilder = performanceMonitor.startEvaluation(rule.getName());
@@ -151,31 +161,35 @@ public class RulesEngine {
         // Check for missing parameters
         Set<String> missingParameters = RuleParameterExtractor.validateParameters(rule, facts);
         if (!missingParameters.isEmpty()) {
-            LOGGER.warning("Missing parameters for rule '" + rule.getName() + "': " + missingParameters);
+            logger.warn("Missing parameters for rule '{}': {}", rule.getName(), missingParameters);
             RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition());
+            LoggingContext.clearRuleContext();
             return RuleResult.error(rule.getName(), "Missing parameters: " + missingParameters, metrics);
         }
 
         StandardEvaluationContext context = createContext(facts);
 
         // Evaluate the rule
-        LOGGER.fine("Evaluating rule: " + rule.getName());
         try {
             Expression exp = parser.parseExpression(rule.getCondition());
             Boolean result = exp.getValue(context, Boolean.class);
-            LOGGER.fine("Rule '" + rule.getName() + "' evaluated to: " + result);
 
             // Complete performance monitoring for successful evaluation
             RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition());
 
+            // Log the completion with performance metrics
+            logger.ruleEvaluationComplete(rule.getName(), result != null && result, metrics.getEvaluationTimeMillis());
+
             if (result != null && result) {
-                LOGGER.info("Rule matched: " + rule.getName());
+                logger.audit("RULE_MATCH", rule.getName(), "Rule matched successfully");
+                LoggingContext.clearRuleContext();
                 return RuleResult.match(rule.getName(), rule.getMessage(), metrics);
             } else {
+                LoggingContext.clearRuleContext();
                 return RuleResult.noMatch(metrics);
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error evaluating rule '" + rule.getName() + "': " + e.getMessage(), e);
+            logger.ruleEvaluationError(rule.getName(), e);
 
             // Create detailed exception with context and suggestions
             RuleEvaluationException ruleException = new RuleEvaluationException(
@@ -189,6 +203,7 @@ public class RulesEngine {
             RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition(), e);
 
             // Attempt error recovery
+            logger.errorRecoveryAttempt(rule.getName(), "default");
             ErrorRecoveryService.RecoveryResult recoveryResult = errorRecoveryService.attemptRecovery(
                 rule.getName(),
                 rule.getCondition(),
@@ -197,9 +212,12 @@ public class RulesEngine {
             );
 
             if (recoveryResult.isSuccessful()) {
-                LOGGER.info("Error recovery successful for rule '" + rule.getName() + "': " + recoveryResult.getRecoveryMessage());
+                logger.errorRecoverySuccess(rule.getName(), "default");
+                logger.audit("ERROR_RECOVERY", rule.getName(), "Error recovery successful: " + recoveryResult.getRecoveryMessage());
+
                 // Preserve performance metrics in the recovered result
                 RuleResult originalResult = recoveryResult.getRuleResult();
+                LoggingContext.clearRuleContext();
                 if (originalResult.hasPerformanceMetrics()) {
                     return originalResult;
                 } else {
@@ -208,7 +226,9 @@ public class RulesEngine {
                                         originalResult.isTriggered(), originalResult.getResultType(), metrics);
                 }
             } else {
-                LOGGER.severe("Error recovery failed for rule '" + rule.getName() + "': " + recoveryResult.getRecoveryMessage());
+                logger.errorRecoveryFailed(rule.getName(), "default", new RuntimeException(recoveryResult.getRecoveryMessage()));
+                logger.audit("ERROR_RECOVERY_FAILED", rule.getName(), "Error recovery failed: " + recoveryResult.getRecoveryMessage());
+                LoggingContext.clearRuleContext();
                 return RuleResult.error(rule.getName(), ruleException.getDetailedMessage(), metrics);
             }
         }
@@ -223,33 +243,33 @@ public class RulesEngine {
      */
     public RuleResult executeRulesList(List<Rule> rules, Map<String, Object> facts) {
         if (rules == null || rules.isEmpty()) {
-            LOGGER.info("No rules provided for execution");
+            logger.info("No rules provided for execution");
             return RuleResult.noRules();
         }
 
-        LOGGER.info("Executing " + rules.size() + " rules");
-        LOGGER.fine("Facts provided: " + (facts != null ? facts.keySet() : "none"));
+        logger.info("Executing {} rules", rules.size());
+        logger.debug("Facts provided: {}", facts != null ? facts.keySet() : "none");
 
         StandardEvaluationContext context = createContext(facts);
 
         // Evaluate rules in priority order
         for (Rule rule : rules) {
-            LOGGER.fine("Evaluating rule: " + rule.getName());
+            logger.debug("Evaluating rule: {}", rule.getName());
             try {
                 Expression exp = parser.parseExpression(rule.getCondition());
                 Boolean result = exp.getValue(context, Boolean.class);
-                LOGGER.fine("Rule '" + rule.getName() + "' evaluated to: " + result);
+                logger.debug("Rule '{}' evaluated to: {}", rule.getName(), result);
 
                 if (result != null && result) {
-                    LOGGER.info("Rule matched: " + rule.getName());
+                    logger.info("Rule matched: {}", rule.getName());
                     return RuleResult.match(rule.getName(), rule.getMessage());
                 }
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Error evaluating rule '" + rule.getName() + "': " + e.getMessage(), e);
+                logger.warn("Error evaluating rule '{}': {}", rule.getName(), e.getMessage(), e);
             }
         }
 
-        LOGGER.info("No rules matched");
+        logger.info("No rules matched");
         return RuleResult.noMatch();
     }
 
@@ -262,32 +282,32 @@ public class RulesEngine {
      */
     public RuleResult executeRuleGroupsList(List<RuleGroup> ruleGroups, Map<String, Object> facts) {
         if (ruleGroups == null || ruleGroups.isEmpty()) {
-            LOGGER.info("No rule groups provided for execution");
+            logger.info("No rule groups provided for execution");
             return RuleResult.noRules();
         }
 
-        LOGGER.info("Executing " + ruleGroups.size() + " rule groups");
-        LOGGER.fine("Facts provided: " + (facts != null ? facts.keySet() : "none"));
+        logger.info("Executing {} rule groups", ruleGroups.size());
+        logger.debug("Facts provided: {}", facts != null ? facts.keySet() : "none");
 
         StandardEvaluationContext context = createContext(facts);
 
         // Evaluate rule groups in priority order
         for (RuleGroup group : ruleGroups) {
-            LOGGER.fine("Evaluating rule group: " + group.getName());
+            logger.debug("Evaluating rule group: {}", group.getName());
             try {
                 boolean result = group.evaluate(context);
-                LOGGER.fine("Rule group '" + group.getName() + "' evaluated to: " + result);
+                logger.debug("Rule group '{}' evaluated to: {}", group.getName(), result);
 
                 if (result) {
-                    LOGGER.info("Rule group matched: " + group.getName());
+                    logger.info("Rule group matched: {}", group.getName());
                     return RuleResult.match(group.getName(), group.getMessage());
                 }
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Error evaluating rule group '" + group.getName() + "': " + e.getMessage(), e);
+                logger.warn("Error evaluating rule group '{}': {}", group.getName(), e.getMessage(), e);
             }
         }
 
-        LOGGER.info("No rule groups matched");
+        logger.info("No rule groups matched");
         return RuleResult.noMatch();
     }
 
@@ -301,12 +321,12 @@ public class RulesEngine {
      */
     public RuleResult executeRules(List<RuleBase> rules, Map<String, Object> facts) {
         if (rules == null || rules.isEmpty()) {
-            LOGGER.info("No rules provided for execution");
+            logger.info("No rules provided for execution");
             return RuleResult.noRules();
         }
 
-        LOGGER.info("Executing " + rules.size() + " rules/rule groups");
-        LOGGER.fine("Facts provided: " + (facts != null ? facts.keySet() : "none"));
+        logger.info("Executing {} rules/rule groups", rules.size());
+        logger.debug("Facts provided: {}", facts != null ? facts.keySet() : "none");
 
         // Check if all rules are of the same type and delegate to the appropriate method
         boolean allRules = true;
@@ -323,53 +343,53 @@ public class RulesEngine {
 
         if (allRules) {
             // All objects are Rule instances, so we can safely cast and delegate
-            LOGGER.fine("All objects are Rule instances, delegating to executeRulesList");
+            logger.debug("All objects are Rule instances, delegating to executeRulesList");
             @SuppressWarnings("unchecked")
             List<Rule> rulesList = (List<Rule>) (List<?>) rules;
             return executeRulesList(rulesList, facts);
         } else if (allRuleGroups) {
             // All objects are RuleGroup instances, so we can safely cast and delegate
-            LOGGER.fine("All objects are RuleGroup instances, delegating to executeRuleGroupsList");
+            logger.debug("All objects are RuleGroup instances, delegating to executeRuleGroupsList");
             @SuppressWarnings("unchecked")
             List<RuleGroup> ruleGroupsList = (List<RuleGroup>) (List<?>) rules;
             return executeRuleGroupsList(ruleGroupsList, facts);
         }
 
-        LOGGER.fine("Mixed list of rules and rule groups, processing manually");
+        logger.debug("Mixed list of rules and rule groups, processing manually");
         // Mixed list or unknown types, process manually
         StandardEvaluationContext context = createContext(facts);
 
         // Evaluate rules in priority order
         for (RuleBase ruleObj : rules) {
-            LOGGER.fine("Evaluating rule/rule group: " + ruleObj.getName());
+            logger.debug("Evaluating rule/rule group: {}", ruleObj.getName());
             try {
                 if (ruleObj instanceof Rule) {
                     Rule rule = (Rule) ruleObj;
                     Expression exp = parser.parseExpression(rule.getCondition());
                     Boolean result = exp.getValue(context, Boolean.class);
-                    LOGGER.fine("Rule '" + rule.getName() + "' evaluated to: " + result);
+                    logger.debug("Rule '{}' evaluated to: {}", rule.getName(), result);
 
                     if (result != null && result) {
-                        LOGGER.info("Rule matched: " + rule.getName());
+                        logger.info("Rule matched: {}", rule.getName());
                         return RuleResult.match(rule.getName(), rule.getMessage());
                     }
                 } else if (ruleObj instanceof RuleGroup) {
                     RuleGroup group = (RuleGroup) ruleObj;
                     boolean result = group.evaluate(context);
-                    LOGGER.fine("Rule group '" + group.getName() + "' evaluated to: " + result);
+                    logger.debug("Rule group '{}' evaluated to: {}", group.getName(), result);
 
                     if (result) {
-                        LOGGER.info("Rule group matched: " + group.getName());
+                        logger.info("Rule group matched: {}", group.getName());
                         return RuleResult.match(group.getName(), group.getMessage());
                     }
                 }
             } catch (Exception e) {
                 String ruleName = ruleObj.getName();
-                LOGGER.log(Level.WARNING, "Error evaluating rule/rule group '" + ruleName + "': " + e.getMessage(), e);
+                logger.warn("Error evaluating rule/rule group '{}': {}", ruleName, e.getMessage(), e);
             }
         }
 
-        LOGGER.info("No rules or rule groups matched");
+        logger.info("No rules or rule groups matched");
         return RuleResult.noMatch();
     }
 
@@ -381,9 +401,9 @@ public class RulesEngine {
      * @return The result of the first rule that matches, or a default result if no rules match
      */
     public RuleResult executeRulesForCategory(String category, Map<String, Object> facts) {
-        LOGGER.info("Executing rules for category: " + category);
+        logger.info("Executing rules for category: {}", category);
         List<RuleBase> rules = configuration.getRulesForCategory(category);
-        LOGGER.fine("Found " + rules.size() + " rules/rule groups in category: " + category);
+        logger.debug("Found {} rules/rule groups in category: {}", rules.size(), category);
         return executeRules(rules, facts);
     }
 }

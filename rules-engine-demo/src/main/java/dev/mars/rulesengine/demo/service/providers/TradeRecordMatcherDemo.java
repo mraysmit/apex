@@ -15,7 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+import dev.mars.rulesengine.core.util.RulesEngineLogger;
 
 /**
  * Demonstration of how to use RecordMatcher for Trade objects.
@@ -25,7 +25,7 @@ import java.util.logging.Logger;
  * This class implements RecordMatcher<Trade> to provide matching functionality.
  */
 public class TradeRecordMatcherDemo implements RecordMatcher<Trade> {
-    private static final Logger LOGGER = Logger.getLogger(TradeRecordMatcherDemo.class.getName());
+    private static final RulesEngineLogger logger = new RulesEngineLogger(TradeRecordMatcherDemo.class);
     private final LookupServiceRegistry registry;
 
     /**
@@ -52,53 +52,53 @@ public class TradeRecordMatcherDemo implements RecordMatcher<Trade> {
      * This method shows the step-by-step process of creating and using a RecordMatcher.
      */
     private static void runTradeRecordMatcherDemo() {
-        LOGGER.info("Starting trade record matcher demonstration");
+        logger.info("Starting trade record matcher demonstration");
 
         // Step 1: Create a RulesEngine
-        LOGGER.info("Step 1: Creating a RulesEngine");
+        logger.info("Step 1: Creating a RulesEngine");
         RulesEngine rulesEngine = new RulesEngine(new RulesEngineConfiguration());
 
         // Step 2: Create a LookupServiceRegistry
-        LOGGER.info("Step 2: Creating a LookupServiceRegistry");
+        logger.info("Step 2: Creating a LookupServiceRegistry");
         LookupServiceRegistry registry = new LookupServiceRegistry();
 
         // Step 3: Create and register validators
-        LOGGER.info("Step 3: Creating and registering validators");
+        logger.info("Step 3: Creating and registering validators");
         registerValidators(registry, rulesEngine);
 
         // Step 4: Create a TradeRecordMatcherDemo
-        LOGGER.info("Step 4: Creating a TradeRecordMatcherDemo");
+        logger.info("Step 4: Creating a TradeRecordMatcherDemo");
         RecordMatcher<Trade> recordMatcher = new TradeRecordMatcherDemo(registry);
 
         // Step 5: Create test trades
-        LOGGER.info("Step 5: Creating test trades");
+        logger.info("Step 5: Creating test trades");
         List<Trade> trades = createTestTrades();
 
         // Step 6: Define validation names to match against
-        LOGGER.info("Step 6: Defining validation names to match against");
+        logger.info("Step 6: Defining validation names to match against");
         List<String> validatorNames = Arrays.asList("equityValidator", "fixedIncomeValidator");
 
         // Step 7: Find matching trades
-        LOGGER.info("Step 7: Finding matching trades");
+        logger.info("Step 7: Finding matching trades");
         List<Trade> matchingTrades = recordMatcher.findMatchingRecords(trades, validatorNames);
 
         // Display matching trades
-        LOGGER.info("Matching trades:");
+        logger.info("Matching trades:");
         for (Trade trade : matchingTrades) {
-            LOGGER.info("- " + trade);
+            logger.info("- {}", trade);
         }
 
         // Step 8: Find non-matching trades
-        LOGGER.info("Step 8: Finding non-matching trades");
+        logger.info("Step 8: Finding non-matching trades");
         List<Trade> nonMatchingTrades = recordMatcher.findNonMatchingRecords(trades, validatorNames);
 
         // Display non-matching trades
-        LOGGER.info("Non-matching trades:");
+        logger.info("Non-matching trades:");
         for (Trade trade : nonMatchingTrades) {
-            LOGGER.info("- " + trade);
+            logger.info("- {}", trade);
         }
 
-        LOGGER.info("Trade record matcher demonstration completed");
+        logger.info("Trade record matcher demonstration completed");
     }
 
     /**
