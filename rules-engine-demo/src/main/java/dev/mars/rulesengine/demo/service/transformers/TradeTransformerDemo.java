@@ -97,13 +97,13 @@ public class TradeTransformerDemo {
             LOGGER.info("Transformed value: " + transformedTrade.getValue());
             LOGGER.info("Transformed category: " + transformedTrade.getCategory());
 
-            // Get the risk rating for the trade
-            double riskRating = config.getRiskRatingForTrade(trade);
-            LOGGER.info("Risk rating for " + trade.getId() + ": " + (riskRating * 100) + "%");
-
             // Get transformation result
-            RuleResult result = transformer.transformWithResult(trade);
+            RuleResult result = transformer.transformWithResult(transformedTrade);
             LOGGER.info("Transformation result: " + result);
+
+            // Get the risk rating for the transformed trade
+            double riskRating = config.getRiskRatingForTrade(transformedTrade);
+            LOGGER.info("Risk rating for " + transformedTrade.getId() + ": " + (riskRating * 100) + "%");
 
             // Add a separator
             LOGGER.info("----------------------------------------");

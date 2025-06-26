@@ -30,30 +30,33 @@ import java.util.stream.Collectors;
  * </pre>
  */
 public class ValidationBuilder {
-    
+
     private final Object data;
     private final Map<String, Object> facts;
     private final List<ValidationRule> rules = new ArrayList<>();
+    private final RulesService rulesService;
     
     /**
      * Create a validation builder for an object.
      * The object will be available as 'data' in conditions.
-     * 
+     *
      * @param data The object to validate
      */
     public ValidationBuilder(Object data) {
         this.data = data;
         this.facts = null;
+        this.rulesService = new RulesService();
     }
-    
+
     /**
      * Create a validation builder for a map of facts.
-     * 
+     *
      * @param facts The facts to validate
      */
     public ValidationBuilder(Map<String, Object> facts) {
         this.data = null;
         this.facts = facts;
+        this.rulesService = new RulesService();
     }
     
     /**
@@ -194,7 +197,7 @@ public class ValidationBuilder {
      * </pre>
      */
     public boolean passes() {
-        return rules.stream().allMatch(rule -> rule.test(getTestData()));
+        return rules.stream().allMatch(rule -> rule.test(getTestData(), rulesService));
     }
     
     /**
@@ -228,7 +231,7 @@ public class ValidationBuilder {
         List<String> errors = new ArrayList<>();
         
         for (ValidationRule rule : rules) {
-            if (!rule.test(getTestData())) {
+            if (!rule.test(getTestData(), rulesService)) {
                 errors.add(rule.getErrorMessage());
             }
         }
@@ -243,7 +246,7 @@ public class ValidationBuilder {
      */
     public String getFirstError() {
         for (ValidationRule rule : rules) {
-            if (!rule.test(getTestData())) {
+            if (!rule.test(getTestData(), rulesService)) {
                 return rule.getErrorMessage();
             }
         }
@@ -257,7 +260,7 @@ public class ValidationBuilder {
      */
     public List<String> getErrors() {
         return rules.stream()
-                .filter(rule -> !rule.test(getTestData()))
+                .filter(rule -> !rule.test(getTestData(), rulesService))
                 .map(ValidationRule::getErrorMessage)
                 .collect(Collectors.toList());
     }
@@ -288,14 +291,14 @@ public class ValidationBuilder {
             this.errorMessage = errorMessage;
         }
         
-        public boolean test(Object data) {
+        public boolean test(Object data, RulesService rulesService) {
             try {
                 if (data instanceof Map) {
                     @SuppressWarnings("unchecked")
                     Map<String, Object> facts = (Map<String, Object>) data;
-                    return Rules.check(condition, facts);
+                    return rulesService.check(condition, facts);
                 } else {
-                    return Rules.check(condition, data);
+                    return rulesService.check(condition, data);
                 }
             } catch (Exception e) {
                 return false; // Fail safely

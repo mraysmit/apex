@@ -1,0 +1,432 @@
+{"timestamp":"2025-06-26 23:00:57.140","thread":"main","level":"INFO ","correlationId":"aadafc65-d011-480b-8509-c631db3e5af5","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.144","thread":"main","level":"INFO ","correlationId":"aadafc65-d011-480b-8509-c631db3e5af5","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.171","thread":"main","level":"INFO ","correlationId":"aadafc65-d011-480b-8509-c631db3e5af5","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: Validation Rule for ageValidator","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.171","thread":"main","level":"INFO ","correlationId":"aadafc65-d011-480b-8509-c631db3e5af5","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.172","thread":"main","level":"INFO ","correlationId":"aadafc65-d011-480b-8509-c631db3e5af5","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.174","thread":"main","level":"INFO ","correlationId":"d0564614-957a-49e5-a371-dd5af7bad46c","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.175","thread":"main","level":"INFO ","correlationId":"d0564614-957a-49e5-a371-dd5af7bad46c","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.176","thread":"main","level":"WARN ","correlationId":"d0564614-957a-49e5-a371-dd5af7bad46c","logger":"d.m.r.core.engine.config.RulesEngine","message":"Error evaluating rule 'AgeRule': EL1021E: A problem occurred whilst attempting to access the property 'age': 'Unable to access property 'age' through getter method'","ruleName":"","rulePhase":"","evaluationTime":""}
+org.springframework.expression.spel.SpelEvaluationException: EL1021E: A problem occurred whilst attempting to access the property 'age': 'Unable to access property 'age' through getter method'
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.PropertyOrFieldReference.readProperty(PropertyOrFieldReference.java:215)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.PropertyOrFieldReference.getValueInternal(PropertyOrFieldReference.java:106)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.PropertyOrFieldReference.access$000(PropertyOrFieldReference.java:53)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.PropertyOrFieldReference$AccessorLValue.getValue(PropertyOrFieldReference.java:412)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.CompoundExpression.getValueInternal(CompoundExpression.java:93)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.OpGE.getValueInternal(OpGE.java:47)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.OpGE.getValueInternal(OpGE.java:37)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.SpelNodeImpl.getTypedValue(SpelNodeImpl.java:119)
+	at spring.expression@5.3.30/org.springframework.expression.spel.standard.SpelExpression.getValue(SpelExpression.java:309)
+	at dev.mars.rulesengine.core@1.0-SNAPSHOT/dev.mars.rulesengine.core.engine.config.RulesEngine.executeRulesList(RulesEngine.java:260)
+	at dev.mars.rulesengine.demo@1.0-SNAPSHOT/dev.mars.rulesengine.demo.integration.CoreFunctionalityTest.testRuleEngineSimple(CoreFunctionalityTest.java:110)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.apache.maven.surefire.junitplatform.LazyLauncher.execute(LazyLauncher.java:56)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:184)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:148)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:122)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+Caused by: org.springframework.expression.AccessException: Unable to access property 'age' through getter method
+	at spring.expression@5.3.30/org.springframework.expression.spel.support.ReflectivePropertyAccessor$OptimalPropertyAccessor.read(ReflectivePropertyAccessor.java:708)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.PropertyOrFieldReference.readProperty(PropertyOrFieldReference.java:210)
+	... 79 common frames omitted
+Caused by: java.lang.IllegalAccessException: class org.springframework.expression.spel.support.ReflectivePropertyAccessor$OptimalPropertyAccessor (in module spring.expression) cannot access class dev.mars.rulesengine.demo.model.Customer (in module dev.mars.rulesengine.demo) because module dev.mars.rulesengine.demo does not export dev.mars.rulesengine.demo.model to module spring.expression
+	at java.base/jdk.internal.reflect.Reflection.newIllegalAccessException(Reflection.java:398)
+	at java.base/java.lang.reflect.AccessibleObject.checkAccess(AccessibleObject.java:709)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:571)
+	at spring.expression@5.3.30/org.springframework.expression.spel.support.ReflectivePropertyAccessor$OptimalPropertyAccessor.read(ReflectivePropertyAccessor.java:704)
+	... 80 common frames omitted
+{"timestamp":"2025-06-26 23:00:57.177","thread":"main","level":"INFO ","correlationId":"d0564614-957a-49e5-a371-dd5af7bad46c","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.178","thread":"main","level":"INFO ","correlationId":"d0564614-957a-49e5-a371-dd5af7bad46c","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.178","thread":"main","level":"WARN ","correlationId":"d0564614-957a-49e5-a371-dd5af7bad46c","logger":"d.m.r.core.engine.config.RulesEngine","message":"Error evaluating rule 'AgeRule': EL1021E: A problem occurred whilst attempting to access the property 'age': 'Unable to access property 'age' through getter method'","ruleName":"","rulePhase":"","evaluationTime":""}
+org.springframework.expression.spel.SpelEvaluationException: EL1021E: A problem occurred whilst attempting to access the property 'age': 'Unable to access property 'age' through getter method'
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.PropertyOrFieldReference.readProperty(PropertyOrFieldReference.java:215)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.PropertyOrFieldReference.getValueInternal(PropertyOrFieldReference.java:106)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.PropertyOrFieldReference.access$000(PropertyOrFieldReference.java:53)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.PropertyOrFieldReference$AccessorLValue.getValue(PropertyOrFieldReference.java:412)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.CompoundExpression.getValueInternal(CompoundExpression.java:93)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.OpGE.getValueInternal(OpGE.java:47)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.OpGE.getValueInternal(OpGE.java:37)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.SpelNodeImpl.getTypedValue(SpelNodeImpl.java:119)
+	at spring.expression@5.3.30/org.springframework.expression.spel.standard.SpelExpression.getValue(SpelExpression.java:309)
+	at dev.mars.rulesengine.core@1.0-SNAPSHOT/dev.mars.rulesengine.core.engine.config.RulesEngine.executeRulesList(RulesEngine.java:260)
+	at dev.mars.rulesengine.demo@1.0-SNAPSHOT/dev.mars.rulesengine.demo.integration.CoreFunctionalityTest.testRuleEngineSimple(CoreFunctionalityTest.java:113)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.apache.maven.surefire.junitplatform.LazyLauncher.execute(LazyLauncher.java:56)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:184)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:148)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:122)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+Caused by: org.springframework.expression.AccessException: Unable to access property 'age' through getter method
+	at spring.expression@5.3.30/org.springframework.expression.spel.support.ReflectivePropertyAccessor$OptimalPropertyAccessor.read(ReflectivePropertyAccessor.java:708)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.PropertyOrFieldReference.readProperty(PropertyOrFieldReference.java:210)
+	... 79 common frames omitted
+Caused by: java.lang.IllegalAccessException: class org.springframework.expression.spel.support.ReflectivePropertyAccessor$OptimalPropertyAccessor (in module spring.expression) cannot access class dev.mars.rulesengine.demo.model.Customer (in module dev.mars.rulesengine.demo) because module dev.mars.rulesengine.demo does not export dev.mars.rulesengine.demo.model to module spring.expression
+	at java.base/jdk.internal.reflect.Reflection.newIllegalAccessException(Reflection.java:398)
+	at java.base/java.lang.reflect.AccessibleObject.checkAccess(AccessibleObject.java:709)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:571)
+	at spring.expression@5.3.30/org.springframework.expression.spel.support.ReflectivePropertyAccessor$OptimalPropertyAccessor.read(ReflectivePropertyAccessor.java:704)
+	... 80 common frames omitted
+{"timestamp":"2025-06-26 23:00:57.179","thread":"main","level":"INFO ","correlationId":"d0564614-957a-49e5-a371-dd5af7bad46c","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.182","thread":"main","level":"INFO ","correlationId":"ddeae3ab-54d9-47ac-a186-3c49732b3973","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.184","thread":"main","level":"INFO ","correlationId":"ddeae3ab-54d9-47ac-a186-3c49732b3973","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.185","thread":"main","level":"WARN ","correlationId":"ddeae3ab-54d9-47ac-a186-3c49732b3973","logger":"d.m.r.core.engine.config.RulesEngine","message":"Error evaluating rule 'DiscountRule': EL1021E: A problem occurred whilst attempting to access the property 'price': 'Unable to access property 'price' through getter method'","ruleName":"","rulePhase":"","evaluationTime":""}
+org.springframework.expression.spel.SpelEvaluationException: EL1021E: A problem occurred whilst attempting to access the property 'price': 'Unable to access property 'price' through getter method'
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.PropertyOrFieldReference.readProperty(PropertyOrFieldReference.java:215)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.PropertyOrFieldReference.getValueInternal(PropertyOrFieldReference.java:106)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.PropertyOrFieldReference.access$000(PropertyOrFieldReference.java:53)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.PropertyOrFieldReference$AccessorLValue.getValue(PropertyOrFieldReference.java:412)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.CompoundExpression.getValueInternal(CompoundExpression.java:93)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.OpGT.getValueInternal(OpGT.java:47)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.OpGT.getValueInternal(OpGT.java:37)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.SpelNodeImpl.getTypedValue(SpelNodeImpl.java:119)
+	at spring.expression@5.3.30/org.springframework.expression.spel.standard.SpelExpression.getValue(SpelExpression.java:309)
+	at dev.mars.rulesengine.core@1.0-SNAPSHOT/dev.mars.rulesengine.core.engine.config.RulesEngine.executeRulesList(RulesEngine.java:260)
+	at dev.mars.rulesengine.demo@1.0-SNAPSHOT/dev.mars.rulesengine.demo.integration.CoreFunctionalityTest.testProductPriceCalculation(CoreFunctionalityTest.java:142)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.apache.maven.surefire.junitplatform.LazyLauncher.execute(LazyLauncher.java:56)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:184)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:148)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:122)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+Caused by: org.springframework.expression.AccessException: Unable to access property 'price' through getter method
+	at spring.expression@5.3.30/org.springframework.expression.spel.support.ReflectivePropertyAccessor$OptimalPropertyAccessor.read(ReflectivePropertyAccessor.java:708)
+	at spring.expression@5.3.30/org.springframework.expression.spel.ast.PropertyOrFieldReference.readProperty(PropertyOrFieldReference.java:210)
+	... 79 common frames omitted
+Caused by: java.lang.IllegalAccessException: class org.springframework.expression.spel.support.ReflectivePropertyAccessor$OptimalPropertyAccessor (in module spring.expression) cannot access class dev.mars.rulesengine.demo.model.Product (in module dev.mars.rulesengine.demo) because module dev.mars.rulesengine.demo does not export dev.mars.rulesengine.demo.model to module spring.expression
+	at java.base/jdk.internal.reflect.Reflection.newIllegalAccessException(Reflection.java:398)
+	at java.base/java.lang.reflect.AccessibleObject.checkAccess(AccessibleObject.java:709)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:571)
+	at spring.expression@5.3.30/org.springframework.expression.spel.support.ReflectivePropertyAccessor$OptimalPropertyAccessor.read(ReflectivePropertyAccessor.java:704)
+	... 80 common frames omitted
+{"timestamp":"2025-06-26 23:00:57.186","thread":"main","level":"INFO ","correlationId":"ddeae3ab-54d9-47ac-a186-3c49732b3973","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.210","thread":"main","level":"INFO ","correlationId":"766a5ddc-e7e4-46a9-84b1-a6012ca73b28","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.211","thread":"main","level":"INFO ","correlationId":"766a5ddc-e7e4-46a9-84b1-a6012ca73b28","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.212","thread":"main","level":"INFO ","correlationId":"766a5ddc-e7e4-46a9-84b1-a6012ca73b28","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: AgeRule","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.213","thread":"main","level":"INFO ","correlationId":"766a5ddc-e7e4-46a9-84b1-a6012ca73b28","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.213","thread":"main","level":"INFO ","correlationId":"766a5ddc-e7e4-46a9-84b1-a6012ca73b28","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.214","thread":"main","level":"INFO ","correlationId":"11c4e904-9a8b-478b-919b-81d97cccf2ad","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.217","thread":"main","level":"INFO ","correlationId":"31f80a44-2f1b-4954-bcf0-d6c2cc34a614","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.223","thread":"main","level":"INFO ","correlationId":"9c2f2cc8-42d2-4c12-8d8d-bd8ec029770c","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.225","thread":"main","level":"INFO ","correlationId":"9c2f2cc8-42d2-4c12-8d8d-bd8ec029770c","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rule groups","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.226","thread":"main","level":"INFO ","correlationId":"9c2f2cc8-42d2-4c12-8d8d-bd8ec029770c","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule group matched: AdultWithSufficientIncome","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.226","thread":"main","level":"INFO ","correlationId":"9c2f2cc8-42d2-4c12-8d8d-bd8ec029770c","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rule groups","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.226","thread":"main","level":"INFO ","correlationId":"9c2f2cc8-42d2-4c12-8d8d-bd8ec029770c","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rule groups matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.226","thread":"main","level":"INFO ","correlationId":"9c2f2cc8-42d2-4c12-8d8d-bd8ec029770c","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rule groups","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.227","thread":"main","level":"INFO ","correlationId":"9c2f2cc8-42d2-4c12-8d8d-bd8ec029770c","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rule groups matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.227","thread":"main","level":"INFO ","correlationId":"9fe6b8f3-c7bc-4fca-877c-ce11b268f0db","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.228","thread":"main","level":"INFO ","correlationId":"9fe6b8f3-c7bc-4fca-877c-ce11b268f0db","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rule groups","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.228","thread":"main","level":"INFO ","correlationId":"9fe6b8f3-c7bc-4fca-877c-ce11b268f0db","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule group matched: SeniorOrLowIncome","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.228","thread":"main","level":"INFO ","correlationId":"9fe6b8f3-c7bc-4fca-877c-ce11b268f0db","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rule groups","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.229","thread":"main","level":"INFO ","correlationId":"9fe6b8f3-c7bc-4fca-877c-ce11b268f0db","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule group matched: SeniorOrLowIncome","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.229","thread":"main","level":"INFO ","correlationId":"9fe6b8f3-c7bc-4fca-877c-ce11b268f0db","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rule groups","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.229","thread":"main","level":"INFO ","correlationId":"9fe6b8f3-c7bc-4fca-877c-ce11b268f0db","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rule groups matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.232","thread":"main","level":"INFO ","correlationId":"d2ee7d05-e139-4257-a916-2f3386b48ef4","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.232","thread":"main","level":"INFO ","correlationId":"d2ee7d05-e139-4257-a916-2f3386b48ef4","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.233","thread":"main","level":"INFO ","correlationId":"d2ee7d05-e139-4257-a916-2f3386b48ef4","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: VolatileMarket","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.233","thread":"main","level":"INFO ","correlationId":"d2ee7d05-e139-4257-a916-2f3386b48ef4","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.233","thread":"main","level":"INFO ","correlationId":"d2ee7d05-e139-4257-a916-2f3386b48ef4","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: KYCVerification","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.234","thread":"main","level":"INFO ","correlationId":"b4d2e065-6f72-4004-8fa0-c6cb8c7bbfa6","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.234","thread":"main","level":"INFO ","correlationId":"b4d2e065-6f72-4004-8fa0-c6cb8c7bbfa6","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.234","thread":"main","level":"INFO ","correlationId":"b4d2e065-6f72-4004-8fa0-c6cb8c7bbfa6","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: TestRule","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.235","thread":"main","level":"INFO ","correlationId":"a94b6ddd-1c1d-4675-b4dd-079430109378","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.236","thread":"main","level":"INFO ","correlationId":"a94b6ddd-1c1d-4675-b4dd-079430109378","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.236","thread":"main","level":"INFO ","correlationId":"a94b6ddd-1c1d-4675-b4dd-079430109378","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: HighValueInvestment","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.236","thread":"main","level":"INFO ","correlationId":"a94b6ddd-1c1d-4675-b4dd-079430109378","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.236","thread":"main","level":"INFO ","correlationId":"a94b6ddd-1c1d-4675-b4dd-079430109378","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: RetirementAccount","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.237","thread":"main","level":"INFO ","correlationId":"015350df-a343-4c60-bd9a-25c196315557","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.240","thread":"main","level":"INFO ","correlationId":"015350df-a343-4c60-bd9a-25c196315557","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.241","thread":"main","level":"INFO ","correlationId":"015350df-a343-4c60-bd9a-25c196315557","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: HighValueInvestment","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.243","thread":"main","level":"INFO ","correlationId":"e2d483ce-9bf1-48c4-9118-1ec0fd5f14ed","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.280","thread":"main","level":"INFO ","correlationId":"896ebb0c-1a0e-4e16-9a98-c726b8e590d0","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.281","thread":"main","level":"INFO ","correlationId":"7e099b79-74bb-4b4a-b1b7-0d6d5ae1d939","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.281","thread":"main","level":"INFO ","correlationId":"7e099b79-74bb-4b4a-b1b7-0d6d5ae1d939","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.288","thread":"main","level":"INFO ","correlationId":"7e099b79-74bb-4b4a-b1b7-0d6d5ae1d939","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: Validation Rule for adultValidator","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.288","thread":"main","level":"INFO ","correlationId":"7e099b79-74bb-4b4a-b1b7-0d6d5ae1d939","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.288","thread":"main","level":"INFO ","correlationId":"7e099b79-74bb-4b4a-b1b7-0d6d5ae1d939","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.290","thread":"main","level":"INFO ","correlationId":"586badce-fbc3-4936-a18b-fcc570613ab6","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.292","thread":"main","level":"INFO ","correlationId":"6a59e1ae-4c57-4475-8723-f195511bfbde","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.292","thread":"main","level":"INFO ","correlationId":"6a59e1ae-4c57-4475-8723-f195511bfbde","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.292","thread":"main","level":"INFO ","correlationId":"6a59e1ae-4c57-4475-8723-f195511bfbde","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: Validation Rule for adultValidator","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.292","thread":"main","level":"INFO ","correlationId":"6a59e1ae-4c57-4475-8723-f195511bfbde","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.292","thread":"main","level":"INFO ","correlationId":"6a59e1ae-4c57-4475-8723-f195511bfbde","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: Validation Rule for adultValidator","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.293","thread":"main","level":"INFO ","correlationId":"6a59e1ae-4c57-4475-8723-f195511bfbde","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.293","thread":"main","level":"INFO ","correlationId":"6a59e1ae-4c57-4475-8723-f195511bfbde","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.293","thread":"main","level":"INFO ","correlationId":"6a59e1ae-4c57-4475-8723-f195511bfbde","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.293","thread":"main","level":"INFO ","correlationId":"6a59e1ae-4c57-4475-8723-f195511bfbde","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: Validation Rule for seniorValidator","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.293","thread":"main","level":"INFO ","correlationId":"6a59e1ae-4c57-4475-8723-f195511bfbde","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.293","thread":"main","level":"INFO ","correlationId":"6a59e1ae-4c57-4475-8723-f195511bfbde","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.293","thread":"main","level":"INFO ","correlationId":"6a59e1ae-4c57-4475-8723-f195511bfbde","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.293","thread":"main","level":"INFO ","correlationId":"6a59e1ae-4c57-4475-8723-f195511bfbde","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: Validation Rule for childValidator","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.293","thread":"main","level":"INFO ","correlationId":"6a59e1ae-4c57-4475-8723-f195511bfbde","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.294","thread":"main","level":"INFO ","correlationId":"6a59e1ae-4c57-4475-8723-f195511bfbde","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.294","thread":"main","level":"INFO ","correlationId":"54a678b2-20cd-4a13-83a9-c9a6c6efe7f9","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.295","thread":"main","level":"INFO ","correlationId":"54a678b2-20cd-4a13-83a9-c9a6c6efe7f9","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.296","thread":"main","level":"INFO ","correlationId":"54a678b2-20cd-4a13-83a9-c9a6c6efe7f9","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: Validation Rule for premiumProductValidator","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.296","thread":"main","level":"INFO ","correlationId":"54a678b2-20cd-4a13-83a9-c9a6c6efe7f9","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.296","thread":"main","level":"INFO ","correlationId":"54a678b2-20cd-4a13-83a9-c9a6c6efe7f9","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.296","thread":"main","level":"INFO ","correlationId":"54a678b2-20cd-4a13-83a9-c9a6c6efe7f9","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.296","thread":"main","level":"INFO ","correlationId":"54a678b2-20cd-4a13-83a9-c9a6c6efe7f9","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.297","thread":"main","level":"INFO ","correlationId":"54a678b2-20cd-4a13-83a9-c9a6c6efe7f9","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.297","thread":"main","level":"INFO ","correlationId":"54a678b2-20cd-4a13-83a9-c9a6c6efe7f9","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: Validation Rule for midRangeProductValidator","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.297","thread":"main","level":"INFO ","correlationId":"54a678b2-20cd-4a13-83a9-c9a6c6efe7f9","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.297","thread":"main","level":"INFO ","correlationId":"54a678b2-20cd-4a13-83a9-c9a6c6efe7f9","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.297","thread":"main","level":"INFO ","correlationId":"54a678b2-20cd-4a13-83a9-c9a6c6efe7f9","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.297","thread":"main","level":"INFO ","correlationId":"54a678b2-20cd-4a13-83a9-c9a6c6efe7f9","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.297","thread":"main","level":"INFO ","correlationId":"54a678b2-20cd-4a13-83a9-c9a6c6efe7f9","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.297","thread":"main","level":"INFO ","correlationId":"54a678b2-20cd-4a13-83a9-c9a6c6efe7f9","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: Validation Rule for budgetProductValidator","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.297","thread":"main","level":"INFO ","correlationId":"54a678b2-20cd-4a13-83a9-c9a6c6efe7f9","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.297","thread":"main","level":"INFO ","correlationId":"54a678b2-20cd-4a13-83a9-c9a6c6efe7f9","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.297","thread":"main","level":"INFO ","correlationId":"54a678b2-20cd-4a13-83a9-c9a6c6efe7f9","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.298","thread":"main","level":"INFO ","correlationId":"54a678b2-20cd-4a13-83a9-c9a6c6efe7f9","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.299","thread":"main","level":"INFO ","correlationId":"a01def51-1346-48ce-944b-d0e1eea6cfa7","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.299","thread":"main","level":"INFO ","correlationId":"a01def51-1346-48ce-944b-d0e1eea6cfa7","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.299","thread":"main","level":"INFO ","correlationId":"a01def51-1346-48ce-944b-d0e1eea6cfa7","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: Validation Rule for adultValidator","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.299","thread":"main","level":"INFO ","correlationId":"a01def51-1346-48ce-944b-d0e1eea6cfa7","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.300","thread":"main","level":"INFO ","correlationId":"a01def51-1346-48ce-944b-d0e1eea6cfa7","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: Validation Rule for premiumProductValidator","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.300","thread":"main","level":"INFO ","correlationId":"a01def51-1346-48ce-944b-d0e1eea6cfa7","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.300","thread":"main","level":"INFO ","correlationId":"a01def51-1346-48ce-944b-d0e1eea6cfa7","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: Validation Rule for childValidator","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.300","thread":"main","level":"INFO ","correlationId":"a01def51-1346-48ce-944b-d0e1eea6cfa7","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.300","thread":"main","level":"INFO ","correlationId":"a01def51-1346-48ce-944b-d0e1eea6cfa7","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: Validation Rule for budgetProductValidator","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.300","thread":"main","level":"INFO ","correlationId":"a01def51-1346-48ce-944b-d0e1eea6cfa7","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.300","thread":"main","level":"INFO ","correlationId":"a01def51-1346-48ce-944b-d0e1eea6cfa7","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: Validation Rule for childValidator","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.300","thread":"main","level":"INFO ","correlationId":"a01def51-1346-48ce-944b-d0e1eea6cfa7","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.301","thread":"main","level":"INFO ","correlationId":"a01def51-1346-48ce-944b-d0e1eea6cfa7","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: Validation Rule for premiumProductValidator","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.362","thread":"main","level":"INFO ","correlationId":"f2f82709-e218-450b-8dde-9a3729c3c68b","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.363","thread":"main","level":"INFO ","correlationId":"6174cfad-b35c-427b-9033-8b03c92d4437","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.367","thread":"main","level":"INFO ","correlationId":"eb2da79c-cfbd-4eee-af62-e0d6d01c424c","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.367","thread":"main","level":"INFO ","correlationId":"238dc37b-9233-4a1a-9cad-a6e330b9c611","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.371","thread":"main","level":"INFO ","correlationId":"69d318a2-f53b-402d-bff3-376eb3ade16c","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.371","thread":"main","level":"INFO ","correlationId":"a5afa7fd-707d-4b60-9f40-4a728acca62c","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.382","thread":"main","level":"INFO ","correlationId":"3a088e58-ee1c-4923-be35-676517076099","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.382","thread":"main","level":"INFO ","correlationId":"5c2860d6-fef4-44ff-8bc0-0a16fa682fa6","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.387","thread":"main","level":"INFO ","correlationId":"62e11500-0cf7-46c0-bbba-4f7ad544946c","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.388","thread":"main","level":"INFO ","correlationId":"d00fb812-962c-4a6f-8b7a-914011b7169c","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.393","thread":"main","level":"INFO ","correlationId":"4e7a8a1f-0333-4049-b507-0d7493caca5e","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.393","thread":"main","level":"INFO ","correlationId":"566bd98b-c65a-484d-b1fa-60128dbd1aee","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.398","thread":"main","level":"INFO ","correlationId":"cf5513fe-20ae-4d2a-9e22-19299406ee7f","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.399","thread":"main","level":"INFO ","correlationId":"de429773-0113-492c-875a-c4c6e9c60d9a","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.399","thread":"main","level":"INFO ","correlationId":"e9b3483c-acfe-4545-9b30-0e6c5ec378f2","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.399","thread":"main","level":"INFO ","correlationId":"c2f27bca-619e-43c7-bdd1-a6065a490831","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.457","thread":"main","level":"INFO ","correlationId":"cfee1c1f-6329-4763-8e60-3bdfe348ffb7","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.457","thread":"main","level":"INFO ","correlationId":"ab85802e-fa75-4360-bbfc-4ae160660140","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.467","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.468","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing rules for category: investment-rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.468","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 3 rules/rule groups","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.468","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules or rule groups matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.468","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing rules for category: risk-assessment","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.468","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 3 rules/rule groups","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.468","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: high-risk-client","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.468","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing rules for category: compliance","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.468","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 2 rules/rule groups","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.468","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules or rule groups matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.468","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing rules for category: investment-rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.468","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 3 rules/rule groups","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.469","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules or rule groups matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.469","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing rules for category: risk-assessment","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.469","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 3 rules/rule groups","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.469","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules or rule groups matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.469","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing rules for category: compliance","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.469","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 2 rules/rule groups","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.469","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: kyc-verified","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.469","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing rules for category: investment-rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.469","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 3 rules/rule groups","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.469","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: high-value-investment","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.469","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing rules for category: risk-assessment","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.469","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 3 rules/rule groups","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.469","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules or rule groups matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.469","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing rules for category: compliance","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.469","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 2 rules/rule groups","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:00:57.469","thread":"main","level":"INFO ","correlationId":"ce9af2c0-f343-4503-8c81-7689a9e280b1","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules or rule groups matched","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:09:43.304","thread":"main","level":"INFO ","correlationId":"1a54a4f3-18d2-41fc-b428-e8352606d72d","logger":"d.m.r.core.engine.config.RulesEngine","message":"Configuration [RulesEngine]: Initialized with configuration: RulesEngineConfiguration","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:09:43.316","thread":"main","level":"INFO ","correlationId":"1a54a4f3-18d2-41fc-b428-e8352606d72d","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:09:43.352","thread":"main","level":"INFO ","correlationId":"1a54a4f3-18d2-41fc-b428-e8352606d72d","logger":"d.m.r.core.engine.config.RulesEngine","message":"Rule matched: AgeRule","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:09:43.352","thread":"main","level":"INFO ","correlationId":"1a54a4f3-18d2-41fc-b428-e8352606d72d","logger":"d.m.r.core.engine.config.RulesEngine","message":"Executing 1 rules","ruleName":"","rulePhase":"","evaluationTime":""}
+{"timestamp":"2025-06-26 23:09:43.353","thread":"main","level":"INFO ","correlationId":"1a54a4f3-18d2-41fc-b428-e8352606d72d","logger":"d.m.r.core.engine.config.RulesEngine","message":"No rules matched","ruleName":"","rulePhase":"","evaluationTime":""}

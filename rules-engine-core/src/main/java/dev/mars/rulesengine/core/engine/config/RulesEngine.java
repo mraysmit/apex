@@ -406,4 +406,43 @@ public class RulesEngine {
         logger.debug("Found {} rules/rule groups in category: {}", rules.size(), category);
         return executeRules(rules, facts);
     }
+
+    /**
+     * Simple evaluation method that returns only a boolean indicating whether a rule was triggered.
+     * This method is provided for simplicity when only the boolean result is needed.
+     *
+     * @param rule The Rule object to evaluate
+     * @param facts The facts to evaluate the rule against
+     * @return true if the rule was triggered, false otherwise
+     */
+    public boolean evaluateRule(Rule rule, Map<String, Object> facts) {
+        RuleResult result = executeRule(rule, facts);
+        return result.isTriggered();
+    }
+
+    /**
+     * Simple evaluation method that returns only a boolean indicating whether any rule in the list was triggered.
+     * This method is provided for simplicity when only the boolean result is needed.
+     *
+     * @param rules The list of Rule objects to evaluate
+     * @param facts The facts to evaluate the rules against
+     * @return true if any rule was triggered, false otherwise
+     */
+    public boolean evaluateRules(List<RuleBase> rules, Map<String, Object> facts) {
+        RuleResult result = executeRules(rules, facts);
+        return result.isTriggered();
+    }
+
+    /**
+     * Simple evaluation method that returns only a boolean indicating whether any rule in the specified category was triggered.
+     * This method is provided for simplicity when only the boolean result is needed.
+     *
+     * @param category The category of rules to evaluate
+     * @param facts The facts to evaluate the rules against
+     * @return true if any rule was triggered, false otherwise
+     */
+    public boolean evaluateRulesForCategory(String category, Map<String, Object> facts) {
+        RuleResult result = executeRulesForCategory(category, facts);
+        return result.isTriggered();
+    }
 }

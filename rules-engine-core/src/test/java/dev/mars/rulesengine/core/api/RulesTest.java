@@ -9,14 +9,16 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test class for the simplified Rules API.
+ * Test class for the RulesService API.
  */
 public class RulesTest {
 
+    private RulesService rulesService;
+
     @BeforeEach
     void setUp() {
-        // Clear any previously defined rules
-        Rules.clearNamedRules();
+        // Create a fresh RulesService instance for each test
+        rulesService = new RulesService();
     }
 
     @Test
@@ -24,71 +26,71 @@ public class RulesTest {
         // Test basic condition checking
         Map<String, Object> facts = new HashMap<>();
         facts.put("age", 25);
-        
-        assertTrue(Rules.check("#age >= 18", facts));
-        assertFalse(Rules.check("#age >= 30", facts));
+
+        assertTrue(rulesService.check("#age >= 18", facts));
+        assertFalse(rulesService.check("#age >= 30", facts));
     }
 
     @Test
     void testCheckWithObject() {
         // Test checking against a single object
         TestCustomer customer = new TestCustomer("John", 25, "john@example.com");
-        
-        assertTrue(Rules.check("#data.age >= 18", customer));
-        assertTrue(Rules.check("#data.name == 'John'", customer));
-        assertFalse(Rules.check("#data.age >= 30", customer));
+
+        assertTrue(rulesService.check("#data.age >= 18", customer));
+        assertTrue(rulesService.check("#data.name == 'John'", customer));
+        assertFalse(rulesService.check("#data.age >= 30", customer));
     }
 
     @Test
     void testNamedRules() {
         // Test defining and using named rules
-        Rules.define("adult", "#age >= 18");
-        Rules.define("senior", "#age >= 65");
-        
-        assertTrue(Rules.isDefined("adult"));
-        assertTrue(Rules.isDefined("senior"));
-        assertFalse(Rules.isDefined("child"));
-        
+        rulesService.define("adult", "#age >= 18");
+        rulesService.define("senior", "#age >= 65");
+
+        assertTrue(rulesService.isDefined("adult"));
+        assertTrue(rulesService.isDefined("senior"));
+        assertFalse(rulesService.isDefined("child"));
+
         Map<String, Object> facts = new HashMap<>();
         facts.put("age", 25);
-        
-        assertTrue(Rules.test("adult", facts));
-        assertFalse(Rules.test("senior", facts));
+
+        assertTrue(rulesService.test("adult", facts));
+        assertFalse(rulesService.test("senior", facts));
     }
 
     @Test
     void testNamedRulesWithObject() {
         // Test named rules with objects
-        Rules.define("adult", "#data.age >= 18");
-        Rules.define("has-email", "#data.email != null");
-        
+        rulesService.define("adult", "#data.age >= 18");
+        rulesService.define("has-email", "#data.email != null");
+
         TestCustomer customer = new TestCustomer("John", 25, "john@example.com");
-        
-        assertTrue(Rules.test("adult", customer));
-        assertTrue(Rules.test("has-email", customer));
+
+        assertTrue(rulesService.test("adult", customer));
+        assertTrue(rulesService.test("has-email", customer));
     }
 
     @Test
     void testNamedRulesWithCustomMessage() {
         // Test named rules with custom messages
-        Rules.define("adult", "#age >= 18", "Customer is an adult");
-        
+        rulesService.define("adult", "#age >= 18", "Customer is an adult");
+
         Map<String, Object> facts = new HashMap<>();
         facts.put("age", 25);
-        
-        assertTrue(Rules.test("adult", facts));
+
+        assertTrue(rulesService.test("adult", facts));
     }
 
     @Test
     void testFluentValidation() {
         // Test fluent validation API
         TestCustomer customer = new TestCustomer("John", 25, "john@example.com");
-        
-        boolean valid = Rules.validate(customer)
+
+        boolean valid = rulesService.validate(customer)
                 .that("#data.age >= 18", "Must be adult")
                 .that("#data.email != null", "Email required")
                 .passes();
-        
+
         assertTrue(valid);
     }
 
@@ -96,12 +98,12 @@ public class RulesTest {
     void testFluentValidationWithFailure() {
         // Test fluent validation with failures
         TestCustomer customer = new TestCustomer("John", 16, null);
-        
-        boolean valid = Rules.validate(customer)
+
+        boolean valid = rulesService.validate(customer)
                 .that("#data.age >= 18", "Must be adult")
                 .that("#data.email != null", "Email required")
                 .passes();
-        
+
         assertFalse(valid);
     }
 
@@ -109,8 +111,8 @@ public class RulesTest {
     void testValidationResult() {
         // Test detailed validation results
         TestCustomer customer = new TestCustomer("John", 16, null);
-        
-        ValidationResult result = Rules.validate(customer)
+
+        ValidationResult result = rulesService.validate(customer)
                 .that("#data.age >= 18", "Must be adult")
                 .that("#data.email != null", "Email required")
                 .validate();
@@ -128,13 +130,13 @@ public class RulesTest {
     void testValidationBuilderHelpers() {
         // Test validation builder helper methods
         TestCustomer customer = new TestCustomer("John", 25, "john@example.com");
-        
-        boolean valid = Rules.validate(customer)
+
+        boolean valid = rulesService.validate(customer)
                 .minimumAge(18)
                 .emailRequired()
                 .notNull("name")
                 .passes();
-        
+
         assertTrue(valid);
     }
 
@@ -142,13 +144,13 @@ public class RulesTest {
     void testValidationBuilderHelpersWithFailure() {
         // Test validation builder helpers with failures
         TestCustomer customer = new TestCustomer(null, 16, null);
-        
-        ValidationResult result = Rules.validate(customer)
+
+        ValidationResult result = rulesService.validate(customer)
                 .minimumAge(18)
                 .emailRequired()
                 .notNull("name")
                 .validate();
-        
+
         assertFalse(result.isValid());
         assertEquals(3, result.getErrorCount());
     }
@@ -160,23 +162,23 @@ public class RulesTest {
         data.put("age", 25);
         data.put("email", "john@example.com");
         data.put("balance", 1500.0);
-        
-        boolean valid = Rules.validate(data)
+
+        boolean valid = rulesService.validate(data)
                 .that("#age >= 18", "Must be adult")
                 .that("#email != null", "Email required")
                 .that("#balance >= 1000", "Minimum balance required")
                 .passes();
-        
+
         assertTrue(valid);
     }
 
     @Test
     void testGetDefinedRules() {
         // Test getting defined rule names
-        Rules.define("rule1", "#age >= 18");
-        Rules.define("rule2", "#balance > 1000");
-        
-        String[] ruleNames = Rules.getDefinedRules();
+        rulesService.define("rule1", "#age >= 18");
+        rulesService.define("rule2", "#balance > 1000");
+
+        String[] ruleNames = rulesService.getDefinedRules();
         assertEquals(2, ruleNames.length);
         assertTrue(java.util.Arrays.asList(ruleNames).contains("rule1"));
         assertTrue(java.util.Arrays.asList(ruleNames).contains("rule2"));
@@ -185,16 +187,16 @@ public class RulesTest {
     @Test
     void testClearNamedRules() {
         // Test clearing named rules
-        Rules.define("rule1", "#age >= 18");
-        Rules.define("rule2", "#balance > 1000");
-        
-        assertEquals(2, Rules.getDefinedRules().length);
-        
-        Rules.clearNamedRules();
-        
-        assertEquals(0, Rules.getDefinedRules().length);
-        assertFalse(Rules.isDefined("rule1"));
-        assertFalse(Rules.isDefined("rule2"));
+        rulesService.define("rule1", "#age >= 18");
+        rulesService.define("rule2", "#balance > 1000");
+
+        assertEquals(2, rulesService.getDefinedRules().length);
+
+        rulesService.clearNamedRules();
+
+        assertEquals(0, rulesService.getDefinedRules().length);
+        assertFalse(rulesService.isDefined("rule1"));
+        assertFalse(rulesService.isDefined("rule2"));
     }
 
     @Test
@@ -202,9 +204,9 @@ public class RulesTest {
         // Test exception when rule not found
         Map<String, Object> facts = new HashMap<>();
         facts.put("age", 25);
-        
+
         assertThrows(IllegalArgumentException.class, () -> {
-            Rules.test("nonexistent", facts);
+            rulesService.test("nonexistent", facts);
         });
     }
 
@@ -213,9 +215,9 @@ public class RulesTest {
         // Test that invalid conditions fail gracefully
         Map<String, Object> facts = new HashMap<>();
         facts.put("age", 25);
-        
+
         // Invalid SpEL expression should return false
-        assertFalse(Rules.check("#invalid.expression.that.will.fail", facts));
+        assertFalse(rulesService.check("#invalid.expression.that.will.fail", facts));
     }
 
     @Test

@@ -4,6 +4,7 @@ module dev.mars.rulesengine.core {
 
     requires java.logging;
     requires spring.expression;
+    requires spring.context;
 
     // Logging dependencies
     requires org.slf4j;
@@ -31,6 +32,7 @@ module dev.mars.rulesengine.core {
     // Export other existing services
     exports dev.mars.rulesengine.core.service.engine;
     exports dev.mars.rulesengine.core.service.data;
+    exports dev.mars.rulesengine.core.service.transform;
     exports dev.mars.rulesengine.core.util;
 
 }

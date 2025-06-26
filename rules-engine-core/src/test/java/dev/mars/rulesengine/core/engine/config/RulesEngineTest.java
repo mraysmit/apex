@@ -478,4 +478,129 @@ public class RulesEngineTest {
         assertTrue(result.getMessage().contains("Missing parameters"));
         assertTrue(result.getMessage().contains("nonExistentVariable"));
     }
+
+    @Test
+    public void testEvaluateRuleWithMatchingRule() {
+        // Create a rule that will match the facts
+        Rule rule = new RuleBuilder()
+            .withName("Age Rule")
+            .withCondition("#age > 18")
+            .withMessage("Person is an adult")
+            .build();
+
+        // Evaluate the rule
+        boolean result = rulesEngine.evaluateRule(rule, facts);
+
+        // Verify the result
+        assertTrue(result);
+    }
+
+    @Test
+    public void testEvaluateRuleWithNonMatchingRule() {
+        // Create a rule that will not match the facts
+        Rule rule = new RuleBuilder()
+            .withName("Age Rule")
+            .withCondition("#age < 18")
+            .withMessage("Person is a minor")
+            .build();
+
+        // Evaluate the rule
+        boolean result = rulesEngine.evaluateRule(rule, facts);
+
+        // Verify the result
+        assertFalse(result);
+    }
+
+    @Test
+    public void testEvaluateRuleWithNullRule() {
+        // Evaluate a null rule
+        boolean result = rulesEngine.evaluateRule(null, facts);
+
+        // Verify the result
+        assertFalse(result);
+    }
+
+    @Test
+    public void testEvaluateRulesWithMatchingRule() {
+        // Create a rule that will match the facts
+        Rule rule = new RuleBuilder()
+            .withName("Age Rule")
+            .withCondition("#age > 18")
+            .withMessage("Person is an adult")
+            .build();
+
+        List<RuleBase> rules = new ArrayList<>();
+        rules.add(rule);
+
+        // Evaluate the rules
+        boolean result = rulesEngine.evaluateRules(rules, facts);
+
+        // Verify the result
+        assertTrue(result);
+    }
+
+    @Test
+    public void testEvaluateRulesWithNonMatchingRule() {
+        // Create a rule that will not match the facts
+        Rule rule = new RuleBuilder()
+            .withName("Age Rule")
+            .withCondition("#age < 18")
+            .withMessage("Person is a minor")
+            .build();
+
+        List<RuleBase> rules = new ArrayList<>();
+        rules.add(rule);
+
+        // Evaluate the rules
+        boolean result = rulesEngine.evaluateRules(rules, facts);
+
+        // Verify the result
+        assertFalse(result);
+    }
+
+    @Test
+    public void testEvaluateRulesWithNoRules() {
+        // Evaluate an empty list of rules
+        boolean result = rulesEngine.evaluateRules(new ArrayList<>(), facts);
+
+        // Verify the result
+        assertFalse(result);
+    }
+
+    @Test
+    public void testEvaluateRulesWithNullRules() {
+        // Evaluate a null list of rules
+        boolean result = rulesEngine.evaluateRules(null, facts);
+
+        // Verify the result
+        assertFalse(result);
+    }
+
+    @Test
+    public void testEvaluateRulesForCategory() {
+        // Create a rule and register it with the configuration
+        Rule rule = configuration.rule()
+            .withName("Age Rule")
+            .withCondition("#age > 18")
+            .withMessage("Person is an adult")
+            .withCategory("demographic")
+            .build();
+
+        configuration.registerRule(rule);
+
+        // Evaluate rules for the category
+        boolean result = rulesEngine.evaluateRulesForCategory("demographic", facts);
+
+        // Verify the result
+        assertTrue(result);
+    }
+
+    @Test
+    public void testEvaluateRulesForNonExistentCategory() {
+        // Evaluate rules for a non-existent category
+        boolean result = rulesEngine.evaluateRulesForCategory("nonExistentCategory", facts);
+
+        // Verify the result
+        assertFalse(result);
+    }
 }

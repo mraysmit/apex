@@ -38,10 +38,11 @@ public class TradeTransformerDemoConfig {
         this.rulesEngine = rulesEngine;
 
         // Initialize trade risk ratings
-        tradeRiskRatings.put("Equity", 0.8);    // 80% risk for Equity trades
-        tradeRiskRatings.put("Bond", 0.4);      // 40% risk for Bond trades
-        tradeRiskRatings.put("ETF", 0.6);       // 60% risk for ETF trades
-        tradeRiskRatings.put("Commodity", 0.9); // 90% risk for Commodity trades
+        tradeRiskRatings.put("Equity", 0.8);        // 80% risk for Equity trades
+        tradeRiskRatings.put("Bond", 0.4);          // 40% risk for Bond trades
+        tradeRiskRatings.put("ETF", 0.6);           // 60% risk for ETF trades
+        tradeRiskRatings.put("Commodity", 0.9);     // 90% risk for Commodity trades
+        tradeRiskRatings.put("HighPriority", 0.95); // 95% risk for High Priority trades
     }
 
     /**
