@@ -1,0 +1,219 @@
+# Financial Enrichment Rules Configuration
+# This YAML file demonstrates how to externalize enrichment and transformation configuration
+
+metadata:
+  name: "Financial Enrichment Rules"
+  version: "1.0.0"
+  description: "Data enrichment and transformation rules for financial instruments"
+  author: "Rules Engine Team"
+  created: "2024-01-15"
+  last-modified: "2024-01-15"
+  tags:
+    - "financial"
+    - "enrichment"
+    - "transformation"
+    - "static-data"
+
+# Define enrichment configurations
+enrichments:
+  - id: "counterparty-enrichment"
+    name: "Counterparty Data Enrichment"
+    description: "Enriches trade with counterparty static data"
+    type: "lookup-enrichment"
+    target-type: "Trade"
+    enabled: true
+    priority: 10
+    condition: "#counterpartyId != null"
+    lookup-config:
+      lookup-service: "counterpartyLookupService"
+      lookup-key: "#counterpartyId"
+      cache-enabled: true
+      cache-ttl-seconds: 3600
+    field-mappings:
+      - source-field: "name"
+        target-field: "counterpartyName"
+        required: true
+      - source-field: "rating"
+        target-field: "counterpartyRating"
+        default-value: "NR"
+      - source-field: "lei"
+        target-field: "counterpartyLei"
+        required: false
+      - source-field: "jurisdiction"
+        target-field: "counterpartyJurisdiction"
+        default-value: "UNKNOWN"
+    tags: ["counterparty", "static-data", "lookup"]
+
+  - id: "currency-enrichment"
+    name: "Currency Data Enrichment"
+    description: "Enriches trade with currency static data"
+    type: "lookup-enrichment"
+    target-type: "Trade"
+    enabled: true
+    priority: 11
+    condition: "#notionalCurrency != null"
+    lookup-config:
+      lookup-service: "currencyLookupService"
+      lookup-key: "#notionalCurrency"
+      cache-enabled: true
+      cache-ttl-seconds: 7200
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+        required: true
+      - source-field: "decimalPlaces"
+        target-field: "currencyDecimalPlaces"
+        default-value: 2
+      - source-field: "isActive"
+        target-field: "currencyActive"
+        default-value: true
+    tags: ["currency", "static-data", "lookup"]
+
+  - id: "commodity-enrichment"
+    name: "Commodity Reference Data Enrichment"
+    description: "Enriches commodity swap with reference index data"
+    type: "lookup-enrichment"
+    target-type: "CommodityTotalReturnSwap"
+    enabled: true
+    priority: 12
+    condition: "#referenceIndex != null"
+    lookup-config:
+      lookup-service: "commodityLookupService"
+      lookup-key: "#referenceIndex"
+      cache-enabled: true
+      cache-ttl-seconds: 1800
+    field-mappings:
+      - source-field: "indexName"
+        target-field: "referenceIndexName"
+        required: true
+      - source-field: "commodityType"
+        target-field: "commodityType"
+        required: true
+      - source-field: "unit"
+        target-field: "commodityUnit"
+        default-value: "BBL"
+      - source-field: "exchange"
+        target-field: "referenceExchange"
+        required: false
+    tags: ["commodity", "reference-data", "lookup"]
+
+  - id: "fee-calculation"
+    name: "Fee Calculation Enrichment"
+    description: "Calculates various fees and commissions for trades"
+    type: "calculation-enrichment"
+    target-type: "Trade"
+    enabled: true
+    priority: 20
+    condition: "#notionalAmount != null && #productType != null"
+    calculation-config:
+      expression: |
+        #productType == 'EQUITY' ? #notionalAmount.multiply(new java.math.BigDecimal('0.001')) :
+        #productType == 'BOND' ? #notionalAmount.multiply(new java.math.BigDecimal('0.0005')) :
+        #productType == 'OPTION' ? #notionalAmount.multiply(new java.math.BigDecimal('0.002')) :
+        #notionalAmount.multiply(new java.math.BigDecimal('0.0015'))
+      result-field: "brokerCommission"
+      dependencies: ["notionalAmount", "productType"]
+    tags: ["fee-calculation", "commission"]
+
+  - id: "risk-metrics-calculation"
+    name: "Risk Metrics Calculation"
+    description: "Calculates basic risk metrics for the trade"
+    type: "calculation-enrichment"
+    target-type: "Trade"
+    enabled: true
+    priority: 21
+    condition: "#notionalAmount != null && #maturityDate != null && #tradeDate != null"
+    calculation-config:
+      expression: |
+        java.time.temporal.ChronoUnit.DAYS.between(#tradeDate, #maturityDate) * 
+        #notionalAmount.doubleValue() / 365.0
+      result-field: "timeWeightedExposure"
+      dependencies: ["notionalAmount", "maturityDate", "tradeDate"]
+    tags: ["risk-calculation", "exposure"]
+
+# Define transformation configurations
+transformations:
+  - id: "trade-standardization"
+    name: "Trade Data Standardization"
+    description: "Standardizes trade data formats and values"
+    type: "field-transformation"
+    target-type: "Trade"
+    enabled: true
+    priority: 30
+    transformation-rules:
+      - condition: "#productType != null"
+        actions:
+          - type: "set-field"
+            field: "productType"
+            expression: "#productType.toUpperCase()"
+      - condition: "#notionalCurrency != null"
+        actions:
+          - type: "set-field"
+            field: "notionalCurrency"
+            expression: "#notionalCurrency.toUpperCase()"
+      - condition: "#counterpartyId != null"
+        actions:
+          - type: "set-field"
+            field: "counterpartyId"
+            expression: "#counterpartyId.trim().toUpperCase()"
+    tags: ["standardization", "data-quality"]
+
+  - id: "commodity-swap-enrichment"
+    name: "Commodity Swap Specific Enrichment"
+    description: "Applies commodity swap specific transformations"
+    type: "conditional-transformation"
+    target-type: "CommodityTotalReturnSwap"
+    enabled: true
+    priority: 31
+    condition: "#commodityType != null"
+    transformation-rules:
+      - condition: "#commodityType == 'ENERGY'"
+        actions:
+          - type: "set-field"
+            field: "riskCategory"
+            value: "HIGH"
+          - type: "set-field"
+            field: "regulatoryCategory"
+            value: "ENERGY_DERIVATIVE"
+        else-actions:
+          - type: "set-field"
+            field: "riskCategory"
+            value: "MEDIUM"
+          - type: "set-field"
+            field: "regulatoryCategory"
+            value: "COMMODITY_DERIVATIVE"
+      - condition: "#notionalAmount != null && #notionalAmount.compareTo(new java.math.BigDecimal('50000000')) > 0"
+        actions:
+          - type: "set-field"
+            field: "approvalRequired"
+            value: true
+          - type: "set-field"
+            field: "approvalLevel"
+            value: "SENIOR_MANAGEMENT"
+    tags: ["commodity-swap", "conditional-logic"]
+
+  - id: "audit-trail-enrichment"
+    name: "Audit Trail Enrichment"
+    description: "Adds audit trail information to trades"
+    type: "field-transformation"
+    target-type: "Trade"
+    enabled: true
+    priority: 40
+    transformation-rules:
+      - condition: "true"  # Always apply
+        actions:
+          - type: "set-field"
+            field: "enrichmentTimestamp"
+            expression: "java.time.Instant.now()"
+          - type: "set-field"
+            field: "enrichmentVersion"
+            value: "1.0.0"
+          - type: "calculate-field"
+            field: "dataQualityScore"
+            expression: |
+              (#tradeId != null ? 20 : 0) +
+              (#counterpartyId != null ? 20 : 0) +
+              (#notionalAmount != null ? 20 : 0) +
+              (#tradeDate != null ? 20 : 0) +
+              (#maturityDate != null ? 20 : 0)
+    tags: ["audit", "data-quality", "metadata"]

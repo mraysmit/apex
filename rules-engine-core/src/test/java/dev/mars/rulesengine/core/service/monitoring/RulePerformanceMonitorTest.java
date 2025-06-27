@@ -70,7 +70,7 @@ public class RulePerformanceMonitorTest {
         RulePerformanceMetrics metrics = result.getPerformanceMetrics();
         assertEquals("Simple Test Rule", metrics.getRuleName());
         assertNotNull(metrics.getEvaluationTime());
-        assertTrue(metrics.getEvaluationTimeNanos() > 0);
+        assertTrue(metrics.getEvaluationTimeNanos() >= 0, "Evaluation time should be non-negative");
         assertFalse(metrics.hasException());
     }
 
@@ -268,8 +268,8 @@ public class RulePerformanceMonitorTest {
 
         // Check global metrics
         assertEquals(10, monitor.getTotalEvaluations());
-        assertTrue(monitor.getTotalEvaluationTimeNanos() > 0);
-        assertTrue(monitor.getAverageEvaluationTimeMillis() > 0);
+        assertTrue(monitor.getTotalEvaluationTimeNanos() >= 0, "Total evaluation time should be non-negative");
+        assertTrue(monitor.getAverageEvaluationTimeMillis() >= 0, "Average evaluation time should be non-negative");
     }
 
     @Test

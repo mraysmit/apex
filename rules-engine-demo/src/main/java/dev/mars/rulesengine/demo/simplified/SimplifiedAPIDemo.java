@@ -7,7 +7,7 @@ import dev.mars.rulesengine.core.api.ValidationResult;
 import dev.mars.rulesengine.core.engine.config.RulesEngine;
 import dev.mars.rulesengine.core.engine.model.Rule;
 import dev.mars.rulesengine.core.engine.model.RuleResult;
-import dev.mars.rulesengine.demo.api.Rules;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

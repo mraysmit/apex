@@ -22,6 +22,7 @@
     <modules>
         <module>rules-engine-core</module>
         <module>rules-engine-demo</module>
+        <module>rules-engine-demo-basic</module>
     </modules>
 
     <dependencyManagement>

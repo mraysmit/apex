@@ -11,6 +11,11 @@ module dev.mars.rulesengine.core {
     requires ch.qos.logback.classic;
     requires ch.qos.logback.core;
 
+    // YAML processing dependencies
+    requires com.fasterxml.jackson.core;
+    requires com.fasterxml.jackson.databind;
+    requires com.fasterxml.jackson.dataformat.yaml;
+
     // Existing exports
     exports dev.mars.rulesengine.core.service.validation;
     exports dev.mars.rulesengine.core.service.common;
@@ -22,6 +27,9 @@ module dev.mars.rulesengine.core {
     exports dev.mars.rulesengine.core.exception;
     exports dev.mars.rulesengine.core.service.error;
     exports dev.mars.rulesengine.core.api;
+
+    // YAML configuration exports
+    exports dev.mars.rulesengine.core.config.yaml;
 
     // New exports for performance monitoring
     exports dev.mars.rulesengine.core.service.monitoring;

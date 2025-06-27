@@ -1,0 +1,1663 @@
+2025-06-26 19:55:24.646 [bf4f086a-40f7-42b9-b162-845b8f44236d]  RULE_MATCH Minimum Balance Rule matched successfully
+2025-06-26 19:55:24.648 [bf4f086a-40f7-42b9-b162-845b8f44236d]  RULE_MATCH KYC Required Rule matched successfully
+2025-06-26 19:55:24.649 [bf4f086a-40f7-42b9-b162-845b8f44236d]  RULE_MATCH Transaction Limit Rule matched successfully
+2025-06-26 19:55:24.655 [d6857d3c-e4ff-4be7-b3a2-a5b4e4ac9a04]  RULE_MATCH Credit Score Check Rule matched successfully
+2025-06-26 19:55:24.656 [d6857d3c-e4ff-4be7-b3a2-a5b4e4ac9a04]  RULE_MATCH Minimum Age Rule matched successfully
+2025-06-26 19:55:24.657 [d6857d3c-e4ff-4be7-b3a2-a5b4e4ac9a04]  RULE_MATCH Minimum Income Rule matched successfully
+2025-06-26 19:55:24.664 [be320147-84bf-46a4-bef5-63c625082991]  RULE_MATCH lastName Required Rule matched successfully
+2025-06-26 19:55:24.665 [be320147-84bf-46a4-bef5-63c625082991]  RULE_MATCH firstName Required Rule matched successfully
+2025-06-26 19:55:24.670 [ea9a099a-82c8-411e-b040-67339921c2f7]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 19:55:24.691 [ea9a099a-82c8-411e-b040-67339921c2f7]  RULE_MATCH Email Required Rule matched successfully
+2025-06-26 19:55:24.692 [ea9a099a-82c8-411e-b040-67339921c2f7]  RULE_MATCH Phone Required Rule matched successfully
+2025-06-26 19:55:24.703 [237cf4fd-75e2-4e47-b703-fe6ebacc7933]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 19:55:24.706 [3ad7a9e3-cc4d-403a-bdbf-2279a7432a0b]  RULE_MATCH Custom Validation Rule matched successfully
+2025-06-26 19:55:24.714 [2fd77a84-e3a6-4de1-b6cd-d79b60fa2888]  RULE_MATCH username Length Check Rule matched successfully
+2025-06-26 19:55:24.731 [28aa0fce-725a-4c09-8146-47a6722d14dc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:55:24.754 [28aa0fce-725a-4c09-8146-47a6722d14dc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:55:24.755 [28aa0fce-725a-4c09-8146-47a6722d14dc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:55:24.759 [28aa0fce-725a-4c09-8146-47a6722d14dc]  RULE_MATCH adult Rule matched successfully
+2025-06-26 19:55:24.766 [28aa0fce-725a-4c09-8146-47a6722d14dc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:55:24.767 [28aa0fce-725a-4c09-8146-47a6722d14dc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:55:24.768 [28aa0fce-725a-4c09-8146-47a6722d14dc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:55:24.771 [28aa0fce-725a-4c09-8146-47a6722d14dc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:55:24.772 [28aa0fce-725a-4c09-8146-47a6722d14dc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:55:24.774 [28aa0fce-725a-4c09-8146-47a6722d14dc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:55:24.776 [28aa0fce-725a-4c09-8146-47a6722d14dc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:55:24.777 [28aa0fce-725a-4c09-8146-47a6722d14dc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:55:24.786 [28aa0fce-725a-4c09-8146-47a6722d14dc]  RULE_MATCH adult Rule matched successfully
+2025-06-26 19:55:24.786 [28aa0fce-725a-4c09-8146-47a6722d14dc]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 19:55:24.794 [28aa0fce-725a-4c09-8146-47a6722d14dc]  RULE_MATCH adult Rule matched successfully
+2025-06-26 19:55:24.811 [5d3afc8b-1a7b-4e70-a3eb-9d8e8db216e7]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 19:55:24.813 [5d3afc8b-1a7b-4e70-a3eb-9d8e8db216e7]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 19:55:24.815 [5d3afc8b-1a7b-4e70-a3eb-9d8e8db216e7]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 19:55:24.817 [5d3afc8b-1a7b-4e70-a3eb-9d8e8db216e7]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 19:55:24.828 [b7b52a34-377a-4aee-b1d0-a6f38ce29bc5]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 19:55:24.831 [b97b507f-363a-48a3-831e-f9b7645ec169]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 19:55:24.833 [b97b507f-363a-48a3-831e-f9b7645ec169]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 19:55:24.834 [b97b507f-363a-48a3-831e-f9b7645ec169]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 19:55:24.840 [b088681e-729b-493e-8175-bffa09985df0]  RULE_MATCH Loan Eligibility Rule matched successfully
+2025-06-26 19:55:24.850 [5dd1e390-5c10-4528-9ead-fff3acf2c287]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 19:55:24.852 [5dd1e390-5c10-4528-9ead-fff3acf2c287]  RULE_MATCH Required Field Check: email Rule matched successfully
+2025-06-26 19:55:24.860 [5dd1e390-5c10-4528-9ead-fff3acf2c287]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 19:55:24.867 [8fde34fc-5e47-473a-9a0a-743b577645c7]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 19:55:24.869 [8fde34fc-5e47-473a-9a0a-743b577645c7]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 19:55:24.879 [9a6a009b-2bcb-4b0c-b7ea-c44808f0984b]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 19:55:24.880 [9a6a009b-2bcb-4b0c-b7ea-c44808f0984b]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 19:55:24.882 [9a6a009b-2bcb-4b0c-b7ea-c44808f0984b]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 19:55:24.889 [b9b43614-7c84-4a9f-9ea6-41aa1e7aa712]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 19:55:24.990 [798f0d5a-3486-47ac-8911-9ae7f46625ad]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 19:55:25.111 [dcdd9e16-8822-4a41-b355-79cad442b2f9]  ERROR_RECOVERY Invalid Rule Error recovery successful: Continued with default result
+2025-06-26 19:55:25.172 [dab136d7-1120-4e31-9d6e-05ca3c69c812]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 19:55:25.187 [69128700-1777-4a11-a91c-fc454d93cd2d]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 19:55:25.187 [69128700-1777-4a11-a91c-fc454d93cd2d]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 19:55:25.188 [69128700-1777-4a11-a91c-fc454d93cd2d]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 19:55:25.188 [69128700-1777-4a11-a91c-fc454d93cd2d]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 19:55:25.188 [69128700-1777-4a11-a91c-fc454d93cd2d]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 19:55:25.189 [69128700-1777-4a11-a91c-fc454d93cd2d]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 19:55:25.189 [69128700-1777-4a11-a91c-fc454d93cd2d]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 19:55:25.189 [69128700-1777-4a11-a91c-fc454d93cd2d]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 19:55:25.189 [69128700-1777-4a11-a91c-fc454d93cd2d]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 19:55:25.190 [69128700-1777-4a11-a91c-fc454d93cd2d]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 19:55:25.193 [0eef3fc6-6a7e-4c87-af3d-2af0522e742c]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 19:55:25.194 [0eef3fc6-6a7e-4c87-af3d-2af0522e742c]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 19:55:25.196 [0eef3fc6-6a7e-4c87-af3d-2af0522e742c]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 19:55:25.197 [0eef3fc6-6a7e-4c87-af3d-2af0522e742c]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 19:55:25.198 [0eef3fc6-6a7e-4c87-af3d-2af0522e742c]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 19:55:25.200 [0eef3fc6-6a7e-4c87-af3d-2af0522e742c]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 19:55:25.202 [0eef3fc6-6a7e-4c87-af3d-2af0522e742c]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 19:55:25.202 [0eef3fc6-6a7e-4c87-af3d-2af0522e742c]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 19:55:25.203 [0eef3fc6-6a7e-4c87-af3d-2af0522e742c]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 19:55:25.205 [0eef3fc6-6a7e-4c87-af3d-2af0522e742c]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 19:55:25.233 [0bb72f6d-5423-4808-9511-de43df186b25]  ERROR_RECOVERY Error Rule Error recovery successful: Continued with default result
+2025-06-26 19:55:25.236 [0b78bfc1-73c3-4f63-8301-7cff51b83724]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 19:55:25.236 [0b78bfc1-73c3-4f63-8301-7cff51b83724]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 19:55:25.236 [0b78bfc1-73c3-4f63-8301-7cff51b83724]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 19:55:25.236 [0b78bfc1-73c3-4f63-8301-7cff51b83724]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 19:55:25.236 [0b78bfc1-73c3-4f63-8301-7cff51b83724]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 19:55:25.299 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 19:59:28.455 [3c6ddd41-9942-4bc6-88b8-e7eb6fa64e20]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:59:28.506 [3c6ddd41-9942-4bc6-88b8-e7eb6fa64e20]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:59:28.508 [3c6ddd41-9942-4bc6-88b8-e7eb6fa64e20]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:59:28.512 [3c6ddd41-9942-4bc6-88b8-e7eb6fa64e20]  RULE_MATCH adult Rule matched successfully
+2025-06-26 19:59:28.521 [3c6ddd41-9942-4bc6-88b8-e7eb6fa64e20]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:59:28.523 [3c6ddd41-9942-4bc6-88b8-e7eb6fa64e20]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:59:28.523 [3c6ddd41-9942-4bc6-88b8-e7eb6fa64e20]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:59:28.526 [3c6ddd41-9942-4bc6-88b8-e7eb6fa64e20]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:59:28.536 [3c6ddd41-9942-4bc6-88b8-e7eb6fa64e20]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:59:28.536 [3c6ddd41-9942-4bc6-88b8-e7eb6fa64e20]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:59:28.539 [3c6ddd41-9942-4bc6-88b8-e7eb6fa64e20]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:59:28.540 [3c6ddd41-9942-4bc6-88b8-e7eb6fa64e20]  RULE_MATCH Check Rule matched successfully
+2025-06-26 19:59:28.554 [3c6ddd41-9942-4bc6-88b8-e7eb6fa64e20]  RULE_MATCH adult Rule matched successfully
+2025-06-26 19:59:28.555 [3c6ddd41-9942-4bc6-88b8-e7eb6fa64e20]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 19:59:28.563 [3c6ddd41-9942-4bc6-88b8-e7eb6fa64e20]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:19:57.139 [d1b88608-6124-42f4-961b-0f3db9c3ef92]  RULE_MATCH Minimum Balance Rule matched successfully
+2025-06-26 20:19:57.141 [d1b88608-6124-42f4-961b-0f3db9c3ef92]  RULE_MATCH KYC Required Rule matched successfully
+2025-06-26 20:19:57.142 [d1b88608-6124-42f4-961b-0f3db9c3ef92]  RULE_MATCH Transaction Limit Rule matched successfully
+2025-06-26 20:19:57.147 [979eb6dc-dacd-4c98-b733-f8d2f545596b]  RULE_MATCH Credit Score Check Rule matched successfully
+2025-06-26 20:19:57.148 [979eb6dc-dacd-4c98-b733-f8d2f545596b]  RULE_MATCH Minimum Age Rule matched successfully
+2025-06-26 20:19:57.149 [979eb6dc-dacd-4c98-b733-f8d2f545596b]  RULE_MATCH Minimum Income Rule matched successfully
+2025-06-26 20:19:57.157 [a740a3ff-f7da-40bd-bdd1-4bfd8eb95183]  RULE_MATCH lastName Required Rule matched successfully
+2025-06-26 20:19:57.158 [a740a3ff-f7da-40bd-bdd1-4bfd8eb95183]  RULE_MATCH firstName Required Rule matched successfully
+2025-06-26 20:19:57.161 [22630bc5-ab9d-4708-9f72-6191a3cc723a]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:19:57.183 [22630bc5-ab9d-4708-9f72-6191a3cc723a]  RULE_MATCH Email Required Rule matched successfully
+2025-06-26 20:19:57.184 [22630bc5-ab9d-4708-9f72-6191a3cc723a]  RULE_MATCH Phone Required Rule matched successfully
+2025-06-26 20:19:57.193 [f71c0956-9406-4d53-8465-dacafc396278]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:19:57.196 [91a932cb-3de4-4d91-a243-54d0ba7142d7]  RULE_MATCH Custom Validation Rule matched successfully
+2025-06-26 20:19:57.204 [e292fa3e-36b7-4729-87d4-72722b643284]  RULE_MATCH username Length Check Rule matched successfully
+2025-06-26 20:19:57.222 [ecb2d6ce-3b86-4b13-b33e-eebe4578aa64]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:19:57.245 [ecb2d6ce-3b86-4b13-b33e-eebe4578aa64]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:19:57.248 [ecb2d6ce-3b86-4b13-b33e-eebe4578aa64]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:19:57.253 [ecb2d6ce-3b86-4b13-b33e-eebe4578aa64]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:19:57.262 [ecb2d6ce-3b86-4b13-b33e-eebe4578aa64]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:19:57.263 [ecb2d6ce-3b86-4b13-b33e-eebe4578aa64]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:19:57.264 [ecb2d6ce-3b86-4b13-b33e-eebe4578aa64]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:19:57.267 [ecb2d6ce-3b86-4b13-b33e-eebe4578aa64]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:19:57.269 [ecb2d6ce-3b86-4b13-b33e-eebe4578aa64]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:19:57.270 [ecb2d6ce-3b86-4b13-b33e-eebe4578aa64]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:19:57.272 [ecb2d6ce-3b86-4b13-b33e-eebe4578aa64]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:19:57.273 [ecb2d6ce-3b86-4b13-b33e-eebe4578aa64]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:19:57.280 [ecb2d6ce-3b86-4b13-b33e-eebe4578aa64]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:19:57.281 [ecb2d6ce-3b86-4b13-b33e-eebe4578aa64]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 20:19:57.288 [ecb2d6ce-3b86-4b13-b33e-eebe4578aa64]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:19:57.309 [aca475e5-5ff3-4ebb-ad2e-e371b7d7a09a]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:19:57.310 [aca475e5-5ff3-4ebb-ad2e-e371b7d7a09a]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:19:57.311 [aca475e5-5ff3-4ebb-ad2e-e371b7d7a09a]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:19:57.312 [aca475e5-5ff3-4ebb-ad2e-e371b7d7a09a]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:19:57.323 [2764046f-c4ce-4107-80a2-c28161675dd3]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:19:57.327 [11b01063-27e7-4cfd-bbe2-0fe4815ae5ad]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:19:57.329 [11b01063-27e7-4cfd-bbe2-0fe4815ae5ad]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:19:57.330 [11b01063-27e7-4cfd-bbe2-0fe4815ae5ad]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:19:57.334 [22130ebf-f1ea-4e9f-9632-daa45e22ba31]  RULE_MATCH Loan Eligibility Rule matched successfully
+2025-06-26 20:19:57.350 [3835dfbd-8ef0-43bb-a85a-062e6325edcb]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:19:57.353 [3835dfbd-8ef0-43bb-a85a-062e6325edcb]  RULE_MATCH Required Field Check: email Rule matched successfully
+2025-06-26 20:19:57.354 [3835dfbd-8ef0-43bb-a85a-062e6325edcb]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:19:57.359 [51c16b37-6131-4064-89f6-9820e91dc836]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:19:57.360 [51c16b37-6131-4064-89f6-9820e91dc836]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:19:57.370 [4505e098-97b0-4edc-8f2d-04474dde21aa]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:19:57.371 [4505e098-97b0-4edc-8f2d-04474dde21aa]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:19:57.373 [4505e098-97b0-4edc-8f2d-04474dde21aa]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:19:57.377 [28f03b88-b322-4bf6-afaa-b0b07401f7b0]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:19:57.475 [3a500cfd-3e22-40dc-9c96-61041c000c7b]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 20:19:57.611 [e07ff7f7-736d-4557-86dc-fc41d8520201]  ERROR_RECOVERY Invalid Rule Error recovery successful: Continued with default result
+2025-06-26 20:19:57.663 [b7c3eaaf-98dc-4200-86ec-c0e5fa1ffbbc]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 20:19:57.675 [60ca7ebc-e7f7-4ef6-813e-79f826bc4e49]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:19:57.676 [60ca7ebc-e7f7-4ef6-813e-79f826bc4e49]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:19:57.676 [60ca7ebc-e7f7-4ef6-813e-79f826bc4e49]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:19:57.676 [60ca7ebc-e7f7-4ef6-813e-79f826bc4e49]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:19:57.676 [60ca7ebc-e7f7-4ef6-813e-79f826bc4e49]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:19:57.676 [60ca7ebc-e7f7-4ef6-813e-79f826bc4e49]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:19:57.676 [60ca7ebc-e7f7-4ef6-813e-79f826bc4e49]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:19:57.677 [60ca7ebc-e7f7-4ef6-813e-79f826bc4e49]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:19:57.677 [60ca7ebc-e7f7-4ef6-813e-79f826bc4e49]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:19:57.677 [60ca7ebc-e7f7-4ef6-813e-79f826bc4e49]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:19:57.679 [209507e5-f27a-4aa0-8224-c3719e8d06e4]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:19:57.679 [209507e5-f27a-4aa0-8224-c3719e8d06e4]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:19:57.680 [209507e5-f27a-4aa0-8224-c3719e8d06e4]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:19:57.680 [209507e5-f27a-4aa0-8224-c3719e8d06e4]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:19:57.680 [209507e5-f27a-4aa0-8224-c3719e8d06e4]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:19:57.681 [209507e5-f27a-4aa0-8224-c3719e8d06e4]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:19:57.682 [209507e5-f27a-4aa0-8224-c3719e8d06e4]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:19:57.682 [209507e5-f27a-4aa0-8224-c3719e8d06e4]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:19:57.683 [209507e5-f27a-4aa0-8224-c3719e8d06e4]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:19:57.684 [209507e5-f27a-4aa0-8224-c3719e8d06e4]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:19:57.709 [b7235e55-9eda-4737-9282-e34b5bfa9b41]  ERROR_RECOVERY Error Rule Error recovery successful: Continued with default result
+2025-06-26 20:19:57.711 [0272778a-9b6b-4399-9f53-73bb683ee51c]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:19:57.711 [0272778a-9b6b-4399-9f53-73bb683ee51c]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:19:57.711 [0272778a-9b6b-4399-9f53-73bb683ee51c]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:19:57.712 [0272778a-9b6b-4399-9f53-73bb683ee51c]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:19:57.712 [0272778a-9b6b-4399-9f53-73bb683ee51c]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:19:57.755 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 20:20:39.531 [f72c5bcd-f076-4bb1-b0e7-b86a0cda49d5]  RULE_MATCH Minimum Balance Rule matched successfully
+2025-06-26 20:20:39.533 [f72c5bcd-f076-4bb1-b0e7-b86a0cda49d5]  RULE_MATCH KYC Required Rule matched successfully
+2025-06-26 20:20:39.534 [f72c5bcd-f076-4bb1-b0e7-b86a0cda49d5]  RULE_MATCH Transaction Limit Rule matched successfully
+2025-06-26 20:20:39.538 [b5a2484b-efd1-4d99-80c2-a1d55f832751]  RULE_MATCH Credit Score Check Rule matched successfully
+2025-06-26 20:20:39.539 [b5a2484b-efd1-4d99-80c2-a1d55f832751]  RULE_MATCH Minimum Age Rule matched successfully
+2025-06-26 20:20:39.540 [b5a2484b-efd1-4d99-80c2-a1d55f832751]  RULE_MATCH Minimum Income Rule matched successfully
+2025-06-26 20:20:39.547 [7142fc44-cf76-4d8c-82f3-e0795514910e]  RULE_MATCH lastName Required Rule matched successfully
+2025-06-26 20:20:39.548 [7142fc44-cf76-4d8c-82f3-e0795514910e]  RULE_MATCH firstName Required Rule matched successfully
+2025-06-26 20:20:39.553 [7d6c63d7-ed44-442d-8dea-49b3a1fc8a48]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:20:39.571 [7d6c63d7-ed44-442d-8dea-49b3a1fc8a48]  RULE_MATCH Email Required Rule matched successfully
+2025-06-26 20:20:39.572 [7d6c63d7-ed44-442d-8dea-49b3a1fc8a48]  RULE_MATCH Phone Required Rule matched successfully
+2025-06-26 20:20:39.582 [b2378a40-9278-4d4f-9574-0b581fd85c9f]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:20:39.586 [4863c476-ba6a-4d24-b534-5ed38b70893d]  RULE_MATCH Custom Validation Rule matched successfully
+2025-06-26 20:20:39.594 [c475fd48-fc3c-4893-8e0d-1a87ca690a25]  RULE_MATCH username Length Check Rule matched successfully
+2025-06-26 20:20:39.610 [9d4e7ba6-fb86-4328-bfd2-c92771f921cb]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:20:39.635 [9d4e7ba6-fb86-4328-bfd2-c92771f921cb]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:20:39.637 [9d4e7ba6-fb86-4328-bfd2-c92771f921cb]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:20:39.639 [9d4e7ba6-fb86-4328-bfd2-c92771f921cb]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:20:39.648 [9d4e7ba6-fb86-4328-bfd2-c92771f921cb]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:20:39.648 [9d4e7ba6-fb86-4328-bfd2-c92771f921cb]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:20:39.649 [9d4e7ba6-fb86-4328-bfd2-c92771f921cb]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:20:39.652 [9d4e7ba6-fb86-4328-bfd2-c92771f921cb]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:20:39.654 [9d4e7ba6-fb86-4328-bfd2-c92771f921cb]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:20:39.654 [9d4e7ba6-fb86-4328-bfd2-c92771f921cb]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:20:39.656 [9d4e7ba6-fb86-4328-bfd2-c92771f921cb]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:20:39.658 [9d4e7ba6-fb86-4328-bfd2-c92771f921cb]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:20:39.669 [9d4e7ba6-fb86-4328-bfd2-c92771f921cb]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:20:39.669 [9d4e7ba6-fb86-4328-bfd2-c92771f921cb]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 20:20:39.677 [9d4e7ba6-fb86-4328-bfd2-c92771f921cb]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:20:39.699 [817f10c6-613b-4fe1-94b7-a7e2c4f35a58]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:20:39.700 [817f10c6-613b-4fe1-94b7-a7e2c4f35a58]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:20:39.701 [817f10c6-613b-4fe1-94b7-a7e2c4f35a58]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:20:39.703 [817f10c6-613b-4fe1-94b7-a7e2c4f35a58]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:20:39.715 [aef46698-cc3d-4d5f-b857-0db7337f66fe]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:20:39.719 [5f9f2f10-15e7-4690-921e-884838d5e150]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:20:39.720 [5f9f2f10-15e7-4690-921e-884838d5e150]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:20:39.721 [5f9f2f10-15e7-4690-921e-884838d5e150]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:20:39.726 [562b502a-cb9b-44d5-9200-7ec87a66a704]  RULE_MATCH Loan Eligibility Rule matched successfully
+2025-06-26 20:20:39.743 [935d2e52-5be7-4ed9-ac26-5167ecdd6bc3]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:20:39.745 [935d2e52-5be7-4ed9-ac26-5167ecdd6bc3]  RULE_MATCH Required Field Check: email Rule matched successfully
+2025-06-26 20:20:39.746 [935d2e52-5be7-4ed9-ac26-5167ecdd6bc3]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:20:39.754 [870114bb-b409-458b-99b9-4f4863e2e3da]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:20:39.755 [870114bb-b409-458b-99b9-4f4863e2e3da]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:20:39.766 [344035a4-540d-447b-b292-7c8a27874c47]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:20:39.767 [344035a4-540d-447b-b292-7c8a27874c47]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:20:39.769 [344035a4-540d-447b-b292-7c8a27874c47]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:20:39.776 [cd210529-d232-4a37-a2ea-bfcacb5178ca]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:20:39.868 [a79f6fd8-37ef-4127-8a56-f6190ce7171a]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 20:20:39.986 [96c76b4c-e7b0-46b4-ab45-c68cbbb34b5a]  ERROR_RECOVERY Invalid Rule Error recovery successful: Continued with default result
+2025-06-26 20:20:40.045 [c0987f0e-9673-4cb7-967c-f3fac1b5a4b2]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 20:20:40.055 [19cd0341-b36d-483c-b98c-ad7b4f31b2e6]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:20:40.056 [19cd0341-b36d-483c-b98c-ad7b4f31b2e6]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:20:40.056 [19cd0341-b36d-483c-b98c-ad7b4f31b2e6]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:20:40.056 [19cd0341-b36d-483c-b98c-ad7b4f31b2e6]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:20:40.056 [19cd0341-b36d-483c-b98c-ad7b4f31b2e6]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:20:40.056 [19cd0341-b36d-483c-b98c-ad7b4f31b2e6]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:20:40.057 [19cd0341-b36d-483c-b98c-ad7b4f31b2e6]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:20:40.057 [19cd0341-b36d-483c-b98c-ad7b4f31b2e6]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:20:40.057 [19cd0341-b36d-483c-b98c-ad7b4f31b2e6]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:20:40.057 [19cd0341-b36d-483c-b98c-ad7b4f31b2e6]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:20:40.059 [c0209242-af22-4b4e-80ae-26868541a773]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:20:40.060 [c0209242-af22-4b4e-80ae-26868541a773]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:20:40.061 [c0209242-af22-4b4e-80ae-26868541a773]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:20:40.062 [c0209242-af22-4b4e-80ae-26868541a773]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:20:40.063 [c0209242-af22-4b4e-80ae-26868541a773]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:20:40.064 [c0209242-af22-4b4e-80ae-26868541a773]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:20:40.065 [c0209242-af22-4b4e-80ae-26868541a773]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:20:40.065 [c0209242-af22-4b4e-80ae-26868541a773]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:20:40.066 [c0209242-af22-4b4e-80ae-26868541a773]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:20:40.066 [c0209242-af22-4b4e-80ae-26868541a773]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:20:40.093 [550dd41c-16a7-4e2a-bbc5-9f313eca8ce8]  ERROR_RECOVERY Error Rule Error recovery successful: Continued with default result
+2025-06-26 20:20:40.095 [6b657ede-205b-4818-89b0-9ec9ce907845]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:20:40.096 [6b657ede-205b-4818-89b0-9ec9ce907845]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:20:40.096 [6b657ede-205b-4818-89b0-9ec9ce907845]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:20:40.097 [6b657ede-205b-4818-89b0-9ec9ce907845]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:20:40.097 [6b657ede-205b-4818-89b0-9ec9ce907845]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:20:40.158 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 20:23:11.496 [f60fa93c-9dc4-44aa-b37f-9814284b5ab5]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 20:23:25.927 [5bcc3e41-55d4-4e33-9e3e-e0ee3c08b41c]  RULE_MATCH Minimum Balance Rule matched successfully
+2025-06-26 20:23:25.930 [5bcc3e41-55d4-4e33-9e3e-e0ee3c08b41c]  RULE_MATCH KYC Required Rule matched successfully
+2025-06-26 20:23:25.931 [5bcc3e41-55d4-4e33-9e3e-e0ee3c08b41c]  RULE_MATCH Transaction Limit Rule matched successfully
+2025-06-26 20:23:25.937 [e480fb7a-9539-42ce-8536-7f9603a2e96c]  RULE_MATCH Credit Score Check Rule matched successfully
+2025-06-26 20:23:25.939 [e480fb7a-9539-42ce-8536-7f9603a2e96c]  RULE_MATCH Minimum Age Rule matched successfully
+2025-06-26 20:23:25.940 [e480fb7a-9539-42ce-8536-7f9603a2e96c]  RULE_MATCH Minimum Income Rule matched successfully
+2025-06-26 20:23:25.948 [03403bdd-93e2-4557-9431-07477f4f3e71]  RULE_MATCH lastName Required Rule matched successfully
+2025-06-26 20:23:25.948 [03403bdd-93e2-4557-9431-07477f4f3e71]  RULE_MATCH firstName Required Rule matched successfully
+2025-06-26 20:23:25.954 [74ca2bac-ca92-4c7e-bbef-599cd95f0f60]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:23:25.986 [74ca2bac-ca92-4c7e-bbef-599cd95f0f60]  RULE_MATCH Email Required Rule matched successfully
+2025-06-26 20:23:25.988 [74ca2bac-ca92-4c7e-bbef-599cd95f0f60]  RULE_MATCH Phone Required Rule matched successfully
+2025-06-26 20:23:26.001 [14475b62-3af7-454d-871d-5bae7a7f10a1]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:23:26.006 [cb1105e7-6cfe-431b-9d6f-9207e0c2f340]  RULE_MATCH Custom Validation Rule matched successfully
+2025-06-26 20:23:26.017 [3a71bbbe-a025-4907-9eff-f536ea71aad4]  RULE_MATCH username Length Check Rule matched successfully
+2025-06-26 20:23:26.037 [50e5fdc8-d18c-4f8a-8856-23c7a26df185]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:23:26.064 [50e5fdc8-d18c-4f8a-8856-23c7a26df185]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:23:26.066 [50e5fdc8-d18c-4f8a-8856-23c7a26df185]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:23:26.071 [50e5fdc8-d18c-4f8a-8856-23c7a26df185]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:23:26.078 [50e5fdc8-d18c-4f8a-8856-23c7a26df185]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:23:26.079 [50e5fdc8-d18c-4f8a-8856-23c7a26df185]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:23:26.079 [50e5fdc8-d18c-4f8a-8856-23c7a26df185]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:23:26.082 [50e5fdc8-d18c-4f8a-8856-23c7a26df185]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:23:26.085 [50e5fdc8-d18c-4f8a-8856-23c7a26df185]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:23:26.085 [50e5fdc8-d18c-4f8a-8856-23c7a26df185]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:23:26.090 [50e5fdc8-d18c-4f8a-8856-23c7a26df185]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:23:26.091 [50e5fdc8-d18c-4f8a-8856-23c7a26df185]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:23:26.101 [50e5fdc8-d18c-4f8a-8856-23c7a26df185]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:23:26.102 [50e5fdc8-d18c-4f8a-8856-23c7a26df185]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 20:23:26.109 [50e5fdc8-d18c-4f8a-8856-23c7a26df185]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:23:26.129 [533754b1-06ee-4e91-b96c-ce0cf5e52d4a]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:23:26.130 [533754b1-06ee-4e91-b96c-ce0cf5e52d4a]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:23:26.131 [533754b1-06ee-4e91-b96c-ce0cf5e52d4a]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:23:26.133 [533754b1-06ee-4e91-b96c-ce0cf5e52d4a]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:23:26.144 [dfee4718-a640-42dd-8bbc-e2b2178c95f0]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:23:26.148 [15128ef2-2d3d-428e-a604-dc185cc014f2]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:23:26.150 [15128ef2-2d3d-428e-a604-dc185cc014f2]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:23:26.152 [15128ef2-2d3d-428e-a604-dc185cc014f2]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:23:26.159 [74142448-e198-43a5-b6cf-52482f6eab1c]  RULE_MATCH Loan Eligibility Rule matched successfully
+2025-06-26 20:23:26.169 [59d471d9-0a5e-46f6-8f70-8110684c68ee]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:23:26.171 [59d471d9-0a5e-46f6-8f70-8110684c68ee]  RULE_MATCH Required Field Check: email Rule matched successfully
+2025-06-26 20:23:26.173 [59d471d9-0a5e-46f6-8f70-8110684c68ee]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:23:26.180 [4c86a57b-00ca-4433-802b-053a147b78fa]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:23:26.182 [4c86a57b-00ca-4433-802b-053a147b78fa]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:23:26.192 [1016083a-7286-49e9-a2e9-574979ef39d9]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:23:26.194 [1016083a-7286-49e9-a2e9-574979ef39d9]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:23:26.195 [1016083a-7286-49e9-a2e9-574979ef39d9]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:23:26.201 [aecee986-61ad-4ff1-ac15-3869c1f82d02]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:23:26.323 [b451eb60-e357-466c-999d-10feb2ab07c1]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 20:23:26.466 [a8223913-6ceb-41ba-96a4-549acf8b9ba8]  ERROR_RECOVERY Invalid Rule Error recovery successful: Continued with default result
+2025-06-26 20:23:26.532 [fb081218-afa0-404d-abb2-b088cbb7b101]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 20:23:26.544 [4d0a7e2a-e710-462f-802a-dda1d7495c5d]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:23:26.545 [4d0a7e2a-e710-462f-802a-dda1d7495c5d]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:23:26.545 [4d0a7e2a-e710-462f-802a-dda1d7495c5d]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:23:26.545 [4d0a7e2a-e710-462f-802a-dda1d7495c5d]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:23:26.545 [4d0a7e2a-e710-462f-802a-dda1d7495c5d]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:23:26.545 [4d0a7e2a-e710-462f-802a-dda1d7495c5d]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:23:26.546 [4d0a7e2a-e710-462f-802a-dda1d7495c5d]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:23:26.546 [4d0a7e2a-e710-462f-802a-dda1d7495c5d]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:23:26.546 [4d0a7e2a-e710-462f-802a-dda1d7495c5d]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:23:26.547 [4d0a7e2a-e710-462f-802a-dda1d7495c5d]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:23:26.549 [49c841c7-bd75-4b2a-a37d-0ffe7d201e19]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:23:26.550 [49c841c7-bd75-4b2a-a37d-0ffe7d201e19]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:23:26.551 [49c841c7-bd75-4b2a-a37d-0ffe7d201e19]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:23:26.552 [49c841c7-bd75-4b2a-a37d-0ffe7d201e19]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:23:26.554 [49c841c7-bd75-4b2a-a37d-0ffe7d201e19]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:23:26.555 [49c841c7-bd75-4b2a-a37d-0ffe7d201e19]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:23:26.557 [49c841c7-bd75-4b2a-a37d-0ffe7d201e19]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:23:26.557 [49c841c7-bd75-4b2a-a37d-0ffe7d201e19]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:23:26.558 [49c841c7-bd75-4b2a-a37d-0ffe7d201e19]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:23:26.559 [49c841c7-bd75-4b2a-a37d-0ffe7d201e19]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:23:26.582 [8a56942c-43de-42d6-a371-d6f24548aae3]  ERROR_RECOVERY Error Rule Error recovery successful: Continued with default result
+2025-06-26 20:23:26.584 [115a569e-e292-4057-9de6-f1fe9d04d6d1]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:23:26.585 [115a569e-e292-4057-9de6-f1fe9d04d6d1]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:23:26.585 [115a569e-e292-4057-9de6-f1fe9d04d6d1]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:23:26.586 [115a569e-e292-4057-9de6-f1fe9d04d6d1]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:23:26.586 [115a569e-e292-4057-9de6-f1fe9d04d6d1]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:23:26.650 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 20:24:52.745 [9964ba48-f5d0-49aa-8fde-98df5bd12eb0]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 20:28:00.655 [8c83f124-98ed-4943-a4da-b13247d2f48f]  RULE_MATCH Minimum Balance Rule matched successfully
+2025-06-26 20:28:00.657 [8c83f124-98ed-4943-a4da-b13247d2f48f]  RULE_MATCH KYC Required Rule matched successfully
+2025-06-26 20:28:00.659 [8c83f124-98ed-4943-a4da-b13247d2f48f]  RULE_MATCH Transaction Limit Rule matched successfully
+2025-06-26 20:28:00.664 [ce34745b-9cd2-4d35-91c7-32e0aafcc86a]  RULE_MATCH Credit Score Check Rule matched successfully
+2025-06-26 20:28:00.665 [ce34745b-9cd2-4d35-91c7-32e0aafcc86a]  RULE_MATCH Minimum Age Rule matched successfully
+2025-06-26 20:28:00.666 [ce34745b-9cd2-4d35-91c7-32e0aafcc86a]  RULE_MATCH Minimum Income Rule matched successfully
+2025-06-26 20:28:00.672 [6d71e026-916a-4fa4-9d56-0904f0fb9a54]  RULE_MATCH lastName Required Rule matched successfully
+2025-06-26 20:28:00.673 [6d71e026-916a-4fa4-9d56-0904f0fb9a54]  RULE_MATCH firstName Required Rule matched successfully
+2025-06-26 20:28:00.676 [cc04213d-3644-45c1-8664-00578b92cbd0]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:28:00.704 [cc04213d-3644-45c1-8664-00578b92cbd0]  RULE_MATCH Email Required Rule matched successfully
+2025-06-26 20:28:00.706 [cc04213d-3644-45c1-8664-00578b92cbd0]  RULE_MATCH Phone Required Rule matched successfully
+2025-06-26 20:28:00.719 [f1b2132c-201d-4d70-af80-bcd7b3c6ee7d]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:28:00.723 [7a82bfbe-ae5e-4d5a-922b-68efa554d25c]  RULE_MATCH Custom Validation Rule matched successfully
+2025-06-26 20:28:00.734 [a3d2c1b8-6a7d-4c54-99e4-c47b91172192]  RULE_MATCH username Length Check Rule matched successfully
+2025-06-26 20:28:00.756 [b5fc81a5-1afe-475b-81a2-0fdb6f29a049]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:28:00.780 [b5fc81a5-1afe-475b-81a2-0fdb6f29a049]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:28:00.782 [b5fc81a5-1afe-475b-81a2-0fdb6f29a049]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:28:00.786 [b5fc81a5-1afe-475b-81a2-0fdb6f29a049]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:28:00.790 [b5fc81a5-1afe-475b-81a2-0fdb6f29a049]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:28:00.791 [b5fc81a5-1afe-475b-81a2-0fdb6f29a049]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:28:00.792 [b5fc81a5-1afe-475b-81a2-0fdb6f29a049]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:28:00.794 [b5fc81a5-1afe-475b-81a2-0fdb6f29a049]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:28:00.796 [b5fc81a5-1afe-475b-81a2-0fdb6f29a049]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:28:00.796 [b5fc81a5-1afe-475b-81a2-0fdb6f29a049]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:28:00.798 [b5fc81a5-1afe-475b-81a2-0fdb6f29a049]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:28:00.799 [b5fc81a5-1afe-475b-81a2-0fdb6f29a049]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:28:00.806 [b5fc81a5-1afe-475b-81a2-0fdb6f29a049]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:28:00.807 [b5fc81a5-1afe-475b-81a2-0fdb6f29a049]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 20:28:00.813 [b5fc81a5-1afe-475b-81a2-0fdb6f29a049]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:28:00.830 [2de9025d-8900-4b81-8303-3565f221a4d8]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:28:00.831 [2de9025d-8900-4b81-8303-3565f221a4d8]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:28:00.832 [2de9025d-8900-4b81-8303-3565f221a4d8]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:28:00.833 [2de9025d-8900-4b81-8303-3565f221a4d8]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:28:00.842 [6f558be9-ac4b-4b0e-9824-ec3640d0bcc1]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:28:00.845 [75d6ce54-a7f5-45df-b8a1-fc3e80d54141]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:28:00.847 [75d6ce54-a7f5-45df-b8a1-fc3e80d54141]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:28:00.848 [75d6ce54-a7f5-45df-b8a1-fc3e80d54141]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:28:00.853 [9144a121-cb65-4eec-9270-c4309216df98]  RULE_MATCH Loan Eligibility Rule matched successfully
+2025-06-26 20:28:00.862 [cbec6494-4469-4e47-b778-cc39f8ea04d4]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:28:00.863 [cbec6494-4469-4e47-b778-cc39f8ea04d4]  RULE_MATCH Required Field Check: email Rule matched successfully
+2025-06-26 20:28:00.864 [cbec6494-4469-4e47-b778-cc39f8ea04d4]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:28:00.869 [42180861-15ee-4de5-a623-b0f618a1e86d]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:28:00.870 [42180861-15ee-4de5-a623-b0f618a1e86d]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:28:00.876 [a170f6d8-964d-4df8-8727-b78234f85c3e]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:28:00.877 [a170f6d8-964d-4df8-8727-b78234f85c3e]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:28:00.878 [a170f6d8-964d-4df8-8727-b78234f85c3e]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:28:00.884 [329cc0fc-102f-4abe-80fb-4ddc16d03acb]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:28:00.972 [984be781-19b8-4723-8857-36e64a47d4d3]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 20:28:01.082 [2e7abb10-e599-485c-ab60-184ce46efd4e]  ERROR_RECOVERY Invalid Rule Error recovery successful: Continued with default result
+2025-06-26 20:28:01.160 [edc184a9-36a2-431a-90ee-1068983d7efe]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 20:28:01.171 [4a60029f-1568-4965-b57b-88afbb914360]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:28:01.171 [4a60029f-1568-4965-b57b-88afbb914360]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:28:01.172 [4a60029f-1568-4965-b57b-88afbb914360]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:28:01.172 [4a60029f-1568-4965-b57b-88afbb914360]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:28:01.173 [4a60029f-1568-4965-b57b-88afbb914360]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:28:01.173 [4a60029f-1568-4965-b57b-88afbb914360]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:28:01.173 [4a60029f-1568-4965-b57b-88afbb914360]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:28:01.174 [4a60029f-1568-4965-b57b-88afbb914360]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:28:01.174 [4a60029f-1568-4965-b57b-88afbb914360]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:28:01.174 [4a60029f-1568-4965-b57b-88afbb914360]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:28:01.177 [4a771437-5c2c-4b40-bca0-5e7a9663a0f8]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:28:01.178 [4a771437-5c2c-4b40-bca0-5e7a9663a0f8]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:28:01.180 [4a771437-5c2c-4b40-bca0-5e7a9663a0f8]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:28:01.181 [4a771437-5c2c-4b40-bca0-5e7a9663a0f8]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:28:01.182 [4a771437-5c2c-4b40-bca0-5e7a9663a0f8]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:28:01.182 [4a771437-5c2c-4b40-bca0-5e7a9663a0f8]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:28:01.182 [4a771437-5c2c-4b40-bca0-5e7a9663a0f8]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:28:01.183 [4a771437-5c2c-4b40-bca0-5e7a9663a0f8]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:28:01.184 [4a771437-5c2c-4b40-bca0-5e7a9663a0f8]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:28:01.185 [4a771437-5c2c-4b40-bca0-5e7a9663a0f8]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:28:01.216 [9ffe33a0-c455-4362-8c41-94727a7a1199]  ERROR_RECOVERY Error Rule Error recovery successful: Continued with default result
+2025-06-26 20:28:01.218 [283990d6-dcbe-4374-89ae-23393b6ee8d9]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:28:01.219 [283990d6-dcbe-4374-89ae-23393b6ee8d9]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:28:01.219 [283990d6-dcbe-4374-89ae-23393b6ee8d9]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:28:01.219 [283990d6-dcbe-4374-89ae-23393b6ee8d9]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:28:01.220 [283990d6-dcbe-4374-89ae-23393b6ee8d9]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:28:01.268 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 20:33:37.339 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 20:33:52.622 [9d3aced2-136c-49fa-bff7-40543c5f42f9]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 20:34:06.959 [d8cffc86-7b26-41ec-b897-7387cb5d6cec]  RULE_MATCH Minimum Balance Rule matched successfully
+2025-06-26 20:34:06.961 [d8cffc86-7b26-41ec-b897-7387cb5d6cec]  RULE_MATCH KYC Required Rule matched successfully
+2025-06-26 20:34:06.962 [d8cffc86-7b26-41ec-b897-7387cb5d6cec]  RULE_MATCH Transaction Limit Rule matched successfully
+2025-06-26 20:34:06.967 [b5a75400-3921-4558-a5ef-0f83c148b8b1]  RULE_MATCH Credit Score Check Rule matched successfully
+2025-06-26 20:34:06.967 [b5a75400-3921-4558-a5ef-0f83c148b8b1]  RULE_MATCH Minimum Age Rule matched successfully
+2025-06-26 20:34:06.968 [b5a75400-3921-4558-a5ef-0f83c148b8b1]  RULE_MATCH Minimum Income Rule matched successfully
+2025-06-26 20:34:06.975 [aa2e30b9-42b4-4349-b210-6f3ea55d31bc]  RULE_MATCH lastName Required Rule matched successfully
+2025-06-26 20:34:06.976 [aa2e30b9-42b4-4349-b210-6f3ea55d31bc]  RULE_MATCH firstName Required Rule matched successfully
+2025-06-26 20:34:06.980 [1c530e28-5212-4b48-94d4-0b1105f5ec7f]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:34:06.996 [1c530e28-5212-4b48-94d4-0b1105f5ec7f]  RULE_MATCH Email Required Rule matched successfully
+2025-06-26 20:34:06.997 [1c530e28-5212-4b48-94d4-0b1105f5ec7f]  RULE_MATCH Phone Required Rule matched successfully
+2025-06-26 20:34:07.006 [47298328-29c5-413b-beb7-a3e9be3e4023]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:34:07.010 [d47754d9-6698-4e3d-9242-aded9c3f1c6a]  RULE_MATCH Custom Validation Rule matched successfully
+2025-06-26 20:34:07.018 [58f19bdb-8ae3-4f37-a3d2-8bf6b1034fff]  RULE_MATCH username Length Check Rule matched successfully
+2025-06-26 20:34:07.033 [022a1140-5fdc-4b73-b19a-0a1f1b148ab3]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:07.057 [022a1140-5fdc-4b73-b19a-0a1f1b148ab3]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:07.060 [022a1140-5fdc-4b73-b19a-0a1f1b148ab3]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:07.064 [022a1140-5fdc-4b73-b19a-0a1f1b148ab3]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:34:07.072 [022a1140-5fdc-4b73-b19a-0a1f1b148ab3]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:07.073 [022a1140-5fdc-4b73-b19a-0a1f1b148ab3]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:07.074 [022a1140-5fdc-4b73-b19a-0a1f1b148ab3]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:07.078 [022a1140-5fdc-4b73-b19a-0a1f1b148ab3]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:07.079 [022a1140-5fdc-4b73-b19a-0a1f1b148ab3]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:07.080 [022a1140-5fdc-4b73-b19a-0a1f1b148ab3]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:07.083 [022a1140-5fdc-4b73-b19a-0a1f1b148ab3]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:07.083 [022a1140-5fdc-4b73-b19a-0a1f1b148ab3]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:07.092 [022a1140-5fdc-4b73-b19a-0a1f1b148ab3]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:34:07.093 [022a1140-5fdc-4b73-b19a-0a1f1b148ab3]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 20:34:07.099 [022a1140-5fdc-4b73-b19a-0a1f1b148ab3]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:34:07.116 [90607c63-8f5a-42a1-9785-ac1ce8e117e5]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:34:07.117 [90607c63-8f5a-42a1-9785-ac1ce8e117e5]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:34:07.118 [90607c63-8f5a-42a1-9785-ac1ce8e117e5]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:34:07.119 [90607c63-8f5a-42a1-9785-ac1ce8e117e5]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:34:07.130 [01dd4ecc-6f6d-4329-bc05-1a76b3c7214e]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:34:07.133 [c11cd79c-f6b3-49bc-af0d-2a9ced5208eb]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:34:07.134 [c11cd79c-f6b3-49bc-af0d-2a9ced5208eb]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:34:07.135 [c11cd79c-f6b3-49bc-af0d-2a9ced5208eb]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:34:07.138 [6d005527-f7b7-4780-9982-6b8a1f50b725]  RULE_MATCH Loan Eligibility Rule matched successfully
+2025-06-26 20:34:07.147 [c481f0b4-fb16-4ce2-a48e-a94da653b685]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:34:07.149 [c481f0b4-fb16-4ce2-a48e-a94da653b685]  RULE_MATCH Required Field Check: email Rule matched successfully
+2025-06-26 20:34:07.149 [c481f0b4-fb16-4ce2-a48e-a94da653b685]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:34:07.153 [0a6686ce-2b0a-4c7d-ad31-f376761aea11]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:34:07.154 [0a6686ce-2b0a-4c7d-ad31-f376761aea11]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:34:07.160 [b5f9946c-7d7d-4d04-b51a-4e66aad7e89c]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:34:07.162 [b5f9946c-7d7d-4d04-b51a-4e66aad7e89c]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:34:07.163 [b5f9946c-7d7d-4d04-b51a-4e66aad7e89c]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:34:07.168 [4a8996f5-f57d-47a8-8698-65ac726b75b7]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:34:07.286 [3e87d86b-2ba9-4d14-9575-97c5cbb5795d]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 20:34:07.410 [c8216e73-b77f-46c1-bc46-573925721aca]  ERROR_RECOVERY Invalid Rule Error recovery successful: Continued with default result
+2025-06-26 20:34:07.489 [b0252bb6-5b8a-42b4-93b2-929acbd29c99]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 20:34:07.505 [d724deae-9a30-42e0-870d-417ebb5cf691]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:34:07.505 [d724deae-9a30-42e0-870d-417ebb5cf691]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:34:07.506 [d724deae-9a30-42e0-870d-417ebb5cf691]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:34:07.506 [d724deae-9a30-42e0-870d-417ebb5cf691]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:34:07.507 [d724deae-9a30-42e0-870d-417ebb5cf691]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:34:07.507 [d724deae-9a30-42e0-870d-417ebb5cf691]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:34:07.507 [d724deae-9a30-42e0-870d-417ebb5cf691]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:34:07.507 [d724deae-9a30-42e0-870d-417ebb5cf691]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:34:07.508 [d724deae-9a30-42e0-870d-417ebb5cf691]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:34:07.508 [d724deae-9a30-42e0-870d-417ebb5cf691]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:34:07.511 [ce03c70e-6fc5-48bc-8dcd-bfd2870adbfe]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:34:07.512 [ce03c70e-6fc5-48bc-8dcd-bfd2870adbfe]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:34:07.513 [ce03c70e-6fc5-48bc-8dcd-bfd2870adbfe]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:34:07.514 [ce03c70e-6fc5-48bc-8dcd-bfd2870adbfe]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:34:07.514 [ce03c70e-6fc5-48bc-8dcd-bfd2870adbfe]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:34:07.515 [ce03c70e-6fc5-48bc-8dcd-bfd2870adbfe]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:34:07.515 [ce03c70e-6fc5-48bc-8dcd-bfd2870adbfe]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:34:07.516 [ce03c70e-6fc5-48bc-8dcd-bfd2870adbfe]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:34:07.517 [ce03c70e-6fc5-48bc-8dcd-bfd2870adbfe]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:34:07.517 [ce03c70e-6fc5-48bc-8dcd-bfd2870adbfe]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:34:07.546 [d32f1d5c-bc45-4a7b-889a-cd50a9ee3bb6]  ERROR_RECOVERY Error Rule Error recovery successful: Continued with default result
+2025-06-26 20:34:07.548 [e731023f-0f6c-4f73-91a3-c04637cc352e]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:34:07.549 [e731023f-0f6c-4f73-91a3-c04637cc352e]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:34:07.549 [e731023f-0f6c-4f73-91a3-c04637cc352e]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:34:07.549 [e731023f-0f6c-4f73-91a3-c04637cc352e]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:34:07.549 [e731023f-0f6c-4f73-91a3-c04637cc352e]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:34:07.591 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 20:34:55.666 [0b6e3cd5-62e9-4b51-8ae7-fe67551d0830]  RULE_MATCH Minimum Balance Rule matched successfully
+2025-06-26 20:34:55.668 [0b6e3cd5-62e9-4b51-8ae7-fe67551d0830]  RULE_MATCH KYC Required Rule matched successfully
+2025-06-26 20:34:55.668 [0b6e3cd5-62e9-4b51-8ae7-fe67551d0830]  RULE_MATCH Transaction Limit Rule matched successfully
+2025-06-26 20:34:55.674 [b226f1af-b779-45ef-bcca-3e18a87b1038]  RULE_MATCH Credit Score Check Rule matched successfully
+2025-06-26 20:34:55.675 [b226f1af-b779-45ef-bcca-3e18a87b1038]  RULE_MATCH Minimum Age Rule matched successfully
+2025-06-26 20:34:55.676 [b226f1af-b779-45ef-bcca-3e18a87b1038]  RULE_MATCH Minimum Income Rule matched successfully
+2025-06-26 20:34:55.681 [a89ef398-2928-477c-bfa0-369c1fe908b6]  RULE_MATCH lastName Required Rule matched successfully
+2025-06-26 20:34:55.682 [a89ef398-2928-477c-bfa0-369c1fe908b6]  RULE_MATCH firstName Required Rule matched successfully
+2025-06-26 20:34:55.687 [13f4d446-9676-4483-bde2-a23c5f0703a8]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:34:55.704 [13f4d446-9676-4483-bde2-a23c5f0703a8]  RULE_MATCH Email Required Rule matched successfully
+2025-06-26 20:34:55.705 [13f4d446-9676-4483-bde2-a23c5f0703a8]  RULE_MATCH Phone Required Rule matched successfully
+2025-06-26 20:34:55.715 [49d2103f-0818-46f2-a969-8e90363e9c71]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:34:55.719 [386be573-0760-4c2f-b1e2-6f495f1707a3]  RULE_MATCH Custom Validation Rule matched successfully
+2025-06-26 20:34:55.726 [a35a9943-155a-4f67-b0b0-8afffb7f8715]  RULE_MATCH username Length Check Rule matched successfully
+2025-06-26 20:34:55.742 [4f3cef02-d16e-4f6a-aebf-e65a449704e7]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:55.767 [4f3cef02-d16e-4f6a-aebf-e65a449704e7]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:55.769 [4f3cef02-d16e-4f6a-aebf-e65a449704e7]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:55.772 [4f3cef02-d16e-4f6a-aebf-e65a449704e7]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:34:55.779 [4f3cef02-d16e-4f6a-aebf-e65a449704e7]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:55.780 [4f3cef02-d16e-4f6a-aebf-e65a449704e7]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:55.780 [4f3cef02-d16e-4f6a-aebf-e65a449704e7]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:55.783 [4f3cef02-d16e-4f6a-aebf-e65a449704e7]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:55.784 [4f3cef02-d16e-4f6a-aebf-e65a449704e7]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:55.785 [4f3cef02-d16e-4f6a-aebf-e65a449704e7]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:55.787 [4f3cef02-d16e-4f6a-aebf-e65a449704e7]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:55.788 [4f3cef02-d16e-4f6a-aebf-e65a449704e7]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:34:55.796 [4f3cef02-d16e-4f6a-aebf-e65a449704e7]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:34:55.797 [4f3cef02-d16e-4f6a-aebf-e65a449704e7]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 20:34:55.801 [4f3cef02-d16e-4f6a-aebf-e65a449704e7]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:34:55.816 [0da55659-d815-4860-b89b-96e253a1ca77]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:34:55.817 [0da55659-d815-4860-b89b-96e253a1ca77]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:34:55.818 [0da55659-d815-4860-b89b-96e253a1ca77]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:34:55.818 [0da55659-d815-4860-b89b-96e253a1ca77]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:34:55.828 [b20fa182-cf8b-43f0-83fa-a8ee128b9a0d]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:34:55.831 [7cc8c431-fdf7-499d-af1a-d3d6653f8054]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:34:55.832 [7cc8c431-fdf7-499d-af1a-d3d6653f8054]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:34:55.834 [7cc8c431-fdf7-499d-af1a-d3d6653f8054]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:34:55.839 [0d26d7f0-2e0f-4880-8201-3c69c93886b6]  RULE_MATCH Loan Eligibility Rule matched successfully
+2025-06-26 20:34:55.845 [92f69d83-a628-45aa-a903-7812ab4d7b6a]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:34:55.847 [92f69d83-a628-45aa-a903-7812ab4d7b6a]  RULE_MATCH Required Field Check: email Rule matched successfully
+2025-06-26 20:34:55.853 [92f69d83-a628-45aa-a903-7812ab4d7b6a]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:34:55.858 [71b668bf-105f-405c-8f1b-46cd1bc36d4a]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:34:55.858 [71b668bf-105f-405c-8f1b-46cd1bc36d4a]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:34:55.864 [e15787cf-e282-44a6-a2ea-a3f1bf6774bf]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:34:55.865 [e15787cf-e282-44a6-a2ea-a3f1bf6774bf]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:34:55.865 [e15787cf-e282-44a6-a2ea-a3f1bf6774bf]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:34:55.870 [2a149868-501e-43e2-8a94-153021b9f177]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:34:55.949 [dd16f32c-6bab-44d0-a1c2-f7c79c13110c]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 20:34:56.052 [1c52acc7-cac1-43aa-b548-c495fcfb809f]  ERROR_RECOVERY Invalid Rule Error recovery successful: Continued with default result
+2025-06-26 20:34:56.109 [99f3ae2f-4608-4818-bf47-1387644c9c10]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 20:34:56.122 [34ac0dc5-2c85-4cb2-b5cb-2b32ea759c4c]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:34:56.123 [34ac0dc5-2c85-4cb2-b5cb-2b32ea759c4c]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:34:56.123 [34ac0dc5-2c85-4cb2-b5cb-2b32ea759c4c]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:34:56.123 [34ac0dc5-2c85-4cb2-b5cb-2b32ea759c4c]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:34:56.123 [34ac0dc5-2c85-4cb2-b5cb-2b32ea759c4c]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:34:56.123 [34ac0dc5-2c85-4cb2-b5cb-2b32ea759c4c]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:34:56.123 [34ac0dc5-2c85-4cb2-b5cb-2b32ea759c4c]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:34:56.124 [34ac0dc5-2c85-4cb2-b5cb-2b32ea759c4c]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:34:56.124 [34ac0dc5-2c85-4cb2-b5cb-2b32ea759c4c]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:34:56.124 [34ac0dc5-2c85-4cb2-b5cb-2b32ea759c4c]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:34:56.127 [c53f0f87-82f2-4d89-a78d-3fb2a4ff0928]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:34:56.128 [c53f0f87-82f2-4d89-a78d-3fb2a4ff0928]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:34:56.128 [c53f0f87-82f2-4d89-a78d-3fb2a4ff0928]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:34:56.129 [c53f0f87-82f2-4d89-a78d-3fb2a4ff0928]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:34:56.129 [c53f0f87-82f2-4d89-a78d-3fb2a4ff0928]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:34:56.129 [c53f0f87-82f2-4d89-a78d-3fb2a4ff0928]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:34:56.129 [c53f0f87-82f2-4d89-a78d-3fb2a4ff0928]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:34:56.130 [c53f0f87-82f2-4d89-a78d-3fb2a4ff0928]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:34:56.130 [c53f0f87-82f2-4d89-a78d-3fb2a4ff0928]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:34:56.130 [c53f0f87-82f2-4d89-a78d-3fb2a4ff0928]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:34:56.158 [699ca5be-54c7-45b8-acd5-e66e0f9932b0]  ERROR_RECOVERY Error Rule Error recovery successful: Continued with default result
+2025-06-26 20:34:56.160 [643c1479-3a6b-40f5-a98a-c8b61b4d0a32]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:34:56.160 [643c1479-3a6b-40f5-a98a-c8b61b4d0a32]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:34:56.160 [643c1479-3a6b-40f5-a98a-c8b61b4d0a32]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:34:56.161 [643c1479-3a6b-40f5-a98a-c8b61b4d0a32]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:34:56.161 [643c1479-3a6b-40f5-a98a-c8b61b4d0a32]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:34:56.206 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 20:35:13.380 [676c370f-ab4f-4be8-8464-cbba82008486]  RULE_MATCH Minimum Balance Rule matched successfully
+2025-06-26 20:35:13.382 [676c370f-ab4f-4be8-8464-cbba82008486]  RULE_MATCH KYC Required Rule matched successfully
+2025-06-26 20:35:13.384 [676c370f-ab4f-4be8-8464-cbba82008486]  RULE_MATCH Transaction Limit Rule matched successfully
+2025-06-26 20:35:13.390 [8eec150e-4aa4-4c45-82e8-07ee93cd166d]  RULE_MATCH Credit Score Check Rule matched successfully
+2025-06-26 20:35:13.391 [8eec150e-4aa4-4c45-82e8-07ee93cd166d]  RULE_MATCH Minimum Age Rule matched successfully
+2025-06-26 20:35:13.391 [8eec150e-4aa4-4c45-82e8-07ee93cd166d]  RULE_MATCH Minimum Income Rule matched successfully
+2025-06-26 20:35:13.399 [d3d88857-b2e1-4fec-b2f5-11a7e48e91ef]  RULE_MATCH lastName Required Rule matched successfully
+2025-06-26 20:35:13.400 [d3d88857-b2e1-4fec-b2f5-11a7e48e91ef]  RULE_MATCH firstName Required Rule matched successfully
+2025-06-26 20:35:13.405 [aaf44498-aeeb-44ed-bd53-6d8dc32f73c6]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:35:13.424 [aaf44498-aeeb-44ed-bd53-6d8dc32f73c6]  RULE_MATCH Email Required Rule matched successfully
+2025-06-26 20:35:13.426 [aaf44498-aeeb-44ed-bd53-6d8dc32f73c6]  RULE_MATCH Phone Required Rule matched successfully
+2025-06-26 20:35:13.438 [9d185352-8cd5-47b8-8dd6-cd4edb046105]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:35:13.440 [ba1e1bfe-7616-4441-8eba-fd7e350d127a]  RULE_MATCH Custom Validation Rule matched successfully
+2025-06-26 20:35:13.449 [79c88c78-e14d-4fda-8b5a-afd7e9c318d0]  RULE_MATCH username Length Check Rule matched successfully
+2025-06-26 20:35:13.467 [1cb5a912-85bf-444f-ad7b-2ede4b7f5213]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:35:13.498 [1cb5a912-85bf-444f-ad7b-2ede4b7f5213]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:35:13.500 [1cb5a912-85bf-444f-ad7b-2ede4b7f5213]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:35:13.503 [1cb5a912-85bf-444f-ad7b-2ede4b7f5213]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:35:13.509 [1cb5a912-85bf-444f-ad7b-2ede4b7f5213]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:35:13.509 [1cb5a912-85bf-444f-ad7b-2ede4b7f5213]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:35:13.510 [1cb5a912-85bf-444f-ad7b-2ede4b7f5213]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:35:13.513 [1cb5a912-85bf-444f-ad7b-2ede4b7f5213]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:35:13.514 [1cb5a912-85bf-444f-ad7b-2ede4b7f5213]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:35:13.515 [1cb5a912-85bf-444f-ad7b-2ede4b7f5213]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:35:13.517 [1cb5a912-85bf-444f-ad7b-2ede4b7f5213]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:35:13.518 [1cb5a912-85bf-444f-ad7b-2ede4b7f5213]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:35:13.526 [1cb5a912-85bf-444f-ad7b-2ede4b7f5213]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:35:13.527 [1cb5a912-85bf-444f-ad7b-2ede4b7f5213]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 20:35:13.533 [1cb5a912-85bf-444f-ad7b-2ede4b7f5213]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:35:13.551 [61209c57-fa65-41bc-a93a-ae3a5ae610f1]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:35:13.552 [61209c57-fa65-41bc-a93a-ae3a5ae610f1]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:35:13.554 [61209c57-fa65-41bc-a93a-ae3a5ae610f1]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:35:13.555 [61209c57-fa65-41bc-a93a-ae3a5ae610f1]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:35:13.568 [5f4fe637-77e0-4916-9a9e-82a64d5ed077]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:35:13.572 [ead24e1e-5b60-4454-8183-71eec6c17c18]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:35:13.574 [ead24e1e-5b60-4454-8183-71eec6c17c18]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:35:13.575 [ead24e1e-5b60-4454-8183-71eec6c17c18]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:35:13.580 [bf92368f-a67f-4517-aca7-d1244b3bd1af]  RULE_MATCH Loan Eligibility Rule matched successfully
+2025-06-26 20:35:13.589 [5edcb28a-ce96-422b-9d73-b05aa1ceda05]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:35:13.590 [5edcb28a-ce96-422b-9d73-b05aa1ceda05]  RULE_MATCH Required Field Check: email Rule matched successfully
+2025-06-26 20:35:13.591 [5edcb28a-ce96-422b-9d73-b05aa1ceda05]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:35:13.597 [64fdf1dc-f2f9-47dd-be65-bfb0d762f389]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:35:13.599 [64fdf1dc-f2f9-47dd-be65-bfb0d762f389]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:35:13.607 [dd36a9cd-5073-4d5c-8be3-e260a58aadd6]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:35:13.609 [dd36a9cd-5073-4d5c-8be3-e260a58aadd6]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:35:13.610 [dd36a9cd-5073-4d5c-8be3-e260a58aadd6]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:35:13.617 [8df560f6-28bd-4c25-bc3e-6176620a167b]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:35:13.715 [1cd14d0c-b00e-4879-a7ab-6e72eafe44c3]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 20:35:13.824 [8cf96c75-f21d-4aa9-a751-345ae1bc4e7b]  ERROR_RECOVERY Invalid Rule Error recovery successful: Continued with default result
+2025-06-26 20:35:13.882 [7f2e5cf6-f222-422e-bd8e-1da934cc7549]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 20:35:13.897 [434d7d4b-f648-456c-88b9-78da23b9dbe3]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:35:13.897 [434d7d4b-f648-456c-88b9-78da23b9dbe3]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:35:13.897 [434d7d4b-f648-456c-88b9-78da23b9dbe3]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:35:13.898 [434d7d4b-f648-456c-88b9-78da23b9dbe3]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:35:13.898 [434d7d4b-f648-456c-88b9-78da23b9dbe3]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:35:13.898 [434d7d4b-f648-456c-88b9-78da23b9dbe3]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:35:13.898 [434d7d4b-f648-456c-88b9-78da23b9dbe3]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:35:13.898 [434d7d4b-f648-456c-88b9-78da23b9dbe3]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:35:13.898 [434d7d4b-f648-456c-88b9-78da23b9dbe3]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:35:13.899 [434d7d4b-f648-456c-88b9-78da23b9dbe3]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:35:13.901 [353e04f9-507e-412e-9196-e08ce5bc9d04]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:35:13.902 [353e04f9-507e-412e-9196-e08ce5bc9d04]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:35:13.902 [353e04f9-507e-412e-9196-e08ce5bc9d04]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:35:13.903 [353e04f9-507e-412e-9196-e08ce5bc9d04]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:35:13.903 [353e04f9-507e-412e-9196-e08ce5bc9d04]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:35:13.903 [353e04f9-507e-412e-9196-e08ce5bc9d04]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:35:13.904 [353e04f9-507e-412e-9196-e08ce5bc9d04]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:35:13.905 [353e04f9-507e-412e-9196-e08ce5bc9d04]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:35:13.905 [353e04f9-507e-412e-9196-e08ce5bc9d04]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:35:13.906 [353e04f9-507e-412e-9196-e08ce5bc9d04]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:35:13.933 [14332334-88c0-48b5-b7ce-34659b5ba9b0]  ERROR_RECOVERY Error Rule Error recovery successful: Continued with default result
+2025-06-26 20:35:13.936 [3b53fcbd-bcfa-425c-9ed6-54135deb674c]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:35:13.936 [3b53fcbd-bcfa-425c-9ed6-54135deb674c]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:35:13.937 [3b53fcbd-bcfa-425c-9ed6-54135deb674c]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:35:13.937 [3b53fcbd-bcfa-425c-9ed6-54135deb674c]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:35:13.937 [3b53fcbd-bcfa-425c-9ed6-54135deb674c]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:35:13.975 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 20:36:10.955 [e660a1b6-8e79-426b-8171-f827436f77ac]  RULE_MATCH Minimum Balance Rule matched successfully
+2025-06-26 20:36:10.958 [e660a1b6-8e79-426b-8171-f827436f77ac]  RULE_MATCH KYC Required Rule matched successfully
+2025-06-26 20:36:10.960 [e660a1b6-8e79-426b-8171-f827436f77ac]  RULE_MATCH Transaction Limit Rule matched successfully
+2025-06-26 20:36:10.966 [510413e3-23b7-4f02-a2a1-5a65343d14d0]  RULE_MATCH Credit Score Check Rule matched successfully
+2025-06-26 20:36:10.967 [510413e3-23b7-4f02-a2a1-5a65343d14d0]  RULE_MATCH Minimum Age Rule matched successfully
+2025-06-26 20:36:10.968 [510413e3-23b7-4f02-a2a1-5a65343d14d0]  RULE_MATCH Minimum Income Rule matched successfully
+2025-06-26 20:36:10.974 [bbddfe22-63e4-409f-869f-7a164fb385fe]  RULE_MATCH lastName Required Rule matched successfully
+2025-06-26 20:36:10.975 [bbddfe22-63e4-409f-869f-7a164fb385fe]  RULE_MATCH firstName Required Rule matched successfully
+2025-06-26 20:36:10.979 [51457acf-9137-4516-915b-3df90a982e72]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:36:11.000 [51457acf-9137-4516-915b-3df90a982e72]  RULE_MATCH Email Required Rule matched successfully
+2025-06-26 20:36:11.002 [51457acf-9137-4516-915b-3df90a982e72]  RULE_MATCH Phone Required Rule matched successfully
+2025-06-26 20:36:11.014 [75dbff9a-69d0-4402-80d9-4d99a096ede3]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:36:11.018 [4e1562ee-c325-4422-93c0-9f9161374168]  RULE_MATCH Custom Validation Rule matched successfully
+2025-06-26 20:36:11.026 [f3fb02ba-fd0a-4981-a0d7-9c38b33cb09b]  RULE_MATCH username Length Check Rule matched successfully
+2025-06-26 20:36:11.045 [62a707b8-a4a5-43d3-bb71-70aa5cfc0130]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:11.070 [62a707b8-a4a5-43d3-bb71-70aa5cfc0130]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:11.071 [62a707b8-a4a5-43d3-bb71-70aa5cfc0130]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:11.074 [62a707b8-a4a5-43d3-bb71-70aa5cfc0130]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:36:11.083 [62a707b8-a4a5-43d3-bb71-70aa5cfc0130]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:11.084 [62a707b8-a4a5-43d3-bb71-70aa5cfc0130]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:11.084 [62a707b8-a4a5-43d3-bb71-70aa5cfc0130]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:11.088 [62a707b8-a4a5-43d3-bb71-70aa5cfc0130]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:11.089 [62a707b8-a4a5-43d3-bb71-70aa5cfc0130]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:11.089 [62a707b8-a4a5-43d3-bb71-70aa5cfc0130]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:11.091 [62a707b8-a4a5-43d3-bb71-70aa5cfc0130]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:11.091 [62a707b8-a4a5-43d3-bb71-70aa5cfc0130]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:11.100 [62a707b8-a4a5-43d3-bb71-70aa5cfc0130]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:36:11.101 [62a707b8-a4a5-43d3-bb71-70aa5cfc0130]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 20:36:11.108 [62a707b8-a4a5-43d3-bb71-70aa5cfc0130]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:36:11.126 [d44904c8-e11a-4cf8-a3f3-266cf5d11add]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:36:11.127 [d44904c8-e11a-4cf8-a3f3-266cf5d11add]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:36:11.127 [d44904c8-e11a-4cf8-a3f3-266cf5d11add]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:36:11.128 [d44904c8-e11a-4cf8-a3f3-266cf5d11add]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:36:11.137 [b5b7ff21-3db2-49a1-a988-da322b2d5741]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:36:11.141 [c0b816bf-471b-4094-af13-ffda8d6064e0]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:36:11.143 [c0b816bf-471b-4094-af13-ffda8d6064e0]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:36:11.144 [c0b816bf-471b-4094-af13-ffda8d6064e0]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:36:11.150 [79fc5743-e88a-440a-81c1-32806c5559e3]  RULE_MATCH Loan Eligibility Rule matched successfully
+2025-06-26 20:36:11.160 [aab9dad0-bd9a-4167-b905-32e0c704d6e8]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:36:11.162 [aab9dad0-bd9a-4167-b905-32e0c704d6e8]  RULE_MATCH Required Field Check: email Rule matched successfully
+2025-06-26 20:36:11.162 [aab9dad0-bd9a-4167-b905-32e0c704d6e8]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:36:11.167 [51e7ee1a-ca8a-4896-8899-ab3fe32791ae]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:36:11.169 [51e7ee1a-ca8a-4896-8899-ab3fe32791ae]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:36:11.178 [d91ca702-cffc-4d67-be6c-737f4de84f3b]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:36:11.180 [d91ca702-cffc-4d67-be6c-737f4de84f3b]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:36:11.182 [d91ca702-cffc-4d67-be6c-737f4de84f3b]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:36:11.186 [de336f22-3383-437a-8505-dc91b8cc0a4b]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:36:11.278 [125bf655-9ad0-4888-b1be-fa246a977b8a]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 20:36:11.371 [fcccc66d-b03c-411f-8152-895d2b58b6d6]  ERROR_RECOVERY Invalid Rule Error recovery successful: Continued with default result
+2025-06-26 20:36:11.434 [64468e92-9c49-410d-8f18-f71afdf2b127]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 20:36:11.446 [b660b1d9-48f0-4971-8fcb-8c8daaf685db]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:36:11.447 [b660b1d9-48f0-4971-8fcb-8c8daaf685db]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:36:11.447 [b660b1d9-48f0-4971-8fcb-8c8daaf685db]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:36:11.447 [b660b1d9-48f0-4971-8fcb-8c8daaf685db]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:36:11.447 [b660b1d9-48f0-4971-8fcb-8c8daaf685db]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:36:11.447 [b660b1d9-48f0-4971-8fcb-8c8daaf685db]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:36:11.447 [b660b1d9-48f0-4971-8fcb-8c8daaf685db]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:36:11.448 [b660b1d9-48f0-4971-8fcb-8c8daaf685db]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:36:11.448 [b660b1d9-48f0-4971-8fcb-8c8daaf685db]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:36:11.448 [b660b1d9-48f0-4971-8fcb-8c8daaf685db]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:36:11.451 [e6c81fc2-fb2c-4497-9892-b5769a05d636]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:36:11.451 [e6c81fc2-fb2c-4497-9892-b5769a05d636]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:36:11.451 [e6c81fc2-fb2c-4497-9892-b5769a05d636]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:36:11.452 [e6c81fc2-fb2c-4497-9892-b5769a05d636]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:36:11.453 [e6c81fc2-fb2c-4497-9892-b5769a05d636]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:36:11.454 [e6c81fc2-fb2c-4497-9892-b5769a05d636]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:36:11.454 [e6c81fc2-fb2c-4497-9892-b5769a05d636]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:36:11.455 [e6c81fc2-fb2c-4497-9892-b5769a05d636]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:36:11.455 [e6c81fc2-fb2c-4497-9892-b5769a05d636]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:36:11.456 [e6c81fc2-fb2c-4497-9892-b5769a05d636]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:36:11.481 [8b21fb07-ac6d-4c5a-ac93-c0208f535bf1]  ERROR_RECOVERY Error Rule Error recovery successful: Continued with default result
+2025-06-26 20:36:11.483 [6e79d83e-4812-4793-a580-105388ec536f]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:36:11.483 [6e79d83e-4812-4793-a580-105388ec536f]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:36:11.483 [6e79d83e-4812-4793-a580-105388ec536f]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:36:11.483 [6e79d83e-4812-4793-a580-105388ec536f]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:36:11.483 [6e79d83e-4812-4793-a580-105388ec536f]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:36:11.521 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 20:36:30.340 [9d6c149e-84e9-4757-bc68-f3b466bfc28d]  RULE_MATCH Minimum Balance Rule matched successfully
+2025-06-26 20:36:30.342 [9d6c149e-84e9-4757-bc68-f3b466bfc28d]  RULE_MATCH KYC Required Rule matched successfully
+2025-06-26 20:36:30.343 [9d6c149e-84e9-4757-bc68-f3b466bfc28d]  RULE_MATCH Transaction Limit Rule matched successfully
+2025-06-26 20:36:30.349 [afdc9aa0-348b-45f9-b4ac-0740b89171b0]  RULE_MATCH Credit Score Check Rule matched successfully
+2025-06-26 20:36:30.350 [afdc9aa0-348b-45f9-b4ac-0740b89171b0]  RULE_MATCH Minimum Age Rule matched successfully
+2025-06-26 20:36:30.351 [afdc9aa0-348b-45f9-b4ac-0740b89171b0]  RULE_MATCH Minimum Income Rule matched successfully
+2025-06-26 20:36:30.358 [f4d40193-cc5b-4517-8e2c-1f8bfaf5c4d2]  RULE_MATCH lastName Required Rule matched successfully
+2025-06-26 20:36:30.359 [f4d40193-cc5b-4517-8e2c-1f8bfaf5c4d2]  RULE_MATCH firstName Required Rule matched successfully
+2025-06-26 20:36:30.363 [3554f386-a61d-485f-aee1-2464abd713c5]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:36:30.387 [3554f386-a61d-485f-aee1-2464abd713c5]  RULE_MATCH Email Required Rule matched successfully
+2025-06-26 20:36:30.388 [3554f386-a61d-485f-aee1-2464abd713c5]  RULE_MATCH Phone Required Rule matched successfully
+2025-06-26 20:36:30.400 [b4481ba7-6484-49e2-9259-0c2edb006133]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:36:30.403 [8fc25d6f-d486-4d58-a135-4c2ace07e9f7]  RULE_MATCH Custom Validation Rule matched successfully
+2025-06-26 20:36:30.413 [6ace41c7-ecdf-4256-8ed3-1168dd4eaad0]  RULE_MATCH username Length Check Rule matched successfully
+2025-06-26 20:36:30.433 [7e033c2f-6524-41fe-9bd5-f3a9e3ddbabc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:30.457 [7e033c2f-6524-41fe-9bd5-f3a9e3ddbabc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:30.459 [7e033c2f-6524-41fe-9bd5-f3a9e3ddbabc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:30.462 [7e033c2f-6524-41fe-9bd5-f3a9e3ddbabc]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:36:30.468 [7e033c2f-6524-41fe-9bd5-f3a9e3ddbabc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:30.469 [7e033c2f-6524-41fe-9bd5-f3a9e3ddbabc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:30.469 [7e033c2f-6524-41fe-9bd5-f3a9e3ddbabc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:30.471 [7e033c2f-6524-41fe-9bd5-f3a9e3ddbabc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:30.473 [7e033c2f-6524-41fe-9bd5-f3a9e3ddbabc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:30.475 [7e033c2f-6524-41fe-9bd5-f3a9e3ddbabc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:30.478 [7e033c2f-6524-41fe-9bd5-f3a9e3ddbabc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:30.479 [7e033c2f-6524-41fe-9bd5-f3a9e3ddbabc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:36:30.491 [7e033c2f-6524-41fe-9bd5-f3a9e3ddbabc]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:36:30.492 [7e033c2f-6524-41fe-9bd5-f3a9e3ddbabc]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 20:36:30.498 [7e033c2f-6524-41fe-9bd5-f3a9e3ddbabc]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:36:30.520 [a7459684-e1cb-45ee-a9cb-7ec18efc7525]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:36:30.522 [a7459684-e1cb-45ee-a9cb-7ec18efc7525]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:36:30.523 [a7459684-e1cb-45ee-a9cb-7ec18efc7525]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:36:30.525 [a7459684-e1cb-45ee-a9cb-7ec18efc7525]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:36:30.536 [82df5917-b4e3-43eb-a398-a14257b67b7f]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:36:30.540 [69c58159-8a3f-44ee-9fe5-8c9e986bc09d]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:36:30.541 [69c58159-8a3f-44ee-9fe5-8c9e986bc09d]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:36:30.542 [69c58159-8a3f-44ee-9fe5-8c9e986bc09d]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:36:30.546 [f7d36d6c-73d8-400f-8503-4c6e97b44ef4]  RULE_MATCH Loan Eligibility Rule matched successfully
+2025-06-26 20:36:30.555 [f774c320-fd1a-4990-9a4d-314f386b0f39]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:36:30.556 [f774c320-fd1a-4990-9a4d-314f386b0f39]  RULE_MATCH Required Field Check: email Rule matched successfully
+2025-06-26 20:36:30.558 [f774c320-fd1a-4990-9a4d-314f386b0f39]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:36:30.565 [4e5a8e5a-8b56-42fe-a7fa-6c3fcacf628e]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:36:30.568 [4e5a8e5a-8b56-42fe-a7fa-6c3fcacf628e]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:36:30.577 [2f458842-0205-4391-8507-9528aab8efaa]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:36:30.578 [2f458842-0205-4391-8507-9528aab8efaa]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:36:30.579 [2f458842-0205-4391-8507-9528aab8efaa]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:36:30.585 [e98e3b81-102e-4200-bcb5-1510268de970]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:36:30.693 [850ea2e5-56ae-4d4c-a0ce-a0fa2852d0f1]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 20:36:30.817 [5abf5327-eff4-45eb-a94c-c3583fc0c6b4]  ERROR_RECOVERY Invalid Rule Error recovery successful: Continued with default result
+2025-06-26 20:36:30.873 [02defeff-1ced-4f32-b207-c2efdefc8379]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 20:36:30.885 [dceb16f4-0ed9-4c81-bb6e-319a693c88a6]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:36:30.886 [dceb16f4-0ed9-4c81-bb6e-319a693c88a6]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:36:30.886 [dceb16f4-0ed9-4c81-bb6e-319a693c88a6]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:36:30.886 [dceb16f4-0ed9-4c81-bb6e-319a693c88a6]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:36:30.886 [dceb16f4-0ed9-4c81-bb6e-319a693c88a6]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:36:30.886 [dceb16f4-0ed9-4c81-bb6e-319a693c88a6]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:36:30.886 [dceb16f4-0ed9-4c81-bb6e-319a693c88a6]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:36:30.886 [dceb16f4-0ed9-4c81-bb6e-319a693c88a6]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:36:30.886 [dceb16f4-0ed9-4c81-bb6e-319a693c88a6]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:36:30.887 [dceb16f4-0ed9-4c81-bb6e-319a693c88a6]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:36:30.889 [9a098575-d3a2-4e25-a0c3-164248747117]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:36:30.890 [9a098575-d3a2-4e25-a0c3-164248747117]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:36:30.890 [9a098575-d3a2-4e25-a0c3-164248747117]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:36:30.891 [9a098575-d3a2-4e25-a0c3-164248747117]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:36:30.891 [9a098575-d3a2-4e25-a0c3-164248747117]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:36:30.892 [9a098575-d3a2-4e25-a0c3-164248747117]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:36:30.893 [9a098575-d3a2-4e25-a0c3-164248747117]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:36:30.893 [9a098575-d3a2-4e25-a0c3-164248747117]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:36:30.893 [9a098575-d3a2-4e25-a0c3-164248747117]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:36:30.894 [9a098575-d3a2-4e25-a0c3-164248747117]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:36:30.927 [7bdc8dcb-faeb-4243-9f0f-c3169dbb57d3]  ERROR_RECOVERY Error Rule Error recovery successful: Continued with default result
+2025-06-26 20:36:30.929 [d8259165-74f4-4470-96ed-0caf950b5742]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:36:30.929 [d8259165-74f4-4470-96ed-0caf950b5742]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:36:30.930 [d8259165-74f4-4470-96ed-0caf950b5742]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:36:30.930 [d8259165-74f4-4470-96ed-0caf950b5742]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:36:30.931 [d8259165-74f4-4470-96ed-0caf950b5742]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:36:30.968 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 20:39:13.044 [1c074e72-949f-47c7-9796-14d802c62111]  RULE_MATCH Minimum Balance Rule matched successfully
+2025-06-26 20:39:13.047 [1c074e72-949f-47c7-9796-14d802c62111]  RULE_MATCH KYC Required Rule matched successfully
+2025-06-26 20:39:13.048 [1c074e72-949f-47c7-9796-14d802c62111]  RULE_MATCH Transaction Limit Rule matched successfully
+2025-06-26 20:39:13.053 [ad94c71d-d901-4381-9c81-45a9b94317e5]  RULE_MATCH Credit Score Check Rule matched successfully
+2025-06-26 20:39:13.054 [ad94c71d-d901-4381-9c81-45a9b94317e5]  RULE_MATCH Minimum Age Rule matched successfully
+2025-06-26 20:39:13.055 [ad94c71d-d901-4381-9c81-45a9b94317e5]  RULE_MATCH Minimum Income Rule matched successfully
+2025-06-26 20:39:13.062 [51bbf7ed-1198-4dec-9aed-07d7828672f3]  RULE_MATCH lastName Required Rule matched successfully
+2025-06-26 20:39:13.063 [51bbf7ed-1198-4dec-9aed-07d7828672f3]  RULE_MATCH firstName Required Rule matched successfully
+2025-06-26 20:39:13.067 [200e476c-6c61-4659-bfd0-fe0a2d376e90]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:39:13.088 [200e476c-6c61-4659-bfd0-fe0a2d376e90]  RULE_MATCH Email Required Rule matched successfully
+2025-06-26 20:39:13.089 [200e476c-6c61-4659-bfd0-fe0a2d376e90]  RULE_MATCH Phone Required Rule matched successfully
+2025-06-26 20:39:13.102 [a2bd711d-e9c0-4ad4-b6e0-f5b424cda2af]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:39:13.105 [bc847671-4b17-4c2d-8874-ea85c6e8b20e]  RULE_MATCH Custom Validation Rule matched successfully
+2025-06-26 20:39:13.114 [8a8f206a-1783-40a9-8d16-ef4d09053c55]  RULE_MATCH username Length Check Rule matched successfully
+2025-06-26 20:39:13.131 [b7265879-5055-49ef-a676-8881956d7bdc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:39:13.155 [b7265879-5055-49ef-a676-8881956d7bdc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:39:13.157 [b7265879-5055-49ef-a676-8881956d7bdc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:39:13.162 [b7265879-5055-49ef-a676-8881956d7bdc]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:39:13.170 [b7265879-5055-49ef-a676-8881956d7bdc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:39:13.170 [b7265879-5055-49ef-a676-8881956d7bdc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:39:13.171 [b7265879-5055-49ef-a676-8881956d7bdc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:39:13.174 [b7265879-5055-49ef-a676-8881956d7bdc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:39:13.176 [b7265879-5055-49ef-a676-8881956d7bdc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:39:13.177 [b7265879-5055-49ef-a676-8881956d7bdc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:39:13.180 [b7265879-5055-49ef-a676-8881956d7bdc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:39:13.181 [b7265879-5055-49ef-a676-8881956d7bdc]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:39:13.188 [b7265879-5055-49ef-a676-8881956d7bdc]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:39:13.189 [b7265879-5055-49ef-a676-8881956d7bdc]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 20:39:13.195 [b7265879-5055-49ef-a676-8881956d7bdc]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:39:13.215 [ecae9217-dcd8-45ec-a4c6-cf306fed991d]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:39:13.216 [ecae9217-dcd8-45ec-a4c6-cf306fed991d]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:39:13.217 [ecae9217-dcd8-45ec-a4c6-cf306fed991d]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:39:13.218 [ecae9217-dcd8-45ec-a4c6-cf306fed991d]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:39:13.231 [bb127f10-1ccf-42c8-bb31-a3766985b245]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:39:13.234 [a7b356a6-e75a-4c7a-8039-0a86704fadb7]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:39:13.235 [a7b356a6-e75a-4c7a-8039-0a86704fadb7]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:39:13.237 [a7b356a6-e75a-4c7a-8039-0a86704fadb7]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:39:13.242 [02cfbd25-1504-494f-bf7c-08d6ec736408]  RULE_MATCH Loan Eligibility Rule matched successfully
+2025-06-26 20:39:13.249 [d6e27790-4ab0-44f6-966a-6bb7435d186a]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:39:13.251 [d6e27790-4ab0-44f6-966a-6bb7435d186a]  RULE_MATCH Required Field Check: email Rule matched successfully
+2025-06-26 20:39:13.252 [d6e27790-4ab0-44f6-966a-6bb7435d186a]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:39:13.257 [4736aba8-f581-48ce-ab64-9aad4953ad96]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:39:13.258 [4736aba8-f581-48ce-ab64-9aad4953ad96]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:39:13.270 [a9c5c607-ba8d-43d9-bdbd-5e922f8639a1]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:39:13.272 [a9c5c607-ba8d-43d9-bdbd-5e922f8639a1]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:39:13.274 [a9c5c607-ba8d-43d9-bdbd-5e922f8639a1]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:39:13.283 [e347bc58-1114-4bdc-b347-e72f3147c03c]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:39:13.402 [19d324bc-07b5-4e8c-9dd4-0e2b953663a3]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 20:39:13.543 [8b979149-17a7-40d5-972a-de620d420958]  ERROR_RECOVERY Invalid Rule Error recovery successful: Continued with default result
+2025-06-26 20:39:13.603 [d50425b9-e200-46d2-8add-75e13439f20f]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 20:39:13.616 [f8c12b83-868d-4d44-8e59-8d5686ed2d90]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:39:13.617 [f8c12b83-868d-4d44-8e59-8d5686ed2d90]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:39:13.617 [f8c12b83-868d-4d44-8e59-8d5686ed2d90]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:39:13.617 [f8c12b83-868d-4d44-8e59-8d5686ed2d90]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:39:13.617 [f8c12b83-868d-4d44-8e59-8d5686ed2d90]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:39:13.617 [f8c12b83-868d-4d44-8e59-8d5686ed2d90]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:39:13.617 [f8c12b83-868d-4d44-8e59-8d5686ed2d90]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:39:13.618 [f8c12b83-868d-4d44-8e59-8d5686ed2d90]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:39:13.618 [f8c12b83-868d-4d44-8e59-8d5686ed2d90]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:39:13.619 [f8c12b83-868d-4d44-8e59-8d5686ed2d90]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:39:13.623 [bbd6569c-2b43-45b2-a085-d2b72650b748]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:39:13.623 [bbd6569c-2b43-45b2-a085-d2b72650b748]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:39:13.624 [bbd6569c-2b43-45b2-a085-d2b72650b748]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:39:13.624 [bbd6569c-2b43-45b2-a085-d2b72650b748]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:39:13.624 [bbd6569c-2b43-45b2-a085-d2b72650b748]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:39:13.625 [bbd6569c-2b43-45b2-a085-d2b72650b748]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:39:13.625 [bbd6569c-2b43-45b2-a085-d2b72650b748]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:39:13.625 [bbd6569c-2b43-45b2-a085-d2b72650b748]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:39:13.626 [bbd6569c-2b43-45b2-a085-d2b72650b748]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:39:13.626 [bbd6569c-2b43-45b2-a085-d2b72650b748]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:39:13.653 [b962383e-20e2-40f7-b04b-1f8122228a9b]  ERROR_RECOVERY Error Rule Error recovery successful: Continued with default result
+2025-06-26 20:39:13.655 [b0db0943-cb93-4c75-b3d4-875fded17684]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:39:13.656 [b0db0943-cb93-4c75-b3d4-875fded17684]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:39:13.656 [b0db0943-cb93-4c75-b3d4-875fded17684]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:39:13.656 [b0db0943-cb93-4c75-b3d4-875fded17684]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:39:13.656 [b0db0943-cb93-4c75-b3d4-875fded17684]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:39:13.708 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 20:40:10.335 [4cf56c8a-db16-4cb4-94a0-a3a890468917]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 20:40:27.033 [3cf417e9-28b2-4baa-b488-88827a06265a]  RULE_MATCH Minimum Balance Rule matched successfully
+2025-06-26 20:40:27.036 [3cf417e9-28b2-4baa-b488-88827a06265a]  RULE_MATCH KYC Required Rule matched successfully
+2025-06-26 20:40:27.037 [3cf417e9-28b2-4baa-b488-88827a06265a]  RULE_MATCH Transaction Limit Rule matched successfully
+2025-06-26 20:40:27.042 [f98da451-c36e-43ac-bcee-3f9e12dc98e9]  RULE_MATCH Credit Score Check Rule matched successfully
+2025-06-26 20:40:27.043 [f98da451-c36e-43ac-bcee-3f9e12dc98e9]  RULE_MATCH Minimum Age Rule matched successfully
+2025-06-26 20:40:27.043 [f98da451-c36e-43ac-bcee-3f9e12dc98e9]  RULE_MATCH Minimum Income Rule matched successfully
+2025-06-26 20:40:27.050 [28b868d3-c600-4e42-8bfc-0a1c6fda42fa]  RULE_MATCH lastName Required Rule matched successfully
+2025-06-26 20:40:27.051 [28b868d3-c600-4e42-8bfc-0a1c6fda42fa]  RULE_MATCH firstName Required Rule matched successfully
+2025-06-26 20:40:27.054 [e4b1a212-1d8c-480d-a734-6d7bfc39cc1f]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:40:27.069 [e4b1a212-1d8c-480d-a734-6d7bfc39cc1f]  RULE_MATCH Email Required Rule matched successfully
+2025-06-26 20:40:27.070 [e4b1a212-1d8c-480d-a734-6d7bfc39cc1f]  RULE_MATCH Phone Required Rule matched successfully
+2025-06-26 20:40:27.080 [ec91843b-9745-4468-b357-153225f1e6b4]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:40:27.085 [9ba4c7e7-e61a-4b65-b3ed-bec3eefaa1a6]  RULE_MATCH Custom Validation Rule matched successfully
+2025-06-26 20:40:27.093 [962c4910-5feb-4d1b-8491-cf3c56a9a2d1]  RULE_MATCH username Length Check Rule matched successfully
+2025-06-26 20:40:27.109 [91e81b0d-bdd3-4f1d-87cb-f25d357e2841]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:40:27.131 [91e81b0d-bdd3-4f1d-87cb-f25d357e2841]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:40:27.134 [91e81b0d-bdd3-4f1d-87cb-f25d357e2841]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:40:27.140 [91e81b0d-bdd3-4f1d-87cb-f25d357e2841]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:40:27.148 [91e81b0d-bdd3-4f1d-87cb-f25d357e2841]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:40:27.149 [91e81b0d-bdd3-4f1d-87cb-f25d357e2841]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:40:27.149 [91e81b0d-bdd3-4f1d-87cb-f25d357e2841]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:40:27.152 [91e81b0d-bdd3-4f1d-87cb-f25d357e2841]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:40:27.154 [91e81b0d-bdd3-4f1d-87cb-f25d357e2841]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:40:27.154 [91e81b0d-bdd3-4f1d-87cb-f25d357e2841]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:40:27.157 [91e81b0d-bdd3-4f1d-87cb-f25d357e2841]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:40:27.158 [91e81b0d-bdd3-4f1d-87cb-f25d357e2841]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:40:27.166 [91e81b0d-bdd3-4f1d-87cb-f25d357e2841]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:40:27.166 [91e81b0d-bdd3-4f1d-87cb-f25d357e2841]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 20:40:27.172 [91e81b0d-bdd3-4f1d-87cb-f25d357e2841]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:40:27.190 [f6bafdc0-4dcb-4055-b5cf-ecb2453f7a88]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:40:27.191 [f6bafdc0-4dcb-4055-b5cf-ecb2453f7a88]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:40:27.192 [f6bafdc0-4dcb-4055-b5cf-ecb2453f7a88]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:40:27.193 [f6bafdc0-4dcb-4055-b5cf-ecb2453f7a88]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:40:27.202 [65f69f9f-3c6e-4f6d-a0f3-e2dbd13bc58e]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:40:27.205 [dc7c81eb-854e-4201-ad6c-b998fcd4461c]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:40:27.206 [dc7c81eb-854e-4201-ad6c-b998fcd4461c]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:40:27.207 [dc7c81eb-854e-4201-ad6c-b998fcd4461c]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:40:27.212 [0c266581-4de4-4da7-af15-6c3e7af63003]  RULE_MATCH Loan Eligibility Rule matched successfully
+2025-06-26 20:40:27.220 [31cf8d32-3b65-4d4e-9d0f-7ae6e476c0a7]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:40:27.221 [31cf8d32-3b65-4d4e-9d0f-7ae6e476c0a7]  RULE_MATCH Required Field Check: email Rule matched successfully
+2025-06-26 20:40:27.221 [31cf8d32-3b65-4d4e-9d0f-7ae6e476c0a7]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:40:27.224 [1d0461af-ccdd-483e-b9f7-dbf6fbe6be96]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:40:27.226 [1d0461af-ccdd-483e-b9f7-dbf6fbe6be96]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:40:27.233 [e95e72d2-8be5-45c5-b917-62126092b425]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:40:27.235 [e95e72d2-8be5-45c5-b917-62126092b425]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:40:27.236 [e95e72d2-8be5-45c5-b917-62126092b425]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:40:27.241 [2fe36f73-8804-4a29-9664-cee5c179f466]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:40:27.367 [4fdbfd51-0f32-4e91-a106-b9cb6a61d205]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 20:40:27.521 [63333bc6-e85f-441b-ad41-8140f136503d]  ERROR_RECOVERY Invalid Rule Error recovery successful: Continued with default result
+2025-06-26 20:40:27.597 [433bc21f-e933-441f-b298-4e1386e628a9]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 20:40:27.617 [fa6e01f9-23a9-4863-8505-97a8f5ec5f86]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:40:27.618 [fa6e01f9-23a9-4863-8505-97a8f5ec5f86]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:40:27.618 [fa6e01f9-23a9-4863-8505-97a8f5ec5f86]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:40:27.618 [fa6e01f9-23a9-4863-8505-97a8f5ec5f86]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:40:27.619 [fa6e01f9-23a9-4863-8505-97a8f5ec5f86]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:40:27.619 [fa6e01f9-23a9-4863-8505-97a8f5ec5f86]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:40:27.619 [fa6e01f9-23a9-4863-8505-97a8f5ec5f86]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:40:27.619 [fa6e01f9-23a9-4863-8505-97a8f5ec5f86]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:40:27.619 [fa6e01f9-23a9-4863-8505-97a8f5ec5f86]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:40:27.619 [fa6e01f9-23a9-4863-8505-97a8f5ec5f86]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:40:27.623 [dbf0756c-7414-41ac-ad86-2f01bcf88d02]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:40:27.625 [dbf0756c-7414-41ac-ad86-2f01bcf88d02]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:40:27.625 [dbf0756c-7414-41ac-ad86-2f01bcf88d02]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:40:27.626 [dbf0756c-7414-41ac-ad86-2f01bcf88d02]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:40:27.626 [dbf0756c-7414-41ac-ad86-2f01bcf88d02]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:40:27.626 [dbf0756c-7414-41ac-ad86-2f01bcf88d02]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:40:27.627 [dbf0756c-7414-41ac-ad86-2f01bcf88d02]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:40:27.627 [dbf0756c-7414-41ac-ad86-2f01bcf88d02]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:40:27.628 [dbf0756c-7414-41ac-ad86-2f01bcf88d02]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:40:27.628 [dbf0756c-7414-41ac-ad86-2f01bcf88d02]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:40:27.671 [4dd0818a-0e83-4575-aa16-98bc91b73268]  ERROR_RECOVERY Error Rule Error recovery successful: Continued with default result
+2025-06-26 20:40:27.673 [c370d802-e272-41c1-89d7-447988438b29]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:40:27.673 [c370d802-e272-41c1-89d7-447988438b29]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:40:27.673 [c370d802-e272-41c1-89d7-447988438b29]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:40:27.674 [c370d802-e272-41c1-89d7-447988438b29]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:40:27.674 [c370d802-e272-41c1-89d7-447988438b29]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:40:27.725 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 20:41:42.982 [3d3e6042-ad24-41b6-8b98-1a525f2682dd]  RULE_MATCH Minimum Balance Rule matched successfully
+2025-06-26 20:41:42.985 [3d3e6042-ad24-41b6-8b98-1a525f2682dd]  RULE_MATCH KYC Required Rule matched successfully
+2025-06-26 20:41:42.986 [3d3e6042-ad24-41b6-8b98-1a525f2682dd]  RULE_MATCH Transaction Limit Rule matched successfully
+2025-06-26 20:41:42.991 [58205968-2f84-494a-987a-3d7d17dbab8c]  RULE_MATCH Credit Score Check Rule matched successfully
+2025-06-26 20:41:42.993 [58205968-2f84-494a-987a-3d7d17dbab8c]  RULE_MATCH Minimum Age Rule matched successfully
+2025-06-26 20:41:42.994 [58205968-2f84-494a-987a-3d7d17dbab8c]  RULE_MATCH Minimum Income Rule matched successfully
+2025-06-26 20:41:43.001 [0d6b6b21-ac2e-441f-a3ca-c597d2332758]  RULE_MATCH lastName Required Rule matched successfully
+2025-06-26 20:41:43.001 [0d6b6b21-ac2e-441f-a3ca-c597d2332758]  RULE_MATCH firstName Required Rule matched successfully
+2025-06-26 20:41:43.006 [1cdda9c2-11d8-4022-8a57-adae2e87de7a]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:41:43.028 [1cdda9c2-11d8-4022-8a57-adae2e87de7a]  RULE_MATCH Email Required Rule matched successfully
+2025-06-26 20:41:43.029 [1cdda9c2-11d8-4022-8a57-adae2e87de7a]  RULE_MATCH Phone Required Rule matched successfully
+2025-06-26 20:41:43.040 [012a7bfa-196d-4e43-9d5b-58665c6ff716]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:41:43.045 [34432747-93e8-47b2-b176-7d7329f7b560]  RULE_MATCH Custom Validation Rule matched successfully
+2025-06-26 20:41:43.055 [1aa1083d-f340-4339-ba62-c73a11cbb5e2]  RULE_MATCH username Length Check Rule matched successfully
+2025-06-26 20:41:43.075 [1efb086f-8f40-42bc-bc7c-8c6470f60e25]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:41:43.101 [1efb086f-8f40-42bc-bc7c-8c6470f60e25]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:41:43.103 [1efb086f-8f40-42bc-bc7c-8c6470f60e25]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:41:43.108 [1efb086f-8f40-42bc-bc7c-8c6470f60e25]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:41:43.116 [1efb086f-8f40-42bc-bc7c-8c6470f60e25]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:41:43.117 [1efb086f-8f40-42bc-bc7c-8c6470f60e25]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:41:43.118 [1efb086f-8f40-42bc-bc7c-8c6470f60e25]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:41:43.121 [1efb086f-8f40-42bc-bc7c-8c6470f60e25]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:41:43.123 [1efb086f-8f40-42bc-bc7c-8c6470f60e25]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:41:43.124 [1efb086f-8f40-42bc-bc7c-8c6470f60e25]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:41:43.127 [1efb086f-8f40-42bc-bc7c-8c6470f60e25]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:41:43.128 [1efb086f-8f40-42bc-bc7c-8c6470f60e25]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:41:43.139 [1efb086f-8f40-42bc-bc7c-8c6470f60e25]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:41:43.140 [1efb086f-8f40-42bc-bc7c-8c6470f60e25]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 20:41:43.147 [1efb086f-8f40-42bc-bc7c-8c6470f60e25]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:41:43.170 [8f008da4-91ee-4eb8-a0b2-4fd3e62e8288]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:41:43.171 [8f008da4-91ee-4eb8-a0b2-4fd3e62e8288]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:41:43.172 [8f008da4-91ee-4eb8-a0b2-4fd3e62e8288]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:41:43.174 [8f008da4-91ee-4eb8-a0b2-4fd3e62e8288]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:41:43.187 [5655891a-b5c1-4394-b7b1-6e5d13447c4b]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:41:43.190 [8c68305c-cdf7-4dca-b2aa-fc7bc61c1b72]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:41:43.192 [8c68305c-cdf7-4dca-b2aa-fc7bc61c1b72]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:41:43.194 [8c68305c-cdf7-4dca-b2aa-fc7bc61c1b72]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:41:43.198 [4acfca4b-30b1-4228-8414-6cabfef10ab4]  RULE_MATCH Loan Eligibility Rule matched successfully
+2025-06-26 20:41:43.208 [ab62fb26-b8a8-4c9e-af90-6cd4de471621]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:41:43.210 [ab62fb26-b8a8-4c9e-af90-6cd4de471621]  RULE_MATCH Required Field Check: email Rule matched successfully
+2025-06-26 20:41:43.219 [ab62fb26-b8a8-4c9e-af90-6cd4de471621]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:41:43.228 [f79e28c5-6e8c-4b5f-bd12-894680aaccba]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:41:43.229 [f79e28c5-6e8c-4b5f-bd12-894680aaccba]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:41:43.237 [0aeba7c9-c87f-4ffd-88e3-567fe02d6671]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:41:43.237 [0aeba7c9-c87f-4ffd-88e3-567fe02d6671]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:41:43.238 [0aeba7c9-c87f-4ffd-88e3-567fe02d6671]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:41:43.245 [8b7ff136-19d6-450e-b94e-6cc7b9531be0]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:41:43.354 [12c67fed-c11d-49ac-bbb3-0f56c623edac]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 20:41:43.486 [24f46d0d-1a77-4d23-b2d0-33fc7f902037]  ERROR_RECOVERY Invalid Rule Error recovery successful: Continued with default result
+2025-06-26 20:41:43.537 [46b9e68a-adbe-4c5a-8781-315e2ba6e120]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 20:41:43.550 [d2783a88-cd3f-43ef-bdc9-d7bb14f31933]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:41:43.551 [d2783a88-cd3f-43ef-bdc9-d7bb14f31933]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:41:43.551 [d2783a88-cd3f-43ef-bdc9-d7bb14f31933]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:41:43.551 [d2783a88-cd3f-43ef-bdc9-d7bb14f31933]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:41:43.552 [d2783a88-cd3f-43ef-bdc9-d7bb14f31933]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:41:43.552 [d2783a88-cd3f-43ef-bdc9-d7bb14f31933]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:41:43.552 [d2783a88-cd3f-43ef-bdc9-d7bb14f31933]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:41:43.553 [d2783a88-cd3f-43ef-bdc9-d7bb14f31933]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:41:43.553 [d2783a88-cd3f-43ef-bdc9-d7bb14f31933]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:41:43.553 [d2783a88-cd3f-43ef-bdc9-d7bb14f31933]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:41:43.558 [45674139-1ba2-4b40-95ae-cbafe707c954]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:41:43.558 [45674139-1ba2-4b40-95ae-cbafe707c954]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:41:43.559 [45674139-1ba2-4b40-95ae-cbafe707c954]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:41:43.559 [45674139-1ba2-4b40-95ae-cbafe707c954]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:41:43.560 [45674139-1ba2-4b40-95ae-cbafe707c954]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:41:43.560 [45674139-1ba2-4b40-95ae-cbafe707c954]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:41:43.560 [45674139-1ba2-4b40-95ae-cbafe707c954]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:41:43.560 [45674139-1ba2-4b40-95ae-cbafe707c954]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:41:43.562 [45674139-1ba2-4b40-95ae-cbafe707c954]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:41:43.562 [45674139-1ba2-4b40-95ae-cbafe707c954]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:41:43.595 [6b94be95-065f-441f-a906-120d88e3e0e8]  ERROR_RECOVERY Error Rule Error recovery successful: Continued with default result
+2025-06-26 20:41:43.596 [7c01b8e2-b38b-4118-b020-cf0ca794d862]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:41:43.596 [7c01b8e2-b38b-4118-b020-cf0ca794d862]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:41:43.596 [7c01b8e2-b38b-4118-b020-cf0ca794d862]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:41:43.596 [7c01b8e2-b38b-4118-b020-cf0ca794d862]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:41:43.597 [7c01b8e2-b38b-4118-b020-cf0ca794d862]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:41:43.651 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 20:42:02.751 [4b4e6a35-7f6e-4b76-b72d-654cb6956dea]  RULE_MATCH Minimum Balance Rule matched successfully
+2025-06-26 20:42:02.754 [4b4e6a35-7f6e-4b76-b72d-654cb6956dea]  RULE_MATCH KYC Required Rule matched successfully
+2025-06-26 20:42:02.756 [4b4e6a35-7f6e-4b76-b72d-654cb6956dea]  RULE_MATCH Transaction Limit Rule matched successfully
+2025-06-26 20:42:02.761 [170074aa-da2d-42d2-94ba-c4c256b39939]  RULE_MATCH Credit Score Check Rule matched successfully
+2025-06-26 20:42:02.763 [170074aa-da2d-42d2-94ba-c4c256b39939]  RULE_MATCH Minimum Age Rule matched successfully
+2025-06-26 20:42:02.764 [170074aa-da2d-42d2-94ba-c4c256b39939]  RULE_MATCH Minimum Income Rule matched successfully
+2025-06-26 20:42:02.771 [16380594-10c0-44ef-a247-2b1851d344bd]  RULE_MATCH lastName Required Rule matched successfully
+2025-06-26 20:42:02.772 [16380594-10c0-44ef-a247-2b1851d344bd]  RULE_MATCH firstName Required Rule matched successfully
+2025-06-26 20:42:02.777 [df422863-4379-4126-b7e2-2963d2a4e538]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:42:02.801 [df422863-4379-4126-b7e2-2963d2a4e538]  RULE_MATCH Email Required Rule matched successfully
+2025-06-26 20:42:02.803 [df422863-4379-4126-b7e2-2963d2a4e538]  RULE_MATCH Phone Required Rule matched successfully
+2025-06-26 20:42:02.814 [beb5e212-0bc1-409c-9c94-6103488e17cb]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:42:02.817 [c4430ff1-4acf-46ea-8732-3e085d20a99c]  RULE_MATCH Custom Validation Rule matched successfully
+2025-06-26 20:42:02.828 [ea21903f-f6ce-4387-8ba8-4c8352670412]  RULE_MATCH username Length Check Rule matched successfully
+2025-06-26 20:42:02.848 [d2f696d9-6222-4f1b-8101-f12df96a02da]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:42:02.878 [d2f696d9-6222-4f1b-8101-f12df96a02da]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:42:02.880 [d2f696d9-6222-4f1b-8101-f12df96a02da]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:42:02.885 [d2f696d9-6222-4f1b-8101-f12df96a02da]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:42:02.892 [d2f696d9-6222-4f1b-8101-f12df96a02da]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:42:02.893 [d2f696d9-6222-4f1b-8101-f12df96a02da]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:42:02.894 [d2f696d9-6222-4f1b-8101-f12df96a02da]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:42:02.897 [d2f696d9-6222-4f1b-8101-f12df96a02da]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:42:02.900 [d2f696d9-6222-4f1b-8101-f12df96a02da]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:42:02.901 [d2f696d9-6222-4f1b-8101-f12df96a02da]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:42:02.903 [d2f696d9-6222-4f1b-8101-f12df96a02da]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:42:02.904 [d2f696d9-6222-4f1b-8101-f12df96a02da]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:42:02.913 [d2f696d9-6222-4f1b-8101-f12df96a02da]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:42:02.914 [d2f696d9-6222-4f1b-8101-f12df96a02da]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 20:42:02.920 [d2f696d9-6222-4f1b-8101-f12df96a02da]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:42:02.940 [73795581-ad0a-4f08-9856-e6d05818dfcb]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:42:02.941 [73795581-ad0a-4f08-9856-e6d05818dfcb]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:42:02.942 [73795581-ad0a-4f08-9856-e6d05818dfcb]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:42:02.944 [73795581-ad0a-4f08-9856-e6d05818dfcb]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:42:02.956 [b11acf34-1f17-4f82-8f19-ec8913590e25]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:42:02.961 [1728a255-a9a9-4892-8ad6-890039414270]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:42:02.963 [1728a255-a9a9-4892-8ad6-890039414270]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:42:02.964 [1728a255-a9a9-4892-8ad6-890039414270]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:42:02.968 [e3f3efec-8039-472b-9d2a-60c40e91a86d]  RULE_MATCH Loan Eligibility Rule matched successfully
+2025-06-26 20:42:02.975 [977b5503-52f2-4723-bd28-3b8d1a9f953e]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:42:02.976 [977b5503-52f2-4723-bd28-3b8d1a9f953e]  RULE_MATCH Required Field Check: email Rule matched successfully
+2025-06-26 20:42:02.977 [977b5503-52f2-4723-bd28-3b8d1a9f953e]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:42:02.982 [6695def4-2db4-4a6c-80c4-f243a4028e1e]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:42:02.984 [6695def4-2db4-4a6c-80c4-f243a4028e1e]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:42:02.993 [0508a9d6-578c-4149-a4ee-6029d7cbb7ef]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:42:02.996 [0508a9d6-578c-4149-a4ee-6029d7cbb7ef]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:42:02.998 [0508a9d6-578c-4149-a4ee-6029d7cbb7ef]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:42:03.006 [962a751b-e975-4285-b115-456f896f9541]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:42:03.109 [0315dbf5-17b0-49a7-aefc-06e5f80628cd]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 20:42:03.226 [fdc28221-9002-46ce-be52-225cb2b70d9a]  ERROR_RECOVERY Invalid Rule Error recovery successful: Continued with default result
+2025-06-26 20:42:03.279 [67eab6b4-915a-4c69-aa38-bdfdb95939d2]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 20:42:03.293 [fe249733-c2a8-46f5-b292-e64534ee6955]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:42:03.294 [fe249733-c2a8-46f5-b292-e64534ee6955]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:42:03.294 [fe249733-c2a8-46f5-b292-e64534ee6955]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:42:03.294 [fe249733-c2a8-46f5-b292-e64534ee6955]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:42:03.295 [fe249733-c2a8-46f5-b292-e64534ee6955]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:42:03.295 [fe249733-c2a8-46f5-b292-e64534ee6955]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:42:03.296 [fe249733-c2a8-46f5-b292-e64534ee6955]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:42:03.296 [fe249733-c2a8-46f5-b292-e64534ee6955]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:42:03.297 [fe249733-c2a8-46f5-b292-e64534ee6955]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:42:03.297 [fe249733-c2a8-46f5-b292-e64534ee6955]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:42:03.300 [f1f3440c-28a6-4558-b8fd-4a1aa1de6b64]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:42:03.301 [f1f3440c-28a6-4558-b8fd-4a1aa1de6b64]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:42:03.301 [f1f3440c-28a6-4558-b8fd-4a1aa1de6b64]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:42:03.302 [f1f3440c-28a6-4558-b8fd-4a1aa1de6b64]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:42:03.302 [f1f3440c-28a6-4558-b8fd-4a1aa1de6b64]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:42:03.303 [f1f3440c-28a6-4558-b8fd-4a1aa1de6b64]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:42:03.304 [f1f3440c-28a6-4558-b8fd-4a1aa1de6b64]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:42:03.304 [f1f3440c-28a6-4558-b8fd-4a1aa1de6b64]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:42:03.304 [f1f3440c-28a6-4558-b8fd-4a1aa1de6b64]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:42:03.305 [f1f3440c-28a6-4558-b8fd-4a1aa1de6b64]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:42:03.335 [4d1c0a6a-9342-4368-a228-ebc17c5a0e4f]  ERROR_RECOVERY Error Rule Error recovery successful: Continued with default result
+2025-06-26 20:42:03.337 [4d047143-9b67-48a7-9a75-ee79ba77b9dd]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:42:03.338 [4d047143-9b67-48a7-9a75-ee79ba77b9dd]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:42:03.338 [4d047143-9b67-48a7-9a75-ee79ba77b9dd]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:42:03.338 [4d047143-9b67-48a7-9a75-ee79ba77b9dd]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:42:03.338 [4d047143-9b67-48a7-9a75-ee79ba77b9dd]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:42:03.380 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 20:43:02.491 [0f7f99a3-85d0-454f-8212-9130d34464b0]  RULE_MATCH Minimum Balance Rule matched successfully
+2025-06-26 20:43:02.494 [0f7f99a3-85d0-454f-8212-9130d34464b0]  RULE_MATCH KYC Required Rule matched successfully
+2025-06-26 20:43:02.495 [0f7f99a3-85d0-454f-8212-9130d34464b0]  RULE_MATCH Transaction Limit Rule matched successfully
+2025-06-26 20:43:02.500 [5c622eef-a8e5-4485-b76e-9c60d9132bd0]  RULE_MATCH Credit Score Check Rule matched successfully
+2025-06-26 20:43:02.502 [5c622eef-a8e5-4485-b76e-9c60d9132bd0]  RULE_MATCH Minimum Age Rule matched successfully
+2025-06-26 20:43:02.503 [5c622eef-a8e5-4485-b76e-9c60d9132bd0]  RULE_MATCH Minimum Income Rule matched successfully
+2025-06-26 20:43:02.509 [84e13e70-c530-44e4-95c2-61750abf07ce]  RULE_MATCH lastName Required Rule matched successfully
+2025-06-26 20:43:02.510 [84e13e70-c530-44e4-95c2-61750abf07ce]  RULE_MATCH firstName Required Rule matched successfully
+2025-06-26 20:43:02.516 [1745d10e-7acb-4ca1-b96d-1013da90da8c]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:43:02.538 [1745d10e-7acb-4ca1-b96d-1013da90da8c]  RULE_MATCH Email Required Rule matched successfully
+2025-06-26 20:43:02.540 [1745d10e-7acb-4ca1-b96d-1013da90da8c]  RULE_MATCH Phone Required Rule matched successfully
+2025-06-26 20:43:02.552 [0237590f-cd26-4c83-a717-32b7ff6ff4cd]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:43:02.556 [a0389cbe-1894-46d5-9f96-cfe187c3af2f]  RULE_MATCH Custom Validation Rule matched successfully
+2025-06-26 20:43:02.563 [2453aeb3-d809-45ba-b25c-1594599d137a]  RULE_MATCH username Length Check Rule matched successfully
+2025-06-26 20:43:02.581 [3cfe7c9a-9f1c-40e9-8fc8-bcc4971a087a]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:43:02.610 [3cfe7c9a-9f1c-40e9-8fc8-bcc4971a087a]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:43:02.612 [3cfe7c9a-9f1c-40e9-8fc8-bcc4971a087a]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:43:02.616 [3cfe7c9a-9f1c-40e9-8fc8-bcc4971a087a]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:43:02.622 [3cfe7c9a-9f1c-40e9-8fc8-bcc4971a087a]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:43:02.624 [3cfe7c9a-9f1c-40e9-8fc8-bcc4971a087a]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:43:02.625 [3cfe7c9a-9f1c-40e9-8fc8-bcc4971a087a]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:43:02.628 [3cfe7c9a-9f1c-40e9-8fc8-bcc4971a087a]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:43:02.629 [3cfe7c9a-9f1c-40e9-8fc8-bcc4971a087a]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:43:02.630 [3cfe7c9a-9f1c-40e9-8fc8-bcc4971a087a]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:43:02.634 [3cfe7c9a-9f1c-40e9-8fc8-bcc4971a087a]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:43:02.635 [3cfe7c9a-9f1c-40e9-8fc8-bcc4971a087a]  RULE_MATCH Check Rule matched successfully
+2025-06-26 20:43:02.646 [3cfe7c9a-9f1c-40e9-8fc8-bcc4971a087a]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:43:02.647 [3cfe7c9a-9f1c-40e9-8fc8-bcc4971a087a]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 20:43:02.653 [3cfe7c9a-9f1c-40e9-8fc8-bcc4971a087a]  RULE_MATCH adult Rule matched successfully
+2025-06-26 20:43:02.671 [948b5fc0-81be-401e-a284-ba41f5014611]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:43:02.673 [948b5fc0-81be-401e-a284-ba41f5014611]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:43:02.675 [948b5fc0-81be-401e-a284-ba41f5014611]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:43:02.676 [948b5fc0-81be-401e-a284-ba41f5014611]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:43:02.686 [70063975-fc25-4c5f-a1a2-c5506f0cf045]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 20:43:02.689 [afb71603-e11a-438d-b169-0ad81502bfed]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:43:02.692 [afb71603-e11a-438d-b169-0ad81502bfed]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:43:02.693 [afb71603-e11a-438d-b169-0ad81502bfed]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 20:43:02.697 [6e7d6b2a-da55-40ff-a8ff-bd9180caabbe]  RULE_MATCH Loan Eligibility Rule matched successfully
+2025-06-26 20:43:02.706 [d40cf921-4d02-4483-b8bf-bec31f5539f4]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:43:02.707 [d40cf921-4d02-4483-b8bf-bec31f5539f4]  RULE_MATCH Required Field Check: email Rule matched successfully
+2025-06-26 20:43:02.708 [d40cf921-4d02-4483-b8bf-bec31f5539f4]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 20:43:02.714 [b1f71120-0663-4db3-8649-dc655af9cd61]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:43:02.716 [b1f71120-0663-4db3-8649-dc655af9cd61]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 20:43:02.726 [ca1fa94c-d820-42cc-86c6-93549c252f7f]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:43:02.728 [ca1fa94c-d820-42cc-86c6-93549c252f7f]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:43:02.729 [ca1fa94c-d820-42cc-86c6-93549c252f7f]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 20:43:02.737 [f6f717e4-ec55-4777-9896-d311eea8b0d0]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 20:43:02.862 [d3f9baa3-bb92-4d94-859a-de2fed844e06]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 20:43:03.015 [eb5c2c51-77a3-4fa6-aeed-e4b8fac52acd]  ERROR_RECOVERY Invalid Rule Error recovery successful: Continued with default result
+2025-06-26 20:43:03.093 [47c7fc94-a5aa-4a01-abdc-fe4e4fc11c2b]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 20:43:03.099 [2a8ff6cc-a0ba-4de1-a034-c1192c85326f]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:43:03.100 [2a8ff6cc-a0ba-4de1-a034-c1192c85326f]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:43:03.100 [2a8ff6cc-a0ba-4de1-a034-c1192c85326f]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:43:03.101 [2a8ff6cc-a0ba-4de1-a034-c1192c85326f]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:43:03.101 [2a8ff6cc-a0ba-4de1-a034-c1192c85326f]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:43:03.101 [2a8ff6cc-a0ba-4de1-a034-c1192c85326f]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:43:03.102 [2a8ff6cc-a0ba-4de1-a034-c1192c85326f]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:43:03.102 [2a8ff6cc-a0ba-4de1-a034-c1192c85326f]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:43:03.103 [2a8ff6cc-a0ba-4de1-a034-c1192c85326f]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 20:43:03.103 [2a8ff6cc-a0ba-4de1-a034-c1192c85326f]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 20:43:03.106 [e5103609-150e-4cba-a363-0d9434b7652b]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:43:03.106 [e5103609-150e-4cba-a363-0d9434b7652b]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:43:03.106 [e5103609-150e-4cba-a363-0d9434b7652b]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:43:03.107 [e5103609-150e-4cba-a363-0d9434b7652b]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:43:03.107 [e5103609-150e-4cba-a363-0d9434b7652b]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:43:03.108 [e5103609-150e-4cba-a363-0d9434b7652b]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:43:03.108 [e5103609-150e-4cba-a363-0d9434b7652b]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:43:03.108 [e5103609-150e-4cba-a363-0d9434b7652b]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:43:03.109 [e5103609-150e-4cba-a363-0d9434b7652b]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:43:03.109 [e5103609-150e-4cba-a363-0d9434b7652b]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 20:43:03.150 [3de1b2b7-0106-4d63-b18b-af5b32ebe8c4]  ERROR_RECOVERY Error Rule Error recovery successful: Continued with default result
+2025-06-26 20:43:03.154 [979ceeed-9068-4430-b4e4-f09d20574aca]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:43:03.154 [979ceeed-9068-4430-b4e4-f09d20574aca]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:43:03.154 [979ceeed-9068-4430-b4e4-f09d20574aca]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:43:03.154 [979ceeed-9068-4430-b4e4-f09d20574aca]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:43:03.154 [979ceeed-9068-4430-b4e4-f09d20574aca]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 20:43:03.222 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 21:55:46.558 [7f91bf68-91b1-470c-a8a1-b3cb16b079a1]  RULE_MATCH Minimum Balance Rule matched successfully
+2025-06-26 21:55:46.560 [7f91bf68-91b1-470c-a8a1-b3cb16b079a1]  RULE_MATCH KYC Required Rule matched successfully
+2025-06-26 21:55:46.561 [7f91bf68-91b1-470c-a8a1-b3cb16b079a1]  RULE_MATCH Transaction Limit Rule matched successfully
+2025-06-26 21:55:46.564 [7659a65e-915e-475c-8fd5-db825841b699]  RULE_MATCH Credit Score Check Rule matched successfully
+2025-06-26 21:55:46.565 [7659a65e-915e-475c-8fd5-db825841b699]  RULE_MATCH Minimum Age Rule matched successfully
+2025-06-26 21:55:46.566 [7659a65e-915e-475c-8fd5-db825841b699]  RULE_MATCH Minimum Income Rule matched successfully
+2025-06-26 21:55:46.571 [1b77aa79-562f-4170-8f1c-6b3d36b4626a]  RULE_MATCH lastName Required Rule matched successfully
+2025-06-26 21:55:46.571 [1b77aa79-562f-4170-8f1c-6b3d36b4626a]  RULE_MATCH firstName Required Rule matched successfully
+2025-06-26 21:55:46.575 [7b64c1c6-a0f3-459e-9de8-6a9c23a309a9]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 21:55:46.588 [7b64c1c6-a0f3-459e-9de8-6a9c23a309a9]  RULE_MATCH Email Required Rule matched successfully
+2025-06-26 21:55:46.589 [7b64c1c6-a0f3-459e-9de8-6a9c23a309a9]  RULE_MATCH Phone Required Rule matched successfully
+2025-06-26 21:55:46.594 [c5f2e795-1759-4daa-ae87-32e16acf691a]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 21:55:46.596 [b6c45c5b-d135-4dff-9754-a9a9f20632b7]  RULE_MATCH Custom Validation Rule matched successfully
+2025-06-26 21:55:46.607 [f83e13dc-d9c3-4bf4-8b9b-2f99fcfd1433]  RULE_MATCH username Length Check Rule matched successfully
+2025-06-26 21:55:46.619 [7464dcef-b5c9-4202-9aed-1fbb3aaf9427]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:55:46.635 [7464dcef-b5c9-4202-9aed-1fbb3aaf9427]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:55:46.637 [7464dcef-b5c9-4202-9aed-1fbb3aaf9427]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:55:46.640 [7464dcef-b5c9-4202-9aed-1fbb3aaf9427]  RULE_MATCH adult Rule matched successfully
+2025-06-26 21:55:46.646 [7464dcef-b5c9-4202-9aed-1fbb3aaf9427]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:55:46.646 [7464dcef-b5c9-4202-9aed-1fbb3aaf9427]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:55:46.647 [7464dcef-b5c9-4202-9aed-1fbb3aaf9427]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:55:46.650 [7464dcef-b5c9-4202-9aed-1fbb3aaf9427]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:55:46.651 [7464dcef-b5c9-4202-9aed-1fbb3aaf9427]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:55:46.652 [7464dcef-b5c9-4202-9aed-1fbb3aaf9427]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:55:46.655 [7464dcef-b5c9-4202-9aed-1fbb3aaf9427]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:55:46.656 [7464dcef-b5c9-4202-9aed-1fbb3aaf9427]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:55:46.663 [7464dcef-b5c9-4202-9aed-1fbb3aaf9427]  RULE_MATCH adult Rule matched successfully
+2025-06-26 21:55:46.664 [7464dcef-b5c9-4202-9aed-1fbb3aaf9427]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 21:55:46.667 [7464dcef-b5c9-4202-9aed-1fbb3aaf9427]  RULE_MATCH adult Rule matched successfully
+2025-06-26 21:55:46.686 [387c1146-9b80-4f6b-88f7-a9a00902c875]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 21:55:46.687 [387c1146-9b80-4f6b-88f7-a9a00902c875]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 21:55:46.688 [387c1146-9b80-4f6b-88f7-a9a00902c875]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 21:55:46.689 [387c1146-9b80-4f6b-88f7-a9a00902c875]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 21:55:46.696 [4c1b461a-de9d-4307-8d20-8b18a4f589da]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 21:55:46.698 [83299af3-1295-466a-ab1a-f835f27d786d]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 21:55:46.699 [83299af3-1295-466a-ab1a-f835f27d786d]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 21:55:46.700 [83299af3-1295-466a-ab1a-f835f27d786d]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 21:55:46.702 [436e111d-3ef9-474b-9c0f-16d8bcefe78b]  RULE_MATCH Loan Eligibility Rule matched successfully
+2025-06-26 21:55:46.708 [6e95caff-96f1-44f9-a114-cc28079c3bf7]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 21:55:46.709 [6e95caff-96f1-44f9-a114-cc28079c3bf7]  RULE_MATCH Required Field Check: email Rule matched successfully
+2025-06-26 21:55:46.709 [6e95caff-96f1-44f9-a114-cc28079c3bf7]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 21:55:46.712 [6d046fd8-20af-460e-97b9-fd74ee3be73c]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 21:55:46.713 [6d046fd8-20af-460e-97b9-fd74ee3be73c]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 21:55:46.718 [ce6796e3-bfaf-470e-bdc2-aadc1a8843b3]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 21:55:46.720 [ce6796e3-bfaf-470e-bdc2-aadc1a8843b3]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 21:55:46.720 [ce6796e3-bfaf-470e-bdc2-aadc1a8843b3]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 21:55:46.723 [73b14258-e8fc-4266-9a26-dd7465716bc0]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 21:55:46.786 [460cc850-947a-4c7c-8b35-c7cf217ee120]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 21:55:46.875 [2f9bd25d-f5dc-4843-9281-a8c3a413886f]  ERROR_RECOVERY Invalid Rule Error recovery successful: Continued with default result
+2025-06-26 21:55:46.909 [1b3d8ca5-5c5e-4d0d-9cc4-ca2e92033661]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 21:55:46.923 [dd537b61-701a-4e03-a881-e0291213a683]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 21:55:46.923 [dd537b61-701a-4e03-a881-e0291213a683]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 21:55:46.923 [dd537b61-701a-4e03-a881-e0291213a683]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 21:55:46.923 [dd537b61-701a-4e03-a881-e0291213a683]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 21:55:46.923 [dd537b61-701a-4e03-a881-e0291213a683]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 21:55:46.923 [dd537b61-701a-4e03-a881-e0291213a683]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 21:55:46.924 [dd537b61-701a-4e03-a881-e0291213a683]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 21:55:46.924 [dd537b61-701a-4e03-a881-e0291213a683]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 21:55:46.924 [dd537b61-701a-4e03-a881-e0291213a683]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 21:55:46.924 [dd537b61-701a-4e03-a881-e0291213a683]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 21:55:46.927 [9d3d6a23-cba2-4334-9f2a-638f7d161b60]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 21:55:46.927 [9d3d6a23-cba2-4334-9f2a-638f7d161b60]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 21:55:46.927 [9d3d6a23-cba2-4334-9f2a-638f7d161b60]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 21:55:46.928 [9d3d6a23-cba2-4334-9f2a-638f7d161b60]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 21:55:46.928 [9d3d6a23-cba2-4334-9f2a-638f7d161b60]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 21:55:46.928 [9d3d6a23-cba2-4334-9f2a-638f7d161b60]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 21:55:46.929 [9d3d6a23-cba2-4334-9f2a-638f7d161b60]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 21:55:46.929 [9d3d6a23-cba2-4334-9f2a-638f7d161b60]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 21:55:46.930 [9d3d6a23-cba2-4334-9f2a-638f7d161b60]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 21:55:46.930 [9d3d6a23-cba2-4334-9f2a-638f7d161b60]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 21:55:46.961 [928b49ef-b6e7-4d1a-a807-5c8ba3fe8a47]  ERROR_RECOVERY Error Rule Error recovery successful: Continued with default result
+2025-06-26 21:55:46.963 [e34a8147-621d-4bc9-b525-11fcd6aa4cf6]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 21:55:46.963 [e34a8147-621d-4bc9-b525-11fcd6aa4cf6]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 21:55:46.963 [e34a8147-621d-4bc9-b525-11fcd6aa4cf6]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 21:55:46.963 [e34a8147-621d-4bc9-b525-11fcd6aa4cf6]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 21:55:46.964 [e34a8147-621d-4bc9-b525-11fcd6aa4cf6]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 21:55:47.011 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 21:57:52.160 [934693de-23c6-4909-a31a-ed3581484898]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 21:58:58.101 [f3e107f4-56b1-40b9-9ffa-8fe95d7a8173]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 21:58:58.126 [067bf53b-4fcc-4344-aa27-98c2d1a78814]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 21:59:33.982 [c77bc983-4164-435f-83a3-baf122a6f970]  RULE_MATCH Minimum Balance Rule matched successfully
+2025-06-26 21:59:33.983 [c77bc983-4164-435f-83a3-baf122a6f970]  RULE_MATCH KYC Required Rule matched successfully
+2025-06-26 21:59:33.983 [c77bc983-4164-435f-83a3-baf122a6f970]  RULE_MATCH Transaction Limit Rule matched successfully
+2025-06-26 21:59:33.987 [be26a292-c192-4bcc-9d11-f4ab9da164cf]  RULE_MATCH Credit Score Check Rule matched successfully
+2025-06-26 21:59:33.988 [be26a292-c192-4bcc-9d11-f4ab9da164cf]  RULE_MATCH Minimum Age Rule matched successfully
+2025-06-26 21:59:33.988 [be26a292-c192-4bcc-9d11-f4ab9da164cf]  RULE_MATCH Minimum Income Rule matched successfully
+2025-06-26 21:59:33.992 [bcfbcc01-09dd-4f3a-9a57-b1215511e9ba]  RULE_MATCH lastName Required Rule matched successfully
+2025-06-26 21:59:33.993 [bcfbcc01-09dd-4f3a-9a57-b1215511e9ba]  RULE_MATCH firstName Required Rule matched successfully
+2025-06-26 21:59:33.996 [8b95ae55-fcd0-4c8b-bf9d-c75b88c6d752]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 21:59:34.007 [8b95ae55-fcd0-4c8b-bf9d-c75b88c6d752]  RULE_MATCH Email Required Rule matched successfully
+2025-06-26 21:59:34.008 [8b95ae55-fcd0-4c8b-bf9d-c75b88c6d752]  RULE_MATCH Phone Required Rule matched successfully
+2025-06-26 21:59:34.013 [72d19739-55bb-439c-a5ac-3e8c0a1a838b]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 21:59:34.015 [7e60381a-7b31-46b2-80dd-8df35dc8dedc]  RULE_MATCH Custom Validation Rule matched successfully
+2025-06-26 21:59:34.023 [1e8a2363-86d5-4f0b-986f-2248a3432623]  RULE_MATCH username Length Check Rule matched successfully
+2025-06-26 21:59:34.034 [60432082-76a7-4610-b302-3346bb8f3ace]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:59:34.050 [60432082-76a7-4610-b302-3346bb8f3ace]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:59:34.051 [60432082-76a7-4610-b302-3346bb8f3ace]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:59:34.053 [60432082-76a7-4610-b302-3346bb8f3ace]  RULE_MATCH adult Rule matched successfully
+2025-06-26 21:59:34.058 [60432082-76a7-4610-b302-3346bb8f3ace]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:59:34.058 [60432082-76a7-4610-b302-3346bb8f3ace]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:59:34.059 [60432082-76a7-4610-b302-3346bb8f3ace]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:59:34.061 [60432082-76a7-4610-b302-3346bb8f3ace]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:59:34.062 [60432082-76a7-4610-b302-3346bb8f3ace]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:59:34.062 [60432082-76a7-4610-b302-3346bb8f3ace]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:59:34.064 [60432082-76a7-4610-b302-3346bb8f3ace]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:59:34.066 [60432082-76a7-4610-b302-3346bb8f3ace]  RULE_MATCH Check Rule matched successfully
+2025-06-26 21:59:34.073 [60432082-76a7-4610-b302-3346bb8f3ace]  RULE_MATCH adult Rule matched successfully
+2025-06-26 21:59:34.074 [60432082-76a7-4610-b302-3346bb8f3ace]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 21:59:34.077 [60432082-76a7-4610-b302-3346bb8f3ace]  RULE_MATCH adult Rule matched successfully
+2025-06-26 21:59:34.098 [a29a57f5-bad3-4395-8ffc-90ff93f424dd]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 21:59:34.098 [a29a57f5-bad3-4395-8ffc-90ff93f424dd]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 21:59:34.099 [a29a57f5-bad3-4395-8ffc-90ff93f424dd]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 21:59:34.099 [a29a57f5-bad3-4395-8ffc-90ff93f424dd]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 21:59:34.108 [a3b3207b-298d-4770-80ee-ab8216a8e355]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 21:59:34.110 [b68152f8-3804-4743-a9d0-50665f54737e]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 21:59:34.111 [b68152f8-3804-4743-a9d0-50665f54737e]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 21:59:34.111 [b68152f8-3804-4743-a9d0-50665f54737e]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 21:59:34.114 [f8a3dff3-adf7-4ba2-bbb3-a7470a858f08]  RULE_MATCH Loan Eligibility Rule matched successfully
+2025-06-26 21:59:34.119 [b5e9ee60-d0ba-4be1-b2ca-bd44b52e98ba]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 21:59:34.120 [b5e9ee60-d0ba-4be1-b2ca-bd44b52e98ba]  RULE_MATCH Required Field Check: email Rule matched successfully
+2025-06-26 21:59:34.121 [b5e9ee60-d0ba-4be1-b2ca-bd44b52e98ba]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 21:59:34.123 [0611ca64-ac8f-4589-a6a6-a619bee89241]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 21:59:34.124 [0611ca64-ac8f-4589-a6a6-a619bee89241]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 21:59:34.128 [e8e69294-07d4-4b8c-80ca-0b7f47ba9c9f]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 21:59:34.129 [e8e69294-07d4-4b8c-80ca-0b7f47ba9c9f]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 21:59:34.129 [e8e69294-07d4-4b8c-80ca-0b7f47ba9c9f]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 21:59:34.132 [e680c05b-8297-471a-b283-d9349065bf55]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 21:59:34.199 [300a41ca-9a19-4be7-b766-b339e4ccaafc]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 21:59:34.204 [44322e72-06fe-4f73-81f8-62a1b09c9e51]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 21:59:34.314 [ebff2f54-a1a9-48fb-9f65-6bc390dd1321]  ERROR_RECOVERY Invalid Rule Error recovery successful: Continued with default result
+2025-06-26 21:59:34.352 [2ec72114-44c7-4f86-8de7-c8edb651ad57]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 21:59:34.368 [b815998a-f8d4-4edd-93b5-6b30663fd2b1]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 21:59:34.369 [b815998a-f8d4-4edd-93b5-6b30663fd2b1]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 21:59:34.369 [b815998a-f8d4-4edd-93b5-6b30663fd2b1]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 21:59:34.369 [b815998a-f8d4-4edd-93b5-6b30663fd2b1]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 21:59:34.369 [b815998a-f8d4-4edd-93b5-6b30663fd2b1]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 21:59:34.369 [b815998a-f8d4-4edd-93b5-6b30663fd2b1]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 21:59:34.369 [b815998a-f8d4-4edd-93b5-6b30663fd2b1]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 21:59:34.370 [b815998a-f8d4-4edd-93b5-6b30663fd2b1]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 21:59:34.370 [b815998a-f8d4-4edd-93b5-6b30663fd2b1]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 21:59:34.370 [b815998a-f8d4-4edd-93b5-6b30663fd2b1]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 21:59:34.374 [c20c3fa8-6c28-44c5-a289-be916f987259]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 21:59:34.374 [c20c3fa8-6c28-44c5-a289-be916f987259]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 21:59:34.374 [c20c3fa8-6c28-44c5-a289-be916f987259]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 21:59:34.374 [c20c3fa8-6c28-44c5-a289-be916f987259]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 21:59:34.375 [c20c3fa8-6c28-44c5-a289-be916f987259]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 21:59:34.375 [c20c3fa8-6c28-44c5-a289-be916f987259]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 21:59:34.375 [c20c3fa8-6c28-44c5-a289-be916f987259]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 21:59:34.375 [c20c3fa8-6c28-44c5-a289-be916f987259]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 21:59:34.376 [c20c3fa8-6c28-44c5-a289-be916f987259]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 21:59:34.376 [c20c3fa8-6c28-44c5-a289-be916f987259]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 21:59:34.403 [6061d086-12c6-4536-ad77-46df98c0e7db]  ERROR_RECOVERY Error Rule Error recovery successful: Continued with default result
+2025-06-26 21:59:34.405 [53f817bb-5e25-4453-aafe-4bffba6d462c]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 21:59:34.405 [53f817bb-5e25-4453-aafe-4bffba6d462c]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 21:59:34.405 [53f817bb-5e25-4453-aafe-4bffba6d462c]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 21:59:34.406 [53f817bb-5e25-4453-aafe-4bffba6d462c]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 21:59:34.406 [53f817bb-5e25-4453-aafe-4bffba6d462c]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 21:59:34.443 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 22:58:22.438 [1723a9cb-cc5e-48e8-a29c-16599defe776]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:22.463 [6826962d-2415-425a-ad2e-e88efa99251c]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:22.464 [6826962d-2415-425a-ad2e-e88efa99251c]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:22.468 [3db6ab88-b1c6-46b9-b3d8-7d519ac8563f]  RULE_MATCH adult Rule matched successfully
+2025-06-26 22:58:22.472 [3b88cac1-a474-4aa0-8385-f8c65e5e1ec5]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:22.472 [3b88cac1-a474-4aa0-8385-f8c65e5e1ec5]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:22.472 [3b88cac1-a474-4aa0-8385-f8c65e5e1ec5]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:22.475 [024af24a-d55d-4ab3-9147-f6b3f232320b]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:22.480 [024af24a-d55d-4ab3-9147-f6b3f232320b]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:22.480 [024af24a-d55d-4ab3-9147-f6b3f232320b]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:22.482 [510ae27c-04ba-4fb6-9026-0f69f697cd0c]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:22.483 [510ae27c-04ba-4fb6-9026-0f69f697cd0c]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:22.490 [7ef0654e-9d95-40e3-80c7-5838d7d2ec77]  RULE_MATCH adult Rule matched successfully
+2025-06-26 22:58:22.491 [7ef0654e-9d95-40e3-80c7-5838d7d2ec77]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 22:58:22.496 [2d337063-b699-4924-b14b-16d987143ce5]  RULE_MATCH adult Rule matched successfully
+2025-06-26 22:58:46.592 [5effbe0b-708e-4bbc-8ba7-30a47d0d3c47]  RULE_MATCH Minimum Balance Rule matched successfully
+2025-06-26 22:58:46.593 [5effbe0b-708e-4bbc-8ba7-30a47d0d3c47]  RULE_MATCH KYC Required Rule matched successfully
+2025-06-26 22:58:46.594 [5effbe0b-708e-4bbc-8ba7-30a47d0d3c47]  RULE_MATCH Transaction Limit Rule matched successfully
+2025-06-26 22:58:46.598 [745de6ac-d3f9-4359-9dcf-d366ad680844]  RULE_MATCH Credit Score Check Rule matched successfully
+2025-06-26 22:58:46.598 [745de6ac-d3f9-4359-9dcf-d366ad680844]  RULE_MATCH Minimum Age Rule matched successfully
+2025-06-26 22:58:46.599 [745de6ac-d3f9-4359-9dcf-d366ad680844]  RULE_MATCH Minimum Income Rule matched successfully
+2025-06-26 22:58:46.603 [57dbf071-f731-4935-bf44-e508fd9e760e]  RULE_MATCH lastName Required Rule matched successfully
+2025-06-26 22:58:46.603 [57dbf071-f731-4935-bf44-e508fd9e760e]  RULE_MATCH firstName Required Rule matched successfully
+2025-06-26 22:58:46.606 [249ef498-4e88-4f37-8270-4d6425dadfb6]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 22:58:46.618 [249ef498-4e88-4f37-8270-4d6425dadfb6]  RULE_MATCH Email Required Rule matched successfully
+2025-06-26 22:58:46.619 [249ef498-4e88-4f37-8270-4d6425dadfb6]  RULE_MATCH Phone Required Rule matched successfully
+2025-06-26 22:58:46.626 [01312124-a760-4875-b6d0-193384760d33]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 22:58:46.628 [5764dc86-f584-41b4-a4f1-5f41fed1364d]  RULE_MATCH Custom Validation Rule matched successfully
+2025-06-26 22:58:46.641 [3b48af54-8eb3-4b8a-8dd2-d7b1b2cf4c63]  RULE_MATCH username Length Check Rule matched successfully
+2025-06-26 22:58:46.653 [cdb02047-41b1-411d-88b8-d6a331c3d47d]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:46.675 [10f09aa7-eaed-41ec-a84c-64e94ea9c2ed]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:46.676 [10f09aa7-eaed-41ec-a84c-64e94ea9c2ed]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:46.678 [c3962735-9951-4cdb-b251-63faab10fdd4]  RULE_MATCH adult Rule matched successfully
+2025-06-26 22:58:46.685 [24c70855-3375-4ed1-b0be-eda4c6b1b0a1]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:46.685 [24c70855-3375-4ed1-b0be-eda4c6b1b0a1]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:46.685 [24c70855-3375-4ed1-b0be-eda4c6b1b0a1]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:46.689 [25eebf99-f04a-49f3-9952-34b843b74988]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:46.691 [25eebf99-f04a-49f3-9952-34b843b74988]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:46.691 [25eebf99-f04a-49f3-9952-34b843b74988]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:46.693 [17e1b1ae-2c13-4702-a3c6-ecf8f2a97b09]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:46.693 [17e1b1ae-2c13-4702-a3c6-ecf8f2a97b09]  RULE_MATCH Check Rule matched successfully
+2025-06-26 22:58:46.700 [0eacd161-825b-4185-8097-28395f697617]  RULE_MATCH adult Rule matched successfully
+2025-06-26 22:58:46.700 [0eacd161-825b-4185-8097-28395f697617]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 22:58:46.705 [5ef19a51-5f64-4c7f-aa30-0de02596d9fe]  RULE_MATCH adult Rule matched successfully
+2025-06-26 22:58:46.723 [9bf81bc5-c7f8-4718-9b15-d001b9e49662]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 22:58:46.724 [9bf81bc5-c7f8-4718-9b15-d001b9e49662]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 22:58:46.724 [9bf81bc5-c7f8-4718-9b15-d001b9e49662]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 22:58:46.725 [9bf81bc5-c7f8-4718-9b15-d001b9e49662]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 22:58:46.732 [82b81673-8e9d-46cb-9577-41eeed062679]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 22:58:46.734 [fa18897b-3acc-4de9-9c7f-1af2c41bdc29]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 22:58:46.735 [fa18897b-3acc-4de9-9c7f-1af2c41bdc29]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 22:58:46.736 [fa18897b-3acc-4de9-9c7f-1af2c41bdc29]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 22:58:46.738 [999fba4a-94ea-4b7e-90ea-144fbda16976]  RULE_MATCH Loan Eligibility Rule matched successfully
+2025-06-26 22:58:46.746 [e1813440-ed86-4805-a05f-39130e50847c]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 22:58:46.747 [e1813440-ed86-4805-a05f-39130e50847c]  RULE_MATCH Required Field Check: email Rule matched successfully
+2025-06-26 22:58:46.747 [e1813440-ed86-4805-a05f-39130e50847c]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 22:58:46.750 [7e8e3f4e-7f7a-4b6f-8d79-f7422013e8e6]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 22:58:46.750 [7e8e3f4e-7f7a-4b6f-8d79-f7422013e8e6]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 22:58:46.756 [33682c99-bf41-4bb6-839e-9c8ec9d081a1]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 22:58:46.757 [33682c99-bf41-4bb6-839e-9c8ec9d081a1]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 22:58:46.757 [33682c99-bf41-4bb6-839e-9c8ec9d081a1]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 22:58:46.759 [709ba329-0440-4e30-9dc3-721dc0215f17]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 22:58:46.837 [908b99ad-f541-4ba5-a347-0032dcfc2680]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 22:58:46.844 [4cef5afe-bf62-45c9-b090-cc7dcaa3f34d]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 22:58:46.929 [5c33dcb1-902a-4c6b-af85-322ed5707365]  ERROR_RECOVERY Invalid Rule Error recovery successful: Continued with default result
+2025-06-26 22:58:46.980 [4286b0f1-fdec-4d7e-af77-992a8063f6f9]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 22:58:46.998 [f1846052-9d50-45e3-a1e1-9066ca6f7d56]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 22:58:46.998 [f1846052-9d50-45e3-a1e1-9066ca6f7d56]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 22:58:46.998 [f1846052-9d50-45e3-a1e1-9066ca6f7d56]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 22:58:46.998 [f1846052-9d50-45e3-a1e1-9066ca6f7d56]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 22:58:46.999 [f1846052-9d50-45e3-a1e1-9066ca6f7d56]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 22:58:46.999 [f1846052-9d50-45e3-a1e1-9066ca6f7d56]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 22:58:46.999 [f1846052-9d50-45e3-a1e1-9066ca6f7d56]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 22:58:46.999 [f1846052-9d50-45e3-a1e1-9066ca6f7d56]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 22:58:46.999 [f1846052-9d50-45e3-a1e1-9066ca6f7d56]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 22:58:46.999 [f1846052-9d50-45e3-a1e1-9066ca6f7d56]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 22:58:47.002 [fee48ce3-b2b3-4f3c-8675-5fcf0135960a]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 22:58:47.002 [fee48ce3-b2b3-4f3c-8675-5fcf0135960a]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 22:58:47.003 [fee48ce3-b2b3-4f3c-8675-5fcf0135960a]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 22:58:47.003 [fee48ce3-b2b3-4f3c-8675-5fcf0135960a]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 22:58:47.003 [fee48ce3-b2b3-4f3c-8675-5fcf0135960a]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 22:58:47.003 [fee48ce3-b2b3-4f3c-8675-5fcf0135960a]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 22:58:47.004 [fee48ce3-b2b3-4f3c-8675-5fcf0135960a]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 22:58:47.004 [fee48ce3-b2b3-4f3c-8675-5fcf0135960a]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 22:58:47.004 [fee48ce3-b2b3-4f3c-8675-5fcf0135960a]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 22:58:47.005 [fee48ce3-b2b3-4f3c-8675-5fcf0135960a]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 22:58:47.021 [c5b5c182-24fb-4c40-8a5e-5868d6f1717f]  ERROR_RECOVERY Error Rule Error recovery successful: Continued with default result
+2025-06-26 22:58:47.022 [48a12879-e323-48d3-a46e-d7982d5454c7]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 22:58:47.022 [48a12879-e323-48d3-a46e-d7982d5454c7]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 22:58:47.022 [48a12879-e323-48d3-a46e-d7982d5454c7]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 22:58:47.023 [48a12879-e323-48d3-a46e-d7982d5454c7]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 22:58:47.023 [48a12879-e323-48d3-a46e-d7982d5454c7]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 22:58:47.046 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 23:00:54.847 [61df8b65-63bf-461f-a086-cd4d8c654440]  RULE_MATCH Minimum Balance Rule matched successfully
+2025-06-26 23:00:54.848 [61df8b65-63bf-461f-a086-cd4d8c654440]  RULE_MATCH KYC Required Rule matched successfully
+2025-06-26 23:00:54.849 [61df8b65-63bf-461f-a086-cd4d8c654440]  RULE_MATCH Transaction Limit Rule matched successfully
+2025-06-26 23:00:54.854 [d6ab150c-2ab3-4d75-a2be-fe8503131796]  RULE_MATCH Credit Score Check Rule matched successfully
+2025-06-26 23:00:54.855 [d6ab150c-2ab3-4d75-a2be-fe8503131796]  RULE_MATCH Minimum Age Rule matched successfully
+2025-06-26 23:00:54.855 [d6ab150c-2ab3-4d75-a2be-fe8503131796]  RULE_MATCH Minimum Income Rule matched successfully
+2025-06-26 23:00:54.860 [fd2b29ab-2bbc-4e6f-b1f5-46ae314209df]  RULE_MATCH lastName Required Rule matched successfully
+2025-06-26 23:00:54.860 [fd2b29ab-2bbc-4e6f-b1f5-46ae314209df]  RULE_MATCH firstName Required Rule matched successfully
+2025-06-26 23:00:54.863 [739d23da-7ca4-4912-86c6-9c16ae171493]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 23:00:54.876 [739d23da-7ca4-4912-86c6-9c16ae171493]  RULE_MATCH Email Required Rule matched successfully
+2025-06-26 23:00:54.877 [739d23da-7ca4-4912-86c6-9c16ae171493]  RULE_MATCH Phone Required Rule matched successfully
+2025-06-26 23:00:54.885 [e4f60f36-1103-41ec-a114-99a6f41ff4a9]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 23:00:54.888 [780caccb-1041-45ad-8ae0-9b7cad2e73a0]  RULE_MATCH Custom Validation Rule matched successfully
+2025-06-26 23:00:54.901 [4780344e-7a9e-4065-b1c3-570b5ef32b9a]  RULE_MATCH username Length Check Rule matched successfully
+2025-06-26 23:00:54.913 [38324a39-0f9f-4e57-96ee-c6cacc4fc9a4]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:00:54.934 [2184e711-0180-4c37-ae2a-b676aaf7bfed]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:00:54.936 [2184e711-0180-4c37-ae2a-b676aaf7bfed]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:00:54.938 [2e66364b-403d-42af-a26b-ca2d4523e0eb]  RULE_MATCH adult Rule matched successfully
+2025-06-26 23:00:54.944 [145a007e-e686-4bd8-b930-8b4384f8814d]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:00:54.944 [145a007e-e686-4bd8-b930-8b4384f8814d]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:00:54.945 [145a007e-e686-4bd8-b930-8b4384f8814d]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:00:54.948 [ef46e6eb-4c82-424f-8835-f5e80c795a8c]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:00:54.949 [ef46e6eb-4c82-424f-8835-f5e80c795a8c]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:00:54.949 [ef46e6eb-4c82-424f-8835-f5e80c795a8c]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:00:54.951 [ea911fff-762e-4bc9-aecb-b283a714f8ea]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:00:54.951 [ea911fff-762e-4bc9-aecb-b283a714f8ea]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:00:54.957 [f45d38f7-546a-4a50-99bf-81194aa8fa29]  RULE_MATCH adult Rule matched successfully
+2025-06-26 23:00:54.957 [f45d38f7-546a-4a50-99bf-81194aa8fa29]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 23:00:54.961 [3cee6873-f863-4cfd-bbf6-52fc3c2e7c2b]  RULE_MATCH adult Rule matched successfully
+2025-06-26 23:00:54.980 [6cf7aee9-34c1-4d64-8d09-c200f7e2f67d]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 23:00:54.981 [6cf7aee9-34c1-4d64-8d09-c200f7e2f67d]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 23:00:54.981 [6cf7aee9-34c1-4d64-8d09-c200f7e2f67d]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 23:00:54.982 [6cf7aee9-34c1-4d64-8d09-c200f7e2f67d]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 23:00:54.990 [90f26808-a26b-47a1-a007-79d6ce0549d3]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 23:00:54.993 [5f063927-fba7-4fe5-9aaf-8fbc32b83028]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 23:00:54.993 [5f063927-fba7-4fe5-9aaf-8fbc32b83028]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 23:00:54.994 [5f063927-fba7-4fe5-9aaf-8fbc32b83028]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 23:00:54.997 [985483a0-95d4-4219-beb6-00449766bd33]  RULE_MATCH Loan Eligibility Rule matched successfully
+2025-06-26 23:00:55.004 [f3b4eaee-5cc7-44ca-8d28-055d3fee4e89]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 23:00:55.005 [f3b4eaee-5cc7-44ca-8d28-055d3fee4e89]  RULE_MATCH Required Field Check: email Rule matched successfully
+2025-06-26 23:00:55.006 [f3b4eaee-5cc7-44ca-8d28-055d3fee4e89]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 23:00:55.009 [d98e669d-e662-4ce2-b4d6-417696800865]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 23:00:55.010 [d98e669d-e662-4ce2-b4d6-417696800865]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 23:00:55.016 [e558f8f1-c462-4071-a73e-96a347e5530c]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 23:00:55.017 [e558f8f1-c462-4071-a73e-96a347e5530c]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 23:00:55.017 [e558f8f1-c462-4071-a73e-96a347e5530c]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 23:00:55.020 [8b89487a-b20d-4bd1-9c4a-f0542892213d]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 23:00:55.087 [df64347b-4a14-4de8-b4d4-5c61dd3c3aa0]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 23:00:55.092 [bdb9ccd4-6295-42c7-b97b-0531e88b4dcc]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 23:00:55.192 [0ec7f077-c95d-4f9a-be51-411028b26d9b]  ERROR_RECOVERY Invalid Rule Error recovery successful: Continued with default result
+2025-06-26 23:00:55.265 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 23:04:53.243 [b5f29c8d-d9f4-4a21-81d0-287ea755f4c4]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:04:53.269 [9bc95638-bcc7-4584-9d1d-473f850b0421]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:04:53.270 [9bc95638-bcc7-4584-9d1d-473f850b0421]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:04:53.272 [d52feb54-8c33-487b-b390-e8009b406717]  RULE_MATCH adult Rule matched successfully
+2025-06-26 23:04:53.276 [f7f742db-acd5-4b08-8fd9-919403ac354d]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:04:53.277 [f7f742db-acd5-4b08-8fd9-919403ac354d]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:04:53.277 [f7f742db-acd5-4b08-8fd9-919403ac354d]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:04:53.279 [f029db22-426a-44da-a439-3bf574e2bb49]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:04:53.284 [f029db22-426a-44da-a439-3bf574e2bb49]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:04:53.285 [f029db22-426a-44da-a439-3bf574e2bb49]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:04:53.287 [f5818ab3-c58d-41ee-9891-d8a800b4b1bd]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:04:53.287 [f5818ab3-c58d-41ee-9891-d8a800b4b1bd]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:04:53.295 [0ec4bd15-6c69-4d97-9216-e9562ce3337a]  RULE_MATCH adult Rule matched successfully
+2025-06-26 23:04:53.295 [0ec4bd15-6c69-4d97-9216-e9562ce3337a]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 23:04:53.300 [97f934d4-4aaf-4104-beff-809c4c579908]  RULE_MATCH adult Rule matched successfully
+2025-06-26 23:05:39.765 [fcc42b87-3774-4c63-8a7b-8aec78e3e9a4]  RULE_MATCH Minimum Balance Rule matched successfully
+2025-06-26 23:05:39.767 [fcc42b87-3774-4c63-8a7b-8aec78e3e9a4]  RULE_MATCH KYC Required Rule matched successfully
+2025-06-26 23:05:39.767 [fcc42b87-3774-4c63-8a7b-8aec78e3e9a4]  RULE_MATCH Transaction Limit Rule matched successfully
+2025-06-26 23:05:39.771 [dc9144a1-a8c6-4f40-bfe5-79b31ccadbf6]  RULE_MATCH Credit Score Check Rule matched successfully
+2025-06-26 23:05:39.772 [dc9144a1-a8c6-4f40-bfe5-79b31ccadbf6]  RULE_MATCH Minimum Age Rule matched successfully
+2025-06-26 23:05:39.772 [dc9144a1-a8c6-4f40-bfe5-79b31ccadbf6]  RULE_MATCH Minimum Income Rule matched successfully
+2025-06-26 23:05:39.776 [6b52b84e-8e4b-4f2f-99fe-4fa7ee37ee0f]  RULE_MATCH lastName Required Rule matched successfully
+2025-06-26 23:05:39.776 [6b52b84e-8e4b-4f2f-99fe-4fa7ee37ee0f]  RULE_MATCH firstName Required Rule matched successfully
+2025-06-26 23:05:39.779 [e568eb1a-5692-4489-a347-ceefebd5a300]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 23:05:39.790 [e568eb1a-5692-4489-a347-ceefebd5a300]  RULE_MATCH Email Required Rule matched successfully
+2025-06-26 23:05:39.791 [e568eb1a-5692-4489-a347-ceefebd5a300]  RULE_MATCH Phone Required Rule matched successfully
+2025-06-26 23:05:39.795 [89f7d8fe-4a50-4665-959f-d2864a1d7f9e]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 23:05:39.796 [474644a1-fb4d-414d-ba9e-87084865bb3e]  RULE_MATCH Custom Validation Rule matched successfully
+2025-06-26 23:05:39.806 [5869290b-cb62-44e5-a46a-8cfdcc4e4200]  RULE_MATCH username Length Check Rule matched successfully
+2025-06-26 23:05:39.816 [0807e90e-54a2-41b5-82cd-e2a9b0f10c8b]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:05:39.831 [3512cea4-f413-481e-a6b8-56219668c342]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:05:39.832 [3512cea4-f413-481e-a6b8-56219668c342]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:05:39.835 [959994f8-c3bb-423d-a75f-163a1f330a0b]  RULE_MATCH adult Rule matched successfully
+2025-06-26 23:05:39.840 [86865494-30eb-4747-a502-981db6fb85b6]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:05:39.841 [86865494-30eb-4747-a502-981db6fb85b6]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:05:39.842 [86865494-30eb-4747-a502-981db6fb85b6]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:05:39.844 [f7a8cd51-b4a1-4066-ac83-5401ba2a231b]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:05:39.845 [f7a8cd51-b4a1-4066-ac83-5401ba2a231b]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:05:39.846 [f7a8cd51-b4a1-4066-ac83-5401ba2a231b]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:05:39.847 [0fe9da63-aca1-4082-9464-f35233344190]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:05:39.848 [0fe9da63-aca1-4082-9464-f35233344190]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:05:39.854 [026c2ccc-dd69-4e5a-aa77-809340a78094]  RULE_MATCH adult Rule matched successfully
+2025-06-26 23:05:39.855 [026c2ccc-dd69-4e5a-aa77-809340a78094]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 23:05:39.859 [584b08ce-f857-4df0-ac07-f11979a29511]  RULE_MATCH adult Rule matched successfully
+2025-06-26 23:05:39.873 [a2a643eb-b940-4b7f-b933-28dc84bdab55]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 23:05:39.874 [a2a643eb-b940-4b7f-b933-28dc84bdab55]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 23:05:39.874 [a2a643eb-b940-4b7f-b933-28dc84bdab55]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 23:05:39.875 [a2a643eb-b940-4b7f-b933-28dc84bdab55]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 23:05:39.881 [25a94ec8-891d-4acb-9315-b31a5db3a976]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 23:05:39.882 [2db14383-02f0-4807-a648-1e87595699d7]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 23:05:39.883 [2db14383-02f0-4807-a648-1e87595699d7]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 23:05:39.883 [2db14383-02f0-4807-a648-1e87595699d7]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 23:05:39.886 [81708792-3b95-4511-a20d-17ad112072d8]  RULE_MATCH Loan Eligibility Rule matched successfully
+2025-06-26 23:05:39.891 [93bcd282-c4e0-4032-9a16-1f0c82b799bf]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 23:05:39.892 [93bcd282-c4e0-4032-9a16-1f0c82b799bf]  RULE_MATCH Required Field Check: email Rule matched successfully
+2025-06-26 23:05:39.892 [93bcd282-c4e0-4032-9a16-1f0c82b799bf]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 23:05:39.894 [3c4b62e6-14b5-42b3-8ac3-0d5d8c8d1694]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 23:05:39.894 [3c4b62e6-14b5-42b3-8ac3-0d5d8c8d1694]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 23:05:39.898 [428e4747-ecfd-4f8a-ae69-52ad907af4e3]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 23:05:39.898 [428e4747-ecfd-4f8a-ae69-52ad907af4e3]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 23:05:39.899 [428e4747-ecfd-4f8a-ae69-52ad907af4e3]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 23:05:39.902 [51b7f0fd-78f2-4f63-844e-4878fc7faa6d]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 23:05:39.971 [5f202146-6c42-4182-a549-e333691d236a]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 23:05:39.976 [5dd23c04-e76f-44e3-9ddb-ffd088becac9]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 23:05:40.060 [27d6912f-67f9-4771-ad28-8e82202fa99b]  ERROR_RECOVERY Invalid Rule Error recovery successful: Continued with default result
+2025-06-26 23:05:40.096 [0e66c1f9-6bc3-4029-a1b8-da17eba8f8d1]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 23:05:40.109 [f7787534-771f-4833-a5cc-62e245b94476]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 23:05:40.109 [f7787534-771f-4833-a5cc-62e245b94476]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 23:05:40.109 [f7787534-771f-4833-a5cc-62e245b94476]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 23:05:40.110 [f7787534-771f-4833-a5cc-62e245b94476]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 23:05:40.110 [f7787534-771f-4833-a5cc-62e245b94476]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 23:05:40.110 [f7787534-771f-4833-a5cc-62e245b94476]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 23:05:40.110 [f7787534-771f-4833-a5cc-62e245b94476]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 23:05:40.111 [f7787534-771f-4833-a5cc-62e245b94476]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 23:05:40.111 [f7787534-771f-4833-a5cc-62e245b94476]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 23:05:40.111 [f7787534-771f-4833-a5cc-62e245b94476]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 23:05:40.114 [ae45cda6-c002-4335-b0b2-21aa9e620c84]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 23:05:40.114 [ae45cda6-c002-4335-b0b2-21aa9e620c84]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 23:05:40.115 [ae45cda6-c002-4335-b0b2-21aa9e620c84]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 23:05:40.115 [ae45cda6-c002-4335-b0b2-21aa9e620c84]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 23:05:40.115 [ae45cda6-c002-4335-b0b2-21aa9e620c84]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 23:05:40.115 [ae45cda6-c002-4335-b0b2-21aa9e620c84]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 23:05:40.116 [ae45cda6-c002-4335-b0b2-21aa9e620c84]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 23:05:40.117 [ae45cda6-c002-4335-b0b2-21aa9e620c84]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 23:05:40.117 [ae45cda6-c002-4335-b0b2-21aa9e620c84]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 23:05:40.118 [ae45cda6-c002-4335-b0b2-21aa9e620c84]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 23:05:40.133 [cd557362-5682-4fb4-aab8-7843f3ac00fa]  ERROR_RECOVERY Error Rule Error recovery successful: Continued with default result
+2025-06-26 23:05:40.135 [2f1d9881-6f4e-4695-81c1-bb890fc640cb]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 23:05:40.135 [2f1d9881-6f4e-4695-81c1-bb890fc640cb]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 23:05:40.135 [2f1d9881-6f4e-4695-81c1-bb890fc640cb]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 23:05:40.135 [2f1d9881-6f4e-4695-81c1-bb890fc640cb]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 23:05:40.135 [2f1d9881-6f4e-4695-81c1-bb890fc640cb]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 23:05:40.164 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 23:08:10.232 [835c1f10-2e1c-49e4-9bb8-4730516d9cbe]  RULE_MATCH Minimum Balance Rule matched successfully
+2025-06-26 23:08:10.234 [835c1f10-2e1c-49e4-9bb8-4730516d9cbe]  RULE_MATCH KYC Required Rule matched successfully
+2025-06-26 23:08:10.234 [835c1f10-2e1c-49e4-9bb8-4730516d9cbe]  RULE_MATCH Transaction Limit Rule matched successfully
+2025-06-26 23:08:10.237 [4bce4af3-2e27-41af-8920-aa5a8c76f0e3]  RULE_MATCH Credit Score Check Rule matched successfully
+2025-06-26 23:08:10.238 [4bce4af3-2e27-41af-8920-aa5a8c76f0e3]  RULE_MATCH Minimum Age Rule matched successfully
+2025-06-26 23:08:10.238 [4bce4af3-2e27-41af-8920-aa5a8c76f0e3]  RULE_MATCH Minimum Income Rule matched successfully
+2025-06-26 23:08:10.241 [494659de-7a5e-419f-a8cd-9a2a4058a045]  RULE_MATCH lastName Required Rule matched successfully
+2025-06-26 23:08:10.242 [494659de-7a5e-419f-a8cd-9a2a4058a045]  RULE_MATCH firstName Required Rule matched successfully
+2025-06-26 23:08:10.244 [3d8e2b33-c924-4e66-9e24-00ec5654f54b]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 23:08:10.256 [3d8e2b33-c924-4e66-9e24-00ec5654f54b]  RULE_MATCH Email Required Rule matched successfully
+2025-06-26 23:08:10.257 [3d8e2b33-c924-4e66-9e24-00ec5654f54b]  RULE_MATCH Phone Required Rule matched successfully
+2025-06-26 23:08:10.261 [9403f69e-2c2b-4f9e-9b22-83a8bf5f9ebc]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 23:08:10.264 [132363ab-674f-4c98-9349-f27bd53f6964]  RULE_MATCH Custom Validation Rule matched successfully
+2025-06-26 23:08:10.274 [f3c226b5-0790-4fbc-b7b9-67f94b7b372e]  RULE_MATCH username Length Check Rule matched successfully
+2025-06-26 23:08:10.289 [f9408653-fa3f-4064-bfe8-6776af3bf97f]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:08:10.309 [3d848d41-bcfc-400e-bb5e-b2b51528c8e2]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:08:10.310 [3d848d41-bcfc-400e-bb5e-b2b51528c8e2]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:08:10.315 [e63a71c3-2908-44ea-b528-6c264c044c9b]  RULE_MATCH adult Rule matched successfully
+2025-06-26 23:08:10.322 [3a5aad79-24b1-467e-b645-a7e85d66dce6]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:08:10.322 [3a5aad79-24b1-467e-b645-a7e85d66dce6]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:08:10.322 [3a5aad79-24b1-467e-b645-a7e85d66dce6]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:08:10.324 [7a5d5133-5c19-4fcc-b6e6-748f6c712873]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:08:10.325 [7a5d5133-5c19-4fcc-b6e6-748f6c712873]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:08:10.326 [7a5d5133-5c19-4fcc-b6e6-748f6c712873]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:08:10.327 [d8149cd5-e7ec-4e18-aca4-8cb311f3d82a]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:08:10.328 [d8149cd5-e7ec-4e18-aca4-8cb311f3d82a]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:08:10.335 [85cd8239-aa12-4eb2-98df-5db5b400eef7]  RULE_MATCH adult Rule matched successfully
+2025-06-26 23:08:10.336 [85cd8239-aa12-4eb2-98df-5db5b400eef7]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 23:08:10.340 [768813e3-92b8-4fa4-b085-f32f534ee096]  RULE_MATCH adult Rule matched successfully
+2025-06-26 23:08:10.357 [7239b48c-dcb7-4dc7-afe3-bc661392341b]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 23:08:10.358 [7239b48c-dcb7-4dc7-afe3-bc661392341b]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 23:08:10.358 [7239b48c-dcb7-4dc7-afe3-bc661392341b]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 23:08:10.359 [7239b48c-dcb7-4dc7-afe3-bc661392341b]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 23:08:10.367 [2f3acc4a-bd79-4070-873c-068aa692de92]  RULE_MATCH Premium Eligibility Rule matched successfully
+2025-06-26 23:08:10.369 [6798ccfb-98d8-4e75-9566-9ca6c66ecdd9]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 23:08:10.370 [6798ccfb-98d8-4e75-9566-9ca6c66ecdd9]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 23:08:10.370 [6798ccfb-98d8-4e75-9566-9ca6c66ecdd9]  RULE_MATCH Simple Condition Rule matched successfully
+2025-06-26 23:08:10.373 [909e3bc4-9f59-4a41-a4b1-627b0e9511a9]  RULE_MATCH Loan Eligibility Rule matched successfully
+2025-06-26 23:08:10.381 [c6c417d6-f2cd-4934-9017-cdf95dcbaa08]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 23:08:10.381 [c6c417d6-f2cd-4934-9017-cdf95dcbaa08]  RULE_MATCH Required Field Check: email Rule matched successfully
+2025-06-26 23:08:10.382 [c6c417d6-f2cd-4934-9017-cdf95dcbaa08]  RULE_MATCH Required Field Check: name Rule matched successfully
+2025-06-26 23:08:10.385 [dcaa1c7a-77b0-4bf2-bd17-376ff22dfe27]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 23:08:10.385 [dcaa1c7a-77b0-4bf2-bd17-376ff22dfe27]  RULE_MATCH Age Eligibility Check Rule matched successfully
+2025-06-26 23:08:10.389 [14e59ae7-ea0b-43bb-bbec-ea2658406f2e]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 23:08:10.390 [14e59ae7-ea0b-43bb-bbec-ea2658406f2e]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 23:08:10.390 [14e59ae7-ea0b-43bb-bbec-ea2658406f2e]  RULE_MATCH Amount Range Check Rule matched successfully
+2025-06-26 23:08:10.392 [ac882029-01e6-4ac7-b9d7-769f05864174]  RULE_MATCH Age Check Rule matched successfully
+2025-06-26 23:08:10.463 [40aecd25-f040-4bf3-8e04-14dbe5178d5e]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 23:08:10.467 [4ba0a23a-7717-4349-8245-f5d88384c180]  RULE_MATCH Age Rule Rule matched successfully
+2025-06-26 23:08:10.560 [649a007a-f415-497e-9d12-8c696fd204aa]  ERROR_RECOVERY Invalid Rule Error recovery successful: Continued with default result
+2025-06-26 23:08:10.598 [58d05f4b-ff75-4087-9b42-8708c7759c92]  RULE_MATCH Simple Test Rule Rule matched successfully
+2025-06-26 23:08:10.618 [14180248-7a2c-4d0b-afe5-25f9c580bd1e]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 23:08:10.618 [14180248-7a2c-4d0b-afe5-25f9c580bd1e]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 23:08:10.618 [14180248-7a2c-4d0b-afe5-25f9c580bd1e]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 23:08:10.618 [14180248-7a2c-4d0b-afe5-25f9c580bd1e]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 23:08:10.618 [14180248-7a2c-4d0b-afe5-25f9c580bd1e]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 23:08:10.619 [14180248-7a2c-4d0b-afe5-25f9c580bd1e]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 23:08:10.619 [14180248-7a2c-4d0b-afe5-25f9c580bd1e]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 23:08:10.619 [14180248-7a2c-4d0b-afe5-25f9c580bd1e]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 23:08:10.619 [14180248-7a2c-4d0b-afe5-25f9c580bd1e]  RULE_MATCH Global Test 1 Rule matched successfully
+2025-06-26 23:08:10.619 [14180248-7a2c-4d0b-afe5-25f9c580bd1e]  RULE_MATCH Global Test 2 Rule matched successfully
+2025-06-26 23:08:10.621 [e39da11c-9d89-4b26-a738-4e9a5082318e]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 23:08:10.622 [e39da11c-9d89-4b26-a738-4e9a5082318e]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 23:08:10.622 [e39da11c-9d89-4b26-a738-4e9a5082318e]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 23:08:10.622 [e39da11c-9d89-4b26-a738-4e9a5082318e]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 23:08:10.622 [e39da11c-9d89-4b26-a738-4e9a5082318e]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 23:08:10.623 [e39da11c-9d89-4b26-a738-4e9a5082318e]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 23:08:10.623 [e39da11c-9d89-4b26-a738-4e9a5082318e]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 23:08:10.623 [e39da11c-9d89-4b26-a738-4e9a5082318e]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 23:08:10.623 [e39da11c-9d89-4b26-a738-4e9a5082318e]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 23:08:10.624 [e39da11c-9d89-4b26-a738-4e9a5082318e]  RULE_MATCH Slow Rule Rule matched successfully
+2025-06-26 23:08:10.639 [1c0b49de-715d-4cc6-9120-e89ba3cc84af]  ERROR_RECOVERY Error Rule Error recovery successful: Continued with default result
+2025-06-26 23:08:10.640 [6a9bcd50-d736-4c9c-a72c-bafe7221c7ca]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 23:08:10.640 [6a9bcd50-d736-4c9c-a72c-bafe7221c7ca]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 23:08:10.640 [6a9bcd50-d736-4c9c-a72c-bafe7221c7ca]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 23:08:10.641 [6a9bcd50-d736-4c9c-a72c-bafe7221c7ca]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 23:08:10.641 [6a9bcd50-d736-4c9c-a72c-bafe7221c7ca]  RULE_MATCH History Test Rule Rule matched successfully
+2025-06-26 23:08:10.665 []  RULE_EXECUTION customer-rule Rule executed successfully
+2025-06-26 23:09:21.053 [8020f2cb-64fa-47c8-b7e7-76edf07e74af]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:09:21.079 [1dd87498-980c-4288-aa91-f23dd034ae75]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:09:21.080 [1dd87498-980c-4288-aa91-f23dd034ae75]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:09:21.084 [126e2990-61b2-417e-b731-6c1eed45369e]  RULE_MATCH adult Rule matched successfully
+2025-06-26 23:09:21.087 [f7684e42-bd19-4f4c-94ae-556beccb59f8]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:09:21.088 [f7684e42-bd19-4f4c-94ae-556beccb59f8]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:09:21.089 [f7684e42-bd19-4f4c-94ae-556beccb59f8]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:09:21.091 [8c93b54c-e438-4385-8e95-c8b4c86fd486]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:09:21.096 [8c93b54c-e438-4385-8e95-c8b4c86fd486]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:09:21.096 [8c93b54c-e438-4385-8e95-c8b4c86fd486]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:09:21.100 [644f7ecd-b3c1-4b6f-a66e-6923d5e1754d]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:09:21.100 [644f7ecd-b3c1-4b6f-a66e-6923d5e1754d]  RULE_MATCH Check Rule matched successfully
+2025-06-26 23:09:21.109 [4a7a1f95-2765-4cd2-b617-2ff91eaad2ed]  RULE_MATCH adult Rule matched successfully
+2025-06-26 23:09:21.109 [4a7a1f95-2765-4cd2-b617-2ff91eaad2ed]  RULE_MATCH has-email Rule matched successfully
+2025-06-26 23:09:21.113 [c38084be-b4a8-4b99-bf3d-5b23071364c0]  RULE_MATCH adult Rule matched successfully

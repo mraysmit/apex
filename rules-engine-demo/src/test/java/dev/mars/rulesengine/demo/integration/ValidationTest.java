@@ -100,7 +100,7 @@ public class ValidationTest {
         // Verify results
         assertTrue(adultResult.isTriggered(), "Adult customer should be valid for adult validation");
         assertEquals(RuleResult.ResultType.MATCH, adultResult.getResultType(), "Adult result type should be MATCH");
-        assertEquals("adultValidator", adultResult.getRuleName(), "Adult rule name should match");
+        assertEquals("Validation Rule for adultValidator", adultResult.getRuleName(), "Adult rule name should match");
         
         assertFalse(childResult.isTriggered(), "Child customer should not be valid for adult validation");
         assertEquals(RuleResult.ResultType.NO_MATCH, childResult.getResultType(), "Child result type should be NO_MATCH");

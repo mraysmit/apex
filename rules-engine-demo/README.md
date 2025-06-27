@@ -4,59 +4,87 @@ A comprehensive demonstration of the SpEL Rules Engine capabilities, featuring r
 
 ## 🎯 Overview
 
-This demo module has been completely reorganized to provide:
+This demo module has been **rationalized and reorganized** to provide:
 
-- **Structured Examples**: Organized by domain and complexity level
-- **Financial Focus**: Real-world OTC derivative validation and enrichment
-- **New Layered APIs**: Ultra-simple, template-based, and advanced configuration
+- **Unified Framework**: Consistent demo structure with standardized interfaces
+- **Consolidated Examples**: Organized by category and complexity level
+- **Layered API Design**: Ultra-simple, template-based, and advanced configuration
 - **Performance Monitoring**: Real-time metrics and optimization techniques
-- **Exception Handling**: Robust error recovery and graceful degradation
-- **Static Data Integration**: Comprehensive reference data validation
+- **Interactive Experience**: Menu-driven interface with non-interactive options
+- **Reduced Complexity**: Streamlined from 50+ files to focused, maintainable structure
 
-## 🏗️ New Module Structure
+## 🏗️ Rationalized Module Structure
 
 ```
 rules-engine-demo/
 ├── src/main/java/dev/mars/rulesengine/demo/
-│   ├── ComprehensiveRulesEngineDemo.java          # Main entry point
-│   ├── examples/                                   # Domain-specific examples
-│   │   └── financial/                             # Financial instrument examples
-│   │       ├── model/                             # Financial data models
-│   │       │   ├── CommodityTotalReturnSwap.java  # OTC commodity swap model
-│   │       │   └── StaticDataEntities.java        # Reference data models
-│   │       └── CommoditySwapValidationDemo.java   # Main financial demo
-│   ├── datasets/                                   # Test data and static data
-│   │   └── FinancialStaticDataProvider.java       # Static data repository
-│   ├── rulesets/                                   # Pre-built rule collections
-│   │   └── FinancialValidationRuleSet.java        # Financial validation rules
-│   ├── showcase/                                   # Feature demonstrations
-│   │   └── PerformanceAndExceptionShowcase.java   # Performance & error handling
-│   └── simplified/                                 # Simplified API examples
-│       └── SimplifiedAPIDemo.java                 # Layered APIs demo
-└── README.md                                       # This file
+│   ├── DemoLauncher.java                          # 🆕 Unified entry point
+│   ├── framework/                                 # 🆕 Demo framework
+│   │   ├── Demo.java                             # Standard demo interface
+│   │   ├── DemoCategory.java                     # Demo categorization
+│   │   └── DemoFramework.java                    # Unified demo management
+│   ├── examples/                                  # 🔄 Consolidated examples
+│   │   ├── BasicUsageExamples.java               # 🆕 Fundamental concepts
+│   │   ├── LayeredAPIDemo.java                   # 🆕 Improved API demonstration
+│   │   ├── PerformanceMonitoringDemo.java        # 🆕 Consolidated performance demos
+│   │   └── financial/                            # Financial instrument examples
+│   │       ├── model/                            # Financial data models
+│   │       └── CommoditySwapValidationDemo.java  # Main financial demo
+│   ├── datasets/                                  # Test data and static data
+│   ├── rulesets/                                  # Pre-built rule collections
+│   ├── showcase/                                  # 📦 Legacy feature demonstrations
+│   ├── simplified/                                # 📦 Legacy simplified API examples
+│   ├── api/                                       # 📦 Legacy static utility API
+│   └── [legacy packages]/                        # 📦 Preserved for compatibility
+└── README.md                                      # Updated documentation
 ```
+
+**Legend**: 🆕 New | 🔄 Improved | 📦 Legacy (preserved for compatibility)
 
 ## 🚀 Quick Start
 
-### Running the Demo
+### Running the Rationalized Demo Suite
 
 ```bash
-# Interactive mode with menu
-java -cp target/classes dev.mars.rulesengine.demo.ComprehensiveRulesEngineDemo
+# Interactive mode with unified menu
+java -cp target/classes dev.mars.rulesengine.demo.DemoLauncher
+
+# Or using Maven
+mvn exec:java
 
 # Non-interactive mode for specific demos
-java -cp target/classes dev.mars.rulesengine.demo.ComprehensiveRulesEngineDemo financial
-java -cp target/classes dev.mars.rulesengine.demo.ComprehensiveRulesEngineDemo performance
+java -cp target/classes dev.mars.rulesengine.demo.DemoLauncher "Basic Usage Examples"
+java -cp target/classes dev.mars.rulesengine.demo.DemoLauncher "Layered API Demonstration"
+java -cp target/classes dev.mars.rulesengine.demo.DemoLauncher "Performance Monitoring"
+
+# Run all demos
+java -cp target/classes dev.mars.rulesengine.demo.DemoLauncher all
+
+# List available demos
+java -cp target/classes dev.mars.rulesengine.demo.DemoLauncher list
+
+# Generate comprehensive report
+java -cp target/classes dev.mars.rulesengine.demo.DemoLauncher report
 ```
 
-### Available Demo Options
+### Available Demo Categories
 
-1. **🏦 Financial Instrument Validation** - OTC Commodity Total Return Swap processing
-2. **🚀 Simplified APIs Demonstration** - New layered API design
-3. **⚡ Performance & Exception Handling** - Monitoring and error recovery
-4. **🔄 Complete End-to-End Demo** - Full feature showcase
-5. **📊 Static Data Validation** - Reference data integration
-6. **🎯 Quick Start Guide** - 5-minute introduction
+#### 🎯 **Basic Usage** (Perfect for newcomers)
+- **Basic Usage Examples** - Fundamental concepts and simple validation operations
+
+#### 🚀 **API Demonstrations** (Understanding the layered design)
+- **Layered API Demonstration** - Comprehensive three-layer API showcase
+- **Simplified API Demo (Legacy)** - Original simplified API examples
+
+#### 🏦 **Financial Examples** (Real-world use cases)
+- **Financial Instrument Validation** - OTC Commodity Total Return Swap processing
+
+#### ⚡ **Performance Monitoring** (Optimization and monitoring)
+- **Performance Monitoring** - Consolidated performance and optimization demos
+- **Performance & Exception Showcase** - Advanced monitoring features
+
+#### 🔧 **Advanced Integration** (Complex scenarios)
+- Legacy integration examples (preserved for compatibility)
 
 ## 💼 Financial Use Case: OTC Commodity Total Return Swaps
 
