@@ -1,0 +1,6 @@
+{
+  "timestamp" : "2025-07-27T10:40:02.234+00:00",
+  "status" : 400,
+  "error" : "Bad Request",
+  "path" : "/api/rules/check"
+}

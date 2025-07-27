@@ -4,18 +4,31 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
  * Represents an OTC Commodity Total Return Swap financial instrument.
- * 
- * A Total Return Swap (TRS) is a derivative contract where one party (total return payer) 
- * transfers the total economic performance of a reference asset to another party (total return receiver).
- * In a commodity TRS, the reference asset is typically a commodity index or basket of commodities.
- * 
- * Key characteristics:
- * - One party pays the total return (price appreciation + income) of the commodity reference
- * - The other party typically pays a floating rate (e.g., LIBOR + spread)
- * - No physical delivery of the underlying commodity
- * - Used for gaining exposure to commodity prices without direct ownership
+ *
+ * This class is part of the PeeGeeQ message queue system, providing
+ * production-ready PostgreSQL-based message queuing capabilities.
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-07-27
+ * @version 1.0
  */
 public class CommodityTotalReturnSwap {
     
@@ -30,6 +43,7 @@ public class CommodityTotalReturnSwap {
     private String counterpartyId;
     private String counterpartyName;
     private String counterpartyLei; // Legal Entity Identifier
+    private String counterpartyRating; // Credit rating (e.g., "A", "BBB", "B")
     
     // Client Information
     private String clientId;
@@ -125,6 +139,9 @@ public class CommodityTotalReturnSwap {
     
     public String getCounterpartyLei() { return counterpartyLei; }
     public void setCounterpartyLei(String counterpartyLei) { this.counterpartyLei = counterpartyLei; }
+
+    public String getCounterpartyRating() { return counterpartyRating; }
+    public void setCounterpartyRating(String counterpartyRating) { this.counterpartyRating = counterpartyRating; }
     
     public String getClientId() { return clientId; }
     public void setClientId(String clientId) { this.clientId = clientId; }

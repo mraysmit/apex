@@ -1,15 +1,42 @@
 package dev.mars.rulesengine.core.config.yaml;
 
+import dev.mars.rulesengine.core.api.RuleSet;
 import dev.mars.rulesengine.core.engine.config.RulesEngine;
 import dev.mars.rulesengine.core.engine.config.RulesEngineConfiguration;
+import dev.mars.rulesengine.core.engine.model.Rule;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
  * High-level service for creating and managing rules engines from YAML configuration.
- * This service combines YAML loading, rule factory, and rules engine initialization.
+ *
+ * This class is part of the PeeGeeQ message queue system, providing
+ * production-ready PostgreSQL-based message queuing capabilities.
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-07-27
+ * @version 1.0
  */
 public class YamlRulesEngineService {
     
@@ -38,20 +65,54 @@ public class YamlRulesEngineService {
     }
     
     /**
-     * Create a rules engine from a YAML configuration file.
-     * 
+     * Create a rules engine from a YAML configuration file using the new generic architecture.
+     * This method leverages GenericRuleSet for enhanced validation, metadata support, and audit trails.
+     *
+     * @param filePath The path to the YAML configuration file
+     * @return A configured RulesEngine with full enterprise metadata support
+     * @throws YamlConfigurationException if configuration loading or processing fails
+     */
+    public RulesEngine createRulesEngineWithGenericArchitecture(String filePath) throws YamlConfigurationException {
+        LOGGER.info("Creating rules engine with generic architecture from YAML file: " + filePath);
+
+        YamlRuleConfiguration yamlConfig = configLoader.loadFromFile(filePath);
+        return createRulesEngineFromYamlConfig(yamlConfig);
+    }
+
+    /**
+     * Create a rules engine from a YAML configuration using the generic architecture.
+     *
+     * @param yamlConfig The YAML configuration
+     * @return A configured RulesEngine with full enterprise metadata support
+     * @throws YamlConfigurationException if configuration processing fails
+     */
+    public RulesEngine createRulesEngineFromYamlConfig(YamlRuleConfiguration yamlConfig) throws YamlConfigurationException {
+        try {
+            // Use the factory's method which has proper category metadata inheritance
+            RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
+            return new RulesEngine(config);
+        } catch (Exception e) {
+            throw new YamlConfigurationException("Failed to create rules engine with generic architecture", e);
+        }
+    }
+
+    /**
+     * Create a rules engine from a YAML configuration file (legacy method).
+     *
      * @param filePath The path to the YAML configuration file
      * @return A configured RulesEngine
      * @throws YamlConfigurationException if configuration loading or processing fails
+     * @deprecated Use createRulesEngineWithGenericArchitecture for enhanced features
      */
+    @Deprecated
     public RulesEngine createRulesEngineFromFile(String filePath) throws YamlConfigurationException {
-        LOGGER.info("Creating rules engine from YAML file: " + filePath);
-        
+        LOGGER.info("Creating rules engine from YAML file (legacy): " + filePath);
+
         YamlRuleConfiguration yamlConfig = configLoader.loadFromFile(filePath);
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
-        
+
         RulesEngine engine = new RulesEngine(config);
-        
+
         LOGGER.info("Successfully created rules engine from file: " + filePath);
         return engine;
     }

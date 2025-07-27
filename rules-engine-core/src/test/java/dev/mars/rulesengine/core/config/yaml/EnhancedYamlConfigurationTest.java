@@ -16,15 +16,31 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
  * Comprehensive tests for the enhanced YAML configuration system with generic architecture support.
- * 
- * Tests cover:
- * - Enterprise metadata integration
- * - Generic category support
- * - GenericRuleSet creation from YAML
- * - Audit trail functionality
- * - Validation and error handling
+ *
+ * This class is part of the PeeGeeQ message queue system, providing
+ * production-ready PostgreSQL-based message queuing capabilities.
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-07-27
+ * @version 1.0
  */
 public class EnhancedYamlConfigurationTest {
 
@@ -43,34 +59,34 @@ public class EnhancedYamlConfigurationTest {
     void testEnhancedYamlRuleWithEnterpriseMetadata() throws YamlConfigurationException {
         String yamlContent = """
             metadata:
-              name: "Enterprise Test Configuration"
+              name: "Financial Services Test Configuration"
               version: "2.0.0"
-              
+
             categories:
-              - name: "patient-eligibility"
-                business-domain: "Healthcare"
-                business-owner: "Chief Medical Officer"
-                
+              - name: "settlement-enrichment"
+                business-domain: "Financial Services Post-Trade"
+                business-owner: "Head of Post-Trade Operations"
+
             rules:
-              - id: "patient-age-check"
-                name: "Patient Age Verification"
-                description: "Validates patient age for treatment eligibility"
-                category: "patient-eligibility"
-                condition: "#patientAge >= 18 && #patientAge <= 65"
-                message: "Patient age must be between 18 and 65"
+              - id: "settlement-date-validation"
+                name: "Settlement Date Validation"
+                description: "Validates settlement date is appropriate relative to trade date"
+                category: "settlement-enrichment"
+                condition: "#settlementDate != null && #settlementDate.isAfter(#tradeDate)"
+                message: "Settlement date must be after trade date"
                 priority: 10
                 enabled: true
-                
+
                 # Enterprise metadata
-                created-by: "healthcare.admin@hospital.com"
-                business-domain: "Healthcare"
-                business-owner: "Chief Medical Officer"
-                source-system: "HOSPITAL_MANAGEMENT_SYSTEM"
+                created-by: "settlement.admin@financialservices.com"
+                business-domain: "Financial Services Post-Trade"
+                business-owner: "Head of Post-Trade Operations"
+                source-system: "SETTLEMENT_MANAGEMENT_SYSTEM"
                 effective-date: "2024-01-01T00:00:00Z"
                 expiration-date: "2025-01-01T00:00:00Z"
-                
+
                 custom-properties:
-                  department: "Cardiology"
+                  department: "Post-Trade Operations"
                   compliance-level: "HIGH"
             """;
 
@@ -83,15 +99,15 @@ public class EnhancedYamlConfigurationTest {
         assertEquals(1, rules.size());
         
         Rule rule = rules.get(0);
-        assertEquals("Patient Age Verification", rule.getName());
-        assertEquals("#patientAge >= 18 && #patientAge <= 65", rule.getCondition());
-        
+        assertEquals("Settlement Date Validation", rule.getName());
+        assertEquals("#settlementDate != null && #settlementDate.isAfter(#tradeDate)", rule.getCondition());
+
         // Test enterprise metadata
         RuleMetadata metadata = rule.getMetadata();
-        assertEquals("healthcare.admin@hospital.com", metadata.getCreatedByUser());
-        assertEquals("Healthcare", metadata.getBusinessDomain().orElse(null));
-        assertEquals("Chief Medical Officer", metadata.getBusinessOwner().orElse(null));
-        assertEquals("HOSPITAL_MANAGEMENT_SYSTEM", metadata.getSourceSystem().orElse(null));
+        assertEquals("settlement.admin@financialservices.com", metadata.getCreatedByUser());
+        assertEquals("Financial Services Post-Trade", metadata.getBusinessDomain().orElse(null));
+        assertEquals("Head of Post-Trade Operations", metadata.getBusinessOwner().orElse(null));
+        assertEquals("SETTLEMENT_MANAGEMENT_SYSTEM", metadata.getSourceSystem().orElse(null));
         
         // Test dates
         assertNotNull(metadata.getEffectiveDate());
@@ -100,7 +116,7 @@ public class EnhancedYamlConfigurationTest {
         assertEquals(Instant.parse("2025-01-01T00:00:00Z"), metadata.getExpirationDate().orElse(null));
         
         // Test custom properties
-        assertEquals("Cardiology", metadata.getCustomProperty("department", String.class).orElse(null));
+        assertEquals("Post-Trade Operations", metadata.getCustomProperty("department", String.class).orElse(null));
         assertEquals("HIGH", metadata.getCustomProperty("compliance-level", String.class).orElse(null));
         
         // Test audit dates
@@ -113,41 +129,41 @@ public class EnhancedYamlConfigurationTest {
         String yamlContent = """
             rules:
               - id: "rule-1"
-                name: "Quality Control Rule 1"
-                category: "quality-control"
-                condition: "#temperature >= 20 && #temperature <= 25"
-                message: "Temperature within range"
-                created-by: "qc.manager@manufacturing.com"
-                business-domain: "Manufacturing"
-                
+                name: "LEI Validation Rule"
+                category: "counterparty-enrichment"
+                condition: "#counterpartyLEI != null && #counterpartyLEI.length() == 20"
+                message: "Valid LEI required for counterparty"
+                created-by: "counterparty.admin@financialservices.com"
+                business-domain: "Financial Services Post-Trade"
+
               - id: "rule-2"
-                name: "Quality Control Rule 2"
-                category: "quality-control"
-                condition: "#pressure <= 100"
-                message: "Pressure within limits"
-                created-by: "qc.manager@manufacturing.com"
-                business-domain: "Manufacturing"
+                name: "Credit Rating Enrichment Rule"
+                category: "counterparty-enrichment"
+                condition: "#counterpartyCreditRating != null"
+                message: "Credit rating required for risk assessment"
+                created-by: "counterparty.admin@financialservices.com"
+                business-domain: "Financial Services Post-Trade"
             """;
 
         YamlRuleConfiguration yamlConfig = loader.fromYamlString(yamlContent);
         
         // Test GenericRuleSet creation
-        List<YamlRule> qualityRules = yamlConfig.getRules();
-        RuleSet.GenericRuleSet ruleSet = factory.createGenericRuleSet("quality-control", qualityRules);
-        
+        List<YamlRule> counterpartyRules = yamlConfig.getRules();
+        RuleSet.GenericRuleSet ruleSet = factory.createGenericRuleSet("counterparty-enrichment", counterpartyRules);
+
         assertNotNull(ruleSet);
-        assertEquals("quality-control", ruleSet.getCategoryName());
+        assertEquals("counterparty-enrichment", ruleSet.getCategoryName());
         assertEquals(2, ruleSet.getRuleCount());
         assertFalse(ruleSet.isEmpty());
-        
+
         List<Rule> rules = ruleSet.getRules();
         assertEquals(2, rules.size());
-        
+
         // Verify rules have proper metadata
         for (Rule rule : rules) {
-            assertEquals("qc.manager@manufacturing.com", rule.getMetadata().getCreatedByUser());
-            assertEquals("Manufacturing", rule.getMetadata().getBusinessDomain().orElse(null));
-            assertTrue(rule.getId().startsWith("quality-control-"));
+            assertEquals("counterparty.admin@financialservices.com", rule.getMetadata().getCreatedByUser());
+            assertEquals("Financial Services Post-Trade", rule.getMetadata().getBusinessDomain().orElse(null));
+            assertTrue(rule.getId().startsWith("counterparty-enrichment-"));
             assertNotNull(rule.getCreatedDate());
             assertNotNull(rule.getModifiedDate());
         }
@@ -157,25 +173,25 @@ public class EnhancedYamlConfigurationTest {
     void testMultipleCategoriesWithGenericArchitecture() throws YamlConfigurationException {
         String yamlContent = """
             categories:
-              - name: "healthcare"
-                business-domain: "Healthcare"
-              - name: "manufacturing"
-                business-domain: "Manufacturing"
-                
+              - name: "settlement-enrichment"
+                business-domain: "Financial Services Post-Trade"
+              - name: "regulatory-enrichment"
+                business-domain: "Financial Services Post-Trade"
+
             rules:
-              - id: "health-rule"
-                name: "Health Rule"
-                category: "healthcare"
-                condition: "#age >= 18"
-                message: "Age valid"
-                created-by: "health.admin@hospital.com"
-                
-              - id: "mfg-rule"
-                name: "Manufacturing Rule"
-                category: "manufacturing"
-                condition: "#temp <= 100"
-                message: "Temperature valid"
-                created-by: "mfg.admin@factory.com"
+              - id: "settlement-rule"
+                name: "Settlement Date Rule"
+                category: "settlement-enrichment"
+                condition: "#settlementDate != null"
+                message: "Settlement date required"
+                created-by: "settlement.admin@financialservices.com"
+
+              - id: "regulatory-rule"
+                name: "UTI Generation Rule"
+                category: "regulatory-enrichment"
+                condition: "#uniqueTransactionId != null"
+                message: "UTI required for regulatory reporting"
+                created-by: "compliance.officer@financialservices.com"
             """;
 
         YamlRuleConfiguration yamlConfig = loader.fromYamlString(yamlContent);
@@ -187,19 +203,19 @@ public class EnhancedYamlConfigurationTest {
         assertEquals(2, rules.size());
         
         // Verify rules are in different categories
-        Rule healthRule = rules.stream()
-            .filter(r -> r.getName().equals("Health Rule"))
+        Rule settlementRule = rules.stream()
+            .filter(r -> r.getName().equals("Settlement Date Rule"))
             .findFirst()
             .orElse(null);
-        assertNotNull(healthRule);
-        assertEquals("health.admin@hospital.com", healthRule.getMetadata().getCreatedByUser());
-        
-        Rule mfgRule = rules.stream()
-            .filter(r -> r.getName().equals("Manufacturing Rule"))
+        assertNotNull(settlementRule);
+        assertEquals("settlement.admin@financialservices.com", settlementRule.getMetadata().getCreatedByUser());
+
+        Rule regulatoryRule = rules.stream()
+            .filter(r -> r.getName().equals("UTI Generation Rule"))
             .findFirst()
             .orElse(null);
-        assertNotNull(mfgRule);
-        assertEquals("mfg.admin@factory.com", mfgRule.getMetadata().getCreatedByUser());
+        assertNotNull(regulatoryRule);
+        assertEquals("compliance.officer@financialservices.com", regulatoryRule.getMetadata().getCreatedByUser());
     }
 
     @Test
@@ -207,35 +223,35 @@ public class EnhancedYamlConfigurationTest {
         String yamlContent = """
             rules:
               - id: "execution-test"
-                name: "Execution Test Rule"
-                category: "test-execution"
-                condition: "#value > 50"
-                message: "Value is greater than 50"
-                created-by: "test.user@company.com"
-                business-domain: "Testing"
+                name: "Trade Value Validation"
+                category: "trade-validation"
+                condition: "#tradeValue > 50000"
+                message: "Trade value exceeds minimum threshold"
+                created-by: "trading.admin@financialservices.com"
+                business-domain: "Financial Services Post-Trade"
             """;
 
         YamlRuleConfiguration yamlConfig = loader.fromYamlString(yamlContent);
         RulesEngine engine = service.createRulesEngineFromYamlConfig(yamlConfig);
 
         // Test rule execution
-        Map<String, Object> facts1 = Map.of("value", 75);
+        Map<String, Object> facts1 = Map.of("tradeValue", 75000.0);
         List<Rule> rules = engine.getConfiguration().getAllRules();
         Rule rule = rules.get(0);
-        
+
         RuleResult result1 = engine.executeRule(rule, facts1);
         assertTrue(result1.isTriggered());
-        assertEquals("Value is greater than 50", result1.getMessage());
-        assertEquals("Execution Test Rule", result1.getRuleName());
-        
+        assertEquals("Trade value exceeds minimum threshold", result1.getMessage());
+        assertEquals("Trade Value Validation", result1.getRuleName());
+
         // Test with failing condition
-        Map<String, Object> facts2 = Map.of("value", 25);
+        Map<String, Object> facts2 = Map.of("tradeValue", 25000.0);
         RuleResult result2 = engine.executeRule(rule, facts2);
         assertFalse(result2.isTriggered());
-        
+
         // Verify rule metadata is preserved
-        assertEquals("test.user@company.com", rule.getMetadata().getCreatedByUser());
-        assertEquals("Testing", rule.getMetadata().getBusinessDomain().orElse(null));
+        assertEquals("trading.admin@financialservices.com", rule.getMetadata().getCreatedByUser());
+        assertEquals("Financial Services Post-Trade", rule.getMetadata().getBusinessDomain().orElse(null));
     }
 
     @Test
@@ -283,9 +299,8 @@ public class EnhancedYamlConfigurationTest {
             """;
 
         YamlRuleConfiguration yamlConfig = loader.fromYamlString(legacyYamlContent);
-        
-        // Should work with both old and new methods
-        RulesEngine legacyEngine = service.createRulesEngineFromFile("test");  // This would fail in real test, but shows API compatibility
+
+        // Test that new method works with legacy YAML format
         RulesEngine newEngine = service.createRulesEngineFromYamlConfig(yamlConfig);
         
         assertNotNull(newEngine);
@@ -306,16 +321,16 @@ public class EnhancedYamlConfigurationTest {
         String yamlContent = """
             rules:
               - id: "custom-props-rule"
-                name: "Custom Properties Rule"
-                category: "test"
-                condition: "#value > 0"
-                message: "Test message"
-                created-by: "test.user@company.com"
+                name: "Fee Calculation Rule"
+                category: "fee-calculation"
+                condition: "#brokerCommission > 0"
+                message: "Broker commission must be positive"
+                created-by: "operations.manager@financialservices.com"
                 custom-properties:
-                  department: "Engineering"
+                  department: "Post-Trade Operations"
                   priority-level: "HIGH"
-                  numeric-value: 42
-                  boolean-flag: true
+                  fee-type: "BROKER_COMMISSION"
+                  regulatory-requirement: true
             """;
 
         YamlRuleConfiguration yamlConfig = loader.fromYamlString(yamlContent);
@@ -325,9 +340,9 @@ public class EnhancedYamlConfigurationTest {
         Rule rule = rules.get(0);
         
         RuleMetadata metadata = rule.getMetadata();
-        assertEquals("Engineering", metadata.getCustomProperty("department", String.class).orElse(null));
+        assertEquals("Post-Trade Operations", metadata.getCustomProperty("department", String.class).orElse(null));
         assertEquals("HIGH", metadata.getCustomProperty("priority-level", String.class).orElse(null));
-        assertEquals(42, metadata.getCustomProperty("numeric-value", Integer.class).orElse(null));
-        assertEquals(true, metadata.getCustomProperty("boolean-flag", Boolean.class).orElse(null));
+        assertEquals("BROKER_COMMISSION", metadata.getCustomProperty("fee-type", String.class).orElse(null));
+        assertEquals(true, metadata.getCustomProperty("regulatory-requirement", Boolean.class).orElse(null));
     }
 }

@@ -1,0 +1,210 @@
+metadata:
+  name: "Financial Services Validation Rules"
+  version: "2.0.0"
+  description: "Comprehensive validation rules for OTC derivatives trading"
+  created-by: "financial-services@rulesengine.dev"
+  created-date: "2025-07-27"
+  domain: "Financial Services"
+  tags: ["finance", "trading", "otc", "derivatives", "compliance"]
+
+# Core trade validation rules
+rules:
+  # Basic trade structure validation
+  - id: "trade-id-required"
+    name: "Trade ID Required"
+    condition: "#data.tradeId != null && #data.tradeId.trim().length() > 0"
+    message: "Trade ID is required and cannot be empty"
+    severity: "ERROR"
+    priority: 1
+    
+  - id: "trade-id-format"
+    name: "Trade ID Format"
+    condition: "#data.tradeId != null && #data.tradeId.matches('^[A-Z]{3}[0-9]{3,6}$')"
+    message: "Trade ID must follow format: 3 letters + 3-6 digits (e.g., TRS001234)"
+    severity: "ERROR"
+    priority: 1
+    
+  # Counterparty validation
+  - id: "counterparty-required"
+    name: "Counterparty Required"
+    condition: "#data.counterpartyId != null && #data.counterpartyId.trim().length() > 0"
+    message: "Counterparty ID is required"
+    severity: "ERROR"
+    priority: 1
+    
+  # Notional amount validation
+  - id: "notional-positive"
+    name: "Positive Notional Amount"
+    condition: "#data.notionalAmount != null && #data.notionalAmount > 0"
+    message: "Notional amount must be positive"
+    severity: "ERROR"
+    priority: 1
+    
+  - id: "minimum-notional"
+    name: "Minimum Notional Amount"
+    condition: "#data.notionalAmount >= 1000000"
+    message: "Minimum notional amount is $1,000,000"
+    severity: "WARNING"
+    priority: 2
+    
+  - id: "maximum-notional"
+    name: "Maximum Notional Amount"
+    condition: "#data.notionalAmount <= 1000000000"
+    message: "Maximum notional amount is $1,000,000,000"
+    severity: "ERROR"
+    priority: 1
+    
+  # Currency validation
+  - id: "currency-required"
+    name: "Currency Required"
+    condition: "#data.notionalCurrency != null && #data.notionalCurrency.trim().length() == 3"
+    message: "Valid 3-character currency code is required"
+    severity: "ERROR"
+    priority: 1
+    
+  # Date validation
+  - id: "trade-date-required"
+    name: "Trade Date Required"
+    condition: "#data.tradeDate != null"
+    message: "Trade date is required"
+    severity: "ERROR"
+    priority: 1
+    
+  - id: "maturity-date-required"
+    name: "Maturity Date Required"
+    condition: "#data.maturityDate != null"
+    message: "Maturity date is required"
+    severity: "ERROR"
+    priority: 1
+    
+  - id: "maturity-after-trade"
+    name: "Maturity After Trade Date"
+    condition: "#data.maturityDate != null && #data.tradeDate != null && #data.maturityDate.isAfter(#data.tradeDate)"
+    message: "Maturity date must be after trade date"
+    severity: "ERROR"
+    priority: 1
+    
+  - id: "minimum-maturity-period"
+    name: "Minimum Maturity Period"
+    condition: "#data.maturityDate != null && #data.tradeDate != null && #data.maturityDate.isAfter(#data.tradeDate.plusDays(30))"
+    message: "Minimum maturity period is 30 days"
+    severity: "WARNING"
+    priority: 2
+    
+  - id: "maximum-maturity-period"
+    name: "Maximum Maturity Period"
+    condition: "#data.maturityDate != null && #data.tradeDate != null && #data.maturityDate.isBefore(#data.tradeDate.plusYears(10))"
+    message: "Maximum maturity period is 10 years"
+    severity: "WARNING"
+    priority: 2
+    
+  # Commodity-specific validation
+  - id: "commodity-type-required"
+    name: "Commodity Type Required"
+    condition: "#data.commodityType != null && #data.commodityType.trim().length() > 0"
+    message: "Commodity type is required"
+    severity: "ERROR"
+    priority: 1
+    
+  - id: "reference-index-required"
+    name: "Reference Index Required"
+    condition: "#data.referenceIndex != null && #data.referenceIndex.trim().length() > 0"
+    message: "Reference index is required for commodity swaps"
+    severity: "ERROR"
+    priority: 1
+    
+  # Regulatory compliance
+  - id: "jurisdiction-valid"
+    name: "Valid Jurisdiction"
+    condition: "#data.jurisdiction == null || (#data.jurisdiction in {'US', 'UK', 'EU', 'ASIA', 'OTHER'})"
+    message: "Jurisdiction must be US, UK, EU, ASIA, or OTHER if specified"
+    severity: "WARNING"
+    priority: 3
+    
+  - id: "large-notional-reporting"
+    name: "Large Notional Reporting Check"
+    condition: "#data.regulatoryRegime != 'DODD_FRANK' || #data.notionalAmount <= 50000000 || #data.clearingEligible == true"
+    message: "Large notional trades under Dodd-Frank may require clearing"
+    severity: "INFO"
+    priority: 4
+
+# Static data enrichment rules
+enrichments:
+  # Currency enrichment
+  - id: "currency-enrichment"
+    type: "lookup-enrichment"
+    condition: "['notionalCurrency'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        data:
+          - code: "USD"
+            name: "US Dollar"
+            region: "North America"
+            decimalPlaces: 2
+            active: true
+            tradeable: true
+          - code: "EUR"
+            name: "Euro"
+            region: "Europe"
+            decimalPlaces: 2
+            active: true
+            tradeable: true
+          - code: "GBP"
+            name: "British Pound"
+            region: "Europe"
+            decimalPlaces: 2
+            active: true
+            tradeable: true
+          - code: "JPY"
+            name: "Japanese Yen"
+            region: "Asia"
+            decimalPlaces: 0
+            active: true
+            tradeable: true
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+      - source-field: "region"
+        target-field: "currencyRegion"
+      - source-field: "decimalPlaces"
+        target-field: "currencyDecimalPlaces"
+      - source-field: "active"
+        target-field: "currencyActive"
+      - source-field: "tradeable"
+        target-field: "currencyTradeable"
+        
+  # Commodity enrichment
+  - id: "commodity-enrichment"
+    type: "lookup-enrichment"
+    condition: "['commodityType'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "type"
+        data:
+          - type: "ENERGY"
+            category: "Energy"
+            description: "Energy commodities including oil, gas, electricity"
+            riskCategory: "HIGH"
+            marginRate: 0.15
+          - type: "METALS"
+            category: "Metals"
+            description: "Precious and base metals"
+            riskCategory: "MEDIUM"
+            marginRate: 0.10
+          - type: "AGRICULTURE"
+            category: "Agriculture"
+            description: "Agricultural commodities and soft commodities"
+            riskCategory: "MEDIUM"
+            marginRate: 0.12
+    field-mappings:
+      - source-field: "category"
+        target-field: "commodityCategory"
+      - source-field: "description"
+        target-field: "commodityDescription"
+      - source-field: "riskCategory"
+        target-field: "commodityRiskCategory"
+      - source-field: "marginRate"
+        target-field: "commodityMarginRate"

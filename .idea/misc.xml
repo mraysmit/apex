@@ -8,6 +8,7 @@
         <option value="$PROJECT_DIR$/rules-engine-core/pom.xml" />
         <option value="$PROJECT_DIR$/rules-engine-demo/pom.xml" />
         <option value="$PROJECT_DIR$/rules-engine-demo-basic/pom.xml" />
+        <option value="$PROJECT_DIR$/rules-engine-rest-api/pom.xml" />
       </list>
     </option>
   </component>

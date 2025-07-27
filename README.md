@@ -2,17 +2,17 @@
 
 A powerful, flexible rules engine for Java applications with revolutionary **YAML Dataset Enrichment** functionality that eliminates the need for external lookup services for small static reference data.
 
-## 🚀 What's New: YAML Dataset Enrichment
+## What's New: YAML Dataset Enrichment
 
 ### Revolutionary Dataset Support
 The Rules Engine now supports **inline YAML datasets**, providing a game-changing approach to reference data management:
 
-- **📊 Inline Datasets**: Embed lookup data directly in YAML configuration files
-- **🚫 No External Services**: Eliminate dependencies on external lookup services
-- **⚡ High Performance**: Sub-millisecond in-memory lookups with caching
-- **📝 Business Editable**: Non-technical users can modify reference data
-- **🔄 Version Controlled**: Datasets stored with configuration in Git
-- **🌍 Environment Specific**: Different datasets per environment
+- **Inline Datasets**: Embed lookup data directly in YAML configuration files
+- **No External Services**: Eliminate dependencies on external lookup services
+- **High Performance**: Sub-millisecond in-memory lookups with caching
+- **Business Editable**: Non-technical users can modify reference data
+- **Version Controlled**: Datasets stored with configuration in Git
+- **Environment Specific**: Different datasets per environment
 
 ### Quick Example
 
@@ -43,17 +43,18 @@ enrichments:
 
 **No Java code required!** The entire lookup dataset is managed in YAML configuration.
 
-## 🎯 Key Features
+## Key Features
 
 ### Core Rules Engine
 - **Three-Layer API Design**: Simple → Structured → Advanced
+- **REST API**: Complete HTTP API with OpenAPI/Swagger documentation
 - **Performance Monitoring**: Enterprise-grade observability
 - **Enhanced Error Handling**: Production-ready reliability
 - **100% Backward Compatible**: Zero breaking changes
 - **High Performance**: < 1% monitoring overhead
 - **YAML Configuration**: External rule management
 
-### 🆕 Dataset Enrichment
+### Dataset Enrichment
 - **Inline Datasets**: Embed reference data in YAML files
 - **Multiple Dataset Types**: Inline, file-based, and external service support
 - **Smart Caching**: Configurable TTL and automatic refresh
@@ -68,9 +69,9 @@ enrichments:
 - **Market Data Integration**: MIC codes and market information
 - **Regulatory Compliance**: Jurisdiction and compliance data
 
-## 📚 Documentation
+## Documentation
 
-### 🆕 Dataset Enrichment Documentation
+### Dataset Enrichment Documentation
 - **[YAML Dataset Enrichment Guide](docs/YAML-Dataset-Enrichment-Guide.md)** - Comprehensive guide to dataset functionality
 - **[Dataset Migration Guide](docs/Dataset-Enrichment-Migration-Guide.md)** - Migrate from external services to datasets
 - **[YAML Configuration Examples](docs/YAML-Configuration-Examples.md)** - Templates and examples
@@ -80,7 +81,7 @@ enrichments:
 - **[Complete User Guide](docs/COMPLETE_USER_GUIDE.md)** - Comprehensive user documentation
 - **[Technical Implementation Guide](docs/TECHNICAL_IMPLEMENTATION_GUIDE.md)** - Technical details and architecture
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Add Dependency
 
@@ -141,7 +142,7 @@ Object enrichedTrade = service.enrichObject(config, trade);
 // Result: trade now contains currencyName="US Dollar", currencyDecimalPlaces=2
 ```
 
-## 🎯 Use Cases
+## Use Cases
 
 ### Perfect for Dataset Enrichment
 - **Currency Reference Data**: ISO currency codes with metadata
@@ -154,12 +155,12 @@ Object enrichedTrade = service.enrichObject(config, trade);
 
 | Dataset Size | Recommendation | Approach |
 |--------------|----------------|----------|
-| **< 100 records** | ✅ **Use YAML Datasets** | Inline datasets |
-| **100-1000 records** | ⚠️ **Consider Datasets** | Inline or file-based |
-| **> 1000 records** | ❌ **Use External Services** | Traditional lookup services |
-| **Dynamic Data** | ❌ **Use External Services** | Real-time data sources |
+| **< 100 records** | **Use YAML Datasets** | Inline datasets |
+| **100-1000 records** | **Consider Datasets** | Inline or file-based |
+| **> 1000 records** | **Use External Services** | Traditional lookup services |
+| **Dynamic Data** | **Use External Services** | Real-time data sources |
 
-## 🏗️ Architecture
+## Architecture
 
 ### Dataset Enrichment Architecture
 
@@ -184,7 +185,7 @@ Object enrichedTrade = service.enrichObject(config, trade);
 - **YamlEnrichmentProcessor**: Processes enrichments with dataset support
 - **DatasetLookupService**: High-performance in-memory lookup implementation
 
-## 🔧 Advanced Features
+## Advanced Features
 
 ### Conditional Enrichment
 ```yaml
@@ -214,7 +215,61 @@ field-mappings:
     transformation: "#value != null ? #value : 2"
 ```
 
-## 🧪 Testing
+## REST API
+
+The project now includes a comprehensive REST API for rule evaluation and management:
+
+### Quick Start
+
+```bash
+# Start the REST API server
+cd rules-engine-rest-api
+mvn spring-boot:run
+
+# Access Swagger UI
+open http://localhost:8080/swagger-ui.html
+```
+
+### Key Endpoints
+
+- **POST /api/rules/check** - Evaluate a single rule condition
+- **POST /api/rules/validate** - Validate data against multiple rules
+- **POST /api/config/load** - Load YAML configuration
+- **GET /api/monitoring/health** - Health check
+
+### Example Usage
+
+```bash
+# Simple rule evaluation
+curl -X POST http://localhost:8080/api/rules/check \
+  -H "Content-Type: application/json" \
+  -d '{
+    "condition": "#age >= 18",
+    "data": {"age": 25},
+    "ruleName": "age-check"
+  }'
+
+# Response
+{
+  "success": true,
+  "matched": true,
+  "ruleName": "age-check",
+  "message": "Rule matched",
+  "timestamp": "2024-07-27T10:30:00Z"
+}
+```
+
+### Features
+
+- **OpenAPI/Swagger Documentation**: Interactive API documentation
+- **Configuration Management**: Load and validate YAML configurations via API
+- **Performance Monitoring**: Built-in health checks and metrics
+- **Named Rules**: Define and reuse named rules
+- **Comprehensive Validation**: Multi-rule validation with detailed error reporting
+
+See the [REST API README](rules-engine-rest-api/README.md) for complete documentation.
+
+## Testing
 
 The project includes comprehensive test coverage:
 
@@ -228,7 +283,7 @@ Run tests:
 mvn test
 ```
 
-## 📈 Performance
+## Performance
 
 ### Dataset Enrichment Performance
 - **Lookup Speed**: Sub-millisecond lookups for datasets < 1000 records
@@ -244,7 +299,7 @@ Memory Usage: ~50KB per dataset
 Cache Hit Rate: > 99% with TTL caching
 ```
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -252,11 +307,11 @@ Cache Hit Rate: > 99% with TTL caching
 4. Update documentation
 5. Submit a pull request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🎉 Migration Success Stories
+## Migration Success Stories
 
 ### Financial Services Company
 - **Migrated**: 12 lookup services to YAML datasets
@@ -274,11 +329,12 @@ This project is licensed under the MIT License - see the LICENSE file for detail
   - Improved development velocity
   - Enhanced testing capabilities
 
-## 🚀 Getting Started
+## Getting Started
 
-1. **Read the Documentation**: Start with the [YAML Dataset Enrichment Guide](docs/YAML-Dataset-Enrichment-Guide.md)
-2. **Try the Examples**: Use the [Configuration Examples](docs/YAML-Configuration-Examples.md)
-3. **Migrate Gradually**: Follow the [Migration Guide](docs/Dataset-Enrichment-Migration-Guide.md)
-4. **Join the Community**: Contribute to the project and share your experiences
+1. **Read the Documentation**: Start with the [Rules Engine User Guide](docs/RULES_ENGINE_USER_GUIDE.md)
+2. **Try the REST API**: Launch the [REST API](rules-engine-rest-api/README.md) and explore with Swagger UI
+3. **Explore Examples**: Use the [Technical Reference](docs/TECHNICAL_REFERENCE.md) for configuration examples
+4. **Financial Services**: Check the [Financial Services Guide](docs/FINANCIAL_SERVICES_GUIDE.md) for domain-specific patterns
+5. **Join the Community**: Contribute to the project and share your experiences
 
 The Rules Engine with YAML Dataset Enrichment provides a powerful, flexible, and maintainable approach to both business rules and reference data management. Start with simple examples and gradually expand to more complex scenarios as your confidence and requirements grow.

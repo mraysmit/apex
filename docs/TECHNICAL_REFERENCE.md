@@ -556,8 +556,253 @@ monitor.addThreshold("execution-time", Duration.ofMillis(100));
 monitor.addThreshold("memory-usage", 50_000_000L); // 50MB
 
 monitor.onThresholdExceeded((metric, value, threshold) -> {
-    log.warn("Performance threshold exceeded: {} = {} (threshold: {})", 
+    log.warn("Performance threshold exceeded: {} = {} (threshold: {})",
         metric, value, threshold);
     // Send alert
 });
+```
+
+## Comprehensive Configuration Examples
+
+### Financial Services Template
+
+```yaml
+metadata:
+  name: "Financial Services Rules"
+  version: "2.0.0"
+  description: "Comprehensive financial services validation and enrichment"
+  domain: "Financial Services"
+  tags: ["finance", "trading", "compliance"]
+
+# Currency enrichment with comprehensive data
+enrichments:
+  - id: "currency-enrichment"
+    type: "lookup-enrichment"
+    condition: "['currency'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "yaml-file"
+        file-path: "datasets/currencies.yaml"
+        key-field: "code"
+        cache-enabled: true
+        cache-ttl-seconds: 7200
+        default-values:
+          region: "Unknown"
+          isActive: false
+          decimalPlaces: 2
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+      - source-field: "region"
+        target-field: "currencyRegion"
+      - source-field: "isActive"
+        target-field: "currencyActive"
+
+  # Country enrichment for regulatory compliance
+  - id: "country-enrichment"
+    type: "lookup-enrichment"
+    condition: "['countryCode'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "yaml-file"
+        file-path: "datasets/countries.yaml"
+        key-field: "code"
+        cache-enabled: true
+    field-mappings:
+      - source-field: "name"
+        target-field: "countryName"
+      - source-field: "region"
+        target-field: "region"
+      - source-field: "regulatoryZone"
+        target-field: "regulatoryZone"
+
+rules:
+  - id: "trade-amount-validation"
+    name: "Trade Amount Validation"
+    condition: "#amount != null && #amount > 0 && #amount <= 10000000"
+    message: "Trade amount must be positive and not exceed 10M"
+    severity: "ERROR"
+    metadata:
+      owner: "Trading Team"
+      purpose: "Risk management"
+
+  - id: "currency-validation"
+    name: "Currency Code Validation"
+    condition: "#currencyActive == true"
+    message: "Currency must be active for trading"
+    severity: "ERROR"
+    depends-on: ["currency-enrichment"]
+```
+
+### Multi-Dataset Enrichment Example
+
+```yaml
+# Complex scenario with multiple related datasets
+enrichments:
+  # Primary instrument enrichment
+  - id: "instrument-enrichment"
+    type: "lookup-enrichment"
+    condition: "['instrumentId'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "yaml-file"
+        file-path: "datasets/instruments.yaml"
+        key-field: "id"
+        cache-enabled: true
+    field-mappings:
+      - source-field: "name"
+        target-field: "instrumentName"
+      - source-field: "type"
+        target-field: "instrumentType"
+      - source-field: "sector"
+        target-field: "sector"
+
+  # Sector-based risk enrichment (depends on instrument enrichment)
+  - id: "sector-risk-enrichment"
+    type: "lookup-enrichment"
+    condition: "['sector'] != null"
+    depends-on: ["instrument-enrichment"]
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "sector"
+        data:
+          - sector: "Technology"
+            riskLevel: "HIGH"
+            volatilityFactor: 1.5
+          - sector: "Utilities"
+            riskLevel: "LOW"
+            volatilityFactor: 0.8
+          - sector: "Healthcare"
+            riskLevel: "MEDIUM"
+            volatilityFactor: 1.2
+    field-mappings:
+      - source-field: "riskLevel"
+        target-field: "sectorRisk"
+      - source-field: "volatilityFactor"
+        target-field: "volatilityFactor"
+
+rules:
+  - id: "high-risk-validation"
+    name: "High Risk Instrument Check"
+    condition: "#sectorRisk == 'HIGH' && #amount > 1000000"
+    message: "High-risk instruments require additional approval for amounts > 1M"
+    severity: "WARNING"
+    depends-on: ["sector-risk-enrichment"]
+```
+
+### Environment-Specific Configuration
+
+```yaml
+# Development environment
+metadata:
+  name: "Development Rules"
+  environment: "development"
+
+enrichments:
+  - id: "test-data-enrichment"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        data:
+          - code: "TEST001"
+            name: "Test Instrument 1"
+            type: "EQUITY"
+          - code: "TEST002"
+            name: "Test Instrument 2"
+            type: "BOND"
+
+---
+# Production environment
+metadata:
+  name: "Production Rules"
+  environment: "production"
+
+enrichments:
+  - id: "production-data-enrichment"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-dataset:
+        type: "yaml-file"
+        file-path: "datasets/production-instruments.yaml"
+        key-field: "code"
+        cache-enabled: true
+        cache-ttl-seconds: 3600
+        preload-enabled: true
+```
+
+## Advanced Dataset Patterns
+
+### Hierarchical Dataset Structure
+
+```yaml
+# datasets/product-hierarchy.yaml
+data:
+  - code: "EQUITY"
+    name: "Equity Securities"
+    category: "SECURITIES"
+    subcategories:
+      - code: "COMMON"
+        name: "Common Stock"
+        riskWeight: 1.0
+      - code: "PREFERRED"
+        name: "Preferred Stock"
+        riskWeight: 0.8
+
+  - code: "FIXED_INCOME"
+    name: "Fixed Income Securities"
+    category: "SECURITIES"
+    subcategories:
+      - code: "GOVT_BOND"
+        name: "Government Bond"
+        riskWeight: 0.2
+      - code: "CORP_BOND"
+        name: "Corporate Bond"
+        riskWeight: 0.5
+```
+
+### Time-Based Dataset Configuration
+
+```yaml
+enrichments:
+  - id: "time-sensitive-enrichment"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        time-based: true
+        effective-date-field: "effectiveDate"
+        data:
+          - code: "RATE001"
+            rate: 0.05
+            effectiveDate: "2024-01-01"
+          - code: "RATE001"
+            rate: 0.055
+            effectiveDate: "2024-07-01"
+```
+
+### Conditional Dataset Loading
+
+```yaml
+enrichments:
+  - id: "conditional-enrichment"
+    type: "lookup-enrichment"
+    condition: "['region'] == 'US' && ['instrumentType'] == 'EQUITY'"
+    lookup-config:
+      lookup-dataset:
+        type: "yaml-file"
+        file-path: "datasets/us-equity-data.yaml"
+        key-field: "symbol"
+
+  - id: "alternative-enrichment"
+    type: "lookup-enrichment"
+    condition: "['region'] == 'EU' && ['instrumentType'] == 'EQUITY'"
+    lookup-config:
+      lookup-dataset:
+        type: "yaml-file"
+        file-path: "datasets/eu-equity-data.yaml"
+        key-field: "isin"
 ```

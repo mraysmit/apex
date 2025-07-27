@@ -5,29 +5,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
  * Fluent builder for validation chains.
- * Provides a readable way to validate multiple conditions against data.
- * 
- * <p>Examples:</p>
- * <pre>
- * // Simple pass/fail validation
- * boolean valid = Rules.validate(customer)
- *     .that("#data.age >= 18", "Must be adult")
- *     .that("#data.email != null", "Email required")
- *     .passes();
- * 
- * // Detailed validation with error messages
- * ValidationResult result = Rules.validate(customer)
- *     .that("#data.age >= 18", "Must be at least 18 years old")
- *     .that("#data.email != null", "Email address is required")
- *     .that("#data.phone != null", "Phone number is required")
- *     .validate();
- * 
- * if (!result.isValid()) {
- *     System.out.println("Validation errors: " + result.getErrors());
- * }
- * </pre>
+ *
+ * This class is part of the PeeGeeQ message queue system, providing
+ * production-ready PostgreSQL-based message queuing capabilities.
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-07-27
+ * @version 1.0
  */
 public class ValidationBuilder {
 

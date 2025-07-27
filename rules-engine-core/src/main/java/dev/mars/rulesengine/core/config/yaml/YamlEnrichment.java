@@ -5,6 +5,32 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Map;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * YAML representation of an enrichment configuration.
+ *
+ * This class is part of the PeeGeeQ message queue system, providing
+ * production-ready PostgreSQL-based message queuing capabilities.
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-07-27
+ * @version 1.0
+ */
 /**
  * YAML representation of an enrichment configuration.
  * This class maps to the YAML structure for defining data enrichments.
@@ -233,13 +259,16 @@ public class YamlEnrichment {
     public static class LookupConfig {
         @JsonProperty("lookup-service")
         private String lookupService;
-        
+
+        @JsonProperty("lookup-dataset")
+        private LookupDataset lookupDataset;
+
         @JsonProperty("lookup-key")
         private String lookupKey; // SpEL expression to extract lookup key
-        
+
         @JsonProperty("cache-enabled")
         private Boolean cacheEnabled;
-        
+
         @JsonProperty("cache-ttl-seconds")
         private Integer cacheTtlSeconds;
         
@@ -280,6 +309,14 @@ public class YamlEnrichment {
         
         public void setCacheTtlSeconds(Integer cacheTtlSeconds) {
             this.cacheTtlSeconds = cacheTtlSeconds;
+        }
+
+        public LookupDataset getLookupDataset() {
+            return lookupDataset;
+        }
+
+        public void setLookupDataset(LookupDataset lookupDataset) {
+            this.lookupDataset = lookupDataset;
         }
     }
     
@@ -322,6 +359,96 @@ public class YamlEnrichment {
         
         public void setDependencies(List<String> dependencies) {
             this.dependencies = dependencies;
+        }
+    }
+
+    /**
+     * Dataset configuration for lookup enrichments.
+     * Supports inline datasets, YAML files, and CSV files.
+     */
+    public static class LookupDataset {
+        @JsonProperty("type")
+        private String type; // "inline", "yaml-file", "csv-file"
+
+        @JsonProperty("file-path")
+        private String filePath; // For file-based datasets
+
+        @JsonProperty("key-field")
+        private String keyField; // Field to use as lookup key
+
+        @JsonProperty("data")
+        private List<Map<String, Object>> data; // For inline datasets
+
+        @JsonProperty("default-values")
+        private Map<String, Object> defaultValues; // Default values for missing fields
+
+        @JsonProperty("cache-enabled")
+        private Boolean cacheEnabled;
+
+        @JsonProperty("cache-ttl-seconds")
+        private Integer cacheTtlSeconds;
+
+        // Default constructor
+        public LookupDataset() {
+            this.cacheEnabled = true;
+            this.cacheTtlSeconds = 3600; // 1 hour default for datasets
+        }
+
+        // Getters and setters
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getFilePath() {
+            return filePath;
+        }
+
+        public void setFilePath(String filePath) {
+            this.filePath = filePath;
+        }
+
+        public String getKeyField() {
+            return keyField;
+        }
+
+        public void setKeyField(String keyField) {
+            this.keyField = keyField;
+        }
+
+        public List<Map<String, Object>> getData() {
+            return data;
+        }
+
+        public void setData(List<Map<String, Object>> data) {
+            this.data = data;
+        }
+
+        public Map<String, Object> getDefaultValues() {
+            return defaultValues;
+        }
+
+        public void setDefaultValues(Map<String, Object> defaultValues) {
+            this.defaultValues = defaultValues;
+        }
+
+        public Boolean getCacheEnabled() {
+            return cacheEnabled;
+        }
+
+        public void setCacheEnabled(Boolean cacheEnabled) {
+            this.cacheEnabled = cacheEnabled;
+        }
+
+        public Integer getCacheTtlSeconds() {
+            return cacheTtlSeconds;
+        }
+
+        public void setCacheTtlSeconds(Integer cacheTtlSeconds) {
+            this.cacheTtlSeconds = cacheTtlSeconds;
         }
     }
 }

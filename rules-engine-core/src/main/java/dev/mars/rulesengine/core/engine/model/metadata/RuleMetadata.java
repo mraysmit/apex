@@ -5,24 +5,41 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
  * Extensible metadata container for rules that supports both standard and custom metadata.
- * 
- * Standard metadata includes:
- * - Audit trail (created/modified dates and users)
- * - Version information
- * - Business context
- * - Technical attributes
- * 
- * Custom metadata can be added through the extensible properties map.
+ *
+ * This class is part of the PeeGeeQ message queue system, providing
+ * production-ready PostgreSQL-based message queuing capabilities.
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-07-27
+ * @version 1.0
  */
 public class RuleMetadata {
     
-    // === STANDARD AUDIT METADATA ===
-    private final Instant createdDate;
+    // === CORE AUDIT METADATA (REQUIRED) ===
+    private final Instant createdDate;      // CRITICAL: When was this rule created
+    private final Instant modifiedDate;     // CRITICAL: When was this rule last modified
+
+    // === ADDITIONAL AUDIT METADATA (OPTIONAL) ===
     private final String createdByUser;
-    private Instant lastModifiedDate;
-    private String lastModifiedByUser;
+    private final String lastModifiedByUser;
     
     // === VERSION METADATA ===
     private final String version;
@@ -48,12 +65,15 @@ public class RuleMetadata {
     
     /**
      * Private constructor - use Builder to create instances.
+     * Ensures createdDate and modifiedDate are ALWAYS set.
      */
     private RuleMetadata(Builder builder) {
-        // Audit metadata
+        // CORE AUDIT METADATA - Always required
         this.createdDate = builder.createdDate != null ? builder.createdDate : Instant.now();
+        this.modifiedDate = builder.modifiedDate != null ? builder.modifiedDate : this.createdDate;
+
+        // ADDITIONAL AUDIT METADATA - Optional
         this.createdByUser = builder.createdByUser;
-        this.lastModifiedDate = builder.lastModifiedDate != null ? builder.lastModifiedDate : this.createdDate;
         this.lastModifiedByUser = builder.lastModifiedByUser != null ? builder.lastModifiedByUser : this.createdByUser;
         
         // Version metadata
@@ -79,11 +99,23 @@ public class RuleMetadata {
         this.customProperties = new HashMap<>(builder.customProperties);
     }
     
-    // === GETTERS ===
-    
+    // === CORE GETTERS (ALWAYS AVAILABLE) ===
+
+    /**
+     * Get the creation date - ALWAYS available, never null.
+     * This is the most critical audit attribute.
+     */
     public Instant getCreatedDate() { return createdDate; }
+
+    /**
+     * Get the last modification date - ALWAYS available, never null.
+     * This is the second most critical audit attribute.
+     */
+    public Instant getModifiedDate() { return modifiedDate; }
+
+    // === ADDITIONAL GETTERS (MAY BE NULL) ===
+
     public String getCreatedByUser() { return createdByUser; }
-    public Instant getLastModifiedDate() { return lastModifiedDate; }
     public String getLastModifiedByUser() { return lastModifiedByUser; }
     
     public String getVersion() { return version; }
@@ -135,10 +167,11 @@ public class RuleMetadata {
     /**
      * Create a new metadata instance with updated modification info.
      * This preserves immutability while allowing updates.
+     * CRITICAL: Always updates modifiedDate to current time.
      */
     public RuleMetadata withModification(String modifiedByUser, String changeReason) {
         return new Builder(this)
-            .lastModifiedDate(Instant.now())
+            .modifiedDate(Instant.now())  // CRITICAL: Always update modification time
             .lastModifiedByUser(modifiedByUser)
             .changeReason(changeReason)
             .build();
@@ -146,11 +179,12 @@ public class RuleMetadata {
     
     /**
      * Create a new metadata instance with a status change.
+     * CRITICAL: Always updates modifiedDate to current time.
      */
     public RuleMetadata withStatus(RuleStatus newStatus, String modifiedByUser) {
         return new Builder(this)
             .status(newStatus)
-            .lastModifiedDate(Instant.now())
+            .modifiedDate(Instant.now())  // CRITICAL: Always update modification time
             .lastModifiedByUser(modifiedByUser)
             .build();
     }
@@ -166,10 +200,12 @@ public class RuleMetadata {
     }
     
     public static class Builder {
-        // Audit metadata
+        // CORE AUDIT METADATA (CRITICAL)
         private Instant createdDate;
+        private Instant modifiedDate;
+
+        // ADDITIONAL AUDIT METADATA
         private String createdByUser;
-        private Instant lastModifiedDate;
         private String lastModifiedByUser;
         
         // Version metadata
@@ -198,11 +234,12 @@ public class RuleMetadata {
         
         /**
          * Copy constructor for creating modified versions.
+         * Preserves the critical createdDate and modifiedDate.
          */
         public Builder(RuleMetadata existing) {
             this.createdDate = existing.createdDate;
+            this.modifiedDate = existing.modifiedDate;
             this.createdByUser = existing.createdByUser;
-            this.lastModifiedDate = existing.lastModifiedDate;
             this.lastModifiedByUser = existing.lastModifiedByUser;
             
             this.version = existing.version;
@@ -224,10 +261,22 @@ public class RuleMetadata {
             this.customProperties = new HashMap<>(existing.customProperties);
         }
         
-        // === AUDIT METADATA BUILDERS ===
+        // === CORE AUDIT METADATA BUILDERS (CRITICAL) ===
+
+        /**
+         * Set the creation date - CRITICAL audit attribute.
+         * If not set, defaults to current time.
+         */
         public Builder createdDate(Instant createdDate) { this.createdDate = createdDate; return this; }
+
+        /**
+         * Set the modification date - CRITICAL audit attribute.
+         * If not set, defaults to creation date.
+         */
+        public Builder modifiedDate(Instant modifiedDate) { this.modifiedDate = modifiedDate; return this; }
+
+        // === ADDITIONAL AUDIT METADATA BUILDERS ===
         public Builder createdByUser(String createdByUser) { this.createdByUser = createdByUser; return this; }
-        public Builder lastModifiedDate(Instant lastModifiedDate) { this.lastModifiedDate = lastModifiedDate; return this; }
         public Builder lastModifiedByUser(String lastModifiedByUser) { this.lastModifiedByUser = lastModifiedByUser; return this; }
         
         // === VERSION METADATA BUILDERS ===
@@ -268,12 +317,12 @@ public class RuleMetadata {
     @Override
     public String toString() {
         return "RuleMetadata{" +
-                "version='" + version + '\'' +
+                "createdDate=" + createdDate +           // CRITICAL: Show first
+                ", modifiedDate=" + modifiedDate +       // CRITICAL: Show second
+                ", version='" + version + '\'' +
                 ", status=" + status +
                 ", createdBy='" + createdByUser + '\'' +
-                ", createdDate=" + createdDate +
                 ", lastModifiedBy='" + lastModifiedByUser + '\'' +
-                ", lastModifiedDate=" + lastModifiedDate +
                 ", businessOwner='" + businessOwner + '\'' +
                 ", customProperties=" + customProperties.size() + " entries" +
                 '}';

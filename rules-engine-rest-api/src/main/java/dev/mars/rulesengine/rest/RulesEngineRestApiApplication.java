@@ -8,27 +8,35 @@ import io.swagger.v3.oas.annotations.servers.Server;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
  * Spring Boot application for the Rules Engine REST API.
- * 
- * This application provides a comprehensive REST API for the SpEL Rules Engine,
- * including rule evaluation, configuration management, performance monitoring,
- * and system health checks.
- * 
- * Features:
- * - Rule evaluation and validation endpoints
- * - YAML configuration management
- * - Performance monitoring and metrics
- * - OpenAPI/Swagger documentation
- * - Health checks and system information
- * 
- * Access points:
- * - API: http://localhost:8080/api/
- * - Swagger UI: http://localhost:8080/swagger-ui.html
- * - Health: http://localhost:8080/actuator/health
- * - Metrics: http://localhost:8080/actuator/metrics
+ *
+ * This class is part of the PeeGeeQ message queue system, providing
+ * production-ready PostgreSQL-based message queuing capabilities.
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-07-27
+ * @version 1.0
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = {
+    org.springframework.boot.actuate.autoconfigure.metrics.task.TaskExecutorMetricsAutoConfiguration.class
+})
 @OpenAPIDefinition(
     info = @Info(
         title = "SpEL Rules Engine REST API",

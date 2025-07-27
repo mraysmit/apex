@@ -15,16 +15,31 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
  * Comprehensive demonstration of OTC Commodity Total Return Swap validation and enrichment
- * using the new layered APIs design of the SpEL Rules Engine.
- * 
- * This demo showcases:
- * 1. Ultra-Simple API (Layer 1) - One-liner validations
- * 2. Template-Based Rules (Layer 2) - Structured rule sets
- * 3. Advanced Configuration (Layer 3) - Full control with performance monitoring
- * 4. Static data validation and enrichment
- * 5. Performance monitoring and exception handling
+ *
+ * This class is part of the PeeGeeQ message queue system, providing
+ * production-ready PostgreSQL-based message queuing capabilities.
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-07-27
+ * @version 1.0
  */
 public class CommoditySwapValidationDemo {
     
@@ -153,26 +168,32 @@ public class CommoditySwapValidationDemo {
     private void demonstrateTemplateBasedRules(CommodityTotalReturnSwap swap) {
         System.out.println("=== LAYER 2: TEMPLATE-BASED RULES ===");
         
-        // Create validation rule set using templates
+        // Create validation rule set using new generic API
         System.out.println("1. Creating Validation Rule Set:");
-        
-        RulesEngine validationEngine = RuleSet.validation()
-            .fieldRequired("tradeId")
-            .fieldRequired("counterpartyId")
-            .fieldRequired("clientId")
-            .fieldRequired("commodityType")
-            .fieldRequired("referenceIndex")
+
+        RulesEngine validationEngine = RuleSet.category("commodity-validation")
+            .withCreatedBy("financial.admin@company.com")
+            .withBusinessDomain("Financial Instruments")
+            .withBusinessOwner("Trading Desk")
+            .customRule("Trade ID Required", "#tradeId != null && #tradeId.trim().length() > 0", "Trade ID is required")
+            .customRule("Counterparty ID Required", "#counterpartyId != null && #counterpartyId.trim().length() > 0", "Counterparty ID is required")
+            .customRule("Client ID Required", "#clientId != null && #clientId.trim().length() > 0", "Client ID is required")
+            .customRule("Commodity Type Required", "#commodityType != null && #commodityType.trim().length() > 0", "Commodity type is required")
+            .customRule("Reference Index Required", "#referenceIndex != null && #referenceIndex.trim().length() > 0", "Reference index is required")
             .build();
-        
-        System.out.println("   ✓ Validation rule set created with 5 rules");
-        
+
+        System.out.println("   ✓ Validation rule set created with 5 rules using generic API");
+
         // Create business rule set
         System.out.println("\n2. Creating Business Rule Set:");
-        
-        RulesEngine businessEngine = RuleSet.business()
-            .premiumEligibility("#maturityDate.isBefore(#tradeDate.plusYears(5))")
-            .discountEligibility("#notionalCurrency == #paymentCurrency && #paymentCurrency == #settlementCurrency")
-            .vipStatus("#settlementDays != null && #settlementDays >= 0 && #settlementDays <= 5")
+
+        RulesEngine businessEngine = RuleSet.category("commodity-business")
+            .withCreatedBy("financial.admin@company.com")
+            .withBusinessDomain("Financial Instruments")
+            .withBusinessOwner("Trading Desk")
+            .customRule("Maturity Eligibility", "#maturityDate.isBefore(#tradeDate.plusYears(5))", "Trade maturity within 5 years")
+            .customRule("Currency Consistency", "#notionalCurrency == #paymentCurrency && #paymentCurrency == #settlementCurrency", "All currencies must match")
+            .customRule("Settlement Terms", "#settlementDays != null && #settlementDays >= 0 && #settlementDays <= 5", "Settlement within 5 days")
             .build();
         
         System.out.println("   ✓ Business rule set created with 3 rules");

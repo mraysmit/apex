@@ -7,6 +7,7 @@ import dev.mars.rulesengine.core.service.lookup.LookupServiceRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -14,9 +15,31 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
  * Comprehensive tests for YamlEnrichmentProcessor.
- * This test validates that YAML enrichment configurations are properly executed at runtime.
+ *
+ * This class is part of the PeeGeeQ message queue system, providing
+ * production-ready PostgreSQL-based message queuing capabilities.
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-07-27
+ * @version 1.0
  */
 public class YamlEnrichmentProcessorTest {
 
@@ -85,25 +108,25 @@ public class YamlEnrichmentProcessorTest {
 
     @Test
     void testLookupEnrichmentExecution() {
-        // Create a test trade object
-        TestTrade trade = new TestTrade();
-        trade.counterpartyId = "CPTY001";
-        trade.notionalCurrency = "USD";
+        // Create a test trade object using Map to avoid module system restrictions
+        Map<String, Object> trade = new HashMap<>();
+        trade.put("counterpartyId", "CPTY001");
+        trade.put("notionalCurrency", "USD");
 
         // Create YAML enrichment configuration for counterparty
         YamlEnrichment enrichment = new YamlEnrichment();
         enrichment.setId("counterparty-enrichment");
         enrichment.setName("Counterparty Data Enrichment");
         enrichment.setType("lookup-enrichment");
-        enrichment.setTargetType("TestTrade");
+        // No target type restriction for Map objects
         enrichment.setEnabled(true);
         enrichment.setPriority(10);
-        enrichment.setCondition("#counterpartyId != null");
+        enrichment.setCondition("['counterpartyId'] != null");  // Map syntax for SpEL
 
         // Set up lookup configuration
         YamlEnrichment.LookupConfig lookupConfig = new YamlEnrichment.LookupConfig();
         lookupConfig.setLookupService("counterpartyLookupService");
-        lookupConfig.setLookupKey("#counterpartyId");
+        lookupConfig.setLookupKey("['counterpartyId']");  // Map syntax for SpEL
         lookupConfig.setCacheEnabled(true);
         lookupConfig.setCacheTtlSeconds(3600);
         enrichment.setLookupConfig(lookupConfig);
@@ -122,18 +145,18 @@ public class YamlEnrichmentProcessorTest {
 
         // Verify the enrichment was applied
         assertSame(trade, result);
-        assertEquals("Goldman Sachs", trade.counterpartyName);
-        assertEquals("A+", trade.counterpartyRating);
-        assertEquals("W22LROWP2IHZNBB6K528", trade.counterpartyLei);
-        assertEquals("US", trade.counterpartyJurisdiction);
+        assertEquals("Goldman Sachs", trade.get("counterpartyName"));
+        assertEquals("A+", trade.get("counterpartyRating"));
+        assertEquals("W22LROWP2IHZNBB6K528", trade.get("counterpartyLei"));
+        assertEquals("US", trade.get("counterpartyJurisdiction"));
     }
 
     @Test
     void testMultipleEnrichmentsExecution() {
-        // Create a test trade object
-        TestTrade trade = new TestTrade();
-        trade.counterpartyId = "CPTY002";
-        trade.notionalCurrency = "EUR";
+        // Create a test trade object using Map
+        Map<String, Object> trade = new HashMap<>();
+        trade.put("counterpartyId", "CPTY002");
+        trade.put("notionalCurrency", "EUR");
 
         // Create multiple enrichments
         List<YamlEnrichment> enrichments = Arrays.asList(
@@ -148,23 +171,23 @@ public class YamlEnrichmentProcessorTest {
         assertSame(trade, result);
         
         // Counterparty enrichment
-        assertEquals("JP Morgan", trade.counterpartyName);
-        assertEquals("AA-", trade.counterpartyRating);
-        assertEquals("7H6GLXDRUGQFU57RNE97", trade.counterpartyLei);
-        assertEquals("US", trade.counterpartyJurisdiction);
-        
+        assertEquals("JP Morgan", trade.get("counterpartyName"));
+        assertEquals("AA-", trade.get("counterpartyRating"));
+        assertEquals("7H6GLXDRUGQFU57RNE97", trade.get("counterpartyLei"));
+        assertEquals("US", trade.get("counterpartyJurisdiction"));
+
         // Currency enrichment
-        assertEquals("Euro", trade.currencyName);
-        assertEquals(2, trade.currencyDecimalPlaces);
-        assertEquals(true, trade.currencyActive);
+        assertEquals("Euro", trade.get("currencyName"));
+        assertEquals(2, trade.get("currencyDecimalPlaces"));
+        assertEquals(true, trade.get("currencyActive"));
     }
 
     @Test
     void testEnrichmentConditionEvaluation() {
-        // Create a test trade object without counterpartyId
-        TestTrade trade = new TestTrade();
-        trade.counterpartyId = null; // This should prevent enrichment
-        trade.notionalCurrency = "USD";
+        // Create a test trade object without counterpartyId using Map
+        Map<String, Object> trade = new HashMap<>();
+        trade.put("counterpartyId", null); // This should prevent enrichment
+        trade.put("notionalCurrency", "USD");
 
         YamlEnrichment enrichment = createCounterpartyEnrichment();
 
@@ -173,15 +196,15 @@ public class YamlEnrichmentProcessorTest {
 
         // Verify the enrichment was NOT applied due to condition
         assertSame(trade, result);
-        assertNull(trade.counterpartyName);
-        assertNull(trade.counterpartyRating);
+        assertNull(trade.get("counterpartyName"));
+        assertNull(trade.get("counterpartyRating"));
     }
 
     @Test
     void testEnrichmentWithDefaultValues() {
-        // Create a test trade object
-        TestTrade trade = new TestTrade();
-        trade.counterpartyId = "UNKNOWN_COUNTERPARTY"; // This won't be found in lookup
+        // Create a test trade object using Map
+        Map<String, Object> trade = new HashMap<>();
+        trade.put("counterpartyId", "UNKNOWN_COUNTERPARTY"); // This won't be found in lookup
 
         YamlEnrichment enrichment = createCounterpartyEnrichment();
 
@@ -190,26 +213,27 @@ public class YamlEnrichmentProcessorTest {
 
         // Verify default values were applied
         assertSame(trade, result);
-        assertEquals("NR", trade.counterpartyRating); // Default value
-        assertEquals("UNKNOWN", trade.counterpartyJurisdiction); // Default value
+        assertEquals("NR", trade.get("counterpartyRating")); // Default value
+        assertEquals("UNKNOWN", trade.get("counterpartyJurisdiction")); // Default value
     }
 
     @Test
     void testCalculationEnrichment() {
-        // Create a test trade object
-        TestTrade trade = new TestTrade();
-        trade.notionalAmount = 1000000.0;
-        trade.rate = 0.05;
+        // Create a test trade object with non-null values using Map
+        Map<String, Object> trade = new HashMap<>();
+        trade.put("notionalAmount", 1000000.0);
+        trade.put("rate", 0.05);
 
         // Create calculation enrichment
         YamlEnrichment enrichment = new YamlEnrichment();
         enrichment.setId("interest-calculation");
         enrichment.setType("calculation-enrichment");
-        enrichment.setTargetType("TestTrade");
+        // No target type restriction for Map objects
         enrichment.setEnabled(true);
+        enrichment.setCondition("['notionalAmount'] != null && ['rate'] != null");  // Map syntax for SpEL
 
         YamlEnrichment.CalculationConfig calcConfig = new YamlEnrichment.CalculationConfig();
-        calcConfig.setExpression("#notionalAmount * #rate");
+        calcConfig.setExpression("['notionalAmount'] * ['rate']");  // Map syntax for SpEL
         calcConfig.setResultField("interestAmount");
         enrichment.setCalculationConfig(calcConfig);
 
@@ -218,20 +242,20 @@ public class YamlEnrichmentProcessorTest {
 
         // Verify the calculation was applied
         assertSame(trade, result);
-        assertEquals(50000.0, trade.interestAmount);
+        assertEquals(50000.0, trade.get("interestAmount"));
     }
 
     @Test
     void testMissingLookupService() {
-        TestTrade trade = new TestTrade();
-        trade.counterpartyId = "CPTY001";
+        Map<String, Object> trade = new HashMap<>();
+        trade.put("counterpartyId", "CPTY001");
 
         YamlEnrichment enrichment = new YamlEnrichment();
         enrichment.setType("lookup-enrichment");
         
         YamlEnrichment.LookupConfig lookupConfig = new YamlEnrichment.LookupConfig();
         lookupConfig.setLookupService("nonExistentService");
-        lookupConfig.setLookupKey("#counterpartyId");
+        lookupConfig.setLookupKey("counterpartyId");  // Remove # for object fields
         enrichment.setLookupConfig(lookupConfig);
 
         // Should throw exception for missing service
@@ -244,14 +268,14 @@ public class YamlEnrichmentProcessorTest {
         YamlEnrichment enrichment = new YamlEnrichment();
         enrichment.setId("counterparty-enrichment");
         enrichment.setType("lookup-enrichment");
-        enrichment.setTargetType("TestTrade");
+        // No target type restriction for Map objects
         enrichment.setEnabled(true);
         enrichment.setPriority(10);
-        enrichment.setCondition("#counterpartyId != null");
+        enrichment.setCondition("['counterpartyId'] != null");  // Map syntax for SpEL
 
         YamlEnrichment.LookupConfig lookupConfig = new YamlEnrichment.LookupConfig();
         lookupConfig.setLookupService("counterpartyLookupService");
-        lookupConfig.setLookupKey("#counterpartyId");
+        lookupConfig.setLookupKey("['counterpartyId']");  // Map syntax for SpEL
         enrichment.setLookupConfig(lookupConfig);
 
         enrichment.setFieldMappings(Arrays.asList(
@@ -268,14 +292,14 @@ public class YamlEnrichmentProcessorTest {
         YamlEnrichment enrichment = new YamlEnrichment();
         enrichment.setId("currency-enrichment");
         enrichment.setType("lookup-enrichment");
-        enrichment.setTargetType("TestTrade");
+        // No target type restriction for Map objects
         enrichment.setEnabled(true);
         enrichment.setPriority(11);
-        enrichment.setCondition("#notionalCurrency != null");
+        enrichment.setCondition("['notionalCurrency'] != null");  // Map syntax for SpEL
 
         YamlEnrichment.LookupConfig lookupConfig = new YamlEnrichment.LookupConfig();
         lookupConfig.setLookupService("currencyLookupService");
-        lookupConfig.setLookupKey("#notionalCurrency");
+        lookupConfig.setLookupKey("['notionalCurrency']");  // Map syntax for SpEL
         enrichment.setLookupConfig(lookupConfig);
 
         enrichment.setFieldMappings(Arrays.asList(
@@ -297,25 +321,5 @@ public class YamlEnrichmentProcessorTest {
         return mapping;
     }
 
-    /**
-     * Test trade class for enrichment testing.
-     */
-    public static class TestTrade {
-        public String counterpartyId;
-        public String notionalCurrency;
-        public Double notionalAmount;
-        public Double rate;
-        
-        // Fields to be enriched
-        public String counterpartyName;
-        public String counterpartyRating;
-        public String counterpartyLei;
-        public String counterpartyJurisdiction;
-        
-        public String currencyName;
-        public Integer currencyDecimalPlaces;
-        public Boolean currencyActive;
-        
-        public Double interestAmount;
-    }
+
 }

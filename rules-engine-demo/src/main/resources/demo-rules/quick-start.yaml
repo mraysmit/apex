@@ -1,0 +1,53 @@
+metadata:
+  name: "Customer Validation Rules"
+  version: "1.0.0"
+  description: "Quick start example rules for customer validation"
+  created-by: "demo@rulesengine.dev"
+  created-date: "2025-07-27"
+
+rules:
+  - id: "age-check"
+    name: "Age Validation"
+    condition: "#data.age >= 18"
+    message: "Customer must be at least 18 years old"
+    description: "Validates that customer meets minimum age requirement"
+    priority: 1
+    
+  - id: "email-check"
+    name: "Email Validation"
+    condition: "#data.email != null && #data.email.contains('@')"
+    message: "Valid email address is required"
+    description: "Ensures customer has a valid email address format"
+    priority: 2
+    
+  - id: "name-check"
+    name: "Name Validation"
+    condition: "#data.name != null && #data.name.length() > 0"
+    message: "Customer name is required"
+    description: "Validates that customer name is provided"
+    priority: 3
+
+# Example of enrichment configuration (for future demos)
+enrichments:
+  - id: "status-enrichment"
+    type: "lookup-enrichment"
+    condition: "['statusCode'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        data:
+          - code: "A"
+            name: "Active"
+            description: "Active customer"
+          - code: "I"
+            name: "Inactive"
+            description: "Inactive customer"
+          - code: "P"
+            name: "Pending"
+            description: "Pending approval"
+    field-mappings:
+      - source-field: "name"
+        target-field: "statusName"
+      - source-field: "description"
+        target-field: "statusDescription"

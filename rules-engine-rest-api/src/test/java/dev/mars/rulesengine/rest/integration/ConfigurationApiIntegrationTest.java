@@ -1,5 +1,6 @@
 package dev.mars.rulesengine.rest.integration;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,10 +20,18 @@ import static org.junit.jupiter.api.Assertions.*;
  * Integration tests for Configuration API endpoints using real Spring Boot context.
  * Uses plain JUnit 5 with real objects and integration testing.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    classes = {dev.mars.rulesengine.rest.RulesEngineRestApiApplication.class,
+               dev.mars.rulesengine.rest.config.IntegrationTestConfiguration.class})
 @ActiveProfiles("test")
 public class ConfigurationApiIntegrationTest {
-    
+
+    @BeforeAll
+    static void setupTestEnvironment() {
+        // Set system property for test-aware logging in core module
+        System.setProperty("test.environment", "true");
+    }
+
     @LocalServerPort
     private int port;
     
@@ -99,12 +108,14 @@ public class ConfigurationApiIntegrationTest {
     
     @Test
     public void testLoadConfiguration_InvalidYaml() {
+        // NOTE: This test intentionally sends invalid YAML to verify error handling
+        // Expected error: "Rule name is required for rule: test-rule"
         String invalidYaml = """
             metadata:
               name: "Invalid Configuration"
             rules:
               - id: "test-rule"
-                # Missing required fields
+                # Missing required 'name' field - this will trigger validation error
                 invalid_field: "this should cause an error"
             """;
         
@@ -159,6 +170,8 @@ public class ConfigurationApiIntegrationTest {
     
     @Test
     public void testValidateConfiguration_InvalidYaml() {
+        // NOTE: This test intentionally sends malformed YAML to verify validation error handling
+        // Expected error: "Configuration is invalid" due to YAML parsing failure
         String invalidYaml = """
             this is not valid yaml content
             - missing proper structure
@@ -225,9 +238,11 @@ public class ConfigurationApiIntegrationTest {
     
     @Test
     public void testUploadConfiguration_EmptyFile() {
+        // NOTE: This test intentionally uploads an empty file to verify error handling
+        // Expected error: "No file provided"
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        
+
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         ByteArrayResource emptyResource = new ByteArrayResource(new byte[0]) {
             @Override
@@ -249,11 +264,13 @@ public class ConfigurationApiIntegrationTest {
     
     @Test
     public void testUploadConfiguration_WrongFileType() {
+        // NOTE: This test intentionally uploads a non-YAML file to verify file type validation
+        // Expected error: "File must be a YAML file (.yaml or .yml)"
         String textContent = "This is a plain text file, not YAML";
-        
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        
+
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         ByteArrayResource textResource = new ByteArrayResource(textContent.getBytes()) {
             @Override

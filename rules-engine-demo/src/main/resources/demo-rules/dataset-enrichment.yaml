@@ -1,0 +1,351 @@
+metadata:
+  name: "Dataset Enrichment Demonstration"
+  version: "1.0.0"
+  description: "Comprehensive examples of YAML dataset enrichment capabilities"
+  created-by: "dataset-demo@rulesengine.dev"
+  created-date: "2025-07-27"
+  domain: "Data Enrichment"
+  tags: ["datasets", "enrichment", "lookup", "reference-data"]
+
+# Basic validation rules that work with enriched data
+rules:
+  - id: "enriched-currency-validation"
+    name: "Enriched Currency Validation"
+    condition: "#currencyActive == true && #currencyTradeable == true"
+    message: "Currency must be active and tradeable"
+    severity: "ERROR"
+    depends-on: ["currency-enrichment"]
+    
+  - id: "regional-compliance-check"
+    name: "Regional Compliance Check"
+    condition: "#currencyRegion != null && #currencyRegion in {'North America', 'Europe', 'Asia'}"
+    message: "Currency region must be supported"
+    severity: "WARNING"
+    depends-on: ["currency-enrichment"]
+    
+  - id: "customer-tier-validation"
+    name: "Customer Tier Validation"
+    condition: "#customerTierName != null && #customerTierMinBalance <= #accountBalance"
+    message: "Account balance must meet minimum tier requirement"
+    severity: "ERROR"
+    depends-on: ["customer-tier-enrichment"]
+
+# Comprehensive enrichment examples
+enrichments:
+  # Currency reference data enrichment
+  - id: "currency-enrichment"
+    type: "lookup-enrichment"
+    description: "Enrich currency codes with comprehensive reference data"
+    condition: "['currency'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        data:
+          - code: "USD"
+            name: "US Dollar"
+            symbol: "$"
+            region: "North America"
+            country: "United States"
+            decimalPlaces: 2
+            active: true
+            tradeable: true
+            majorCurrency: true
+            centralBank: "Federal Reserve"
+            isoNumeric: 840
+          - code: "EUR"
+            name: "Euro"
+            symbol: "€"
+            region: "Europe"
+            country: "Eurozone"
+            decimalPlaces: 2
+            active: true
+            tradeable: true
+            majorCurrency: true
+            centralBank: "European Central Bank"
+            isoNumeric: 978
+          - code: "GBP"
+            name: "British Pound"
+            symbol: "£"
+            region: "Europe"
+            country: "United Kingdom"
+            decimalPlaces: 2
+            active: true
+            tradeable: true
+            majorCurrency: true
+            centralBank: "Bank of England"
+            isoNumeric: 826
+          - code: "JPY"
+            name: "Japanese Yen"
+            symbol: "¥"
+            region: "Asia"
+            country: "Japan"
+            decimalPlaces: 0
+            active: true
+            tradeable: true
+            majorCurrency: true
+            centralBank: "Bank of Japan"
+            isoNumeric: 392
+          - code: "CHF"
+            name: "Swiss Franc"
+            symbol: "CHF"
+            region: "Europe"
+            country: "Switzerland"
+            decimalPlaces: 2
+            active: true
+            tradeable: true
+            majorCurrency: false
+            centralBank: "Swiss National Bank"
+            isoNumeric: 756
+          - code: "CAD"
+            name: "Canadian Dollar"
+            symbol: "C$"
+            region: "North America"
+            country: "Canada"
+            decimalPlaces: 2
+            active: true
+            tradeable: true
+            majorCurrency: false
+            centralBank: "Bank of Canada"
+            isoNumeric: 124
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+      - source-field: "symbol"
+        target-field: "currencySymbol"
+      - source-field: "region"
+        target-field: "currencyRegion"
+      - source-field: "country"
+        target-field: "currencyCountry"
+      - source-field: "decimalPlaces"
+        target-field: "currencyDecimalPlaces"
+      - source-field: "active"
+        target-field: "currencyActive"
+      - source-field: "tradeable"
+        target-field: "currencyTradeable"
+      - source-field: "majorCurrency"
+        target-field: "currencyMajor"
+      - source-field: "centralBank"
+        target-field: "currencyCentralBank"
+      - source-field: "isoNumeric"
+        target-field: "currencyIsoNumeric"
+
+  # Country/Region enrichment
+  - id: "country-enrichment"
+    type: "lookup-enrichment"
+    description: "Enrich country codes with regional and regulatory information"
+    condition: "['countryCode'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        data:
+          - code: "US"
+            name: "United States"
+            region: "North America"
+            continent: "North America"
+            regulatoryRegime: "CFTC"
+            timeZone: "Multiple"
+            language: "English"
+            gdpRanking: 1
+            financialCenter: true
+          - code: "GB"
+            name: "United Kingdom"
+            region: "Europe"
+            continent: "Europe"
+            regulatoryRegime: "FCA"
+            timeZone: "GMT"
+            language: "English"
+            gdpRanking: 6
+            financialCenter: true
+          - code: "DE"
+            name: "Germany"
+            region: "Europe"
+            continent: "Europe"
+            regulatoryRegime: "ESMA"
+            timeZone: "CET"
+            language: "German"
+            gdpRanking: 4
+            financialCenter: true
+          - code: "JP"
+            name: "Japan"
+            region: "Asia"
+            continent: "Asia"
+            regulatoryRegime: "JFSA"
+            timeZone: "JST"
+            language: "Japanese"
+            gdpRanking: 3
+            financialCenter: true
+    field-mappings:
+      - source-field: "name"
+        target-field: "countryName"
+      - source-field: "region"
+        target-field: "countryRegion"
+      - source-field: "continent"
+        target-field: "countryContinent"
+      - source-field: "regulatoryRegime"
+        target-field: "countryRegulatoryRegime"
+      - source-field: "timeZone"
+        target-field: "countryTimeZone"
+      - source-field: "language"
+        target-field: "countryLanguage"
+      - source-field: "gdpRanking"
+        target-field: "countryGdpRanking"
+      - source-field: "financialCenter"
+        target-field: "countryFinancialCenter"
+
+  # Customer tier enrichment
+  - id: "customer-tier-enrichment"
+    type: "lookup-enrichment"
+    description: "Enrich customer tier codes with benefits and requirements"
+    condition: "['customerTier'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "tier"
+        data:
+          - tier: "BASIC"
+            name: "Basic Customer"
+            description: "Entry-level customer tier"
+            minBalance: 0
+            maxTransactionLimit: 10000
+            feeDiscount: 0.0
+            prioritySupport: false
+            dedicatedManager: false
+            benefits: ["Basic trading", "Standard support"]
+          - tier: "SILVER"
+            name: "Silver Customer"
+            description: "Mid-tier customer with enhanced benefits"
+            minBalance: 50000
+            maxTransactionLimit: 100000
+            feeDiscount: 0.05
+            prioritySupport: true
+            dedicatedManager: false
+            benefits: ["Reduced fees", "Priority support", "Extended trading hours"]
+          - tier: "GOLD"
+            name: "Gold Customer"
+            description: "High-value customer with premium benefits"
+            minBalance: 250000
+            maxTransactionLimit: 1000000
+            feeDiscount: 0.10
+            prioritySupport: true
+            dedicatedManager: true
+            benefits: ["Significant fee reduction", "Dedicated manager", "Premium research"]
+          - tier: "PLATINUM"
+            name: "Platinum Customer"
+            description: "Ultra-high-net-worth customer tier"
+            minBalance: 1000000
+            maxTransactionLimit: 10000000
+            feeDiscount: 0.15
+            prioritySupport: true
+            dedicatedManager: true
+            benefits: ["Maximum fee discount", "White-glove service", "Exclusive products"]
+    field-mappings:
+      - source-field: "name"
+        target-field: "customerTierName"
+      - source-field: "description"
+        target-field: "customerTierDescription"
+      - source-field: "minBalance"
+        target-field: "customerTierMinBalance"
+      - source-field: "maxTransactionLimit"
+        target-field: "customerTierMaxTransaction"
+      - source-field: "feeDiscount"
+        target-field: "customerTierFeeDiscount"
+      - source-field: "prioritySupport"
+        target-field: "customerTierPrioritySupport"
+      - source-field: "dedicatedManager"
+        target-field: "customerTierDedicatedManager"
+      - source-field: "benefits"
+        target-field: "customerTierBenefits"
+
+  # Product category enrichment
+  - id: "product-category-enrichment"
+    type: "lookup-enrichment"
+    description: "Enrich product categories with risk and regulatory information"
+    condition: "['productCategory'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "category"
+        data:
+          - category: "EQUITY"
+            name: "Equity Securities"
+            description: "Stocks, shares, and equity derivatives"
+            riskLevel: "MEDIUM"
+            regulatoryCategory: "SECURITIES"
+            marginRequirement: 0.25
+            liquidityRating: "HIGH"
+            tradingHours: "09:30-16:00"
+          - category: "FIXED_INCOME"
+            name: "Fixed Income"
+            description: "Bonds, notes, and fixed income derivatives"
+            riskLevel: "LOW"
+            regulatoryCategory: "SECURITIES"
+            marginRequirement: 0.10
+            liquidityRating: "HIGH"
+            tradingHours: "08:00-17:00"
+          - category: "COMMODITY"
+            name: "Commodities"
+            description: "Physical commodities and commodity derivatives"
+            riskLevel: "HIGH"
+            regulatoryCategory: "DERIVATIVES"
+            marginRequirement: 0.15
+            liquidityRating: "MEDIUM"
+            tradingHours: "24/5"
+          - category: "FX"
+            name: "Foreign Exchange"
+            description: "Currency pairs and FX derivatives"
+            riskLevel: "HIGH"
+            regulatoryCategory: "FX"
+            marginRequirement: 0.05
+            liquidityRating: "VERY_HIGH"
+            tradingHours: "24/5"
+    field-mappings:
+      - source-field: "name"
+        target-field: "productCategoryName"
+      - source-field: "description"
+        target-field: "productCategoryDescription"
+      - source-field: "riskLevel"
+        target-field: "productCategoryRiskLevel"
+      - source-field: "regulatoryCategory"
+        target-field: "productCategoryRegulatoryCategory"
+      - source-field: "marginRequirement"
+        target-field: "productCategoryMarginRequirement"
+      - source-field: "liquidityRating"
+        target-field: "productCategoryLiquidityRating"
+      - source-field: "tradingHours"
+        target-field: "productCategoryTradingHours"
+
+  # Conditional enrichment example - only for high-value transactions
+  - id: "high-value-transaction-enrichment"
+    type: "lookup-enrichment"
+    description: "Additional enrichment for high-value transactions"
+    condition: "['transactionAmount'] != null && ['transactionAmount'] > 1000000"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "type"
+        data:
+          - type: "HIGH_VALUE"
+            name: "High Value Transaction"
+            description: "Transaction exceeds $1M threshold"
+            requiresApproval: true
+            approvalLevel: "SENIOR_MANAGER"
+            additionalReporting: true
+            enhancedMonitoring: true
+            complianceReview: true
+    field-mappings:
+      - source-field: "name"
+        target-field: "transactionTypeName"
+      - source-field: "description"
+        target-field: "transactionTypeDescription"
+      - source-field: "requiresApproval"
+        target-field: "transactionRequiresApproval"
+      - source-field: "approvalLevel"
+        target-field: "transactionApprovalLevel"
+      - source-field: "additionalReporting"
+        target-field: "transactionAdditionalReporting"
+      - source-field: "enhancedMonitoring"
+        target-field: "transactionEnhancedMonitoring"
+      - source-field: "complianceReview"
+        target-field: "transactionComplianceReview"

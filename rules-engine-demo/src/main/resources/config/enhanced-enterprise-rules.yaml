@@ -1,283 +1,283 @@
-# Enhanced Enterprise Rules Configuration
+# Financial Services Post-Trade Settlement Rules Configuration
 # Demonstrates the new generic architecture with full enterprise metadata support
-# This configuration showcases user-defined categories and comprehensive audit trails
+# This configuration focuses on financial services post-trade settlement enrichment
 
 metadata:
-  name: "Enhanced Enterprise Rules Configuration"
+  name: "Financial Services Post-Trade Settlement Rules"
   version: "2.0.0"
-  description: "Comprehensive enterprise rules with full audit support and generic categories"
-  author: "enterprise.admin@company.com"
+  description: "Comprehensive post-trade settlement enrichment rules with full audit support"
+  author: "settlement.admin@financialservices.com"
   created: "2024-01-15T10:00:00Z"
   last-modified: "2024-01-20T15:30:00Z"
   tags:
-    - "enterprise"
-    - "generic-architecture"
+    - "financial-services"
+    - "post-trade-settlement"
+    - "enrichment"
     - "audit-ready"
-    - "multi-domain"
 
-# User-defined categories (no hardcoded business domains)
+# Financial Services Post-Trade Settlement Categories
 categories:
-  - name: "patient-eligibility"
-    display-name: "Patient Eligibility"
-    description: "Rules for determining patient eligibility for medical treatments"
+  - name: "settlement-enrichment"
+    display-name: "Settlement Enrichment"
+    description: "Rules for enriching trade data with settlement information"
     priority: 10
     enabled: true
-    business-domain: "Healthcare"
-    business-owner: "Chief Medical Officer"
-    created-by: "healthcare.admin@hospital.com"
-    
-  - name: "quality-control"
-    display-name: "Quality Control"
-    description: "Manufacturing quality control and safety rules"
+    business-domain: "Financial Services Post-Trade"
+    business-owner: "Head of Post-Trade Operations"
+    created-by: "settlement.admin@financialservices.com"
+
+  - name: "counterparty-enrichment"
+    display-name: "Counterparty Enrichment"
+    description: "Rules for enriching counterparty information and validation"
     priority: 20
     enabled: true
-    business-domain: "Manufacturing"
-    business-owner: "Quality Manager"
-    created-by: "qc.manager@manufacturing.com"
-    
-  - name: "data-governance"
-    display-name: "Data Governance"
-    description: "Data privacy, security, and compliance rules"
+    business-domain: "Financial Services Post-Trade"
+    business-owner: "Head of Counterparty Management"
+    created-by: "counterparty.admin@financialservices.com"
+
+  - name: "regulatory-enrichment"
+    display-name: "Regulatory Enrichment"
+    description: "Rules for regulatory reporting and compliance enrichment"
     priority: 30
     enabled: true
-    business-domain: "Data Management"
-    business-owner: "Chief Data Officer"
-    created-by: "governance.officer@company.com"
-    
-  - name: "risk-management"
-    display-name: "Risk Management"
-    description: "Enterprise risk assessment and mitigation rules"
+    business-domain: "Financial Services Post-Trade"
+    business-owner: "Chief Compliance Officer"
+    created-by: "compliance.officer@financialservices.com"
+
+  - name: "fee-calculation"
+    display-name: "Fee and Commission Calculation"
+    description: "Rules for calculating fees, commissions, and charges"
     priority: 40
     enabled: true
-    business-domain: "Risk Management"
-    business-owner: "Chief Risk Officer"
-    created-by: "risk.officer@enterprise.com"
+    business-domain: "Financial Services Post-Trade"
+    business-owner: "Head of Operations"
+    created-by: "operations.manager@financialservices.com"
 
-# Rules with comprehensive enterprise metadata
+# Financial Services Post-Trade Settlement Rules with comprehensive enterprise metadata
 rules:
-  # Healthcare Domain Rules
-  - id: "patient-age-verification"
-    name: "Patient Age Verification"
-    description: "Validates that patient age is within acceptable range for treatment"
-    category: "patient-eligibility"
-    condition: "#patientAge >= 18 && #patientAge <= 65"
-    message: "Patient age must be between 18 and 65 years for this treatment"
+  # Settlement Enrichment Rules
+  - id: "settlement-date-validation"
+    name: "Settlement Date Validation"
+    description: "Validates that settlement date is appropriate relative to trade date"
+    category: "settlement-enrichment"
+    condition: "#settlementDate != null && #settlementDate.isAfter(#tradeDate)"
+    message: "Settlement date must be after trade date"
     priority: 10
     enabled: true
-    tags: ["age-validation", "treatment-eligibility"]
-    
+    tags: ["settlement-date", "trade-validation"]
+
     # Enterprise metadata
-    created-by: "healthcare.admin@hospital.com"
-    business-domain: "Healthcare"
-    business-owner: "Chief Medical Officer"
-    source-system: "HOSPITAL_MANAGEMENT_SYSTEM"
+    created-by: "settlement.admin@financialservices.com"
+    business-domain: "Financial Services Post-Trade"
+    business-owner: "Head of Post-Trade Operations"
+    source-system: "SETTLEMENT_MANAGEMENT_SYSTEM"
     effective-date: "2024-01-01T00:00:00Z"
     expiration-date: "2025-01-01T00:00:00Z"
-    
+
     # Custom properties for domain-specific needs
     custom-properties:
-      department: "Cardiology"
+      department: "Post-Trade Operations"
       compliance-level: "HIGH"
       review-frequency: "QUARTERLY"
-      medical-specialty: "CARDIOLOGY"
-      
-  - id: "insurance-verification"
-    name: "Insurance Coverage Verification"
-    description: "Validates that patient has active insurance coverage"
-    category: "patient-eligibility"
-    condition: "#hasInsurance == true && #insuranceActive == true"
-    message: "Patient must have active insurance coverage"
+      regulatory-requirement: "T+2_SETTLEMENT"
+
+  - id: "ssi-enrichment"
+    name: "Standard Settlement Instructions Enrichment"
+    description: "Validates and enriches standard settlement instructions"
+    category: "settlement-enrichment"
+    condition: "#standardSettlementInstructions != null && #custodianBIC != null"
+    message: "Standard Settlement Instructions and custodian BIC required"
     priority: 11
     enabled: true
-    tags: ["insurance", "coverage-validation"]
-    
-    created-by: "healthcare.admin@hospital.com"
-    business-domain: "Healthcare"
-    business-owner: "Chief Medical Officer"
-    source-system: "INSURANCE_VERIFICATION_SYSTEM"
+    tags: ["ssi", "custodian-validation"]
+
+    created-by: "settlement.admin@financialservices.com"
+    business-domain: "Financial Services Post-Trade"
+    business-owner: "Head of Post-Trade Operations"
+    source-system: "SSI_MANAGEMENT_SYSTEM"
     effective-date: "2024-01-01T00:00:00Z"
-    
+
     custom-properties:
-      department: "Patient Services"
+      department: "Settlement Operations"
       compliance-level: "HIGH"
       integration-required: true
 
-  # Manufacturing Domain Rules
-  - id: "temperature-range-check"
-    name: "Temperature Range Validation"
-    description: "Validates that manufacturing temperature is within acceptable operational range"
-    category: "quality-control"
-    condition: "#temperature >= 20 && #temperature <= 25"
-    message: "Temperature must be between 20°C and 25°C for safe operation"
+  # Counterparty Enrichment Rules
+  - id: "lei-validation"
+    name: "Legal Entity Identifier Validation"
+    description: "Validates that counterparty has a valid Legal Entity Identifier"
+    category: "counterparty-enrichment"
+    condition: "#counterpartyLEI != null && #counterpartyLEI.length() == 20"
+    message: "Valid 20-character LEI required for counterparty"
     priority: 10
     enabled: true
-    tags: ["temperature", "safety", "operational-limits"]
-    
-    created-by: "qc.manager@manufacturing.com"
-    business-domain: "Manufacturing"
-    business-owner: "Quality Manager"
-    source-system: "MANUFACTURING_CONTROL_SYSTEM"
+    tags: ["lei", "counterparty", "regulatory-compliance"]
+
+    created-by: "counterparty.admin@financialservices.com"
+    business-domain: "Financial Services Post-Trade"
+    business-owner: "Head of Counterparty Management"
+    source-system: "COUNTERPARTY_MANAGEMENT_SYSTEM"
     effective-date: "2024-01-01T00:00:00Z"
-    
+
     custom-properties:
-      equipment-type: "FURNACE"
-      safety-critical: true
-      alert-threshold: "IMMEDIATE"
-      
-  - id: "pressure-safety-check"
-    name: "Pressure Safety Validation"
-    description: "Validates that system pressure is within safe operational limits"
-    category: "quality-control"
-    condition: "#pressure <= 100 && #pressure >= 10"
-    message: "System pressure must be between 10 and 100 PSI"
+      department: "Counterparty Management"
+      regulatory-requirement: "EMIR_SFTR"
+      validation-level: "CRITICAL"
+
+  - id: "credit-rating-enrichment"
+    name: "Credit Rating Enrichment"
+    description: "Enriches counterparty data with current credit rating information"
+    category: "counterparty-enrichment"
+    condition: "#counterpartyCreditRating != null && #counterpartyCreditRating.matches('[A-C][+-]?')"
+    message: "Valid credit rating required for counterparty risk assessment"
     priority: 11
     enabled: true
-    tags: ["pressure", "safety", "critical-limits"]
-    
-    created-by: "qc.manager@manufacturing.com"
-    business-domain: "Manufacturing"
-    business-owner: "Quality Manager"
-    source-system: "PRESSURE_MONITORING_SYSTEM"
-    effective-date: "2024-01-01T00:00:00Z"
-    
-    custom-properties:
-      equipment-type: "PRESSURE_VESSEL"
-      safety-critical: true
-      shutdown-required: true
+    tags: ["credit-rating", "risk-assessment", "counterparty"]
 
-  # Data Governance Rules
-  - id: "pii-protection-check"
-    name: "PII Protection Validation"
-    description: "Ensures personally identifiable information is properly encrypted or excluded"
-    category: "data-governance"
-    condition: "#containsPII == false || #encrypted == true"
-    message: "Personally identifiable information must be encrypted or excluded"
+    created-by: "counterparty.admin@financialservices.com"
+    business-domain: "Financial Services Post-Trade"
+    business-owner: "Head of Counterparty Management"
+    source-system: "CREDIT_RATING_SYSTEM"
+    effective-date: "2024-01-01T00:00:00Z"
+
+    custom-properties:
+      department: "Risk Management"
+      data-source: "EXTERNAL_RATING_AGENCY"
+      refresh-frequency: "DAILY"
+
+  # Regulatory Enrichment Rules
+  - id: "uti-generation"
+    name: "Unique Transaction Identifier Generation"
+    description: "Ensures trade has a valid Unique Transaction Identifier for regulatory reporting"
+    category: "regulatory-enrichment"
+    condition: "#uniqueTransactionId != null && #uniqueTransactionId.length() >= 52"
+    message: "Valid UTI with minimum 52 characters required for regulatory reporting"
     priority: 10
     enabled: true
-    tags: ["pii", "encryption", "privacy"]
-    
-    created-by: "governance.officer@company.com"
-    business-domain: "Data Management"
-    business-owner: "Chief Data Officer"
-    source-system: "DATA_GOVERNANCE_PLATFORM"
+    tags: ["uti", "regulatory-reporting", "compliance"]
+
+    created-by: "compliance.officer@financialservices.com"
+    business-domain: "Financial Services Post-Trade"
+    business-owner: "Chief Compliance Officer"
+    source-system: "REGULATORY_REPORTING_SYSTEM"
     effective-date: "2024-01-01T00:00:00Z"
-    
+
     custom-properties:
-      regulation: "GDPR"
+      regulation: "EMIR_SFTR"
       compliance-level: "CRITICAL"
       audit-required: true
-      
-  - id: "data-retention-check"
-    name: "Data Retention Policy Validation"
-    description: "Validates that data age complies with retention policies"
-    category: "data-governance"
-    condition: "#dataAge <= 2555"  # 7 years in days
-    message: "Data exceeds maximum retention period of 7 years"
+
+  - id: "mifid-reporting-flags"
+    name: "MiFID II Reporting Flags Validation"
+    description: "Validates that MiFID II reporting flags are properly set"
+    category: "regulatory-enrichment"
+    condition: "#mifidReportingRequired == true && #reportingFlags != null"
+    message: "MiFID II reporting flags must be present when reporting is required"
     priority: 11
     enabled: true
-    tags: ["retention", "compliance", "lifecycle"]
-    
-    created-by: "governance.officer@company.com"
-    business-domain: "Data Management"
-    business-owner: "Chief Data Officer"
-    source-system: "DATA_LIFECYCLE_MANAGEMENT"
-    effective-date: "2024-01-01T00:00:00Z"
-    
-    custom-properties:
-      regulation: "SOX"
-      retention-period: "7-YEARS"
-      auto-delete: true
+    tags: ["mifid", "reporting-flags", "compliance"]
 
-  # Risk Management Rules
-  - id: "credit-risk-assessment"
-    name: "Credit Risk Assessment"
-    description: "Comprehensive credit risk evaluation based on score and debt-to-income ratio"
-    category: "risk-management"
-    condition: "#creditScore >= 650 && #debtToIncome <= 0.43"
-    message: "Credit risk within acceptable limits"
+    created-by: "compliance.officer@financialservices.com"
+    business-domain: "Financial Services Post-Trade"
+    business-owner: "Chief Compliance Officer"
+    source-system: "MIFID_REPORTING_SYSTEM"
+    effective-date: "2024-01-01T00:00:00Z"
+
+    custom-properties:
+      regulation: "MIFID_II"
+      reporting-jurisdiction: "EU"
+      validation-level: "HIGH"
+
+  # Fee and Commission Calculation Rules
+  - id: "broker-commission-validation"
+    name: "Broker Commission Validation"
+    description: "Validates that broker commission is within reasonable range"
+    category: "fee-calculation"
+    condition: "#brokerCommission >= 0 && #brokerCommission <= #tradeValue * 0.01"
+    message: "Broker commission must be non-negative and not exceed 1% of trade value"
     priority: 10
     enabled: true
-    tags: ["credit-risk", "financial-assessment"]
-    
-    created-by: "risk.officer@enterprise.com"
-    business-domain: "Risk Management"
-    business-owner: "Chief Risk Officer"
-    source-system: "ENTERPRISE_RISK_PLATFORM"
+    tags: ["commission", "fee-validation", "broker"]
+
+    created-by: "operations.manager@financialservices.com"
+    business-domain: "Financial Services Post-Trade"
+    business-owner: "Head of Operations"
+    source-system: "FEE_CALCULATION_SYSTEM"
     effective-date: "2024-01-01T00:00:00Z"
     expiration-date: "2025-01-01T00:00:00Z"
-    
+
     custom-properties:
-      risk-category: "CREDIT"
-      assessment-model: "FICO_ENHANCED"
+      fee-type: "BROKER_COMMISSION"
+      calculation-method: "PERCENTAGE_BASED"
       regulatory-requirement: true
-      
-  - id: "operational-risk-check"
-    name: "Operational Risk Validation"
-    description: "Validates that operational risk metrics are within enterprise thresholds"
-    category: "risk-management"
-    condition: "#operationalRiskScore <= 75"
-    message: "Operational risk score within acceptable range"
+
+  - id: "clearing-fee-validation"
+    name: "Clearing Fee Validation"
+    description: "Validates that clearing fees are properly calculated and applied"
+    category: "fee-calculation"
+    condition: "#clearingFee > 0 && #clearingFee <= #tradeValue * 0.005"
+    message: "Clearing fee must be positive and not exceed 0.5% of trade value"
     priority: 11
     enabled: true
-    tags: ["operational-risk", "threshold-monitoring"]
-    
-    created-by: "risk.officer@enterprise.com"
-    business-domain: "Risk Management"
-    business-owner: "Chief Risk Officer"
-    source-system: "OPERATIONAL_RISK_SYSTEM"
+    tags: ["clearing-fee", "fee-validation", "post-trade"]
+
+    created-by: "operations.manager@financialservices.com"
+    business-domain: "Financial Services Post-Trade"
+    business-owner: "Head of Operations"
+    source-system: "CLEARING_FEE_SYSTEM"
     effective-date: "2024-01-01T00:00:00Z"
-    
+
     custom-properties:
-      risk-category: "OPERATIONAL"
-      threshold-type: "DYNAMIC"
-      escalation-required: false
+      fee-type: "CLEARING_FEE"
+      calculation-method: "FIXED_RATE"
+      clearing-house: "LCH_CLEARNET"
 
 # Rule groups for organized execution (optional)
 rule-groups:
-  - id: "healthcare-eligibility-group"
-    name: "Healthcare Patient Eligibility"
-    description: "Complete patient eligibility validation for healthcare services"
-    category: "patient-eligibility"
+  - id: "settlement-enrichment-group"
+    name: "Settlement Enrichment Validation"
+    description: "Complete settlement data enrichment and validation"
+    category: "settlement-enrichment"
     priority: 10
     enabled: true
     stop-on-first-failure: false
     parallel-execution: true
     rule-ids:
-      - "patient-age-verification"
-      - "insurance-verification"
-      
-  - id: "manufacturing-safety-group"
-    name: "Manufacturing Safety Checks"
-    description: "Critical safety validations for manufacturing operations"
-    category: "quality-control"
+      - "settlement-date-validation"
+      - "ssi-enrichment"
+
+  - id: "counterparty-enrichment-group"
+    name: "Counterparty Data Enrichment"
+    description: "Critical counterparty data validation and enrichment"
+    category: "counterparty-enrichment"
     priority: 10
     enabled: true
-    stop-on-first-failure: true  # Stop immediately on safety violations
+    stop-on-first-failure: true  # Stop immediately on counterparty validation failures
     parallel-execution: true
     rule-ids:
-      - "temperature-range-check"
-      - "pressure-safety-check"
-      
-  - id: "data-compliance-group"
-    name: "Data Compliance Validation"
-    description: "Comprehensive data governance and compliance checks"
-    category: "data-governance"
-    priority: 10
-    enabled: true
-    stop-on-first-failure: false
-    parallel-execution: true
-    rule-ids:
-      - "pii-protection-check"
-      - "data-retention-check"
-      
-  - id: "enterprise-risk-group"
-    name: "Enterprise Risk Assessment"
-    description: "Complete enterprise risk evaluation and monitoring"
-    category: "risk-management"
+      - "lei-validation"
+      - "credit-rating-enrichment"
+
+  - id: "regulatory-compliance-group"
+    name: "Regulatory Compliance Validation"
+    description: "Comprehensive regulatory reporting and compliance checks"
+    category: "regulatory-enrichment"
     priority: 10
     enabled: true
     stop-on-first-failure: false
     parallel-execution: true
     rule-ids:
-      - "credit-risk-assessment"
-      - "operational-risk-check"
+      - "uti-generation"
+      - "mifid-reporting-flags"
+
+  - id: "fee-calculation-group"
+    name: "Fee and Commission Calculation"
+    description: "Complete fee and commission validation and calculation"
+    category: "fee-calculation"
+    priority: 10
+    enabled: true
+    stop-on-first-failure: false
+    parallel-execution: true
+    rule-ids:
+      - "broker-commission-validation"
+      - "clearing-fee-validation"

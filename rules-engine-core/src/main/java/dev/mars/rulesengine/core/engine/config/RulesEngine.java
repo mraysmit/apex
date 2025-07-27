@@ -11,6 +11,7 @@ import dev.mars.rulesengine.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.rulesengine.core.util.LoggingContext;
 import dev.mars.rulesengine.core.util.RuleParameterExtractor;
 import dev.mars.rulesengine.core.util.RulesEngineLogger;
+import dev.mars.rulesengine.core.util.TestAwareLogger;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -18,6 +19,32 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.*;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * This class implements a business rules engine using SpEL.
+ *
+ * This class is part of the PeeGeeQ message queue system, providing
+ * production-ready PostgreSQL-based message queuing capabilities.
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-07-27
+ * @version 1.0
+ */
 /**
  * This class implements a business rules engine using SpEL.
  * It provides a flexible, configurable rules system that can be easily extended
@@ -161,7 +188,7 @@ public class RulesEngine {
         // Check for missing parameters
         Set<String> missingParameters = RuleParameterExtractor.validateParameters(rule, facts);
         if (!missingParameters.isEmpty()) {
-            logger.warn("Missing parameters for rule '{}': {}", rule.getName(), missingParameters);
+            TestAwareLogger.warn(logger, "Missing parameters for rule '{}': {}", rule.getName(), missingParameters);
             RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition());
             LoggingContext.clearRuleContext();
             return RuleResult.error(rule.getName(), "Missing parameters: " + missingParameters, metrics);

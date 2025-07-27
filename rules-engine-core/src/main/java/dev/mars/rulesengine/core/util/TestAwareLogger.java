@@ -20,7 +20,13 @@ public class TestAwareLogger {
         if (profiles != null && profiles.contains("test")) {
             return true;
         }
-        
+
+        // Check for test environment property
+        String testEnv = System.getProperty("test.environment");
+        if ("true".equals(testEnv)) {
+            return true;
+        }
+
         // Also check for test class in stack trace
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         for (StackTraceElement element : stackTrace) {
@@ -29,7 +35,7 @@ public class TestAwareLogger {
                 return true;
             }
         }
-        
+
         return false;
     }
     
@@ -47,16 +53,19 @@ public class TestAwareLogger {
     
     /**
      * Log an error message with throwable, prefixing with test indicator if in test environment.
+     * In test environment, only logs the message without stack trace to avoid log pollution.
      */
     public static void error(Logger logger, String message, Throwable throwable, Object... args) {
         if (isTestEnvironment()) {
+            // In test environment, log only the message without stack trace to keep logs clean
             String prefixedMessage = TEST_PREFIX + message;
             if (args.length > 0) {
-                logger.error(prefixedMessage, args[0], throwable);
+                logger.error(prefixedMessage, args[0]);
             } else {
-                logger.error(prefixedMessage, throwable);
+                logger.error(prefixedMessage);
             }
         } else {
+            // In production, log with full stack trace for debugging
             if (args.length > 0) {
                 logger.error(message, args[0], throwable);
             } else {
@@ -79,21 +88,80 @@ public class TestAwareLogger {
     
     /**
      * Log a warning message with throwable, prefixing with test indicator if in test environment.
+     * In test environment, only logs the message without stack trace to avoid log pollution.
      */
     public static void warn(Logger logger, String message, Throwable throwable, Object... args) {
         if (isTestEnvironment()) {
+            // In test environment, log only the message without stack trace to keep logs clean
             String prefixedMessage = TEST_WARN_PREFIX + message;
             if (args.length > 0) {
-                logger.warn(prefixedMessage, args[0], throwable);
+                logger.warn(prefixedMessage, args[0]);
             } else {
-                logger.warn(prefixedMessage, throwable);
+                logger.warn(prefixedMessage);
             }
         } else {
+            // In production, log with full stack trace for debugging
             if (args.length > 0) {
                 logger.warn(message, args[0], throwable);
             } else {
                 logger.warn(message, throwable);
             }
+        }
+    }
+
+    // Overloaded methods for RulesEngineLogger
+
+    /**
+     * Log an error message using RulesEngineLogger, prefixing with test indicator if in test environment.
+     */
+    public static void error(RulesEngineLogger logger, String message, Object... args) {
+        if (isTestEnvironment()) {
+            String prefixedMessage = TEST_PREFIX + message;
+            logger.error(prefixedMessage, args);
+        } else {
+            logger.error(message, args);
+        }
+    }
+
+    /**
+     * Log an error message with throwable using RulesEngineLogger, prefixing with test indicator if in test environment.
+     * In test environment, only logs the message without stack trace to avoid log pollution.
+     */
+    public static void error(RulesEngineLogger logger, String message, Throwable throwable, Object... args) {
+        if (isTestEnvironment()) {
+            // In test environment, log only the message without stack trace to keep logs clean
+            String prefixedMessage = TEST_PREFIX + message;
+            logger.error(prefixedMessage, args);
+        } else {
+            // In production, log with full stack trace for debugging
+            logger.error(message, throwable, args);
+        }
+    }
+
+    /**
+     * Log a warning message using RulesEngineLogger, prefixing with test indicator if in test environment.
+     */
+    public static void warn(RulesEngineLogger logger, String message, Object... args) {
+        if (isTestEnvironment()) {
+            String prefixedMessage = TEST_WARN_PREFIX + message;
+            logger.warn(prefixedMessage, args);
+        } else {
+            logger.warn(message, args);
+        }
+    }
+
+    /**
+     * Log a warning message with throwable using RulesEngineLogger, prefixing with test indicator if in test environment.
+     * In test environment, only logs the message without stack trace to avoid log pollution.
+     */
+    public static void warn(RulesEngineLogger logger, String message, Throwable throwable, Object... args) {
+        if (isTestEnvironment()) {
+            // In test environment, log only the message without stack trace to keep logs clean
+            String prefixedMessage = TEST_WARN_PREFIX + message;
+            logger.warn(prefixedMessage, args);
+        } else {
+            // In production, log with full stack trace for debugging
+            logger.warn(message, throwable, args);
         }
     }
 }

@@ -5,14 +5,37 @@ import dev.mars.rulesengine.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.rulesengine.core.service.lookup.LookupServiceRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import testmodels.TestTrade;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
  * Integration tests for YAML dataset-based enrichment.
- * Tests the complete flow from YAML configuration to enrichment execution.
+ *
+ * This class is part of the PeeGeeQ message queue system, providing
+ * production-ready PostgreSQL-based message queuing capabilities.
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-07-27
+ * @version 1.0
  */
 public class YamlDatasetEnrichmentTest {
 
@@ -31,19 +54,19 @@ public class YamlDatasetEnrichmentTest {
         // Create enrichment with inline currency dataset
         YamlEnrichment enrichment = createCurrencyEnrichment();
         
-        // Create test trade object
-        TestTrade trade = new TestTrade();
-        trade.notionalCurrency = "USD";
-        
+        // Create test trade object using Map to avoid module system restrictions
+        Map<String, Object> trade = new HashMap<>();
+        trade.put("notionalCurrency", "USD");
+
         // Process enrichment
         Object result = processor.processEnrichment(enrichment, trade);
-        
+
         // Verify enrichment was applied
         assertSame(trade, result);
-        assertEquals("US Dollar", trade.currencyName);
-        assertEquals(2, trade.currencyDecimalPlaces);
-        assertEquals(true, trade.currencyActive);
-        assertEquals("North America", trade.currencyRegion);
+        assertEquals("US Dollar", trade.get("currencyName"));
+        assertEquals(2, trade.get("currencyDecimalPlaces"));
+        assertEquals(true, trade.get("currencyActive"));
+        assertEquals("North America", trade.get("currencyRegion"));
     }
 
     @Test
@@ -54,62 +77,61 @@ public class YamlDatasetEnrichmentTest {
             createCountryEnrichment()
         );
         
-        // Create test trade object
-        TestTrade trade = new TestTrade();
-        trade.notionalCurrency = "EUR";
-        trade.counterpartyJurisdiction = "GB";
-        
+        // Create test trade object using Map
+        Map<String, Object> trade = new HashMap<>();
+        trade.put("notionalCurrency", "EUR");
+        trade.put("counterpartyJurisdiction", "GB");
+
         // Process all enrichments
         Object result = processor.processEnrichments(enrichments, trade);
-        
+
         // Verify both enrichments were applied
         assertSame(trade, result);
-        
+
         // Currency enrichment
-        assertEquals("Euro", trade.currencyName);
-        assertEquals(2, trade.currencyDecimalPlaces);
-        assertEquals("Europe", trade.currencyRegion);
-        
+        assertEquals("Euro", trade.get("currencyName"));
+        assertEquals(2, trade.get("currencyDecimalPlaces"));
+        assertEquals("Europe", trade.get("currencyRegion"));
+
         // Country enrichment
-        assertEquals("United Kingdom", trade.jurisdictionName);
-        assertEquals("Europe", trade.jurisdictionRegion);
-        assertEquals("UK_REGULATIONS", trade.regulatoryRegime);
+        assertEquals("United Kingdom", trade.get("jurisdictionName"));
+        assertEquals("Europe", trade.get("jurisdictionRegion"));
+        assertEquals("UK_REGULATIONS", trade.get("regulatoryRegime"));
     }
 
     @Test
     void testEnrichmentWithDefaultValues() {
         YamlEnrichment enrichment = createCurrencyEnrichment();
         
-        // Create test trade with unknown currency
-        TestTrade trade = new TestTrade();
-        trade.notionalCurrency = "XYZ"; // Unknown currency
-        
+        // Create test trade with unknown currency using Map
+        Map<String, Object> trade = new HashMap<>();
+        trade.put("notionalCurrency", "XYZ"); // Unknown currency
+
         // Process enrichment
         Object result = processor.processEnrichment(enrichment, trade);
-        
+
         // Verify default values were applied
         assertSame(trade, result);
-        assertEquals("Unknown", trade.currencyRegion); // Default value
-        assertEquals(false, trade.currencyActive); // Default value
-        assertNull(trade.currencyName); // No default for this field
+        assertEquals("Unknown", trade.get("currencyRegion")); // Default value
+        assertEquals(false, trade.get("currencyActive")); // Default value
+        assertNull(trade.get("currencyName")); // No default for this field
     }
 
     @Test
     void testConditionalDatasetEnrichment() {
         YamlEnrichment enrichment = createCurrencyEnrichment();
         
-        // Create test trade without currency (condition should fail)
-        TestTrade trade = new TestTrade();
-        trade.notionalCurrency = null;
-        
+        // Create test trade without currency (condition should fail) using Map
+        Map<String, Object> trade = new HashMap<>();
+        trade.put("notionalCurrency", null);
+
         // Process enrichment
         Object result = processor.processEnrichment(enrichment, trade);
-        
+
         // Verify enrichment was NOT applied due to condition
         assertSame(trade, result);
-        assertNull(trade.currencyName);
-        assertNull(trade.currencyRegion);
-        assertEquals(0, trade.currencyDecimalPlaces); // Default int value
+        assertNull(trade.get("currencyName"));
+        assertNull(trade.get("currencyRegion"));
     }
 
     @Test
@@ -119,14 +141,14 @@ public class YamlDatasetEnrichmentTest {
         
         YamlEnrichment datasetEnrichment = createCurrencyEnrichment();
         
-        TestTrade trade = new TestTrade();
-        trade.notionalCurrency = "GBP";
-        
+        Map<String, Object> trade = new HashMap<>();
+        trade.put("notionalCurrency", "GBP");
+
         Object result = processor.processEnrichment(datasetEnrichment, trade);
-        
+
         assertSame(trade, result);
-        assertEquals("British Pound", trade.currencyName);
-        assertEquals("Europe", trade.currencyRegion);
+        assertEquals("British Pound", trade.get("currencyName"));
+        assertEquals("Europe", trade.get("currencyRegion"));
     }
 
     @Test
@@ -158,13 +180,14 @@ public class YamlDatasetEnrichmentTest {
         enrichment.setId("currency-dataset-enrichment");
         enrichment.setName("Currency Dataset Enrichment");
         enrichment.setType("lookup-enrichment");
+        // No target type restriction for Map objects
         enrichment.setEnabled(true);
         enrichment.setPriority(10);
-        enrichment.setCondition("#notionalCurrency != null");
+        enrichment.setCondition("['notionalCurrency'] != null");  // Map syntax for SpEL
         
         // Create lookup configuration with inline dataset
         YamlEnrichment.LookupConfig lookupConfig = new YamlEnrichment.LookupConfig();
-        lookupConfig.setLookupKey("#notionalCurrency");
+        lookupConfig.setLookupKey("['notionalCurrency']");  // Map syntax for SpEL
         
         // Create inline currency dataset
         YamlEnrichment.LookupDataset dataset = new YamlEnrichment.LookupDataset();
@@ -205,13 +228,14 @@ public class YamlDatasetEnrichmentTest {
         enrichment.setId("country-dataset-enrichment");
         enrichment.setName("Country Dataset Enrichment");
         enrichment.setType("lookup-enrichment");
+        // No target type restriction for Map objects
         enrichment.setEnabled(true);
         enrichment.setPriority(11);
-        enrichment.setCondition("#counterpartyJurisdiction != null");
+        enrichment.setCondition("['counterpartyJurisdiction'] != null");  // Map syntax for SpEL
         
         // Create lookup configuration with inline dataset
         YamlEnrichment.LookupConfig lookupConfig = new YamlEnrichment.LookupConfig();
-        lookupConfig.setLookupKey("#counterpartyJurisdiction");
+        lookupConfig.setLookupKey("['counterpartyJurisdiction']");  // Map syntax for SpEL
         
         // Create inline country dataset
         YamlEnrichment.LookupDataset dataset = new YamlEnrichment.LookupDataset();
@@ -271,22 +295,5 @@ public class YamlDatasetEnrichmentTest {
         return mapping;
     }
 
-    /**
-     * Test trade class for enrichment testing.
-     */
-    public static class TestTrade {
-        public String notionalCurrency;
-        public String counterpartyJurisdiction;
-        
-        // Fields to be enriched by currency dataset
-        public String currencyName;
-        public int currencyDecimalPlaces;
-        public Boolean currencyActive;
-        public String currencyRegion;
-        
-        // Fields to be enriched by country dataset
-        public String jurisdictionName;
-        public String jurisdictionRegion;
-        public String regulatoryRegime;
-    }
+
 }

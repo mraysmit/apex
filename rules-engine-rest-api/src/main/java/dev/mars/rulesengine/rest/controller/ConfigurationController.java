@@ -18,16 +18,38 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import dev.mars.rulesengine.rest.util.TestAwareLogger;
+
 import java.io.ByteArrayInputStream;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
  * REST Controller for configuration management operations.
- * 
- * This controller provides endpoints for loading, managing, and inspecting
- * YAML configurations for the Rules Engine.
+ *
+ * This class is part of the PeeGeeQ message queue system, providing
+ * production-ready PostgreSQL-based message queuing capabilities.
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-07-27
+ * @version 1.0
  */
 @RestController
 @RequestMapping("/api/config")
@@ -35,9 +57,12 @@ import java.util.Map;
 public class ConfigurationController {
     
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationController.class);
-    
+
     @Autowired
     private YamlConfigurationLoader yamlConfigurationLoader;
+
+    @Autowired
+    private TestAwareLogger testAwareLogger;
     
     // Store the current configuration for inspection
     private YamlRuleConfiguration currentConfiguration;
@@ -175,7 +200,7 @@ public class ConfigurationController {
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
-            logger.error("Error loading configuration: {}", e.getMessage(), e);
+            testAwareLogger.error(logger, "Error loading configuration: {}", e, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of(
                     "error", "Failed to load configuration",
@@ -250,7 +275,7 @@ public class ConfigurationController {
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
-            logger.error("Error uploading configuration file: {}", e.getMessage(), e);
+            testAwareLogger.error(logger, "Error uploading configuration file: {}", e, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of(
                     "error", "Failed to upload and load configuration file",
@@ -305,7 +330,7 @@ public class ConfigurationController {
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
-            logger.warn("Configuration validation failed: {}", e.getMessage());
+            testAwareLogger.warn(logger, "Configuration validation failed: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of(
                     "valid", false,

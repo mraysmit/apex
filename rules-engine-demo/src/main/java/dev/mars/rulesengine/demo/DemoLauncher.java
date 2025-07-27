@@ -13,19 +13,31 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Scanner;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
  * Unified demo launcher for the rationalized SpEL Rules Engine Demo Suite.
- * 
- * This replaces the old ComprehensiveRulesEngineDemo with a cleaner, more organized approach
- * using the new demo framework. It automatically discovers and registers all available demos,
- * providing both interactive and non-interactive execution modes.
- * 
- * Usage:
- * - Interactive mode: java DemoLauncher
- * - Run specific demo: java DemoLauncher [demo-name]
- * - Run all demos: java DemoLauncher all
- * - List demos: java DemoLauncher list
- * - Generate report: java DemoLauncher report
+ *
+ * This class is part of the PeeGeeQ message queue system, providing
+ * production-ready PostgreSQL-based message queuing capabilities.
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-07-27
+ * @version 1.0
  */
 public class DemoLauncher {
     

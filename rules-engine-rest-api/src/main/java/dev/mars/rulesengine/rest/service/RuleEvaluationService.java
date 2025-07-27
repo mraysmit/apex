@@ -9,10 +9,38 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import dev.mars.rulesengine.rest.util.TestAwareLogger;
+
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Service class for rule evaluation operations.
+ *
+ * This class is part of the PeeGeeQ message queue system, providing
+ * production-ready PostgreSQL-based message queuing capabilities.
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-07-27
+ * @version 1.0
+ */
 /**
  * Service class for rule evaluation operations.
  * 
@@ -24,9 +52,12 @@ import java.util.Map;
 public class RuleEvaluationService {
     
     private static final Logger logger = LoggerFactory.getLogger(RuleEvaluationService.class);
-    
+
     @Autowired
     private RulesService rulesService;
+
+    @Autowired
+    private TestAwareLogger testAwareLogger;
     
     /**
      * Validates data against multiple validation rules.
@@ -41,7 +72,11 @@ public class RuleEvaluationService {
         ValidationResponse response = new ValidationResponse();
         
         if (request.getValidationRules() == null || request.getValidationRules().isEmpty()) {
-            logger.warn("No validation rules provided");
+            if (testAwareLogger != null) {
+                testAwareLogger.warn(logger, "No validation rules provided");
+            } else {
+                logger.warn("No validation rules provided");
+            }
             response.setValid(true);
             response.setTotalRules(0);
             response.setPassedRules(0);
