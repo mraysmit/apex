@@ -1,0 +1,318 @@
+package dev.mars.rulesengine.rest.controller;
+
+import dev.mars.rulesengine.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.rulesengine.core.config.yaml.YamlRuleConfiguration;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.ByteArrayInputStream;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * REST Controller for configuration management operations.
+ * 
+ * This controller provides endpoints for loading, managing, and inspecting
+ * YAML configurations for the Rules Engine.
+ */
+@RestController
+@RequestMapping("/api/config")
+@Tag(name = "Configuration", description = "Configuration management operations")
+public class ConfigurationController {
+    
+    private static final Logger logger = LoggerFactory.getLogger(ConfigurationController.class);
+    
+    @Autowired
+    private YamlConfigurationLoader yamlConfigurationLoader;
+    
+    // Store the current configuration for inspection
+    private YamlRuleConfiguration currentConfiguration;
+    private Instant configurationLoadTime;
+    
+    /**
+     * Get current configuration information.
+     */
+    @GetMapping("/info")
+    @Operation(
+        summary = "Get configuration information",
+        description = "Returns information about the currently loaded configuration including metadata and statistics."
+    )
+    @ApiResponse(responseCode = "200", description = "Configuration information retrieved successfully")
+    public ResponseEntity<Map<String, Object>> getConfigurationInfo() {
+        try {
+            Map<String, Object> info = new HashMap<>();
+            
+            if (currentConfiguration != null) {
+                info.put("hasConfiguration", true);
+                info.put("loadTime", configurationLoadTime);
+                
+                // Add metadata if available
+                if (currentConfiguration.getMetadata() != null) {
+                    Map<String, Object> metadata = new HashMap<>();
+                    metadata.put("name", currentConfiguration.getMetadata().getName());
+                    metadata.put("version", currentConfiguration.getMetadata().getVersion());
+                    metadata.put("description", currentConfiguration.getMetadata().getDescription());
+                    metadata.put("author", currentConfiguration.getMetadata().getAuthor());
+                    metadata.put("created", currentConfiguration.getMetadata().getCreated());
+                    metadata.put("lastModified", currentConfiguration.getMetadata().getLastModified());
+                    metadata.put("tags", currentConfiguration.getMetadata().getTags());
+                    info.put("metadata", metadata);
+                }
+                
+                // Add statistics
+                Map<String, Object> stats = new HashMap<>();
+                stats.put("rulesCount", currentConfiguration.getRules() != null ? 
+                         currentConfiguration.getRules().size() : 0);
+                stats.put("ruleGroupsCount", currentConfiguration.getRuleGroups() != null ? 
+                         currentConfiguration.getRuleGroups().size() : 0);
+                stats.put("enrichmentsCount", currentConfiguration.getEnrichments() != null ? 
+                         currentConfiguration.getEnrichments().size() : 0);
+                stats.put("categoriesCount", currentConfiguration.getCategories() != null ? 
+                         currentConfiguration.getCategories().size() : 0);
+                info.put("statistics", stats);
+                
+            } else {
+                info.put("hasConfiguration", false);
+                info.put("message", "No configuration currently loaded");
+            }
+            
+            info.put("timestamp", Instant.now());
+            
+            return ResponseEntity.ok(info);
+            
+        } catch (Exception e) {
+            logger.error("Error retrieving configuration info: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Failed to retrieve configuration info: " + e.getMessage()));
+        }
+    }
+    
+    /**
+     * Load configuration from YAML content.
+     */
+    @PostMapping("/load")
+    @Operation(
+        summary = "Load YAML configuration",
+        description = "Loads a new YAML configuration from the provided content. This replaces any existing configuration."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Configuration loaded successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid YAML configuration"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> loadConfiguration(
+            @RequestBody 
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "YAML configuration content",
+                content = @Content(
+                    mediaType = "application/x-yaml",
+                    examples = @ExampleObject(
+                        name = "Sample configuration",
+                        value = """
+                        metadata:
+                          name: "Sample Rules"
+                          version: "1.0.0"
+                          description: "Sample rules configuration"
+                        
+                        rules:
+                          - id: "sample-rule"
+                            name: "Sample Rule"
+                            condition: "#value > 0"
+                            message: "Value is positive"
+                        """
+                    )
+                )
+            )
+            String yamlContent) {
+        
+        try {
+            logger.info("Loading new YAML configuration");
+            logger.debug("YAML content length: {} characters", yamlContent.length());
+            
+            // Load configuration from string content
+            YamlRuleConfiguration config = yamlConfigurationLoader.loadFromStream(
+                new ByteArrayInputStream(yamlContent.getBytes())
+            );
+            
+            // Store the configuration
+            this.currentConfiguration = config;
+            this.configurationLoadTime = Instant.now();
+            
+            // Prepare response
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Configuration loaded successfully");
+            response.put("loadTime", configurationLoadTime);
+            
+            if (config.getMetadata() != null) {
+                response.put("configurationName", config.getMetadata().getName());
+                response.put("configurationVersion", config.getMetadata().getVersion());
+            }
+            
+            // Add statistics
+            Map<String, Object> stats = new HashMap<>();
+            stats.put("rulesCount", config.getRules() != null ? config.getRules().size() : 0);
+            stats.put("ruleGroupsCount", config.getRuleGroups() != null ? config.getRuleGroups().size() : 0);
+            stats.put("enrichmentsCount", config.getEnrichments() != null ? config.getEnrichments().size() : 0);
+            response.put("statistics", stats);
+            
+            logger.info("Configuration loaded successfully: {} rules, {} enrichments", 
+                       stats.get("rulesCount"), stats.get("enrichmentsCount"));
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            logger.error("Error loading configuration: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                    "error", "Failed to load configuration",
+                    "details", e.getMessage(),
+                    "timestamp", Instant.now()
+                ));
+        }
+    }
+    
+    /**
+     * Load configuration from uploaded file.
+     */
+    @PostMapping("/upload")
+    @Operation(
+        summary = "Upload YAML configuration file",
+        description = "Uploads and loads a YAML configuration file. This replaces any existing configuration."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Configuration file uploaded and loaded successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid file or YAML configuration"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> uploadConfiguration(
+            @Parameter(description = "YAML configuration file to upload")
+            @RequestParam("file") MultipartFile file) {
+        
+        try {
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "No file provided"));
+            }
+            
+            if (!file.getOriginalFilename().toLowerCase().endsWith(".yaml") && 
+                !file.getOriginalFilename().toLowerCase().endsWith(".yml")) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "File must be a YAML file (.yaml or .yml)"));
+            }
+            
+            logger.info("Uploading configuration file: {}", file.getOriginalFilename());
+            
+            // Load configuration from uploaded file
+            YamlRuleConfiguration config = yamlConfigurationLoader.loadFromStream(
+                file.getInputStream()
+            );
+            
+            // Store the configuration
+            this.currentConfiguration = config;
+            this.configurationLoadTime = Instant.now();
+            
+            // Prepare response
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Configuration file uploaded and loaded successfully");
+            response.put("fileName", file.getOriginalFilename());
+            response.put("fileSize", file.getSize());
+            response.put("loadTime", configurationLoadTime);
+            
+            if (config.getMetadata() != null) {
+                response.put("configurationName", config.getMetadata().getName());
+                response.put("configurationVersion", config.getMetadata().getVersion());
+            }
+            
+            // Add statistics
+            Map<String, Object> stats = new HashMap<>();
+            stats.put("rulesCount", config.getRules() != null ? config.getRules().size() : 0);
+            stats.put("ruleGroupsCount", config.getRuleGroups() != null ? config.getRuleGroups().size() : 0);
+            stats.put("enrichmentsCount", config.getEnrichments() != null ? config.getEnrichments().size() : 0);
+            response.put("statistics", stats);
+            
+            logger.info("Configuration file loaded successfully: {} ({} bytes)", 
+                       file.getOriginalFilename(), file.getSize());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            logger.error("Error uploading configuration file: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                    "error", "Failed to upload and load configuration file",
+                    "details", e.getMessage(),
+                    "timestamp", Instant.now()
+                ));
+        }
+    }
+    
+    /**
+     * Validate YAML configuration without loading it.
+     */
+    @PostMapping("/validate")
+    @Operation(
+        summary = "Validate YAML configuration",
+        description = "Validates the provided YAML configuration without loading it into the system."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Configuration is valid"),
+        @ApiResponse(responseCode = "400", description = "Configuration is invalid")
+    })
+    public ResponseEntity<Map<String, Object>> validateConfiguration(
+            @RequestBody String yamlContent) {
+        
+        try {
+            logger.info("Validating YAML configuration");
+            
+            // Attempt to parse the configuration
+            YamlRuleConfiguration config = yamlConfigurationLoader.loadFromStream(
+                new ByteArrayInputStream(yamlContent.getBytes())
+            );
+            
+            // Prepare validation response
+            Map<String, Object> response = new HashMap<>();
+            response.put("valid", true);
+            response.put("message", "Configuration is valid");
+            response.put("timestamp", Instant.now());
+            
+            if (config.getMetadata() != null) {
+                response.put("configurationName", config.getMetadata().getName());
+                response.put("configurationVersion", config.getMetadata().getVersion());
+            }
+            
+            // Add statistics
+            Map<String, Object> stats = new HashMap<>();
+            stats.put("rulesCount", config.getRules() != null ? config.getRules().size() : 0);
+            stats.put("ruleGroupsCount", config.getRuleGroups() != null ? config.getRuleGroups().size() : 0);
+            stats.put("enrichmentsCount", config.getEnrichments() != null ? config.getEnrichments().size() : 0);
+            response.put("statistics", stats);
+            
+            logger.info("Configuration validation successful");
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            logger.warn("Configuration validation failed: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                    "valid", false,
+                    "error", "Configuration is invalid",
+                    "details", e.getMessage(),
+                    "timestamp", Instant.now()
+                ));
+        }
+    }
+}

@@ -1,0 +1,29 @@
+metadata:
+  name: "Test Rules Configuration"
+  version: "1.0.0"
+  description: "Test rules for REST API testing"
+
+# Simple test rules
+rules:
+  - id: "test-rule"
+    name: "Test Rule"
+    condition: "#value > 0"
+    message: "Test rule passed"
+    enabled: true
+
+# Simple test enrichment
+enrichments:
+  - id: "test-enrichment"
+    type: "lookup-enrichment"
+    condition: "['code'] != null"
+    enabled: true
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        data:
+          - code: "TEST"
+            name: "Test Data"
+    field-mappings:
+      - source-field: "name"
+        target-field: "testName"

@@ -1,0 +1,36 @@
+# Test configuration for Rules Engine REST API
+spring:
+  application:
+    name: rules-engine-rest-api-test
+  
+  # Disable web server for faster tests
+  main:
+    web-application-type: servlet
+  
+  # Logging configuration for tests
+  logging:
+    level:
+      dev.mars.rulesengine: DEBUG
+      org.springframework: WARN
+      org.springframework.test: INFO
+    pattern:
+      console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# Rules Engine test configuration
+rules:
+  config:
+    default-path: classpath:rules/test-rules.yaml
+  performance:
+    monitoring:
+      enabled: false  # Disable for faster tests
+  error:
+    recovery:
+      enabled: true
+
+# Disable actuator endpoints for tests
+management:
+  endpoints:
+    enabled-by-default: false
+  endpoint:
+    health:
+      enabled: true

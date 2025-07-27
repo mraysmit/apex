@@ -1,0 +1,168 @@
+metadata:
+  name: "Default Rules Configuration"
+  version: "1.0.0"
+  description: "Default rules configuration for the Rules Engine REST API"
+  author: "Rules Engine Team"
+  created: "2024-07-27"
+  last-modified: "2024-07-27"
+  tags: ["default", "api", "demo"]
+
+# Sample rules for demonstration
+rules:
+  - id: "age-validation"
+    name: "Age Validation"
+    condition: "#age != null && #age >= 18"
+    message: "Age must be at least 18"
+    severity: "ERROR"
+    enabled: true
+    metadata:
+      owner: "API Team"
+      domain: "Validation"
+      purpose: "Age verification"
+      tags: ["validation", "age"]
+
+  - id: "email-validation"
+    name: "Email Validation"
+    condition: "#email != null && #email.contains('@') && #email.contains('.')"
+    message: "Valid email address is required"
+    severity: "ERROR"
+    enabled: true
+    metadata:
+      owner: "API Team"
+      domain: "Validation"
+      purpose: "Email format verification"
+      tags: ["validation", "email"]
+
+  - id: "balance-check"
+    name: "Balance Check"
+    condition: "#balance != null && #balance >= 0"
+    message: "Balance cannot be negative"
+    severity: "WARNING"
+    enabled: true
+    metadata:
+      owner: "API Team"
+      domain: "Financial"
+      purpose: "Balance validation"
+      tags: ["validation", "financial"]
+
+# Sample enrichments with inline datasets
+enrichments:
+  - id: "status-enrichment"
+    type: "lookup-enrichment"
+    condition: "['status'] != null"
+    enabled: true
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        cache-enabled: true
+        cache-ttl-seconds: 3600
+        default-values:
+          description: "Unknown status"
+          isActive: false
+        data:
+          - code: "A"
+            name: "Active"
+            description: "Active status"
+            isActive: true
+          - code: "I"
+            name: "Inactive"
+            description: "Inactive status"
+            isActive: false
+          - code: "P"
+            name: "Pending"
+            description: "Pending status"
+            isActive: false
+          - code: "S"
+            name: "Suspended"
+            description: "Suspended status"
+            isActive: false
+    field-mappings:
+      - source-field: "name"
+        target-field: "statusName"
+      - source-field: "description"
+        target-field: "statusDescription"
+      - source-field: "isActive"
+        target-field: "statusActive"
+    metadata:
+      owner: "API Team"
+      purpose: "Status code enrichment"
+      lastUpdated: "2024-07-27"
+
+  - id: "country-enrichment"
+    type: "lookup-enrichment"
+    condition: "['countryCode'] != null"
+    enabled: true
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        cache-enabled: true
+        cache-ttl-seconds: 7200
+        default-values:
+          region: "Unknown"
+          currency: "USD"
+        data:
+          - code: "US"
+            name: "United States"
+            region: "North America"
+            currency: "USD"
+            timezone: "America/New_York"
+          - code: "GB"
+            name: "United Kingdom"
+            region: "Europe"
+            currency: "GBP"
+            timezone: "Europe/London"
+          - code: "DE"
+            name: "Germany"
+            region: "Europe"
+            currency: "EUR"
+            timezone: "Europe/Berlin"
+          - code: "JP"
+            name: "Japan"
+            region: "Asia"
+            currency: "JPY"
+            timezone: "Asia/Tokyo"
+          - code: "CA"
+            name: "Canada"
+            region: "North America"
+            currency: "CAD"
+            timezone: "America/Toronto"
+    field-mappings:
+      - source-field: "name"
+        target-field: "countryName"
+      - source-field: "region"
+        target-field: "region"
+      - source-field: "currency"
+        target-field: "currency"
+      - source-field: "timezone"
+        target-field: "timezone"
+    metadata:
+      owner: "API Team"
+      purpose: "Country code enrichment"
+      lastUpdated: "2024-07-27"
+
+# Sample rule groups
+rule-groups:
+  - id: "customer-validation"
+    name: "Customer Validation Rules"
+    description: "Complete customer validation rule set"
+    enabled: true
+    rules:
+      - rule-id: "age-validation"
+      - rule-id: "email-validation"
+    metadata:
+      owner: "API Team"
+      domain: "Customer Management"
+      purpose: "Customer data validation"
+
+  - id: "financial-validation"
+    name: "Financial Validation Rules"
+    description: "Financial data validation rules"
+    enabled: true
+    rules:
+      - rule-id: "balance-check"
+    metadata:
+      owner: "API Team"
+      domain: "Financial"
+      purpose: "Financial data validation"

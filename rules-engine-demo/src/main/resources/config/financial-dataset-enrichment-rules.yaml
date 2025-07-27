@@ -1,0 +1,318 @@
+# Financial Services Dataset-Based Enrichment Rules
+# Demonstrates inline YAML datasets for small static lookup data
+
+metadata:
+  name: "Financial Services Dataset Enrichment Rules"
+  version: "1.0.0"
+  description: "Post-trade settlement enrichment using inline YAML datasets"
+  author: "settlement.admin@financialservices.com"
+  created: "2024-01-25T10:00:00Z"
+  tags:
+    - "financial-services"
+    - "post-trade-settlement"
+    - "dataset-enrichment"
+    - "inline-data"
+
+# Dataset-based enrichments for financial services
+enrichments:
+  # Currency enrichment using inline dataset
+  - id: "currency-dataset-enrichment"
+    name: "Currency Data Enrichment (Inline Dataset)"
+    description: "Enrich trades with currency information from inline YAML dataset"
+    type: "lookup-enrichment"
+    target-type: "Trade"
+    condition: "#notionalCurrency != null"
+    priority: 10
+    enabled: true
+    
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        cache-enabled: true
+        cache-ttl-seconds: 7200  # 2 hours
+        default-values:
+          region: "Unknown"
+          isActive: false
+          centralBank: "Unknown"
+        data:
+          - code: "USD"
+            name: "US Dollar"
+            decimalPlaces: 2
+            isActive: true
+            region: "North America"
+            centralBank: "Federal Reserve"
+            majorCurrency: true
+          - code: "EUR"
+            name: "Euro"
+            decimalPlaces: 2
+            isActive: true
+            region: "Europe"
+            centralBank: "European Central Bank"
+            majorCurrency: true
+          - code: "GBP"
+            name: "British Pound"
+            decimalPlaces: 2
+            isActive: true
+            region: "Europe"
+            centralBank: "Bank of England"
+            majorCurrency: true
+          - code: "JPY"
+            name: "Japanese Yen"
+            decimalPlaces: 0
+            isActive: true
+            region: "Asia"
+            centralBank: "Bank of Japan"
+            majorCurrency: true
+          - code: "CHF"
+            name: "Swiss Franc"
+            decimalPlaces: 2
+            isActive: true
+            region: "Europe"
+            centralBank: "Swiss National Bank"
+            majorCurrency: true
+          - code: "CAD"
+            name: "Canadian Dollar"
+            decimalPlaces: 2
+            isActive: true
+            region: "North America"
+            centralBank: "Bank of Canada"
+            majorCurrency: false
+      lookup-key: "#notionalCurrency"
+      
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+        required: false
+      - source-field: "decimalPlaces"
+        target-field: "currencyDecimalPlaces"
+        required: false
+        default-value: 2
+      - source-field: "region"
+        target-field: "currencyRegion"
+        required: false
+        default-value: "Unknown"
+      - source-field: "centralBank"
+        target-field: "currencyCentralBank"
+        required: false
+      - source-field: "majorCurrency"
+        target-field: "isMajorCurrency"
+        required: false
+        default-value: false
+
+  # Market Identifier Code (MIC) enrichment
+  - id: "mic-dataset-enrichment"
+    name: "Market Identifier Code Enrichment (Inline Dataset)"
+    description: "Enrich trades with trading venue information"
+    type: "lookup-enrichment"
+    target-type: "Trade"
+    condition: "#tradingVenue != null"
+    priority: 11
+    enabled: true
+    
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "mic"
+        cache-enabled: true
+        cache-ttl-seconds: 3600  # 1 hour
+        default-values:
+          country: "Unknown"
+          timezone: "UTC"
+          assetClasses: []
+        data:
+          - mic: "XLON"
+            name: "London Stock Exchange"
+            country: "GB"
+            operatingHours: "08:00-16:30"
+            timezone: "Europe/London"
+            assetClasses: ["EQUITY", "BOND", "ETF"]
+            regulatedMarket: true
+          - mic: "XNYS"
+            name: "New York Stock Exchange"
+            country: "US"
+            operatingHours: "09:30-16:00"
+            timezone: "America/New_York"
+            assetClasses: ["EQUITY"]
+            regulatedMarket: true
+          - mic: "XNAS"
+            name: "NASDAQ"
+            country: "US"
+            operatingHours: "09:30-16:00"
+            timezone: "America/New_York"
+            assetClasses: ["EQUITY"]
+            regulatedMarket: true
+          - mic: "XPAR"
+            name: "Euronext Paris"
+            country: "FR"
+            operatingHours: "09:00-17:30"
+            timezone: "Europe/Paris"
+            assetClasses: ["EQUITY", "BOND", "DERIVATIVE"]
+            regulatedMarket: true
+          - mic: "XFRA"
+            name: "Frankfurt Stock Exchange"
+            country: "DE"
+            operatingHours: "09:00-17:30"
+            timezone: "Europe/Berlin"
+            assetClasses: ["EQUITY", "BOND"]
+            regulatedMarket: true
+      lookup-key: "#tradingVenue"
+      
+    field-mappings:
+      - source-field: "name"
+        target-field: "venueName"
+        required: false
+      - source-field: "country"
+        target-field: "venueCountry"
+        required: false
+        default-value: "Unknown"
+      - source-field: "timezone"
+        target-field: "venueTimezone"
+        required: false
+        default-value: "UTC"
+      - source-field: "operatingHours"
+        target-field: "venueOperatingHours"
+        required: false
+      - source-field: "regulatedMarket"
+        target-field: "isRegulatedMarket"
+        required: false
+        default-value: false
+
+  # Country/Jurisdiction enrichment
+  - id: "jurisdiction-dataset-enrichment"
+    name: "Jurisdiction Enrichment (Inline Dataset)"
+    description: "Enrich counterparty data with jurisdiction information"
+    type: "lookup-enrichment"
+    target-type: "Trade"
+    condition: "#counterpartyJurisdiction != null"
+    priority: 12
+    enabled: true
+    
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "alpha2Code"
+        cache-enabled: true
+        cache-ttl-seconds: 86400  # 24 hours (static data)
+        default-values:
+          region: "Unknown"
+          regulatoryRegime: "OTHER"
+          timeZone: "UTC"
+        data:
+          - alpha2Code: "US"
+            name: "United States"
+            region: "North America"
+            regulatoryRegime: "US_REGULATIONS"
+            timeZone: "America/New_York"
+            cftcJurisdiction: true
+            secJurisdiction: true
+          - alpha2Code: "GB"
+            name: "United Kingdom"
+            region: "Europe"
+            regulatoryRegime: "UK_REGULATIONS"
+            timeZone: "Europe/London"
+            fcaJurisdiction: true
+            mifidApplicable: true
+          - alpha2Code: "DE"
+            name: "Germany"
+            region: "Europe"
+            regulatoryRegime: "EU_REGULATIONS"
+            timeZone: "Europe/Berlin"
+            bafinJurisdiction: true
+            mifidApplicable: true
+          - alpha2Code: "FR"
+            name: "France"
+            region: "Europe"
+            regulatoryRegime: "EU_REGULATIONS"
+            timeZone: "Europe/Paris"
+            amfJurisdiction: true
+            mifidApplicable: true
+          - alpha2Code: "JP"
+            name: "Japan"
+            region: "Asia"
+            regulatoryRegime: "JP_REGULATIONS"
+            timeZone: "Asia/Tokyo"
+            jsaJurisdiction: true
+          - alpha2Code: "SG"
+            name: "Singapore"
+            region: "Asia"
+            regulatoryRegime: "SG_REGULATIONS"
+            timeZone: "Asia/Singapore"
+            masJurisdiction: true
+      lookup-key: "#counterpartyJurisdiction"
+      
+    field-mappings:
+      - source-field: "name"
+        target-field: "jurisdictionName"
+        required: false
+      - source-field: "region"
+        target-field: "jurisdictionRegion"
+        required: false
+        default-value: "Unknown"
+      - source-field: "regulatoryRegime"
+        target-field: "regulatoryRegime"
+        required: false
+        default-value: "OTHER"
+      - source-field: "timeZone"
+        target-field: "jurisdictionTimeZone"
+        required: false
+        default-value: "UTC"
+      - source-field: "mifidApplicable"
+        target-field: "mifidApplicable"
+        required: false
+        default-value: false
+
+  # Settlement instruction codes
+  - id: "settlement-instruction-enrichment"
+    name: "Settlement Instruction Code Enrichment"
+    description: "Enrich trades with settlement instruction details"
+    type: "lookup-enrichment"
+    target-type: "Trade"
+    condition: "#settlementInstructionCode != null"
+    priority: 13
+    enabled: true
+    
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        cache-enabled: true
+        cache-ttl-seconds: 1800  # 30 minutes
+        default-values:
+          description: "Unknown Settlement Instruction"
+          settlementCycle: "T+2"
+        data:
+          - code: "DFP"
+            description: "Delivery Free of Payment"
+            settlementCycle: "T+0"
+            requiresConfirmation: false
+          - code: "DVP"
+            description: "Delivery Versus Payment"
+            settlementCycle: "T+2"
+            requiresConfirmation: true
+          - code: "RFP"
+            description: "Receive Free of Payment"
+            settlementCycle: "T+0"
+            requiresConfirmation: false
+          - code: "RVP"
+            description: "Receive Versus Payment"
+            settlementCycle: "T+2"
+            requiresConfirmation: true
+          - code: "PFOD"
+            description: "Payment Free of Delivery"
+            settlementCycle: "T+0"
+            requiresConfirmation: false
+      lookup-key: "#settlementInstructionCode"
+      
+    field-mappings:
+      - source-field: "description"
+        target-field: "settlementInstructionDescription"
+        required: false
+      - source-field: "settlementCycle"
+        target-field: "settlementCycle"
+        required: false
+        default-value: "T+2"
+      - source-field: "requiresConfirmation"
+        target-field: "requiresSettlementConfirmation"
+        required: false
+        default-value: true

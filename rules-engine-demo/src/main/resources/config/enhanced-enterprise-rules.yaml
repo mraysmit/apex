@@ -1,0 +1,283 @@
+# Enhanced Enterprise Rules Configuration
+# Demonstrates the new generic architecture with full enterprise metadata support
+# This configuration showcases user-defined categories and comprehensive audit trails
+
+metadata:
+  name: "Enhanced Enterprise Rules Configuration"
+  version: "2.0.0"
+  description: "Comprehensive enterprise rules with full audit support and generic categories"
+  author: "enterprise.admin@company.com"
+  created: "2024-01-15T10:00:00Z"
+  last-modified: "2024-01-20T15:30:00Z"
+  tags:
+    - "enterprise"
+    - "generic-architecture"
+    - "audit-ready"
+    - "multi-domain"
+
+# User-defined categories (no hardcoded business domains)
+categories:
+  - name: "patient-eligibility"
+    display-name: "Patient Eligibility"
+    description: "Rules for determining patient eligibility for medical treatments"
+    priority: 10
+    enabled: true
+    business-domain: "Healthcare"
+    business-owner: "Chief Medical Officer"
+    created-by: "healthcare.admin@hospital.com"
+    
+  - name: "quality-control"
+    display-name: "Quality Control"
+    description: "Manufacturing quality control and safety rules"
+    priority: 20
+    enabled: true
+    business-domain: "Manufacturing"
+    business-owner: "Quality Manager"
+    created-by: "qc.manager@manufacturing.com"
+    
+  - name: "data-governance"
+    display-name: "Data Governance"
+    description: "Data privacy, security, and compliance rules"
+    priority: 30
+    enabled: true
+    business-domain: "Data Management"
+    business-owner: "Chief Data Officer"
+    created-by: "governance.officer@company.com"
+    
+  - name: "risk-management"
+    display-name: "Risk Management"
+    description: "Enterprise risk assessment and mitigation rules"
+    priority: 40
+    enabled: true
+    business-domain: "Risk Management"
+    business-owner: "Chief Risk Officer"
+    created-by: "risk.officer@enterprise.com"
+
+# Rules with comprehensive enterprise metadata
+rules:
+  # Healthcare Domain Rules
+  - id: "patient-age-verification"
+    name: "Patient Age Verification"
+    description: "Validates that patient age is within acceptable range for treatment"
+    category: "patient-eligibility"
+    condition: "#patientAge >= 18 && #patientAge <= 65"
+    message: "Patient age must be between 18 and 65 years for this treatment"
+    priority: 10
+    enabled: true
+    tags: ["age-validation", "treatment-eligibility"]
+    
+    # Enterprise metadata
+    created-by: "healthcare.admin@hospital.com"
+    business-domain: "Healthcare"
+    business-owner: "Chief Medical Officer"
+    source-system: "HOSPITAL_MANAGEMENT_SYSTEM"
+    effective-date: "2024-01-01T00:00:00Z"
+    expiration-date: "2025-01-01T00:00:00Z"
+    
+    # Custom properties for domain-specific needs
+    custom-properties:
+      department: "Cardiology"
+      compliance-level: "HIGH"
+      review-frequency: "QUARTERLY"
+      medical-specialty: "CARDIOLOGY"
+      
+  - id: "insurance-verification"
+    name: "Insurance Coverage Verification"
+    description: "Validates that patient has active insurance coverage"
+    category: "patient-eligibility"
+    condition: "#hasInsurance == true && #insuranceActive == true"
+    message: "Patient must have active insurance coverage"
+    priority: 11
+    enabled: true
+    tags: ["insurance", "coverage-validation"]
+    
+    created-by: "healthcare.admin@hospital.com"
+    business-domain: "Healthcare"
+    business-owner: "Chief Medical Officer"
+    source-system: "INSURANCE_VERIFICATION_SYSTEM"
+    effective-date: "2024-01-01T00:00:00Z"
+    
+    custom-properties:
+      department: "Patient Services"
+      compliance-level: "HIGH"
+      integration-required: true
+
+  # Manufacturing Domain Rules
+  - id: "temperature-range-check"
+    name: "Temperature Range Validation"
+    description: "Validates that manufacturing temperature is within acceptable operational range"
+    category: "quality-control"
+    condition: "#temperature >= 20 && #temperature <= 25"
+    message: "Temperature must be between 20°C and 25°C for safe operation"
+    priority: 10
+    enabled: true
+    tags: ["temperature", "safety", "operational-limits"]
+    
+    created-by: "qc.manager@manufacturing.com"
+    business-domain: "Manufacturing"
+    business-owner: "Quality Manager"
+    source-system: "MANUFACTURING_CONTROL_SYSTEM"
+    effective-date: "2024-01-01T00:00:00Z"
+    
+    custom-properties:
+      equipment-type: "FURNACE"
+      safety-critical: true
+      alert-threshold: "IMMEDIATE"
+      
+  - id: "pressure-safety-check"
+    name: "Pressure Safety Validation"
+    description: "Validates that system pressure is within safe operational limits"
+    category: "quality-control"
+    condition: "#pressure <= 100 && #pressure >= 10"
+    message: "System pressure must be between 10 and 100 PSI"
+    priority: 11
+    enabled: true
+    tags: ["pressure", "safety", "critical-limits"]
+    
+    created-by: "qc.manager@manufacturing.com"
+    business-domain: "Manufacturing"
+    business-owner: "Quality Manager"
+    source-system: "PRESSURE_MONITORING_SYSTEM"
+    effective-date: "2024-01-01T00:00:00Z"
+    
+    custom-properties:
+      equipment-type: "PRESSURE_VESSEL"
+      safety-critical: true
+      shutdown-required: true
+
+  # Data Governance Rules
+  - id: "pii-protection-check"
+    name: "PII Protection Validation"
+    description: "Ensures personally identifiable information is properly encrypted or excluded"
+    category: "data-governance"
+    condition: "#containsPII == false || #encrypted == true"
+    message: "Personally identifiable information must be encrypted or excluded"
+    priority: 10
+    enabled: true
+    tags: ["pii", "encryption", "privacy"]
+    
+    created-by: "governance.officer@company.com"
+    business-domain: "Data Management"
+    business-owner: "Chief Data Officer"
+    source-system: "DATA_GOVERNANCE_PLATFORM"
+    effective-date: "2024-01-01T00:00:00Z"
+    
+    custom-properties:
+      regulation: "GDPR"
+      compliance-level: "CRITICAL"
+      audit-required: true
+      
+  - id: "data-retention-check"
+    name: "Data Retention Policy Validation"
+    description: "Validates that data age complies with retention policies"
+    category: "data-governance"
+    condition: "#dataAge <= 2555"  # 7 years in days
+    message: "Data exceeds maximum retention period of 7 years"
+    priority: 11
+    enabled: true
+    tags: ["retention", "compliance", "lifecycle"]
+    
+    created-by: "governance.officer@company.com"
+    business-domain: "Data Management"
+    business-owner: "Chief Data Officer"
+    source-system: "DATA_LIFECYCLE_MANAGEMENT"
+    effective-date: "2024-01-01T00:00:00Z"
+    
+    custom-properties:
+      regulation: "SOX"
+      retention-period: "7-YEARS"
+      auto-delete: true
+
+  # Risk Management Rules
+  - id: "credit-risk-assessment"
+    name: "Credit Risk Assessment"
+    description: "Comprehensive credit risk evaluation based on score and debt-to-income ratio"
+    category: "risk-management"
+    condition: "#creditScore >= 650 && #debtToIncome <= 0.43"
+    message: "Credit risk within acceptable limits"
+    priority: 10
+    enabled: true
+    tags: ["credit-risk", "financial-assessment"]
+    
+    created-by: "risk.officer@enterprise.com"
+    business-domain: "Risk Management"
+    business-owner: "Chief Risk Officer"
+    source-system: "ENTERPRISE_RISK_PLATFORM"
+    effective-date: "2024-01-01T00:00:00Z"
+    expiration-date: "2025-01-01T00:00:00Z"
+    
+    custom-properties:
+      risk-category: "CREDIT"
+      assessment-model: "FICO_ENHANCED"
+      regulatory-requirement: true
+      
+  - id: "operational-risk-check"
+    name: "Operational Risk Validation"
+    description: "Validates that operational risk metrics are within enterprise thresholds"
+    category: "risk-management"
+    condition: "#operationalRiskScore <= 75"
+    message: "Operational risk score within acceptable range"
+    priority: 11
+    enabled: true
+    tags: ["operational-risk", "threshold-monitoring"]
+    
+    created-by: "risk.officer@enterprise.com"
+    business-domain: "Risk Management"
+    business-owner: "Chief Risk Officer"
+    source-system: "OPERATIONAL_RISK_SYSTEM"
+    effective-date: "2024-01-01T00:00:00Z"
+    
+    custom-properties:
+      risk-category: "OPERATIONAL"
+      threshold-type: "DYNAMIC"
+      escalation-required: false
+
+# Rule groups for organized execution (optional)
+rule-groups:
+  - id: "healthcare-eligibility-group"
+    name: "Healthcare Patient Eligibility"
+    description: "Complete patient eligibility validation for healthcare services"
+    category: "patient-eligibility"
+    priority: 10
+    enabled: true
+    stop-on-first-failure: false
+    parallel-execution: true
+    rule-ids:
+      - "patient-age-verification"
+      - "insurance-verification"
+      
+  - id: "manufacturing-safety-group"
+    name: "Manufacturing Safety Checks"
+    description: "Critical safety validations for manufacturing operations"
+    category: "quality-control"
+    priority: 10
+    enabled: true
+    stop-on-first-failure: true  # Stop immediately on safety violations
+    parallel-execution: true
+    rule-ids:
+      - "temperature-range-check"
+      - "pressure-safety-check"
+      
+  - id: "data-compliance-group"
+    name: "Data Compliance Validation"
+    description: "Comprehensive data governance and compliance checks"
+    category: "data-governance"
+    priority: 10
+    enabled: true
+    stop-on-first-failure: false
+    parallel-execution: true
+    rule-ids:
+      - "pii-protection-check"
+      - "data-retention-check"
+      
+  - id: "enterprise-risk-group"
+    name: "Enterprise Risk Assessment"
+    description: "Complete enterprise risk evaluation and monitoring"
+    category: "risk-management"
+    priority: 10
+    enabled: true
+    stop-on-first-failure: false
+    parallel-execution: true
+    rule-ids:
+      - "credit-risk-assessment"
+      - "operational-risk-check"
