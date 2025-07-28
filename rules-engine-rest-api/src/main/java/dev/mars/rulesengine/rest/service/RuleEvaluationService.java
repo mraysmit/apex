@@ -2,7 +2,6 @@ package dev.mars.rulesengine.rest.service;
 
 import dev.mars.rulesengine.core.api.RulesService;
 import dev.mars.rulesengine.core.api.ValidationBuilder;
-import dev.mars.rulesengine.core.api.ValidationResult;
 import dev.mars.rulesengine.rest.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

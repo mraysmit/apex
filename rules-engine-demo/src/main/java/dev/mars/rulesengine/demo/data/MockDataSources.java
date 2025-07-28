@@ -6,7 +6,7 @@ import dev.mars.rulesengine.demo.model.Trade;
 import dev.mars.rulesengine.core.service.lookup.LookupService;
 import dev.mars.rulesengine.core.service.lookup.LookupServiceRegistry;
 import dev.mars.rulesengine.core.service.lookup.RecordMatcher;
-import dev.mars.rulesengine.demo.service.providers.TradeRecordMatcherDemo;
+import dev.mars.rulesengine.demo.rulesets.TradeRecordMatcherDemo;
 
 import java.util.ArrayList;
 import java.util.Arrays;

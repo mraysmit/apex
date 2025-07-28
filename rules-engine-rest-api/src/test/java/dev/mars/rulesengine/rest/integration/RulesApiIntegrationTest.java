@@ -1,6 +1,5 @@
 package dev.mars.rulesengine.rest.integration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.mars.rulesengine.rest.dto.RuleEvaluationRequest;
 import dev.mars.rulesengine.rest.dto.ValidationRequest;
 import org.junit.jupiter.api.BeforeAll;
@@ -9,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integration tests for the Rules Engine REST API using real Spring Boot context.
- * These tests use plain JUnit 5 with real objects and integration testing.
+ * These tests use plain JUnit 5 with real objects and advanced testing.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = {dev.mars.rulesengine.rest.RulesEngineRestApiApplication.class,
@@ -40,33 +40,41 @@ public class RulesApiIntegrationTest {
     @Autowired
     private TestRestTemplate restTemplate;
     
-    @Autowired
-    private ObjectMapper objectMapper;
-    
     private String getBaseUrl() {
         return "http://localhost:" + port;
+    }
+
+    private Map<String, Object> getResponseBody(ResponseEntity<Map<String, Object>> response) {
+        assertNotNull(response.getBody());
+        return response.getBody();
     }
     
     @Test
     public void testHealthEndpoint() {
-        ResponseEntity<Map> response = restTemplate.getForEntity(
-            getBaseUrl() + "/actuator/health", Map.class);
-        
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            getBaseUrl() + "/actuator/health",
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("UP", response.getBody().get("status"));
+        Map<String, Object> body = getResponseBody(response);
+        assertEquals("UP", body.get("status"));
     }
     
     @Test
     public void testMonitoringHealthEndpoint() {
-        ResponseEntity<Map> response = restTemplate.getForEntity(
-            getBaseUrl() + "/api/monitoring/health", Map.class);
-        
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            getBaseUrl() + "/api/monitoring/health",
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("UP", response.getBody().get("status"));
-        assertTrue(response.getBody().containsKey("memory"));
-        assertTrue(response.getBody().containsKey("system"));
+        Map<String, Object> body = getResponseBody(response);
+        assertEquals("UP", body.get("status"));
+        assertTrue(body.containsKey("memory"));
+        assertTrue(body.containsKey("system"));
     }
     
     @Test
@@ -83,14 +91,20 @@ public class RulesApiIntegrationTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<RuleEvaluationRequest> entity = new HttpEntity<>(request, headers);
         
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            getBaseUrl() + "/api/rules/check", entity, Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            getBaseUrl() + "/api/rules/check",
+            HttpMethod.POST,
+            entity,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
         
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(true, response.getBody().get("success"));
-        assertEquals(true, response.getBody().get("matched"));
-        assertEquals("age-check", response.getBody().get("ruleName"));
+
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody); // Explicit null check for IDE
+        assertEquals(true, responseBody.get("success"));
+        assertEquals(true, responseBody.get("matched"));
+        assertEquals("age-check", responseBody.get("ruleName"));
     }
     
     @Test
@@ -107,14 +121,18 @@ public class RulesApiIntegrationTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<RuleEvaluationRequest> entity = new HttpEntity<>(request, headers);
         
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            getBaseUrl() + "/api/rules/check", entity, Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            getBaseUrl() + "/api/rules/check",
+            HttpMethod.POST,
+            entity,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
         
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(true, response.getBody().get("success"));
-        assertEquals(false, response.getBody().get("matched"));
-        assertEquals("age-check", response.getBody().get("ruleName"));
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertEquals(true, responseBody.get("success"));
+        assertEquals(false, responseBody.get("matched"));
+        assertEquals("age-check", responseBody.get("ruleName"));
     }
     
     @Test
@@ -136,15 +154,20 @@ public class RulesApiIntegrationTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<ValidationRequest> entity = new HttpEntity<>(request, headers);
         
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            getBaseUrl() + "/api/rules/validate", entity, Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            getBaseUrl() + "/api/rules/validate",
+            HttpMethod.POST,
+            entity,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
         
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(true, response.getBody().get("valid"));
-        assertEquals(2, response.getBody().get("totalRules"));
-        assertEquals(2, response.getBody().get("passedRules"));
-        assertEquals(0, response.getBody().get("failedRules"));
+
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertEquals(true, responseBody.get("valid"));
+        assertEquals(2, responseBody.get("totalRules"));
+        assertEquals(2, responseBody.get("passedRules"));
+        assertEquals(0, responseBody.get("failedRules"));
     }
     
     @Test
@@ -171,16 +194,21 @@ public class RulesApiIntegrationTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<ValidationRequest> entity = new HttpEntity<>(request, headers);
         
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            getBaseUrl() + "/api/rules/validate", entity, Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            getBaseUrl() + "/api/rules/validate",
+            HttpMethod.POST,
+            entity,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
         
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(false, response.getBody().get("valid"));
-        assertEquals(2, response.getBody().get("totalRules"));
-        assertEquals(0, response.getBody().get("passedRules"));
-        assertEquals(2, response.getBody().get("failedRules"));
-        assertTrue(response.getBody().containsKey("errors"));
+
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertEquals(false, responseBody.get("valid"));
+        assertEquals(2, responseBody.get("totalRules"));
+        assertEquals(0, responseBody.get("passedRules"));
+        assertEquals(2, responseBody.get("failedRules"));
+        assertTrue(responseBody.containsKey("errors"));
     }
     
     @Test
@@ -194,49 +222,69 @@ public class RulesApiIntegrationTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Map<String, String>> entity = new HttpEntity<>(ruleDefinition, headers);
         
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            getBaseUrl() + "/api/rules/define/positive-check", entity, Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            getBaseUrl() + "/api/rules/define/positive-check",
+            HttpMethod.POST,
+            entity,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
         
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("Rule defined successfully", response.getBody().get("message"));
-        assertEquals("positive-check", response.getBody().get("ruleName"));
-        assertEquals("#value > 0", response.getBody().get("condition"));
+
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("Rule defined successfully", responseBody.get("message"));
+        assertEquals("positive-check", responseBody.get("ruleName"));
+        assertEquals("#value > 0", responseBody.get("condition"));
     }
     
     @Test
     public void testGetDefinedRulesEndpoint() {
-        ResponseEntity<Map> response = restTemplate.getForEntity(
-            getBaseUrl() + "/api/rules/defined", Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            getBaseUrl() + "/api/rules/defined",
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
         
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().containsKey("definedRules"));
-        assertTrue(response.getBody().containsKey("count"));
-        assertTrue(response.getBody().containsKey("timestamp"));
+
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertTrue(responseBody.containsKey("definedRules"));
+        assertTrue(responseBody.containsKey("count"));
+        assertTrue(responseBody.containsKey("timestamp"));
     }
     
     @Test
     public void testConfigurationInfoEndpoint() {
-        ResponseEntity<Map> response = restTemplate.getForEntity(
-            getBaseUrl() + "/api/config/info", Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            getBaseUrl() + "/api/config/info",
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
         
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().containsKey("hasConfiguration"));
-        assertTrue(response.getBody().containsKey("timestamp"));
+
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertTrue(responseBody.containsKey("hasConfiguration"));
+        assertTrue(responseBody.containsKey("timestamp"));
     }
     
     @Test
     public void testSystemStatsEndpoint() {
-        ResponseEntity<Map> response = restTemplate.getForEntity(
-            getBaseUrl() + "/api/monitoring/stats", Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            getBaseUrl() + "/api/monitoring/stats",
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
         
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().containsKey("totalMemory"));
-        assertTrue(response.getBody().containsKey("definedRulesCount"));
-        assertTrue(response.getBody().containsKey("timestamp"));
+
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertTrue(responseBody.containsKey("totalMemory"));
+        assertTrue(responseBody.containsKey("definedRulesCount"));
+        assertTrue(responseBody.containsKey("timestamp"));
     }
     
     @Test
@@ -255,13 +303,18 @@ public class RulesApiIntegrationTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<RuleEvaluationRequest> entity = new HttpEntity<>(request, headers);
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            getBaseUrl() + "/api/rules/check", entity, Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            getBaseUrl() + "/api/rules/check",
+            HttpMethod.POST,
+            entity,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
 
         // The API handles errors gracefully and returns 200 with success=false
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(false, response.getBody().get("matched"));
-        assertEquals("invalid-rule", response.getBody().get("ruleName"));
+
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertEquals(false, responseBody.get("matched"));
+        assertEquals("invalid-rule", responseBody.get("ruleName"));
     }
 }

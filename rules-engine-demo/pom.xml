@@ -29,6 +29,10 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+        </dependency>
 
         <!-- Logging dependencies -->
         <dependency>
@@ -97,7 +101,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>dev.mars.rulesengine.demo.integration.SpelAdvancedFeaturesDemo</mainClass>
+                            <mainClass>dev.mars.rulesengine.demo.advanced.SpelAdvancedFeaturesDemo</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

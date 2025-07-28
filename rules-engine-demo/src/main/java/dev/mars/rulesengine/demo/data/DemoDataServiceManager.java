@@ -1,7 +1,7 @@
 package dev.mars.rulesengine.demo.data;
 
 import dev.mars.rulesengine.core.service.data.DataServiceManager;
-import dev.mars.rulesengine.demo.service.providers.MockDataSource;
+import dev.mars.rulesengine.demo.rulesets.MockDataSource;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd

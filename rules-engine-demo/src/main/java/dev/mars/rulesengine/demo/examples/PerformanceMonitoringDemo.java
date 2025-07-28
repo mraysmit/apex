@@ -5,8 +5,7 @@ import dev.mars.rulesengine.core.engine.config.RulesEngine;
 import dev.mars.rulesengine.core.engine.config.RulesEngineConfiguration;
 import dev.mars.rulesengine.core.engine.model.Rule;
 import dev.mars.rulesengine.core.service.monitoring.RulePerformanceMonitor;
-import dev.mars.rulesengine.demo.framework.Demo;
-import dev.mars.rulesengine.demo.framework.DemoCategory;
+
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -40,7 +39,7 @@ import java.util.concurrent.Executors;
  * @since 2025-07-27
  * @version 1.0
  */
-public class PerformanceMonitoringDemo implements Demo {
+public class PerformanceMonitoringDemo  {
     
     private final RulesService rulesService;
     private final RulesEngine rulesEngine;
@@ -55,32 +54,14 @@ public class PerformanceMonitoringDemo implements Demo {
         this.executorService = Executors.newFixedThreadPool(4);
     }
     
-    @Override
-    public String getName() {
-        return "Performance Monitoring";
-    }
+
     
-    @Override
-    public String getDescription() {
-        return "Comprehensive demonstration of performance monitoring, metrics collection, and optimization techniques";
-    }
-    
-    @Override
-    public DemoCategory getCategory() {
-        return DemoCategory.PERFORMANCE_MONITORING;
-    }
-    
-    @Override
-    public int getEstimatedRuntimeSeconds() {
-        return 60;
-    }
-    
-    @Override
+
     public void run() {
         runNonInteractive();
     }
     
-    @Override
+
     public void runNonInteractive() {
         System.out.println("=== PERFORMANCE MONITORING DEMONSTRATION ===");
         System.out.println("Comprehensive monitoring and optimization techniques\n");

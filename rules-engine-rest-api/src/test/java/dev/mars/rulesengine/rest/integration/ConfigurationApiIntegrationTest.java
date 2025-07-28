@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
@@ -18,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integration tests for Configuration API endpoints using real Spring Boot context.
- * Uses plain JUnit 5 with real objects and integration testing.
+ * Uses plain JUnit 5 with real objects and advanced testing.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = {dev.mars.rulesengine.rest.RulesEngineRestApiApplication.class,
@@ -44,13 +45,17 @@ public class ConfigurationApiIntegrationTest {
     
     @Test
     public void testConfigurationInfo_InitialState() {
-        ResponseEntity<Map> response = restTemplate.getForEntity(
-            getBaseUrl() + "/api/config/info", Map.class);
-        
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            getBaseUrl() + "/api/config/info",
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().containsKey("hasConfiguration"));
-        assertTrue(response.getBody().containsKey("timestamp"));
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertTrue(responseBody.containsKey("hasConfiguration"));
+        assertTrue(responseBody.containsKey("timestamp"));
     }
     
     @Test
@@ -89,18 +94,23 @@ public class ConfigurationApiIntegrationTest {
         headers.setContentType(MediaType.valueOf("application/x-yaml"));
         HttpEntity<String> entity = new HttpEntity<>(yamlContent, headers);
         
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            getBaseUrl() + "/api/config/load", entity, Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            getBaseUrl() + "/api/config/load",
+            HttpMethod.POST,
+            entity,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
         
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("Configuration loaded successfully", response.getBody().get("message"));
-        assertTrue(response.getBody().containsKey("loadTime"));
-        assertEquals("Test Configuration", response.getBody().get("configurationName"));
-        assertEquals("1.0.0", response.getBody().get("configurationVersion"));
-        
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("Configuration loaded successfully", responseBody.get("message"));
+        assertTrue(responseBody.containsKey("loadTime"));
+        assertEquals("Test Configuration", responseBody.get("configurationName"));
+        assertEquals("1.0.0", responseBody.get("configurationVersion"));
+
         // Verify statistics
-        Map<String, Object> stats = (Map<String, Object>) response.getBody().get("statistics");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> stats = (Map<String, Object>) responseBody.get("statistics");
         assertNotNull(stats);
         assertEquals(1, stats.get("rulesCount"));
         assertEquals(1, stats.get("enrichmentsCount"));
@@ -123,14 +133,18 @@ public class ConfigurationApiIntegrationTest {
         headers.setContentType(MediaType.valueOf("application/x-yaml"));
         HttpEntity<String> entity = new HttpEntity<>(invalidYaml, headers);
         
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            getBaseUrl() + "/api/config/load", entity, Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            getBaseUrl() + "/api/config/load",
+            HttpMethod.POST,
+            entity,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
         
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("Failed to load configuration", response.getBody().get("error"));
-        assertTrue(response.getBody().containsKey("details"));
-        assertTrue(response.getBody().containsKey("timestamp"));
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("Failed to load configuration", responseBody.get("error"));
+        assertTrue(responseBody.containsKey("details"));
+        assertTrue(responseBody.containsKey("timestamp"));
     }
     
     @Test
@@ -152,18 +166,23 @@ public class ConfigurationApiIntegrationTest {
         headers.setContentType(MediaType.valueOf("application/x-yaml"));
         HttpEntity<String> entity = new HttpEntity<>(yamlContent, headers);
         
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            getBaseUrl() + "/api/config/validate", entity, Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            getBaseUrl() + "/api/config/validate",
+            HttpMethod.POST,
+            entity,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
         
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(true, response.getBody().get("valid"));
-        assertEquals("Configuration is valid", response.getBody().get("message"));
-        assertEquals("Validation Test", response.getBody().get("configurationName"));
-        assertEquals("1.0.0", response.getBody().get("configurationVersion"));
-        
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertEquals(true, responseBody.get("valid"));
+        assertEquals("Configuration is valid", responseBody.get("message"));
+        assertEquals("Validation Test", responseBody.get("configurationName"));
+        assertEquals("1.0.0", responseBody.get("configurationVersion"));
+
         // Verify statistics
-        Map<String, Object> stats = (Map<String, Object>) response.getBody().get("statistics");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> stats = (Map<String, Object>) responseBody.get("statistics");
         assertNotNull(stats);
         assertEquals(1, stats.get("rulesCount"));
     }
@@ -182,14 +201,18 @@ public class ConfigurationApiIntegrationTest {
         headers.setContentType(MediaType.valueOf("application/x-yaml"));
         HttpEntity<String> entity = new HttpEntity<>(invalidYaml, headers);
         
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            getBaseUrl() + "/api/config/validate", entity, Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            getBaseUrl() + "/api/config/validate",
+            HttpMethod.POST,
+            entity,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
         
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(false, response.getBody().get("valid"));
-        assertEquals("Configuration is invalid", response.getBody().get("error"));
-        assertTrue(response.getBody().containsKey("details"));
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertEquals(false, responseBody.get("valid"));
+        assertEquals("Configuration is invalid", responseBody.get("error"));
+        assertTrue(responseBody.containsKey("details"));
     }
     
     @Test
@@ -223,17 +246,21 @@ public class ConfigurationApiIntegrationTest {
         
         HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
         
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            getBaseUrl() + "/api/config/upload", entity, Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            getBaseUrl() + "/api/config/upload",
+            HttpMethod.POST,
+            entity,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
         
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("Configuration file uploaded and loaded successfully", response.getBody().get("message"));
-        assertEquals("test-config.yaml", response.getBody().get("fileName"));
-        assertEquals("Upload Test Configuration", response.getBody().get("configurationName"));
-        assertEquals("2.0.0", response.getBody().get("configurationVersion"));
-        assertTrue(response.getBody().containsKey("fileSize"));
-        assertTrue(response.getBody().containsKey("loadTime"));
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("Configuration file uploaded and loaded successfully", responseBody.get("message"));
+        assertEquals("test-config.yaml", responseBody.get("fileName"));
+        assertEquals("Upload Test Configuration", responseBody.get("configurationName"));
+        assertEquals("2.0.0", responseBody.get("configurationVersion"));
+        assertTrue(responseBody.containsKey("fileSize"));
+        assertTrue(responseBody.containsKey("loadTime"));
     }
     
     @Test
@@ -254,12 +281,16 @@ public class ConfigurationApiIntegrationTest {
         
         HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
         
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            getBaseUrl() + "/api/config/upload", entity, Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            getBaseUrl() + "/api/config/upload",
+            HttpMethod.POST,
+            entity,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
         
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("No file provided", response.getBody().get("error"));
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("No file provided", responseBody.get("error"));
     }
     
     @Test
@@ -282,19 +313,26 @@ public class ConfigurationApiIntegrationTest {
         
         HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
         
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            getBaseUrl() + "/api/config/upload", entity, Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            getBaseUrl() + "/api/config/upload",
+            HttpMethod.POST,
+            entity,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
         
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("File must be a YAML file (.yaml or .yml)", response.getBody().get("error"));
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("File must be a YAML file (.yaml or .yml)", responseBody.get("error"));
     }
     
     @Test
     public void testConfigurationWorkflow() {
         // 1. Check initial state
-        ResponseEntity<Map> infoResponse = restTemplate.getForEntity(
-            getBaseUrl() + "/api/config/info", Map.class);
+        ResponseEntity<Map<String, Object>> infoResponse = restTemplate.exchange(
+            getBaseUrl() + "/api/config/info",
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
         assertEquals(HttpStatus.OK, infoResponse.getStatusCode());
         
         // 2. Load a configuration
@@ -314,15 +352,21 @@ public class ConfigurationApiIntegrationTest {
         headers.setContentType(MediaType.valueOf("application/x-yaml"));
         HttpEntity<String> loadEntity = new HttpEntity<>(yamlContent, headers);
         
-        ResponseEntity<Map> loadResponse = restTemplate.postForEntity(
-            getBaseUrl() + "/api/config/load", loadEntity, Map.class);
+        ResponseEntity<Map<String, Object>> loadResponse = restTemplate.exchange(
+            getBaseUrl() + "/api/config/load",
+            HttpMethod.POST,
+            loadEntity,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
         assertEquals(HttpStatus.OK, loadResponse.getStatusCode());
         
         // 3. Verify configuration is now loaded
-        ResponseEntity<Map> updatedInfoResponse = restTemplate.getForEntity(
-            getBaseUrl() + "/api/config/info", Map.class);
+        ResponseEntity<Map<String, Object>> updatedInfoResponse = restTemplate.exchange(
+            getBaseUrl() + "/api/config/info",
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<Map<String, Object>>() {});
         assertEquals(HttpStatus.OK, updatedInfoResponse.getStatusCode());
-        
+
         Map<String, Object> updatedInfo = updatedInfoResponse.getBody();
         assertNotNull(updatedInfo);
         // The configuration should now be loaded (depending on implementation)

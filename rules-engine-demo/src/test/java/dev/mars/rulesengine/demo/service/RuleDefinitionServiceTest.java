@@ -1,7 +1,7 @@
 package dev.mars.rulesengine.demo.service;
 
 import dev.mars.rulesengine.core.engine.model.Rule;
-import dev.mars.rulesengine.demo.service.providers.RuleDefinitionServiceDemo;
+import dev.mars.rulesengine.demo.rulesets.RuleDefinitionServiceDemo;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

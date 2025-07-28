@@ -3,7 +3,7 @@ package dev.mars.rulesengine.demo;
 import org.junit.jupiter.api.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import dev.mars.rulesengine.demo.integration.SpelRulesEngineDemo;
+import dev.mars.rulesengine.demo.advanced.SpelRulesEngineDemo;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd

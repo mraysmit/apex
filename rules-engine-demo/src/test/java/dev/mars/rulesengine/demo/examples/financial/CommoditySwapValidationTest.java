@@ -1,9 +1,9 @@
 package dev.mars.rulesengine.demo.examples.financial;
 
 import dev.mars.rulesengine.core.api.RulesService;
-import dev.mars.rulesengine.demo.examples.financial.model.CommodityTotalReturnSwap;
-import dev.mars.rulesengine.demo.examples.financial.model.StaticDataEntities.*;
-import dev.mars.rulesengine.demo.datasets.FinancialStaticDataProvider;
+import dev.mars.rulesengine.demo.examples.CommodityTotalReturnSwap;
+import dev.mars.rulesengine.demo.examples.StaticDataEntities.*;
+import dev.mars.rulesengine.demo.data.FinancialStaticDataProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

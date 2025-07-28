@@ -1,5 +1,6 @@
 package dev.mars.rulesengine.demo;
 
+import dev.mars.rulesengine.demo.examples.LayeredAPIDemo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -283,7 +284,7 @@ class LayeredAPIDemoTest {
     @Timeout(value = 30, unit = TimeUnit.SECONDS)
     void testMainMethod() {
         assertDoesNotThrow(() -> {
-            LayeredAPIDemo.main(new String[]{});
+            new LayeredAPIDemo().run();
         }, "Main method should work independently");
         
         String output = outputStream.toString();

@@ -9,11 +9,11 @@ import dev.mars.rulesengine.core.service.engine.RuleEngineService;
 import dev.mars.rulesengine.core.service.engine.TemplateProcessorService;
 import dev.mars.rulesengine.core.service.lookup.LookupService;
 import dev.mars.rulesengine.demo.data.MockDataSources;
-import dev.mars.rulesengine.demo.integration.SpelAdvancedFeaturesDemo;
-import dev.mars.rulesengine.demo.integration.SpelAdvancedFeaturesDemoConfig;
+import dev.mars.rulesengine.demo.advanced.SpelAdvancedFeaturesDemo;
+import dev.mars.rulesengine.demo.advanced.SpelAdvancedFeaturesDemoConfig;
 import dev.mars.rulesengine.demo.model.Product;
 import dev.mars.rulesengine.demo.model.Trade;
-import dev.mars.rulesengine.demo.service.providers.PricingServiceDemo;
+import dev.mars.rulesengine.demo.rulesets.PricingServiceDemo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

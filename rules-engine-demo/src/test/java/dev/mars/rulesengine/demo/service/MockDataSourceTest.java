@@ -4,7 +4,7 @@ import dev.mars.rulesengine.core.service.lookup.LookupService;
 import dev.mars.rulesengine.demo.model.Customer;
 import dev.mars.rulesengine.demo.model.Product;
 import dev.mars.rulesengine.demo.model.Trade;
-import dev.mars.rulesengine.demo.service.providers.MockDataSource;
+import dev.mars.rulesengine.demo.rulesets.MockDataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

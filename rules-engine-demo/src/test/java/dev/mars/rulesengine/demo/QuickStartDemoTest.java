@@ -1,5 +1,6 @@
 package dev.mars.rulesengine.demo;
 
+import dev.mars.rulesengine.demo.examples.QuickStartDemo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -248,7 +249,7 @@ class QuickStartDemoTest {
     @Timeout(value = 30, unit = TimeUnit.SECONDS)
     void testMainMethod() {
         assertDoesNotThrow(() -> {
-            QuickStartDemo.main(new String[]{});
+            new QuickStartDemo().run();
         }, "Main method should work independently");
         
         // Verify output was produced (captured by our setup)

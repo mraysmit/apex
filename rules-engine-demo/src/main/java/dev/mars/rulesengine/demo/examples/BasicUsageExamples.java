@@ -1,8 +1,6 @@
 package dev.mars.rulesengine.demo.examples;
 
 import dev.mars.rulesengine.core.api.RulesService;
-import dev.mars.rulesengine.demo.framework.Demo;
-import dev.mars.rulesengine.demo.framework.DemoCategory;
 import dev.mars.rulesengine.demo.model.Customer;
 import dev.mars.rulesengine.demo.model.Product;
 import dev.mars.rulesengine.demo.model.Trade;
@@ -37,41 +35,18 @@ import java.util.Map;
  * @since 2025-07-27
  * @version 1.0
  */
-public class BasicUsageExamples implements Demo {
+public class BasicUsageExamples {
     
     private final RulesService rulesService;
     
     public BasicUsageExamples() {
         this.rulesService = new RulesService();
     }
-    
-    @Override
-    public String getName() {
-        return "Basic Usage Examples";
-    }
-    
-    @Override
-    public String getDescription() {
-        return "Fundamental concepts and simple validation operations using the rules engine";
-    }
-    
-    @Override
-    public DemoCategory getCategory() {
-        return DemoCategory.BASIC_USAGE;
-    }
-    
-    @Override
-    public int getEstimatedRuntimeSeconds() {
-        return 30;
-    }
-    
-    @Override
+
+    /**
+     * Run the complete Basic Usage Examples demonstration.
+     */
     public void run() {
-        runNonInteractive();
-    }
-    
-    @Override
-    public void runNonInteractive() {
         System.out.println("=== BASIC USAGE EXAMPLES ===");
         
         demonstrateSimpleValidations();

@@ -3,7 +3,6 @@ package dev.mars.rulesengine.rest.config;
 import dev.mars.rulesengine.core.api.RulesService;
 import dev.mars.rulesengine.core.api.SimpleRulesEngine;
 import dev.mars.rulesengine.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.rulesengine.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.rulesengine.core.engine.config.RulesEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,8 +95,9 @@ public class RulesEngineConfiguration {
             if (defaultConfigPath.startsWith("classpath:")) {
                 String resourcePath = defaultConfigPath.substring("classpath:".length());
                 try {
-                    YamlRuleConfiguration config = loader.loadFromClasspath(resourcePath);
-                    dev.mars.rulesengine.core.engine.config.RulesEngineConfiguration engineConfig = 
+                    // Try to load configuration but use default for now
+                    loader.loadFromClasspath(resourcePath);
+                    dev.mars.rulesengine.core.engine.config.RulesEngineConfiguration engineConfig =
                         new dev.mars.rulesengine.core.engine.config.RulesEngineConfiguration();
                     
                     // Configure performance monitoring
@@ -121,8 +121,9 @@ public class RulesEngineConfiguration {
             } else {
                 // File path
                 try {
-                    YamlRuleConfiguration config = loader.loadFromFile(defaultConfigPath);
-                    dev.mars.rulesengine.core.engine.config.RulesEngineConfiguration engineConfig = 
+                    // Try to load configuration but use default for now
+                    loader.loadFromFile(defaultConfigPath);
+                    dev.mars.rulesengine.core.engine.config.RulesEngineConfiguration engineConfig =
                         new dev.mars.rulesengine.core.engine.config.RulesEngineConfiguration();
                     return new RulesEngine(engineConfig);
                 } catch (Exception e) {

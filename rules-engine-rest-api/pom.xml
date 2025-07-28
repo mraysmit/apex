@@ -86,7 +86,7 @@
             <version>${spring.boot.version}</version>
             <scope>test</scope>
             <exclusions>
-                <!-- Exclude Mockito as requested - using real objects and integration testing instead -->
+                <!-- Exclude Mockito as requested - using real objects and advanced testing instead -->
                 <exclusion>
                     <groupId>org.mockito</groupId>
                     <artifactId>mockito-core</artifactId>

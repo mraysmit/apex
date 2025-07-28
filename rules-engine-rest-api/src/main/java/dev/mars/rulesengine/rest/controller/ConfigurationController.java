@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -233,13 +232,14 @@ public class ConfigurationController {
                     .body(Map.of("error", "No file provided"));
             }
             
-            if (!file.getOriginalFilename().toLowerCase().endsWith(".yaml") && 
-                !file.getOriginalFilename().toLowerCase().endsWith(".yml")) {
+            String filename = file.getOriginalFilename();
+            if (filename == null || (!filename.toLowerCase().endsWith(".yaml") &&
+                !filename.toLowerCase().endsWith(".yml"))) {
                 return ResponseEntity.badRequest()
                     .body(Map.of("error", "File must be a YAML file (.yaml or .yml)"));
             }
             
-            logger.info("Uploading configuration file: {}", file.getOriginalFilename());
+            logger.info("Uploading configuration file: {}", filename);
             
             // Load configuration from uploaded file
             YamlRuleConfiguration config = yamlConfigurationLoader.loadFromStream(

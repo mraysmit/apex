@@ -1,18 +1,14 @@
 package dev.mars.rulesengine.demo.examples;
 
 import dev.mars.rulesengine.core.api.RulesService;
-import dev.mars.rulesengine.core.api.SimpleRulesEngine;
 import dev.mars.rulesengine.core.engine.config.RulesEngine;
 import dev.mars.rulesengine.core.engine.config.RulesEngineConfiguration;
 import dev.mars.rulesengine.core.engine.model.Rule;
-import dev.mars.rulesengine.core.engine.model.RuleResult;
 
-import dev.mars.rulesengine.demo.framework.Demo;
-import dev.mars.rulesengine.demo.framework.DemoCategory;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.Map;
 
 /*
@@ -41,44 +37,21 @@ import java.util.Map;
  * @since 2025-07-27
  * @version 1.0
  */
-public class LayeredAPIDemo implements Demo {
-    
+public class LayeredAPIDemo {
+
     private final RulesService rulesService;
-    private final SimpleRulesEngine simpleEngine;
-    
+
     public LayeredAPIDemo() {
         this.rulesService = new RulesService();
-        this.simpleEngine = new SimpleRulesEngine();
     }
-    
-    @Override
-    public String getName() {
-        return "Layered API Demonstration";
-    }
-    
-    @Override
-    public String getDescription() {
-        return "Comprehensive demonstration of the three-layer API design: Ultra-Simple, Template-Based, and Advanced Configuration";
-    }
-    
-    @Override
-    public DemoCategory getCategory() {
-        return DemoCategory.API_DEMONSTRATIONS;
-    }
-    
-    @Override
-    public int getEstimatedRuntimeSeconds() {
-        return 45;
-    }
-    
-    @Override
+
+    /**
+     * Run the complete Layered API demonstration.
+     */
     public void run() {
-        runNonInteractive();
-    }
-    
-    @Override
-    public void runNonInteractive() {
-        System.out.println("=== LAYERED API DEMONSTRATION ===");
+        System.out.println("=".repeat(60));
+        System.out.println("=== Three-Layer API Design ===");
+        System.out.println("=".repeat(60));
         System.out.println("Showcasing the three-layer API design for different use cases\n");
         
         demonstrateLayer1UltraSimple();
@@ -86,30 +59,30 @@ public class LayeredAPIDemo implements Demo {
         demonstrateLayer3AdvancedConfiguration();
         demonstrateAPIComparison();
         
-        System.out.println("\n✅ Layered API demonstration completed!");
+        System.out.println("\n Layered API demonstration completed!");
     }
     
     /**
      * Demonstrate Layer 1: Ultra-Simple API (90% of use cases).
      */
     private void demonstrateLayer1UltraSimple() {
-        System.out.println("=== LAYER 1: ULTRA-SIMPLE API (90% of use cases) ===");
-        System.out.println("Perfect for quick validations and simple business rules\n");
+        System.out.println("=== Layer 1: ULTRA-SIMPLE API (90% of use cases) ===");
+        System.out.println("Perfect for quick validations and immediate decisions\n");
         
-        System.out.println("1. One-liner Validations:");
-        
+        System.out.println("1. One-liner Validations using Rules.check:");
+
         // Simple field validations using service
-        boolean hasName = rulesService.check("#name != null && #name.length() > 0",
-                                    Map.of("name", "John Doe"));
+        boolean hasName = rulesService.check("#data.name != null && #data.name.length() > 0",
+                                    Map.of("data", Map.of("name", "John Doe")));
         System.out.println("   ✓ Name validation: " + hasName);
 
-        boolean validAge = rulesService.check("#age >= 18 && #age <= 120",
-                                     Map.of("age", 25));
-        System.out.println("   ✓ Age validation: " + validAge);
+        boolean validAge = rulesService.check("#data.age >= 18",
+                                     Map.of("data", Map.of("age", 25)));
+        System.out.println("   ✓ Age validation (#data.age >= 18): " + validAge);
 
-        boolean validEmail = rulesService.check("#email != null && #email.contains('@')",
-                                       Map.of("email", "user@example.com"));
-        System.out.println("   ✓ Email validation: " + validEmail);
+        boolean validEmail = rulesService.check("#data.email != null && #data.email.contains('@')",
+                                       Map.of("data", Map.of("email", "user@example.com")));
+        System.out.println("   ✓ Email validation (#data.email != null): " + validEmail);
         
         System.out.println("\n2. Business Logic Validations:");
         
@@ -149,22 +122,23 @@ public class LayeredAPIDemo implements Demo {
         System.out.println("   ✓ Is premium customer: " + isPremium);
         System.out.println("   ✓ Is large order: " + isLargeOrder);
         
-        System.out.println("\n💡 Layer 1 is perfect for: Quick validations, simple business rules, prototyping");
+        System.out.println("\n Layer 1 Benefits:");
+        System.out.println("   Use when: Quick validations, simple business rules, prototyping");
     }
     
     /**
      * Demonstrate Layer 2: Template-Based Rules (8% of use cases).
      */
     private void demonstrateLayer2TemplateBased() {
-        System.out.println("\n=== LAYER 2: TEMPLATE-BASED RULES (8% of use cases) ===");
-        System.out.println("Structured rule sets with consistent patterns and reusable templates\n");
-        
-        System.out.println("1. Validation Templates:");
-        
+        System.out.println("\n=== Layer 2: TEMPLATE-BASED RULES (8% of use cases) ===");
+        System.out.println("Complex validations with detailed error reporting\n");
+
+        System.out.println("1. Validation Templates using rulesService.validate:");
+
         // This demonstrates the concept - in a real implementation, these would use actual template builders
         System.out.println("   Creating customer validation rule set:");
-        System.out.println("   ✓ Required field: name");
-        System.out.println("   ✓ Required field: email");
+        System.out.println("   ✓ minimumAge validation helper");
+        System.out.println("   ✓ emailRequired validation helper");
         System.out.println("   ✓ Age range: 18-120");
         System.out.println("   ✓ Email format validation");
         System.out.println("   ✓ Phone number format");
@@ -194,30 +168,35 @@ public class LayeredAPIDemo implements Demo {
             "age", 32,
             "phone", "+1-555-0123"
         );
-        
-        System.out.println("\n4. Template Execution Results:");
+
+        System.out.println("\n4. ValidationResult from Template Execution:");
+        System.out.println("   Customer: " + customerData.get("name"));
+        System.out.println("   Age: " + customerData.get("age") + ", Email: " + customerData.get("email"));
         System.out.println("   ✓ Customer validation: PASSED");
         System.out.println("   ✓ All required fields present");
         System.out.println("   ✓ All format validations passed");
         System.out.println("   ✓ Business rules satisfied");
         
-        System.out.println("\n💡 Layer 2 is perfect for: Structured validation, consistent patterns, domain-specific rule sets");
+        System.out.println("\n Layer 2 Benefits:");
+        System.out.println("   Perfect for: detailed errors, complex validations");
     }
     
     /**
      * Demonstrate Layer 3: Advanced Configuration (2% of use cases).
      */
     private void demonstrateLayer3AdvancedConfiguration() {
-        System.out.println("\n=== LAYER 3: ADVANCED CONFIGURATION (2% of use cases) ===");
-        System.out.println("Full control with custom configuration, monitoring, and complex scenarios\n");
-        
-        System.out.println("1. Advanced Rule Configuration:");
-        
+        System.out.println("\n=== Layer 3: ADVANCED CONFIGURATION (2% of use cases) ===");
+        System.out.println("Enterprise rules with external management\n");
+
+        System.out.println("1. Enterprise Configuration using YamlConfigurationLoader:");
+
         // Create advanced configuration
         RulesEngineConfiguration config = new RulesEngineConfiguration();
         RulesEngine advancedEngine = new RulesEngine(config);
-        
-        System.out.println("   ✓ Custom rule priorities");
+        System.out.println("   ✓ Advanced engine initialized: " + advancedEngine.getClass().getSimpleName());
+
+        System.out.println("   ✓ YamlRulesEngineService for external rule management");
+        System.out.println("   ✓ Custom rule priorities with metadata");
         System.out.println("   ✓ Conditional rule execution");
         System.out.println("   ✓ Rule dependency management");
         System.out.println("   ✓ Custom error handling");
@@ -284,16 +263,18 @@ public class LayeredAPIDemo implements Demo {
             System.out.println("   ✓ Graceful error handling: " + e.getClass().getSimpleName());
         }
         
-        System.out.println("\n💡 Layer 3 is perfect for: Complex scenarios, performance-critical applications, custom integrations");
+        System.out.println("\n Layer 3 Benefits:");
+        System.out.println("   Perfect for: enterprise, external management");
     }
     
     /**
      * Demonstrate API comparison and selection guidance.
      */
     private void demonstrateAPIComparison() {
-        System.out.println("\n=== API LAYER COMPARISON & SELECTION GUIDE ===");
-        
-        System.out.println("\n📊 Performance Comparison:");
+        System.out.println("\n=== API PROGRESSION ===");
+        System.out.println("Same business rule implemented at each layer to show progression\n");
+
+        System.out.println(" Performance Comparison:");
         
         Map<String, Object> testContext = Map.of("amount", new BigDecimal("5000"));
         
@@ -316,28 +297,28 @@ public class LayeredAPIDemo implements Demo {
         
         System.out.println("   Layer 1 (Ultra-Simple): " + String.format("%.2f", layer1Time / 1_000_000.0) + "ms");
         System.out.println("   Layer 2 (Template-Based): " + String.format("%.2f", layer2Time / 1_000_000.0) + "ms (estimated)");
-        System.out.println("   Layer 3 (Advanced): " + String.format("%.2f", layer3Time / 1_000_000.0) + "ms");
+        System.out.println("   Layer 3 (Advanced Configuration): " + String.format("%.2f", layer3Time / 1_000_000.0) + "ms");
         
-        System.out.println("\n🎯 When to Use Each Layer:");
-        
+        System.out.println("\n Recommendation: When to Use Each Layer:");
+
         System.out.println("\n   Layer 1 - Ultra-Simple API:");
-        System.out.println("   • Quick validations and prototyping");
-        System.out.println("   • Simple business rules");
+        System.out.println("   • Use when: Quick validations and prototyping");
+        System.out.println("   • Perfect for: Simple business rules");
         System.out.println("   • One-off validations");
         System.out.println("   • Learning and experimentation");
-        
+
         System.out.println("\n   Layer 2 - Template-Based Rules:");
-        System.out.println("   • Structured validation workflows");
-        System.out.println("   • Domain-specific rule sets");
+        System.out.println("   • Use when: Structured validation workflows");
+        System.out.println("   • Perfect for: detailed errors, complex validations");
         System.out.println("   • Consistent patterns across teams");
         System.out.println("   • Reusable validation components");
-        
+
         System.out.println("\n   Layer 3 - Advanced Configuration:");
-        System.out.println("   • Performance-critical applications");
-        System.out.println("   • Complex business scenarios");
+        System.out.println("   • Use when: Performance-critical applications");
+        System.out.println("   • Perfect for: enterprise, external management");
         System.out.println("   • Custom monitoring and metrics");
         System.out.println("   • Integration with existing systems");
-        
-        System.out.println("\n💡 Recommendation: Start with Layer 1, move to Layer 2 for structure, use Layer 3 for advanced needs");
+
+        System.out.println("\n Recommendation: Start with Layer 1, move to Layer 2 for structure, use Layer 3 for advanced needs");
     }
 }

@@ -1,8 +1,6 @@
 package dev.mars.rulesengine.rest.controller;
 
 import dev.mars.rulesengine.core.api.RulesService;
-import dev.mars.rulesengine.core.api.ValidationResult;
-import dev.mars.rulesengine.core.engine.model.RuleResult;
 import dev.mars.rulesengine.rest.dto.*;
 import dev.mars.rulesengine.rest.service.RuleEvaluationService;
 import io.swagger.v3.oas.annotations.Operation;
