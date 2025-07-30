@@ -1,10 +1,10 @@
 # APEX - Unified Demo Suite
 
-🚀 **Comprehensive demonstrations of APEX capabilities**
+**Comprehensive demonstrations of APEX capabilities**
 
 This unified demo suite showcases the full power of APEX (Advanced Processing Engine for eXpressions) through five focused demonstrations, from simple validations to enterprise-grade solutions.
 
-## 🎯 Quick Start
+## Quick Start
 
 ### Run All Demos
 ```bash
@@ -23,7 +23,7 @@ java -cp target/classes dev.mars.rulesengine.demo.DemoRunner quickstart
 # Three-layer API design
 java -cp target/classes dev.mars.rulesengine.demo.DemoRunner layered
 
-# Revolutionary dataset enrichment
+# Dataset enrichment
 java -cp target/classes dev.mars.rulesengine.demo.DemoRunner dataset
 
 # Financial services examples
@@ -33,7 +33,7 @@ java -cp target/classes dev.mars.rulesengine.demo.DemoRunner financial
 java -cp target/classes dev.mars.rulesengine.demo.DemoRunner performance
 ```
 
-## 📋 Demo Suite Overview
+## Demo Suite Overview
 
 ### 1. QuickStart Demo (5 Minutes)
 **Perfect for:** First-time users, quick evaluation
@@ -72,7 +72,7 @@ RulesEngine engine = YamlRulesEngineService.loadFromFile("rules.yaml");
 **Key Insight:** Start simple, add complexity only when needed.
 
 ### 3. YAML Dataset Demo
-**Perfect for:** Understanding the revolutionary dataset enrichment
+**Perfect for:** Understanding dataset enrichment
 
 **Demonstrates:**
 - Inline datasets embedded in YAML files
@@ -81,7 +81,7 @@ RulesEngine engine = YamlRulesEngineService.loadFromFile("rules.yaml");
 - Performance benefits of in-memory lookups
 - Business value and ROI analysis
 
-**Revolutionary Feature:**
+**Key Feature:**
 ```yaml
 enrichments:
   - id: "currency-enrichment"
@@ -120,7 +120,7 @@ enrichments:
 
 **Enterprise-Grade:** < 1% monitoring overhead.
 
-## 🏗️ Architecture Highlights
+## Architecture Highlights
 
 ### Three-Layer API Design
 ```
@@ -129,7 +129,7 @@ Layer 2: Template-Based (8%)   → ValidationBuilder with helpers
 Layer 3: Advanced Config (2%)  → Full YAML configuration
 ```
 
-### Revolutionary YAML Datasets
+### YAML Datasets
 - **Traditional:** External lookup services, network latency, complex dependencies
 - **Our Approach:** Inline datasets, sub-millisecond lookups, zero dependencies
 
@@ -139,7 +139,7 @@ Layer 3: Advanced Config (2%)  → Full YAML configuration
 - **Concurrent Safety:** Full thread safety
 - **Error Recovery:** Graceful degradation
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 rules-engine-demo/
@@ -162,15 +162,15 @@ rules-engine-demo/
     └── DemoRunnerTest.java
 ```
 
-## 🎮 Interactive Features
+## Interactive Features
 
 ### Menu-Driven Interface
 ```
-📋 Available Demonstrations:
+Available Demonstrations:
 
   1. QuickStart Demo        - 5-minute introduction to core concepts
   2. Layered API Demo       - Three-layer API design philosophy
-  3. YAML Dataset Demo      - Revolutionary dataset enrichment
+  3. YAML Dataset Demo      - Dataset enrichment
   4. Financial Services     - OTC derivatives and trading rules
   5. Performance Demo       - Monitoring and optimization
   6. Run All Demos          - Complete demonstration suite
@@ -192,7 +192,7 @@ java DemoRunner finance   # Same as financial
 java DemoRunner perf      # Same as performance
 ```
 
-## 🧪 Testing
+## Testing
 
 ### Run All Tests
 ```bash
@@ -208,7 +208,7 @@ mvn test
 ### Test Philosophy
 Tests verify that documented functionality works **exactly as specified** in the user guide, ensuring consistency between documentation and implementation.
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Java 17 or higher
@@ -229,14 +229,14 @@ java -cp target/classes dev.mars.rulesengine.demo.DemoRunner quickstart
 java -cp target/classes dev.mars.rulesengine.demo.DemoRunner all
 ```
 
-## 📚 Documentation References
+## Documentation References
 
 - **Complete User Guide:** `docs/COMPLETE_USER_GUIDE.md`
 - **Technical Reference:** `docs/TECHNICAL_IMPLEMENTATION_GUIDE.md`
 - **YAML Dataset Guide:** `docs/YAML-Dataset-Enrichment-Guide.md`
 - **Financial Services:** `docs/FINANCIAL_SERVICES_GUIDE.md`
 
-## 🌟 Key Innovations
+## Key Innovations
 
 ### 1. Three-Layer API Design
 Progressive complexity that serves 100% of use cases while keeping 90% simple.
@@ -253,15 +253,15 @@ Real-world OTC derivatives validation patterns.
 ### 5. 100% Backward Compatible
 Seamless integration with existing systems.
 
-## 🎯 Next Steps
+## Next Steps
 
 1. **Start with QuickStart:** Get familiar with core concepts (5 minutes)
 2. **Explore Layered API:** Understand the design philosophy
-3. **Try YAML Datasets:** See the revolutionary enrichment approach
+3. **Try YAML Datasets:** See the enrichment approach
 4. **Financial Examples:** Real-world domain patterns
 5. **Performance Analysis:** Enterprise deployment insights
 
-## 💡 Pro Tips
+## Pro Tips
 
 - **Development:** Start with Layer 1 (Ultra-Simple API)
 - **Testing:** Use Layer 2 (Template-Based) for detailed validation
@@ -271,7 +271,7 @@ Seamless integration with existing systems.
 
 ---
 
-**Ready to revolutionize your business rules management?**
+**Ready to improve your business rules management?**
 
 Start with: `java -cp target/classes dev.mars.rulesengine.demo.DemoRunner quickstart`
 

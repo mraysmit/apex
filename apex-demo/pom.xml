@@ -76,7 +76,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>dev.mars.rulesengine.demo.DemoRunner</mainClass>
+                    <mainClass>dev.mars.apex.demo.DemoRunner</mainClass>
                 </configuration>
             </plugin>
             <plugin>
@@ -86,7 +86,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>dev.mars.rulesengine.demo.DemoRunner</mainClass>
+                            <mainClass>dev.mars.apex.demo.DemoRunner</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -101,7 +101,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>dev.mars.rulesengine.demo.advanced.SpelAdvancedFeaturesDemo</mainClass>
+                            <mainClass>dev.mars.apex.demo.DemoRunner</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

@@ -39,32 +39,34 @@ The runner automatically discovers demos by looking for classes with:
 
 Currently discovered demos include:
 
-### Core Demos (8 demos)
+### Core Demos (2 demos)
 - `QuickStartDemo` - 5-minute introduction to the rules engine
-- `YamlDatasetDemo` - YAML dataset enrichment capabilities
-- `FinancialServicesDemo` - Financial domain demonstrations
-- `PerformanceDemo` - Performance monitoring features
 - `LayeredAPIDemo` - Three-layer API design
-- `SimplifiedAPIDemo` - Simplified API usage
-- `YamlConfigurationDemo` - YAML configuration examples
-- `BatchProcessingDemo` - Batch processing capabilities
 
-### Examples Demos (6 demos)
-- `BasicUsageExamples` - Fundamental concepts and operations
-- `LayeredAPIDemo` - API layer demonstrations
+### Examples Demos (15 demos)
 - `AdvancedFeaturesDemo` - Advanced SpEL features
+- `BasicUsageExamples` - Fundamental concepts and operations
+- `BatchProcessingDemo` - Batch processing capabilities
 - `CommoditySwapValidationDemo` - Financial instrument validation
+- `CustodyAutoRepairDemo` - Custody auto-repair functionality
+- `CustodyAutoRepairStandaloneDemo` - Standalone custody repair
+- `CustodyAutoRepairYamlDemo` - YAML-driven custody repair
+- `FinancialServicesDemo` - Financial domain demonstrations
 - `FinancialTradingDemo` - Trading system examples
+- `FluentRuleBuilderExample` - Fluent API examples
+- `LayeredAPIDemo` - API layer demonstrations
+- `PerformanceDemo` - Performance monitoring features
 - `PerformanceMonitoringDemo` - Performance monitoring
+- `SimplifiedAPIDemo` - Simplified API usage
+- `SpelRulesEngineDemo` - SpEL engine demonstrations
+- `YamlConfigurationDemo` - YAML configuration examples
+- `YamlDatasetDemo` - YAML dataset enrichment capabilities
 
-### Integration Demos (4 demos)
+### Advanced Demos (4 demos)
 - `DataServiceManagerDemo` - Data service integration
 - `DynamicMethodExecutionDemo` - Dynamic method execution
 - `PerformanceAndExceptionDemo` - Error handling and monitoring
 - `SpelAdvancedFeaturesDemo` - Advanced SpEL capabilities
-
-### Financial Demos (1 demo)
-- `CommoditySwapValidationDemo` - OTC commodity swap validation
 
 ## Output
 
@@ -79,16 +81,16 @@ Example output:
 === SpEL Rules Engine - All Demos Runner ===
 Automatically discovering and running all available demos...
 
-Discovered 19 runnable demos:
-  - dev.mars.rulesengine.demo.examples.QuickStartDemo (run())
-  - dev.mars.rulesengine.demo.examples.BasicUsageExamples (run())
+Discovered 23 runnable demos:
+  - dev.mars.apex.demo.core.QuickStartDemo (run())
+  - dev.mars.apex.demo.examples.BasicUsageExamples (run())
   ...
 
 ════════════════════════════════════════════════════════════════════════════════
 PACKAGE: CORE
 ════════════════════════════════════════════════════════════════════════════════
 
-▶ Running: dev.mars.rulesengine.demo.examples.QuickStartDemo
+▶ Running: dev.mars.apex.demo.core.QuickStartDemo
   Method: run()
   ------------------------------------------------------------
   [Demo output...]
@@ -98,8 +100,8 @@ PACKAGE: CORE
 ════════════════════════════════════════════════════════════════════════════════
 EXECUTION SUMMARY
 ════════════════════════════════════════════════════════════════════════════════
-Total Demos: 19
-Successful: 19
+Total Demos: 23
+Successful: 23
 Failed: 0
 Skipped: 0
 

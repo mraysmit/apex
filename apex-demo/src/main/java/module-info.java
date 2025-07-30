@@ -19,6 +19,7 @@ module dev.mars.apex.demo {
 
     // Export main demo packages for external access
     exports dev.mars.apex.demo;
+    exports dev.mars.apex.demo.core;
     exports dev.mars.apex.demo.rulesets;
     exports dev.mars.apex.demo.data to spring.expression;
     exports dev.mars.apex.demo.examples;

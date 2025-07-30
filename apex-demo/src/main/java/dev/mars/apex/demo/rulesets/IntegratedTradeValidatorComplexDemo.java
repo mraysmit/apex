@@ -454,7 +454,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade>, Na
         // Create Rule for enhanced trade type check
         Rule enhancedTradeCheckRule = new Rule(
                 "EnhancedTradeCheckRule",
-                "#trade instanceof T(model.dev.mars.rulesengine.demo.EnhancedTrade)",
+                "#trade instanceof T(model.dev.mars.apex.demo.EnhancedTrade)",
                 "Trade must be an EnhancedTrade"
         );
         ruleGroup.addRule(enhancedTradeCheckRule, 2);
@@ -578,7 +578,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade>, Na
         // Create Rule for enhanced trade type check
         Rule enhancedTradeCheckRule = new Rule(
                 "EnhancedTradeCheckRule",
-                "#trade instanceof T(model.dev.mars.rulesengine.demo.EnhancedTrade)",
+                "#trade instanceof T(model.dev.mars.apex.demo.EnhancedTrade)",
                 "Trade must be an EnhancedTrade"
         );
         ruleGroup.addRule(enhancedTradeCheckRule, 2);
@@ -682,7 +682,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade>, Na
         // Create Rule for enhanced trade type check
         Rule enhancedTradeCheckRule = new Rule(
                 "EnhancedTradeCheckRule",
-                "#trade instanceof T(model.dev.mars.rulesengine.demo.EnhancedTrade)",
+                "#trade instanceof T(model.dev.mars.apex.demo.EnhancedTrade)",
                 "Trade must be an EnhancedTrade"
         );
         mainRuleGroup.addRule(enhancedTradeCheckRule, 2);

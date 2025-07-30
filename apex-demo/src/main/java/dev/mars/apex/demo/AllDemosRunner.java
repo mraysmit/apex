@@ -80,11 +80,13 @@ public class AllDemosRunner {
      */
     private void registerKnownDemoClasses() {
         // Core demos
-        registerDemoClass("dev.mars.apex.demo.examples.QuickStartDemo");
+        registerDemoClass("dev.mars.apex.demo.core.QuickStartDemo");
+        registerDemoClass("dev.mars.apex.demo.core.LayeredAPIDemo");
+
+        // Examples demos
         registerDemoClass("dev.mars.apex.demo.examples.YamlDatasetDemo");
         registerDemoClass("dev.mars.apex.demo.examples.FinancialServicesDemo");
         registerDemoClass("dev.mars.apex.demo.examples.PerformanceDemo");
-        registerDemoClass("dev.mars.apex.demo.core.LayeredAPIDemo");
         registerDemoClass("dev.mars.apex.demo.examples.SimplifiedAPIDemo");
         registerDemoClass("dev.mars.apex.demo.examples.YamlConfigurationDemo");
         registerDemoClass("dev.mars.apex.demo.examples.BatchProcessingDemo");
@@ -95,24 +97,18 @@ public class AllDemosRunner {
         registerDemoClass("dev.mars.apex.demo.examples.AdvancedFeaturesDemo");
         registerDemoClass("dev.mars.apex.demo.examples.CommoditySwapValidationDemo");
         registerDemoClass("dev.mars.apex.demo.examples.FinancialTradingDemo");
-        registerDemoClass("dev.mars.apex.demo.examples.IntegrationExamples");
         registerDemoClass("dev.mars.apex.demo.examples.PerformanceMonitoringDemo");
+        registerDemoClass("dev.mars.apex.demo.examples.SpelRulesEngineDemo");
+        registerDemoClass("dev.mars.apex.demo.examples.CustodyAutoRepairDemo");
+        registerDemoClass("dev.mars.apex.demo.examples.CustodyAutoRepairStandaloneDemo");
+        registerDemoClass("dev.mars.apex.demo.examples.CustodyAutoRepairYamlDemo");
+        registerDemoClass("dev.mars.apex.demo.examples.FluentRuleBuilderExample");
 
-        // Integration demos
+        // Advanced demos
         registerDemoClass("dev.mars.apex.demo.advanced.DataServiceManagerDemo");
         registerDemoClass("dev.mars.apex.demo.advanced.DynamicMethodExecutionDemo");
         registerDemoClass("dev.mars.apex.demo.advanced.PerformanceAndExceptionDemo");
-        registerDemoClass("dev.mars.apex.demo.advanced.RuleConfigurationDemo");
         registerDemoClass("dev.mars.apex.demo.advanced.SpelAdvancedFeaturesDemo");
-        registerDemoClass("dev.mars.apex.demo.examples.SpelRulesEngineDemo");
-
-        // Advanced demos
-        registerDemoClass("dev.mars.apex.demo.advanced.AdvancedFeaturesDemo");
-        registerDemoClass("dev.mars.apex.demo.advanced.IntegrationExamples");
-        registerDemoClass("dev.mars.apex.demo.advanced.PerformanceMonitoringDemo");
-
-        // Financial demos
-        registerDemoClass("dev.mars.apex.demo.financial.CommoditySwapValidationDemo");
     }
 
     /**
