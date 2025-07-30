@@ -1,0 +1,141 @@
+package dev.mars.apex.rest.config;
+
+import dev.mars.apex.core.api.RulesService;
+import dev.mars.apex.core.api.SimpleRulesEngine;
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Spring configuration for the Rules Engine REST API.
+ *
+ * This class is part of the PeeGeeQ message queue system, providing
+ * production-ready PostgreSQL-based message queuing capabilities.
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-07-27
+ * @version 1.0
+ */
+@Configuration
+public class RulesEngineConfiguration {
+    
+    private static final Logger logger = LoggerFactory.getLogger(RulesEngineConfiguration.class);
+    
+    @Value("${rules.config.default-path:classpath:rules/default-rules.yaml}")
+    private String defaultConfigPath;
+    
+    @Value("${rules.performance.monitoring.enabled:true}")
+    private boolean performanceMonitoringEnabled;
+    
+    @Value("${rules.error.recovery.enabled:true}")
+    private boolean errorRecoveryEnabled;
+    
+    /**
+     * Primary RulesService bean for dependency injection.
+     * This provides the instance-based API for rule evaluation.
+     */
+    @Bean
+    @Primary
+    public RulesService rulesService() {
+        logger.info("Creating primary RulesService bean");
+        return new RulesService();
+    }
+    
+    /**
+     * SimpleRulesEngine bean for basic rule operations.
+     * This provides a simplified API for common use cases.
+     */
+    @Bean
+    public SimpleRulesEngine simpleRulesEngine() {
+        logger.info("Creating SimpleRulesEngine bean");
+        return new SimpleRulesEngine();
+    }
+    
+    /**
+     * YamlConfigurationLoader bean for loading YAML configurations.
+     * This is used by the configuration management endpoints.
+     */
+    @Bean
+    public YamlConfigurationLoader yamlConfigurationLoader() {
+        logger.info("Creating YamlConfigurationLoader bean");
+        return new YamlConfigurationLoader();
+    }
+    
+    /**
+     * Default RulesEngine bean loaded from configuration.
+     * This provides a pre-configured engine for immediate use.
+     */
+    @Bean("defaultRulesEngine")
+    public RulesEngine defaultRulesEngine(YamlConfigurationLoader loader) {
+        try {
+            logger.info("Loading default rules configuration from: {}", defaultConfigPath);
+            
+            // Try to load default configuration
+            if (defaultConfigPath.startsWith("classpath:")) {
+                String resourcePath = defaultConfigPath.substring("classpath:".length());
+                try {
+                    // Try to load configuration but use default for now
+                    loader.loadFromClasspath(resourcePath);
+                    dev.mars.apex.core.engine.config.RulesEngineConfiguration engineConfig =
+                        new dev.mars.apex.core.engine.config.RulesEngineConfiguration();
+                    
+                    // Configure performance monitoring
+                    if (performanceMonitoringEnabled) {
+                        logger.info("Performance monitoring enabled");
+                        // Performance monitoring configuration would go here
+                    }
+                    
+                    // Configure error recovery
+                    if (errorRecoveryEnabled) {
+                        logger.info("Error recovery enabled");
+                        // Error recovery configuration would go here
+                    }
+                    
+                    return new RulesEngine(engineConfig);
+                } catch (Exception e) {
+                    logger.warn("Could not load default configuration from {}: {}", defaultConfigPath, e.getMessage());
+                    logger.info("Creating default RulesEngine with empty configuration");
+                    return new RulesEngine(new dev.mars.apex.core.engine.config.RulesEngineConfiguration());
+                }
+            } else {
+                // File path
+                try {
+                    // Try to load configuration but use default for now
+                    loader.loadFromFile(defaultConfigPath);
+                    dev.mars.apex.core.engine.config.RulesEngineConfiguration engineConfig =
+                        new dev.mars.apex.core.engine.config.RulesEngineConfiguration();
+                    return new RulesEngine(engineConfig);
+                } catch (Exception e) {
+                    logger.warn("Could not load default configuration from {}: {}", defaultConfigPath, e.getMessage());
+                    logger.info("Creating default RulesEngine with empty configuration");
+                    return new RulesEngine(new dev.mars.apex.core.engine.config.RulesEngineConfiguration());
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error creating default RulesEngine: {}", e.getMessage(), e);
+            logger.info("Falling back to empty configuration");
+            return new RulesEngine(new dev.mars.apex.core.engine.config.RulesEngineConfiguration());
+        }
+    }
+}

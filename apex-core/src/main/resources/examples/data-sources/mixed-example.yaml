@@ -1,0 +1,384 @@
+# Example YAML configuration for mixed data sources
+# This demonstrates cache data sources and a complete multi-source setup
+
+name: "Mixed Data Sources Example"
+description: "Complete example with cache, database, API, and file sources working together"
+version: "1.0.0"
+
+dataSources:
+  # Primary cache for frequently accessed data
+  - name: "primary-cache"
+    type: "cache"
+    sourceType: "memory"
+    enabled: true
+    description: "Primary in-memory cache for hot data"
+    tags:
+      - "cache"
+      - "primary"
+      - "hot-data"
+    
+    # Cache configuration
+    cache:
+      enabled: true
+      maxSize: 10000
+      ttlSeconds: 1800  # 30 minutes
+      evictionPolicy: "LRU"
+      keyPrefix: "primary"
+      
+      # Background cleanup
+      cleanupInterval: 300  # 5 minutes
+      
+      # Statistics collection
+      collectStatistics: true
+    
+    healthCheck:
+      enabled: true
+      intervalSeconds: 30
+      timeoutSeconds: 2
+
+  # Session cache for user sessions
+  - name: "session-cache"
+    type: "cache"
+    sourceType: "memory"
+    enabled: true
+    description: "User session cache"
+    tags:
+      - "cache"
+      - "sessions"
+      - "user-data"
+    
+    cache:
+      enabled: true
+      maxSize: 5000
+      ttlSeconds: 3600  # 1 hour
+      evictionPolicy: "LRU"
+      keyPrefix: "session"
+      
+      # Shorter cleanup for sessions
+      cleanupInterval: 60  # 1 minute
+      collectStatistics: true
+    
+    healthCheck:
+      enabled: true
+      intervalSeconds: 60
+      timeoutSeconds: 3
+
+  # User database (primary data source)
+  - name: "user-database"
+    type: "database"
+    sourceType: "postgresql"
+    enabled: true
+    description: "Primary user database"
+    tags:
+      - "database"
+      - "primary"
+      - "users"
+    
+    connection:
+      host: "localhost"
+      port: 5432
+      database: "userdb"
+      username: "app_user"
+      password: "${DB_PASSWORD}"
+      maxPoolSize: 20
+      minPoolSize: 5
+    
+    queries:
+      getUserById: "SELECT * FROM users WHERE id = :id"
+      getUserByEmail: "SELECT * FROM users WHERE email = :email"
+      default: "SELECT 1"
+    
+    parameterNames:
+      - "id"
+      - "email"
+    
+    # Database has its own cache
+    cache:
+      enabled: true
+      ttlSeconds: 600  # 10 minutes
+      maxSize: 2000
+      keyPrefix: "userdb"
+    
+    healthCheck:
+      enabled: true
+      intervalSeconds: 30
+      timeoutSeconds: 5
+
+  # External API for enrichment data
+  - name: "enrichment-api"
+    type: "rest-api"
+    enabled: true
+    description: "External API for data enrichment"
+    tags:
+      - "api"
+      - "external"
+      - "enrichment"
+    
+    connection:
+      baseUrl: "https://api.enrichment.com/v1"
+      timeout: 10000
+      retryAttempts: 2
+    
+    authentication:
+      type: "api-key"
+      apiKey: "${ENRICHMENT_API_KEY}"
+      keyParameter: "key"
+      keyLocation: "query"
+    
+    endpoints:
+      enrichUser: "/users/{userId}/enrich"
+      getCompanyInfo: "/companies/{domain}"
+      default: "/health"
+    
+    parameterNames:
+      - "userId"
+      - "domain"
+    
+    cache:
+      enabled: true
+      ttlSeconds: 7200  # 2 hours for enrichment data
+      maxSize: 1000
+      keyPrefix: "enrichment"
+    
+    circuitBreaker:
+      enabled: true
+      failureThreshold: 3
+      recoveryTimeout: 30000
+    
+    healthCheck:
+      enabled: true
+      intervalSeconds: 120
+      timeoutSeconds: 8
+
+  # Configuration files
+  - name: "config-files"
+    type: "file-system"
+    enabled: true
+    description: "Application configuration files"
+    tags:
+      - "files"
+      - "config"
+      - "json"
+    
+    connection:
+      basePath: "/etc/app/config"
+      filePattern: "*.json"
+      watchForChanges: true
+      encoding: "UTF-8"
+    
+    fileFormat:
+      type: "json"
+      rootPath: "$"
+    
+    parameterNames:
+      - "filename"
+    
+    cache:
+      enabled: true
+      ttlSeconds: 3600  # 1 hour for config
+      maxSize: 100
+      keyPrefix: "config"
+      cacheKeyIncludesFileModTime: true
+    
+    healthCheck:
+      enabled: true
+      intervalSeconds: 300
+      timeoutSeconds: 5
+
+# Rules demonstrating data source integration
+rules:
+  # Rule using multiple data sources
+  - name: "enriched-user-lookup"
+    description: "Get user data with enrichment from multiple sources"
+    condition: "true"  # Always execute when called
+    actions:
+      - type: "data-lookup"
+        steps:
+          # Step 1: Check cache first
+          - dataSource: "primary-cache"
+            query: "user:${userId}"
+            resultVariable: "cachedUser"
+          
+          # Step 2: If not in cache, get from database
+          - condition: "cachedUser == null"
+            dataSource: "user-database"
+            query: "getUserById"
+            parameters:
+              id: "${userId}"
+            resultVariable: "dbUser"
+          
+          # Step 3: Enrich user data from external API
+          - condition: "dbUser != null"
+            dataSource: "enrichment-api"
+            query: "enrichUser"
+            parameters:
+              userId: "${userId}"
+            resultVariable: "enrichmentData"
+          
+          # Step 4: Combine data and cache result
+          - condition: "dbUser != null"
+            action: "combine-data"
+            sources:
+              - "dbUser"
+              - "enrichmentData"
+            resultVariable: "enrichedUser"
+          
+          # Step 5: Store in cache for future use
+          - condition: "enrichedUser != null"
+            dataSource: "primary-cache"
+            action: "put"
+            key: "user:${userId}"
+            value: "${enrichedUser}"
+            ttl: 1800
+
+  # Rule for session management
+  - name: "session-management"
+    description: "Manage user sessions with cache"
+    condition: "sessionId != null"
+    actions:
+      - type: "session-lookup"
+        steps:
+          # Check session cache
+          - dataSource: "session-cache"
+            query: "session:${sessionId}"
+            resultVariable: "session"
+          
+          # If session not found or expired, create new one
+          - condition: "session == null"
+            action: "create-session"
+            dataSource: "user-database"
+            query: "getUserById"
+            parameters:
+              id: "${userId}"
+            resultVariable: "user"
+          
+          # Store new session in cache
+          - condition: "session == null && user != null"
+            dataSource: "session-cache"
+            action: "put"
+            key: "session:${sessionId}"
+            value: "${user}"
+            ttl: 3600
+
+  # Rule for configuration-driven behavior
+  - name: "config-driven-processing"
+    description: "Process data based on configuration files"
+    condition: "true"
+    actions:
+      - type: "config-lookup"
+        steps:
+          # Load processing configuration
+          - dataSource: "config-files"
+            query: "processing-config.json"
+            resultVariable: "config"
+          
+          # Apply configuration-based processing
+          - condition: "config != null"
+            action: "apply-config"
+            configuration: "${config}"
+            inputData: "${inputData}"
+            resultVariable: "processedData"
+
+# Global configuration for data source coordination
+configuration:
+  # Data source priorities for failover
+  dataSourcePriorities:
+    userLookup:
+      - "primary-cache"      # Try cache first
+      - "user-database"      # Fallback to database
+    
+    enrichment:
+      - "enrichment-api"     # Primary enrichment source
+  
+  # Cache warming strategies
+  cacheWarming:
+    enabled: true
+    strategies:
+      - name: "user-cache-warming"
+        sourceDataSource: "user-database"
+        targetDataSource: "primary-cache"
+        query: "SELECT id, username, email FROM users WHERE last_login > NOW() - INTERVAL '7 days'"
+        schedule: "0 2 * * *"  # Daily at 2 AM
+        keyTemplate: "user:${id}"
+        ttl: 3600
+  
+  # Data consistency checks
+  consistencyChecks:
+    enabled: true
+    checks:
+      - name: "cache-db-consistency"
+        primarySource: "user-database"
+        cacheSource: "primary-cache"
+        checkInterval: 3600  # 1 hour
+        sampleSize: 100
+  
+  # Monitoring and alerting
+  monitoring:
+    enabled: true
+    metrics:
+      - "cache-hit-ratio"
+      - "database-response-time"
+      - "api-success-rate"
+      - "file-processing-time"
+    
+    alerts:
+      - condition: "cache-hit-ratio < 0.8"
+        message: "Cache hit ratio is below 80%"
+        severity: "warning"
+      
+      - condition: "database-response-time > 1000"
+        message: "Database response time is above 1 second"
+        severity: "critical"
+      
+      - condition: "api-success-rate < 0.95"
+        message: "API success rate is below 95%"
+        severity: "warning"
+
+# Environment-specific configurations
+environments:
+  development:
+    dataSources:
+      - name: "primary-cache"
+        cache:
+          maxSize: 1000
+          ttlSeconds: 300
+      
+      - name: "user-database"
+        connection:
+          host: "localhost"
+          maxPoolSize: 5
+      
+      - name: "enrichment-api"
+        enabled: false  # Disable external API in dev
+      
+      - name: "config-files"
+        connection:
+          basePath: "./config"
+  
+  production:
+    dataSources:
+      - name: "primary-cache"
+        cache:
+          maxSize: 50000
+          ttlSeconds: 3600
+      
+      - name: "user-database"
+        connection:
+          host: "prod-db.example.com"
+          maxPoolSize: 50
+      
+      - name: "enrichment-api"
+        connection:
+          timeout: 5000  # Shorter timeout in production
+        circuitBreaker:
+          failureThreshold: 2  # More sensitive
+      
+      - name: "config-files"
+        connection:
+          basePath: "/etc/app/config"
+    
+    configuration:
+      monitoring:
+        alerts:
+          - condition: "cache-hit-ratio < 0.9"  # Higher threshold in prod
+            severity: "critical"

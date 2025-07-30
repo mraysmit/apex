@@ -1,0 +1,370 @@
+# Example YAML configuration for file system data sources
+# This demonstrates various file format configurations including CSV, JSON, XML, and fixed-width
+
+name: "File System Data Sources Example"
+description: "Example configuration showing different file system data source setups"
+version: "1.0.0"
+
+dataSources:
+  # CSV file data source
+  - name: "customer-csv-files"
+    type: "file-system"
+    enabled: true
+    description: "Customer data from CSV files"
+    tags:
+      - "csv"
+      - "customers"
+      - "batch-data"
+    
+    # File system connection
+    connection:
+      basePath: "/data/customers"
+      filePattern: "customers_*.csv"
+      recursive: false
+      watchForChanges: true
+      encoding: "UTF-8"
+    
+    # CSV format configuration
+    fileFormat:
+      type: "csv"
+      hasHeaderRow: true
+      delimiter: ","
+      quoteCharacter: "\""
+      escapeCharacter: "\\"
+      skipLines: 0
+      
+      # Column mappings
+      columnMappings:
+        "customer_id": "id"
+        "customer_name": "name"
+        "email_address": "email"
+        "phone_number": "phone"
+        "registration_date": "registeredAt"
+      
+      # Data type conversions
+      columnTypes:
+        "id": "integer"
+        "name": "string"
+        "email": "string"
+        "phone": "string"
+        "registeredAt": "date"
+      
+      # Date format for parsing
+      dateFormat: "yyyy-MM-dd"
+    
+    parameterNames:
+      - "filename"
+      - "dateRange"
+    
+    cache:
+      enabled: true
+      ttlSeconds: 1800  # 30 minutes for file data
+      maxSize: 1000
+      keyPrefix: "customers"
+      
+      # Cache based on file modification time
+      cacheKeyIncludesFileModTime: true
+    
+    healthCheck:
+      enabled: true
+      intervalSeconds: 300  # 5 minutes
+      timeoutSeconds: 10
+      checkFileAccess: true
+
+  # JSON file data source
+  - name: "product-json-files"
+    type: "file-system"
+    enabled: true
+    description: "Product catalog from JSON files"
+    tags:
+      - "json"
+      - "products"
+      - "catalog"
+    
+    connection:
+      basePath: "/data/products"
+      filePattern: "*.json"
+      recursive: true
+      watchForChanges: true
+      encoding: "UTF-8"
+      
+      # File filtering
+      excludePatterns:
+        - "*.backup.json"
+        - "temp_*.json"
+    
+    # JSON format configuration
+    fileFormat:
+      type: "json"
+      rootPath: "$.products"  # JSONPath to extract array
+      flattenArrays: false
+      
+      # Field mappings
+      columnMappings:
+        "product_id": "id"
+        "product_name": "name"
+        "category_id": "categoryId"
+        "price_amount": "price"
+        "is_active": "active"
+    
+    parameterNames:
+      - "filename"
+      - "category"
+    
+    cache:
+      enabled: true
+      ttlSeconds: 3600  # 1 hour for product data
+      maxSize: 2000
+      keyPrefix: "products"
+      cacheKeyIncludesFileModTime: true
+    
+    healthCheck:
+      enabled: true
+      intervalSeconds: 600  # 10 minutes
+      timeoutSeconds: 15
+      checkFileAccess: true
+
+  # XML file data source
+  - name: "order-xml-files"
+    type: "file-system"
+    enabled: true
+    description: "Order data from XML files"
+    tags:
+      - "xml"
+      - "orders"
+      - "transactions"
+    
+    connection:
+      basePath: "/data/orders"
+      filePattern: "order_*.xml"
+      recursive: false
+      watchForChanges: true
+      encoding: "UTF-8"
+    
+    # XML format configuration
+    fileFormat:
+      type: "xml"
+      recordElement: "order"  # XML element representing each record
+      rootElement: "orders"   # Root container element
+      
+      # Namespace handling
+      namespaces:
+        "ord": "http://example.com/orders"
+        "cust": "http://example.com/customers"
+      
+      # Attribute and element mappings
+      columnMappings:
+        "@id": "orderId"           # XML attribute
+        "customer/name": "customerName"  # Nested element
+        "total": "totalAmount"
+        "status": "orderStatus"
+        "items/item": "orderItems"  # Array of items
+    
+    parameterNames:
+      - "filename"
+      - "dateRange"
+      - "status"
+    
+    cache:
+      enabled: true
+      ttlSeconds: 900  # 15 minutes for order data
+      maxSize: 1500
+      keyPrefix: "orders"
+      cacheKeyIncludesFileModTime: true
+    
+    healthCheck:
+      enabled: true
+      intervalSeconds: 180  # 3 minutes
+      timeoutSeconds: 10
+      checkFileAccess: true
+
+  # Fixed-width file data source
+  - name: "legacy-fixed-width-files"
+    type: "file-system"
+    enabled: true
+    description: "Legacy system data in fixed-width format"
+    tags:
+      - "fixed-width"
+      - "legacy"
+      - "mainframe"
+    
+    connection:
+      basePath: "/data/legacy"
+      filePattern: "EXTRACT_*.DAT"
+      recursive: false
+      watchForChanges: false  # Legacy files don't change
+      encoding: "IBM437"  # Legacy encoding
+    
+    # Fixed-width format configuration
+    fileFormat:
+      type: "fixed-width"
+      skipLines: 2  # Skip header lines
+      
+      # Field definitions with positions and lengths
+      fieldDefinitions:
+        - name: "recordType"
+          startPosition: 1
+          length: 2
+          type: "string"
+        
+        - name: "customerId"
+          startPosition: 3
+          length: 10
+          type: "integer"
+        
+        - name: "customerName"
+          startPosition: 13
+          length: 30
+          type: "string"
+        
+        - name: "accountNumber"
+          startPosition: 43
+          length: 12
+          type: "string"
+        
+        - name: "balance"
+          startPosition: 55
+          length: 15
+          type: "decimal"
+          format: "0000000000.00000"  # Fixed decimal format
+        
+        - name: "lastActivity"
+          startPosition: 70
+          length: 8
+          type: "date"
+          format: "yyyyMMdd"
+        
+        - name: "status"
+          startPosition: 78
+          length: 1
+          type: "string"
+    
+    parameterNames:
+      - "filename"
+      - "recordType"
+    
+    cache:
+      enabled: true
+      ttlSeconds: 7200  # 2 hours for legacy data
+      maxSize: 500
+      keyPrefix: "legacy"
+      cacheKeyIncludesFileModTime: true
+    
+    healthCheck:
+      enabled: true
+      intervalSeconds: 1800  # 30 minutes
+      timeoutSeconds: 30
+      checkFileAccess: true
+
+  # Log file data source
+  - name: "application-logs"
+    type: "file-system"
+    enabled: true
+    description: "Application log files for analysis"
+    tags:
+      - "logs"
+      - "monitoring"
+      - "text"
+    
+    connection:
+      basePath: "/var/log/application"
+      filePattern: "app-*.log"
+      recursive: true
+      watchForChanges: true
+      encoding: "UTF-8"
+      
+      # Only process recent files
+      maxFileAge: 86400  # 24 hours in seconds
+    
+    # Plain text format configuration
+    fileFormat:
+      type: "txt"
+      # Each line becomes a record with line number and content
+      
+      # Pattern matching for structured logs
+      linePatterns:
+        - name: "errorLog"
+          pattern: "^(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}) ERROR (.+)$"
+          groups:
+            - "timestamp"
+            - "message"
+        
+        - name: "infoLog"
+          pattern: "^(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}) INFO (.+)$"
+          groups:
+            - "timestamp"
+            - "message"
+    
+    parameterNames:
+      - "filename"
+      - "logLevel"
+      - "timeRange"
+    
+    cache:
+      enabled: false  # Don't cache log data
+    
+    healthCheck:
+      enabled: true
+      intervalSeconds: 60
+      timeoutSeconds: 5
+      checkFileAccess: true
+
+# Global file system configuration
+configuration:
+  # Default file watching settings
+  defaultFileWatching:
+    enabled: true
+    pollInterval: 5000  # 5 seconds
+    bufferSize: 8192
+  
+  # Default encoding
+  defaultEncoding: "UTF-8"
+  
+  # Default cache settings
+  defaultCache:
+    enabled: true
+    ttlSeconds: 1800
+    maxSize: 1000
+    cacheKeyIncludesFileModTime: true
+  
+  # File processing limits
+  maxFileSize: 104857600  # 100MB
+  maxFilesPerDirectory: 1000
+  
+  # Error handling
+  errorHandling:
+    skipCorruptedFiles: true
+    logParsingErrors: true
+    maxErrorsPerFile: 10
+
+# Environment-specific overrides
+environments:
+  development:
+    dataSources:
+      - name: "customer-csv-files"
+        connection:
+          basePath: "./test-data/customers"
+        cache:
+          ttlSeconds: 60
+      
+      - name: "legacy-fixed-width-files"
+        enabled: false  # Disable in development
+  
+  staging:
+    dataSources:
+      - name: "customer-csv-files"
+        connection:
+          basePath: "/staging-data/customers"
+        cache:
+          ttlSeconds: 600
+  
+  production:
+    dataSources:
+      - name: "customer-csv-files"
+        connection:
+          basePath: "/prod-data/customers"
+        cache:
+          ttlSeconds: 3600
+          maxSize: 5000
+        healthCheck:
+          intervalSeconds: 120  # More frequent in production

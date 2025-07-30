@@ -229,8 +229,8 @@ class ApexRestApiIntegrationTest {
         }
 
         @Test
-        @DisplayName("Should handle null data gracefully")
-        void shouldHandleNullData() {
+        @DisplayName("Should validate null data and return 400 Bad Request")
+        void shouldValidateNullData() {
             // Given
             RuleEvaluationRequest request = new RuleEvaluationRequest();
             request.setCondition("age > 18");
@@ -241,14 +241,19 @@ class ApexRestApiIntegrationTest {
             HttpEntity<RuleEvaluationRequest> entity = new HttpEntity<>(request, headers);
 
             // When
-            ResponseEntity<RuleEvaluationResponse> response = restTemplate.postForEntity(
-                getBaseUrl() + "/api/rules/check", entity, RuleEvaluationResponse.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                getBaseUrl() + "/api/rules/check", entity, String.class);
 
             // Then
-            assertEquals(HttpStatus.OK, response.getStatusCode());
+            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
             assertNotNull(response.getBody());
-            assertTrue(response.getBody().isSuccess());
-            assertFalse(response.getBody().isMatched()); // Error recovery returns false
+            // The response should contain validation error information
+            String responseBody = response.getBody().toLowerCase();
+            assertTrue(responseBody.contains("data cannot be null") ||
+                      responseBody.contains("validation") ||
+                      responseBody.contains("notnull") ||
+                      responseBody.contains("bad request"),
+                      "Response body should contain validation error: " + response.getBody());
         }
     }
 

@@ -1,3 +1,4 @@
+
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
@@ -33,6 +34,25 @@ build/
 
 ### VS Code ###
 .vscode/
-
+git ls-files | grep -i log
 ### Mac OS ###
 .DS_Store
+
+### Log files ###
+*.log
+logs/
+*.log.*
+log/
+*.out
+*.err
+application*.log
+spring*.log
+*.log.gz
+*.log.zip
+/logs/**
+**/logs/**
+# Add these case variations
+*.LOG
+*.Log
+Logs/
+LOGS/

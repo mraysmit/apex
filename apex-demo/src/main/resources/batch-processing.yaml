@@ -1,0 +1,160 @@
+# SpEL Rules Engine - Batch Processing Configuration
+# Optimized rules for high-volume data processing scenarios
+#
+# Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+# Licensed under the Apache License, Version 2.0
+
+name: "Batch Processing Rules"
+description: "High-performance rules optimized for batch processing scenarios"
+version: "1.0"
+
+# Performance-optimized rules for batch processing
+rules:
+  # Customer validation rule optimized for batch processing
+  - name: "batch-customer-validation"
+    description: "Fast customer validation for batch processing"
+    condition: "#data.age >= 18 && #data.email != null && #data.name != null"
+    message: "Customer validation passed"
+    priority: 1
+    metadata:
+      category: "validation"
+      performance_optimized: true
+      batch_friendly: true
+
+  # Trade validation rule for financial batch processing
+  - name: "batch-trade-validation"
+    description: "High-speed trade validation for settlement processing"
+    condition: "#data.amount > 0 && #data.currency != null && #data.counterparty != null"
+    message: "Trade ready for settlement"
+    priority: 2
+    metadata:
+      category: "financial"
+      performance_optimized: true
+      batch_friendly: true
+
+  # Risk threshold rule for batch risk calculations
+  - name: "batch-risk-threshold"
+    description: "Risk threshold check for batch risk calculations"
+    condition: "#data.amount <= 1000000"
+    message: "Trade within risk limits"
+    priority: 3
+    metadata:
+      category: "risk"
+      performance_optimized: true
+      batch_friendly: true
+
+  # Data quality rule for batch data processing
+  - name: "batch-data-quality"
+    description: "Data quality validation for batch processing"
+    condition: "#data.id != null && #data.timestamp != null"
+    message: "Data quality check passed"
+    priority: 4
+    metadata:
+      category: "quality"
+      performance_optimized: true
+      batch_friendly: true
+
+# Dataset enrichment for batch processing scenarios
+datasets:
+  # Currency conversion rates for financial batch processing
+  currency_rates:
+    description: "Currency conversion rates for batch financial processing"
+    data:
+      - currency: "USD"
+        rate: 1.0
+        region: "North America"
+      - currency: "EUR"
+        rate: 0.85
+        region: "Europe"
+      - currency: "GBP"
+        rate: 0.73
+        region: "United Kingdom"
+      - currency: "JPY"
+        rate: 110.0
+        region: "Asia"
+
+  # Counterparty risk ratings for batch risk processing
+  counterparty_ratings:
+    description: "Counterparty risk ratings for batch risk calculations"
+    data:
+      - name: "Goldman Sachs"
+        rating: "AAA"
+        risk_weight: 0.1
+      - name: "JP Morgan"
+        rating: "AAA"
+        risk_weight: 0.1
+      - name: "Morgan Stanley"
+        rating: "AA+"
+        risk_weight: 0.15
+      - name: "Citi"
+        rating: "AA"
+        risk_weight: 0.2
+      - name: "Deutsche Bank"
+        rating: "A+"
+        risk_weight: 0.25
+
+  # Regional processing rules for batch geographic processing
+  regional_rules:
+    description: "Regional processing rules for batch geographic scenarios"
+    data:
+      - region: "North America"
+        timezone: "EST"
+        business_hours: "09:00-17:00"
+        settlement_days: 2
+      - region: "Europe"
+        timezone: "CET"
+        business_hours: "08:00-16:00"
+        settlement_days: 2
+      - region: "Asia"
+        timezone: "JST"
+        business_hours: "09:00-17:00"
+        settlement_days: 1
+
+# Performance configuration for batch processing
+performance:
+  # Enable caching for repeated rule evaluations
+  enable_caching: true
+  cache_size: 10000
+  
+  # Parallel processing configuration
+  enable_parallel_processing: true
+  thread_pool_size: 8
+  
+  # Memory optimization settings
+  enable_memory_optimization: true
+  batch_size: 1000
+  
+  # Monitoring configuration
+  enable_monitoring: true
+  metrics_collection_interval: 5000
+  
+  # Error handling configuration
+  enable_error_recovery: true
+  max_retry_attempts: 3
+  
+# Batch processing specific configuration
+batch_processing:
+  # Chunk size for memory-efficient processing
+  chunk_size: 500
+  
+  # Parallel processing settings
+  parallel_streams: true
+  max_parallel_threads: 8
+  
+  # Result aggregation settings
+  enable_result_aggregation: true
+  aggregation_batch_size: 1000
+  
+  # Performance monitoring
+  enable_performance_tracking: true
+  track_throughput: true
+  track_memory_usage: true
+  
+  # Error handling for batch scenarios
+  continue_on_error: true
+  error_threshold_percentage: 10
+  
+  # Optimization settings
+  enable_rule_compilation: true
+  enable_expression_caching: true
+  enable_result_pooling: true

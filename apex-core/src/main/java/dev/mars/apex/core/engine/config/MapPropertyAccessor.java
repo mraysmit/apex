@@ -1,77 +1,55 @@
 package dev.mars.apex.core.engine.config;
 
+import org.springframework.expression.AccessException;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.PropertyAccessor;
+import org.springframework.expression.TypedValue;
+
 import java.util.Map;
-import java.lang.reflect.Method;
 
 /**
- * A wrapper class that allows Map entries to be accessed as properties in SpEL expressions.
+ * A custom PropertyAccessor that allows Map entries to be accessed as properties in SpEL expressions.
  * This enables expressions like "age > 18" instead of requiring "['age'] > 18".
  */
-public class MapPropertyAccessor {
-    private final Map<String, Object> map;
-    
-    public MapPropertyAccessor(Map<String, Object> map) {
-        this.map = map;
-    }
-    
-    /**
-     * Get a property value from the underlying map.
-     * This method uses reflection to dynamically handle property access.
-     */
-    public Object getProperty(String propertyName) {
-        return map.get(propertyName);
-    }
-    
-    /**
-     * Check if a property exists in the underlying map.
-     */
-    public boolean hasProperty(String propertyName) {
-        return map.containsKey(propertyName);
-    }
-    
-    /**
-     * Get the underlying map.
-     */
-    public Map<String, Object> getMap() {
-        return map;
-    }
-    
-    /**
-     * Override toString for debugging.
-     */
+public class MapPropertyAccessor implements PropertyAccessor {
+
     @Override
-    public String toString() {
-        return "MapPropertyAccessor{" + map + "}";
+    public Class<?>[] getSpecificTargetClasses() {
+        return new Class<?>[] { Map.class };
     }
-    
-    /**
-     * Dynamic property access using reflection.
-     * This allows SpEL to access map keys as if they were properties.
-     */
-    public Object get(String key) {
-        return map.get(key);
+
+    @Override
+    public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+        if (target instanceof Map) {
+            Map<?, ?> map = (Map<?, ?>) target;
+            return map.containsKey(name);
+        }
+        return false;
     }
-    
-    // Dynamic getters for common property names
-    public Object getAge() { return map.get("age"); }
-    public Object getName() { return map.get("name"); }
-    public Object getEmail() { return map.get("email"); }
-    public Object getStatus() { return map.get("status"); }
-    public Object getAmount() { return map.get("amount"); }
-    public Object getType() { return map.get("type"); }
-    public Object getId() { return map.get("id"); }
-    public Object getCode() { return map.get("code"); }
-    public Object getValue() { return map.get("value"); }
-    public Object getCategory() { return map.get("category"); }
-    public Object getPrice() { return map.get("price"); }
-    public Object getQuantity() { return map.get("quantity"); }
-    public Object getDate() { return map.get("date"); }
-    public Object getTime() { return map.get("time"); }
-    public Object getTimestamp() { return map.get("timestamp"); }
-    public Object getActive() { return map.get("active"); }
-    public Object getEnabled() { return map.get("enabled"); }
-    public Object getValid() { return map.get("valid"); }
-    public Object getScore() { return map.get("score"); }
-    public Object getRating() { return map.get("rating"); }
-    public Object getLevel() { return map.get("level"); }
+
+    @Override
+    public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+        if (target instanceof Map) {
+            Map<?, ?> map = (Map<?, ?>) target;
+            Object value = map.get(name);
+            return new TypedValue(value);
+        }
+        throw new AccessException("Cannot read property '" + name + "' from non-Map object");
+    }
+
+    @Override
+    public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
+        return target instanceof Map;
+    }
+
+    @Override
+    public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
+        if (target instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> map = (Map<String, Object>) target;
+            map.put(name, newValue);
+        } else {
+            throw new AccessException("Cannot write property '" + name + "' to non-Map object");
+        }
+    }
 }

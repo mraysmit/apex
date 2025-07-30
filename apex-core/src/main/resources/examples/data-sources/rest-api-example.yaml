@@ -1,0 +1,337 @@
+# Example YAML configuration for REST API data sources
+# This demonstrates various REST API configurations with different authentication methods
+
+name: "REST API Data Sources Example"
+description: "Example configuration showing different REST API data source setups"
+version: "1.0.0"
+
+dataSources:
+  # Public API with API key authentication
+  - name: "weather-api"
+    type: "rest-api"
+    enabled: true
+    description: "Weather data API service"
+    tags:
+      - "external"
+      - "weather"
+      - "public-api"
+    
+    connection:
+      baseUrl: "https://api.openweathermap.org/data/2.5"
+      timeout: 15000
+      retryAttempts: 3
+      retryDelay: 1000
+      
+      # HTTP/2 support
+      httpVersion: "HTTP_2"
+      
+      # Connection pooling
+      maxConnections: 20
+      connectionTimeout: 10000
+      readTimeout: 15000
+    
+    # API Key authentication
+    authentication:
+      type: "api-key"
+      apiKey: "${WEATHER_API_KEY}"
+      keyParameter: "appid"  # Query parameter name
+      keyLocation: "query"   # Can be "query", "header", or "body"
+    
+    # API endpoints
+    endpoints:
+      getCurrentWeather: "/weather?q={city}&units={units}"
+      getForecast: "/forecast?q={city}&cnt={days}&units={units}"
+      getWeatherByCoords: "/weather?lat={lat}&lon={lon}&units={units}"
+      default: "/weather?q=London&units=metric"
+    
+    parameterNames:
+      - "city"
+      - "units"
+      - "days"
+      - "lat"
+      - "lon"
+    
+    # Response caching
+    cache:
+      enabled: true
+      ttlSeconds: 600  # 10 minutes for weather data
+      maxSize: 1000
+      keyPrefix: "weather"
+    
+    # Circuit breaker configuration
+    circuitBreaker:
+      enabled: true
+      failureThreshold: 5
+      recoveryTimeout: 30000
+      halfOpenMaxCalls: 3
+    
+    healthCheck:
+      enabled: true
+      intervalSeconds: 60
+      timeoutSeconds: 10
+      endpoint: "/weather?q=London&units=metric"
+
+  # Internal API with Bearer token authentication
+  - name: "user-service-api"
+    type: "rest-api"
+    enabled: true
+    description: "Internal user service API"
+    tags:
+      - "internal"
+      - "microservice"
+      - "users"
+    
+    connection:
+      baseUrl: "https://user-service.internal.example.com/api/v1"
+      timeout: 10000
+      retryAttempts: 2
+      retryDelay: 500
+      
+      # Custom headers
+      defaultHeaders:
+        "Content-Type": "application/json"
+        "Accept": "application/json"
+        "X-Service-Name": "rules-engine"
+    
+    # Bearer token authentication
+    authentication:
+      type: "bearer"
+      token: "${USER_SERVICE_TOKEN}"
+      tokenPrefix: "Bearer"  # Optional, defaults to "Bearer"
+    
+    endpoints:
+      getUser: "/users/{userId}"
+      getUserProfile: "/users/{userId}/profile"
+      getUserPreferences: "/users/{userId}/preferences"
+      searchUsers: "/users/search?q={query}&limit={limit}"
+      createUser: "/users"
+      updateUser: "/users/{userId}"
+      deleteUser: "/users/{userId}"
+      default: "/health"
+    
+    parameterNames:
+      - "userId"
+      - "query"
+      - "limit"
+    
+    # HTTP method mappings
+    httpMethods:
+      getUser: "GET"
+      getUserProfile: "GET"
+      getUserPreferences: "GET"
+      searchUsers: "GET"
+      createUser: "POST"
+      updateUser: "PUT"
+      deleteUser: "DELETE"
+    
+    cache:
+      enabled: true
+      ttlSeconds: 300  # 5 minutes for user data
+      maxSize: 2000
+      keyPrefix: "users"
+      
+      # Cache only GET requests
+      cacheableHttpMethods:
+        - "GET"
+    
+    circuitBreaker:
+      enabled: true
+      failureThreshold: 3
+      recoveryTimeout: 15000
+      halfOpenMaxCalls: 2
+    
+    healthCheck:
+      enabled: true
+      intervalSeconds: 30
+      timeoutSeconds: 5
+      endpoint: "/health"
+
+  # OAuth2 authenticated API
+  - name: "social-media-api"
+    type: "rest-api"
+    enabled: true
+    description: "Social media platform API"
+    tags:
+      - "external"
+      - "social"
+      - "oauth2"
+    
+    connection:
+      baseUrl: "https://api.socialmedia.com/v2"
+      timeout: 20000
+      retryAttempts: 2
+      retryDelay: 2000
+      
+      # SSL configuration
+      sslEnabled: true
+      sslVerifyHostname: true
+    
+    # OAuth2 authentication
+    authentication:
+      type: "oauth2"
+      clientId: "${SOCIAL_CLIENT_ID}"
+      clientSecret: "${SOCIAL_CLIENT_SECRET}"
+      tokenUrl: "https://api.socialmedia.com/oauth/token"
+      scope: "read:posts read:profile"
+      grantType: "client_credentials"
+    
+    endpoints:
+      getUserPosts: "/users/{userId}/posts?limit={limit}"
+      getPost: "/posts/{postId}"
+      getUserProfile: "/users/{userId}"
+      searchPosts: "/posts/search?q={query}&limit={limit}"
+      getTrendingPosts: "/posts/trending?limit={limit}"
+      default: "/status"
+    
+    parameterNames:
+      - "userId"
+      - "postId"
+      - "query"
+      - "limit"
+    
+    cache:
+      enabled: true
+      ttlSeconds: 900  # 15 minutes for social media data
+      maxSize: 1500
+      keyPrefix: "social"
+    
+    # Rate limiting
+    rateLimiting:
+      enabled: true
+      requestsPerMinute: 100
+      burstSize: 20
+    
+    circuitBreaker:
+      enabled: true
+      failureThreshold: 4
+      recoveryTimeout: 60000
+      halfOpenMaxCalls: 2
+    
+    healthCheck:
+      enabled: true
+      intervalSeconds: 120
+      timeoutSeconds: 15
+      endpoint: "/status"
+
+  # Basic authentication API
+  - name: "legacy-api"
+    type: "rest-api"
+    enabled: true
+    description: "Legacy system API with basic auth"
+    tags:
+      - "legacy"
+      - "internal"
+      - "basic-auth"
+    
+    connection:
+      baseUrl: "https://legacy.example.com/api"
+      timeout: 30000
+      retryAttempts: 1
+      retryDelay: 5000
+      
+      # Legacy system might need HTTP/1.1
+      httpVersion: "HTTP_1_1"
+    
+    # Basic authentication
+    authentication:
+      type: "basic"
+      username: "${LEGACY_USERNAME}"
+      password: "${LEGACY_PASSWORD}"
+    
+    endpoints:
+      getCustomers: "/customers?page={page}&size={size}"
+      getCustomer: "/customers/{customerId}"
+      getOrders: "/customers/{customerId}/orders"
+      default: "/ping"
+    
+    parameterNames:
+      - "page"
+      - "size"
+      - "customerId"
+    
+    cache:
+      enabled: true
+      ttlSeconds: 1800  # 30 minutes for legacy data
+      maxSize: 500
+      keyPrefix: "legacy"
+    
+    # More lenient circuit breaker for legacy system
+    circuitBreaker:
+      enabled: true
+      failureThreshold: 8
+      recoveryTimeout: 120000
+      halfOpenMaxCalls: 1
+    
+    healthCheck:
+      enabled: true
+      intervalSeconds: 300  # Less frequent health checks
+      timeoutSeconds: 20
+      endpoint: "/ping"
+
+# Global REST API configuration
+configuration:
+  # Default timeouts
+  defaultTimeout: 15000
+  defaultConnectionTimeout: 10000
+  defaultReadTimeout: 15000
+  
+  # Default retry settings
+  defaultRetryAttempts: 2
+  defaultRetryDelay: 1000
+  
+  # Default circuit breaker settings
+  defaultCircuitBreaker:
+    enabled: true
+    failureThreshold: 5
+    recoveryTimeout: 30000
+    halfOpenMaxCalls: 3
+  
+  # Default cache settings
+  defaultCache:
+    enabled: true
+    ttlSeconds: 300
+    maxSize: 1000
+  
+  # Default headers for all APIs
+  defaultHeaders:
+    "User-Agent": "SpEL-Rules-Engine/1.0"
+    "Accept": "application/json"
+  
+  # Security settings
+  security:
+    validateSSLCertificates: true
+    allowInsecureConnections: false
+    maxRedirects: 3
+
+# Environment-specific overrides
+environments:
+  development:
+    dataSources:
+      - name: "user-service-api"
+        connection:
+          baseUrl: "http://localhost:8080/api/v1"
+          timeout: 5000
+        cache:
+          ttlSeconds: 60
+      
+      - name: "legacy-api"
+        enabled: false  # Disable in development
+  
+  staging:
+    dataSources:
+      - name: "user-service-api"
+        connection:
+          baseUrl: "https://user-service.staging.example.com/api/v1"
+        cache:
+          ttlSeconds: 180
+  
+  production:
+    dataSources:
+      - name: "user-service-api"
+        connection:
+          maxConnections: 50
+        cache:
+          ttlSeconds: 600
+          maxSize: 5000
+        circuitBreaker:
+          failureThreshold: 2  # More sensitive in production

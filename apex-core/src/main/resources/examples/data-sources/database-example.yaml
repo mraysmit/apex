@@ -1,0 +1,254 @@
+# Example YAML configuration for database data sources
+# This demonstrates various database configurations including PostgreSQL, MySQL, and H2
+
+name: "Database Data Sources Example"
+description: "Example configuration showing different database data source setups"
+version: "1.0.0"
+
+# Data source configurations
+dataSources:
+  # PostgreSQL production database
+  - name: "user-database"
+    type: "database"
+    sourceType: "postgresql"
+    enabled: true
+    description: "Primary user database for production"
+    tags:
+      - "production"
+      - "primary"
+      - "users"
+    
+    # Connection configuration
+    connection:
+      host: "localhost"
+      port: 5432
+      database: "userdb"
+      username: "app_user"
+      password: "${DB_PASSWORD}" # Environment variable
+      schema: "public"
+      
+      # Connection pool settings
+      maxPoolSize: 20
+      minPoolSize: 5
+      connectionTimeout: 30000
+      idleTimeout: 600000
+      maxLifetime: 1800000
+      
+      # SSL configuration
+      sslEnabled: true
+      sslMode: "require"
+    
+    # Predefined queries
+    queries:
+      getUserById: "SELECT id, username, email, created_at FROM users WHERE id = :id"
+      getUserByEmail: "SELECT id, username, email, created_at FROM users WHERE email = :email"
+      getActiveUsers: "SELECT id, username, email FROM users WHERE status = 'ACTIVE' ORDER BY created_at DESC"
+      getUserCount: "SELECT COUNT(*) as total FROM users"
+      default: "SELECT 1 as health_check"
+    
+    # Parameter definitions
+    parameterNames:
+      - "id"
+      - "email"
+      - "status"
+    
+    # Caching configuration
+    cache:
+      enabled: true
+      ttlSeconds: 300
+      maxSize: 1000
+      keyPrefix: "userdb"
+    
+    # Health check configuration
+    healthCheck:
+      enabled: true
+      intervalSeconds: 30
+      timeoutSeconds: 5
+      failureThreshold: 3
+      query: "SELECT 1"
+
+  # MySQL analytics database
+  - name: "analytics-database"
+    type: "database"
+    sourceType: "mysql"
+    enabled: true
+    description: "Analytics database for reporting"
+    tags:
+      - "production"
+      - "analytics"
+      - "reporting"
+    
+    connection:
+      host: "analytics-db.example.com"
+      port: 3306
+      database: "analytics"
+      username: "analytics_user"
+      password: "${ANALYTICS_DB_PASSWORD}"
+      
+      # MySQL specific settings
+      useSSL: true
+      serverTimezone: "UTC"
+      characterEncoding: "utf8mb4"
+      
+      # Connection pool
+      maxPoolSize: 15
+      minPoolSize: 3
+      connectionTimeout: 20000
+    
+    queries:
+      getDailyStats: |
+        SELECT 
+          DATE(created_at) as date,
+          COUNT(*) as events,
+          COUNT(DISTINCT user_id) as unique_users
+        FROM events 
+        WHERE created_at >= :startDate AND created_at < :endDate
+        GROUP BY DATE(created_at)
+        ORDER BY date DESC
+      
+      getUserActivity: |
+        SELECT 
+          user_id,
+          event_type,
+          COUNT(*) as count,
+          MAX(created_at) as last_activity
+        FROM events 
+        WHERE user_id = :userId 
+          AND created_at >= :startDate
+        GROUP BY user_id, event_type
+      
+      getTopPages: |
+        SELECT 
+          page_url,
+          COUNT(*) as views,
+          COUNT(DISTINCT user_id) as unique_visitors
+        FROM page_views 
+        WHERE created_at >= :startDate
+        GROUP BY page_url
+        ORDER BY views DESC
+        LIMIT :limit
+    
+    parameterNames:
+      - "startDate"
+      - "endDate"
+      - "userId"
+      - "limit"
+    
+    cache:
+      enabled: true
+      ttlSeconds: 600  # 10 minutes for analytics data
+      maxSize: 500
+      keyPrefix: "analytics"
+    
+    healthCheck:
+      enabled: true
+      intervalSeconds: 60
+      timeoutSeconds: 10
+      failureThreshold: 2
+
+  # H2 in-memory database for testing
+  - name: "test-database"
+    type: "database"
+    sourceType: "h2"
+    enabled: false  # Only enabled in test environments
+    description: "In-memory database for testing"
+    tags:
+      - "test"
+      - "in-memory"
+    
+    connection:
+      url: "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE"
+      username: "sa"
+      password: ""
+      
+      # H2 specific settings
+      mode: "PostgreSQL"  # Compatibility mode
+      initScript: "classpath:test-data.sql"
+    
+    queries:
+      createUser: |
+        INSERT INTO users (username, email, status) 
+        VALUES (:username, :email, :status)
+      
+      getAllUsers: "SELECT * FROM users ORDER BY id"
+      
+      deleteUser: "DELETE FROM users WHERE id = :id"
+      
+      truncateUsers: "TRUNCATE TABLE users"
+    
+    parameterNames:
+      - "username"
+      - "email"
+      - "status"
+      - "id"
+    
+    cache:
+      enabled: false  # No caching for test database
+    
+    healthCheck:
+      enabled: true
+      intervalSeconds: 10
+      timeoutSeconds: 2
+      failureThreshold: 1
+
+# Global configuration
+configuration:
+  # Default connection timeout for all databases
+  defaultConnectionTimeout: 30000
+  
+  # Default health check settings
+  defaultHealthCheck:
+    enabled: true
+    intervalSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  # Default cache settings
+  defaultCache:
+    enabled: true
+    ttlSeconds: 300
+    maxSize: 1000
+  
+  # Monitoring settings
+  monitoring:
+    enabled: true
+    metricsCollectionInterval: 60
+    healthCheckLogging: true
+  
+  # Security settings
+  security:
+    encryptPasswords: true
+    requireSSL: true
+    allowPlaintextPasswords: false
+
+# Environment-specific overrides
+environments:
+  development:
+    dataSources:
+      - name: "user-database"
+        connection:
+          host: "localhost"
+          sslEnabled: false
+        cache:
+          ttlSeconds: 60  # Shorter cache in dev
+      
+      - name: "test-database"
+        enabled: true  # Enable H2 in development
+  
+  staging:
+    dataSources:
+      - name: "user-database"
+        connection:
+          host: "staging-db.example.com"
+        cache:
+          ttlSeconds: 180
+  
+  production:
+    dataSources:
+      - name: "user-database"
+        connection:
+          host: "prod-db.example.com"
+          maxPoolSize: 50
+        cache:
+          ttlSeconds: 600
+          maxSize: 5000

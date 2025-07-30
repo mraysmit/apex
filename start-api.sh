@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# SpEL Rules Engine REST API Startup Script
+# APEX REST API Startup Script
 # This script builds and starts the REST API server
 
 set -e
 
-echo "🚀 Starting SpEL Rules Engine REST API..."
+echo "🚀 Starting APEX REST API..."
 echo
 
 # Check if Maven is installed
@@ -52,5 +52,5 @@ echo
 echo "Press Ctrl+C to stop the server"
 echo
 
-cd rules-engine-rest-api
-java -jar target/rules-engine-rest-api-1.0-SNAPSHOT.jar
+cd apex-rest-api
+java -jar target/apex-rest-api-1.0-SNAPSHOT.jar
