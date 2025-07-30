@@ -1,11 +1,8 @@
 # APEX - Advanced Processing Engine for eXpressions
 
-A powerful, enterprise-grade expression processor for Java applications with comprehensive **External Data Source Integration** that provides seamless access to databases, REST APIs, file systems, caches, and more.
+A powerful expression processor for Java applications with comprehensive data source integration that provides seamless access to databases, REST APIs, file systems, caches, and more.
 
-## What's New: External Data Source Integration
-
-### Enterprise-Grade Data Integration
-APEX now features **comprehensive external data source integration**, providing enterprise-level data access capabilities:
+### Comprehensive Data Integration
 
 - **Multiple Data Sources**: Database, REST API, File System, Cache, and extensible custom sources
 - **Unified Interface**: Consistent API across all data source types
