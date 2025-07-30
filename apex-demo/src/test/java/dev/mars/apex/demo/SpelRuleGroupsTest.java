@@ -1,9 +1,9 @@
 package dev.mars.apex.demo;
 
+import dev.mars.apex.demo.examples.ApexRulesEngineDemo;
 import org.junit.jupiter.api.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import dev.mars.apex.demo.examples.SpelRulesEngineDemo;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -42,7 +42,7 @@ public class SpelRuleGroupsTest {
 
         try {
             // Test rule groups functionality
-            SpelRulesEngineDemo.demoRuleGroupsDemo();
+            ApexRulesEngineDemo.demoRuleGroupsDemo();
 
             // Print the output with DEBUG_LOG prefix so it appears in the test results
             String output = outContent.toString();

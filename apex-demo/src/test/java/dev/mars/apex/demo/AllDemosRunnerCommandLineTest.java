@@ -35,15 +35,15 @@ public class AllDemosRunnerCommandLineTest {
         String output = outContent.toString();
         
         // Verify expected output
-        assertTrue(output.contains("SpEL Rules Engine"), "Should show the banner");
+        assertTrue(output.contains("APEX Rules Engine"), "Should show the banner");
         assertTrue(output.contains("Discovered"), "Should show discovered demos");
         assertTrue(output.contains("runnable demos"), "Should mention runnable demos");
         assertTrue(output.contains("QuickStartDemo"), "Should list QuickStartDemo");
         assertTrue(output.contains("BatchProcessingDemo"), "Should list BatchProcessingDemo");
         assertTrue(output.contains("BasicUsageExamples"), "Should list BasicUsageExamples");
-        
+
         // Verify package organization
-        assertTrue(output.contains("core:"), "Should show core package");
+        assertTrue(output.contains("advanced:"), "Should show advanced package");
         assertTrue(output.contains("examples:"), "Should show examples package");
         
         // Restore output to show results
@@ -62,15 +62,15 @@ public class AllDemosRunnerCommandLineTest {
     @Test
     public void testMainWithPackageArgument() {
         // Test the --package command line argument
-        AllDemosRunner.main(new String[]{"--package", "core"});
-        
+        AllDemosRunner.main(new String[]{"--package", "examples"});
+
         String output = outContent.toString();
-        
+
         // Verify expected output
-        assertTrue(output.contains("SpEL Rules Engine"), "Should show the banner");
+        assertTrue(output.contains("APEX Rules Engine"), "Should show the banner");
         assertTrue(output.contains("Running"), "Should show running message");
         assertTrue(output.contains("demos from package"), "Should mention package filtering");
-        assertTrue(output.contains("demos from package: core"), "Should show package filtering message");
+        assertTrue(output.contains("demos from package: examples"), "Should show package filtering message");
         
         // Should contain core demos
         assertTrue(output.contains("QuickStartDemo") || output.contains("BatchProcessingDemo"), 

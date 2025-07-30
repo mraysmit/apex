@@ -3169,6 +3169,171 @@ dataManager.initializeWithMockData();
 // Load custom data sources
 dataManager.loadDataSource(new CustomDataSource("ProductsSource", "products"));
 
+// Request data for rule evaluation
+List<Product> products = dataManager.requestData("products");
+Customer customer = dataManager.requestData("customer");
+```
+
+#### DemoDataServiceManager
+
+For demonstration and testing scenarios, the `DemoDataServiceManager` extends the base manager with pre-configured mock data sources:
+
+```java
+public class DemoDataServiceManager extends DataServiceManager {
+
+    @Override
+    public DataServiceManager initializeWithMockData() {
+        // Create and load mock data sources for various data types
+        loadDataSource(new MockDataSource("ProductsDataSource", "products"));
+        loadDataSource(new MockDataSource("InventoryDataSource", "inventory"));
+        loadDataSource(new MockDataSource("CustomerDataSource", "customer"));
+        loadDataSource(new MockDataSource("TemplateCustomerDataSource", "templateCustomer"));
+        loadDataSource(new MockDataSource("LookupServicesDataSource", "lookupServices"));
+        loadDataSource(new MockDataSource("SourceRecordsDataSource", "sourceRecords"));
+
+        // Add data sources for dynamic matching scenarios
+        loadDataSource(new MockDataSource("MatchingRecordsDataSource", "matchingRecords"));
+        loadDataSource(new MockDataSource("NonMatchingRecordsDataSource", "nonMatchingRecords"));
+
+        return this;
+    }
+}
+```
+
+#### Available Mock Data Types
+
+The `DemoDataServiceManager` provides the following pre-configured data types:
+
+| Data Type | Description | Sample Data |
+|-----------|-------------|-------------|
+| `products` | Financial products and instruments | US Treasury Bond, Apple Stock, Gold ETF |
+| `inventory` | Available inventory items | Bitcoin ETF, Corporate Bond, Microsoft Corp |
+| `customer` | Sample customer profile | Alice Smith, 35, Gold tier |
+| `templateCustomer` | Template customer for testing | Bob Johnson, 65, Silver tier |
+| `lookupServices` | Lookup service configurations | InstrumentType, AssetClass mappings |
+| `sourceRecords` | Trade records for processing | T001-T008 with various instrument types |
+| `matchingRecords` | Dynamic matching results | Records that match lookup criteria |
+| `nonMatchingRecords` | Dynamic non-matching results | Records that don't match criteria |
+
+#### Usage Examples
+
+```java
+// Basic usage
+DemoDataServiceManager dataManager = new DemoDataServiceManager();
+dataManager.initializeWithMockData();
+
+// Get products for rule evaluation
+List<Product> products = dataManager.requestData("products");
+System.out.println("Available products: " + products.size());
+
+// Get customer data
+Customer customer = dataManager.requestData("customer");
+System.out.println("Customer: " + customer.getName() + " (" + customer.getTier() + ")");
+
+// Advanced usage with parameters for dynamic matching
+List<Trade> sourceRecords = dataManager.requestData("sourceRecords");
+List<LookupService> lookupServices = dataManager.requestData("lookupServices");
+
+// Get matching records based on lookup criteria
+List<Trade> matchingRecords = dataManager.requestData("matchingRecords", sourceRecords, lookupServices);
+List<Trade> nonMatchingRecords = dataManager.requestData("nonMatchingRecords", sourceRecords, lookupServices);
+
+System.out.println("Matching records: " + matchingRecords.size());
+System.out.println("Non-matching records: " + nonMatchingRecords.size());
+```
+
+#### Integration with Rules Engine
+
+Data services integrate seamlessly with rule evaluation by providing data context:
+
+```java
+// Set up data service manager
+DemoDataServiceManager dataManager = new DemoDataServiceManager();
+dataManager.initializeWithMockData();
+
+// Create rules engine configuration
+RulesEngineConfiguration config = new RulesEngineConfiguration();
+
+// Define rules that use data from data services
+Rule productValidationRule = config.rule("product-validation")
+    .withName("Product Validation")
+    .withCondition("#products.?[category == 'Equity'].size() > 0")
+    .withMessage("Equity products are available")
+    .build();
+
+Rule customerTierRule = config.rule("customer-tier")
+    .withName("Customer Tier Check")
+    .withCondition("#customer.tier == 'Gold'")
+    .withMessage("Gold tier customer detected")
+    .build();
+
+// Create rules engine
+RulesEngine engine = new RulesEngine(config);
+
+// Get data from data services
+List<Product> products = dataManager.requestData("products");
+Customer customer = dataManager.requestData("customer");
+
+// Create evaluation context with data
+Map<String, Object> facts = new HashMap<>();
+facts.put("products", products);
+facts.put("customer", customer);
+
+// Evaluate rules with data context
+RuleResult result = engine.evaluate(facts);
+System.out.println("Rule evaluation result: " + result.isTriggered());
+System.out.println("Message: " + result.getMessage());
+```
+
+#### Custom Data Source Implementation
+
+You can extend the data service manager with custom data sources for specific business needs:
+
+```java
+public class CustomFinancialDataSource implements DataSource {
+    private final String name;
+    private final String dataType;
+    private final DatabaseConnection dbConnection;
+
+    public CustomFinancialDataSource(String name, String dataType, DatabaseConnection dbConnection) {
+        this.name = name;
+        this.dataType = dataType;
+        this.dbConnection = dbConnection;
+    }
+
+    @Override
+    public <T> T getData(String dataType, Object... parameters) {
+        switch (dataType) {
+            case "realTimeQuotes":
+                return (T) fetchRealTimeQuotes(parameters);
+            case "historicalPrices":
+                return (T) fetchHistoricalPrices(parameters);
+            case "marketData":
+                return (T) fetchMarketData(parameters);
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public boolean supportsDataType(String dataType) {
+        return Arrays.asList("realTimeQuotes", "historicalPrices", "marketData").contains(dataType);
+    }
+
+    private List<Quote> fetchRealTimeQuotes(Object... parameters) {
+        // Implement real-time quote fetching logic
+        String query = "SELECT * FROM quotes WHERE symbol = ? AND timestamp > ?";
+        return dbConnection.query(query, parameters);
+    }
+}
+
+// Usage with DataServiceManager
+DataServiceManager manager = new DataServiceManager();
+manager.loadDataSource(new CustomFinancialDataSource("MarketDataSource", "realTimeQuotes", dbConnection));
+
+// Use in rules
+List<Quote> quotes = manager.requestData("realTimeQuotes", "AAPL", Instant.now().minus(1, ChronoUnit.HOURS));
+
 // Request data by type
 List<Product> products = dataManager.requestData("products");
 

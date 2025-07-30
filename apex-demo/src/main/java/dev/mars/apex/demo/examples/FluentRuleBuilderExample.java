@@ -1,7 +1,5 @@
 package dev.mars.apex.demo.examples;
 
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.engine.RuleEngineService;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -9,7 +7,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import java.math.BigDecimal;
 import java.util.*;
 
-import static dev.mars.apex.demo.examples.SpelRulesEngineDemo.*;
+import static dev.mars.apex.demo.examples.ApexRulesEngineDemo.*;
 
 /**
  * Standalone example demonstrating the Fluent Rule Builder pattern.

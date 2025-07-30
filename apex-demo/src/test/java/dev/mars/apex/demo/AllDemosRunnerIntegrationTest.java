@@ -59,17 +59,17 @@ public class AllDemosRunnerIntegrationTest {
     public void testRunAllDemosFromCorePackage() {
         AllDemosRunner runner = new AllDemosRunner();
         
-        // Test running demos from core package
+        // Test running demos from examples package
         assertDoesNotThrow(() -> {
-            runner.runDemosFromPackage("core");
-        }, "Running core demos should not throw exceptions");
-        
+            runner.runDemosFromPackage("examples");
+        }, "Running examples demos should not throw exceptions");
+
         String output = outContent.toString();
-        assertTrue(output.contains("demos from package: core"), "Should show package filtering message");
-        
+        assertTrue(output.contains("demos from package: examples"), "Should show package filtering message");
+
         // Restore output to show results
         System.setOut(originalOut);
-        System.out.println("Core demos executed successfully!");
+        System.out.println("Examples demos executed successfully!");
         System.out.println("Output contained " + output.split("\n").length + " lines");
     }
     

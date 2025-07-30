@@ -37,7 +37,7 @@ public class AllDemosRunner {
     private int skippedCount = 0;
     
     public static void main(String[] args) {
-        System.out.println("=== SpEL Rules Engine - All Demos Runner ===");
+        System.out.println("=== APEX Rules Engine - All Demos Runner ===");
         System.out.println("Automatically discovering and running all available demos...\n");
         
         AllDemosRunner runner = new AllDemosRunner();
@@ -80,8 +80,8 @@ public class AllDemosRunner {
      */
     private void registerKnownDemoClasses() {
         // Core demos
-        registerDemoClass("dev.mars.apex.demo.core.QuickStartDemo");
-        registerDemoClass("dev.mars.apex.demo.core.LayeredAPIDemo");
+        registerDemoClass("dev.mars.apex.demo.QuickStartDemo");
+        registerDemoClass("dev.mars.apex.demo.LayeredAPIDemo");
 
         // Examples demos
         registerDemoClass("dev.mars.apex.demo.examples.YamlDatasetDemo");
@@ -98,7 +98,7 @@ public class AllDemosRunner {
         registerDemoClass("dev.mars.apex.demo.examples.CommoditySwapValidationDemo");
         registerDemoClass("dev.mars.apex.demo.examples.FinancialTradingDemo");
         registerDemoClass("dev.mars.apex.demo.examples.PerformanceMonitoringDemo");
-        registerDemoClass("dev.mars.apex.demo.examples.SpelRulesEngineDemo");
+        registerDemoClass("dev.mars.apex.demo.examples.ApexRulesEngineDemo");
         registerDemoClass("dev.mars.apex.demo.examples.CustodyAutoRepairDemo");
         registerDemoClass("dev.mars.apex.demo.examples.CustodyAutoRepairStandaloneDemo");
         registerDemoClass("dev.mars.apex.demo.examples.CustodyAutoRepairYamlDemo");
@@ -108,7 +108,7 @@ public class AllDemosRunner {
         registerDemoClass("dev.mars.apex.demo.advanced.DataServiceManagerDemo");
         registerDemoClass("dev.mars.apex.demo.advanced.DynamicMethodExecutionDemo");
         registerDemoClass("dev.mars.apex.demo.advanced.PerformanceAndExceptionDemo");
-        registerDemoClass("dev.mars.apex.demo.advanced.SpelAdvancedFeaturesDemo");
+        registerDemoClass("dev.mars.apex.demo.advanced.ApexAdvancedFeaturesDemo");
     }
 
     /**

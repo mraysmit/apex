@@ -82,7 +82,7 @@ Example output:
 Automatically discovering and running all available demos...
 
 Discovered 23 runnable demos:
-  - dev.mars.apex.demo.core.QuickStartDemo (run())
+  - dev.mars.apex.demo.QuickStartDemo (run())
   - dev.mars.apex.demo.examples.BasicUsageExamples (run())
   ...
 
@@ -90,7 +90,7 @@ Discovered 23 runnable demos:
 PACKAGE: CORE
 ════════════════════════════════════════════════════════════════════════════════
 
-▶ Running: dev.mars.apex.demo.core.QuickStartDemo
+▶ Running: dev.mars.apex.demo.QuickStartDemo
   Method: run()
   ------------------------------------------------------------
   [Demo output...]

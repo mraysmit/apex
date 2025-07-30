@@ -11,7 +11,9 @@ import dev.mars.apex.core.service.data.external.DataSourceException;
 import dev.mars.apex.core.service.data.external.DataSourceMetrics;
 import dev.mars.apex.core.service.data.external.ConnectionStatus;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
-import dev.mars.apex.demo.core.DemoRunner;
+import dev.mars.apex.demo.DemoRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -38,6 +40,8 @@ import java.util.Map;
  * @since 1.0.0
  */
 public class ExternalDataSourceDemo implements DemoRunner.Demo {
+
+    private static final Logger logger = LoggerFactory.getLogger(ExternalDataSourceDemo.class);
 
     private DataSourceFactory factory;
     private Path tempDir;
@@ -296,6 +300,53 @@ public class ExternalDataSourceDemo implements DemoRunner.Demo {
         System.out.println();
     }
 
+    private void demonstrateCacheIntegration() {
+        System.out.println("🗄️ CACHE INTEGRATION DEMONSTRATION");
+        System.out.println("-".repeat(50));
+
+        try {
+            // Create a configuration with cache enabled
+            DataSourceConfiguration config = createCacheEnabledConfiguration();
+            ExternalDataSource dataSource = factory.createDataSource(config);
+
+            System.out.println("Cache Configuration:");
+            System.out.println("  Type: In-Memory Cache");
+            System.out.println("  TTL: 300 seconds");
+            System.out.println("  Max Size: 1000 entries");
+            System.out.println();
+
+            // Demonstrate cache performance
+            System.out.println("Testing cache performance:");
+
+            // First lookup (cache miss)
+            long startTime = System.nanoTime();
+            Map<String, Object> parameters = Map.of("id", "1");
+            Object result1 = dataSource.queryForObject("getUserById", parameters);
+            long firstLookupTime = System.nanoTime() - startTime;
+
+            System.out.println("  First lookup (cache miss): " + firstLookupTime/1000 + " μs");
+
+            // Second lookup (cache hit)
+            startTime = System.nanoTime();
+            Object result2 = dataSource.queryForObject("getUserById", parameters);
+            long secondLookupTime = System.nanoTime() - startTime;
+
+            System.out.println("  Second lookup (cache hit): " + secondLookupTime/1000 + " μs");
+            System.out.println("  Performance improvement: " +
+                             (firstLookupTime / (double) secondLookupTime) + "x faster");
+
+            System.out.println("✅ Cache integration demonstration completed");
+
+            dataSource.shutdown();
+
+        } catch (Exception e) {
+            System.out.println("❌ Cache integration failed: " + e.getMessage());
+            logger.error("Cache integration demonstration failed", e);
+        }
+
+        System.out.println();
+    }
+
     private void demonstrateHealthMonitoring() {
         System.out.println("🏥 HEALTH MONITORING DEMONSTRATION");
         System.out.println("-".repeat(50));
@@ -533,6 +584,24 @@ public class ExternalDataSourceDemo implements DemoRunner.Demo {
         config.setCache(cacheConfig);
 
         return config;
+    }
+
+    private DataSourceConfiguration createCacheEnabledConfiguration() {
+        // Create a CSV file configuration with cache enabled
+        try {
+            Path csvFile = tempDir.resolve("users.csv");
+            DataSourceConfiguration config = createCsvFileConfiguration(csvFile.toString());
+
+            CacheConfig cacheConfig = new CacheConfig();
+            cacheConfig.setEnabled(true);
+            cacheConfig.setTtlSeconds(300L);
+            cacheConfig.setMaxSize(1000);
+            config.setCache(cacheConfig);
+
+            return config;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create cache-enabled configuration", e);
+        }
     }
 
     private DataSourceConfiguration createHealthMonitoredConfiguration(String filePath) {

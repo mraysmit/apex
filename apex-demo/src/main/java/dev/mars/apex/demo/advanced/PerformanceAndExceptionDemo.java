@@ -154,7 +154,7 @@ public class PerformanceAndExceptionDemo {
                 
                 for (Rule rule : testRules) {
                     var metricsBuilder = performanceMonitor.startEvaluation(
-                        rule.getName() + "-thread-" + Thread.currentThread().getId(), "concurrent");
+                        rule.getName() + "-thread-" + Thread.currentThread().threadId(), "concurrent");
                     
                     try {
                         Thread.sleep(1); // Simulate processing

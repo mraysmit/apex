@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  * Advanced Features Demo - Consolidated advanced SpEL and rules engine features.
  *
  * This demo consolidates functionality from:
- * - SpelAdvancedFeaturesDemo
+ * - ApexAdvancedFeaturesDemo
  * - DynamicMethodExecutionDemo
  * - CollectionOperationsDemo
  * - TemplateProcessingDemo

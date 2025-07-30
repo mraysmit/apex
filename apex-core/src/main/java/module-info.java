@@ -43,6 +43,7 @@ module dev.mars.apex.core {
     exports dev.mars.apex.core.service.engine;
     exports dev.mars.apex.core.service.data;
     exports dev.mars.apex.core.service.transform;
+    exports dev.mars.apex.core.service.enrichment;
     exports dev.mars.apex.core.util;
 
     // External data source exports

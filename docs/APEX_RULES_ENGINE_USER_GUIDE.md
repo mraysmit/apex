@@ -115,6 +115,7 @@ graph TB
 - **YAML Configuration**: External rule and dataset management with hot-reloading support
 - **Rule Groups**: Organize related rules with execution control and priority management
 - **Rule Chains**: Advanced patterns for nested rules and complex business logic workflows
+- **Data Service Configuration**: Programmatic setup of data sources for rule evaluation
 - **Metadata Support**: Enterprise metadata including business ownership, effective dates, and custom properties
 
 **Data Enrichment**
@@ -714,6 +715,538 @@ For detailed configuration guides, see:
 - [REST API Configuration Guide](external-data-sources/rest-api-configuration.md)
 - [File System Configuration Guide](external-data-sources/file-system-configuration.md)
 - [Best Practices Guide](external-data-sources/best-practices.md)
+
+## Rule Groups Configuration
+
+### Overview
+
+Rule Groups provide a way to organize related rules and control their execution as a logical unit. Rules within a group can be combined using AND or OR operators, allowing for complex validation scenarios where multiple conditions must be met (AND) or where any one of several conditions is sufficient (OR).
+
+### Key Features
+
+- **Logical Operators**: Combine rules with AND or OR operators
+- **Priority Management**: Control execution order within groups
+- **Category Support**: Organize groups by business domain
+- **Sequence Control**: Define rule execution order within groups
+- **Metadata Support**: Rich metadata for governance and audit trails
+
+### Programmatic Rule Group Creation
+
+#### Using RuleGroupBuilder
+
+```java
+// Create a rule group with AND operator
+RuleGroup validationGroup = new RuleGroupBuilder()
+    .withId("validation-group")
+    .withName("Customer Validation Group")
+    .withDescription("Complete customer validation checks")
+    .withCategory("customer-validation")
+    .withPriority(10)
+    .withAndOperator() // All rules must pass
+    .build();
+
+// Create a rule group with OR operator
+RuleGroup eligibilityGroup = new RuleGroupBuilder()
+    .withId("eligibility-group")
+    .withName("Customer Eligibility Group")
+    .withDescription("Customer eligibility checks")
+    .withCategory("customer-eligibility")
+    .withPriority(20)
+    .withOrOperator() // Any rule can pass
+    .build();
+```
+
+#### Using RulesEngineConfiguration
+
+```java
+RulesEngineConfiguration config = new RulesEngineConfiguration();
+
+// Create rule group with AND operator
+RuleGroup andGroup = config.createRuleGroupWithAnd(
+    "RG001",                           // Group ID
+    new Category("validation", 10),    // Category
+    "Validation Checks",               // Name
+    "All validation rules must pass",  // Description
+    10                                 // Priority
+);
+
+// Create rule group with OR operator
+RuleGroup orGroup = config.createRuleGroupWithOr(
+    "RG002",                           // Group ID
+    new Category("eligibility", 20),   // Category
+    "Eligibility Checks",              // Name
+    "Any eligibility rule can pass",   // Description
+    20                                 // Priority
+);
+
+// Create multi-category rule group
+Set<String> categories = Set.of("validation", "compliance");
+RuleGroup multiCategoryGroup = config.createRuleGroupWithAnd(
+    "RG003",                           // Group ID
+    categories,                        // Multiple categories
+    "Compliance Validation",           // Name
+    "Compliance and validation checks", // Description
+    30                                 // Priority
+);
+```
+
+#### Adding Rules to Groups
+
+```java
+// Create individual rules
+Rule ageRule = config.rule("age-check")
+    .withName("Age Validation")
+    .withCondition("#age >= 18")
+    .withMessage("Customer must be at least 18")
+    .build();
+
+Rule emailRule = config.rule("email-check")
+    .withName("Email Validation")
+    .withCondition("#email != null && #email.contains('@')")
+    .withMessage("Valid email required")
+    .build();
+
+Rule incomeRule = config.rule("income-check")
+    .withName("Income Validation")
+    .withCondition("#income >= 25000")
+    .withMessage("Minimum income requirement")
+    .build();
+
+// Add rules to AND group (all must pass)
+andGroup.addRule(ageRule, 1);    // Execute first
+andGroup.addRule(emailRule, 2);  // Execute second
+andGroup.addRule(incomeRule, 3); // Execute third
+
+// Add rules to OR group (any can pass)
+orGroup.addRule(ageRule, 1);
+orGroup.addRule(incomeRule, 2);
+
+// Register groups with configuration
+config.registerRuleGroup(andGroup);
+config.registerRuleGroup(orGroup);
+```
+
+### YAML Rule Group Configuration
+
+#### Basic Rule Group Configuration
+
+```yaml
+metadata:
+  name: "Customer Processing Rules"
+  version: "1.0.0"
+
+rules:
+  - id: "age-validation"
+    name: "Age Check"
+    condition: "#age >= 18"
+    message: "Customer must be at least 18"
+
+  - id: "email-validation"
+    name: "Email Check"
+    condition: "#email != null && #email.contains('@')"
+    message: "Valid email address required"
+
+  - id: "income-validation"
+    name: "Income Check"
+    condition: "#income >= 25000"
+    message: "Minimum income of $25,000 required"
+
+rule-groups:
+  - id: "customer-validation"
+    name: "Customer Validation Rules"
+    description: "Complete customer validation rule set"
+    category: "validation"
+    priority: 10
+    enabled: true
+    stop-on-first-failure: false
+    parallel-execution: false
+    rule-ids:
+      - "age-validation"
+      - "email-validation"
+      - "income-validation"
+    metadata:
+      owner: "Customer Team"
+      domain: "Customer Management"
+      purpose: "Customer data validation"
+```
+
+#### Advanced Rule Group Configuration
+
+```yaml
+rule-groups:
+  # AND group - all rules must pass
+  - id: "strict-validation"
+    name: "Strict Validation Group"
+    description: "All validation rules must pass"
+    category: "validation"
+    categories: ["validation", "compliance"]  # Multiple categories
+    priority: 10
+    enabled: true
+    stop-on-first-failure: true  # Stop on first failure for efficiency
+    parallel-execution: false    # Sequential execution
+    rule-ids:
+      - "age-validation"
+      - "email-validation"
+      - "income-validation"
+    tags: ["strict", "validation", "required"]
+    metadata:
+      owner: "Compliance Team"
+      business-domain: "Customer Onboarding"
+      created-by: "compliance.admin@company.com"
+    execution-config:
+      timeout-ms: 5000
+      retry-count: 3
+      circuit-breaker: true
+
+  # OR group - any rule can pass with advanced rule references
+  - id: "eligibility-check"
+    name: "Customer Eligibility Check"
+    description: "Customer meets at least one eligibility criteria"
+    category: "eligibility"
+    priority: 20
+    enabled: true
+    stop-on-first-failure: false # Continue even if one rule fails
+    parallel-execution: true     # Parallel execution for performance
+    rule-references:
+      - rule-id: "premium-customer"
+        sequence: 1
+        enabled: true
+        override-priority: 5
+      - rule-id: "long-term-customer"
+        sequence: 2
+        enabled: true
+        override-priority: 10
+      - rule-id: "high-value-customer"
+        sequence: 3
+        enabled: true
+        override-priority: 15
+    metadata:
+      owner: "Business Team"
+      purpose: "Customer eligibility determination"
+```
+
+#### Complete YAML Configuration Reference
+
+```yaml
+rule-groups:
+  - id: "complete-example"                    # Required: Unique identifier
+    name: "Complete Rule Group Example"       # Required: Human-readable name
+    description: "Shows all available options" # Optional: Description
+
+    # Category Configuration
+    category: "validation"                    # Single category
+    categories: ["validation", "compliance"] # Multiple categories (alternative to category)
+
+    # Execution Configuration
+    priority: 10                             # Optional: Execution priority (default: 100)
+    enabled: true                            # Optional: Enable/disable group (default: true)
+    stop-on-first-failure: false            # Optional: Stop on first rule failure (default: false)
+    parallel-execution: false               # Optional: Execute rules in parallel (default: false)
+
+    # Rule References - Option 1: Simple rule IDs
+    rule-ids:
+      - "rule-1"
+      - "rule-2"
+      - "rule-3"
+
+    # Rule References - Option 2: Advanced rule references with control
+    rule-references:
+      - rule-id: "advanced-rule-1"
+        sequence: 1                          # Optional: Execution sequence
+        enabled: true                        # Optional: Enable/disable this rule (default: true)
+        override-priority: 5                 # Optional: Override rule's default priority
+      - rule-id: "advanced-rule-2"
+        sequence: 2
+        enabled: false                       # Disabled rule
+        override-priority: 10
+
+    # Metadata and Tags
+    tags: ["validation", "customer", "strict"] # Optional: Tags for categorization
+    metadata:                                # Optional: Custom metadata
+      owner: "Team Name"
+      business-domain: "Domain"
+      created-by: "user@company.com"
+      purpose: "Business purpose"
+      custom-field: "custom-value"
+
+    # Advanced Execution Configuration
+    execution-config:                        # Optional: Advanced execution settings
+      timeout-ms: 5000                      # Optional: Timeout in milliseconds
+      retry-count: 3                        # Optional: Number of retries on failure
+      circuit-breaker: true                 # Optional: Enable circuit breaker pattern
+```
+
+#### YAML Configuration Properties Reference
+
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `id` | String | Yes | - | Unique identifier for the rule group |
+| `name` | String | Yes | - | Human-readable name for the rule group |
+| `description` | String | No | "" | Description of what the rule group does |
+| `category` | String | No | - | Single category for the rule group |
+| `categories` | List<String> | No | - | Multiple categories (alternative to `category`) |
+| `priority` | Integer | No | 100 | Execution priority (lower = higher priority) |
+| `enabled` | Boolean | No | true | Whether the rule group is enabled |
+| `stop-on-first-failure` | Boolean | No | false | Stop execution on first rule failure (AND logic) |
+| `parallel-execution` | Boolean | No | false | Execute rules in parallel for performance |
+| `rule-ids` | List<String> | No | - | Simple list of rule IDs to include |
+| `rule-references` | List<RuleReference> | No | - | Advanced rule references with control options |
+| `tags` | List<String> | No | - | Tags for categorization and filtering |
+| `metadata` | Map<String, Object> | No | - | Custom metadata for governance |
+| `execution-config` | ExecutionConfig | No | - | Advanced execution configuration |
+
+#### Rule Reference Properties
+
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `rule-id` | String | Yes | - | ID of the rule to reference |
+| `sequence` | Integer | No | - | Execution sequence within the group |
+| `enabled` | Boolean | No | true | Whether this rule is enabled in the group |
+| `override-priority` | Integer | No | - | Override the rule's default priority |
+
+#### Execution Config Properties
+
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `timeout-ms` | Long | No | - | Timeout in milliseconds for rule group execution |
+| `retry-count` | Integer | No | - | Number of retries on execution failure |
+| `circuit-breaker` | Boolean | No | false | Enable circuit breaker pattern for resilience |
+
+### Rule Group Execution Behavior
+
+#### AND Groups (All Rules Must Pass)
+
+```java
+// AND group behavior
+RuleGroup andGroup = config.createRuleGroupWithAnd("and-group", category, "AND Group", "All must pass", 10);
+
+// Execution logic:
+// - All rules must evaluate to true
+// - If any rule fails, the entire group fails
+// - Execution can stop on first failure (configurable)
+// - Result is true only if ALL rules pass
+
+Map<String, Object> data = Map.of("age", 25, "email", "test@example.com", "income", 30000);
+RuleResult result = engine.executeRuleGroup(andGroup, data);
+// Returns true only if age >= 18 AND email is valid AND income >= 25000
+```
+
+#### OR Groups (Any Rule Can Pass)
+
+```java
+// OR group behavior
+RuleGroup orGroup = config.createRuleGroupWithOr("or-group", category, "OR Group", "Any can pass", 20);
+
+// Execution logic:
+// - Any rule can evaluate to true for group to pass
+// - If one rule passes, the entire group passes
+// - Execution can stop on first success (configurable)
+// - Result is true if ANY rule passes
+
+Map<String, Object> data = Map.of("age", 16, "email", null, "income", 30000);
+RuleResult result = engine.executeRuleGroup(orGroup, data);
+// Returns true if income >= 25000 (even though age and email fail)
+```
+
+### Integration with Rules Engine
+
+```java
+// Create rules engine with rule groups
+RulesEngineConfiguration config = new RulesEngineConfiguration();
+
+// Add individual rules and rule groups
+config.rule("basic-rule").withCondition("#value > 0").build();
+config.createRuleGroupWithAnd("validation-group", category, "Validation", "All validations", 10);
+
+RulesEngine engine = new RulesEngine(config);
+
+// Execute all rules and groups for a category
+List<RuleResult> results = engine.executeRulesForCategory(category, data);
+
+// Execute specific rule group
+RuleGroup group = config.getRuleGroupById("validation-group");
+RuleResult groupResult = engine.executeRuleGroup(group, data);
+```
+
+### Best Practices
+
+#### Rule Group Organization
+- Use AND groups for validation scenarios where all conditions must be met
+- Use OR groups for eligibility scenarios where any condition is sufficient
+- Group related rules by business domain or functional area
+- Use meaningful IDs and names for easy identification
+
+#### Performance Optimization
+- Enable `stop-on-first-failure` for AND groups to improve performance
+- Enable `stop-on-first-success` for OR groups when appropriate
+- Use `parallel-execution` for independent rules that can run concurrently
+- Order rules by execution cost (fastest first) for optimal performance
+
+#### Governance and Maintenance
+- Include comprehensive metadata for audit trails
+- Use tags for categorization and filtering
+- Document rule group purpose and business logic
+- Version control rule group configurations
+
+## Data Service Configuration
+
+### Overview
+
+Data service configuration provides a programmatic way to set up data sources that rules can reference for lookups, enrichments, and data-driven rule evaluation. This approach is particularly useful for testing, demonstrations, and scenarios where you need to configure mock or custom data sources.
+
+### DataServiceManager
+
+The `DataServiceManager` serves as the central orchestration point for all data operations:
+
+```java
+// Initialize with mock data sources
+DataServiceManager dataManager = new DataServiceManager();
+dataManager.initializeWithMockData();
+
+// Load custom data sources
+dataManager.loadDataSource(new CustomDataSource("ProductsSource", "products"));
+
+// Request data for rule evaluation
+List<Product> products = dataManager.requestData("products");
+Customer customer = dataManager.requestData("customer");
+```
+
+### DemoDataServiceManager
+
+For demonstration and testing purposes, the `DemoDataServiceManager` extends the base manager with pre-configured mock data:
+
+```java
+public class DemoDataServiceManager extends DataServiceManager {
+
+    @Override
+    public DataServiceManager initializeWithMockData() {
+        // Create and load mock data sources for various data types
+        loadDataSource(new MockDataSource("ProductsDataSource", "products"));
+        loadDataSource(new MockDataSource("InventoryDataSource", "inventory"));
+        loadDataSource(new MockDataSource("CustomerDataSource", "customer"));
+        loadDataSource(new MockDataSource("TemplateCustomerDataSource", "templateCustomer"));
+        loadDataSource(new MockDataSource("LookupServicesDataSource", "lookupServices"));
+        loadDataSource(new MockDataSource("SourceRecordsDataSource", "sourceRecords"));
+
+        // Add data sources for dynamic matching
+        loadDataSource(new MockDataSource("MatchingRecordsDataSource", "matchingRecords"));
+        loadDataSource(new MockDataSource("NonMatchingRecordsDataSource", "nonMatchingRecords"));
+
+        return this;
+    }
+}
+```
+
+### MockDataSource Implementation
+
+The `MockDataSource` provides pre-populated test data for various business scenarios:
+
+```java
+public class MockDataSource implements DataSource {
+    private final String name;
+    private final String dataType;
+    private final Map<String, Object> dataStore = new HashMap<>();
+
+    public MockDataSource(String name, String dataType) {
+        this.name = name;
+        this.dataType = dataType;
+        initializeData(); // Populate with test data
+    }
+
+    @Override
+    public <T> T getData(String dataType, Object... parameters) {
+        // Handle special cases like dynamic matching
+        if ("matchingRecords".equals(dataType) || "nonMatchingRecords".equals(dataType)) {
+            // Dynamic data processing based on parameters
+            return processMatchingLogic(parameters);
+        }
+
+        return (T) dataStore.get(dataType);
+    }
+}
+```
+
+### Integration with Rules
+
+Data services integrate seamlessly with rule evaluation:
+
+```java
+// Set up data service manager
+DemoDataServiceManager dataManager = new DemoDataServiceManager();
+dataManager.initializeWithMockData();
+
+// Create rules engine with data context
+RulesEngineConfiguration config = new RulesEngineConfiguration();
+RulesEngine engine = new RulesEngine(config);
+
+// Get data for rule evaluation
+List<Product> products = dataManager.requestData("products");
+Customer customer = dataManager.requestData("customer");
+
+// Create evaluation context with data
+Map<String, Object> facts = new HashMap<>();
+facts.put("products", products);
+facts.put("customer", customer);
+
+// Evaluate rules with data context
+RuleResult result = engine.evaluate(facts);
+```
+
+### Custom Data Sources
+
+You can create custom data sources for specific business needs:
+
+```java
+public class CustomDataSource implements DataSource {
+    private final String name;
+    private final String dataType;
+
+    public CustomDataSource(String name, String dataType) {
+        this.name = name;
+        this.dataType = dataType;
+    }
+
+    @Override
+    public <T> T getData(String dataType, Object... parameters) {
+        // Implement custom data retrieval logic
+        // Could connect to databases, APIs, files, etc.
+        return retrieveCustomData(dataType, parameters);
+    }
+
+    @Override
+    public boolean supportsDataType(String dataType) {
+        return this.dataType.equals(dataType);
+    }
+}
+
+// Usage
+DataServiceManager manager = new DataServiceManager();
+manager.loadDataSources(
+    new CustomDataSource("CustomProductsSource", "customProducts"),
+    new CustomDataSource("CustomCustomerSource", "customCustomer"),
+    new CustomDataSource("CustomTradesSource", "customTrades")
+);
+```
+
+### Best Practices
+
+#### Data Service Organization
+- Use meaningful names for data sources and data types
+- Group related data sources logically
+- Implement proper error handling for data retrieval failures
+- Cache frequently accessed data for performance
+
+#### Testing and Development
+- Use `DemoDataServiceManager` for demonstrations and testing
+- Create environment-specific data service configurations
+- Mock external dependencies during development
+- Validate data integrity before rule evaluation
+
+#### Production Considerations
+- Replace mock data sources with production implementations
+- Implement proper connection pooling and resource management
+- Add monitoring and health checks for data sources
+- Use appropriate caching strategies for performance
 
 ## Migration from External Services
 

@@ -20,31 +20,31 @@ APEX now includes comprehensive external data source integration capabilities, p
 
 ### External Data Source Architecture
 
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   YAML Config   │───▶│ Configuration    │───▶│ Data Source     │
-│   - Data Sources│    │ Service          │    │ Registry        │
-│   - Connections │    │ - Load Config    │    │ - Registration  │
-│   - Queries     │    │ - Validation     │    │ - Discovery     │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                                │                        │
-                                ▼                        ▼
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│ Data Source     │◀───│ Data Source      │───▶│ Data Source     │
-│ Factory         │    │ Manager          │    │ Implementations │
-│ - Create Sources│    │ - Load Balancing │    │ - Database      │
-│ - Resource Cache│    │ - Failover       │    │ - REST API      │
-│ - Custom Types  │    │ - Health Monitor │    │ - File System   │
-└─────────────────┘    └──────────────────┘    │ - Cache         │
-                                │               └─────────────────┘
-                                ▼
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│ Application     │◀───│ Unified Data     │───▶│ External        │
-│ Layer           │    │ Access API       │    │ Systems         │
-│ - Rules Engine  │    │ - Query          │    │ - Databases     │
-│ - Business Logic│    │ - Cache          │    │ - APIs          │
-│ - Enrichment    │    │ - Health Checks  │    │ - Files         │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
+```mermaid
+flowchart TD
+    A[YAML Config<br/>- Data Sources<br/>- Connections<br/>- Queries] --> B[Configuration Service<br/>- Load Config<br/>- Validation]
+    B --> C[Data Source Registry<br/>- Registration<br/>- Discovery]
+
+    B --> D[Data Source Manager<br/>- Load Balancing<br/>- Failover<br/>- Health Monitor]
+    C --> E[Data Source Factory<br/>- Create Sources<br/>- Resource Cache<br/>- Custom Types]
+    D --> F[Data Source Implementations<br/>- Database<br/>- REST API<br/>- File System<br/>- Cache]
+
+    E --> G[Unified Data Access API<br/>- Query<br/>- Cache<br/>- Health Checks]
+    D --> G
+    F --> G
+
+    G --> H[Application Layer<br/>- Rules Engine<br/>- Business Logic<br/>- Enrichment]
+    G --> I[External Systems<br/>- Databases<br/>- APIs<br/>- Files]
+
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5
+    style C fill:#e8f5e8
+    style D fill:#fff3e0
+    style E fill:#fce4ec
+    style F fill:#f1f8e9
+    style G fill:#e0f2f1
+    style H fill:#fff8e1
+    style I fill:#ffebee
 ```
 
 ### Key External Data Source Components
@@ -59,6 +59,8 @@ APEX now includes comprehensive external data source integration capabilities, p
 #### Management Components
 - `DataSourceConfigurationService` - High-level service for configuration management
 - `DataSourceManager` - Coordinates multiple data sources with load balancing and failover
+- `DataServiceManager` - Core manager for programmatic data source configuration and access
+- `DemoDataServiceManager` - Demo implementation with pre-configured mock data sources
 - `DataSourceRegistry` - Centralized registry for all data sources with health monitoring
 - `DataSourceFactory` - Creates and configures data source instances with resource caching
 
@@ -68,12 +70,99 @@ APEX now includes comprehensive external data source integration capabilities, p
 - `FileSystemDataSource` - File processing with format-specific readers
 - `CacheDataSource` - In-memory caching with TTL and eviction policies
 
-### Integration with Rules Engine
+### Programmatic Data Service Configuration
 
-The external data source integration seamlessly integrates with the existing rules engine architecture:
+In addition to YAML-based external data source configuration, APEX provides programmatic data service configuration through the `DataServiceManager` and related classes:
 
 ```java
-// Load data source configuration
+// Basic data service setup
+DataServiceManager dataManager = new DataServiceManager();
+
+// Load individual data sources
+dataManager.loadDataSource(new MockDataSource("ProductsDataSource", "products"));
+dataManager.loadDataSource(new CustomDataSource("CustomerDataSource", "customer"));
+
+// Load multiple data sources at once
+dataManager.loadDataSources(
+    new MockDataSource("InventoryDataSource", "inventory"),
+    new MockDataSource("LookupServicesDataSource", "lookupServices")
+);
+
+// Request data for rule evaluation
+List<Product> products = dataManager.requestData("products");
+Customer customer = dataManager.requestData("customer");
+```
+
+#### Demo Data Service Manager
+
+For testing and demonstration purposes, use the `DemoDataServiceManager`:
+
+```java
+// Initialize with pre-configured mock data
+DemoDataServiceManager demoManager = new DemoDataServiceManager();
+demoManager.initializeWithMockData();
+
+// Available data types:
+// - products: List of financial products
+// - inventory: Available inventory items
+// - customer: Sample customer data
+// - templateCustomer: Template customer for testing
+// - lookupServices: Lookup service configurations
+// - sourceRecords: Trade records for matching
+// - matchingRecords: Dynamic matching results
+// - nonMatchingRecords: Dynamic non-matching results
+```
+
+#### Custom Data Source Implementation
+
+Create custom data sources for specific business needs:
+
+```java
+public class DatabaseDataSource implements DataSource {
+    private final String name;
+    private final String dataType;
+    private final DatabaseConnection connection;
+
+    public DatabaseDataSource(String name, String dataType, DatabaseConnection connection) {
+        this.name = name;
+        this.dataType = dataType;
+        this.connection = connection;
+    }
+
+    @Override
+    public <T> T getData(String dataType, Object... parameters) {
+        if (!supportsDataType(dataType)) {
+            return null;
+        }
+
+        // Implement database query logic
+        String query = buildQuery(dataType, parameters);
+        return connection.executeQuery(query);
+    }
+
+    @Override
+    public boolean supportsDataType(String dataType) {
+        return this.dataType.equals(dataType);
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getDataType() {
+        return dataType;
+    }
+}
+```
+
+### Integration with Rules Engine
+
+Both YAML-based and programmatic data source configurations integrate seamlessly with the rules engine:
+
+```java
+// YAML-based external data source integration
 DataSourceConfigurationService configService = DataSourceConfigurationService.getInstance();
 YamlRuleConfiguration yamlConfig = loadConfiguration("data-sources.yaml");
 configService.initialize(yamlConfig);
@@ -86,26 +175,195 @@ Object user = userDb.queryForObject("getUserById", params);
 // Use with load balancing
 DataSourceManager manager = configService.getDataSourceManager();
 List<Object> results = manager.queryWithFailover(DataSourceType.DATABASE, "getAllUsers", Collections.emptyMap());
+
+// Programmatic data service integration
+DemoDataServiceManager dataManager = new DemoDataServiceManager();
+dataManager.initializeWithMockData();
+
+// Create evaluation context with data
+Map<String, Object> facts = new HashMap<>();
+facts.put("products", dataManager.requestData("products"));
+facts.put("customer", dataManager.requestData("customer"));
+facts.put("inventory", dataManager.requestData("inventory"));
+
+// Evaluate rules with data context
+RulesEngine engine = new RulesEngine(configuration);
+RuleResult result = engine.evaluate(facts);
 ```
 
 ## Architecture Overview
+
+### System Architecture
+
+The APEX Rules Engine provides a comprehensive, layered architecture designed for enterprise-scale rule processing:
+
+```mermaid
+graph TB
+    subgraph "Client Applications"
+        WEB[Web Applications]
+        API[REST APIs]
+        BATCH[Batch Processing]
+        MICRO[Microservices]
+    end
+
+    subgraph "API Layer"
+        SIMPLE[Ultra-Simple API<br/>Rules.check()]
+        TEMPLATE[Template-Based API<br/>RuleSet.validation()]
+        ADVANCED[Advanced API<br/>RulesEngineConfiguration]
+    end
+
+    subgraph "Core Engine"
+        ENGINE[Rules Engine]
+        GROUPS[Rule Groups<br/>AND/OR Logic]
+        CHAINS[Rule Chains<br/>6 Patterns]
+        EVAL[Expression Evaluator<br/>SpEL Integration]
+    end
+
+    subgraph "Configuration & Management"
+        YAML[YAML Configuration]
+        PROG[Programmatic Config]
+        META[Metadata Management]
+        VALID[Validation Engine]
+    end
+
+    subgraph "Data Integration"
+        DATASVC[Data Service Manager]
+        EXTERNAL[External Data Sources]
+        CACHE[Caching Layer]
+        ENRICH[Data Enrichment]
+    end
+
+    subgraph "Monitoring & Support"
+        PERF[Performance Monitor]
+        ERROR[Error Recovery]
+        METRICS[Metrics Collection]
+        HEALTH[Health Checks]
+    end
+
+    subgraph "Foundation"
+        SPEL[Spring Expression Language]
+        SPRING[Spring Framework]
+        JVM[Java Virtual Machine]
+    end
+
+    %% Client to API connections
+    WEB --> SIMPLE
+    API --> TEMPLATE
+    BATCH --> ADVANCED
+    MICRO --> TEMPLATE
+
+    %% API to Core connections
+    SIMPLE --> ENGINE
+    TEMPLATE --> ENGINE
+    ADVANCED --> ENGINE
+
+    %% Core Engine internal connections
+    ENGINE --> GROUPS
+    ENGINE --> CHAINS
+    ENGINE --> EVAL
+
+    %% Configuration connections
+    YAML --> ENGINE
+    PROG --> ENGINE
+    META --> ENGINE
+    VALID --> ENGINE
+
+    %% Data Integration connections
+    DATASVC --> ENGINE
+    EXTERNAL --> DATASVC
+    CACHE --> DATASVC
+    ENRICH --> ENGINE
+
+    %% Monitoring connections
+    ENGINE --> PERF
+    ENGINE --> ERROR
+    ENGINE --> METRICS
+    ENGINE --> HEALTH
+
+    %% Foundation connections
+    EVAL --> SPEL
+    ENGINE --> SPRING
+    SPRING --> JVM
+
+    %% Styling
+    style WEB fill:#e3f2fd
+    style API fill:#e3f2fd
+    style BATCH fill:#e3f2fd
+    style MICRO fill:#e3f2fd
+
+    style SIMPLE fill:#f3e5f5
+    style TEMPLATE fill:#f3e5f5
+    style ADVANCED fill:#f3e5f5
+
+    style ENGINE fill:#e8f5e8
+    style GROUPS fill:#e8f5e8
+    style CHAINS fill:#e8f5e8
+    style EVAL fill:#e8f5e8
+
+    style YAML fill:#fff3e0
+    style PROG fill:#fff3e0
+    style META fill:#fff3e0
+    style VALID fill:#fff3e0
+
+    style DATASVC fill:#fce4ec
+    style EXTERNAL fill:#fce4ec
+    style CACHE fill:#fce4ec
+    style ENRICH fill:#fce4ec
+
+    style PERF fill:#f1f8e9
+    style ERROR fill:#f1f8e9
+    style METRICS fill:#f1f8e9
+    style HEALTH fill:#f1f8e9
+
+    style SPEL fill:#e0f2f1
+    style SPRING fill:#e0f2f1
+    style JVM fill:#e0f2f1
+```
 
 ### Core Components
 
 The SpEL Rules Engine is built with a layered architecture that provides flexibility while maintaining performance:
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    API Layer (3 Levels)                    │
-├─────────────────────────────────────────────────────────────┤
-│  Ultra-Simple API  │  Template-Based API  │  Advanced API  │
-├─────────────────────────────────────────────────────────────┤
-│                   Core Rules Engine                        │
-├─────────────────────────────────────────────────────────────┤
-│  Performance Monitor │  Error Recovery  │  Configuration   │
-├─────────────────────────────────────────────────────────────┤
-│              Spring Expression Language (SpEL)             │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph API["API Layer (3 Levels)"]
+        A[Ultra-Simple API]
+        B[Template-Based API]
+        C[Advanced API]
+    end
+
+    subgraph Core["Core Rules Engine"]
+        D[Rules Engine]
+        E[Rule Groups]
+        F[Rule Chains]
+    end
+
+    subgraph Support["Support Services"]
+        G[Performance Monitor]
+        H[Error Recovery]
+        I[Configuration]
+    end
+
+    subgraph Foundation["Foundation"]
+        J[Spring Expression Language SpEL]
+    end
+
+    A --> D
+    B --> D
+    C --> D
+
+    D --> G
+    D --> H
+    D --> I
+
+    G --> J
+    H --> J
+    I --> J
+
+    style API fill:#e1f5fe
+    style Core fill:#f3e5f5
+    style Support fill:#e8f5e8
+    style Foundation fill:#fff3e0
 ```
 
 ### Key Classes and Interfaces
@@ -114,7 +372,8 @@ The SpEL Rules Engine is built with a layered architecture that provides flexibi
 - `RulesEngine` - Main rule execution engine
 - `RulesEngineConfiguration` - Configuration management
 - `Rule` - Individual rule representation
-- `RuleGroup` - Collection of related rules
+- `RuleGroup` - Collection of related rules with AND/OR operators
+- `RuleGroupBuilder` - Builder pattern for creating rule groups
 - `RuleResult` - Execution result with metadata
 
 #### API Layer Classes
@@ -133,6 +392,59 @@ The SpEL Rules Engine is built with a layered architecture that provides flexibi
 - `ErrorRecoveryService` - Error recovery management
 - `RuleEngineException` - Base exception hierarchy
 - `ErrorRecoveryStrategy` - Recovery strategy enumeration
+
+## Rule Configuration Methods
+
+The APEX Rules Engine supports multiple configuration approaches to meet different use cases and complexity requirements:
+
+```mermaid
+flowchart TD
+    A[Rule Configuration Methods] --> B[Programmatic Configuration]
+    A --> C[YAML Configuration]
+    A --> D[Data Service Configuration]
+
+    B --> B1[RuleBuilder]
+    B --> B2[RulesEngineConfiguration]
+    B --> B3[RuleSet API]
+    B --> B4[SimpleRulesEngine]
+    B --> B5[RuleGroupBuilder]
+
+    C --> C1[Basic YAML Rules]
+    C --> C2[Rule Groups YAML]
+    C --> C3[Rule Chains YAML<br/>6 Patterns]
+    C --> C4[Enterprise YAML<br/>with Metadata]
+
+    D --> D1[DataServiceManager]
+    D --> D2[DemoDataServiceManager]
+    D --> D3[MockDataSource]
+    D --> D4[Custom DataSource]
+
+    B1 --> E[Rules Engine]
+    B2 --> E
+    B3 --> E
+    B4 --> E
+    B5 --> E
+
+    C1 --> F[YAML Processor]
+    C2 --> F
+    C3 --> F
+    C4 --> F
+    F --> E
+
+    D1 --> G[Data Context]
+    D2 --> G
+    D3 --> G
+    D4 --> G
+    G --> E
+
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5
+    style C fill:#e8f5e8
+    style D fill:#fff3e0
+    style E fill:#fce4ec
+    style F fill:#f1f8e9
+    style G fill:#e0f2f1
+```
 
 ## Implementation Patterns
 
@@ -190,6 +502,207 @@ RulesEngineConfiguration config = new RulesEngineConfiguration.Builder()
     .build();
 
 RulesEngine engine = new RulesEngine(config);
+```
+
+## Rule Groups Architecture
+
+### Overview
+
+Rule Groups provide a mechanism for organizing related rules and controlling their execution as logical units. They support both AND and OR operators, allowing for complex validation scenarios and business logic combinations.
+
+### Core Components
+
+#### RuleGroup Class
+
+```java
+public class RuleGroup implements RuleBase {
+    private final String id;
+    private final Set<Category> categories;
+    private final String name;
+    private final String description;
+    private final int priority;
+    private final Map<Integer, Rule> rulesBySequence;
+    private final boolean isAndOperator;
+
+    // Constructor for single category
+    public RuleGroup(String id, String category, String name, String description,
+                     int priority, boolean isAndOperator)
+
+    // Constructor for multiple categories
+    public RuleGroup(String id, Set<Category> categories, String name, String description,
+                     int priority, boolean isAndOperator)
+
+    // Add rule with sequence number
+    public void addRule(Rule rule, int sequenceNumber)
+
+    // Execution method
+    public RuleResult evaluate(Map<String, Object> facts)
+}
+```
+
+#### RuleGroupBuilder
+
+```java
+public class RuleGroupBuilder {
+    private String id;
+    private Set<Category> categories = new HashSet<>();
+    private String name;
+    private String description;
+    private int priority = 100;
+    private boolean isAndOperator = true;
+
+    public RuleGroupBuilder withId(String id)
+    public RuleGroupBuilder withName(String name)
+    public RuleGroupBuilder withDescription(String description)
+    public RuleGroupBuilder withCategory(Category category)
+    public RuleGroupBuilder withCategoryNames(Set<String> categoryNames)
+    public RuleGroupBuilder withPriority(int priority)
+    public RuleGroupBuilder withAndOperator()
+    public RuleGroupBuilder withOrOperator()
+    public RuleGroup build()
+}
+```
+
+### Configuration Methods
+
+#### Programmatic Configuration
+
+```java
+// Method 1: Using RuleGroupBuilder
+RuleGroup group = new RuleGroupBuilder()
+    .withId("validation-group")
+    .withName("Customer Validation")
+    .withDescription("Complete customer validation checks")
+    .withCategory("validation")
+    .withPriority(10)
+    .withAndOperator()
+    .build();
+
+// Method 2: Using RulesEngineConfiguration
+RulesEngineConfiguration config = new RulesEngineConfiguration();
+
+// AND group
+RuleGroup andGroup = config.createRuleGroupWithAnd(
+    "and-group", category, "AND Group", "All must pass", 10);
+
+// OR group
+RuleGroup orGroup = config.createRuleGroupWithOr(
+    "or-group", category, "OR Group", "Any can pass", 20);
+
+// Multi-category group
+Set<String> categories = Set.of("validation", "compliance");
+RuleGroup multiGroup = config.createRuleGroupWithAnd(
+    "multi-group", categories, "Multi Group", "Multiple categories", 30);
+
+// Register groups
+config.registerRuleGroup(andGroup);
+config.registerRuleGroup(orGroup);
+```
+
+#### YAML Configuration
+
+```yaml
+rule-groups:
+  - id: "customer-validation"
+    name: "Customer Validation Rules"
+    description: "Complete customer validation rule set"
+    category: "validation"
+    priority: 10
+    enabled: true
+    stop-on-first-failure: false
+    parallel-execution: false
+    rule-ids:
+      - "age-validation"
+      - "email-validation"
+      - "income-validation"
+    metadata:
+      owner: "Customer Team"
+      domain: "Customer Management"
+
+  - id: "eligibility-check"
+    name: "Customer Eligibility Check"
+    description: "Customer meets eligibility criteria"
+    category: "eligibility"
+    categories: ["eligibility", "customer"]  # Multiple categories
+    priority: 20
+    enabled: true
+    stop-on-first-failure: false
+    parallel-execution: true
+    rule-references:
+      - rule-id: "premium-customer"
+        sequence: 1
+        enabled: true
+        override-priority: 5
+      - rule-id: "long-term-customer"
+        sequence: 2
+        enabled: true
+        override-priority: 10
+    tags: ["eligibility", "customer"]
+    metadata:
+      owner: "Business Team"
+      purpose: "Customer eligibility determination"
+    execution-config:
+      timeout-ms: 3000
+      retry-count: 2
+      circuit-breaker: false
+```
+
+### Execution Patterns
+
+#### AND Group Execution
+
+```java
+// AND group: ALL rules must pass
+public RuleResult evaluateAndGroup(RuleGroup group, Map<String, Object> facts) {
+    boolean allPassed = true;
+    List<RuleResult> individualResults = new ArrayList<>();
+
+    // Execute rules in sequence order
+    for (Map.Entry<Integer, Rule> entry : group.getRulesBySequence().entrySet()) {
+        Rule rule = entry.getValue();
+        RuleResult result = rule.evaluate(facts);
+        individualResults.add(result);
+
+        if (!result.isTriggered()) {
+            allPassed = false;
+            if (group.isStopOnFirstFailure()) {
+                break; // Early termination for performance
+            }
+        }
+    }
+
+    return new RuleResult(group.getName(),
+                         allPassed ? "All rules passed" : "One or more rules failed",
+                         allPassed, individualResults);
+}
+```
+
+#### OR Group Execution
+
+```java
+// OR group: ANY rule can pass
+public RuleResult evaluateOrGroup(RuleGroup group, Map<String, Object> facts) {
+    boolean anyPassed = false;
+    List<RuleResult> individualResults = new ArrayList<>();
+
+    // Execute rules in sequence order
+    for (Map.Entry<Integer, Rule> entry : group.getRulesBySequence().entrySet()) {
+        Rule rule = entry.getValue();
+        RuleResult result = rule.evaluate(facts);
+        individualResults.add(result);
+
+        if (result.isTriggered()) {
+            anyPassed = true;
+            if (group.isStopOnFirstSuccess()) {
+                break; // Early termination for performance
+            }
+        }
+    }
+
+    return new RuleResult(group.getName(),
+                         anyPassed ? "At least one rule passed" : "No rules passed",
+                         anyPassed, individualResults);
+}
 ```
 
 ## Nested Rules and Rule Chaining Patterns

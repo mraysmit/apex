@@ -64,7 +64,7 @@ class QuickStartDemoTest {
         String output = outputStream.toString();
         
         assertAll("QuickStart demo sections",
-            () -> assertTrue(output.contains("SpEL Rules Engine - Quick Start (5 Minutes)"), 
+            () -> assertTrue(output.contains("APEX Rules Engine - Quick Start (5 Minutes)"),
                            "Should display main title"),
             () -> assertTrue(output.contains("1. One-Liner Rule Evaluation"), 
                            "Should demonstrate one-liner evaluation"),

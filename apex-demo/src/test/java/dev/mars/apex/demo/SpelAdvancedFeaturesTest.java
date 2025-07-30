@@ -8,9 +8,9 @@ import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.engine.RuleEngineService;
 import dev.mars.apex.core.service.engine.TemplateProcessorService;
 import dev.mars.apex.core.service.lookup.LookupService;
+import dev.mars.apex.demo.advanced.ApexAdvancedFeaturesDemo;
+import dev.mars.apex.demo.advanced.ApexAdvancedFeaturesDemoConfig;
 import dev.mars.apex.demo.data.MockDataSources;
-import dev.mars.apex.demo.advanced.SpelAdvancedFeaturesDemo;
-import dev.mars.apex.demo.advanced.SpelAdvancedFeaturesDemoConfig;
 import dev.mars.apex.demo.model.Product;
 import dev.mars.apex.demo.model.Trade;
 import dev.mars.apex.demo.rulesets.PricingServiceDemo;
@@ -63,8 +63,8 @@ public class SpelAdvancedFeaturesTest {
     private RuleEngineService ruleEngineService;
     private TemplateProcessorService templateProcessorService;
     private RulesEngine rulesEngine;
-    private SpelAdvancedFeaturesDemoConfig config;
-    private SpelAdvancedFeaturesDemo demo;
+    private ApexAdvancedFeaturesDemoConfig config;
+    private ApexAdvancedFeaturesDemo demo;
     private PricingServiceDemo pricingService;
     private StandardEvaluationContext context;
     private ByteArrayOutputStream outContent;
@@ -80,7 +80,7 @@ public class SpelAdvancedFeaturesTest {
         pricingService = new PricingServiceDemo();
 
         // Initialize config
-        config = new SpelAdvancedFeaturesDemoConfig(
+        config = new ApexAdvancedFeaturesDemoConfig(
             rulesEngine,
             evaluatorService,
             ruleEngineService,
@@ -88,7 +88,7 @@ public class SpelAdvancedFeaturesTest {
         );
 
         // Initialize demo
-        demo = new SpelAdvancedFeaturesDemo(config);
+        demo = new ApexAdvancedFeaturesDemo(config);
 
         // Initialize context
         context = new StandardEvaluationContext();
@@ -106,7 +106,7 @@ public class SpelAdvancedFeaturesTest {
     @Test
     public void testFullDemo() {
         // Run the main method of the demo class to test all functionality
-        SpelAdvancedFeaturesDemo.main(new String[]{});
+        ApexAdvancedFeaturesDemo.main(new String[]{});
     }
 
     /**

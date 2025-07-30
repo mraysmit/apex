@@ -8,7 +8,9 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.demo.core.DemoRunner;
+import dev.mars.apex.demo.DemoRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,21 +18,36 @@ import java.util.Map;
 
 /**
  * Comprehensive demonstration of data management capabilities from the Data Management Guide.
- * 
- * This demo showcases:
+ *
+ * This demo showcases APEX's powerful data enrichment and management features:
+ *
+ * Core Features Demonstrated:
  * - YAML dataset configuration and loading
  * - Data enrichment with lookup operations
  * - Validation with enriched data
- * - Nested object structures
- * - Multi-dataset scenarios
- * - Error handling and defaults
- * 
+ * - Nested object structures and complex mappings
+ * - Multi-dataset scenarios and relationships
+ * - Error handling and default value strategies
+ * - Performance optimization for data operations
+ *
+ * Real-world Use Cases:
+ * - Currency and country code enrichment
+ * - Product catalog lookups
+ * - Customer data validation and enhancement
+ * - Reference data management
+ * - Data quality and completeness checks
+ *
+ * Each section includes detailed explanations, performance metrics, and best practices
+ * for implementing data management patterns in production systems.
+ *
  * Based on scenarios from APEX_DATA_MANAGEMENT_GUIDE.md
- * 
+ *
  * @author APEX Rules Engine Team
  * @since 1.0.0
  */
 public class DataManagementDemo implements DemoRunner.Demo {
+
+    private static final Logger logger = LoggerFactory.getLogger(DataManagementDemo.class);
 
     private YamlEnrichmentProcessor enrichmentProcessor;
     private LookupServiceRegistry serviceRegistry;
@@ -38,33 +55,117 @@ public class DataManagementDemo implements DemoRunner.Demo {
 
     @Override
     public void run() {
+        long startTime = System.currentTimeMillis();
+        logger.info("Starting Data Management demonstration");
+
         System.out.println("=".repeat(80));
         System.out.println("APEX DATA MANAGEMENT DEMONSTRATION");
         System.out.println("=".repeat(80));
+        System.out.println("Comprehensive showcase of APEX's data enrichment and management capabilities");
+        System.out.println("Estimated duration: 8-10 minutes");
+        System.out.println();
+        System.out.println("Sections covered:");
+        System.out.println("1. Basic Dataset Structure - Foundation concepts");
+        System.out.println("2. Simple Enrichment - Single field lookups");
+        System.out.println("3. Complex Enrichment - Multi-field transformations");
+        System.out.println("4. Nested Structures - Hierarchical data handling");
+        System.out.println("5. Multi-Dataset Scenarios - Related data sources");
+        System.out.println("6. Validation with Enriched Data - Quality assurance");
+        System.out.println("7. Error Handling and Defaults - Resilience patterns");
         System.out.println();
 
         initializeServices();
-        
-        demonstrateBasicDatasetStructure();
-        demonstrateSimpleEnrichment();
-        demonstrateComplexEnrichment();
-        demonstrateNestedStructures();
-        demonstrateMultiDatasetScenario();
-        demonstrateValidationWithEnrichedData();
-        demonstrateErrorHandlingAndDefaults();
-        
+
+        // Execute each demonstration section with timing and error handling
+        executeTimedSection("Basic Dataset Structure", this::demonstrateBasicDatasetStructure);
+        executeTimedSection("Simple Enrichment", this::demonstrateSimpleEnrichment);
+        executeTimedSection("Complex Enrichment", this::demonstrateComplexEnrichment);
+        executeTimedSection("Nested Structures", this::demonstrateNestedStructures);
+        executeTimedSection("Multi-Dataset Scenario", this::demonstrateMultiDatasetScenario);
+        executeTimedSection("Validation with Enriched Data", this::demonstrateValidationWithEnrichedData);
+        executeTimedSection("Error Handling and Defaults", this::demonstrateErrorHandlingAndDefaults);
+
+        long totalDuration = System.currentTimeMillis() - startTime;
         System.out.println();
         System.out.println("=".repeat(80));
         System.out.println("DATA MANAGEMENT DEMONSTRATION COMPLETED");
+        System.out.println("Total duration: " + totalDuration + "ms");
+        System.out.println("You've learned advanced data management patterns with APEX!");
         System.out.println("=".repeat(80));
+
+        logger.info("Data Management demonstration completed in {}ms", totalDuration);
     }
 
+    /**
+     * Execute a demonstration section with timing and error handling.
+     *
+     * @param sectionName The name of the section for logging and display
+     * @param section The runnable section to execute
+     */
+    private void executeTimedSection(String sectionName, Runnable section) {
+        long sectionStart = System.currentTimeMillis();
+        logger.debug("Starting section: {}", sectionName);
+
+        try {
+            section.run();
+            long sectionDuration = System.currentTimeMillis() - sectionStart;
+            logger.info("Section '{}' completed in {}ms", sectionName, sectionDuration);
+            System.out.println("   (Section completed in " + sectionDuration + "ms)");
+        } catch (Exception e) {
+            logger.error("Error in section '{}': {}", sectionName, e.getMessage(), e);
+            System.out.println("   ERROR: " + e.getMessage());
+            System.out.println("   This demonstrates error handling in data management operations");
+        }
+
+        System.out.println();
+    }
+
+    /**
+     * Initialize the core services required for data management operations.
+     *
+     * This method sets up the service infrastructure needed for:
+     * - Lookup service registry for managing data sources
+     * - Expression evaluator for rule processing
+     * - Enrichment processor for data transformation
+     *
+     * Each service is initialized with appropriate configuration and
+     * error handling to ensure robust operation.
+     */
     private void initializeServices() {
-        System.out.println("🔧 Initializing Data Management Services...");
-        serviceRegistry = new LookupServiceRegistry();
-        evaluatorService = new ExpressionEvaluatorService();
-        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
-        System.out.println("✅ Services initialized successfully");
+        long initStart = System.currentTimeMillis();
+        logger.info("Initializing Data Management Services");
+
+        System.out.println("INITIALIZATION PHASE");
+        System.out.println("-".repeat(40));
+        System.out.println("Setting up core data management services...");
+
+        try {
+            // Initialize lookup service registry
+            System.out.println("1. Initializing Lookup Service Registry...");
+            serviceRegistry = new LookupServiceRegistry();
+            logger.debug("LookupServiceRegistry initialized");
+
+            // Initialize expression evaluator
+            System.out.println("2. Initializing Expression Evaluator Service...");
+            evaluatorService = new ExpressionEvaluatorService();
+            logger.debug("ExpressionEvaluatorService initialized");
+
+            // Initialize enrichment processor
+            System.out.println("3. Initializing YAML Enrichment Processor...");
+            enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
+            logger.debug("YamlEnrichmentProcessor initialized");
+
+            long initDuration = System.currentTimeMillis() - initStart;
+            System.out.println("Services initialized successfully (in " + initDuration + "ms)");
+
+            logger.info("All data management services initialized in {}ms", initDuration);
+
+        } catch (Exception e) {
+            logger.error("Failed to initialize data management services", e);
+            System.out.println("ERROR: Failed to initialize services - " + e.getMessage());
+            throw new RuntimeException("Service initialization failed", e);
+        }
+
         System.out.println();
     }
 

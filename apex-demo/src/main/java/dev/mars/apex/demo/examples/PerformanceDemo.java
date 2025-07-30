@@ -79,10 +79,10 @@ public class PerformanceDemo {
      * Demonstrate basic performance monitoring setup.
      */
     private void demonstrateBasicPerformanceMonitoring() {
-        System.out.println("📋 BASIC PERFORMANCE MONITORING");
+        System.out.println(" BASIC PERFORMANCE MONITORING");
         System.out.println("-".repeat(50));
         
-        System.out.println("🎯 Monitoring Configuration:");
+        System.out.println(" Monitoring Configuration:");
         System.out.println("  Enabled: " + performanceMonitor.isEnabled());
         System.out.println("  Memory Tracking: true (default)");
         System.out.println("  Complexity Analysis: true (default)");
@@ -117,7 +117,7 @@ public class PerformanceDemo {
         System.out.println("  Expression Complexity: " + metrics.getExpressionComplexity());
         System.out.println("  Cache Hit: " + (metrics.isCacheHit() ? "Yes" : "No"));
         
-        System.out.println("\n💡 Monitoring Benefits:");
+        System.out.println("\n Monitoring Benefits:");
         System.out.println("   • Real-time performance metrics collection");
         System.out.println("   • Memory usage tracking and optimization");
         System.out.println("   • Expression complexity analysis");
@@ -128,7 +128,7 @@ public class PerformanceDemo {
      * Demonstrate comprehensive metrics collection.
      */
     private void demonstrateMetricsCollection() {
-        System.out.println("📋 COMPREHENSIVE METRICS COLLECTION");
+        System.out.println(" COMPREHENSIVE METRICS COLLECTION");
         System.out.println("-".repeat(50));
         
         // Execute multiple rules to collect metrics
@@ -141,7 +141,7 @@ public class PerformanceDemo {
         
         Customer customer = createSampleCustomer();
         
-        System.out.println("🎯 Executing Multiple Rules for Metrics Collection:");
+        System.out.println(" Executing Multiple Rules for Metrics Collection:");
         System.out.println();
         
         for (String ruleSpec : rules) {
@@ -167,14 +167,14 @@ public class PerformanceDemo {
         }
         
         // Display aggregated metrics
-        System.out.println("📊 Aggregated Performance Metrics:");
+        System.out.println(" Aggregated Performance Metrics:");
         System.out.println("  Total Evaluations: " + performanceMonitor.getTotalEvaluations());
         System.out.println("  Average Evaluation Time: " +
                          String.format("%.2f", performanceMonitor.getAverageEvaluationTimeMillis()) + "ms");
         
         // Show snapshots for each rule
         Map<String, PerformanceSnapshot> snapshots = performanceMonitor.getAllSnapshots();
-        System.out.println("\n📈 Rule Performance Snapshots:");
+        System.out.println("\n Rule Performance Snapshots:");
         for (PerformanceSnapshot snapshot : snapshots.values()) {
             System.out.println("  " + snapshot.getRuleName() + ":");
             System.out.println("    Executions: " + snapshot.getEvaluationCount());
@@ -182,7 +182,7 @@ public class PerformanceDemo {
             System.out.println("    Success Rate: " + String.format("%.1f%%", snapshot.getSuccessRate() * 100));
         }
         
-        System.out.println("\n💡 Metrics Benefits:");
+        System.out.println("\n Metrics Benefits:");
         System.out.println("   • Historical performance tracking");
         System.out.println("   • Rule-specific performance analysis");
         System.out.println("   • Success rate monitoring");
@@ -193,10 +193,10 @@ public class PerformanceDemo {
      * Demonstrate concurrent execution monitoring.
      */
     private void demonstrateConcurrentExecution() {
-        System.out.println("📋 CONCURRENT EXECUTION MONITORING");
+        System.out.println(" CONCURRENT EXECUTION MONITORING");
         System.out.println("-".repeat(50));
         
-        System.out.println("🎯 Simulating High-Volume Concurrent Processing:");
+        System.out.println(" Simulating High-Volume Concurrent Processing:");
         
         ExecutorService executor = Executors.newFixedThreadPool(4);
         List<Future<RulePerformanceMetrics>> futures = new ArrayList<>();
@@ -256,14 +256,14 @@ public class PerformanceDemo {
             
             // Check for thread safety
             long uniqueThreads = results.stream()
-                .map(m -> Thread.currentThread().getId())
+                .map(m -> Thread.currentThread().threadId())
                 .distinct()
                 .count();
             
             System.out.println("  Thread Safety: ✅ Verified");
         }
         
-        System.out.println("\n💡 Concurrent Benefits:");
+        System.out.println("\n Concurrent Benefits:");
         System.out.println("   • Thread-safe performance monitoring");
         System.out.println("   • Concurrent execution metrics");
         System.out.println("   • Scalability performance analysis");
@@ -274,10 +274,10 @@ public class PerformanceDemo {
      * Demonstrate performance optimization techniques.
      */
     private void demonstratePerformanceOptimization() {
-        System.out.println("📋 PERFORMANCE OPTIMIZATION");
+        System.out.println(" PERFORMANCE OPTIMIZATION");
         System.out.println("-".repeat(50));
         
-        System.out.println("🎯 Optimization Techniques:");
+        System.out.println(" Optimization Techniques:");
         
         // 1. Expression complexity optimization
         System.out.println("\n1. Expression Complexity Optimization:");
@@ -317,7 +317,7 @@ public class PerformanceDemo {
         System.out.println("  Memory After: " + afterMemory + " bytes");
         System.out.println("  Memory Delta: " + (afterMemory - beforeMemory) + " bytes");
         
-        System.out.println("\n💡 Optimization Benefits:");
+        System.out.println("\n Optimization Benefits:");
         System.out.println("   • Expression complexity analysis");
         System.out.println("   • Memory usage optimization");
         System.out.println("   • Performance bottleneck identification");
@@ -328,10 +328,10 @@ public class PerformanceDemo {
      * Demonstrate exception handling and recovery monitoring.
      */
     private void demonstrateExceptionHandling() {
-        System.out.println("📋 EXCEPTION HANDLING & RECOVERY");
+        System.out.println(" EXCEPTION HANDLING & RECOVERY");
         System.out.println("-".repeat(50));
         
-        System.out.println("🎯 Testing Error Scenarios:");
+        System.out.println(" Testing Error Scenarios:");
         
         Customer customer = createSampleCustomer();
         
@@ -365,7 +365,7 @@ public class PerformanceDemo {
             System.out.println("  Has Exception: " + (metrics.hasException() ? "Yes" : "No"));
         }
         
-        System.out.println("\n💡 Exception Handling Benefits:");
+        System.out.println("\n Exception Handling Benefits:");
         System.out.println("   • Graceful error recovery");
         System.out.println("   • Exception performance tracking");
         System.out.println("   • Error rate monitoring");
@@ -376,14 +376,14 @@ public class PerformanceDemo {
      * Demonstrate performance insights and recommendations.
      */
     private void demonstratePerformanceInsights() {
-        System.out.println("📋 PERFORMANCE INSIGHTS & RECOMMENDATIONS");
+        System.out.println(" PERFORMANCE INSIGHTS & RECOMMENDATIONS");
         System.out.println("-".repeat(50));
         
         // Generate performance insights
         Map<String, PerformanceSnapshot> snapshots = performanceMonitor.getAllSnapshots();
         
         if (!snapshots.isEmpty()) {
-            System.out.println("🎯 Performance Analysis:");
+            System.out.println(" Performance Analysis:");
             
             // Find slowest rule
             PerformanceSnapshot slowest = snapshots.values().stream()
@@ -391,7 +391,7 @@ public class PerformanceDemo {
                 .orElse(null);
             
             if (slowest != null) {
-                System.out.println("\n🐌 Slowest Rule:");
+                System.out.println("\n Slowest Rule:");
                 System.out.println("  Name: " + slowest.getRuleName());
                 System.out.println("  Average Time: " + slowest.getAverageEvaluationTime().toMillis() + "ms");
                 System.out.println("  Executions: " + slowest.getEvaluationCount());
@@ -404,7 +404,7 @@ public class PerformanceDemo {
                 .orElse(null);
             
             if (mostExecuted != null) {
-                System.out.println("\n🔥 Most Executed Rule:");
+                System.out.println("\n Most Executed Rule:");
                 System.out.println("  Name: " + mostExecuted.getRuleName());
                 System.out.println("  Executions: " + mostExecuted.getEvaluationCount());
                 System.out.println("  Total Time: " + mostExecuted.getTotalEvaluationTime().toMillis() + "ms");
@@ -412,7 +412,7 @@ public class PerformanceDemo {
             }
             
             // Performance recommendations
-            System.out.println("\n💡 Performance Recommendations:");
+            System.out.println("\n Performance Recommendations:");
             for (PerformanceSnapshot snapshot : snapshots.values()) {
                 if (snapshot.getAverageEvaluationTime().toMillis() > 10) {
                     System.out.println("  ⚠️  Consider optimizing '" + snapshot.getRuleName() + "' (avg: " + 
@@ -429,7 +429,7 @@ public class PerformanceDemo {
             }
         }
         
-        System.out.println("\n💡 Insights Benefits:");
+        System.out.println("\n Insights Benefits:");
         System.out.println("   • Automated performance analysis");
         System.out.println("   • Optimization recommendations");
         System.out.println("   • Performance trend identification");

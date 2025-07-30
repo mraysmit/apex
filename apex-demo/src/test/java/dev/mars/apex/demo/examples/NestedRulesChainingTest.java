@@ -15,7 +15,7 @@ import java.math.RoundingMode;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static dev.mars.apex.demo.examples.SpelRulesEngineDemo.*;
+import static dev.mars.apex.demo.examples.ApexRulesEngineDemo.*;
 
 /**
  * Test class demonstrating nested rules and rule chaining scenarios.

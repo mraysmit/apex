@@ -205,6 +205,8 @@ Start here if you're migrating from external services to datasets:
 ### **Configuration Questions**
 - **YAML syntax and structure**: [Rules Engine User Guide](RULES_ENGINE_USER_GUIDE.md)
 - **Dataset configuration**: [Rules Engine User Guide](RULES_ENGINE_USER_GUIDE.md) dataset section
+- **Rule groups configuration**: [Rules Engine User Guide](RULES_ENGINE_USER_GUIDE.md) rule groups section
+- **Data service configuration**: [Rules Engine User Guide](RULES_ENGINE_USER_GUIDE.md) data service section
 - **Examples and templates**: [Technical Reference](TECHNICAL_REFERENCE.md) examples section
 
 ### **Implementation Questions**

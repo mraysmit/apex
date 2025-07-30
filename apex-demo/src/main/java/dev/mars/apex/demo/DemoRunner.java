@@ -17,8 +17,7 @@ package dev.mars.apex.demo;
  */
 
 import dev.mars.apex.demo.examples.*;
-import dev.mars.apex.demo.core.QuickStartDemo;
-import dev.mars.apex.demo.core.LayeredAPIDemo;
+
 import java.util.Scanner;
 
 /**
@@ -33,6 +32,18 @@ import java.util.Scanner;
  * @version 1.0
  */
 public class DemoRunner {
+
+    /**
+     * Interface for demo classes that can be run by the DemoRunner.
+     * Implementing this interface allows demos to be executed in a consistent manner.
+     */
+    public interface Demo {
+        /**
+         * Run the demonstration.
+         * This method should contain all the logic for the demo execution.
+         */
+        void run();
+    }
 
     public static void main(String[] args) {
         DemoRunner runner = new DemoRunner();

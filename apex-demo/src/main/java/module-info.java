@@ -2,11 +2,15 @@ module dev.mars.apex.demo {
     // Core dependencies
     requires java.base;
     requires java.logging;
+    requires java.sql;
 
     // APEX dependencies
     requires dev.mars.apex.core;
     requires spring.expression;
     requires spring.context;
+
+    // Database dependencies
+    requires org.postgresql.jdbc;
 
     // Logging dependencies
     requires org.slf4j;
@@ -19,9 +23,10 @@ module dev.mars.apex.demo {
 
     // Export main demo packages for external access
     exports dev.mars.apex.demo;
-    exports dev.mars.apex.demo.core;
     exports dev.mars.apex.demo.rulesets;
     exports dev.mars.apex.demo.data to spring.expression;
     exports dev.mars.apex.demo.examples;
     exports dev.mars.apex.demo.advanced;
+    exports dev.mars.apex.demo.bootstrap;
+    exports dev.mars.apex.demo.bootstrap.model to spring.expression;
 }

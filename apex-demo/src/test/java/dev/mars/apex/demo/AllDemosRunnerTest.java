@@ -80,6 +80,6 @@ public class AllDemosRunnerTest {
         }, "Main method with --list should not throw exceptions");
         
         String output = outContent.toString();
-        assertTrue(output.contains("SpEL Rules Engine"), "Should show the banner");
+        assertTrue(output.contains("APEX Rules Engine"), "Should show the banner");
     }
 }
