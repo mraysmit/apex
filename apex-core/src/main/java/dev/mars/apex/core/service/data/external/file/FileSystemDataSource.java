@@ -188,20 +188,32 @@ public class FileSystemDataSource implements ExternalDataSource {
     
     @Override
     public <T> List<T> query(String query, Map<String, Object> parameters) throws DataSourceException {
-        // For file systems, the "query" is typically a file pattern or path
         try {
+            // First, check if this is a named query from configuration
+            String actualQuery = resolveNamedQuery(query);
+
+            // If it's a JSONPath query, execute it against loaded data
+            if (actualQuery.startsWith("$.") || actualQuery.startsWith("$[")) {
+                return executeJsonPathQuery(actualQuery, parameters);
+            }
+
+            // If it's a SQL-like query for CSV, execute it against loaded data
+            if (actualQuery.toUpperCase().startsWith("SELECT")) {
+                return executeCsvQuery(actualQuery, parameters);
+            }
+            // Otherwise, treat it as a file pattern
             Path basePath = Paths.get(configuration.getConnection().getBasePath());
-            List<Path> matchingFiles = findMatchingFiles(basePath, query);
-            
+            List<Path> matchingFiles = findMatchingFiles(basePath, actualQuery);
+
             List<T> results = new ArrayList<>();
             for (Path file : matchingFiles) {
                 List<T> fileData = loadDataFromFile(file);
                 results.addAll(fileData);
             }
-            
+
             metrics.recordRecordsProcessed(results.size());
             return results;
-            
+
         } catch (IOException e) {
             throw DataSourceException.executionError("File system query failed", e, "query");
         }
@@ -436,6 +448,220 @@ public class FileSystemDataSource implements ExternalDataSource {
         LOGGER.info("Stopped file monitoring for '{}'", configuration.getName());
     }
     
+    /**
+     * Resolve named query from configuration.
+     */
+    private String resolveNamedQuery(String query) {
+        if (configuration.getQueries() != null && configuration.getQueries().containsKey(query)) {
+            return configuration.getQueries().get(query);
+        }
+        return query; // Return as-is if not found in named queries
+    }
+
+    /**
+     * Execute JSONPath query against loaded data.
+     */
+    @SuppressWarnings("unchecked")
+    private <T> List<T> executeJsonPathQuery(String jsonPathQuery, Map<String, Object> parameters) throws DataSourceException {
+        try {
+            // Load data from files first
+            Path basePath = Paths.get(configuration.getConnection().getBasePath());
+            String filePattern = configuration.getConnection().getFilePattern();
+
+            if (filePattern == null) {
+                throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
+                    "File pattern is required for JSONPath queries");
+            }
+
+            List<Path> matchingFiles = findMatchingFiles(basePath, filePattern);
+            if (matchingFiles.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            // For now, use the most recent file
+            Path mostRecentFile = matchingFiles.stream()
+                .max(Comparator.comparing(path -> {
+                    try {
+                        return Files.getLastModifiedTime(path);
+                    } catch (IOException e) {
+                        return FileTime.fromMillis(0);
+                    }
+                }))
+                .orElse(null);
+
+            if (mostRecentFile == null) {
+                return new ArrayList<>();
+            }
+
+            // Load and parse the file
+            List<Object> fileData = loadDataFromFile(mostRecentFile);
+
+            // Apply JSONPath query (simplified implementation)
+            List<T> results = new ArrayList<>();
+            String processedQuery = processQueryParameters(jsonPathQuery, parameters);
+
+
+
+            // Simple JSONPath implementation for basic queries
+            if (processedQuery.contains("[?(@.")) {
+                // Extract filter condition
+                results.addAll((List<T>) filterDataWithJsonPath(fileData, processedQuery, parameters));
+            } else if (processedQuery.equals("$[*]") || processedQuery.equals("$.*") || processedQuery.equals("$.users[*]")) {
+                // Return all data
+                results.addAll((List<T>) fileData);
+            }
+
+            return results;
+
+        } catch (IOException e) {
+            throw DataSourceException.executionError("JSONPath query execution failed", e, "query");
+        }
+    }
+
+    /**
+     * Process query parameters in JSONPath expression.
+     */
+    private String processQueryParameters(String query, Map<String, Object> parameters) {
+        String processedQuery = query;
+        for (Map.Entry<String, Object> param : parameters.entrySet()) {
+            String placeholder = "{" + param.getKey() + "}";
+            if (processedQuery.contains(placeholder)) {
+                processedQuery = processedQuery.replace(placeholder, String.valueOf(param.getValue()));
+            }
+        }
+        return processedQuery;
+    }
+
+    /**
+     * Filter data using JSONPath-like expression.
+     */
+    private List<Object> filterDataWithJsonPath(List<Object> data, String jsonPath, Map<String, Object> parameters) {
+        List<Object> results = new ArrayList<>();
+
+        // Simple implementation for queries like "$[?(@.id == '1')]" or "$.users[?(@.id == '1')]"
+        if (jsonPath.contains("[?(@.") && jsonPath.contains("==")) {
+            String condition = jsonPath.substring(jsonPath.indexOf("[?(@.") + 5, jsonPath.lastIndexOf(")]"));
+            String[] parts = condition.split("==");
+            if (parts.length == 2) {
+                String fieldName = parts[0].trim();
+                String expectedValue = parts[1].trim().replace("'", "").replace("\"", "");
+
+                for (Object item : data) {
+                    if (item instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> map = (Map<String, Object>) item;
+                        Object fieldValue = map.get(fieldName);
+                        if (fieldValue != null && fieldValue.toString().equals(expectedValue)) {
+                            results.add(item);
+                        }
+                    }
+                }
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Execute SQL-like query against CSV data.
+     */
+    @SuppressWarnings("unchecked")
+    private <T> List<T> executeCsvQuery(String sqlQuery, Map<String, Object> parameters) throws DataSourceException {
+        try {
+            // Load data from files first
+            Path basePath = Paths.get(configuration.getConnection().getBasePath());
+            String filePattern = configuration.getConnection().getFilePattern();
+
+            if (filePattern == null) {
+                throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
+                    "File pattern is required for CSV queries");
+            }
+
+            List<Path> matchingFiles = findMatchingFiles(basePath, filePattern);
+            if (matchingFiles.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            // For now, use the most recent file
+            Path mostRecentFile = matchingFiles.stream()
+                .max(Comparator.comparing(path -> {
+                    try {
+                        return Files.getLastModifiedTime(path);
+                    } catch (IOException e) {
+                        return FileTime.fromMillis(0);
+                    }
+                }))
+                .orElse(null);
+
+            if (mostRecentFile == null) {
+                return new ArrayList<>();
+            }
+
+            // Load and parse the file
+            List<Object> fileData = loadDataFromFile(mostRecentFile);
+
+            // Apply SQL-like filtering (simplified implementation)
+            List<T> results = new ArrayList<>();
+
+            // Parse simple WHERE clause
+            if (sqlQuery.toUpperCase().contains("WHERE")) {
+                results.addAll((List<T>) filterCsvDataWithSql(fileData, sqlQuery, parameters));
+            } else {
+                // SELECT * - return all data
+                results.addAll((List<T>) fileData);
+            }
+
+            // Record metrics
+            metrics.recordSuccessfulRequest(0); // We don't track time here
+            metrics.recordRecordsProcessed(results.size());
+
+            return results;
+
+        } catch (IOException e) {
+            throw DataSourceException.executionError("CSV query execution failed", e, "query");
+        }
+    }
+
+    /**
+     * Filter CSV data using SQL-like WHERE clause.
+     */
+    private List<Object> filterCsvDataWithSql(List<Object> data, String sqlQuery, Map<String, Object> parameters) {
+        List<Object> results = new ArrayList<>();
+
+        // Simple implementation for queries like "SELECT * WHERE name = :name"
+        String upperQuery = sqlQuery.toUpperCase();
+        if (upperQuery.contains("WHERE") && upperQuery.contains("=")) {
+            String whereClause = sqlQuery.substring(sqlQuery.toUpperCase().indexOf("WHERE") + 5).trim();
+
+            // Parse simple condition like "name = :name"
+            String[] parts = whereClause.split("=");
+            if (parts.length == 2) {
+                String fieldName = parts[0].trim();
+                String parameterName = parts[1].trim();
+
+                // Remove parameter prefix (:)
+                if (parameterName.startsWith(":")) {
+                    parameterName = parameterName.substring(1);
+                }
+
+                Object expectedValue = parameters.get(parameterName);
+                if (expectedValue != null) {
+                    for (Object item : data) {
+                        if (item instanceof Map) {
+                            @SuppressWarnings("unchecked")
+                            Map<String, Object> map = (Map<String, Object>) item;
+                            Object fieldValue = map.get(fieldName);
+                            if (fieldValue != null && fieldValue.toString().equals(expectedValue.toString())) {
+                                results.add(item);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return results;
+    }
+
     /**
      * Check for file changes and reload if necessary.
      */

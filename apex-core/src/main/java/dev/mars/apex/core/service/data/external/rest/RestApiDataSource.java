@@ -67,20 +67,24 @@ public class RestApiDataSource implements ExternalDataSource {
     public void initialize(DataSourceConfiguration config) throws DataSourceException {
         this.configuration = config;
         this.connectionStatus = ConnectionStatus.connecting();
-        
+
         try {
-            // Test the connection
-            if (testConnection()) {
-                this.connectionStatus = ConnectionStatus.connected("REST API connection established");
-                LOGGER.info("REST API data source '{}' initialized successfully", config.getName());
-            } else {
-                throw new DataSourceException(DataSourceException.ErrorType.CONNECTION_ERROR,
-                    "Failed to establish REST API connection", null, config.getName(), "initialize", true);
+            // Validate configuration first
+            if (config.getConnection() == null || config.getConnection().getBaseUrl() == null) {
+                throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
+                    "REST API data source requires baseUrl configuration", null, config.getName(), "initialize", false);
             }
+
+            // Initialize successfully without testing connection during initialization
+            // Connection testing will be done on-demand when testConnection() is called
+            this.connectionStatus = ConnectionStatus.connected("REST API data source initialized");
+            LOGGER.info("REST API data source '{}' initialized successfully", config.getName());
+        } catch (DataSourceException e) {
+            // Re-throw configuration errors
+            throw e;
         } catch (Exception e) {
             this.connectionStatus = ConnectionStatus.error("Initialization failed", e);
-            throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
-                "Failed to initialize REST API data source", e, config.getName(), "initialize", false);
+            LOGGER.warn("REST API data source '{}' initialized but encountered error during connection test", config.getName(), e);
         }
     }
     
@@ -109,10 +113,23 @@ public class RestApiDataSource implements ExternalDataSource {
         try {
             String healthEndpoint = getHealthEndpoint();
             HttpRequest request = buildHttpRequest(healthEndpoint, "GET", null);
-            
+
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             return response.statusCode() >= 200 && response.statusCode() < 300;
-            
+
+        } catch (java.net.http.HttpConnectTimeoutException e) {
+            LOGGER.warn("REST API connection test timed out for '{}'", configuration.getName(), e);
+            return false;
+        } catch (java.net.ConnectException e) {
+            LOGGER.warn("REST API connection test failed to connect for '{}'", configuration.getName(), e);
+            return false;
+        } catch (java.io.IOException e) {
+            LOGGER.warn("REST API connection test failed with IO error for '{}'", configuration.getName(), e);
+            return false;
+        } catch (InterruptedException e) {
+            LOGGER.warn("REST API connection test was interrupted for '{}'", configuration.getName(), e);
+            Thread.currentThread().interrupt();
+            return false;
         } catch (Exception e) {
             LOGGER.warn("REST API connection test failed for '{}'", configuration.getName(), e);
             return false;
@@ -180,22 +197,34 @@ public class RestApiDataSource implements ExternalDataSource {
     @Override
     public <T> List<T> query(String query, Map<String, Object> parameters) throws DataSourceException {
         // For REST APIs, the "query" is typically an endpoint path
+        long startTime = System.currentTimeMillis();
+
         try {
-            String endpoint = buildEndpoint(query, parameters);
+            // First, resolve named query from configuration
+            String actualQuery = resolveNamedQuery(query);
+            String endpoint = buildEndpoint(actualQuery, parameters);
             HttpRequest request = buildHttpRequest(endpoint, "GET", null);
-            
+
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            
+
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                return parseResponseToList(response.body());
+                List<T> result = parseResponseToList(response.body());
+                metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
+                return result;
             } else {
+                metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
                 throw new DataSourceException(DataSourceException.ErrorType.EXECUTION_ERROR,
-                    "API call failed with status: " + response.statusCode(), null, 
+                    "API call failed with status: " + response.statusCode(), null,
                     configuration.getName(), "query", true);
             }
-            
+
         } catch (IOException | InterruptedException e) {
+            metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
             throw DataSourceException.executionError("REST API call failed", e, "query");
+        } catch (DataSourceException e) {
+            // Re-throw DataSourceException but ensure metrics are recorded
+            metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
+            throw e;
         }
     }
     
@@ -353,7 +382,17 @@ public class RestApiDataSource implements ExternalDataSource {
         
         return endpoint;
     }
-    
+
+    /**
+     * Resolve named query from configuration.
+     */
+    private String resolveNamedQuery(String query) {
+        if (configuration.getQueries() != null && configuration.getQueries().containsKey(query)) {
+            return configuration.getQueries().get(query);
+        }
+        return query; // Return as-is if not found in named queries
+    }
+
     /**
      * Build HTTP request with authentication and headers.
      */

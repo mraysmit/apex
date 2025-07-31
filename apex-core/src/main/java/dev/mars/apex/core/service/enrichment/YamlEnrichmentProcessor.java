@@ -256,11 +256,10 @@ public class YamlEnrichmentProcessor {
                    " (type: " + (lookupResult != null ? lookupResult.getClass().getSimpleName() : "null") + ")");
 
         if (lookupResult == null) {
-            LOGGER.fine("Lookup returned null result for key: " + lookupKey);
-            return targetObject;
+            LOGGER.fine("Lookup returned null result for key: " + lookupKey + ", applying default values");
         }
-        
-        // 4. Apply field mappings
+
+        // 4. Apply field mappings (even if lookup result is null, to apply default values)
         return applyFieldMappings(enrichment.getFieldMappings(), lookupResult, targetObject);
     }
     
@@ -530,6 +529,16 @@ public class YamlEnrichmentProcessor {
 
         // Add common variables and functions
         context.setVariable("serviceRegistry", serviceRegistry);
+
+        // If the root object is a Map, add its entries as variables for easier access
+        if (rootObject instanceof Map) {
+            Map<?, ?> rootMap = (Map<?, ?>) rootObject;
+            for (Map.Entry<?, ?> entry : rootMap.entrySet()) {
+                if (entry.getKey() instanceof String) {
+                    context.setVariable((String) entry.getKey(), entry.getValue());
+                }
+            }
+        }
 
         return context;
     }

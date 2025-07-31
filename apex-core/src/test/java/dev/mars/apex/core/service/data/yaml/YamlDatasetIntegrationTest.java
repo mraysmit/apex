@@ -51,6 +51,16 @@ class YamlDatasetIntegrationTest {
         serviceRegistry = new LookupServiceRegistry();
         evaluatorService = new ExpressionEvaluatorService();
         enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
+
+        // Enable detailed logging for debugging
+        java.util.logging.Logger.getLogger("dev.mars.apex.core.service.enrichment").setLevel(java.util.logging.Level.FINEST);
+        java.util.logging.Logger.getLogger("dev.mars.apex.core.service.lookup").setLevel(java.util.logging.Level.FINEST);
+
+        // Create a console handler to see the logs
+        java.util.logging.ConsoleHandler handler = new java.util.logging.ConsoleHandler();
+        handler.setLevel(java.util.logging.Level.FINEST);
+        java.util.logging.Logger.getLogger("dev.mars.apex.core.service.enrichment").addHandler(handler);
+        java.util.logging.Logger.getLogger("dev.mars.apex.core.service.lookup").addHandler(handler);
     }
 
     @Test
@@ -105,14 +115,45 @@ class YamlDatasetIntegrationTest {
         transaction.put("currency", "USD");
         transaction.put("amount", 1000.00);
 
+        // Debug: Print enrichment configuration
+        System.out.println("Enrichment ID: " + enrichment.getId());
+        System.out.println("Enrichment Type: " + enrichment.getType());
+        System.out.println("Enrichment Condition: " + enrichment.getCondition());
+        System.out.println("Lookup Key: " + enrichment.getLookupConfig().getLookupKey());
+        System.out.println("Dataset Type: " + enrichment.getLookupConfig().getLookupDataset().getType());
+        System.out.println("Dataset Key Field: " + enrichment.getLookupConfig().getLookupDataset().getKeyField());
+        System.out.println("Dataset Data Size: " + enrichment.getLookupConfig().getLookupDataset().getData().size());
+        System.out.println("Field Mappings Count: " + enrichment.getFieldMappings().size());
+        System.out.println("Transaction before: " + transaction);
+
+        // Test the lookup service directly first
+        try {
+            dev.mars.apex.core.service.lookup.DatasetLookupService lookupService =
+                dev.mars.apex.core.service.lookup.DatasetLookupServiceFactory.createDatasetLookupService(
+                    "test-currency-service", enrichment.getLookupConfig().getLookupDataset());
+
+            Object lookupResult = lookupService.enrich("USD");
+            System.out.println("Direct lookup result for 'USD': " + lookupResult);
+        } catch (Exception e) {
+            System.out.println("Direct lookup failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+
         // Process enrichment
         Object result = enrichmentProcessor.processEnrichment(enrichment, transaction);
+
+        // Debug: Print transaction after enrichment
+        System.out.println("Transaction after: " + transaction);
 
         // Verify enrichment was processed (result should be the same object)
         assertSame(transaction, result);
 
-        // Note: The actual field mapping would depend on the lookup service implementation
-        // For this test, we're verifying the enrichment processor can handle the configuration
+        // Check if any fields were added
+        System.out.println("Currency name: " + transaction.get("currencyName"));
+        System.out.println("Currency active: " + transaction.get("currencyActive"));
+        System.out.println("Currency region: " + transaction.get("currencyRegion"));
+
+        // For now, just verify the enrichment processor ran without error
         assertNotNull(result);
     }
 
@@ -310,7 +351,7 @@ class YamlDatasetIntegrationTest {
         YamlEnrichment enrichment = new YamlEnrichment();
         enrichment.setId("currency-lookup");
         enrichment.setType("lookup-enrichment");
-        enrichment.setCondition("#transaction.currency != null");
+        enrichment.setCondition("#currency != null");
 
         YamlEnrichment.LookupConfig lookupConfig = new YamlEnrichment.LookupConfig();
 
@@ -340,47 +381,175 @@ class YamlDatasetIntegrationTest {
     }
 
     private YamlEnrichment createAdvancedProductEnrichment() {
-        // Simplified version for testing - just create basic enrichment structure
         YamlEnrichment enrichment = new YamlEnrichment();
         enrichment.setId("product-lookup");
         enrichment.setType("lookup-enrichment");
-        enrichment.setCondition("#order.productId != null");
+        enrichment.setCondition("#productId != null");
+
+        YamlEnrichment.LookupConfig lookupConfig = new YamlEnrichment.LookupConfig();
+        YamlEnrichment.LookupDataset lookupDataset = new YamlEnrichment.LookupDataset();
+        lookupDataset.setType("inline");
+        lookupDataset.setKeyField("code");
+
+        // Inline product dataset
+        List<Map<String, Object>> productData = List.of(
+            Map.of("code", "LAPTOP001", "name", "Business Laptop", "price", 1299.99,
+                   "category", "Electronics", "available", true, "minQuantity", 1, "maxQuantity", 10)
+        );
+        lookupDataset.setData(productData);
+        lookupConfig.setLookupDataset(lookupDataset);
+        lookupConfig.setLookupKey("#productId");
+        enrichment.setLookupConfig(lookupConfig);
+
+        List<YamlEnrichment.FieldMapping> fieldMappings = List.of(
+            createFieldMapping("name", "productName"),
+            createFieldMapping("price", "productPrice"),
+            createFieldMapping("category", "productCategory"),
+            createFieldMapping("available", "productAvailable"),
+            createFieldMapping("minQuantity", "productMinQuantity"),
+            createFieldMapping("maxQuantity", "productMaxQuantity")
+        );
+        enrichment.setFieldMappings(fieldMappings);
+
         return enrichment;
     }
 
     private YamlEnrichment createNestedProductEnrichment() {
-        // Simplified version for testing
         YamlEnrichment enrichment = new YamlEnrichment();
         enrichment.setId("nested-product-lookup");
         enrichment.setType("lookup-enrichment");
-        enrichment.setCondition("#order.productId != null");
+        enrichment.setCondition("#productId != null");
+
+        YamlEnrichment.LookupConfig lookupConfig = new YamlEnrichment.LookupConfig();
+        YamlEnrichment.LookupDataset lookupDataset = new YamlEnrichment.LookupDataset();
+        lookupDataset.setType("inline");
+        lookupDataset.setKeyField("code");
+
+        // Inline product dataset with nested structure
+        Map<String, Object> laptopData = new HashMap<>();
+        laptopData.put("code", "LAPTOP001");
+        laptopData.put("basePrice", 1299.99);
+        laptopData.put("currency", "USD");
+        laptopData.put("volumeDiscount", 0.10);
+        laptopData.put("loyaltyDiscount", 0.05);
+        laptopData.put("available", true);
+        laptopData.put("stockLevel", 150);
+        laptopData.put("availableForSale", 125);
+        laptopData.put("length", 35.5);
+        laptopData.put("width", 24.2);
+        laptopData.put("weight", 1.8);
+        laptopData.put("processor", "Intel i7");
+
+        List<Map<String, Object>> productData = List.of(laptopData);
+        lookupDataset.setData(productData);
+        lookupConfig.setLookupDataset(lookupDataset);
+        lookupConfig.setLookupKey("#productId");
+        enrichment.setLookupConfig(lookupConfig);
+
+        List<YamlEnrichment.FieldMapping> fieldMappings = List.of(
+            createFieldMapping("basePrice", "basePrice"),
+            createFieldMapping("currency", "currency"),
+            createFieldMapping("volumeDiscount", "volumeDiscount"),
+            createFieldMapping("loyaltyDiscount", "loyaltyDiscount"),
+            createFieldMapping("available", "available"),
+            createFieldMapping("stockLevel", "stockLevel"),
+            createFieldMapping("availableForSale", "availableForSale"),
+            createFieldMapping("length", "length"),
+            createFieldMapping("width", "width"),
+            createFieldMapping("weight", "weight"),
+            createFieldMapping("processor", "processor")
+        );
+        enrichment.setFieldMappings(fieldMappings);
+
         return enrichment;
     }
 
     private YamlEnrichment createCountryEnrichment() {
-        // Simplified version for testing
         YamlEnrichment enrichment = new YamlEnrichment();
         enrichment.setId("country-lookup");
         enrichment.setType("lookup-enrichment");
-        enrichment.setCondition("#order.countryCode != null");
+        enrichment.setCondition("#countryCode != null");
+
+        YamlEnrichment.LookupConfig lookupConfig = new YamlEnrichment.LookupConfig();
+        YamlEnrichment.LookupDataset lookupDataset = new YamlEnrichment.LookupDataset();
+        lookupDataset.setType("inline");
+        lookupDataset.setKeyField("code");
+
+        // Country dataset
+        List<Map<String, Object>> countryData = List.of(
+            Map.of("code", "US", "name", "United States", "region", "North America")
+        );
+        lookupDataset.setData(countryData);
+        lookupConfig.setLookupDataset(lookupDataset);
+        lookupConfig.setLookupKey("#countryCode");
+        enrichment.setLookupConfig(lookupConfig);
+
+        List<YamlEnrichment.FieldMapping> fieldMappings = List.of(
+            createFieldMapping("name", "countryName"),
+            createFieldMapping("region", "countryRegion")
+        );
+        enrichment.setFieldMappings(fieldMappings);
+
         return enrichment;
     }
 
     private YamlEnrichment createConditionalEnrichment() {
-        // Simplified version for testing
         YamlEnrichment enrichment = new YamlEnrichment();
         enrichment.setId("premium-customer-enrichment");
         enrichment.setType("lookup-enrichment");
-        enrichment.setCondition("#order.customerId != null && #order.amount > 1000");
+        enrichment.setCondition("#customerId != null && #amount > 1000");
+
+        YamlEnrichment.LookupConfig lookupConfig = new YamlEnrichment.LookupConfig();
+        YamlEnrichment.LookupDataset lookupDataset = new YamlEnrichment.LookupDataset();
+        lookupDataset.setType("inline");
+        lookupDataset.setKeyField("category");
+
+        // Customer category dataset
+        List<Map<String, Object>> categoryData = List.of(
+            Map.of("category", "PREMIUM", "discountRate", 0.15, "priorityProcessing", true)
+        );
+        lookupDataset.setData(categoryData);
+        lookupConfig.setLookupDataset(lookupDataset);
+        lookupConfig.setLookupKey("'PREMIUM'"); // Static lookup for premium customers
+        enrichment.setLookupConfig(lookupConfig);
+
+        List<YamlEnrichment.FieldMapping> fieldMappings = List.of(
+            createFieldMapping("discountRate", "premiumDiscount"),
+            createFieldMapping("priorityProcessing", "priorityProcessing")
+        );
+        enrichment.setFieldMappings(fieldMappings);
+
         return enrichment;
     }
 
     private YamlEnrichment createEnrichmentWithDefaults() {
-        // Simplified version for testing
         YamlEnrichment enrichment = new YamlEnrichment();
         enrichment.setId("currency-with-defaults");
         enrichment.setType("lookup-enrichment");
-        enrichment.setCondition("#transaction.currency != null");
+        enrichment.setCondition("#currency != null");
+
+        YamlEnrichment.LookupConfig lookupConfig = new YamlEnrichment.LookupConfig();
+        YamlEnrichment.LookupDataset lookupDataset = new YamlEnrichment.LookupDataset();
+        lookupDataset.setType("inline");
+        lookupDataset.setKeyField("code");
+
+        // Currency dataset with limited data to test defaults
+        List<Map<String, Object>> currencyData = List.of(
+            Map.of("code", "USD", "name", "US Dollar")
+            // Missing other currencies to test default behavior
+        );
+        lookupDataset.setData(currencyData);
+        lookupConfig.setLookupDataset(lookupDataset);
+        lookupConfig.setLookupKey("#currency");
+        enrichment.setLookupConfig(lookupConfig);
+
+        List<YamlEnrichment.FieldMapping> fieldMappings = List.of(
+            createFieldMappingWithDefault("name", "currencyName", "Unknown Currency"),
+            createFieldMappingWithDefault("active", "currencyActive", false),
+            createFieldMappingWithDefault("region", "currencyRegion", "Unknown")
+        );
+        enrichment.setFieldMappings(fieldMappings);
+
         return enrichment;
     }
 
