@@ -95,17 +95,38 @@ logging:
 # Application information
 info:
   app:
-    name: SpEL Rules Engine REST API
-    description: Comprehensive REST API for the SpEL Rules Engine with YAML Dataset Enrichment
+    name: APEX REST API
+    description: Comprehensive REST API for APEX (Advanced Processing Engine for eXpressions) with YAML Dataset Enrichment
     version: 1.0.0
     encoding: UTF-8
     java:
       version: ${java.version}
   build:
-    artifact: ${project.artifactId:rules-engine-rest-api}
-    name: ${project.name:Rules Engine REST API}
-    description: ${project.description:REST API for the SpEL Rules Engine}
+    artifact: ${project.artifactId:apex-rest-api}
+    name: ${project.name:APEX REST API}
+    description: ${project.description:REST API for APEX}
     version: ${project.version:1.0.0}
+  api:
+    version: v1
+    majorVersion: 1
+    minorVersion: 0
+    patchVersion: 0
+    status: stable
+    releaseDate: "2025-07-31"
+    deprecationPolicy:
+      minimumSupportPeriod: "12 months"
+      warningHeaders: true
+      migrationGuides: true
+    versioning:
+      strategy: "url-path"
+      currentPath: "/api"
+      futureVersions:
+        v2: "/api/v2"
+        v3: "/api/v3"
+    compatibility:
+      backwardCompatible: []
+      forwardCompatible: ["v2-beta"]
+      breakingChanges: []
 
 ---
 # Development profile

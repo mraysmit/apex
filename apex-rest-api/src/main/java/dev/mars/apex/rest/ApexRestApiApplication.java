@@ -41,10 +41,32 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
     info = @Info(
         title = "APEX REST API",
         version = "1.0.0",
-        description = "Comprehensive REST API for APEX (Advanced Processing Engine for eXpressions) with YAML Dataset Enrichment",
+        description = """
+            Comprehensive REST API for APEX (Advanced Processing Engine for eXpressions) with YAML Dataset Enrichment.
+
+            ## API Versioning
+
+            This API follows semantic versioning (SemVer) with URL path versioning:
+            - Current version: v1 (implicit in /api/ paths)
+            - Future versions: /api/v2/, /api/v3/, etc.
+
+            ## Version Support
+
+            - **v1**: Current stable version
+            - Backward compatibility maintained for minimum 12 months after new major version release
+            - Deprecation warnings provided via HTTP headers
+
+            ## Error Handling
+
+            All errors follow RFC 7807 Problem Details format with correlation IDs for request tracking.
+
+            ## Rate Limiting
+
+            Standard rate limits apply. Contact support for enterprise limits.
+            """,
         contact = @Contact(
             name = "APEX Team",
-            email = "support@apex.dev",
+            email = "apexsupport@mars.dev",
             url = "https://github.com/apex/apex"
         ),
         license = @License(
@@ -53,8 +75,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
         )
     ),
     servers = {
-        @Server(url = "http://localhost:8080", description = "Development Server"),
-        @Server(url = "https://api.apex.dev", description = "Production Server")
+        @Server(url = "http://localhost:8080", description = "Development Server (v1)"),
+        @Server(url = "https://api.apex.dev", description = "Production Server (v1)"),
+        @Server(url = "https://api.apex.dev/v2", description = "Production Server (v2 - Coming Soon)")
     }
 )
 public class ApexRestApiApplication {

@@ -79,18 +79,18 @@ class ApexRestApiIntegrationTest {
             HttpEntity<RuleEvaluationRequest> entity = new HttpEntity<>(request, headers);
 
             // When
-            ResponseEntity<RuleEvaluationResponse> response = restTemplate.postForEntity(
-                getBaseUrl() + "/api/rules/check", entity, RuleEvaluationResponse.class);
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                getBaseUrl() + "/api/rules/check", entity, Map.class);
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertNotNull(response.getBody());
-            assertTrue(response.getBody().isSuccess());
-            assertTrue(response.getBody().isMatched());
-            assertEquals("check-rule", response.getBody().getRuleName());
-            assertEquals("Rule matched", response.getBody().getMessage());
-            assertNotNull(response.getBody().getTimestamp());
-            assertNotNull(response.getBody().getEvaluationId());
+            assertEquals(true, response.getBody().get("success"));
+            assertEquals(true, response.getBody().get("matched"));
+            assertEquals("check-rule", response.getBody().get("ruleName"));
+            assertEquals("Rule matched", response.getBody().get("message"));
+            assertNotNull(response.getBody().get("timestamp"));
+            assertNotNull(response.getBody().get("evaluationId"));
         }
 
         @Test
@@ -108,16 +108,16 @@ class ApexRestApiIntegrationTest {
             HttpEntity<RuleEvaluationRequest> entity = new HttpEntity<>(request, headers);
 
             // When
-            ResponseEntity<RuleEvaluationResponse> response = restTemplate.postForEntity(
-                getBaseUrl() + "/api/rules/check", entity, RuleEvaluationResponse.class);
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                getBaseUrl() + "/api/rules/check", entity, Map.class);
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertNotNull(response.getBody());
-            assertTrue(response.getBody().isSuccess());
-            assertFalse(response.getBody().isMatched());
-            assertEquals("check-rule", response.getBody().getRuleName());
-            assertEquals("Rule did not match", response.getBody().getMessage());
+            assertEquals(true, response.getBody().get("success"));
+            assertEquals(false, response.getBody().get("matched"));
+            assertEquals("check-rule", response.getBody().get("ruleName"));
+            assertEquals("Rule did not match", response.getBody().get("message"));
         }
 
         @Test
@@ -137,14 +137,14 @@ class ApexRestApiIntegrationTest {
             HttpEntity<RuleEvaluationRequest> entity = new HttpEntity<>(request, headers);
 
             // When
-            ResponseEntity<RuleEvaluationResponse> response = restTemplate.postForEntity(
-                getBaseUrl() + "/api/rules/check", entity, RuleEvaluationResponse.class);
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                getBaseUrl() + "/api/rules/check", entity, Map.class);
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertNotNull(response.getBody());
-            assertTrue(response.getBody().isSuccess());
-            assertTrue(response.getBody().isMatched());
+            assertEquals(true, response.getBody().get("success"));
+            assertEquals(true, response.getBody().get("matched"));
         }
 
         @Test
@@ -163,14 +163,14 @@ class ApexRestApiIntegrationTest {
             HttpEntity<RuleEvaluationRequest> entity = new HttpEntity<>(request, headers);
 
             // When
-            ResponseEntity<RuleEvaluationResponse> response = restTemplate.postForEntity(
-                getBaseUrl() + "/api/rules/check", entity, RuleEvaluationResponse.class);
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                getBaseUrl() + "/api/rules/check", entity, Map.class);
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertNotNull(response.getBody());
-            assertTrue(response.getBody().isSuccess());
-            assertTrue(response.getBody().isMatched());
+            assertEquals(true, response.getBody().get("success"));
+            assertEquals(true, response.getBody().get("matched"));
         }
     }
 
@@ -193,14 +193,14 @@ class ApexRestApiIntegrationTest {
             HttpEntity<RuleEvaluationRequest> entity = new HttpEntity<>(request, headers);
 
             // When
-            ResponseEntity<RuleEvaluationResponse> response = restTemplate.postForEntity(
-                getBaseUrl() + "/api/rules/check", entity, RuleEvaluationResponse.class);
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                getBaseUrl() + "/api/rules/check", entity, Map.class);
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertNotNull(response.getBody());
-            assertTrue(response.getBody().isSuccess());
-            assertFalse(response.getBody().isMatched()); // Error recovery returns false
+            assertEquals(true, response.getBody().get("success"));
+            assertEquals(false, response.getBody().get("matched")); // Error recovery returns false
         }
 
         @Test
@@ -218,14 +218,14 @@ class ApexRestApiIntegrationTest {
             HttpEntity<RuleEvaluationRequest> entity = new HttpEntity<>(request, headers);
 
             // When
-            ResponseEntity<RuleEvaluationResponse> response = restTemplate.postForEntity(
-                getBaseUrl() + "/api/rules/check", entity, RuleEvaluationResponse.class);
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                getBaseUrl() + "/api/rules/check", entity, Map.class);
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertNotNull(response.getBody());
-            assertTrue(response.getBody().isSuccess());
-            assertFalse(response.getBody().isMatched()); // Error recovery returns false
+            assertEquals(true, response.getBody().get("success"));
+            assertEquals(false, response.getBody().get("matched")); // Error recovery returns false
         }
 
         @Test

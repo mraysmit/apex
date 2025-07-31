@@ -42,30 +42,25 @@ import java.util.Map;
 @Schema(description = "Request for rule evaluation")
 public class RuleEvaluationRequest {
     
-    @Schema(description = "SpEL expression or rule condition to evaluate", 
-            example = "#age >= 18 && #email != null")
+    @Schema(description = "SpEL expression or rule condition to evaluate", example = "#age >= 18 && #email != null")
     @JsonProperty("condition")
     @NotBlank(message = "Condition cannot be blank")
     private String condition;
     
-    @Schema(description = "Data object or facts to evaluate the rule against",
-            example = "{\"age\": 25, \"email\": \"john@example.com\", \"balance\": 1500}")
+    @Schema(description = "Data object or facts to evaluate the rule against", example = "{\"age\": 25, \"email\": \"john@example.com\", \"balance\": 1500}")
     @JsonProperty("data")
     @NotNull(message = "Data cannot be null")
     private Map<String, Object> data;
     
-    @Schema(description = "Optional rule name for identification",
-            example = "customer-validation")
+    @Schema(description = "Optional rule name for identification", example = "customer-validation")
     @JsonProperty("ruleName")
     private String ruleName;
     
-    @Schema(description = "Optional message to return when rule matches",
-            example = "Customer validation passed")
+    @Schema(description = "Optional message to return when rule matches", example = "Customer validation passed")
     @JsonProperty("message")
     private String message;
     
-    @Schema(description = "Whether to include performance metrics in the response",
-            example = "true")
+    @Schema(description = "Whether to include performance metrics in the response", example = "true")
     @JsonProperty("includeMetrics")
     private boolean includeMetrics = false;
     
