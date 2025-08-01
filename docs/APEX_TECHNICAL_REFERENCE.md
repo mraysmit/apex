@@ -4,19 +4,62 @@
 **Date:** 2025-07-30
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
+Welcome to the APEX Technical Reference Guide! This document provides detailed technical information for developers, architects, and system integrators working with APEX. While the User Guide focuses on getting started and common use cases, this reference dives deep into the technical architecture, advanced patterns, and implementation details.
+
 ## External Data Source Integration
 
 ### Overview
 
-APEX now includes comprehensive external data source integration capabilities, providing enterprise-grade data access through a unified interface. This integration supports multiple data source types with advanced features like connection pooling, health monitoring, caching, and automatic failover.
+One of APEX's most powerful features is its ability to connect to external data sources seamlessly. Think of this as giving your rules access to live data from databases, web APIs, files, and other systems - all through a simple, unified interface.
+
+**What does this mean for you?**
+Instead of having to write custom code to fetch data from different systems, APEX handles all the complexity of connecting to various data sources. Your rules can simply reference data like `#userDatabase.getUser(123)` or `#priceAPI.getCurrentPrice('AAPL')`, and APEX takes care of the rest.
+
+**Enterprise-grade features included:**
+- **Connection pooling**: Efficiently manages database connections for high performance
+- **Health monitoring**: Automatically checks if data sources are available and healthy
+- **Caching**: Stores frequently accessed data in memory for faster access
+- **Automatic failover**: If one data source fails, APEX can automatically try backup sources
+- **Load balancing**: Distributes requests across multiple data sources for better performance
 
 ### Supported Data Source Types
 
-1. **Database Sources**: PostgreSQL, MySQL, Oracle, SQL Server, H2
-2. **REST API Sources**: HTTP/HTTPS APIs with various authentication methods
-3. **File System Sources**: CSV, JSON, XML, fixed-width, plain text files
-4. **Cache Sources**: In-memory caching with LRU eviction and TTL support
-5. **Custom Sources**: Extensible plugin architecture for custom implementations
+APEX supports five main types of data sources, each designed for different use cases. You can mix and match these types based on your needs:
+
+#### 1. Database Sources
+Connect to relational databases where your business data lives.
+- **Supported databases**: PostgreSQL, MySQL, Oracle, SQL Server, H2
+- **Best for**: Customer data, transaction records, master data, audit logs
+- **Features**: Connection pooling, prepared statements, transaction support
+- **Example use**: Looking up customer credit scores, validating account balances
+
+#### 2. REST API Sources
+Integrate with web services and external APIs.
+- **Protocols**: HTTP/HTTPS with various authentication methods (Bearer tokens, API keys, OAuth2)
+- **Best for**: Real-time data, third-party services, microservices integration
+- **Features**: Circuit breakers, retry logic, timeout handling
+- **Example use**: Getting current exchange rates, validating addresses with postal services
+
+#### 3. File System Sources
+Process data from files on your local system or network drives.
+- **Supported formats**: CSV, JSON, XML, fixed-width text files, plain text
+- **Best for**: Batch data processing, configuration files, data imports
+- **Features**: File watching, automatic parsing, encoding support
+- **Example use**: Processing daily trade files, loading reference data from CSV files
+
+#### 4. Cache Sources
+High-speed in-memory data storage for frequently accessed information.
+- **Features**: LRU (Least Recently Used) eviction, TTL (Time To Live) support
+- **Best for**: Frequently accessed lookup data, computed results, session data
+- **Performance**: Microsecond access times for cached data
+- **Example use**: Caching currency conversion rates, storing user preferences
+
+#### 5. Custom Sources
+Build your own data source integrations for specialized needs.
+- **Architecture**: Extensible plugin system with well-defined interfaces
+- **Best for**: Legacy systems, proprietary protocols, specialized data formats
+- **Features**: Full control over data retrieval and caching logic
+- **Example use**: Connecting to mainframe systems, custom message queues
 
 ### External Data Source Architecture
 
@@ -49,69 +92,121 @@ flowchart TD
 
 ### Key External Data Source Components
 
-#### Core Interfaces
-- `ExternalDataSource` - Main interface for all data source implementations
-- `DataSourceConfiguration` - Configuration class for data sources
-- `DataSourceType` - Enumeration of supported data source types
-- `ConnectionStatus` - Health and connection status information
-- `DataSourceMetrics` - Performance and usage metrics
+Understanding the architecture helps you work more effectively with APEX's data integration features. The system is organized into three main layers:
 
-#### Management Components
-- `DataSourceConfigurationService` - High-level service for configuration management
-- `DataSourceManager` - Coordinates multiple data sources with load balancing and failover
-- `DataServiceManager` - Core manager for programmatic data source configuration and access
-- `DemoDataServiceManager` - Demo implementation with pre-configured mock data sources
-- `DataSourceRegistry` - Centralized registry for all data sources with health monitoring
-- `DataSourceFactory` - Creates and configures data source instances with resource caching
+#### Core Interfaces (The Foundation)
+These are the basic building blocks that define how data sources work:
 
-#### Implementation Classes
-- `DatabaseDataSource` - Database connectivity with connection pooling
-- `RestApiDataSource` - REST API integration with circuit breakers
-- `FileSystemDataSource` - File processing with format-specific readers
-- `CacheDataSource` - In-memory caching with TTL and eviction policies
+- **`ExternalDataSource`** - The main contract that all data sources must implement. Think of this as the "blueprint" that ensures all data sources work the same way.
+- **`DataSourceConfiguration`** - Holds all the settings for a data source (like connection strings, timeouts, etc.)
+- **`DataSourceType`** - An enumeration that identifies what kind of data source you're working with (DATABASE, REST_API, FILE_SYSTEM, etc.)
+- **`ConnectionStatus`** - Tracks whether a data source is healthy and available
+- **`DataSourceMetrics`** - Collects performance data (response times, success rates, error counts)
+
+#### Management Components (The Orchestrators)
+These components coordinate and manage multiple data sources:
+
+- **`DataSourceConfigurationService`** - The high-level service that loads and manages your YAML configurations. This is usually your main entry point.
+- **`DataSourceManager`** - The smart coordinator that handles load balancing between multiple data sources and automatic failover when sources go down.
+- **`DataServiceManager`** - A simpler manager for programmatic configuration, great for testing and demos.
+- **`DemoDataServiceManager`** - Pre-configured with sample data sources for quick demos and testing.
+- **`DataSourceRegistry`** - The central directory that keeps track of all available data sources and monitors their health.
+- **`DataSourceFactory`** - The factory that creates and configures data source instances, handling resource management and caching.
+
+#### Implementation Classes (The Workers)
+These are the actual implementations that do the work of connecting to different systems:
+
+- **`DatabaseDataSource`** - Handles database connections with connection pooling, prepared statements, and transaction management.
+- **`RestApiDataSource`** - Manages HTTP/HTTPS API calls with circuit breakers, retries, and authentication.
+- **`FileSystemDataSource`** - Processes files with format-specific readers and file system monitoring.
+- **`CacheDataSource`** - Provides high-speed in-memory caching with intelligent eviction policies.
 
 ### Programmatic Data Service Configuration
 
-In addition to YAML-based external data source configuration, APEX provides programmatic data service configuration through the `DataServiceManager` and related classes:
+While YAML configuration is great for production systems, sometimes you need to set up data sources programmatically - especially for testing, demos, or when building dynamic systems. APEX provides a simple programmatic API through the `DataServiceManager`.
+
+**When to use programmatic configuration:**
+- Unit testing and integration testing
+- Demo applications and proof-of-concepts
+- Dynamic systems where data sources are determined at runtime
+- Embedded applications where YAML files aren't practical
+
+**Basic setup example:**
 
 ```java
-// Basic data service setup
+// Create a data service manager
 DataServiceManager dataManager = new DataServiceManager();
 
-// Load individual data sources
+// Load individual data sources one at a time
 dataManager.loadDataSource(new MockDataSource("ProductsDataSource", "products"));
 dataManager.loadDataSource(new CustomDataSource("CustomerDataSource", "customer"));
 
-// Load multiple data sources at once
+// Or load multiple data sources at once for efficiency
 dataManager.loadDataSources(
     new MockDataSource("InventoryDataSource", "inventory"),
     new MockDataSource("LookupServicesDataSource", "lookupServices")
 );
 
-// Request data for rule evaluation
+// Request data for use in your rules
 List<Product> products = dataManager.requestData("products");
 Customer customer = dataManager.requestData("customer");
 ```
 
+**Line-by-line explanation:**
+- **Line 2**: Create a new `DataServiceManager` instance - this is your central coordinator for managing all data sources
+- **Line 5**: Load a single data source with a descriptive name ("ProductsDataSource") and data type identifier ("products")
+- **Line 6**: Load another data source for customer data - each data source has a unique name and type
+- **Line 9-12**: Alternative approach to load multiple data sources in a single method call for better performance
+- **Line 10**: Create an inventory data source that will provide inventory-related data
+- **Line 11**: Create a lookup services data source for reference data and enrichment
+- **Line 15**: Request typed data from the "products" data source - returns a strongly-typed List<Product>
+- **Line 16**: Request customer data - the generic method automatically handles type casting based on the data source configuration
+
+**What's happening here:**
+1. **Create the manager**: `DataServiceManager` is your central coordinator
+2. **Load data sources**: Register your data sources with descriptive names
+3. **Request data**: Use simple method calls to get data for your rules
+4. **Type safety**: The generic `requestData()` method returns properly typed data
+
 #### Demo Data Service Manager
 
-For testing and demonstration purposes, use the `DemoDataServiceManager`:
+The `DemoDataServiceManager` is your best friend for getting started quickly, running demos, or testing your rules. It comes pre-loaded with realistic sample data that covers common business scenarios.
+
+**Perfect for:**
+- Learning APEX without setting up real databases
+- Creating demos and proof-of-concepts
+- Unit testing your rules with consistent test data
+- Prototyping new rule logic before connecting to production systems
 
 ```java
-// Initialize with pre-configured mock data
+// One line to get a fully configured demo environment
 DemoDataServiceManager demoManager = new DemoDataServiceManager();
 demoManager.initializeWithMockData();
 
-// Available data types:
-// - products: List of financial products
-// - inventory: Available inventory items
-// - customer: Sample customer data
-// - templateCustomer: Template customer for testing
-// - lookupServices: Lookup service configurations
-// - sourceRecords: Trade records for matching
-// - matchingRecords: Dynamic matching results
-// - nonMatchingRecords: Dynamic non-matching results
+// Now you have access to realistic sample data for various scenarios
 ```
+
+**Line-by-line explanation:**
+- **Line 2**: Create a new `DemoDataServiceManager` instance - this extends the basic DataServiceManager with pre-configured demo data
+- **Line 3**: Initialize the manager with realistic mock data for all supported data types - this loads sample products, customers, inventory, etc.
+- **Line 5**: Comment indicating that the manager is now ready to provide data for testing and demonstration purposes
+
+**Available data types and what they contain:**
+
+- **`products`**: List of financial products (bonds, equities, derivatives) with realistic attributes
+- **`inventory`**: Available inventory items with quantities, prices, and categories
+- **`customer`**: Sample customer data with demographics, account information, and transaction history
+- **`templateCustomer`**: A template customer object perfect for testing validation rules
+- **`lookupServices`**: Pre-configured lookup service data for enrichment testing
+- **`sourceRecords`**: Trade records that can be used for matching and validation scenarios
+- **`matchingRecords`**: Dynamic matching results that demonstrate complex rule logic
+- **`nonMatchingRecords`**: Records that fail matching criteria, useful for testing negative cases
+
+**Why use the demo manager?**
+- **No setup required**: Works immediately without any configuration
+- **Realistic data**: Sample data reflects real-world business scenarios
+- **Comprehensive coverage**: Includes data for most common rule testing scenarios
+- **Consistent results**: Same data every time, making tests predictable
 
 #### Custom Data Source Implementation
 
@@ -157,6 +252,22 @@ public class DatabaseDataSource implements DataSource {
 }
 ```
 
+**Line-by-line explanation:**
+- **Line 1**: Class declaration implementing the `DataSource` interface - this ensures all data sources have a consistent API
+- **Line 2**: Private field to store the human-readable name of this data source (e.g., "Customer Database")
+- **Line 3**: Private field to store the data type this source provides (e.g., "customer", "product")
+- **Line 4**: Private field to hold the database connection object for executing queries
+- **Line 6**: Constructor that initializes all required fields - name for identification, dataType for routing, connection for data access
+- **Line 7-9**: Store the provided parameters in instance fields for later use
+- **Line 12**: Generic method that retrieves data of type T based on the requested dataType and optional parameters
+- **Line 13-15**: Guard clause that returns null if this data source doesn't support the requested data type
+- **Line 18**: Build a SQL query string based on the data type and parameters (implementation would be specific to your database schema)
+- **Line 19**: Execute the query using the database connection and return the typed result
+- **Line 23**: Method to check if this data source can provide data for a specific type
+- **Line 24**: Simple string comparison to determine if this source handles the requested data type
+- **Line 27-29**: Getter method to return the name of this data source
+- **Line 31-33**: Getter method to return the data type this source provides
+
 ### Integration with Rules Engine
 
 Both YAML-based and programmatic data source configurations integrate seamlessly with the rules engine:
@@ -191,11 +302,37 @@ RulesEngine engine = new RulesEngine(configuration);
 RuleResult result = engine.evaluate(facts);
 ```
 
+**Line-by-line explanation:**
+- **Line 2**: Get the singleton instance of the configuration service that manages YAML-based data source configurations
+- **Line 3**: Load the YAML configuration file containing data source definitions (databases, APIs, files, etc.)
+- **Line 4**: Initialize the configuration service with the loaded YAML configuration
+- **Line 7**: Retrieve a specific data source by name from the configuration service
+- **Line 8**: Create a parameter map for the database query - in this case, passing a user ID
+- **Line 9**: Execute a named query ("getUserById") with parameters and get the result object
+- **Line 12**: Get the data source manager that handles load balancing and failover between multiple data sources
+- **Line 13**: Execute a query with automatic failover - if one database fails, it tries backup databases
+- **Line 16**: Create a demo data service manager for testing and demonstration purposes
+- **Line 17**: Initialize with realistic mock data for all supported data types
+- **Line 20**: Create a facts map that will hold all data available to the rules engine
+- **Line 21**: Add product data to the facts map using the key "products"
+- **Line 22**: Add customer data to the facts map using the key "customer"
+- **Line 23**: Add inventory data to the facts map using the key "inventory"
+- **Line 26**: Create a rules engine instance with the provided configuration
+- **Line 27**: Evaluate all rules against the facts map and return the combined result
+
 ## Architecture Overview
 
 ### System Architecture
 
-The APEX Rules Engine provides a comprehensive, layered architecture designed for enterprise-scale rule processing:
+Understanding APEX's architecture helps you make better decisions about how to use it in your systems. APEX is built with a layered architecture that balances simplicity for basic use cases with power for complex enterprise scenarios.
+
+**The key principle**: Start simple and add complexity only when you need it.
+
+The architecture is designed around several core ideas:
+- **Progressive complexity**: Three API layers from ultra-simple to advanced
+- **Separation of concerns**: Each layer has a specific responsibility
+- **Enterprise-ready**: Built-in monitoring, error handling, and performance optimization
+- **Extensible**: Plugin architecture for custom data sources and rule patterns
 
 ```mermaid
 graph TB
@@ -207,37 +344,37 @@ graph TB
     end
 
     subgraph "API Layer"
-        SIMPLE[Ultra-Simple API<br/>Rules.check()]
-        TEMPLATE[Template-Based API<br/>RuleSet.validation()]
-        ADVANCED[Advanced API<br/>RulesEngineConfiguration]
+        SIMPLE["Ultra-Simple API<br>Rules.check()"]
+        TEMPLATE["Template-Based API<br>RuleSet.validation()"]
+        ADVANCED["Advanced API<br>RulesEngineConfiguration"]
     end
 
     subgraph "Core Engine"
-        ENGINE[Rules Engine]
-        GROUPS[Rule Groups<br/>AND/OR Logic]
-        CHAINS[Rule Chains<br/>6 Patterns]
-        EVAL[Expression Evaluator<br/>SpEL Integration]
+        ENGINE["Rules Engine"]
+        GROUPS["Rule Groups<br>AND/OR Logic"]
+        CHAINS["Rule Chains<br>6 Patterns"]
+        EVAL["Expression Evaluator<br>SpEL Integration"]
     end
 
-    subgraph "Configuration & Management"
-        YAML[YAML Configuration]
-        PROG[Programmatic Config]
-        META[Metadata Management]
-        VALID[Validation Engine]
+    subgraph "Configuration and Management"
+        YAML["YAML Configuration"]
+        PROG["Programmatic Config"]
+        META["Metadata Management"]
+        VALID["Validation Engine"]
     end
 
     subgraph "Data Integration"
-        DATASVC[Data Service Manager]
-        EXTERNAL[External Data Sources]
-        CACHE[Caching Layer]
-        ENRICH[Data Enrichment]
+        DATASVC["Data Service Manager"]
+        EXTERNAL["External Data Sources"]
+        CACHE["Caching Layer"]
+        ENRICH["Data Enrichment"]
     end
 
-    subgraph "Monitoring & Support"
-        PERF[Performance Monitor]
-        ERROR[Error Recovery]
-        METRICS[Metrics Collection]
-        HEALTH[Health Checks]
+    subgraph "Monitoring and Support"
+        PERF["Performance Monitor"]
+        ERROR["Error Recovery"]
+        METRICS["Metrics Collection"]
+        HEALTH["Health Checks"]
     end
 
     subgraph "Foundation"
@@ -322,7 +459,13 @@ graph TB
 
 ### Core Components
 
-The SpEL Rules Engine is built with a layered architecture that provides flexibility while maintaining performance:
+APEX's architecture is like a well-organized building with different floors serving different purposes. Each layer builds on the one below it, providing more functionality while maintaining the simplicity of the lower layers.
+
+**Think of it this way:**
+- **Foundation floor**: Spring Expression Language (SpEL) provides the basic rule evaluation engine
+- **Core floor**: The Rules Engine handles rule execution, groups, and chains
+- **Service floor**: Support services provide monitoring, error handling, and configuration
+- **API floor**: Three different APIs provide different levels of complexity and power
 
 ```mermaid
 flowchart TD
@@ -368,30 +511,40 @@ flowchart TD
 
 ### Key Classes and Interfaces
 
-#### Core Engine Classes
-- `RulesEngine` - Main rule execution engine
-- `RulesEngineConfiguration` - Configuration management
-- `Rule` - Individual rule representation
-- `RuleGroup` - Collection of related rules with AND/OR operators
-- `RuleGroupBuilder` - Builder pattern for creating rule groups
-- `RuleResult` - Execution result with metadata
+Here are the main classes you'll work with when using APEX. Don't worry about memorizing all of these - you'll naturally learn the ones you need as you use the system.
 
-#### API Layer Classes
-- `Rules` - Static utility class for ultra-simple API
-- `RuleSet` - Template-based rule creation
-- `ValidationBuilder` - Fluent validation interface
-- `RulesService` - Instance-based service for dependency injection
+#### Core Engine Classes (The Heart of APEX)
+These classes handle the actual rule execution:
 
-#### Performance Monitoring
-- `RulePerformanceMonitor` - Central monitoring service
-- `RulePerformanceMetrics` - Individual rule metrics
-- `PerformanceSnapshot` - Aggregated performance data
-- `PerformanceAnalyzer` - Analysis and insights generation
+- **`RulesEngine`** - The main engine that executes your rules. This is like the conductor of an orchestra, coordinating all the other components.
+- **`RulesEngineConfiguration`** - Holds all your configuration settings. Think of this as the blueprint that tells the engine how to behave.
+- **`Rule`** - Represents a single business rule. Each rule has a condition, message, and metadata.
+- **`RuleGroup`** - A collection of related rules that work together with AND/OR logic (like "all validation rules must pass").
+- **`RuleGroupBuilder`** - A helper class that makes it easy to create rule groups programmatically.
+- **`RuleResult`** - Contains the results of rule execution, including whether rules passed, failed, or had errors.
 
-#### Error Handling
-- `ErrorRecoveryService` - Error recovery management
-- `RuleEngineException` - Base exception hierarchy
-- `ErrorRecoveryStrategy` - Recovery strategy enumeration
+#### API Layer Classes (Your Entry Points)
+These classes provide different ways to interact with APEX:
+
+- **`Rules`** - Static utility methods for quick, one-line rule evaluations. Perfect for simple scenarios.
+- **`RuleSet`** - Template-based rule creation with pre-built patterns for common scenarios like validation.
+- **`ValidationBuilder`** - A fluent interface for building validation rule sets in a readable way.
+- **`RulesService`** - An instance-based service that works well with dependency injection frameworks like Spring.
+
+#### Performance Monitoring (Keeping Things Fast)
+These classes help you understand and optimize rule performance:
+
+- **`RulePerformanceMonitor`** - The central service that tracks how fast your rules execute.
+- **`RulePerformanceMetrics`** - Detailed metrics for individual rules (execution time, success rate, etc.).
+- **`PerformanceSnapshot`** - A point-in-time view of overall system performance.
+- **`PerformanceAnalyzer`** - Analyzes performance data and provides insights and recommendations.
+
+#### Error Handling (When Things Go Wrong)
+These classes help APEX handle errors gracefully:
+
+- **`ErrorRecoveryService`** - Manages how APEX responds to errors (continue processing, stop, retry, etc.).
+- **`RuleEngineException`** - The base class for all APEX-specific exceptions, with detailed error information.
+- **`ErrorRecoveryStrategy`** - Defines different strategies for handling errors (like CONTINUE_ON_ERROR or FAIL_FAST).
 
 ## Rule Configuration Methods
 
@@ -448,22 +601,54 @@ flowchart TD
 
 ## Implementation Patterns
 
-### 1. Ultra-Simple API Pattern
+APEX provides three distinct implementation patterns, each designed for different use cases and complexity levels. Think of these as different tools in your toolbox - use the simplest one that meets your needs.
+
+### 1. Ultra-Simple API Pattern (For Quick Tasks)
+
+**When to use**: One-off rule evaluations, simple validation checks, prototyping
+**Complexity**: Very Low
+**Setup time**: Seconds
+
+This pattern is perfect when you just need to check one rule quickly:
 
 ```java
-// Static utility methods for quick evaluations
+// Static utility methods for instant rule evaluation
 public class Rules {
+    // Check if a rule passes (returns true/false)
     public static boolean check(String expression, Object data) {
         return RulesEngine.getDefault().evaluate(expression, data).isSuccess();
     }
-    
+
+    // Calculate a value using a rule expression
     public static <T> T calculate(String expression, Object data, Class<T> returnType) {
         return RulesEngine.getDefault().calculate(expression, data, returnType);
     }
 }
+
+// Usage examples:
+boolean isEligible = Rules.check("#age >= 18", customer);
+BigDecimal discount = Rules.calculate("#amount * 0.1", order, BigDecimal.class);
 ```
 
-### 2. Template-Based API Pattern
+**Line-by-line explanation:**
+- **Line 2**: Static utility class that provides the simplest possible API for rule evaluation
+- **Line 4**: Static method that evaluates a rule expression and returns true if the rule passes, false otherwise
+- **Line 5**: Get the default rules engine instance, evaluate the expression against the data, and check if the result is successful
+- **Line 9**: Generic static method that evaluates an expression and returns a calculated value of the specified type
+- **Line 10**: Use the default rules engine to calculate a value from the expression, with automatic type conversion
+- **Line 14**: Example usage - check if a customer is eligible (age >= 18) using the customer object
+- **Line 15**: Example usage - calculate a 10% discount on an order amount and return it as a BigDecimal
+
+**Benefits**: No setup required, works immediately, perfect for simple scenarios
+**Limitations**: No configuration options, no performance monitoring, no complex rule relationships
+
+### 2. Template-Based API Pattern (For Common Scenarios)
+
+**When to use**: Validation scenarios, common business patterns, structured rule sets
+**Complexity**: Low to Medium
+**Setup time**: Minutes
+
+This pattern provides pre-built templates for common use cases:
 
 ```java
 // Fluent builder for common validation scenarios
@@ -471,44 +656,127 @@ public class RuleSet {
     public static ValidationBuilder validation() {
         return new ValidationBuilder();
     }
-    
+
     public static class ValidationBuilder {
+        // Pre-built validation patterns
         public ValidationBuilder ageCheck(int minimumAge) {
             return addRule("#data.age >= " + minimumAge);
         }
-        
+
         public ValidationBuilder emailRequired() {
             return addRule("#data.email != null && #data.email.contains('@')");
         }
-        
+
+        public ValidationBuilder balanceMinimum(BigDecimal minimum) {
+            return addRule("#data.balance >= " + minimum);
+        }
+
         public RulesEngine build() {
             return new RulesEngine(configuration);
         }
     }
 }
+
+// Usage example:
+RulesEngine validator = RuleSet.validation()
+    .ageCheck(18)
+    .emailRequired()
+    .balanceMinimum(new BigDecimal("1000"))
+    .build();
 ```
 
-### 3. Advanced Configuration Pattern
+**Line-by-line explanation:**
+- **Line 2**: Main RuleSet class that provides factory methods for creating different types of rule builders
+- **Line 3**: Static factory method that returns a new ValidationBuilder instance for creating validation rule sets
+- **Line 7**: Inner class that implements the fluent builder pattern for validation rules
+- **Line 9**: Method that adds an age validation rule with a configurable minimum age requirement
+- **Line 10**: Create a SpEL expression that checks if the data's age field is greater than or equal to the minimum
+- **Line 13**: Method that adds an email validation rule requiring a non-null email with an @ symbol
+- **Line 14**: Create a SpEL expression that validates email presence and basic format
+- **Line 17**: Method that adds a balance validation rule with a configurable minimum balance
+- **Line 18**: Create a SpEL expression that checks if the balance meets the minimum requirement
+- **Line 21**: Build method that creates and returns a configured RulesEngine instance
+- **Line 22**: Construct the rules engine with the accumulated configuration from the builder
+- **Line 27**: Example usage showing the fluent API in action
+- **Line 28**: Add an age check requiring customers to be at least 18 years old
+- **Line 29**: Add an email validation requirement
+- **Line 30**: Add a minimum balance requirement of 1000 (currency units)
+- **Line 31**: Build the final rules engine with all validation rules configured
+
+**Benefits**: Pre-built patterns, readable code, good for common scenarios
+**Limitations**: Limited to built-in templates, less flexibility than advanced configuration
+
+### 3. Advanced Configuration Pattern (For Complex Systems)
+
+**When to use**: Enterprise applications, complex rule relationships, performance-critical systems
+**Complexity**: Medium to High
+**Setup time**: Hours to days (depending on complexity)
+
+This pattern gives you full control over every aspect of the rules engine:
 
 ```java
-// Full configuration-based approach
+// Full configuration-based approach with all enterprise features
 RulesEngineConfiguration config = new RulesEngineConfiguration.Builder()
-    .withPerformanceMonitoring(true)
-    .withErrorRecovery(ErrorRecoveryStrategy.CONTINUE_ON_ERROR)
-    .withCaching(true)
-    .addRule(rule1)
+    .withPerformanceMonitoring(true)           // Track rule execution performance
+    .withErrorRecovery(ErrorRecoveryStrategy.CONTINUE_ON_ERROR)  // Handle errors gracefully
+    .withCaching(true)                         // Cache rule results for performance
+    .withMaxExecutionTime(Duration.ofSeconds(30))  // Prevent runaway rules
+    .addRule(rule1)                           // Add individual rules
     .addRule(rule2)
-    .addEnrichment(enrichment1)
+    .addRuleGroup(validationGroup)            // Add rule groups
+    .addEnrichment(enrichment1)               // Add data enrichments
+    .addDataSource(databaseSource)            // Add external data sources
     .build();
 
 RulesEngine engine = new RulesEngine(config);
 ```
 
+**Line-by-line explanation:**
+- **Line 2**: Create a new configuration builder using the Builder pattern for complex configuration setup
+- **Line 3**: Enable performance monitoring to track execution times, memory usage, and other metrics
+- **Line 4**: Set error recovery strategy to continue processing other rules even if one rule fails
+- **Line 5**: Enable caching to store rule results and improve performance for repeated evaluations
+- **Line 6**: Set a maximum execution time of 30 seconds to prevent infinite loops or runaway rules
+- **Line 7**: Add an individual rule (rule1) to the configuration
+- **Line 8**: Add another individual rule (rule2) to the configuration
+- **Line 9**: Add a rule group that contains multiple related rules with AND/OR logic
+- **Line 10**: Add a data enrichment that will enhance input data with additional information
+- **Line 11**: Add an external data source (like a database) for rules to access external data
+- **Line 12**: Build the final configuration object with all the specified settings
+- **Line 14**: Create a new rules engine instance using the comprehensive configuration
+
+**Benefits**: Full control, enterprise features, maximum flexibility, performance optimization
+**Limitations**: More complex setup, requires deeper understanding of APEX concepts
+
+### Choosing the Right Pattern
+
+| Pattern | Use When | Setup Time | Flexibility | Enterprise Features |
+|---------|----------|------------|-------------|-------------------|
+| **Ultra-Simple** | Quick checks, prototypes | Seconds | Low | None |
+| **Template-Based** | Common scenarios, validation | Minutes | Medium | Basic |
+| **Advanced** | Enterprise systems, complex rules | Hours+ | High | Full |
+
+**Recommendation**: Start with the Ultra-Simple pattern for learning and prototyping, move to Template-Based for structured applications, and use Advanced configuration for production enterprise systems.
+
 ## Rule Groups Architecture
 
 ### Overview
 
-Rule Groups provide a mechanism for organizing related rules and controlling their execution as logical units. They support both AND and OR operators, allowing for complex validation scenarios and business logic combinations.
+Rule Groups are one of APEX's most powerful organizational features. Think of them as smart containers that hold related rules and execute them according to business logic patterns.
+
+**What are Rule Groups?**
+Instead of executing rules individually, Rule Groups let you organize related rules and control how they work together. For example, you might have a "Customer Validation" group where ALL rules must pass, or an "Eligibility Check" group where ANY rule can pass.
+
+**Why use Rule Groups?**
+- **Logical organization**: Group related rules together (like all validation rules, all eligibility rules)
+- **Business logic control**: Use AND logic (all must pass) or OR logic (any can pass)
+- **Performance optimization**: Stop execution early when the outcome is determined
+- **Better maintainability**: Organize rules by business domain or functional area
+- **Clearer results**: Get group-level results in addition to individual rule results
+
+**Two main patterns:**
+- **AND Groups**: All rules must pass for the group to succeed (like validation scenarios)
+- **OR Groups**: Any rule can pass for the group to succeed (like eligibility scenarios)
 
 ### Core Components
 
@@ -540,6 +808,20 @@ public class RuleGroup implements RuleBase {
 }
 ```
 
+**Line-by-line explanation:**
+- **Line 1**: Class declaration implementing RuleBase interface, making rule groups compatible with individual rules
+- **Line 2**: Unique identifier for this rule group (e.g., "customer-validation-group")
+- **Line 3**: Set of categories this rule group belongs to (e.g., "validation", "compliance")
+- **Line 4**: Human-readable name for the rule group (e.g., "Customer Validation Rules")
+- **Line 5**: Detailed description explaining the purpose of this rule group
+- **Line 6**: Priority level for execution order when multiple rule groups exist
+- **Line 7**: Map storing rules by their sequence number for ordered execution
+- **Line 8**: Boolean flag determining if this is an AND group (all must pass) or OR group (any can pass)
+- **Line 11-12**: Constructor for creating a rule group with a single category
+- **Line 15-16**: Constructor for creating a rule group with multiple categories
+- **Line 19**: Method to add a rule to the group with a specific sequence number for execution order
+- **Line 22**: Main execution method that evaluates all rules in the group according to the AND/OR logic
+
 #### RuleGroupBuilder
 
 ```java
@@ -562,6 +844,24 @@ public class RuleGroupBuilder {
     public RuleGroup build()
 }
 ```
+
+**Line-by-line explanation:**
+- **Line 1**: Builder class that implements the Builder pattern for creating RuleGroup instances
+- **Line 2**: Private field to store the unique identifier for the rule group being built
+- **Line 3**: Private field to store the set of categories, initialized as an empty HashSet
+- **Line 4**: Private field to store the human-readable name of the rule group
+- **Line 5**: Private field to store the detailed description of the rule group's purpose
+- **Line 6**: Private field to store the priority level, defaulting to 100 (medium priority)
+- **Line 7**: Private field to store the operator type, defaulting to true (AND operator)
+- **Line 9**: Fluent method to set the rule group ID and return the builder for method chaining
+- **Line 10**: Fluent method to set the rule group name and return the builder
+- **Line 11**: Fluent method to set the rule group description and return the builder
+- **Line 12**: Fluent method to add a single category to the rule group and return the builder
+- **Line 13**: Fluent method to add multiple categories by name and return the builder
+- **Line 14**: Fluent method to set the priority level and return the builder
+- **Line 15**: Fluent method to configure the group as an AND group (all rules must pass)
+- **Line 16**: Fluent method to configure the group as an OR group (any rule can pass)
+- **Line 17**: Final method that creates and returns the configured RuleGroup instance
 
 ### Configuration Methods
 
@@ -598,6 +898,23 @@ RuleGroup multiGroup = config.createRuleGroupWithAnd(
 config.registerRuleGroup(andGroup);
 config.registerRuleGroup(orGroup);
 ```
+
+**Line-by-line explanation:**
+- **Line 2**: Create a new RuleGroupBuilder instance using the fluent builder pattern
+- **Line 3**: Set the unique identifier for this rule group to "validation-group"
+- **Line 4**: Set the human-readable name to "Customer Validation"
+- **Line 5**: Set a detailed description explaining the purpose of this rule group
+- **Line 6**: Assign this rule group to the "validation" category for organization
+- **Line 7**: Set the priority to 10 (high priority - will execute before lower priority groups)
+- **Line 8**: Configure this as an AND group, meaning all rules must pass for the group to succeed
+- **Line 9**: Build and return the configured RuleGroup instance
+- **Line 12**: Create a new RulesEngineConfiguration instance for alternative configuration approach
+- **Line 15-16**: Create an AND rule group using the configuration's factory method
+- **Line 19-20**: Create an OR rule group using the configuration's factory method
+- **Line 23**: Create a set of category names for a multi-category rule group
+- **Line 24-25**: Create a rule group that belongs to multiple categories (validation and compliance)
+- **Line 28**: Register the AND group with the configuration so it will be included in rule execution
+- **Line 29**: Register the OR group with the configuration
 
 #### YAML Configuration
 
@@ -646,6 +963,52 @@ rule-groups:
       retry-count: 2
       circuit-breaker: false
 ```
+
+**Line-by-line explanation:**
+- **Line 1**: Root element defining a collection of rule groups
+- **Line 2**: Start of the first rule group definition
+- **Line 3**: Unique identifier for the rule group, used for referencing and management
+- **Line 4**: Human-readable name displayed in logs and management interfaces
+- **Line 5**: Detailed description explaining what this rule group validates
+- **Line 6**: Single category assignment for organizational purposes
+- **Line 7**: Priority level (10 = high priority, executes before lower priority groups)
+- **Line 8**: Boolean flag to enable/disable this rule group without removing it
+- **Line 9**: Whether to stop executing remaining rules when the first rule fails (false = continue)
+- **Line 10**: Whether rules in this group can execute in parallel (false = sequential execution)
+- **Line 11**: Start of the list of rule IDs that belong to this group
+- **Line 12**: Reference to the age validation rule
+- **Line 13**: Reference to the email validation rule
+- **Line 14**: Reference to the income validation rule
+- **Line 15**: Start of metadata section for governance and tracking
+- **Line 16**: Team or person responsible for maintaining this rule group
+- **Line 17**: Business domain this rule group belongs to
+- **Line 19**: Start of the second rule group definition
+- **Line 20**: Unique identifier for the eligibility check rule group
+- **Line 21**: Human-readable name for the eligibility rule group
+- **Line 22**: Description of the eligibility checking purpose
+- **Line 23**: Primary category for this rule group
+- **Line 24**: Multiple categories this rule group belongs to (eligibility and customer)
+- **Line 25**: Priority level (20 = lower priority than the validation group)
+- **Line 26**: This rule group is enabled and will execute
+- **Line 27**: Continue executing all rules even if one fails
+- **Line 28**: Rules in this group can execute in parallel for better performance
+- **Line 29**: Start of rule references with additional configuration
+- **Line 30**: Reference to the premium customer rule with specific settings
+- **Line 31**: Execution sequence number (1 = execute first)
+- **Line 32**: This specific rule reference is enabled
+- **Line 33**: Override the rule's default priority with value 5
+- **Line 34**: Reference to the long-term customer rule
+- **Line 35**: Execution sequence number (2 = execute second)
+- **Line 36**: This rule reference is enabled
+- **Line 37**: Override priority for this rule reference
+- **Line 38**: Tags for categorization and searching
+- **Line 39**: Start of metadata for this rule group
+- **Line 40**: Business team responsible for this rule group
+- **Line 41**: Purpose statement for governance
+- **Line 42**: Start of execution configuration section
+- **Line 43**: Maximum execution time in milliseconds (3 seconds)
+- **Line 44**: Number of retry attempts if execution fails
+- **Line 45**: Whether to use circuit breaker pattern for fault tolerance
 
 ### Execution Patterns
 
@@ -707,7 +1070,29 @@ public RuleResult evaluateOrGroup(RuleGroup group, Map<String, Object> facts) {
 
 ## Nested Rules and Rule Chaining Patterns
 
-The Rules Engine supports sophisticated rule dependencies and chaining scenarios where rules depend on results of previous rules. These patterns are essential for complex business workflows and decision trees.
+When simple rules aren't enough, APEX provides sophisticated rule chaining patterns that let you build complex business workflows. These patterns handle scenarios where rules depend on the results of other rules, creating intelligent decision trees and multi-stage processes.
+
+**What is Rule Chaining?**
+Rule chaining is like creating a flowchart in code. Instead of evaluating all rules independently, you can create sequences where:
+- Rule B only runs if Rule A succeeds
+- Rule C uses the result from Rule B as input
+- Different rules run based on previous results
+- Scores accumulate across multiple rules
+
+**Why use Rule Chaining?**
+- **Performance**: Skip expensive operations when conditions aren't met
+- **Complex logic**: Model real-world business processes with dependencies
+- **Dynamic routing**: Send different data through different validation paths
+- **Accumulative scoring**: Build up scores across multiple criteria
+- **Decision trees**: Create branching logic based on intermediate results
+
+**Six powerful patterns available:**
+1. **Conditional Chaining**: Execute expensive rules only when needed
+2. **Sequential Dependency**: Build processing pipelines
+3. **Result-Based Routing**: Route to different rule sets based on results
+4. **Accumulative Chaining**: Build up scores with intelligent rule selection
+5. **Complex Workflow**: Multi-stage processes with dependencies
+6. **Fluent Builder**: Decision trees with conditional branching
 
 ```mermaid
 graph TD
@@ -761,7 +1146,20 @@ graph TD
 
 ### Pattern 1: Conditional Chaining
 
-Execute Rule B only if Rule A triggers. This pattern is ideal for expensive operations that should only run when certain conditions are met.
+**The Problem**: You have expensive or specialized rules that should only run when certain conditions are met. For example, enhanced due diligence checks that only apply to high-value transactions.
+
+**The Solution**: Conditional Chaining executes a "trigger rule" first, then runs different rule sets based on whether the trigger succeeded or failed.
+
+**Real-world example**:
+- Trigger: "Is this a high-value customer transaction?"
+- If YES: Run enhanced compliance checks, manager approval, detailed audit
+- If NO: Run standard processing with basic validation
+
+**Benefits**:
+- **Performance**: Skip expensive operations when they're not needed
+- **Resource efficiency**: Don't waste time on unnecessary processing
+- **Clear logic**: Explicitly model conditional business processes
+- **Cost optimization**: Avoid expensive API calls or database queries when possible
 
 ```mermaid
 flowchart TD
@@ -818,6 +1216,27 @@ if (resultA.isTriggered()) {
 }
 ```
 
+**Line-by-line explanation:**
+- **Line 2**: Create a new Rule instance that will serve as the trigger rule for conditional processing
+- **Line 3**: Set the rule ID to "HighValueCustomerCheck" for identification and logging
+- **Line 4**: Define the condition using SpEL - checks if customer is PREMIUM and transaction exceeds 100,000
+- **Line 5**: Set a descriptive message explaining what this rule validates
+- **Line 9**: Execute the trigger rule using the rule engine service with the current context
+- **Line 10**: Create an evaluation context from the current data context for rule execution
+- **Line 11**: Extract the first (and only) result from the results list
+- **Line 13**: Check if the trigger rule was triggered (condition evaluated to true)
+- **Line 14**: If triggered, create the enhanced due diligence rule that will run expensive checks
+- **Line 15**: Create a new Rule for enhanced due diligence with specific requirements
+- **Line 16**: Set the rule ID for the enhanced check
+- **Line 17**: Define condition requiring account age of at least 3 years
+- **Line 18**: Set descriptive message for the enhanced due diligence rule
+- **Line 21**: Execute the enhanced due diligence rule with the current context
+- **Line 22**: Create evaluation context for the enhanced rule execution
+- **Line 24**: Check if the enhanced due diligence rule passed
+- **Line 25**: If passed, approve the transaction with enhanced checks message
+- **Line 27**: If enhanced due diligence failed, reject the transaction
+- **Line 29**: If trigger rule didn't fire, approve with standard processing (no enhanced checks needed)
+
 **Use Cases:**
 - Financial approval workflows with escalating requirements
 - Multi-stage validation where expensive checks are conditional
@@ -825,7 +1244,20 @@ if (resultA.isTriggered()) {
 
 ### Pattern 2: Sequential Dependency
 
-Each rule builds upon results from the previous rule, creating a processing pipeline where each step depends on the previous one.
+**The Problem**: You need to build up a result through multiple steps, where each step uses the output from the previous step. Like calculating a final price through multiple discount stages.
+
+**The Solution**: Sequential Dependency creates a processing pipeline where each rule adds to or modifies the result from the previous rule.
+
+**Real-world example**:
+1. **Stage 1**: Calculate base discount based on customer tier (15% for Gold customers)
+2. **Stage 2**: Apply regional multiplier (20% bonus for US customers = 15% × 1.2 = 18%)
+3. **Stage 3**: Calculate final amount using the accumulated discount
+
+**Benefits**:
+- **Clear progression**: Each step builds logically on the previous one
+- **Maintainable**: Easy to add, remove, or modify individual stages
+- **Debuggable**: Can inspect intermediate results at each stage
+- **Reusable**: Individual stages can be reused in different pipelines
 
 ```mermaid
 flowchart LR
@@ -889,6 +1321,32 @@ evalContext = createEvaluationContext(context);
 BigDecimal finalAmount = evaluatorService.evaluate(rule3.getCondition(), evalContext, BigDecimal.class);
 ```
 
+**Line-by-line explanation:**
+- **Line 1**: Create a HashMap to store all data that will be available to the rules
+- **Line 2**: Set the base amount to 100,000 (could be order value, loan amount, etc.)
+- **Line 3**: Set the customer tier to "GOLD" which will determine the base discount rate
+- **Line 4**: Set the region to "US" which will affect the regional multiplier
+- **Line 7**: Create the first rule that calculates the base discount based on customer tier
+- **Line 8**: Set the rule ID for identification and logging purposes
+- **Line 9**: Define a conditional expression that assigns different discount rates based on customer tier
+- **Line 10**: Set a descriptive message explaining what this rule calculates
+- **Line 13**: Create an evaluation context from the current data for rule execution
+- **Line 14**: Execute the rule condition and get the calculated base discount as a Double
+- **Line 17**: Add the calculated base discount back to the context so subsequent rules can use it
+- **Line 20**: Create the second rule that applies a regional multiplier to the base discount
+- **Line 21**: Set the rule ID for the regional multiplier calculation
+- **Line 22**: Define condition that multiplies base discount by 1.2 for US customers, otherwise uses base discount
+- **Line 23**: Set descriptive message for the regional multiplier rule
+- **Line 26**: Create a new evaluation context with the updated data (including baseDiscount)
+- **Line 27**: Execute the regional multiplier rule and get the final discount rate
+- **Line 28**: Add the final discount rate to the context for use by the next rule
+- **Line 31**: Create the third rule that calculates the final amount after applying all discounts
+- **Line 32**: Set the rule ID for the final amount calculation
+- **Line 33**: Define expression that calculates final amount: baseAmount × (1 - finalDiscount)
+- **Line 34**: Set descriptive message for the final calculation rule
+- **Line 37**: Create evaluation context with all accumulated data
+- **Line 38**: Execute the final calculation rule and get the result as a BigDecimal
+
 **Use Cases:**
 - Pricing calculations with multiple factors
 - Multi-step data transformations
@@ -896,7 +1354,21 @@ BigDecimal finalAmount = evaluatorService.evaluate(rule3.getCondition(), evalCon
 
 ### Pattern 3: Result-Based Routing
 
-Route to different rule sets based on previous results, creating dynamic execution paths.
+**The Problem**: Different types of data need different processing rules. A high-risk transaction needs different validation than a low-risk one.
+
+**The Solution**: Result-Based Routing uses a "router rule" to determine which path to take, then executes the appropriate rule set for that path.
+
+**Real-world example**:
+- **Router**: Calculate risk score and determine if it's HIGH_RISK, MEDIUM_RISK, or LOW_RISK
+- **HIGH_RISK path**: Manager approval + compliance review + enhanced monitoring
+- **MEDIUM_RISK path**: Standard approval + basic monitoring
+- **LOW_RISK path**: Auto-approval only
+
+**Benefits**:
+- **Efficiency**: Only run the rules that are relevant to each case
+- **Flexibility**: Easy to add new routing paths or modify existing ones
+- **Clarity**: Business logic clearly shows different treatment for different scenarios
+- **Scalability**: Can handle many different routing scenarios without complexity
 
 ```mermaid
 flowchart TD
@@ -970,6 +1442,30 @@ switch (processingPath) {
 }
 ```
 
+**Line-by-line explanation:**
+- **Line 2**: Create a router rule that will determine which processing path to take
+- **Line 3**: Set the rule ID to "ProcessingPathRouter" for identification
+- **Line 4**: Define a nested conditional expression that returns HIGH_RISK, MEDIUM_RISK, or LOW_RISK based on risk score
+- **Line 5**: Set descriptive message explaining the router rule's purpose
+- **Line 8**: Create an evaluation context from the current data context
+- **Line 9**: Execute the router rule and get the processing path as a String result
+- **Line 12**: Use a switch statement to route to different rule sets based on the determined path
+- **Line 13**: Handle the HIGH_RISK case with the most stringent requirements
+- **Line 15**: Create a rule requiring manager approval for transactions over 100,000
+- **Line 16**: Create a rule requiring compliance review for very high risk scores (>80)
+- **Line 17**: Create a rule requiring excellent customer history for high-risk processing
+- **Line 19**: Combine all high-risk rules into a single list for batch execution
+- **Line 20**: Execute all high-risk rules together and collect the results
+- **Line 22**: Check if all high-risk rules passed using Java streams
+- **Line 23**: Output the result - either approved with multiple approvals or requires manual review
+- **Line 24**: Break out of the switch statement for HIGH_RISK case
+- **Line 26**: Handle the MEDIUM_RISK case with standard approval processes
+- **Line 28**: Call a method to execute standard approval rules (implementation not shown)
+- **Line 29**: Break out of the switch statement for MEDIUM_RISK case
+- **Line 31**: Handle the LOW_RISK case with minimal validation
+- **Line 33**: Call a method to execute basic validation only (implementation not shown)
+- **Line 34**: Break out of the switch statement for LOW_RISK case
+
 **Use Cases:**
 - Risk-based processing with different validation requirements
 - Customer tier-based workflows
@@ -977,7 +1473,26 @@ switch (processingPath) {
 
 ### Pattern 4: Accumulative Chaining
 
-Build up a score or result across multiple rules, where each rule contributes to a cumulative outcome. This pattern now supports advanced **Weight-Based Rule Selection** strategies that determine which rules are executed based on weights, priorities, and dynamic thresholds.
+**The Problem**: You need to build up a score from multiple criteria, like credit scoring where you evaluate income, credit history, employment, and debt ratio to get a final approval decision.
+
+**The Solution**: Accumulative Chaining runs multiple rules that each contribute points to a running total, then makes a final decision based on the accumulated score.
+
+**Advanced Feature**: **Weight-Based Rule Selection** - intelligently choose which rules to execute based on their importance, priority, or dynamic conditions. This saves processing time by focusing on the most critical rules.
+
+**Real-world example**:
+- **Credit Score Rule**: 25 points if credit score ≥ 700 (weight: 0.9, high priority)
+- **Income Rule**: 20 points if income ≥ $80,000 (weight: 0.8, high priority)
+- **Employment Rule**: 15 points if employed ≥ 5 years (weight: 0.6, medium priority)
+- **Debt Ratio Rule**: 10 points if debt ratio < 20% (weight: 0.5, low priority)
+- **Final Decision**: APPROVED if total ≥ 60 points
+
+**Smart Rule Selection**: With weight threshold 0.7, only the first two rules run (saving processing time), but still providing enough data for a good decision.
+
+**Benefits**:
+- **Intelligent processing**: Focus on the most important criteria
+- **Performance optimization**: Skip low-importance rules when appropriate
+- **Flexible scoring**: Different weights for different importance levels
+- **Dynamic adaptation**: Adjust rule selection based on context (like risk level)
 
 ```mermaid
 flowchart TD
@@ -1079,13 +1594,57 @@ evalContext = createEvaluationContext(context);
 String decision = evaluatorService.evaluate(finalRule.getCondition(), evalContext, String.class);
 ```
 
+**Line-by-line explanation:**
+- **Line 1**: Create a HashMap to store all data and the accumulating score
+- **Line 2**: Set the credit score to 750 (excellent credit)
+- **Line 3**: Set the annual income to $85,000
+- **Line 4**: Set employment years to 8 (stable employment)
+- **Line 5**: Set existing debt to $25,000
+- **Line 6**: Initialize the totalScore accumulator to 0 - this will collect points from all rules
+- **Line 9**: Create the first rule that evaluates credit score and assigns points
+- **Line 10**: Set rule ID for credit score evaluation
+- **Line 11**: Define tiered scoring: 25 points for 700+, 15 for 650+, 10 for 600+, 0 otherwise
+- **Line 12**: Set descriptive message for the credit score component
+- **Line 15**: Create evaluation context with current data
+- **Line 16**: Execute the credit score rule and get the points as an Integer
+- **Line 17**: Add the credit score points to the running total (accumulation step)
+- **Line 20**: Create the second rule that evaluates income and assigns points
+- **Line 21**: Set rule ID for income evaluation
+- **Line 22**: Define tiered scoring: 20 points for $80K+, 15 for $60K+, 10 for $40K+, 0 otherwise
+- **Line 23**: Set descriptive message for the income component
+- **Line 26**: Create fresh evaluation context with updated data (including current totalScore)
+- **Line 27**: Execute the income rule and get the points
+- **Line 28**: Add the income points to the running total (second accumulation)
+- **Line 31**: Create the third rule that evaluates employment stability
+- **Line 32**: Set rule ID for employment stability evaluation
+- **Line 33**: Define tiered scoring: 15 points for 5+ years, 10 for 2+ years, 5 otherwise
+- **Line 34**: Set descriptive message for employment stability component
+- **Line 37**: Create evaluation context with all accumulated data
+- **Line 38**: Execute the employment stability rule and get the points
+- **Line 39**: Add employment points to the running total (final accumulation)
+- **Line 42**: Create the final decision rule that uses the accumulated score
+- **Line 43**: Set rule ID for the final loan decision
+- **Line 44**: Define decision logic: APPROVED for 60+, CONDITIONAL for 40+, DENIED otherwise
+- **Line 45**: Set descriptive message for the final decision rule
+- **Line 48**: Create evaluation context with the final accumulated score
+- **Line 49**: Execute the final decision rule and get the decision as a String
+
 ## Weight-Based Rule Selection Strategies
 
-Pattern 4 now supports advanced rule selection strategies that determine which rules are executed based on weights, priorities, and dynamic conditions:
+One of the most powerful features of Accumulative Chaining is intelligent rule selection. Instead of always running every rule, APEX can automatically choose which rules to execute based on their importance, priority, or current context.
+
+**Why is this useful?**
+- **Performance**: Skip less important rules to save processing time
+- **Resource efficiency**: Focus computational resources on the most critical evaluations
+- **Dynamic adaptation**: Adjust rule selection based on risk level, customer tier, or other factors
+- **Cost optimization**: Avoid expensive API calls or database queries for low-priority rules
+
+**Four selection strategies available:**
 
 ### Strategy 1: Weight Threshold Selection
+**Best for**: Fixed importance levels where you want to skip rules below a certain importance
 
-Execute only rules with weight above a specified threshold:
+Execute only rules with weight above a specified threshold. Think of this as setting a "minimum importance level" - only rules that are important enough will run.
 
 ```yaml
 rule-selection:
@@ -1093,9 +1652,17 @@ rule-selection:
   weight-threshold: 0.7  # Only execute rules with weight >= 0.7
 ```
 
-### Strategy 2: Top-Weighted Selection
+**Line-by-line explanation:**
+- **Line 1**: Configuration section for rule selection strategy
+- **Line 2**: Set the selection strategy to "weight-threshold" - only rules above a certain weight will execute
+- **Line 3**: Set the weight threshold to 0.7 - only rules with weight 0.7 or higher will be executed
 
-Execute the top N rules by weight:
+**Example**: In credit scoring, you might set threshold 0.7 to focus only on the most critical factors (credit score, income) and skip less important ones (employment length, debt ratio).
+
+### Strategy 2: Top-Weighted Selection
+**Best for**: Resource-constrained environments where you can only afford to run a limited number of rules
+
+Execute the top N rules by weight, regardless of their actual weight values. This guarantees you'll run exactly the number of rules you specify.
 
 ```yaml
 rule-selection:
@@ -1103,9 +1670,17 @@ rule-selection:
   max-rules: 3  # Execute only the 3 highest-weighted rules
 ```
 
-### Strategy 3: Priority-Based Selection
+**Line-by-line explanation:**
+- **Line 1**: Configuration section for rule selection strategy
+- **Line 2**: Set strategy to "top-weighted" - execute only the highest-weighted rules regardless of their actual weight values
+- **Line 3**: Limit execution to the top 3 rules by weight - useful for resource-constrained environments
 
-Execute rules based on priority levels (HIGH > MEDIUM > LOW):
+**Example**: In a high-volume trading system, you might only have time to run the 3 most important validation rules per transaction.
+
+### Strategy 3: Priority-Based Selection
+**Best for**: Business scenarios where rules are organized by priority levels (HIGH/MEDIUM/LOW)
+
+Execute rules based on priority levels, which is more business-friendly than numeric weights.
 
 ```yaml
 rule-selection:
@@ -1113,15 +1688,30 @@ rule-selection:
   min-priority: "MEDIUM"  # Execute HIGH and MEDIUM priority rules only
 ```
 
-### Strategy 4: Dynamic Threshold Selection
+**Line-by-line explanation:**
+- **Line 1**: Configuration section for rule selection strategy
+- **Line 2**: Set strategy to "priority-based" - select rules based on business priority levels rather than numeric weights
+- **Line 3**: Set minimum priority to "MEDIUM" - will execute HIGH and MEDIUM priority rules, skipping LOW priority rules
 
-Calculate threshold dynamically based on context:
+**Example**: During system maintenance, you might only run HIGH priority rules to reduce load, or during normal operations run HIGH and MEDIUM priority rules.
+
+### Strategy 4: Dynamic Threshold Selection
+**Best for**: Context-aware systems where rule importance changes based on current conditions
+
+Calculate the weight threshold dynamically based on the current context. This is the most flexible approach.
 
 ```yaml
 rule-selection:
   strategy: "dynamic-threshold"
   threshold-expression: "#riskLevel == 'HIGH' ? 0.8 : 0.6"  # Higher threshold for high-risk scenarios
 ```
+
+**Line-by-line explanation:**
+- **Line 1**: Configuration section for rule selection strategy
+- **Line 2**: Set strategy to "dynamic-threshold" - calculate the weight threshold dynamically based on current context
+- **Line 3**: Define SpEL expression that sets threshold to 0.8 for high-risk scenarios, 0.6 otherwise - adapts rule selection to context
+
+**Example**: For high-risk customers, use a higher threshold (0.8) to run only the most critical rules. For low-risk customers, use a lower threshold (0.6) to run more comprehensive checks.
 
 ### Complete Example with Rule Selection
 
@@ -1151,6 +1741,32 @@ rule-chains:
       final-decision-rule:
         condition: "#totalScore >= 40 ? 'APPROVED' : 'DENIED'"
 ```
+
+**Line-by-line explanation:**
+- **Line 1**: Root element defining a collection of rule chains
+- **Line 2**: Start of a rule chain definition with unique identifier
+- **Line 3**: Specify this chain uses the "accumulative-chaining" pattern for building up scores
+- **Line 4**: Start of configuration section for this rule chain
+- **Line 5**: Name of the variable that will accumulate the total score across all rules
+- **Line 6**: Initial value for the accumulator (starts at 0)
+- **Line 7**: Start of rule selection configuration section
+- **Line 8**: Use "weight-threshold" strategy to select which rules to execute
+- **Line 9**: Set weight threshold to 0.7 - only rules with weight >= 0.7 will execute
+- **Line 10**: Start of the list of rules that can contribute to the accumulated score
+- **Line 11**: First rule definition for credit history evaluation
+- **Line 12**: SpEL condition that awards 30 points for credit score >= 700, otherwise 15 points
+- **Line 13**: Weight of 0.9 (above threshold) - this rule will be selected for execution
+- **Line 14**: Priority level set to HIGH for business importance
+- **Line 15**: Second rule definition for income verification
+- **Line 16**: SpEL condition that awards 25 points for income >= $80K, otherwise 10 points
+- **Line 17**: Weight of 0.8 (above threshold) - this rule will be selected for execution
+- **Line 18**: Priority level set to HIGH for business importance
+- **Line 19**: Third rule definition for employment check
+- **Line 20**: SpEL condition that awards 15 points for 5+ years employment, otherwise 5 points
+- **Line 21**: Weight of 0.6 (below threshold) - this rule will be skipped due to weight threshold
+- **Line 22**: Priority level set to MEDIUM (lower than the other rules)
+- **Line 23**: Start of final decision rule configuration
+- **Line 24**: SpEL condition that approves if total score >= 40, otherwise denies
 
 **Rule Selection Results:**
 - Total rules available: 3
@@ -1197,7 +1813,22 @@ rule-chains:
 
 ### Pattern 5: Complex Financial Workflow
 
-Multi-stage financial workflow processing with dependencies and conditional execution. This pattern supports complex business processes with multiple stages, dependencies between stages, and conditional execution paths.
+**The Problem**: Real-world business processes often involve multiple stages with complex dependencies. For example, trade processing might require pre-validation, risk assessment, approval (which varies based on risk), and settlement calculation - all in a specific order with conditional logic.
+
+**The Solution**: Complex Financial Workflow handles multi-stage processes where stages have dependencies on each other and can include conditional execution paths.
+
+**Real-world example - Trade Processing**:
+1. **Pre-validation**: Check basic trade data (if this fails, stop everything)
+2. **Risk Assessment**: Calculate risk level (depends on pre-validation passing)
+3. **Approval**: Different approval rules based on risk level (depends on risk assessment)
+4. **Settlement**: Calculate settlement days (depends on approval)
+
+**Key Features**:
+- **Dependency management**: Stages execute in the correct order automatically
+- **Conditional execution**: Different rules run based on previous results
+- **Failure handling**: Configure whether failures stop the workflow or continue
+- **Result passing**: Each stage can pass data to subsequent stages
+- **Circular dependency detection**: Prevents infinite loops
 
 ```mermaid
 flowchart TD
@@ -1299,6 +1930,41 @@ rule-chains:
                   message: "Standard approval applied"
 ```
 
+**Line-by-line explanation:**
+- **Line 1**: Root element defining a collection of rule chains
+- **Line 2**: Unique identifier for this complex workflow rule chain
+- **Line 3**: Human-readable name for the workflow
+- **Line 4**: Specify this uses the "complex-workflow" pattern for multi-stage processing with dependencies
+- **Line 5**: Boolean flag to enable this workflow (can be disabled without removing configuration)
+- **Line 6**: Start of configuration section for the workflow
+- **Line 7**: Start of stages definition - each stage represents a phase in the workflow
+- **Line 8**: First stage identifier for pre-validation phase
+- **Line 9**: Human-readable name for the pre-validation stage
+- **Line 10**: Start of rules list for this stage
+- **Line 11**: SpEL condition checking that required trade fields are not null
+- **Line 12**: Descriptive message for the basic validation rule
+- **Line 13**: Action to take if this stage fails - "terminate" stops the entire workflow
+- **Line 14**: Second stage identifier for risk assessment phase
+- **Line 15**: Human-readable name for the risk assessment stage
+- **Line 16**: Dependency declaration - this stage depends on pre-validation completing successfully
+- **Line 17**: Start of rules list for risk assessment stage
+- **Line 18**: SpEL condition that returns 'HIGH' or 'MEDIUM' risk based on amount and volatility
+- **Line 19**: Descriptive message for the risk assessment rule
+- **Line 20**: Output variable name - the result of this stage will be stored as "riskLevel"
+- **Line 21**: Third stage identifier for approval phase
+- **Line 22**: Human-readable name for the approval stage
+- **Line 23**: Dependency declaration - this stage depends on risk assessment completing
+- **Line 24**: Start of conditional execution configuration
+- **Line 25**: SpEL condition that determines which branch to execute based on risk level
+- **Line 26**: Start of rules to execute when condition is true (high risk)
+- **Line 27**: Start of rules list for high-risk branch
+- **Line 28**: SpEL condition requiring senior approval for high-risk trades
+- **Line 29**: Descriptive message for senior approval requirement
+- **Line 30**: Start of rules to execute when condition is false (not high risk)
+- **Line 31**: Start of rules list for standard risk branch
+- **Line 32**: SpEL condition that always passes (true) for standard approval
+- **Line 33**: Descriptive message for standard approval path
+
 **Key Features:**
 - **Dependency Management**: Stages execute in dependency order using topological sort
 - **Conditional Execution**: Stages can have conditional logic with on-true/on-false branches
@@ -1314,7 +1980,23 @@ rule-chains:
 
 ### Pattern 6: Fluent Rule Builder
 
-Compose rules with conditional execution paths using a tree-like structure, where rule results determine execution of subsequent rules through success/failure branches.
+**The Problem**: You need to create complex decision trees where the path taken depends on the results of previous decisions. Like a customer onboarding process where VIP customers get different treatment than standard customers.
+
+**The Solution**: Fluent Rule Builder creates decision trees where each rule can have success and failure branches, leading to different subsequent rules.
+
+**Real-world example - Customer Processing**:
+- **Root**: Is this a VIP or Premium customer?
+  - **If YES**: Check if transaction > $100K
+    - **If YES**: Run regional compliance checks → Final approval
+    - **If NO**: Standard processing
+  - **If NO**: Basic validation → Standard customer approval
+
+**Key Features**:
+- **Tree structure**: Rules form a decision tree with branching logic
+- **Success/failure paths**: Each rule can define what happens next for both outcomes
+- **Depth tracking**: Prevents infinite recursion with configurable limits
+- **Execution tracking**: Full audit trail of which path was taken
+- **Flexible branching**: Can create complex nested decision logic
 
 ```mermaid
 flowchart TD
@@ -1531,6 +2213,15 @@ System.out.println("Average execution time: " + snapshot.getAverageExecutionTime
 System.out.println("Memory usage: " + snapshot.getMemoryUsage());
 ```
 
+**Line-by-line explanation:**
+- **Line 2**: Create a new configuration builder for setting up the rules engine
+- **Line 3**: Enable performance monitoring to track execution times, memory usage, and other metrics
+- **Line 4**: Set the metrics collection interval to 30 seconds for regular performance snapshots
+- **Line 5**: Build the final configuration object with performance monitoring enabled
+- **Line 8**: Get a performance snapshot from the engine's performance monitor
+- **Line 9**: Print the average execution time across all rule evaluations
+- **Line 10**: Print the current memory usage of the rules engine
+
 ### Performance Metrics
 
 #### Rule-Level Metrics
@@ -1559,6 +2250,14 @@ for (PerformanceInsight insight : insights) {
 }
 ```
 
+**Line-by-line explanation:**
+- **Line 2**: Get the performance analyzer from the rules engine for detailed analysis
+- **Line 3**: Analyze current performance data and get a list of insights and recommendations
+- **Line 5**: Iterate through each performance insight returned by the analyzer
+- **Line 6**: Print the identified performance issue (e.g., "Slow rule execution detected")
+- **Line 7**: Print the recommended action to address the issue (e.g., "Consider adding caching")
+- **Line 8**: Print the potential impact of the issue (e.g., "High - affects all rule evaluations")
+
 ## Rule Metadata System
 
 ### Core Audit Dates
@@ -1576,6 +2275,12 @@ Instant modified = rule.getModifiedDate();   // ALWAYS available
 Instant created2 = rule.getMetadata().getCreatedDate();   // ALWAYS available
 Instant modified2 = rule.getMetadata().getModifiedDate(); // ALWAYS available
 ```
+
+**Line-by-line explanation:**
+- **Line 2**: Get the creation date from the rule - this method is guaranteed to never return null
+- **Line 3**: Get the last modified date from the rule - this method is guaranteed to never return null
+- **Line 6**: Alternative way to access creation date directly from the rule's metadata object
+- **Line 7**: Alternative way to access modified date directly from the rule's metadata object
 
 ### Comprehensive Metadata
 
@@ -1598,6 +2303,23 @@ Rule rule = configuration.rule("TRADE-VAL-001")
     )
     .build();
 ```
+
+**Line-by-line explanation:**
+- **Line 2**: Start building a rule with the unique identifier "TRADE-VAL-001"
+- **Line 3**: Set the human-readable name for this rule
+- **Line 4**: Define the SpEL condition that validates trade amount is positive and not exceeding 1 million
+- **Line 5**: Set the success message when the rule passes
+- **Line 6**: Start configuring comprehensive metadata using a lambda expression
+- **Line 7**: Set the team or person responsible for maintaining this rule
+- **Line 8**: Set the business domain this rule belongs to (Finance)
+- **Line 9**: Set the purpose statement explaining why this rule exists
+- **Line 10**: Set the version number for tracking rule changes over time
+- **Line 11**: Add tags for categorization and searching (trading, validation, regulatory)
+- **Line 12**: Set the effective date when this rule becomes active (January 1, 2024)
+- **Line 13**: Set the expiration date when this rule should be reviewed or retired
+- **Line 14**: Add custom property linking to specific regulatory reference
+- **Line 15**: Add custom property with business owner contact information
+- **Line 17**: Build the final rule with all metadata configured
 
 ### Metadata Queries
 
@@ -1637,6 +2359,22 @@ rules:
       tags: ["validation", "age"]
 ```
 
+**Line-by-line explanation:**
+- **Line 1**: Start of metadata section for the entire rule configuration file
+- **Line 2**: Human-readable name for this collection of rules
+- **Line 3**: Version number for tracking changes to this rule set
+- **Line 4**: Description explaining the purpose of these rules
+- **Line 6**: Start of the rules collection
+- **Line 7**: First rule definition with unique identifier "age-validation"
+- **Line 8**: Human-readable name for the age validation rule
+- **Line 9**: SpEL condition that checks if the customer's age is at least 18
+- **Line 10**: Error message displayed when the rule fails
+- **Line 11**: Severity level set to "ERROR" indicating this is a critical validation
+- **Line 12**: Start of metadata section for this specific rule
+- **Line 13**: Team responsible for maintaining this rule
+- **Line 14**: Business domain this rule belongs to
+- **Line 15**: Tags for categorization and searching
+
 ### Advanced Enrichment Configuration
 
 ```yaml
@@ -1671,6 +2409,38 @@ enrichments:
       purpose: "Currency standardization"
       lastUpdated: "2024-07-26"
 ```
+
+**Line-by-line explanation:**
+- **Line 1**: Start of enrichments collection - enrichments add data to input before rule evaluation
+- **Line 2**: Unique identifier for this currency enrichment
+- **Line 3**: Type of enrichment - "lookup-enrichment" performs data lookups from external sources
+- **Line 4**: SpEL condition that determines when this enrichment runs (only if currency field exists)
+- **Line 5**: Boolean flag to enable/disable this enrichment
+- **Line 6**: Start of lookup configuration section
+- **Line 7**: Start of dataset configuration
+- **Line 8**: Dataset type - "yaml-file" loads data from a YAML file
+- **Line 9**: Path to the YAML file containing currency data
+- **Line 10**: Field name in the dataset that serves as the lookup key
+- **Line 11**: Enable caching to improve performance for repeated lookups
+- **Line 12**: Cache time-to-live of 3600 seconds (1 hour)
+- **Line 13**: Preload the entire dataset into memory at startup for faster access
+- **Line 14**: Start of default values section for missing data
+- **Line 15**: Default region value when not found in dataset
+- **Line 16**: Default active status when not found in dataset
+- **Line 17**: Default decimal places when not found in dataset
+- **Line 18**: Start of field mappings section
+- **Line 19**: Map the "name" field from dataset to "currencyName" in the enriched data
+- **Line 20**: Target field name in the enriched data
+- **Line 21**: Map the "region" field from dataset to "currencyRegion" in the enriched data
+- **Line 22**: Target field name for currency region
+- **Line 23**: Map the "isActive" field from dataset to "currencyActive" in the enriched data
+- **Line 24**: Target field name for currency active status
+- **Line 25**: Map the "decimalPlaces" field from dataset to "currencyDecimals" in the enriched data
+- **Line 26**: Target field name for decimal places information
+- **Line 27**: Start of metadata section for governance
+- **Line 28**: Team responsible for maintaining this enrichment
+- **Line 29**: Purpose statement explaining why this enrichment exists
+- **Line 30**: Last updated date for tracking changes
 
 ### Multi-Environment Configuration
 
@@ -1731,14 +2501,14 @@ enrichments:
 @Configuration
 @EnableRulesEngine
 public class RulesEngineConfig {
-    
+
     @Bean
     @Primary
     public RulesEngine primaryRulesEngine() {
         return YamlConfigurationLoader.load("classpath:rules/primary-rules.yaml")
             .createEngine();
     }
-    
+
     @Bean("validationEngine")
     public RulesEngine validationRulesEngine() {
         return YamlConfigurationLoader.load("classpath:rules/validation-rules.yaml")
@@ -1748,14 +2518,14 @@ public class RulesEngineConfig {
 
 @Service
 public class BusinessService {
-    
+
     @Autowired
     private RulesEngine rulesEngine;
-    
+
     @Autowired
     @Qualifier("validationEngine")
     private RulesEngine validationEngine;
-    
+
     public void processData(Object data) {
         RuleResult validationResult = validationEngine.evaluate(data);
         if (validationResult.isSuccess()) {
@@ -1765,6 +2535,32 @@ public class BusinessService {
     }
 }
 ```
+
+**Line-by-line explanation:**
+- **Line 1**: Spring configuration class annotation to define beans
+- **Line 2**: Enable APEX rules engine integration with Spring Boot
+- **Line 3**: Configuration class that sets up rules engine beans
+- **Line 5**: Bean annotation to register this method as a Spring bean
+- **Line 6**: Primary annotation makes this the default rules engine when multiple exist
+- **Line 7**: Method that creates the primary rules engine bean
+- **Line 8**: Load YAML configuration from classpath and create the rules engine
+- **Line 9**: Return the configured rules engine instance
+- **Line 12**: Bean annotation with specific name "validationEngine"
+- **Line 13**: Method that creates a specialized validation rules engine
+- **Line 14**: Load validation-specific YAML configuration from classpath
+- **Line 15**: Return the validation rules engine instance
+- **Line 19**: Service class annotation for Spring component scanning
+- **Line 20**: Business service class that uses the rules engines
+- **Line 22**: Autowired annotation to inject the primary rules engine
+- **Line 23**: Private field to hold the primary rules engine reference
+- **Line 25**: Autowired with qualifier to inject the specific validation engine
+- **Line 26**: Qualifier annotation to specify which bean to inject by name
+- **Line 27**: Private field to hold the validation rules engine reference
+- **Line 29**: Business method that processes data using both rules engines
+- **Line 30**: First evaluate data using the validation engine
+- **Line 31**: Check if validation was successful before proceeding
+- **Line 32**: If validation passed, evaluate using the primary business rules engine
+- **Line 33**: Comment indicating where result processing logic would go
 
 ### Microservices Integration
 
@@ -1878,10 +2674,10 @@ public class CustomErrorHandler implements RuleErrorHandler {
 public void testAgeValidationRule() {
     // Arrange
     Map<String, Object> data = Map.of("age", 25);
-    
+
     // Act
     RuleResult result = rulesEngine.evaluate(data);
-    
+
     // Assert
     assertTrue(result.isSuccess());
     assertFalse(result.hasFailures());
@@ -1891,15 +2687,29 @@ public void testAgeValidationRule() {
 public void testEnrichmentFunctionality() {
     // Arrange
     Map<String, Object> data = Map.of("currency", "USD");
-    
+
     // Act
     RuleResult result = rulesEngine.evaluate(data);
-    
+
     // Assert
     assertEquals("US Dollar", result.getEnrichedData().get("currencyName"));
     assertEquals("North America", result.getEnrichedData().get("currencyRegion"));
 }
 ```
+
+**Line-by-line explanation:**
+- **Line 1**: JUnit test annotation to mark this as a test method
+- **Line 2**: Test method name that clearly describes what is being tested
+- **Line 4**: Create test data with an age of 25 (above the minimum age requirement)
+- **Line 7**: Execute the rules engine with the test data
+- **Line 10**: Assert that the rule evaluation was successful (no failures)
+- **Line 11**: Assert that there are no failure messages in the result
+- **Line 14**: Second test method annotation
+- **Line 15**: Test method for enrichment functionality
+- **Line 17**: Create test data with a currency code "USD"
+- **Line 20**: Execute the rules engine which should enrich the data with currency information
+- **Line 23**: Assert that the enriched data contains the expected currency name
+- **Line 24**: Assert that the enriched data contains the expected currency region
 
 ### Integration Testing
 
@@ -1943,6 +2753,17 @@ enrichments:
         preload-enabled: true
         cache-refresh-ahead: true
 ```
+
+**Line-by-line explanation:**
+- **Line 2**: Start of enrichments collection for performance-optimized configuration
+- **Line 3**: Unique identifier for this cached lookup enrichment
+- **Line 4**: Start of lookup configuration section
+- **Line 5**: Start of dataset configuration with caching options
+- **Line 6**: Enable caching to store lookup results in memory
+- **Line 7**: Set cache time-to-live to 3600 seconds (1 hour) before data expires
+- **Line 8**: Limit cache to maximum 1000 entries to control memory usage
+- **Line 9**: Enable preloading to load all data into cache at startup
+- **Line 10**: Enable refresh-ahead to refresh cache entries before they expire
 
 ### Memory Management
 
@@ -2041,6 +2862,67 @@ rules:
     severity: "ERROR"
     depends-on: ["currency-enrichment"]
 ```
+
+**Line-by-line explanation:**
+- **Line 1**: Start of metadata section for the entire financial services rule set
+- **Line 2**: Name of this comprehensive rule configuration
+- **Line 3**: Version 2.0.0 indicating this is a mature, production-ready configuration
+- **Line 4**: Description explaining this covers validation and enrichment for financial services
+- **Line 5**: Business domain classification for organizational purposes
+- **Line 6**: Tags for categorization and searching across multiple domains
+- **Line 9**: Start of enrichments collection for data enhancement
+- **Line 10**: Unique identifier for currency enrichment functionality
+- **Line 11**: Type of enrichment - lookup-based data enhancement
+- **Line 12**: Condition to run this enrichment only when currency field exists
+- **Line 13**: Start of lookup configuration section
+- **Line 14**: Start of dataset configuration
+- **Line 15**: Dataset type - loads from YAML file
+- **Line 16**: Path to the currencies dataset file
+- **Line 17**: Field in the dataset that serves as the lookup key
+- **Line 18**: Enable caching for performance optimization
+- **Line 19**: Cache TTL of 7200 seconds (2 hours) for currency data
+- **Line 20**: Start of default values for missing data
+- **Line 21**: Default region when currency not found in dataset
+- **Line 22**: Default active status when currency not found
+- **Line 23**: Default decimal places when currency not found
+- **Line 24**: Start of field mappings section
+- **Line 25**: Map dataset "name" field to "currencyName" in enriched data
+- **Line 26**: Target field name for currency name
+- **Line 27**: Map dataset "region" field to "currencyRegion" in enriched data
+- **Line 28**: Target field name for currency region
+- **Line 29**: Map dataset "isActive" field to "currencyActive" in enriched data
+- **Line 30**: Target field name for currency active status
+- **Line 33**: Unique identifier for country enrichment functionality
+- **Line 34**: Type of enrichment - lookup-based for country data
+- **Line 35**: Condition to run this enrichment only when countryCode field exists
+- **Line 36**: Start of lookup configuration for country data
+- **Line 37**: Start of country dataset configuration
+- **Line 38**: Dataset type - loads from YAML file
+- **Line 39**: Path to the countries dataset file
+- **Line 40**: Field in the dataset that serves as the lookup key
+- **Line 41**: Enable caching for country lookup performance
+- **Line 42**: Start of field mappings for country data
+- **Line 43**: Map dataset "name" field to "countryName" in enriched data
+- **Line 44**: Target field name for country name
+- **Line 45**: Map dataset "region" field to "region" in enriched data
+- **Line 46**: Target field name for country region
+- **Line 47**: Map dataset "regulatoryZone" field to "regulatoryZone" in enriched data
+- **Line 48**: Target field name for regulatory zone information
+- **Line 50**: Start of rules collection for validation logic
+- **Line 51**: Unique identifier for trade amount validation rule
+- **Line 52**: Human-readable name for the trade amount rule
+- **Line 53**: SpEL condition validating amount is not null, positive, and under 10 million
+- **Line 54**: Error message when trade amount validation fails
+- **Line 55**: Severity level set to ERROR for critical validation
+- **Line 56**: Start of metadata for this rule
+- **Line 57**: Team responsible for maintaining this rule
+- **Line 58**: Purpose statement for risk management
+- **Line 60**: Unique identifier for currency validation rule
+- **Line 61**: Human-readable name for currency validation
+- **Line 62**: SpEL condition checking that currency is active for trading
+- **Line 63**: Error message when currency is not active
+- **Line 64**: Severity level set to ERROR for critical validation
+- **Line 65**: Dependency declaration - this rule depends on currency enrichment completing first
 
 ### Multi-Dataset Enrichment Example
 

@@ -10,6 +10,7 @@ import dev.mars.apex.core.service.engine.TemplateProcessorService;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -283,18 +284,25 @@ public class ApexAdvancedFeaturesDemo {
 
         // Get lookup services from data service
         List<LookupService> lookupServices = dataServiceManager.requestData("lookupServices");
+        // Ensure lookupServices is never null to prevent SpEL evaluation errors
+        if (lookupServices == null) {
+            lookupServices = Collections.emptyList();
+        }
         context.setVariable("lookupServices", lookupServices);
 
         // Dynamically find lookup service by name
         String lookupName = "InstrumentTypes";
         context.setVariable("lookupName", lookupName);
 
+        // Use null-safe expression to prevent SpEL evaluation errors
         RuleResult result = evaluatorService.evaluateWithResult(
-            "#lookupServices.?[name == #lookupName][0]", context, LookupService.class);
+            "#lookupServices != null && #lookupServices.size() > 0 ? #lookupServices.?[name == #lookupName][0] : null",
+            context, LookupService.class);
 
         if (result.isTriggered()) {
             LookupService lookupService = evaluatorService.evaluate(
-                "#lookupServices.?[name == #lookupName][0]", context, LookupService.class);
+                "#lookupServices != null && #lookupServices.size() > 0 ? #lookupServices.?[name == #lookupName][0] : null",
+                context, LookupService.class);
 
             if (lookupService != null) {
                 System.out.println("Found lookup service: " + lookupService.getName());
@@ -305,7 +313,7 @@ public class ApexAdvancedFeaturesDemo {
                 context.setVariable("testValue", testValue);
 
                 Boolean isValid = evaluatorService.evaluate(
-                    "#lookupServices.?[name == #lookupName][0].validate(#testValue)", 
+                    "#lookupServices != null && #lookupServices.size() > 0 ? #lookupServices.?[name == #lookupName][0]?.validate(#testValue) : false",
                     context, Boolean.class);
 
                 System.out.println("Is '" + testValue + "' valid? " + isValid);

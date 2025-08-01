@@ -1,6 +1,12 @@
 # External Data Source Integration - Complete Guide
 
-APEX (Advanced Processing Engine for eXpressions) provides comprehensive support for integrating with external data sources, enabling rules to access and process data from databases, REST APIs, file systems, caches, and more. This unified guide combines all aspects of external data source integration including configuration, API reference, best practices, and database-specific guidance.
+Welcome to the comprehensive guide for APEX's external data source integration! This guide will help you connect APEX to your existing systems and data sources, making your rules more powerful and dynamic.
+
+**What you'll learn:**
+This guide covers everything you need to know about connecting APEX to external systems - from simple database connections to complex multi-source integrations. Whether you're a developer setting up your first data source or an architect designing enterprise-scale integrations, you'll find practical guidance and real-world examples.
+
+**Why external data sources matter:**
+Instead of having static rules that only work with the data you provide, external data sources let your rules access live data from your databases, APIs, files, and other systems. This means your rules can make decisions based on current customer information, real-time market data, or any other external information your business needs.
 
 ## Table of Contents
 
@@ -23,21 +29,47 @@ APEX (Advanced Processing Engine for eXpressions) provides comprehensive support
 
 ## Overview
 
-The external data source integration provides:
+APEX's external data source integration is designed to make connecting to your existing systems as simple and reliable as possible. Think of it as a universal adapter that lets your rules talk to any system in your organization.
 
-- **Multiple Data Source Types**: Database, REST API, File System, Cache, and extensible custom sources
-- **Unified Interface**: Consistent API across all data source types
-- **Enterprise Features**: Connection pooling, health monitoring, caching, circuit breakers
-- **YAML Configuration**: Declarative configuration with environment-specific overrides
-- **High Availability**: Load balancing, failover, and automatic recovery
-- **Performance Monitoring**: Comprehensive metrics and statistics collection
-- **Thread Safety**: Concurrent access support with proper synchronization
+### What External Data Sources Give You
+
+**Multiple Data Source Types** - Connect to the systems you already use:
+- **Databases**: PostgreSQL, MySQL, Oracle, SQL Server, H2 - all with connection pooling and optimization
+- **REST APIs**: Any HTTP/HTTPS service with authentication, retries, and circuit breakers
+- **File Systems**: CSV, JSON, XML files with automatic parsing and monitoring
+- **Caches**: High-speed in-memory storage for frequently accessed data
+- **Custom Sources**: Build your own connectors for specialized systems
+
+**Unified Interface** - Learn once, use everywhere:
+All data sources work the same way in your rules, regardless of whether you're connecting to a database, API, or file. This means less complexity and more consistency in your code.
+
+**Enterprise Features** - Production-ready from day one:
+- **Connection pooling**: Efficiently manage database connections for high performance
+- **Health monitoring**: Automatically detect and handle system failures
+- **Caching**: Store frequently accessed data in memory for faster access
+- **Circuit breakers**: Protect your systems from cascading failures
+- **Load balancing**: Distribute requests across multiple data sources
+- **Automatic recovery**: Reconnect automatically when systems come back online
+
+**YAML Configuration** - Simple, readable setup:
+Configure everything in human-readable YAML files with environment-specific overrides. No complex programming required for basic setups.
+
+**High Availability** - Built for mission-critical systems:
+Load balancing, automatic failover, and recovery mechanisms ensure your rules keep working even when individual systems have problems.
+
+**Performance Monitoring** - Know what's happening:
+Comprehensive metrics and statistics help you understand performance, identify bottlenecks, and optimize your integrations.
+
+**Thread Safety** - Concurrent access without worries:
+All components are designed for multi-threaded environments with proper synchronization, so you can safely use them in high-concurrency applications.
 
 ## Quick Start
 
+Let's get you connected to your first external data source in just a few minutes! This example shows how to connect to a PostgreSQL database, but the same principles apply to all data source types.
+
 ### 1. Add Dependencies
 
-Ensure you have the SpEL Rules Engine core dependency:
+First, make sure you have the APEX core dependency in your project:
 
 ```xml
 <dependency>
@@ -47,259 +79,811 @@ Ensure you have the SpEL Rules Engine core dependency:
 </dependency>
 ```
 
-### 2. Basic Configuration
+**What this gives you:** All the external data source integration capabilities are included in the core APEX library - no additional dependencies needed for basic functionality.
 
-Create a YAML configuration file:
+### 2. Create Your Configuration File
+
+Create a YAML file that describes your data source. Don't worry about understanding every option - we'll explain the key parts:
 
 ```yaml
 # data-sources.yaml
-name: "My Application"
-version: "1.0.0"
+name: "My Application"                    # A friendly name for your configuration
+version: "1.0.0"                         # Version for tracking changes
 
-dataSources:
-  - name: "user-database"
-    type: "database"
-    sourceType: "postgresql"
-    enabled: true
-    
-    connection:
-      host: "localhost"
-      port: 5432
-      database: "myapp"
-      username: "app_user"
-      password: "${DB_PASSWORD}"
-    
-    queries:
+dataSources:                             # List of all your data sources
+  - name: "user-database"                # Unique name for this data source
+    type: "database"                     # Type of data source
+    sourceType: "postgresql"             # Specific database type
+    enabled: true                        # Turn this data source on/off
+
+    connection:                          # How to connect to your database
+      host: "localhost"                  # Database server location
+      port: 5432                         # Database port (5432 is PostgreSQL default)
+      database: "myapp"                  # Database name
+      username: "app_user"               # Database username
+      password: "${DB_PASSWORD}"         # Password from environment variable (secure!)
+
+    queries:                             # Named queries you can use in your rules
       getUserById: "SELECT * FROM users WHERE id = :id"
       getAllUsers: "SELECT * FROM users ORDER BY created_at DESC"
-    
-    parameterNames:
+
+    parameterNames:                      # Parameters your queries expect
       - "id"
-    
-    cache:
-      enabled: true
-      ttlSeconds: 300
-      maxSize: 1000
+
+    cache:                               # Optional caching for better performance
+      enabled: true                      # Turn caching on
+      ttlSeconds: 300                    # Cache data for 5 minutes
+      maxSize: 1000                      # Store up to 1000 cached results
 ```
 
-### 3. Initialize and Use
+**Key concepts explained:**
+- **Environment variables**: `${DB_PASSWORD}` gets the password from your environment, keeping it secure
+- **Named queries**: Instead of writing SQL in your Java code, define queries here with descriptive names
+- **Parameters**: Use `:id` in queries and list parameter names so APEX knows what to expect
+- **Caching**: Automatically cache query results to improve performance
+
+### 3. Initialize and Use in Your Code
+
+Now you can use your data source in Java code:
 
 ```java
-// Load configuration
+// Step 1: Load your configuration file
 DataSourceConfigurationService configService = DataSourceConfigurationService.getInstance();
 YamlRuleConfiguration yamlConfig = loadYamlConfiguration("data-sources.yaml");
 configService.initialize(yamlConfig);
 
-// Get data source
+// Step 2: Get your data source by name
 ExternalDataSource userDb = configService.getDataSource("user-database");
 
-// Execute queries
+// Step 3: Execute queries with parameters
 Map<String, Object> parameters = Map.of("id", 123);
 List<Object> results = userDb.query("getUserById", parameters);
 
-// Get single result
+// Step 4: Get a single result (useful when you expect one record)
 Object user = userDb.queryForObject("getUserById", parameters);
 ```
 
+**What's happening here:**
+1. **Configuration loading**: APEX reads your YAML file and sets up the data source
+2. **Data source retrieval**: Get your configured data source by the name you gave it
+3. **Query execution**: Run your named queries with parameters
+4. **Result handling**: Get back Java objects you can use in your rules
+
+**That's it!** You now have a working external data source integration. Your rules can access live database data using simple method calls.
+
 ## Supported Data Sources
 
-### Database Sources
-- **PostgreSQL**: Full-featured support with connection pooling
-- **MySQL**: Complete MySQL integration with SSL support
-- **Oracle**: Enterprise Oracle database connectivity
-- **SQL Server**: Microsoft SQL Server integration
-- **H2**: In-memory and file-based H2 database support
+APEX supports a wide variety of data sources, each optimized for different use cases. Here's what's available and when to use each type:
 
-### REST API Sources
-- **Authentication**: Bearer tokens, API keys, Basic auth, OAuth2
-- **HTTP Methods**: GET, POST, PUT, DELETE, PATCH
-- **Features**: Circuit breakers, retry logic, response caching
-- **Formats**: JSON response parsing with JSONPath support
+### Database Sources - For Structured Data
+Perfect for accessing your existing business data stored in relational databases.
 
-### File System Sources
-- **CSV Files**: Configurable delimiters, headers, data type conversion
-- **JSON Files**: JSONPath extraction, nested object handling
+**Supported Databases:**
+- **PostgreSQL**: Full-featured support with connection pooling, SSL, and advanced features
+- **MySQL**: Complete integration with SSL support and MySQL-specific optimizations
+- **Oracle**: Enterprise-grade Oracle database connectivity with connection pooling
+- **SQL Server**: Microsoft SQL Server integration with Windows authentication support
+- **H2**: Lightweight in-memory and file-based database, perfect for testing and development
+
+**When to use database sources:**
+- Customer information, transaction records, product catalogs
+- Any structured data you already store in databases
+- When you need ACID transactions and data consistency
+- For complex queries with joins and aggregations
+
+**Key features:** Connection pooling, prepared statements, transaction support, SSL encryption
+
+### REST API Sources - For External Services
+Connect to web services, microservices, and third-party APIs.
+
+**Authentication Methods:**
+- **Bearer tokens**: For modern APIs with JWT or similar tokens
+- **API keys**: Simple key-based authentication in headers or query parameters
+- **Basic auth**: Username/password authentication for legacy systems
+- **OAuth2**: Full OAuth2 flow support for secure integrations
+
+**HTTP Methods:** GET, POST, PUT, DELETE, PATCH - all the standard REST operations
+
+**Enterprise Features:**
+- **Circuit breakers**: Protect your system when external APIs fail
+- **Retry logic**: Automatically retry failed requests with exponential backoff
+- **Response caching**: Cache API responses to improve performance and reduce API calls
+- **JSON parsing**: Automatic parsing with JSONPath support for extracting specific data
+
+**When to use REST API sources:**
+- Third-party services (payment processors, address validation, etc.)
+- Microservices in your architecture
+- Real-time data that changes frequently
+- When you need to send data to external systems
+
+### File System Sources - For File-Based Data
+Process data from files on your local system or network drives.
+
+**Supported File Formats:**
+- **CSV Files**: Configurable delimiters, headers, automatic data type conversion
+- **JSON Files**: JSONPath extraction, nested object handling, array processing
 - **XML Files**: XPath queries, namespace support, attribute extraction
-- **Fixed-Width**: Legacy mainframe file format support
-- **Plain Text**: Log files and unstructured text processing
+- **Fixed-Width**: Legacy mainframe file formats with column definitions
+- **Plain Text**: Log files, unstructured text, custom parsing
 
-### Cache Sources
-- **In-Memory**: High-performance local caching with LRU eviction
-- **Distributed**: Ready for Redis/Hazelcast integration
-- **Features**: TTL support, pattern matching, statistics collection
+**Advanced Features:**
+- **File watching**: Automatically detect when files change
+- **Batch processing**: Handle large files efficiently
+- **Error handling**: Skip malformed records and continue processing
+- **Encoding support**: Handle different character encodings (UTF-8, ISO-8859-1, etc.)
+
+**When to use file system sources:**
+- Daily batch files from other systems
+- Configuration files that change periodically
+- Log file analysis and monitoring
+- Legacy system integration where files are the only interface
+
+### Cache Sources - For High-Speed Data Access
+Store frequently accessed data in memory for ultra-fast retrieval.
+
+**Cache Types:**
+- **In-Memory**: High-performance local caching with LRU (Least Recently Used) eviction
+- **Distributed**: Ready for Redis/Hazelcast integration for multi-server deployments
+
+**Key Features:**
+- **TTL support**: Automatic expiration of cached data
+- **Pattern matching**: Find cached items using wildcards
+- **Statistics collection**: Monitor cache hit rates and performance
+- **Multiple eviction policies**: LRU, LFU, FIFO, and more
+
+**When to use cache sources:**
+- Frequently accessed lookup data (currency rates, product categories)
+- Expensive calculation results that don't change often
+- Session data and user preferences
+- Any data where speed is more important than absolute freshness
 
 ## Configuration
 
-### Environment Variables
+Configuration is where you tell APEX how to connect to your data sources. APEX uses YAML configuration files because they're human-readable and easy to maintain. Let's explore the key configuration concepts:
 
-Use environment variables for sensitive data:
+### Environment Variables - Keeping Secrets Safe
+
+**Why use environment variables?**
+Never put passwords, API keys, or other sensitive information directly in configuration files. Environment variables keep your secrets secure and allow the same configuration to work in different environments.
 
 ```yaml
 connection:
   username: "app_user"
-  password: "${DB_PASSWORD}"  # Resolved from environment
-  apiKey: "${API_KEY}"
+  password: "${DB_PASSWORD}"  # Gets password from environment variable
+  apiKey: "${API_KEY}"        # Gets API key from environment variable
 ```
 
-### Environment-Specific Overrides
+**How to set environment variables:**
+```bash
+# Linux/Mac
+export DB_PASSWORD="your_secure_password"
+export API_KEY="your_api_key"
+
+# Windows
+set DB_PASSWORD=your_secure_password
+set API_KEY=your_api_key
+```
+
+**Benefits:**
+- Secrets never appear in your code or configuration files
+- Different environments (dev, test, prod) can use different values
+- Easier to rotate passwords and keys without changing code
+
+### Environment-Specific Overrides - One Config, Multiple Environments
+
+Instead of maintaining separate configuration files for each environment, use overrides to customize settings:
 
 ```yaml
+# Base configuration that applies everywhere
+dataSources:
+  - name: "user-database"
+    type: "database"
+    sourceType: "postgresql"
+    # ... base settings ...
+
+# Environment-specific overrides
+environments:
+  development:                           # Settings for development environment
+    dataSources:
+      - name: "user-database"
+        connection:
+          host: "localhost"              # Use local database in dev
+          maxPoolSize: 5                 # Smaller pool for dev
+        cache:
+          ttlSeconds: 60                 # Short cache time for testing
+
+  production:                            # Settings for production environment
+    dataSources:
+      - name: "user-database"
+        connection:
+          host: "prod-db.example.com"    # Production database server
+          maxPoolSize: 50                # Larger pool for production load
+        cache:
+          ttlSeconds: 600                # Longer cache time for performance
+          maxSize: 5000                  # More cache entries
+```
+
+**How it works:**
+1. APEX loads the base configuration first
+2. Then it applies environment-specific overrides based on your current environment
+3. Only the specified settings are overridden - everything else stays the same
+
+### Health Checks - Monitoring Your Data Sources
+
+Health checks automatically monitor your data sources and detect problems before they affect your rules:
+
+```yaml
+healthCheck:
+  enabled: true                          # Turn health monitoring on
+  intervalSeconds: 30                    # Check every 30 seconds
+  timeoutSeconds: 5                      # Wait up to 5 seconds for response
+  failureThreshold: 3                    # Mark unhealthy after 3 failures
+  recoveryThreshold: 2                   # Mark healthy after 2 successes
+  query: "SELECT 1"                      # Simple query to test database
+```
+
+**What health checks do:**
+- Regularly test if your data sources are responding
+- Automatically mark failed data sources as unhealthy
+- Provide metrics on data source availability
+- Enable automatic failover to backup data sources
+
+**Custom health check queries:**
+- **Database**: `"SELECT 1"` or `"SELECT COUNT(*) FROM users"`
+- **REST API**: A simple GET request to a health endpoint
+- **File System**: Check if a directory is accessible
+- **Cache**: Test a simple get/put operation
+
+### Caching Configuration - Speed Up Your Rules
+
+Caching stores frequently accessed data in memory for much faster access:
+
+```yaml
+cache:
+  enabled: true                          # Turn caching on
+  ttlSeconds: 300                        # Cache data for 5 minutes
+  maxSize: 1000                          # Store up to 1000 cached results
+  keyPrefix: "myapp"                     # Prefix for cache keys (helps avoid conflicts)
+  evictionPolicy: "LRU"                  # Remove least recently used items when full
+```
+
+**Cache timing guidelines:**
+- **Frequently changing data**: 30-60 seconds
+- **Stable reference data**: 5-60 minutes
+- **Configuration data**: 1-24 hours
+- **Static lookup data**: Several hours or days
+
+**Eviction policies explained:**
+- **LRU (Least Recently Used)**: Remove items that haven't been accessed recently
+- **LFU (Least Frequently Used)**: Remove items that are accessed least often
+- **FIFO (First In, First Out)**: Remove the oldest items first
+- **TTL-based**: Remove items when they expire (regardless of usage)
+
+## Usage Examples
+
+Once you have your data sources configured, using them in your Java code is straightforward. Here are practical examples for each type of data source:
+
+### Database Operations - Working with SQL Data
+
+**Simple queries without parameters:**
+```java
+// Get all users - no parameters needed
+List<Object> users = dataSource.query("getAllUsers", Collections.emptyMap());
+
+// The query "getAllUsers" was defined in your YAML configuration
+// Returns a List of Map objects, each representing a database row
+```
+
+**Parameterized queries - the safe way to pass data:**
+```java
+// Get a specific user by ID and status
+Map<String, Object> params = Map.of(
+    "id", 123,
+    "status", "active"
+);
+Object user = dataSource.queryForObject("getUserById", params);
+
+// This executes: SELECT * FROM users WHERE id = :id AND status = :status
+// Parameters are safely bound to prevent SQL injection
+```
+
+**Batch operations for efficiency:**
+```java
+// Update multiple records in one database round-trip
+List<String> updates = List.of(
+    "UPDATE users SET last_login = NOW() WHERE id = 1",
+    "UPDATE users SET last_login = NOW() WHERE id = 2",
+    "UPDATE users SET last_login = NOW() WHERE id = 3"
+);
+dataSource.batchUpdate(updates);
+
+// Much faster than executing updates one by one
+```
+
+**Working with complex parameters:**
+```java
+// Create a new user with multiple fields
+Map<String, Object> newUserParams = Map.of(
+    "username", "john_doe",
+    "email", "john@example.com",
+    "firstName", "John",
+    "lastName", "Doe",
+    "status", "ACTIVE"
+);
+Object result = dataSource.query("createUser", newUserParams);
+```
+
+### REST API Operations - Calling External Services
+
+**GET requests - retrieving data:**
+```java
+// Get user profile from external API
+Map<String, Object> params = Map.of("userId", 123);
+Object userProfile = apiSource.queryForObject("getUserProfile", params);
+
+// This might call: GET https://api.example.com/users/123
+// The URL pattern is defined in your YAML configuration
+```
+
+**POST requests - sending data:**
+```java
+// Create a new user via API (configured in YAML)
+Map<String, Object> newUser = Map.of(
+    "name", "John Doe",
+    "email", "john@example.com",
+    "department", "Engineering"
+);
+Object result = apiSource.query("createUser", newUser);
+
+// This sends a POST request with the user data as JSON
+```
+
+**Handling API responses:**
+```java
+// API calls return parsed JSON as Java objects
+Map<String, Object> response = (Map<String, Object>) apiSource.queryForObject("getUserProfile", params);
+
+// Access response fields
+String userName = (String) response.get("name");
+String email = (String) response.get("email");
+Map<String, Object> address = (Map<String, Object>) response.get("address");
+```
+
+### File System Operations - Processing Files
+
+**Reading CSV files:**
+```java
+// Read CSV file and get parsed data
+Object csvData = fileSource.getData("csv", "users.csv");
+
+// Returns List<Map<String, Object>> where each Map is a CSV row
+List<Map<String, Object>> users = (List<Map<String, Object>>) csvData;
+for (Map<String, Object> user : users) {
+    String name = (String) user.get("name");
+    String email = (String) user.get("email");
+}
+```
+
+**Reading JSON configuration files:**
+```java
+// Read JSON file with parameters
+Map<String, Object> params = Map.of("filename", "config.json");
+Object config = fileSource.queryForObject("getConfig", params);
+
+// Access JSON data
+Map<String, Object> configData = (Map<String, Object>) config;
+String apiUrl = (String) configData.get("apiUrl");
+Integer timeout = (Integer) configData.get("timeout");
+```
+
+**Processing XML files:**
+```java
+// Read XML file with XPath query
+Map<String, Object> xmlParams = Map.of(
+    "filename", "data.xml",
+    "xpath", "//user[@status='active']"  // XPath to find active users
+);
+List<Object> activeUsers = fileSource.query("getActiveUsers", xmlParams);
+```
+
+### Cache Operations - High-Speed Data Storage
+
+**Storing data in cache:**
+```java
+// Store user data in cache for fast access
+Map<String, Object> params = Map.of(
+    "key", "user:123",
+    "value", userData
+);
+cacheSource.query("put", params);
+
+// Data is now stored in memory for fast retrieval
+```
+
+**Retrieving cached data:**
+```java
+// Get data from cache
+Map<String, Object> getParams = Map.of("key", "user:123");
+Object cachedData = cacheSource.queryForObject("get", getParams);
+
+if (cachedData != null) {
+    // Cache hit - use the cached data
+    System.out.println("Found in cache: " + cachedData);
+} else {
+    // Cache miss - need to fetch from original source
+    System.out.println("Not in cache, fetching from database...");
+}
+```
+
+**Pattern-based cache operations:**
+```java
+// Find all cached user keys
+Map<String, Object> patternParams = Map.of("pattern", "user:*");
+List<Object> userKeys = cacheSource.query("keys", patternParams);
+
+// Get multiple cached items at once
+Map<String, Object> batchParams = Map.of(
+    "keys", List.of("user:1", "user:2", "user:3")
+);
+Map<String, Object> batchResults = (Map<String, Object>) cacheSource.queryForObject("getAll", batchParams);
+```
+
+## Architecture
+
+Understanding APEX's external data source architecture helps you make better decisions about how to structure your integrations. The architecture is designed around the principle of separation of concerns - each component has a specific job to do.
+
+### Core Components - The Building Blocks
+
+Think of these components as different layers in a well-organized system:
+
+**1. DataSourceConfigurationService - The Orchestrator**
+This is your main entry point and the component you'll interact with most. It's like a conductor that coordinates all the other components.
+- Loads and manages your YAML configuration files
+- Provides a simple API for accessing data sources
+- Handles environment-specific overrides
+- Manages the lifecycle of all data sources
+
+**2. DataSourceManager - The Coordinator**
+The manager handles the complex task of coordinating multiple data sources, especially when you have multiple instances of the same type.
+- Provides load balancing across multiple data sources
+- Handles automatic failover when data sources fail
+- Manages health monitoring and recovery
+- Coordinates batch operations across data sources
+
+**3. DataSourceRegistry - The Directory**
+The registry is like a phone book that keeps track of all your data sources and their current status.
+- Maintains a centralized directory of all data sources
+- Tracks health status and availability
+- Provides fast lookup by name or type
+- Manages data source lifecycle events
+
+**4. DataSourceFactory - The Builder**
+The factory is responsible for creating and configuring data source instances based on your configuration.
+- Creates data source instances from YAML configuration
+- Handles type-specific setup and initialization
+- Manages resource allocation and cleanup
+- Supports custom data source types through plugins
+
+### Data Flow - How Requests Work
+
+Here's what happens when your rule needs data from an external source:
+
+```
+Your Rule → ConfigurationService → Manager → Registry → DataSource → External System
+    ↑                                                                        ↓
+    ←←←←←←←←←←←←←←←←←←←← Response Data ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+```
+
+**Step by step:**
+1. **Your rule** requests data using a simple method call
+2. **ConfigurationService** routes the request to the appropriate manager
+3. **Manager** selects the best available data source (load balancing, health checks)
+4. **Registry** provides the actual data source instance
+5. **DataSource** executes the query against the external system
+6. **Response** flows back through the same path with caching applied at appropriate levels
+
+### Thread Safety - Built for Concurrency
+
+All APEX components are designed to work safely in multi-threaded environments:
+
+**Thread-Safe Data Structures:**
+- Uses `ConcurrentHashMap` and other thread-safe collections
+- Atomic operations for counters and statistics
+- Immutable configuration objects that can't be accidentally modified
+
+**Connection Management:**
+- Database connection pooling handles concurrent access automatically
+- HTTP clients are thread-safe and can handle multiple simultaneous requests
+- File system access is properly synchronized to prevent conflicts
+
+**Proper Synchronization:**
+- Critical sections are protected with appropriate locking mechanisms
+- Lock-free algorithms where possible for better performance
+- No shared mutable state between threads unless properly synchronized
+
+**What this means for you:**
+- You can safely call data source methods from multiple threads
+- No need to worry about synchronization in your application code
+- APEX handles all the complexity of concurrent access internally
+
+## Best Practices
+
+Following these best practices will help you build reliable, secure, and performant external data source integrations. These recommendations come from real-world experience and will save you time and trouble in the long run.
+
+### Configuration Management - Organize for Success
+
+**1. Use Environment Variables for Sensitive Data**
+**Why:** Keeps secrets out of your code and configuration files, making them more secure and easier to manage.
+
+```yaml
+# ✅ DO: Use environment variables
+connection:
+  username: "app_user"
+  password: "${DB_PASSWORD}"
+  apiKey: "${API_KEY}"
+
+# ❌ DON'T: Hardcode sensitive data
+connection:
+  password: "hardcoded_password"  # Never do this!
+```
+
+**2. Use Environment-Specific Configurations**
+**Why:** One configuration file can work across all your environments (dev, test, prod) with appropriate overrides.
+
+```yaml
+# Base configuration
+dataSources:
+  - name: "user-database"
+    # ... common settings ...
+
+# Environment overrides
 environments:
   development:
     dataSources:
       - name: "user-database"
         connection:
           host: "localhost"
-        cache:
-          ttlSeconds: 60
-  
+          maxPoolSize: 5
   production:
     dataSources:
       - name: "user-database"
         connection:
           host: "prod-db.example.com"
           maxPoolSize: 50
-        cache:
-          ttlSeconds: 600
-          maxSize: 5000
 ```
 
-### Health Checks
+**3. Validate Configurations Before Deployment**
+**Why:** Catch configuration errors early, before they cause runtime failures.
+
+```java
+public void validateConfiguration(DataSourceConfiguration config) {
+    if (config.getName() == null || config.getName().trim().isEmpty()) {
+        throw new IllegalArgumentException("Data source name is required");
+    }
+
+    if (config.getConnection() == null) {
+        throw new IllegalArgumentException("Connection configuration is required");
+    }
+
+    // Add more validation as needed
+}
+```
+
+**4. Document Your Queries and Endpoints**
+**Why:** Makes maintenance easier and helps other developers understand your integrations.
 
 ```yaml
-healthCheck:
-  enabled: true
-  intervalSeconds: 30
-  timeoutSeconds: 5
-  failureThreshold: 3
-  query: "SELECT 1"  # Custom health check query
+queries:
+  getUserById:
+    sql: "SELECT * FROM users WHERE id = :id"
+    description: "Retrieves a single user by their unique ID"
+    parameters: ["id"]
+    returns: "Single user object or null if not found"
 ```
 
-### Caching Configuration
+### Performance Optimization - Make It Fast
+
+**1. Enable Caching with Appropriate TTL Values**
+**Why:** Reduces load on external systems and improves response times.
 
 ```yaml
 cache:
   enabled: true
-  ttlSeconds: 300      # 5 minutes
-  maxSize: 1000        # Maximum entries
-  keyPrefix: "myapp"   # Cache key prefix
-  evictionPolicy: "LRU" # Eviction strategy
+  # Choose TTL based on how often your data changes
+  ttlSeconds: 300     # 5 minutes for frequently changing data
+  ttlSeconds: 3600    # 1 hour for stable reference data
+  ttlSeconds: 86400   # 24 hours for configuration data
 ```
 
-## Usage Examples
+**2. Configure Connection Pooling Based on Load**
+**Why:** Proper pool sizing prevents connection exhaustion and optimizes resource usage.
 
-### Database Operations
+```yaml
+connection:
+  # For high-throughput applications
+  maxPoolSize: 50
+  minPoolSize: 10
+
+  # For low-latency requirements
+  connectionTimeout: 5000
+  idleTimeout: 300000
+```
+
+**3. Use Efficient Queries and Indexes**
+**Why:** Faster queries mean better performance and lower resource usage.
+
+```yaml
+queries:
+  # ✅ DO: Use specific columns and indexed fields
+  getUserByEmail: "SELECT id, username, email FROM users WHERE email = :email"
+
+  # ❌ DON'T: Use SELECT * or unindexed searches
+  getAllUserData: "SELECT * FROM users"
+  findUserByName: "SELECT * FROM users WHERE LOWER(name) LIKE '%:name%'"
+```
+
+**4. Group Operations into Batches**
+**Why:** Reduces network round-trips and improves throughput.
 
 ```java
-// Simple query
-List<Object> users = dataSource.query("getAllUsers", Collections.emptyMap());
-
-// Parameterized query
-Map<String, Object> params = Map.of("id", 123, "status", "active");
-Object user = dataSource.queryForObject("getUserById", params);
-
-// Batch operations
+// ✅ DO: Use batch operations
 List<String> updates = List.of(
     "UPDATE users SET last_login = NOW() WHERE id = 1",
-    "UPDATE users SET last_login = NOW() WHERE id = 2"
+    "UPDATE users SET last_login = NOW() WHERE id = 2",
+    "UPDATE users SET last_login = NOW() WHERE id = 3"
 );
 dataSource.batchUpdate(updates);
+
+// ❌ DON'T: Execute operations one by one
+for (int id : userIds) {
+    dataSource.query("updateLastLogin", Map.of("id", id));
+}
 ```
 
-### REST API Operations
+### Error Handling - Plan for Failures
+
+**1. Configure Circuit Breakers for External APIs**
+**Why:** Protects your system from cascading failures when external services are down.
+
+```yaml
+circuitBreaker:
+  enabled: true
+  failureThreshold: 5      # Open circuit after 5 failures
+  recoveryTimeout: 30000   # Try again after 30 seconds
+  halfOpenMaxCalls: 3      # Test with 3 calls when recovering
+```
+
+**2. Use Retry Logic with Exponential Backoff**
+**Why:** Handles transient failures gracefully without overwhelming failing systems.
+
+```yaml
+connection:
+  retryAttempts: 3
+  retryDelay: 1000         # Start with 1 second
+  retryMultiplier: 2.0     # Double the delay each time (1s, 2s, 4s)
+  maxRetryDelay: 30000     # Cap at 30 seconds
+```
+
+**3. Monitor Data Source Health Continuously**
+**Why:** Early detection of problems allows for proactive response.
+
+```yaml
+healthCheck:
+  enabled: true
+  intervalSeconds: 30      # Check every 30 seconds
+  timeoutSeconds: 5        # 5 second timeout
+  failureThreshold: 3      # Mark unhealthy after 3 failures
+```
+
+**4. Implement Graceful Degradation**
+**Why:** Your application can continue working even when some data sources fail.
 
 ```java
-// GET request
-Map<String, Object> params = Map.of("userId", 123);
-Object userProfile = apiSource.queryForObject("getUserProfile", params);
-
-// POST request (configured in YAML)
-Map<String, Object> newUser = Map.of("name", "John", "email", "john@example.com");
-Object result = apiSource.query("createUser", newUser);
+try {
+    Object userData = userDatabase.queryForObject("getUserById", params);
+    return userData;
+} catch (DataSourceException e) {
+    // Fallback to cache or default values
+    logger.warn("Database unavailable, using cached data", e);
+    return userCache.queryForObject("get", Map.of("key", "user:" + userId));
+}
 ```
 
-### File System Operations
+### Security - Protect Your Data
+
+**1. Always Use Encrypted Connections in Production**
+**Why:** Protects sensitive data in transit from interception.
+
+```yaml
+connection:
+  sslEnabled: true
+  sslMode: "require"       # For PostgreSQL
+  useSSL: true            # For MySQL
+  encrypt: true           # For SQL Server
+```
+
+**2. Use Strong Authentication Methods**
+**Why:** Prevents unauthorized access to your data sources.
+
+```yaml
+authentication:
+  type: "bearer"          # Use token-based auth when possible
+  token: "${API_TOKEN}"
+
+  # Or for databases
+  type: "certificate"     # Use certificate-based auth for high security
+  certificatePath: "/path/to/cert.pem"
+```
+
+**3. Limit Database Permissions to Minimum Required**
+**Why:** Reduces the impact of security breaches.
+
+```sql
+-- ✅ DO: Create specific users with limited permissions
+CREATE USER app_user WITH PASSWORD 'secure_password';
+GRANT SELECT, INSERT, UPDATE ON users TO app_user;
+GRANT SELECT ON products TO app_user;
+
+-- ❌ DON'T: Use admin accounts for applications
+-- GRANT ALL PRIVILEGES TO app_user;  -- Too much access!
+```
+
+**4. Log All Data Access for Compliance**
+**Why:** Provides audit trails required by many regulations and helps with troubleshooting.
 
 ```java
-// Read CSV file
-Object csvData = fileSource.getData("csv", "users.csv");
-
-// Read JSON file with parameters
-Map<String, Object> params = Map.of("filename", "config.json");
-Object config = fileSource.queryForObject("getConfig", params);
+// Log data access events
+logger.info("Data access: user={}, query={}, parameters={}",
+    currentUser, queryName, sanitizeParameters(parameters));
 ```
 
-### Cache Operations
+### Monitoring - Know What's Happening
+
+**1. Enable Comprehensive Metrics Collection**
+**Why:** Provides visibility into performance and helps identify issues.
 
 ```java
-// Store in cache
-Map<String, Object> params = Map.of("key", "user:123", "value", userData);
-cacheSource.query("put", params);
-
-// Retrieve from cache
-Map<String, Object> getParams = Map.of("key", "user:123");
-Object cachedData = cacheSource.queryForObject("get", getParams);
+// Regularly check and log metrics
+DataSourceMetrics metrics = dataSource.getMetrics();
+logger.info("Data source performance: success_rate={}%, avg_response_time={}ms, cache_hit_ratio={}%",
+    metrics.getSuccessRate() * 100,
+    metrics.getAverageResponseTime(),
+    metrics.getCacheHitRatio() * 100);
 ```
 
-## Architecture
+**2. Set Up Alerts for Health Check Failures**
+**Why:** Enables rapid response to system problems.
 
-### Core Components
-
-1. **DataSourceRegistry**: Centralized registry for all data sources
-2. **DataSourceFactory**: Creates and configures data source instances
-3. **DataSourceManager**: Coordinates multiple data sources with load balancing
-4. **DataSourceConfigurationService**: High-level service for configuration management
-
-### Data Flow
-
-```
-YAML Config → ConfigurationService → Manager → Registry → DataSource → External System
+```java
+// Monitor health and send alerts
+if (dataSource.getConnectionStatus().getState() != ConnectionStatus.State.CONNECTED) {
+    alertService.sendAlert("Data source unhealthy: " + dataSource.getName());
+}
 ```
 
-### Thread Safety
+**3. Monitor Response Times and Throughput**
+**Why:** Helps identify performance degradation before it affects users.
 
-All components are designed for concurrent access:
-- Thread-safe data structures (ConcurrentHashMap, etc.)
-- Proper synchronization for shared resources
-- Connection pooling for database sources
-- Immutable configuration objects
+```java
+// Track performance trends
+if (metrics.getAverageResponseTime() > 1000) {  // 1 second threshold
+    logger.warn("Slow response time detected: {}ms", metrics.getAverageResponseTime());
+}
+```
 
-## Best Practices
+**4. Track Resource Usage for Capacity Planning**
+**Why:** Helps you plan for growth and avoid resource exhaustion.
 
-### Configuration Management
+```java
+// Monitor connection pool usage
+int activeConnections = metrics.getActiveConnections();
+int totalConnections = metrics.getTotalConnections();
+double utilization = (double) activeConnections / totalConnections;
 
-1. **Use Environment Variables**: Never hardcode sensitive data
-2. **Environment-Specific Configs**: Use environment overrides
-3. **Validation**: Always validate configurations before deployment
-4. **Documentation**: Document all custom queries and endpoints
-
-### Performance Optimization
-
-1. **Enable Caching**: Use appropriate TTL values for your use case
-2. **Connection Pooling**: Configure pool sizes based on load
-3. **Query Optimization**: Use efficient queries and indexes
-4. **Batch Operations**: Group multiple operations when possible
-
-### Error Handling
-
-1. **Circuit Breakers**: Configure for external APIs
-2. **Retry Logic**: Use exponential backoff for transient failures
-3. **Health Checks**: Monitor data source health continuously
-4. **Graceful Degradation**: Handle failures gracefully
-
-### Security
-
-1. **SSL/TLS**: Always use encrypted connections in production
-2. **Authentication**: Use strong authentication methods
-3. **Access Control**: Limit database permissions to minimum required
-4. **Audit Logging**: Log all data access for compliance
-
-### Monitoring
-
-1. **Metrics Collection**: Enable comprehensive metrics
-2. **Health Monitoring**: Set up alerts for health check failures
-3. **Performance Tracking**: Monitor response times and throughput
-4. **Capacity Planning**: Track resource usage trends
+if (utilization > 0.8) {  // 80% threshold
+    logger.warn("High connection pool utilization: {}%", utilization * 100);
+}
+```
 
 ## Troubleshooting
 
@@ -652,41 +1236,156 @@ public class AuthenticationConfig {
 
 ### Supported Databases
 
-The database data source provides robust integration with relational databases, featuring connection pooling, query management, caching, health monitoring, and security.
+APEX provides robust integration with all major relational databases. Each database type has its own specific configuration options and best practices, but they all share common features like connection pooling, query management, caching, health monitoring, and security.
 
-#### PostgreSQL
+**What you get with database integration:**
+- **Connection pooling**: Efficiently manage database connections for high performance
+- **Query management**: Define named queries in YAML for better maintainability
+- **Automatic caching**: Cache query results to reduce database load
+- **Health monitoring**: Continuously monitor database connectivity and performance
+- **Security**: SSL/TLS encryption, credential management, and access control
+- **Transaction support**: Handle database transactions properly
+- **Prepared statements**: Automatic SQL injection protection
+
+#### PostgreSQL - The Popular Open Source Choice
+
+PostgreSQL is a powerful, open-source relational database that's popular for its reliability, performance, and rich feature set. It's an excellent choice for most applications.
+
+**When to choose PostgreSQL:**
+- You need a reliable, ACID-compliant database
+- You want advanced features like JSON support, full-text search, and custom data types
+- You're building a new application and want a modern database
+- You need good performance with complex queries
+- You want strong community support and extensive documentation
+
 ```yaml
 dataSources:
   - name: "postgres-db"
     type: "database"
     sourceType: "postgresql"
     connection:
-      host: "localhost"
-      port: 5432
-      database: "myapp"
-      username: "app_user"
-      password: "${DB_PASSWORD}"
-      schema: "public"
-      sslEnabled: true
-      sslMode: "require"
+      host: "localhost"                    # Database server hostname
+      port: 5432                          # PostgreSQL default port
+      database: "myapp"                   # Database name
+      username: "app_user"                # Database username
+      password: "${DB_PASSWORD}"          # Password from environment variable
+      schema: "public"                    # Database schema (usually "public")
+      sslEnabled: true                    # Enable SSL encryption
+      sslMode: "require"                  # Force SSL (use "prefer" for dev)
+
+      # Optional PostgreSQL-specific settings
+      applicationName: "APEX-Rules-Engine" # Shows up in PostgreSQL logs
+      connectTimeout: 10000               # 10 seconds to establish connection
+      socketTimeout: 30000                # 30 seconds for query timeout
+
+      # Connection pool settings for optimal performance
+      maxPoolSize: 20                     # Maximum connections in pool
+      minPoolSize: 5                      # Minimum connections to maintain
+      connectionTimeout: 30000            # Wait 30s for connection from pool
+      idleTimeout: 600000                 # Close idle connections after 10 minutes
+      maxLifetime: 1800000                # Recreate connections after 30 minutes
+
+    queries:
+      # PostgreSQL uses $1, $2, etc. for parameters (not :name syntax)
+      getUserById: "SELECT * FROM users WHERE id = $1"
+      getUsersByStatus: "SELECT * FROM users WHERE status = $1 ORDER BY created_at DESC"
+      createUser: "INSERT INTO users (username, email, status) VALUES ($1, $2, $3) RETURNING id"
+
+      # Complex query example
+      getUserWithProfile: |
+        SELECT u.id, u.username, u.email, u.status, u.created_at,
+               p.first_name, p.last_name, p.phone
+        FROM users u
+        LEFT JOIN profiles p ON u.id = p.user_id
+        WHERE u.id = $1 AND u.status = $2
+
+    parameterNames:
+      - "id"
+      - "status"
+      - "username"
+      - "email"
+      - "first_name"
+      - "last_name"
 ```
 
-#### MySQL
+**PostgreSQL-specific tips:**
+- **Parameter syntax**: Use `$1, $2, $3` instead of `:name` syntax
+- **SSL modes**: Use `require` for production, `prefer` for development
+- **RETURNING clause**: Great for getting generated IDs after INSERT operations
+- **Application name**: Helps identify your application in PostgreSQL logs and monitoring
+- **JSON support**: PostgreSQL has excellent JSON and JSONB support for semi-structured data
+
+#### MySQL - The World's Most Popular Database
+
+MySQL is the world's most popular open-source database, known for its speed, reliability, and ease of use. It's particularly popular for web applications and is part of the classic LAMP stack.
+
+**When to choose MySQL:**
+- You're building web applications or content management systems
+- You need fast read performance and simple queries
+- You want a database with a huge community and lots of hosting options
+- You're working with existing MySQL infrastructure
+- You need a lightweight database with good performance
+
 ```yaml
 dataSources:
   - name: "mysql-db"
     type: "database"
     sourceType: "mysql"
     connection:
-      host: "localhost"
-      port: 3306
-      database: "myapp"
-      username: "app_user"
-      password: "${DB_PASSWORD}"
-      useSSL: true
-      serverTimezone: "UTC"
-      characterEncoding: "utf8mb4"
+      host: "localhost"                    # Database server hostname
+      port: 3306                          # MySQL default port
+      database: "myapp"                   # Database name
+      username: "app_user"                # Database username
+      password: "${DB_PASSWORD}"          # Password from environment variable
+      useSSL: true                        # Enable SSL encryption
+      serverTimezone: "UTC"               # Set timezone (important for date/time handling)
+      characterEncoding: "utf8mb4"        # Full UTF-8 support (including emojis)
+
+      # MySQL-specific performance settings
+      cachePrepStmts: true                # Cache prepared statements
+      prepStmtCacheSize: 250              # Number of statements to cache
+      prepStmtCacheSqlLimit: 2048         # Max SQL length to cache
+      useServerPrepStmts: true            # Use server-side prepared statements
+
+      # Connection pool settings
+      maxPoolSize: 25                     # Maximum connections in pool
+      minPoolSize: 5                      # Minimum connections to maintain
+      connectionTimeout: 20000            # Wait 20s for connection from pool
+      idleTimeout: 600000                 # Close idle connections after 10 minutes
+      maxLifetime: 1800000                # Recreate connections after 30 minutes
+
+    queries:
+      # MySQL uses ? for parameters (not $1 or :name)
+      getUserById: "SELECT * FROM users WHERE id = ?"
+      getUsersByStatus: "SELECT * FROM users WHERE status = ? ORDER BY created_at DESC"
+      createUser: "INSERT INTO users (username, email, status) VALUES (?, ?, ?)"
+
+      # Get the last inserted ID (MySQL-specific)
+      getLastInsertId: "SELECT LAST_INSERT_ID()"
+
+      # Complex query with joins
+      getUserWithProfile: |
+        SELECT u.id, u.username, u.email, u.status, u.created_at,
+               p.first_name, p.last_name, p.phone
+        FROM users u
+        LEFT JOIN profiles p ON u.id = p.user_id
+        WHERE u.id = ? AND u.status = ?
+
+    parameterNames:
+      - "id"
+      - "status"
+      - "username"
+      - "email"
+      - "first_name"
+      - "last_name"
 ```
+
+**MySQL-specific tips:**
+- **Parameter syntax**: Use `?` for parameters (JDBC standard)
+- **Character encoding**: Always use `utf8mb4` for full UTF-8 support (including emojis)
+- **Timezone**: Set `serverTimezone` to avoid timezone-related issues
+- **Prepared statements**: Enable caching for better performance
+- **Getting IDs**: Use `LAST_INSERT_ID()` to get auto-generated IDs after INSERT
 
 #### Oracle
 ```yaml

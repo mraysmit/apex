@@ -164,247 +164,461 @@ graph TB
 
 ## Quick Start (5 Minutes)
 
-### 1. One-Liner Rule Evaluation
+Welcome to APEX! This section will get you up and running quickly with three progressively more powerful approaches. Don't worry if some concepts seem unfamiliar at first - we'll explain everything step by step.
+
+### Understanding the Basics
+
+Before we dive in, let's understand what APEX does: it evaluates business rules against your data. Think of it as asking questions like "Is this customer old enough?" or "Does this transaction meet our requirements?" APEX uses expressions (written in Spring Expression Language or SpEL) to define these questions.
+
+The `#` symbol in expressions refers to data you provide. For example, `#age >= 18` means "check if the age value is 18 or greater."
+
+### 1. One-Liner Rule Evaluation (Simplest Approach)
+
+This is the easiest way to get started. You can evaluate a single rule with just one line of code:
 
 ```java
 import dev.mars.rulesengine.core.api.Rules;
 
-// Evaluate a rule in one line
-boolean isAdult = Rules.check("#age >= 18", Map.of("age", 25)); // true
-boolean hasBalance = Rules.check("#balance > 1000", Map.of("balance", 500)); // false
+// Check if someone is an adult (age 18 or older)
+boolean isAdult = Rules.check("#age >= 18", Map.of("age", 25)); // returns true
 
-// With objects
+// Check if account has sufficient balance
+boolean hasBalance = Rules.check("#balance > 1000", Map.of("balance", 500)); // returns false
+
+// Working with objects instead of simple values
 Customer customer = new Customer("John", 25, "john@example.com");
-boolean valid = Rules.check("#data.age >= 18 && #data.email != null", customer); // true
+boolean valid = Rules.check("#data.age >= 18 && #data.email != null", customer); // returns true
 ```
 
-### 2. Template-Based Rules
+**What's happening here:**
+- `Rules.check()` is a static method that evaluates one rule
+- The first parameter is your rule expression (the question you're asking)
+- The second parameter is your data (either a Map or an object)
+- It returns true/false based on whether the rule passes
+
+### 2. Template-Based Rules (Structured Approach)
+
+When you need multiple related rules, templates provide a cleaner approach:
 
 ```java
 import dev.mars.rulesengine.core.api.RuleSet;
 
-// Create validation rules using templates
+// Create a set of validation rules using pre-built templates
 RulesEngine validation = RuleSet.validation()
-    .ageCheck(18)
-    .emailRequired()
-    .balanceMinimum(1000)
+    .ageCheck(18)           // Must be 18 or older
+    .emailRequired()        // Must have an email address
+    .balanceMinimum(1000)   // Must have at least $1000 balance
     .build();
 
+// Validate your customer data against all rules at once
 ValidationResult result = validation.validate(customer);
+
+// Check the results
+if (result.isValid()) {
+    System.out.println("Customer passed all validations!");
+} else {
+    System.out.println("Validation failed: " + result.getFailureMessages());
+}
 ```
 
-### 3. YAML Configuration
+**What's happening here:**
+- `RuleSet.validation()` creates a builder for common validation scenarios
+- Each method (like `ageCheck()`) adds a pre-configured rule
+- `build()` creates the final rules engine
+- `validate()` runs all rules and gives you a comprehensive result
 
-Create a `rules.yaml` file:
+### 3. YAML Configuration (Most Flexible Approach)
+
+For complex scenarios or when non-developers need to modify rules, YAML configuration is ideal. This approach separates your business logic from your code.
+
+First, create a `rules.yaml` file that defines your business rules:
 
 ```yaml
+# This section provides information about your rule set
 metadata:
   name: "Customer Validation Rules"
   version: "1.0.0"
 
+# Define your business rules here
 rules:
-  - id: "age-check"
-    name: "Age Validation"
-    condition: "#data.age >= 18"
-    message: "Customer must be at least 18 years old"
-    
+  - id: "age-check"                                    # Unique identifier
+    name: "Age Validation"                             # Human-readable name
+    condition: "#data.age >= 18"                       # The actual rule logic
+    message: "Customer must be at least 18 years old"  # Error message if rule fails
+
   - id: "email-check"
     name: "Email Validation"
     condition: "#data.email != null && #data.email.contains('@')"
     message: "Valid email address is required"
 
+# Enrichments add extra data to your objects during rule evaluation
 enrichments:
-  - id: "status-enrichment"
-    type: "lookup-enrichment"
-    condition: "['statusCode'] != null"
+  - id: "status-enrichment"                    # Unique identifier for this enrichment
+    type: "lookup-enrichment"                  # Type of enrichment (lookup from a dataset)
+    condition: "['statusCode'] != null"        # Only enrich if statusCode exists
     lookup-config:
-      lookup-dataset:
-        type: "inline"
-        key-field: "code"
-        data:
+      lookup-dataset:                          # The data to look up from
+        type: "inline"                         # Data is defined right here in the file
+        key-field: "code"                      # Field to match against
+        data:                                  # The actual lookup data
           - code: "A"
             name: "Active"
             description: "Active customer"
           - code: "I"
             name: "Inactive"
             description: "Inactive customer"
-    field-mappings:
-      - source-field: "name"
-        target-field: "statusName"
+    field-mappings:                            # How to add the looked-up data to your object
+      - source-field: "name"                   # Take the "name" from lookup data
+        target-field: "statusName"             # Add it as "statusName" to your object
       - source-field: "description"
         target-field: "statusDescription"
 ```
 
-Load and use the configuration:
+Now load and use this configuration in your Java code:
 
 ```java
-// Load YAML configuration
+// Load the YAML configuration file
 RulesEngineConfiguration config = YamlConfigurationLoader.load("rules.yaml");
 RulesEngine engine = new RulesEngine(config);
 
-// Evaluate rules with enrichment
+// Prepare your data for evaluation
 Map<String, Object> data = Map.of(
-    "age", 25,
-    "email", "john@example.com",
-    "statusCode", "A"
+    "age", 25,                    // Customer's age
+    "email", "john@example.com",  // Customer's email
+    "statusCode", "A"             // Customer's status code (will be enriched)
 );
 
+// Evaluate all rules and enrichments
 RuleResult result = engine.evaluate(data);
+
+// Check what happened
+if (result.isSuccess()) {
+    System.out.println("All rules passed!");
+
+    // Access enriched data
+    String statusName = (String) result.getEnrichedData().get("statusName");
+    System.out.println("Customer status: " + statusName); // Prints "Active"
+} else {
+    System.out.println("Some rules failed: " + result.getFailureMessages());
+}
 ```
+
+**What's happening here:**
+- The YAML file defines your business logic separately from your code
+- `YamlConfigurationLoader.load()` reads and parses the YAML file
+- The rules engine evaluates both rules and enrichments automatically
+- Enrichments add extra information to your data (like looking up "Active" from status code "A")
+- You get back a comprehensive result with both validation outcomes and enriched data
+
+### Which Approach Should You Use?
+
+- **One-liner**: Perfect for simple, one-off rule checks
+- **Template-based**: Great for common validation scenarios with multiple related rules
+- **YAML configuration**: Best for complex business logic, when rules change frequently, or when business users need to modify rules
+
+You can start with the one-liner approach and gradually move to more sophisticated approaches as your needs grow!
 
 ## Core Concepts
 
-### Rules
-Rules are the fundamental building blocks that define business logic:
+Understanding these three core concepts will help you make the most of APEX. Think of them as the building blocks for creating intelligent business logic.
+
+### Rules: Your Business Logic
+
+Rules are the heart of APEX - they define the questions you want to ask about your data. Each rule is like a business requirement written in a way the computer can understand.
+
+**Anatomy of a Rule:**
 
 ```yaml
 rules:
-  - id: "trade-amount-validation"
-    name: "Trade Amount Validation"
-    condition: "#amount > 0 && #amount <= 1000000"
-    message: "Trade amount must be between 0 and 1,000,000"
-    severity: "ERROR"
-    tags: ["financial", "validation"]
+  - id: "trade-amount-validation"                              # Unique identifier for this rule
+    name: "Trade Amount Validation"                            # Human-readable name
+    condition: "#amount > 0 && #amount <= 1000000"            # The actual business logic
+    message: "Trade amount must be between 0 and 1,000,000"   # What to show if the rule fails
+    severity: "ERROR"                                          # How serious is a failure?
+    tags: ["financial", "validation"]                         # Categories for organization
 ```
 
-### Enrichments
-Enrichments add data to your objects during rule evaluation:
+**Breaking down the condition:**
+- `#amount > 0` means "the amount must be greater than zero"
+- `&&` means "AND" (both conditions must be true)
+- `#amount <= 1000000` means "the amount must be less than or equal to 1,000,000"
+- Together: "The amount must be positive and not exceed 1 million"
+
+**Common rule patterns:**
+- Validation: `#age >= 18` (must be 18 or older)
+- Range checking: `#score >= 0 && #score <= 100` (score between 0-100)
+- Required fields: `#email != null` (email must exist)
+- Pattern matching: `#email.contains('@')` (email must contain @)
+
+### Enrichments: Adding Smart Data
+
+Enrichments automatically add related information to your data during rule evaluation. Think of them as smart lookups that happen behind the scenes.
+
+**Why use enrichments?**
+Instead of just having a currency code like "USD", enrichments can automatically add the full name "US Dollar" and region "North America" to your data.
 
 ```yaml
 enrichments:
-  - id: "currency-enrichment"
-    type: "lookup-enrichment"
-    condition: "['currency'] != null"
+  - id: "currency-enrichment"                    # Unique identifier
+    type: "lookup-enrichment"                    # Type of enrichment (lookup from data)
+    condition: "['currency'] != null"            # Only enrich if currency code exists
     lookup-config:
-      lookup-dataset:
-        type: "inline"
-        key-field: "code"
-        cache-enabled: true
-        data:
+      lookup-dataset:                            # Where to find the lookup data
+        type: "inline"                           # Data is defined right here
+        key-field: "code"                        # Field to match against (currency code)
+        cache-enabled: true                      # Cache for better performance
+        data:                                    # The actual lookup data
           - code: "USD"
             name: "US Dollar"
             region: "North America"
           - code: "EUR"
             name: "Euro"
             region: "Europe"
-    field-mappings:
-      - source-field: "name"
-        target-field: "currencyName"
+    field-mappings:                              # How to add the data to your object
+      - source-field: "name"                     # Take "name" from lookup data
+        target-field: "currencyName"             # Add as "currencyName" to your object
       - source-field: "region"
         target-field: "currencyRegion"
 ```
 
-### Datasets
-Datasets provide lookup data for enrichments:
+**What happens during enrichment:**
+1. Your data has `currency: "USD"`
+2. APEX looks up "USD" in the dataset
+3. It finds the matching record with name "US Dollar" and region "North America"
+4. It adds `currencyName: "US Dollar"` and `currencyRegion: "North America"` to your data
+5. Your rules can now use these enriched fields
 
-#### Inline Datasets (Recommended for small, static data)
+### Datasets: Your Reference Data
+
+Datasets are collections of reference data that enrichments use for lookups. They're like lookup tables that contain additional information about codes, IDs, or other identifiers in your data.
+
+**Two ways to organize your datasets:**
+
+#### Inline Datasets (Best for small, unique data)
+
+Use inline datasets when you have small amounts of data that are specific to one configuration file:
+
 ```yaml
 lookup-dataset:
-  type: "inline"
-  key-field: "code"
-  cache-enabled: true
-  cache-ttl-seconds: 3600
-  data:
-    - code: "USD"
-      name: "US Dollar"
+  type: "inline"                    # Data is defined right here in this file
+  key-field: "code"                 # Field to match against when looking up
+  cache-enabled: true               # Keep data in memory for faster lookups
+  cache-ttl-seconds: 3600          # Cache for 1 hour (3600 seconds)
+  data:                            # The actual data
+    - code: "USD"                  # This is the key field
+      name: "US Dollar"            # Additional information
     - code: "EUR"
       name: "Euro"
 ```
 
-#### External Dataset Files (Recommended for larger, reusable data)
+**When to use inline datasets:**
+- Small datasets (less than 50 records)
+- Data that's unique to this specific configuration
+- Simple lookup tables that won't be reused elsewhere
+
+#### External Dataset Files (Best for larger, reusable data)
+
+Use external files when you have larger datasets or data that multiple configurations might use:
+
 ```yaml
 lookup-dataset:
-  type: "yaml-file"
-  file-path: "datasets/currencies.yaml"
-  key-field: "code"
-  cache-enabled: true
+  type: "yaml-file"                           # Data comes from an external file
+  file-path: "datasets/currencies.yaml"      # Path to the data file
+  key-field: "code"                          # Field to match against
+  cache-enabled: true                        # Cache for performance
 ```
+
+Then create `datasets/currencies.yaml`:
+```yaml
+data:
+  - code: "USD"
+    name: "US Dollar"
+    symbol: "$"
+    region: "North America"
+  - code: "EUR"
+    name: "Euro"
+    symbol: "€"
+    region: "Europe"
+  - code: "GBP"
+    name: "British Pound"
+    symbol: "£"
+    region: "Europe"
+```
+
+**When to use external dataset files:**
+- Larger datasets (50+ records)
+- Data that multiple configurations need to share
+- Data that changes independently of your rule configurations
+- When you want to keep your main configuration file clean and focused
 
 ## YAML Configuration Guide
 
+YAML (Yet Another Markup Language) is a human-readable format for configuration files. Don't worry if you're new to YAML - it's designed to be easy to read and write. Think of it as a structured way to organize information, similar to how you might organize information in an outline.
+
+### Understanding YAML Basics
+
+YAML uses indentation (spaces) to show relationships between items. Here are the key concepts:
+- **Indentation matters**: Use spaces (not tabs) to show hierarchy
+- **Lists**: Items that start with a dash (`-`)
+- **Key-value pairs**: `key: value`
+- **Nested structures**: Indent to show items belong together
+
 ### Configuration Structure
 
+Every APEX configuration file follows this basic structure:
+
 ```yaml
+# Metadata section: Information about this configuration file
 metadata:
-  name: "Configuration Name"
-  version: "1.0.0"
-  description: "Configuration description"
-  author: "Team Name"
-  created: "2024-01-15"
-  last-modified: "2024-07-26"
-  tags: ["tag1", "tag2"]
+  name: "Configuration Name"              # What this configuration does
+  version: "1.0.0"                       # Version for tracking changes
+  description: "Configuration description" # Detailed explanation
+  author: "Team Name"                     # Who created/maintains this
+  created: "2024-01-15"                  # When it was created
+  last-modified: "2024-07-26"           # Last update date
+  tags: ["tag1", "tag2"]                # Categories for organization
 
+# Rules section: Your business logic
 rules:
-  # Rule definitions
+  # Individual rule definitions go here
+  # Each rule defines a condition to check
 
+# Enrichments section: Data enhancement
 enrichments:
-  # Enrichment definitions
+  # Enrichment definitions go here
+  # Each enrichment adds data to your objects
 
+# Rule groups section: Organized rule collections
 rule-groups:
-  # Rule group definitions
+  # Rule group definitions go here
+  # Groups let you organize related rules together
 ```
+
+**Why organize it this way?**
+- **Metadata**: Helps you track and document your configurations
+- **Rules**: Contains your business logic and validation requirements
+- **Enrichments**: Automatically adds useful information to your data
+- **Rule Groups**: Organizes related rules for better management
 
 ### Rule Configuration
 
+Rules are where you define your business logic. Each rule is like a question you're asking about your data. Here's how to configure them:
+
 ```yaml
 rules:
-  - id: "unique-rule-id"
-    name: "Human Readable Name"
-    condition: "#data.field > 100"
-    message: "Validation message"
-    severity: "ERROR"  # ERROR, WARNING, INFO
-    enabled: true
-    tags: ["validation", "business"]
-    metadata:
-      owner: "Business Team"
-      domain: "Finance"
-      purpose: "Regulatory compliance"
+  - id: "unique-rule-id"                    # Required: Unique identifier (like a name tag)
+    name: "Human Readable Name"             # Required: What this rule does in plain English
+    condition: "#data.field > 100"          # Required: The actual business logic to check
+    message: "Validation message"           # Optional: What to show if the rule fails
+    severity: "ERROR"                       # Optional: How serious is a failure? (ERROR, WARNING, INFO)
+    enabled: true                           # Optional: Turn this rule on/off (default: true)
+    tags: ["validation", "business"]        # Optional: Categories for organization
+    metadata:                               # Optional: Additional information for governance
+      owner: "Business Team"               # Who owns/maintains this rule
+      domain: "Finance"                    # What business area it belongs to
+      purpose: "Regulatory compliance"     # Why this rule exists
 ```
+
+**Understanding each part:**
+
+- **id**: A unique name for this rule (like "customer-age-check"). Use descriptive names that make sense to your team.
+
+- **name**: A human-friendly description that anyone can understand (like "Customer Age Validation").
+
+- **condition**: The actual business logic using SpEL expressions. Common patterns:
+  - `#age >= 18` (age must be 18 or older)
+  - `#amount > 0 && #amount <= 1000` (amount between 0 and 1000)
+  - `#email != null && #email.contains('@')` (email must exist and contain @)
+
+- **message**: What users see when the rule fails. Make it helpful and actionable.
+
+- **severity**: How important is this rule?
+  - `ERROR`: Critical - must be fixed
+  - `WARNING`: Important - should be reviewed
+  - `INFO`: Informational - good to know
+
+- **enabled**: Allows you to temporarily turn rules on/off without deleting them.
+
+- **tags**: Help organize and filter rules. Use consistent tags across your organization.
+
+- **metadata**: Additional information for governance, documentation, and audit trails.
 
 ### Enrichment Configuration
 
+Enrichments automatically add related information to your data. Think of them as smart lookups that happen automatically during rule evaluation.
+
 ```yaml
 enrichments:
-  - id: "enrichment-id"
-    type: "lookup-enrichment"
-    condition: "['field'] != null"
-    enabled: true
-    lookup-config:
-      lookup-dataset:
-        type: "inline"  # or "yaml-file"
-        key-field: "lookupKey"
-        cache-enabled: true
-        cache-ttl-seconds: 3600
-        default-values:
+  - id: "enrichment-id"                     # Required: Unique identifier for this enrichment
+    type: "lookup-enrichment"               # Required: Type of enrichment (lookup is most common)
+    condition: "['field'] != null"          # Optional: Only enrich if this condition is true
+    enabled: true                           # Optional: Turn this enrichment on/off (default: true)
+    lookup-config:                          # Configuration for the lookup process
+      lookup-dataset:                       # Where to find the lookup data
+        type: "inline"                      # Data source type: "inline" or "yaml-file"
+        key-field: "lookupKey"              # Field to match against in your data
+        cache-enabled: true                 # Keep lookup data in memory for speed
+        cache-ttl-seconds: 3600            # How long to cache (1 hour = 3600 seconds)
+        default-values:                     # What to use if no match is found
           defaultField: "defaultValue"
-        data:
-          - lookupKey: "key1"
-            field1: "value1"
+        data:                              # The actual lookup data (for inline type)
+          - lookupKey: "key1"              # This is what we match against
+            field1: "value1"               # Additional data to add
             field2: "value2"
-    field-mappings:
-      - source-field: "field1"
-        target-field: "enrichedField1"
+    field-mappings:                        # How to add the looked-up data to your object
+      - source-field: "field1"             # Take this field from the lookup data
+        target-field: "enrichedField1"     # Add it to your object with this name
       - source-field: "field2"
         target-field: "enrichedField2"
 ```
 
+**Understanding enrichment flow:**
+
+1. **Check condition**: If specified, only enrich when the condition is true
+2. **Find matching data**: Look up the key value in your dataset
+3. **Map fields**: Copy specified fields from the lookup data to your object
+4. **Use defaults**: If no match found, use default values (if configured)
+
+**Example in action:**
+- Your data has: `{statusCode: "A"}`
+- Lookup dataset has: `{code: "A", name: "Active", description: "Customer is active"}`
+- Field mappings copy `name` to `statusName` and `description` to `statusDescription`
+- Result: Your data now has: `{statusCode: "A", statusName: "Active", statusDescription: "Customer is active"}`
+
+**Common use cases:**
+- Convert codes to human-readable names (status codes, country codes, etc.)
+- Add regional information based on location codes
+- Enrich product data with category information
+- Add calculated fields based on lookup tables
+
 ## Dataset Enrichment
+
+Dataset enrichment is one of APEX's most powerful features. It automatically adds related information to your data during rule evaluation, transforming simple codes into rich, meaningful data.
+
+### Understanding Dataset Enrichment
+
+Imagine you have customer data with just a status code like "A". Dataset enrichment can automatically add the full status name "Active" and description "Customer account is active and in good standing" to your data. This happens transparently during rule evaluation, so your rules can work with both the original code and the enriched information.
 
 ### When to Use Dataset Enrichment
 
-**Good Candidates:**
-- Currency codes and names
-- Country codes and regions
-- Status codes and descriptions
-- Product categories
-- Reference data that changes infrequently
-- Small to medium datasets (< 1000 records)
+Dataset enrichment works best for reference data - information that helps explain or categorize your main data.
 
-**Not Suitable For:**
-- Large datasets (> 1000 records)
-- Frequently changing data
-- Data requiring complex business logic
-- Real-time data from external systems
+**Perfect candidates for dataset enrichment:**
+- **Currency codes and names**: "USD" → "US Dollar", "EUR" → "Euro"
+- **Country codes and regions**: "US" → "United States", "North America"
+- **Status codes and descriptions**: "A" → "Active", "Customer account is active"
+- **Product categories**: "ELEC" → "Electronics", "Consumer electronics category"
+- **Reference data that changes infrequently**: Data that's stable over time
+- **Small to medium datasets**: Less than 1000 records for optimal performance
+
+**Not suitable for dataset enrichment:**
+- **Large datasets**: More than 1000 records (use external data sources instead)
+- **Frequently changing data**: Data that updates multiple times per day
+- **Data requiring complex business logic**: Calculations or complex transformations
+- **Real-time data from external systems**: Live data that needs fresh API calls
+
+**Why these limitations?**
+Dataset enrichment loads all data into memory for fast lookups. This works great for small, stable reference data but isn't efficient for large or frequently changing datasets.
 
 ### Dataset Types
 
@@ -1317,23 +1531,56 @@ public void testCurrencyEnrichment() {
 
 ## Best Practices
 
+Following these best practices will help you build maintainable, performant, and reliable rule-based systems with APEX. These recommendations come from real-world experience and will save you time and effort in the long run.
+
 ### Configuration Organization
-- Use external dataset files for reusable data
-- Keep inline datasets small (< 50 records)
-- Use meaningful IDs and names
-- Include metadata for documentation
 
-### Performance
-- Enable caching for frequently accessed datasets
-- Use appropriate cache TTL values
-- Monitor performance metrics
-- Preload datasets when possible
+Good organization makes your rules easier to understand, maintain, and debug.
 
-### Maintenance
-- Version control all configuration files
-- Use environment-specific configurations
-- Document dataset sources and update procedures
-- Regular review and cleanup of unused datasets
+**File Organization:**
+- **Use external dataset files for reusable data**: If multiple configurations need the same lookup data, put it in a separate file that can be shared
+- **Keep inline datasets small**: Limit inline datasets to less than 50 records to keep configuration files readable
+- **Use meaningful IDs and names**: Choose descriptive identifiers like "customer-age-validation" instead of "rule1"
+- **Include metadata for documentation**: Add owner, purpose, and creation date information to help future maintainers
+
+**Naming Conventions:**
+- Use consistent naming patterns across your organization
+- Include the business domain in rule IDs (e.g., "finance-trade-validation", "customer-eligibility-check")
+- Use descriptive messages that help users understand what went wrong
+
+### Performance Optimization
+
+APEX is designed for high performance, but following these practices will ensure optimal speed.
+
+**Caching Strategy:**
+- **Enable caching for frequently accessed datasets**: Turn on caching for lookup data that's used often
+- **Use appropriate cache TTL values**: Set cache expiration times based on how often your data changes
+  - Static data (countries, currencies): 24 hours or more
+  - Semi-static data (product categories): 1-4 hours
+  - Dynamic data: 5-30 minutes
+- **Monitor performance metrics**: Use APEX's built-in monitoring to identify slow rules or enrichments
+- **Preload datasets when possible**: Load reference data at startup rather than on first use
+
+**Rule Optimization:**
+- Order rules by execution cost (fastest first) when using rule groups
+- Use specific conditions to avoid unnecessary rule evaluations
+- Consider using rule chains for complex multi-step logic
+
+### Maintenance and Governance
+
+Proper maintenance practices prevent technical debt and ensure long-term success.
+
+**Version Control:**
+- **Version control all configuration files**: Treat YAML configurations like code - use Git or similar
+- **Use environment-specific configurations**: Have separate configurations for development, testing, and production
+- **Document dataset sources and update procedures**: Record where data comes from and how to update it
+- **Regular review and cleanup of unused datasets**: Remove obsolete rules and datasets to keep configurations clean
+
+**Change Management:**
+- Test configuration changes in non-production environments first
+- Use meaningful commit messages when updating configurations
+- Consider the impact of rule changes on existing processes
+- Maintain a changelog for significant rule modifications
 
 ## Advanced Rule Patterns
 
