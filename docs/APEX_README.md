@@ -1,5 +1,9 @@
 # APEX - Advanced Processing Engine for eXpressions
 
+**Version:** 1.0
+**Date:** 2025-07-30
+**Author:** Mark Andrew Ray-Smith Cityline Ltd
+
 A powerful expression processor for Java applications with comprehensive data source integration that provides seamless access to databases, REST APIs, file systems, caches, and more.
 
 ## System Architecture Overview
