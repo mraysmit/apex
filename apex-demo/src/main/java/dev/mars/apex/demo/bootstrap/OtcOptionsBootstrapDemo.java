@@ -732,9 +732,7 @@ public class OtcOptionsBootstrapDemo {
             logger.info("Buyer Party ID: {}", sampleOption.getBuyerParty());
             logger.info("Seller Party ID: {}", sampleOption.getSellerParty());
             logger.info("Option Type: {}", sampleOption.getOptionType());
-            logger.info("Underlying Asset: {} ({})",
-                sampleOption.getUnderlyingAsset().getCommodity(),
-                sampleOption.getUnderlyingAsset().getUnit());
+            logger.info("Underlying Asset: {} ({})", sampleOption.getUnderlyingAsset().getCommodity(), sampleOption.getUnderlyingAsset().getUnit());
             logger.info("Strike Price: {} {}", sampleOption.getStrikePrice(), sampleOption.getStrikeCurrency());
             logger.info("Notional Quantity: {}", sampleOption.getNotionalQuantity());
             logger.info("Expiry Date: {}", sampleOption.getExpiryDate());
