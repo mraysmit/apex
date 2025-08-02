@@ -109,6 +109,9 @@ public class AllDemosRunner {
         registerDemoClass("dev.mars.apex.demo.advanced.DynamicMethodExecutionDemo");
         registerDemoClass("dev.mars.apex.demo.advanced.PerformanceAndExceptionDemo");
         registerDemoClass("dev.mars.apex.demo.advanced.ApexAdvancedFeaturesDemo");
+
+        // Bootstrap demos
+        registerDemoClass("dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo");
     }
 
     /**

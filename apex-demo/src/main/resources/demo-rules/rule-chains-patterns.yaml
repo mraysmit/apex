@@ -1,3 +1,66 @@
+# ============================================================================
+# APEX Rules Engine - Rule Chains Patterns Demonstration
+# ============================================================================
+#
+# This YAML configuration provides a comprehensive demonstration of all
+# advanced rule chaining patterns available in the APEX Rules Engine,
+# showcasing sophisticated decision-making and workflow automation capabilities.
+#
+# OVERVIEW:
+# Rule chains enable complex business logic implementation through structured
+# patterns that go beyond simple rule evaluation. They support conditional
+# execution, sequential processing, parallel evaluation, and accumulative
+# decision making.
+#
+# RULE CHAINING PATTERNS DEMONSTRATED:
+# 1. CONDITIONAL CHAINING - Execute rules based on trigger conditions
+#    - Trigger-based rule execution
+#    - Different rule sets for different conditions
+#    - Business workflow automation
+#
+# 2. SEQUENTIAL CHAINING - Execute rules in strict order
+#    - Step-by-step processing workflows
+#    - Early termination on failures
+#    - Pipeline-style data processing
+#
+# 3. PARALLEL CHAINING - Execute multiple rule sets simultaneously
+#    - Independent rule evaluation
+#    - Concurrent processing for performance
+#    - Aggregated results from multiple paths
+#
+# 4. ACCUMULATIVE CHAINING - Build scores across multiple criteria
+#    - Weighted scoring algorithms
+#    - Multi-factor decision making
+#    - Threshold-based final decisions
+#
+# 5. HIERARCHICAL CHAINING - Nested rule structures
+#    - Parent-child rule relationships
+#    - Cascading rule evaluation
+#    - Complex organizational logic
+#
+# 6. CIRCUIT BREAKER CHAINING - Fault tolerance patterns
+#    - Automatic failure detection
+#    - Graceful degradation strategies
+#    - System resilience and recovery
+#
+# BUSINESS USE CASES:
+# - Customer onboarding workflows with conditional paths
+# - Financial transaction processing with risk assessment
+# - Compliance checking with escalation procedures
+# - Product recommendation with multi-factor scoring
+# - Order processing with validation pipelines
+# - Risk management with circuit breaker patterns
+#
+# TECHNICAL FEATURES:
+# - Pattern-specific configuration options
+# - Priority-based execution ordering
+# - Category-based rule organization
+# - Business domain classification
+# - Comprehensive audit trails
+# - Performance optimization settings
+#
+# ============================================================================
+
 metadata:
   name: "Rule Chains Patterns Demo Configuration"
   version: "1.0.0"
@@ -20,7 +83,43 @@ rule-groups:
     rule-ids:
       - "basic-validation"
 
-# New rule-chains section for nested rules and chaining patterns
+# ============================================================================
+# ADVANCED RULE CHAINING PATTERNS
+# ============================================================================
+#
+# This section demonstrates sophisticated rule chaining patterns that enable
+# complex business logic implementation through structured rule relationships
+# and conditional execution flows.
+#
+# PATTERN CATEGORIES:
+# 1. WORKFLOW PATTERNS - Business process automation
+#    - Conditional chaining for decision trees
+#    - Sequential chaining for step-by-step processes
+#    - Parallel chaining for concurrent evaluations
+#
+# 2. SCORING PATTERNS - Multi-criteria decision making
+#    - Accumulative chaining for weighted scoring
+#    - Hierarchical chaining for nested evaluations
+#    - Threshold-based decision making
+#
+# 3. RESILIENCE PATTERNS - Fault tolerance and recovery
+#    - Circuit breaker chaining for system protection
+#    - Fallback mechanisms for graceful degradation
+#    - Error recovery and retry logic
+#
+# CONFIGURATION ELEMENTS:
+# - pattern: Specifies the chaining pattern type
+# - priority: Execution order for multiple chains
+# - category: Logical grouping for organization
+# - business-domain: Domain-specific classification
+# - configuration: Pattern-specific settings and rules
+#
+# EXECUTION FLOW:
+# - Chains execute in priority order (lower numbers first)
+# - Pattern-specific logic determines rule evaluation
+# - Results are aggregated according to pattern rules
+# - Audit trails capture decision paths and outcomes
+#
 rule-chains:
   
   # Pattern 1: Conditional Chaining - Execute Rule B only if Rule A triggers

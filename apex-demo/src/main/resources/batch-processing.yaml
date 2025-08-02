@@ -1,14 +1,99 @@
-# SpEL Rules Engine - Batch Processing Configuration
-# Optimized rules for high-volume data processing scenarios
+# ============================================================================
+# APEX Rules Engine - Batch Processing Configuration
+# ============================================================================
+#
+# This YAML configuration is specifically optimized for high-volume, high-throughput
+# batch processing scenarios where performance, memory efficiency, and scalability
+# are critical requirements.
+#
+# OVERVIEW:
+# This configuration demonstrates enterprise-grade batch processing capabilities
+# for financial services, data processing pipelines, and high-volume transaction
+# processing systems that need to handle thousands or millions of records efficiently.
+#
+# BATCH PROCESSING PIPELINE:
+# 1. VALIDATION STAGE - High-speed validation of incoming data records
+#    - Customer validation for account processing
+#    - Trade validation for settlement systems
+#    - Risk threshold checks for compliance
+#    - Data quality validation for ETL pipelines
+#
+# 2. ENRICHMENT STAGE - Performance-optimized data enhancement
+#    - Currency conversion using cached exchange rates
+#    - Counterparty risk rating lookups
+#    - Regional processing rule application
+#    - Parallel data enrichment processing
+#
+# 3. OPTIMIZATION STAGE - Memory and performance optimization
+#    - Rule compilation for faster execution
+#    - Expression caching for repeated evaluations
+#    - Result pooling for memory efficiency
+#    - Parallel processing with configurable thread pools
+#
+# PERFORMANCE FEATURES:
+# - Chunked processing for memory efficiency (500-1000 records per chunk)
+# - Parallel processing with configurable thread pools (up to 8 threads)
+# - Rule compilation and expression caching for speed optimization
+# - Memory optimization with result pooling and batch sizing
+# - Error recovery with configurable retry mechanisms
+# - Real-time performance monitoring and metrics collection
+#
+# USE CASES:
+# - End-of-day settlement processing in financial institutions
+# - Large-scale customer data validation and enrichment
+# - High-frequency trading rule validation
+# - Regulatory compliance batch processing
+# - ETL pipeline data quality validation
+# - Real-time risk assessment for trading systems
+#
+# SCALABILITY FEATURES:
+# - Horizontal scaling through parallel processing
+# - Memory-efficient chunked processing
+# - Configurable error thresholds for fault tolerance
+# - Performance tracking for capacity planning
+# - Adaptive batch sizing based on system resources
+#
+# PRODUCTION CONSIDERATIONS:
+# - Optimized for 24/7 production environments
+# - Built-in error recovery and fault tolerance
+# - Comprehensive monitoring and alerting capabilities
+# - Configurable performance tuning parameters
+# - Support for both synchronous and asynchronous processing
 #
 # Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
 # Licensed under the Apache License, Version 2.0
+# ============================================================================
 
 name: "Batch Processing Rules"
 description: "High-performance rules optimized for batch processing scenarios"
 version: "1.0"
 
-# Performance-optimized rules for batch processing
+# ============================================================================
+# PERFORMANCE-OPTIMIZED VALIDATION RULES
+# ============================================================================
+#
+# These rules are specifically designed for high-throughput batch processing
+# scenarios where speed and efficiency are paramount. Each rule includes
+# performance optimization metadata and is designed to minimize execution time.
+#
+# OPTIMIZATION FEATURES:
+# - Simple, fast SpEL expressions optimized for speed
+# - Minimal object traversal and method calls
+# - Cached evaluation results where possible
+# - Priority-based execution order for early termination
+# - Batch-friendly design for parallel processing
+#
+# RULE CATEGORIES:
+# - validation: Core data validation rules
+# - financial: Financial transaction validation
+# - risk: Risk assessment and threshold checks
+# - quality: Data quality and completeness validation
+#
+# PERFORMANCE METADATA:
+# - performance_optimized: Indicates rule is tuned for speed
+# - batch_friendly: Suitable for parallel batch processing
+# - category: Functional grouping for organized execution
+#
 rules:
   # Customer validation rule optimized for batch processing
   - name: "batch-customer-validation"
@@ -54,7 +139,31 @@ rules:
       performance_optimized: true
       batch_friendly: true
 
-# Dataset enrichment for batch processing scenarios
+# ============================================================================
+# REFERENCE DATASETS FOR BATCH ENRICHMENT
+# ============================================================================
+#
+# These datasets provide reference data for high-speed lookups during batch
+# processing. Data is optimized for fast access and minimal memory footprint.
+#
+# DATASET FEATURES:
+# - In-memory datasets for fastest possible lookup performance
+# - Optimized data structures for batch processing scenarios
+# - Financial market data for trading and settlement systems
+# - Geographic and regional data for multi-region processing
+# - Risk assessment data for compliance and regulatory requirements
+#
+# PERFORMANCE CONSIDERATIONS:
+# - Small, focused datasets to minimize memory usage
+# - Simple key-value structures for O(1) lookup performance
+# - Pre-loaded data to avoid I/O during batch processing
+# - Cached datasets with configurable refresh intervals
+#
+# DATASET TYPES:
+# - currency_rates: Exchange rates for financial calculations
+# - counterparty_ratings: Credit ratings for risk assessment
+# - regional_rules: Geographic processing parameters
+#
 datasets:
   # Currency conversion rates for financial batch processing
   currency_rates:
@@ -110,7 +219,33 @@ datasets:
         business_hours: "09:00-17:00"
         settlement_days: 1
 
-# Performance configuration for batch processing
+# ============================================================================
+# PERFORMANCE OPTIMIZATION CONFIGURATION
+# ============================================================================
+#
+# This section configures the core performance optimization features for
+# high-throughput batch processing scenarios.
+#
+# CACHING CONFIGURATION:
+# - enable_caching: Enables result caching for repeated rule evaluations
+# - cache_size: Maximum number of cached results (10,000 recommended)
+#
+# PARALLEL PROCESSING:
+# - enable_parallel_processing: Enables multi-threaded rule execution
+# - thread_pool_size: Number of worker threads (8 recommended for most systems)
+#
+# MEMORY OPTIMIZATION:
+# - enable_memory_optimization: Enables memory-efficient processing modes
+# - batch_size: Number of records processed in each memory batch
+#
+# MONITORING AND METRICS:
+# - enable_monitoring: Enables real-time performance monitoring
+# - metrics_collection_interval: Frequency of metrics collection (milliseconds)
+#
+# ERROR HANDLING:
+# - enable_error_recovery: Enables automatic error recovery mechanisms
+# - max_retry_attempts: Maximum number of retry attempts for failed operations
+#
 performance:
   # Enable caching for repeated rule evaluations
   enable_caching: true
@@ -132,7 +267,42 @@ performance:
   enable_error_recovery: true
   max_retry_attempts: 3
   
-# Batch processing specific configuration
+# ============================================================================
+# BATCH PROCESSING SPECIFIC CONFIGURATION
+# ============================================================================
+#
+# This section contains advanced configuration options specifically designed
+# for large-scale batch processing scenarios in production environments.
+#
+# CHUNKING AND MEMORY MANAGEMENT:
+# - chunk_size: Number of records processed in each memory chunk (500 recommended)
+# - enable_result_aggregation: Enables efficient result collection and aggregation
+# - aggregation_batch_size: Size of result batches for aggregation (1000 recommended)
+#
+# PARALLEL PROCESSING OPTIMIZATION:
+# - parallel_streams: Enables Java parallel streams for processing
+# - max_parallel_threads: Maximum number of parallel processing threads
+#
+# PERFORMANCE MONITORING:
+# - enable_performance_tracking: Enables detailed performance metrics collection
+# - track_throughput: Monitors records processed per second
+# - track_memory_usage: Monitors memory consumption during processing
+#
+# ERROR HANDLING AND FAULT TOLERANCE:
+# - continue_on_error: Whether to continue processing when errors occur
+# - error_threshold_percentage: Maximum acceptable error rate (10% recommended)
+#
+# ADVANCED OPTIMIZATIONS:
+# - enable_rule_compilation: Pre-compiles rules for faster execution
+# - enable_expression_caching: Caches SpEL expression parsing results
+# - enable_result_pooling: Reuses result objects to reduce garbage collection
+#
+# PRODUCTION TUNING RECOMMENDATIONS:
+# - Start with default values and adjust based on system performance
+# - Monitor memory usage and adjust chunk_size accordingly
+# - Tune thread counts based on available CPU cores
+# - Set error_threshold_percentage based on data quality expectations
+#
 batch_processing:
   # Chunk size for memory-efficient processing
   chunk_size: 500

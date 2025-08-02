@@ -1,3 +1,63 @@
+# ============================================================================
+# APEX Rules Engine - Dataset Enrichment Demonstration
+# ============================================================================
+#
+# This YAML configuration showcases comprehensive dataset enrichment capabilities,
+# demonstrating how to enhance data with reference information using various
+# lookup patterns and enrichment strategies.
+#
+# OVERVIEW:
+# This configuration demonstrates advanced data enrichment techniques that
+# transform basic data records into rich, contextual information by adding
+# reference data, calculated fields, and derived insights.
+#
+# ENRICHMENT STRATEGIES:
+# 1. REFERENCE DATA LOOKUP - Static data enrichment
+#    - Currency reference data (ISO codes, regions, symbols)
+#    - Country information (timezones, tax rates, regulations)
+#    - Customer tier classification (benefits, requirements)
+#    - Product catalog information (categories, specifications)
+#
+# 2. CALCULATED ENRICHMENT - Dynamic field computation
+#    - Age calculation from birth dates
+#    - Discount rate computation based on multiple factors
+#    - Risk scoring using weighted algorithms
+#    - Performance metrics and KPI calculations
+#
+# 3. HIERARCHICAL ENRICHMENT - Multi-level data relationships
+#    - Geographic hierarchy (country → region → timezone)
+#    - Organizational structure (department → division → company)
+#    - Product taxonomy (category → subcategory → product)
+#
+# DATASET TYPES DEMONSTRATED:
+# - Inline datasets: Embedded reference data for fast lookups
+# - External datasets: References to external data sources
+# - Calculated datasets: Dynamic data generation using expressions
+# - Hierarchical datasets: Multi-level relationship mapping
+#
+# BUSINESS USE CASES:
+# - Customer data enrichment for personalization
+# - Financial data enhancement for risk assessment
+# - Geographic data augmentation for compliance
+# - Product information enrichment for recommendations
+# - Regulatory data addition for compliance reporting
+#
+# TECHNICAL FEATURES:
+# - Multiple field mappings per enrichment
+# - Conditional enrichment based on data availability
+# - Dependency management between enrichments
+# - Performance optimization for large datasets
+# - Error handling for missing reference data
+#
+# INTEGRATION SCENARIOS:
+# - CRM systems requiring customer context
+# - E-commerce platforms needing product information
+# - Financial systems requiring regulatory data
+# - Analytics platforms needing dimensional data
+# - Reporting systems requiring reference information
+#
+# ============================================================================
+
 metadata:
   name: "Dataset Enrichment Demonstration"
   version: "1.0.0"
@@ -7,7 +67,31 @@ metadata:
   domain: "Data Enrichment"
   tags: ["datasets", "enrichment", "lookup", "reference-data"]
 
-# Basic validation rules that work with enriched data
+# ============================================================================
+# VALIDATION RULES FOR ENRICHED DATA
+# ============================================================================
+#
+# These validation rules demonstrate how to validate data that has been
+# enriched with reference information. They show dependency management
+# and how enriched fields can be used in validation logic.
+#
+# RULE DEPENDENCIES:
+# - depends-on: Specifies which enrichments must complete before validation
+# - Ensures enriched fields are available for validation logic
+# - Enables complex validation scenarios using reference data
+#
+# ENRICHED FIELD VALIDATION PATTERNS:
+# - Currency validation using enriched currency properties
+# - Regional compliance using geographic reference data
+# - Customer tier validation using enriched tier information
+# - Product validation using catalog reference data
+#
+# VALIDATION SCENARIOS:
+# - Cross-reference validation (currency active and tradeable)
+# - Regional compliance (supported regions and jurisdictions)
+# - Business rule validation (tier requirements and balances)
+# - Data quality validation (completeness after enrichment)
+#
 rules:
   - id: "enriched-currency-validation"
     name: "Enriched Currency Validation"
@@ -30,7 +114,42 @@ rules:
     severity: "ERROR"
     depends-on: ["customer-tier-enrichment"]
 
-# Comprehensive enrichment examples
+# ============================================================================
+# COMPREHENSIVE ENRICHMENT EXAMPLES
+# ============================================================================
+#
+# This section demonstrates various enrichment patterns and techniques
+# for adding reference data, calculated fields, and derived insights
+# to your data records.
+#
+# ENRICHMENT TYPES:
+# 1. LOOKUP ENRICHMENT - Reference data addition
+#    - Static reference data from inline datasets
+#    - Multiple field mappings per lookup
+#    - Conditional enrichment based on data availability
+#
+# 2. CALCULATION ENRICHMENT - Dynamic field computation
+#    - Mathematical calculations using SpEL expressions
+#    - Date/time calculations and transformations
+#    - Business logic implementation through expressions
+#
+# 3. HIERARCHICAL ENRICHMENT - Multi-level data relationships
+#    - Geographic hierarchies (country → region → timezone)
+#    - Organizational structures (department → division)
+#    - Product taxonomies (category → subcategory)
+#
+# DATASET FEATURES:
+# - Inline datasets: Fast, embedded reference data
+# - Key-field matching: Efficient lookup mechanisms
+# - Multiple field mappings: Comprehensive data enhancement
+# - Conditional logic: Smart enrichment based on context
+#
+# PERFORMANCE CONSIDERATIONS:
+# - Inline datasets for frequently accessed reference data
+# - Optimized key-field indexing for fast lookups
+# - Conditional enrichment to avoid unnecessary processing
+# - Field mapping optimization for memory efficiency
+#
 enrichments:
   # Currency reference data enrichment
   - id: "currency-enrichment"

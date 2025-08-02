@@ -62,24 +62,30 @@ public class QuickStartDemo {
         System.out.println(" 1. One-Liner Rule Evaluation");
         System.out.println("-".repeat(40));
         
-        // Example 1: Simple map-based evaluation
-        System.out.println("// Evaluate a rule in one line");
-        boolean isAdult = rulesService.check("#age >= 18", Map.of("age", 25));
-        System.out.println("boolean isAdult = Rules.check(\"#age >= 18\", Map.of(\"age\", 25));");
+        // Example 1: Simple map-based evaluation with named rules
+        System.out.println("// Define and test named rules for clarity");
+
+        // Define meaningful rule names
+        rulesService.define("adult-age-check", "#age >= 18", "Customer must be 18 or older");
+        rulesService.define("sufficient-balance", "#balance > 1000", "Account balance must exceed $1000");
+        rulesService.define("customer-validation", "#data.age >= 18 && #data.email != null", "Customer must be adult with valid email");
+
+        boolean isAdult = rulesService.test("adult-age-check", Map.of("age", 25));
+        System.out.println("boolean isAdult = Rules.test(\"adult-age-check\", Map.of(\"age\", 25));");
         System.out.println("Result: " + isAdult + " ✓");
         System.out.println();
-        
-        boolean hasBalance = rulesService.check("#balance > 1000", Map.of("balance", 500));
-        System.out.println("boolean hasBalance = Rules.check(\"#balance > 1000\", Map.of(\"balance\", 500));");
+
+        boolean hasBalance = rulesService.test("sufficient-balance", Map.of("balance", 500));
+        System.out.println("boolean hasBalance = Rules.test(\"sufficient-balance\", Map.of(\"balance\", 500));");
         System.out.println("Result: " + hasBalance + " ✗");
         System.out.println();
-        
+
         // Example 2: Object-based evaluation
         System.out.println("// With objects");
         Customer customer = createSampleCustomer();
-        boolean valid = rulesService.check("#data.age >= 18 && #data.email != null", customer);
+        boolean valid = rulesService.test("customer-validation", customer);
         System.out.println("Customer customer = new Customer(\"John\", 25, \"john@example.com\");");
-        System.out.println("boolean valid = Rules.check(\"#data.age >= 18 && #data.email != null\", customer);");
+        System.out.println("boolean valid = Rules.test(\"customer-validation\", customer);");
         System.out.println("Result: " + valid + " ✓");
         
         System.out.println("\n Key Points:");
@@ -191,7 +197,7 @@ public class QuickStartDemo {
         customer.setName("John");
         customer.setAge(25);
         customer.setEmail("john@example.com");
-        // Note: Customer class doesn't have balance field, so validation will fail
+        customer.setBalance(500.0); // Set balance below minimum to demonstrate validation
         return customer;
     }
     

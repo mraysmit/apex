@@ -14,15 +14,19 @@ import java.util.concurrent.*;
 
 /**
  * Performance Demo - Demonstrates performance monitoring and optimization capabilities.
- * 
+ *
  * This demo showcases:
  * - Performance monitoring setup and configuration
  * - Real-time metrics collection and analysis
  * - Performance optimization techniques
- * - Exception handling and recovery
+ * - Exception handling and recovery (INCLUDES INTENTIONAL ERROR TESTS)
  * - Concurrent execution monitoring
  * - Performance insights and recommendations
- * 
+ *
+ * IMPORTANT: This demo includes intentional error test cases in the exception handling
+ * section to demonstrate the engine's error recovery capabilities. All exceptions in
+ * the demonstrateExceptionHandling() method are EXPECTED and designed to test robustness.
+ *
  * Demonstrates enterprise-grade performance monitoring for production systems.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
@@ -326,38 +330,52 @@ public class PerformanceDemo {
     
     /**
      * Demonstrate exception handling and recovery monitoring.
+     *
+     * NOTE: This method INTENTIONALLY tests error conditions to demonstrate
+     * the engine's error recovery capabilities. All exceptions thrown here
+     * are EXPECTED and are part of the test design.
      */
     private void demonstrateExceptionHandling() {
         System.out.println(" EXCEPTION HANDLING & RECOVERY");
         System.out.println("-".repeat(50));
-        
-        System.out.println(" Testing Error Scenarios:");
-        
+
+        System.out.println(" Testing Error Scenarios (INTENTIONAL ERRORS FOR TESTING):");
+        System.out.println(" NOTE: All exceptions below are EXPECTED and demonstrate error recovery");
+
         Customer customer = createSampleCustomer();
-        
-        // Test various error conditions
+
+        // INTENTIONAL ERROR CONDITIONS FOR TESTING ERROR RECOVERY
+        // These are designed to fail to test the engine's exception handling
         String[] errorConditions = {
-            "#data.nonExistentField > 0", // Field doesn't exist
-            "#data.age / 0 > 1", // Division by zero
-            "#data.email.substring(100)", // String index out of bounds
-            "#invalidFunction(#data.age)" // Unknown function
+            "#data.nonExistentField > 0",    // INTENTIONAL: Field doesn't exist - tests missing property handling
+            "#data.age / 0 > 1",             // INTENTIONAL: Division by zero - tests arithmetic error handling
+            "#data.email.substring(100)",    // INTENTIONAL: String index out of bounds - tests string operation errors
+            "#invalidFunction(#data.age)"    // INTENTIONAL: Unknown function - tests invalid function handling
         };
-        
+
+        String[] errorDescriptions = {
+            "Missing property error (EXPECTED)",
+            "Division by zero error (EXPECTED)",
+            "String index out of bounds error (EXPECTED)",
+            "Invalid function error (EXPECTED)"
+        };
+
         for (int i = 0; i < errorConditions.length; i++) {
             String ruleName = "error-test-" + (i + 1);
             String condition = errorConditions[i];
-            
-            System.out.println("\nError Test " + (i + 1) + ":");
+
+            System.out.println("\nError Test " + (i + 1) + " - " + errorDescriptions[i] + ":");
             System.out.println("  Condition: " + condition);
             
             RulePerformanceMetrics.Builder builder = performanceMonitor.startEvaluation(ruleName, "error-handling");
             
             try {
                 boolean result = rulesService.check(condition, customer);
-                System.out.println("  Result: " + result + " (Unexpected success)");
+                System.out.println("  Result: " + result + " (UNEXPECTED: This error test should have failed!)");
             } catch (Exception e) {
-                System.out.println("  Exception: " + e.getClass().getSimpleName());
-                System.out.println("  Message: " + e.getMessage());
+                System.out.println("  ✓ EXPECTED Exception: " + e.getClass().getSimpleName());
+                System.out.println("  ✓ EXPECTED Message: " + e.getMessage());
+                System.out.println("  ✓ Error recovery working as designed");
             }
             
             RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(builder, condition);

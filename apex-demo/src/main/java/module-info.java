@@ -8,13 +8,19 @@ module dev.mars.apex.demo {
     requires dev.mars.apex.core;
     requires spring.expression;
     requires spring.context;
+    requires spring.beans;
 
     // Database dependencies
     requires org.postgresql.jdbc;
+    requires java.sql.rowset;
+
+    // Jackson dependencies for JSON processing
+    requires com.fasterxml.jackson.annotation;
+    requires com.fasterxml.jackson.databind;
 
     // Logging dependencies
     requires org.slf4j;
-    requires ch.qos.logback.classic;
+    requires org.slf4j.simple;
     requires jul.to.slf4j;
     requires jdk.compiler;
 

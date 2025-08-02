@@ -1,3 +1,71 @@
+# ============================================================================
+# APEX Rules Engine - Commodity Swap Validation Bootstrap
+# ============================================================================
+#
+# This YAML configuration provides a complete, self-contained demonstration
+# of commodity derivatives validation and enrichment using the APEX Rules Engine.
+# It serves as a bootstrap configuration for commodity trading systems.
+#
+# OVERVIEW:
+# This configuration implements comprehensive validation and enrichment logic
+# for commodity swap transactions, covering all aspects from basic field
+# validation to complex business rules and regulatory compliance.
+#
+# BOOTSTRAP DESIGN PHILOSOPHY:
+# - Complete end-to-end demonstration in a single configuration
+# - Self-contained with all necessary reference data included
+# - Production-ready patterns and best practices
+# - Comprehensive coverage of commodity derivatives scenarios
+# - Educational value for developers and business analysts
+#
+# COMMODITY DERIVATIVES COVERAGE:
+# - Energy commodities (Oil, Gas, Power)
+# - Agricultural commodities (Wheat, Corn, Soybeans)
+# - Metals (Gold, Silver, Copper, Aluminum)
+# - Soft commodities (Coffee, Sugar, Cotton)
+# - Weather derivatives and carbon credits
+#
+# VALIDATION LAYERS:
+# 1. ULTRA-SIMPLE API - Basic field validation
+#    - Required field presence checks
+#    - Data type and format validation
+#    - Simple business rule enforcement
+#
+# 2. TEMPLATE-BASED RULES - Business logic validation
+#    - Maturity date validation
+#    - Notional amount limits
+#    - Counterparty eligibility
+#    - Currency and settlement validation
+#
+# 3. ADVANCED CONFIGURATION - Complex business rules
+#    - Multi-factor risk assessment
+#    - Regulatory compliance checking
+#    - Market-specific validation rules
+#    - Cross-validation between related fields
+#
+# ENRICHMENT CAPABILITIES:
+# - Commodity reference data lookup
+# - Market convention application
+# - Risk factor calculation
+# - Regulatory classification
+# - Settlement instruction generation
+#
+# BUSINESS VALUE:
+# - Reduces trade settlement failures
+# - Ensures regulatory compliance
+# - Automates risk assessment
+# - Standardizes validation across systems
+# - Provides audit trail for compliance
+#
+# INTEGRATION SCENARIOS:
+# - Trading platform pre-trade validation
+# - Middle office trade processing
+# - Risk management system integration
+# - Regulatory reporting preparation
+# - Settlement system preparation
+#
+# ============================================================================
+
 metadata:
   name: "Commodity Swap Validation Bootstrap"
   version: "1.0"
@@ -8,6 +76,38 @@ metadata:
   created-date: "2025-07-31"
   last-modified: "2025-07-31"
 
+# ============================================================================
+# COMMODITY DERIVATIVES VALIDATION RULE CHAINS
+# ============================================================================
+#
+# These rule chains implement a comprehensive validation pipeline for
+# commodity swap transactions, demonstrating all three API layers of
+# the APEX Rules Engine in a realistic financial services context.
+#
+# VALIDATION PIPELINE ARCHITECTURE:
+# 1. BASIC VALIDATION (Priority 100) - Essential field validation
+# 2. BUSINESS RULES (Priority 200) - Financial business logic
+# 3. ADVANCED RULES (Priority 300) - Complex compliance and risk rules
+#
+# CHAINING PATTERNS USED:
+# - Conditional Chaining: Execute different rule sets based on conditions
+# - Accumulative Chaining: Build risk scores and compliance ratings
+# - Sequential Chaining: Step-by-step validation with early termination
+#
+# COMMODITY-SPECIFIC FEATURES:
+# - Multi-asset class support (Energy, Agriculture, Metals)
+# - Market convention validation
+# - Seasonal adjustment factors
+# - Storage and delivery specifications
+# - Weather derivative support
+#
+# REGULATORY COMPLIANCE:
+# - Position limit monitoring
+# - Large trader reporting thresholds
+# - Market manipulation detection
+# - Cross-border transaction rules
+# - Environmental compliance (carbon credits)
+#
 rule-chains:
   # Ultra-Simple API validation chain
   - id: "ultra-simple-validation"

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<customers>
+    <customer id="CUST004">
+        <name>
+            <first>Alice</first>
+            <last>Johnson</last>
+        </name>
+        <contact>
+            <email>alice.johnson@example.com</email>
+        </contact>
+        <age>32</age>
+        <country>CA</country>
+        <accountBalance>25000.00</accountBalance>
+        <status>ACTIVE</status>
+    </customer>
+    <customer id="CUST005">
+        <name>
+            <first>Bob</first>
+            <last>Wilson</last>
+        </name>
+        <contact>
+            <email>bob.wilson@example.com</email>
+        </contact>
+        <age>16</age>
+        <country>DE</country>
+        <accountBalance>8000.00</accountBalance>
+        <status>PENDING</status>
+    </customer>
+</customers>

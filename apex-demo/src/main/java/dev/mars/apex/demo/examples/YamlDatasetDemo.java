@@ -245,14 +245,14 @@ public class YamlDatasetDemo {
         
         System.out.println("External Service Lookup:");
         System.out.println("    Average Response Time: " + externalServiceTime + "ms");
-        System.out.println("  🌐 Network Dependency: Required");
+        System.out.println("   Network Dependency: Required");
         System.out.println("   Caching: Complex to implement");
         System.out.println("   Throughput: ~6-7 lookups/second");
         System.out.println();
         
         System.out.println("In-Memory Dataset Lookup:");
         System.out.println("    Average Response Time: <1ms");
-        System.out.println("  🌐 Network Dependency: None");
+        System.out.println("   Network Dependency: None");
         System.out.println("   Caching: Built-in and automatic");
         System.out.println("   Throughput: >10,000 lookups/second");
         System.out.println();
@@ -281,7 +281,7 @@ public class YamlDatasetDemo {
         System.out.println(" BUSINESS VALUE");
         System.out.println("-".repeat(40));
         
-        System.out.println("🏢 Enterprise Benefits:");
+        System.out.println(" Enterprise Benefits:");
         System.out.println("  • Reduced infrastructure complexity");
         System.out.println("  • Lower operational costs (no lookup services)");
         System.out.println("  • Faster time-to-market for rule changes");
@@ -289,7 +289,7 @@ public class YamlDatasetDemo {
         System.out.println("  • Improved system reliability and availability");
         System.out.println();
         
-        System.out.println("👥 Team Benefits:");
+        System.out.println(" Team Benefits:");
         System.out.println("  • Developers: Simplified architecture");
         System.out.println("  • Operations: Fewer services to maintain");
         System.out.println("  • Business: Direct control over reference data");
@@ -304,7 +304,7 @@ public class YamlDatasetDemo {
         System.out.println("  • Regulatory jurisdiction mappings");
         System.out.println("  • Market identifiers and trading venues");
         
-        System.out.println("\n💰 ROI Calculation Example:");
+        System.out.println("\n ROI Calculation Example:");
         System.out.println("  Lookup Service Costs: $2,000/month");
         System.out.println("  Development Time Saved: 40 hours");
         System.out.println("  Operational Overhead: 10 hours/month");

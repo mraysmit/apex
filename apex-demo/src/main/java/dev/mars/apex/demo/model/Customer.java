@@ -34,6 +34,7 @@ public class Customer {
     private int age;
     private String email;
     private String membershipLevel;
+    private double balance;
     private List<String> preferredCategories;
 
     /**
@@ -48,6 +49,7 @@ public class Customer {
         this.name = name;
         this.age = age;
         this.membershipLevel = membershipLevel;
+        this.balance = 0.0;
         this.preferredCategories = new ArrayList<>(preferredCategories);
     }
 
@@ -58,6 +60,23 @@ public class Customer {
         this.name = "Unknown";
         this.age = 0;
         this.membershipLevel = "Basic";
+        this.balance = 0.0;
+        this.preferredCategories = new ArrayList<>();
+    }
+
+    /**
+     * Create a new customer with basic information (commonly used in demos).
+     *
+     * @param name The name of the customer
+     * @param age The age of the customer
+     * @param email The email of the customer
+     */
+    public Customer(String name, int age, String email) {
+        this.name = name;
+        this.age = age;
+        this.email = email;
+        this.membershipLevel = "Basic";
+        this.balance = 0.0;
         this.preferredCategories = new ArrayList<>();
     }
 
@@ -69,7 +88,9 @@ public class Customer {
     public Customer(Customer other) {
         this.name = other.name;
         this.age = other.age;
+        this.email = other.email;
         this.membershipLevel = other.membershipLevel;
+        this.balance = other.balance;
         this.preferredCategories = new ArrayList<>(other.getPreferredCategories());
     }
 
@@ -125,6 +146,24 @@ public class Customer {
      */
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    /**
+     * Get the balance of the customer.
+     *
+     * @return The customer's balance
+     */
+    public double getBalance() {
+        return balance;
+    }
+
+    /**
+     * Set the balance of the customer.
+     *
+     * @param balance The new balance
+     */
+    public void setBalance(double balance) {
+        this.balance = balance;
     }
 
     /**
@@ -198,7 +237,9 @@ public class Customer {
         return "Customer{" +
                 "name='" + name + '\'' +
                 ", age=" + age +
+                ", email='" + email + '\'' +
                 ", membershipLevel='" + membershipLevel + '\'' +
+                ", balance=" + balance +
                 ", preferredCategories=" + preferredCategories +
                 '}';
     }

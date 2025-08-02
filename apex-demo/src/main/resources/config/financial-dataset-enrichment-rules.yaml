@@ -1,5 +1,78 @@
-# Financial Services Dataset-Based Enrichment Rules
-# Demonstrates inline YAML datasets for small static lookup data
+# ============================================================================
+# APEX Rules Engine - Financial Dataset Enrichment Configuration
+# ============================================================================
+#
+# This YAML configuration demonstrates advanced dataset-based enrichment
+# patterns for financial services, showcasing inline YAML datasets for
+# static reference data management and high-performance lookup operations.
+#
+# OVERVIEW:
+# This configuration implements comprehensive financial reference data
+# enrichment using inline YAML datasets, providing fast, reliable lookups
+# for currency information, counterparty data, market conventions, and
+# regulatory classifications in post-trade settlement processing.
+#
+# DATASET ENRICHMENT STRATEGY:
+# This configuration demonstrates best practices for managing static
+# reference data within rule configurations, optimizing for:
+# - Fast in-memory lookups with caching
+# - Version-controlled reference data management
+# - Self-contained configurations for deployment
+# - Comprehensive financial market coverage
+#
+# ENRICHMENT CATEGORIES:
+# 1. CURRENCY ENRICHMENT - ISO 4217 currency reference data
+#    - Currency names, symbols, and decimal places
+#    - Regional classifications and central bank information
+#    - Active status and major currency indicators
+#    - Trading conventions and market hours
+#
+# 2. COUNTERPARTY ENRICHMENT - Trading counterparty information
+#    - Legal entity identifiers (LEI) and classifications
+#    - Credit ratings and risk assessments
+#    - Settlement preferences and instructions
+#    - Regulatory status and compliance information
+#
+# 3. MARKET ENRICHMENT - Market and exchange reference data
+#    - Market identifiers and operating hours
+#    - Settlement cycles and conventions
+#    - Holiday calendars and business day rules
+#    - Regulatory jurisdiction and oversight
+#
+# 4. INSTRUMENT ENRICHMENT - Financial instrument classifications
+#    - Asset class categorization and risk factors
+#    - Regulatory treatment and capital requirements
+#    - Settlement conventions and market practices
+#    - Pricing and valuation methodologies
+#
+# TECHNICAL FEATURES:
+# - Inline datasets for fast, reliable lookups
+# - Configurable caching with TTL (Time-To-Live) settings
+# - Default values for missing reference data
+# - Multiple field mappings per enrichment
+# - Conditional enrichment based on data availability
+#
+# PERFORMANCE OPTIMIZATION:
+# - In-memory datasets for sub-millisecond lookups
+# - Intelligent caching with configurable refresh intervals
+# - Optimized key-field indexing for large datasets
+# - Batch processing support for high-volume scenarios
+#
+# BUSINESS VALUE:
+# - Ensures data consistency across all trading systems
+# - Reduces dependency on external reference data services
+# - Provides reliable fallback for critical reference data
+# - Enables offline processing and disaster recovery
+# - Supports regulatory reporting and compliance requirements
+#
+# INTEGRATION SCENARIOS:
+# - Post-trade settlement and clearing systems
+# - Regulatory reporting and compliance platforms
+# - Risk management and exposure calculation systems
+# - Accounting and finance system integration
+# - Market data and pricing system enhancement
+#
+# ============================================================================
 
 metadata:
   name: "Financial Services Dataset Enrichment Rules"
@@ -13,7 +86,46 @@ metadata:
     - "dataset-enrichment"
     - "inline-data"
 
-# Dataset-based enrichments for financial services
+# ============================================================================
+# FINANCIAL REFERENCE DATA ENRICHMENTS
+# ============================================================================
+#
+# This section implements comprehensive financial reference data enrichment
+# using inline YAML datasets optimized for high-performance lookups and
+# reliable data consistency across financial services operations.
+#
+# ENRICHMENT ARCHITECTURE:
+# Each enrichment rule combines:
+# - Business logic for conditional application
+# - High-performance lookup datasets with caching
+# - Comprehensive field mappings for data enhancement
+# - Error handling with default values and fallbacks
+#
+# DATASET FEATURES:
+# - type: "inline" - Embedded datasets for fast, reliable access
+# - key-field: Primary key for efficient lookups
+# - cache-enabled: In-memory caching for performance optimization
+# - cache-ttl-seconds: Time-to-live for cache refresh cycles
+# - default-values: Fallback data for missing reference entries
+#
+# LOOKUP PERFORMANCE:
+# - Sub-millisecond lookup times with in-memory caching
+# - Optimized key-field indexing for large datasets
+# - Configurable cache refresh for data consistency
+# - Batch processing support for high-volume scenarios
+#
+# FIELD MAPPING STRATEGY:
+# - source-field: Field name in the lookup dataset
+# - target-field: Field name added to the enriched record
+# - Multiple mappings per enrichment for comprehensive enhancement
+# - Conditional mappings based on data availability
+#
+# DATA GOVERNANCE:
+# - Version-controlled reference data within configurations
+# - Self-contained datasets for deployment consistency
+# - Audit trail for reference data changes
+# - Business ownership and accountability for data accuracy
+#
 enrichments:
   # Currency enrichment using inline dataset
   - id: "currency-dataset-enrichment"

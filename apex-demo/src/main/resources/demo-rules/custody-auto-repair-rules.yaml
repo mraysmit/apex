@@ -1,6 +1,63 @@
-# Custody and Safekeeping Auto-Repair Rules Configuration
-# Standing Instruction (SI) Auto-Repair for Asian Markets
-# Demonstrates weighted rule-based decision making for settlement instruction repair
+# ============================================================================
+# APEX Rules Engine - Custody Auto-Repair Configuration
+# ============================================================================
+#
+# This YAML configuration implements sophisticated auto-repair logic for
+# custody and safekeeping settlement instructions in Asian financial markets.
+# It demonstrates advanced rule chaining patterns and weighted decision making.
+#
+# OVERVIEW:
+# This configuration automates the repair of failed settlement instructions
+# by intelligently selecting appropriate Standing Instructions (SIs) based
+# on client preferences, market conventions, and instrument characteristics.
+#
+# BUSINESS CONTEXT:
+# In custody operations, settlement instructions sometimes fail due to:
+# - Missing or incorrect settlement details
+# - Changes in counterparty information
+# - Market-specific settlement conventions
+# - Client preference updates
+# - Regulatory requirement changes
+#
+# AUTO-REPAIR PROCESS:
+# 1. ELIGIBILITY CHECK - Determines if instruction can be auto-repaired
+#    - Client authorization verification
+#    - Market operating hours validation
+#    - Instruction type compatibility
+#    - Risk threshold compliance
+#
+# 2. WEIGHTED EVALUATION - Scores available Standing Instructions
+#    - Client-level SIs (60% weight) - Highest priority
+#    - Market-level SIs (30% weight) - Market conventions
+#    - Instrument-level SIs (10% weight) - Asset-specific rules
+#
+# 3. DECISION MAKING - Determines repair action based on score
+#    - Score ≥ 50: REPAIR_APPROVED (automatic repair)
+#    - Score 20-49: PARTIAL_REPAIR (limited automation)
+#    - Score < 20: MANUAL_REVIEW_REQUIRED (human intervention)
+#
+# ASIAN MARKET SPECIALIZATION:
+# - Hong Kong (HK) settlement conventions
+# - Singapore (SG) market practices
+# - Japanese (JP) regulatory requirements
+# - Korean (KR) market specifics
+# - Multi-currency settlement support
+#
+# ADVANCED FEATURES:
+# - Rule chaining with accumulative and conditional patterns
+# - Weighted scoring algorithms for decision optimization
+# - Market-specific business hours and cut-off times
+# - Multi-level Standing Instruction hierarchy
+# - Comprehensive audit trail and decision logging
+#
+# INTEGRATION POINTS:
+# - Custody management systems
+# - Settlement platforms (SWIFT, local networks)
+# - Client reporting and notification systems
+# - Risk management and compliance systems
+# - Market data and reference data services
+#
+# ============================================================================
 
 metadata:
   name: "Custody Auto-Repair Rules"
@@ -10,7 +67,40 @@ metadata:
   created: "2025-07-29"
   tags: ["custody", "settlement", "auto-repair", "asian-markets", "standing-instructions"]
 
-# Rule chains using accumulative chaining pattern for weighted decision making
+# ============================================================================
+# RULE CHAINS FOR AUTO-REPAIR DECISION MAKING
+# ============================================================================
+#
+# These rule chains implement sophisticated decision-making logic using
+# advanced chaining patterns to automate custody settlement instruction repair.
+#
+# CHAINING PATTERNS:
+# 1. ACCUMULATIVE CHAINING - Builds weighted scores across multiple criteria
+#    - Accumulates scores from client, market, and instrument level rules
+#    - Uses configurable weights to prioritize different factors
+#    - Produces final decision based on accumulated score thresholds
+#
+# 2. CONDITIONAL CHAINING - Sequential evaluation with early termination
+#    - Evaluates pre-conditions before attempting repair
+#    - Stops processing when conditions are not met
+#    - Ensures only eligible instructions proceed to repair
+#
+# WEIGHTED SCORING ALGORITHM:
+# - Client-level SIs: 60% weight (highest priority for client preferences)
+# - Market-level SIs: 30% weight (market conventions and practices)
+# - Instrument-level SIs: 10% weight (asset-specific requirements)
+#
+# DECISION THRESHOLDS:
+# - Score ≥ 50: High confidence - automatic repair approved
+# - Score 20-49: Medium confidence - partial repair with monitoring
+# - Score < 20: Low confidence - manual review required
+#
+# BUSINESS LOGIC:
+# - Prioritizes client-specific standing instructions
+# - Falls back to market conventions when client SIs unavailable
+# - Uses instrument defaults as last resort
+# - Maintains audit trail of decision factors
+#
 rule-chains:
   - id: "si-auto-repair-chain"
     name: "Standing Instruction Auto-Repair Chain"

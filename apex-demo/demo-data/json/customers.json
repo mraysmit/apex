@@ -1,0 +1,34 @@
+{
+  "customers": [
+    {
+      "customerId": "CUST001",
+      "firstName": "John",
+      "lastName": "Smith",
+      "email": "john.smith@example.com",
+      "age": 25,
+      "country": "US",
+      "accountBalance": 15000.50,
+      "status": "ACTIVE"
+    },
+    {
+      "customerId": "CUST002",
+      "firstName": "Jane",
+      "lastName": "Doe",
+      "email": "jane.doe@example.com",
+      "age": 17,
+      "country": "GB",
+      "accountBalance": 5000.00,
+      "status": "PENDING"
+    },
+    {
+      "customerId": "CUST003",
+      "firstName": "Invalid",
+      "lastName": "Customer",
+      "email": "invalid-email",
+      "age": 30,
+      "country": "US",
+      "accountBalance": 0.0,
+      "status": "INACTIVE"
+    }
+  ]
+}

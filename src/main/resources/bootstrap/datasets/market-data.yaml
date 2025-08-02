@@ -1,0 +1,130 @@
+# ============================================================================
+# APEX Rules Engine - Market Data Reference Dataset
+# ============================================================================
+#
+# External YAML dataset containing currency and market reference data
+# for OTC Options Bootstrap Demo enrichment processing.
+#
+# Generated on: 2025-08-02
+# Used by: OTC Options Bootstrap Demo
+# Purpose: Currency enrichment and market data lookup
+#
+# ============================================================================
+
+metadata:
+  name: "Market Data Reference Dataset"
+  version: "1.0.0"
+  description: "Currency and market reference data for OTC Options processing"
+  created-date: "2025-08-02"
+  source: "OTC Options Bootstrap Demo Generator"
+  coverage: "Major trading currencies and market data"
+
+# Currency reference data with trading and market information
+currencies:
+  - code: "USD"
+    name: "US Dollar"
+    symbol: "$"
+    region: "North America"
+    country: "United States"
+    timezone: "EST"
+    tradingHours: "09:00-17:00"
+    decimalPlaces: 2
+    majorCurrency: true
+    centralBank: "Federal Reserve"
+    holidays:
+      - "2025-01-01"  # New Year's Day
+      - "2025-07-04"  # Independence Day
+      - "2025-12-25"  # Christmas Day
+
+  - code: "EUR"
+    name: "Euro"
+    symbol: "€"
+    region: "Europe"
+    country: "Eurozone"
+    timezone: "CET"
+    tradingHours: "08:00-16:00"
+    decimalPlaces: 2
+    majorCurrency: true
+    centralBank: "European Central Bank"
+    holidays:
+      - "2025-01-01"  # New Year's Day
+      - "2025-05-01"  # Labour Day
+      - "2025-12-25"  # Christmas Day
+
+  - code: "GBP"
+    name: "British Pound Sterling"
+    symbol: "£"
+    region: "Europe"
+    country: "United Kingdom"
+    timezone: "GMT"
+    tradingHours: "08:00-16:00"
+    decimalPlaces: 2
+    majorCurrency: true
+    centralBank: "Bank of England"
+    holidays:
+      - "2025-01-01"  # New Year's Day
+      - "2025-12-25"  # Christmas Day
+      - "2025-12-26"  # Boxing Day
+
+  - code: "JPY"
+    name: "Japanese Yen"
+    symbol: "¥"
+    region: "Asia"
+    country: "Japan"
+    timezone: "JST"
+    tradingHours: "09:00-15:00"
+    decimalPlaces: 0
+    majorCurrency: true
+    centralBank: "Bank of Japan"
+    holidays:
+      - "2025-01-01"  # New Year's Day
+      - "2025-05-03"  # Constitution Day
+      - "2025-12-23"  # Emperor's Birthday
+
+# Market and exchange information
+markets:
+  - exchange: "NYMEX"
+    fullName: "New York Mercantile Exchange"
+    location: "New York"
+    timezone: "EST"
+    tradingHours: "09:00-14:30"
+    specialties:
+      - "Energy Commodities"
+      - "Natural Gas"
+      - "Crude Oil"
+    currency: "USD"
+
+  - exchange: "ICE"
+    fullName: "Intercontinental Exchange"
+    location: "London/Atlanta"
+    timezone: "GMT/EST"
+    tradingHours: "08:00-17:00"
+    specialties:
+      - "Brent Crude Oil"
+      - "Energy Derivatives"
+      - "Agricultural Commodities"
+    currency: "USD"
+
+  - exchange: "COMEX"
+    fullName: "Commodity Exchange"
+    location: "New York"
+    timezone: "EST"
+    tradingHours: "08:20-13:30"
+    specialties:
+      - "Precious Metals"
+      - "Gold"
+      - "Silver"
+      - "Copper"
+    currency: "USD"
+
+  - exchange: "CBOT"
+    fullName: "Chicago Board of Trade"
+    location: "Chicago"
+    timezone: "CST"
+    tradingHours: "08:30-13:15"
+    specialties:
+      - "Agricultural Commodities"
+      - "Wheat"
+      - "Corn"
+      - "Soybeans"
+    currency: "USD"

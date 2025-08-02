@@ -14,7 +14,7 @@ Here are the market-standard, open-source–style definitions (as you’d find o
 [3]: https://en.wikipedia.org/wiki/Option_%28finance%29 "Option (finance) - Wikipedia"
 
 
-To represent these OTC derivatives as messages in XML and XSD format, you'll want to follow a structure inspired by Financial products Markup Language (FpML), which is the market standard XML-based protocol for OTC derivatives.
+To represent these OTC derivatives as messages in XML and XSD format, we'll follow a structure inspired by Financial products Markup Language (FpML), which is the market standard XML-based protocol for OTC derivatives.
 
 Below is a structured way to define each instrument as a trade message. I'll provide simplified but robust definitions that you can extend:
 

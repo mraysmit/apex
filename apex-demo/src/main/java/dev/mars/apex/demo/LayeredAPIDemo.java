@@ -71,21 +71,31 @@ public class LayeredAPIDemo {
         
         System.out.println("1. One-liner Validations using Rules.check:");
 
-        // Simple field validations using service
-        boolean hasName = rulesService.check("#data.name != null && #data.name.length() > 0",
-                                    Map.of("data", Map.of("name", "John Doe")));
+        // Define meaningful rule names for better logging
+        rulesService.define("name-validation", "#data.name != null && #data.name.length() > 0", "Name must be present and non-empty");
+        rulesService.define("age-validation", "#data.age >= 18", "Customer must be 18 or older");
+        rulesService.define("email-validation", "#data.email != null && #data.email.contains('@')", "Email address must be valid");
+
+        // Simple field validations using named rules
+        boolean hasName = rulesService.test("name-validation", Map.of("data", Map.of("name", "John Doe")));
         System.out.println("   " + (hasName ? "✅" : "❌") + " Name validation: " + hasName);
 
-        boolean validAge = rulesService.check("#data.age >= 18",
-                                     Map.of("data", Map.of("age", 25)));
+        boolean validAge = rulesService.test("age-validation", Map.of("data", Map.of("age", 25)));
         System.out.println("   " + (validAge ? "✅" : "❌") + " Age validation (#data.age >= 18): " + validAge);
 
-        boolean validEmail = rulesService.check("#data.email != null && #data.email.contains('@')",
-                                       Map.of("data", Map.of("email", "user@example.com")));
+        boolean validEmail = rulesService.test("email-validation", Map.of("data", Map.of("email", "user@example.com")));
         System.out.println("   " + (validEmail ? "✅" : "❌") + " Email validation (#data.email != null): " + validEmail);
         
         System.out.println("\n2. Business Logic Validations:");
-        
+
+        // Define business rule names for clarity
+        rulesService.define("order-approval",
+            "#orderAmount <= #creditLimit && (#customerType == 'PREMIUM' || #orderAmount <= 10000)",
+            "Order must be within credit limit and meet customer type requirements");
+        rulesService.define("discount-eligibility",
+            "#customerType == 'PREMIUM' && #orderAmount > 10000",
+            "Premium customers with orders over $10,000 qualify for discounts");
+
         // Complex business rules in simple expressions
         Map<String, Object> orderContext = Map.of(
             "orderAmount", new BigDecimal("15000"),
@@ -93,17 +103,11 @@ public class LayeredAPIDemo {
             "creditLimit", new BigDecimal("50000"),
             "orderDate", LocalDate.now()
         );
-        
-        boolean orderApproved = rulesService.check(
-            "#orderAmount <= #creditLimit && (#customerType == 'PREMIUM' || #orderAmount <= 10000)",
-            orderContext
-        );
+
+        boolean orderApproved = rulesService.test("order-approval", orderContext);
         System.out.println("   " + (orderApproved ? "✅" : "❌") + " Order approval: " + orderApproved);
 
-        boolean discountEligible = rulesService.check(
-            "#customerType == 'PREMIUM' && #orderAmount > 10000",
-            orderContext
-        );
+        boolean discountEligible = rulesService.test("discount-eligibility", orderContext);
         System.out.println("   " + (discountEligible ? "✅" : "❌") + " Discount eligibility: " + discountEligible);
         
         System.out.println("\n3. Named Rules for Reuse:");
@@ -234,17 +238,20 @@ public class LayeredAPIDemo {
             )
         );
         
-        // Execute complex rule
-        boolean complexResult = rulesService.check(complexRule.getCondition(), complexContext);
+        // Define and execute complex rule with meaningful name
+        rulesService.define("enterprise-transaction-approval", complexRule.getCondition(),
+            "Complex transaction approval with multiple compliance checks");
+        boolean complexResult = rulesService.test("enterprise-transaction-approval", complexContext);
         System.out.println("   ✓ Complex transaction approval: " + complexResult);
         
         System.out.println("\n3. Performance Monitoring:");
         
-        // Demonstrate performance features
+        // Demonstrate performance features with named rule
+        rulesService.define("performance-test-rule", "#amount > 1000", "Performance testing rule for monitoring");
         long startTime = System.nanoTime();
-        
+
         for (int i = 0; i < 1000; i++) {
-            rulesService.check("#amount > 1000", Map.of("amount", new BigDecimal("5000")));
+            rulesService.test("performance-test-rule", Map.of("amount", new BigDecimal("5000")));
         }
         
         long executionTime = System.nanoTime() - startTime;
@@ -257,8 +264,9 @@ public class LayeredAPIDemo {
         System.out.println("\n4. Custom Error Handling:");
         
         try {
-            // Demonstrate error handling
-            rulesService.check("#invalidProperty.someMethod()", Map.of("amount", 1000));
+            // Demonstrate error handling with named rule
+            rulesService.define("error-handling-test", "#invalidProperty.someMethod()", "Error handling demonstration rule");
+            rulesService.test("error-handling-test", Map.of("amount", 1000));
         } catch (Exception e) {
             System.out.println("   ✓ Graceful error handling: " + e.getClass().getSimpleName());
         }
@@ -277,21 +285,25 @@ public class LayeredAPIDemo {
         System.out.println(" Performance Comparison:");
         
         Map<String, Object> testContext = Map.of("amount", new BigDecimal("5000"));
-        
+
+        // Define performance comparison rules with meaningful names
+        rulesService.define("layer1-performance-test", "#amount > 1000", "Layer 1 performance comparison rule");
+        rulesService.define("layer3-performance-test", "#amount > 1000", "Layer 3 performance comparison rule");
+
         // Layer 1 performance
         long layer1Start = System.nanoTime();
         for (int i = 0; i < 100; i++) {
-            rulesService.check("#amount > 1000", testContext);
+            rulesService.test("layer1-performance-test", testContext);
         }
         long layer1Time = System.nanoTime() - layer1Start;
-        
+
         // Layer 2 performance (simulated)
         long layer2Time = layer1Time * 2; // Template-based is typically 2x slower
-        
+
         // Layer 3 performance
         long layer3Start = System.nanoTime();
         for (int i = 0; i < 100; i++) {
-            rulesService.check("#amount > 1000", testContext);
+            rulesService.test("layer3-performance-test", testContext);
         }
         long layer3Time = System.nanoTime() - layer3Start;
         

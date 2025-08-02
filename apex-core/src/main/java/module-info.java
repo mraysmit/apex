@@ -10,8 +10,7 @@ module dev.mars.apex.core {
 
     // Logging dependencies
     requires org.slf4j;
-    requires ch.qos.logback.classic;
-    requires ch.qos.logback.core;
+
 
     // YAML processing dependencies
     requires com.fasterxml.jackson.core;

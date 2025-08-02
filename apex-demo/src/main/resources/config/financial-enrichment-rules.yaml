@@ -1,5 +1,86 @@
-# Financial Enrichment Rules Configuration
-# This YAML file demonstrates how to externalize enrichment and transformation configuration
+# ============================================================================
+# APEX Rules Engine - Financial Enrichment Rules Configuration
+# ============================================================================
+#
+# This YAML configuration demonstrates advanced financial data enrichment
+# patterns using external service lookups, sophisticated caching strategies,
+# and comprehensive field mapping for post-trade processing systems.
+#
+# OVERVIEW:
+# This configuration implements enterprise-grade data enrichment for
+# financial instruments and trading data, showcasing integration with
+# external reference data services, intelligent caching, and robust
+# error handling for mission-critical financial operations.
+#
+# ENRICHMENT ARCHITECTURE:
+# This configuration demonstrates production-ready patterns for:
+# - External service integration with fallback mechanisms
+# - Intelligent caching with configurable TTL settings
+# - Comprehensive field mapping with validation
+# - Error handling and default value management
+# - Performance optimization for high-volume processing
+#
+# EXTERNAL SERVICE INTEGRATION:
+# Unlike inline datasets, this configuration integrates with external
+# reference data services, providing:
+# - Real-time data updates from authoritative sources
+# - Scalable architecture for large reference datasets
+# - Integration with enterprise data management systems
+# - Centralized data governance and quality control
+#
+# ENRICHMENT CATEGORIES:
+# 1. COUNTERPARTY ENRICHMENT - Trading counterparty information
+#    - Legal entity data and regulatory identifiers
+#    - Credit ratings and risk classifications
+#    - Settlement instructions and preferences
+#    - Compliance status and regulatory approvals
+#
+# 2. CURRENCY ENRICHMENT - Foreign exchange reference data
+#    - ISO 4217 currency codes and specifications
+#    - Exchange rates and conversion factors
+#    - Regional classifications and central bank data
+#    - Trading conventions and market hours
+#
+# 3. INSTRUMENT ENRICHMENT - Financial instrument reference data
+#    - Security identifiers (ISIN, CUSIP, Bloomberg)
+#    - Asset class classifications and risk factors
+#    - Market data and pricing information
+#    - Corporate actions and lifecycle events
+#
+# 4. MARKET ENRICHMENT - Trading venue and market data
+#    - Exchange identifiers and operating hours
+#    - Settlement cycles and market conventions
+#    - Regulatory oversight and compliance requirements
+#    - Holiday calendars and business day rules
+#
+# TECHNICAL FEATURES:
+# - External service lookup with configurable endpoints
+# - Multi-level caching with TTL and refresh strategies
+# - Comprehensive field mapping with validation rules
+# - Error handling with default values and fallbacks
+# - Performance monitoring and alerting capabilities
+#
+# PERFORMANCE OPTIMIZATION:
+# - Intelligent caching reduces external service calls
+# - Batch processing support for high-volume scenarios
+# - Connection pooling and circuit breaker patterns
+# - Asynchronous processing for non-critical enrichments
+#
+# BUSINESS VALUE:
+# - Real-time access to authoritative reference data
+# - Reduced operational risk through data validation
+# - Improved straight-through processing rates
+# - Enhanced regulatory compliance and reporting
+# - Scalable architecture for growing data volumes
+#
+# INTEGRATION SCENARIOS:
+# - Post-trade settlement and clearing systems
+# - Risk management and exposure calculation
+# - Regulatory reporting and compliance platforms
+# - Market data distribution and pricing systems
+# - Client reporting and portfolio management
+#
+# ============================================================================
 
 metadata:
   name: "Financial Enrichment Rules"
@@ -14,7 +95,52 @@ metadata:
     - "transformation"
     - "static-data"
 
-# Define enrichment configurations
+# ============================================================================
+# EXTERNAL SERVICE ENRICHMENT CONFIGURATIONS
+# ============================================================================
+#
+# This section defines enrichment rules that integrate with external
+# reference data services to provide real-time, authoritative data
+# enhancement for financial trading and settlement operations.
+#
+# EXTERNAL SERVICE ARCHITECTURE:
+# Each enrichment rule integrates with dedicated microservices or
+# external data providers, offering:
+# - Real-time data access from authoritative sources
+# - Scalable architecture for large reference datasets
+# - Centralized data governance and quality control
+# - Integration with enterprise data management platforms
+#
+# LOOKUP SERVICE INTEGRATION:
+# - lookup-service: Spring bean name for the external service
+# - lookup-key: SpEL expression defining the lookup key
+# - cache-enabled: Enables intelligent caching for performance
+# - cache-ttl-seconds: Time-to-live for cached data entries
+#
+# FIELD MAPPING FEATURES:
+# - source-field: Field name from the external service response
+# - target-field: Field name added to the enriched record
+# - required: Whether the field must be present (validation)
+# - default-value: Fallback value when data is unavailable
+#
+# ERROR HANDLING STRATEGY:
+# - Graceful degradation when external services are unavailable
+# - Default values ensure processing continues with partial data
+# - Comprehensive logging and monitoring for service health
+# - Circuit breaker patterns for resilience and fault tolerance
+#
+# PERFORMANCE CONSIDERATIONS:
+# - Intelligent caching reduces external service dependency
+# - Batch processing optimizes service call efficiency
+# - Connection pooling and timeout management
+# - Asynchronous processing for non-critical enrichments
+#
+# BUSINESS CONTINUITY:
+# - Fallback mechanisms ensure continuous operation
+# - Default values maintain processing flow during outages
+# - Comprehensive monitoring and alerting for service health
+# - Disaster recovery support with cached data persistence
+#
 enrichments:
   - id: "counterparty-enrichment"
     name: "Counterparty Data Enrichment"
