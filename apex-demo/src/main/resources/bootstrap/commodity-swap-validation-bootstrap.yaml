@@ -70,6 +70,7 @@ metadata:
   name: "Commodity Swap Validation Bootstrap"
   version: "1.0"
   description: "Complete commodity derivatives validation and enrichment demonstration"
+  type: "bootstrap"
   created-by: "financial.admin@company.com"
   business-domain: "Commodity Derivatives"
   business-owner: "Trading Desk"

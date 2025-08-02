@@ -69,6 +69,7 @@ metadata:
   name: "Countries Lookup Dataset"
   version: "1.0.0"
   description: "Country codes with currency, timezone, and regional data"
+  type: "dataset"
   last-updated: "2024-08-01"
   source: "ISO 3166-1 alpha-2 country codes"
 

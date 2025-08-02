@@ -1,10 +1,330 @@
 # APEX - Technical Reference Guide
 
 **Version:** 1.0
-**Date:** 2025-07-30
+**Date:** 2025-08-02
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
-Welcome to the APEX Technical Reference Guide! This document provides detailed technical information for developers, architects, and system integrators working with APEX. While the User Guide focuses on getting started and common use cases, this reference dives deep into the technical architecture, advanced patterns, and implementation details.
+Welcome to the APEX Technical Reference Guide! This document provides detailed technical information for developers, architects, and system integrators working with APEX. While the User Guide focuses on getting started and common use cases, this reference dives deep into the technical architecture, advanced patterns, implementation details, scenario-based configuration management, and enterprise YAML validation systems.
+
+## Scenario-Based Configuration Architecture
+
+### Technical Overview
+
+APEX's scenario-based configuration system provides a sophisticated architecture for managing complex rule configurations through a three-layer hierarchy. This system enables enterprise-scale configuration management with centralized discovery, type-safe routing, and comprehensive dependency tracking.
+
+### Architecture Components
+
+```mermaid
+graph TD
+    subgraph "Discovery Layer"
+        Registry["Scenario Registry<br/>config/data-type-scenarios.yaml<br/>• Central catalog<br/>• Metadata management<br/>• Discovery API"]
+    end
+
+    subgraph "Routing Layer"
+        ScenarioFiles["Scenario Files<br/>scenarios/*.yaml<br/>• Data type mappings<br/>• Rule file references<br/>• Lightweight routing"]
+    end
+
+    subgraph "Configuration Layer"
+        ConfigFiles["Configuration Files<br/>config/*.yaml<br/>• Reusable rule sets<br/>• Business logic<br/>• Validation chains"]
+
+        BootstrapFiles["Bootstrap Files<br/>bootstrap/*.yaml<br/>• Complete demos<br/>• Self-contained scenarios<br/>• Inline datasets"]
+
+        EnrichmentFiles["Enrichment Files<br/>enrichments/*.yaml<br/>• Data enrichment logic<br/>• External lookups<br/>• Calculation rules"]
+    end
+
+    subgraph "Data Layer"
+        InlineData["Inline Datasets<br/>• Embedded data<br/>• Static references"]
+        ExternalYAML["External YAML<br/>• Shared reference data"]
+        DatabaseSources["Database Sources<br/>• Dynamic data"]
+        APISources["API Sources<br/>• Real-time data"]
+    end
+
+    Registry -->|"loads & validates"| ScenarioFiles
+    ScenarioFiles -->|"references"| ConfigFiles
+    ScenarioFiles -->|"references"| BootstrapFiles
+    ConfigFiles -.->|"may reference"| EnrichmentFiles
+    BootstrapFiles -->|"contains"| InlineData
+    ConfigFiles -->|"references"| ExternalYAML
+    EnrichmentFiles -->|"queries"| DatabaseSources
+    EnrichmentFiles -->|"calls"| APISources
+```
+
+### Core Components
+
+#### 1. DataTypeScenarioService
+
+The central service for scenario management and data type routing:
+
+```java
+public class DataTypeScenarioService {
+
+    // Load scenarios from registry
+    public void loadScenarios(String registryPath) throws ScenarioException;
+
+    // Get scenario for specific data type
+    public ScenarioConfiguration getScenarioForData(Object data) throws ScenarioException;
+
+    // Get scenario by ID
+    public ScenarioConfiguration getScenario(String scenarioId) throws ScenarioException;
+
+    // List all available scenarios
+    public List<ScenarioConfiguration> getAvailableScenarios();
+
+    // Validate scenario configuration
+    public ScenarioValidationResult validateScenario(String scenarioId);
+}
+```
+
+#### 2. ScenarioConfiguration
+
+Represents a loaded scenario with metadata and rule file references:
+
+```java
+public class ScenarioConfiguration {
+    private String scenarioId;
+    private String name;
+    private String description;
+    private List<String> dataTypes;
+    private List<String> ruleConfigurations;
+    private Map<String, Object> metadata;
+
+    // Getters and utility methods
+    public boolean supportsDataType(Class<?> dataType);
+    public boolean supportsDataType(String dataTypeName);
+    public List<String> getRuleConfigurations();
+}
+```
+
+#### 3. YamlDependencyAnalyzer
+
+Advanced dependency analysis and validation system:
+
+```java
+public class YamlDependencyAnalyzer {
+
+    // Analyze complete dependency chain
+    public YamlDependencyGraph analyzeYamlDependencies(String rootFile);
+
+    // Generate comprehensive reports
+    public String generateTextReport(YamlDependencyGraph graph);
+    public String generateTreeReport(YamlDependencyGraph graph);
+
+    // Validate dependency health
+    public DependencyHealthReport validateDependencies(YamlDependencyGraph graph);
+}
+```
+
+### YAML Validation System
+
+#### Technical Architecture
+
+APEX includes a comprehensive YAML validation system that ensures configuration integrity across all file types:
+
+```java
+public class YamlMetadataValidator {
+
+    // Validate single file
+    public YamlValidationResult validateFile(String filePath);
+
+    // Validate multiple files
+    public YamlValidationSummary validateFiles(List<String> filePaths);
+
+    // Type-specific validation
+    private void validateScenarioContent(Map<String, Object> yamlContent, YamlValidationResult result);
+    private void validateBootstrapContent(Map<String, Object> yamlContent, YamlValidationResult result);
+    private void validateRuleConfigContent(Map<String, Object> yamlContent, YamlValidationResult result);
+}
+```
+
+#### Validation Features
+
+**Metadata Validation:**
+- Required fields: `name`, `version`, `description`, `type`
+- Type-specific required fields (e.g., `business-domain` for scenarios)
+- Semantic versioning format validation
+- Ownership and contact information validation
+
+**Content Validation:**
+- Scenario files: `scenario-id`, `data-types`, `rule-configurations`
+- Registry files: Valid registry entries with required fields
+- Bootstrap files: Expected content sections
+- Rule config files: Rules, enrichments, or rule-chains sections
+
+**Dependency Validation:**
+- Complete dependency chain analysis
+- Missing file detection
+- Circular dependency detection
+- YAML syntax validation
+
+#### File Type System
+
+APEX supports the following standardized file types:
+
+| Type | Purpose | Required Fields | Content Validation |
+|------|---------|----------------|-------------------|
+| `scenario` | Data type routing | `business-domain`, `owner` | `scenario` section with `data-types` and `rule-configurations` |
+| `scenario-registry` | Central registry | `created-by` | `scenario-registry` list with valid entries |
+| `bootstrap` | Complete demos | `business-domain`, `created-by` | `rule-chains` or `categories` sections |
+| `rule-config` | Reusable rules | `author` | `rules`, `enrichments`, or `rule-chains` sections |
+| `dataset` | Reference data | `source` | `data`, `countries`, or `dataset` sections |
+| `enrichment` | Data enrichment | `author` | Enrichment-specific content |
+| `rule-chain` | Sequential rules | `author` | Rule chain definitions |
+
+### Implementation Patterns
+
+#### 1. Scenario-Driven Processing
+
+```java
+@Service
+public class ScenarioBasedProcessor {
+
+    @Autowired
+    private DataTypeScenarioService scenarioService;
+
+    @Autowired
+    private RuleEngineService ruleEngine;
+
+    public ProcessingResult process(Object data) {
+        // 1. Discover scenario for data type
+        ScenarioConfiguration scenario = scenarioService.getScenarioForData(data);
+
+        // 2. Load and execute rule configurations
+        List<String> ruleFiles = scenario.getRuleConfigurations();
+        ProcessingResult result = new ProcessingResult();
+
+        for (String ruleFile : ruleFiles) {
+            RuleConfiguration rules = loadRuleConfiguration(ruleFile);
+            RuleExecutionResult ruleResult = ruleEngine.execute(rules, data);
+            result.addRuleResult(ruleResult);
+        }
+
+        return result;
+    }
+}
+```
+
+#### 2. Configuration Validation Pipeline
+
+```java
+@Component
+public class ConfigurationValidationPipeline {
+
+    public ValidationReport validateAllConfigurations() {
+        YamlMetadataValidator validator = new YamlMetadataValidator();
+
+        // 1. Discover all YAML files
+        List<String> yamlFiles = discoverYamlFiles();
+
+        // 2. Validate metadata and structure
+        YamlValidationSummary validationSummary = validator.validateFiles(yamlFiles);
+
+        // 3. Analyze dependencies
+        YamlDependencyAnalyzer dependencyAnalyzer = new YamlDependencyAnalyzer();
+        Map<String, YamlDependencyGraph> dependencyGraphs = new HashMap<>();
+
+        for (String file : yamlFiles) {
+            if (isRootConfigurationFile(file)) {
+                YamlDependencyGraph graph = dependencyAnalyzer.analyzeYamlDependencies(file);
+                dependencyGraphs.put(file, graph);
+            }
+        }
+
+        // 4. Generate comprehensive report
+        return ValidationReport.builder()
+            .validationSummary(validationSummary)
+            .dependencyGraphs(dependencyGraphs)
+            .recommendations(generateRecommendations(validationSummary, dependencyGraphs))
+            .build();
+    }
+}
+```
+
+#### 3. Dynamic Scenario Registration
+
+```java
+@RestController
+@RequestMapping("/api/scenarios")
+public class ScenarioManagementController {
+
+    @PostMapping("/register")
+    public ResponseEntity<ScenarioRegistrationResult> registerScenario(
+            @RequestBody ScenarioRegistrationRequest request) {
+
+        // 1. Validate scenario configuration
+        YamlValidationResult validation = validateScenarioConfiguration(request);
+        if (!validation.isValid()) {
+            return ResponseEntity.badRequest()
+                .body(ScenarioRegistrationResult.failure(validation.getErrors()));
+        }
+
+        // 2. Register scenario
+        scenarioService.registerScenario(request.getScenarioConfiguration());
+
+        // 3. Update registry
+        registryManager.updateRegistry(request.getRegistryEntry());
+
+        return ResponseEntity.ok(ScenarioRegistrationResult.success());
+    }
+}
+```
+
+### Performance Considerations
+
+#### Caching Strategy
+
+```java
+@Configuration
+@EnableCaching
+public class ScenarioCacheConfiguration {
+
+    @Bean
+    @Primary
+    public CacheManager scenarioCacheManager() {
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager();
+        cacheManager.setCaffeine(Caffeine.newBuilder()
+            .maximumSize(1000)
+            .expireAfterWrite(Duration.ofHours(1))
+            .recordStats());
+        return cacheManager;
+    }
+}
+
+@Service
+public class CachedScenarioService {
+
+    @Cacheable(value = "scenarios", key = "#scenarioId")
+    public ScenarioConfiguration getScenario(String scenarioId) {
+        return loadScenarioFromFile(scenarioId);
+    }
+
+    @Cacheable(value = "dataTypeScenarios", key = "#dataType.name")
+    public ScenarioConfiguration getScenarioForDataType(Class<?> dataType) {
+        return findScenarioForDataType(dataType);
+    }
+}
+```
+
+#### Lazy Loading and Preloading
+
+```java
+@Component
+public class ScenarioPreloader {
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void preloadCriticalScenarios() {
+        List<String> criticalScenarios = configurationProperties.getCriticalScenarios();
+
+        criticalScenarios.parallelStream().forEach(scenarioId -> {
+            try {
+                scenarioService.getScenario(scenarioId);
+                logger.info("Preloaded critical scenario: {}", scenarioId);
+            } catch (Exception e) {
+                logger.error("Failed to preload scenario: {}", scenarioId, e);
+            }
+        });
+    }
+}
+```
 
 ## External Data Source Integration
 

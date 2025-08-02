@@ -1,12 +1,300 @@
 # APEX - Financial Services Guide
 
 **Version:** 1.0
-**Date:** 2025-07-30
+**Date:** 2025-08-02
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
 ## Overview
 
-This guide provides comprehensive documentation for using APEX (Advanced Processing Engine for eXpressions) in financial services environments, with specific focus on post-trade settlement, regulatory compliance, and OTC derivatives validation.
+This guide provides comprehensive documentation for using APEX (Advanced Processing Engine for eXpressions) in financial services environments, with specific focus on post-trade settlement, regulatory compliance, OTC derivatives validation, and scenario-based configuration management for financial workflows.
+
+## Financial Services Scenario Management
+
+### Overview
+
+APEX's scenario-based configuration system is particularly powerful for financial services organizations that need to manage complex processing pipelines for different instrument types, regulatory regimes, and business workflows. Scenarios provide a centralized way to route different financial data types to appropriate validation, enrichment, and processing rules.
+
+### Financial Services Use Cases
+
+#### 1. Derivatives Processing Scenarios
+
+Different derivative instruments require different processing approaches:
+
+```yaml
+# config/data-type-scenarios.yaml
+scenario-registry:
+  - scenario-id: "otc-options-standard"
+    config-file: "scenarios/derivatives/otc-options-scenario.yaml"
+    data-types: ["OtcOption", "EquityOption", "FxOption"]
+    description: "Standard validation and enrichment for OTC Options"
+    business-domain: "Derivatives Trading"
+    regulatory-scope: "EMIR, Dodd-Frank"
+    owner: "derivatives.trading@firm.com"
+
+  - scenario-id: "commodity-swaps-standard"
+    config-file: "scenarios/derivatives/commodity-swaps-scenario.yaml"
+    data-types: ["CommoditySwap", "CommodityTotalReturnSwap"]
+    description: "Multi-layered validation for commodity derivatives"
+    business-domain: "Commodity Derivatives"
+    regulatory-scope: "EMIR, CFTC"
+    owner: "commodity.trading@firm.com"
+
+  - scenario-id: "credit-derivatives-standard"
+    config-file: "scenarios/derivatives/credit-derivatives-scenario.yaml"
+    data-types: ["CreditDefaultSwap", "TotalReturnSwap"]
+    description: "Credit derivatives processing with counterparty risk"
+    business-domain: "Credit Derivatives"
+    regulatory-scope: "EMIR, Basel III"
+    owner: "credit.trading@firm.com"
+```
+
+#### 2. Settlement Processing Scenarios
+
+Different settlement workflows based on geography and instrument type:
+
+```yaml
+scenario-registry:
+  - scenario-id: "settlement-auto-repair-asia"
+    config-file: "scenarios/settlements/auto-repair-asia-scenario.yaml"
+    data-types: ["SettlementInstruction", "CustodyInstruction"]
+    description: "Auto-repair for failed settlements in Asian markets"
+    business-domain: "Post-Trade Settlement"
+    regulatory-scope: "Asian Markets (Japan, Hong Kong, Singapore)"
+    owner: "settlements.asia@firm.com"
+
+  - scenario-id: "settlement-auto-repair-europe"
+    config-file: "scenarios/settlements/auto-repair-europe-scenario.yaml"
+    data-types: ["SettlementInstruction", "T2SInstruction"]
+    description: "Auto-repair for European settlement systems"
+    business-domain: "Post-Trade Settlement"
+    regulatory-scope: "European Union (T2S, CSDR)"
+    owner: "settlements.europe@firm.com"
+```
+
+#### 3. Regulatory Reporting Scenarios
+
+Different reporting requirements by jurisdiction:
+
+```yaml
+scenario-registry:
+  - scenario-id: "emir-reporting"
+    config-file: "scenarios/regulatory/emir-reporting-scenario.yaml"
+    data-types: ["EmirReportableTransaction", "DerivativeTrade"]
+    description: "EMIR regulatory reporting validation and enrichment"
+    business-domain: "Regulatory Reporting"
+    regulatory-scope: "European Union (EMIR)"
+    owner: "regulatory.reporting@firm.com"
+
+  - scenario-id: "cftc-reporting"
+    config-file: "scenarios/regulatory/cftc-reporting-scenario.yaml"
+    data-types: ["CftcReportableTransaction", "SwapTransaction"]
+    description: "CFTC regulatory reporting for US jurisdiction"
+    business-domain: "Regulatory Reporting"
+    regulatory-scope: "United States (CFTC)"
+    owner: "regulatory.reporting@firm.com"
+```
+
+### Example: OTC Options Processing Scenario
+
+Here's a complete example of how to set up scenario-based processing for OTC Options:
+
+**Scenario File** (`scenarios/derivatives/otc-options-scenario.yaml`):
+
+```yaml
+metadata:
+  name: "OTC Options Processing Scenario"
+  version: "1.0.0"
+  description: "Complete processing pipeline for OTC Options including validation, enrichment, and regulatory checks"
+  type: "scenario"
+  business-domain: "Derivatives Trading"
+  regulatory-scope: "EMIR, Dodd-Frank, MiFID II"
+  owner: "derivatives.trading@firm.com"
+  created: "2025-08-02"
+  compliance-reviewed: true
+  risk-approved: true
+
+scenario:
+  scenario-id: "otc-options-standard"
+  name: "OTC Options Standard Processing"
+  description: "Standard validation and enrichment pipeline for OTC Options"
+
+  # Data types this scenario applies to
+  data-types:
+    - "com.firm.model.derivatives.OtcOption"
+    - "com.firm.model.derivatives.EquityOption"
+    - "com.firm.model.derivatives.FxOption"
+    - "OtcOption"  # Short alias
+
+  # Processing pipeline - order matters
+  rule-configurations:
+    - "config/derivatives/pre-trade-validation.yaml"      # Basic validation
+    - "config/derivatives/counterparty-enrichment.yaml"   # Add counterparty data
+    - "config/derivatives/market-data-enrichment.yaml"    # Add market data
+    - "config/derivatives/risk-calculation.yaml"          # Calculate risk metrics
+    - "config/derivatives/regulatory-validation.yaml"     # Regulatory compliance
+    - "config/derivatives/post-trade-enrichment.yaml"     # Final enrichment
+```
+
+**Usage in Trading System**:
+
+```java
+@Service
+public class DerivativesProcessingService {
+
+    @Autowired
+    private DataTypeScenarioService scenarioService;
+
+    @Autowired
+    private RuleEngineService ruleEngine;
+
+    @Autowired
+    private AuditService auditService;
+
+    @Transactional
+    public TradeProcessingResult processDerivativeTrade(Object trade) {
+        try {
+            // 1. Discover appropriate scenario
+            ScenarioConfiguration scenario = scenarioService.getScenarioForData(trade);
+
+            // 2. Log scenario selection for audit
+            auditService.logScenarioSelection(trade, scenario.getScenarioId());
+
+            // 3. Execute processing pipeline
+            TradeProcessingResult result = new TradeProcessingResult();
+
+            for (String ruleFile : scenario.getRuleConfigurations()) {
+                RuleConfiguration rules = loadRuleConfiguration(ruleFile);
+                RuleExecutionResult ruleResult = ruleEngine.execute(rules, trade);
+
+                result.addStageResult(ruleFile, ruleResult);
+
+                // Stop processing if critical validation fails
+                if (ruleResult.hasCriticalErrors()) {
+                    result.setStatus(ProcessingStatus.FAILED);
+                    break;
+                }
+            }
+
+            // 4. Final validation
+            if (result.isSuccessful()) {
+                validateFinalResult(trade, result);
+            }
+
+            return result;
+
+        } catch (Exception e) {
+            auditService.logProcessingError(trade, e);
+            throw new TradeProcessingException("Failed to process derivative trade", e);
+        }
+    }
+}
+```
+
+### Financial Services Best Practices
+
+#### 1. Regulatory Compliance
+
+**Scenario Metadata for Compliance**:
+```yaml
+metadata:
+  regulatory-scope: "EMIR, MiFID II, CFTC"     # Applicable regulations
+  compliance-reviewed: true                     # Compliance team approval
+  compliance-reviewer: "compliance@firm.com"   # Who reviewed
+  compliance-date: "2025-08-01"               # When reviewed
+  risk-approved: true                          # Risk team approval
+  risk-reviewer: "risk@firm.com"               # Who approved
+  risk-date: "2025-08-01"                     # When approved
+```
+
+**Audit Trail Integration**:
+```java
+@Component
+public class ComplianceAuditInterceptor {
+
+    @EventListener
+    public void onScenarioExecution(ScenarioExecutionEvent event) {
+        ComplianceAuditRecord record = ComplianceAuditRecord.builder()
+            .timestamp(Instant.now())
+            .scenarioId(event.getScenarioId())
+            .dataType(event.getDataType())
+            .userId(event.getUserId())
+            .regulatoryScope(event.getScenario().getRegulatoryScope())
+            .processingResult(event.getResult())
+            .build();
+
+        complianceAuditRepository.save(record);
+    }
+}
+```
+
+#### 2. Risk Management
+
+**Risk-Based Scenario Selection**:
+```java
+public class RiskAwareScenarioSelector {
+
+    public ScenarioConfiguration selectScenario(Object trade, RiskContext riskContext) {
+        String baseScenarioId = getBaseScenarioId(trade);
+
+        // Enhanced validation for high-risk trades
+        if (riskContext.isHighRisk()) {
+            return scenarioService.getScenario(baseScenarioId + "-enhanced");
+        }
+
+        // Standard processing for normal trades
+        return scenarioService.getScenario(baseScenarioId + "-standard");
+    }
+}
+```
+
+#### 3. Multi-Jurisdiction Support
+
+**Jurisdiction-Specific Scenarios**:
+```yaml
+# scenarios/derivatives/otc-options-us-scenario.yaml
+scenario:
+  scenario-id: "otc-options-us"
+  rule-configurations:
+    - "config/derivatives/us/dodd-frank-validation.yaml"
+    - "config/derivatives/us/cftc-reporting.yaml"
+    - "config/derivatives/us/fed-risk-rules.yaml"
+
+# scenarios/derivatives/otc-options-eu-scenario.yaml
+scenario:
+  scenario-id: "otc-options-eu"
+  rule-configurations:
+    - "config/derivatives/eu/emir-validation.yaml"
+    - "config/derivatives/eu/mifid-reporting.yaml"
+    - "config/derivatives/eu/eba-risk-rules.yaml"
+```
+
+#### 4. Performance Optimization
+
+**Caching for High-Frequency Trading**:
+```java
+@Configuration
+public class TradingSystemCacheConfig {
+
+    @Bean
+    public CacheManager tradingCacheManager() {
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager();
+        cacheManager.setCaffeine(Caffeine.newBuilder()
+            .maximumSize(10000)
+            .expireAfterWrite(Duration.ofMinutes(5))  // Short TTL for trading data
+            .recordStats());
+        return cacheManager;
+    }
+}
+
+@Service
+public class HighFrequencyScenarioService {
+
+    @Cacheable(value = "scenarios", key = "#dataType.simpleName")
+    public ScenarioConfiguration getScenarioForDataType(Class<?> dataType) {
+        return scenarioService.getScenarioForDataType(dataType);
+    }
+}
+```
 
 ## External Data Source Integration for Financial Services
 

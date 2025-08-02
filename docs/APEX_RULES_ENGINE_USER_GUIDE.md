@@ -1,15 +1,17 @@
 # APEX - Complete User Guide
 
 **Version:** 1.0
-**Date:** 2025-07-30
+**Date:** 2025-08-02
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
 ## Overview
 
-APEX (Advanced Processing Engine for eXpressions) is a comprehensive rule evaluation system built on Spring Expression Language (SpEL) with enterprise-grade external data source integration. It provides a progressive API design that scales from simple rule evaluation to complex business rule management systems with seamless data access capabilities.
+APEX (Advanced Processing Engine for eXpressions) is a comprehensive rule evaluation system built on Spring Expression Language (SpEL) with enterprise-grade external data source integration and scenario-based configuration management. It provides a progressive API design that scales from simple rule evaluation to complex business rule management systems with seamless data access capabilities.
 
 ### Key Capabilities
 
+- **Scenario-Based Configuration**: Centralized management and routing of data processing pipelines
+- **YAML Validation System**: Enterprise-grade validation with comprehensive error reporting
 - **External Data Source Integration**: Connect to databases, REST APIs, file systems, and caches
 - **YAML Dataset Enrichment**: Embed reference data directly in configuration files
 - **Progressive API Design**: Three-layer API from simple to advanced use cases
@@ -670,6 +672,142 @@ lookup-dataset:
   data:
     # Dataset entries
 ```
+
+## Scenario-Based Configuration Management
+
+### Overview
+
+APEX includes a powerful scenario-based configuration system that provides centralized management and routing of data processing pipelines. This system enables organizations to manage complex rule configurations through lightweight scenario files that associate data types with appropriate rule configurations.
+
+### Key Benefits
+
+- **Centralized Management**: Single registry manages all available scenarios
+- **Lightweight Configuration**: Scenario files contain only routing information, not business logic
+- **Type-Safe Processing**: Automatic routing based on data type detection
+- **Dependency Tracking**: Complete analysis of configuration file dependencies
+- **Enterprise Validation**: Comprehensive YAML validation with detailed error reporting
+
+### How Scenarios Work
+
+Scenarios provide a three-layer architecture:
+
+1. **Registry Layer**: Central discovery mechanism (`config/data-type-scenarios.yaml`)
+2. **Scenario Layer**: Lightweight routing files (`scenarios/*.yaml`)
+3. **Rule Configuration Layer**: Actual business logic files (`bootstrap/*.yaml`, `config/*.yaml`)
+
+### Example: OTC Options Scenario
+
+Here's how to set up a scenario for processing OTC Options:
+
+**1. Registry Entry** (`config/data-type-scenarios.yaml`):
+```yaml
+scenario-registry:
+  - scenario-id: "otc-options-standard"
+    config-file: "scenarios/otc-options-scenario.yaml"
+    data-types: ["OtcOption", "dev.mars.apex.demo.bootstrap.model.OtcOption"]
+    description: "Standard validation and enrichment pipeline for OTC Options"
+    business-domain: "Derivatives Trading"
+    owner: "derivatives.team@company.com"
+```
+
+**2. Scenario File** (`scenarios/otc-options-scenario.yaml`):
+```yaml
+metadata:
+  name: "OTC Options Processing Scenario"
+  version: "1.0.0"
+  description: "Associates OTC Options with existing rule configurations"
+  type: "scenario"
+  business-domain: "Derivatives Trading"
+  owner: "derivatives.team@company.com"
+
+scenario:
+  scenario-id: "otc-options-standard"
+  name: "OTC Options Standard Processing"
+  description: "Associates OTC Options with existing rule configurations"
+
+  # Data types this scenario applies to
+  data-types:
+    - "dev.mars.apex.demo.bootstrap.model.OtcOption"
+    - "OtcOption"  # Short name alias
+
+  # References to existing rule configuration files
+  rule-configurations:
+    - "bootstrap/otc-options-bootstrap.yaml"
+    - "config/derivatives-validation-rules.yaml"
+```
+
+**3. Using Scenarios in Code**:
+```java
+// Load the scenario registry
+DataTypeScenarioService scenarioService = new DataTypeScenarioService();
+scenarioService.loadScenarios("config/data-type-scenarios.yaml");
+
+// Automatic routing based on data type
+OtcOption option = new OtcOption(...);
+ScenarioConfiguration scenario = scenarioService.getScenarioForData(option);
+
+// Get rule configuration files to load and execute
+List<String> ruleFiles = scenario.getRuleConfigurations();
+for (String ruleFile : ruleFiles) {
+    RuleConfiguration rules = ruleLoader.load(ruleFile);
+    ruleEngine.execute(rules, option);
+}
+```
+
+### YAML Validation System
+
+APEX includes comprehensive YAML validation to ensure configuration integrity:
+
+**Validation Features:**
+- **Required Metadata**: All YAML files must include proper metadata with required `type` field
+- **Type-Specific Validation**: Different validation rules for different file types
+- **Dependency Validation**: Validates complete dependency chains and detects missing references
+- **Syntax Validation**: Ensures proper YAML syntax and structure
+- **Comprehensive Reporting**: Detailed validation reports with errors, warnings, and recommendations
+
+**Supported File Types:**
+- `scenario`: Scenario configuration files
+- `scenario-registry`: Central scenario registry
+- `bootstrap`: Complete demo configurations
+- `rule-config`: Reusable rule configurations
+- `dataset`: Data reference files
+- `enrichment`: Data enrichment configurations
+- `rule-chain`: Sequential rule execution files
+
+**Example Validation Usage:**
+```java
+// Validate a single file
+YamlMetadataValidator validator = new YamlMetadataValidator();
+YamlValidationResult result = validator.validateFile("scenarios/otc-options-scenario.yaml");
+
+if (result.isValid()) {
+    System.out.println("✓ File is valid");
+} else {
+    System.out.println("✗ Validation errors:");
+    result.getErrors().forEach(error -> System.out.println("  - " + error));
+}
+
+// Validate multiple files
+List<String> files = List.of("scenarios/scenario1.yaml", "config/rules.yaml");
+YamlValidationSummary summary = validator.validateFiles(files);
+String report = summary.getReport(); // Comprehensive validation report
+```
+
+### Available Scenarios
+
+APEX includes several pre-built scenarios for common financial services use cases:
+
+- **OTC Options Standard Processing**: Complete validation and enrichment pipeline for OTC Options
+- **Commodity Swaps Standard Processing**: Multi-layered validation for commodity derivatives
+- **Settlement Auto-Repair**: Intelligent auto-repair for failed settlement instructions
+
+### Best Practices
+
+1. **Keep Scenarios Lightweight**: Only include data type mappings and rule file references
+2. **Use Descriptive Names**: Clear scenario IDs and descriptions for maintainability
+3. **Validate Regularly**: Run YAML validation as part of CI/CD pipeline
+4. **Document Ownership**: Include clear ownership and contact information
+5. **Version Control**: Use semantic versioning for scenario configurations
 
 ## External Data Source Integration
 

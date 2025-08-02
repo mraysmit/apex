@@ -86,6 +86,7 @@ metadata:
   name: "Financial Enrichment Rules"
   version: "1.0.0"
   description: "Data enrichment and transformation rules for financial instruments"
+  type: "rule-config"
   author: "Rules Engine Team"
   created: "2024-01-15"
   last-modified: "2024-01-15"

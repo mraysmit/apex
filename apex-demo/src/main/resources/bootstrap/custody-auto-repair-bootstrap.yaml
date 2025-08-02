@@ -77,10 +77,12 @@ metadata:
   name: "Custody Auto-Repair Bootstrap Rules"
   version: "1.0"
   description: "Complete bootstrap demonstration of Standing Instruction auto-repair for custody settlement in Asian markets"
+  type: "bootstrap"
   author: "Mark Andrew Ray-Smith Cityline Ltd"
   created: "2025-07-30"
+  created-by: "bootstrap.admin@company.com"
+  business-domain: "Custody and Safekeeping"
   tags: ["bootstrap", "custody", "settlement", "auto-repair", "asian-markets", "standing-instructions", "weighted-rules"]
-  businessDomain: "Custody and Safekeeping"
   regulatoryScope: "Asian Markets (Japan, Hong Kong, Singapore, Korea)"
   
 # ============================================================================

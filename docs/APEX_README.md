@@ -1,10 +1,10 @@
 # APEX - Advanced Processing Engine for eXpressions
 
 **Version:** 1.0
-**Date:** 2025-07-30
+**Date:** 2025-08-02
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
-A powerful expression processor for Java applications with comprehensive data source integration that provides seamless access to databases, REST APIs, file systems, caches, and more.
+A powerful expression processor for Java applications with comprehensive data source integration, scenario-based configuration management, and enterprise-grade YAML validation that provides seamless access to databases, REST APIs, file systems, caches, and more.
 
 ## System Architecture Overview
 
@@ -14,13 +14,16 @@ graph TB
         A[Business Rules]
         B[YAML Configuration]
         C[Dataset Definitions]
+        D[Scenario Management]
+        E[Configuration Validation]
     end
 
     subgraph "Rules Engine Core"
-        D[Expression Evaluator]
-        E[Rule Engine Service]
-        F[Rule Chain Executor]
-        G[Context Manager]
+        F[Expression Evaluator]
+        G[Rule Engine Service]
+        H[Rule Chain Executor]
+        I[Context Manager]
+        J[Scenario Router]
     end
 
     subgraph "Advanced Patterns"
@@ -142,6 +145,67 @@ Welcome to the comprehensive documentation for the SpEL Rules Engine with YAML D
 
 **Who should read:** Financial services teams and domain experts
 **Time to read:** 30-35 minutes
+
+## Scenario-Based Configuration Management
+
+APEX now includes a powerful scenario-based configuration system that provides centralized management and routing of data processing pipelines. This system enables organizations to manage complex rule configurations through lightweight scenario files that associate data types with appropriate rule configurations.
+
+### Key Features
+
+- **Centralized Registry**: Single registry file manages all available scenarios
+- **Lightweight Routing**: Scenario files contain only data type mappings and rule file references
+- **Type-Safe Processing**: Automatic routing based on data type detection
+- **Dependency Analysis**: Complete YAML dependency chain analysis and validation
+- **Configuration Validation**: Enterprise-grade YAML metadata validation
+
+### Architecture Overview
+
+```mermaid
+graph TD
+    Registry["Scenario Registry<br/>Central discovery<br/>Scenario catalog<br/>Metadata management"]
+
+    ScenarioFiles["Scenario Files<br/>Data type mappings<br/>Rule file references<br/>Lightweight routing"]
+
+    subgraph RuleLayer["Rule Configuration Layer"]
+        ConfigFiles["Configuration Files<br/>Reusable rule sets<br/>Validation chains<br/>Business logic"]
+
+        EnrichmentFiles["Enrichment Files<br/>Data enrichment logic<br/>External data lookups<br/>Calculation rules"]
+
+        RuleChainFiles["Rule Chain Files<br/>Sequential rule execution<br/>Conditional logic<br/>Workflow definitions"]
+    end
+
+    subgraph DataLayer["Data Layer"]
+        InlineDatasets["Inline Datasets<br/>Embedded data<br/>Static references"]
+
+        ExternalYAML["External YAML Files<br/>Shared reference data<br/>Configuration data"]
+
+        DatabaseSources["Database Sources<br/>Dynamic data<br/>Transactional data"]
+
+        APISources["API Sources<br/>External services<br/>Real-time data"]
+    end
+
+    Registry -->|"discovers & loads"| ScenarioFiles
+    ScenarioFiles -->|"references"| ConfigFiles
+    ConfigFiles -.->|"may reference"| RuleChainFiles
+    ConfigFiles -.->|"may reference"| EnrichmentFiles
+    RuleLayer -->|"may access"| DataLayer
+```
+
+### YAML Validation System
+
+APEX includes comprehensive YAML validation to ensure configuration integrity:
+
+- **Metadata Validation**: All YAML files must include proper metadata with required `type` field
+- **Type-Specific Validation**: Different validation rules for different file types (scenario, bootstrap, rule-config, dataset)
+- **Dependency Validation**: Validates complete dependency chains and detects missing references
+- **Syntax Validation**: Ensures proper YAML syntax and structure
+- **Comprehensive Reporting**: Detailed validation reports with errors, warnings, and recommendations
+
+### Available Scenarios
+
+- **OTC Options Standard Processing**: Complete validation and enrichment pipeline for OTC Options
+- **Commodity Swaps Standard Processing**: Multi-layered validation for commodity derivatives
+- **Settlement Auto-Repair**: Intelligent auto-repair for failed settlement instructions
 
 ### Comprehensive Data Integration
 

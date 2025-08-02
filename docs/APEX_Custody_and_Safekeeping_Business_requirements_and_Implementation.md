@@ -1,7 +1,7 @@
 # APEX Custody and Safekeeping Auto-Repair: Business Requirements and Implementation Guide
 
-**Version:** 1.0  
-**Date:** 2025-07-31  
+**Version:** 1.0
+**Date:** 2025-08-02
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
 ---
@@ -10,6 +10,7 @@
 
 1. [Section 1: Business Requirements and Rules Framework](#section-1-business-requirements-and-rules-framework)
 2. [Section 2: APEX Implementation Guide](#section-2-apex-implementation-guide)
+3. [Section 3: Scenario-Based Configuration Management](#section-3-scenario-based-configuration-management)
 
 ---
 
@@ -2039,5 +2040,258 @@ This cross-reference table maps each section of the YAML configuration to its ex
 | `configuration.asianMarkets` | Global Configuration Settings | Section 4 |
 
 This ensures that every section of the operational YAML file is thoroughly explained and documented within the implementation guide.
+
+---
+
+# Section 3: Scenario-Based Configuration Management
+
+## Overview
+
+APEX's scenario-based configuration system provides powerful capabilities for managing custody and safekeeping auto-repair configurations across different environments, markets, and business contexts. This section explains how to leverage scenarios for custody operations.
+
+## Custody Auto-Repair Scenario Configuration
+
+### Scenario Registry Entry
+
+The custody auto-repair scenario is registered in the central scenario registry:
+
+```yaml
+# config/data-type-scenarios.yaml
+scenario-registry:
+  - scenario-id: "settlement-auto-repair-asia"
+    config-file: "scenarios/settlement-auto-repair-scenario.yaml"
+    data-types:
+      - "SettlementInstruction"
+      - "dev.mars.apex.demo.bootstrap.model.BootstrapSettlementInstruction"
+    description: "Intelligent auto-repair for failed settlement instructions in Asian markets"
+    business-domain: "Post-Trade Settlement"
+    regulatory-scope: "Asian Markets (Japan, Hong Kong, Singapore, Korea)"
+    owner: "settlements.asia@firm.com"
+    compliance-reviewed: true
+    risk-approved: true
+```
+
+### Scenario Configuration File
+
+The scenario file provides lightweight routing to the custody auto-repair bootstrap configuration:
+
+```yaml
+# scenarios/settlement-auto-repair-scenario.yaml
+metadata:
+  name: "Settlement Auto-Repair Scenario"
+  version: "1.0.0"
+  description: "Associates settlement instructions with custody auto-repair processing"
+  type: "scenario"
+  business-domain: "Post-Trade Settlement"
+  regulatory-scope: "Asian Markets (Japan, Hong Kong, Singapore, Korea)"
+  owner: "settlements.asia@firm.com"
+  compliance-reviewed: true
+  compliance-reviewer: "compliance.settlements@firm.com"
+  compliance-date: "2025-08-01"
+  risk-approved: true
+  risk-reviewer: "risk.settlements@firm.com"
+  risk-date: "2025-08-01"
+
+scenario:
+  scenario-id: "settlement-auto-repair-asia"
+  name: "Settlement Auto-Repair for Asian Markets"
+  description: "Intelligent auto-repair for failed settlement instructions"
+
+  # Data types this scenario applies to
+  data-types:
+    - "dev.mars.apex.demo.bootstrap.model.BootstrapSettlementInstruction"
+    - "SettlementInstruction"
+
+  # References to the complete auto-repair configuration
+  rule-configurations:
+    - "bootstrap/custody-auto-repair-bootstrap.yaml"
+    - "config/settlement-validation-rules.yaml"
+```
+
+## Multi-Environment Scenario Management
+
+### Development Environment
+
+```yaml
+# scenarios/settlement-auto-repair-dev-scenario.yaml
+scenario:
+  scenario-id: "settlement-auto-repair-dev"
+  data-types: ["SettlementInstruction"]
+  rule-configurations:
+    - "config/dev/custody-auto-repair-dev.yaml"
+    - "config/dev/mock-standing-instructions.yaml"
+```
+
+### Production Environment
+
+```yaml
+# scenarios/settlement-auto-repair-prod-scenario.yaml
+scenario:
+  scenario-id: "settlement-auto-repair-prod"
+  data-types: ["SettlementInstruction"]
+  rule-configurations:
+    - "bootstrap/custody-auto-repair-bootstrap.yaml"
+    - "config/prod/live-standing-instructions.yaml"
+    - "config/prod/regulatory-compliance.yaml"
+```
+
+## Market-Specific Scenarios
+
+### Japan Market
+
+```yaml
+# scenarios/settlement-auto-repair-japan-scenario.yaml
+scenario:
+  scenario-id: "settlement-auto-repair-japan"
+  data-types: ["SettlementInstruction"]
+  rule-configurations:
+    - "config/japan/jgb-settlement-rules.yaml"
+    - "config/japan/jscc-standing-instructions.yaml"
+    - "config/japan/boj-compliance-rules.yaml"
+```
+
+### Hong Kong Market
+
+```yaml
+# scenarios/settlement-auto-repair-hk-scenario.yaml
+scenario:
+  scenario-id: "settlement-auto-repair-hk"
+  data-types: ["SettlementInstruction"]
+  rule-configurations:
+    - "config/hongkong/hkex-settlement-rules.yaml"
+    - "config/hongkong/ccass-standing-instructions.yaml"
+    - "config/hongkong/hkma-compliance-rules.yaml"
+```
+
+## Integration with Custody Systems
+
+### Scenario-Driven Processing
+
+```java
+@Service
+public class CustodySettlementProcessor {
+
+    @Autowired
+    private DataTypeScenarioService scenarioService;
+
+    @Autowired
+    private RuleEngineService ruleEngine;
+
+    @Autowired
+    private SettlementAuditService auditService;
+
+    public SettlementResult processSettlementInstruction(SettlementInstruction instruction) {
+        try {
+            // 1. Determine appropriate scenario based on market and instruction type
+            ScenarioConfiguration scenario = selectScenario(instruction);
+
+            // 2. Log scenario selection for audit trail
+            auditService.logScenarioSelection(instruction, scenario.getScenarioId());
+
+            // 3. Execute auto-repair processing
+            SettlementResult result = new SettlementResult();
+
+            for (String ruleFile : scenario.getRuleConfigurations()) {
+                RuleConfiguration rules = loadRuleConfiguration(ruleFile);
+                RuleExecutionResult ruleResult = ruleEngine.execute(rules, instruction);
+
+                result.addProcessingStage(ruleFile, ruleResult);
+
+                // Check for critical failures that should stop processing
+                if (ruleResult.hasCriticalErrors()) {
+                    result.setStatus(SettlementStatus.FAILED);
+                    auditService.logCriticalFailure(instruction, ruleResult);
+                    break;
+                }
+            }
+
+            // 4. Final validation and audit
+            if (result.isSuccessful()) {
+                auditService.logSuccessfulRepair(instruction, result);
+            }
+
+            return result;
+
+        } catch (Exception e) {
+            auditService.logProcessingError(instruction, e);
+            throw new SettlementProcessingException("Failed to process settlement instruction", e);
+        }
+    }
+
+    private ScenarioConfiguration selectScenario(SettlementInstruction instruction) {
+        String market = instruction.getMarket();
+        String environment = systemProperties.getEnvironment();
+
+        // Build scenario ID based on market and environment
+        String scenarioId = String.format("settlement-auto-repair-%s-%s",
+            market.toLowerCase(), environment);
+
+        try {
+            return scenarioService.getScenario(scenarioId);
+        } catch (ScenarioNotFoundException e) {
+            // Fallback to default scenario
+            return scenarioService.getScenario("settlement-auto-repair-default");
+        }
+    }
+}
+```
+
+## Compliance and Audit Integration
+
+### Regulatory Compliance Tracking
+
+```java
+@Component
+public class SettlementComplianceTracker {
+
+    @EventListener
+    public void onScenarioExecution(SettlementScenarioExecutionEvent event) {
+        ComplianceRecord record = ComplianceRecord.builder()
+            .timestamp(Instant.now())
+            .scenarioId(event.getScenarioId())
+            .instructionId(event.getInstruction().getId())
+            .market(event.getInstruction().getMarket())
+            .regulatoryScope(event.getScenario().getRegulatoryScope())
+            .autoRepairActions(event.getResult().getRepairActions())
+            .complianceStatus(evaluateCompliance(event))
+            .build();
+
+        complianceRepository.save(record);
+
+        // Alert on compliance violations
+        if (record.getComplianceStatus() == ComplianceStatus.VIOLATION) {
+            alertService.sendComplianceAlert(record);
+        }
+    }
+}
+```
+
+## Best Practices for Custody Scenarios
+
+### 1. Market-Specific Configuration
+
+- **Separate scenarios per market**: Each market has unique settlement rules and requirements
+- **Regulatory compliance**: Include regulatory scope in scenario metadata
+- **Local standing instructions**: Market-specific standing instruction datasets
+
+### 2. Environment Management
+
+- **Environment-specific scenarios**: Different configurations for dev/test/prod
+- **Gradual rollout**: Test scenarios in lower environments before production
+- **Configuration validation**: Validate all scenarios before deployment
+
+### 3. Audit and Compliance
+
+- **Complete audit trail**: Log all scenario selections and processing results
+- **Regulatory reporting**: Include scenario information in regulatory reports
+- **Compliance validation**: Regular validation of scenario configurations
+
+### 4. Performance Optimization
+
+- **Scenario caching**: Cache frequently used scenarios for better performance
+- **Lazy loading**: Load scenario configurations on demand
+- **Monitoring**: Monitor scenario performance and processing times
+
+This scenario-based approach provides the flexibility needed for complex custody and safekeeping operations while maintaining strict compliance and audit requirements.
 
 ---

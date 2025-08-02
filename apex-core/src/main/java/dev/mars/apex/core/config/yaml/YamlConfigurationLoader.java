@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /*
@@ -191,8 +192,71 @@ public class YamlConfigurationLoader {
     }
     
     /**
+     * Load raw YAML content as a Map for dependency analysis.
+     *
+     * @param filePath The path to the YAML file
+     * @return The YAML content as a Map
+     * @throws YamlConfigurationException if loading fails
+     */
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> loadAsMap(String filePath) throws YamlConfigurationException {
+        try {
+            Path path = Paths.get(filePath);
+            if (!Files.exists(path)) {
+                throw new YamlConfigurationException("Configuration file not found: " + filePath);
+            }
+
+            LOGGER.info("Loading YAML file as Map: " + filePath);
+            Map<String, Object> yamlContent = yamlMapper.readValue(path.toFile(), Map.class);
+
+            // Validate metadata if present
+            validateMetadata(yamlContent, filePath);
+
+            return yamlContent;
+
+        } catch (IOException e) {
+            throw new YamlConfigurationException("Failed to load YAML file as Map: " + filePath, e);
+        }
+    }
+
+    /**
+     * Validates basic metadata requirements for YAML files.
+     *
+     * @param yamlContent The loaded YAML content
+     * @param filePath The file path for error reporting
+     * @throws YamlConfigurationException if validation fails
+     */
+    @SuppressWarnings("unchecked")
+    private void validateMetadata(Map<String, Object> yamlContent, String filePath) throws YamlConfigurationException {
+        Object metadataObj = yamlContent.get("metadata");
+        if (metadataObj == null) {
+            LOGGER.warning("YAML file missing metadata section: " + filePath);
+            return; // Don't fail for missing metadata, just warn
+        }
+
+        if (!(metadataObj instanceof Map)) {
+            throw new YamlConfigurationException("Invalid metadata section in file: " + filePath + " - must be a map/object");
+        }
+
+        Map<String, Object> metadata = (Map<String, Object>) metadataObj;
+
+        // Check for required 'type' field
+        Object typeObj = metadata.get("type");
+        if (typeObj == null) {
+            throw new YamlConfigurationException("Missing required 'type' field in metadata for file: " + filePath);
+        }
+
+        if (!(typeObj instanceof String) || ((String) typeObj).trim().isEmpty()) {
+            throw new YamlConfigurationException("Invalid 'type' field in metadata for file: " + filePath + " - must be a non-empty string");
+        }
+
+        String type = (String) typeObj;
+        LOGGER.fine("Validated YAML file type '" + type + "' for file: " + filePath);
+    }
+
+    /**
      * Parse YAML string into configuration.
-     * 
+     *
      * @param yamlString The YAML string to parse
      * @return The parsed configuration
      * @throws YamlConfigurationException if parsing fails

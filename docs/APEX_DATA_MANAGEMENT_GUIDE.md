@@ -1,12 +1,12 @@
 # APEX - Data Management Guide
 
 **Version:** 1.0
-**Date:** 2025-07-30
+**Date:** 2025-08-02
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
 ## Overview
 
-APEX (Advanced Processing Engine for eXpressions) provides comprehensive data management capabilities designed for enterprise-grade applications. This guide takes you on a journey from basic data concepts to advanced enterprise implementations, ensuring you understand each concept thoroughly before moving to the next level.
+APEX (Advanced Processing Engine for eXpressions) provides comprehensive data management capabilities designed for enterprise-grade applications, including scenario-based configuration management and enterprise YAML validation. This guide takes you on a journey from basic data concepts to advanced enterprise implementations, ensuring you understand each concept thoroughly before moving to the next level.
 
 ## Table of Contents
 
@@ -29,15 +29,17 @@ APEX (Advanced Processing Engine for eXpressions) provides comprehensive data ma
 12. [Organizing and Managing Multiple Datasets](#12-organizing-and-managing-multiple-datasets)
 
 **Part 4: Advanced Topics**
-13. [External Data Source Integration](#13-external-data-source-integration)
-14. [Financial Services Data Patterns](#14-financial-services-data-patterns)
-15. [Performance and Optimization](#15-performance-and-optimization)
-16. [Enterprise Data Architecture](#16-enterprise-data-architecture)
+13. [Scenario-Based Configuration Management](#13-scenario-based-configuration-management)
+14. [YAML Validation and Quality Assurance](#14-yaml-validation-and-quality-assurance)
+15. [External Data Source Integration](#15-external-data-source-integration)
+16. [Financial Services Data Patterns](#16-financial-services-data-patterns)
+17. [Performance and Optimization](#17-performance-and-optimization)
+18. [Enterprise Data Architecture](#18-enterprise-data-architecture)
 
 **Part 5: Reference and Examples**
-17. [Complete Examples and Use Cases](#17-complete-examples-and-use-cases)
-18. [Best Practices and Patterns](#18-best-practices-and-patterns)
-19. [Troubleshooting Common Issues](#19-troubleshooting-common-issues)
+19. [Complete Examples and Use Cases](#19-complete-examples-and-use-cases)
+20. [Best Practices and Patterns](#20-best-practices-and-patterns)
+21. [Troubleshooting Common Issues](#21-troubleshooting-common-issues)
 
 ---
 
@@ -3030,6 +3032,537 @@ graph TD
 ```
 
 This comprehensive approach to dataset organization and management ensures that your data remains reliable, maintainable, and scalable as your system grows.
+
+---
+
+# Part 4: Advanced Topics
+
+## 13. Scenario-Based Configuration Management
+
+### Introduction to Scenarios
+
+APEX's scenario-based configuration system provides a sophisticated approach to managing complex rule configurations. Instead of hardcoding which rules to apply to which data types, scenarios provide a flexible routing mechanism that associates data types with appropriate rule configurations.
+
+### Why Use Scenarios?
+
+**Traditional Approach Problems:**
+- Hard-coded data type to rule mappings
+- Difficult to change processing pipelines
+- No central visibility into available configurations
+- Complex maintenance as system grows
+
+**Scenario-Based Benefits:**
+- Centralized configuration management
+- Flexible data type routing
+- Easy to modify processing pipelines
+- Clear visibility into all available scenarios
+- Type-safe processing with validation
+
+### Scenario Architecture
+
+```mermaid
+graph TD
+    subgraph "Data Processing Flow"
+        Input["Input Data<br/>(OtcOption, CommoditySwap, etc.)"]
+        Registry["Scenario Registry<br/>config/data-type-scenarios.yaml"]
+        Scenario["Scenario File<br/>scenarios/otc-options-scenario.yaml"]
+        Rules["Rule Configuration Files<br/>bootstrap/otc-options-bootstrap.yaml<br/>config/derivatives-validation-rules.yaml"]
+        Output["Processed Output"]
+    end
+
+    Input --> Registry
+    Registry --> Scenario
+    Scenario --> Rules
+    Rules --> Output
+```
+
+### Creating Your First Scenario
+
+**Step 1: Define the Registry Entry**
+
+Add an entry to `config/data-type-scenarios.yaml`:
+
+```yaml
+metadata:
+  name: "Scenario Registry Configuration"
+  type: "scenario-registry"
+  created-by: "data.admin@company.com"
+
+scenario-registry:
+  - scenario-id: "my-data-processing"
+    config-file: "scenarios/my-data-scenario.yaml"
+    data-types: ["MyDataType", "com.company.model.MyDataType"]
+    description: "Processing pipeline for my custom data type"
+    business-domain: "My Business Domain"
+    owner: "my.team@company.com"
+```
+
+**Step 2: Create the Scenario File**
+
+Create `scenarios/my-data-scenario.yaml`:
+
+```yaml
+metadata:
+  name: "My Data Processing Scenario"
+  version: "1.0.0"
+  description: "Associates my data type with appropriate rule configurations"
+  type: "scenario"
+  business-domain: "My Business Domain"
+  owner: "my.team@company.com"
+
+scenario:
+  scenario-id: "my-data-processing"
+  name: "My Data Standard Processing"
+  description: "Standard processing pipeline for my data type"
+
+  # Data types this scenario applies to
+  data-types:
+    - "com.company.model.MyDataType"
+    - "MyDataType"  # Short name alias
+
+  # References to existing rule configuration files
+  rule-configurations:
+    - "config/my-validation-rules.yaml"
+    - "config/my-enrichment-rules.yaml"
+```
+
+**Step 3: Use the Scenario in Code**
+
+```java
+@Service
+public class MyDataProcessor {
+
+    @Autowired
+    private DataTypeScenarioService scenarioService;
+
+    @Autowired
+    private RuleEngineService ruleEngine;
+
+    public ProcessingResult processMyData(MyDataType data) {
+        // Automatic scenario discovery
+        ScenarioConfiguration scenario = scenarioService.getScenarioForData(data);
+
+        // Load and execute rule configurations
+        ProcessingResult result = new ProcessingResult();
+        for (String ruleFile : scenario.getRuleConfigurations()) {
+            RuleConfiguration rules = loadRuleConfiguration(ruleFile);
+            RuleExecutionResult ruleResult = ruleEngine.execute(rules, data);
+            result.addRuleResult(ruleResult);
+        }
+
+        return result;
+    }
+}
+```
+
+### Advanced Scenario Patterns
+
+#### 1. Multi-Type Scenarios
+
+A single scenario can handle multiple related data types:
+
+```yaml
+scenario:
+  scenario-id: "derivatives-processing"
+  data-types:
+    - "OtcOption"
+    - "CommoditySwap"
+    - "InterestRateSwap"
+    - "CreditDefaultSwap"
+  rule-configurations:
+    - "config/derivatives-common-validation.yaml"
+    - "config/derivatives-enrichment.yaml"
+```
+
+#### 2. Environment-Specific Scenarios
+
+Different scenarios for different environments:
+
+```yaml
+# scenarios/otc-options-dev-scenario.yaml
+scenario:
+  scenario-id: "otc-options-dev"
+  data-types: ["OtcOption"]
+  rule-configurations:
+    - "config/dev/otc-options-rules.yaml"
+    - "config/dev/mock-data-sources.yaml"
+
+# scenarios/otc-options-prod-scenario.yaml
+scenario:
+  scenario-id: "otc-options-prod"
+  data-types: ["OtcOption"]
+  rule-configurations:
+    - "config/prod/otc-options-rules.yaml"
+    - "config/prod/live-data-sources.yaml"
+```
+
+#### 3. Conditional Scenario Selection
+
+Use metadata to select scenarios based on conditions:
+
+```java
+public ScenarioConfiguration selectScenario(Object data, ProcessingContext context) {
+    String environment = context.getEnvironment();
+    String dataType = data.getClass().getSimpleName();
+
+    String scenarioId = dataType.toLowerCase() + "-" + environment;
+    return scenarioService.getScenario(scenarioId);
+}
+```
+
+### Scenario Management Best Practices
+
+#### 1. Naming Conventions
+- **Scenario IDs**: Use kebab-case with business domain prefix
+  - `derivatives-otc-options-standard`
+  - `settlements-auto-repair-asia`
+  - `risk-credit-scoring-retail`
+
+#### 2. File Organization
+```
+config/
+├── data-type-scenarios.yaml          # Central registry
+scenarios/
+├── derivatives/
+│   ├── otc-options-scenario.yaml
+│   ├── commodity-swaps-scenario.yaml
+│   └── credit-derivatives-scenario.yaml
+├── settlements/
+│   ├── custody-auto-repair-scenario.yaml
+│   └── payment-processing-scenario.yaml
+└── risk/
+    ├── credit-scoring-scenario.yaml
+    └── market-risk-scenario.yaml
+```
+
+#### 3. Version Management
+- Use semantic versioning for scenarios
+- Maintain backward compatibility
+- Document breaking changes
+- Provide migration guides
+
+#### 4. Testing Scenarios
+```java
+@Test
+public void testOtcOptionsScenario() {
+    // Load scenario
+    ScenarioConfiguration scenario = scenarioService.getScenario("otc-options-standard");
+
+    // Verify configuration
+    assertThat(scenario.getDataTypes()).contains("OtcOption");
+    assertThat(scenario.getRuleConfigurations()).isNotEmpty();
+
+    // Test with sample data
+    OtcOption testOption = createTestOtcOption();
+    ProcessingResult result = processor.process(testOption);
+
+    assertThat(result.isSuccessful()).isTrue();
+}
+```
+
+## 14. YAML Validation and Quality Assurance
+
+### Introduction to YAML Validation
+
+As your APEX configuration grows, maintaining quality and consistency across all YAML files becomes critical. APEX includes a comprehensive validation system that ensures your configurations are correct, complete, and follow best practices.
+
+### Why YAML Validation Matters
+
+**Common YAML Configuration Problems:**
+- Missing required metadata fields
+- Inconsistent file structures
+- Broken references between files
+- Invalid YAML syntax
+- Undocumented configuration files
+- Inconsistent naming conventions
+
+**Benefits of Validation:**
+- Early detection of configuration errors
+- Consistent metadata across all files
+- Automated quality assurance
+- Better documentation and maintainability
+- Reduced production issues
+- Easier onboarding for new team members
+
+### APEX Validation System
+
+#### Validation Levels
+
+1. **Syntax Validation**: Ensures valid YAML syntax
+2. **Metadata Validation**: Checks required fields and structure
+3. **Type-Specific Validation**: Validates content based on file type
+4. **Dependency Validation**: Verifies references between files
+5. **Business Rule Validation**: Checks domain-specific requirements
+
+#### Supported File Types
+
+| Type | Purpose | Required Metadata | Content Validation |
+|------|---------|------------------|-------------------|
+| `scenario` | Data type routing | `business-domain`, `owner` | `scenario` section with `data-types` and `rule-configurations` |
+| `scenario-registry` | Central registry | `created-by` | `scenario-registry` list with valid entries |
+| `bootstrap` | Complete demos | `business-domain`, `created-by` | `rule-chains` or `categories` sections |
+| `rule-config` | Reusable rules | `author` | `rules`, `enrichments`, or `rule-chains` sections |
+| `dataset` | Reference data | `source` | `data`, `countries`, or `dataset` sections |
+| `enrichment` | Data enrichment | `author` | Enrichment-specific content |
+| `rule-chain` | Sequential rules | `author` | Rule chain definitions |
+
+### Setting Up Validation
+
+#### 1. Basic File Validation
+
+```java
+// Validate a single file
+YamlMetadataValidator validator = new YamlMetadataValidator();
+YamlValidationResult result = validator.validateFile("scenarios/otc-options-scenario.yaml");
+
+if (result.isValid()) {
+    System.out.println("✓ File is valid");
+} else {
+    System.out.println("✗ Validation errors:");
+    result.getErrors().forEach(error -> System.out.println("  - " + error));
+}
+
+// Check for warnings
+if (result.hasWarnings()) {
+    System.out.println("⚠ Warnings:");
+    result.getWarnings().forEach(warning -> System.out.println("  - " + warning));
+}
+```
+
+#### 2. Batch Validation
+
+```java
+// Validate multiple files
+List<String> filesToValidate = Arrays.asList(
+    "scenarios/otc-options-scenario.yaml",
+    "config/data-type-scenarios.yaml",
+    "bootstrap/otc-options-bootstrap.yaml"
+);
+
+YamlValidationSummary summary = validator.validateFiles(filesToValidate);
+
+System.out.println("Validation Summary:");
+System.out.println("Total Files: " + summary.getTotalCount());
+System.out.println("Valid Files: " + summary.getValidCount());
+System.out.println("Invalid Files: " + summary.getInvalidCount());
+System.out.println("Files with Warnings: " + summary.getWarningCount());
+
+// Generate comprehensive report
+String report = summary.getReport();
+System.out.println(report);
+```
+
+#### 3. Dependency Analysis
+
+```java
+// Analyze complete dependency chain
+YamlDependencyAnalyzer analyzer = new YamlDependencyAnalyzer();
+YamlDependencyGraph graph = analyzer.analyzeYamlDependencies("scenarios/otc-options-scenario.yaml");
+
+// Generate dependency report
+String dependencyReport = analyzer.generateTextReport(graph);
+System.out.println(dependencyReport);
+
+// Check for issues
+if (!graph.getStatistics().isHealthy()) {
+    System.out.println("Issues found:");
+    if (!graph.getMissingFiles().isEmpty()) {
+        System.out.println("Missing files: " + graph.getMissingFiles());
+    }
+    if (graph.hasCircularDependencies()) {
+        System.out.println("Circular dependencies: " + graph.findCircularDependencies());
+    }
+}
+```
+
+### Creating Quality Standards
+
+#### 1. Metadata Standards
+
+Establish consistent metadata requirements:
+
+```yaml
+# Standard metadata template
+metadata:
+  name: "Descriptive Name"           # Required: Human-readable name
+  version: "1.0.0"                   # Required: Semantic version
+  description: "Clear description"   # Required: What this file does
+  type: "file-type"                  # Required: One of the supported types
+  author: "team@company.com"         # Required for most types
+  created: "2025-08-02"             # Optional: Creation date
+  last-modified: "2025-08-02"       # Optional: Last modification date
+  business-domain: "Domain Name"     # Required for scenarios/bootstrap
+  owner: "responsible.team@company.com"  # Required for scenarios
+  tags: ["tag1", "tag2"]            # Optional: Classification tags
+```
+
+#### 2. Naming Conventions
+
+Establish consistent naming patterns:
+
+```yaml
+# File naming conventions
+scenarios/
+├── {domain}-{type}-{variant}-scenario.yaml
+│   ├── derivatives-otc-options-standard-scenario.yaml
+│   ├── settlements-custody-repair-asia-scenario.yaml
+│   └── risk-credit-scoring-retail-scenario.yaml
+
+config/
+├── {domain}-{purpose}-{type}.yaml
+│   ├── derivatives-validation-rules.yaml
+│   ├── settlements-enrichment-rules.yaml
+│   └── risk-calculation-rules.yaml
+
+bootstrap/
+├── {domain}-{use-case}-bootstrap.yaml
+│   ├── derivatives-otc-options-bootstrap.yaml
+│   ├── settlements-auto-repair-bootstrap.yaml
+│   └── risk-credit-scoring-bootstrap.yaml
+```
+
+#### 3. Content Standards
+
+Define content quality requirements:
+
+```yaml
+# Scenario content standards
+scenario:
+  scenario-id: "kebab-case-id"           # Must match file name pattern
+  name: "Title Case Name"                # Human-readable title
+  description: "Complete sentence."      # End with period
+
+  data-types:                            # At least one required
+    - "com.company.model.FullClassName"  # Full class name
+    - "ShortAlias"                       # Short alias
+
+  rule-configurations:                   # At least one required
+    - "relative/path/to/file.yaml"       # Relative paths only
+```
+
+### Automated Validation Pipeline
+
+#### 1. CI/CD Integration
+
+```yaml
+# .github/workflows/yaml-validation.yml
+name: YAML Configuration Validation
+
+on:
+  push:
+    paths:
+      - '**/*.yaml'
+      - '**/*.yml'
+  pull_request:
+    paths:
+      - '**/*.yaml'
+      - '**/*.yml'
+
+jobs:
+  validate-yaml:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Run YAML Validation
+        run: |
+          cd apex-core
+          mvn test -Dtest=YamlValidationIntegrationTest
+
+      - name: Generate Validation Report
+        run: |
+          cd apex-demo
+          mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.util.YamlValidationDemo
+```
+
+#### 2. Pre-commit Hooks
+
+```bash
+#!/bin/sh
+# .git/hooks/pre-commit
+
+echo "Running YAML validation..."
+
+# Run validation
+cd apex-core
+mvn -q test -Dtest=YamlValidationIntegrationTest
+
+if [ $? -ne 0 ]; then
+    echo "❌ YAML validation failed. Please fix errors before committing."
+    exit 1
+fi
+
+echo "✅ YAML validation passed."
+```
+
+#### 3. Automated Quality Reports
+
+```java
+@Component
+@Scheduled(cron = "0 0 2 * * ?") // Daily at 2 AM
+public class YamlQualityReporter {
+
+    public void generateDailyQualityReport() {
+        YamlMetadataValidator validator = new YamlMetadataValidator();
+
+        // Discover all YAML files
+        List<String> yamlFiles = discoverAllYamlFiles();
+
+        // Validate all files
+        YamlValidationSummary summary = validator.validateFiles(yamlFiles);
+
+        // Generate report
+        QualityReport report = QualityReport.builder()
+            .timestamp(Instant.now())
+            .totalFiles(summary.getTotalCount())
+            .validFiles(summary.getValidCount())
+            .invalidFiles(summary.getInvalidCount())
+            .filesWithWarnings(summary.getWarningCount())
+            .details(summary.getReport())
+            .build();
+
+        // Send to monitoring system
+        monitoringService.sendQualityReport(report);
+
+        // Email if issues found
+        if (!summary.isAllValid()) {
+            emailService.sendQualityAlert(report);
+        }
+    }
+}
+```
+
+### Validation Best Practices
+
+#### 1. Validation Strategy
+- **Fail Fast**: Validate configurations at startup
+- **Continuous Validation**: Regular automated checks
+- **Pre-deployment Validation**: Gate deployments on validation success
+- **Developer Feedback**: Quick feedback during development
+
+#### 2. Error Handling
+- **Clear Error Messages**: Specific, actionable error descriptions
+- **Context Information**: File names, line numbers, field names
+- **Suggested Fixes**: Recommendations for resolving issues
+- **Documentation Links**: References to relevant documentation
+
+#### 3. Performance Considerations
+- **Caching**: Cache validation results for unchanged files
+- **Parallel Processing**: Validate multiple files concurrently
+- **Incremental Validation**: Only validate changed files
+- **Lazy Loading**: Load and validate files on demand
+
+#### 4. Team Adoption
+- **Training**: Educate team on validation requirements
+- **Documentation**: Clear guidelines and examples
+- **Tooling**: IDE plugins and command-line tools
+- **Gradual Rollout**: Implement validation incrementally
 
 ---
 

@@ -44,6 +44,7 @@ metadata:
   name: "OTC Options Bootstrap Configuration"
   version: "1.0.0"
   description: "Complete OTC Options validation and enrichment with three data lookup methods"
+  type: "bootstrap"
   created-by: "bootstrap.admin@company.com"
   business-domain: "OTC Derivatives"
   business-owner: "Derivatives Trading Desk"

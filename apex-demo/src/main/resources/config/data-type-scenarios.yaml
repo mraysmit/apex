@@ -1,0 +1,109 @@
+# ============================================================================
+# SCENARIO REGISTRY CONFIGURATION
+# ============================================================================
+#
+# This configuration defines the registry of available scenario configurations
+# and their file locations. Each scenario is defined in its own YAML file.
+#
+# PURPOSE:
+# - Registry of all available scenario configurations
+# - Maps scenario IDs to their configuration file locations
+# - Enables discovery and loading of scenario configurations
+# - Supports organized file structure with one scenario per file
+#
+# STRUCTURE:
+# scenario-registry:
+#   - scenario-id: Unique identifier for the scenario
+#     config-file: Path to the scenario configuration file
+#     data-types: List of data types this scenario handles
+#     description: Brief description of the scenario
+#
+# ============================================================================
+
+metadata:
+  name: "Scenario Registry Configuration"
+  version: "1.0.0"
+  description: "Registry of available scenario configurations and their file locations"
+  type: "scenario-registry"
+  created-by: "APEX Rules Engine Team"
+  last-modified: "2025-08-02"
+
+# ============================================================================
+# SCENARIO REGISTRY
+# ============================================================================
+
+scenario-registry:
+  # OTC Options Processing Scenario
+  - scenario-id: "otc-options-standard"
+    config-file: "scenarios/otc-options-scenario.yaml"
+    data-types:
+      - "dev.mars.apex.demo.bootstrap.model.OtcOption"
+      - "OtcOption"
+    description: "Standard validation and enrichment pipeline for OTC Options"
+    business-domain: "Derivatives Trading"
+    owner: "derivatives.team@company.com"
+
+  # Commodity Swaps Processing Scenario
+  - scenario-id: "commodity-swaps-standard"
+    config-file: "scenarios/commodity-swaps-scenario.yaml"
+    data-types:
+      - "dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap.CommodityTotalReturnSwap"
+      - "CommodityTotalReturnSwap"
+      - "CommoditySwap"
+    description: "Multi-layered validation for commodity total return swaps"
+    business-domain: "Commodity Derivatives"
+    owner: "commodity.trading@company.com"
+
+  # Settlement Instructions Auto-Repair Scenario
+  - scenario-id: "settlement-auto-repair"
+    config-file: "scenarios/settlement-auto-repair-scenario.yaml"
+    data-types:
+      - "dev.mars.apex.demo.bootstrap.model.BootstrapSettlementInstruction"
+      - "SettlementInstruction"
+    description: "Intelligent auto-repair for failed settlement instructions"
+    business-domain: "Post-Trade Settlement"
+    owner: "settlement.operations@company.com"
+
+# ============================================================================
+# SCENARIO ROUTING CONFIGURATION
+# ============================================================================
+
+# Defines how to route incoming data to appropriate scenarios
+routing:
+  # Default routing strategy
+  strategy: "data-type-based"
+  
+  # Routing rules
+  rules:
+    # Route by Java class name
+    - condition: "#data.class.simpleName == 'OtcOption'"
+      target-scenario: "otc-options-standard"
+    
+    # Route by data type field
+    - condition: "#dataType == 'CommoditySwap'"
+      target-scenario: "commodity-swaps-standard"
+    
+    # Route by business context
+    - condition: "#businessContext == 'settlement-repair'"
+      target-scenario: "settlement-auto-repair"
+  
+  # Fallback scenario if no routing rule matches
+  default-scenario: "generic-validation"
+
+# ============================================================================
+# PROCESSING CONFIGURATION
+# ============================================================================
+
+processing:
+  # Global settings
+  enable-scenario-routing: true
+  cache-scenario-configs: true
+  audit-scenario-execution: true
+  
+  # Performance settings
+  max-concurrent-scenarios: 10
+  scenario-timeout-ms: 5000
+  
+  # Error handling
+  continue-on-scenario-error: false
+  fallback-to-default: true

@@ -8,6 +8,9 @@ This guide covers everything you need to know about connecting APEX to external 
 **Why external data sources matter:**
 Instead of having static rules that only work with the data you provide, external data sources let your rules access live data from your databases, APIs, files, and other systems. This means your rules can make decisions based on current customer information, real-time market data, or any other external information your business needs.
 
+**Integration with Scenarios:**
+APEX's scenario-based configuration system provides powerful routing capabilities for external data sources. Different scenarios can use different data source configurations, enabling environment-specific setups (dev/test/prod), jurisdiction-specific data sources, and business-domain-specific integrations. This guide shows how to configure external data sources that work seamlessly with APEX's scenario management system.
+
 ## Table of Contents
 
 1. [Overview](#overview)
