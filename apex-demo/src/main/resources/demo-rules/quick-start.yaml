@@ -50,6 +50,8 @@ metadata:
   name: "Customer Validation Rules"
   version: "1.0.0"
   description: "Quick start example rules for customer validation"
+  type: "rule-config"
+  author: "demo@rulesengine.dev"
   created-by: "demo@rulesengine.dev"
   created-date: "2025-07-27"
 

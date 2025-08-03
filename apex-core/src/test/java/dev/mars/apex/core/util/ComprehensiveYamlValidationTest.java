@@ -1,0 +1,123 @@
+package dev.mars.apex.core.util;
+
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Comprehensive test to validate ALL YAML files in the project have proper metadata.
+ */
+class ComprehensiveYamlValidationTest {
+    
+    @Test
+    void testAllYamlFilesHaveTypeAttribute() throws IOException {
+        // Use the actual project structure
+        YamlMetadataValidator validator = new YamlMetadataValidator("../apex-demo/src/main/resources");
+        
+        // Discover ALL YAML files in the project
+        List<String> allYamlFiles = discoverAllYamlFiles("../apex-demo/src/main/resources");
+        
+        System.out.println("=== COMPREHENSIVE YAML VALIDATION TEST ===");
+        System.out.println("Discovered " + allYamlFiles.size() + " YAML files:");
+        
+        for (String file : allYamlFiles) {
+            System.out.println("  " + file);
+        }
+        
+        // Validate all files
+        YamlValidationSummary summary = validator.validateFiles(allYamlFiles);
+        
+        // Print comprehensive results
+        System.out.println("\n=== VALIDATION RESULTS ===");
+        System.out.println("Total Files: " + summary.getTotalCount());
+        System.out.println("Valid Files: " + summary.getValidCount());
+        System.out.println("Invalid Files: " + summary.getInvalidCount());
+        System.out.println("Files with Warnings: " + summary.getWarningCount());
+        System.out.println("Overall Status: " + (summary.isAllValid() ? "PASS" : "FAIL"));
+        
+        // Show detailed results for each file
+        System.out.println("\n=== DETAILED RESULTS ===");
+        for (YamlValidationResult result : summary.getResults()) {
+            String status = result.getStatus();
+            String indicator = switch (status) {
+                case "VALID" -> "✓";
+                case "VALID_WITH_WARNINGS" -> "⚠";
+                case "INVALID" -> "✗";
+                default -> "?";
+            };
+            
+            System.out.printf("  %s %s (%s)%n", indicator, result.getFilePath(), status);
+            
+            // Show errors and warnings
+            if (!result.getErrors().isEmpty()) {
+                for (String error : result.getErrors()) {
+                    System.out.println("      ERROR: " + error);
+                }
+            }
+            if (!result.getWarnings().isEmpty()) {
+                for (String warning : result.getWarnings()) {
+                    System.out.println("      WARNING: " + warning);
+                }
+            }
+        }
+        
+        // Print comprehensive report if there are issues
+        if (!summary.isAllValid() || summary.getWarningCount() > 0) {
+            System.out.println("\n" + summary.getReport());
+        }
+        
+        // Assertions
+        assertTrue(summary.getTotalCount() > 0, "Should have found YAML files to validate");
+        
+        // Check that all files are valid
+        if (!summary.isAllValid()) {
+            List<YamlValidationResult> invalidResults = summary.getInvalidResults();
+            StringBuilder errorMessage = new StringBuilder("The following YAML files are invalid:\n");
+            for (YamlValidationResult result : invalidResults) {
+                errorMessage.append("  - ").append(result.getFilePath()).append(":\n");
+                for (String error : result.getErrors()) {
+                    errorMessage.append("    * ").append(error).append("\n");
+                }
+            }
+            fail(errorMessage.toString());
+        }
+        
+        System.out.println("\n=== TEST COMPLETED SUCCESSFULLY ===");
+        System.out.println("All " + summary.getTotalCount() + " YAML files have proper metadata with 'type' attributes!");
+    }
+    
+    /**
+     * Discovers all YAML files in the specified directory recursively.
+     */
+    private List<String> discoverAllYamlFiles(String baseDir) throws IOException {
+        List<String> yamlFiles = new ArrayList<>();
+        
+        Path basePath = Paths.get(baseDir);
+        if (!Files.exists(basePath)) {
+            System.err.println("Base directory does not exist: " + baseDir);
+            return yamlFiles;
+        }
+        
+        try (Stream<Path> paths = Files.walk(basePath)) {
+            paths.filter(Files::isRegularFile)
+                 .filter(path -> {
+                     String fileName = path.toString().toLowerCase();
+                     return fileName.endsWith(".yaml") || fileName.endsWith(".yml");
+                 })
+                 .forEach(path -> {
+                     String relativePath = basePath.relativize(path).toString().replace('\\', '/');
+                     yamlFiles.add(relativePath);
+                 });
+        }
+        
+        return yamlFiles;
+    }
+}

@@ -78,6 +78,8 @@ metadata:
   name: "File Processing Rules"
   version: "1.0.0"
   description: "Complete validation and enrichment for customer file processing"
+  type: "rule-config"
+  author: "file.processing@company.com"
   domain: "Customer Management"
   tags: ["validation", "enrichment", "file-processing"]
 

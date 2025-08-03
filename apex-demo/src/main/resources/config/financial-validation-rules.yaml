@@ -81,6 +81,7 @@ metadata:
   name: "Financial Validation Rules"
   version: "1.0.0"
   description: "Comprehensive validation rules for financial instruments, particularly OTC Commodity Total Return Swaps"
+  type: "rule-config"
   author: "Rules Engine Team"
   created: "2024-01-15"
   last-modified: "2024-01-15"

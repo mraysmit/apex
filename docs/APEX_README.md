@@ -195,11 +195,26 @@ graph TD
 
 APEX includes comprehensive YAML validation to ensure configuration integrity:
 
-- **Metadata Validation**: All YAML files must include proper metadata with required `type` field
-- **Type-Specific Validation**: Different validation rules for different file types (scenario, bootstrap, rule-config, dataset)
+- **Mandatory Metadata Validation**: All YAML files must include proper metadata with required fields:
+  - `name`: Human-readable file name
+  - `version`: Semantic version number
+  - `description`: Clear purpose description
+  - `type`: File type identifier (scenario, bootstrap, rule-config, dataset, etc.)
+- **Type-Specific Validation**: Different validation rules for different file types with additional required fields
 - **Dependency Validation**: Validates complete dependency chains and detects missing references
 - **Syntax Validation**: Ensures proper YAML syntax and structure
 - **Comprehensive Reporting**: Detailed validation reports with errors, warnings, and recommendations
+
+**Example Required Metadata:**
+```yaml
+metadata:
+  name: "OTC Options Processing Scenario"
+  version: "1.0.0"
+  description: "Associates OTC Options with existing rule configurations"
+  type: "scenario"
+  business-domain: "Derivatives Trading"  # Required for scenarios
+  owner: "derivatives.team@company.com"   # Required for scenarios
+```
 
 ### Available Scenarios
 

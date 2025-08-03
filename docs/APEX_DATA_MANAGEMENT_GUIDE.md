@@ -738,7 +738,7 @@ project-root/
 1. **Dataset files store data**, rule configuration files store logic
 2. **Dataset files are referenced by** rule configuration files
 3. **Use `type: "dataset"`** in metadata for dataset files
-4. **Use `type: "rules"`** in metadata for rule configuration files
+4. **Use `type: "rule-config"`** in metadata for rule configuration files
 5. **Organize files in separate directories** for clarity
 6. **One dataset can be used by multiple rule configurations**
 
@@ -3306,6 +3306,104 @@ As your APEX configuration grows, maintaining quality and consistency across all
 | `enrichment` | Data enrichment | `author` | Enrichment-specific content |
 | `rule-chain` | Sequential rules | `author` | Rule chain definitions |
 
+### Mandatory Metadata Attributes
+
+#### Universal Required Fields
+
+**Every YAML file in APEX must include these four core metadata fields:**
+
+```yaml
+metadata:
+  name: "Descriptive Name"           # Required: Human-readable name
+  version: "1.0.0"                   # Required: Semantic version number
+  description: "Clear description"   # Required: What this file does
+  type: "file-type"                  # Required: One of the supported types
+```
+
+**Why These Fields Are Mandatory:**
+
+1. **`name`**: Provides human-readable identification for documentation and tooling
+2. **`version`**: Enables version tracking and compatibility management
+3. **`description`**: Documents the purpose and functionality for maintainability
+4. **`type`**: Critical for automated processing, validation, and routing
+
+#### Type-Specific Required Fields
+
+Beyond the universal fields, each file type has additional mandatory metadata:
+
+**Scenario Files (`type: "scenario"`):**
+```yaml
+metadata:
+  name: "OTC Options Processing Scenario"
+  version: "1.0.0"
+  description: "Associates OTC Options with existing rule configurations"
+  type: "scenario"
+  business-domain: "Derivatives Trading"    # Required: Business context
+  owner: "derivatives.team@company.com"     # Required: Responsible team/person
+```
+
+**Bootstrap Files (`type: "bootstrap"`):**
+```yaml
+metadata:
+  name: "OTC Options Bootstrap Configuration"
+  version: "1.0.0"
+  description: "Complete OTC Options processing demonstration"
+  type: "bootstrap"
+  business-domain: "Derivatives Trading"    # Required: Business context
+  created-by: "bootstrap.admin@company.com" # Required: Creator identification
+```
+
+**Rule Configuration Files (`type: "rule-config"`):**
+```yaml
+metadata:
+  name: "Financial Validation Rules"
+  version: "1.0.0"
+  description: "Comprehensive validation rules for financial instruments"
+  type: "rule-config"
+  author: "rules.team@company.com"          # Required: Rule authorship
+```
+
+**Dataset Files (`type: "dataset"`):**
+```yaml
+metadata:
+  name: "Countries Lookup Dataset"
+  version: "1.0.0"
+  description: "Country codes with currency and timezone data"
+  type: "dataset"
+  source: "ISO 3166-1 alpha-2 country codes"  # Required: Data source
+```
+
+**Scenario Registry (`type: "scenario-registry"`):**
+```yaml
+metadata:
+  name: "Scenario Registry Configuration"
+  version: "1.0.0"
+  description: "Central registry of all available scenarios"
+  type: "scenario-registry"
+  created-by: "registry.admin@company.com"  # Required: Registry manager
+```
+
+#### Validation Enforcement
+
+**Automatic Validation:**
+- All YAML files are validated when loaded by the system
+- Missing required fields cause immediate validation failures
+- Invalid `type` values are rejected with clear error messages
+
+**Validation Error Examples:**
+```
+ERROR: Missing required metadata field: type
+ERROR: Missing required field for type 'scenario': business-domain
+ERROR: Invalid file type: invalid-type. Valid types: [scenario, scenario-registry, bootstrap, rule-config, dataset, enrichment, rule-chain]
+```
+
+**Best Practices for Metadata:**
+1. **Use semantic versioning** (e.g., 1.0.0, 1.1.0, 2.0.0)
+2. **Provide clear, descriptive names** that explain the file's purpose
+3. **Include comprehensive descriptions** for better documentation
+4. **Use consistent email formats** for ownership fields
+5. **Add optional fields** like `created`, `last-modified`, `tags` for better tracking
+
 ### Setting Up Validation
 
 #### 1. Basic File Validation
@@ -4097,9 +4195,10 @@ YAML rule configuration files contain business rules, enrichment logic, and data
 **Option 1: Using `type` property in metadata**
 ```yaml
 metadata:
-  type: "rules"  # or "configuration" - identifies as rule configuration
+  type: "rule-config"  # Standard type for rule configurations
   name: "Enterprise Business Rules"
   version: "2.0.0"
+  author: "rules.team@company.com"
   # ... other metadata
 
 rules:  # Contains business rules
@@ -4160,7 +4259,7 @@ The system provides utility methods to programmatically identify file types:
 ```java
 // Enhanced metadata class to support file type identification
 public class YamlFileMetadata {
-    private String type;           // "dataset", "rules", "configuration"
+    private String type;           // "dataset", "rule-config", "scenario", "bootstrap", etc.
     private String dataType;       // For datasets: "reference-data", "operational-data", etc.
     private String name;
     private String version;
@@ -4203,7 +4302,7 @@ public class YamlFileTypeDetector {
                     String type = typeNode.asText();
                     if ("dataset".equals(type)) {
                         return FileType.DATASET;
-                    } else if ("rules".equals(type) || "configuration".equals(type)) {
+                    } else if ("rule-config".equals(type)) {
                         return FileType.RULE_CONFIGURATION;
                     }
                 }
@@ -5018,7 +5117,7 @@ public class YamlFileMetadata {
 | Aspect | Dataset Files | Rule Configuration Files |
 |--------|---------------|-------------------------|
 | **Primary Purpose** | Store structured data records | Define business rules and enrichment logic |
-| **Metadata Type** | `type: "dataset"` | `type: "rules"` or `type: "configuration"` |
+| **Metadata Type** | `type: "dataset"` | `type: "rule-config"` |
 | **Key Sections** | `data:` (required) | `rules:`, `enrichments:`, `data-sources:` |
 | **Content** | Data records (currencies, instruments, etc.) | Business logic, conditions, validations |
 | **Usage** | Referenced by rule configurations for lookups | Executed by rules engine to process data |
@@ -5034,7 +5133,9 @@ public class YamlFileMetadata {
 YAML File
 ├── Has metadata.type?
 │   ├── "dataset" → Dataset File
-│   ├── "rules" or "configuration" → Rule Configuration File
+│   ├── "rule-config" → Rule Configuration File
+│   ├── "scenario" → Scenario File
+│   ├── "bootstrap" → Bootstrap Demo File
 │   └── No explicit type → Check structure
 │
 └── Check file structure:

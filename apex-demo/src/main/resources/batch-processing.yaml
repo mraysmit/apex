@@ -1,6 +1,17 @@
 # ============================================================================
 # APEX Rules Engine - Batch Processing Configuration
 # ============================================================================
+
+metadata:
+  name: "Batch Processing Rules Configuration"
+  version: "1.0.0"
+  description: "High-performance batch processing rules optimized for throughput and scalability"
+  type: "rule-config"
+  author: "batch.processing@company.com"
+  created: "2025-08-02"
+  business-domain: "Batch Processing"
+  performance-optimized: true
+
 #
 # This YAML configuration is specifically optimized for high-volume, high-throughput
 # batch processing scenarios where performance, memory efficiency, and scalability

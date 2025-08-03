@@ -66,6 +66,8 @@ metadata:
   name: "Financial Services Validation Rules"
   version: "2.0.0"
   description: "Comprehensive validation rules for OTC derivatives trading"
+  type: "rule-config"
+  author: "financial-services@rulesengine.dev"
   created-by: "financial-services@rulesengine.dev"
   created-date: "2025-07-27"
   domain: "Financial Services"

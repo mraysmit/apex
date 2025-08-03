@@ -63,6 +63,7 @@ metadata:
   name: "Custody Auto-Repair Rules"
   version: "1.0"
   description: "Standing Instruction auto-repair rules for custody settlement in Asian markets"
+  type: "rule-config"
   author: "Mark Andrew Ray-Smith Cityline Ltd"
   created: "2025-07-29"
   tags: ["custody", "settlement", "auto-repair", "asian-markets", "standing-instructions"]

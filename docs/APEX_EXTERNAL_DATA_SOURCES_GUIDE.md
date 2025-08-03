@@ -244,6 +244,36 @@ Store frequently accessed data in memory for ultra-fast retrieval.
 
 Configuration is where you tell APEX how to connect to your data sources. APEX uses YAML configuration files because they're human-readable and easy to maintain. Let's explore the key configuration concepts:
 
+### Mandatory Metadata Requirements
+
+**All external data source configuration files must include proper metadata:**
+
+```yaml
+metadata:
+  name: "Customer Database Configuration"
+  version: "1.0.0"
+  description: "PostgreSQL connection for customer data lookups"
+  type: "rule-config"                        # Required: File type identifier
+  author: "data.integration@company.com"     # Required: Configuration author
+  created: "2025-08-02"                     # Optional: Creation date
+  business-domain: "Customer Management"     # Optional: Business context
+  environment: "production"                  # Optional: Target environment
+```
+
+**Why Metadata Matters for Data Sources:**
+- **Validation**: Ensures configuration files are properly structured
+- **Documentation**: Provides clear identification and purpose
+- **Audit Trail**: Tracks who created and modified configurations
+- **Environment Management**: Helps identify configuration scope and purpose
+- **Automated Processing**: Enables scenario-based routing and validation
+
+**Required Fields:**
+- `name`: Human-readable configuration name
+- `version`: Semantic version for change tracking
+- `description`: Clear explanation of the data source purpose
+- `type`: Must be "rule-config" for data source configurations
+- `author`: Email or identifier of the configuration creator
+
 ### Environment Variables - Keeping Secrets Safe
 
 **Why use environment variables?**

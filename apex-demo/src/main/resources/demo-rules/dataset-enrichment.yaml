@@ -62,6 +62,8 @@ metadata:
   name: "Dataset Enrichment Demonstration"
   version: "1.0.0"
   description: "Comprehensive examples of YAML dataset enrichment capabilities"
+  type: "rule-config"
+  author: "dataset-demo@rulesengine.dev"
   created-by: "dataset-demo@rulesengine.dev"
   created-date: "2025-07-27"
   domain: "Data Enrichment"

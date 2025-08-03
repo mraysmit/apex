@@ -2049,6 +2049,87 @@ This ensures that every section of the operational YAML file is thoroughly expla
 
 APEX's scenario-based configuration system provides powerful capabilities for managing custody and safekeeping auto-repair configurations across different environments, markets, and business contexts. This section explains how to leverage scenarios for custody operations.
 
+## Metadata Requirements for Custody Operations
+
+### Mandatory Metadata for Custody Configurations
+
+All custody and safekeeping YAML files must include comprehensive metadata to support regulatory compliance, audit requirements, and operational oversight:
+
+**Universal Required Fields:**
+```yaml
+metadata:
+  name: "Descriptive Configuration Name"
+  version: "1.0.0"                          # Required: Semantic versioning
+  description: "Clear purpose description"   # Required: Functionality explanation
+  type: "file-type"                         # Required: One of supported types
+```
+
+**Custody-Specific Metadata Requirements:**
+
+**For Settlement Scenario Files:**
+```yaml
+metadata:
+  name: "Settlement Auto-Repair Scenario"
+  version: "1.0.0"
+  description: "Associates settlement instructions with custody auto-repair processing"
+  type: "scenario"
+  business-domain: "Post-Trade Settlement"           # Required: Business context
+  regulatory-scope: "Asian Markets (Japan, HK, SG)" # Required: Regulatory jurisdiction
+  owner: "settlements.asia@firm.com"                # Required: Business owner
+  compliance-reviewed: true                          # Required: Compliance approval
+  compliance-reviewer: "compliance.settlements@firm.com"  # Required: Who reviewed
+  compliance-date: "2025-08-02"                    # Required: Review date
+  risk-approved: true                               # Required: Risk approval
+  risk-reviewer: "risk.settlements@firm.com"       # Required: Risk approver
+  risk-date: "2025-08-02"                         # Required: Approval date
+```
+
+**For Custody Bootstrap Configurations:**
+```yaml
+metadata:
+  name: "Custody Auto-Repair Bootstrap Rules"
+  version: "1.0"
+  description: "Complete bootstrap demonstration of Standing Instruction auto-repair"
+  type: "bootstrap"
+  business-domain: "Custody and Safekeeping"        # Required: Business context
+  created-by: "bootstrap.admin@company.com"         # Required: Creator identification
+  regulatory-scope: "Asian Markets"                 # Required: Regulatory context
+  operational-impact: "High"                        # Required: Impact assessment
+  sla-requirements: "T+1 settlement"                # Required: SLA context
+```
+
+**For Standing Instruction Rule Files:**
+```yaml
+metadata:
+  name: "Standing Instruction Auto-Repair Rules"
+  version: "1.0"
+  description: "Intelligent repair rules for failed settlement instructions"
+  type: "rule-config"
+  author: "custody.rules@firm.com"                  # Required: Technical author
+  business-domain: "Custody and Safekeeping"        # Required: Business context
+  regulatory-scope: "Asian Markets"                 # Required: Regulatory context
+  operational-criticality: "Critical"               # Required: Criticality level
+  last-tested: "2025-08-01"                        # Required: Testing validation
+```
+
+### Regulatory and Compliance Metadata
+
+**Additional Fields for Regulatory Compliance:**
+- `regulatory-scope`: Specific markets and jurisdictions covered
+- `compliance-reviewed`: Boolean indicating compliance team approval
+- `compliance-reviewer`: Email of compliance reviewer
+- `compliance-date`: Date of compliance review
+- `risk-approved`: Boolean indicating risk team approval
+- `risk-reviewer`: Email of risk approver
+- `operational-impact`: Impact level (Low, Medium, High, Critical)
+- `sla-requirements`: Service level agreement requirements
+
+**Audit Trail Support:**
+- All metadata changes are tracked for regulatory examination
+- Version history provides complete change audit trail
+- Compliance metadata enables automated regulatory reporting
+- Risk approval workflow ensures proper oversight
+
 ## Custody Auto-Repair Scenario Configuration
 
 ### Scenario Registry Entry

@@ -190,6 +190,79 @@ public class DerivativesProcessingService {
 }
 ```
 
+### Financial Services Metadata Requirements
+
+#### Mandatory Metadata for Financial Services
+
+All YAML files in financial services environments must include comprehensive metadata to support regulatory compliance, audit trails, and risk management:
+
+**Universal Required Fields:**
+```yaml
+metadata:
+  name: "Descriptive Name"                    # Required: Clear identification
+  version: "1.0.0"                           # Required: Semantic versioning
+  description: "Clear purpose description"   # Required: Functionality explanation
+  type: "file-type"                          # Required: One of supported types
+```
+
+**Financial Services Specific Requirements:**
+
+**For Scenario Files:**
+```yaml
+metadata:
+  name: "OTC Options Processing Scenario"
+  version: "1.0.0"
+  description: "Complete processing pipeline for OTC Options"
+  type: "scenario"
+  business-domain: "Derivatives Trading"      # Required: Business context
+  regulatory-scope: "EMIR, Dodd-Frank"       # Required: Applicable regulations
+  owner: "derivatives.trading@firm.com"      # Required: Business owner
+  compliance-reviewed: true                   # Required: Compliance approval
+  compliance-reviewer: "compliance@firm.com" # Required: Who reviewed
+  compliance-date: "2025-08-02"             # Required: When reviewed
+  risk-approved: true                        # Required: Risk approval
+  risk-reviewer: "risk@firm.com"             # Required: Risk approver
+```
+
+**For Rule Configuration Files:**
+```yaml
+metadata:
+  name: "EMIR Reporting Validation Rules"
+  version: "1.0.0"
+  description: "Validation rules for EMIR regulatory reporting"
+  type: "rule-config"
+  author: "regulatory.team@firm.com"         # Required: Technical author
+  business-domain: "Regulatory Reporting"    # Required: Business context
+  regulatory-scope: "European Union (EMIR)" # Required: Regulatory context
+  compliance-reviewed: true                  # Required: Compliance sign-off
+  last-compliance-review: "2025-08-01"      # Required: Review date
+```
+
+**For Dataset Files:**
+```yaml
+metadata:
+  name: "Counterparty Reference Data"
+  version: "1.0.0"
+  description: "Master counterparty data for derivatives trading"
+  type: "dataset"
+  source: "Legal Entity Identifier (LEI) Registry"  # Required: Data source
+  data-classification: "Confidential"               # Required: Data sensitivity
+  retention-period: "7 years"                       # Required: Regulatory retention
+  last-updated: "2025-08-02"                       # Required: Data freshness
+```
+
+#### Validation and Compliance
+
+**Automated Compliance Checks:**
+- All financial services YAML files are validated for required compliance metadata
+- Missing regulatory scope or compliance approval fields trigger validation errors
+- Automated alerts for files approaching compliance review dates
+
+**Regulatory Audit Support:**
+- Complete metadata provides audit trail for regulatory examinations
+- Version history tracks all changes with approval workflows
+- Compliance metadata enables automated regulatory reporting
+
 ### Financial Services Best Practices
 
 #### 1. Regulatory Compliance

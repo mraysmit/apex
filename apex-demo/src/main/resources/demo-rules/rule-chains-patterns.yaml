@@ -65,6 +65,7 @@ metadata:
   name: "Rule Chains Patterns Demo Configuration"
   version: "1.0.0"
   description: "Comprehensive demonstration of all 6 nested rules and rule chaining patterns"
+  type: "rule-config"
   author: "Rules Engine Team"
   created-date: "2025-07-28"
 

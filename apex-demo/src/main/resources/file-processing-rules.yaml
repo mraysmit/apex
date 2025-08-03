@@ -65,6 +65,7 @@ metadata:
   name: "File Processing Rules"
   version: "1.0.0"
   description: "Validation and enrichment rules for JSON/XML customer data"
+  type: "rule-config"
   author: "APEX Demo Team"
 
 # ============================================================================

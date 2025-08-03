@@ -231,15 +231,28 @@ if (result.isValid()) {
 
 ### 3. YAML Configuration (Most Flexible Approach)
 
-For complex scenarios or when non-developers need to modify rules, YAML configuration is ideal. This approach separates your business logic from your code.
+For complex scenarios or when non-developers need to modify rules, YAML configuration is ideal. This approach separates your business logic from your code and provides the most flexibility.
 
-First, create a `rules.yaml` file that defines your business rules:
+YAML configuration introduces two powerful concepts that work together:
+- **Rules**: Define your business logic and validation requirements
+- **Enrichments**: Automatically add related data during rule evaluation
+
+Let's explore each concept separately, then see how they work together.
+
+#### 3.1 Rules: Defining Your Business Logic
+
+Rules are the heart of APEX - they define the questions you want to ask about your data. Each rule is like a business requirement written in a way the computer can understand.
+
+**Start with a simple rules-only configuration:**
 
 ```yaml
-# This section provides information about your rule set
+# Required metadata for all YAML files
 metadata:
   name: "Customer Validation Rules"
   version: "1.0.0"
+  description: "Basic validation rules for customer data"
+  type: "rule-config"
+  author: "validation.team@company.com"
 
 # Define your business rules here
 rules:
@@ -247,15 +260,84 @@ rules:
     name: "Age Validation"                             # Human-readable name
     condition: "#data.age >= 18"                       # The actual rule logic
     message: "Customer must be at least 18 years old"  # Error message if rule fails
+    severity: "ERROR"                                  # How serious is a failure?
 
   - id: "email-check"
     name: "Email Validation"
     condition: "#data.email != null && #data.email.contains('@')"
     message: "Valid email address is required"
+    severity: "ERROR"
+
+  - id: "name-check"
+    name: "Name Validation"
+    condition: "#data.name != null && #data.name.length() > 0"
+    message: "Customer name is required"
+    severity: "ERROR"
+```
+
+**Use this rules configuration in your Java code:**
+
+```java
+// Load the YAML configuration file
+RulesEngineConfiguration config = YamlConfigurationLoader.load("customer-rules.yaml");
+RulesEngine engine = new RulesEngine(config);
+
+// Prepare your data for evaluation
+Map<String, Object> data = Map.of(
+    "age", 25,
+    "email", "john@example.com",
+    "name", "John Doe"
+);
+
+// Evaluate all rules
+RuleResult result = engine.evaluate(data);
+
+// Check what happened
+if (result.isSuccess()) {
+    System.out.println("All validation rules passed!");
+} else {
+    System.out.println("Validation failed:");
+    result.getFailureMessages().forEach(System.out::println);
+}
+```
+
+**Understanding Rule Conditions:**
+
+Rules use Spring Expression Language (SpEL) for conditions:
+- `#data.age >= 18` - Access the 'age' field and check if it's 18 or greater
+- `#data.email != null` - Check if the 'email' field exists and is not null
+- `#data.email.contains('@')` - Check if the email contains an @ symbol
+- `#data.name.length() > 0` - Check if the name has at least one character
+
+**Common Rule Patterns:**
+- **Validation**: `#age >= 18` (must be 18 or older)
+- **Range checking**: `#score >= 0 && #score <= 100` (score between 0-100)
+- **Required fields**: `#email != null` (email must exist)
+- **Pattern matching**: `#email.contains('@')` (email must contain @)
+- **Complex logic**: `#amount > 1000 ? #approvalRequired == true : true` (amounts over 1000 need approval)
+
+#### 3.2 Enrichments: Adding Smart Data
+
+Enrichments automatically add related information to your data during rule evaluation. Think of them as smart lookups that happen behind the scenes before your rules are evaluated.
+
+**Why use enrichments?**
+Instead of just having a status code like "A", enrichments can automatically add the full description "Active Customer" to your data, which your rules can then use.
+
+**Create an enrichment-focused configuration:**
+
+```yaml
+# Required metadata for all YAML files
+metadata:
+  name: "Customer Data Enrichment"
+  version: "1.0.0"
+  description: "Enrichment rules to add reference data to customer records"
+  type: "rule-config"
+  author: "data.enrichment@company.com"
 
 # Enrichments add extra data to your objects during rule evaluation
 enrichments:
   - id: "status-enrichment"                    # Unique identifier for this enrichment
+    name: "Customer Status Enrichment"         # Human-readable name
     type: "lookup-enrichment"                  # Type of enrichment (lookup from a dataset)
     condition: "['statusCode'] != null"        # Only enrich if statusCode exists
     lookup-config:
@@ -266,129 +348,218 @@ enrichments:
           - code: "A"
             name: "Active"
             description: "Active customer"
+            priority: "High"
           - code: "I"
             name: "Inactive"
             description: "Inactive customer"
+            priority: "Low"
+          - code: "S"
+            name: "Suspended"
+            description: "Suspended customer"
+            priority: "Medium"
     field-mappings:                            # How to add the looked-up data to your object
       - source-field: "name"                   # Take the "name" from lookup data
         target-field: "statusName"             # Add it as "statusName" to your object
       - source-field: "description"
         target-field: "statusDescription"
+      - source-field: "priority"
+        target-field: "customerPriority"
 ```
 
-Now load and use this configuration in your Java code:
+**Use this enrichment configuration:**
 
 ```java
-// Load the YAML configuration file
-RulesEngineConfiguration config = YamlConfigurationLoader.load("rules.yaml");
+// Load the enrichment configuration
+RulesEngineConfiguration config = YamlConfigurationLoader.load("customer-enrichment.yaml");
 RulesEngine engine = new RulesEngine(config);
 
-// Prepare your data for evaluation
+// Prepare your data (notice we only have the status code)
 Map<String, Object> data = Map.of(
-    "age", 25,                    // Customer's age
-    "email", "john@example.com",  // Customer's email
-    "statusCode", "A"             // Customer's status code (will be enriched)
+    "name", "John Doe",
+    "statusCode", "A"  // Just the code - enrichment will add more data
 );
 
-// Evaluate all rules and enrichments
+// Evaluate (this will run enrichments)
 RuleResult result = engine.evaluate(data);
 
-// Check what happened
+// Access the enriched data
+Map<String, Object> enrichedData = result.getEnrichedData();
+System.out.println("Status Name: " + enrichedData.get("statusName"));         // "Active"
+System.out.println("Description: " + enrichedData.get("statusDescription"));  // "Active customer"
+System.out.println("Priority: " + enrichedData.get("customerPriority"));      // "High"
+```
+
+**What happens during enrichment:**
+1. Your data has `statusCode: "A"`
+2. APEX looks up "A" in the inline dataset
+3. It finds the matching record with name "Active", description "Active customer", priority "High"
+4. It adds `statusName: "Active"`, `statusDescription: "Active customer"`, and `customerPriority: "High"` to your data
+5. Your rules can now use these enriched fields
+
+#### 3.3 Combining Rules and Enrichments
+
+The real power of YAML configuration comes from combining rules and enrichments. Enrichments run first to add data, then rules evaluate using both the original and enriched data.
+
+**Complete configuration with both rules and enrichments:**
+
+```yaml
+# Required metadata for all YAML files
+metadata:
+  name: "Customer Validation and Enrichment"
+  version: "1.0.0"
+  description: "Complete customer processing with enrichment and validation"
+  type: "rule-config"
+  author: "customer.processing@company.com"
+  created: "2025-08-02"
+
+# Enrichments run FIRST to add reference data
+enrichments:
+  - id: "status-enrichment"
+    name: "Customer Status Enrichment"
+    type: "lookup-enrichment"
+    condition: "['statusCode'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        data:
+          - code: "A"
+            name: "Active"
+            description: "Active customer"
+            allowTransactions: true
+            creditLimit: 10000
+          - code: "I"
+            name: "Inactive"
+            description: "Inactive customer"
+            allowTransactions: false
+            creditLimit: 0
+          - code: "S"
+            name: "Suspended"
+            description: "Suspended customer"
+            allowTransactions: false
+            creditLimit: 0
+    field-mappings:
+      - source-field: "name"
+        target-field: "statusName"
+      - source-field: "allowTransactions"
+        target-field: "canTransact"
+      - source-field: "creditLimit"
+        target-field: "maxCredit"
+
+# Rules run AFTER enrichments and can use the enriched data
+rules:
+  - id: "age-check"
+    name: "Age Validation"
+    condition: "#data.age >= 18"
+    message: "Customer must be at least 18 years old"
+    severity: "ERROR"
+
+  - id: "transaction-permission-check"
+    name: "Transaction Permission Check"
+    condition: "#data.canTransact == true"  # Uses enriched field!
+    message: "Customer status does not allow transactions"
+    severity: "ERROR"
+
+  - id: "credit-limit-check"
+    name: "Credit Limit Validation"
+    condition: "#data.requestedAmount <= #data.maxCredit"  # Uses enriched field!
+    message: "Requested amount exceeds customer credit limit"
+    severity: "ERROR"
+
+  - id: "email-check"
+    name: "Email Validation"
+    condition: "#data.email != null && #data.email.contains('@')"
+    message: "Valid email address is required"
+    severity: "WARNING"
+```
+
+**Using the combined configuration:**
+
+```java
+// Load the complete configuration
+RulesEngineConfiguration config = YamlConfigurationLoader.load("customer-complete.yaml");
+RulesEngine engine = new RulesEngine(config);
+
+// Prepare your data
+Map<String, Object> data = Map.of(
+    "age", 25,
+    "email", "john@example.com",
+    "statusCode", "A",           // Will be enriched to add transaction permissions
+    "requestedAmount", 5000      // Will be validated against enriched credit limit
+);
+
+// Evaluate (enrichments run first, then rules)
+RuleResult result = engine.evaluate(data);
+
+// Check results
 if (result.isSuccess()) {
     System.out.println("All rules passed!");
 
     // Access enriched data
-    String statusName = (String) result.getEnrichedData().get("statusName");
-    System.out.println("Customer status: " + statusName); // Prints "Active"
+    Map<String, Object> enrichedData = result.getEnrichedData();
+    System.out.println("Customer Status: " + enrichedData.get("statusName"));
+    System.out.println("Can Transact: " + enrichedData.get("canTransact"));
+    System.out.println("Credit Limit: " + enrichedData.get("maxCredit"));
 } else {
-    System.out.println("Some rules failed: " + result.getFailureMessages());
+    System.out.println("Some rules failed:");
+    result.getFailureMessages().forEach(System.out::println);
 }
 ```
 
-**What's happening here:**
-- The YAML file defines your business logic separately from your code
-- `YamlConfigurationLoader.load()` reads and parses the YAML file
-- The rules engine evaluates both rules and enrichments automatically
-- Enrichments add extra information to your data (like looking up "Active" from status code "A")
-- You get back a comprehensive result with both validation outcomes and enriched data
+**Execution Flow:**
+1. **Enrichment Phase**: APEX looks up status code "A" and adds:
+   - `statusName: "Active"`
+   - `canTransact: true`
+   - `maxCredit: 10000`
+
+2. **Rules Phase**: APEX evaluates rules using both original and enriched data:
+   - Age check: `25 >= 18` ✓ Pass
+   - Transaction permission: `true == true` ✓ Pass (uses enriched `canTransact`)
+   - Credit limit: `5000 <= 10000` ✓ Pass (uses enriched `maxCredit`)
+   - Email check: `john@example.com` contains '@' ✓ Pass
+
+**Key Benefits of This Approach:**
+- **Separation of Concerns**: Enrichments handle data lookup, rules handle business logic
+- **Reusability**: The same enrichments can be used by multiple rule sets
+- **Maintainability**: Business users can modify rules without touching enrichment logic
+- **Performance**: Enrichments run once, rules can use the enriched data multiple times
 
 ### Which Approach Should You Use?
 
 - **One-liner**: Perfect for simple, one-off rule checks
 - **Template-based**: Great for common validation scenarios with multiple related rules
 - **YAML configuration**: Best for complex business logic, when rules change frequently, or when business users need to modify rules
+- **YAML with external data sources**: Ideal for enterprise scenarios requiring real-time data from databases, APIs, or large datasets
+
+**Data Integration Considerations:**
+- **Small, static data**: Use inline datasets or external YAML files
+- **Large or dynamic data**: Use [external data sources](#3-external-data-sources) (databases, REST APIs, file systems)
+- **Enterprise integration**: Connect to existing systems using the [APEX External Data Sources Guide](APEX_EXTERNAL_DATA_SOURCES_GUIDE.md)
 
 You can start with the one-liner approach and gradually move to more sophisticated approaches as your needs grow!
 
 ## Core Concepts
 
-Understanding these three core concepts will help you make the most of APEX. Think of them as the building blocks for creating intelligent business logic.
+Now that you've seen the three approaches to using APEX, let's dive deeper into the core concepts that make YAML configuration so powerful. We've already covered Rules and Enrichments in detail in the [YAML Configuration section](#3-yaml-configuration-most-flexible-approach), so here we'll focus on Datasets and provide a quick summary.
 
-### Rules: Your Business Logic
+### Quick Summary: Rules and Enrichments
 
-Rules are the heart of APEX - they define the questions you want to ask about your data. Each rule is like a business requirement written in a way the computer can understand.
+**Rules** (detailed in [section 3.1](#31-rules-defining-your-business-logic)):
+- Define your business logic using Spring Expression Language (SpEL)
+- Include conditions, messages, and severity levels
+- Run after enrichments and can use enriched data
+- Common patterns: validation, range checking, required fields
 
-**Anatomy of a Rule:**
+**Enrichments** (detailed in [section 3.2](#32-enrichments-adding-smart-data)):
+- Automatically add related data during rule evaluation
+- Run before rules to provide additional context
+- Use lookup datasets to find related information
+- Map lookup results to new fields in your data
 
-```yaml
-rules:
-  - id: "trade-amount-validation"                              # Unique identifier for this rule
-    name: "Trade Amount Validation"                            # Human-readable name
-    condition: "#amount > 0 && #amount <= 1000000"            # The actual business logic
-    message: "Trade amount must be between 0 and 1,000,000"   # What to show if the rule fails
-    severity: "ERROR"                                          # How serious is a failure?
-    tags: ["financial", "validation"]                         # Categories for organization
-```
-
-**Breaking down the condition:**
-- `#amount > 0` means "the amount must be greater than zero"
-- `&&` means "AND" (both conditions must be true)
-- `#amount <= 1000000` means "the amount must be less than or equal to 1,000,000"
-- Together: "The amount must be positive and not exceed 1 million"
-
-**Common rule patterns:**
-- Validation: `#age >= 18` (must be 18 or older)
-- Range checking: `#score >= 0 && #score <= 100` (score between 0-100)
-- Required fields: `#email != null` (email must exist)
-- Pattern matching: `#email.contains('@')` (email must contain @)
-
-### Enrichments: Adding Smart Data
-
-Enrichments automatically add related information to your data during rule evaluation. Think of them as smart lookups that happen behind the scenes.
-
-**Why use enrichments?**
-Instead of just having a currency code like "USD", enrichments can automatically add the full name "US Dollar" and region "North America" to your data.
-
-```yaml
-enrichments:
-  - id: "currency-enrichment"                    # Unique identifier
-    type: "lookup-enrichment"                    # Type of enrichment (lookup from data)
-    condition: "['currency'] != null"            # Only enrich if currency code exists
-    lookup-config:
-      lookup-dataset:                            # Where to find the lookup data
-        type: "inline"                           # Data is defined right here
-        key-field: "code"                        # Field to match against (currency code)
-        cache-enabled: true                      # Cache for better performance
-        data:                                    # The actual lookup data
-          - code: "USD"
-            name: "US Dollar"
-            region: "North America"
-          - code: "EUR"
-            name: "Euro"
-            region: "Europe"
-    field-mappings:                              # How to add the data to your object
-      - source-field: "name"                     # Take "name" from lookup data
-        target-field: "currencyName"             # Add as "currencyName" to your object
-      - source-field: "region"
-        target-field: "currencyRegion"
-```
-
-**What happens during enrichment:**
-1. Your data has `currency: "USD"`
-2. APEX looks up "USD" in the dataset
-3. It finds the matching record with name "US Dollar" and region "North America"
-4. It adds `currencyName: "US Dollar"` and `currencyRegion: "North America"` to your data
-5. Your rules can now use these enriched fields
+**Combined Power** (detailed in [section 3.3](#33-combining-rules-and-enrichments)):
+- Enrichments run first to add reference data
+- Rules then evaluate using both original and enriched data
+- Enables sophisticated business logic with clean separation of concerns
 
 ### Datasets: Your Reference Data
 
@@ -432,6 +603,16 @@ lookup-dataset:
 
 Then create `datasets/currencies.yaml`:
 ```yaml
+# Required metadata for all YAML files
+metadata:
+  name: "Currency Reference Data"
+  version: "1.0.0"
+  description: "Currency codes with names, symbols, and regional information"
+  type: "dataset"
+  source: "ISO 4217 currency codes"
+  last-updated: "2025-08-02"
+
+# The actual dataset
 data:
   - code: "USD"
     name: "US Dollar"
@@ -445,6 +626,10 @@ data:
     name: "British Pound"
     symbol: "£"
     region: "Europe"
+  - code: "JPY"
+    name: "Japanese Yen"
+    symbol: "¥"
+    region: "Asia"
 ```
 
 **When to use external dataset files:**
@@ -475,9 +660,10 @@ metadata:
   name: "Configuration Name"              # What this configuration does
   version: "1.0.0"                       # Version for tracking changes
   description: "Configuration description" # Detailed explanation
+  type: "rule-config"                     # Required: File type (rule-config, scenario, dataset, etc.)
   author: "Team Name"                     # Who created/maintains this
-  created: "2024-01-15"                  # When it was created
-  last-modified: "2024-07-26"           # Last update date
+  created: "2025-08-02"                  # When it was created
+  last-modified: "2025-08-02"           # Last update date
   tags: ["tag1", "tag2"]                # Categories for organization
 
 # Rules section: Your business logic
@@ -614,13 +800,16 @@ Dataset enrichment works best for reference data - information that helps explai
 - **Small to medium datasets**: Less than 1000 records for optimal performance
 
 **Not suitable for dataset enrichment:**
-- **Large datasets**: More than 1000 records (use external data sources instead)
+- **Large datasets**: More than 1000 records (use [external data sources](#3-external-data-sources) instead)
 - **Frequently changing data**: Data that updates multiple times per day
 - **Data requiring complex business logic**: Calculations or complex transformations
 - **Real-time data from external systems**: Live data that needs fresh API calls
 
 **Why these limitations?**
 Dataset enrichment loads all data into memory for fast lookups. This works great for small, stable reference data but isn't efficient for large or frequently changing datasets.
+
+**💡 Solution for Large or Dynamic Data:**
+For scenarios that exceed these limitations, APEX provides powerful [external data sources](#3-external-data-sources) that can connect to databases, REST APIs, file systems, and caches. See the complete [APEX External Data Sources Guide](APEX_EXTERNAL_DATA_SOURCES_GUIDE.md) for enterprise-scale data integration.
 
 ### Dataset Types
 
@@ -659,6 +848,160 @@ lookup-dataset:
   file-path: "datasets/statuses.yaml"
   key-field: "code"
 ```
+
+#### 3. External Data Sources
+
+For dynamic, large-scale, or real-time data, APEX provides powerful external data source integration. Instead of storing data in YAML files, you can connect directly to databases, REST APIs, file systems, and caches.
+
+**Why use external data sources?**
+- **Live data**: Always get the most current information
+- **Large datasets**: Handle millions of records efficiently
+- **Real-time updates**: Data changes are immediately available
+- **Enterprise integration**: Connect to existing systems and databases
+- **Performance**: Optimized queries and caching for high-volume operations
+
+**Database Integration Example:**
+
+```yaml
+# Configuration with database lookup
+metadata:
+  name: "Customer Database Enrichment"
+  version: "1.0.0"
+  description: "Customer data enrichment using PostgreSQL database"
+  type: "rule-config"
+  author: "data.integration@company.com"
+
+enrichments:
+  - id: "customer-enrichment"
+    name: "Customer Database Lookup"
+    type: "lookup-enrichment"
+    condition: "['customerId'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "database"                    # External database source
+        connection-name: "customer-db"     # Named connection
+        query: "SELECT customer_name, credit_rating, account_status FROM customers WHERE customer_id = ?"
+        key-field: "customerId"            # Field to use in WHERE clause
+        cache-enabled: true                # Cache results for performance
+        cache-ttl-seconds: 300            # Cache for 5 minutes
+    field-mappings:
+      - source-field: "customer_name"
+        target-field: "customerName"
+      - source-field: "credit_rating"
+        target-field: "creditRating"
+      - source-field: "account_status"
+        target-field: "accountStatus"
+```
+
+**REST API Integration Example:**
+
+```yaml
+# Configuration with REST API lookup
+enrichments:
+  - id: "market-data-enrichment"
+    name: "Real-time Market Data"
+    type: "lookup-enrichment"
+    condition: "['symbol'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "rest-api"                   # External REST API source
+        base-url: "https://api.marketdata.com"
+        endpoint: "/v1/quotes/{symbol}"    # {symbol} will be replaced
+        method: "GET"
+        headers:
+          Authorization: "Bearer ${API_TOKEN}"  # Environment variable
+          Content-Type: "application/json"
+        timeout-seconds: 5
+        cache-enabled: true
+        cache-ttl-seconds: 60             # Cache for 1 minute
+    field-mappings:
+      - source-field: "price"
+        target-field: "currentPrice"
+      - source-field: "volume"
+        target-field: "tradingVolume"
+```
+
+**File System Integration Example:**
+
+```yaml
+# Configuration with file system lookup
+enrichments:
+  - id: "reference-data-enrichment"
+    name: "File System Reference Data"
+    type: "lookup-enrichment"
+    condition: "['productCode'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "file-system"               # External file system source
+        file-path: "/data/products/products.csv"
+        format: "csv"                     # CSV, JSON, XML supported
+        key-field: "code"
+        delimiter: ","
+        has-header: true
+        cache-enabled: true
+        watch-for-changes: true           # Reload when file changes
+    field-mappings:
+      - source-field: "name"
+        target-field: "productName"
+      - source-field: "category"
+        target-field: "productCategory"
+```
+
+**Using External Data Sources in Java:**
+
+```java
+// Configure external data sources
+ExternalDataSourceConfiguration dbConfig = ExternalDataSourceConfiguration.builder()
+    .connectionName("customer-db")
+    .jdbcUrl("jdbc:postgresql://localhost:5432/customers")
+    .username("${DB_USERNAME}")  // From environment variables
+    .password("${DB_PASSWORD}")
+    .build();
+
+// Load configuration with external data sources
+RulesEngineConfiguration config = YamlConfigurationLoader.load("customer-enrichment.yaml");
+RulesEngine engine = new RulesEngine(config);
+
+// Register external data sources
+engine.registerDataSource("customer-db", dbConfig);
+
+// Use normally - external data sources work transparently
+Map<String, Object> data = Map.of("customerId", "CUST123");
+RuleResult result = engine.evaluate(data);
+
+// Access enriched data from database
+String customerName = (String) result.getEnrichedData().get("customerName");
+String creditRating = (String) result.getEnrichedData().get("creditRating");
+```
+
+**Key Benefits of External Data Sources:**
+- **Always Current**: Data is fetched in real-time or from cache
+- **Scalable**: Handle large datasets without memory constraints
+- **Enterprise Ready**: Connect to existing databases and APIs
+- **Performance Optimized**: Built-in caching and connection pooling
+- **Secure**: Support for authentication and encrypted connections
+
+**When to Use Each Type:**
+
+| Dataset Type | Best For | Example Use Cases |
+|--------------|----------|-------------------|
+| **Inline** | Small, static data | Status codes, country codes, simple lookups |
+| **External YAML** | Medium, shared data | Product catalogs, reference data, configuration |
+| **Database** | Large, dynamic data | Customer records, transaction history, real-time data |
+| **REST API** | External services | Market data, third-party services, microservices |
+| **File System** | Batch data, reports | Daily files, CSV imports, data feeds |
+
+**📖 For Complete External Data Sources Documentation:**
+
+This is just an introduction to external data sources. For comprehensive coverage including:
+- **Database connection configuration and pooling**
+- **REST API authentication and error handling**
+- **File system monitoring and format support**
+- **Caching strategies and performance optimization**
+- **Security and encryption**
+- **Enterprise patterns and best practices**
+
+See the **[APEX External Data Sources Guide](APEX_EXTERNAL_DATA_SOURCES_GUIDE.md)** - the authoritative resource for external data integration.
 
 ### Performance Optimization
 
@@ -765,6 +1108,30 @@ APEX includes comprehensive YAML validation to ensure configuration integrity:
 - **Syntax Validation**: Ensures proper YAML syntax and structure
 - **Comprehensive Reporting**: Detailed validation reports with errors, warnings, and recommendations
 
+**Mandatory Metadata Attributes:**
+
+All YAML files in APEX must include a `metadata` section with the following required fields. For complete standards and examples, see the [Configuration Standards and Validation](#configuration-standards-and-validation) section.
+
+```yaml
+metadata:
+  name: "Descriptive Name"           # Required: Human-readable name
+  version: "1.0.0"                   # Required: Semantic version number
+  description: "Clear description"   # Required: What this file does
+  type: "file-type"                  # Required: One of the supported types below
+```
+
+**Additional Required Fields by Type:**
+
+| File Type | Additional Required Fields | Purpose |
+|-----------|---------------------------|---------|
+| `scenario` | `business-domain`, `owner` | Business context and ownership |
+| `scenario-registry` | `created-by` | Registry management |
+| `bootstrap` | `business-domain`, `created-by` | Demo context and creator |
+| `rule-config` | `author` | Rule authorship |
+| `dataset` | `source` | Data source information |
+| `enrichment` | `author` | Enrichment logic authorship |
+| `rule-chain` | `author` | Rule chain authorship |
+
 **Supported File Types:**
 - `scenario`: Scenario configuration files
 - `scenario-registry`: Central scenario registry
@@ -773,6 +1140,32 @@ APEX includes comprehensive YAML validation to ensure configuration integrity:
 - `dataset`: Data reference files
 - `enrichment`: Data enrichment configurations
 - `rule-chain`: Sequential rule execution files
+
+**Example Complete Metadata:**
+
+```yaml
+# Example for a scenario file
+metadata:
+  name: "OTC Options Processing Scenario"
+  version: "1.0.0"
+  description: "Associates OTC Options with existing rule configurations"
+  type: "scenario"
+  business-domain: "Derivatives Trading"
+  owner: "derivatives.team@company.com"
+  created: "2025-08-02"
+  last-modified: "2025-08-02"
+  tags: ["derivatives", "options", "trading"]
+
+# Example for a rule-config file
+metadata:
+  name: "Financial Validation Rules"
+  version: "1.0.0"
+  description: "Comprehensive validation rules for financial instruments"
+  type: "rule-config"
+  author: "rules.team@company.com"
+  created: "2025-08-02"
+  business-domain: "Financial Services"
+```
 
 **Example Validation Usage:**
 ```java
@@ -809,11 +1202,13 @@ APEX includes several pre-built scenarios for common financial services use case
 4. **Document Ownership**: Include clear ownership and contact information
 5. **Version Control**: Use semantic versioning for scenario configurations
 
+For comprehensive configuration standards, naming conventions, and implementation checklists, see the [Configuration Standards and Validation](#configuration-standards-and-validation) section.
+
 ## External Data Source Integration
 
 ### Overview
 
-The SpEL Rules Engine provides comprehensive external data source integration, enabling seamless access to databases, REST APIs, file systems, and caches through a unified interface. This enterprise-grade integration supports advanced features like connection pooling, health monitoring, caching, and automatic failover.
+The APEX Rules Engine provides comprehensive external data source integration, enabling seamless access to databases, REST APIs, file systems, and caches through a unified interface. This enterprise-grade integration supports advanced features like connection pooling, health monitoring, caching, and automatic failover.
 
 ### Supported Data Source Types
 
@@ -1186,6 +1581,9 @@ config.registerRuleGroup(orGroup);
 metadata:
   name: "Customer Processing Rules"
   version: "1.0.0"
+  description: "Customer validation and processing rules"
+  type: "rule-config"
+  author: "customer.team@company.com"
 
 rules:
   - id: "age-validation"
@@ -2466,20 +2864,317 @@ rule-chains:
 
 For complete implementation details, examples, and architecture information, see the **[Technical Reference Guide](TECHNICAL_REFERENCE.md)** section on "Nested Rules and Rule Chaining Patterns".
 
+## Configuration Standards and Validation
+
+### Overview
+
+This section provides comprehensive standards for YAML configuration management in APEX, including mandatory metadata requirements, file type specifications, scenario management, and validation procedures. These standards ensure consistency, maintainability, and regulatory compliance across all APEX configurations.
+
+### File Type System
+
+APEX uses a standardized file type system to categorize and validate different kinds of YAML configurations:
+
+| Type | Purpose | Additional Required Fields | Content Validation |
+|------|---------|---------------------------|-------------------|
+| `scenario` | Data type routing | `business-domain`, `owner` | `scenario` section with `data-types` and `rule-configurations` |
+| `scenario-registry` | Central registry | `created-by` | `scenario-registry` list with valid entries |
+| `bootstrap` | Complete demos | `business-domain`, `created-by` | `rule-chains` or `categories` sections |
+| `rule-config` | Reusable rules | `author` | `rules`, `enrichments`, or `rule-chains` sections |
+| `dataset` | Reference data | `source` | `data`, `countries`, or `dataset` sections |
+| `enrichment` | Data enrichment | `author` | Enrichment-specific content |
+| `rule-chain` | Sequential rules | `author` | Rule chain definitions |
+
+### Complete Metadata Examples by Type
+
+#### Bootstrap Files (`type: "bootstrap"`)
+```yaml
+metadata:
+  name: "OTC Options Bootstrap Configuration"
+  version: "1.0.0"
+  description: "Complete OTC Options processing demonstration"
+  type: "bootstrap"
+  business-domain: "Derivatives Trading"    # Required: Business context
+  created-by: "bootstrap.admin@company.com" # Required: Creator identification
+  created: "2025-08-02"                    # Optional: Creation date
+  tags: ["derivatives", "options", "demo"] # Optional: Classification tags
+```
+
+#### Rule Configuration Files (`type: "rule-config"`)
+```yaml
+metadata:
+  name: "Financial Validation Rules"
+  version: "1.0.0"
+  description: "Comprehensive validation rules for financial instruments"
+  type: "rule-config"
+  author: "rules.team@company.com"          # Required: Rule authorship
+  business-domain: "Financial Services"     # Optional: Business context
+  created: "2025-08-02"                    # Optional: Creation date
+  last-modified: "2025-08-02"             # Optional: Last modification
+```
+
+#### Dataset Files (`type: "dataset"`)
+```yaml
+metadata:
+  name: "Countries Lookup Dataset"
+  version: "1.0.0"
+  description: "Country codes with currency and timezone data"
+  type: "dataset"
+  source: "ISO 3166-1 alpha-2 country codes"  # Required: Data source
+  last-updated: "2025-08-02"                  # Optional: Data freshness
+  data-classification: "Public"               # Optional: Data sensitivity
+```
+
+#### Scenario Registry (`type: "scenario-registry"`)
+```yaml
+metadata:
+  name: "Scenario Registry Configuration"
+  version: "1.0.0"
+  description: "Central registry of all available scenarios"
+  type: "scenario-registry"
+  created-by: "registry.admin@company.com"  # Required: Registry manager
+  created: "2025-08-02"                     # Optional: Creation date
+  last-updated: "2025-08-02"               # Optional: Last update
+```
+
+### Financial Services Compliance Standards
+
+For financial services environments, additional metadata fields support regulatory compliance and audit requirements:
+
+```yaml
+metadata:
+  name: "EMIR Reporting Validation Rules"
+  version: "1.0.0"
+  description: "Validation rules for EMIR regulatory reporting"
+  type: "rule-config"
+  author: "regulatory.team@firm.com"
+  business-domain: "Regulatory Reporting"
+  regulatory-scope: "European Union (EMIR)"       # Required: Regulatory context
+  compliance-reviewed: true                       # Required: Compliance approval
+  compliance-reviewer: "compliance@firm.com"     # Required: Who reviewed
+  compliance-date: "2025-08-02"                 # Required: When reviewed
+  risk-approved: true                            # Required: Risk approval
+  risk-reviewer: "risk@firm.com"                # Required: Risk approver
+  risk-date: "2025-08-02"                      # Required: Approval date
+  operational-impact: "High"                    # Optional: Impact level
+```
+
+**Regulatory Compliance Fields:**
+- `regulatory-scope`: Applicable regulations and jurisdictions
+- `compliance-reviewed`: Boolean indicating compliance team approval
+- `compliance-reviewer`: Email of compliance reviewer
+- `compliance-date`: Date of compliance review
+- `risk-approved`: Boolean indicating risk team approval
+- `risk-reviewer`: Email of risk approver
+- `operational-impact`: Impact level (Low, Medium, High, Critical)
+
+### Configuration Standards and Conventions
+
+#### 1. Naming Conventions
+
+**File Naming Patterns:**
+- Scenarios: `{domain}-{type}-{variant}-scenario.yaml`
+  - Example: `derivatives-otc-options-standard-scenario.yaml`
+- Bootstrap: `{domain}-{use-case}-bootstrap.yaml`
+  - Example: `derivatives-otc-options-bootstrap.yaml`
+- Rule Config: `{domain}-{purpose}-rules.yaml`
+  - Example: `financial-validation-rules.yaml`
+
+**Scenario IDs:**
+- Use kebab-case: `otc-options-standard`
+- Include business domain: `derivatives-otc-options-standard`
+- Environment suffix if needed: `otc-options-dev`, `otc-options-prod`
+
+#### 2. Version Management
+
+- **Use semantic versioning** (1.0.0, 1.1.0, 2.0.0)
+- **Increment major version** for breaking changes
+- **Increment minor version** for new features
+- **Increment patch version** for bug fixes
+
+#### 3. Documentation Standards
+
+- **Provide clear, descriptive names** that explain the file's purpose
+- **Include comprehensive descriptions** for better documentation
+- **Document business context and ownership** for maintainability
+- **Add tags for categorization** to improve discoverability
+
+#### 4. Validation Integration
+
+- **Run validation as part of CI/CD pipeline** to catch errors early
+- **Validate all files before deployment** to ensure quality
+- **Generate validation reports for compliance** documentation
+- **Set up automated alerts for validation failures** for quick response
+
+### Implementation Checklists
+
+#### For New YAML Files
+
+When creating new YAML configuration files, follow this checklist:
+
+- [ ] **Include all required metadata fields** (`name`, `version`, `description`, `type`)
+- [ ] **Use correct `type` value** for file purpose (scenario, bootstrap, rule-config, etc.)
+- [ ] **Add type-specific required fields** (author, business-domain, owner, etc.)
+- [ ] **Follow naming conventions** for files and IDs
+- [ ] **Include business domain and ownership** information
+- [ ] **Add regulatory scope if applicable** for financial services
+- [ ] **Validate file before committing** using YAML validation tools
+
+#### For Existing Files
+
+When updating existing YAML files to meet current standards:
+
+- [ ] **Add missing `type` field** to metadata section
+- [ ] **Verify all required fields are present** for the file type
+- [ ] **Update to use standardized type values** (e.g., `rule-config` not `rules`)
+- [ ] **Add missing business context fields** (business-domain, owner, etc.)
+- [ ] **Run comprehensive validation** to check for errors
+- [ ] **Fix any validation errors** before deployment
+
+#### For CI/CD Integration
+
+To integrate YAML validation into your development workflow:
+
+- [ ] **Add YAML validation to build pipeline** using YamlMetadataValidator
+- [ ] **Configure validation failure alerts** to notify teams of issues
+- [ ] **Generate validation reports** for compliance documentation
+- [ ] **Set up automated quality checks** for pull requests
+- [ ] **Document validation procedures** for team members
+
+### Validation Error Examples and Solutions
+
+**Common Validation Errors:**
+
+```
+ERROR: Missing required metadata field: type
+SOLUTION: Add type field to metadata section with appropriate value
+
+ERROR: Missing required field for type 'scenario': business-domain
+SOLUTION: Add business-domain field to scenario metadata
+
+ERROR: Invalid file type: invalid-type
+SOLUTION: Use one of: scenario, scenario-registry, bootstrap, rule-config, dataset, enrichment, rule-chain
+
+ERROR: Scenario files must have a 'scenario' section
+SOLUTION: Add scenario section with scenario-id, data-types, and rule-configurations
+```
+
+### Automated Validation Setup
+
+**Basic Validation in Java:**
+```java
+// Validate a single file
+YamlMetadataValidator validator = new YamlMetadataValidator();
+YamlValidationResult result = validator.validateFile("scenarios/otc-options-scenario.yaml");
+
+if (result.isValid()) {
+    System.out.println("✓ File is valid");
+} else {
+    System.out.println("✗ Validation errors:");
+    result.getErrors().forEach(error -> System.out.println("  - " + error));
+}
+
+// Validate multiple files
+List<String> files = List.of("scenarios/scenario1.yaml", "config/rules.yaml");
+YamlValidationSummary summary = validator.validateFiles(files);
+String report = summary.getReport(); // Comprehensive validation report
+```
+
+**CI/CD Pipeline Integration:**
+```yaml
+# .github/workflows/yaml-validation.yml
+name: YAML Configuration Validation
+
+on:
+  push:
+    paths:
+      - '**/*.yaml'
+      - '**/*.yml'
+  pull_request:
+    paths:
+      - '**/*.yaml'
+      - '**/*.yml'
+
+jobs:
+  validate-yaml:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Run YAML Validation
+        run: |
+          cd apex-core
+          mvn test -Dtest=ComprehensiveYamlValidationTest
+```
+
+### Quality Assurance Guidelines
+
+#### Pre-Deployment Validation
+
+Before deploying any YAML configuration changes:
+
+1. **Run comprehensive validation** on all affected files
+2. **Check dependency chains** for missing references
+3. **Verify business logic** with domain experts
+4. **Test in lower environments** before production
+5. **Document changes** in version control
+
+#### Ongoing Maintenance
+
+For long-term configuration quality:
+
+1. **Regular validation audits** to catch drift
+2. **Automated quality reports** for management visibility
+3. **Team training** on configuration standards
+4. **Documentation updates** as standards evolve
+5. **Compliance reviews** for regulatory requirements
+
 ## Getting Help
 
 ### Common Issues
+
+**Configuration Issues:**
 - **Configuration not loading**: Check YAML syntax and file paths
+- **Missing metadata errors**: Ensure all required metadata fields are present (see [Configuration Standards](#configuration-standards-and-validation))
+- **Validation failures**: Use the implementation checklists to verify file structure
+- **Type errors**: Verify correct `type` value for your file purpose
+
+**Runtime Issues:**
 - **Enrichment not working**: Verify condition expressions and field mappings
 - **Performance issues**: Enable caching and monitor metrics
 - **Data not found**: Check key field matching and default values
+- **Scenario not found**: Verify scenario registry and data type mappings
 
 ### Documentation Resources
-- Technical Implementation Guide for architecture details
-- Financial Services Guide for domain-specific examples
-- Configuration examples and templates
+
+**Core Guides:**
+- **[Configuration Standards and Validation](#configuration-standards-and-validation)**: Comprehensive standards for YAML files
+- **Technical Implementation Guide**: Architecture details and advanced patterns
+- **Financial Services Guide**: Domain-specific examples and compliance requirements
+
+**Quick References:**
+- **[Mandatory Metadata Attributes](#mandatory-metadata-attributes)**: Required fields for all file types
+- **[Implementation Checklists](#implementation-checklists)**: Step-by-step validation guides
+- **Configuration examples and templates**: Working examples for common use cases
 
 ### Support
+
+**Self-Service:**
+- **Check validation errors** using YamlMetadataValidator for specific error messages
+- **Review configuration standards** for proper file structure and metadata
+- **Use implementation checklists** to verify your configurations meet requirements
+
+**Community Support:**
 - Create GitHub issues for bugs or feature requests
 - Check existing documentation for common solutions
 - Review configuration examples for similar use cases
+
+**Enterprise Support:**
+- Configuration validation services for large-scale deployments
+- Custom training on APEX configuration standards
+- Regulatory compliance consulting for financial services
