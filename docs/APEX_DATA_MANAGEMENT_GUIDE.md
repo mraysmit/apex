@@ -4024,21 +4024,41 @@ public class CustomDataSource implements DataSource {
 
 ## 2. Data Source Implementations
 
-### Mock Data Sources
+### Mock Data Sources (Testing Only)
 
-The `MockDataSource` provides comprehensive test data for demonstrations:
+⚠️ **IMPORTANT**: `MockDataSource` is for testing purposes only and has been moved to test packages.
+
+**Location**: `apex-demo/src/test/java/dev/mars/apex/demo/test/data/MockDataSource.java`
 
 ```java
-// Create mock data sources for different types
-MockDataSource productsSource = new MockDataSource("ProductsDataSource", "products");
-MockDataSource customerSource = new MockDataSource("CustomerDataSource", "customer");
-MockDataSource inventorySource = new MockDataSource("InventoryDataSource", "inventory");
+// FOR TESTING ONLY - Use in unit tests
+@Test
+public void testRuleExecution() {
+    MockDataSource testSource = new MockDataSource("TestDataSource", "products");
+    // ... test logic
+}
+```
 
-// Supported data types
-String[] supportedTypes = {
-    "products", "inventory", "customer", "templateCustomer",
-    "lookupServices", "sourceRecords", "matchingRecords", "nonMatchingRecords"
-};
+**Limitations of MockDataSource**:
+- ❌ No health monitoring or metrics
+- ❌ No connection management
+- ❌ No configuration-driven setup
+- ❌ Hardcoded data types only
+- ❌ Not suitable for production or realistic demos
+
+### Production Data Sources
+
+For production and realistic demos, use `ExternalDataSource` implementations:
+
+```java
+// FOR PRODUCTION AND DEMOS - Use ExternalDataSource implementations
+FileSystemDataSource fileSource = new FileSystemDataSource();
+DataSourceConfiguration config = createFileConfig("demo-data/", "*.json");
+fileSource.initialize(config);
+
+CacheDataSource cacheSource = new CacheDataSource();
+DataSourceConfiguration cacheConfig = createCacheConfig(1000, 3600);
+cacheSource.initialize(cacheConfig);
 ```
 
 **Features:**

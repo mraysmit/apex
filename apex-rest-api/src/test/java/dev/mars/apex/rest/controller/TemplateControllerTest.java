@@ -1,6 +1,7 @@
 package dev.mars.apex.rest.controller;
 
 import dev.mars.apex.core.service.engine.TemplateProcessorService;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -95,7 +96,7 @@ class TemplateControllerTest {
             }
             """;
 
-        when(templateProcessorService.processJsonTemplate(eq(jsonTemplate), eq(testContext)))
+        when(templateProcessorService.processJsonTemplate(eq(jsonTemplate), any(StandardEvaluationContext.class)))
             .thenReturn(processedJson);
 
         // Act
@@ -112,7 +113,7 @@ class TemplateControllerTest {
         assertEquals(processedJson, responseBody.get("processedTemplate"));
         assertEquals(testContext, responseBody.get("context"));
 
-        verify(templateProcessorService).processJsonTemplate(jsonTemplate, testContext);
+        verify(templateProcessorService).processJsonTemplate(eq(jsonTemplate), any(StandardEvaluationContext.class));
     }
 
     @Test
@@ -123,7 +124,7 @@ class TemplateControllerTest {
         request.setTemplate(jsonTemplate);
         request.setContext(testContext);
 
-        when(templateProcessorService.processJsonTemplate(eq(jsonTemplate), eq(testContext)))
+        when(templateProcessorService.processJsonTemplate(eq(jsonTemplate), any(StandardEvaluationContext.class)))
             .thenThrow(new RuntimeException("Template processing failed"));
 
         // Act
@@ -157,7 +158,7 @@ class TemplateControllerTest {
             </customer>
             """;
 
-        when(templateProcessorService.processXmlTemplate(eq(xmlTemplate), eq(testContext)))
+        when(templateProcessorService.processXmlTemplate(eq(xmlTemplate), any(StandardEvaluationContext.class)))
             .thenReturn(processedXml);
 
         // Act
@@ -174,7 +175,7 @@ class TemplateControllerTest {
         assertEquals(processedXml, responseBody.get("processedTemplate"));
         assertEquals(testContext, responseBody.get("context"));
 
-        verify(templateProcessorService).processXmlTemplate(xmlTemplate, testContext);
+        verify(templateProcessorService).processXmlTemplate(eq(xmlTemplate), any(StandardEvaluationContext.class));
     }
 
     @Test
@@ -195,7 +196,7 @@ class TemplateControllerTest {
             Thank you for your business.
             """;
 
-        when(templateProcessorService.processTemplate(eq(textTemplate), eq(testContext)))
+        when(templateProcessorService.processTemplate(eq(textTemplate), any(StandardEvaluationContext.class)))
             .thenReturn(processedText);
 
         // Act
@@ -212,7 +213,7 @@ class TemplateControllerTest {
         assertEquals(processedText, responseBody.get("processedTemplate"));
         assertEquals(testContext, responseBody.get("context"));
 
-        verify(templateProcessorService).processTemplate(textTemplate, testContext);
+        verify(templateProcessorService).processTemplate(eq(textTemplate), any(StandardEvaluationContext.class));
     }
 
     @Test
@@ -229,11 +230,11 @@ class TemplateControllerTest {
         request.setTemplates(templates);
         request.setContext(testContext);
 
-        when(templateProcessorService.processJsonTemplate(eq(jsonTemplate), eq(testContext)))
+        when(templateProcessorService.processJsonTemplate(eq(jsonTemplate), any(StandardEvaluationContext.class)))
             .thenReturn("processed json");
-        when(templateProcessorService.processXmlTemplate(eq(xmlTemplate), eq(testContext)))
+        when(templateProcessorService.processXmlTemplate(eq(xmlTemplate), any(StandardEvaluationContext.class)))
             .thenReturn("processed xml");
-        when(templateProcessorService.processTemplate(eq(textTemplate), eq(testContext)))
+        when(templateProcessorService.processTemplate(eq(textTemplate), any(StandardEvaluationContext.class)))
             .thenReturn("processed text");
 
         // Act
@@ -259,9 +260,9 @@ class TemplateControllerTest {
             assertNotNull(template.get("processedTemplate"));
         }
 
-        verify(templateProcessorService).processJsonTemplate(jsonTemplate, testContext);
-        verify(templateProcessorService).processXmlTemplate(xmlTemplate, testContext);
-        verify(templateProcessorService).processTemplate(textTemplate, testContext);
+        verify(templateProcessorService).processJsonTemplate(eq(jsonTemplate), any(StandardEvaluationContext.class));
+        verify(templateProcessorService).processXmlTemplate(eq(xmlTemplate), any(StandardEvaluationContext.class));
+        verify(templateProcessorService).processTemplate(eq(textTemplate), any(StandardEvaluationContext.class));
     }
 
     @Test
@@ -277,9 +278,9 @@ class TemplateControllerTest {
         request.setTemplates(templates);
         request.setContext(testContext);
 
-        when(templateProcessorService.processJsonTemplate(eq(jsonTemplate), eq(testContext)))
+        when(templateProcessorService.processJsonTemplate(eq(jsonTemplate), any(StandardEvaluationContext.class)))
             .thenReturn("processed json");
-        when(templateProcessorService.processJsonTemplate(eq("invalid template"), eq(testContext)))
+        when(templateProcessorService.processJsonTemplate(eq("invalid template"), any(StandardEvaluationContext.class)))
             .thenThrow(new RuntimeException("Invalid template"));
 
         // Act
@@ -400,7 +401,7 @@ class TemplateControllerTest {
         request.setTemplates(templates);
         request.setContext(testContext);
 
-        when(templateProcessorService.processTemplate(eq("some template"), eq(testContext)))
+        when(templateProcessorService.processTemplate(eq("some template"), any(StandardEvaluationContext.class)))
             .thenReturn("processed as text");
 
         // Act
@@ -415,6 +416,21 @@ class TemplateControllerTest {
         assertEquals(1, responseBody.get("successfulTemplates"));
 
         // Unknown type should default to text processing
-        verify(templateProcessorService).processTemplate("some template", testContext);
+        verify(templateProcessorService).processTemplate(eq("some template"), any(StandardEvaluationContext.class));
+    }
+
+    /**
+     * Helper method to create evaluation context from a map of variables.
+     */
+    private StandardEvaluationContext createEvaluationContext(Map<String, Object> contextVariables) {
+        StandardEvaluationContext context = new StandardEvaluationContext();
+
+        if (contextVariables != null) {
+            for (Map.Entry<String, Object> entry : contextVariables.entrySet()) {
+                context.setVariable(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return context;
     }
 }

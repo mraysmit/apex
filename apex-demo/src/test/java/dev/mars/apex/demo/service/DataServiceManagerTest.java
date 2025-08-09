@@ -5,10 +5,11 @@ import dev.mars.apex.core.service.data.DataServiceManager;
 import dev.mars.apex.core.service.data.DataSource;
 import dev.mars.apex.core.service.lookup.LookupService;
 import dev.mars.apex.demo.data.DemoDataServiceManager;
+import dev.mars.apex.demo.data.MockDataSource;
 import dev.mars.apex.demo.model.Customer;
 import dev.mars.apex.demo.model.Product;
 import dev.mars.apex.demo.model.Trade;
-import dev.mars.apex.demo.rulesets.MockDataSource;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

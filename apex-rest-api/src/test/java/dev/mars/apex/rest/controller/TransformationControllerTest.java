@@ -1,7 +1,7 @@
 package dev.mars.apex.rest.controller;
 
 import dev.mars.apex.core.service.transform.GenericTransformerService;
-import dev.mars.apex.core.service.transform.TransformerRule;
+
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

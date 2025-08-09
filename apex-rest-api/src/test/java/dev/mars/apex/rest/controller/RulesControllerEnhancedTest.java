@@ -1,6 +1,6 @@
 package dev.mars.apex.rest.controller;
 
-import dev.mars.apex.core.service.engine.RulesEngine;
+import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;

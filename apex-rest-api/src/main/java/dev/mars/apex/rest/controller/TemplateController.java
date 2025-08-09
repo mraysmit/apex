@@ -1,6 +1,7 @@
 package dev.mars.apex.rest.controller;
 
 import dev.mars.apex.core.service.engine.TemplateProcessorService;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -79,8 +80,8 @@ public class TemplateController {
         try {
             // Process the JSON template
             String processedJson = templateProcessorService.processJsonTemplate(
-                request.getTemplate(), 
-                request.getContext()
+                request.getTemplate(),
+                createEvaluationContext(request.getContext())
             );
 
             // Prepare response
@@ -145,8 +146,8 @@ public class TemplateController {
         try {
             // Process the XML template
             String processedXml = templateProcessorService.processXmlTemplate(
-                request.getTemplate(), 
-                request.getContext()
+                request.getTemplate(),
+                createEvaluationContext(request.getContext())
             );
 
             // Prepare response
@@ -212,8 +213,8 @@ public class TemplateController {
         try {
             // Process the text template
             String processedText = templateProcessorService.processTemplate(
-                request.getTemplate(), 
-                request.getContext()
+                request.getTemplate(),
+                createEvaluationContext(request.getContext())
             );
 
             // Prepare response
@@ -267,16 +268,16 @@ public class TemplateController {
                     switch (templateItem.getType().toUpperCase()) {
                         case "JSON":
                             processedTemplate = templateProcessorService.processJsonTemplate(
-                                templateItem.getTemplate(), request.getContext());
+                                templateItem.getTemplate(), createEvaluationContext(request.getContext()));
                             break;
                         case "XML":
                             processedTemplate = templateProcessorService.processXmlTemplate(
-                                templateItem.getTemplate(), request.getContext());
+                                templateItem.getTemplate(), createEvaluationContext(request.getContext()));
                             break;
                         case "TEXT":
                         default:
                             processedTemplate = templateProcessorService.processTemplate(
-                                templateItem.getTemplate(), request.getContext());
+                                templateItem.getTemplate(), createEvaluationContext(request.getContext()));
                             break;
                     }
 
@@ -369,5 +370,20 @@ public class TemplateController {
         public void setType(String type) { this.type = type; }
         public String getTemplate() { return template; }
         public void setTemplate(String template) { this.template = template; }
+    }
+
+    /**
+     * Helper method to create evaluation context from a map of variables.
+     */
+    private StandardEvaluationContext createEvaluationContext(Map<String, Object> contextVariables) {
+        StandardEvaluationContext context = new StandardEvaluationContext();
+
+        if (contextVariables != null) {
+            for (Map.Entry<String, Object> entry : contextVariables.entrySet()) {
+                context.setVariable(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return context;
     }
 }

@@ -210,7 +210,7 @@ public class EnrichmentController {
         try {
             // For now, we'll simulate predefined configurations
             // In a real implementation, these would be stored and retrieved from a configuration store
-            Map<String, String> predefinedConfigs = getPredefinedConfigurations();
+            Map<String, String> predefinedConfigs = getSimulatedPredefinedConfigurations();
             
             String yamlConfig = predefinedConfigs.get(configName);
             if (yamlConfig == null) {
@@ -265,7 +265,7 @@ public class EnrichmentController {
     public ResponseEntity<Map<String, Object>> getPredefinedConfigurations() {
         logger.debug("Retrieving predefined enrichment configurations");
 
-        Map<String, String> predefinedConfigs = getPredefinedConfigurations();
+        Map<String, String> predefinedConfigs = getSimulatedPredefinedConfigurations();
 
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
@@ -279,7 +279,7 @@ public class EnrichmentController {
     /**
      * Get predefined configurations (simulated for demo purposes).
      */
-    private Map<String, String> getPredefinedConfigurations() {
+    private Map<String, String> getSimulatedPredefinedConfigurations() {
         Map<String, String> configs = new HashMap<>();
         
         configs.put("customer-profile", """

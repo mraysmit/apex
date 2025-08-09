@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.advanced;
 
 import dev.mars.apex.core.service.data.DataSource;
-import dev.mars.apex.demo.rulesets.MockDataSource;
+import dev.mars.apex.demo.data.MockDataSource;
 
 import java.util.*;
 import java.util.logging.Logger;

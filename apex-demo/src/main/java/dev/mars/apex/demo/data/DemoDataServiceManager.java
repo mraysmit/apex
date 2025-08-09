@@ -1,7 +1,9 @@
 package dev.mars.apex.demo.data;
 
 import dev.mars.apex.core.service.data.DataServiceManager;
-import dev.mars.apex.demo.rulesets.MockDataSource;
+import dev.mars.apex.demo.data.MockDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -32,17 +34,24 @@ import dev.mars.apex.demo.rulesets.MockDataSource;
 /**
  * A demo implementation of DataServiceManager that initializes with mock data.
  * This class is used for testing and demonstration purposes.
+ *
+ * NOTE: This class uses MockDataSource which is now located in the test package.
+ * For production scenarios, consider using actual ExternalDataSource implementations.
  */
 public class DemoDataServiceManager extends DataServiceManager {
+
+    private static final Logger logger = LoggerFactory.getLogger(DemoDataServiceManager.class);
 
     /**
      * Initialize with default mock data sources.
      * This method creates and loads MockDataSource instances for various data types.
-     * 
+     *
      * @return This manager for method chaining
      */
     @Override
     public DataServiceManager initializeWithMockData() {
+        logger.info("Initializing DemoDataServiceManager with mock data sources");
+
         // Create and load mock data sources for various data types
         loadDataSource(new MockDataSource("ProductsDataSource", "products"));
         loadDataSource(new MockDataSource("InventoryDataSource", "inventory"));
@@ -56,6 +65,7 @@ public class DemoDataServiceManager extends DataServiceManager {
         loadDataSource(new MockDataSource("MatchingRecordsDataSource", "matchingRecords"));
         loadDataSource(new MockDataSource("NonMatchingRecordsDataSource", "nonMatchingRecords"));
 
+        logger.info("Mock data sources initialized successfully");
         return this;
     }
 }
