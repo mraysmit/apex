@@ -111,7 +111,7 @@ public class CustodyAutoRepairYamlTest {
             String yamlContent = new String(configStream.readAllBytes());
             
             // Verify business-friendly features
-            assertTrue(yamlContent.contains("# Custody and Safekeeping Auto-Repair Rules Configuration"), 
+            assertTrue(yamlContent.contains("# APEX Rules Engine - Custody Auto-Repair Configuration"),
                       "YAML should have descriptive header comment");
             assertTrue(yamlContent.contains("description:"), "YAML should contain descriptions");
             assertTrue(yamlContent.contains("name:"), "YAML should contain human-readable names");
