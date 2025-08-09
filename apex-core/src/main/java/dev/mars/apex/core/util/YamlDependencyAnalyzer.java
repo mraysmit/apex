@@ -155,7 +155,8 @@ public class YamlDependencyAnalyzer {
                 configLoader.loadAsMap(fullPath);
                 node.setYamlValid(true);
             } catch (Exception e) {
-                logger.warn("Invalid YAML syntax in file: {}", filePath, e);
+                logger.warn("Invalid YAML syntax in file: {}", filePath);
+                logger.debug("YAML parsing error details", e);
                 node.setYamlValid(false);
             }
         }

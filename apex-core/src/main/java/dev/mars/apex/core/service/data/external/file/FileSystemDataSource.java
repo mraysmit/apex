@@ -157,7 +157,8 @@ public class FileSystemDataSource implements ExternalDataSource {
     }
     
     @Override
-    public Object getData(String dataType, Object... parameters) {
+    @SuppressWarnings("unchecked")
+    public <T> T getData(String dataType, Object... parameters) {
         long startTime = System.currentTimeMillis();
         
         try {
@@ -168,7 +169,7 @@ public class FileSystemDataSource implements ExternalDataSource {
                 if (cached != null && !cached.isExpired()) {
                     metrics.recordCacheHit();
                     metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
-                    return findDataInCache(cached, parameters);
+                    return (T) findDataInCache(cached, parameters);
                 }
                 metrics.recordCacheMiss();
             }
@@ -177,7 +178,7 @@ public class FileSystemDataSource implements ExternalDataSource {
             Object result = loadDataFromFile(dataType, parameters);
             
             metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
-            return result;
+            return (T) result;
             
         } catch (Exception e) {
             metrics.recordFailedRequest(System.currentTimeMillis() - startTime);

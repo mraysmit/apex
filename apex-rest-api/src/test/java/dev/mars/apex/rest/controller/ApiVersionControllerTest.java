@@ -1,29 +1,22 @@
 package dev.mars.apex.rest.controller;
 
+import dev.mars.apex.rest.BaseIntegrationTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Unit tests for ApiVersionController.
- * Tests controller logic using Spring Boot Test.
+ * Integration tests for ApiVersionController.
+ * Tests controller endpoints using real HTTP calls.
  */
-@SpringBootTest
-@ActiveProfiles("test")
-@DisplayName("API Version Controller Unit Tests")
-public class ApiVersionControllerTest {
-
-    @Autowired
-    private ApiVersionController apiVersionController;
+@DisplayName("API Version Controller Integration Tests")
+public class ApiVersionControllerTest extends BaseIntegrationTest {
 
     @Nested
     @DisplayName("Version Information Tests")
@@ -33,7 +26,8 @@ public class ApiVersionControllerTest {
         @DisplayName("Should return API version information")
         void shouldReturnApiVersionInformation() {
             // When
-            ResponseEntity<Map<String, Object>> response = apiVersionController.getVersionInfo();
+            ResponseEntity<Map> response = restTemplate.getForEntity(
+                url("/api/version"), Map.class);
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -48,7 +42,8 @@ public class ApiVersionControllerTest {
         @DisplayName("Should include API version details")
         void shouldIncludeApiVersionDetails() {
             // When
-            ResponseEntity<Map<String, Object>> response = apiVersionController.getVersionInfo();
+            ResponseEntity<Map> response = restTemplate.getForEntity(
+                url("/api/version"), Map.class);
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -62,7 +57,8 @@ public class ApiVersionControllerTest {
         @DisplayName("Should include build information")
         void shouldIncludeBuildInformation() {
             // When
-            ResponseEntity<Map<String, Object>> response = apiVersionController.getVersionInfo();
+            ResponseEntity<Map> response = restTemplate.getForEntity(
+                url("/api/version"), Map.class);
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -81,7 +77,8 @@ public class ApiVersionControllerTest {
         @DisplayName("Should return deprecation information")
         void shouldReturnDeprecationInformation() {
             // When
-            ResponseEntity<Map<String, Object>> response = apiVersionController.getDeprecationInfo();
+            ResponseEntity<Map> response = restTemplate.getForEntity(
+                url("/api/version/deprecation"), Map.class);
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -103,7 +100,8 @@ public class ApiVersionControllerTest {
         @DisplayName("Should return version health status")
         void shouldReturnVersionHealthStatus() {
             // When
-            ResponseEntity<Map<String, Object>> response = apiVersionController.getVersionHealth();
+            ResponseEntity<Map> response = restTemplate.getForEntity(
+                url("/api/version/health"), Map.class);
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -117,7 +115,8 @@ public class ApiVersionControllerTest {
         @DisplayName("Should include compatibility information")
         void shouldIncludeCompatibilityInformation() {
             // When
-            ResponseEntity<Map<String, Object>> response = apiVersionController.getVersionHealth();
+            ResponseEntity<Map> response = restTemplate.getForEntity(
+                url("/api/version/health"), Map.class);
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());

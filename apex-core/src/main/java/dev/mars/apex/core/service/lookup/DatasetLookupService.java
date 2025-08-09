@@ -121,7 +121,7 @@ public class DatasetLookupService extends LookupService {
     }
     
     @Override
-    public Object enrich(Object key) {
+    public Object transform(Object key) {
         if (key == null) {
             LOGGER.fine("Lookup key is null, returning default values");
             return defaultValues.isEmpty() ? null : new HashMap<>(defaultValues);

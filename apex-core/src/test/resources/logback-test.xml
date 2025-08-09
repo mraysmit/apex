@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Console appender for test output -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Bridge JUL to SLF4J -->
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+
+    <!-- Reduce noise from YAML validation during tests -->
+    <logger name="dev.mars.apex.core.config.yaml.YamlConfigurationLoader" level="ERROR"/>
+    <logger name="dev.mars.apex.core.util.YamlDependencyAnalyzer" level="INFO"/>
+    <logger name="dev.mars.apex.core.util.YamlMetadataValidator" level="INFO"/>
+
+    <!-- Root logger -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>

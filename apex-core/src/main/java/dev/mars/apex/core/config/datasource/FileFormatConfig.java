@@ -316,19 +316,23 @@ public class FileFormatConfig {
                     throw new IllegalArgumentException("Delimiter is required for CSV files");
                 }
                 break;
-                
+
+            case JSON:
+                // JSON files don't require additional validation beyond basic file properties
+                break;
+
             case XML:
                 if (recordElement == null || recordElement.trim().isEmpty()) {
                     throw new IllegalArgumentException("Record element is required for XML files");
                 }
                 break;
-                
+
             case FIXED_WIDTH:
                 if (fieldDefinitions == null || fieldDefinitions.isEmpty()) {
                     throw new IllegalArgumentException("Field definitions are required for fixed-width files");
                 }
                 break;
-                
+
             case CUSTOM:
                 if (customParser == null || customParser.trim().isEmpty()) {
                     throw new IllegalArgumentException("Custom parser class is required for custom file formats");

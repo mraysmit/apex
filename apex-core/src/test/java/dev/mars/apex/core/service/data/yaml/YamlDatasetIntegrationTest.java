@@ -132,7 +132,7 @@ class YamlDatasetIntegrationTest {
                 dev.mars.apex.core.service.lookup.DatasetLookupServiceFactory.createDatasetLookupService(
                     "test-currency-service", enrichment.getLookupConfig().getLookupDataset());
 
-            Object lookupResult = lookupService.enrich("USD");
+            Object lookupResult = lookupService.transform("USD");
             System.out.println("Direct lookup result for 'USD': " + lookupResult);
         } catch (Exception e) {
             System.out.println("Direct lookup failed: " + e.getMessage());

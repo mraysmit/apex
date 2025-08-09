@@ -7,7 +7,6 @@ import dev.mars.apex.core.engine.model.RuleResult;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Predicate;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd

@@ -16,8 +16,10 @@
 
 metadata:
   name: "Production Demo Configuration"
+  type: "rule-config"
   version: "2.0.0"
   description: "Configuration for production-ready demo data sources"
+  author: "apex-demo-team@company.com"
   environment: "demo"
   created-by: "apex-demo-team@company.com"
 

@@ -125,7 +125,8 @@ public class DatabaseDataSource implements ExternalDataSource {
     }
     
     @Override
-    public Object getData(String dataType, Object... parameters) {
+    @SuppressWarnings("unchecked")
+    public <T> T getData(String dataType, Object... parameters) {
         long startTime = System.currentTimeMillis();
         
         try {
@@ -136,7 +137,7 @@ public class DatabaseDataSource implements ExternalDataSource {
                 if (cached != null && !cached.isExpired()) {
                     metrics.recordCacheHit();
                     metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
-                    return cached.getData();
+                    return (T) cached.getData();
                 }
                 metrics.recordCacheMiss();
             }
@@ -152,7 +153,7 @@ public class DatabaseDataSource implements ExternalDataSource {
             }
             
             metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
-            return result;
+            return (T) result;
             
         } catch (Exception e) {
             metrics.recordFailedRequest(System.currentTimeMillis() - startTime);

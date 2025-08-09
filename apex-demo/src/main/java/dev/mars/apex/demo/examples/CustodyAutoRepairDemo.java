@@ -1,8 +1,6 @@
 package dev.mars.apex.demo.examples;
 
 import dev.mars.apex.core.api.RulesService;
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.engine.RuleEngineService;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.demo.model.SettlementInstruction;

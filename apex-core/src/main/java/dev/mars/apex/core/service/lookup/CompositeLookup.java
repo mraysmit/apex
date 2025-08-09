@@ -31,14 +31,14 @@ import dev.mars.apex.core.service.validation.Validator;
  */
 public class CompositeLookup implements IDataLookup {
     private String name;
-    private Validator validator;
+    private Validator<Object> validator;
     private GenericTransformer<Object> transformer;
 
     public CompositeLookup(String name) {
         this.name = name;
     }
 
-    public CompositeLookup withValidator(Validator validator) {
+    public CompositeLookup withValidator(Validator<Object> validator) {
         this.validator = validator;
         return this;
     }

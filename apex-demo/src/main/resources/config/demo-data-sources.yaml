@@ -17,8 +17,10 @@
 
 metadata:
   name: "APEX Demo Data Sources Configuration"
+  type: "rule-config"
   version: "2.0.0"
   description: "Production data source configurations for APEX demonstrations"
+  author: "apex-demo-team@company.com"
   created-by: "apex-demo-team@company.com"
   environment: "demo"
 

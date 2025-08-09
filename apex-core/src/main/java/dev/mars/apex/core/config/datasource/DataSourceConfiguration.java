@@ -325,7 +325,11 @@ public class DataSourceConfiguration {
                     throw new IllegalArgumentException("Implementation class is required for custom data sources");
                 }
                 break;
-            // Other types have optional configurations
+            case MESSAGE_QUEUE:
+            case CACHE:
+            case FILE_SYSTEM:
+                // These types have optional configurations
+                break;
         }
     }
     

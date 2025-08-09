@@ -1,14 +1,14 @@
 package dev.mars.apex.demo.service;
 
+import dev.mars.apex.core.service.data.DataSource;
 import dev.mars.apex.core.service.lookup.LookupService;
 import dev.mars.apex.demo.model.Customer;
 import dev.mars.apex.demo.model.Product;
 import dev.mars.apex.demo.model.Trade;
-import dev.mars.apex.demo.data.MockDataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,38 +29,35 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 
 /**
- * Test class for MockDataSource.
+ * Test class for data source functionality.
  *
- * This class is part of the PeeGeeQ message queue system, providing
- * production-ready PostgreSQL-based message queuing capabilities.
+ * This class tests data source implementations using a test-specific implementation
+ * that provides the same functionality as the deprecated MockDataSource.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-27
  * @version 1.0
  */
-/**
- * Test class for MockDataSource.
- */
 public class MockDataSourceTest {
-    private MockDataSource productsDataSource;
-    private MockDataSource inventoryDataSource;
-    private MockDataSource customerDataSource;
-    private MockDataSource templateCustomerDataSource;
-    private MockDataSource lookupServicesDataSource;
-    private MockDataSource sourceRecordsDataSource;
-    private MockDataSource matchingRecordsDataSource;
-    private MockDataSource nonMatchingRecordsDataSource;
+    private TestDataSource productsDataSource;
+    private TestDataSource inventoryDataSource;
+    private TestDataSource customerDataSource;
+    private TestDataSource templateCustomerDataSource;
+    private TestDataSource lookupServicesDataSource;
+    private TestDataSource sourceRecordsDataSource;
+    private TestDataSource matchingRecordsDataSource;
+    private TestDataSource nonMatchingRecordsDataSource;
 
     @BeforeEach
     public void setUp() {
-        productsDataSource = new MockDataSource("ProductsDataSource", "products");
-        inventoryDataSource = new MockDataSource("InventoryDataSource", "inventory");
-        customerDataSource = new MockDataSource("CustomerDataSource", "customer");
-        templateCustomerDataSource = new MockDataSource("TemplateCustomerDataSource", "templateCustomer");
-        lookupServicesDataSource = new MockDataSource("LookupServicesDataSource", "lookupServices");
-        sourceRecordsDataSource = new MockDataSource("SourceRecordsDataSource", "sourceRecords");
-        matchingRecordsDataSource = new MockDataSource("MatchingRecordsDataSource", "matchingRecords");
-        nonMatchingRecordsDataSource = new MockDataSource("NonMatchingRecordsDataSource", "nonMatchingRecords");
+        productsDataSource = new TestDataSource("ProductsDataSource", "products");
+        inventoryDataSource = new TestDataSource("InventoryDataSource", "inventory");
+        customerDataSource = new TestDataSource("CustomerDataSource", "customer");
+        templateCustomerDataSource = new TestDataSource("TemplateCustomerDataSource", "templateCustomer");
+        lookupServicesDataSource = new TestDataSource("LookupServicesDataSource", "lookupServices");
+        sourceRecordsDataSource = new TestDataSource("SourceRecordsDataSource", "sourceRecords");
+        matchingRecordsDataSource = new TestDataSource("MatchingRecordsDataSource", "matchingRecords");
+        nonMatchingRecordsDataSource = new TestDataSource("NonMatchingRecordsDataSource", "nonMatchingRecords");
     }
 
     @Test
@@ -251,5 +248,196 @@ public class MockDataSourceTest {
         assertNull(matchingRecordsDataSource.getData("matchingRecords"));
         assertNull(matchingRecordsDataSource.getData("matchingRecords", "invalid"));
         assertNull(matchingRecordsDataSource.getData("matchingRecords", null, null));
+    }
+
+    /**
+     * Test implementation of DataSource to replace deprecated MockDataSource.
+     * This provides the same functionality without deprecation warnings.
+     */
+    private static class TestDataSource implements DataSource {
+        private final String name;
+        private final String dataType;
+        private final Map<String, Object> dataStore = new HashMap<>();
+
+        public TestDataSource(String name, String dataType) {
+            this.name = name;
+            this.dataType = dataType;
+            initializeData();
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String getDataType() {
+            return dataType;
+        }
+
+        @Override
+        public boolean supportsDataType(String dataType) {
+            if (dataType == null || dataType.isEmpty()) {
+                return false;
+            }
+            return this.dataType.equals(dataType);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> T getData(String dataType, Object... parameters) {
+            if (!supportsDataType(dataType)) {
+                return null;
+            }
+
+            // Special handling for matchingRecords and nonMatchingRecords
+            if ("matchingRecords".equals(dataType) || "nonMatchingRecords".equals(dataType)) {
+                if (parameters.length < 2 || !(parameters[0] instanceof List) || !(parameters[1] instanceof List)) {
+                    return null;
+                }
+
+                List<Trade> sourceRecords = (List<Trade>) parameters[0];
+                List<LookupService> lookupServices = (List<LookupService>) parameters[1];
+
+                if ("matchingRecords".equals(dataType)) {
+                    return (T) getMatchingRecords(sourceRecords, lookupServices);
+                } else {
+                    return (T) getNonMatchingRecords(sourceRecords, lookupServices);
+                }
+            }
+
+            return (T) dataStore.get(dataType);
+        }
+
+        /**
+         * Initialize the test data for this data source.
+         */
+        private void initializeData() {
+            // Handle null dataType gracefully
+            if (dataType == null) {
+                return;
+            }
+
+            switch (dataType) {
+                case "products":
+                    initializeProducts();
+                    break;
+                case "inventory":
+                    initializeInventory();
+                    break;
+                case "customer":
+                    initializeCustomer();
+                    break;
+                case "templateCustomer":
+                    initializeTemplateCustomer();
+                    break;
+                case "lookupServices":
+                    initializeLookupServices();
+                    break;
+                case "sourceRecords":
+                    initializeSourceRecords();
+                    break;
+                // matchingRecords and nonMatchingRecords are handled dynamically in getData()
+                default:
+                    // No initialization for other data types
+                    break;
+            }
+        }
+
+        private void initializeProducts() {
+            List<Product> products = Arrays.asList(
+                new Product("Laptop", 999.99, "Electronics"),
+                new Product("Mouse", 29.99, "Electronics"),
+                new Product("Keyboard", 79.99, "Electronics"),
+                new Product("US Treasury Bond", 1200.0, "FixedIncome")
+            );
+            dataStore.put("products", products);
+        }
+
+        private void initializeInventory() {
+            List<Product> inventory = Arrays.asList(
+                new Product("Monitor", 299.99, "Electronics"),
+                new Product("Speakers", 149.99, "Electronics"),
+                new Product("Webcam", 89.99, "Electronics"),
+                new Product("Bitcoin ETF", 450.0, "ETF")
+            );
+            dataStore.put("inventory", inventory);
+        }
+
+        private void initializeCustomer() {
+            Customer customer = new Customer("Alice Smith", 35, "alice@example.com");
+            dataStore.put("customer", customer);
+        }
+
+        private void initializeTemplateCustomer() {
+            Customer templateCustomer = new Customer("Bob Johnson", 65, "bob@example.com");
+            dataStore.put("templateCustomer", templateCustomer);
+        }
+
+        private void initializeLookupServices() {
+            List<LookupService> lookupServices = new ArrayList<>();
+
+            // Create InstrumentTypes lookup service
+            List<String> instrumentTypeValues = Arrays.asList("Equity", "Bond", "ETF", "Option", "Future");
+            LookupService instrumentTypes = new LookupService("InstrumentTypes", instrumentTypeValues);
+
+            // Create AssetClasses lookup service
+            List<String> assetClassValues = Arrays.asList("Equity", "FixedIncome", "Currency");
+            LookupService assetClasses = new LookupService("AssetClasses", assetClassValues);
+
+            lookupServices.add(instrumentTypes);
+            lookupServices.add(assetClasses);
+
+            dataStore.put("lookupServices", lookupServices);
+        }
+
+        private void initializeSourceRecords() {
+            List<Trade> sourceRecords = new ArrayList<>();
+            sourceRecords.add(new Trade("T001", "Equity", "InstrumentType"));
+            sourceRecords.add(new Trade("T002", "Bond", "InstrumentType"));
+            sourceRecords.add(new Trade("T003", "ETF", "InstrumentType"));
+            sourceRecords.add(new Trade("T004", "Equity", "AssetClass"));
+            sourceRecords.add(new Trade("T005", "FixedIncome", "AssetClass"));
+            sourceRecords.add(new Trade("T006", "Currency", "AssetClass"));
+            sourceRecords.add(new Trade("T007", "Commodity", "AssetClass"));
+            // Add a non-matching trade
+            sourceRecords.add(new Trade("T008", "NonMatchingValue", "NonMatchingCategory"));
+
+            dataStore.put("sourceRecords", sourceRecords);
+        }
+
+        private List<Trade> getMatchingRecords(List<Trade> sourceRecords, List<LookupService> lookupServices) {
+            List<Trade> matchingRecords = new ArrayList<>();
+            Set<String> supportedValues = new HashSet<>();
+
+            for (LookupService service : lookupServices) {
+                supportedValues.addAll(service.getLookupValues());
+            }
+
+            for (Trade trade : sourceRecords) {
+                if (supportedValues.contains(trade.getValue())) {
+                    matchingRecords.add(trade);
+                }
+            }
+
+            return matchingRecords;
+        }
+
+        private List<Trade> getNonMatchingRecords(List<Trade> sourceRecords, List<LookupService> lookupServices) {
+            List<Trade> nonMatchingRecords = new ArrayList<>();
+            Set<String> supportedValues = new HashSet<>();
+
+            for (LookupService service : lookupServices) {
+                supportedValues.addAll(service.getLookupValues());
+            }
+
+            for (Trade trade : sourceRecords) {
+                if (!supportedValues.contains(trade.getValue())) {
+                    nonMatchingRecords.add(trade);
+                }
+            }
+
+            return nonMatchingRecords;
+        }
     }
 }

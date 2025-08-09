@@ -1,14 +1,13 @@
 package dev.mars.apex.demo.examples;
 
 import dev.mars.apex.core.api.RulesService;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
+
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMetrics;
 import dev.mars.apex.core.service.monitoring.PerformanceSnapshot;
 import dev.mars.apex.demo.model.Customer;
 
-import java.time.Instant;
+
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -36,15 +35,10 @@ import java.util.concurrent.*;
 public class PerformanceDemo {
     
     private final RulesService rulesService;
-    private final RulesEngine rulesEngine;
     private final RulePerformanceMonitor performanceMonitor;
     
     public PerformanceDemo() {
         this.rulesService = new RulesService();
-        
-        // Create rules engine with performance monitoring enabled
-        RulesEngineConfiguration config = new RulesEngineConfiguration();
-        this.rulesEngine = new RulesEngine(config);
         this.performanceMonitor = new RulePerformanceMonitor();
     }
     
@@ -107,9 +101,7 @@ public class PerformanceDemo {
         RulePerformanceMetrics.Builder metricsBuilder = performanceMonitor.startEvaluation(ruleName, "evaluation");
         
         // Execute rule
-        Instant startTime = Instant.now();
         boolean result = rulesService.check(condition, customer);
-        Instant endTime = Instant.now();
         
         // Complete monitoring
         RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, condition);
@@ -216,7 +208,7 @@ public class PerformanceDemo {
                 customer.setAge(25 + (taskId % 20)); // Varying ages
                 
                 RulePerformanceMetrics.Builder builder = performanceMonitor.startEvaluation(ruleName, "concurrent");
-                boolean result = rulesService.check(condition, customer);
+                rulesService.check(condition, customer);
                 return performanceMonitor.completeEvaluation(builder, condition);
             });
             futures.add(future);
@@ -259,11 +251,6 @@ public class PerformanceDemo {
             System.out.println("  Max Time: " + maxTime + "ms");
             
             // Check for thread safety
-            long uniqueThreads = results.stream()
-                .map(m -> Thread.currentThread().threadId())
-                .distinct()
-                .count();
-            
             System.out.println("  Thread Safety: ✅ Verified");
         }
         
@@ -296,7 +283,7 @@ public class PerformanceDemo {
         for (int i = 0; i < expressions.length; i++) {
             String ruleName = "optimization-test-" + (i + 1);
             RulePerformanceMetrics.Builder builder = performanceMonitor.startEvaluation(ruleName, "optimization");
-            boolean result = rulesService.check(expressions[i], customer);
+            rulesService.check(expressions[i], customer);
             RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(builder, expressions[i]);
             
             System.out.println("  Expression " + (i + 1) + ": " + metrics.getEvaluationTimeMillis() + "ms " +

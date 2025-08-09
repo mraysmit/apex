@@ -330,7 +330,7 @@ public class YamlEnrichmentProcessor {
         }
         
         // Perform actual lookup
-        Object result = lookupService.enrich(lookupKey);
+        Object result = lookupService.transform(lookupKey);
         
         // Cache result if caching is enabled
         if (lookupConfig.getCacheEnabled() != null && lookupConfig.getCacheEnabled()) {

@@ -1,7 +1,6 @@
 package dev.mars.apex.demo.data;
 
 import dev.mars.apex.core.service.data.DataServiceManager;
-import dev.mars.apex.demo.data.MockDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +22,14 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A demo implementation of DataServiceManager that initializes with mock data.
+ * This class is used for testing and demonstration purposes.
+ *
+ * ⚠️ LEGACY DEMO CLASS - DEPRECATED ⚠️
+ * This class uses the deprecated MockDataSource and should be replaced with
+ * ProductionDemoDataServiceManager for realistic demonstrations.
+ *
+ * @deprecated Use ProductionDemoDataServiceManager with ExternalDataSource implementations instead
+ * @see ProductionDemoDataServiceManager
  *
  * This class is part of the PeeGeeQ message queue system, providing
  * production-ready PostgreSQL-based message queuing capabilities.
@@ -31,13 +38,7 @@ import org.slf4j.LoggerFactory;
  * @since 2025-07-27
  * @version 1.0
  */
-/**
- * A demo implementation of DataServiceManager that initializes with mock data.
- * This class is used for testing and demonstration purposes.
- *
- * NOTE: This class uses MockDataSource which is now located in the test package.
- * For production scenarios, consider using actual ExternalDataSource implementations.
- */
+@Deprecated
 public class DemoDataServiceManager extends DataServiceManager {
 
     private static final Logger logger = LoggerFactory.getLogger(DemoDataServiceManager.class);
@@ -46,13 +47,20 @@ public class DemoDataServiceManager extends DataServiceManager {
      * Initialize with default mock data sources.
      * This method creates and loads MockDataSource instances for various data types.
      *
+     * ⚠️ DEPRECATED - Use ProductionDemoDataServiceManager instead ⚠️
+     * This method uses deprecated MockDataSource for backward compatibility only.
+     *
+     * @deprecated Use ProductionDemoDataServiceManager.initializeWithMockData() instead
      * @return This manager for method chaining
      */
     @Override
+    @Deprecated
     public DataServiceManager initializeWithMockData() {
-        logger.info("Initializing DemoDataServiceManager with mock data sources");
+        logger.warn("DemoDataServiceManager is deprecated. Use ProductionDemoDataServiceManager instead.");
+        logger.info("Initializing DemoDataServiceManager with deprecated mock data sources");
 
         // Create and load mock data sources for various data types
+        // Note: Using deprecated MockDataSource for backward compatibility only
         loadDataSource(new MockDataSource("ProductsDataSource", "products"));
         loadDataSource(new MockDataSource("InventoryDataSource", "inventory"));
         loadDataSource(new MockDataSource("CustomerDataSource", "customer"));
@@ -66,6 +74,7 @@ public class DemoDataServiceManager extends DataServiceManager {
         loadDataSource(new MockDataSource("NonMatchingRecordsDataSource", "nonMatchingRecords"));
 
         logger.info("Mock data sources initialized successfully");
+        logger.warn("Consider migrating to ProductionDemoDataServiceManager for production-ready demonstrations");
         return this;
     }
 }

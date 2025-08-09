@@ -2,7 +2,6 @@ package dev.mars.apex.demo.examples;
 
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import dev.mars.apex.core.config.datasource.ConnectionConfig;
-import dev.mars.apex.core.config.datasource.ConnectionPoolConfig;
 import dev.mars.apex.core.config.datasource.CacheConfig;
 import dev.mars.apex.core.config.datasource.HealthCheckConfig;
 import dev.mars.apex.core.service.data.external.DataSourceType;
@@ -18,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -321,7 +319,6 @@ public class ExternalDataSourceDemo implements DemoRunner.Demo {
             // First lookup (cache miss)
             long startTime = System.nanoTime();
             Map<String, Object> parameters = Map.of("id", "1");
-            Object result1 = dataSource.queryForObject("getUserById", parameters);
             long firstLookupTime = System.nanoTime() - startTime;
 
             System.out.println("  First lookup (cache miss): " + firstLookupTime/1000 + " μs");

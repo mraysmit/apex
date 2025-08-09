@@ -50,27 +50,54 @@ class YamlDependencyAnalyzerTest {
         String ruleConfigContent = """
             metadata:
               name: "Test Rules"
-            
+              type: "rule-config"
+
             rules:
               rule-chains:
                 - "chains/validation-chain.yaml"
               enrichment-refs:
                 - "enrichments/test-enrichment.yaml"
             """;
-        
+
         String bootstrapContent = """
             metadata:
               name: "Test Bootstrap"
-            
+              type: "bootstrap"
+
             datasets:
               - name: "test-dataset"
                 type: "inline"
             """;
         
+        // Create the referenced files that are expected
+        String chainContent = """
+            metadata:
+              name: "Validation Chain"
+              type: "chain"
+
+            chain:
+              name: "validation-chain"
+              steps:
+                - type: "validation"
+                  name: "basic-validation"
+            """;
+
+        String enrichmentContent = """
+            metadata:
+              name: "Test Enrichment"
+              type: "enrichment"
+
+            enrichment:
+              name: "test-enrichment"
+              type: "lookup"
+            """;
+
         // Write files
         writeFile("scenarios/test-scenario.yaml", scenarioContent);
         writeFile("config/test-rules.yaml", ruleConfigContent);
         writeFile("bootstrap/test-bootstrap.yaml", bootstrapContent);
+        writeFile("chains/validation-chain.yaml", chainContent);
+        writeFile("enrichments/test-enrichment.yaml", enrichmentContent);
         
         // Analyze dependencies
         YamlDependencyGraph graph = analyzer.analyzeYamlDependencies("scenarios/test-scenario.yaml");
@@ -78,14 +105,16 @@ class YamlDependencyAnalyzerTest {
         // Verify results
         assertNotNull(graph);
         assertEquals("scenarios/test-scenario.yaml", graph.getRootFile());
-        assertEquals(5, graph.getTotalFiles()); // scenario + 2 rule files + 2 referenced files (missing)
-        assertEquals(2, graph.getMissingFiles().size()); // chains/validation-chain.yaml and enrichments/test-enrichment.yaml
-        assertFalse(graph.getStatistics().isHealthy()); // Has missing files
+        assertEquals(5, graph.getTotalFiles()); // scenario + 2 rule files + 2 referenced files
+        assertEquals(0, graph.getMissingFiles().size()); // All files exist now
+        assertTrue(graph.getStatistics().isHealthy()); // No missing files
         
         // Verify specific nodes exist
         assertNotNull(graph.getNode("scenarios/test-scenario.yaml"));
         assertNotNull(graph.getNode("config/test-rules.yaml"));
         assertNotNull(graph.getNode("bootstrap/test-bootstrap.yaml"));
+        assertNotNull(graph.getNode("chains/validation-chain.yaml"));
+        assertNotNull(graph.getNode("enrichments/test-enrichment.yaml"));
         
         // Verify dependencies
         List<YamlDependency> dependencies = graph.getAllDependencies();
@@ -96,6 +125,10 @@ class YamlDependencyAnalyzerTest {
     void testMissingFileDetection() throws IOException {
         // Create scenario that references missing files
         String scenarioContent = """
+            metadata:
+              name: "Test Scenario with Missing Files"
+              type: "scenario"
+
             scenario:
               scenario-id: "test-scenario"
               rule-configurations:
@@ -120,6 +153,10 @@ class YamlDependencyAnalyzerTest {
     void testInvalidYamlDetection() throws IOException {
         // Create scenario with valid YAML
         String scenarioContent = """
+            metadata:
+              name: "Test Scenario with Invalid Reference"
+              type: "scenario"
+
             scenario:
               scenario-id: "test-scenario"
               rule-configurations:
@@ -150,14 +187,23 @@ class YamlDependencyAnalyzerTest {
     void testNestedDependencies() throws IOException {
         // Create scenario
         String scenarioContent = """
+            metadata:
+              name: "Test Nested Dependencies Scenario"
+              type: "scenario"
+
             scenario:
               scenario-id: "test-scenario"
               rule-configurations:
                 - "config/level1.yaml"
             """;
-        
+
         // Create level 1 file that references level 2
         String level1Content = """
+            metadata:
+              name: "Level 1 Rules"
+              type: "rule-config"
+              author: "test"
+
             rules:
               rule-chains:
                 - "chains/level2.yaml"
@@ -165,13 +211,23 @@ class YamlDependencyAnalyzerTest {
         
         // Create level 2 file that references level 3
         String level2Content = """
+            metadata:
+              name: "Level 2 Chain"
+              type: "rule-chain"
+              author: "test"
+
             enrichments:
               enrichment-refs:
                 - "enrichments/level3.yaml"
             """;
-        
+
         // Create level 3 file
         String level3Content = """
+            metadata:
+              name: "Level 3 Enrichment"
+              type: "enrichment"
+              author: "test"
+
             enrichment:
               name: "Final Level"
             """;
@@ -204,24 +260,43 @@ class YamlDependencyAnalyzerTest {
     void testCircularDependencyDetection() throws IOException {
         // Create files with circular dependencies
         String file1Content = """
+            metadata:
+              name: "File 1"
+              type: "rule-config"
+              author: "test"
+
             rules:
               rule-chains:
                 - "config/file2.yaml"
             """;
-        
+
         String file2Content = """
+            metadata:
+              name: "File 2"
+              type: "rule-config"
+              author: "test"
+
             enrichments:
               enrichment-refs:
                 - "config/file3.yaml"
             """;
-        
+
         String file3Content = """
+            metadata:
+              name: "File 3"
+              type: "rule-config"
+              author: "test"
+
             includes:
               include:
                 - "config/file1.yaml"
             """;
-        
+
         String scenarioContent = """
+            metadata:
+              name: "Circular Dependency Test Scenario"
+              type: "scenario"
+
             scenario:
               rule-configurations:
                 - "config/file1.yaml"
@@ -246,13 +321,22 @@ class YamlDependencyAnalyzerTest {
     void testTextReportGeneration() throws IOException {
         // Create simple scenario
         String scenarioContent = """
+            metadata:
+              name: "Text Report Test Scenario"
+              type: "scenario"
+
             scenario:
               scenario-id: "test-scenario"
               rule-configurations:
                 - "config/test-rules.yaml"
             """;
-        
+
         String rulesContent = """
+            metadata:
+              name: "Test Rules"
+              type: "rule-config"
+              author: "test"
+
             rules:
               name: "Test Rules"
             """;
@@ -276,13 +360,46 @@ class YamlDependencyAnalyzerTest {
     
     @Test
     void testFileTypeDetection() throws IOException {
-        // Create files in different directories
-        writeFile("scenarios/test-scenario.yaml", "scenario: test");
-        writeFile("bootstrap/test-bootstrap.yaml", "bootstrap: test");
-        writeFile("enrichments/test-enrichment.yaml", "enrichment: test");
-        writeFile("rule-chains/test-chain.yaml", "chain: test");
-        writeFile("datasets/test-dataset.yaml", "dataset: test");
-        writeFile("config/test-config.yaml", "config: test");
+        // Create files in different directories with proper metadata
+        writeFile("scenarios/test-scenario.yaml", """
+            metadata:
+              name: "Test Scenario"
+              type: "scenario"
+            scenario: test
+            """);
+        writeFile("bootstrap/test-bootstrap.yaml", """
+            metadata:
+              name: "Test Bootstrap"
+              type: "bootstrap"
+            bootstrap: test
+            """);
+        writeFile("enrichments/test-enrichment.yaml", """
+            metadata:
+              name: "Test Enrichment"
+              type: "enrichment"
+              author: "test"
+            enrichment: test
+            """);
+        writeFile("rule-chains/test-chain.yaml", """
+            metadata:
+              name: "Test Chain"
+              type: "rule-chain"
+              author: "test"
+            chain: test
+            """);
+        writeFile("datasets/test-dataset.yaml", """
+            metadata:
+              name: "Test Dataset"
+              type: "dataset"
+            dataset: test
+            """);
+        writeFile("config/test-config.yaml", """
+            metadata:
+              name: "Test Config"
+              type: "rule-config"
+              author: "test"
+            config: test
+            """);
         
         // Test each file type
         YamlDependencyGraph graph1 = analyzer.analyzeYamlDependencies("scenarios/test-scenario.yaml");

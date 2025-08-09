@@ -135,7 +135,8 @@ public class CacheDataSource implements ExternalDataSource {
     }
     
     @Override
-    public Object getData(String dataType, Object... parameters) {
+    @SuppressWarnings("unchecked")
+    public <T> T getData(String dataType, Object... parameters) {
         long startTime = System.currentTimeMillis();
         
         try {
@@ -145,7 +146,7 @@ public class CacheDataSource implements ExternalDataSource {
             if (result != null) {
                 metrics.recordCacheHit();
                 metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
-                return result;
+                return (T) result;
             } else {
                 metrics.recordCacheMiss();
                 metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);

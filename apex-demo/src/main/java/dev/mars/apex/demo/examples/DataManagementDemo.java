@@ -2,9 +2,6 @@ package dev.mars.apex.demo.examples;
 
 import dev.mars.apex.core.config.yaml.YamlDataset;
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
-import dev.mars.apex.core.config.yaml.YamlRule;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
@@ -228,7 +225,13 @@ public class DataManagementDemo implements DemoRunner.Demo {
         Object result = enrichmentProcessor.processEnrichment(enrichment, transaction);
         
         System.out.println("\nEnriched Transaction:");
-        printMap((Map<String, Object>) result, "  ");
+        if (result instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> resultMap = (Map<String, Object>) result;
+            printMap(resultMap, "  ");
+        } else {
+            System.out.println("  Result is not a Map: " + result);
+        }
         
         System.out.println("✅ Simple enrichment demonstrated");
         System.out.println();
@@ -255,7 +258,13 @@ public class DataManagementDemo implements DemoRunner.Demo {
         Object result = enrichmentProcessor.processEnrichment(enrichment, order);
         
         System.out.println("\nEnriched Order:");
-        printMap((Map<String, Object>) result, "  ");
+        if (result instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> resultMap = (Map<String, Object>) result;
+            printMap(resultMap, "  ");
+        } else {
+            System.out.println("  Result is not a Map: " + result);
+        }
         
         System.out.println("✅ Complex enrichment demonstrated");
         System.out.println();
@@ -587,7 +596,9 @@ public class DataManagementDemo implements DemoRunner.Demo {
         map.forEach((key, value) -> {
             if (value instanceof Map) {
                 System.out.println(indent + key + ":");
-                printNestedMap((Map<String, Object>) value, indent + "  ");
+                @SuppressWarnings("unchecked")
+                Map<String, Object> nestedMap = (Map<String, Object>) value;
+                printNestedMap(nestedMap, indent + "  ");
             } else {
                 System.out.println(indent + key + ": " + value);
             }
@@ -598,7 +609,9 @@ public class DataManagementDemo implements DemoRunner.Demo {
         map.forEach((key, value) -> {
             if (value instanceof Map) {
                 System.out.println(indent + key + ":");
-                printNestedMap((Map<String, Object>) value, indent + "  ");
+                @SuppressWarnings("unchecked")
+                Map<String, Object> nestedMap = (Map<String, Object>) value;
+                printNestedMap(nestedMap, indent + "  ");
             } else {
                 System.out.println(indent + key + ": " + value);
             }

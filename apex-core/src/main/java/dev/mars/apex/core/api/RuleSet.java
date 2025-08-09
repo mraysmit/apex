@@ -3,7 +3,6 @@ package dev.mars.apex.core.api;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.metadata.RuleMetadata;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -360,18 +359,6 @@ public class RuleSet {
         private Rule createRuleWithMetadata(String name, String condition, String message, String description) {
             String uniqueId = generateUniqueRuleId(name);
 
-            // Build comprehensive metadata
-            RuleMetadata metadata = RuleMetadata.builder()
-                .createdByUser(createdByUser)
-                .businessDomain(businessDomain)
-                .businessOwner(businessOwner)
-                .sourceSystem(sourceSystem)
-                .effectiveDate(effectiveDate)
-                .expirationDate(expirationDate)
-                .customProperty("ruleSetCategory", categoryName)
-                .customProperty("creationMethod", "RuleSet.category(\"" + categoryName + "\")")
-                .build();
-
             return config.rule(uniqueId)
                     .withCategory(categoryName)
                     .withName(name)
@@ -386,6 +373,7 @@ public class RuleSet {
                     .withEffectiveDate(effectiveDate)
                     .withExpirationDate(expirationDate)
                     .withCustomProperty("ruleSetCategory", categoryName)
+                    .withCustomProperty("creationMethod", "RuleSet.category(\"" + categoryName + "\")")
                     .build();
         }
 

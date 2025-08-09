@@ -5,7 +5,7 @@ module dev.mars.apex.core {
     requires java.logging;
     requires java.sql;
     requires java.net.http;
-    requires spring.expression;
+    requires transitive spring.expression;
     requires spring.context;
 
     // Logging dependencies
@@ -22,6 +22,7 @@ module dev.mars.apex.core {
     exports dev.mars.apex.core.service.common;
     exports dev.mars.apex.core.service.lookup;
     exports dev.mars.apex.core.engine.model;
+    exports dev.mars.apex.core.engine.model.metadata;
     exports dev.mars.apex.core.engine.config;
 
     // New exports for enhanced error handling
@@ -53,5 +54,7 @@ module dev.mars.apex.core {
     exports dev.mars.apex.core.service.data.external.factory;
     exports dev.mars.apex.core.service.data.external.manager;
     exports dev.mars.apex.core.service.data.external.config;
+    exports dev.mars.apex.core.service.data.external.cache;
+    exports dev.mars.apex.core.service.data.external.file;
 
 }

@@ -58,16 +58,14 @@ public class LookupService implements IDataLookup {
     }
 
     @Override
-    public Object enrich(Object value) {
-        if (value instanceof String && enrichmentData.containsKey(value)) {
-            return enrichmentData.get(value);
-        }
-        return value;
-    }
-
-    @Override
     public Object transform(Object value) {
-        return transformationFunction.apply(value);
+        // First apply enrichment if applicable
+        Object enrichedValue = value;
+        if (value instanceof String && enrichmentData.containsKey(value)) {
+            enrichedValue = enrichmentData.get(value);
+        }
+        // Then apply transformation function
+        return transformationFunction.apply(enrichedValue);
     }
 
     @Override
