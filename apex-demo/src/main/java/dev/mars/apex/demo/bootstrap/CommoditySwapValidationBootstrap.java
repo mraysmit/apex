@@ -290,7 +290,7 @@ public class CommoditySwapValidationBootstrap {
 
             System.out.println("Step 1.3: Loading static data repositories...");
             initializeStaticData();
-            System.out.println("   Static data loaded: {} clients, {} counterparties, {} commodities, {} currencies",
+            System.out.printf("   Static data loaded: %d clients, %d counterparties, %d commodities, %d currencies%n",
                 clients.size(), counterparties.size(), commodities.size(), currencies.size());
 
             System.out.println("Step 1.4: Loading YAML configuration...");
@@ -304,7 +304,7 @@ public class CommoditySwapValidationBootstrap {
             long initEndTime = System.currentTimeMillis();
             long initDuration = initEndTime - initStartTime;
 
-            System.out.println("Bootstrap initialization completed successfully in {} ms", initDuration);
+            System.out.printf("Bootstrap initialization completed successfully in %d ms%n", initDuration);
             System.out.println("Summary: Database + Static Data + YAML Config + APEX Components ready");
             logExecution("Bootstrap initialized in " + initDuration + "ms");
 
@@ -341,7 +341,7 @@ public class CommoditySwapValidationBootstrap {
                 System.out.println("   PostgreSQL not available - switching to in-memory simulation");
                 setupInMemorySimulation();
                 long dbSetupEnd = System.currentTimeMillis();
-                System.out.println("   In-memory simulation setup completed in {} ms", dbSetupEnd - dbSetupStart);
+                System.out.printf("   In-memory simulation setup completed in %d ms%n", dbSetupEnd - dbSetupStart);
                 return;
             }
 
@@ -360,7 +360,7 @@ public class CommoditySwapValidationBootstrap {
             createDatabaseSchema();
 
             long dbSetupEnd = System.currentTimeMillis();
-            System.out.println("Database infrastructure setup completed in {} ms", dbSetupEnd - dbSetupStart);
+            System.out.printf("Database infrastructure setup completed in %d ms%n", dbSetupEnd - dbSetupStart);
             System.out.println("   Database: apex_commodity_demo");
             System.out.println("   Tables: 5 (commodity_swaps, commodity_reference_data, client_data, counterparty_data, validation_audit)");
             System.out.println("   Status: Ready for commodity swap validation operations");
@@ -574,30 +574,30 @@ public class CommoditySwapValidationBootstrap {
         try {
             System.out.println("   Loading clients repository...");
             initializeClients();
-            System.out.println("     Loaded {} institutional clients with regulatory classifications", clients.size());
+            System.out.printf("     Loaded %d institutional clients with regulatory classifications%n", clients.size());
 
             System.out.println("   Loading counterparties repository...");
             initializeCounterparties();
-            System.out.println("     Loaded {} counterparties with credit ratings and authorized products", counterparties.size());
+            System.out.printf("     Loaded %d counterparties with credit ratings and authorized products%n", counterparties.size());
 
             System.out.println("   Loading commodities repository...");
             initializeCommodities();
-            System.out.println("     Loaded {} commodities across Energy, Metals, and Agricultural sectors", commodities.size());
+            System.out.printf("     Loaded %d commodities across Energy, Metals, and Agricultural sectors%n", commodities.size());
 
             System.out.println("   Loading currencies repository...");
             initializeCurrencies();
-            System.out.println("     Loaded {} major global currencies with trading details", currencies.size());
+            System.out.printf("     Loaded %d major global currencies with trading details%n", currencies.size());
 
             long staticDataEnd = System.currentTimeMillis();
             long staticDataDuration = staticDataEnd - staticDataStart;
 
-            System.out.println("Static data repositories initialized successfully in {} ms", staticDataDuration);
+            System.out.printf("Static data repositories initialized successfully in %d ms%n", staticDataDuration);
             System.out.println("Summary:");
-            System.out.println("   - Clients: {} (Energy Trading Fund, Global Investment Corp, Hedge Fund)", clients.size());
-            System.out.println("   - Counterparties: {} (Global Bank, Trading House, Energy Specialist)", counterparties.size());
-            System.out.println("   - Commodities: {} (WTI, Brent, Henry Hub, Gold, Silver, Corn)", commodities.size());
-            System.out.println("   - Currencies: {} (USD, EUR, GBP, JPY, CHF, CAD)", currencies.size());
-            System.out.println("   Total Reference Records: {}", clients.size() + counterparties.size() + commodities.size() + currencies.size());
+            System.out.printf("   - Clients: %d (Energy Trading Fund, Global Investment Corp, Hedge Fund)%n", clients.size());
+            System.out.printf("   - Counterparties: %d (Global Bank, Trading House, Energy Specialist)%n", counterparties.size());
+            System.out.printf("   - Commodities: %d (WTI, Brent, Henry Hub, Gold, Silver, Corn)%n", commodities.size());
+            System.out.printf("   - Currencies: %d (USD, EUR, GBP, JPY, CHF, CAD)%n", currencies.size());
+            System.out.printf("   Total Reference Records: %d%n", clients.size() + counterparties.size() + commodities.size() + currencies.size());
 
             logExecution("Static data initialized: " + (clients.size() + counterparties.size() + commodities.size() + currencies.size()) + " records in " + staticDataDuration + "ms");
 
@@ -1148,7 +1148,7 @@ public class CommoditySwapValidationBootstrap {
             System.out.println("   Generating embedded YAML configuration...");
             // Create embedded YAML configuration
             String yamlContent = createEmbeddedYamlConfiguration();
-            System.out.println("     YAML content generated: {} characters", yamlContent.length());
+            System.out.printf("     YAML content generated: %d characters%n", yamlContent.length());
             System.out.println("     Configuration includes: validation chains + enrichment patterns + thresholds");
 
             System.out.println("   Loading YAML configuration into APEX...");
@@ -1161,7 +1161,7 @@ public class CommoditySwapValidationBootstrap {
             long yamlLoadEnd = System.currentTimeMillis();
             long yamlLoadDuration = yamlLoadEnd - yamlLoadStart;
 
-            System.out.println("YAML configuration loaded successfully in {} ms", yamlLoadDuration);
+            System.out.printf("YAML configuration loaded successfully in %d ms%n", yamlLoadDuration);
             System.out.println("Configuration Summary:");
             System.out.println("   - Rule Chains: 3 (Ultra-Simple, Template-Based, Advanced)");
             System.out.println("   - Enrichment Patterns: 2 (Client Data, Commodity Reference)");
@@ -1389,7 +1389,7 @@ public class CommoditySwapValidationBootstrap {
             long apexInitEnd = System.currentTimeMillis();
             long apexInitDuration = apexInitEnd - apexInitStart;
 
-            System.out.println("APEX components initialized successfully in {} ms", apexInitDuration);
+            System.out.printf("APEX components initialized successfully in %d ms%n", apexInitDuration);
             System.out.println("Components Summary:");
             System.out.println("   - Rules Service: Ready for validation rule execution");
             System.out.println("   - Enrichment Service: Ready for data enrichment operations");
@@ -1476,8 +1476,8 @@ public class CommoditySwapValidationBootstrap {
             System.out.println("=================================================================");
             System.out.println("ALL SCENARIOS EXECUTED SUCCESSFULLY!");
             System.out.println("=================================================================");
-            System.out.println("Total Execution Time: {} ms", allScenariosDuration);
-            System.out.println("Scenarios Completed: {}/{}", completedScenarios, totalScenarios);
+            System.out.printf("Total Execution Time: %d ms%n", allScenariosDuration);
+            System.out.printf("Scenarios Completed: %d/%d%n", completedScenarios, totalScenarios);
             System.out.println("Validation Methods: 3 (Ultra-Simple, Template-Based, Advanced)");
             System.out.println("Enrichment Sources: 4 (Clients, Counterparties, Commodities, Currencies)");
             System.out.println("Performance Metrics: Collected across all scenarios");
@@ -1523,9 +1523,9 @@ public class CommoditySwapValidationBootstrap {
             // Create sample commodity swap
             System.out.println("Step 1.1: Creating sample energy commodity swap...");
             CommodityTotalReturnSwap swap = createSampleEnergySwap();
-            System.out.println("   Sample swap created: {} ({} - {})", swap.getTradeId(), swap.getCommodityType(), swap.getReferenceIndex());
-            System.out.println("   Notional: {} {}, Maturity: {}", swap.getNotionalAmount(), swap.getNotionalCurrency(), swap.getMaturityDate());
-            System.out.println("   Counterparty: {}, Client: {}", swap.getCounterpartyId(), swap.getClientId());
+            System.out.printf("   Sample swap created: %s (%s - %s)%n", swap.getTradeId(), swap.getCommodityType(), swap.getReferenceIndex());
+            System.out.printf("   Notional: %s %s, Maturity: %s%n", swap.getNotionalAmount(), swap.getNotionalCurrency(), swap.getMaturityDate());
+            System.out.printf("   Counterparty: %s, Client: %s%n", swap.getCounterpartyId(), swap.getClientId());
 
             System.out.println("Step 1.2: Initializing Ultra-Simple API validation engine...");
             // Ultra-Simple API validation
@@ -1535,26 +1535,26 @@ public class CommoditySwapValidationBootstrap {
             System.out.println("Step 1.3: Converting swap data to validation context...");
             // Convert swap to map for rule evaluation
             Map<String, Object> context = convertSwapToMap(swap);
-            System.out.println("   Validation context created with {} fields", context.size());
+            System.out.printf("   Validation context created with %d fields%n", context.size());
 
             System.out.println("Step 1.4: Executing basic field validations...");
             // Basic field validations
             long validationStart = System.currentTimeMillis();
 
             boolean tradeIdValid = rulesService.check("#tradeId != null && #tradeId.trim().length() > 0", context);
-            System.out.println("   Trade ID validation: {} ({})", tradeIdValid ? "PASS" : "FAIL", swap.getTradeId());
+            System.out.printf("   Trade ID validation: %s (%s)%n", tradeIdValid ? "PASS" : "FAIL", swap.getTradeId());
 
             boolean counterpartyValid = rulesService.check("#counterpartyId != null && #counterpartyId.trim().length() > 0", context);
-            System.out.println("   Counterparty validation: {} ({})", counterpartyValid ? "PASS" : "FAIL", swap.getCounterpartyId());
+            System.out.printf("   Counterparty validation: %s (%s)%n", counterpartyValid ? "PASS" : "FAIL", swap.getCounterpartyId());
 
             boolean clientValid = rulesService.check("#clientId != null && #clientId.trim().length() > 0", context);
-            System.out.println("   Client validation: {} ({})", clientValid ? "PASS" : "FAIL", swap.getClientId());
+            System.out.printf("   Client validation: %s (%s)%n", clientValid ? "PASS" : "FAIL", swap.getClientId());
 
             boolean notionalValid = rulesService.check("#notionalAmount != null && #notionalAmount > 0", context);
-            System.out.println("   Notional validation: {} ({})", notionalValid ? "PASS" : "FAIL", swap.getNotionalAmount());
+            System.out.printf("   Notional validation: %s (%s)%n", notionalValid ? "PASS" : "FAIL", swap.getNotionalAmount());
 
             boolean commodityTypeValid = rulesService.check("#commodityType != null && #commodityType.trim().length() > 0", context);
-            System.out.println("   Commodity type validation: {} ({})", commodityTypeValid ? "PASS" : "FAIL", swap.getCommodityType());
+            System.out.printf("   Commodity type validation: %s (%s)%n", commodityTypeValid ? "PASS" : "FAIL", swap.getCommodityType());
 
             long validationEnd = System.currentTimeMillis();
             long validationDuration = validationEnd - validationStart;
@@ -1564,9 +1564,9 @@ public class CommoditySwapValidationBootstrap {
             int passedChecks = (tradeIdValid ? 1 : 0) + (counterpartyValid ? 1 : 0) + (clientValid ? 1 : 0) + (notionalValid ? 1 : 0) + (commodityTypeValid ? 1 : 0);
 
             System.out.println("VALIDATION RESULTS SUMMARY:");
-            System.out.println("   Overall Result: {} ({}/5 checks passed)", overallValid ? "PASS" : "FAIL", passedChecks);
-            System.out.println("   Validation Time: {} ms", validationDuration);
-            System.out.println("   Trade Status: {}", overallValid ? "APPROVED for further processing" : "REJECTED - requires correction");
+            System.out.printf("   Overall Result: %s (%d/5 checks passed)%n", overallValid ? "PASS" : "FAIL", passedChecks);
+            System.out.printf("   Validation Time: %d ms%n", validationDuration);
+            System.out.printf("   Trade Status: %s%n", overallValid ? "APPROVED for further processing" : "REJECTED - requires correction");
 
             long processingTime = System.currentTimeMillis() - startTime;
             performanceMetrics.put("Scenario1_ProcessingTime", processingTime);
@@ -1576,12 +1576,12 @@ public class CommoditySwapValidationBootstrap {
             System.out.println("Step 1.6: Recording audit trail...");
             // Store audit record
             storeValidationAudit(swap.getTradeId(), "ULTRA_SIMPLE_API", overallValid ? "PASS" : "FAIL", processingTime);
-            System.out.println("   Audit record stored for trade: {}", swap.getTradeId());
+            System.out.printf("   Audit record stored for trade: %s%n", swap.getTradeId());
 
             System.out.println("SCENARIO 1 COMPLETED SUCCESSFULLY");
-            System.out.println("   Total Processing Time: {} ms", processingTime);
+            System.out.printf("   Total Processing Time: %d ms%n", processingTime);
             System.out.println("   Validation Approach: Ultra-Simple API");
-            System.out.println("   Result: {} with {}/5 checks passed", overallValid ? "PASS" : "FAIL", passedChecks);
+            System.out.printf("   Result: %s with %d/5 checks passed%n", overallValid ? "PASS" : "FAIL", passedChecks);
 
             logExecution("Scenario 1 (Ultra-Simple API) completed: " + (overallValid ? "PASS" : "FAIL") + " in " + processingTime + "ms");
 
