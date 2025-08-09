@@ -1,6 +1,9 @@
 package dev.mars.apex.rest.controller;
 
 import dev.mars.apex.core.api.RulesService;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.rest.dto.*;
 import dev.mars.apex.rest.service.RuleEvaluationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,8 +24,9 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import java.util.Map;
-import java.util.UUID;
+import jakarta.validation.constraints.NotNull;
+import java.time.Instant;
+import java.util.*;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -60,9 +64,12 @@ public class RulesController {
     
     @Autowired
     private RulesService rulesService;
-    
+
     @Autowired
     private RuleEvaluationService ruleEvaluationService;
+
+    @Autowired
+    private RulesEngine rulesEngine;
     
     /**
      * Simple rule check endpoint.
@@ -283,5 +290,210 @@ public class RulesController {
             "count", definedRules.length,
             "timestamp", java.time.Instant.now()
         ));
+    }
+
+    /**
+     * Execute a rule directly with provided facts.
+     */
+    @PostMapping("/execute")
+    @Operation(
+        summary = "Execute rule directly",
+        description = "Executes a rule directly using the rule engine with provided facts."
+    )
+    @ApiResponse(responseCode = "200", description = "Rule executed successfully")
+    public ResponseEntity<Map<String, Object>> executeRule(
+            @RequestBody
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "Rule execution request",
+                content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(
+                        name = "Execute rule",
+                        value = """
+                        {
+                          "rule": {
+                            "name": "high-value-trade",
+                            "condition": "#amount > 10000",
+                            "message": "High value trade detected",
+                            "priority": "HIGH"
+                          },
+                          "facts": {
+                            "amount": 15000.0,
+                            "currency": "USD",
+                            "customerId": "CUST001"
+                          }
+                        }
+                        """
+                    )
+                )
+            )
+            @Valid @NotNull RuleExecutionRequest request) {
+
+        logger.info("Executing rule: {}", request.getRule().getName());
+
+        try {
+            // Create Rule object from request
+            Rule rule = new Rule(
+                request.getRule().getName(),
+                request.getRule().getCondition(),
+                request.getRule().getMessage()
+            );
+
+            // Execute the rule
+            RuleResult result = rulesEngine.executeRule(rule, request.getFacts());
+
+            // Prepare response
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("rule", Map.of(
+                "name", rule.getName(),
+                "condition", rule.getCondition(),
+                "message", rule.getMessage(),
+                "priority", rule.getPriority()
+            ));
+            response.put("facts", request.getFacts());
+            response.put("result", Map.of(
+                "triggered", result.isTriggered(),
+                "ruleName", result.getRuleName(),
+                "message", result.getMessage(),
+                "resultType", result.getResultType().toString(),
+                "timestamp", result.getTimestamp(),
+                "hasPerformanceMetrics", result.hasPerformanceMetrics()
+            ));
+            response.put("timestamp", java.time.Instant.now());
+
+            logger.info("Rule execution completed: triggered={}", result.isTriggered());
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Error executing rule: {}", e.getMessage(), e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Rule execution failed");
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("timestamp", java.time.Instant.now());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * Execute multiple rules in batch.
+     */
+    @PostMapping("/batch")
+    @Operation(
+        summary = "Execute multiple rules in batch",
+        description = "Executes multiple rules against the same set of facts."
+    )
+    @ApiResponse(responseCode = "200", description = "Batch rule execution completed")
+    public ResponseEntity<Map<String, Object>> executeBatchRules(
+            @RequestBody @Valid @NotNull BatchRuleExecutionRequest request) {
+
+        logger.info("Executing {} rules in batch", request.getRules().size());
+
+        try {
+            // Convert DTOs to Rule objects
+            List<Rule> rules = new ArrayList<>();
+            for (RuleDto ruleDto : request.getRules()) {
+                Rule rule = new Rule(ruleDto.getName(), ruleDto.getCondition(), ruleDto.getMessage());
+                rules.add(rule);
+            }
+
+            // Execute all rules
+            List<RuleResult> results = new ArrayList<>();
+            for (Rule rule : rules) {
+                RuleResult result = rulesEngine.executeRule(rule, request.getFacts());
+                results.add(result);
+            }
+
+            // Prepare response
+            List<Map<String, Object>> ruleResults = new ArrayList<>();
+            for (RuleResult result : results) {
+                ruleResults.add(Map.of(
+                    "triggered", result.isTriggered(),
+                    "ruleName", result.getRuleName(),
+                    "message", result.getMessage(),
+                    "resultType", result.getResultType().toString(),
+                    "timestamp", result.getTimestamp()
+                ));
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("totalRules", rules.size());
+            response.put("triggeredRules", results.stream().mapToInt(r -> r.isTriggered() ? 1 : 0).sum());
+            response.put("facts", request.getFacts());
+            response.put("results", ruleResults);
+            response.put("timestamp", java.time.Instant.now());
+
+            logger.info("Batch rule execution completed: {}/{} rules triggered",
+                results.stream().mapToInt(r -> r.isTriggered() ? 1 : 0).sum(), rules.size());
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Error during batch rule execution: {}", e.getMessage(), e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Batch rule execution failed");
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("timestamp", java.time.Instant.now());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    // DTOs for request/response
+    public static class RuleExecutionRequest {
+        @NotNull
+        private RuleDto rule;
+
+        @NotNull
+        private Map<String, Object> facts;
+
+        // Getters and setters
+        public RuleDto getRule() { return rule; }
+        public void setRule(RuleDto rule) { this.rule = rule; }
+        public Map<String, Object> getFacts() { return facts; }
+        public void setFacts(Map<String, Object> facts) { this.facts = facts; }
+    }
+
+    public static class RuleDto {
+        @NotBlank
+        private String name;
+        @NotBlank
+        private String condition;
+        private String message;
+        private String priority;
+
+        // Constructors
+        public RuleDto() {}
+
+        public RuleDto(String name, String condition, String message) {
+            this.name = name;
+            this.condition = condition;
+            this.message = message;
+        }
+
+        // Getters and setters
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+        public String getCondition() { return condition; }
+        public void setCondition(String condition) { this.condition = condition; }
+        public String getMessage() { return message; }
+        public void setMessage(String message) { this.message = message; }
+        public String getPriority() { return priority; }
+        public void setPriority(String priority) { this.priority = priority; }
+    }
+
+    public static class BatchRuleExecutionRequest {
+        @NotNull
+        private List<RuleDto> rules;
+
+        @NotNull
+        private Map<String, Object> facts;
+
+        // Getters and setters
+        public List<RuleDto> getRules() { return rules; }
+        public void setRules(List<RuleDto> rules) { this.rules = rules; }
+        public Map<String, Object> getFacts() { return facts; }
+        public void setFacts(Map<String, Object> facts) { this.facts = facts; }
     }
 }

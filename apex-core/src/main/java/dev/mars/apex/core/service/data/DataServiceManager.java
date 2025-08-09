@@ -166,9 +166,28 @@ public class DataServiceManager {
     }
 
     /**
+     * Get the names of all registered data sources.
+     *
+     * @return Array of registered data source names
+     */
+    public String[] getRegisteredDataSources() {
+        return dataSourcesByName.keySet().toArray(new String[0]);
+    }
+
+    /**
+     * Get a data source by name.
+     *
+     * @param name The name of the data source
+     * @return The data source, or null if not found
+     */
+    public DataSource getDataSource(String name) {
+        return getDataSourceByName(name);
+    }
+
+    /**
      * Initialize with default mock data sources.
      * This is a convenience method for quick setup with test data.
-     * 
+     *
      * @return This manager for method chaining
      */
     public DataServiceManager initializeWithMockData() {

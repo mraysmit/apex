@@ -56,11 +56,22 @@ public interface DataSource {
 
     /**
      * Get data from this source.
-     * 
+     *
      * @param <T> The type of data to return
      * @param dataType The type of data to get
      * @param parameters Optional parameters to filter or customize the data
      * @return The requested data, or null if the data type is not supported
      */
     <T> T getData(String dataType, Object... parameters);
+
+    /**
+     * Perform a lookup operation using a key.
+     * This is a convenience method that delegates to getData with the key as a parameter.
+     *
+     * @param key The lookup key
+     * @return The lookup result, or null if not found
+     */
+    default Object lookup(String key) {
+        return getData(getDataType(), key);
+    }
 }

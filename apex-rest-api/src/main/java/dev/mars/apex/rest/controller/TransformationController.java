@@ -1,0 +1,335 @@
+package dev.mars.apex.rest.controller;
+
+import dev.mars.apex.core.service.transform.GenericTransformerService;
+import dev.mars.apex.core.service.transform.TransformerRule;
+import dev.mars.apex.core.engine.model.RuleResult;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import java.time.Instant;
+import java.util.*;
+
+/**
+ * REST Controller for transformation operations.
+ * Provides endpoints for data transformation using the APEX transformation engine.
+ */
+@RestController
+@RequestMapping("/api/transform")
+@Tag(name = "Transformation", description = "Data transformation operations")
+public class TransformationController {
+
+    private static final Logger logger = LoggerFactory.getLogger(TransformationController.class);
+
+    @Autowired
+    private GenericTransformerService transformerService;
+
+    /**
+     * Transform data using a registered transformer.
+     */
+    @PostMapping("/{transformerName}")
+    @Operation(
+        summary = "Transform data using a registered transformer",
+        description = "Applies a registered transformer to the provided data and returns the transformed result."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Data transformed successfully"),
+        @ApiResponse(responseCode = "404", description = "Transformer not found"),
+        @ApiResponse(responseCode = "400", description = "Invalid transformation request"),
+        @ApiResponse(responseCode = "500", description = "Transformation error")
+    })
+    public ResponseEntity<Map<String, Object>> transformData(
+            @Parameter(description = "Name of the transformer to use", example = "customer-normalizer")
+            @PathVariable @NotBlank String transformerName,
+
+            @RequestBody
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "Data to transform",
+                content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(
+                        name = "Customer data",
+                        value = """
+                        {
+                          "firstName": "john",
+                          "lastName": "doe",
+                          "email": "JOHN.DOE@EXAMPLE.COM",
+                          "age": 25
+                        }
+                        """
+                    )
+                )
+            )
+            @Valid @NotNull Object data) {
+
+        logger.info("Transforming data using transformer: {}", transformerName);
+        logger.debug("Input data: {}", data);
+
+        try {
+            // Transform the data
+            Object transformedData = transformerService.transform(transformerName, data);
+
+            // Prepare response
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("transformerName", transformerName);
+            response.put("originalData", data);
+            response.put("transformedData", transformedData);
+            response.put("timestamp", Instant.now());
+
+            logger.info("Data transformation completed successfully");
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            logger.warn("Transformer not found: {}", transformerName);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Transformer not found");
+            errorResponse.put("transformerName", transformerName);
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("timestamp", Instant.now());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+
+        } catch (Exception e) {
+            logger.error("Error during transformation: {}", e.getMessage(), e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Transformation failed");
+            errorResponse.put("transformerName", transformerName);
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("timestamp", Instant.now());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * Transform data with detailed result information.
+     */
+    @PostMapping("/{transformerName}/detailed")
+    @Operation(
+        summary = "Transform data with detailed result",
+        description = "Applies a transformer and returns detailed transformation result including rule execution details."
+    )
+    @ApiResponse(responseCode = "200", description = "Detailed transformation completed")
+    public ResponseEntity<Map<String, Object>> transformDataWithResult(
+            @Parameter(description = "Name of the transformer to use")
+            @PathVariable @NotBlank String transformerName,
+
+            @RequestBody @Valid @NotNull Object data) {
+
+        logger.info("Transforming data with detailed result using transformer: {}", transformerName);
+
+        try {
+            // Transform with detailed result
+            RuleResult result = transformerService.transformWithResult(transformerName, data);
+
+            // Prepare detailed response
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("transformerName", transformerName);
+            response.put("originalData", data);
+            response.put("ruleResult", Map.of(
+                "triggered", result.isTriggered(),
+                "ruleName", result.getRuleName(),
+                "message", result.getMessage(),
+                "result", result.getResult(),
+                "executionTime", result.getExecutionTime(),
+                "error", result.getError()
+            ));
+            response.put("timestamp", Instant.now());
+
+            logger.info("Detailed transformation completed successfully");
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Error during detailed transformation: {}", e.getMessage(), e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Detailed transformation failed");
+            errorResponse.put("transformerName", transformerName);
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("timestamp", Instant.now());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * Create and apply a dynamic transformer.
+     */
+    @PostMapping("/dynamic")
+    @Operation(
+        summary = "Create and apply dynamic transformer",
+        description = "Creates a transformer on-the-fly with the provided rules and applies it to the data."
+    )
+    @ApiResponse(responseCode = "200", description = "Dynamic transformation completed")
+    public ResponseEntity<Map<String, Object>> transformWithDynamicRules(
+            @RequestBody
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "Dynamic transformation request",
+                content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(
+                        name = "Dynamic transformation",
+                        value = """
+                        {
+                          "data": {
+                            "firstName": "john",
+                            "lastName": "doe",
+                            "email": "JOHN.DOE@EXAMPLE.COM"
+                          },
+                          "transformerRules": [
+                            {
+                              "name": "normalize-name",
+                              "condition": "#firstName != null",
+                              "transformation": "#firstName.substring(0,1).toUpperCase() + #firstName.substring(1).toLowerCase()",
+                              "targetField": "firstName"
+                            },
+                            {
+                              "name": "normalize-email",
+                              "condition": "#email != null",
+                              "transformation": "#email.toLowerCase()",
+                              "targetField": "email"
+                            }
+                          ]
+                        }
+                        """
+                    )
+                )
+            )
+            @Valid @NotNull DynamicTransformationRequest request) {
+
+        logger.info("Applying dynamic transformation with {} rules", request.getTransformerRules().size());
+
+        try {
+            // Convert DTO rules to TransformerRule objects
+            List<TransformerRule<Object>> transformerRules = new ArrayList<>();
+            for (TransformerRuleDto ruleDto : request.getTransformerRules()) {
+                TransformerRule<Object> rule = new TransformerRule<>(
+                    ruleDto.getName(),
+                    ruleDto.getCondition(),
+                    ruleDto.getTransformation(),
+                    ruleDto.getTargetField()
+                );
+                transformerRules.add(rule);
+            }
+
+            // Apply dynamic transformation
+            Object transformedData = transformerService.transform(request.getData(), transformerRules);
+
+            // Prepare response
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("originalData", request.getData());
+            response.put("transformedData", transformedData);
+            response.put("appliedRules", request.getTransformerRules().size());
+            response.put("timestamp", Instant.now());
+
+            logger.info("Dynamic transformation completed successfully");
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Error during dynamic transformation: {}", e.getMessage(), e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Dynamic transformation failed");
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("timestamp", Instant.now());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * Get list of registered transformers.
+     */
+    @GetMapping("/registered")
+    @Operation(
+        summary = "Get registered transformers",
+        description = "Returns a list of all registered transformers available for use."
+    )
+    @ApiResponse(responseCode = "200", description = "Registered transformers retrieved successfully")
+    public ResponseEntity<Map<String, Object>> getRegisteredTransformers() {
+        logger.debug("Retrieving registered transformers");
+
+        try {
+            // Get registered transformers from service
+            String[] registeredTransformers = transformerService.getRegisteredTransformers();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("transformers", Arrays.asList(registeredTransformers));
+            response.put("count", registeredTransformers.length);
+            response.put("timestamp", Instant.now());
+
+            logger.debug("Retrieved {} registered transformers", registeredTransformers.length);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Error retrieving registered transformers: {}", e.getMessage(), e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Failed to retrieve transformers");
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("timestamp", Instant.now());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    // DTOs for request/response
+    public static class DynamicTransformationRequest {
+        @NotNull
+        private Object data;
+        
+        @NotNull
+        private List<TransformerRuleDto> transformerRules;
+
+        // Getters and setters
+        public Object getData() { return data; }
+        public void setData(Object data) { this.data = data; }
+        public List<TransformerRuleDto> getTransformerRules() { return transformerRules; }
+        public void setTransformerRules(List<TransformerRuleDto> transformerRules) { this.transformerRules = transformerRules; }
+    }
+
+    public static class TransformerRuleDto {
+        @NotBlank
+        private String name;
+        @NotBlank
+        private String condition;
+        @NotBlank
+        private String transformation;
+        @NotBlank
+        private String targetField;
+
+        // Constructors
+        public TransformerRuleDto() {}
+        
+        public TransformerRuleDto(String name, String condition, String transformation, String targetField) {
+            this.name = name;
+            this.condition = condition;
+            this.transformation = transformation;
+            this.targetField = targetField;
+        }
+
+        // Getters and setters
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+        public String getCondition() { return condition; }
+        public void setCondition(String condition) { this.condition = condition; }
+        public String getTransformation() { return transformation; }
+        public void setTransformation(String transformation) { this.transformation = transformation; }
+        public String getTargetField() { return targetField; }
+        public void setTargetField(String targetField) { this.targetField = targetField; }
+    }
+}

@@ -405,4 +405,13 @@ public class GenericTransformerService {
             return copy;
         }
     }
+
+    /**
+     * Get the names of all registered transformers.
+     *
+     * @return Array of registered transformer names
+     */
+    public String[] getRegisteredTransformers() {
+        return registry.getServiceNames(GenericTransformer.class);
+    }
 }

@@ -45,4 +45,17 @@ public class LookupServiceRegistry {
         }
         return null;
     }
+
+    /**
+     * Get the names of all registered services of a specific type.
+     *
+     * @param type The type of services to get names for
+     * @return Array of service names
+     */
+    public <T extends NamedService> String[] getServiceNames(Class<T> type) {
+        return services.entrySet().stream()
+            .filter(entry -> type.isInstance(entry.getValue()))
+            .map(Map.Entry::getKey)
+            .toArray(String[]::new);
+    }
 }
