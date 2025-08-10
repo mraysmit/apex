@@ -1,6 +1,5 @@
 package dev.mars.apex.core.service.monitoring;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -65,13 +64,12 @@ public class RulePerformanceMonitor {
         final String ruleName;
         final Instant startTime;
         final long startMemory;
-        final String phase;
-        
+
         EvaluationContext(String ruleName, String phase) {
             this.ruleName = ruleName;
             this.startTime = Instant.now();
             this.startMemory = trackMemory() ? getUsedMemory() : 0;
-            this.phase = phase;
+            // phase parameter is used directly in startEvaluation method, not stored here
         }
         
         private static boolean trackMemory() {

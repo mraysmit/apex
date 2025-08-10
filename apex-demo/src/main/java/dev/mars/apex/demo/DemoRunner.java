@@ -144,10 +144,15 @@ public class DemoRunner {
     }
 
     private void displayBanner() {
-        System.out.println("╔══════════════════════════════════════════════════════════════════════════════╗");
-        System.out.println("║                        SpEL Rules Engine - Demo Suite                       ║");
-        System.out.println("║                     Comprehensive demonstrations of APEX                    ║");
-        System.out.println("╚══════════════════════════════════════════════════════════════════════════════╝");
+        if (isTestEnvironment()) {
+            System.out.println("=== SpEL Rules Engine - Demo Suite (TEST MODE) ===");
+            System.out.println("Comprehensive demonstrations of APEX");
+        } else {
+            System.out.println("╔══════════════════════════════════════════════════════════════════════════════╗");
+            System.out.println("║                        SpEL Rules Engine - Demo Suite                       ║");
+            System.out.println("║                     Comprehensive demonstrations of APEX                    ║");
+            System.out.println("╚══════════════════════════════════════════════════════════════════════════════╝");
+        }
         System.out.println();
     }
 
@@ -201,8 +206,12 @@ public class DemoRunner {
 
     private void runQuickStartDemo() {
         try {
-            System.out.println("Quick Start (5 Minutes)");
-            System.out.println("=======================");
+            if (isTestEnvironment()) {
+                System.out.println("Quick Start (5 Minutes) - TEST MODE");
+            } else {
+                System.out.println("Quick Start (5 Minutes)");
+                System.out.println("=======================");
+            }
             new QuickStartDemo().run();
         } catch (Exception e) {
             System.out.println("Error running QuickStart demo: " + e.getMessage());

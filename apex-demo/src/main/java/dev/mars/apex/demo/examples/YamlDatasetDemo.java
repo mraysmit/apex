@@ -242,12 +242,23 @@ public class YamlDatasetDemo {
         // Simulate performance metrics
         long externalServiceTime = 150; // milliseconds
         long inMemoryTime = 0; // sub-millisecond
-        
+
         System.out.println("External Service Lookup:");
         System.out.println("    Average Response Time: " + externalServiceTime + "ms");
         System.out.println("   Network Dependency: Required");
         System.out.println("   Caching: Complex to implement");
         System.out.println("   Throughput: ~6-7 lookups/second");
+
+        System.out.println("\nIn-Memory Dataset Lookup:");
+        System.out.println("    Average Response Time: <" + (inMemoryTime + 1) + "ms (sub-millisecond)");
+        System.out.println("   Network Dependency: None");
+        System.out.println("   Caching: Built-in");
+        System.out.println("   Throughput: >10,000 lookups/second");
+
+        System.out.println("\nPerformance Improvement:");
+        System.out.println("   Speed improvement: " + (externalServiceTime > 0 ? externalServiceTime + "x faster" : "Significantly faster"));
+        System.out.println("   Reliability: No network failures");
+        System.out.println("   Scalability: Linear with memory");
         System.out.println();
         
         System.out.println("In-Memory Dataset Lookup:");
@@ -319,7 +330,9 @@ public class YamlDatasetDemo {
             "EUR", Map.of("name", "Euro", "region", "Europe", "decimalPlaces", 2),
             "GBP", Map.of("name", "British Pound", "region", "Europe", "decimalPlaces", 2)
         );
-        return (Map<String, Object>) currencies.getOrDefault(currencyCode, Map.of());
+        @SuppressWarnings("unchecked")
+        Map<String, Object> result = (Map<String, Object>) currencies.getOrDefault(currencyCode, Map.of());
+        return result;
     }
     
     private Map<String, Object> simulateFieldMapping(Map<String, Object> originalData, String currencyCode) {
@@ -335,15 +348,23 @@ public class YamlDatasetDemo {
     }
     
     private boolean evaluateCondition(String condition, Map<String, Object> data) {
-        // Simplified condition evaluation for demo purposes
-        if (condition.contains("'PREMIUM'")) {
-            return "PREMIUM".equals(data.get("customerType"));
+        // Use RulesService for proper condition evaluation
+        try {
+            // Convert array-style syntax to SpEL syntax for RulesService
+            String spelCondition = condition.replace("['", "#").replace("']", "");
+            return rulesService.check(spelCondition, data);
+        } catch (Exception e) {
+            // Fallback to simplified evaluation for demo purposes
+            System.out.println("    Note: Using simplified evaluation for condition: " + condition);
+            if (condition.contains("'PREMIUM'")) {
+                return "PREMIUM".equals(data.get("customerType"));
+            }
+            if (condition.contains("> 1000")) {
+                Object amount = data.get("amount");
+                return amount instanceof Number && ((Number) amount).doubleValue() > 1000;
+            }
+            return true;
         }
-        if (condition.contains("> 1000")) {
-            Object amount = data.get("amount");
-            return amount instanceof Number && ((Number) amount).doubleValue() > 1000;
-        }
-        return true;
     }
     
     /**

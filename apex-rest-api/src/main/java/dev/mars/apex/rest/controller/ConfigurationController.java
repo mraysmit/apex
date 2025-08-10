@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -158,6 +158,10 @@ public class ConfigurationController {
 
         logger.info("Loading new YAML configuration");
         logger.debug("YAML content length: {} characters", yamlContent.length());
+
+        // Use test-aware logger for enhanced testing capabilities
+        testAwareLogger.warn(logger, "Configuration loading initiated via REST API - this may cause temporary service disruption");
+        testAwareLogger.error(logger, "YAML configuration size: {} bytes", yamlContent.getBytes().length);
 
         // Load configuration from string content
         YamlRuleConfiguration config = yamlConfigurationLoader.loadFromStream(

@@ -9,11 +9,9 @@ import java.util.List;
 public class YamlValidationSummary {
     
     private final List<YamlValidationResult> results;
-    private final long validationTimestamp;
     
     public YamlValidationSummary() {
         this.results = new ArrayList<>();
-        this.validationTimestamp = System.currentTimeMillis();
     }
     
     /**

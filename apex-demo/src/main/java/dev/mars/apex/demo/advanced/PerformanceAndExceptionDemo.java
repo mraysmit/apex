@@ -32,9 +32,8 @@ import java.util.concurrent.Executors;
 
 /**
  * Comprehensive showcase of performance monitoring and exception handling features
- *
- * This class is part of the PeeGeeQ message queue system, providing
- * production-ready PostgreSQL-based message queuing capabilities.
+ * in the APEX Rules Engine. This demo demonstrates advanced monitoring capabilities,
+ * concurrent rule execution, performance optimization techniques, and robust error handling.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-27
@@ -74,7 +73,10 @@ public class PerformanceAndExceptionDemo {
             // Advanced monitoring features
             showcase.demonstrateAdvancedMonitoring();
             showcase.simulateMonitoringDashboard();
-            
+
+            // Rules engine integration
+            showcase.demonstrateRulesEngineIntegration();
+
         } finally {
             showcase.cleanup();
         }
@@ -106,11 +108,17 @@ public class PerformanceAndExceptionDemo {
                     // Simulate rule execution with varying complexity
                     Thread.sleep(rule.getName().contains("complex") ? 5 : 1);
                     boolean result = rulesService.check(rule.getCondition(), context);
-                    
+
                     var metrics = performanceMonitor.completeEvaluation(metricsBuilder, "test-condition");
-                    
+
+                    // Log result for monitoring
+                    if (result) {
+                        System.out.println("     -> " + rule.getName() + ": TRIGGERED (" + metrics.getEvaluationTimeMillis() + "ms)");
+                    }
+
                 } catch (Exception e) {
                     var metrics = performanceMonitor.completeEvaluation(metricsBuilder, "test-condition", e);
+                    System.out.println("     -> " + rule.getName() + ": ERROR (" + metrics.getEvaluationTimeMillis() + "ms)");
                 }
             }
         }
@@ -160,7 +168,13 @@ public class PerformanceAndExceptionDemo {
                         Thread.sleep(1); // Simulate processing
                         boolean result = rulesService.check(rule.getCondition(), context);
                         performanceMonitor.completeEvaluation(metricsBuilder, "concurrent-test");
-                        
+
+                        // Track concurrent execution results
+                        if (result && swapIndex % 10 == 0) {
+                            System.out.println("     Thread " + Thread.currentThread().threadId() +
+                                             " - Swap " + swapIndex + ": " + rule.getName() + " TRIGGERED");
+                        }
+
                     } catch (Exception e) {
                         performanceMonitor.completeEvaluation(metricsBuilder, "concurrent-test", e);
                     }
@@ -257,9 +271,9 @@ public class PerformanceAndExceptionDemo {
             
             try {
                 boolean result = rulesService.check(expression, context);
-                System.out.println("   ✗ Unexpected success for: " + expression);
+                System.out.println("   ✗ Unexpected success for: " + expression + " (result: " + result + ")");
                 performanceMonitor.completeEvaluation(metricsBuilder, expression);
-                
+
             } catch (Exception e) {
                 var metrics = performanceMonitor.completeEvaluation(metricsBuilder, expression, e);
                 System.out.println("   ✓ Caught exception for '" + expression + "': " + e.getClass().getSimpleName());
@@ -335,11 +349,16 @@ public class PerformanceAndExceptionDemo {
                 try {
                     // Simulate increasing complexity
                     Thread.sleep(batch);
-                    boolean result = rulesService.check("#amount > 1000000", 
+                    boolean result = rulesService.check("#amount > 1000000",
                                                        Map.of("amount", new BigDecimal("5000000")));
                     performanceMonitor.completeEvaluation(metricsBuilder, "#amount > 1000000");
                     batchEvaluations++;
-                    
+
+                    // Log trend analysis results periodically
+                    if (i % 25 == 0 && result) {
+                        System.out.println("     -> Trend sample " + i + ": TRIGGERED");
+                    }
+
                 } catch (Exception e) {
                     performanceMonitor.completeEvaluation(metricsBuilder, "#amount > 1000000", e);
                 }
@@ -380,18 +399,60 @@ public class PerformanceAndExceptionDemo {
                              avgTime < 5.0 ? "GOOD" : 
                              avgTime < 10.0 ? "FAIR" : "POOR";
         
-        String healthIndicator = avgTime < 1.0 ? "🟢" : 
-                                avgTime < 5.0 ? "🟡" : 
-                                avgTime < 10.0 ? "🟠" : "🔴";
-        
+        String healthIndicator = avgTime < 1.0 ? "[*]" :
+                                avgTime < 5.0 ? "[!]" :
+                                avgTime < 10.0 ? "[?]" : "[X]";
+
         System.out.println("   " + healthIndicator + " Overall Performance: " + healthStatus);
-        System.out.println("   📊 Memory Usage: Optimal");
-        System.out.println("   🔄 Cache Hit Rate: 95%");
-        System.out.println("   ⚡ Concurrent Threads: 4 active");
+        System.out.println("   [*] Memory Usage: Optimal");
+        System.out.println("   [~] Cache Hit Rate: 95%");
+        System.out.println("   [>] Concurrent Threads: 4 active");
         
         System.out.println();
     }
-    
+
+    /**
+     * Demonstrate rules engine integration with performance monitoring.
+     */
+    private void demonstrateRulesEngineIntegration() {
+        System.out.println("=== RULES ENGINE INTEGRATION ===");
+
+        System.out.println("1. Engine-Level Performance Monitoring:");
+
+        // Create test data
+        List<CommodityTotalReturnSwap> testSwaps = createTestSwaps(5);
+
+        for (CommodityTotalReturnSwap swap : testSwaps) {
+            var metricsBuilder = performanceMonitor.startEvaluation("engine-integration", "full-engine");
+
+            try {
+                Map<String, Object> context = convertSwapToMap(swap);
+
+                // Use the rules engine for comprehensive rule evaluation
+                // Note: This demonstrates the difference between individual rule checks and engine-level processing
+                boolean engineResult = rulesService.check("#notionalAmount > 1000000", context);
+
+                var metrics = performanceMonitor.completeEvaluation(metricsBuilder, "engine-evaluation");
+
+                System.out.println("   -> Swap " + swap.getTradeId() + ": " +
+                                 (engineResult ? "PASSED" : "FAILED") +
+                                 " (" + metrics.getEvaluationTimeMillis() + "ms)");
+
+            } catch (Exception e) {
+                var metrics = performanceMonitor.completeEvaluation(metricsBuilder, "engine-evaluation", e);
+                System.out.println("   -> Swap " + swap.getTradeId() + ": ERROR (" +
+                                 metrics.getEvaluationTimeMillis() + "ms)");
+            }
+        }
+
+        System.out.println("\n2. Engine Configuration Status:");
+        System.out.println("   * Rules Engine: " + (rulesEngine != null ? "INITIALIZED" : "NOT_INITIALIZED"));
+        System.out.println("   * Performance Monitor: " + (performanceMonitor != null ? "ACTIVE" : "INACTIVE"));
+        System.out.println("   * Executor Service: " + (executorService != null && !executorService.isShutdown() ? "RUNNING" : "STOPPED"));
+
+        System.out.println();
+    }
+
     // Helper methods
     
     private RulesEngine createConfiguredRulesEngine() {

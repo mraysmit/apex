@@ -1,0 +1,23 @@
+[
+  {
+    "id": "PROD001",
+    "name": "US Treasury Bond",
+    "price": 1200.0,
+    "category": "FixedIncome",
+    "available": true
+  },
+  {
+    "id": "PROD002",
+    "name": "Apple Stock",
+    "price": 150.0,
+    "category": "Equity",
+    "available": true
+  },
+  {
+    "id": "PROD003",
+    "name": "Bitcoin ETF",
+    "price": 450.0,
+    "category": "ETF",
+    "available": true
+  }
+]

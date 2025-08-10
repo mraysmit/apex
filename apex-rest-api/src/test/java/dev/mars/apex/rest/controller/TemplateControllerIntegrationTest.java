@@ -3,6 +3,8 @@ package dev.mars.apex.rest.controller;
 import dev.mars.apex.rest.BaseIntegrationTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -30,10 +32,11 @@ public class TemplateControllerIntegrationTest extends BaseIntegrationTest {
         request.put("context", context);
 
         // Act
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            url("/api/templates/json"), 
-            createJsonEntity(request), 
-            Map.class
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            url("/api/templates/json"),
+            HttpMethod.POST,
+            createJsonEntity(request),
+            new ParameterizedTypeReference<Map<String, Object>>() {}
         );
 
         // Assert
@@ -57,10 +60,11 @@ public class TemplateControllerIntegrationTest extends BaseIntegrationTest {
         request.put("context", context);
 
         // Act
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            url("/api/templates/xml"), 
-            createJsonEntity(request), 
-            Map.class
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            url("/api/templates/xml"),
+            HttpMethod.POST,
+            createJsonEntity(request),
+            new ParameterizedTypeReference<Map<String, Object>>() {}
         );
 
         // Assert
@@ -84,10 +88,11 @@ public class TemplateControllerIntegrationTest extends BaseIntegrationTest {
         request.put("context", context);
 
         // Act
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            url("/api/templates/text"), 
-            createJsonEntity(request), 
-            Map.class
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            url("/api/templates/text"),
+            HttpMethod.POST,
+            createJsonEntity(request),
+            new ParameterizedTypeReference<Map<String, Object>>() {}
         );
 
         // Assert
@@ -110,10 +115,11 @@ public class TemplateControllerIntegrationTest extends BaseIntegrationTest {
         request.put("context", context);
 
         // Act
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            url("/api/templates/text"), 
-            createJsonEntity(request), 
-            Map.class
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            url("/api/templates/text"),
+            HttpMethod.POST,
+            createJsonEntity(request),
+            new ParameterizedTypeReference<Map<String, Object>>() {}
         );
 
         // Assert

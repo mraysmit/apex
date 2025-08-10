@@ -69,16 +69,21 @@ public class SimplifiedAPIDemo {
     private void demonstrateUltraSimpleAPI() {
         System.out.println("=== LAYER 1: ULTRA-SIMPLE API (90% of use cases) ===");
 
-        System.out.println("1. One-liner Rule Evaluations:");
+        System.out.println("1. One-liner Rule Evaluations (using SimpleRulesEngine):");
 
-        // Simple field validations
-        boolean hasName = rulesService.check("#name != null && #name.length() > 0",
-                                           Map.of("name", "John Doe"));
-        System.out.println("   ✓ Name validation: " + hasName);
+        // Simple field validations using SimpleRulesEngine
+        boolean hasName = simpleEngine.evaluate("#name != null && #name.length() > 0",
+                                               Map.of("name", "John Doe"));
+        System.out.println("   ✓ Name validation (SimpleEngine): " + hasName);
 
-        boolean validAge = rulesService.check("#age >= 18 && #age <= 120",
-                                            Map.of("age", 25));
-        System.out.println("   ✓ Age validation: " + validAge);
+        // Compare with RulesService
+        boolean hasNameViaService = rulesService.check("#name != null && #name.length() > 0",
+                                                      Map.of("name", "John Doe"));
+        System.out.println("   ✓ Name validation (RulesService): " + hasNameViaService);
+
+        boolean validAge = simpleEngine.evaluate("#age >= 18 && #age <= 120",
+                                                Map.of("age", 25));
+        System.out.println("   ✓ Age validation (SimpleEngine): " + validAge);
 
         boolean validEmail = rulesService.check("#email != null && #email.contains('@')",
                                               Map.of("email", "user@example.com"));
@@ -156,7 +161,7 @@ public class SimplifiedAPIDemo {
         System.out.println("   ✓ Counterparty credit check");
         System.out.println("   ✓ Regulatory compliance");
 
-        // Simulate template execution
+        // Execute template validation using customer data
         Map<String, Object> customerData = Map.of(
             "name", "Alice Johnson",
             "email", "alice@example.com",
@@ -164,11 +169,19 @@ public class SimplifiedAPIDemo {
             "phone", "+1-555-0123"
         );
 
-        System.out.println("\n4. Template Execution Results:");
-        System.out.println("   ✓ Customer validation: PASSED");
-        System.out.println("   ✓ All required fields present");
-        System.out.println("   ✓ All format validations passed");
-        System.out.println("   ✓ Business rules satisfied");
+        System.out.println("\n4. Template Execution Results (using customer data):");
+        System.out.println("   Customer: " + customerData.get("name"));
+        System.out.println("   Email: " + customerData.get("email"));
+
+        // Validate using SimpleRulesEngine
+        boolean nameValid = simpleEngine.evaluate("#name != null && #name.length() > 0", customerData);
+        boolean emailValid = simpleEngine.evaluate("#email != null && #email.contains('@')", customerData);
+        boolean ageValid = simpleEngine.evaluate("#age >= 18", customerData);
+
+        System.out.println("   ✓ Name validation: " + (nameValid ? "PASSED" : "FAILED"));
+        System.out.println("   ✓ Email validation: " + (emailValid ? "PASSED" : "FAILED"));
+        System.out.println("   ✓ Age validation: " + (ageValid ? "PASSED" : "FAILED"));
+        System.out.println("   ✓ Overall validation: " + (nameValid && emailValid && ageValid ? "PASSED" : "FAILED"));
 
         System.out.println();
     }

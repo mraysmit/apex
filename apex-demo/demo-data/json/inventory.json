@@ -1,0 +1,20 @@
+[
+  {
+    "productId": "PROD001",
+    "quantity": 1000,
+    "reserved": 50,
+    "available": 950
+  },
+  {
+    "productId": "PROD002",
+    "quantity": 500,
+    "reserved": 25,
+    "available": 475
+  },
+  {
+    "productId": "PROD003",
+    "quantity": 200,
+    "reserved": 10,
+    "available": 190
+  }
+]

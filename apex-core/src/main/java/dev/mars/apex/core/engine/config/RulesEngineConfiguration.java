@@ -104,16 +104,7 @@ public class RulesEngineConfiguration {
         sortRulesByPriority(category);
     }
 
-    /**
-     * Add a rule to a category by name.
-     * 
-     * @param rule The rule to add
-     * @param categoryName The name of the category to add the rule to
-     */
-    private void addRuleToCategory(RuleBase rule, String categoryName) {
-        Category category = getCategoryByName(categoryName);
-        addRuleToCategory(rule, category);
-    }
+
 
     /**
      * Get a category by name, creating it if it doesn't exist.
@@ -163,15 +154,7 @@ public class RulesEngineConfiguration {
         }
     }
 
-    /**
-     * Sort rules in a category by priority.
-     * 
-     * @param categoryName The name of the category to sort
-     */
-    private void sortRulesByPriority(String categoryName) {
-        Category category = getCategoryByName(categoryName);
-        sortRulesByPriority(category);
-    }
+
 
     /**
      * Create a new rule by combining multiple rules with an "AND" operator.

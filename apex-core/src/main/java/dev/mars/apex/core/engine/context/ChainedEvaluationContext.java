@@ -200,9 +200,8 @@ public class ChainedEvaluationContext extends StandardEvaluationContext {
      */
     public ChainedEvaluationContext createCopy() {
         ChainedEvaluationContext copy = new ChainedEvaluationContext();
-        
-        // Copy all variables
-        Map<String, Object> variables = new HashMap<>();
+
+        // Copy all variables from stage results
         // Note: StandardEvaluationContext doesn't provide direct access to variables,
         // so we copy from our stage results and any additional variables would need
         // to be tracked separately if needed

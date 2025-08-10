@@ -145,10 +145,14 @@ public class YamlRuleFactory {
      * Create a GenericRuleSet from YAML configuration for a specific category.
      * This method leverages the new generic architecture with full enterprise metadata support.
      *
+     * This is a public API method intended for advanced users who need fine-grained control
+     * over rule set creation for specific categories.
+     *
      * @param categoryName The category name
      * @param yamlRules The list of YAML rules for this category
      * @return A configured GenericRuleSet
      */
+    @SuppressWarnings("unused") // Public API method for advanced users
     public RuleSet.GenericRuleSet createGenericRuleSet(String categoryName, List<YamlRule> yamlRules) {
         LOGGER.fine("Creating GenericRuleSet for category: " + categoryName + " with " + yamlRules.size() + " rules");
 
@@ -480,8 +484,8 @@ public class YamlRuleFactory {
         
         // Determine category
         String categoryName = yamlGroup.getCategory() != null ? yamlGroup.getCategory() : "default";
-        Category category = getOrCreateCategory(categoryName, priority);
-        
+        getOrCreateCategory(categoryName, priority); // Ensure category exists in cache
+
         RuleGroup group = new RuleGroup(id, categoryName, name, description, priority, stopOnFirstFailure);
         
         // Add rules to the group
@@ -541,10 +545,14 @@ public class YamlRuleFactory {
     
     /**
      * Create a list of rules from YAML configuration.
-     * 
+     *
+     * This is a public API method intended for users who need to create rules
+     * independently without a full RulesEngineConfiguration.
+     *
      * @param yamlConfig The YAML configuration
      * @return List of Rule objects
      */
+    @SuppressWarnings("unused") // Public API method for independent rule creation
     public List<Rule> createRules(YamlRuleConfiguration yamlConfig) {
         List<Rule> rules = new ArrayList<>();
         
@@ -561,11 +569,15 @@ public class YamlRuleFactory {
     
     /**
      * Create a list of rule groups from YAML configuration.
-     * 
+     *
+     * This is a public API method intended for users who need to create rule groups
+     * independently without a full RulesEngineConfiguration.
+     *
      * @param yamlConfig The YAML configuration
      * @param config The rules engine configuration (to lookup existing rules)
      * @return List of RuleGroup objects
      */
+    @SuppressWarnings("unused") // Public API method for independent rule group creation
     public List<RuleGroup> createRuleGroups(YamlRuleConfiguration yamlConfig, RulesEngineConfiguration config) {
         List<RuleGroup> groups = new ArrayList<>();
         
@@ -582,10 +594,14 @@ public class YamlRuleFactory {
     
     /**
      * Create a list of categories from YAML configuration.
-     * 
+     *
+     * This is a public API method intended for users who need to create categories
+     * independently without a full RulesEngineConfiguration.
+     *
      * @param yamlConfig The YAML configuration
      * @return List of Category objects
      */
+    @SuppressWarnings("unused") // Public API method for independent category creation
     public List<Category> createCategories(YamlRuleConfiguration yamlConfig) {
         List<Category> categories = new ArrayList<>();
         

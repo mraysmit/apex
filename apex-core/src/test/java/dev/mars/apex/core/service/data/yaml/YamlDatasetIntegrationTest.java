@@ -1,9 +1,7 @@
 package dev.mars.apex.core.service.data.yaml;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlDataset;
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
-import dev.mars.apex.core.config.yaml.YamlRule;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
@@ -553,23 +551,7 @@ class YamlDatasetIntegrationTest {
         return enrichment;
     }
 
-    private YamlRule createCurrencyValidationRule() {
-        YamlRule rule = new YamlRule();
-        rule.setId("currency-active-check");
-        rule.setName("Currency Must Be Active");
-        rule.setCondition("#currencyActive == true");
-        rule.setMessage("Currency must be active for trading");
-        return rule;
-    }
 
-    private YamlRule createQuantityValidationRule() {
-        YamlRule rule = new YamlRule();
-        rule.setId("quantity-range-check");
-        rule.setName("Quantity Within Product Limits");
-        rule.setCondition("#order.quantity >= #productMinQuantity && #order.quantity <= #productMaxQuantity");
-        rule.setMessage("Quantity must be within product limits");
-        return rule;
-    }
 
     private YamlEnrichment.FieldMapping createFieldMapping(String sourceField, String targetField) {
         YamlEnrichment.FieldMapping mapping = new YamlEnrichment.FieldMapping();

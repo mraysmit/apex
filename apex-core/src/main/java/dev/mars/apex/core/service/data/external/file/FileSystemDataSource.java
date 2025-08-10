@@ -6,9 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.nio.file.attribute.FileTime;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -240,10 +240,27 @@ public class FileSystemDataSource implements ExternalDataSource {
     
     @Override
     public void batchUpdate(List<String> updates) throws DataSourceException {
-        // File system updates would involve writing to files
-        // This is a basic implementation - could be enhanced for specific use cases
-        throw new DataSourceException(DataSourceException.ErrorType.EXECUTION_ERROR,
-            "Batch updates not supported for file system data source");
+        // File system updates involve writing data to files
+        long startTime = System.currentTimeMillis();
+
+        try {
+            Path basePath = Paths.get(configuration.getConnection().getBasePath());
+
+            for (String update : updates) {
+                processFileUpdate(basePath, update);
+            }
+
+            // Clear cache after updates to ensure fresh data on next read
+            fileDataCache.clear();
+
+            metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
+            LOGGER.info("Completed batch update of {} operations for file system data source '{}'",
+                updates.size(), getName());
+
+        } catch (Exception e) {
+            metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
+            throw DataSourceException.executionError("File system batch update failed", e, "batchUpdate");
+        }
     }
     
     @Override
@@ -743,7 +760,110 @@ public class FileSystemDataSource implements ExternalDataSource {
         
         return data.isEmpty() ? null : data.get(0);
     }
-    
+
+    /**
+     * Process a single file update operation.
+     *
+     * @param basePath The base path for file operations
+     * @param update The update operation string
+     * @throws IOException if file operation fails
+     */
+    private void processFileUpdate(Path basePath, String update) throws IOException {
+        // Parse update string format: "operation:filename:data"
+        // Examples:
+        // - "write:output.csv:data"
+        // - "append:log.txt:data"
+        // - "delete:temp.json"
+
+        String[] parts = update.split(":", 3);
+        if (parts.length < 2) {
+            throw new IOException("Invalid update format. Expected 'operation:filename[:data]'");
+        }
+
+        String operation = parts[0].trim().toLowerCase();
+        String filename = parts[1].trim();
+        String data = parts.length > 2 ? parts[2] : "";
+
+        Path targetFile = basePath.resolve(filename);
+
+        switch (operation) {
+            case "write":
+                writeDataToFile(targetFile, data);
+                break;
+
+            case "append":
+                appendDataToFile(targetFile, data);
+                break;
+
+            case "delete":
+                deleteFile(targetFile);
+                break;
+
+            case "create":
+                createFile(targetFile, data);
+                break;
+
+            default:
+                throw new IOException("Unsupported file operation: " + operation);
+        }
+
+        LOGGER.debug("Processed file update: {} on {}", operation, filename);
+    }
+
+    /**
+     * Write data to a file, overwriting existing content.
+     */
+    private void writeDataToFile(Path filePath, String data) throws IOException {
+        // Ensure parent directory exists
+        Files.createDirectories(filePath.getParent());
+
+        // Determine encoding
+        String encoding = configuration.getFileFormat() != null &&
+                         configuration.getFileFormat().getEncoding() != null ?
+                         configuration.getFileFormat().getEncoding() : "UTF-8";
+
+        Files.writeString(filePath, data, Charset.forName(encoding));
+    }
+
+    /**
+     * Append data to a file.
+     */
+    private void appendDataToFile(Path filePath, String data) throws IOException {
+        // Ensure parent directory exists
+        Files.createDirectories(filePath.getParent());
+
+        // Determine encoding
+        String encoding = configuration.getFileFormat() != null &&
+                         configuration.getFileFormat().getEncoding() != null ?
+                         configuration.getFileFormat().getEncoding() : "UTF-8";
+
+        Files.writeString(filePath, data, Charset.forName(encoding), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+    }
+
+    /**
+     * Delete a file.
+     */
+    private void deleteFile(Path filePath) throws IOException {
+        if (Files.exists(filePath)) {
+            Files.delete(filePath);
+        }
+    }
+
+    /**
+     * Create a new file with data.
+     */
+    private void createFile(Path filePath, String data) throws IOException {
+        // Ensure parent directory exists
+        Files.createDirectories(filePath.getParent());
+
+        // Only create if file doesn't exist
+        if (!Files.exists(filePath)) {
+            writeDataToFile(filePath, data);
+        } else {
+            throw new IOException("File already exists: " + filePath);
+        }
+    }
+
     /**
      * Cached file data holder.
      */

@@ -75,7 +75,8 @@ public class CollectionOperationsTest {
         assertTrue(result.isTriggered(), "Rule should be triggered");
         
         // Get the actual value using evaluate
-        List<TestProduct> fixedIncomeProducts = evaluatorService.evaluate(
+        @SuppressWarnings("unchecked")
+        List<TestProduct> fixedIncomeProducts = (List<TestProduct>) evaluatorService.evaluate(
             "#products.?[category == 'FixedIncome']", context, List.class);
         
         // Verify the filtered products
@@ -99,7 +100,8 @@ public class CollectionOperationsTest {
         assertTrue(result.isTriggered(), "Rule should be triggered");
         
         // Get the actual value using evaluate
-        List<String> productNames = evaluatorService.evaluate(
+        @SuppressWarnings("unchecked")
+        List<String> productNames = (List<String>) evaluatorService.evaluate(
             "#products.![name]", context, List.class);
         
         // Verify the projected names
@@ -122,7 +124,8 @@ public class CollectionOperationsTest {
         assertTrue(result.isTriggered(), "Rule should be triggered");
         
         // Get the actual value using evaluate
-        List<String> equityProductNames = evaluatorService.evaluate(
+        @SuppressWarnings("unchecked")
+        List<String> equityProductNames = (List<String>) evaluatorService.evaluate(
             "#products.?[category == 'Equity'].![name]", context, List.class);
         
         // Verify the combined selection and projection

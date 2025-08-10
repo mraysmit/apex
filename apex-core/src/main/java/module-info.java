@@ -9,7 +9,7 @@ module dev.mars.apex.core {
     requires spring.context;
 
     // Logging dependencies
-    requires org.slf4j;
+    requires transitive org.slf4j;
 
 
     // YAML processing dependencies

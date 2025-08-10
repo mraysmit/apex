@@ -164,12 +164,16 @@ public class QuickStartDemo {
                 // Create rules engine from YAML
                 YamlRulesEngineService service = new YamlRulesEngineService();
                 RulesEngine engine = service.createRulesEngineFromYamlConfig(config);
-                
+
+                System.out.println("  Rules engine created: " + (engine != null ? "✅ SUCCESS" : "❌ FAILED"));
+                System.out.println("  Configuration loaded: " + (engine.getConfiguration() != null ? "✅ YES" : "❌ NO"));
+                System.out.println("  Available rules: " + engine.getConfiguration().getAllRules().size());
+
                 // Test the YAML rules
                 Customer customer = createSampleCustomer();
                 System.out.println("\nTesting YAML rules against sample customer:");
                 System.out.println("  Customer: " + customer.getName() + ", age " + customer.getAge());
-                
+
                 // Note: This would require the YAML file to exist, which we'll create next
                 System.out.println("  PASSED YAML configuration loaded successfully!");
                 

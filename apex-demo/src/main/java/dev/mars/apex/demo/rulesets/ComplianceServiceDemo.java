@@ -4,8 +4,7 @@ import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.model.Trade;
-import dev.mars.apex.demo.rulesets.ComplianceServiceDemoConfig;
-import dev.mars.apex.demo.rulesets.PostTradeProcessingServiceDemoConfig;
+
 
 import java.util.Arrays;
 import java.util.List;

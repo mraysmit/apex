@@ -1,7 +1,6 @@
 package dev.mars.apex.demo.examples;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
+
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
@@ -28,8 +27,6 @@ public class NestedRulesChainingTest {
 
     @BeforeEach
     void setUp() {
-        RulesEngineConfiguration config = new RulesEngineConfiguration();
-        RulesEngine engine = new RulesEngine(config);
         evaluatorService = new ExpressionEvaluatorService();
         ruleEngineService = new RuleEngineService(evaluatorService);
     }

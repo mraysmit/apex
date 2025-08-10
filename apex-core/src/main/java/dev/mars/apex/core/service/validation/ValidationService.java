@@ -76,7 +76,6 @@ public class ValidationService {
      * @param value The value to validate
      * @return True if the value is valid, false otherwise
      */
-    @SuppressWarnings("unchecked")
     public <T> boolean validate(String validatorName, T value) {
         RuleResult result = validateWithResult(validatorName, value);
         return result != null && result.isTriggered();

@@ -5,7 +5,7 @@ import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.common.NamedService;
+
 import dev.mars.apex.core.service.validation.Validator;
 import dev.mars.apex.core.util.RuleParameterExtractor;
 import dev.mars.apex.demo.model.Trade;
@@ -58,7 +58,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  * It demonstrates how to create, configure, and use a trade validation
  * with various validation scenarios in a clear, sequential manner.
  */
-public class IntegratedTradeValidatorDemo implements Validator<Trade>, NamedService {
+public class IntegratedTradeValidatorDemo implements Validator<Trade> {
     private static final Logger LOGGER = Logger.getLogger(IntegratedTradeValidatorDemo.class.getName());
 
     // Core components

@@ -2,7 +2,6 @@ package dev.mars.apex.core.service.data.external;
 
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import dev.mars.apex.core.config.datasource.ConnectionConfig;
-import dev.mars.apex.core.config.datasource.ConnectionPoolConfig;
 import dev.mars.apex.core.config.datasource.CacheConfig;
 import dev.mars.apex.core.config.datasource.HealthCheckConfig;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;

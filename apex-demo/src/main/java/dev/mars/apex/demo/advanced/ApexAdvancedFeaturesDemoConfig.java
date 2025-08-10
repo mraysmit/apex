@@ -11,7 +11,6 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -44,8 +43,7 @@ import java.util.logging.Logger;
  * This class provides configuration, rules, and data for the ApexAdvancedFeaturesDemo.
  */
 public class ApexAdvancedFeaturesDemoConfig {
-    private static final Logger LOGGER = Logger.getLogger(ApexAdvancedFeaturesDemoConfig.class.getName());
-    
+
     private final RulesEngine rulesEngine;
     private final ExpressionEvaluatorService evaluatorService;
     private final RuleEngineService ruleEngineService;

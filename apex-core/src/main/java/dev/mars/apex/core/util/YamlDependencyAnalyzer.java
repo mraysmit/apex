@@ -5,8 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -245,25 +243,7 @@ public class YamlDependencyAnalyzer {
         }
     }
     
-    /**
-     * Resolves a relative file path against a base file path.
-     */
-    private String resolvePath(String basePath, String relativePath) {
-        if (relativePath.startsWith("/")) {
-            // Absolute path
-            return relativePath.substring(1); // Remove leading slash
-        }
-        
-        // Relative path - resolve against the directory of the base file
-        Path baseDir = Paths.get(basePath).getParent();
-        if (baseDir == null) {
-            return relativePath;
-        }
-        
-        Path resolved = baseDir.resolve(relativePath).normalize();
-        return resolved.toString().replace('\\', '/'); // Ensure forward slashes
-    }
-    
+
     /**
      * Generates a text report of the dependency analysis.
      */

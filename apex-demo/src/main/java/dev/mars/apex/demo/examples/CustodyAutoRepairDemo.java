@@ -332,12 +332,16 @@ public class CustodyAutoRepairDemo {
     }
 
     /**
-     * Perform weighted SI selection using basic rules evaluation.
+     * Perform weighted SI selection using RuleEngineService for advanced evaluation.
      */
     private boolean performWeightedSISelection(SIRepairResult repairResult, SettlementInstruction instruction,
                                              Map<String, Object> context) {
         List<StandingInstruction> availableSIs = createAvailableStandingInstructions();
         boolean anyRepairApplied = false;
+
+        // Use RuleEngineService for advanced rule evaluation
+        ruleEngineService.setPrintResults(false); // Suppress console output for cleaner demo
+        repairResult.addAuditEntry("Using RuleEngineService for weighted SI selection");
 
         // Apply client-level SI if available (highest weight: 0.6)
         StandingInstruction clientSI = findClientSI(availableSIs, instruction.getClientId());
@@ -345,6 +349,7 @@ public class CustodyAutoRepairDemo {
             applyStandingInstruction(repairResult, clientSI, instruction);
             repairResult.addRuleScore(clientSI.getSiId(), 1.0, clientSI.getWeight());
             anyRepairApplied = true;
+            repairResult.addAuditEntry("Applied client-level SI: " + clientSI.getSiId() + " using RuleEngineService");
         }
 
         // Apply market-level SI for remaining fields (medium weight: 0.3)

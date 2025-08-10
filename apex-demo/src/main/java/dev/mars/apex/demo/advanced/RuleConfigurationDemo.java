@@ -522,37 +522,7 @@ public class RuleConfigurationDemo {
         return config.createRuleGroupWithOr(id, category, name, description, priority);
     }
 
-    /**
-     * Helper method to get a rule from the configuration.
-     * Logs a warning if the rule is not found.
-     * 
-     * @param config The rules engine configuration
-     * @param ruleId The ID of the rule to get
-     * @return The rule with the specified ID, or null if not found
-     */
-    private static Rule getRule(RulesEngineConfiguration config, String ruleId) {
-        Rule rule = config.getRuleById(ruleId);
-        if (rule == null) {
-            System.err.println("Rule with ID '" + ruleId + "' not found in configuration");
-        }
-        return rule;
-    }
 
-    /**
-     * Helper method to add a rule to a rule group.
-     * Checks if the rule is null before adding it to the group.
-     * 
-     * @param ruleGroup The rule group to add the rule to
-     * @param rule The rule to add
-     * @param sequenceNumber The sequence number for the rule within the group
-     */
-    private static void addRuleToGroup(RuleGroup ruleGroup, Rule rule, int sequenceNumber) {
-        if (rule == null) {
-            System.err.println("Cannot add null rule to group '" + ruleGroup.getName() + "' at sequence " + sequenceNumber);
-            return;
-        }
-        ruleGroup.addRule(rule, sequenceNumber);
-    }
 
     /**
      * Helper method to combine rules with an AND operator.

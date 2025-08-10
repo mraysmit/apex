@@ -6,7 +6,6 @@ import dev.mars.apex.core.service.lookup.DatasetLookupService;
 import dev.mars.apex.core.service.lookup.DatasetLookupServiceFactory;
 import dev.mars.apex.core.service.lookup.LookupService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -54,6 +53,7 @@ public class YamlEnrichmentProcessor {
     private static final Logger LOGGER = Logger.getLogger(YamlEnrichmentProcessor.class.getName());
     
     private final LookupServiceRegistry serviceRegistry;
+    @SuppressWarnings("unused") // Reserved for future expression evaluation enhancements
     private final ExpressionEvaluatorService evaluatorService;
     private final SpelExpressionParser parser;
     
@@ -63,12 +63,12 @@ public class YamlEnrichmentProcessor {
     // Cache for lookup results (if caching is enabled)
     private final Map<String, CachedLookupResult> lookupCache = new ConcurrentHashMap<>();
     
-    public YamlEnrichmentProcessor(LookupServiceRegistry serviceRegistry, 
+    public YamlEnrichmentProcessor(LookupServiceRegistry serviceRegistry,
                                    ExpressionEvaluatorService evaluatorService) {
         this.serviceRegistry = serviceRegistry;
         this.evaluatorService = evaluatorService;
         this.parser = new SpelExpressionParser();
-        
+
         LOGGER.info("YamlEnrichmentProcessor initialized with service registry and expression evaluator");
     }
     

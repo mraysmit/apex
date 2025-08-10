@@ -214,7 +214,6 @@ public class YamlMetadataValidator {
     /**
      * Validates type-specific content based on the file type.
      */
-    @SuppressWarnings("unchecked")
     private void validateTypeSpecificContent(Map<String, Object> yamlContent, String fileType, YamlValidationResult result) {
         switch (fileType) {
             case "scenario":

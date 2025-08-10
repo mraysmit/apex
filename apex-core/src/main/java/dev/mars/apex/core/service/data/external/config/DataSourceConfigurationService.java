@@ -347,22 +347,34 @@ public class DataSourceConfigurationService implements DataSourceManagerListener
     public void onManagerEvent(DataSourceManagerEvent event) {
         // Forward manager events as configuration events
         switch (event.getEventType()) {
+            case INITIALIZED:
+                // Manager initialization - no specific action needed
+                break;
+
+            case SHUTDOWN:
+                // Manager shutdown - no specific action needed
+                break;
+
             case DATA_SOURCE_ADDED:
                 // Configuration tracking is updated elsewhere
                 break;
-                
+
             case DATA_SOURCE_REMOVED:
                 // Configuration tracking is updated elsewhere
                 break;
-                
+
             case HEALTH_RESTORED:
             case HEALTH_LOST:
                 // Forward health events
                 DataSourceConfigurationEvent configEvent = event.isHealthImprovement() ?
                     DataSourceConfigurationEvent.healthRestored(event.getDataSourceName()) :
                     DataSourceConfigurationEvent.healthLost(event.getDataSourceName());
-                
+
                 notifyListeners(configEvent);
+                break;
+
+            case REFRESH_COMPLETED:
+                // Refresh operation completed - no specific action needed
                 break;
         }
     }

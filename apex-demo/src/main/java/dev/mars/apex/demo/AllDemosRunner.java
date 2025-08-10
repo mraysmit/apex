@@ -1,8 +1,6 @@
 package dev.mars.apex.demo;
 
-import java.io.File;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,7 +24,6 @@ import java.util.stream.Collectors;
  */
 public class AllDemosRunner {
     
-    private static final String DEMO_BASE_PACKAGE = "dev.mars.apex.demo";
     private static final String[] EXCLUDED_CLASSES = {
         "AllDemosRunner", "DemoRunner", "DemoFramework", "Demo", "DemoCategory"
     };
@@ -112,6 +109,14 @@ public class AllDemosRunner {
 
         // Bootstrap demos
         registerDemoClass("dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo");
+
+        // Ruleset demos
+        registerDemoClass("dev.mars.apex.demo.rulesets.ComplianceServiceDemo");
+        registerDemoClass("dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap");
+        registerDemoClass("dev.mars.apex.demo.rulesets.PricingServiceDemo");
+        registerDemoClass("dev.mars.apex.demo.rulesets.RuleDefinitionServiceDemo");
+        registerDemoClass("dev.mars.apex.demo.rulesets.CustomerTransformerDemo");
+        registerDemoClass("dev.mars.apex.demo.rulesets.PostTradeProcessingServiceDemo");
     }
 
     /**
@@ -133,47 +138,7 @@ public class AllDemosRunner {
         }
     }
     
-    /**
-     * Find all classes in the demo package structure.
-     */
-    private Set<Class<?>> findDemoClasses() throws Exception {
-        Set<Class<?>> classes = new HashSet<>();
-        String packagePath = DEMO_BASE_PACKAGE.replace('.', '/');
 
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        URL resource = classLoader.getResource(packagePath);
-
-        if (resource != null) {
-            File directory = new File(resource.getFile());
-            if (directory.exists()) {
-                findClassesInDirectory(directory, DEMO_BASE_PACKAGE, classes);
-            }
-        }
-        return classes;
-    }
-    
-    /**
-     * Recursively find classes in directory structure.
-     */
-    private void findClassesInDirectory(File directory, String packageName, Set<Class<?>> classes) {
-        File[] files = directory.listFiles();
-        if (files == null) return;
-
-        for (File file : files) {
-            if (file.isDirectory()) {
-                findClassesInDirectory(file, packageName + "." + file.getName(), classes);
-            } else if (file.getName().endsWith(".class")) {
-                String className = packageName + "." + file.getName().substring(0, file.getName().length() - 6);
-                try {
-                    Class<?> clazz = Class.forName(className);
-                    classes.add(clazz);
-                } catch (ClassNotFoundException | NoClassDefFoundError e) {
-                    // Skip classes that can't be loaded
-                }
-            }
-        }
-    }
-    
     /**
      * Check if a class should be skipped.
      */

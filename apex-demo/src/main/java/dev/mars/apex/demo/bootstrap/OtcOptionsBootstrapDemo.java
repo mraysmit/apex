@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.bootstrap;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 // import dev.mars.apex.core.engine.RulesService; // Simplified for demo
 import dev.mars.apex.demo.bootstrap.infrastructure.DatabaseSetup;
 import dev.mars.apex.demo.bootstrap.infrastructure.DataSourceVerifier;
@@ -10,15 +10,10 @@ import dev.mars.apex.demo.bootstrap.model.OtcOption;
 import dev.mars.apex.demo.bootstrap.model.UnderlyingAsset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -160,10 +155,8 @@ public class OtcOptionsBootstrapDemo {
     private ExternalDatasetSetup externalDatasetSetup;
     private XmlDataGenerator xmlDataGenerator;
     
-    private final ObjectMapper objectMapper;
-    
+
     public OtcOptionsBootstrapDemo() {
-        this.objectMapper = new ObjectMapper();
         // Initialize dependencies manually for demo runner compatibility
         this.databaseSetup = new DatabaseSetup();
         this.dataSourceVerifier = new DataSourceVerifier();

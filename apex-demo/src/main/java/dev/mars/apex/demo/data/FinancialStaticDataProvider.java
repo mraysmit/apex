@@ -24,9 +24,8 @@ import java.util.*;
 
 /**
  * Provides static data for financial instrument validation and enrichment examples.
- *
- * This class is part of the PeeGeeQ message queue system, providing
- * production-ready PostgreSQL-based message queuing capabilities.
+ * This class contains comprehensive reference data for clients, counterparties,
+ * currencies, and commodities used in APEX Rules Engine demonstrations.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-27

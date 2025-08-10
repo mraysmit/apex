@@ -118,32 +118,47 @@ public class FinancialTradingDemo {
         FinancialTrade highRiskTrade = createTrade("TRD003", new BigDecimal("5000000"), "USD", "High Risk Corp");
         FinancialTrade lowRiskTrade = createTrade("TRD004", new BigDecimal("100000"), "USD", "Goldman Sachs");
 
-        Map<String, Object> riskContext = new HashMap<>();
-        riskContext.put("trade", highRiskTrade);
-        riskContext.put("counterpartyRating", "B");
-        riskContext.put("portfolioExposure", new BigDecimal("50000000"));
-        riskContext.put("riskLimit", new BigDecimal("100000000"));
+        // Test high-risk trade
+        System.out.println("High-Risk Trade Analysis:");
+        Map<String, Object> highRiskContext = new HashMap<>();
+        highRiskContext.put("trade", highRiskTrade);
+        highRiskContext.put("counterpartyRating", "B");
+        highRiskContext.put("portfolioExposure", new BigDecimal("50000000"));
+        highRiskContext.put("riskLimit", new BigDecimal("100000000"));
 
-        // Risk limit check
-        boolean riskLimitValid = rulesService.check(
+        boolean highRiskLimitValid = rulesService.check(
             "#portfolioExposure + #trade.amount <= #riskLimit",
-            riskContext
+            highRiskContext
         );
-        System.out.println("Risk limit check: " + riskLimitValid);
+        System.out.println("  High-risk limit check: " + highRiskLimitValid);
 
-        // Counterparty risk assessment
+        // Test low-risk trade
+        System.out.println("Low-Risk Trade Analysis:");
+        Map<String, Object> lowRiskContext = new HashMap<>();
+        lowRiskContext.put("trade", lowRiskTrade);
+        lowRiskContext.put("counterpartyRating", "AAA");
+        lowRiskContext.put("portfolioExposure", new BigDecimal("50000000"));
+        lowRiskContext.put("riskLimit", new BigDecimal("100000000"));
+
+        boolean lowRiskLimitValid = rulesService.check(
+            "#portfolioExposure + #trade.amount <= #riskLimit",
+            lowRiskContext
+        );
+        System.out.println("  Low-risk limit check: " + lowRiskLimitValid);
+
+        // Counterparty risk assessment (using high-risk context)
         boolean counterpartyRiskAcceptable = rulesService.check(
             "#counterpartyRating in {'AAA', 'AA', 'A'} || #trade.amount <= 1000000",
-            riskContext
+            highRiskContext
         );
-        System.out.println("Counterparty risk acceptable: " + counterpartyRiskAcceptable);
+        System.out.println("  Counterparty risk acceptable (high-risk): " + counterpartyRiskAcceptable);
 
-        // Concentration risk check
+        // Concentration risk check (using low-risk context for comparison)
         boolean concentrationRiskValid = rulesService.check(
             "#trade.amount <= #riskLimit * 0.1",
-            riskContext
+            lowRiskContext
         );
-        System.out.println("Concentration risk valid: " + concentrationRiskValid);
+        System.out.println("  Concentration risk valid (low-risk): " + concentrationRiskValid);
     }
 
     /**

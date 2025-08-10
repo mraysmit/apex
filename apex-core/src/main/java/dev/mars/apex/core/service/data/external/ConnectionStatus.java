@@ -208,8 +208,17 @@ public class ConnectionStatus {
     }
     
     /**
+     * Check if the data source is currently connected.
+     *
+     * @return true if the data source is connected
+     */
+    public boolean isConnected() {
+        return state == State.CONNECTED;
+    }
+
+    /**
      * Check if the data source is currently operational.
-     * 
+     *
      * @return true if the data source can be used
      */
     public boolean isOperational() {

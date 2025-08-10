@@ -117,8 +117,13 @@ public class YamlConfigurationDemo {
 
         // Load rules engine using inline YAML configuration
         String yamlConfig = createSampleYamlConfiguration();
+        System.out.println("YAML Configuration loaded:");
+        System.out.println("  Configuration size: " + yamlConfig.length() + " characters");
+        System.out.println("  Contains rules: " + yamlConfig.contains("rules:"));
+        System.out.println("  Contains enrichments: " + yamlConfig.contains("enrichments:"));
+
         RulesEngine engine = yamlService.createRulesEngineFromString(yamlConfig);
-        
+
         // Create test data
         CommodityTotalReturnSwap validSwap = createValidSwap();
         CommodityTotalReturnSwap invalidSwap = createInvalidSwap();

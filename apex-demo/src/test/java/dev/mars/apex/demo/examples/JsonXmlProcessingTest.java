@@ -26,7 +26,13 @@ public class JsonXmlProcessingTest {
     void testValidCustomerProcessing() {
         // Create a valid customer
         Map<String, Object> customer = createValidCustomer();
-        
+
+        // Validate customer data structure
+        assertNotNull(customer, "Customer should not be null");
+        assertTrue(customer.containsKey("name"), "Customer should have name");
+        assertTrue(customer.containsKey("email"), "Customer should have email");
+        assertTrue(customer.containsKey("age"), "Customer should have age");
+
         // This should not throw any exceptions
         assertDoesNotThrow(() -> {
             // The demo processes customers internally
@@ -39,7 +45,18 @@ public class JsonXmlProcessingTest {
     void testInvalidCustomerProcessing() {
         // Create an invalid customer (underage)
         Map<String, Object> customer = createInvalidCustomer();
-        
+
+        // Validate invalid customer data structure
+        assertNotNull(customer, "Invalid customer should not be null");
+        assertTrue(customer.containsKey("name"), "Invalid customer should have name");
+        assertTrue(customer.containsKey("email"), "Invalid customer should have email");
+        assertTrue(customer.containsKey("age"), "Invalid customer should have age");
+
+        // Verify it's actually invalid (underage)
+        Object age = customer.get("age");
+        assertTrue(age instanceof Integer, "Age should be an integer");
+        assertTrue((Integer) age < 18, "Customer should be underage for this test");
+
         // This should not throw any exceptions even with invalid data
         assertDoesNotThrow(() -> {
             assertNotNull(demo);

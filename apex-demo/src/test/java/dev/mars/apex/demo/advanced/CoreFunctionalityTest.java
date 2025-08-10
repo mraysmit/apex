@@ -170,12 +170,21 @@ public class CoreFunctionalityTest {
         // Verify rule triggered
         assertTrue(result.isTriggered(), "Discount rule should be triggered");
 
-        // Calculate the discounted price manually
-        double discountRate = 0.1; // 10% discount
-        double originalPrice = product.getPrice();
-        double discountedPrice = originalPrice * (1 - discountRate);
+        // Use transformer service to calculate the discounted price
+        Map<String, Object> transformationContext = new HashMap<>();
+        transformationContext.put("originalPrice", product.getPrice());
+        transformationContext.put("discountRate", 0.1);
 
-        // Verify the calculation
+        // Apply price transformation using transformer service
+        Object transformedPrice = transformerService.transform(
+            "#originalPrice * (1 - #discountRate)",
+            transformationContext
+        );
+
+        // Verify the transformation
+        assertNotNull(transformedPrice, "Transformed price should not be null");
+        assertTrue(transformedPrice instanceof Number, "Transformed price should be a number");
+        double discountedPrice = ((Number) transformedPrice).doubleValue();
         assertEquals(90.0, discountedPrice, 0.01, "Discounted price should be 90.0");
     }
 }

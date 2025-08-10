@@ -80,6 +80,12 @@ public class YamlConfiguredFileProcessingDemo {
         YamlConfigurationLoader loader = new YamlConfigurationLoader();
         YamlRuleConfiguration yamlConfig = loader.loadFromClasspath("yaml-examples/file-processing-config.yaml");
 
+        System.out.println("YAML Configuration loaded:");
+        System.out.println("  Rules: " + (yamlConfig.getRules() != null ? yamlConfig.getRules().size() : 0));
+        System.out.println("  Enrichments: " + (yamlConfig.getEnrichments() != null ? yamlConfig.getEnrichments().size() : 0));
+        System.out.println("  Rule Groups: " + (yamlConfig.getRuleGroups() != null ? yamlConfig.getRuleGroups().size() : 0));
+        System.out.println("  Data Sources: " + (yamlConfig.getDataSources() != null ? yamlConfig.getDataSources().size() : 0));
+
         // Create basic configuration and rules engine
         RulesEngineConfiguration config = new RulesEngineConfiguration();
         rulesEngine = new RulesEngine(config);
@@ -456,6 +462,7 @@ public class YamlConfiguredFileProcessingDemo {
         // Country-based enrichment
         String country = (String) customer.get("country");
         if (country != null && countryLookupData.containsKey(country)) {
+            @SuppressWarnings("unchecked")
             Map<String, Object> countryData = (Map<String, Object>) countryLookupData.get(country);
             customer.put("currency", countryData.get("currency"));
             customer.put("timezone", countryData.get("timezone"));

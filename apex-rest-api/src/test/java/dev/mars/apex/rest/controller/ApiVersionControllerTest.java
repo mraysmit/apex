@@ -4,6 +4,8 @@ import dev.mars.apex.rest.BaseIntegrationTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -26,8 +28,8 @@ public class ApiVersionControllerTest extends BaseIntegrationTest {
         @DisplayName("Should return API version information")
         void shouldReturnApiVersionInformation() {
             // When
-            ResponseEntity<Map> response = restTemplate.getForEntity(
-                url("/api/version"), Map.class);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                url("/api/version"), HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, Object>>() {});
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -42,8 +44,8 @@ public class ApiVersionControllerTest extends BaseIntegrationTest {
         @DisplayName("Should include API version details")
         void shouldIncludeApiVersionDetails() {
             // When
-            ResponseEntity<Map> response = restTemplate.getForEntity(
-                url("/api/version"), Map.class);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                url("/api/version"), HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, Object>>() {});
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -57,8 +59,8 @@ public class ApiVersionControllerTest extends BaseIntegrationTest {
         @DisplayName("Should include build information")
         void shouldIncludeBuildInformation() {
             // When
-            ResponseEntity<Map> response = restTemplate.getForEntity(
-                url("/api/version"), Map.class);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                url("/api/version"), HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, Object>>() {});
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -77,8 +79,8 @@ public class ApiVersionControllerTest extends BaseIntegrationTest {
         @DisplayName("Should return deprecation information")
         void shouldReturnDeprecationInformation() {
             // When
-            ResponseEntity<Map> response = restTemplate.getForEntity(
-                url("/api/version/deprecation"), Map.class);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                url("/api/version/deprecation"), HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, Object>>() {});
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -100,8 +102,8 @@ public class ApiVersionControllerTest extends BaseIntegrationTest {
         @DisplayName("Should return version health status")
         void shouldReturnVersionHealthStatus() {
             // When
-            ResponseEntity<Map> response = restTemplate.getForEntity(
-                url("/api/version/health"), Map.class);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                url("/api/version/health"), HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, Object>>() {});
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -115,8 +117,8 @@ public class ApiVersionControllerTest extends BaseIntegrationTest {
         @DisplayName("Should include compatibility information")
         void shouldIncludeCompatibilityInformation() {
             // When
-            ResponseEntity<Map> response = restTemplate.getForEntity(
-                url("/api/version/health"), Map.class);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                url("/api/version/health"), HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, Object>>() {});
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());

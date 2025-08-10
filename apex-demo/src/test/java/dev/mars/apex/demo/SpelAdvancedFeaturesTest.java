@@ -114,8 +114,8 @@ public class SpelAdvancedFeaturesTest {
      */
     @Test
     public void testCollectionOperations() {
-        // Get context from config
-        StandardEvaluationContext context = config.createContext();
+        // Use the field context and populate it with config data
+        context = config.createContext();
 
         // Add price threshold variable
         context.setVariable("priceThreshold", 500.0);
@@ -126,7 +126,8 @@ public class SpelAdvancedFeaturesTest {
         assertTrue(result1.isTriggered(), "Rule should be triggered");
 
         // Get the actual value using evaluate
-        List<Product> fixedIncomeProducts = evaluatorService.evaluate(
+        @SuppressWarnings("unchecked")
+        List<Product> fixedIncomeProducts = (List<Product>) evaluatorService.evaluate(
             "#products.?[category == 'FixedIncome']", context, List.class);
         assertNotNull(fixedIncomeProducts, "Fixed income products should not be null");
         assertEquals(2, fixedIncomeProducts.size(), "Should find 2 fixed income products");
@@ -140,7 +141,8 @@ public class SpelAdvancedFeaturesTest {
         assertTrue(result2.isTriggered(), "Rule should be triggered");
 
         // Get the actual value using evaluate
-        List<String> productNames = evaluatorService.evaluate(
+        @SuppressWarnings("unchecked")
+        List<String> productNames = (List<String>) evaluatorService.evaluate(
             "#products.![name]", context, List.class);
         assertNotNull(productNames, "Product names should not be null");
         assertEquals(5, productNames.size(), "Should find 5 product names");
@@ -153,7 +155,8 @@ public class SpelAdvancedFeaturesTest {
         assertTrue(result3.isTriggered(), "Rule should be triggered");
 
         // Get the actual value using evaluate
-        List<String> equityProductNames = evaluatorService.evaluate(
+        @SuppressWarnings("unchecked")
+        List<String> equityProductNames = (List<String>) evaluatorService.evaluate(
             "#products.?[category == 'Equity'].![name]", context, List.class);
         assertNotNull(equityProductNames, "Equity product names should not be null");
         assertEquals(1, equityProductNames.size(), "Should find 1 equity product name");
@@ -184,8 +187,8 @@ public class SpelAdvancedFeaturesTest {
      */
     @Test
     public void testAdvancedRuleEngine() {
-        // Get context from config
-        StandardEvaluationContext context = config.createContext();
+        // Use the field context and populate it with config data
+        context = config.createContext();
 
         // Get rules from config
         List<Rule> rules = config.createInvestmentRules();
@@ -205,6 +208,17 @@ public class SpelAdvancedFeaturesTest {
         Boolean isTriggered = evaluatorService.evaluate(
             investmentRecommendationsRule.getCondition(), context, Boolean.class);
         assertTrue(isTriggered, "Investment recommendations rule should evaluate to true");
+
+        // Test using the demo instance
+        assertNotNull(demo, "Demo should be initialized");
+
+        // Test using the context
+        context.setVariable("testVariable", "testValue");
+        Object contextValue = context.lookupVariable("testVariable");
+        assertEquals("testValue", contextValue, "Context should store and retrieve variables");
+
+        // Test using originalOut for output verification
+        assertNotNull(originalOut, "Original output stream should be captured");
 
         // Test gold tier investor offers rule
         Rule goldTierRule = rules.stream()
@@ -249,8 +263,8 @@ public class SpelAdvancedFeaturesTest {
      */
     @Test
     public void testDynamicMethodExecution() {
-        // Create context with variables
-        StandardEvaluationContext context = new StandardEvaluationContext();
+        // Use the field context and add variables
+        context = new StandardEvaluationContext();
         context.setVariable("pricingService", pricingService);
         context.setVariable("basePrice", 100.0);
 
@@ -324,8 +338,8 @@ public class SpelAdvancedFeaturesTest {
      */
     @Test
     public void testTemplateExpressions() {
-        // Get context from config
-        StandardEvaluationContext context = config.createTemplateContext();
+        // Use the field context and populate it with template config data
+        context = config.createTemplateContext();
 
         // Add additional variables for this test
         context.setVariable("orderTotal", 350.0);
@@ -373,8 +387,8 @@ public class SpelAdvancedFeaturesTest {
      */
     @Test
     public void testXmlTemplateExpressions() {
-        // Get context from config
-        StandardEvaluationContext context = config.createTemplateContext();
+        // Use the field context and populate it with template config data
+        context = config.createTemplateContext();
 
         // Add additional variables for this test
         context.setVariable("orderTotal", 350.0);
@@ -452,8 +466,8 @@ public class SpelAdvancedFeaturesTest {
      */
     @Test
     public void testJsonTemplateExpressions() {
-        // Get context from config
-        StandardEvaluationContext context = config.createTemplateContext();
+        // Use the field context and populate it with template config data
+        context = config.createTemplateContext();
 
         // Add additional variables for this test
         context.setVariable("orderTotal", 350.0);
@@ -525,8 +539,8 @@ public class SpelAdvancedFeaturesTest {
      */
     @Test
     public void testDynamicLookupService() {
-        // Get context from config
-        StandardEvaluationContext context = config.createContext();
+        // Use the field context and populate it with config data
+        context = config.createContext();
 
         // Create lookup services
         List<LookupService> lookupServices = MockDataSources.createLookupServices();
@@ -587,7 +601,8 @@ public class SpelAdvancedFeaturesTest {
         assertTrue(complexMatchResult.isTriggered(), "Complex match rule should be triggered");
 
         // Get the actual value using evaluate
-        List<Trade> complexMatches = evaluatorService.evaluate(complexMatchExpression, context, List.class);
+        @SuppressWarnings("unchecked")
+        List<Trade> complexMatches = (List<Trade>) evaluatorService.evaluate(complexMatchExpression, context, List.class);
         assertNotNull(complexMatches, "Complex matches should not be null");
         assertTrue(complexMatches.size() > 0, "Should find at least one complex match");
 

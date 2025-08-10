@@ -507,36 +507,23 @@ public class DataSourceRegistry {
      */
     private static class DataSourceRegistration {
         private final ExternalDataSource dataSource;
-        private final LocalDateTime registrationTime;
         private volatile boolean healthy;
-        private volatile LocalDateTime lastHealthCheck;
 
         public DataSourceRegistration(ExternalDataSource dataSource) {
             this.dataSource = dataSource;
-            this.registrationTime = LocalDateTime.now();
             this.healthy = dataSource.isHealthy();
-            this.lastHealthCheck = LocalDateTime.now();
         }
 
         public ExternalDataSource getDataSource() {
             return dataSource;
         }
 
-        public LocalDateTime getRegistrationTime() {
-            return registrationTime;
-        }
-
         public boolean isHealthy() {
             return healthy;
         }
 
-        public LocalDateTime getLastHealthCheck() {
-            return lastHealthCheck;
-        }
-
         public void updateHealthStatus(boolean healthy) {
             this.healthy = healthy;
-            this.lastHealthCheck = LocalDateTime.now();
         }
     }
 }

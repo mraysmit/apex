@@ -299,13 +299,32 @@ public class QuickStartDemo {
                 long engineDuration = System.nanoTime() - engineStart;
 
                 System.out.println("Rules engine created (in " + engineDuration/1000 + " microseconds)");
+                System.out.println("  Engine configuration: " + (engine.getConfiguration() != null ? "✅ LOADED" : "❌ FAILED"));
+                System.out.println("  Available rules: " + engine.getConfiguration().getAllRules().size());
                 logger.debug("Rules engine created from YAML in {} nanoseconds", engineDuration);
 
-                // Test the YAML rules
+                // Test the YAML rules using the engine
                 Customer customer = createSampleCustomer();
                 System.out.println("\nStep 4: Testing YAML rules against sample customer:");
                 System.out.println("  Customer: " + customer.getName() + ", age " + customer.getAge() +
                                  ", email: " + customer.getEmail());
+
+                // Execute rules using the engine
+                Map<String, Object> customerData = Map.of(
+                    "name", customer.getName(),
+                    "age", customer.getAge(),
+                    "email", customer.getEmail()
+                );
+
+                // Test with the loaded engine
+                var allRules = engine.getConfiguration().getAllRules();
+                if (!allRules.isEmpty()) {
+                    var firstRule = allRules.get(0);
+                    var result = engine.executeRule(firstRule, customerData);
+                    System.out.println("  Rule test result: " + (result.isTriggered() ? "✅ PASSED" : "❌ FAILED"));
+                } else {
+                    System.out.println("  No rules found in configuration");
+                }
 
                 System.out.println("  PASSED YAML configuration loaded and tested successfully!");
 

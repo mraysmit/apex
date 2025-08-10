@@ -9,7 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -38,7 +37,6 @@ public class InMemoryCacheManager implements CacheManager {
     private final DataSourceConfiguration configuration;
     private final ConcurrentHashMap<String, CacheEntry> cache;
     private final CacheStatistics statistics;
-    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     
     // Background cleanup
     private ScheduledExecutorService cleanupExecutor;

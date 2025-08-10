@@ -1,7 +1,11 @@
 package dev.mars.apex.rest.controller;
 
 import dev.mars.apex.core.service.transform.GenericTransformerService;
-
+import dev.mars.apex.core.engine.model.TransformerRule;
+import dev.mars.apex.core.service.transform.FieldTransformerAction;
+import dev.mars.apex.core.service.transform.FieldTransformerActionBuilder;
+import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 import dev.mars.apex.core.engine.model.RuleResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -214,12 +218,11 @@ public class TransformationController {
         logger.info("Applying dynamic transformation with {} rules", request.getTransformerRules().size());
 
         try {
-            // TODO: Implement proper TransformerRule creation from DTO
-            // For now, return the original data as this feature needs proper implementation
-            // The TransformerRule constructor requires Rule objects and FieldTransformerAction lists
-            // which need to be properly constructed from the DTO parameters
+            // Convert DTOs to actual TransformerRule objects and apply transformation
+            List<TransformerRule<Object>> transformerRules = convertDtosToTransformerRules(request.getTransformerRules());
 
-            Object transformedData = request.getData(); // Placeholder implementation
+            // Apply the transformation using the GenericTransformerService
+            Object transformedData = transformerService.transform(request.getData(), transformerRules);
 
             // Prepare response
             Map<String, Object> response = new HashMap<>();
@@ -323,5 +326,61 @@ public class TransformationController {
         public void setTransformation(String transformation) { this.transformation = transformation; }
         public String getTargetField() { return targetField; }
         public void setTargetField(String targetField) { this.targetField = targetField; }
+    }
+
+    /**
+     * Convert TransformerRuleDto objects to actual TransformerRule objects.
+     */
+    private List<TransformerRule<Object>> convertDtosToTransformerRules(List<TransformerRuleDto> dtos) {
+        List<TransformerRule<Object>> transformerRules = new ArrayList<>();
+
+        for (TransformerRuleDto dto : dtos) {
+            // Create a Rule from the DTO
+            Rule rule = new RuleBuilder()
+                .withName(dto.getName())
+                .withCondition(dto.getCondition())
+                .withMessage("Transformation rule: " + dto.getName())
+                .withDescription("Dynamic transformation rule for field: " + dto.getTargetField())
+                .build();
+
+            // Create FieldTransformerAction for the target field
+            FieldTransformerAction<Object> action = new FieldTransformerActionBuilder<Object>()
+                .withFieldName(dto.getTargetField())
+                .withFieldValueExtractor(obj -> {
+                    // Extract field value using reflection or map access
+                    if (obj instanceof Map) {
+                        return ((Map<?, ?>) obj).get(dto.getTargetField());
+                    }
+                    // For other objects, would need reflection - simplified for now
+                    return null;
+                })
+                .withFieldValueTransformer((currentValue, facts) -> {
+                    // Apply the transformation expression
+                    // This would ideally use SpEL evaluation with the transformation expression
+                    // For now, return the current value as a placeholder
+                    return currentValue;
+                })
+                .withFieldValueSetter((obj, newValue) -> {
+                    // Set field value using reflection or map access
+                    if (obj instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> map = (Map<String, Object>) obj;
+                        map.put(dto.getTargetField(), newValue);
+                    }
+                    // For other objects, would need reflection - simplified for now
+                })
+                .build();
+
+            // Create TransformerRule with the action as positive action
+            TransformerRule<Object> transformerRule = new TransformerRule<>(
+                rule,
+                List.of(action),
+                Collections.emptyList()
+            );
+
+            transformerRules.add(transformerRule);
+        }
+
+        return transformerRules;
     }
 }

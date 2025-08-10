@@ -40,8 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * and managing correlation IDs for better log traceability.
  */
 public class LoggingContext {
-    private static final Logger logger = LoggerFactory.getLogger(LoggingContext.class);
-    
+
     // MDC Keys
     public static final String CORRELATION_ID = "correlationId";
     public static final String RULE_NAME = "ruleName";

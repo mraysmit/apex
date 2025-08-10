@@ -46,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class PostgreSQLIntegrationTest {
 
     @Container
+    @SuppressWarnings("resource") // Testcontainers manages lifecycle automatically
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
             .withDatabaseName("testdb")
             .withUsername("testuser")

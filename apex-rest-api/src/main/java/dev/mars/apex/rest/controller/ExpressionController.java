@@ -3,7 +3,7 @@ package dev.mars.apex.rest.controller;
 import dev.mars.apex.core.service.expression.ExpressionEvaluationService;
 import dev.mars.apex.core.engine.model.RuleResult;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
+
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

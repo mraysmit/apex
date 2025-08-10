@@ -102,9 +102,14 @@ public class DataSourceConfiguration {
     public String getSourceType() {
         return sourceType;
     }
-    
+
     public void setSourceType(String sourceType) {
         this.sourceType = sourceType;
+    }
+
+    public String getDataType() {
+        // Return sourceType as the data type, or fall back to type
+        return sourceType != null ? sourceType : type;
     }
     
     public String getDescription() {

@@ -236,10 +236,13 @@ public class CustodyAutoRepairStandaloneDemo {
             marketSI.setDefaultSettlementMethod("DVP");
             
             SIRepairResult result = performBasicRepair(instruction, marketSI);
-            
+
             System.out.println("  → Custodian: " + instruction.getCustodianId());
             System.out.println("  → Settlement Method: " + marketSI.getDefaultSettlementMethod());
             System.out.println("  → Confidence: " + String.format("%.1f%%", marketSI.getConfidenceLevel() * 100));
+            System.out.println("  → Repair Status: " + (result.isRepairSuccessful() ? "✅ SUCCESS" : "❌ FAILED"));
+            System.out.println("  → Repair Result: " + result.getRepairStatus());
+            System.out.println("  → Fields Repaired: " + result.getFieldsRepaired());
             System.out.println();
         }
     }

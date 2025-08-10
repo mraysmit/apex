@@ -3,6 +3,8 @@ package dev.mars.apex.rest.controller;
 import dev.mars.apex.rest.BaseIntegrationTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -25,10 +27,11 @@ public class ExpressionControllerIntegrationTest extends BaseIntegrationTest {
         request.put("expression", "2 + 3 * 4");
 
         // Act
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            url("/api/expressions/evaluate"), 
-            createJsonEntity(request), 
-            Map.class
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            url("/api/expressions/evaluate"),
+            HttpMethod.POST,
+            createJsonEntity(request),
+            new ParameterizedTypeReference<Map<String, Object>>() {}
         );
 
         // Assert
@@ -50,10 +53,11 @@ public class ExpressionControllerIntegrationTest extends BaseIntegrationTest {
         request.put("context", context);
 
         // Act
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            url("/api/expressions/evaluate"), 
-            createJsonEntity(request), 
-            Map.class
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            url("/api/expressions/evaluate"),
+            HttpMethod.POST,
+            createJsonEntity(request),
+            new ParameterizedTypeReference<Map<String, Object>>() {}
         );
 
         // Assert
@@ -70,10 +74,11 @@ public class ExpressionControllerIntegrationTest extends BaseIntegrationTest {
         request.put("expression", "amount > 1000 && status == 'ACTIVE'");
 
         // Act
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            url("/api/expressions/validate"), 
-            createJsonEntity(request), 
-            Map.class
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            url("/api/expressions/validate"),
+            HttpMethod.POST,
+            createJsonEntity(request),
+            new ParameterizedTypeReference<Map<String, Object>>() {}
         );
 
         // Assert
@@ -91,10 +96,11 @@ public class ExpressionControllerIntegrationTest extends BaseIntegrationTest {
         request.put("expression", "invalid syntax +++");
 
         // Act
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            url("/api/expressions/validate"), 
-            createJsonEntity(request), 
-            Map.class
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            url("/api/expressions/validate"),
+            HttpMethod.POST,
+            createJsonEntity(request),
+            new ParameterizedTypeReference<Map<String, Object>>() {}
         );
 
         // Assert
@@ -108,9 +114,11 @@ public class ExpressionControllerIntegrationTest extends BaseIntegrationTest {
     @DisplayName("Should get available expression functions")
     void shouldGetAvailableExpressionFunctions() {
         // Act
-        ResponseEntity<Map> response = restTemplate.getForEntity(
-            url("/api/expressions/functions"), 
-            Map.class
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            url("/api/expressions/functions"),
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<Map<String, Object>>() {}
         );
 
         // Assert

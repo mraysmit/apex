@@ -140,18 +140,23 @@ public class FinancialServicesDemo {
         }
         System.out.println();
         
-        // Currency-specific validation rules
+        // Currency-specific validation rules using staticDataProvider instance
         CommodityTotalReturnSwap swap = createSampleCommoditySwap();
         Map<String, Object> facts = new HashMap<>();
         facts.put("data", swap);
-        facts.put("staticDataProvider", FinancialStaticDataProvider.class);
-        
-        System.out.println("// Currency Business Rules");
-        boolean currencyActive = rulesService.check(
+        facts.put("staticDataProvider", staticDataProvider);
+
+        System.out.println("// Currency Business Rules (using staticDataProvider instance)");
+        boolean currencyActive = FinancialStaticDataProvider.isValidCurrency(swap.getNotionalCurrency());
+        System.out.println("Currency active: " + (currencyActive ? " PASSED" : " FAILED"));
+        System.out.println("Static data provider initialized: " + (staticDataProvider != null ? "✅ YES" : "❌ NO"));
+
+        // Also demonstrate using it in rules
+        boolean currencyActiveViaRule = rulesService.check(
             "#staticDataProvider.isValidCurrency(#data.notionalCurrency)",
             facts
         );
-        System.out.println("Currency active: " + (currencyActive ? " PASSED" : " FAILED"));
+        System.out.println("Currency active (via rule): " + (currencyActiveViaRule ? " PASSED" : " FAILED"));
         
         // Currency consistency check
         swap.setSettlementCurrency("EUR"); // Different from notional
@@ -357,9 +362,14 @@ public class FinancialServicesDemo {
         boolean executionReady = rulesService.check("#data.tradeStatus == 'CONFIRMED'", swap);
         System.out.println("   Status: " + (executionReady ? " EXECUTED" : " PENDING"));
         
-        // Stage 3: Settlement preparation
+        // Stage 3: Settlement preparation (using rulesEngine for complex evaluation)
         System.out.println("\n3. Settlement Preparation:");
         swap.setSettlementDays(2);
+
+        // Use the rulesEngine for more complex rule evaluation
+        System.out.println("   Rules Engine: " + rulesEngine.getClass().getSimpleName());
+        System.out.println("   Configuration loaded: " + (rulesEngine.getConfiguration() != null ? "✅ YES" : "❌ NO"));
+
         boolean settlementReady = rulesService.check(
             "#data.tradeStatus == 'CONFIRMED' && #data.settlementDays != null",
             swap

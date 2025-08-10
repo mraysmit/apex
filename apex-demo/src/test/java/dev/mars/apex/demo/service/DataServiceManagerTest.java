@@ -4,8 +4,8 @@ import dev.mars.apex.core.service.data.CustomDataSource;
 import dev.mars.apex.core.service.data.DataServiceManager;
 import dev.mars.apex.core.service.data.DataSource;
 import dev.mars.apex.core.service.lookup.LookupService;
-import dev.mars.apex.demo.data.DemoDataServiceManager;
-import dev.mars.apex.demo.data.MockDataSource;
+import dev.mars.apex.demo.data.ProductionDemoDataServiceManager;
+import dev.mars.apex.demo.test.data.TestDataSource;
 import dev.mars.apex.demo.model.Customer;
 import dev.mars.apex.demo.model.Product;
 import dev.mars.apex.demo.model.Trade;
@@ -52,7 +52,7 @@ public class DataServiceManagerTest {
 
     @BeforeEach
     public void setUp() {
-        dataServiceManager = new DemoDataServiceManager();
+        dataServiceManager = new ProductionDemoDataServiceManager();
         dataServiceManager.initializeWithMockData();
     }
 
@@ -216,8 +216,8 @@ public class DataServiceManagerTest {
         // Create a new DataServiceManager
         DataServiceManager manager = new DataServiceManager();
 
-        // Create a mock data source
-        MockDataSource dataSource = new MockDataSource("TestDataSource", "testData");
+        // Create a test data source
+        TestDataSource dataSource = new TestDataSource("TestDataSource", "testData");
 
         // Load the data source
         manager.loadDataSource(dataSource);
@@ -247,8 +247,8 @@ public class DataServiceManagerTest {
         // Create a new DataServiceManager
         DataServiceManager manager = new DataServiceManager();
 
-        // Create a mock data source with null name
-        MockDataSource dataSource = new MockDataSource(null, "testData") {
+        // Create a test data source with null name
+        TestDataSource dataSource = new TestDataSource(null, "testData") {
             @Override
             public String getName() {
                 return null;
@@ -268,8 +268,8 @@ public class DataServiceManagerTest {
         // Create a new DataServiceManager
         DataServiceManager manager = new DataServiceManager();
 
-        // Create a mock data source with empty name
-        MockDataSource dataSource = new MockDataSource("", "testData") {
+        // Create a test data source with empty name
+        TestDataSource dataSource = new TestDataSource("", "testData") {
             @Override
             public String getName() {
                 return "";
@@ -289,8 +289,8 @@ public class DataServiceManagerTest {
         // Create a new DataServiceManager
         DataServiceManager manager = new DataServiceManager();
 
-        // Create a mock data source with null data type
-        MockDataSource dataSource = new MockDataSource("TestDataSource", null) {
+        // Create a test data source with null data type
+        TestDataSource dataSource = new TestDataSource("TestDataSource", null) {
             @Override
             public String getDataType() {
                 return null;
@@ -310,8 +310,8 @@ public class DataServiceManagerTest {
         // Create a new DataServiceManager
         DataServiceManager manager = new DataServiceManager();
 
-        // Create a mock data source with empty data type
-        MockDataSource dataSource = new MockDataSource("TestDataSource", "") {
+        // Create a test data source with empty data type
+        TestDataSource dataSource = new TestDataSource("TestDataSource", "") {
             @Override
             public String getDataType() {
                 return "";
@@ -331,9 +331,9 @@ public class DataServiceManagerTest {
         // Create a new DataServiceManager
         DataServiceManager manager = new DataServiceManager();
 
-        // Create mock data sources
-        MockDataSource dataSource1 = new MockDataSource("TestDataSource1", "testData1");
-        MockDataSource dataSource2 = new MockDataSource("TestDataSource2", "testData2");
+        // Create test data sources
+        TestDataSource dataSource1 = new TestDataSource("TestDataSource1", "testData1");
+        TestDataSource dataSource2 = new TestDataSource("TestDataSource2", "testData2");
 
         // Load the data sources
         manager.loadDataSources(dataSource1, dataSource2);
@@ -355,8 +355,8 @@ public class DataServiceManagerTest {
         // Create a new DataServiceManager
         DataServiceManager manager = new DataServiceManager();
 
-        // Load null data sources
-        manager.loadDataSources(null);
+        // Load null data sources (cast to DataSource[] to confirm non-varargs invocation)
+        manager.loadDataSources((DataSource[]) null);
 
         // Verify no data sources were loaded
         DataSource loadedDataSource = manager.getDataSourceByName("TestDataSource");
@@ -368,8 +368,8 @@ public class DataServiceManagerTest {
         // Create a new DataServiceManager
         DataServiceManager manager = new DataServiceManager();
 
-        // Create a mock data source
-        MockDataSource dataSource = new MockDataSource("TestDataSource", "testData");
+        // Create a test data source
+        TestDataSource dataSource = new TestDataSource("TestDataSource", "testData");
 
         // Load the data sources with a null data source
         manager.loadDataSources(dataSource, null);
@@ -386,8 +386,8 @@ public class DataServiceManagerTest {
         // Create a new DataServiceManager
         DataServiceManager manager = new DataServiceManager();
 
-        // Create a mock data source
-        MockDataSource dataSource = new MockDataSource("TestDataSource", "testData");
+        // Create a test data source
+        TestDataSource dataSource = new TestDataSource("TestDataSource", "testData");
 
         // Load the data source
         manager.loadDataSource(dataSource);
@@ -414,8 +414,8 @@ public class DataServiceManagerTest {
         // Create a new DataServiceManager
         DataServiceManager manager = new DataServiceManager();
 
-        // Create a mock data source
-        MockDataSource dataSource = new MockDataSource("TestDataSource", "testData");
+        // Create a test data source
+        TestDataSource dataSource = new TestDataSource("TestDataSource", "testData");
 
         // Load the data source
         manager.loadDataSource(dataSource);

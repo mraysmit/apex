@@ -188,7 +188,8 @@ public class TradeRecordMatcherDemo implements RecordMatcher<Trade> {
      */
     private boolean hasMatch(Trade trade, List<String> validatorNames) {
         for (String validatorName : validatorNames) {
-            Validator validator = registry.getService(validatorName, Validator.class);
+            @SuppressWarnings("unchecked")
+            Validator<String> validator = (Validator<String>) registry.getService(validatorName, Validator.class);
             if (validator != null && validator.validate(trade.getValue())) {
                 return true;
             }

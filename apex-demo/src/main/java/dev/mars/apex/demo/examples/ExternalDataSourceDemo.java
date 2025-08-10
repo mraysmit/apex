@@ -303,8 +303,9 @@ public class ExternalDataSourceDemo implements DemoRunner.Demo {
         System.out.println("-".repeat(50));
 
         try {
-            // Create a configuration with cache enabled
-            DataSourceConfiguration config = createCacheEnabledConfiguration();
+            // Create a cached CSV configuration using the dedicated method
+            Path csvFile = tempDir.resolve("users.csv");
+            DataSourceConfiguration config = createCachedCsvConfiguration(csvFile.toString());
             ExternalDataSource dataSource = factory.createDataSource(config);
 
             System.out.println("Cache Configuration:");
@@ -325,10 +326,11 @@ public class ExternalDataSourceDemo implements DemoRunner.Demo {
 
             // Second lookup (cache hit)
             startTime = System.nanoTime();
-            Object result2 = dataSource.queryForObject("getUserById", parameters);
+            Object cachedResult = dataSource.queryForObject("getUserById", parameters);
             long secondLookupTime = System.nanoTime() - startTime;
 
             System.out.println("  Second lookup (cache hit): " + secondLookupTime/1000 + " μs");
+            System.out.println("  Cached result available: " + (cachedResult != null ? "✅ YES" : "❌ NO"));
             System.out.println("  Performance improvement: " +
                              (firstLookupTime / (double) secondLookupTime) + "x faster");
 
@@ -581,24 +583,6 @@ public class ExternalDataSourceDemo implements DemoRunner.Demo {
         config.setCache(cacheConfig);
 
         return config;
-    }
-
-    private DataSourceConfiguration createCacheEnabledConfiguration() {
-        // Create a CSV file configuration with cache enabled
-        try {
-            Path csvFile = tempDir.resolve("users.csv");
-            DataSourceConfiguration config = createCsvFileConfiguration(csvFile.toString());
-
-            CacheConfig cacheConfig = new CacheConfig();
-            cacheConfig.setEnabled(true);
-            cacheConfig.setTtlSeconds(300L);
-            cacheConfig.setMaxSize(1000);
-            config.setCache(cacheConfig);
-
-            return config;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create cache-enabled configuration", e);
-        }
     }
 
     private DataSourceConfiguration createHealthMonitoredConfiguration(String filePath) {

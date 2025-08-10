@@ -86,6 +86,8 @@ class PostTradeProcessingServiceDemoConfig {
      * Initialize default values for settlement fees and days.
      */
     private void initializeDefaultValues() {
+        LOGGER.info("Initializing post-trade processing configuration");
+
         // Initialize settlement fees by type
         settlementFees.put(TYPE_EQUITY, 1.50);
         settlementFees.put(TYPE_FIXED_INCOME, 2.25);
@@ -99,6 +101,8 @@ class PostTradeProcessingServiceDemoConfig {
         settlementDays.put(TYPE_DERIVATIVE, 1);
         settlementDays.put(TYPE_FOREX, 2);
         settlementDays.put(TYPE_COMMODITY, 3);
+
+        LOGGER.info("Configured settlement parameters for " + settlementFees.size() + " trade types");
     }
 
     /**

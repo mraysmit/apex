@@ -3,7 +3,7 @@ package dev.mars.apex.rest.controller;
 import dev.mars.apex.core.service.engine.TemplateProcessorService;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
+
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

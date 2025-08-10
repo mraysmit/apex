@@ -3,6 +3,8 @@ package dev.mars.apex.rest.controller;
 import dev.mars.apex.rest.BaseIntegrationTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -29,10 +31,11 @@ public class RulesControllerIntegrationTest extends BaseIntegrationTest {
         request.put("context", context);
 
         // Act
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            url("/api/rules/evaluate"), 
-            createJsonEntity(request), 
-            Map.class
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            url("/api/rules/evaluate"),
+            HttpMethod.POST,
+            createJsonEntity(request),
+            new ParameterizedTypeReference<Map<String, Object>>() {}
         );
 
         // Assert
@@ -54,10 +57,11 @@ public class RulesControllerIntegrationTest extends BaseIntegrationTest {
         request.put("context", context);
 
         // Act
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            url("/api/rules/evaluate"), 
-            createJsonEntity(request), 
-            Map.class
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            url("/api/rules/evaluate"),
+            HttpMethod.POST,
+            createJsonEntity(request),
+            new ParameterizedTypeReference<Map<String, Object>>() {}
         );
 
         // Assert
@@ -78,10 +82,11 @@ public class RulesControllerIntegrationTest extends BaseIntegrationTest {
         request.put("context", context);
 
         // Act
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            url("/api/rules/evaluate"), 
-            createJsonEntity(request), 
-            Map.class
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            url("/api/rules/evaluate"),
+            HttpMethod.POST,
+            createJsonEntity(request),
+            new ParameterizedTypeReference<Map<String, Object>>() {}
         );
 
         // Assert
@@ -98,10 +103,11 @@ public class RulesControllerIntegrationTest extends BaseIntegrationTest {
         request.put("expression", "amount > 1000 && customerTier == 'GOLD'");
 
         // Act
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-            url("/api/rules/validate"), 
-            createJsonEntity(request), 
-            Map.class
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            url("/api/rules/validate"),
+            HttpMethod.POST,
+            createJsonEntity(request),
+            new ParameterizedTypeReference<Map<String, Object>>() {}
         );
 
         // Assert
@@ -115,9 +121,11 @@ public class RulesControllerIntegrationTest extends BaseIntegrationTest {
     @DisplayName("Should get available rule functions")
     void shouldGetAvailableRuleFunctions() {
         // Act
-        ResponseEntity<Map> response = restTemplate.getForEntity(
-            url("/api/rules/functions"), 
-            Map.class
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            url("/api/rules/functions"),
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<Map<String, Object>>() {}
         );
 
         // Assert

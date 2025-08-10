@@ -155,7 +155,13 @@ public class PerformanceMonitoringDemo  {
                     try {
                         Thread.sleep(1); // Simulate processing
                         boolean result = rulesService.check(rule.getCondition(), context);
-                        performanceMonitor.completeEvaluation(metricsBuilder, "concurrent-test");
+                        var metrics = performanceMonitor.completeEvaluation(metricsBuilder, "concurrent-test");
+
+                        // Log result for performance analysis
+                        if (result && metrics.getEvaluationTimeMillis() > 2) {
+                            System.out.println("      Slow rule detected: " + rule.getName() +
+                                             " (" + metrics.getEvaluationTimeMillis() + "ms)");
+                        }
                         
                     } catch (Exception e) {
                         performanceMonitor.completeEvaluation(metricsBuilder, "concurrent-test", e);
@@ -180,17 +186,19 @@ public class PerformanceMonitoringDemo  {
     }
     
     /**
-     * Demonstrate performance optimization techniques.
+     * Demonstrate performance optimization techniques using both RulesService and RulesEngine.
      */
     private void demonstratePerformanceOptimization() {
         System.out.println("=== PERFORMANCE OPTIMIZATION ===");
-        
+
         System.out.println("1. Rule Caching Demonstration:");
-        
+        System.out.println("   Rules Engine: " + rulesEngine.getClass().getSimpleName());
+        System.out.println("   Configuration loaded: " + (rulesEngine.getConfiguration() != null ? "✅ YES" : "❌ NO"));
+
         String cachedRule = "#amount > 1000";
         Map<String, Object> testContext = Map.of("amount", new BigDecimal("5000"));
-        
-        // Test with caching
+
+        // Test with caching using RulesService
         long startTime = System.nanoTime();
         for (int i = 0; i < 1000; i++) {
             rulesService.check(cachedRule, testContext);
@@ -257,7 +265,7 @@ public class PerformanceMonitoringDemo  {
             
             try {
                 boolean result = rulesService.check(expression, context);
-                System.out.println("   ✗ Unexpected success for: " + expression);
+                System.out.println("   ✗ Unexpected success for: " + expression + " (result: " + result + ")");
                 performanceMonitor.completeEvaluation(metricsBuilder, expression);
                 
             } catch (Exception e) {
@@ -291,10 +299,10 @@ public class PerformanceMonitoringDemo  {
                 try {
                     // Simulate increasing complexity
                     Thread.sleep(batch);
-                    boolean result = rulesService.check("#amount > 1000", 
+                    boolean result = rulesService.check("#amount > 1000",
                                                        Map.of("amount", new BigDecimal("5000")));
                     performanceMonitor.completeEvaluation(metricsBuilder, "#amount > 1000");
-                    batchEvaluations++;
+                    if (result) batchEvaluations++;
                     
                 } catch (Exception e) {
                     performanceMonitor.completeEvaluation(metricsBuilder, "#amount > 1000", e);

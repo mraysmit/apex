@@ -196,13 +196,19 @@ public class FileBasedProcessingDemo {
     private void processJsonFiles() throws Exception {
         System.out.println("\nProcessing JSON Files");
         System.out.println("-".repeat(30));
-        
+
+        if (useProductionDataSources) {
+            System.out.println("Using production data source approach (FileSystemDataSource concept)");
+        } else {
+            System.out.println("Using legacy file processing approach");
+        }
+
         Path jsonDir = Paths.get("demo-data/json");
         if (!Files.exists(jsonDir)) {
             System.out.println("No JSON directory found.");
             return;
         }
-        
+
         Files.list(jsonDir)
             .filter(path -> path.toString().endsWith(".json"))
             .forEach(this::processJsonFile);
@@ -238,13 +244,19 @@ public class FileBasedProcessingDemo {
     private void processXmlFiles() throws Exception {
         System.out.println("\nProcessing XML Files");
         System.out.println("-".repeat(30));
-        
+
+        if (useProductionDataSources) {
+            System.out.println("Using production data source approach (FileSystemDataSource concept)");
+        } else {
+            System.out.println("Using legacy file processing approach");
+        }
+
         Path xmlDir = Paths.get("demo-data/xml");
         if (!Files.exists(xmlDir)) {
             System.out.println("No XML directory found.");
             return;
         }
-        
+
         Files.list(xmlDir)
             .filter(path -> path.toString().endsWith(".xml"))
             .forEach(this::processXmlFile);

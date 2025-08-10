@@ -8,6 +8,7 @@ import dev.mars.apex.core.service.data.external.database.JdbcTemplateFactory;
 import dev.mars.apex.core.service.data.external.file.FileSystemDataSource;
 import dev.mars.apex.core.service.data.external.rest.RestApiDataSource;
 import dev.mars.apex.core.service.data.external.rest.RestTemplateFactory;
+import dev.mars.apex.core.service.data.external.messagequeue.MessageQueueDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -351,13 +352,20 @@ public class DataSourceFactory {
     /**
      * Create a message queue data source.
      */
-    private ExternalDataSource createMessageQueueDataSource(DataSourceConfiguration configuration) 
+    private ExternalDataSource createMessageQueueDataSource(DataSourceConfiguration configuration)
             throws DataSourceException {
-        
-        // Message queue implementation would go here
-        // For now, throw an exception indicating it's not implemented
-        throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
-            "Message queue data sources are not yet implemented");
+
+        try {
+            MessageQueueDataSource dataSource = new MessageQueueDataSource();
+            dataSource.initialize(configuration);
+
+            LOGGER.info("Created message queue data source: {}", configuration.getName());
+            return dataSource;
+
+        } catch (Exception e) {
+            throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
+                "Failed to create message queue data source", e, configuration.getName(), "create", false);
+        }
     }
     
     /**

@@ -5,7 +5,7 @@ import dev.mars.apex.core.service.data.external.DataSourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -86,11 +86,9 @@ public class CircuitBreaker {
         }
         
         long startTime = System.currentTimeMillis();
-        boolean success = false;
-        
+
         try {
             T result = callable.call();
-            success = true;
             onSuccess(System.currentTimeMillis() - startTime);
             return result;
             

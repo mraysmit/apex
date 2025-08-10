@@ -5,7 +5,7 @@ import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.common.NamedService;
+
 import dev.mars.apex.core.service.lookup.LookupService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.validation.Validator;
@@ -59,7 +59,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  * including complex rule groups with AND/OR relationships, nested rule groups,
  * and advanced with reference data through lookup services.
  */
-public class IntegratedTradeValidatorComplexDemo implements Validator<Trade>, NamedService {
+public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
     private static final Logger LOGGER = Logger.getLogger(IntegratedTradeValidatorComplexDemo.class.getName());
 
     // Core components

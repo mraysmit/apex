@@ -79,12 +79,16 @@ class ComplianceServiceDemoConfig {
      * Initialize default values for regulatory requirements and deadlines.
      */
     private void initializeDefaultValues() {
+        LOGGER.info("Initializing compliance service configuration with regulatory requirements");
+
         // Initialize regulatory requirements by trade type
         regulatoryRequirements.put(PostTradeProcessingServiceDemoConfig.TYPE_EQUITY, Arrays.asList(REG_MIFID_II, REG_BASEL_III));
         regulatoryRequirements.put(PostTradeProcessingServiceDemoConfig.TYPE_FIXED_INCOME, Arrays.asList(REG_MIFID_II, REG_BASEL_III, REG_SFTR));
         regulatoryRequirements.put(PostTradeProcessingServiceDemoConfig.TYPE_DERIVATIVE, Arrays.asList(REG_MIFID_II, REG_EMIR, REG_DODD_FRANK));
         regulatoryRequirements.put(PostTradeProcessingServiceDemoConfig.TYPE_FOREX, Arrays.asList(REG_MIFID_II, REG_DODD_FRANK));
         regulatoryRequirements.put(PostTradeProcessingServiceDemoConfig.TYPE_COMMODITY, Arrays.asList(REG_MIFID_II, REG_EMIR));
+
+        LOGGER.info("Configured regulatory requirements for " + regulatoryRequirements.size() + " trade types");
 
         // Initialize reporting deadlines (in hours) by regulatory framework
         reportingDeadlines.put(REG_MIFID_II, 24);

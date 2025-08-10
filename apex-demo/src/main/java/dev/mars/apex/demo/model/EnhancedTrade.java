@@ -22,18 +22,13 @@ import java.util.Map;
 
 /**
  * Enhanced Trade model with settlement and custody domain concepts.
- *
- * This class is part of the PeeGeeQ message queue system, providing
- * production-ready PostgreSQL-based message queuing capabilities.
+ * This class extends the basic Trade model with additional properties
+ * relevant to financial services domains including settlement, custody,
+ * compliance, and risk management capabilities.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-27
  * @version 1.0
- */
-/**
- * Enhanced Trade model with settlement and custody domain concepts.
- * This class extends the basic Trade model with additional properties
- * relevant to financial services domains.
  */
 public class EnhancedTrade extends Trade {
     // Settlement domain properties

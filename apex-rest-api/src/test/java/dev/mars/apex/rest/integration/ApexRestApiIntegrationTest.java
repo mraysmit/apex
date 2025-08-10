@@ -3,7 +3,7 @@ package dev.mars.apex.rest.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.mars.apex.rest.ApexRestApiApplication;
 import dev.mars.apex.rest.dto.RuleEvaluationRequest;
-import dev.mars.apex.rest.dto.RuleEvaluationResponse;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.HashMap;
@@ -51,8 +52,11 @@ class ApexRestApiIntegrationTest {
         @Test
         @DisplayName("Should return UP status for health check")
         void shouldReturnHealthyStatus() {
-            ResponseEntity<Map> response = restTemplate.getForEntity(
-                getBaseUrl() + "/actuator/health", Map.class);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                getBaseUrl() + "/actuator/health",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Map<String, Object>>() {});
             
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertNotNull(response.getBody());
@@ -79,8 +83,11 @@ class ApexRestApiIntegrationTest {
             HttpEntity<RuleEvaluationRequest> entity = new HttpEntity<>(request, headers);
 
             // When
-            ResponseEntity<Map> response = restTemplate.postForEntity(
-                getBaseUrl() + "/api/rules/check", entity, Map.class);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                getBaseUrl() + "/api/rules/check",
+                HttpMethod.POST,
+                entity,
+                new ParameterizedTypeReference<Map<String, Object>>() {});
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -108,8 +115,11 @@ class ApexRestApiIntegrationTest {
             HttpEntity<RuleEvaluationRequest> entity = new HttpEntity<>(request, headers);
 
             // When
-            ResponseEntity<Map> response = restTemplate.postForEntity(
-                getBaseUrl() + "/api/rules/check", entity, Map.class);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                getBaseUrl() + "/api/rules/check",
+                HttpMethod.POST,
+                entity,
+                new ParameterizedTypeReference<Map<String, Object>>() {});
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -137,8 +147,11 @@ class ApexRestApiIntegrationTest {
             HttpEntity<RuleEvaluationRequest> entity = new HttpEntity<>(request, headers);
 
             // When
-            ResponseEntity<Map> response = restTemplate.postForEntity(
-                getBaseUrl() + "/api/rules/check", entity, Map.class);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                getBaseUrl() + "/api/rules/check",
+                HttpMethod.POST,
+                entity,
+                new ParameterizedTypeReference<Map<String, Object>>() {});
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -163,8 +176,11 @@ class ApexRestApiIntegrationTest {
             HttpEntity<RuleEvaluationRequest> entity = new HttpEntity<>(request, headers);
 
             // When
-            ResponseEntity<Map> response = restTemplate.postForEntity(
-                getBaseUrl() + "/api/rules/check", entity, Map.class);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                getBaseUrl() + "/api/rules/check",
+                HttpMethod.POST,
+                entity,
+                new ParameterizedTypeReference<Map<String, Object>>() {});
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -193,8 +209,11 @@ class ApexRestApiIntegrationTest {
             HttpEntity<RuleEvaluationRequest> entity = new HttpEntity<>(request, headers);
 
             // When
-            ResponseEntity<Map> response = restTemplate.postForEntity(
-                getBaseUrl() + "/api/rules/check", entity, Map.class);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                getBaseUrl() + "/api/rules/check",
+                HttpMethod.POST,
+                entity,
+                new ParameterizedTypeReference<Map<String, Object>>() {});
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -218,8 +237,11 @@ class ApexRestApiIntegrationTest {
             HttpEntity<RuleEvaluationRequest> entity = new HttpEntity<>(request, headers);
 
             // When
-            ResponseEntity<Map> response = restTemplate.postForEntity(
-                getBaseUrl() + "/api/rules/check", entity, Map.class);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                getBaseUrl() + "/api/rules/check",
+                HttpMethod.POST,
+                entity,
+                new ParameterizedTypeReference<Map<String, Object>>() {});
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -265,14 +287,33 @@ class ApexRestApiIntegrationTest {
         @DisplayName("Should return defined rules")
         void shouldReturnDefinedRules() {
             // When
-            ResponseEntity<Map> response = restTemplate.getForEntity(
-                getBaseUrl() + "/api/rules/defined", Map.class);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                getBaseUrl() + "/api/rules/defined",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Map<String, Object>>() {});
 
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertNotNull(response.getBody());
             assertTrue(response.getBody().containsKey("count"));
             assertTrue(response.getBody().containsKey("definedRules"));
+
+            // Validate JSON structure using ObjectMapper
+            try {
+                String jsonResponse = objectMapper.writeValueAsString(response.getBody());
+                assertNotNull(jsonResponse, "Response should be serializable to JSON");
+                assertTrue(jsonResponse.contains("\"count\""), "JSON should contain count field");
+                assertTrue(jsonResponse.contains("\"definedRules\""), "JSON should contain definedRules field");
+
+                // Verify we can deserialize back to Map
+                @SuppressWarnings("unchecked")
+                Map<String, Object> deserializedResponse = objectMapper.readValue(jsonResponse, Map.class);
+                assertEquals(response.getBody().get("count"), deserializedResponse.get("count"),
+                           "Deserialized count should match original");
+            } catch (Exception e) {
+                fail("JSON serialization/deserialization should work: " + e.getMessage());
+            }
             assertTrue(response.getBody().containsKey("timestamp"));
         }
     }

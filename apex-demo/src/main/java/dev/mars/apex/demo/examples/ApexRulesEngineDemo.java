@@ -288,6 +288,11 @@ public class ApexRulesEngineDemo {
         ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
         RuleEngineService ruleEngineService = new RuleEngineService(evaluatorService);
 
+        System.out.println("Rules Engine initialized:");
+        System.out.println("  Configuration loaded: " + (engine.getConfiguration() != null ? "✅ YES" : "❌ NO"));
+        System.out.println("  Available rules: " + engine.getConfiguration().getAllRules().size());
+        System.out.println();
+
         // Demonstrate different chaining patterns
         demonstrateConditionalChaining(ruleEngineService, evaluatorService);
         demonstrateSequentialDependency(ruleEngineService, evaluatorService);

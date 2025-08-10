@@ -121,14 +121,14 @@ public class YamlDependencyAnalysisDemo {
                 if (!graph.getMissingFiles().isEmpty()) {
                     System.out.println("  Missing Files:");
                     for (String missingFile : graph.getMissingFiles()) {
-                        System.out.println("    ✗ " + missingFile);
+                        System.out.println("    [X] " + missingFile);
                     }
                 }
                 
                 if (!graph.getInvalidYamlFiles().isEmpty()) {
                     System.out.println("  Invalid YAML Files:");
                     for (String invalidFile : graph.getInvalidYamlFiles()) {
-                        System.out.println("    ⚠ " + invalidFile);
+                        System.out.println("    [!] " + invalidFile);
                     }
                 }
                 
@@ -136,11 +136,11 @@ public class YamlDependencyAnalysisDemo {
                     System.out.println("  Circular Dependencies:");
                     List<List<String>> cycles = graph.findCircularDependencies();
                     for (List<String> cycle : cycles) {
-                        System.out.println("    ↻ " + String.join(" → ", cycle));
+                        System.out.println("    [~] " + String.join(" -> ", cycle));
                     }
                 }
             } else {
-                System.out.println("✓ All dependencies are healthy");
+                System.out.println("[*] All dependencies are healthy");
             }
             
         } catch (Exception e) {

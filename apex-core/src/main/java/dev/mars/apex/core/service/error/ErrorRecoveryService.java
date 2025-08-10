@@ -1,14 +1,11 @@
 package dev.mars.apex.core.service.error;
 
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.exception.RuleEvaluationException;
-import dev.mars.apex.core.exception.RuleEngineException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
-import java.util.Map;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 

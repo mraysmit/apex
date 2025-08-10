@@ -44,9 +44,6 @@ public class RuleChainExecutor {
     
     private static final Logger LOGGER = Logger.getLogger(RuleChainExecutor.class.getName());
     
-    private final RuleEngineService ruleEngineService;
-    private final ExpressionEvaluatorService evaluatorService;
-    
     // Pattern-specific executors
     private final ConditionalChainingExecutor conditionalChainingExecutor;
     private final SequentialDependencyExecutor sequentialDependencyExecutor;
@@ -57,13 +54,11 @@ public class RuleChainExecutor {
     
     /**
      * Create a new rule chain executor.
-     * 
+     *
      * @param ruleEngineService The rule engine service for executing individual rules
      * @param evaluatorService The expression evaluator service for evaluating SpEL expressions
      */
     public RuleChainExecutor(RuleEngineService ruleEngineService, ExpressionEvaluatorService evaluatorService) {
-        this.ruleEngineService = ruleEngineService;
-        this.evaluatorService = evaluatorService;
         
         // Initialize pattern-specific executors
         this.conditionalChainingExecutor = new ConditionalChainingExecutor(ruleEngineService, evaluatorService);

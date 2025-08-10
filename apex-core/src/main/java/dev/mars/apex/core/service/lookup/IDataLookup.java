@@ -1,6 +1,5 @@
 package dev.mars.apex.core.service.lookup;
 
-import dev.mars.apex.core.service.common.NamedService;
 import dev.mars.apex.core.service.validation.Validator;
 
 /*
@@ -33,7 +32,7 @@ import dev.mars.apex.core.service.validation.Validator;
  * Legacy interface that combines validation and transformation capabilities.
  * Kept for backward compatibility.
  */
-public interface IDataLookup extends Validator, NamedService {
+public interface IDataLookup extends Validator<Object> {
     /**
      * Transform a value of type Object.
      * 

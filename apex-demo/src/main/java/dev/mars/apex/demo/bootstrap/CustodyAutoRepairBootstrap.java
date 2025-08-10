@@ -1,6 +1,5 @@
 package dev.mars.apex.demo.bootstrap;
 
-import dev.mars.apex.core.api.RulesService;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
@@ -204,15 +203,13 @@ public class CustodyAutoRepairBootstrap {
     private static final String DB_PASSWORD = "postgres";
     
     // APEX components
-    private RulesService rulesService;
     private EnrichmentService enrichmentService;
     private YamlRuleConfiguration yamlConfig;
-    
+
     // Database connection
     private Connection connection;
-    
-    // Performance metrics
-    private Map<String, Long> performanceMetrics;
+
+    // Execution log
     private List<String> executionLog;
     
     public static void main(String[] args) {
@@ -240,7 +237,7 @@ public class CustodyAutoRepairBootstrap {
             System.out.println("CUSTODY AUTO-REPAIR BOOTSTRAP COMPLETED SUCCESSFULLY!");
             System.out.println("=================================================================");
             System.out.println("Total Execution Time: " + totalDuration + " ms");
-            System.out.println("Phases Completed: 4/4");
+            System.out.println("Phases Completed: 7/7");
             System.out.println("Repair Strategies: 4 (Standing Instructions, Market Standards, Inquiry, Manual)");
             System.out.println("Asian Markets: 5 (Hong Kong, Singapore, Tokyo, Seoul, Taiwan)");
             System.out.println("Demo Status: SUCCESS");
@@ -269,7 +266,7 @@ public class CustodyAutoRepairBootstrap {
      * Run the complete bootstrap demonstration.
      *
      * This method orchestrates the complete custody auto-repair demonstration
-     * through six comprehensive phases, from infrastructure setup through
+     * through seven comprehensive phases, from infrastructure setup through
      * performance analysis and reporting.
      *
      * EXECUTION PHASES:
@@ -285,50 +282,56 @@ public class CustodyAutoRepairBootstrap {
         System.out.println("=================================================================");
         System.out.println("STARTING CUSTODY AUTO-REPAIR BOOTSTRAP EXECUTION");
         System.out.println("=================================================================");
-        System.out.println("Executing comprehensive 6-phase demonstration of Asian markets auto-repair");
+        System.out.println("Executing comprehensive 7-phase demonstration of Asian markets auto-repair");
         System.out.println("Processing failed settlement instructions through intelligent repair pipeline");
         System.out.println("=================================================================");
 
         long startTime = System.currentTimeMillis();
-        int totalPhases = 6;
+        int totalPhases = 7;
         int completedPhases = 0;
 
         try {
             // Initialize components
-            System.out.println(">>> PHASE 1/6: Component Initialization");
+            System.out.println(">>> PHASE 1/7: Component Initialization");
             initializeComponents();
             completedPhases++;
             System.out.println("Phase 1 completed successfully - APEX components ready");
 
             // Phase 2: Database Infrastructure Setup
-            System.out.println(">>> PHASE 2/6: Database Infrastructure Setup");
+            System.out.println(">>> PHASE 2/7: Database Infrastructure Setup");
             setupDatabaseInfrastructure();
             completedPhases++;
             System.out.println("Phase 2 completed successfully - Database infrastructure ready");
 
             // Phase 3: YAML Configuration Loading
-            System.out.println(">>> PHASE 3/6: YAML Configuration Loading");
+            System.out.println(">>> PHASE 3/7: YAML Configuration Loading");
             loadYamlConfiguration();
             completedPhases++;
             System.out.println("Phase 3 completed successfully - Repair rules and patterns loaded");
 
             // Phase 4: Test Data Population
-            System.out.println(">>> PHASE 4/6: Test Data Population");
+            System.out.println(">>> PHASE 4/7: Test Data Population");
             populateTestData();
             completedPhases++;
             System.out.println("Phase 4 completed successfully - Asian markets test data populated");
 
-            // Phase 5: Scenario Execution
-            System.out.println(">>> PHASE 5/6: Scenario Execution");
+            // Phase 5: APEX Rules Engine Initialization
+            System.out.println(">>> PHASE 5/7: APEX Rules Engine Initialization");
+            initializeApexEngine();
+            completedPhases++;
+            System.out.println("Phase 5 completed successfully - APEX rules engine initialized");
+
+            // Phase 6: Scenario Execution
+            System.out.println(">>> PHASE 6/7: Scenario Execution");
             executeAllScenarios();
             completedPhases++;
-            System.out.println("Phase 5 completed successfully - Auto-repair scenarios executed");
+            System.out.println("Phase 6 completed successfully - Auto-repair scenarios executed");
 
-            // Phase 6: Performance Analysis
-            System.out.println(">>> PHASE 6/6: Performance Analysis");
+            // Phase 7: Performance Analysis
+            System.out.println(">>> PHASE 7/7: Performance Analysis");
             analyzePerformance();
             completedPhases++;
-            System.out.println("Phase 6 completed successfully - Performance analysis completed");
+            System.out.println("Phase 7 completed successfully - Performance analysis completed");
 
             long totalTime = System.currentTimeMillis() - startTime;
 
@@ -371,17 +374,9 @@ public class CustodyAutoRepairBootstrap {
         long initStart = System.currentTimeMillis();
 
         try {
-            System.out.println("   Initializing performance metrics tracking...");
-            this.performanceMetrics = new HashMap<>();
-            System.out.println("     Performance metrics repository created");
-
             System.out.println("   Initializing execution log...");
             this.executionLog = new ArrayList<>();
             System.out.println("     Execution log initialized for audit trail");
-
-            System.out.println("   Initializing APEX Rules Service...");
-            this.rulesService = new RulesService();
-            System.out.println("     Rules Service initialized - ready for repair decision processing");
 
             System.out.println("   Initializing enrichment service dependencies...");
             // Initialize enrichment service with required dependencies
@@ -514,9 +509,9 @@ public class CustodyAutoRepairBootstrap {
             if (!rs.next()) {
                 // Create database
                 stmt.executeUpdate("CREATE DATABASE " + DB_NAME);
-                System.out.println("✅ Created database: " + DB_NAME);
+                System.out.println("[*] Created database: " + DB_NAME);
             } else {
-                System.out.println("✅ Database already exists: " + DB_NAME);
+                System.out.println("[*] Database already exists: " + DB_NAME);
             }
         }
     }
@@ -527,7 +522,7 @@ public class CustodyAutoRepairBootstrap {
     private void connectToDatabase() throws SQLException {
         this.connection = DriverManager.getConnection(
             DB_URL + DB_NAME, DB_USER, DB_PASSWORD);
-        System.out.println("✅ Connected to database: " + DB_NAME);
+        System.out.println("[*] Connected to database: " + DB_NAME);
     }
     
     /**
@@ -657,7 +652,7 @@ public class CustodyAutoRepairBootstrap {
             }
         }
         
-        System.out.println("✅ Database schema created successfully");
+        System.out.println("[*] Database schema created successfully");
         logExecution("Database schema created");
     }
     
@@ -672,14 +667,14 @@ public class CustodyAutoRepairBootstrap {
             YamlConfigurationLoader loader = new YamlConfigurationLoader();
             this.yamlConfig = loader.loadFromClasspath("bootstrap/custody-auto-repair-bootstrap.yaml");
             
-            System.out.println("✅ YAML configuration loaded successfully");
+            System.out.println("[*] YAML configuration loaded successfully");
             System.out.println("   - Rule chains: " + yamlConfig.getRuleChains().size());
             System.out.println("   - Enrichments: " + yamlConfig.getEnrichments().size());
             
             logExecution("YAML configuration loaded");
             
         } catch (Exception e) {
-            System.err.println("❌ Failed to load YAML configuration: " + e.getMessage());
+            System.err.println("[X] Failed to load YAML configuration: " + e.getMessage());
             throw e;
         }
     }
@@ -714,7 +709,7 @@ public class CustodyAutoRepairBootstrap {
         // Insert standing instructions
         insertStandingInstructionsData();
         
-        System.out.println("✅ Database test data populated successfully");
+        System.out.println("[*] Database test data populated successfully");
     }
     
     /**
@@ -734,7 +729,7 @@ public class CustodyAutoRepairBootstrap {
             }
         }
         
-        System.out.println("✅ Existing data cleared for fresh demo");
+        System.out.println("[*] Existing data cleared for fresh demo");
     }
     
     /**
@@ -767,7 +762,7 @@ public class CustodyAutoRepairBootstrap {
             }
         }
         
-        System.out.println("✅ Asian markets reference data inserted");
+        System.out.println("[*] Asian markets reference data inserted");
     }
     
     /**
@@ -822,14 +817,14 @@ public class CustodyAutoRepairBootstrap {
             }
         }
         
-        System.out.println("✅ Standing instructions data inserted");
+        System.out.println("[*] Standing instructions data inserted");
     }
     
     /**
      * Populate in-memory test data when database is not available.
      */
     private void populateInMemoryTestData() {
-        System.out.println("✅ In-memory test data simulation ready");
+        System.out.println("[*] In-memory test data simulation ready");
     }
     
     /**
@@ -842,7 +837,7 @@ public class CustodyAutoRepairBootstrap {
             throw new IllegalStateException("YAML configuration not loaded");
         }
         
-        System.out.println("✅ APEX rules engine initialized successfully");
+        System.out.println("[*] APEX rules engine initialized successfully");
         System.out.println("   - Rules service ready");
         System.out.println("   - Enrichment service ready");
         System.out.println("   - Configuration loaded with " + yamlConfig.getEnrichments().size() + " enrichments");
@@ -871,7 +866,7 @@ public class CustodyAutoRepairBootstrap {
         // Scenario 5: Client Opt-Out Exception
         executeScenario5_ClientOptOut();
 
-        System.out.println("✅ All scenarios executed successfully");
+        System.out.println("[*] All scenarios executed successfully");
         logExecution("All scenarios executed");
     }
 

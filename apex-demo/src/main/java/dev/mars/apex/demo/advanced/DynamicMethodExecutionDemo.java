@@ -1,8 +1,7 @@
 package dev.mars.apex.demo.advanced;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import dev.mars.apex.demo.model.Trade;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.*;
@@ -67,17 +66,13 @@ public class DynamicMethodExecutionDemo {
     private static void runDynamicMethodExecutionDemo() {
         System.out.println("Starting dynamic method execution demonstration");
 
-        // Step 1: Create a RulesEngine
-        System.out.println("Step 1: Creating a RulesEngine");
-        RulesEngine rulesEngine = new RulesEngine(new RulesEngineConfiguration());
-
-        // Step 2: Create an ExpressionEvaluatorService
-        System.out.println("Step 2: Creating an ExpressionEvaluatorService");
+        // Step 1: Create an ExpressionEvaluatorService
+        System.out.println("Step 1: Creating an ExpressionEvaluatorService");
         ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
 
-        // Step 3: Create a DynamicMethodExecutionDemoConfig
-        System.out.println("Step 3: Creating a DynamicMethodExecutionDemoConfig");
-        DynamicMethodExecutionDemoConfig config = new DynamicMethodExecutionDemoConfig(rulesEngine, evaluatorService);
+        // Step 2: Create a DynamicMethodExecutionDemoConfig
+        System.out.println("Step 2: Creating a DynamicMethodExecutionDemoConfig");
+        DynamicMethodExecutionDemoConfig config = new DynamicMethodExecutionDemoConfig(evaluatorService);
 
         // Step 4: Create an evaluation context with self-contained services
         System.out.println("Step 4: Creating an evaluation context");
@@ -102,6 +97,18 @@ public class DynamicMethodExecutionDemo {
         // Step 9: Demonstrate conditional processing
         System.out.println("Step 9: Demonstrating conditional processing");
         demonstrateConditionalProcessing(config, context);
+
+        // Step 10: Demonstrate rule-based processing
+        System.out.println("Step 10: Demonstrating rule-based processing");
+        demonstrateRuleBasedProcessing(config, context);
+
+        // Step 11: Demonstrate pricing variations
+        System.out.println("Step 11: Demonstrating pricing variations");
+        demonstratePricingVariations(config, context);
+
+        // Step 12: Demonstrate trade validation
+        System.out.println("Step 12: Demonstrating trade validation");
+        demonstrateTradeValidation(config, context);
 
         System.out.println("Dynamic method execution demonstration completed");
     }
@@ -173,7 +180,8 @@ public class DynamicMethodExecutionDemo {
         String[] tradeTypes = {"equity", "fixedIncome", "derivative", "forex", "commodity"};
         for (String tradeType : tradeTypes) {
             String expression = "#complianceService.getApplicableRegulations(#trades['" + tradeType + "'])";
-            List<String> regulations = config.evaluateComplianceAndReporting(expression, context, List.class);
+            @SuppressWarnings("unchecked")
+            List<String> regulations = (List<String>) config.evaluateComplianceAndReporting(expression, context, List.class);
             System.out.println("Example 5." + (tradeType.charAt(0) - 'a' + 1) +
                     ": Applicable regulations for " + tradeType + " trade: " + regulations);
         }
@@ -228,5 +236,142 @@ public class DynamicMethodExecutionDemo {
             System.out.println("Example 8." + (tradeType.charAt(0) - 'a' + 1) +
                     ": Conditional processing for " + tradeType + " trade: " + result);
         }
+    }
+
+    /**
+     * Demonstrate rule-based processing using the rules engine.
+     *
+     * @param config The dynamic method execution config
+     * @param context The evaluation context
+     */
+    private static void demonstrateRuleBasedProcessing(DynamicMethodExecutionDemoConfig config, StandardEvaluationContext context) {
+        System.out.println("\n----- CATEGORY 6: RULE-BASED PROCESSING -----");
+
+        // Example 9: Show available rules
+        Map<String, String> availableRules = config.getAvailableRules();
+        System.out.println("Example 9.1: Available rules:");
+        for (Map.Entry<String, String> entry : availableRules.entrySet()) {
+            System.out.println("  - " + entry.getKey() + ": " + entry.getValue());
+        }
+
+        // Example 10: Execute individual rules
+        System.out.println("\nExample 9.2: Executing individual rules for equity trade:");
+        context.setVariable("trade", context.lookupVariable("trades"));
+        @SuppressWarnings("unchecked")
+        Map<String, Object> trades = (Map<String, Object>) context.lookupVariable("trades");
+        context.setVariable("trade", trades.get("equity"));
+        context.setVariable("basePrice", 100.0);
+
+        try {
+            Integer settlementDays = config.executeRule("SettlementDays", context, Integer.class);
+            System.out.println("  - Settlement Days: " + settlementDays);
+
+            String settlementMethod = config.executeRule("SettlementMethod", context, String.class);
+            System.out.println("  - Settlement Method: " + settlementMethod);
+
+            Double marketRisk = config.executeRule("MarketRisk", context, Double.class);
+            System.out.println("  - Market Risk: " + marketRisk);
+
+            Double standardPrice = config.executeRule("StandardPrice", context, Double.class);
+            System.out.println("  - Standard Price: " + standardPrice);
+        } catch (Exception e) {
+            System.out.println("  - Error executing rules: " + e.getMessage());
+        }
+
+        // Example 11: Execute all rules at once
+        System.out.println("\nExample 9.3: Executing all rules for derivative trade:");
+        context.setVariable("trade", trades.get("derivative"));
+        context.setVariable("basePrice", 500.0);
+
+        Map<String, Object> allResults = config.executeAllRules(context);
+        for (Map.Entry<String, Object> entry : allResults.entrySet()) {
+            System.out.println("  - " + entry.getKey() + ": " + entry.getValue());
+        }
+    }
+
+    /**
+     * Demonstrate pricing variations using all pricing methods.
+     *
+     * @param config The dynamic method execution config
+     * @param context The evaluation context
+     */
+    private static void demonstratePricingVariations(DynamicMethodExecutionDemoConfig config, StandardEvaluationContext context) {
+        System.out.println("\n----- CATEGORY 7: PRICING VARIATIONS -----");
+
+        // Example 12: Demonstrate all pricing methods for different base prices
+        double[] basePrices = {100.0, 500.0, 1000.0, 2500.0};
+
+        for (int i = 0; i < basePrices.length; i++) {
+            double basePrice = basePrices[i];
+            System.out.println("\nExample 10." + (i + 1) + ": Pricing variations for base price $" + basePrice + ":");
+
+            Map<String, Double> pricingResults = config.demonstratePricingVariations(basePrice, context);
+
+            System.out.println("  - Standard Price: $" + pricingResults.get("standard"));
+            System.out.println("  - Premium Price (+20%): $" + pricingResults.get("premium"));
+            System.out.println("  - Sale Price (-20%): $" + pricingResults.get("sale"));
+            System.out.println("  - Clearance Price (-50%): $" + pricingResults.get("clearance"));
+
+            // Calculate price spread
+            double spread = pricingResults.get("premium") - pricingResults.get("clearance");
+            System.out.println("  - Price Spread (Premium to Clearance): $" + spread);
+        }
+    }
+
+    /**
+     * Demonstrate trade validation including invalid trades.
+     *
+     * @param config The dynamic method execution config
+     * @param context The evaluation context
+     */
+    private static void demonstrateTradeValidation(DynamicMethodExecutionDemoConfig config, StandardEvaluationContext context) {
+        System.out.println("\n----- CATEGORY 8: TRADE VALIDATION -----");
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> trades = (Map<String, Object>) context.lookupVariable("trades");
+
+        // Example 13: Validate valid trades
+        System.out.println("Example 11.1: Validating valid trades:");
+        String[] validTradeTypes = {"equity", "fixedIncome", "derivative", "forex", "commodity"};
+
+        for (String tradeType : validTradeTypes) {
+            Object tradeObj = trades.get(tradeType);
+            if (tradeObj instanceof Trade) {
+                Trade trade = (Trade) tradeObj;
+                Map<String, Object> validationResults = config.validateTrade(trade, context);
+
+                System.out.println("  - " + tradeType.toUpperCase() + " Trade (" + trade.getId() + "):");
+                System.out.println("    * Has ID: " + validationResults.get("hasId"));
+                System.out.println("    * Has Value: " + validationResults.get("hasValue"));
+                System.out.println("    * Has Category: " + validationResults.get("hasCategory"));
+                System.out.println("    * Settlement Days: " + validationResults.get("settlementDays"));
+                System.out.println("    * Valid Settlement: " + validationResults.get("validSettlementDays"));
+            }
+        }
+
+        // Example 14: Validate invalid trade
+        System.out.println("\nExample 11.2: Validating invalid trade:");
+        Object invalidTradeObj = trades.get("invalid");
+        if (invalidTradeObj instanceof Trade) {
+            Trade invalidTrade = (Trade) invalidTradeObj;
+            Map<String, Object> validationResults = config.validateTrade(invalidTrade, context);
+
+            System.out.println("  - INVALID Trade:");
+            System.out.println("    * Has ID: " + validationResults.get("hasId"));
+            System.out.println("    * Has Value: " + validationResults.get("hasValue"));
+            System.out.println("    * Has Category: " + validationResults.get("hasCategory"));
+            System.out.println("    * Settlement Days: " + validationResults.get("settlementDays"));
+            System.out.println("    * Valid Settlement: " + validationResults.get("validSettlementDays"));
+        }
+
+        // Example 15: Validate null trade
+        System.out.println("\nExample 11.3: Validating null trade:");
+        Map<String, Object> nullValidationResults = config.validateTrade(null, context);
+        System.out.println("  - NULL Trade:");
+        System.out.println("    * Has ID: " + nullValidationResults.get("hasId"));
+        System.out.println("    * Has Value: " + nullValidationResults.get("hasValue"));
+        System.out.println("    * Has Category: " + nullValidationResults.get("hasCategory"));
+        System.out.println("    * Settlement Days: " + nullValidationResults.get("settlementDays"));
+        System.out.println("    * Valid Settlement: " + nullValidationResults.get("validSettlementDays"));
     }
 }

@@ -35,7 +35,7 @@ import java.util.logging.Logger;
  * Data provider for the ApexAdvancedFeaturesDemo.
  * This class uses MockDataSource to provide example data for the demo.
  */
-class ApexAdvancedFeaturesDataProvider {
+public class ApexAdvancedFeaturesDataProvider {
     private static final Logger LOGGER = Logger.getLogger(ApexAdvancedFeaturesDataProvider.class.getName());
 
     private final Map<String, Object> dataStore = new HashMap<>();
