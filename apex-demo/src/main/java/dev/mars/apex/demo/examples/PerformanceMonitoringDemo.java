@@ -210,7 +210,7 @@ public class PerformanceMonitoringDemo  {
         System.out.println("\n2. Expression Complexity Analysis:");
         
         String simpleExpression = "#amount > 1000";
-        String complexExpression = "#amount != null && #amount.compareTo(new java.math.BigDecimal('1000')) > 0 && #currency == 'USD'";
+        String complexExpression = "#amount != null && #amount.compareTo(T(java.math.BigDecimal).new('1000')) > 0 && #currency == 'USD'";
         
         Map<String, Object> context = Map.of("amount", new BigDecimal("5000"), "currency", "USD");
         
@@ -367,7 +367,7 @@ public class PerformanceMonitoringDemo  {
     private List<Rule> createPerformanceTestRules() {
         return Arrays.asList(
             new Rule("simple-amount-check", "#amount > 1000", "Simple amount check"),
-            new Rule("complex-validation", "#amount != null && #amount.compareTo(new java.math.BigDecimal('1000')) > 0", "Complex validation"),
+            new Rule("complex-validation", "#amount != null && #amount.compareTo(T(java.math.BigDecimal).new('1000')) > 0", "Complex validation"),
             new Rule("date-validation", "#date != null", "Date validation"),
             new Rule("currency-check", "#currency == 'USD'", "Currency check"),
             new Rule("complex-business-rule", "#amount > 1000 && #currency == 'USD' && #date != null", "Complex business rule")

@@ -313,7 +313,7 @@ public class YamlConfigurationDemo {
                 name: "Maturity Date Validation"
                 description: "Validate maturity date is in the future"
                 category: "Financial-Validation"
-                condition: "maturityDate != null && maturityDate.isAfter(java.time.LocalDate.now())"
+                condition: "maturityDate != null && maturityDate.isAfter(T(java.time.LocalDate).now())"
                 priority: 90
                 enabled: true
                 message: "Maturity date must be in the future"

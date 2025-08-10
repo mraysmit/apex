@@ -233,7 +233,7 @@ rules:
     name: "Notional Amount Positive"
     description: "Validates that notional amount is positive"
     category: "business-logic"
-    condition: "#notionalAmount != null && #notionalAmount.compareTo(java.math.BigDecimal.ZERO) > 0"
+    condition: "#notionalAmount != null && #notionalAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0"
     message: "Notional amount must be positive"
     priority: 20
     enabled: true
@@ -243,7 +243,7 @@ rules:
     name: "Notional Amount Limit"
     description: "Validates notional amount against maximum limit"
     category: "business-logic"
-    condition: "#notionalAmount != null && #notionalAmount.compareTo(new java.math.BigDecimal('1000000000')) <= 0"
+    condition: "#notionalAmount != null && #notionalAmount.compareTo(T(java.math.BigDecimal).new('1000000000')) <= 0"
     message: "Notional amount cannot exceed 1 billion"
     priority: 21
     enabled: true
@@ -295,7 +295,7 @@ rules:
     name: "Large Exposure Check"
     description: "Flags large exposures requiring additional oversight"
     category: "risk-management"
-    condition: "#notionalAmount != null && #notionalAmount.compareTo(new java.math.BigDecimal('100000000')) > 0"
+    condition: "#notionalAmount != null && #notionalAmount.compareTo(T(java.math.BigDecimal).new('100000000')) > 0"
     message: "Large exposure detected - risk committee approval required"
     priority: 41
     enabled: true

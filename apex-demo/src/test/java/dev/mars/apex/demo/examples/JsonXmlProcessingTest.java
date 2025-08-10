@@ -94,6 +94,7 @@ public class JsonXmlProcessingTest {
         customer.put("customerId", "TEST001");
         customer.put("firstName", "Test");
         customer.put("lastName", "Customer");
+        customer.put("name", "Test Customer");  // Add the name field that the test expects
         customer.put("email", "test.customer@example.com");
         customer.put("age", 25);
         customer.put("country", "US");
@@ -110,6 +111,7 @@ public class JsonXmlProcessingTest {
         customer.put("customerId", "TEST002");
         customer.put("firstName", "Invalid");
         customer.put("lastName", "Customer");
+        customer.put("name", "Invalid Customer");  // Add the name field that the test expects
         customer.put("email", "invalid-email");  // Invalid email format
         customer.put("age", 16);  // Underage
         customer.put("country", "XX");  // Invalid country

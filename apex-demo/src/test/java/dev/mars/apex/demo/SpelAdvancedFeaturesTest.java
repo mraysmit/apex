@@ -1,13 +1,7 @@
 package dev.mars.apex.demo;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
-import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.engine.RuleEngineService;
-import dev.mars.apex.core.service.engine.TemplateProcessorService;
-import dev.mars.apex.core.service.lookup.LookupService;
+
 import dev.mars.apex.demo.advanced.ApexAdvancedFeaturesDemo;
 import dev.mars.apex.demo.advanced.ApexAdvancedFeaturesDemoConfig;
 import dev.mars.apex.demo.data.MockDataSources;
@@ -59,10 +53,10 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class SpelAdvancedFeaturesTest {
 
-    private ExpressionEvaluatorService evaluatorService;
-    private RuleEngineService ruleEngineService;
-    private TemplateProcessorService templateProcessorService;
-    private RulesEngine rulesEngine;
+    private dev.mars.apex.core.service.engine.ExpressionEvaluatorService evaluatorService;
+    private dev.mars.apex.core.service.engine.RuleEngineService ruleEngineService;
+    private dev.mars.apex.core.service.engine.TemplateProcessorService templateProcessorService;
+    private dev.mars.apex.core.engine.config.RulesEngine rulesEngine;
     private ApexAdvancedFeaturesDemoConfig config;
     private ApexAdvancedFeaturesDemo demo;
     private PricingServiceDemo pricingService;
@@ -73,10 +67,10 @@ public class SpelAdvancedFeaturesTest {
     @BeforeEach
     public void setUp() {
         // Initialize services
-        evaluatorService = new ExpressionEvaluatorService();
-        ruleEngineService = new RuleEngineService(evaluatorService);
-        templateProcessorService = new TemplateProcessorService(evaluatorService);
-        rulesEngine = new RulesEngine(new RulesEngineConfiguration());
+        evaluatorService = new dev.mars.apex.core.service.engine.ExpressionEvaluatorService();
+        ruleEngineService = new dev.mars.apex.core.service.engine.RuleEngineService(evaluatorService);
+        templateProcessorService = new dev.mars.apex.core.service.engine.TemplateProcessorService(evaluatorService);
+        rulesEngine = new dev.mars.apex.core.engine.config.RulesEngine(new dev.mars.apex.core.engine.config.RulesEngineConfiguration());
         pricingService = new PricingServiceDemo();
 
         // Initialize config
@@ -121,7 +115,7 @@ public class SpelAdvancedFeaturesTest {
         context.setVariable("priceThreshold", 500.0);
 
         // Test collection selection - filter fixed income products
-        RuleResult result1 = evaluatorService.evaluateWithResult(
+        dev.mars.apex.core.engine.model.RuleResult result1 = evaluatorService.evaluateWithResult(
             "#products.?[category == 'FixedIncome']", context, List.class);
         assertTrue(result1.isTriggered(), "Rule should be triggered");
 
@@ -136,7 +130,7 @@ public class SpelAdvancedFeaturesTest {
         }
 
         // Test collection projection - get all product names
-        RuleResult result2 = evaluatorService.evaluateWithResult(
+        dev.mars.apex.core.engine.model.RuleResult result2 = evaluatorService.evaluateWithResult(
             "#products.![name]", context, List.class);
         assertTrue(result2.isTriggered(), "Rule should be triggered");
 
@@ -150,7 +144,7 @@ public class SpelAdvancedFeaturesTest {
         assertTrue(productNames.contains("Apple Stock"), "Should contain Apple Stock");
 
         // Test combining selection and projection - names of equity products
-        RuleResult result3 = evaluatorService.evaluateWithResult(
+        dev.mars.apex.core.engine.model.RuleResult result3 = evaluatorService.evaluateWithResult(
             "#products.?[category == 'Equity'].![name]", context, List.class);
         assertTrue(result3.isTriggered(), "Rule should be triggered");
 
@@ -163,7 +157,7 @@ public class SpelAdvancedFeaturesTest {
         assertEquals("Apple Stock", equityProductNames.get(0), "Equity product should be Apple Stock");
 
         // Test first and last elements
-        RuleResult result4 = evaluatorService.evaluateWithResult(
+        dev.mars.apex.core.engine.model.RuleResult result4 = evaluatorService.evaluateWithResult(
             "#products.^[price > #priceThreshold].name", context, String.class);
         assertTrue(result4.isTriggered(), "Rule should be triggered");
 
@@ -172,7 +166,7 @@ public class SpelAdvancedFeaturesTest {
             "#products.^[price > #priceThreshold].name", context, String.class);
         assertEquals("US Treasury Bond", firstExpensiveProduct, "First expensive product should be US Treasury Bond");
 
-        RuleResult result5 = evaluatorService.evaluateWithResult(
+        dev.mars.apex.core.engine.model.RuleResult result5 = evaluatorService.evaluateWithResult(
             "#products.$[price < 200].name", context, String.class);
         assertTrue(result5.isTriggered(), "Rule should be triggered");
 
@@ -191,16 +185,16 @@ public class SpelAdvancedFeaturesTest {
         context = config.createContext();
 
         // Get rules from config
-        List<Rule> rules = config.createInvestmentRules();
+        List<dev.mars.apex.core.engine.model.Rule> rules = config.createInvestmentRules();
 
         // Test investment recommendations rule
-        Rule investmentRecommendationsRule = rules.stream()
+        dev.mars.apex.core.engine.model.Rule investmentRecommendationsRule = rules.stream()
             .filter(r -> r.getName().equals("InvestmentRecommendationsRule"))
             .findFirst()
             .orElseThrow(() -> new AssertionError("InvestmentRecommendationsRule not found"));
 
         // Check if the rule is triggered
-        RuleResult result1 = evaluatorService.evaluateWithResult(
+        dev.mars.apex.core.engine.model.RuleResult result1 = evaluatorService.evaluateWithResult(
             investmentRecommendationsRule.getCondition(), context, Boolean.class);
         assertTrue(result1.isTriggered(), "Investment recommendations rule should be triggered");
 
@@ -221,13 +215,13 @@ public class SpelAdvancedFeaturesTest {
         assertNotNull(originalOut, "Original output stream should be captured");
 
         // Test gold tier investor offers rule
-        Rule goldTierRule = rules.stream()
+        dev.mars.apex.core.engine.model.Rule goldTierRule = rules.stream()
             .filter(r -> r.getName().equals("GoldTierInvestorOffersRule"))
             .findFirst()
             .orElseThrow(() -> new AssertionError("GoldTierInvestorOffersRule not found"));
 
         // Check if the rule is triggered
-        RuleResult result2 = evaluatorService.evaluateWithResult(
+        dev.mars.apex.core.engine.model.RuleResult result2 = evaluatorService.evaluateWithResult(
             goldTierRule.getCondition(), context, Boolean.class);
         assertTrue(result2.isTriggered(), "Gold tier investor offers rule should be triggered");
 
@@ -237,13 +231,13 @@ public class SpelAdvancedFeaturesTest {
         assertTrue(isGoldTierTriggered, "Gold tier investor offers rule should evaluate to true");
 
         // Test low-cost investment options rule
-        Rule lowCostRule = rules.stream()
+        dev.mars.apex.core.engine.model.Rule lowCostRule = rules.stream()
             .filter(r -> r.getName().equals("LowCostInvestmentOptionsRule"))
             .findFirst()
             .orElseThrow(() -> new AssertionError("LowCostInvestmentOptionsRule not found"));
 
         // Check if the rule is triggered
-        RuleResult result3 = evaluatorService.evaluateWithResult(
+        dev.mars.apex.core.engine.model.RuleResult result3 = evaluatorService.evaluateWithResult(
             lowCostRule.getCondition(), context, Boolean.class);
         assertTrue(result3.isTriggered(), "Low-cost investment options rule should be triggered");
 
@@ -253,9 +247,9 @@ public class SpelAdvancedFeaturesTest {
         assertTrue(isLowCostTriggered, "Low-cost investment options rule should evaluate to true");
 
         // Evaluate all rules using the rule engine service
-        List<RuleResult> results = ruleEngineService.evaluateRules(rules, context);
+        List<dev.mars.apex.core.engine.model.RuleResult> results = ruleEngineService.evaluateRules(rules, context);
         assertEquals(3, results.size(), "Should evaluate 3 rules");
-        assertTrue(results.stream().allMatch(RuleResult::isTriggered), "All rules should be triggered");
+        assertTrue(results.stream().allMatch(dev.mars.apex.core.engine.model.RuleResult::isTriggered), "All rules should be triggered");
     }
 
     /**
@@ -281,7 +275,7 @@ public class SpelAdvancedFeaturesTest {
             String expression = entry.getValue();
 
             // Check if the rule is triggered
-            RuleResult result = evaluatorService.evaluateWithResult(expression, context, Double.class);
+            dev.mars.apex.core.engine.model.RuleResult result = evaluatorService.evaluateWithResult(expression, context, Double.class);
             assertTrue(result.isTriggered(), strategyName + " pricing strategy rule should be triggered");
 
             // Get the actual value using evaluate
@@ -314,7 +308,7 @@ public class SpelAdvancedFeaturesTest {
             "#pricingService.calculateSalePrice(#basePrice)";
 
         // Check if the rule is triggered
-        RuleResult result1 = evaluatorService.evaluateWithResult(dynamicMethodExpression, context, Double.class);
+        dev.mars.apex.core.engine.model.RuleResult result1 = evaluatorService.evaluateWithResult(dynamicMethodExpression, context, Double.class);
         assertTrue(result1.isTriggered(), "Dynamic pricing rule should be triggered");
 
         // Since basePrice is 100, should use premium pricing
@@ -325,7 +319,7 @@ public class SpelAdvancedFeaturesTest {
         context.setVariable("basePrice", 40.0);
 
         // Check if the rule is triggered
-        RuleResult result2 = evaluatorService.evaluateWithResult(dynamicMethodExpression, context, Double.class);
+        dev.mars.apex.core.engine.model.RuleResult result2 = evaluatorService.evaluateWithResult(dynamicMethodExpression, context, Double.class);
         assertTrue(result2.isTriggered(), "Dynamic pricing rule should be triggered");
 
         // Get the actual value using evaluate
@@ -374,7 +368,7 @@ public class SpelAdvancedFeaturesTest {
 
         // Test with RuleResult - check if a specific expression in the template evaluates correctly
         String discountExpression = "#customer.membershipLevel == 'Silver' ? #orderTotal * 0.1 : #orderTotal * 0.05";
-        RuleResult result = evaluatorService.evaluateWithResult(discountExpression, context, Double.class);
+        dev.mars.apex.core.engine.model.RuleResult result = evaluatorService.evaluateWithResult(discountExpression, context, Double.class);
         assertTrue(result.isTriggered(), "Discount expression rule should be triggered");
 
         // Get the actual value using evaluate
@@ -438,7 +432,7 @@ public class SpelAdvancedFeaturesTest {
 
         // Test with RuleResult - check if a specific expression in the template evaluates correctly
         String ageConditionExpression = "#customer.age > 60";
-        RuleResult ageResult = evaluatorService.evaluateWithResult(ageConditionExpression, context, Boolean.class);
+        dev.mars.apex.core.engine.model.RuleResult ageResult = evaluatorService.evaluateWithResult(ageConditionExpression, context, Boolean.class);
         assertTrue(ageResult.isTriggered(), "Age condition rule should be triggered");
 
         // Get the actual value using evaluate
@@ -446,7 +440,7 @@ public class SpelAdvancedFeaturesTest {
         assertTrue(isOver60, "Customer should be over 60");
 
         String membershipConditionExpression = "#customer.membershipLevel == 'Gold'";
-        RuleResult membershipResult = evaluatorService.evaluateWithResult(membershipConditionExpression, context, Boolean.class);
+        dev.mars.apex.core.engine.model.RuleResult membershipResult = evaluatorService.evaluateWithResult(membershipConditionExpression, context, Boolean.class);
         assertFalse(membershipResult.isTriggered(), "Membership condition rule should not be triggered");
 
         // Get the actual value using evaluate
@@ -509,7 +503,7 @@ public class SpelAdvancedFeaturesTest {
         // Test with RuleResult - check if a specific expression in the template evaluates correctly
         String discountExpression = "#customer.membershipLevel == 'Gold' ? #orderTotal * 0.15 : " +
                 "(#customer.membershipLevel == 'Silver' ? #orderTotal * 0.1 : #orderTotal * 0.05)";
-        RuleResult discountResult = evaluatorService.evaluateWithResult(discountExpression, context, Double.class);
+        dev.mars.apex.core.engine.model.RuleResult discountResult = evaluatorService.evaluateWithResult(discountExpression, context, Double.class);
         assertTrue(discountResult.isTriggered(), "Discount expression rule should be triggered");
 
         // Get the actual value using evaluate
@@ -519,7 +513,7 @@ public class SpelAdvancedFeaturesTest {
         String totalExpression = "#orderTotal + #tradingFee - " +
                 "(#customer.membershipLevel == 'Gold' ? #orderTotal * 0.15 : " +
                 "(#customer.membershipLevel == 'Silver' ? #orderTotal * 0.1 : #orderTotal * 0.05))";
-        RuleResult totalResult = evaluatorService.evaluateWithResult(totalExpression, context, Double.class);
+        dev.mars.apex.core.engine.model.RuleResult totalResult = evaluatorService.evaluateWithResult(totalExpression, context, Double.class);
         assertTrue(totalResult.isTriggered(), "Total expression rule should be triggered");
 
         // Get the actual value using evaluate
@@ -543,7 +537,7 @@ public class SpelAdvancedFeaturesTest {
         context = config.createContext();
 
         // Create lookup services
-        List<LookupService> lookupServices = MockDataSources.createLookupServices();
+        List<dev.mars.apex.core.service.lookup.LookupService> lookupServices = MockDataSources.createLookupServices();
         assertNotNull(lookupServices, "Lookup services should not be null");
         assertTrue(lookupServices.size() > 0, "Should have at least one lookup service");
 
@@ -564,7 +558,7 @@ public class SpelAdvancedFeaturesTest {
         // Verify all matching trades have values in lookup services
         for (Trade trade : matchingTrades) {
             boolean hasMatch = false;
-            for (LookupService lookupService : lookupServices) {
+            for (dev.mars.apex.core.service.lookup.LookupService lookupService : lookupServices) {
                 if (lookupService.getLookupValues().contains(trade.getValue())) {
                     hasMatch = true;
                     break;
@@ -580,7 +574,7 @@ public class SpelAdvancedFeaturesTest {
         // Verify all non-matching trades don't have values in lookup services
         for (Trade trade : nonMatchingTrades) {
             boolean hasMatch = false;
-            for (LookupService lookupService : lookupServices) {
+            for (dev.mars.apex.core.service.lookup.LookupService lookupService : lookupServices) {
                 if (lookupService.getLookupValues().contains(trade.getValue())) {
                     hasMatch = true;
                     break;
@@ -597,7 +591,7 @@ public class SpelAdvancedFeaturesTest {
         "]";
 
         // Check if the rule is triggered
-        RuleResult complexMatchResult = evaluatorService.evaluateWithResult(complexMatchExpression, context, List.class);
+        dev.mars.apex.core.engine.model.RuleResult complexMatchResult = evaluatorService.evaluateWithResult(complexMatchExpression, context, List.class);
         assertTrue(complexMatchResult.isTriggered(), "Complex match rule should be triggered");
 
         // Get the actual value using evaluate
@@ -610,21 +604,21 @@ public class SpelAdvancedFeaturesTest {
         for (Trade trade : complexMatches) {
             if ("InstrumentType".equals(trade.getCategory())) {
                 String categoryMatchExpression = "#lookupServices[0].lookupValues.contains('" + trade.getValue() + "')";
-                RuleResult categoryMatchResult = evaluatorService.evaluateWithResult(categoryMatchExpression, context, Boolean.class);
+                dev.mars.apex.core.engine.model.RuleResult categoryMatchResult = evaluatorService.evaluateWithResult(categoryMatchExpression, context, Boolean.class);
                 assertTrue(categoryMatchResult.isTriggered(), "Category match rule should be triggered");
 
                 Boolean categoryMatch = evaluatorService.evaluate(categoryMatchExpression, context, Boolean.class);
                 assertTrue(categoryMatch, "InstrumentType trade " + trade.getValue() + " should match lookupServices[0]");
             } else if ("Market".equals(trade.getCategory())) {
                 String categoryMatchExpression = "#lookupServices[1].lookupValues.contains('" + trade.getValue() + "')";
-                RuleResult categoryMatchResult = evaluatorService.evaluateWithResult(categoryMatchExpression, context, Boolean.class);
+                dev.mars.apex.core.engine.model.RuleResult categoryMatchResult = evaluatorService.evaluateWithResult(categoryMatchExpression, context, Boolean.class);
                 assertTrue(categoryMatchResult.isTriggered(), "Category match rule should be triggered");
 
                 Boolean categoryMatch = evaluatorService.evaluate(categoryMatchExpression, context, Boolean.class);
                 assertTrue(categoryMatch, "Market trade " + trade.getValue() + " should match lookupServices[1]");
             } else if ("TradeStatus".equals(trade.getCategory())) {
                 String categoryMatchExpression = "#lookupServices[2].lookupValues.contains('" + trade.getValue() + "')";
-                RuleResult categoryMatchResult = evaluatorService.evaluateWithResult(categoryMatchExpression, context, Boolean.class);
+                dev.mars.apex.core.engine.model.RuleResult categoryMatchResult = evaluatorService.evaluateWithResult(categoryMatchExpression, context, Boolean.class);
                 assertTrue(categoryMatchResult.isTriggered(), "Category match rule should be triggered");
 
                 Boolean categoryMatch = evaluatorService.evaluate(categoryMatchExpression, context, Boolean.class);

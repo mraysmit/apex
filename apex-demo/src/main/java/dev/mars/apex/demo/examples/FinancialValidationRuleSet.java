@@ -139,7 +139,7 @@ public class FinancialValidationRuleSet {
                           "Notional amount is required"));
         
         rules.add(new Rule("notional-amount-positive", 
-                          "#notionalAmount != null && #notionalAmount.compareTo(java.math.BigDecimal.ZERO) > 0", 
+                          "#notionalAmount != null && #notionalAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0",
                           "Notional amount must be positive"));
         
         rules.add(new Rule("notional-currency-required", 
@@ -161,11 +161,11 @@ public class FinancialValidationRuleSet {
         
         // Notional amount business rules
         rules.add(new Rule("minimum-notional-amount", 
-                          "#notionalAmount != null && #notionalAmount.compareTo(new java.math.BigDecimal('1000000')) >= 0", 
+                          "#notionalAmount != null && #notionalAmount.compareTo(T(java.math.BigDecimal).new('1000000')) >= 0",
                           "Minimum notional amount is $1,000,000"));
         
         rules.add(new Rule("maximum-notional-amount", 
-                          "#notionalAmount != null && #notionalAmount.compareTo(new java.math.BigDecimal('1000000000')) <= 0", 
+                          "#notionalAmount != null && #notionalAmount.compareTo(T(java.math.BigDecimal).new('1000000000')) <= 0",
                           "Maximum notional amount is $1,000,000,000"));
         
         // Maturity business rules
@@ -207,8 +207,8 @@ public class FinancialValidationRuleSet {
         
         rules.add(new Rule("funding-spread-range", 
                           "#fundingSpread == null || " +
-                          "(#fundingSpread.compareTo(new java.math.BigDecimal('-1000')) >= 0 && " +
-                          "#fundingSpread.compareTo(new java.math.BigDecimal('1000')) <= 0)", 
+                          "(#fundingSpread.compareTo(T(java.math.BigDecimal).new('-1000')) >= 0 && " +
+                          "#fundingSpread.compareTo(T(java.math.BigDecimal).new('1000')) <= 0)",
                           "Funding spread must be between -1000 and +1000 basis points if specified"));
         
         rules.add(new Rule("fixed-rate-required-for-fixed-funding", 
@@ -269,24 +269,24 @@ public class FinancialValidationRuleSet {
         List<Rule> rules = new ArrayList<>();
         
         // Concentration limits
-        rules.add(new Rule("single-counterparty-limit", 
-                          "#notionalAmount != null && #notionalAmount.compareTo(new java.math.BigDecimal('50000000')) <= 0", 
+        rules.add(new Rule("single-counterparty-limit",
+                          "#notionalAmount != null && #notionalAmount.compareTo(T(java.math.BigDecimal).new('50000000')) <= 0",
                           "Single counterparty exposure limit is $50,000,000"));
         
         // Commodity-specific limits
-        rules.add(new Rule("energy-commodity-limit", 
+        rules.add(new Rule("energy-commodity-limit",
                           "#commodityType != 'ENERGY' || " +
-                          "(#commodityType == 'ENERGY' && #notionalAmount.compareTo(new java.math.BigDecimal('100000000')) <= 0)", 
+                          "(#commodityType == 'ENERGY' && #notionalAmount.compareTo(T(java.math.BigDecimal).new('100000000')) <= 0)",
                           "Energy commodity exposure limit is $100,000,000"));
         
-        rules.add(new Rule("metals-commodity-limit", 
+        rules.add(new Rule("metals-commodity-limit",
                           "#commodityType != 'METALS' || " +
-                          "(#commodityType == 'METALS' && #notionalAmount.compareTo(new java.math.BigDecimal('75000000')) <= 0)", 
+                          "(#commodityType == 'METALS' && #notionalAmount.compareTo(T(java.math.BigDecimal).new('75000000')) <= 0)",
                           "Metals commodity exposure limit is $75,000,000"));
         
-        rules.add(new Rule("agricultural-commodity-limit", 
+        rules.add(new Rule("agricultural-commodity-limit",
                           "#commodityType != 'AGRICULTURAL' || " +
-                          "(#commodityType == 'AGRICULTURAL' && #notionalAmount.compareTo(new java.math.BigDecimal('25000000')) <= 0)", 
+                          "(#commodityType == 'AGRICULTURAL' && #notionalAmount.compareTo(T(java.math.BigDecimal).new('25000000')) <= 0)",
                           "Agricultural commodity exposure limit is $25,000,000"));
         
         // Maturity-based risk limits
@@ -294,7 +294,7 @@ public class FinancialValidationRuleSet {
                           "#tradeDate == null || #maturityDate == null || " +
                           "#maturityDate.isBefore(#tradeDate.plusYears(5)) || " +
                           "(#maturityDate.compareTo(#tradeDate.plusYears(5)) >= 0 && " +
-                          "#notionalAmount.compareTo(new java.math.BigDecimal('25000000')) <= 0)", 
+                          "#notionalAmount.compareTo(T(java.math.BigDecimal).new('25000000')) <= 0)",
                           "Long-term trades (>5 years) are limited to $25,000,000 notional"));
         
         return rules;

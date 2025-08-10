@@ -222,7 +222,7 @@ public class PerformanceAndExceptionDemo {
         
         // Compare simple vs complex expressions
         String simpleExpression = "#amount > 1000000";
-        String complexExpression = "#amount != null && #amount.compareTo(new java.math.BigDecimal('1000000')) > 0 && #currency == 'USD'";
+        String complexExpression = "#amount != null && #amount.compareTo(T(java.math.BigDecimal).new('1000000')) > 0 && #currency == 'USD'";
         
         Map<String, Object> context = Map.of("amount", new BigDecimal("5000000"), "currency", "USD");
         
@@ -484,10 +484,10 @@ public class PerformanceAndExceptionDemo {
     private List<Rule> createPerformanceTestRules() {
         return Arrays.asList(
             new Rule("simple-amount-check", "#notionalAmount > 1000000", "Simple amount check"),
-            new Rule("complex-validation", "#notionalAmount != null && #notionalAmount.compareTo(new java.math.BigDecimal('1000000')) > 0", "Complex validation"),
+            new Rule("complex-validation", "#notionalAmount != null && #notionalAmount.compareTo(T(java.math.BigDecimal).new('1000000')) > 0", "Complex validation"),
             new Rule("date-validation", "#tradeDate != null && #maturityDate != null && #maturityDate.isAfter(#tradeDate)", "Date validation"),
             new Rule("currency-check", "#notionalCurrency == 'USD'", "Currency check"),
-            new Rule("complex-business-rule", "#commodityType == 'ENERGY' && #referenceIndex == 'WTI' && #notionalAmount.compareTo(new java.math.BigDecimal('10000000')) <= 0", "Complex business rule")
+            new Rule("complex-business-rule", "#commodityType == 'ENERGY' && #referenceIndex == 'WTI' && #notionalAmount.compareTo(T(java.math.BigDecimal).new('10000000')) <= 0", "Complex business rule")
         );
     }
     

@@ -140,7 +140,13 @@ public class ProductionDemoDataServiceManager extends DataServiceManager {
         try {
             DataSourceConfiguration config = createFileSystemConfig();
             FileBasedDataSource fileSource = new FileBasedDataSource(config);
-            loadDataSource(fileSource);
+
+            // Register the data source for each data type it supports
+            // We need to create wrapper data sources for each specific data type
+            loadDataSource(new DataSourceWrapper(fileSource, "products", "products"));
+            loadDataSource(new DataSourceWrapper(fileSource, "customers", "customers"));
+            loadDataSource(new DataSourceWrapper(fileSource, "InventoryDataSource", "inventory"));
+
             logger.info("FileSystemDataSource initialized successfully");
 
         } catch (Exception e) {
@@ -155,7 +161,15 @@ public class ProductionDemoDataServiceManager extends DataServiceManager {
         try {
             DataSourceConfiguration config = createCacheConfig();
             CacheBasedDataSource cacheSource = new CacheBasedDataSource(config);
-            loadDataSource(cacheSource);
+
+            // Register the data source for each data type it supports
+            loadDataSource(new DataSourceWrapper(cacheSource, "customer", "customer"));
+            loadDataSource(new DataSourceWrapper(cacheSource, "templateCustomer", "templateCustomer"));
+            loadDataSource(new DataSourceWrapper(cacheSource, "matchingRecords", "matchingRecords"));
+            loadDataSource(new DataSourceWrapper(cacheSource, "nonMatchingRecords", "nonMatchingRecords"));
+            loadDataSource(new DataSourceWrapper(cacheSource, "lookupServices", "lookupServices"));
+            loadDataSource(new DataSourceWrapper(cacheSource, "sourceRecords", "sourceRecords"));
+
             logger.info("CacheDataSource initialized successfully");
 
         } catch (Exception e) {
@@ -445,6 +459,7 @@ public class ProductionDemoDataServiceManager extends DataServiceManager {
             inventory.add(new Product("Corporate Bond", 250.0, "FixedIncome"));
             inventory.add(new Product("Microsoft Stock", 350.0, "Equity"));
             inventory.add(new Product("Real Estate ETF", 125.0, "ETF"));
+            inventory.add(new Product("Bitcoin ETF", 450.0, "ETF"));
             inventory.add(new Product("Premium Bond", 1500.0, "FixedIncome"));
 
             return inventory;
@@ -504,29 +519,18 @@ public class ProductionDemoDataServiceManager extends DataServiceManager {
         }
 
         private Object createMatchingRecords() {
-            List<Map<String, Object>> records = new ArrayList<>();
-            Map<String, Object> record1 = new HashMap<>();
-            record1.put("id", "MATCH001");
-            record1.put("status", "MATCHED");
-            record1.put("score", 95.5);
-            records.add(record1);
+            List<dev.mars.apex.demo.model.Trade> records = new ArrayList<>();
 
-            Map<String, Object> record2 = new HashMap<>();
-            record2.put("id", "MATCH002");
-            record2.put("status", "MATCHED");
-            record2.put("score", 87.2);
-            records.add(record2);
+            records.add(new dev.mars.apex.demo.model.Trade("T001", "Equity", "InstrumentType"));
+            records.add(new dev.mars.apex.demo.model.Trade("T002", "Bond", "InstrumentType"));
 
             return records;
         }
 
         private Object createNonMatchingRecords() {
-            List<Map<String, Object>> records = new ArrayList<>();
-            Map<String, Object> record1 = new HashMap<>();
-            record1.put("id", "NOMATCH001");
-            record1.put("status", "NO_MATCH");
-            record1.put("score", 15.3);
-            records.add(record1);
+            List<dev.mars.apex.demo.model.Trade> records = new ArrayList<>();
+
+            records.add(new dev.mars.apex.demo.model.Trade("T008", "NonMatchingValue", "InstrumentType"));
 
             return records;
         }
@@ -557,20 +561,12 @@ public class ProductionDemoDataServiceManager extends DataServiceManager {
         }
 
         private Object createSourceRecords() {
-            List<Map<String, Object>> records = new ArrayList<>();
-            Map<String, Object> record1 = new HashMap<>();
-            record1.put("id", "SRC001");
-            record1.put("source", "BLOOMBERG");
-            record1.put("type", "MARKET_DATA");
-            record1.put("timestamp", System.currentTimeMillis());
-            records.add(record1);
+            List<dev.mars.apex.demo.model.Trade> records = new ArrayList<>();
 
-            Map<String, Object> record2 = new HashMap<>();
-            record2.put("id", "SRC002");
-            record2.put("source", "REUTERS");
-            record2.put("type", "NEWS");
-            record2.put("timestamp", System.currentTimeMillis());
-            records.add(record2);
+            records.add(new dev.mars.apex.demo.model.Trade("T001", "Equity", "InstrumentType"));
+            records.add(new dev.mars.apex.demo.model.Trade("T002", "Bond", "InstrumentType"));
+            records.add(new dev.mars.apex.demo.model.Trade("T003", "Derivative", "InstrumentType"));
+            records.add(new dev.mars.apex.demo.model.Trade("T008", "NonMatchingValue", "InstrumentType"));
 
             return records;
         }
@@ -594,6 +590,41 @@ public class ProductionDemoDataServiceManager extends DataServiceManager {
         @SuppressWarnings("unchecked")
         public <T> T getData(String dataType, Object... parameters) {
             return (T) cache.get(dataType);
+        }
+    }
+
+    /**
+     * Wrapper class to register a data source for a specific data type.
+     */
+    private static class DataSourceWrapper implements dev.mars.apex.core.service.data.DataSource {
+        private final dev.mars.apex.core.service.data.DataSource delegate;
+        private final String name;
+        private final String dataType;
+
+        public DataSourceWrapper(dev.mars.apex.core.service.data.DataSource delegate, String name, String dataType) {
+            this.delegate = delegate;
+            this.name = name;
+            this.dataType = dataType;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String getDataType() {
+            return dataType;
+        }
+
+        @Override
+        public boolean supportsDataType(String dataType) {
+            return this.dataType.equals(dataType) && delegate.supportsDataType(dataType);
+        }
+
+        @Override
+        public <T> T getData(String dataType, Object... parameters) {
+            return delegate.getData(dataType, parameters);
         }
     }
 }

@@ -234,10 +234,10 @@ enrichments:
     condition: "#notionalAmount != null && #productType != null"
     calculation-config:
       expression: |
-        #productType == 'EQUITY' ? #notionalAmount.multiply(new java.math.BigDecimal('0.001')) :
-        #productType == 'BOND' ? #notionalAmount.multiply(new java.math.BigDecimal('0.0005')) :
-        #productType == 'OPTION' ? #notionalAmount.multiply(new java.math.BigDecimal('0.002')) :
-        #notionalAmount.multiply(new java.math.BigDecimal('0.0015'))
+        #productType == 'EQUITY' ? #notionalAmount.multiply(T(java.math.BigDecimal).new('0.001')) :
+        #productType == 'BOND' ? #notionalAmount.multiply(T(java.math.BigDecimal).new('0.0005')) :
+        #productType == 'OPTION' ? #notionalAmount.multiply(T(java.math.BigDecimal).new('0.002')) :
+        #notionalAmount.multiply(T(java.math.BigDecimal).new('0.0015'))
       result-field: "brokerCommission"
       dependencies: ["notionalAmount", "productType"]
     tags: ["fee-calculation", "commission"]
@@ -252,7 +252,7 @@ enrichments:
     condition: "#notionalAmount != null && #maturityDate != null && #tradeDate != null"
     calculation-config:
       expression: |
-        java.time.temporal.ChronoUnit.DAYS.between(#tradeDate, #maturityDate) * 
+        T(java.time.temporal.ChronoUnit).DAYS.between(#tradeDate, #maturityDate) *
         #notionalAmount.doubleValue() / 365.0
       result-field: "timeWeightedExposure"
       dependencies: ["notionalAmount", "maturityDate", "tradeDate"]
@@ -309,7 +309,7 @@ transformations:
           - type: "set-field"
             field: "regulatoryCategory"
             value: "COMMODITY_DERIVATIVE"
-      - condition: "#notionalAmount != null && #notionalAmount.compareTo(new java.math.BigDecimal('50000000')) > 0"
+      - condition: "#notionalAmount != null && #notionalAmount.compareTo(T(java.math.BigDecimal).new('50000000')) > 0"
         actions:
           - type: "set-field"
             field: "approvalRequired"
@@ -331,7 +331,7 @@ transformations:
         actions:
           - type: "set-field"
             field: "enrichmentTimestamp"
-            expression: "java.time.Instant.now()"
+            expression: "T(java.time.Instant).now()"
           - type: "set-field"
             field: "enrichmentVersion"
             value: "1.0.0"

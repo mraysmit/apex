@@ -15,7 +15,7 @@ public class RuleDefinitionServiceDemoTest {
 
     @Test
     void testCreateInvestmentRecommendationsRule() {
-        Rule rule = RuleDefinitionServiceDemo.createInvestmentRecommendationsRule();
+        dev.mars.apex.core.engine.model.Rule rule = RuleDefinitionServiceDemo.createInvestmentRecommendationsRule();
         
         assertNotNull(rule);
         assertEquals("Investment Recommendations", rule.getName());
@@ -26,7 +26,7 @@ public class RuleDefinitionServiceDemoTest {
 
     @Test
     void testCreateHighValueTransactionRule() {
-        Rule rule = RuleDefinitionServiceDemo.createHighValueTransactionRule();
+        dev.mars.apex.core.engine.model.Rule rule = RuleDefinitionServiceDemo.createHighValueTransactionRule();
         
         assertNotNull(rule);
         assertEquals("High Value Transaction", rule.getName());
@@ -37,7 +37,7 @@ public class RuleDefinitionServiceDemoTest {
 
     @Test
     void testCreateCustomerEligibilityRule() {
-        Rule rule = RuleDefinitionServiceDemo.createCustomerEligibilityRule();
+        dev.mars.apex.core.engine.model.Rule rule = RuleDefinitionServiceDemo.createCustomerEligibilityRule();
         
         assertNotNull(rule);
         assertEquals("Customer Eligibility", rule.getName());
@@ -48,7 +48,7 @@ public class RuleDefinitionServiceDemoTest {
 
     @Test
     void testCreateProductAvailabilityRule() {
-        Rule rule = RuleDefinitionServiceDemo.createProductAvailabilityRule();
+        dev.mars.apex.core.engine.model.Rule rule = RuleDefinitionServiceDemo.createProductAvailabilityRule();
         
         assertNotNull(rule);
         assertEquals("Product Availability", rule.getName());
@@ -59,14 +59,14 @@ public class RuleDefinitionServiceDemoTest {
 
     @Test
     void testCreateFinancialRules() {
-        List<Rule> rules = RuleDefinitionServiceDemo.createFinancialRules();
+        List<dev.mars.apex.core.engine.model.Rule> rules = RuleDefinitionServiceDemo.createFinancialRules();
         
         assertNotNull(rules);
         assertFalse(rules.isEmpty());
         assertTrue(rules.size() >= 4);
         
         // Verify all rules have names and conditions
-        for (Rule rule : rules) {
+        for (dev.mars.apex.core.engine.model.Rule rule : rules) {
             assertNotNull(rule.getName());
             assertNotNull(rule.getCondition());
             assertNotNull(rule.getDescription());
@@ -83,14 +83,14 @@ public class RuleDefinitionServiceDemoTest {
 
     @Test
     void testCreateCustomerRules() {
-        List<Rule> rules = RuleDefinitionServiceDemo.createCustomerRules();
+        List<dev.mars.apex.core.engine.model.Rule> rules = RuleDefinitionServiceDemo.createCustomerRules();
         
         assertNotNull(rules);
         assertFalse(rules.isEmpty());
         assertTrue(rules.size() >= 4);
         
         // Verify all rules have proper structure
-        for (Rule rule : rules) {
+        for (dev.mars.apex.core.engine.model.Rule rule : rules) {
             assertNotNull(rule.getName());
             assertNotNull(rule.getCondition());
             assertNotNull(rule.getDescription());
@@ -105,14 +105,14 @@ public class RuleDefinitionServiceDemoTest {
 
     @Test
     void testCreateProductRules() {
-        List<Rule> rules = RuleDefinitionServiceDemo.createProductRules();
+        List<dev.mars.apex.core.engine.model.Rule> rules = RuleDefinitionServiceDemo.createProductRules();
         
         assertNotNull(rules);
         assertFalse(rules.isEmpty());
         assertTrue(rules.size() >= 4);
         
         // Verify all rules have proper structure
-        for (Rule rule : rules) {
+        for (dev.mars.apex.core.engine.model.Rule rule : rules) {
             assertNotNull(rule.getName());
             assertNotNull(rule.getCondition());
             assertNotNull(rule.getDescription());
@@ -128,11 +128,11 @@ public class RuleDefinitionServiceDemoTest {
     @Test
     void testRuleConditionsAreValid() {
         // Test that all rule conditions contain valid SpEL expressions
-        List<Rule> allRules = new ArrayList<>(RuleDefinitionServiceDemo.createFinancialRules());
+        List<dev.mars.apex.core.engine.model.Rule> allRules = new ArrayList<>(RuleDefinitionServiceDemo.createFinancialRules());
         allRules.addAll(RuleDefinitionServiceDemo.createCustomerRules());
         allRules.addAll(RuleDefinitionServiceDemo.createProductRules());
         
-        for (Rule rule : allRules) {
+        for (dev.mars.apex.core.engine.model.Rule rule : allRules) {
             String condition = rule.getCondition();
             
             // Basic validation - should contain SpEL variable references
@@ -149,11 +149,11 @@ public class RuleDefinitionServiceDemoTest {
 
     @Test
     void testRuleDescriptionsAreInformative() {
-        List<Rule> allRules = new ArrayList<>(RuleDefinitionServiceDemo.createFinancialRules());
+        List<dev.mars.apex.core.engine.model.Rule> allRules = new ArrayList<>(RuleDefinitionServiceDemo.createFinancialRules());
         allRules.addAll(RuleDefinitionServiceDemo.createCustomerRules());
         allRules.addAll(RuleDefinitionServiceDemo.createProductRules());
         
-        for (Rule rule : allRules) {
+        for (dev.mars.apex.core.engine.model.Rule rule : allRules) {
             String description = rule.getDescription();
             
             // Should have meaningful descriptions
@@ -175,9 +175,9 @@ public class RuleDefinitionServiceDemoTest {
 
     @Test
     void testRuleCollectionsAreDistinct() {
-        List<Rule> financialRules = RuleDefinitionServiceDemo.createFinancialRules();
-        List<Rule> customerRules = RuleDefinitionServiceDemo.createCustomerRules();
-        List<Rule> productRules = RuleDefinitionServiceDemo.createProductRules();
+        List<dev.mars.apex.core.engine.model.Rule> financialRules = RuleDefinitionServiceDemo.createFinancialRules();
+        List<dev.mars.apex.core.engine.model.Rule> customerRules = RuleDefinitionServiceDemo.createCustomerRules();
+        List<dev.mars.apex.core.engine.model.Rule> productRules = RuleDefinitionServiceDemo.createProductRules();
         
         // Verify collections have different focuses
         assertTrue(financialRules.stream().anyMatch(r -> r.getCondition().contains("transaction") || r.getCondition().contains("currency")),
