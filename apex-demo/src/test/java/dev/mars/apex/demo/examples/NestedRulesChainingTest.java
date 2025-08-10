@@ -1,10 +1,7 @@
 package dev.mars.apex.demo.examples;
 
-
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.engine.RuleEngineService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -14,7 +11,9 @@ import java.math.RoundingMode;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static dev.mars.apex.demo.examples.ApexRulesEngineDemo.*;
+import dev.mars.apex.demo.examples.ApexRulesEngineDemo.RuleChain;
+import dev.mars.apex.demo.examples.ApexRulesEngineDemo.RuleChainBuilder;
+import dev.mars.apex.demo.examples.ApexRulesEngineDemo.RuleChainResult;
 
 /**
  * Test class demonstrating nested rules and rule chaining scenarios.
@@ -22,13 +21,13 @@ import static dev.mars.apex.demo.examples.ApexRulesEngineDemo.*;
  */
 public class NestedRulesChainingTest {
 
-    private RuleEngineService ruleEngineService;
-    private ExpressionEvaluatorService evaluatorService;
+    private dev.mars.apex.core.service.engine.RuleEngineService ruleEngineService;
+    private dev.mars.apex.core.service.engine.ExpressionEvaluatorService evaluatorService;
 
     @BeforeEach
     void setUp() {
-        evaluatorService = new ExpressionEvaluatorService();
-        ruleEngineService = new RuleEngineService(evaluatorService);
+        evaluatorService = new dev.mars.apex.core.service.engine.ExpressionEvaluatorService();
+        ruleEngineService = new dev.mars.apex.core.service.engine.RuleEngineService(evaluatorService);
     }
 
     /**

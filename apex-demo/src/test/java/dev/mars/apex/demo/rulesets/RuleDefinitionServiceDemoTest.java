@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.rulesets;
 
-import dev.mars.apex.core.engine.model.Rule;
+
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

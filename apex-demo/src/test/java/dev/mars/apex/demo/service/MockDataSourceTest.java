@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.service;
 
 import dev.mars.apex.core.service.data.DataSource;
-import dev.mars.apex.core.service.lookup.LookupService;
+
 import dev.mars.apex.demo.model.Customer;
 import dev.mars.apex.demo.model.Product;
 import dev.mars.apex.demo.model.Trade;
@@ -156,16 +156,16 @@ public class MockDataSourceTest {
 
     @Test
     public void testGetDataLookupServices() {
-        List<LookupService> lookupServices = lookupServicesDataSource.getData("lookupServices");
+        List<Map<String, Object>> lookupServices = lookupServicesDataSource.getData("lookupServices");
         assertNotNull(lookupServices);
         assertFalse(lookupServices.isEmpty());
-        
+
         // Verify some lookup service data
         boolean foundInstrumentTypes = false;
-        for (LookupService lookupService : lookupServices) {
-            if ("InstrumentTypes".equals(lookupService.getName())) {
+        for (Map<String, Object> lookupService : lookupServices) {
+            if ("InstrumentTypes".equals(lookupService.get("name"))) {
                 foundInstrumentTypes = true;
-                List<String> values = lookupService.getLookupValues();
+                List<String> values = (List<String>) lookupService.get("values");
                 assertTrue(values.contains("Equity"));
                 assertTrue(values.contains("Bond"));
                 break;
@@ -197,13 +197,13 @@ public class MockDataSourceTest {
     public void testGetDataMatchingRecords() {
         // Get source records and lookup services
         List<Trade> sourceRecords = sourceRecordsDataSource.getData("sourceRecords");
-        List<LookupService> lookupServices = lookupServicesDataSource.getData("lookupServices");
-        
+        List<Map<String, Object>> lookupServices = lookupServicesDataSource.getData("lookupServices");
+
         // Test finding matching records
         List<Trade> matchingRecords = matchingRecordsDataSource.getData("matchingRecords", sourceRecords, lookupServices);
         assertNotNull(matchingRecords);
         assertFalse(matchingRecords.isEmpty());
-        
+
         // Verify that matching records contain expected trades
         boolean foundEquityTrade = false;
         for (Trade trade : matchingRecords) {
@@ -219,12 +219,12 @@ public class MockDataSourceTest {
     public void testGetDataNonMatchingRecords() {
         // Get source records and lookup services
         List<Trade> sourceRecords = sourceRecordsDataSource.getData("sourceRecords");
-        List<LookupService> lookupServices = lookupServicesDataSource.getData("lookupServices");
-        
+        List<Map<String, Object>> lookupServices = lookupServicesDataSource.getData("lookupServices");
+
         // Test finding non-matching records
         List<Trade> nonMatchingRecords = nonMatchingRecordsDataSource.getData("nonMatchingRecords", sourceRecords, lookupServices);
         assertNotNull(nonMatchingRecords);
-        
+
         // Verify that non-matching records contain expected trades
         boolean foundCommodityTrade = false;
         for (Trade trade : nonMatchingRecords) {
@@ -297,7 +297,7 @@ public class MockDataSourceTest {
                 }
 
                 List<Trade> sourceRecords = (List<Trade>) parameters[0];
-                List<LookupService> lookupServices = (List<LookupService>) parameters[1];
+                List<Map<String, Object>> lookupServices = (List<Map<String, Object>>) parameters[1];
 
                 if ("matchingRecords".equals(dataType)) {
                     return (T) getMatchingRecords(sourceRecords, lookupServices);
@@ -366,24 +366,28 @@ public class MockDataSourceTest {
 
         private void initializeCustomer() {
             Customer customer = new Customer("Alice Smith", 35, "alice@example.com");
+            customer.setMembershipLevel("Gold");
             dataStore.put("customer", customer);
         }
 
         private void initializeTemplateCustomer() {
             Customer templateCustomer = new Customer("Bob Johnson", 65, "bob@example.com");
+            templateCustomer.setMembershipLevel("Silver");
             dataStore.put("templateCustomer", templateCustomer);
         }
 
         private void initializeLookupServices() {
-            List<LookupService> lookupServices = new ArrayList<>();
+            List<Map<String, Object>> lookupServices = new ArrayList<>();
 
             // Create InstrumentTypes lookup service
-            List<String> instrumentTypeValues = Arrays.asList("Equity", "Bond", "ETF", "Option", "Future");
-            LookupService instrumentTypes = new LookupService("InstrumentTypes", instrumentTypeValues);
+            Map<String, Object> instrumentTypes = new HashMap<>();
+            instrumentTypes.put("name", "InstrumentTypes");
+            instrumentTypes.put("values", Arrays.asList("Equity", "Bond", "ETF", "Option", "Future"));
 
             // Create AssetClasses lookup service
-            List<String> assetClassValues = Arrays.asList("Equity", "FixedIncome", "Currency");
-            LookupService assetClasses = new LookupService("AssetClasses", assetClassValues);
+            Map<String, Object> assetClasses = new HashMap<>();
+            assetClasses.put("name", "AssetClasses");
+            assetClasses.put("values", Arrays.asList("Equity", "FixedIncome", "Currency"));
 
             lookupServices.add(instrumentTypes);
             lookupServices.add(assetClasses);
@@ -406,12 +410,15 @@ public class MockDataSourceTest {
             dataStore.put("sourceRecords", sourceRecords);
         }
 
-        private List<Trade> getMatchingRecords(List<Trade> sourceRecords, List<LookupService> lookupServices) {
+        private List<Trade> getMatchingRecords(List<Trade> sourceRecords, List<Map<String, Object>> lookupServices) {
             List<Trade> matchingRecords = new ArrayList<>();
             Set<String> supportedValues = new HashSet<>();
 
-            for (LookupService service : lookupServices) {
-                supportedValues.addAll(service.getLookupValues());
+            for (Map<String, Object> service : lookupServices) {
+                List<String> values = (List<String>) service.get("values");
+                if (values != null) {
+                    supportedValues.addAll(values);
+                }
             }
 
             for (Trade trade : sourceRecords) {
@@ -423,12 +430,15 @@ public class MockDataSourceTest {
             return matchingRecords;
         }
 
-        private List<Trade> getNonMatchingRecords(List<Trade> sourceRecords, List<LookupService> lookupServices) {
+        private List<Trade> getNonMatchingRecords(List<Trade> sourceRecords, List<Map<String, Object>> lookupServices) {
             List<Trade> nonMatchingRecords = new ArrayList<>();
             Set<String> supportedValues = new HashSet<>();
 
-            for (LookupService service : lookupServices) {
-                supportedValues.addAll(service.getLookupValues());
+            for (Map<String, Object> service : lookupServices) {
+                List<String> values = (List<String>) service.get("values");
+                if (values != null) {
+                    supportedValues.addAll(values);
+                }
             }
 
             for (Trade trade : sourceRecords) {

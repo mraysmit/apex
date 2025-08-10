@@ -2,16 +2,7 @@
 spring:
   application:
     name: apex-rest-api
-  
-  # Server configuration
-  server:
-    port: 8080
-    servlet:
-      context-path: /
-    compression:
-      enabled: true
-      mime-types: application/json,application/xml,text/html,text/xml,text/plain,application/javascript,text/css
-  
+
   # Jackson configuration for JSON processing
   jackson:
     serialization:
@@ -19,7 +10,7 @@ spring:
       indent-output: true
     deserialization:
       fail-on-unknown-properties: false
-    default-property-inclusion: non_null
+    default-property-inclusion: NON_NULL
   
   # Multipart file upload configuration
   servlet:
@@ -27,6 +18,15 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
       enabled: true
+
+# Server configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain,application/javascript,text/css
 
 # Management endpoints (Spring Boot Actuator)
 management:
@@ -52,8 +52,8 @@ management:
 
 # Rules Engine specific configuration
 rules:
-  config:
-    default-path: classpath:rules/default-rules.yaml
+  # config:
+    # path: classpath:rules/rules.yaml  # Uncomment and specify path to load rules configuration
   performance:
     monitoring:
       enabled: true
@@ -80,10 +80,10 @@ springdoc:
 # Logging configuration
 logging:
   level:
-    dev.mars.rulesengine: INFO
-    org.springframework.web: INFO
-    org.springframework.security: INFO
-    org.springdoc: INFO
+    "[dev.mars.rulesengine]": INFO
+    "[org.springframework.web]": INFO
+    "[org.springframework.security]": INFO
+    "[org.springdoc]": INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
@@ -124,9 +124,10 @@ info:
         v2: "/api/v2"
         v3: "/api/v3"
     compatibility:
-      backwardCompatible: []
-      forwardCompatible: ["v2-beta"]
-      breakingChanges: []
+      backwardCompatible: {}
+      forwardCompatible:
+        v2-beta: true
+      breakingChanges: {}
 
 ---
 # Development profile
@@ -134,24 +135,24 @@ spring:
   config:
     activate:
       on-profile: dev
-  
-  # Development server configuration
-  server:
-    port: 8080
-  
-  # Development logging
-  logging:
+
+# Development server configuration
+server:
+  port: 8080
+
+# Development logging
+logging:
     level:
-      dev.mars.rulesengine: DEBUG
-      org.springframework.web: DEBUG
-      org.springframework.boot.web: DEBUG
+      "[dev.mars.rulesengine]"  : DEBUG
+      "[org.springframework.web]": DEBUG
+      "[org.springframework.boot.web]": DEBUG
     pattern:
       console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
 # Development rules configuration
 rules:
   config:
-    default-path: classpath:rules/dev-rules.yaml
+    path: classpath:rules/dev-rules.yaml  # Path to load development rules
   performance:
     monitoring:
       enabled: true
@@ -165,26 +166,26 @@ spring:
   config:
     activate:
       on-profile: prod
-  
-  # Production server configuration
-  server:
-    port: 8080
-    compression:
-      enabled: true
-  
-  # Production logging
-  logging:
+
+# Production server configuration
+server:
+  port: 8080
+  compression:
+    enabled: true
+
+# Production logging
+logging:
     level:
-      dev.mars.rulesengine: INFO
-      org.springframework.web: WARN
-      org.springframework.boot: WARN
+      "[dev.mars.rulesengine]": INFO
+      "[org.springframework.web]": WARN
+      "[org.springframework.boot]": WARN
     file:
       name: /var/log/rules-engine/rules-engine-rest-api.log
 
 # Production rules configuration
 rules:
   config:
-    default-path: file:/etc/rules-engine/production-rules.yaml
+    path: file:/etc/rules-engine/production-rules.yaml
   performance:
     monitoring:
       enabled: true
@@ -211,21 +212,21 @@ spring:
   config:
     activate:
       on-profile: test
-  
-  # Test server configuration
-  server:
-    port: 0  # Random port for tests
-  
-  # Test logging
-  logging:
+
+# Test server configuration
+server:
+  port: 0  # Random port for tests
+
+# Test logging
+logging:
     level:
-      dev.mars.rulesengine: DEBUG
-      org.springframework.test: DEBUG
+      "[dev.mars.rulesengine]": DEBUG
+      "[org.springframework.test]": DEBUG
 
 # Test rules configuration
 rules:
   config:
-    default-path: classpath:rules/test-rules.yaml
+    path: classpath:rules/test-rules.yaml
   performance:
     monitoring:
       enabled: false  # Disable for faster tests

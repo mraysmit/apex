@@ -7,7 +7,9 @@ import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.transform.GenericTransformerService;
 import dev.mars.apex.core.service.validation.ValidationService;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.demo.model.Customer;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import dev.mars.apex.demo.model.Product;
 import dev.mars.apex.core.service.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,6 +56,7 @@ public class CoreFunctionalityTest {
     private LookupServiceRegistry registry;
     private ValidationService validationService;
     private GenericTransformerService transformerService;
+    private ExpressionEvaluatorService expressionEvaluatorService;
     private RulesEngine rulesEngine;
 
     @BeforeEach
@@ -67,6 +70,7 @@ public class CoreFunctionalityTest {
         // Create services
         validationService = new ValidationService(registry, rulesEngine);
         transformerService = new GenericTransformerService(registry, rulesEngine);
+        expressionEvaluatorService = new ExpressionEvaluatorService();
     }
 
     /**
@@ -170,15 +174,16 @@ public class CoreFunctionalityTest {
         // Verify rule triggered
         assertTrue(result.isTriggered(), "Discount rule should be triggered");
 
-        // Use transformer service to calculate the discounted price
-        Map<String, Object> transformationContext = new HashMap<>();
-        transformationContext.put("originalPrice", product.getPrice());
-        transformationContext.put("discountRate", 0.1);
+        // Use expression evaluator service to calculate the discounted price
+        StandardEvaluationContext transformationContext = new StandardEvaluationContext();
+        transformationContext.setVariable("originalPrice", product.getPrice());
+        transformationContext.setVariable("discountRate", 0.1);
 
-        // Apply price transformation using transformer service
-        Object transformedPrice = transformerService.transform(
+        // Apply price transformation using expression evaluator service
+        Object transformedPrice = expressionEvaluatorService.evaluate(
             "#originalPrice * (1 - #discountRate)",
-            transformationContext
+            transformationContext,
+            Double.class
         );
 
         // Verify the transformation

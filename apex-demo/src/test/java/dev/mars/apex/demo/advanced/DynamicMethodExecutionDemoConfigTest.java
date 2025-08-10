@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.advanced;
 
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+
 import dev.mars.apex.demo.model.Trade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ public class DynamicMethodExecutionDemoConfigTest {
     @BeforeEach
     void setUp() {
         // Create mock services
-        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
+        dev.mars.apex.core.service.engine.ExpressionEvaluatorService evaluatorService = new dev.mars.apex.core.service.engine.ExpressionEvaluatorService();
         
         // Create config
         config = new DynamicMethodExecutionDemoConfig(evaluatorService);

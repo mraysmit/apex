@@ -310,9 +310,5 @@ public class ValidationBuilder {
         public String getErrorMessage() {
             return errorMessage;
         }
-        
-        public String getCondition() {
-            return condition;
-        }
     }
 }

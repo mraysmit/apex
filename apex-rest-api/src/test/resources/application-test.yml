@@ -10,77 +10,24 @@ spring:
 # Logging configuration for tests
 logging:
   level:
-    dev.mars.apex: DEBUG
-    dev.mars.rulesengine: DEBUG
-    org.springframework: WARN
-    org.springframework.test: INFO
-    org.springframework.web: INFO
+    "[dev.mars.apex]": DEBUG
+    "[dev.mars.rulesengine]": DEBUG
+    "[org.springframework]": WARN
+    "[org.springframework.test]": INFO
+    "[org.springframework.web]": INFO
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
 # APEX Rules Engine test configuration
 rules:
   config:
-    default-path: classpath:rules/test-rules.yaml
+    path: classpath:rules/test-rules.yaml
   performance:
     monitoring:
       enabled: false  # Disable for faster tests
   error:
     recovery:
       enabled: true
-
-# APEX specific test configuration
-apex:
-  rules:
-    # Enable all rule engines for testing
-    engines:
-      - simple
-      - advanced
-      - chaining
-
-    # Test data sources
-    data-sources:
-      test-customer-lookup:
-        type: mock
-        data:
-          CUST001:
-            customerName: "John Doe"
-            customerTier: "GOLD"
-            riskRating: "LOW"
-            accountBalance: 15000.0
-          CUST002:
-            customerName: "Jane Smith"
-            customerTier: "SILVER"
-            riskRating: "MEDIUM"
-            accountBalance: 5000.0
-
-    # Test transformers
-    transformers:
-      customer-normalizer:
-        enabled: true
-      address-formatter:
-        enabled: true
-
-    # Test enrichment configurations
-    enrichment:
-      customer-profile:
-        enabled: true
-      trade-enrichment:
-        enabled: true
-
-# Test-specific service configurations
-services:
-  expression-evaluation:
-    cache-enabled: false
-    validation-strict: true
-
-  template-processing:
-    cache-templates: false
-    enable-security-checks: false
-
-  data-source-manager:
-    connection-timeout: 1000
-    retry-attempts: 1
 
 # Mock configurations for testing
 mock:
@@ -105,11 +52,12 @@ limits:
 # Actuator endpoints for testing
 management:
   endpoints:
-    enabled-by-default: false
+    access:
+      default: none
     web:
       exposure:
         include: "health,info"
   endpoint:
     health:
-      enabled: true
+      access: unrestricted
       show-details: always

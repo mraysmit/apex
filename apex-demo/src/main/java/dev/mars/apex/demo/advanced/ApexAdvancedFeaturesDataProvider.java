@@ -1,6 +1,8 @@
 package dev.mars.apex.demo.advanced;
 
 import dev.mars.apex.core.service.data.DataSource;
+import dev.mars.apex.demo.model.Customer;
+import dev.mars.apex.demo.model.Product;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -162,50 +164,58 @@ public class ApexAdvancedFeaturesDataProvider {
 
         private List<Object> createSampleProducts() {
             List<Object> products = new ArrayList<>();
-            Map<String, Object> product1 = new HashMap<>();
-            product1.put("id", 1);
-            product1.put("name", "Sample Product 1");
-            product1.put("price", 99.99);
+
+            Product product1 = new Product("US Treasury Bond", 550.00, "FixedIncome");
             products.add(product1);
 
-            Map<String, Object> product2 = new HashMap<>();
-            product2.put("id", 2);
-            product2.put("name", "Sample Product 2");
-            product2.put("price", 149.99);
+            Product product2 = new Product("Apple Stock", 149.99, "Equity");
             products.add(product2);
+
+            Product product3 = new Product("Gold ETF", 75.50, "ETF");
+            products.add(product3);
+
+            Product product4 = new Product("Premium Corporate Bond", 750.00, "FixedIncome");
+            products.add(product4);
+
+            Product product5 = new Product("Corporate Bond", 180.00, "ETF");
+            products.add(product5);
 
             return products;
         }
 
         private List<Object> createSampleInventory() {
             List<Object> inventory = new ArrayList<>();
-            Map<String, Object> item1 = new HashMap<>();
-            item1.put("productId", 1);
-            item1.put("quantity", 100);
+
+            // Create inventory items as Product objects with appropriate pricing
+            Product item1 = new Product("Corporate Bond", 250.0, "FixedIncome");
             inventory.add(item1);
 
-            Map<String, Object> item2 = new HashMap<>();
-            item2.put("productId", 2);
-            item2.put("quantity", 50);
+            Product item2 = new Product("Microsoft Stock", 350.0, "Equity");
             inventory.add(item2);
+
+            Product item3 = new Product("Real Estate ETF", 125.0, "ETF");
+            inventory.add(item3);
+
+            Product item4 = new Product("Premium Bond", 1500.0, "FixedIncome");
+            inventory.add(item4);
 
             return inventory;
         }
 
         private Object createSampleCustomer() {
-            Map<String, Object> customer = new HashMap<>();
-            customer.put("id", 1);
-            customer.put("name", "John Doe");
-            customer.put("email", "john.doe@example.com");
+            Customer customer = new Customer("John Doe", 35, "john.doe@example.com");
+            customer.setMembershipLevel("Gold");
+            customer.setBalance(15000.0);
+            customer.setPreferredCategories(Arrays.asList("FixedIncome", "Equity"));
             return customer;
         }
 
         private Object createSampleTemplateCustomer() {
-            Map<String, Object> template = new HashMap<>();
-            template.put("id", 0);
-            template.put("name", "Template Customer");
-            template.put("email", "template@example.com");
-            return template;
+            Customer customer = new Customer("Bob Johnson", 65, "bob.johnson@example.com");
+            customer.setMembershipLevel("Silver");
+            customer.setBalance(25000.0);
+            customer.setPreferredCategories(Arrays.asList("FixedIncome", "ETF"));
+            return customer;
         }
 
         private List<Object> createSampleLookupServices() {

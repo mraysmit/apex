@@ -84,6 +84,9 @@ public class TestDataSource implements DataSource {
      * Initialize the data store with sample data based on the data type.
      */
     private void initializeData() {
+        if (dataType == null) {
+            return; // No initialization for null data type
+        }
         switch (dataType) {
             case "products":
                 initializeProducts();

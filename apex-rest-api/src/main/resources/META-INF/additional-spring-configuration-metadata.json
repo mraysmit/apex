@@ -1,0 +1,88 @@
+{
+  "properties": [
+    {
+      "name": "rules.config.path",
+      "type": "java.lang.String",
+      "description": "Path to the rules configuration file (e.g., classpath:rules/rules.yaml or file:/path/to/rules.yaml)"
+    },
+    {
+      "name": "rules.performance.monitoring.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable performance monitoring for rules engine",
+      "defaultValue": true
+    },
+    {
+      "name": "rules.error.recovery.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable error recovery mechanisms in rules engine",
+      "defaultValue": true
+    },
+    {
+      "name": "rules.cache.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable caching for rules engine results",
+      "defaultValue": true
+    },
+    {
+      "name": "rules.cache.ttl-seconds",
+      "type": "java.lang.Integer",
+      "description": "Time-to-live for cache entries in seconds",
+      "defaultValue": 3600
+    },
+    {
+      "name": "timeouts.rule-execution",
+      "type": "java.lang.Integer",
+      "description": "Timeout for rule execution in milliseconds",
+      "defaultValue": 5000
+    },
+    {
+      "name": "timeouts.template-processing",
+      "type": "java.lang.Integer",
+      "description": "Timeout for template processing in milliseconds",
+      "defaultValue": 3000
+    },
+    {
+      "name": "timeouts.expression-evaluation",
+      "type": "java.lang.Integer",
+      "description": "Timeout for expression evaluation in milliseconds",
+      "defaultValue": 2000
+    },
+    {
+      "name": "limits.max-batch-size",
+      "type": "java.lang.Integer",
+      "description": "Maximum batch size for processing",
+      "defaultValue": 100
+    },
+    {
+      "name": "limits.max-expression-length",
+      "type": "java.lang.Integer",
+      "description": "Maximum length for expressions",
+      "defaultValue": 1000
+    },
+
+    {
+      "name": "mock.data-sources.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable mock data sources for testing",
+      "defaultValue": true
+    },
+    {
+      "name": "mock.data-sources.default-response-time",
+      "type": "java.lang.Integer",
+      "description": "Default response time for mock data sources in milliseconds",
+      "defaultValue": 50
+    },
+    {
+      "name": "mock.external-services.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable mock external services for testing",
+      "defaultValue": true
+    },
+    {
+      "name": "mock.external-services.simulate-delays",
+      "type": "java.lang.Boolean",
+      "description": "Simulate delays in mock external services",
+      "defaultValue": false
+    }
+  ]
+}

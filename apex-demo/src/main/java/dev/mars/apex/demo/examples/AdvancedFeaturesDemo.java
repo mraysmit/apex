@@ -1,14 +1,12 @@
 package dev.mars.apex.demo.examples;
 
 import dev.mars.apex.core.api.RulesService;
-import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.model.Customer;
 import dev.mars.apex.demo.model.FinancialTrade;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd

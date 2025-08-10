@@ -96,6 +96,12 @@
             <version>${micrometer.version}</version>
         </dependency>
 
+        <!-- Spring Boot Configuration Processor for IDE support -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
 
         <!-- Test dependencies -->
         <dependency>

@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.util.Map;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -40,8 +40,7 @@ import org.springframework.context.annotation.Primary;
 /**
  * Spring configuration for the Rules Engine REST API.
  *
- * This class is part of the PeeGeeQ message queue system, providing
- * production-ready PostgreSQL-based message queuing capabilities.
+
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-27
@@ -51,15 +50,9 @@ import org.springframework.context.annotation.Primary;
 public class RulesEngineConfiguration {
     
     private static final Logger logger = LoggerFactory.getLogger(RulesEngineConfiguration.class);
-    
-    @Value("${rules.config.default-path:classpath:rules/default-rules.yaml}")
-    private String defaultConfigPath;
-    
-    @Value("${rules.performance.monitoring.enabled:true}")
-    private boolean performanceMonitoringEnabled;
-    
-    @Value("${rules.error.recovery.enabled:true}")
-    private boolean errorRecoveryEnabled;
+
+    @Autowired
+    private RulesConfigurationProperties rulesProperties;
     
     /**
      * Primary RulesService bean for dependency injection.
@@ -99,51 +92,47 @@ public class RulesEngineConfiguration {
     @Bean("defaultRulesEngine")
     public RulesEngine defaultRulesEngine(YamlConfigurationLoader loader) {
         try {
-            logger.info("Loading default rules configuration from: {}", defaultConfigPath);
-            
-            // Try to load default configuration
-            if (defaultConfigPath.startsWith("classpath:")) {
-                String resourcePath = defaultConfigPath.substring("classpath:".length());
+            // Create base engine configuration
+            dev.mars.apex.core.engine.config.RulesEngineConfiguration engineConfig =
+                new dev.mars.apex.core.engine.config.RulesEngineConfiguration();
+
+            // Configure performance monitoring
+            if (rulesProperties.getPerformance().getMonitoring().isEnabled()) {
+                logger.info("Performance monitoring enabled");
+                // Performance monitoring configuration would go here
+            }
+
+            // Configure error recovery
+            if (rulesProperties.getError().getRecovery().isEnabled()) {
+                logger.info("Error recovery enabled");
+                // Error recovery configuration would go here
+            }
+
+            // Try to load rules configuration if path is specified
+            String rulesConfigPath = rulesProperties.getConfig().getPath();
+            if (rulesConfigPath != null && !rulesConfigPath.trim().isEmpty()) {
+                logger.info("Loading rules configuration from: {}", rulesConfigPath);
+
                 try {
-                    // Try to load configuration but use default for now
-                    loader.loadFromClasspath(resourcePath);
-                    dev.mars.apex.core.engine.config.RulesEngineConfiguration engineConfig =
-                        new dev.mars.apex.core.engine.config.RulesEngineConfiguration();
-                    
-                    // Configure performance monitoring
-                    if (performanceMonitoringEnabled) {
-                        logger.info("Performance monitoring enabled");
-                        // Performance monitoring configuration would go here
+                    if (rulesConfigPath.startsWith("classpath:")) {
+                        String resourcePath = rulesConfigPath.substring("classpath:".length());
+                        loader.loadFromClasspath(resourcePath);
+                        logger.info("Successfully loaded rules configuration from classpath: {}", resourcePath);
+                    } else {
+                        loader.loadFromFile(rulesConfigPath);
+                        logger.info("Successfully loaded rules configuration from file: {}", rulesConfigPath);
                     }
-                    
-                    // Configure error recovery
-                    if (errorRecoveryEnabled) {
-                        logger.info("Error recovery enabled");
-                        // Error recovery configuration would go here
-                    }
-                    
-                    return new RulesEngine(engineConfig);
                 } catch (Exception e) {
-                    logger.warn("Could not load default configuration from {}: {}", defaultConfigPath, e.getMessage());
-                    logger.info("Creating default RulesEngine with empty configuration");
-                    return new RulesEngine(new dev.mars.apex.core.engine.config.RulesEngineConfiguration());
+                    logger.warn("Could not load rules configuration from {}: {}", rulesConfigPath, e.getMessage());
+                    logger.info("Continuing with empty rules configuration");
                 }
             } else {
-                // File path
-                try {
-                    // Try to load configuration but use default for now
-                    loader.loadFromFile(defaultConfigPath);
-                    dev.mars.apex.core.engine.config.RulesEngineConfiguration engineConfig =
-                        new dev.mars.apex.core.engine.config.RulesEngineConfiguration();
-                    return new RulesEngine(engineConfig);
-                } catch (Exception e) {
-                    logger.warn("Could not load default configuration from {}: {}", defaultConfigPath, e.getMessage());
-                    logger.info("Creating default RulesEngine with empty configuration");
-                    return new RulesEngine(new dev.mars.apex.core.engine.config.RulesEngineConfiguration());
-                }
+                logger.info("No rules configuration path specified, creating engine with empty configuration");
             }
+
+            return new RulesEngine(engineConfig);
         } catch (Exception e) {
-            logger.error("Error creating default RulesEngine: {}", e.getMessage(), e);
+            logger.error("Error creating RulesEngine: {}", e.getMessage(), e);
             logger.info("Falling back to empty configuration");
             return new RulesEngine(new dev.mars.apex.core.engine.config.RulesEngineConfiguration());
         }
@@ -251,6 +240,7 @@ public class RulesEngineConfiguration {
             return this.dataType.equals(dataType);
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public <T> T getData(String dataType, Object... parameters) {
             if (!supportsDataType(dataType)) {

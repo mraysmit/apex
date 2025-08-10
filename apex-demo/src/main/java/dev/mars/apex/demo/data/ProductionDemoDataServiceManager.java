@@ -4,12 +4,15 @@ import dev.mars.apex.core.config.datasource.CacheConfig;
 import dev.mars.apex.core.config.datasource.ConnectionConfig;
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import dev.mars.apex.core.service.data.DataServiceManager;
+import dev.mars.apex.demo.model.Customer;
+import dev.mars.apex.demo.model.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -412,51 +415,37 @@ public class ProductionDemoDataServiceManager extends DataServiceManager {
             }
         }
 
-        private List<Map<String, Object>> createSampleProducts() {
-            List<Map<String, Object>> products = new ArrayList<>();
+        private List<Product> createSampleProducts() {
+            List<Product> products = new ArrayList<>();
 
-            Map<String, Object> product1 = new HashMap<>();
-            product1.put("id", "PROD001");
-            product1.put("name", "US Treasury Bond");
-            product1.put("price", 1200.0);
-            product1.put("category", "FixedIncome");
-            product1.put("available", true);
-            products.add(product1);
-
-            Map<String, Object> product2 = new HashMap<>();
-            product2.put("id", "PROD002");
-            product2.put("name", "Apple Stock");
-            product2.put("price", 150.0);
-            product2.put("category", "Equity");
-            product2.put("available", true);
-            products.add(product2);
+            products.add(new Product("US Treasury Bond", 1200.0, "FixedIncome"));
+            products.add(new Product("Apple Stock", 150.0, "Equity"));
+            products.add(new Product("Gold ETF", 75.0, "ETF"));
+            products.add(new Product("Corporate Bond", 500.0, "FixedIncome"));
+            products.add(new Product("Microsoft Stock", 300.0, "Equity"));
 
             return products;
         }
 
-        private List<Map<String, Object>> createSampleCustomers() {
-            List<Map<String, Object>> customers = new ArrayList<>();
+        private List<Customer> createSampleCustomers() {
+            List<Customer> customers = new ArrayList<>();
 
-            Map<String, Object> customer1 = new HashMap<>();
-            customer1.put("id", "CUST001");
-            customer1.put("name", "Alice Smith");
-            customer1.put("age", 35);
-            customer1.put("email", "alice.smith@example.com");
-            customer1.put("membershipLevel", "Gold");
+            Customer customer1 = new Customer("Alice Smith", 35, "alice.smith@example.com");
+            customer1.setMembershipLevel("Gold");
+            customer1.setBalance(50000.0);
+            customer1.setPreferredCategories(Arrays.asList("FixedIncome", "Equity"));
             customers.add(customer1);
 
             return customers;
         }
 
-        private List<Map<String, Object>> createSampleInventory() {
-            List<Map<String, Object>> inventory = new ArrayList<>();
+        private List<Product> createSampleInventory() {
+            List<Product> inventory = new ArrayList<>();
 
-            Map<String, Object> item1 = new HashMap<>();
-            item1.put("productId", "PROD001");
-            item1.put("quantity", 1000);
-            item1.put("reserved", 50);
-            item1.put("available", 950);
-            inventory.add(item1);
+            inventory.add(new Product("Corporate Bond", 250.0, "FixedIncome"));
+            inventory.add(new Product("Microsoft Stock", 350.0, "Equity"));
+            inventory.add(new Product("Real Estate ETF", 125.0, "ETF"));
+            inventory.add(new Product("Premium Bond", 1500.0, "FixedIncome"));
 
             return inventory;
         }
@@ -499,17 +488,18 @@ public class ProductionDemoDataServiceManager extends DataServiceManager {
         private void initializeCache() {
             // Initialize with some cached data
             cache.put("customer", createSampleCustomer());
+            cache.put("templateCustomer", createTemplateCustomer());
             cache.put("matchingRecords", createMatchingRecords());
             cache.put("nonMatchingRecords", createNonMatchingRecords());
+            cache.put("lookupServices", createLookupServices());
+            cache.put("sourceRecords", createSourceRecords());
         }
 
         private Object createSampleCustomer() {
-            Map<String, Object> customer = new HashMap<>();
-            customer.put("id", "CUST001");
-            customer.put("name", "Alice Smith");
-            customer.put("age", 35);
-            customer.put("email", "alice.smith@example.com");
-            customer.put("membershipLevel", "Gold");
+            Customer customer = new Customer("Alice Smith", 35, "alice.smith@example.com");
+            customer.setMembershipLevel("Gold");
+            customer.setBalance(50000.0);
+            customer.setPreferredCategories(Arrays.asList("Equity", "ETF"));
             return customer;
         }
 
@@ -537,6 +527,50 @@ public class ProductionDemoDataServiceManager extends DataServiceManager {
             record1.put("status", "NO_MATCH");
             record1.put("score", 15.3);
             records.add(record1);
+
+            return records;
+        }
+
+        private Object createTemplateCustomer() {
+            Customer customer = new Customer("Bob Johnson", 65, "bob.johnson@example.com");
+            customer.setMembershipLevel("Silver");
+            customer.setBalance(25000.0);
+            customer.setPreferredCategories(Arrays.asList("FixedIncome", "ETF"));
+            return customer;
+        }
+
+        private Object createLookupServices() {
+            List<Map<String, Object>> services = new ArrayList<>();
+            Map<String, Object> service1 = new HashMap<>();
+            service1.put("name", "CurrencyLookup");
+            service1.put("endpoint", "http://api.example.com/currency");
+            service1.put("enabled", true);
+            services.add(service1);
+
+            Map<String, Object> service2 = new HashMap<>();
+            service2.put("name", "RatingLookup");
+            service2.put("endpoint", "http://api.example.com/rating");
+            service2.put("enabled", true);
+            services.add(service2);
+
+            return services;
+        }
+
+        private Object createSourceRecords() {
+            List<Map<String, Object>> records = new ArrayList<>();
+            Map<String, Object> record1 = new HashMap<>();
+            record1.put("id", "SRC001");
+            record1.put("source", "BLOOMBERG");
+            record1.put("type", "MARKET_DATA");
+            record1.put("timestamp", System.currentTimeMillis());
+            records.add(record1);
+
+            Map<String, Object> record2 = new HashMap<>();
+            record2.put("id", "SRC002");
+            record2.put("source", "REUTERS");
+            record2.put("type", "NEWS");
+            record2.put("timestamp", System.currentTimeMillis());
+            records.add(record2);
 
             return records;
         }
