@@ -1,5 +1,9 @@
 # APEX Rules Engine REST API - Quick Reference
 
+**Version:** 1.0
+**Date:** 2025-08-02
+**Author:** Mark Andrew Ray-Smith Cityline Ltd
+
 ## Base URL
 ```
 http://localhost:8080/api

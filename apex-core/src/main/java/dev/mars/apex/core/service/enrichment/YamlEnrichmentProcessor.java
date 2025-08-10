@@ -10,7 +10,8 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -460,21 +461,27 @@ public class YamlEnrichmentProcessor {
             return value;
         }
 
-        // Handle regular objects using reflection
+        // Handle regular objects using proper getter methods instead of reflection
         try {
-            Field field = object.getClass().getDeclaredField(fieldName);
-            field.setAccessible(true);
-            Object value = field.get(object);
-            LOGGER.finest("Reflection lookup for '" + fieldName + "' returned: " + value);
+            // Try to find a getter method first (proper OOP approach)
+            String getterName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+            Method getter = object.getClass().getMethod(getterName);
+            Object value = getter.invoke(object);
+            LOGGER.finest("Getter method lookup for '" + fieldName + "' returned: " + value);
             return value;
-        } catch (NoSuchFieldException e) {
-            LOGGER.fine("Field '" + fieldName + "' not found on object of type " +
-                       object.getClass().getSimpleName());
-            return null;
-        } catch (IllegalAccessException e) {
-            LOGGER.warning("Could not access field '" + fieldName + "' on object of type " +
-                          object.getClass().getSimpleName() + ": " + e.getMessage());
-            return null;
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            // Try boolean getter (isXxx)
+            try {
+                String booleanGetterName = "is" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+                Method booleanGetter = object.getClass().getMethod(booleanGetterName);
+                Object value = booleanGetter.invoke(object);
+                LOGGER.finest("Boolean getter method lookup for '" + fieldName + "' returned: " + value);
+                return value;
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e2) {
+                LOGGER.fine("No getter method found for field '" + fieldName + "' on object of type " +
+                           object.getClass().getSimpleName());
+                return null;
+            }
         }
     }
 
@@ -503,17 +510,36 @@ public class YamlEnrichmentProcessor {
             return;
         }
 
-        // Handle regular objects using reflection
+        // Handle regular objects using proper setter methods instead of reflection
         try {
-            Field field = object.getClass().getDeclaredField(fieldName);
-            field.setAccessible(true);
-            field.set(object, value);
+            // Try to find a setter method first (proper OOP approach)
+            String setterName = "set" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+            Method setter = object.getClass().getMethod(setterName, value.getClass());
+            setter.invoke(object, value);
             LOGGER.finest("Successfully set field '" + fieldName + "' to: " + value);
-        } catch (NoSuchFieldException e) {
-            LOGGER.warning("Field '" + fieldName + "' not found on object of type " +
-                          object.getClass().getSimpleName());
-        } catch (IllegalAccessException e) {
-            LOGGER.log(Level.WARNING, "Could not set field '" + fieldName + "' on object of type " +
+        } catch (NoSuchMethodException e) {
+            // Try with different parameter types if exact match fails
+            try {
+                String setterName = "set" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+                Method[] methods = object.getClass().getMethods();
+                for (Method method : methods) {
+                    if (method.getName().equals(setterName) && method.getParameterCount() == 1) {
+                        Class<?> paramType = method.getParameterTypes()[0];
+                        if (paramType.isAssignableFrom(value.getClass())) {
+                            method.invoke(object, value);
+                            LOGGER.finest("Successfully set field '" + fieldName + "' to: " + value);
+                            return;
+                        }
+                    }
+                }
+                LOGGER.warning("No suitable setter method found for field '" + fieldName + "' on object of type " +
+                              object.getClass().getSimpleName());
+            } catch (IllegalAccessException | InvocationTargetException e2) {
+                LOGGER.log(Level.WARNING, "Could not invoke setter for field '" + fieldName + "' on object of type " +
+                          object.getClass().getSimpleName() + ": " + e2.getMessage(), e2);
+            }
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            LOGGER.log(Level.WARNING, "Could not invoke setter for field '" + fieldName + "' on object of type " +
                       object.getClass().getSimpleName() + ": " + e.getMessage(), e);
         }
     }

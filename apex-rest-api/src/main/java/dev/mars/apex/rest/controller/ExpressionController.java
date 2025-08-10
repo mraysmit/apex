@@ -332,8 +332,8 @@ public class ExpressionController {
     public static class ExpressionEvaluationRequest {
         @NotBlank
         private String expression;
-        
-        @NotNull
+
+        // Context is optional - can be null for simple expressions
         private Map<String, Object> context;
 
         // Getters and setters
@@ -346,8 +346,8 @@ public class ExpressionController {
     public static class BatchExpressionEvaluationRequest {
         @NotNull
         private List<ExpressionItem> expressions;
-        
-        @NotNull
+
+        // Context is optional - can be null for simple expressions
         private Map<String, Object> context;
 
         // Getters and setters

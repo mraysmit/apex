@@ -4,8 +4,18 @@ import dev.mars.apex.core.api.RulesService;
 import dev.mars.apex.core.api.SimpleRulesEngine;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.service.data.DataServiceManager;
+import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.engine.TemplateProcessorService;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import dev.mars.apex.core.service.expression.ExpressionEvaluationService;
+import dev.mars.apex.core.service.transform.GenericTransformerService;
+import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import dev.mars.apex.core.service.data.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.time.Instant;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -136,6 +146,132 @@ public class RulesEngineConfiguration {
             logger.error("Error creating default RulesEngine: {}", e.getMessage(), e);
             logger.info("Falling back to empty configuration");
             return new RulesEngine(new dev.mars.apex.core.engine.config.RulesEngineConfiguration());
+        }
+    }
+
+    /**
+     * LookupServiceRegistry bean for service registration and lookup.
+     */
+    @Bean
+    public LookupServiceRegistry lookupServiceRegistry() {
+        logger.info("Creating LookupServiceRegistry bean");
+        return new LookupServiceRegistry();
+    }
+
+    /**
+     * ExpressionEvaluatorService bean for SpEL expression evaluation.
+     */
+    @Bean
+    public ExpressionEvaluatorService expressionEvaluatorService() {
+        logger.info("Creating ExpressionEvaluatorService bean");
+        return new ExpressionEvaluatorService();
+    }
+
+    /**
+     * ExpressionEvaluationService bean for enhanced SpEL expression evaluation.
+     * This provides a higher-level API for expression evaluation with Map-based contexts.
+     */
+    @Bean
+    public ExpressionEvaluationService expressionEvaluationService() {
+        logger.info("Creating ExpressionEvaluationService bean");
+        return new ExpressionEvaluationService();
+    }
+
+    /**
+     * DataServiceManager bean for data source management.
+     * Creates a DataServiceManager with test data sources for REST API operations.
+     */
+    @Bean
+    public DataServiceManager dataServiceManager() {
+        logger.info("Creating DataServiceManager bean with test data sources");
+        DataServiceManager manager = new DataServiceManager();
+
+        // Add a test data source for integration tests
+        manager.loadDataSource(new TestDataSource("testDataSource", "testData"));
+
+        return manager;
+    }
+
+    /**
+     * GenericTransformerService bean for data transformation operations.
+     */
+    @Bean
+    public GenericTransformerService genericTransformerService(
+            LookupServiceRegistry lookupServiceRegistry,
+            RulesEngine rulesEngine) {
+        logger.info("Creating GenericTransformerService bean");
+        return new GenericTransformerService(lookupServiceRegistry, rulesEngine);
+    }
+
+    /**
+     * EnrichmentService bean for data enrichment operations.
+     */
+    @Bean
+    public EnrichmentService enrichmentService(
+            LookupServiceRegistry lookupServiceRegistry,
+            ExpressionEvaluatorService expressionEvaluatorService) {
+        logger.info("Creating EnrichmentService bean");
+        return new EnrichmentService(lookupServiceRegistry, expressionEvaluatorService);
+    }
+
+    /**
+     * TemplateProcessorService bean for template processing operations.
+     */
+    @Bean
+    public TemplateProcessorService templateProcessorService(
+            ExpressionEvaluatorService expressionEvaluatorService) {
+        logger.info("Creating TemplateProcessorService bean");
+        return new TemplateProcessorService(expressionEvaluatorService);
+    }
+
+    /**
+     * Simple test data source for integration testing.
+     */
+    private static class TestDataSource implements DataSource {
+        private final String name;
+        private final String dataType;
+
+        public TestDataSource(String name, String dataType) {
+            this.name = name;
+            this.dataType = dataType;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String getDataType() {
+            return dataType;
+        }
+
+        @Override
+        public boolean supportsDataType(String dataType) {
+            return this.dataType.equals(dataType);
+        }
+
+        @Override
+        public <T> T getData(String dataType, Object... parameters) {
+            if (!supportsDataType(dataType)) {
+                return null;
+            }
+
+            // Return test data based on the key parameter
+            if (parameters.length > 0 && parameters[0] instanceof String) {
+                String key = (String) parameters[0];
+                return (T) Map.of(
+                    "key", key,
+                    "value", "Test data for key: " + key,
+                    "timestamp", Instant.now(),
+                    "source", name
+                );
+            }
+
+            return (T) Map.of(
+                "message", "Test data from " + name,
+                "timestamp", Instant.now()
+            );
         }
     }
 }

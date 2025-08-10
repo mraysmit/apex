@@ -1,5 +1,9 @@
 # APEX Rules Engine REST API Guide
 
+**Version:** 1.0
+**Date:** 2025-08-02
+**Author:** Mark Andrew Ray-Smith Cityline Ltd
+
 ## Table of Contents
 
 1. [Overview](#overview)

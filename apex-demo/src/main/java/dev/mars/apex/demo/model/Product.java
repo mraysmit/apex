@@ -1,5 +1,7 @@
 package dev.mars.apex.demo.model;
 
+import java.io.Serializable;
+
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
  *
@@ -26,7 +28,8 @@ package dev.mars.apex.demo.model;
  * @since 2025-07-27
  * @version 1.0
  */
-public class Product {
+public class Product implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String name;
     private double price;
     private String category;
@@ -51,6 +54,24 @@ public class Product {
         this.name = "Unknown";
         this.price = 0.0;
         this.category = "Uncategorized";
+    }
+
+    /**
+     * Copy constructor - creates a new product with the same values as the provided product.
+     * This eliminates the need for reflection-based copying.
+     *
+     * @param other The product to copy
+     */
+    public Product(Product other) {
+        if (other != null) {
+            this.name = other.name;
+            this.price = other.price;
+            this.category = other.category;
+        } else {
+            this.name = "Unknown";
+            this.price = 0.0;
+            this.category = "Uncategorized";
+        }
     }
 
     /**

@@ -1,5 +1,7 @@
 package dev.mars.apex.demo.model;
 
+import java.io.Serializable;
+
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
  *
@@ -30,7 +32,8 @@ package dev.mars.apex.demo.model;
  * Represents a trade with basic information.
  * This class is used for demonstration purposes.
  */
-public class Trade {
+public class Trade implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String id;
     private String value;
     private String category;
@@ -55,6 +58,24 @@ public class Trade {
         this.id = "Unknown";
         this.value = "";
         this.category = "Uncategorized";
+    }
+
+    /**
+     * Copy constructor - creates a new trade with the same values as the provided trade.
+     * This eliminates the need for reflection-based copying.
+     *
+     * @param other The trade to copy
+     */
+    public Trade(Trade other) {
+        if (other != null) {
+            this.id = other.id;
+            this.value = other.value;
+            this.category = other.category;
+        } else {
+            this.id = "Unknown";
+            this.value = "";
+            this.category = "Uncategorized";
+        }
     }
 
     /**

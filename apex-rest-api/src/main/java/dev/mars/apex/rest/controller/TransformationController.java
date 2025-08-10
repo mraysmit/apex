@@ -7,11 +7,12 @@ import dev.mars.apex.core.service.transform.FieldTransformerActionBuilder;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.config.RuleBuilder;
 import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.rest.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ import java.util.*;
  * Provides endpoints for data transformation using the APEX transformation engine.
  */
 @RestController
-@RequestMapping("/api/transform")
+@RequestMapping("/api/transformations")
 @Tag(name = "Transformation", description = "Data transformation operations")
 public class TransformationController {
 
@@ -40,6 +41,42 @@ public class TransformationController {
 
     @Autowired
     private GenericTransformerService transformerService;
+
+    /**
+     * Get all registered transformers.
+     */
+    @GetMapping("/transformers")
+    @Operation(
+        summary = "Get registered transformers",
+        description = "Returns a list of all registered transformers available for use."
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Transformers retrieved successfully")
+    public ResponseEntity<Map<String, Object>> getRegisteredTransformers() {
+        logger.info("Retrieving registered transformers");
+
+        try {
+            // Get registered transformers from the service
+            String[] transformerNames = transformerService.getRegisteredTransformers();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("transformers", Arrays.asList(transformerNames));
+            response.put("count", transformerNames.length);
+            response.put("timestamp", Instant.now());
+
+            logger.info("Retrieved {} registered transformers", transformerNames.length);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Error retrieving transformers: {}", e.getMessage(), e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Transformer retrieval failed");
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("timestamp", Instant.now());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
 
     /**
      * Transform data using a registered transformer.
@@ -50,12 +87,12 @@ public class TransformationController {
         description = "Applies a registered transformer to the provided data and returns the transformed result."
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Data transformed successfully"),
-        @ApiResponse(responseCode = "404", description = "Transformer not found"),
-        @ApiResponse(responseCode = "400", description = "Invalid transformation request"),
-        @ApiResponse(responseCode = "500", description = "Transformation error")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Data transformed successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Transformer not found"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid transformation request"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Transformation error")
     })
-    public ResponseEntity<Map<String, Object>> transformData(
+    public ResponseEntity<ApiResponse<Map<String, Object>>> transformData(
             @Parameter(description = "Name of the transformer to use", example = "customer-normalizer")
             @PathVariable @NotBlank String transformerName,
 
@@ -86,36 +123,26 @@ public class TransformationController {
             // Transform the data
             Object transformedData = transformerService.transform(transformerName, data);
 
-            // Prepare response
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("transformerName", transformerName);
-            response.put("originalData", data);
-            response.put("transformedData", transformedData);
-            response.put("timestamp", Instant.now());
+            // Prepare response data
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("transformerName", transformerName);
+            responseData.put("originalData", data);
+            responseData.put("transformedData", transformedData);
 
             logger.info("Data transformation completed successfully");
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(ApiResponse.success(responseData));
 
         } catch (IllegalArgumentException e) {
             logger.warn("Transformer not found: {}", transformerName);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("success", false);
-            errorResponse.put("error", "Transformer not found");
-            errorResponse.put("transformerName", transformerName);
-            errorResponse.put("message", e.getMessage());
-            errorResponse.put("timestamp", Instant.now());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.<Map<String, Object>>error("Transformer not found", e.getMessage())
+                    .withAdditionalInfo("transformerName", transformerName));
 
         } catch (Exception e) {
             logger.error("Error during transformation: {}", e.getMessage(), e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("success", false);
-            errorResponse.put("error", "Transformation failed");
-            errorResponse.put("transformerName", transformerName);
-            errorResponse.put("message", e.getMessage());
-            errorResponse.put("timestamp", Instant.now());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.<Map<String, Object>>error("Transformation failed", e.getMessage())
+                    .withAdditionalInfo("transformerName", transformerName));
         }
     }
 
@@ -127,7 +154,7 @@ public class TransformationController {
         summary = "Transform data with detailed result",
         description = "Applies a transformer and returns detailed transformation result including rule execution details."
     )
-    @ApiResponse(responseCode = "200", description = "Detailed transformation completed")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Detailed transformation completed")
     public ResponseEntity<Map<String, Object>> transformDataWithResult(
             @Parameter(description = "Name of the transformer to use")
             @PathVariable @NotBlank String transformerName,
@@ -178,7 +205,7 @@ public class TransformationController {
         summary = "Create and apply dynamic transformer",
         description = "Creates a transformer on-the-fly with the provided rules and applies it to the data."
     )
-    @ApiResponse(responseCode = "200", description = "Dynamic transformation completed")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Dynamic transformation completed")
     public ResponseEntity<Map<String, Object>> transformWithDynamicRules(
             @RequestBody
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -246,41 +273,7 @@ public class TransformationController {
         }
     }
 
-    /**
-     * Get list of registered transformers.
-     */
-    @GetMapping("/registered")
-    @Operation(
-        summary = "Get registered transformers",
-        description = "Returns a list of all registered transformers available for use."
-    )
-    @ApiResponse(responseCode = "200", description = "Registered transformers retrieved successfully")
-    public ResponseEntity<Map<String, Object>> getRegisteredTransformers() {
-        logger.debug("Retrieving registered transformers");
 
-        try {
-            // Get registered transformers from service
-            String[] registeredTransformers = transformerService.getRegisteredTransformers();
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("transformers", Arrays.asList(registeredTransformers));
-            response.put("count", registeredTransformers.length);
-            response.put("timestamp", Instant.now());
-
-            logger.debug("Retrieved {} registered transformers", registeredTransformers.length);
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            logger.error("Error retrieving registered transformers: {}", e.getMessage(), e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("success", false);
-            errorResponse.put("error", "Failed to retrieve transformers");
-            errorResponse.put("message", e.getMessage());
-            errorResponse.put("timestamp", Instant.now());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        }
-    }
 
     // DTOs for request/response
     public static class DynamicTransformationRequest {

@@ -27,7 +27,7 @@ import java.util.*;
  * Provides endpoints for processing JSON, XML, and generic templates using the APEX template engine.
  */
 @RestController
-@RequestMapping("/api/template")
+@RequestMapping("/api/templates")
 @Tag(name = "Template Processing", description = "Template processing operations")
 public class TemplateController {
 

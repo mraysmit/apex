@@ -3,11 +3,12 @@ package dev.mars.apex.rest.controller;
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.rest.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ import java.util.*;
  * Provides endpoints for enriching data using the APEX enrichment engine.
  */
 @RestController
-@RequestMapping("/api/enrich")
+@RequestMapping("/api/enrichment")
 @Tag(name = "Enrichment", description = "Data enrichment operations")
 public class EnrichmentController {
 
@@ -41,17 +42,59 @@ public class EnrichmentController {
     private YamlConfigurationLoader yamlConfigurationLoader;
 
     /**
+     * Get predefined enrichment configurations.
+     */
+    @GetMapping("/configurations")
+    @Operation(
+        summary = "Get predefined configurations",
+        description = "Returns a list of predefined enrichment configurations available for use."
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Configurations retrieved successfully")
+    public ResponseEntity<Map<String, Object>> getPredefinedConfigurations() {
+        logger.info("Retrieving predefined enrichment configurations");
+
+        try {
+            // In a real implementation, this would load from a configuration registry
+            // For now, return a sample list of available configurations
+            List<String> configurations = Arrays.asList(
+                "customer-profile",
+                "trade-enrichment",
+                "risk-assessment",
+                "market-data-enrichment"
+            );
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("configurations", configurations);
+            response.put("count", configurations.size());
+            response.put("timestamp", Instant.now());
+
+            logger.info("Retrieved {} predefined configurations", configurations.size());
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Error retrieving configurations: {}", e.getMessage(), e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Configuration retrieval failed");
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("timestamp", Instant.now());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
      * Enrich an object using YAML configuration.
      */
-    @PostMapping("/object")
+    @PostMapping("/enrich")
     @Operation(
         summary = "Enrich object using YAML configuration",
         description = "Enriches the provided object using enrichment rules defined in YAML configuration."
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Object enriched successfully"),
-        @ApiResponse(responseCode = "400", description = "Invalid enrichment request"),
-        @ApiResponse(responseCode = "500", description = "Enrichment error")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Object enriched successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid enrichment request"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Enrichment error")
     })
     public ResponseEntity<Map<String, Object>> enrichObject(
             @RequestBody
@@ -123,7 +166,7 @@ public class EnrichmentController {
         summary = "Enrich multiple objects using YAML configuration",
         description = "Enriches multiple objects using enrichment rules defined in YAML configuration."
     )
-    @ApiResponse(responseCode = "200", description = "Batch enrichment completed")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Batch enrichment completed")
     public ResponseEntity<Map<String, Object>> enrichBatch(
             @RequestBody
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -198,7 +241,7 @@ public class EnrichmentController {
         summary = "Enrich object using predefined configuration",
         description = "Enriches the provided object using a predefined enrichment configuration."
     )
-    @ApiResponse(responseCode = "200", description = "Object enriched using predefined configuration")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Object enriched using predefined configuration")
     public ResponseEntity<Map<String, Object>> enrichWithPredefinedConfig(
             @Parameter(description = "Name of the predefined enrichment configuration")
             @PathVariable String configName,
@@ -253,28 +296,7 @@ public class EnrichmentController {
         }
     }
 
-    /**
-     * Get available predefined enrichment configurations.
-     */
-    @GetMapping("/predefined")
-    @Operation(
-        summary = "Get available predefined enrichment configurations",
-        description = "Returns a list of all available predefined enrichment configurations."
-    )
-    @ApiResponse(responseCode = "200", description = "Predefined configurations retrieved successfully")
-    public ResponseEntity<Map<String, Object>> getPredefinedConfigurations() {
-        logger.debug("Retrieving predefined enrichment configurations");
 
-        Map<String, String> predefinedConfigs = getSimulatedPredefinedConfigurations();
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("configurations", predefinedConfigs.keySet());
-        response.put("count", predefinedConfigs.size());
-        response.put("timestamp", Instant.now());
-
-        return ResponseEntity.ok(response);
-    }
 
     /**
      * Get predefined configurations (simulated for demo purposes).

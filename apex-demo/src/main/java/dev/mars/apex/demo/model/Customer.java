@@ -1,5 +1,6 @@
 package dev.mars.apex.demo.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +30,8 @@ import java.util.List;
  * @since 2025-07-27
  * @version 1.0
  */
-public class Customer {
+public class Customer implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String name;
     private int age;
     private String email;
@@ -79,6 +81,8 @@ public class Customer {
         this.balance = 0.0;
         this.preferredCategories = new ArrayList<>();
     }
+
+
 
     /**
      * Create a new customer as a copy of another customer.
