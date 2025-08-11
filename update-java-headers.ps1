@@ -5,7 +5,8 @@
     Updates comment headers in Java class files with author information.
 
 .DESCRIPTION
-    This script scans all Java files in the PeeGeeQ project and updates their comment headers
+    APEX is a powerful expression processor for Java applications with comprehensive data source integration
+    This script scans all Java files in the APEX project and updates their comment headers
     to include proper copyright notices and author tags with "Mark Andrew Ray-Smith Cityline Ltd".
 
 .PARAMETER DryRun

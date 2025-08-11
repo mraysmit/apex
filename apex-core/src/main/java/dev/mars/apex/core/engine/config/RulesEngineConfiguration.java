@@ -29,8 +29,7 @@ import java.util.logging.Logger;
 /**
  * This class handles the configuration and setup of rules for the Rules Engine.
  *
- * This class is part of the PeeGeeQ message queue system, providing
- * production-ready PostgreSQL-based message queuing capabilities.
+* This class is part of the APEX A powerful expression processor for Java applications.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-27

@@ -26,8 +26,7 @@ import java.util.function.Supplier;
 /**
  * Enhanced logger wrapper for the Rules Engine that provides:
  *
- * This class is part of the PeeGeeQ message queue system, providing
- * production-ready PostgreSQL-based message queuing capabilities.
+* This class is part of the APEX A powerful expression processor for Java applications.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-27

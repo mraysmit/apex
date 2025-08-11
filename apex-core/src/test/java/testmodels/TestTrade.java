@@ -19,8 +19,7 @@ package testmodels;
 /**
  * Test trade class for enrichment testing.
  *
- * This class is part of the PeeGeeQ message queue system, providing
- * production-ready PostgreSQL-based message queuing capabilities.
+* This class is part of the APEX A powerful expression processor for Java applications.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-27
