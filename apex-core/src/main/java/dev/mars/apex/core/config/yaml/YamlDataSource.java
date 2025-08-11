@@ -14,7 +14,7 @@ import java.util.Objects;
  * This class represents the YAML structure for configuring external data sources
  * and provides conversion methods to create DataSourceConfiguration objects.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

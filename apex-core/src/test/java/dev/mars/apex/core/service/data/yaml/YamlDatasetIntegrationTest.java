@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Environment variable resolution
  * - Error handling and validation
  * 
- * @author APEX Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 class YamlDatasetIntegrationTest {

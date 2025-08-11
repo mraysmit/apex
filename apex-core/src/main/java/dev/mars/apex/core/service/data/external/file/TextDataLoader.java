@@ -24,7 +24,7 @@ import java.util.*;
  * - Field type conversion
  * - Skip lines functionality
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

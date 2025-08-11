@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * ProcessingPipeline pipeline = scenario.getProcessingPipeline();
  * ```
  * 
- * @author APEX Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 public class DataTypeScenarioService {

@@ -19,7 +19,7 @@ import java.util.Map;
  * - Enrichment configurations
  * - Associated datasets
  * 
- * @author APEX Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 public class ScenarioConfiguration {

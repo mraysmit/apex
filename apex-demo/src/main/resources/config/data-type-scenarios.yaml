@@ -25,7 +25,7 @@ metadata:
   version: "1.0.0"
   description: "Registry of available scenario configurations and their file locations"
   type: "scenario-registry"
-  created-by: "APEX Rules Engine Team"
+  created-by: "Mark Andrew Ray-Smith Cityline Ltd"
   last-modified: "2025-08-02"
 
 # ============================================================================

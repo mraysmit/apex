@@ -34,7 +34,7 @@ import java.util.Map;
  * 
  * Based on scenarios from APEX_EXTERNAL_DATA_SOURCES_GUIDE.md
  * 
- * @author APEX Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 public class ExternalDataSourceDemo implements DemoRunner.Demo {

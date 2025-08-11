@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
  * This class encapsulates information about manager lifecycle events
  * and data source management operations.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

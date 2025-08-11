@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * - OPEN: Service is failing, calls are blocked
  * - HALF_OPEN: Testing if service has recovered
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

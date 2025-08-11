@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  * - Event-driven notifications
  * - Performance monitoring and metrics
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

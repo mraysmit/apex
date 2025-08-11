@@ -21,7 +21,7 @@ import java.util.stream.Stream;
  * proper metadata structure including required fields like 'type', and
  * validates content against expected schemas for different file types.
  * 
- * @author APEX Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 public class YamlValidationDemo {

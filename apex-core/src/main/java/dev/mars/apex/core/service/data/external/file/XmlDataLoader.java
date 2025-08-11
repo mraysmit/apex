@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  * Note: This is a basic XML parser implementation using regex patterns.
  * In production, you would typically use a proper XML parser like DOM or SAX.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

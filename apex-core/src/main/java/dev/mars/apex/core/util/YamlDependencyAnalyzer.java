@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
  * - config-files: [list of files]
  * - include/import statements
  * 
- * @author APEX Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 public class YamlDependencyAnalyzer {

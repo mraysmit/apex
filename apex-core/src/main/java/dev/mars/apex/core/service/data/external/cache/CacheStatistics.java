@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * This class tracks various cache performance metrics including
  * hit/miss ratios, eviction counts, and timing information.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

@@ -7,7 +7,7 @@ package dev.mars.apex.core.service.data.external;
  * detailed information about the failure including error codes and
  * recovery suggestions.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

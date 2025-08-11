@@ -6,7 +6,7 @@ package dev.mars.apex.core.service.data.external.manager;
  * Implementations of this interface can be registered with the DataSourceManager
  * to receive notifications about manager lifecycle events and data source changes.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

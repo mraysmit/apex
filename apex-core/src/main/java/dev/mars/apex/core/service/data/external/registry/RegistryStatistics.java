@@ -13,7 +13,7 @@ import java.util.Map;
  * This class provides statistical information about the registered
  * data sources including counts by type, health status, and timestamps.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

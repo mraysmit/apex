@@ -7,7 +7,7 @@ package dev.mars.apex.core.util;
  * another YAML file (target), including the type of reference and the location
  * within the YAML structure where the reference occurs.
  * 
- * @author APEX Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 public class YamlDependency {

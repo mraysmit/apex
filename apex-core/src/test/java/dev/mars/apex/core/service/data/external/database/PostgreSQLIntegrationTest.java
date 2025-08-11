@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Error handling and resilience
  * - Caching integration
  * 
- * @author APEX Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 @Testcontainers

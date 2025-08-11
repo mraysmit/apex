@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Health monitoring and metrics
  * - Performance optimization
  * 
- * @author APEX Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 class ExternalDataSourceIntegrationTest {

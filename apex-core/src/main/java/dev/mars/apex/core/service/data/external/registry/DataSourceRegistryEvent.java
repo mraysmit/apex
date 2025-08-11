@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  * This class encapsulates information about data source lifecycle events
  * such as registration, unregistration, and health status changes.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

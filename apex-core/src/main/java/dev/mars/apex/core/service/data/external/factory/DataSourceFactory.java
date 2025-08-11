@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * - Error handling and fallback mechanisms
  * - Extensible architecture for custom data sources
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

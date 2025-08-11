@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentMap;
  * - SQL Server
  * - H2 (for testing)
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */
@@ -241,7 +241,12 @@ public class JdbcTemplateFactory {
      */
     private static String generateCacheKey(DataSourceConfiguration config) {
         ConnectionConfig conn = config.getConnection();
-        return String.format("%s:%s:%s:%d:%s", 
+        if (conn == null) {
+            return String.format("%s:%s:null",
+                config.getName(),
+                config.getSourceType());
+        }
+        return String.format("%s:%s:%s:%d:%s",
             config.getName(),
             config.getSourceType(),
             conn.getHost(),

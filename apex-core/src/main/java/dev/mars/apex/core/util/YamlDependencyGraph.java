@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
  * including nodes for each file, edges representing dependencies, and
  * various analysis results like missing files and circular dependencies.
  * 
- * @author APEX Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 public class YamlDependencyGraph {

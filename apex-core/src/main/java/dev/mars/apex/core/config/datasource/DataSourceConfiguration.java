@@ -14,7 +14,7 @@ import java.util.Objects;
  * and manage an external data source, including connection settings,
  * caching configuration, health checks, and authentication.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

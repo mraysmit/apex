@@ -26,7 +26,7 @@ import java.util.*;
  * Note: This is a basic JSON parser implementation. In production, you would
  * typically use a library like Jackson or Gson for more robust JSON parsing.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

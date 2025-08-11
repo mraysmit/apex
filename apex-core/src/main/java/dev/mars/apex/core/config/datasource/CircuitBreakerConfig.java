@@ -8,7 +8,7 @@ import java.util.Objects;
  * This class contains circuit breaker-related configuration for implementing
  * the circuit breaker pattern to handle external service failures gracefully.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

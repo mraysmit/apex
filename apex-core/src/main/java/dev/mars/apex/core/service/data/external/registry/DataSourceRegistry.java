@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  * - Event-driven notifications for data source changes
  * - Query capabilities for data source discovery
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

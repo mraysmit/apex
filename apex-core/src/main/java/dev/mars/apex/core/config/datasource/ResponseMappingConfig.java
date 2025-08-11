@@ -12,7 +12,7 @@ import java.util.Objects;
  * from external data sources, particularly useful for REST APIs and
  * structured data formats.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

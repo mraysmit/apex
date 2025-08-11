@@ -9,7 +9,7 @@ import java.util.List;
  * Each node contains information about a YAML file including its path,
  * type, existence status, validity, and its relationships to other files.
  * 
- * @author APEX Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 public class YamlNode {

@@ -10,7 +10,7 @@ import dev.mars.apex.core.service.data.external.ExternalDataSource;
  * This interface allows for extensibility by enabling custom data source
  * implementations to be registered with the DataSourceFactory.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

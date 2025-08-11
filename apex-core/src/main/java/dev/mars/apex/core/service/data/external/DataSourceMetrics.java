@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * 
  * All metrics are thread-safe and can be updated concurrently.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

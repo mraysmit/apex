@@ -8,7 +8,7 @@ import java.util.Objects;
  * This class contains health check-related configuration including
  * check intervals, timeout settings, and health check queries or endpoints.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

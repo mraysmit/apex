@@ -33,7 +33,7 @@ import java.util.List;
  * 4. Execute scenario-specific processing pipeline
  * 5. Display results showing different processing for each type
  * 
- * @author APEX Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 public class ScenarioBasedProcessingDemo {

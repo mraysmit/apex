@@ -30,7 +30,7 @@ import java.util.*;
  * - enrichment: Data enrichment configurations
  * - rule-chain: Sequential rule execution files
  * 
- * @author APEX Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 public class YamlMetadataValidator {

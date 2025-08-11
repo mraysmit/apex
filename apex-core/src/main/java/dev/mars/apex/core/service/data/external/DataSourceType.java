@@ -6,7 +6,7 @@ package dev.mars.apex.core.service.data.external;
  * Each type represents a different category of data source with specific
  * characteristics and implementation requirements.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

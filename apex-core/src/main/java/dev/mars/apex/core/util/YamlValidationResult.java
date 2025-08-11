@@ -9,7 +9,7 @@ import java.util.List;
  * Contains validation status, errors, warnings, and metadata about the
  * validation process for a specific YAML file.
  * 
- * @author APEX Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 public class YamlValidationResult {

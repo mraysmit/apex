@@ -9,7 +9,7 @@ import java.util.Objects;
  * This class provides detailed information about the current state of a data source
  * connection, including status, timestamps, and error information.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

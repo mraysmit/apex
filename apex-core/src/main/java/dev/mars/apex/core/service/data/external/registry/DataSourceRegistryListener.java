@@ -6,7 +6,7 @@ package dev.mars.apex.core.service.data.external.registry;
  * Implementations of this interface can be registered with the DataSourceRegistry
  * to receive notifications about data source lifecycle events and health changes.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

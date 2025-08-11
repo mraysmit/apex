@@ -11,7 +11,7 @@ import java.util.Objects;
  * This class contains file format-specific configuration for parsing
  * different file types including CSV, JSON, XML, and custom formats.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * - SQL Server
  * - H2 (for testing)
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

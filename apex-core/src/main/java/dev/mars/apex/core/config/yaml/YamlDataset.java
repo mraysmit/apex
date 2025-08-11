@@ -9,7 +9,7 @@ import java.util.Map;
  * Represents the structure of a YAML dataset file as described in the Data Management Guide.
  * A dataset file contains metadata and data sections.
  * 
- * @author APEX Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 public class YamlDataset {

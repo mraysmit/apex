@@ -12,7 +12,7 @@ import java.util.List;
  * This interface defines the contract for data loaders that can parse
  * various file formats and convert them into structured data objects.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

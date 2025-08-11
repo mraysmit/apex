@@ -10,7 +10,7 @@ import java.util.Objects;
  * This class contains connection-specific settings such as host, port,
  * database name, URLs, timeouts, and connection pooling parameters.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */

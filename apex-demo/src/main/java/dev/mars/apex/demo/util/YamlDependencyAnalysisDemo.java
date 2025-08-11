@@ -14,7 +14,7 @@ import java.util.List;
  * This demo analyzes the actual scenario files in the project and shows
  * the complete dependency chains, missing files, and validation results.
  * 
- * @author APEX Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 public class YamlDependencyAnalysisDemo {

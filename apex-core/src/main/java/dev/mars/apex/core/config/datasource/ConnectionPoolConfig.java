@@ -8,7 +8,7 @@ import java.util.Objects;
  * This class contains settings for managing connection pools,
  * including pool size limits, timeouts, and validation parameters.
  * 
- * @author SpEL Rules Engine Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
  */
