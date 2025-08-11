@@ -58,7 +58,7 @@ public class RulesEngineConfiguration {
     /**
      * Create a new rule builder with a generated ID.
      * This is the recommended way to create and register rules.
-     * 
+     *
      * @return A new rule builder
      */
     public RuleBuilder rule() {
@@ -68,12 +68,12 @@ public class RulesEngineConfiguration {
     /**
      * Create a new rule builder with the specified ID.
      * This is the recommended way to create and register rules with a specific ID.
-     * 
+     *
      * @param id The unique identifier for the rule
      * @return A new rule builder
      */
     public RuleBuilder rule(String id) {
-        return new RuleBuilder(id);
+        return new RuleBuilder(id, this);
     }
 
     /**
@@ -327,11 +327,22 @@ public class RulesEngineConfiguration {
 
     /**
      * Get a rule by its ID.
-     * 
+     *
      * @param id The ID of the rule
      * @return The rule with the specified ID, or null if not found
      */
     public Rule getRuleById(String id) {
+        return rulesById.get(id);
+    }
+
+    /**
+     * Get a rule by its ID with logging if not found.
+     * Use this method when you expect the rule to exist and want to log if it's missing.
+     *
+     * @param id The ID of the rule
+     * @return The rule with the specified ID, or null if not found
+     */
+    public Rule getRuleByIdWithLogging(String id) {
         Rule rule = rulesById.get(id);
         if (rule == null) {
             LOGGER.warning("Rule with ID '" + id + "' not found");
@@ -529,9 +540,8 @@ public class RulesEngineConfiguration {
 
         List<Rule> rules = new ArrayList<>();
         for (String ruleId : ruleIds) {
-            Rule rule = getRuleById(ruleId);
+            Rule rule = getRuleByIdWithLogging(ruleId);
             if (rule == null) {
-                LOGGER.warning("Rule with ID '" + ruleId + "' not found");
                 return null;
             }
             rules.add(rule);
@@ -585,9 +595,8 @@ public class RulesEngineConfiguration {
 
         List<Rule> rules = new ArrayList<>();
         for (String ruleId : ruleIds) {
-            Rule rule = getRuleById(ruleId);
+            Rule rule = getRuleByIdWithLogging(ruleId);
             if (rule == null) {
-                LOGGER.warning("Rule with ID '" + ruleId + "' not found");
                 return null;
             }
             rules.add(rule);

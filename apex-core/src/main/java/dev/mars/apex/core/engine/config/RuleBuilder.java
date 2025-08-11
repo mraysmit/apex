@@ -53,6 +53,9 @@ public class RuleBuilder {
     // Metadata builder
     private RuleMetadata.Builder metadataBuilder = RuleMetadata.builder();
 
+    // Reference to the configuration for automatic registration
+    private RulesEngineConfiguration configuration;
+
     /**
      * Create a new RuleBuilder with a generated ID.
      */
@@ -67,6 +70,17 @@ public class RuleBuilder {
      */
     public RuleBuilder(String id) {
         this.id = id;
+    }
+
+    /**
+     * Create a new RuleBuilder with the specified ID and configuration for automatic registration.
+     *
+     * @param id The unique identifier for the rule
+     * @param configuration The configuration to register the rule with when built
+     */
+    public RuleBuilder(String id, RulesEngineConfiguration configuration) {
+        this.id = id;
+        this.configuration = configuration;
     }
 
     /**
@@ -345,6 +359,13 @@ public class RuleBuilder {
         // Build metadata
         RuleMetadata metadata = metadataBuilder.build();
 
-        return new Rule(id, categories, name, condition, message, description, priority, metadata);
+        Rule rule = new Rule(id, categories, name, condition, message, description, priority, metadata);
+
+        // Auto-register the rule if configuration is available
+        if (configuration != null) {
+            configuration.registerRule(rule);
+        }
+
+        return rule;
     }
 }

@@ -100,6 +100,8 @@ class YamlMetadataValidatorTest {
     
     @Test
     void testMissingMetadataSection() throws IOException {
+        System.out.println("TEST: Triggering intentional error - testing YAML file missing metadata section validation");
+
         String noMetadata = """
             scenario:
               scenario-id: "test-scenario"
@@ -108,11 +110,11 @@ class YamlMetadataValidatorTest {
               rule-configurations:
                 - "config/test-rules.yaml"
             """;
-        
+
         writeFile("scenarios/no-metadata.yaml", noMetadata);
-        
+
         YamlValidationResult result = validator.validateFile("scenarios/no-metadata.yaml");
-        
+
         assertFalse(result.isValid(), "File without metadata should fail validation");
         assertTrue(result.getErrors().stream().anyMatch(error -> error.contains("Missing 'metadata' section")));
     }

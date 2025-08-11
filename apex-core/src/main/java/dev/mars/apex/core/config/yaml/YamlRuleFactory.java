@@ -501,12 +501,10 @@ public class YamlRuleFactory {
         if (yamlGroup.getRuleIds() != null) {
             int sequence = 1;
             for (String ruleId : yamlGroup.getRuleIds()) {
-                Rule rule = config.getRuleById(ruleId);
+                Rule rule = config.getRuleByIdWithLogging(ruleId);
                 if (rule != null) {
                     group.addRule(rule, sequence++);
                     LOGGER.fine("Added rule " + ruleId + " to group " + group.getId());
-                } else {
-                    LOGGER.warning("Rule not found for ID: " + ruleId + " in group: " + group.getId());
                 }
             }
         }
