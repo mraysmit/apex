@@ -162,6 +162,8 @@ class ExternalDataSourceIntegrationTest {
 
     @Test
     void testErrorHandlingAndResilience() throws DataSourceException {
+        System.out.println("TEST: Triggering intentional error - testing external data source error handling and resilience");
+
         // Test error handling from External Data Sources Guide Section 9
         DataSourceConfiguration config = createInvalidRestApiConfiguration();
         ExternalDataSource dataSource = factory.createDataSource(config);

@@ -254,13 +254,15 @@ public class RuleEvaluationServiceTest {
     
     @Test
     public void testQuickCheck_InvalidCondition() {
+        System.out.println("TEST: Triggering intentional error - testing invalid condition handling with graceful degradation");
+
         // NOTE: This test intentionally uses an invalid condition to verify error handling
         // Expected: Should return false on error (graceful degradation)
         String condition = "#invalid.syntax";
         Map<String, Object> data = Map.of("age", 25);
 
         boolean result = ruleEvaluationService.quickCheck(condition, data);
-        
+
         assertFalse(result); // Should return false on error
     }
     

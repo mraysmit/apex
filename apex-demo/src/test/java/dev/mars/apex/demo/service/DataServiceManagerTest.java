@@ -187,6 +187,8 @@ public class DataServiceManagerTest {
 
     @Test
     public void testUnsupportedDataType() {
+        System.out.println("TEST: Triggering intentional error - testing unsupported data type handling");
+
         // Test requesting an unsupported data type
         Object result = dataServiceManager.requestData("unsupportedType");
         assertNull(result);
@@ -194,6 +196,8 @@ public class DataServiceManagerTest {
 
     @Test
     public void testNonExistentDataSource() {
+        System.out.println("TEST: Triggering intentional error - testing non-existent data source handling");
+
         // Test requesting data from a non-existent data source
         Object result = dataServiceManager.requestDataByName("NonExistentDataSource", "products");
         assertNull(result);
@@ -219,19 +223,26 @@ public class DataServiceManagerTest {
 
     @Test
     public void testLoadDataSourceWithNullDataSource() {
+        // INTENTIONAL ERROR TEST: This test validates fail-fast behavior for null data sources
+        // Expected: IllegalArgumentException with WARNING log message (not SEVERE)
+
+        System.out.println("TEST: Triggering intentional error - testing null data source validation");
+
         // Create a new DataServiceManager
         DataServiceManager manager = new DataServiceManager();
 
-        // Load a null data source
-        manager.loadDataSource(null);
+        // Loading a null data source should throw IllegalArgumentException
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            manager.loadDataSource(null);
+        });
 
-        // Verify no data source was loaded
-        DataSource loadedDataSource = manager.getDataSourceByName("TestDataSource");
-        assertNull(loadedDataSource);
+        assertEquals("Data source cannot be null", exception.getMessage());
     }
 
     @Test
     public void testLoadDataSourceWithNullName() {
+        System.out.println("TEST: Triggering intentional error - testing null data source name validation");
+
         // Create a new DataServiceManager
         DataServiceManager manager = new DataServiceManager();
 
@@ -243,16 +254,18 @@ public class DataServiceManagerTest {
             }
         };
 
-        // Load the data source
-        manager.loadDataSource(dataSource);
+        // Loading a data source with null name should throw IllegalArgumentException
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            manager.loadDataSource(dataSource);
+        });
 
-        // Verify no data source was loaded
-        DataSource loadedDataSource = manager.getDataSourceByType("testData");
-        assertNull(loadedDataSource);
+        assertEquals("Data source name cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testLoadDataSourceWithEmptyName() {
+        System.out.println("TEST: Triggering intentional error - testing empty data source name validation");
+
         // Create a new DataServiceManager
         DataServiceManager manager = new DataServiceManager();
 
@@ -264,16 +277,18 @@ public class DataServiceManagerTest {
             }
         };
 
-        // Load the data source
-        manager.loadDataSource(dataSource);
+        // Loading a data source with empty name should throw IllegalArgumentException
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            manager.loadDataSource(dataSource);
+        });
 
-        // Verify no data source was loaded
-        DataSource loadedDataSource = manager.getDataSourceByType("testData");
-        assertNull(loadedDataSource);
+        assertEquals("Data source name cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testLoadDataSourceWithNullDataType() {
+        System.out.println("TEST: Triggering intentional error - testing null data source type validation");
+
         // Create a new DataServiceManager
         DataServiceManager manager = new DataServiceManager();
 
@@ -285,16 +300,18 @@ public class DataServiceManagerTest {
             }
         };
 
-        // Load the data source
-        manager.loadDataSource(dataSource);
+        // Loading a data source with null data type should throw IllegalArgumentException
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            manager.loadDataSource(dataSource);
+        });
 
-        // Verify no data source was loaded
-        DataSource loadedDataSource = manager.getDataSourceByName("TestDataSource");
-        assertNull(loadedDataSource);
+        assertEquals("Data source data type cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testLoadDataSourceWithEmptyDataType() {
+        System.out.println("TEST: Triggering intentional error - testing empty data source type validation");
+
         // Create a new DataServiceManager
         DataServiceManager manager = new DataServiceManager();
 
@@ -306,12 +323,12 @@ public class DataServiceManagerTest {
             }
         };
 
-        // Load the data source
-        manager.loadDataSource(dataSource);
+        // Loading a data source with empty data type should throw IllegalArgumentException
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            manager.loadDataSource(dataSource);
+        });
 
-        // Verify no data source was loaded
-        DataSource loadedDataSource = manager.getDataSourceByName("TestDataSource");
-        assertNull(loadedDataSource);
+        assertEquals("Data source data type cannot be null or empty", exception.getMessage());
     }
 
     @Test
@@ -340,33 +357,35 @@ public class DataServiceManagerTest {
 
     @Test
     public void testLoadDataSourcesWithNullDataSources() {
+        System.out.println("TEST: Triggering intentional error - testing null data sources array validation");
+
         // Create a new DataServiceManager
         DataServiceManager manager = new DataServiceManager();
 
-        // Load null data sources (cast to DataSource[] to confirm non-varargs invocation)
-        manager.loadDataSources((DataSource[]) null);
+        // Loading null data sources array should throw IllegalArgumentException
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            manager.loadDataSources((DataSource[]) null);
+        });
 
-        // Verify no data sources were loaded
-        DataSource loadedDataSource = manager.getDataSourceByName("TestDataSource");
-        assertNull(loadedDataSource);
+        assertEquals("Data sources array cannot be null", exception.getMessage());
     }
 
     @Test
     public void testLoadDataSourcesWithNullDataSource() {
+        System.out.println("TEST: Triggering intentional error - testing null data source in array validation");
+
         // Create a new DataServiceManager
         DataServiceManager manager = new DataServiceManager();
 
         // Create a test data source
         TestDataSource dataSource = new TestDataSource("TestDataSource", "testData");
 
-        // Load the data sources with a null data source
-        manager.loadDataSources(dataSource, null);
+        // Loading data sources with a null data source should throw IllegalArgumentException
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            manager.loadDataSources(dataSource, null);
+        });
 
-        // Verify only the non-null data source was loaded
-        DataSource loadedDataSource = manager.getDataSourceByName("TestDataSource");
-        assertNotNull(loadedDataSource);
-        assertEquals("TestDataSource", loadedDataSource.getName());
-        assertEquals("testData", loadedDataSource.getDataType());
+        assertEquals("Data source cannot be null", exception.getMessage());
     }
 
     @Test

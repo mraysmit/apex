@@ -204,11 +204,13 @@ class PostgreSQLIntegrationTest {
 
     @Test
     void testErrorHandling() {
+        System.out.println("TEST: Triggering intentional error - testing PostgreSQL database error handling");
+
         // Test invalid query
         assertThrows(DataSourceException.class, () -> {
             dataSource.query("INVALID SQL QUERY", new HashMap<>());
         });
-        
+
         // Test invalid parameters
         assertThrows(DataSourceException.class, () -> {
             Map<String, Object> params = Map.of("nonexistent_param", "value");

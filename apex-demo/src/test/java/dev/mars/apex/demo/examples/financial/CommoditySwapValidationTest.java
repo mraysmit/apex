@@ -121,10 +121,12 @@ public class CommoditySwapValidationTest {
     
     @Test
     void testInvalidSwapValidation() {
+        System.out.println("TEST: Triggering intentional error - testing invalid commodity swap validation");
+
         // Create invalid swap with null trade ID
         CommodityTotalReturnSwap invalidSwap = createValidCommoditySwap();
         invalidSwap.setTradeId(null);
-        
+
         Map<String, Object> contextWithNullTradeId = new HashMap<>();
         contextWithNullTradeId.put("tradeId", invalidSwap.getTradeId());
         boolean hasTradeId = rulesService.check("#tradeId != null && #tradeId.length() > 0",

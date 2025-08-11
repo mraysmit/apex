@@ -100,6 +100,8 @@ public class DynamicMethodExecutionDemoConfigTest {
 
     @Test
     void testValidateTrulyInvalidTrade() {
+        System.out.println("TEST: Triggering intentional error - testing validation of truly invalid trade with null/empty fields");
+
         Trade invalidTrade = new Trade();
         invalidTrade.setId(null); // Explicitly set ID to null
         invalidTrade.setValue(""); // Empty value
@@ -116,8 +118,10 @@ public class DynamicMethodExecutionDemoConfigTest {
 
     @Test
     void testValidateNullTrade() {
+        System.out.println("TEST: Triggering intentional error - testing validation of null trade object");
+
         Map<String, Object> validationResults = config.validateTrade(null, context);
-        
+
         assertNotNull(validationResults);
         assertEquals(false, validationResults.get("hasId"));
         assertEquals(false, validationResults.get("hasValue"));

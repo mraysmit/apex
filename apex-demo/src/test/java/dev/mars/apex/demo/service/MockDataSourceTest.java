@@ -238,12 +238,16 @@ public class MockDataSourceTest {
 
     @Test
     public void testGetDataWithUnsupportedDataType() {
+        System.out.println("TEST: Triggering intentional error - testing unsupported data type handling in mock data source");
+
         // Test with unsupported data type
         assertNull(productsDataSource.getData("unsupportedType"));
     }
 
     @Test
     public void testGetDataWithInvalidParameters() {
+        System.out.println("TEST: Triggering intentional error - testing invalid parameters handling in mock data source");
+
         // Test with invalid parameters for matchingRecords
         assertNull(matchingRecordsDataSource.getData("matchingRecords"));
         assertNull(matchingRecordsDataSource.getData("matchingRecords", "invalid"));

@@ -52,27 +52,29 @@ public class DataServiceManager {
 
     /**
      * Load a data source.
-     * 
+     *
      * @param dataSource The data source to load
      * @return This manager for method chaining
+     * @throws IllegalArgumentException if dataSource is null, has no name, or has no data type
      */
     public DataServiceManager loadDataSource(DataSource dataSource) {
         if (dataSource == null) {
-            LOGGER.warning("Attempted to load null data source");
-            return this;
+            // Log at WARNING level - serious enough to notice but not SEVERE/FATAL
+            LOGGER.warning("Attempted to load null data source - this indicates a programming error");
+            throw new IllegalArgumentException("Data source cannot be null");
         }
 
         String name = dataSource.getName();
         String dataType = dataSource.getDataType();
 
         if (name == null || name.isEmpty()) {
-            LOGGER.warning("Data source has no name, ignoring");
-            return this;
+            LOGGER.warning("Data source has no name - this indicates a programming error");
+            throw new IllegalArgumentException("Data source name cannot be null or empty");
         }
 
         if (dataType == null || dataType.isEmpty()) {
-            LOGGER.warning("Data source has no data type, ignoring");
-            return this;
+            LOGGER.warning("Data source has no data type - this indicates a programming error");
+            throw new IllegalArgumentException("Data source data type cannot be null or empty");
         }
 
         // Register the data source by name and type
@@ -85,18 +87,19 @@ public class DataServiceManager {
 
     /**
      * Load multiple data sources.
-     * 
+     *
      * @param dataSources The data sources to load
      * @return This manager for method chaining
+     * @throws IllegalArgumentException if dataSources array is null
      */
     public DataServiceManager loadDataSources(DataSource... dataSources) {
         if (dataSources == null) {
-            LOGGER.warning("Attempted to load null data sources");
-            return this;
+            LOGGER.warning("Attempted to load null data sources array - this indicates a programming error");
+            throw new IllegalArgumentException("Data sources array cannot be null");
         }
 
         for (DataSource dataSource : dataSources) {
-            loadDataSource(dataSource);
+            loadDataSource(dataSource); // This will throw if individual data source is null
         }
 
         return this;
