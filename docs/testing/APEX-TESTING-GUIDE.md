@@ -5,12 +5,13 @@ This guide provides complete testing strategies for the APEX Rules Engine, cover
 ## Table of Contents
 
 1. [Quick Start](#quick-start)
-2. [Granular Testing Strategies](#granular-testing-strategies)
-3. [Performance-Optimized Execution](#performance-optimized-execution)
-4. [Test Logging and Reporting](#test-logging-and-reporting)
-5. [Development Workflows](#development-workflows)
-6. [Advanced Options](#advanced-options)
-7. [Troubleshooting](#troubleshooting)
+2. [Testing Documentation Suite](#testing-documentation-suite)
+3. [Granular Testing Strategies](#granular-testing-strategies)
+4. [Performance-Optimized Execution](#performance-optimized-execution)
+5. [Test Logging and Reporting](#test-logging-and-reporting)
+6. [Development Workflows](#development-workflows)
+7. [Advanced Options](#advanced-options)
+8. [Troubleshooting](#troubleshooting)
 
 ## Quick Start
 
@@ -74,6 +75,75 @@ chmod +x run-tests-with-reports.sh
 # Run specific module
 ./run-tests-with-reports.sh apex-core
 ./run-tests-with-reports.sh apex-demo
+```
+
+## Testing Documentation Suite
+
+This comprehensive testing guide is part of a complete documentation suite covering all aspects of APEX testing:
+
+### Core Testing Guides
+- **APEX-TESTING-GUIDE.md** (this document) - Main testing overview and strategy
+
+### Engine & Executor Testing
+- **engine-executor-testing-methodology.md** - Detailed methodology for rule executor testing
+- **executor-testing-examples.md** - Practical examples and code samples
+- **executor-testing-quick-reference.md** - Quick reference for common testing patterns
+
+### Service Layer Testing
+- **service-layer-testing-guide.md** - Comprehensive guide to service layer testing (462 tests)
+- **service-testing-methodology.md** - Testing methodology for service components
+- **service-testing-quick-reference.md** - Quick reference for service testing patterns
+
+### Service Layer Test Coverage Summary
+
+The service layer contains **462 comprehensive tests** across **20 test classes**:
+
+#### **Cache Services (117 tests)**
+- **CacheDataSourceTest** (37 tests) - Cache-based data source implementation
+- **CacheManagerTest** (22 tests) - Central cache management system
+- **CacheStatisticsTest** (22 tests) - Cache statistics and performance monitoring
+- **InMemoryCacheManagerTest** (36 tests) - In-memory cache implementation
+
+#### **Database Services (70 tests)**
+- **DatabaseDataSourceTest** (27 tests) - Database connectivity and operations
+- **DatabaseHealthIndicatorTest** (14 tests) - Database health monitoring
+- **JdbcTemplateFactoryTest** (15 tests) - JDBC template creation and configuration
+- **PostgreSQLIntegrationTest** (14 tests) - PostgreSQL-specific integration
+
+#### **File Services (54 tests)**
+- **CsvDataLoaderTest** (27 tests) - CSV file processing and data loading
+- **JsonDataLoaderTest** (27 tests) - JSON file processing and data loading
+
+#### **Configuration Services (62 tests)**
+- **DataSourceConfigurationServiceTest** (24 tests) - Configuration management service
+- **DataSourceConfigurationEventTest** (24 tests) - Configuration event system
+- **DataSourceConfigurationListenerTest** (14 tests) - Configuration event listeners
+
+#### **Factory Services (20 tests)**
+- **DataSourceFactoryTest** (20 tests) - Data source factory pattern implementation
+
+#### **Core Data Services (122 tests)**
+- **CustomDataSourceTest** (32 tests) - Custom data source implementations
+- **DataSourceTypeTest** (33 tests) - Data source type enumeration and behavior
+- **DataSourceMetricsTest** (32 tests) - Metrics collection and performance monitoring
+- **DataSourceExceptionTest** (25 tests) - Exception handling and error management
+
+#### **Integration Tests (17 tests)**
+- **ExternalDataSourceIntegrationTest** (8 tests) - End-to-end integration testing
+- **YamlDatasetIntegrationTest** (9 tests) - YAML-based dataset integration
+
+### Quick Service Test Execution
+
+```bash
+# Run all service tests
+mvn test -pl apex-core -Dtest="dev.mars.apex.core.service.**"
+
+# Run by category
+mvn test -pl apex-core -Dtest="*Cache*Test"        # Cache services
+mvn test -pl apex-core -Dtest="*Database*Test"     # Database services
+mvn test -pl apex-core -Dtest="*DataLoader*Test"   # File services
+mvn test -pl apex-core -Dtest="*Configuration*Test" # Configuration services
+mvn test -pl apex-core -Dtest="*Integration*Test"  # Integration tests
 ```
 
 ## Granular Testing Strategies
