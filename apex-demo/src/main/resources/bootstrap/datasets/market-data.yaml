@@ -13,6 +13,7 @@
 
 metadata:
   name: "Market Data Reference Dataset"
+  type: "dataset"
   version: "1.0.0"
   description: "Currency and market reference data for OTC Options processing"
   created-date: "2025-08-11"

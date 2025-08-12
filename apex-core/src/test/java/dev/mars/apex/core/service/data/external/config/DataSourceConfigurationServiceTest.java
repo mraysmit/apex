@@ -8,6 +8,7 @@ import dev.mars.apex.core.service.data.external.manager.DataSourceManager;
 import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -95,27 +96,34 @@ class DataSourceConfigurationServiceTest {
     void testSingletonThreadSafety() throws InterruptedException {
         final int threadCount = 10;
         final CountDownLatch latch = new CountDownLatch(threadCount);
-        final List<DataSourceConfigurationService> instances = new ArrayList<>();
-        
+        // Use thread-safe collection to avoid race conditions in the test itself
+        final List<DataSourceConfigurationService> instances = Collections.synchronizedList(new ArrayList<>());
+
         for (int i = 0; i < threadCount; i++) {
             Thread thread = new Thread(() -> {
                 try {
-                    instances.add(DataSourceConfigurationService.getInstance());
+                    DataSourceConfigurationService instance = DataSourceConfigurationService.getInstance();
+                    instances.add(instance);
                 } finally {
                     latch.countDown();
                 }
             });
             thread.start();
         }
-        
-        latch.await(5, TimeUnit.SECONDS);
-        
-        assertEquals(threadCount, instances.size());
-        
-        // All instances should be the same
+
+        // Wait for all threads to complete
+        assertTrue(latch.await(5, TimeUnit.SECONDS), "All threads should complete within 5 seconds");
+
+        // Verify we got the expected number of instances
+        assertEquals(threadCount, instances.size(),
+                    "Should have collected instances from all " + threadCount + " threads");
+
+        // All instances should be the same (singleton behavior)
         DataSourceConfigurationService firstInstance = instances.get(0);
-        for (DataSourceConfigurationService instance : instances) {
-            assertSame(firstInstance, instance);
+        for (int i = 0; i < instances.size(); i++) {
+            DataSourceConfigurationService instance = instances.get(i);
+            assertSame(firstInstance, instance,
+                      "Instance " + i + " should be the same as the first instance (singleton pattern)");
         }
     }
 
