@@ -161,22 +161,33 @@ public class CacheDataSource implements ExternalDataSource {
     
     @Override
     public <T> List<T> query(String query, Map<String, Object> parameters) throws DataSourceException {
-        // For caches, the "query" is typically a key pattern
         try {
-            List<String> matchingKeys = cacheManager.getKeysByPattern(query);
-            List<T> results = new ArrayList<>();
-            
-            for (String key : matchingKeys) {
-                @SuppressWarnings("unchecked")
-                T value = (T) cacheManager.get(key);
-                if (value != null) {
-                    results.add(value);
+            // Handle special cache operations
+            if ("put".equals(query) || "putWithTtl".equals(query)) {
+                return handlePutOperation(parameters);
+            } else if ("get".equals(query)) {
+                return handleGetOperation(parameters);
+            } else if ("remove".equals(query)) {
+                return handleRemoveOperation(parameters);
+            } else if ("keys".equals(query)) {
+                return handleKeysOperation(parameters);
+            } else {
+                // For other queries, treat as key pattern
+                List<String> matchingKeys = cacheManager.getKeysByPattern(query);
+                List<T> results = new ArrayList<>();
+
+                for (String key : matchingKeys) {
+                    @SuppressWarnings("unchecked")
+                    T value = (T) cacheManager.get(key);
+                    if (value != null) {
+                        results.add(value);
+                    }
                 }
+
+                metrics.recordRecordsProcessed(results.size());
+                return results;
             }
-            
-            metrics.recordRecordsProcessed(results.size());
-            return results;
-            
+
         } catch (Exception e) {
             throw DataSourceException.executionError("Cache query failed", e, "query");
         }
@@ -413,22 +424,109 @@ public class CacheDataSource implements ExternalDataSource {
     }
     
     /**
+     * Handle cache put operation.
+     */
+    @SuppressWarnings("unchecked")
+    private <T> List<T> handlePutOperation(Map<String, Object> parameters) {
+        String key = (String) parameters.get("key");
+        Object value = parameters.get("value");
+        Object ttlObj = parameters.get("ttl");
+
+        if (key != null && value != null) {
+            if (ttlObj != null) {
+                // Handle both Integer and Long TTL values
+                long ttl = ttlObj instanceof Long ? (Long) ttlObj : ((Number) ttlObj).longValue();
+                cacheManager.put(key, value, ttl);
+            } else {
+                cacheManager.put(key, value);
+            }
+        }
+
+        // Return empty list for put operations
+        return new ArrayList<>();
+    }
+
+    /**
+     * Handle cache get operation.
+     */
+    @SuppressWarnings("unchecked")
+    private <T> List<T> handleGetOperation(Map<String, Object> parameters) {
+        String key = (String) parameters.get("key");
+
+        if (key != null) {
+            Object value = cacheManager.get(key);
+            if (value != null) {
+                // Record cache hit
+                metrics.recordCacheHit();
+                List<T> results = new ArrayList<>();
+                results.add((T) value);
+                return results;
+            } else {
+                // Record cache miss
+                metrics.recordCacheMiss();
+            }
+        }
+
+        // Return empty list if key not found
+        return new ArrayList<>();
+    }
+
+    /**
+     * Handle cache remove operation.
+     */
+    @SuppressWarnings("unchecked")
+    private <T> List<T> handleRemoveOperation(Map<String, Object> parameters) {
+        String key = (String) parameters.get("key");
+
+        if (key != null) {
+            boolean removed = cacheManager.remove(key);
+            // Return a list with boolean result
+            List<T> results = new ArrayList<>();
+            results.add((T) Boolean.valueOf(removed));
+            return results;
+        }
+
+        // Return empty list if no key provided
+        return new ArrayList<>();
+    }
+
+    /**
+     * Handle cache keys operation.
+     */
+    @SuppressWarnings("unchecked")
+    private <T> List<T> handleKeysOperation(Map<String, Object> parameters) {
+        String pattern = (String) parameters.get("pattern");
+
+        if (pattern != null) {
+            List<String> matchingKeys = cacheManager.getKeysByPattern(pattern);
+            List<T> results = new ArrayList<>();
+            for (String key : matchingKeys) {
+                results.add((T) key);
+            }
+            return results;
+        }
+
+        // Return empty list if no pattern provided
+        return new ArrayList<>();
+    }
+
+    /**
      * Build cache key from data type and parameters.
      */
     private String buildCacheKey(String dataType, Object... parameters) {
         StringBuilder key = new StringBuilder();
-        
+
         // Add key prefix if configured
         if (configuration.getCache() != null && configuration.getCache().getKeyPrefix() != null) {
             key.append(configuration.getCache().getKeyPrefix()).append(":");
         }
-        
+
         key.append(dataType);
-        
+
         for (Object param : parameters) {
             key.append(":").append(param != null ? param.toString() : "null");
         }
-        
+
         return key.toString();
     }
 }

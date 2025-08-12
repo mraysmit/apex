@@ -42,8 +42,8 @@ public class DataSourceRegistry {
     private final Map<DataSourceType, Set<String>> typeIndex = new ConcurrentHashMap<>();
     private final Map<String, Set<String>> tagIndex = new ConcurrentHashMap<>();
     
-    // Event listeners
-    private final List<DataSourceRegistryListener> listeners = new ArrayList<>();
+    // Event listeners - use thread-safe collection
+    private final List<DataSourceRegistryListener> listeners = new java.util.concurrent.CopyOnWriteArrayList<>();
     
     // Background monitoring
     private ScheduledExecutorService monitoringExecutor;
@@ -315,9 +315,7 @@ public class DataSourceRegistry {
      */
     public void addListener(DataSourceRegistryListener listener) {
         if (listener != null) {
-            synchronized (listeners) {
-                listeners.add(listener);
-            }
+            listeners.add(listener);
         }
     }
     
@@ -328,9 +326,7 @@ public class DataSourceRegistry {
      */
     public void removeListener(DataSourceRegistryListener listener) {
         if (listener != null) {
-            synchronized (listeners) {
-                listeners.remove(listener);
-            }
+            listeners.remove(listener);
         }
     }
     
@@ -374,8 +370,8 @@ public class DataSourceRegistry {
             dataSources.clear();
             typeIndex.clear();
             tagIndex.clear();
-            listeners.clear();
         }
+        listeners.clear();
         
         LOGGER.info("Data source registry shut down");
     }
@@ -488,12 +484,8 @@ public class DataSourceRegistry {
      * Notify all listeners of a registry event.
      */
     private void notifyListeners(DataSourceRegistryEvent event) {
-        List<DataSourceRegistryListener> currentListeners;
-        synchronized (listeners) {
-            currentListeners = new ArrayList<>(listeners);
-        }
-
-        for (DataSourceRegistryListener listener : currentListeners) {
+        // CopyOnWriteArrayList is already thread-safe for iteration
+        for (DataSourceRegistryListener listener : listeners) {
             try {
                 listener.onDataSourceEvent(event);
             } catch (Exception e) {

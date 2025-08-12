@@ -290,11 +290,11 @@ class YamlMultiSourceLookupTest {
             }
         }
         
-        // Fallback to database
+        // Fallback to database - use getData() for query keys
         ExternalDataSource dbSource = dataSources.get("user-database");
         if (dbSource != null) {
-            Map<String, Object> dbParams = Map.of("id", Integer.parseInt(userId.replace("user", "")));
-            return dbSource.queryForObject("getUserById", dbParams);
+            int id = Integer.parseInt(userId.replace("user", ""));
+            return dbSource.getData("getUserById", id);
         }
         
         return null;
@@ -308,8 +308,8 @@ class YamlMultiSourceLookupTest {
 
     private Object getBaseUserData(String userId) throws DataSourceException {
         ExternalDataSource dbSource = dataSources.get("user-database");
-        Map<String, Object> params = Map.of("id", Integer.parseInt(userId.replace("user", "")));
-        return dbSource.queryForObject("getUserById", params);
+        int id = Integer.parseInt(userId.replace("user", ""));
+        return dbSource.getData("getUserById", id);
     }
 
     private Object enrichUserWithProfileData(Object baseUser, String userId) throws DataSourceException {
@@ -431,10 +431,10 @@ class YamlMultiSourceLookupTest {
         yamlFile.setDescription("User profile files for enrichment");
 
         Map<String, Object> connection = yamlFile.getConnection();
-        connection.put("basePath", basePath);
-        connection.put("filePattern", "*.json");
+        connection.put("base-path", basePath);  // Use hyphenated key as expected by conversion
+        connection.put("file-pattern", "*.json");
         connection.put("encoding", "UTF-8");
-        connection.put("watchForChanges", false);
+        connection.put("watch-for-changes", false);
 
         Map<String, Object> fileFormat = yamlFile.getFileFormat();
         fileFormat.put("type", "json");
@@ -448,11 +448,17 @@ class YamlMultiSourceLookupTest {
     // ========================================
 
     private void initializeDatabaseWithTestData(ExternalDataSource dbSource) throws DataSourceException {
-        // Create table
-        dbSource.query("createTable", Collections.emptyMap());
+        // Get the actual SQL statements from configuration
+        DataSourceConfiguration config = dbSource.getConfiguration();
+        String createTableSql = config.getQueries().get("createTable");
+        String insertDataSql = config.getQueries().get("insertTestData");
 
-        // Insert test data
-        dbSource.query("insertTestData", Collections.emptyMap());
+        // Clean up any existing data first
+        String dropTableSql = "DROP TABLE IF EXISTS users";
+
+        // Execute DDL and DML statements using batchUpdate
+        List<String> statements = List.of(dropTableSql, createTableSql, insertDataSql);
+        dbSource.batchUpdate(statements);
     }
 
     private Path createUserProfileFile() throws IOException {

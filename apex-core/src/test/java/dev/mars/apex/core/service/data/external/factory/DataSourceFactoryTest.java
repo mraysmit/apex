@@ -364,37 +364,68 @@ class DataSourceFactoryTest {
         }
 
         @Override
-        public Object getData(String key) throws DataSourceException {
-            return "test-data";
+        public <T> T getData(String dataType, Object... parameters) {
+            return (T) "test-data";
         }
 
         @Override
-        public List<Object> query(String query, Map<String, Object> parameters) throws DataSourceException {
-            return List.of("test-result");
+        public <T> List<T> query(String query, Map<String, Object> parameters) throws DataSourceException {
+            return (List<T>) List.of("test-result");
         }
 
         @Override
-        public Object queryForObject(String query, Map<String, Object> parameters) throws DataSourceException {
-            return "test-object";
+        public <T> T queryForObject(String query, Map<String, Object> parameters) throws DataSourceException {
+            return (T) "test-object";
         }
 
         @Override
-        public int[] batchUpdate(List<String> statements) throws DataSourceException {
-            return new int[]{1};
+        @SuppressWarnings("unchecked")
+        public <T> List<List<T>> batchQuery(List<String> queries) throws DataSourceException {
+            return (List<List<T>>) (List<?>) List.of(List.of("batch-result"));
         }
 
         @Override
-        public boolean testConnection() throws DataSourceException {
+        public void batchUpdate(List<String> statements) throws DataSourceException {
+            // No-op for test
+        }
+
+        @Override
+        public boolean testConnection() {
             return true;
         }
 
         @Override
         public ConnectionStatus getConnectionStatus() {
-            return new ConnectionStatus(true, "Test connection");
+            return ConnectionStatus.connected("Test connection");
         }
 
         @Override
         public void shutdown() {
+            // No-op for test
+        }
+
+        @Override
+        public DataSourceType getSourceType() {
+            return DataSourceType.CUSTOM;
+        }
+
+        @Override
+        public DataSourceMetrics getMetrics() {
+            return new DataSourceMetrics();
+        }
+
+        @Override
+        public void initialize(DataSourceConfiguration config) throws DataSourceException {
+            // No-op for test
+        }
+
+        @Override
+        public DataSourceConfiguration getConfiguration() {
+            return null;
+        }
+
+        @Override
+        public void refresh() throws DataSourceException {
             // No-op for test
         }
     }

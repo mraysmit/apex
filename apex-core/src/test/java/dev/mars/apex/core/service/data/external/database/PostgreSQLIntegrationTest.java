@@ -407,12 +407,20 @@ class PostgreSQLIntegrationTest {
     }
 
     private void insertTestUsers() throws DataSourceException {
-        List<String> insertStatements = List.of(
-            "INSERT INTO users (name, email, status) VALUES ('John Doe', 'john@example.com', 'ACTIVE') ON CONFLICT (email) DO NOTHING",
-            "INSERT INTO users (name, email, status) VALUES ('Jane Smith', 'jane@example.com', 'ACTIVE') ON CONFLICT (email) DO NOTHING",
-            "INSERT INTO users (name, email, status) VALUES ('Bob Wilson', 'bob@example.com', 'INACTIVE') ON CONFLICT (email) DO NOTHING"
+        // First clean up any existing test data to ensure consistent IDs
+        List<String> cleanupStatements = List.of(
+            "DELETE FROM orders WHERE user_id IN (SELECT id FROM users WHERE email IN ('john@example.com', 'jane@example.com', 'bob@example.com'))",
+            "DELETE FROM users WHERE email IN ('john@example.com', 'jane@example.com', 'bob@example.com')"
         );
 
+        List<String> insertStatements = List.of(
+            "INSERT INTO users (id, name, email, status) VALUES (1, 'John Doe', 'john@example.com', 'ACTIVE') ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, email = EXCLUDED.email, status = EXCLUDED.status",
+            "INSERT INTO users (id, name, email, status) VALUES (2, 'Jane Smith', 'jane@example.com', 'ACTIVE') ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, email = EXCLUDED.email, status = EXCLUDED.status",
+            "INSERT INTO users (id, name, email, status) VALUES (3, 'Bob Wilson', 'bob@example.com', 'INACTIVE') ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, email = EXCLUDED.email, status = EXCLUDED.status"
+        );
+
+        // Execute cleanup first, then inserts
+        dataSource.batchUpdate(cleanupStatements);
         dataSource.batchUpdate(insertStatements);
     }
 

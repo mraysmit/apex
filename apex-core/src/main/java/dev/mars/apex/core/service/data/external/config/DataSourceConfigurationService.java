@@ -52,8 +52,8 @@ public class DataSourceConfigurationService implements DataSourceManagerListener
     private final ConcurrentMap<String, DataSourceConfiguration> configurations = new ConcurrentHashMap<>();
     private volatile YamlRuleConfiguration currentYamlConfig;
     
-    // Event listeners
-    private final List<DataSourceConfigurationListener> listeners = new java.util.ArrayList<>();
+    // Event listeners - use thread-safe collection
+    private final List<DataSourceConfigurationListener> listeners = new java.util.concurrent.CopyOnWriteArrayList<>();
     
     /**
      * Private constructor for singleton pattern.
@@ -297,27 +297,23 @@ public class DataSourceConfigurationService implements DataSourceManagerListener
     
     /**
      * Add a configuration event listener.
-     * 
+     *
      * @param listener The listener to add
      */
     public void addListener(DataSourceConfigurationListener listener) {
         if (listener != null) {
-            synchronized (listeners) {
-                listeners.add(listener);
-            }
+            listeners.add(listener);
         }
     }
     
     /**
      * Remove a configuration event listener.
-     * 
+     *
      * @param listener The listener to remove
      */
     public void removeListener(DataSourceConfigurationListener listener) {
         if (listener != null) {
-            synchronized (listeners) {
-                listeners.remove(listener);
-            }
+            listeners.remove(listener);
         }
     }
     
@@ -334,9 +330,7 @@ public class DataSourceConfigurationService implements DataSourceManagerListener
         configurations.clear();
         currentYamlConfig = null;
         
-        synchronized (listeners) {
-            listeners.clear();
-        }
+        listeners.clear();
         
         LOGGER.info("DataSourceConfigurationService shut down");
     }
@@ -399,12 +393,8 @@ public class DataSourceConfigurationService implements DataSourceManagerListener
      * Notify all listeners of a configuration event.
      */
     private void notifyListeners(DataSourceConfigurationEvent event) {
-        List<DataSourceConfigurationListener> currentListeners;
-        synchronized (listeners) {
-            currentListeners = new java.util.ArrayList<>(listeners);
-        }
-        
-        for (DataSourceConfigurationListener listener : currentListeners) {
+        // CopyOnWriteArrayList is already thread-safe for iteration
+        for (DataSourceConfigurationListener listener : listeners) {
             try {
                 listener.onConfigurationEvent(event);
             } catch (Exception e) {

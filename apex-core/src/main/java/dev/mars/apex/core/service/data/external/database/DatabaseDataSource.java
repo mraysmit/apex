@@ -164,25 +164,54 @@ public class DatabaseDataSource implements ExternalDataSource {
     
     @Override
     public <T> List<T> query(String query, Map<String, Object> parameters) throws DataSourceException {
+        // Validate inputs
+        if (query == null) {
+            throw DataSourceException.configurationError("Query cannot be null");
+        }
+        if (parameters == null) {
+            throw new NullPointerException("Parameters cannot be null");
+        }
+
         long startTime = System.currentTimeMillis();
-        
+
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = prepareStatement(connection, query, parameters)) {
-            
-            ResultSet resultSet = statement.executeQuery();
-            List<T> results = new ArrayList<>();
-            
-            while (resultSet.next()) {
-                @SuppressWarnings("unchecked")
-                T result = (T) mapResultSetToObject(resultSet);
-                results.add(result);
+
+            // Check if this is an UPDATE, INSERT, DELETE statement
+            // But exclude INSERT/UPDATE/DELETE with RETURNING clause as they return results
+            String trimmedQuery = query.trim().toUpperCase();
+            boolean isModifyingStatement = trimmedQuery.startsWith("UPDATE") || trimmedQuery.startsWith("INSERT") ||
+                                         trimmedQuery.startsWith("DELETE") || trimmedQuery.startsWith("CREATE") ||
+                                         trimmedQuery.startsWith("DROP") || trimmedQuery.startsWith("ALTER");
+            boolean hasReturningClause = trimmedQuery.contains("RETURNING");
+
+            if (isModifyingStatement && !hasReturningClause) {
+
+                // Use executeUpdate for DML/DDL statements
+                int updateCount = statement.executeUpdate();
+                metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
+                metrics.recordRecordsProcessed(updateCount);
+
+                // Return empty list for update operations
+                return new ArrayList<>();
+
+            } else {
+                // Use executeQuery for SELECT statements
+                ResultSet resultSet = statement.executeQuery();
+                List<T> results = new ArrayList<>();
+
+                while (resultSet.next()) {
+                    @SuppressWarnings("unchecked")
+                    T result = (T) mapResultSetToObject(resultSet);
+                    results.add(result);
+                }
+
+                metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
+                metrics.recordRecordsProcessed(results.size());
+
+                return results;
             }
-            
-            metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
-            metrics.recordRecordsProcessed(results.size());
-            
-            return results;
-            
+
         } catch (SQLException e) {
             metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
             throw DataSourceException.executionError("Database query failed", e, "query");
@@ -324,27 +353,53 @@ public class DatabaseDataSource implements ExternalDataSource {
     /**
      * Prepare a SQL statement with named parameters.
      */
-    private PreparedStatement prepareStatement(Connection connection, String query, 
+    private PreparedStatement prepareStatement(Connection connection, String query,
                                              Map<String, Object> parameters) throws SQLException {
-        // Simple implementation - replace named parameters with ? placeholders
+        // Validate inputs
+        if (query == null) {
+            throw new SQLException("Query cannot be null");
+        }
+        if (parameters == null) {
+            throw new SQLException("Parameters cannot be null");
+        }
+
+        // Better implementation - process parameters in order they appear in SQL
         String processedQuery = query;
         List<Object> paramValues = new ArrayList<>();
-        
-        for (Map.Entry<String, Object> entry : parameters.entrySet()) {
-            String paramName = ":" + entry.getKey();
-            if (processedQuery.contains(paramName)) {
-                processedQuery = processedQuery.replace(paramName, "?");
-                paramValues.add(entry.getValue());
+
+        // Find all parameter placeholders in order
+        int searchIndex = 0;
+        while (searchIndex < processedQuery.length()) {
+            int colonIndex = processedQuery.indexOf(':', searchIndex);
+            if (colonIndex == -1) break;
+
+            // Find the end of the parameter name
+            int endIndex = colonIndex + 1;
+            while (endIndex < processedQuery.length() &&
+                   (Character.isLetterOrDigit(processedQuery.charAt(endIndex)) ||
+                    processedQuery.charAt(endIndex) == '_')) {
+                endIndex++;
+            }
+
+            String paramName = processedQuery.substring(colonIndex + 1, endIndex);
+            if (parameters.containsKey(paramName)) {
+                // Replace this occurrence with ?
+                processedQuery = processedQuery.substring(0, colonIndex) + "?" +
+                               processedQuery.substring(endIndex);
+                paramValues.add(parameters.get(paramName));
+                searchIndex = colonIndex + 1;
+            } else {
+                searchIndex = endIndex;
             }
         }
-        
+
         PreparedStatement statement = connection.prepareStatement(processedQuery);
-        
+
         // Set parameter values
         for (int i = 0; i < paramValues.size(); i++) {
             statement.setObject(i + 1, paramValues.get(i));
         }
-        
+
         return statement;
     }
     
