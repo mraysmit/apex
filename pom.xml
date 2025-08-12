@@ -14,15 +14,16 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.boot.version>3.5.4</spring.boot.version>
         <junit.version>5.11.4</junit.version>
+        <junit.platform.version>1.11.4</junit.platform.version>
         <slf4j.version>2.0.16</slf4j.version>
         <logback.version>1.5.12</logback.version>
         <jackson.version>2.18.2</jackson.version>
         <springdoc.version>2.7.0</springdoc.version>
         <micrometer.version>1.14.2</micrometer.version>
-        <testcontainers.version>1.18.3</testcontainers.version>
+        <testcontainers.version>1.21.3</testcontainers.version>
 
         <awaitility.version>4.2.0</awaitility.version>
-        <postgresql.version>42.6.0</postgresql.version>
+        <postgresql.version>42.7.7</postgresql.version>
         <hikaricp.version>5.0.1</hikaricp.version>
     </properties>
 
@@ -119,13 +120,31 @@
             <dependency>
                 <groupId>org.junit.platform</groupId>
                 <artifactId>junit-platform-suite-api</artifactId>
-                <version>1.10.0</version>
+                <version>${junit.platform.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.junit.platform</groupId>
                 <artifactId>junit-platform-suite-engine</artifactId>
-                <version>1.10.0</version>
+                <version>${junit.platform.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-commons</artifactId>
+                <version>${junit.platform.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-engine</artifactId>
+                <version>${junit.platform.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-launcher</artifactId>
+                <version>${junit.platform.version}</version>
                 <scope>test</scope>
             </dependency>
 
