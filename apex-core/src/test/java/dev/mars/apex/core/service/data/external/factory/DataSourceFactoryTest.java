@@ -107,8 +107,7 @@ class DataSourceFactoryTest {
         }
 
         startLatch.countDown(); // Start all threads
-        assertTrue(completionLatch.await(10, TimeUnit.SECONDS),
-            "All threads should complete within timeout");
+        assertTrue(completionLatch.await(10, TimeUnit.SECONDS), "All threads should complete within timeout");
         assertEquals(1, instances.size(), "All threads should get the same singleton instance");
     }
 
@@ -119,8 +118,7 @@ class DataSourceFactoryTest {
     @Test
     @DisplayName("Should throw exception when configuration is null")
     void testCreateDataSourceWithNullConfiguration() {
-        DataSourceException exception = assertThrows(DataSourceException.class, 
-            () -> factory.createDataSource(null));
+        DataSourceException exception = assertThrows(DataSourceException.class, () -> factory.createDataSource(null));
         
         assertEquals(DataSourceException.ErrorType.CONFIGURATION_ERROR, exception.getErrorType());
         assertTrue(exception.getMessage().contains("Configuration cannot be null"));
@@ -129,8 +127,7 @@ class DataSourceFactoryTest {
     @Test
     @DisplayName("Should throw exception when configuration is invalid")
     void testCreateDataSourceWithInvalidConfiguration() {
-        DataSourceException exception = assertThrows(DataSourceException.class, 
-            () -> factory.createDataSource(invalidConfig));
+        DataSourceException exception = assertThrows(DataSourceException.class, () -> factory.createDataSource(invalidConfig));
         
         assertEquals(DataSourceException.ErrorType.CONFIGURATION_ERROR, exception.getErrorType());
         assertTrue(exception.getMessage().contains("Invalid configuration"));
@@ -143,8 +140,7 @@ class DataSourceFactoryTest {
         DataSourceConfiguration configMissingName = new DataSourceConfiguration();
         configMissingName.setType("cache");
         
-        DataSourceException exception = assertThrows(DataSourceException.class, 
-            () -> factory.createDataSource(configMissingName));
+        DataSourceException exception = assertThrows(DataSourceException.class, () -> factory.createDataSource(configMissingName));
         
         assertTrue(exception.getMessage().contains("name is required") || 
                   exception.getMessage().contains("Invalid configuration"));
@@ -258,8 +254,7 @@ class DataSourceFactoryTest {
         restConfig.setType("rest-api");
         // Missing connection with base URL
 
-        DataSourceException exception = assertThrows(DataSourceException.class,
-            () -> factory.createDataSource(restConfig));
+        DataSourceException exception = assertThrows(DataSourceException.class, () -> factory.createDataSource(restConfig));
 
         assertTrue(exception.getMessage().contains("Base URL is required") ||
                   exception.getMessage().contains("Invalid configuration"));
@@ -703,7 +698,8 @@ class DataSourceFactoryTest {
 
         assertTrue(exceptions.isEmpty(),
             "No exceptions should occur: " + exceptions.stream()
-                .map(Exception::getMessage).collect(Collectors.joining(", ")));
+
+                    .map(Exception::getMessage).collect(Collectors.joining(", ")));
 
         assertEquals(threadCount, successCount.get(),
             "All threads should successfully create data sources");

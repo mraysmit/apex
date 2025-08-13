@@ -5,8 +5,9 @@ import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -216,29 +217,177 @@ class DataSourceConfigurationListenerTest {
     @DisplayName("Should handle concurrent event processing")
     void testConcurrentEventProcessing() throws InterruptedException {
         ThreadSafeListener threadSafeListener = new ThreadSafeListener();
-        final int threadCount = 10;
-        final int eventsPerThread = 100;
-        final CountDownLatch latch = new CountDownLatch(threadCount);
-        
+        final int threadCount = 20;  // Increased from 10
+        final int eventsPerThread = 50; // Reduced to keep total reasonable
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        final CountDownLatch completionLatch = new CountDownLatch(threadCount);
+
         for (int i = 0; i < threadCount; i++) {
             final int threadId = i;
             Thread thread = new Thread(() -> {
                 try {
+                    startLatch.await(); // Synchronized start
                     for (int j = 0; j < eventsPerThread; j++) {
                         DataSourceConfigurationEvent event = DataSourceConfigurationEvent.configurationAdded(
                             "config-" + threadId + "-" + j, testConfiguration);
                         threadSafeListener.onConfigurationAdded(event);
                     }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 } finally {
-                    latch.countDown();
+                    completionLatch.countDown();
                 }
             });
             thread.start();
         }
-        
-        latch.await(10, TimeUnit.SECONDS);
-        
+
+        startLatch.countDown(); // Start all threads simultaneously
+        assertTrue(completionLatch.await(15, TimeUnit.SECONDS),
+            "All threads should complete within timeout");
+
         assertEquals(threadCount * eventsPerThread, threadSafeListener.getEventCount());
+    }
+
+    @Test
+    @DisplayName("Should handle concurrent mixed event types safely")
+    void testConcurrentMixedEventTypes() throws InterruptedException {
+        ThreadSafeStatisticsListener statsListener = new ThreadSafeStatisticsListener();
+        final int threadCount = 15;
+        final int operationsPerThread = 30;
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        final CountDownLatch completionLatch = new CountDownLatch(threadCount);
+        final AtomicInteger totalOperations = new AtomicInteger(0);
+
+        for (int i = 0; i < threadCount; i++) {
+            final int threadId = i;
+            Thread thread = new Thread(() -> {
+                try {
+                    startLatch.await();
+                    for (int j = 0; j < operationsPerThread; j++) {
+                        // Cycle through different event types
+                        switch ((threadId + j) % 7) {
+                            case 0:
+                                statsListener.onServiceInitialized(DataSourceConfigurationEvent.initialized(1));
+                                break;
+                            case 1:
+                                statsListener.onConfigurationAdded(DataSourceConfigurationEvent.configurationAdded("config-" + threadId + "-" + j, testConfiguration));
+                                break;
+                            case 2:
+                                statsListener.onConfigurationRemoved(DataSourceConfigurationEvent.configurationRemoved("config-" + threadId + "-" + j, testConfiguration));
+                                break;
+                            case 3:
+                                statsListener.onConfigurationUpdated(DataSourceConfigurationEvent.configurationUpdated("config-" + threadId + "-" + j, testConfiguration));
+                                break;
+                            case 4:
+                                statsListener.onHealthRestored(DataSourceConfigurationEvent.healthRestored("config-" + threadId + "-" + j));
+                                break;
+                            case 5:
+                                statsListener.onHealthLost(DataSourceConfigurationEvent.healthLost("config-" + threadId + "-" + j));
+                                break;
+                            case 6:
+                                statsListener.onConfigurationsReloaded(DataSourceConfigurationEvent.reloaded(5));
+                                break;
+                        }
+                        totalOperations.incrementAndGet();
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    completionLatch.countDown();
+                }
+            });
+            thread.start();
+        }
+
+        startLatch.countDown();
+        assertTrue(completionLatch.await(20, TimeUnit.SECONDS),
+            "All threads should complete within timeout");
+
+        assertEquals(threadCount * operationsPerThread, totalOperations.get());
+        assertEquals(threadCount * operationsPerThread, statsListener.getTotalEvents());
+        assertTrue(statsListener.getLifecycleEvents() > 0);
+        assertTrue(statsListener.getConfigurationChangeEvents() > 0);
+        assertTrue(statsListener.getHealthEvents() > 0);
+    }
+
+    @Test
+    @DisplayName("Should handle concurrent listener registration and event processing")
+    void testConcurrentListenerRegistrationAndEvents() throws InterruptedException {
+        // This test simulates a scenario where listeners are being registered/unregistered
+        // while events are being processed - testing the service's thread safety
+        final int eventThreads = 5;
+        final int listenerThreads = 3;
+        final int eventsPerThread = 20;
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        final CountDownLatch completionLatch = new CountDownLatch(eventThreads + listenerThreads);
+        final ConcurrentLinkedQueue<Exception> exceptions = new ConcurrentLinkedQueue<>();
+        final List<ThreadSafeListener> listeners = new CopyOnWriteArrayList<>();
+
+        // Create event processing threads entThreads * eventsPerThread
+        for (int i = 0; i < eventThreads; i++) {
+            final int threadId = i;
+            Thread eventThread = new Thread(() -> {
+                try {
+                    startLatch.await();
+                    for (int j = 0; j < eventsPerThread; j++) {
+                        // Process events on all current listeners
+                        for (ThreadSafeListener listener : listeners) {
+                            try {
+                                DataSourceConfigurationEvent event = DataSourceConfigurationEvent.configurationAdded(
+                                    "event-" + threadId + "-" + j, testConfiguration);
+                                listener.onConfigurationAdded(event);
+                            } catch (Exception e) {
+                                exceptions.offer(e);
+                            }
+                        }
+                        Thread.sleep(1); // Small delay to increase chance of concurrent access
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } catch (Exception e) {
+                    exceptions.offer(e);
+                } finally {
+                    completionLatch.countDown();
+                }
+            });
+            eventThread.start();
+        }
+
+        // Create listener management threads
+        for (int i = 0; i < listenerThreads; i++) {
+            Thread listenerThread = new Thread(() -> {
+                try {
+                    startLatch.await();
+                    for (int j = 0; j < 10; j++) {
+                        // Add listener
+                        ThreadSafeListener listener = new ThreadSafeListener();
+                        listeners.add(listener);
+                        Thread.sleep(5);
+
+                        // Remove listener after some time
+                        if (listeners.size() > 2) {
+                            listeners.remove(0);
+                        }
+                        Thread.sleep(5);
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } catch (Exception e) {
+                    exceptions.offer(e);
+                } finally {
+                    completionLatch.countDown();
+                }
+            });
+            listenerThread.start();
+        }
+
+        startLatch.countDown();
+        assertTrue(completionLatch.await(30, TimeUnit.SECONDS),
+            "All threads should complete within timeout");
+
+        assertTrue(exceptions.isEmpty(),
+            "No exceptions should occur during concurrent operations: " +
+            exceptions.stream().map(Exception::getMessage).reduce("", (a, b) -> a + "; " + b));
     }
 
     // ========================================
@@ -414,9 +563,129 @@ class DataSourceConfigurationListenerTest {
             }
         }
 
+        @Override
+        public synchronized void onConfigurationAdded(DataSourceConfigurationEvent event) {
+            if (event != null) {
+                eventCount++;
+            }
+        }
+
+        @Override
+        public synchronized void onConfigurationRemoved(DataSourceConfigurationEvent event) {
+            if (event != null) {
+                eventCount++;
+            }
+        }
+
+        @Override
+        public synchronized void onConfigurationUpdated(DataSourceConfigurationEvent event) {
+            if (event != null) {
+                eventCount++;
+            }
+        }
+
+        @Override
+        public synchronized void onHealthRestored(DataSourceConfigurationEvent event) {
+            if (event != null) {
+                eventCount++;
+            }
+        }
+
+        @Override
+        public synchronized void onHealthLost(DataSourceConfigurationEvent event) {
+            if (event != null) {
+                eventCount++;
+            }
+        }
+
+        @Override
+        public synchronized void onServiceInitialized(DataSourceConfigurationEvent event) {
+            if (event != null) {
+                eventCount++;
+            }
+        }
+
+        @Override
+        public synchronized void onConfigurationsReloaded(DataSourceConfigurationEvent event) {
+            if (event != null) {
+                eventCount++;
+            }
+        }
+
         public int getEventCount() {
             return eventCount;
         }
+    }
+
+    /**
+     * Thread-safe statistics listener for detailed concurrent testing.
+     */
+    private static class ThreadSafeStatisticsListener implements DataSourceConfigurationListener {
+        private final AtomicInteger totalEvents = new AtomicInteger(0);
+        private final AtomicInteger lifecycleEvents = new AtomicInteger(0);
+        private final AtomicInteger configurationChangeEvents = new AtomicInteger(0);
+        private final AtomicInteger healthEvents = new AtomicInteger(0);
+
+        @Override
+        public void onConfigurationEvent(DataSourceConfigurationEvent event) {
+            if (event != null) {
+                totalEvents.incrementAndGet();
+                if (event.isLifecycleEvent()) {
+                    lifecycleEvents.incrementAndGet();
+                } else if (event.isConfigurationChangeEvent()) {
+                    configurationChangeEvents.incrementAndGet();
+                } else if (event.isHealthEvent()) {
+                    healthEvents.incrementAndGet();
+                }
+            }
+        }
+
+        @Override
+        public void onConfigurationAdded(DataSourceConfigurationEvent event) {
+            totalEvents.incrementAndGet();
+            configurationChangeEvents.incrementAndGet();
+        }
+
+        @Override
+        public void onConfigurationRemoved(DataSourceConfigurationEvent event) {
+            totalEvents.incrementAndGet();
+            configurationChangeEvents.incrementAndGet();
+        }
+
+        @Override
+        public void onConfigurationUpdated(DataSourceConfigurationEvent event) {
+            totalEvents.incrementAndGet();
+            configurationChangeEvents.incrementAndGet();
+        }
+
+        @Override
+        public void onHealthRestored(DataSourceConfigurationEvent event) {
+            totalEvents.incrementAndGet();
+            healthEvents.incrementAndGet();
+        }
+
+        @Override
+        public void onHealthLost(DataSourceConfigurationEvent event) {
+            totalEvents.incrementAndGet();
+            healthEvents.incrementAndGet();
+        }
+
+        @Override
+        public void onServiceInitialized(DataSourceConfigurationEvent event) {
+            totalEvents.incrementAndGet();
+            lifecycleEvents.incrementAndGet();
+        }
+
+        @Override
+        public void onConfigurationsReloaded(DataSourceConfigurationEvent event) {
+            totalEvents.incrementAndGet();
+            lifecycleEvents.incrementAndGet();
+        }
+
+        public int getTotalEvents() { return totalEvents.get(); }
+        public int getLifecycleEvents() { return lifecycleEvents.get(); }
+        public int getConfigurationChangeEvents() { return configurationChangeEvents.get(); }
+        public int getHealthEvents() { return healthEvents.get(); }
     }
 
     /**

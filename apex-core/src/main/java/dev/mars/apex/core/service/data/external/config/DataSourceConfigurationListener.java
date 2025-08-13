@@ -1,10 +1,15 @@
 package dev.mars.apex.core.service.data.external.config;
 
 /**
- * Listener interface for data source configuration events.
+ * Observer pattern interface that enables components to receive notifications about
+ * changes in the data source configuration. Listener interface for data source configuration events.
  * 
  * Implementations of this interface can be registered with the DataSourceConfigurationService
  * to receive notifications about configuration lifecycle events and health changes.
+ *
+ * Enables reactive programming patterns where components can respond to
+ * configuration changes without tight coupling to the configuration service itself.
+ *
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
