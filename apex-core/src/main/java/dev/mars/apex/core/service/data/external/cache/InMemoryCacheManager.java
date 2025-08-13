@@ -5,10 +5,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -37,11 +37,15 @@ public class InMemoryCacheManager implements CacheManager {
     private final DataSourceConfiguration configuration;
     private final ConcurrentHashMap<String, CacheEntry> cache;
     private final CacheStatistics statistics;
-    
+
     // Background cleanup
     private ScheduledExecutorService cleanupExecutor;
     private volatile boolean running = false;
-    
+
+    // Thread safety for eviction operations
+    private final ReadWriteLock evictionLock = new ReentrantReadWriteLock();
+    private final AtomicInteger currentSize = new AtomicInteger(0);
+
     // Configuration
     private final int maxSize;
     private final long defaultTtlSeconds;
@@ -84,25 +88,49 @@ public class InMemoryCacheManager implements CacheManager {
         if (key == null) {
             return;
         }
-        
+
         long startTime = System.nanoTime();
-        
+
         try {
-            // Check if we need to evict entries to make room
-            if (cache.size() >= maxSize) {
-                evictLRU();
+            // Use read lock for normal operations, upgrade to write lock for eviction
+            evictionLock.readLock().lock();
+            try {
+                // Check if we need to evict entries to make room
+                while (currentSize.get() >= maxSize) {
+                    // Upgrade to write lock for eviction
+                    evictionLock.readLock().unlock();
+                    evictionLock.writeLock().lock();
+                    try {
+                        // Double-check condition after acquiring write lock
+                        if (currentSize.get() >= maxSize) {
+                            evictLRUInternal();
+                        }
+                        // Downgrade to read lock
+                        evictionLock.readLock().lock();
+                    } finally {
+                        evictionLock.writeLock().unlock();
+                    }
+                }
+
+                long expiryTime = ttlSeconds > 0 ?
+                    System.currentTimeMillis() + (ttlSeconds * 1000) :
+                    Long.MAX_VALUE;
+
+                CacheEntry entry = new CacheEntry(value, expiryTime, System.currentTimeMillis());
+                CacheEntry previous = cache.put(key, entry);
+
+                // Update size counter atomically
+                if (previous == null) {
+                    currentSize.incrementAndGet();
+                }
+
+                statistics.recordPut();
+                statistics.recordLoadTime(System.nanoTime() - startTime);
+
+            } finally {
+                evictionLock.readLock().unlock();
             }
-            
-            long expiryTime = ttlSeconds > 0 ? 
-                System.currentTimeMillis() + (ttlSeconds * 1000) : 
-                Long.MAX_VALUE;
-            
-            CacheEntry entry = new CacheEntry(value, expiryTime, System.currentTimeMillis());
-            cache.put(key, entry);
-            
-            statistics.recordPut();
-            statistics.recordLoadTime(System.nanoTime() - startTime);
-            
+
         } catch (Exception e) {
             LOGGER.error("Failed to put value in cache for key: {}", key, e);
         }
@@ -126,7 +154,10 @@ public class InMemoryCacheManager implements CacheManager {
             
             // Check if expired
             if (entry.isExpired()) {
-                cache.remove(key);
+                // Only decrement if we actually removed the entry
+                if (cache.remove(key, entry)) {
+                    currentSize.decrementAndGet();
+                }
                 statistics.recordMiss();
                 statistics.recordEviction();
                 return null;
@@ -152,15 +183,16 @@ public class InMemoryCacheManager implements CacheManager {
         if (key == null) {
             return false;
         }
-        
+
         try {
             CacheEntry removed = cache.remove(key);
             if (removed != null) {
+                currentSize.decrementAndGet();
                 statistics.recordRemoval();
                 return true;
             }
             return false;
-            
+
         } catch (Exception e) {
             LOGGER.error("Failed to remove value from cache for key: {}", key, e);
             return false;
@@ -181,7 +213,10 @@ public class InMemoryCacheManager implements CacheManager {
             
             // Check if expired
             if (entry.isExpired()) {
-                cache.remove(key);
+                // Only decrement if we actually removed the entry
+                if (cache.remove(key, entry)) {
+                    currentSize.decrementAndGet();
+                }
                 statistics.recordEviction();
                 return false;
             }
@@ -240,15 +275,16 @@ public class InMemoryCacheManager implements CacheManager {
     
     @Override
     public int size() {
-        return cache.size();
+        return currentSize.get();
     }
     
     @Override
     public void clear() {
         try {
             cache.clear();
+            currentSize.set(0);
             LOGGER.info("Cache cleared for '{}'", configuration.getName());
-            
+
         } catch (Exception e) {
             LOGGER.error("Failed to clear cache", e);
         }
@@ -256,27 +292,31 @@ public class InMemoryCacheManager implements CacheManager {
     
     @Override
     public void evictExpired() {
+        evictionLock.writeLock().lock();
         try {
             long currentTime = System.currentTimeMillis();
             int evictedCount = 0;
-            
+
             Iterator<Map.Entry<String, CacheEntry>> iterator = cache.entrySet().iterator();
             while (iterator.hasNext()) {
                 Map.Entry<String, CacheEntry> entry = iterator.next();
                 if (entry.getValue().isExpired(currentTime)) {
                     iterator.remove();
+                    currentSize.decrementAndGet();
                     evictedCount++;
                     statistics.recordEviction();
                 }
             }
-            
+
             if (evictedCount > 0) {
-                LOGGER.debug("Evicted {} expired entries from cache '{}'", 
+                LOGGER.debug("Evicted {} expired entries from cache '{}'",
                     evictedCount, configuration.getName());
             }
-            
+
         } catch (Exception e) {
             LOGGER.error("Failed to evict expired entries", e);
+        } finally {
+            evictionLock.writeLock().unlock();
         }
     }
     
@@ -307,6 +347,7 @@ public class InMemoryCacheManager implements CacheManager {
         }
         
         cache.clear();
+        currentSize.set(0);
         LOGGER.info("In-memory cache manager shut down for '{}'", configuration.getName());
     }
 
@@ -333,9 +374,10 @@ public class InMemoryCacheManager implements CacheManager {
 
     /**
      * Evict least recently used entries to make room for new entries.
+     * This method should only be called when holding the write lock.
      */
-    private void evictLRU() {
-        if (cache.size() < maxSize) {
+    private void evictLRUInternal() {
+        if (currentSize.get() < maxSize) {
             return;
         }
 
@@ -354,6 +396,7 @@ public class InMemoryCacheManager implements CacheManager {
 
             if (lruKey != null) {
                 cache.remove(lruKey);
+                currentSize.decrementAndGet();
                 statistics.recordEviction();
                 LOGGER.debug("Evicted LRU entry with key: {}", lruKey);
             }

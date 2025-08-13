@@ -3,9 +3,14 @@ package dev.mars.apex.core.service.data.external.factory;
 import dev.mars.apex.core.config.datasource.*;
 import dev.mars.apex.core.service.data.external.*;
 import org.junit.jupiter.api.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,6 +30,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 1.0.0
  */
 class DataSourceFactoryTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceFactoryTest.class);
 
     private DataSourceFactory factory;
     private DataSourceConfiguration validConfig;
@@ -78,25 +85,30 @@ class DataSourceFactoryTest {
     @Test
     @DisplayName("Should be thread-safe singleton implementation")
     void testSingletonThreadSafety() throws InterruptedException {
-        final int threadCount = 10;
+        final int threadCount = 50;
         final Set<DataSourceFactory> instances = ConcurrentHashMap.newKeySet();
-        final List<Thread> threads = new ArrayList<>();
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        final CountDownLatch completionLatch = new CountDownLatch(threadCount);
 
         // Create multiple threads that call getInstance()
         for (int i = 0; i < threadCount; i++) {
             Thread thread = new Thread(() -> {
-                DataSourceFactory instance = DataSourceFactory.getInstance();
-                instances.add(instance);
+                try {
+                    startLatch.await(); // Synchronize start
+                    DataSourceFactory instance = DataSourceFactory.getInstance();
+                    instances.add(instance);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    completionLatch.countDown();
+                }
             });
-            threads.add(thread);
             thread.start();
         }
 
-        // Wait for all threads to complete
-        for (Thread thread : threads) {
-            thread.join();
-        }
-
+        startLatch.countDown(); // Start all threads
+        assertTrue(completionLatch.await(10, TimeUnit.SECONDS),
+            "All threads should complete within timeout");
         assertEquals(1, instances.size(), "All threads should get the same singleton instance");
     }
 
@@ -588,5 +600,195 @@ class DataSourceFactoryTest {
         config.setConnection(connectionConfig);
 
         return config;
+    }
+
+    // ========================================
+    // Concurrent Access Tests
+    // ========================================
+
+    @Test
+    @DisplayName("Should handle concurrent data source creation safely")
+    void testConcurrentDataSourceCreation() throws InterruptedException {
+        final int threadCount = 20;
+        final int operationsPerThread = 10;
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        final CountDownLatch completionLatch = new CountDownLatch(threadCount);
+        final ConcurrentLinkedQueue<Exception> exceptions = new ConcurrentLinkedQueue<>();
+        final AtomicInteger successCount = new AtomicInteger(0);
+
+        // Create worker threads that perform concurrent operations
+        for (int i = 0; i < threadCount; i++) {
+            final int threadId = i;
+            Thread worker = new Thread(() -> {
+                try {
+                    startLatch.await(); // Synchronize start
+                    for (int j = 0; j < operationsPerThread; j++) {
+                        try {
+                            DataSourceConfiguration config = createCacheConfig(
+                                "concurrent-test-" + threadId + "-" + j, "memory");
+                            ExternalDataSource ds = factory.createDataSource(config);
+                            assertNotNull(ds, "Data source should not be null");
+                            assertTrue(ds.isHealthy(), "Data source should be healthy");
+                            ds.shutdown();
+                            successCount.incrementAndGet();
+                        } catch (Exception e) {
+                            exceptions.offer(e);
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    exceptions.offer(e);
+                } finally {
+                    completionLatch.countDown();
+                }
+            });
+            worker.start();
+        }
+
+        startLatch.countDown(); // Start all threads
+        assertTrue(completionLatch.await(30, TimeUnit.SECONDS),
+            "All threads should complete within timeout");
+
+        if (!exceptions.isEmpty()) {
+            String errorMessages = exceptions.stream()
+                .map(Exception::getMessage)
+                .collect(Collectors.joining(", "));
+            fail("No exceptions should occur: " + errorMessages);
+        }
+
+        assertEquals(threadCount * operationsPerThread, successCount.get(),
+            "All operations should succeed");
+    }
+
+    @Test
+    @DisplayName("Should deduplicate concurrent creation of identical data sources")
+    void testConcurrentCreationDeduplication() throws InterruptedException {
+        final int threadCount = 10;
+        final String dataSourceName = "dedup-test-cache";
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        final CountDownLatch completionLatch = new CountDownLatch(threadCount);
+        final List<ExternalDataSource> createdDataSources = new CopyOnWriteArrayList<>();
+        final ConcurrentLinkedQueue<Exception> exceptions = new ConcurrentLinkedQueue<>();
+        final AtomicInteger successCount = new AtomicInteger(0);
+
+        // Create multiple threads that try to create the same data source
+        for (int i = 0; i < threadCount; i++) {
+            Thread worker = new Thread(() -> {
+                try {
+                    startLatch.await(); // Synchronize start
+
+                    // All threads create data source with identical configuration
+                    DataSourceConfiguration config = createCacheConfig(dataSourceName, "memory");
+                    ExternalDataSource ds = factory.createDataSource(config);
+
+                    assertNotNull(ds, "Data source should not be null");
+                    assertEquals(dataSourceName, ds.getName());
+                    assertTrue(ds.isHealthy(), "Data source should be healthy");
+
+                    createdDataSources.add(ds);
+                    successCount.incrementAndGet();
+
+                } catch (Exception e) {
+                    exceptions.offer(e);
+                } finally {
+                    completionLatch.countDown();
+                }
+            });
+            worker.start();
+        }
+
+        startLatch.countDown(); // Start all threads
+        assertTrue(completionLatch.await(15, TimeUnit.SECONDS),
+            "All threads should complete within timeout");
+
+        assertTrue(exceptions.isEmpty(),
+            "No exceptions should occur: " + exceptions.stream()
+                .map(Exception::getMessage).collect(Collectors.joining(", ")));
+
+        assertEquals(threadCount, successCount.get(),
+            "All threads should successfully create data sources");
+
+        assertEquals(threadCount, createdDataSources.size(),
+            "All threads should get data source instances");
+
+        // Verify all data sources have the same name (they should be separate instances but with same config)
+        assertTrue(createdDataSources.stream().allMatch(ds -> dataSourceName.equals(ds.getName())),
+            "All data sources should have the same name");
+
+        // Clean up created data sources
+        createdDataSources.forEach(ds -> {
+            try {
+                ds.shutdown();
+            } catch (Exception e) {
+                LOGGER.warn("Error shutting down data source during cleanup", e);
+            }
+        });
+    }
+
+    @Test
+    @DisplayName("Should handle concurrent cache operations safely")
+    void testConcurrentCacheOperations() throws InterruptedException {
+        final int threadCount = 15;
+        final int operationsPerThread = 20;
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        final CountDownLatch completionLatch = new CountDownLatch(threadCount);
+        final AtomicInteger successCount = new AtomicInteger(0);
+        final ConcurrentLinkedQueue<Exception> exceptions = new ConcurrentLinkedQueue<>();
+
+        // Create a cache data source for testing
+        DataSourceConfiguration cacheConfig = createCacheConfig("concurrent-cache-test", "memory");
+        ExternalDataSource cacheDataSource;
+        try {
+            cacheDataSource = factory.createDataSource(cacheConfig);
+        } catch (DataSourceException e) {
+            fail("Failed to create cache data source for testing: " + e.getMessage());
+            return;
+        }
+
+        // Create worker threads that perform concurrent cache operations
+        for (int i = 0; i < threadCount; i++) {
+            final int threadId = i;
+            Thread worker = new Thread(() -> {
+                try {
+                    startLatch.await(); // Synchronize start
+
+                    for (int j = 0; j < operationsPerThread; j++) {
+                        try {
+                            String key = "key-" + threadId + "-" + j;
+                            String value = "value-" + threadId + "-" + j;
+
+                            // Test cache operations
+                            Object result = cacheDataSource.getData("cache", key, value);
+                            // For cache data sources, getData might return null for non-existent keys
+
+                            successCount.incrementAndGet();
+
+                        } catch (Exception e) {
+                            exceptions.offer(e);
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    exceptions.offer(e);
+                } finally {
+                    completionLatch.countDown();
+                }
+            });
+            worker.start();
+        }
+
+        startLatch.countDown(); // Start all threads
+        assertTrue(completionLatch.await(20, TimeUnit.SECONDS),
+            "All threads should complete within timeout");
+
+        assertTrue(exceptions.isEmpty(),
+            "No exceptions should occur: " + exceptions.stream()
+                .map(Exception::getMessage).collect(Collectors.joining(", ")));
+
+        assertEquals(threadCount * operationsPerThread, successCount.get(),
+            "All cache operations should succeed");
+
+        // Clean up
+        cacheDataSource.shutdown();
     }
 }

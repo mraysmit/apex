@@ -12,6 +12,10 @@ import dev.mars.apex.core.service.data.external.messagequeue.MessageQueueDataSou
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+
 import javax.sql.DataSource;
 import java.net.http.HttpClient;
 import java.util.Map;
@@ -46,9 +50,12 @@ public class DataSourceFactory {
     // Cache for created resources to avoid recreation
     private final Map<String, DataSource> jdbcDataSourceCache = new ConcurrentHashMap<>();
     private final Map<String, HttpClient> httpClientCache = new ConcurrentHashMap<>();
-    
+
     // Custom data source providers
     private final Map<String, DataSourceProvider> customProviders = new ConcurrentHashMap<>();
+
+    // Concurrent creation deduplication
+    private final Map<String, CompletableFuture<ExternalDataSource>> pendingCreations = new ConcurrentHashMap<>();
     
     /**
      * Private constructor for singleton pattern.
@@ -76,7 +83,7 @@ public class DataSourceFactory {
     
     /**
      * Create a data source from configuration.
-     * 
+     *
      * @param configuration The data source configuration
      * @return Configured data source instance
      * @throws DataSourceException if creation fails
@@ -86,7 +93,7 @@ public class DataSourceFactory {
             throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
                 "Configuration cannot be null");
         }
-        
+
         // Validate configuration
         try {
             configuration.validate();
@@ -94,21 +101,62 @@ public class DataSourceFactory {
             throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
                 "Invalid configuration: " + e.getMessage(), e);
         }
-        
+
+        // Generate unique key for deduplication
+        String creationKey = generateCreationKey(configuration);
+
+        // Use computeIfAbsent to ensure only one creation per unique configuration
+        CompletableFuture<ExternalDataSource> future = pendingCreations.computeIfAbsent(creationKey,
+            k -> CompletableFuture.supplyAsync(() -> {
+                try {
+                    return createDataSourceInternal(configuration);
+                } catch (DataSourceException e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    // Remove from pending creations when done
+                    pendingCreations.remove(k);
+                }
+            }));
+
+        try {
+            return future.get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
+                "Data source creation was interrupted", e, configuration.getName(), "createDataSource", false);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException && cause.getCause() instanceof DataSourceException) {
+                throw (DataSourceException) cause.getCause();
+            } else if (cause instanceof DataSourceException) {
+                throw (DataSourceException) cause;
+            } else {
+                throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
+                    "Failed to create data source '" + configuration.getName() + "'", cause,
+                    configuration.getName(), "createDataSource", false);
+            }
+        }
+    }
+
+    /**
+     * Internal method to create a data source without deduplication.
+     * This is the actual implementation that was previously in createDataSource.
+     */
+    private ExternalDataSource createDataSourceInternal(DataSourceConfiguration configuration) throws DataSourceException {
         DataSourceType type = configuration.getDataSourceType();
         String name = configuration.getName();
-        
+
         LOGGER.info("Creating data source '{}' of type {}", name, type);
-        
+
         try {
             ExternalDataSource dataSource = createDataSourceByType(type, configuration);
-            
+
             // Initialize the data source
             dataSource.initialize(configuration);
-            
+
             LOGGER.info("Successfully created and initialized data source '{}'", name);
             return dataSource;
-            
+
         } catch (DataSourceException e) {
             LOGGER.error("Failed to create data source '{}': {}", name, e.getMessage());
             throw e;
@@ -224,9 +272,18 @@ public class DataSourceFactory {
     public void clearCache() {
         jdbcDataSourceCache.clear();
         httpClientCache.clear();
+        // Wait for any pending creations to complete before clearing
+        pendingCreations.values().forEach(future -> {
+            try {
+                future.get();
+            } catch (Exception e) {
+                LOGGER.warn("Error waiting for pending data source creation during cache clear", e);
+            }
+        });
+        pendingCreations.clear();
         LOGGER.info("Cleared data source factory cache");
     }
-    
+
     /**
      * Shutdown the factory and clean up resources.
      */
@@ -421,6 +478,33 @@ public class DataSourceFactory {
             key.append(configuration.getConnection().getPort()).append(":");
             key.append(configuration.getConnection().getDatabase()).append(":");
             key.append(configuration.getConnection().getUsername());
+        }
+
+        return key.toString();
+    }
+
+    /**
+     * Generate unique key for data source creation deduplication.
+     * This key should uniquely identify configurations that would result in identical data sources.
+     */
+    private String generateCreationKey(DataSourceConfiguration configuration) {
+        StringBuilder key = new StringBuilder();
+        key.append(configuration.getName()).append(":");
+        key.append(configuration.getType()).append(":");
+        key.append(configuration.getSourceType()).append(":");
+
+        if (configuration.getConnection() != null) {
+            key.append(configuration.getConnection().getHost()).append(":");
+            key.append(configuration.getConnection().getPort()).append(":");
+            key.append(configuration.getConnection().getDatabase()).append(":");
+            key.append(configuration.getConnection().getUsername()).append(":");
+            key.append(configuration.getConnection().getBaseUrl()).append(":");
+            key.append(configuration.getConnection().getBasePath());
+        }
+
+        if (configuration.getCache() != null) {
+            key.append(":cache:").append(configuration.getCache().getMaxSize())
+               .append(":").append(configuration.getCache().getTtlSeconds());
         }
 
         return key.toString();

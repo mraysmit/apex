@@ -1,32 +1,272 @@
-create a new version of the TradeValidatorDemo called DynamicTradeValidatorDemo. This new version will implement the same validation rules but it will not implement or use the Validator<T> class. Instead it will use the dynamic evaluation capabilities of the rules engine. Examples of dynamic behaviour are present in the project, for example DynamicMethodExecutionTest. The claases of Rule, RuleGroup and RuleResult should of course be used.
+
+I'll analyze the DataSourceFactoryTest class and the broader codebase for concurrent access concerns, then propose a remediation approach without making any changes.
+
+Now let me examine the DataSourceFactory implementation to understand the concurrent access patterns:
+
+Now let me examine other related classes to understand the broader concurrent access patterns:
+
+Now let me examine the test patterns and concurrent access concerns in more detail:
+
+Based on my analysis of the DataSourceFactoryTest class and the broader codebase, I can identify several concurrent access concerns and propose a comprehensive remediation approach. Here's my assessment:
+
+## Concurrent Access Concerns Identified
+
+### 1. **DataSourceFactory Singleton Pattern Issues**
+- **Double-checked locking implementation**: While the current implementation uses `volatile` and synchronized blocks, it's correct but could benefit from additional concurrent access testing
+- **Shared cache maps**: `jdbcDataSourceCache`, `httpClientCache`, and `customProviders` use `ConcurrentHashMap` which is good, but cache operations aren't atomic across multiple maps
+
+### 2. **Cache Management Thread Safety**
+- **InMemoryCacheManager**: Uses `ConcurrentHashMap` but has race conditions in:
+    - `evictLRU()` method during size checking and eviction
+    - `evictExpired()` iterator operations
+    - Cache statistics updates during concurrent access
+
+### 3. **DataSource Implementation Concerns**
+- **DatabaseDataSource**: `resultCache` and `preparedQueries` use `ConcurrentHashMap` but cache key generation and TTL checking aren't atomic
+- **FileSystemDataSource**: File operations and cache clearing aren't synchronized
+- **RestApiDataSource**: Response caching has similar atomicity issues
+
+### 4. **Metrics Collection Race Conditions**
+- **DataSourceMetrics**: While using `AtomicLong` and `AtomicReference`, the min/max response time updates have potential race conditions in the compare-and-set loops
+
+### 5. **Test-Specific Concurrency Issues**
+- **Singleton thread safety test**: Only tests 10 threads, insufficient for stress testing
+- **Cache clearing in tearDown**: Not synchronized with ongoing operations
+- **Custom provider registration**: No concurrent registration/unregistration testing
+
+## Proposed Remediation Approach
+
+### Phase 1: Enhanced Concurrent Testing
+```java
+// Add comprehensive concurrent access tests
+@Test
+@DisplayName("Should handle concurrent data source creation safely")
+void testConcurrentDataSourceCreation() throws InterruptedException {
+    final int threadCount = 50;
+    final int operationsPerThread = 100;
+    final CountDownLatch startLatch = new CountDownLatch(1);
+    final CountDownLatch completionLatch = new CountDownLatch(threadCount);
+    final ConcurrentLinkedQueue<Exception> exceptions = new ConcurrentLinkedQueue<>();
+    final AtomicInteger successCount = new AtomicInteger(0);
+
+    // Create worker threads that perform concurrent operations
+    for (int i = 0; i < threadCount; i++) {
+        final int threadId = i;
+        Thread worker = new Thread(() -> {
+            try {
+                startLatch.await(); // Synchronize start
+                for (int j = 0; j < operationsPerThread; j++) {
+                    try {
+                        DataSourceConfiguration config = createCacheConfig(
+                            "concurrent-test-" + threadId + "-" + j, "memory");
+                        ExternalDataSource ds = factory.createDataSource(config);
+                        ds.shutdown();
+                        successCount.incrementAndGet();
+                    } catch (Exception e) {
+                        exceptions.offer(e);
+                    }
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                exceptions.offer(e);
+            } finally {
+                completionLatch.countDown();
+            }
+        });
+        worker.start();
+    }
+
+    startLatch.countDown(); // Start all threads
+    assertTrue(completionLatch.await(30, TimeUnit.SECONDS), 
+        "All threads should complete within timeout");
+    
+    assertTrue(exceptions.isEmpty(), 
+        "No exceptions should occur: " + exceptions.stream()
+            .map(Exception::getMessage).collect(Collectors.joining(", ")));
+    assertEquals(threadCount * operationsPerThread, successCount.get());
+}
+```
+
+### Phase 2: Cache Manager Improvements
+```java
+// Enhanced InMemoryCacheManager with better synchronization
+public class InMemoryCacheManager implements CacheManager {
+    private final ConcurrentHashMap<String, CacheEntry> cache;
+    private final ReadWriteLock evictionLock = new ReentrantReadWriteLock();
+    private final AtomicInteger currentSize = new AtomicInteger(0);
+    
+    @Override
+    public void put(String key, Object value, long ttlSeconds) {
+        evictionLock.readLock().lock();
+        try {
+            // Check size atomically and evict if needed
+            while (currentSize.get() >= maxSize) {
+                evictionLock.readLock().unlock();
+                evictionLock.writeLock().lock();
+                try {
+                    if (currentSize.get() >= maxSize) {
+                        evictLRUInternal();
+                    }
+                    evictionLock.readLock().lock();
+                } finally {
+                    evictionLock.writeLock().unlock();
+                }
+            }
+            
+            CacheEntry entry = new CacheEntry(value, calculateExpiry(ttlSeconds));
+            CacheEntry previous = cache.put(key, entry);
+            if (previous == null) {
+                currentSize.incrementAndGet();
+            }
+        } finally {
+            evictionLock.readLock().unlock();
+        }
+    }
+}
+```
+
+### Phase 3: Factory-Level Synchronization
+```java
+// Enhanced DataSourceFactory with better concurrent access control
+public class DataSourceFactory {
+    private final ReadWriteLock factoryLock = new ReentrantReadWriteLock();
+    private final ConcurrentHashMap<String, CompletableFuture<DataSource>> pendingCreations = new ConcurrentHashMap<>();
+    
+    public ExternalDataSource createDataSource(DataSourceConfiguration configuration) throws DataSourceException {
+        String cacheKey = generateCacheKey(configuration);
+        
+        // Prevent duplicate concurrent creations
+        CompletableFuture<DataSource> future = pendingCreations.computeIfAbsent(cacheKey, 
+            k -> CompletableFuture.supplyAsync(() -> {
+                try {
+                    return createDataSourceInternal(configuration);
+                } catch (DataSourceException e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    pendingCreations.remove(k);
+                }
+            }));
+        
+        try {
+            return (ExternalDataSource) future.get();
+        } catch (Exception e) {
+            throw new DataSourceException(ErrorType.CONFIGURATION_ERROR, 
+                "Failed to create data source", e);
+        }
+    }
+}
+```
+
+### Phase 4: Metrics Thread Safety Improvements
+```java
+// Enhanced DataSourceMetrics with lock-free algorithms
+public class DataSourceMetrics {
+    private final LongAdder totalRequests = new LongAdder();
+    private final LongAdder successfulRequests = new LongAdder();
+    private final AtomicLong minResponseTime = new AtomicLong(Long.MAX_VALUE);
+    private final AtomicLong maxResponseTime = new AtomicLong(0);
+    
+    public void recordResponseTime(long responseTimeMs) {
+        // Use more efficient lock-free min/max updates
+        updateMin(minResponseTime, responseTimeMs);
+        updateMax(maxResponseTime, responseTimeMs);
+    }
+    
+    private void updateMin(AtomicLong current, long newValue) {
+        long currentValue = current.get();
+        while (newValue < currentValue) {
+            if (current.compareAndSet(currentValue, newValue)) {
+                break;
+            }
+            currentValue = current.get();
+        }
+    }
+}
+```
+
+### Phase 5: Test Infrastructure Enhancements
+```java
+// Add stress testing utilities
+@TestMethodOrder(OrderAnnotation.class)
+class DataSourceFactoryStressTest {
+    
+    @Test
+    @Order(1)
+    @DisplayName("Stress test: High-frequency singleton access")
+    void stressTestSingletonAccess() throws InterruptedException {
+        final int threadCount = 100;
+        final int accessesPerThread = 1000;
+        final CyclicBarrier barrier = new CyclicBarrier(threadCount);
+        final Set<DataSourceFactory> instances = ConcurrentHashMap.newKeySet();
+        
+        List<CompletableFuture<Void>> futures = IntStream.range(0, threadCount)
+            .mapToObj(i -> CompletableFuture.runAsync(() -> {
+                try {
+                    barrier.await(); // Synchronize all threads
+                    for (int j = 0; j < accessesPerThread; j++) {
+                        instances.add(DataSourceFactory.getInstance());
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }))
+            .collect(Collectors.toList());
+        
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+            .get(30, TimeUnit.SECONDS);
+        
+        assertEquals(1, instances.size(), "Should have exactly one singleton instance");
+    }
+    
+    @Test
+    @Order(2)
+    @DisplayName("Stress test: Concurrent cache operations")
+    void stressTestCacheOperations() {
+        // Implementation for concurrent cache stress testing
+    }
+}
+```
+
+### Phase 6: Documentation and Monitoring
+```java
+// Add comprehensive concurrent access documentation
+/**
+ * Thread Safety Analysis for DataSourceFactory
+ * 
+ * SAFE OPERATIONS:
+ * - getInstance() - Double-checked locking with volatile
+ * - registerProvider() - ConcurrentHashMap operations
+ * - getSupportedTypes() - Read-only operations on concurrent collections
+ * 
+ * POTENTIAL RACE CONDITIONS:
+ * - createDataSource() with identical configurations
+ * - clearCache() during active data source creation
+ * - shutdown() during ongoing operations
+ * 
+ * MITIGATION STRATEGIES:
+ * - Use CompletableFuture for deduplicating concurrent creations
+ * - Implement graceful shutdown with operation completion waiting
+ * - Add monitoring for concurrent access patterns
+ */
+```
+
+## Implementation Priority
+
+1. **High Priority**: Fix cache manager race conditions and add concurrent creation deduplication
+2. **Medium Priority**: Enhance test coverage with stress testing and concurrent scenarios
+3. **Low Priority**: Add monitoring and documentation improvements
+
+## Testing Strategy
+
+1. **Unit Tests**: Add concurrent access tests for each component
+2. **Integration Tests**: Test full factory lifecycle under concurrent load
+3. **Stress Tests**: Long-running tests with high thread counts
+4. **Property-Based Tests**: Use tools like jqwik for concurrent property testing
+
+This remediation approach addresses the identified concurrent access concerns while maintaining backward compatibility and improving overall system reliability under concurrent load.
 
 
 
-
-
-I'll help you check the test coverage for data services and data lookup features. Let me first gather information about the data services and their YAML configurations, then examine the existing tests.
-
-Now let me look for YAML configuration files and their structure:
-
-Now let me examine the existing tests for data services:
-
-Now let me look at the specific YAML example files to understand the data lookup configurations:
-
-Now let me check what tests currently exist for the data lookup functionality:
-
-Let me examine some key test files to understand the current test coverage:
-
-Now let me run the existing tests to see what's currently working:
-
-Let me check what specific tests exist for YAML data source functionality:
-
-Let me run a more specific test to see what's working:
-
-Let me check the demo tests to see what data lookup functionality is being tested:
-
-Now let me create a comprehensive plan for testing data services and data lookup features. Based on my analysis, I can see there are several areas that need better test coverage:
-
-Based on my analysis of the codebase, here's my comprehensive plan for validating the functionality of data services and data lookup features:
 
 ## Current Test Coverage Analysis
 
