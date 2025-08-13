@@ -2,6 +2,8 @@ metadata:
   name: "Test Rules Configuration"
   version: "1.0.0"
   description: "Test rules for REST API testing"
+  type: "rule-config"
+  author: "API Test Team"
 
 # Simple test rules
 rules:

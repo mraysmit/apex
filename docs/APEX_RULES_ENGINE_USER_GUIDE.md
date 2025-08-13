@@ -1204,6 +1204,247 @@ APEX includes several pre-built scenarios for common financial services use case
 
 For comprehensive configuration standards, naming conventions, and implementation checklists, see the [Configuration Standards and Validation](#configuration-standards-and-validation) section.
 
+### YAML Validation Tips and Troubleshooting
+
+#### Common Validation Errors and Solutions
+
+**1. Missing Type Field**
+```yaml
+# ❌ INCORRECT - Missing type field
+metadata:
+  name: "My Rules"
+  version: "1.0.0"
+  description: "Sample rules"
+  # Missing: type field
+
+# ✅ CORRECT - Include required type field
+metadata:
+  name: "My Rules"
+  version: "1.0.0"
+  description: "Sample rules"
+  type: "rule-config"
+  author: "team@company.com"
+```
+
+**Error Message**: `Missing required metadata field: type`
+**Solution**: Add the appropriate `type` field from: `scenario`, `rule-config`, `bootstrap`, `dataset`, `enrichment`, `rule-chain`
+
+**2. Invalid File Type**
+```yaml
+# ❌ INCORRECT - Invalid type value
+metadata:
+  type: "rules"  # Invalid type
+
+# ✅ CORRECT - Use valid type
+metadata:
+  type: "rule-config"  # Valid type
+```
+
+**Error Message**: `Invalid file type: rules. Valid types: [scenario, rule-config, bootstrap, dataset, enrichment, rule-chain]`
+**Solution**: Use one of the valid file types listed in the error message
+
+**3. Missing Type-Specific Required Fields**
+```yaml
+# ❌ INCORRECT - Missing author for rule-config
+metadata:
+  type: "rule-config"
+  name: "Validation Rules"
+  version: "1.0.0"
+  description: "Sample validation rules"
+  # Missing: author field
+
+# ✅ CORRECT - Include type-specific required fields
+metadata:
+  type: "rule-config"
+  name: "Validation Rules"
+  version: "1.0.0"
+  description: "Sample validation rules"
+  author: "rules.team@company.com"  # Required for rule-config
+```
+
+**Error Message**: `Missing required field for type 'rule-config': author`
+**Solution**: Add the required fields based on file type:
+- `scenario`: `business-domain`, `owner`
+- `bootstrap`: `business-domain`, `created-by`
+- `rule-config`: `author`
+- `dataset`: `source`
+- `enrichment`: `author`
+- `rule-chain`: `author`
+
+**4. Invalid Version Format**
+```yaml
+# ⚠️ WARNING - Non-semantic version
+metadata:
+  version: "v1.0"  # Should be semantic versioning
+
+# ✅ CORRECT - Semantic versioning
+metadata:
+  version: "1.0.0"  # Major.Minor.Patch format
+```
+
+**Warning Message**: `Version should follow semantic versioning format (e.g., 1.0.0)`
+**Solution**: Use semantic versioning format: `MAJOR.MINOR.PATCH` (e.g., `1.0.0`, `2.1.3`)
+
+#### Validation Tools and Utilities
+
+**Quick Project-Wide Validation**
+```bash
+# Run comprehensive validation across all YAML files
+mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.util.YamlValidationDemo -pl apex-demo
+
+# Run dependency analysis to check file references
+mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.util.YamlDependencyAnalysisDemo -pl apex-demo
+```
+
+**Integration Testing**
+```bash
+# Validate YAML files in build pipeline
+mvn test -Dtest=YamlValidationIntegrationTest -pl apex-demo
+
+# Test dependency analysis
+mvn test -Dtest=YamlDependencyAnalysisIntegrationTest -pl apex-demo
+```
+
+**Programmatic Validation**
+```java
+// Quick single file validation
+YamlMetadataValidator validator = new YamlMetadataValidator();
+YamlValidationResult result = validator.validateFile("config/my-rules.yaml");
+
+if (!result.isValid()) {
+    System.out.println("Validation errors:");
+    result.getErrors().forEach(error -> System.out.println("  - " + error));
+}
+
+// Batch validation for better performance
+List<String> files = Arrays.asList(
+    "scenarios/scenario1.yaml",
+    "config/rules1.yaml",
+    "config/rules2.yaml"
+);
+YamlValidationSummary summary = validator.validateFiles(files);
+System.out.println("Valid files: " + summary.getValidCount() + "/" + summary.getTotalCount());
+```
+
+#### Performance Optimization Tips
+
+**1. Batch Validation**
+- Use `validateFiles()` instead of multiple `validateFile()` calls
+- Batch validation is significantly faster for multiple files
+- Validation results include timestamps for caching
+
+**2. Early Failure Detection**
+```java
+// Stop on first validation error for quick feedback
+YamlValidationSummary summary = validator.validateFiles(files);
+if (!summary.isAllValid()) {
+    System.out.println("First error found: " + summary.getFirstError());
+    return; // Exit early
+}
+```
+
+**3. Dependency Analysis Optimization**
+- Dependency analysis caches results for unchanged files
+- Use `YamlDependencyGraph.getStatistics()` to monitor performance
+- Consider parallel analysis for large projects
+
+#### IDE Integration Tips
+
+**1. YAML Schema Validation**
+- Configure your IDE to use YAML schemas for auto-completion
+- Enable real-time validation feedback
+- Set up file templates with proper metadata structure
+
+**2. File Templates**
+Create IDE templates for common YAML file types:
+
+```yaml
+# Template for rule-config files
+metadata:
+  name: "${NAME}"
+  version: "1.0.0"
+  description: "${DESCRIPTION}"
+  type: "rule-config"
+  author: "${USER_EMAIL}"
+  created: "${DATE}"
+
+rules:
+  # Add your rules here
+```
+
+**3. Live Validation**
+- Set up file watchers to run validation on save
+- Configure build tools to validate on commit
+- Use pre-commit hooks for team-wide validation
+
+#### Debugging Validation Issues
+
+**1. Enable Detailed Logging**
+```java
+// Get detailed validation information
+YamlValidationResult result = validator.validateFile("problematic-file.yaml");
+System.out.println("Detailed summary:");
+System.out.println(result.getSummary()); // Includes line numbers and context
+```
+
+**2. Dependency Analysis for Missing References**
+```java
+// Check for missing file references
+YamlDependencyAnalyzer analyzer = new YamlDependencyAnalyzer();
+YamlDependencyGraph graph = analyzer.analyzeYamlDependencies("scenarios/my-scenario.yaml");
+
+if (!graph.getMissingFiles().isEmpty()) {
+    System.out.println("Missing referenced files:");
+    graph.getMissingFiles().forEach(file -> System.out.println("  - " + file));
+}
+```
+
+**3. Circular Dependency Detection**
+```java
+// Detect circular dependencies in rule chains
+var cycles = graph.findCircularDependencies();
+if (!cycles.isEmpty()) {
+    System.out.println("Circular dependencies found:");
+    cycles.forEach(cycle -> System.out.println("  - " + String.join(" -> ", cycle)));
+}
+```
+
+#### Quick Reference
+
+**Required Metadata Fields (All Files):**
+- `name`: Human-readable name
+- `version`: Semantic version (e.g., "1.0.0")
+- `description`: Detailed description
+- `type`: File type classification
+
+**Valid File Types:**
+- `scenario`: Business scenario configurations
+- `rule-config`: Rule configuration files
+- `bootstrap`: Self-contained demonstration configurations
+- `dataset`: Reference data collections
+- `enrichment`: Data enrichment configurations
+- `rule-chain`: Rule chain definitions
+
+**Type-Specific Required Fields:**
+- `scenario`: `business-domain`, `owner`
+- `bootstrap`: `business-domain`, `created-by`
+- `rule-config`: `author`
+- `dataset`: `source`
+- `enrichment`: `author`
+- `rule-chain`: `author`
+
+**Validation Commands:**
+```bash
+# Quick validation
+mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.util.YamlValidationDemo -pl apex-demo
+
+# Dependency analysis
+mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.util.YamlDependencyAnalysisDemo -pl apex-demo
+
+# Integration tests
+mvn test -Dtest=YamlValidationIntegrationTest -pl apex-demo
+```
+
 ## External Data Source Integration
 
 ### Overview
@@ -2870,6 +3111,14 @@ For complete implementation details, examples, and architecture information, see
 
 This section provides comprehensive standards for YAML configuration management in APEX, including mandatory metadata requirements, file type specifications, scenario management, and validation procedures. These standards ensure consistency, maintainability, and regulatory compliance across all APEX configurations.
 
+**Quick Validation**: Use the built-in validation utilities to check your configurations:
+```bash
+# Validate all YAML files in your project
+mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.util.YamlValidationDemo -pl apex-demo
+```
+
+For detailed troubleshooting and validation tips, see [YAML Validation Tips and Troubleshooting](#yaml-validation-tips-and-troubleshooting).
+
 ### File Type System
 
 APEX uses a standardized file type system to categorize and validate different kinds of YAML configurations:
@@ -3140,9 +3389,9 @@ For long-term configuration quality:
 
 **Configuration Issues:**
 - **Configuration not loading**: Check YAML syntax and file paths
-- **Missing metadata errors**: Ensure all required metadata fields are present (see [Configuration Standards](#configuration-standards-and-validation))
-- **Validation failures**: Use the implementation checklists to verify file structure
-- **Type errors**: Verify correct `type` value for your file purpose
+- **Missing metadata errors**: Ensure all required metadata fields are present (see [YAML Validation Tips and Troubleshooting](#yaml-validation-tips-and-troubleshooting))
+- **Validation failures**: Use the validation utilities and implementation checklists to verify file structure
+- **Type errors**: Verify correct `type` value for your file purpose (see [Quick Reference](#quick-reference))
 
 **Runtime Issues:**
 - **Enrichment not working**: Verify condition expressions and field mappings
@@ -3165,9 +3414,18 @@ For long-term configuration quality:
 ### Support
 
 **Self-Service:**
+- **Run validation utilities** to quickly identify and fix issues:
+  ```bash
+  # Comprehensive project validation
+  mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.util.YamlValidationDemo -pl apex-demo
+
+  # Dependency analysis
+  mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.util.YamlDependencyAnalysisDemo -pl apex-demo
+  ```
 - **Check validation errors** using YamlMetadataValidator for specific error messages
 - **Review configuration standards** for proper file structure and metadata
 - **Use implementation checklists** to verify your configurations meet requirements
+- **See [YAML Validation Tips and Troubleshooting](#yaml-validation-tips-and-troubleshooting)** for common issues and solutions
 
 **Community Support:**
 - Create GitHub issues for bugs or feature requests

@@ -2,6 +2,7 @@ metadata:
   name: "Default Rules Configuration"
   version: "1.0.0"
   description: "Default rules configuration for the Rules Engine REST API"
+  type: "rule-config"
   author: "Rules Engine Team"
   created: "2024-07-27"
   last-modified: "2024-07-27"
