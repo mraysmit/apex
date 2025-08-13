@@ -371,16 +371,19 @@ class DataSourceFactoryTest {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public <T> T getData(String dataType, Object... parameters) {
             return (T) "test-data";
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public <T> List<T> query(String query, Map<String, Object> parameters) throws DataSourceException {
             return (List<T>) List.of("test-result");
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public <T> T queryForObject(String query, Map<String, Object> parameters) throws DataSourceException {
             return (T) "test-object";
         }

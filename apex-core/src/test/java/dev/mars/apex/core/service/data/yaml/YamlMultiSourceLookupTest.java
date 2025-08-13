@@ -279,6 +279,10 @@ class YamlMultiSourceLookupTest {
     // Helper Methods for Data Operations
     // ========================================
 
+    /**
+     * Implements cache-first lookup with database fallback pattern.
+     * First attempts to retrieve data from cache, then falls back to database if cache miss.
+     */
     private Object lookupUserWithFallback(String userId) throws DataSourceException {
         // Try cache first
         ExternalDataSource cacheSource = dataSources.get("primary-cache");
@@ -289,72 +293,82 @@ class YamlMultiSourceLookupTest {
                 return cachedUser;
             }
         }
-        
+
         // Fallback to database - use getData() for query keys
         ExternalDataSource dbSource = dataSources.get("user-database");
         if (dbSource != null) {
             int id = Integer.parseInt(userId.replace("user", ""));
             return dbSource.getData("getUserById", id);
         }
-        
+
         return null;
     }
 
+    /** Stores user data in cache for subsequent lookups. */
     private void storeUserInCache(String userId, Object userData) throws DataSourceException {
         ExternalDataSource cacheSource = dataSources.get("primary-cache");
         Map<String, Object> putParams = Map.of("key", userId, "value", userData);
         cacheSource.query("put", putParams);
     }
 
+    /** Retrieves base user data from database source. */
     private Object getBaseUserData(String userId) throws DataSourceException {
         ExternalDataSource dbSource = dataSources.get("user-database");
         int id = Integer.parseInt(userId.replace("user", ""));
         return dbSource.getData("getUserById", id);
     }
 
+    /** Enriches base user data with profile information from file source. */
     private Object enrichUserWithProfileData(Object baseUser, String userId) throws DataSourceException {
         ExternalDataSource fileSource = dataSources.get("profile-files");
         Object profileData = fileSource.getData("json", "user-profiles.json");
-        
+
         // Simulate enrichment logic
         Map<String, Object> enriched = new HashMap<>();
         if (baseUser instanceof Map) {
-            enriched.putAll((Map<String, Object>) baseUser);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> baseUserMap = (Map<String, Object>) baseUser;
+            enriched.putAll(baseUserMap);
         }
         enriched.put("profileData", profileData);
-        
+
         return enriched;
     }
 
+    /** Adds user preferences from cache to complete the enrichment process. */
     private Object addUserPreferencesFromCache(Object enrichedUser, String userId) throws DataSourceException {
         ExternalDataSource cacheSource = dataSources.get("primary-cache");
         Map<String, Object> prefParams = Map.of("key", "preferences:" + userId);
         Object preferences = cacheSource.queryForObject("get", prefParams);
-        
+
         Map<String, Object> fullyEnriched = new HashMap<>();
         if (enrichedUser instanceof Map) {
-            fullyEnriched.putAll((Map<String, Object>) enrichedUser);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> enrichedUserMap = (Map<String, Object>) enrichedUser;
+            fullyEnriched.putAll(enrichedUserMap);
         }
         fullyEnriched.put("preferences", preferences != null ? preferences : Collections.emptyMap());
-        
+
         return fullyEnriched;
     }
 
+    /** Measures lookup time for performance comparison between different sources. */
     private long measureLookupTime(String sourceName, String dataKey) throws DataSourceException {
         ExternalDataSource source = dataSources.get(sourceName);
-        
+
         long startTime = System.nanoTime();
-        
+
         if ("primary-cache".equals(sourceName)) {
             Map<String, Object> params = Map.of("key", dataKey);
             source.queryForObject("get", params);
         } else {
             source.getData(dataKey);
         }
-        
+
         return System.nanoTime() - startTime;
     }
 
+    /** Verifies that enriched user data contains all expected components from multiple sources. */
     private void verifyEnrichedUserData(Object enrichedUser) {
         assertNotNull(enrichedUser, "Enriched user should not be null");
         assertTrue(enrichedUser instanceof Map, "Enriched user should be a Map");
@@ -379,6 +393,7 @@ class YamlMultiSourceLookupTest {
     // Helper Methods for Creating YAML Configurations
     // ========================================
 
+    /** Creates YAML configuration for in-memory cache data source. */
     private YamlDataSource createCacheYamlDataSource() {
         YamlDataSource yamlCache = new YamlDataSource();
         yamlCache.setName("primary-cache");
@@ -397,6 +412,7 @@ class YamlMultiSourceLookupTest {
         return yamlCache;
     }
 
+    /** Creates YAML configuration for H2 in-memory database data source. */
     private YamlDataSource createDatabaseYamlDataSource() {
         YamlDataSource yamlDb = new YamlDataSource();
         yamlDb.setName("user-database");
@@ -423,6 +439,7 @@ class YamlMultiSourceLookupTest {
         return yamlDb;
     }
 
+    /** Creates YAML configuration for file system data source with JSON profile data. */
     private YamlDataSource createFileYamlDataSource(String basePath) {
         YamlDataSource yamlFile = new YamlDataSource();
         yamlFile.setName("profile-files");
@@ -447,6 +464,7 @@ class YamlMultiSourceLookupTest {
     // Helper Methods for Test Data Creation
     // ========================================
 
+    /** Initializes database with test user data for multi-source scenarios. */
     private void initializeDatabaseWithTestData(ExternalDataSource dbSource) throws DataSourceException {
         // Get the actual SQL statements from configuration
         DataSourceConfiguration config = dbSource.getConfiguration();
@@ -461,6 +479,7 @@ class YamlMultiSourceLookupTest {
         dbSource.batchUpdate(statements);
     }
 
+    /** Creates temporary JSON file with user profile data for file source testing. */
     private Path createUserProfileFile() throws IOException {
         String profileContent = """
             {
@@ -481,6 +500,7 @@ class YamlMultiSourceLookupTest {
         return profileFile;
     }
 
+    /** Pre-populates cache with user preference data for enrichment testing. */
     private void populateCacheWithPreferences() throws DataSourceException {
         ExternalDataSource cacheSource = dataSources.get("primary-cache");
 
@@ -495,6 +515,7 @@ class YamlMultiSourceLookupTest {
         cacheSource.query("put", putParams);
     }
 
+    /** Creates test user data structure for cache and database operations. */
     private Map<String, Object> createTestUserData(String id, String name) {
         return Map.of(
             "id", id,

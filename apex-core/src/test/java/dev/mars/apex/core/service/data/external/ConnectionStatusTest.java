@@ -56,20 +56,13 @@ class ConnectionStatusTest {
     @Test
     @DisplayName("Should have correct descriptions")
     void testStateDescriptions() {
-        assertEquals("Data source has not been initialized", 
-                    ConnectionStatus.State.NOT_INITIALIZED.getDescription());
-        assertEquals("Data source is establishing connection", 
-                    ConnectionStatus.State.CONNECTING.getDescription());
-        assertEquals("Data source is connected and operational", 
-                    ConnectionStatus.State.CONNECTED.getDescription());
-        assertEquals("Data source is disconnected", 
-                    ConnectionStatus.State.DISCONNECTED.getDescription());
-        assertEquals("Data source connection has an error", 
-                    ConnectionStatus.State.ERROR.getDescription());
-        assertEquals("Data source is being shut down", 
-                    ConnectionStatus.State.SHUTTING_DOWN.getDescription());
-        assertEquals("Data source has been shut down", 
-                    ConnectionStatus.State.SHUTDOWN.getDescription());
+        assertEquals("Data source has not been initialized", ConnectionStatus.State.NOT_INITIALIZED.getDescription());
+        assertEquals("Data source is establishing connection", ConnectionStatus.State.CONNECTING.getDescription());
+        assertEquals("Data source is connected and operational", ConnectionStatus.State.CONNECTED.getDescription());
+        assertEquals("Data source is disconnected", ConnectionStatus.State.DISCONNECTED.getDescription());
+        assertEquals("Data source connection has an error", ConnectionStatus.State.ERROR.getDescription());
+        assertEquals("Data source is being shut down", ConnectionStatus.State.SHUTTING_DOWN.getDescription());
+        assertEquals("Data source has been shut down", ConnectionStatus.State.SHUTDOWN.getDescription());
     }
 
     @Test

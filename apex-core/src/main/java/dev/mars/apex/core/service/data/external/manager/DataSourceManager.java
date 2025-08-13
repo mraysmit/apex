@@ -212,25 +212,35 @@ public class DataSourceManager implements DataSourceRegistryListener {
         if (typeGroup == null || typeGroup.isEmpty()) {
             return null;
         }
-        
+
+        // Create a snapshot of the list to avoid concurrent modification issues
+        List<String> snapshot;
+        synchronized (typeGroup) {
+            snapshot = new ArrayList<>(typeGroup);
+        }
+
+        if (snapshot.isEmpty()) {
+            return null;
+        }
+
         // Simple round-robin load balancing
         String typeKey = type.name();
         int counter = loadBalancingCounters.compute(typeKey, (k, v) -> (v == null ? 0 : v + 1));
-        int index = counter % typeGroup.size();
-        
-        String selectedName = typeGroup.get(index);
+        int index = counter % snapshot.size();
+
+        String selectedName = snapshot.get(index);
         ExternalDataSource dataSource = registry.getDataSource(selectedName);
-        
+
         // If the selected data source is unhealthy, try to find a healthy one
         if (dataSource == null || !dataSource.isHealthy()) {
-            for (String name : typeGroup) {
+            for (String name : snapshot) {
                 ExternalDataSource candidate = registry.getDataSource(name);
                 if (candidate != null && candidate.isHealthy()) {
                     return candidate;
                 }
             }
         }
-        
+
         return dataSource;
     }
     
@@ -511,7 +521,7 @@ public class DataSourceManager implements DataSourceRegistryListener {
             ExternalDataSource dataSource = registry.getDataSource(name);
             if (dataSource != null) {
                 DataSourceType type = dataSource.getSourceType();
-                typeGroups.computeIfAbsent(type, k -> new ArrayList<>()).add(name);
+                typeGroups.computeIfAbsent(type, k -> Collections.synchronizedList(new ArrayList<>())).add(name);
             }
         }
     }

@@ -115,6 +115,7 @@ class DataSourceTypeTest {
         assertNull(DataSourceType.fromConfigValue("unknown"));
         assertNull(DataSourceType.fromConfigValue("invalid"));
         assertNull(DataSourceType.fromConfigValue("nosql"));
+        assertNull(DataSourceType.fromConfigValue("null"));
         assertNull(DataSourceType.fromConfigValue(""));
         assertNull(DataSourceType.fromConfigValue("   "));
     }
