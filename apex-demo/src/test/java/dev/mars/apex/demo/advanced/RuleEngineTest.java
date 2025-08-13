@@ -11,6 +11,7 @@ import dev.mars.apex.core.service.engine.RuleEngineService;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.ArrayList;
@@ -63,6 +64,15 @@ public class RuleEngineTest {
         rulesEngine = new RulesEngine(config);
         ruleConfigService = new RuleConfigurationService(config);
         ruleEngineService = new RuleEngineService(new ExpressionEvaluatorService());
+    }
+
+    @AfterEach
+    public void tearDown() {
+        // Clear any registered rules and groups to prevent test interference
+        config = null;
+        rulesEngine = null;
+        ruleConfigService = null;
+        ruleEngineService = null;
     }
 
     /**
@@ -122,7 +132,7 @@ public class RuleEngineTest {
         // Create a rule group with AND operator
         RuleGroup ruleGroup = new RuleGroup(
             "group-001",
-            "test-category",
+            "test-category-and",
             "AdultWithSufficientIncome",
             "Person is an adult with sufficient income",
             5,
@@ -189,7 +199,7 @@ public class RuleEngineTest {
         // Create a rule group with OR operator
         RuleGroup ruleGroup = new RuleGroup(
             "group-002",
-            "test-category",
+            "test-category-or",
             "SeniorOrLowIncome",
             "Person is a senior or has low income",
             5,
@@ -243,7 +253,7 @@ public class RuleEngineTest {
         // Register rules using the rule configuration service
         Rule rule1 = ruleConfigService.registerRule(
             "R001",
-            "test-category",
+            "test-category-config",
             "AgeRule",
             "#age >= 18",
             "Person is an adult",
@@ -253,7 +263,7 @@ public class RuleEngineTest {
 
         Rule rule2 = ruleConfigService.registerRule(
             "R002",
-            "test-category",
+            "test-category-config",
             "IncomeRule",
             "#income >= 50000",
             "Person has sufficient income",
@@ -277,7 +287,7 @@ public class RuleEngineTest {
         assertEquals("IncomeRule", retrievedRule2.getName(), "Rule 2 name should match");
 
         // Get rules by category
-        List<RuleBase> rulesByCategory = config.getRulesForCategory("test-category");
+        List<RuleBase> rulesByCategory = config.getRulesForCategory("test-category-config");
 
         // Verify rules by category
         assertEquals(2, rulesByCategory.size(), "Should find 2 rules in the category");
