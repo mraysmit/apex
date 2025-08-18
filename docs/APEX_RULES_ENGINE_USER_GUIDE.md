@@ -137,6 +137,8 @@ graph TB
 - **Regulatory Compliance**: Support for MiFID II, EMIR, and Dodd-Frank requirements
 - **Risk Assessment**: Multi-criteria risk scoring with weighted components
 - **Trade Processing**: Complex workflow patterns for trade lifecycle management
+- **Bootstrap Demos**: Complete end-to-end financial scenarios with database setup and infrastructure
+- **Asian Markets Support**: Specialized patterns for Asian regulatory regimes and market conventions
 
 **Advanced Rule Patterns**
 - **Conditional Chaining**: Execute expensive rules only when conditions are met
@@ -1016,6 +1018,53 @@ lookup-dataset:
     # Dataset entries
 ```
 
+### Global Configuration Settings
+
+APEX supports global configuration sections for enterprise deployments:
+
+```yaml
+# Global configuration for enterprise scenarios
+configuration:
+  # Processing thresholds
+  thresholds:
+    highValueAmount: 10000000      # $10M threshold for high-value transactions
+    repairApprovalScore: 50        # Score >= 50 for full auto-repair
+    partialRepairScore: 20         # Score >= 20 for partial repair
+    confidenceThreshold: 0.7       # Minimum confidence level
+
+  # Performance settings
+  performance:
+    maxProcessingTimeMs: 100       # Target processing time
+    cacheEnabled: true             # Enable caching for performance
+    auditEnabled: true             # Enable comprehensive audit trails
+    metricsEnabled: true           # Enable performance metrics collection
+    batchSize: 100                 # Batch processing size
+
+  # Business rules
+  businessRules:
+    clientOptOutRespected: true    # Honor client preferences
+    highValueManualReview: true    # Force manual review for high-value
+    requireApprovalForHighRisk: true  # Additional approval for high-risk clients
+    auditAllDecisions: true        # Log all decision points
+
+  # Regional support (example: Asian markets)
+  asianMarkets:
+    supportedMarkets: ["JAPAN", "HONG_KONG", "SINGAPORE", "KOREA"]
+    regulatoryReporting: true      # Enable regulatory reporting
+    settlementCycles:              # Market-specific settlement cycles
+      JAPAN: 2
+      HONG_KONG: 2
+      SINGAPORE: 3
+      KOREA: 2
+```
+
+**Configuration Benefits:**
+- **Centralized Settings**: Single location for all global parameters
+- **Environment-Specific**: Different settings for development, testing, and production
+- **Business Rule Enforcement**: Configurable business policies and thresholds
+- **Performance Tuning**: Adjustable performance and caching parameters
+- **Regional Compliance**: Support for different regulatory regimes and market conventions
+
 ## Scenario-Based Configuration Management
 
 ### Overview
@@ -1193,6 +1242,20 @@ APEX includes several pre-built scenarios for common financial services use case
 - **OTC Options Standard Processing**: Complete validation and enrichment pipeline for OTC Options
 - **Commodity Swaps Standard Processing**: Multi-layered validation for commodity derivatives
 - **Settlement Auto-Repair**: Intelligent auto-repair for failed settlement instructions
+
+### Bootstrap Scenarios
+
+APEX provides complete bootstrap scenarios that demonstrate end-to-end processing with infrastructure setup:
+
+- **OTC Options Bootstrap**: Complete demo with PostgreSQL database, external YAML files, and XML data generation
+- **Commodity Swap Validation Bootstrap**: Self-contained validation pipeline with client, counterparty, and commodity enrichment
+- **Custody Auto-Repair Bootstrap**: Asian markets custody processing with weighted scoring and regulatory compliance
+
+**Bootstrap Features:**
+- **Infrastructure Setup**: Automatic database table creation and external file generation
+- **Complete Data Pipeline**: Inline datasets, database lookups, and external file integration
+- **Performance Monitoring**: Sub-100ms processing with comprehensive metrics and audit trails
+- **Self-Contained**: All dependencies and data sources included for immediate execution
 
 ### Best Practices
 
@@ -3436,3 +3499,24 @@ For long-term configuration quality:
 - Configuration validation services for large-scale deployments
 - Custom training on APEX configuration standards
 - Regulatory compliance consulting for financial services
+- Bootstrap scenario development for specific business domains
+- Performance optimization and tuning services
+
+### Bootstrap Demo Resources
+
+**Getting Started with Bootstrap Demos:**
+- **OTC Options Bootstrap**: `mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo -pl apex-demo`
+- **Commodity Swap Bootstrap**: `mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap -pl apex-demo`
+- **Custody Auto-Repair Bootstrap**: `mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap -pl apex-demo`
+
+**Bootstrap Documentation:**
+- **Complete Implementation Guides**: Each bootstrap includes detailed README with business requirements and technical implementation
+- **Configuration Walkthroughs**: Step-by-step explanation of YAML configurations and business logic
+- **Performance Metrics**: Detailed performance analysis and optimization recommendations
+- **Financial Services Patterns**: Real-world examples of regulatory compliance and risk management
+
+**Bootstrap Features:**
+- **Self-Contained**: All dependencies, data sources, and infrastructure included
+- **Production-Ready**: Enterprise-grade patterns with monitoring, audit trails, and error handling
+- **Educational**: Comprehensive documentation and guided tours of advanced APEX features
+- **Extensible**: Templates for creating custom bootstrap scenarios for specific business domains
