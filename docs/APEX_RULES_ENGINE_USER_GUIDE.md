@@ -640,6 +640,721 @@ data:
 - Data that changes independently of your rule configurations
 - When you want to keep your main configuration file clean and focused
 
+## Using Parameters in APEX Rules
+
+One of APEX's most powerful features is its ability to create generic, reusable rules through parameterization. Instead of creating multiple similar rules for different scenarios, you can create a single parameterized rule that adapts to different contexts. This section covers six different approaches to parameterization, each suited for different use cases.
+
+### Overview of Parameterization Approaches
+
+APEX supports multiple parameterization strategies, each with specific strengths and use cases:
+
+1. **Runtime Data Parameters** - Pass parameters through the data context (most flexible)
+2. **Configuration-Driven Thresholds** - Global configuration sections with parameterized values
+3. **REST API Parameter Substitution** - Dynamic endpoint URLs with parameter replacement
+4. **Rule Chain Variables** - Pass results between stages in sequential processing
+5. **Template Processing** - SpEL expressions in templates for dynamic content generation
+6. **External Data Source Parameters** - Parameterized queries for databases and APIs
+
+### 1. Runtime Data Parameters (Most Common)
+
+**What it is:** Pass parameters through the data context when evaluating rules. This is the most flexible and commonly used parameterization approach.
+
+**When to use:**
+- Different thresholds for different customers, products, or scenarios
+- Rules that need to adapt based on runtime conditions
+- A/B testing scenarios with different parameter values
+- Multi-tenant applications with tenant-specific parameters
+- Dynamic business rules that change based on context
+
+**Example:**
+
+```yaml
+metadata:
+  name: "Generic Threshold Validation"
+  version: "1.0.0"
+  description: "Parameterized rules using runtime data context"
+  type: "rule-config"
+  author: "business.rules@company.com"
+
+rules:
+  - id: "threshold-check"
+    name: "Generic Threshold Validation"
+    condition: "#data.value >= #data.threshold"
+    message: "Value {{#data.value}} meets threshold {{#data.threshold}}"
+    severity: "ERROR"
+
+  - id: "percentage-check"
+    name: "Generic Percentage Validation"
+    condition: "#data.percentage >= #data.minPercentage && #data.percentage <= #data.maxPercentage"
+    message: "Percentage {{#data.percentage}} is within range {{#data.minPercentage}}-{{#data.maxPercentage}}"
+    severity: "WARNING"
+
+  - id: "tier-based-limit"
+    name: "Customer Tier Based Limit"
+    condition: "#data.amount <= (#data.customerTier == 'PLATINUM' ? #data.platinumLimit : (#data.customerTier == 'GOLD' ? #data.goldLimit : #data.standardLimit))"
+    message: "Amount {{#data.amount}} exceeds limit for tier {{#data.customerTier}}"
+    severity: "ERROR"
+```
+
+**Usage in Java:**
+
+```java
+// Different thresholds for different scenarios
+Map<String, Object> highValueScenario = Map.of(
+    "value", 100000,
+    "threshold", 50000,
+    "percentage", 85.5,
+    "minPercentage", 80.0,
+    "maxPercentage", 90.0
+);
+
+Map<String, Object> standardScenario = Map.of(
+    "value", 5000,
+    "threshold", 10000,
+    "percentage", 75.0,
+    "minPercentage", 70.0,
+    "maxPercentage", 80.0
+);
+
+// Customer tier-based limits
+Map<String, Object> platinumCustomer = Map.of(
+    "amount", 150000,
+    "customerTier", "PLATINUM",
+    "platinumLimit", 200000,
+    "goldLimit", 100000,
+    "standardLimit", 50000
+);
+
+RuleResult result1 = engine.evaluate(highValueScenario);
+RuleResult result2 = engine.evaluate(standardScenario);
+RuleResult result3 = engine.evaluate(platinumCustomer);
+```
+
+**Benefits:**
+- Maximum flexibility - parameters can change for each evaluation
+- No rule configuration changes needed for different scenarios
+- Easy to implement and understand
+- Perfect for dynamic business requirements
+
+### 2. Configuration-Driven Thresholds
+
+**What it is:** Use global configuration sections to define parameterized thresholds and business rules that can be referenced throughout your rule configurations.
+
+**When to use:**
+- Enterprise-wide business parameters that apply across multiple rules
+- Regulatory thresholds that change periodically
+- Environment-specific settings (dev, test, production)
+- Regional compliance parameters
+- Performance tuning parameters
+
+**Example:**
+
+```yaml
+metadata:
+  name: "Enterprise Configuration with Thresholds"
+  version: "1.0.0"
+  description: "Global configuration parameters for enterprise rules"
+  type: "rule-config"
+  author: "enterprise.config@company.com"
+
+# Global configuration section
+configuration:
+  # Business thresholds
+  thresholds:
+    highValueAmount: 10000000      # $10M threshold for high-value transactions
+    repairApprovalScore: 50        # Score >= 50 for full auto-repair
+    partialRepairScore: 20         # Score >= 20 for partial repair
+    confidenceThreshold: 0.7       # Minimum confidence level
+    riskToleranceLevel: 0.85       # Maximum acceptable risk level
+
+  # Performance settings
+  performance:
+    maxProcessingTimeMs: 100       # Target processing time
+    cacheEnabled: true             # Enable caching for performance
+    auditEnabled: true             # Enable comprehensive audit trails
+    batchSize: 100                 # Batch processing size
+
+  # Regional compliance (example: Asian markets)
+  asianMarkets:
+    supportedMarkets: ["JAPAN", "HONG_KONG", "SINGAPORE", "KOREA"]
+    regulatoryReporting: true      # Enable regulatory reporting
+    settlementCycles:              # Market-specific settlement cycles
+      JAPAN: 2
+      HONG_KONG: 2
+      SINGAPORE: 3
+      KOREA: 2
+
+rules:
+  - id: "high-value-transaction-check"
+    name: "High Value Transaction Validation"
+    condition: "#data.amount >= #config.thresholds.highValueAmount"
+    message: "Transaction amount {{#data.amount}} exceeds high-value threshold"
+    severity: "ERROR"
+
+  - id: "repair-approval-check"
+    name: "Automated Repair Approval"
+    condition: "#data.repairScore >= #config.thresholds.repairApprovalScore"
+    message: "Repair automatically approved with score {{#data.repairScore}}"
+    severity: "INFO"
+
+  - id: "asian-market-settlement"
+    name: "Asian Market Settlement Cycle"
+    condition: "#config.asianMarkets.supportedMarkets.contains(#data.market)"
+    message: "Settlement cycle for {{#data.market}} is {{#config.asianMarkets.settlementCycles[#data.market]}} days"
+    severity: "INFO"
+```
+
+**Benefits:**
+- Centralized parameter management
+- Environment-specific configurations
+- Easy to update business parameters without changing rule logic
+- Supports complex nested configuration structures
+- Ideal for enterprise governance and compliance
+
+### 3. REST API Parameter Substitution
+
+**What it is:** Use parameterized REST API endpoints for dynamic data enrichment, where URL parameters are substituted at runtime based on your data.
+
+**When to use:**
+- Real-time data enrichment from external services
+- Dynamic lookups based on data attributes
+- Integration with microservices and external APIs
+- Scenarios requiring fresh data for each evaluation
+- Third-party service integration
+
+**Example:**
+
+```yaml
+metadata:
+  name: "Dynamic API Enrichment"
+  version: "1.0.0"
+  description: "REST API enrichment with parameter substitution"
+  type: "rule-config"
+  author: "integration.team@company.com"
+
+enrichments:
+  - id: "customer-enrichment"
+    name: "Real-time Customer Data"
+    type: "lookup-enrichment"
+    condition: "['customerId'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "rest-api"                   # External REST API source
+        base-url: "https://api.customer.com"
+        endpoint: "/v1/customers/{customerId}/profile"  # Parameter substitution
+        method: "GET"
+        headers:
+          Authorization: "Bearer ${API_TOKEN}"  # Environment variable
+          Content-Type: "application/json"
+        timeout-seconds: 5
+        cache-enabled: true
+        cache-ttl-seconds: 300            # Cache for 5 minutes
+        parameter-names:                   # Define parameter mapping
+          - "customerId"
+    field-mappings:
+      - source-field: "creditRating"
+        target-field: "customerCreditRating"
+      - source-field: "riskProfile"
+        target-field: "customerRiskProfile"
+
+  - id: "market-data-enrichment"
+    name: "Real-time Market Data"
+    type: "lookup-enrichment"
+    condition: "['symbol'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "rest-api"
+        base-url: "https://api.marketdata.com"
+        endpoint: "/v1/quotes/{symbol}?currency={currency}"  # Multiple parameters
+        method: "GET"
+        timeout-seconds: 3
+        cache-enabled: true
+        cache-ttl-seconds: 60             # Cache for 1 minute
+        parameter-names:
+          - "symbol"
+          - "currency"
+    field-mappings:
+      - source-field: "price"
+        target-field: "currentPrice"
+      - source-field: "volume"
+        target-field: "tradingVolume"
+
+rules:
+  - id: "credit-risk-check"
+    name: "Credit Risk Validation"
+    condition: "#data.customerCreditRating >= 'BBB' && #data.customerRiskProfile != 'HIGH'"
+    message: "Customer credit risk is acceptable"
+    severity: "INFO"
+
+  - id: "market-volatility-check"
+    name: "Market Volatility Check"
+    condition: "#data.tradingVolume > 1000000"
+    message: "High trading volume detected: {{#data.tradingVolume}}"
+    severity: "WARNING"
+```
+
+**Usage in Java:**
+
+```java
+// Data with parameters for API calls
+Map<String, Object> data = Map.of(
+    "customerId", "CUST123",
+    "symbol", "AAPL",
+    "currency", "USD"
+);
+
+// API calls will be made to:
+// https://api.customer.com/v1/customers/CUST123/profile
+// https://api.marketdata.com/v1/quotes/AAPL?currency=USD
+
+RuleResult result = engine.evaluate(data);
+```
+
+**Benefits:**
+- Real-time data integration
+- Dynamic parameter substitution
+- Built-in caching and error handling
+- Supports complex API authentication
+- Ideal for microservices architectures
+
+### 4. Rule Chain Variables
+
+**What it is:** Pass results between stages in sequential processing chains, where each stage can use variables from previous stages as parameters.
+
+**When to use:**
+- Multi-stage business processes with dependencies
+- Complex calculations that build upon previous results
+- Workflow scenarios where each step depends on the previous
+- Accumulative scoring systems
+- Pipeline processing with intermediate results
+
+**Example:**
+
+```yaml
+metadata:
+  name: "Sequential Processing with Variables"
+  version: "1.0.0"
+  description: "Rule chains with variable passing between stages"
+  type: "rule-config"
+  author: "workflow.team@company.com"
+
+rule-chains:
+  - id: "loan-approval-pipeline"
+    pattern: "sequential-dependency"
+    configuration:
+      stages:
+        - stage: 1
+          name: "Base Credit Score Calculation"
+          rule:
+            condition: "#creditScore >= 700 ? 25 : (#creditScore >= 650 ? 15 : 10)"
+            message: "Base credit score component calculated"
+          output-variable: "baseCreditComponent"
+
+        - stage: 2
+          name: "Income Assessment"
+          rule:
+            condition: "#annualIncome >= 80000 ? 20 : (#annualIncome >= 50000 ? 15 : 10)"
+            message: "Income component calculated"
+          output-variable: "incomeComponent"
+
+        - stage: 3
+          name: "Risk Adjustment"
+          rule:
+            condition: "#riskProfile == 'LOW' ? (#baseCreditComponent + #incomeComponent) * 1.1 : (#baseCreditComponent + #incomeComponent) * 0.9"
+            message: "Risk-adjusted score calculated"
+          output-variable: "riskAdjustedScore"
+
+        - stage: 4
+          name: "Final Decision"
+          rule:
+            condition: "#riskAdjustedScore >= 40 ? 'APPROVED' : (#riskAdjustedScore >= 25 ? 'REVIEW' : 'DENIED')"
+            message: "Final loan decision: {{#riskAdjustedScore >= 40 ? 'APPROVED' : (#riskAdjustedScore >= 25 ? 'REVIEW' : 'DENIED')}}"
+          output-variable: "loanDecision"
+
+  - id: "pricing-calculation"
+    pattern: "sequential-dependency"
+    configuration:
+      stages:
+        - stage: 1
+          name: "Base Rate Calculation"
+          rule:
+            condition: "#customerTier == 'PLATINUM' ? 0.02 : (#customerTier == 'GOLD' ? 0.025 : 0.03)"
+            message: "Base rate determined"
+          output-variable: "baseRate"
+
+        - stage: 2
+          name: "Volume Discount"
+          rule:
+            condition: "#tradingVolume > 10000000 ? #baseRate * 0.8 : (#tradingVolume > 5000000 ? #baseRate * 0.9 : #baseRate)"
+            message: "Volume discount applied"
+          output-variable: "discountedRate"
+
+        - stage: 3
+          name: "Relationship Bonus"
+          rule:
+            condition: "#relationshipYears > 5 ? #discountedRate * 0.95 : #discountedRate"
+            message: "Relationship bonus applied"
+          output-variable: "finalRate"
+
+  - id: "credit-scoring"
+    pattern: "accumulative-chaining"
+    configuration:
+      accumulator-variable: "totalScore"
+      initial-value: 0
+      accumulation-rules:
+        - id: "credit-history-component"
+          condition: "#creditHistory == 'EXCELLENT' ? 30 : (#creditHistory == 'GOOD' ? 20 : 10)"
+          message: "Credit history component"
+          weight: 1.5  # Higher weight for credit history
+        - id: "debt-ratio-component"
+          condition: "#debtToIncomeRatio < 0.3 ? 25 : (#debtToIncomeRatio < 0.5 ? 15 : 5)"
+          message: "Debt ratio component"
+          weight: 1.0
+        - id: "employment-component"
+          condition: "#employmentYears >= 5 ? 20 : (#employmentYears >= 2 ? 15 : 10)"
+          message: "Employment stability component"
+          weight: 1.2
+      final-decision-rule:
+        id: "credit-decision"
+        condition: "#totalScore >= 60 ? 'APPROVED' : (#totalScore >= 40 ? 'CONDITIONAL' : 'DENIED')"
+        message: "Credit decision based on total score: {{#totalScore}}"
+```
+
+**Usage in Java:**
+
+```java
+// Data for loan approval pipeline
+Map<String, Object> loanData = Map.of(
+    "creditScore", 720,
+    "annualIncome", 85000,
+    "riskProfile", "LOW",
+    "customerTier", "GOLD",
+    "tradingVolume", 12000000,
+    "relationshipYears", 7
+);
+
+// Data for credit scoring
+Map<String, Object> creditData = Map.of(
+    "creditHistory", "EXCELLENT",
+    "debtToIncomeRatio", 0.25,
+    "employmentYears", 6
+);
+
+RuleChainResult loanResult = engine.executeChain("loan-approval-pipeline", loanData);
+RuleChainResult creditResult = engine.executeChain("credit-scoring", creditData);
+
+// Access intermediate variables
+Double baseCreditComponent = (Double) loanResult.getVariable("baseCreditComponent");
+Double finalRate = (Double) loanResult.getVariable("finalRate");
+String loanDecision = (String) loanResult.getVariable("loanDecision");
+```
+
+**Benefits:**
+- Complex multi-stage processing
+- Intermediate results available for debugging
+- Supports both sequential and accumulative patterns
+- Weighted scoring capabilities
+- Perfect for workflow and pipeline scenarios
+
+### 5. Template Processing
+
+**What it is:** Use SpEL expressions in templates for dynamic content generation, allowing parameterized templates that adapt based on context data.
+
+**When to use:**
+- Dynamic document generation
+- Parameterized message templates
+- Configuration file generation
+- Dynamic JSON/XML content creation
+- Conditional content based on parameters
+
+**Example:**
+
+```yaml
+metadata:
+  name: "Dynamic Template Processing"
+  version: "1.0.0"
+  description: "Template-based parameterization with SpEL expressions"
+  type: "rule-config"
+  author: "template.team@company.com"
+
+rules:
+  - id: "notification-template"
+    name: "Dynamic Notification Generation"
+    condition: "true"  # Always execute when called
+    message: |
+      Customer: #{#customerName}
+      Account: #{#accountNumber}
+      Transaction: #{#transactionType} of #{#amount} #{#currency}
+      Status: #{#amount > 10000 ? 'HIGH_VALUE' : 'STANDARD'}
+      Timestamp: #{T(java.time.Instant).now()}
+      Approval: #{#amount > 50000 ? 'MANUAL_REVIEW_REQUIRED' : 'AUTO_APPROVED'}
+
+  - id: "risk-assessment-template"
+    name: "Risk Assessment Report"
+    condition: "true"
+    message: |
+      Risk Assessment Report
+      ======================
+      Customer Tier: #{#customerTier}
+      Risk Score: #{#riskScore}
+      Risk Level: #{#riskScore > 80 ? 'HIGH' : (#riskScore > 50 ? 'MEDIUM' : 'LOW')}
+      Recommended Action: #{#riskScore > 80 ? 'IMMEDIATE_REVIEW' : (#riskScore > 50 ? 'MONITOR' : 'STANDARD_PROCESSING')}
+
+      Factors:
+      - Credit Rating: #{#creditRating}
+      - Transaction History: #{#transactionHistory}
+      - Geographic Risk: #{#geographicRisk ? 'YES' : 'NO'}
+
+      Next Review Date: #{T(java.time.LocalDate).now().plusDays(#riskScore > 80 ? 30 : 90)}
+
+  - id: "json-template"
+    name: "Dynamic JSON Generation"
+    condition: "true"
+    message: |
+      {
+        "customerId": "#{#customerId}",
+        "customerName": "#{#customerName}",
+        "totalAmount": #{#totalAmount},
+        "currency": "#{#currency}",
+        "timestamp": "#{T(java.time.Instant).now()}",
+        "status": "#{#amount > 1000 ? 'HIGH_VALUE' : 'STANDARD'}",
+        "approvalRequired": #{#amount > 50000 ? true : false},
+        "processingFee": #{#amount * 0.001},
+        "region": "#{#country == 'US' ? 'North America' : (#country == 'UK' ? 'Europe' : 'Other')}"
+      }
+```
+
+**Usage in Java:**
+
+```java
+// Template processing through REST API or direct service
+Map<String, Object> templateData = Map.of(
+    "customerName", "John Doe",
+    "accountNumber", "ACC123456",
+    "transactionType", "TRANSFER",
+    "amount", 75000,
+    "currency", "USD",
+    "customerTier", "PLATINUM",
+    "riskScore", 65,
+    "creditRating", "AAA",
+    "transactionHistory", "EXCELLENT",
+    "geographicRisk", false,
+    "customerId", "CUST001",
+    "totalAmount", 75000.0,
+    "country", "US"
+);
+
+// Process templates
+RuleResult notificationResult = engine.evaluate("notification-template", templateData);
+RuleResult riskResult = engine.evaluate("risk-assessment-template", templateData);
+RuleResult jsonResult = engine.evaluate("json-template", templateData);
+
+String notification = notificationResult.getMessage();
+String riskReport = riskResult.getMessage();
+String jsonOutput = jsonResult.getMessage();
+```
+
+**Benefits:**
+- Dynamic content generation
+- Conditional logic within templates
+- Support for complex expressions and calculations
+- Integration with Java time and utility classes
+- Perfect for document and message generation
+
+### 6. External Data Source Parameters
+
+**What it is:** Use parameterized queries for databases and external data sources, where query parameters are substituted based on your data context.
+
+**When to use:**
+- Database lookups with dynamic WHERE clauses
+- File system access with parameterized paths
+- Cache operations with dynamic keys
+- Large dataset queries that can't be pre-loaded
+- Real-time data requirements from external systems
+
+**Example:**
+
+```yaml
+metadata:
+  name: "Parameterized External Data Sources"
+  version: "1.0.0"
+  description: "Database and file system integration with parameters"
+  type: "rule-config"
+  author: "data.integration@company.com"
+
+enrichments:
+  - id: "customer-database-lookup"
+    name: "Customer Database Enrichment"
+    type: "lookup-enrichment"
+    condition: "['customerId'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "database"                    # External database source
+        connection-name: "customer-db"     # Named connection
+        query: |
+          SELECT customer_name, credit_rating, account_status, credit_limit, region
+          FROM customers
+          WHERE customer_id = ?
+          AND status = 'ACTIVE'
+          AND region IN (?, ?)
+        parameters:                         # Parameter mapping
+          - field: "customerId"             # First ? parameter
+          - field: "primaryRegion"          # Second ? parameter
+          - field: "secondaryRegion"        # Third ? parameter
+        cache-enabled: true
+        cache-ttl-seconds: 300            # Cache for 5 minutes
+    field-mappings:
+      - source-field: "customer_name"
+        target-field: "customerName"
+      - source-field: "credit_rating"
+        target-field: "creditRating"
+      - source-field: "account_status"
+        target-field: "accountStatus"
+      - source-field: "credit_limit"
+        target-field: "creditLimit"
+      - source-field: "region"
+        target-field: "customerRegion"
+
+  - id: "transaction-history-lookup"
+    name: "Transaction History Analysis"
+    type: "lookup-enrichment"
+    condition: "['customerId'] != null && ['lookbackDays'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "database"
+        connection-name: "transaction-db"
+        query: |
+          SELECT
+            COUNT(*) as transaction_count,
+            SUM(amount) as total_amount,
+            AVG(amount) as average_amount,
+            MAX(amount) as max_amount
+          FROM transactions
+          WHERE customer_id = ?
+          AND transaction_date >= CURRENT_DATE - INTERVAL ? DAY
+          AND status = 'COMPLETED'
+        parameters:
+          - field: "customerId"
+          - field: "lookbackDays"
+        cache-enabled: true
+        cache-ttl-seconds: 600            # Cache for 10 minutes
+    field-mappings:
+      - source-field: "transaction_count"
+        target-field: "recentTransactionCount"
+      - source-field: "total_amount"
+        target-field: "recentTotalAmount"
+      - source-field: "average_amount"
+        target-field: "averageTransactionAmount"
+      - source-field: "max_amount"
+        target-field: "maxTransactionAmount"
+
+  - id: "file-based-configuration"
+    name: "Dynamic Configuration File Loading"
+    type: "lookup-enrichment"
+    condition: "['configType'] != null && ['environment'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "file-system"               # External file system source
+        file-path: "/config/{environment}/{configType}-config.json"  # Parameterized path
+        format: "json"
+        parameters:
+          - field: "environment"          # dev, test, prod
+          - field: "configType"           # pricing, limits, rules
+        cache-enabled: true
+        watch-for-changes: true           # Reload when file changes
+    field-mappings:
+      - source-field: "maxLimit"
+        target-field: "configuredMaxLimit"
+      - source-field: "processingFee"
+        target-field: "configuredFee"
+      - source-field: "approvalThreshold"
+        target-field: "configuredThreshold"
+
+rules:
+  - id: "credit-limit-check"
+    name: "Dynamic Credit Limit Validation"
+    condition: "#data.requestedAmount <= #data.creditLimit"
+    message: "Requested amount {{#data.requestedAmount}} is within credit limit {{#data.creditLimit}}"
+    severity: "ERROR"
+
+  - id: "transaction-pattern-analysis"
+    name: "Transaction Pattern Analysis"
+    condition: "#data.requestedAmount <= #data.maxTransactionAmount * 2"
+    message: "Transaction amount is consistent with recent patterns (max: {{#data.maxTransactionAmount}})"
+    severity: "WARNING"
+
+  - id: "environment-specific-validation"
+    name: "Environment-Specific Limit Check"
+    condition: "#data.requestedAmount <= #data.configuredMaxLimit"
+    message: "Amount within configured limit for {{#data.environment}} environment"
+    severity: "ERROR"
+```
+
+**Usage in Java:**
+
+```java
+// Configure external data sources
+ExternalDataSourceConfiguration dbConfig = ExternalDataSourceConfiguration.builder()
+    .connectionName("customer-db")
+    .jdbcUrl("jdbc:postgresql://localhost:5432/customers")
+    .username("${DB_USERNAME}")
+    .password("${DB_PASSWORD}")
+    .build();
+
+// Load configuration and register data sources
+RulesEngineConfiguration config = YamlConfigurationLoader.load("parameterized-data-sources.yaml");
+RulesEngine engine = new RulesEngine(config);
+engine.registerDataSource("customer-db", dbConfig);
+engine.registerDataSource("transaction-db", transactionDbConfig);
+
+// Data with parameters for database queries and file paths
+Map<String, Object> data = Map.of(
+    "customerId", "CUST123",
+    "primaryRegion", "US",
+    "secondaryRegion", "CA",
+    "lookbackDays", 30,
+    "environment", "prod",
+    "configType", "limits",
+    "requestedAmount", 50000
+);
+
+// Database queries will be executed with parameters:
+// SELECT ... FROM customers WHERE customer_id = 'CUST123' AND region IN ('US', 'CA')
+// SELECT ... FROM transactions WHERE customer_id = 'CUST123' AND transaction_date >= CURRENT_DATE - INTERVAL 30 DAY
+// File will be loaded from: /config/prod/limits-config.json
+
+RuleResult result = engine.evaluate(data);
+```
+
+**Benefits:**
+- Dynamic database queries with parameters
+- Parameterized file system access
+- Built-in caching and performance optimization
+- Support for complex SQL queries
+- Ideal for large-scale data integration
+
+### Choosing the Right Parameterization Approach
+
+| Approach | Best For | Flexibility | Performance | Complexity |
+|----------|----------|-------------|-------------|------------|
+| **Runtime Data Parameters** | Dynamic business rules, A/B testing | High | High | Low |
+| **Configuration-Driven Thresholds** | Enterprise settings, compliance | Medium | High | Low |
+| **REST API Parameter Substitution** | Real-time external data | High | Medium | Medium |
+| **Rule Chain Variables** | Multi-stage workflows | Medium | High | Medium |
+| **Template Processing** | Document generation, messaging | High | High | Low |
+| **External Data Source Parameters** | Large datasets, database integration | Medium | Medium | High |
+
+### Best Practices for Parameterization
+
+1. **Start Simple**: Begin with runtime data parameters for most use cases
+2. **Use Configuration for Stability**: Put stable business parameters in configuration sections
+3. **Cache External Data**: Always enable caching for external data sources
+4. **Document Parameters**: Clearly document what parameters each rule expects
+5. **Validate Parameters**: Include parameter validation in your rules
+6. **Test Different Scenarios**: Test rules with various parameter combinations
+7. **Monitor Performance**: Track performance impact of parameterized rules
+8. **Version Control**: Keep parameter changes in version control with rule changes
+
 ## YAML Configuration Guide
 
 YAML (Yet Another Markup Language) is a human-readable format for configuration files. Don't worry if you're new to YAML - it's designed to be easy to read and write. Think of it as a structured way to organize information, similar to how you might organize information in an outline.

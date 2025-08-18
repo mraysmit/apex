@@ -27,19 +27,20 @@ APEX (Advanced Processing Engine for eXpressions) provides comprehensive data ma
 10. [Complex Data Enrichment Patterns](#10-complex-data-enrichment-patterns)
 11. [Data Validation Strategies](#11-data-validation-strategies)
 12. [Organizing and Managing Multiple Datasets](#12-organizing-and-managing-multiple-datasets)
+13. [Using Parameters in Data Management](#13-using-parameters-in-data-management)
 
 **Part 4: Advanced Topics**
-13. [Scenario-Based Configuration Management](#13-scenario-based-configuration-management)
-14. [YAML Validation and Quality Assurance](#14-yaml-validation-and-quality-assurance)
-15. [External Data Source Integration](#15-external-data-source-integration)
-16. [Financial Services Data Patterns](#16-financial-services-data-patterns)
-17. [Performance and Optimization](#17-performance-and-optimization)
-18. [Enterprise Data Architecture](#18-enterprise-data-architecture)
+14. [Scenario-Based Configuration Management](#14-scenario-based-configuration-management)
+15. [YAML Validation and Quality Assurance](#15-yaml-validation-and-quality-assurance)
+16. [External Data Source Integration](#16-external-data-source-integration)
+17. [Financial Services Data Patterns](#17-financial-services-data-patterns)
+18. [Performance and Optimization](#18-performance-and-optimization)
+19. [Enterprise Data Architecture](#19-enterprise-data-architecture)
 
 **Part 5: Reference and Examples**
-19. [Complete Examples and Use Cases](#19-complete-examples-and-use-cases)
-20. [Best Practices and Patterns](#20-best-practices-and-patterns)
-21. [Troubleshooting Common Issues](#21-troubleshooting-common-issues)
+20. [Complete Examples and Use Cases](#20-complete-examples-and-use-cases)
+21. [Best Practices and Patterns](#21-best-practices-and-patterns)
+22. [Troubleshooting Common Issues](#22-troubleshooting-common-issues)
 
 ---
 
@@ -3035,9 +3036,1169 @@ This comprehensive approach to dataset organization and management ensures that 
 
 ---
 
+## 13. Using Parameters in Data Management
+
+One of the most powerful features of APEX data management is the ability to create parameterized, reusable data configurations. Instead of creating multiple similar datasets or rules for different scenarios, you can create generic configurations that adapt to different contexts through parameterization. This section covers six different approaches to parameterization specifically focused on data management scenarios.
+
+### Overview of Data Management Parameterization
+
+APEX supports multiple parameterization strategies for data management, each optimized for different data scenarios:
+
+1. **Dynamic Data Context Parameters** - Pass parameters through data context for flexible dataset lookups
+2. **Configuration-Driven Data Sources** - Global configuration sections for data source parameters
+3. **REST API Data Parameters** - Dynamic API endpoints with parameter substitution for real-time data
+4. **Database Query Parameters** - Parameterized SQL queries for dynamic database lookups
+5. **File System Path Parameters** - Dynamic file paths for environment-specific data files
+6. **Template-Based Data Generation** - SpEL expressions for dynamic data creation and transformation
+
+### 1. Dynamic Data Context Parameters
+
+**What it is:** Pass parameters through the data context to make dataset lookups and enrichments adapt to different scenarios dynamically.
+
+**When to use:**
+- Multi-tenant applications with tenant-specific data
+- Regional data variations (different currencies, regulations, etc.)
+- Time-based data lookups (historical vs. current data)
+- User-specific or role-specific data filtering
+- A/B testing scenarios with different data sets
+
+**Example: Multi-Tenant Customer Data**
+
+```yaml
+# datasets/customers-template.yaml
+metadata:
+  type: "dataset"
+  name: "Multi-Tenant Customer Data"
+  version: "1.0.0"
+  description: "Customer data with tenant-specific parameters"
+
+data:
+  - id: "CUST001"
+    name: "John Smith"
+    tenant: "TENANT_A"
+    region: "US"
+    tier: "PREMIUM"
+    credit-limit: 50000
+    currency: "USD"
+
+  - id: "CUST002"
+    name: "Jane Doe"
+    tenant: "TENANT_A"
+    region: "US"
+    tier: "STANDARD"
+    credit-limit: 25000
+    currency: "USD"
+
+  - id: "CUST003"
+    name: "Hans Mueller"
+    tenant: "TENANT_B"
+    region: "EU"
+    tier: "PREMIUM"
+    credit-limit: 40000
+    currency: "EUR"
+```
+
+```yaml
+# rules/tenant-aware-enrichment.yaml
+metadata:
+  type: "rule-config"
+  name: "Tenant-Aware Customer Enrichment"
+  version: "1.0.0"
+  description: "Customer enrichment with tenant and region parameters"
+
+enrichments:
+  - id: "tenant-customer-enrichment"
+    name: "Tenant-Specific Customer Lookup"
+    type: "lookup-enrichment"
+    condition: "#data.customerId != null && #data.tenantId != null && #data.region != null"
+    lookup-config:
+      lookup-dataset:
+        type: "yaml-file"
+        file-path: "datasets/customers-template.yaml"
+        key-field: "id"
+        # Filter dataset based on parameters
+        filter-conditions:
+          - field: "tenant"
+            operator: "equals"
+            value: "#data.tenantId"
+          - field: "region"
+            operator: "equals"
+            value: "#data.region"
+        cache-enabled: true
+        cache-ttl-seconds: 1800
+    field-mappings:
+      - source-field: "name"
+        target-field: "customerName"
+      - source-field: "tier"
+        target-field: "customerTier"
+      - source-field: "credit-limit"
+        target-field: "creditLimit"
+      - source-field: "currency"
+        target-field: "customerCurrency"
+
+  - id: "regional-pricing-enrichment"
+    name: "Region-Specific Pricing"
+    type: "lookup-enrichment"
+    condition: "#data.productId != null && #data.region != null"
+    lookup-config:
+      lookup-dataset:
+        type: "yaml-file"
+        file-path: "datasets/regional-pricing.yaml"
+        key-field: "product-id"
+        filter-conditions:
+          - field: "region"
+            operator: "equals"
+            value: "#data.region"
+    field-mappings:
+      - source-field: "price"
+        target-field: "regionalPrice"
+      - source-field: "currency"
+        target-field: "priceCurrency"
+      - source-field: "tax-rate"
+        target-field: "regionalTaxRate"
+
+rules:
+  - id: "tenant-validation"
+    name: "Tenant-Specific Validation"
+    condition: "#customerName != null && #customerTier != null"
+    message: "Customer {{#customerName}} validated for tenant {{#data.tenantId}} in region {{#data.region}}"
+    severity: "INFO"
+
+  - id: "credit-limit-check"
+    name: "Regional Credit Limit Check"
+    condition: "#data.requestedAmount <= #creditLimit"
+    message: "Amount {{#data.requestedAmount}} {{#priceCurrency}} within credit limit {{#creditLimit}} {{#customerCurrency}}"
+    severity: "ERROR"
+```
+
+**Usage in Java:**
+
+```java
+// Different tenant scenarios
+Map<String, Object> tenantAData = Map.of(
+    "customerId", "CUST001",
+    "tenantId", "TENANT_A",
+    "region", "US",
+    "productId", "PROD001",
+    "requestedAmount", 30000
+);
+
+Map<String, Object> tenantBData = Map.of(
+    "customerId", "CUST003",
+    "tenantId", "TENANT_B",
+    "region", "EU",
+    "productId", "PROD001",
+    "requestedAmount", 25000
+);
+
+// Same rules, different data based on parameters
+RuleResult resultA = engine.evaluate(tenantAData);
+RuleResult resultB = engine.evaluate(tenantBData);
+```
+
+**Benefits:**
+- Single configuration supports multiple tenants
+- Dynamic filtering based on context
+- Reduced configuration duplication
+- Easy to add new tenants or regions
+
+### 2. Configuration-Driven Data Sources
+
+**What it is:** Use global configuration sections to define data source parameters that can be referenced throughout your data management configurations.
+
+**When to use:**
+- Environment-specific data source configurations (dev, test, prod)
+- Database connection parameters that vary by deployment
+- API endpoints that change between environments
+- File system paths that differ across systems
+- Performance tuning parameters for data sources
+
+**Example: Environment-Specific Data Sources**
+
+```yaml
+# config/data-management-config.yaml
+metadata:
+  type: "rule-config"
+  name: "Environment-Specific Data Management"
+  version: "1.0.0"
+  description: "Data source configuration with environment parameters"
+
+# Global configuration section
+configuration:
+  # Environment-specific settings
+  environment:
+    name: "${ENVIRONMENT_NAME:development}"  # Default to development
+    region: "${AWS_REGION:us-east-1}"
+
+  # Database configuration parameters
+  databases:
+    customer-db:
+      host: "${CUSTOMER_DB_HOST:localhost}"
+      port: "${CUSTOMER_DB_PORT:5432}"
+      database: "${CUSTOMER_DB_NAME:customers}"
+      schema: "${CUSTOMER_DB_SCHEMA:public}"
+      connection-pool-size: "${DB_POOL_SIZE:10}"
+      timeout-seconds: "${DB_TIMEOUT:30}"
+
+    reference-db:
+      host: "${REFERENCE_DB_HOST:localhost}"
+      port: "${REFERENCE_DB_PORT:5432}"
+      database: "${REFERENCE_DB_NAME:reference_data}"
+      schema: "${REFERENCE_DB_SCHEMA:public}"
+
+  # API configuration parameters
+  external-apis:
+    market-data:
+      base-url: "${MARKET_DATA_API_URL:https://api.marketdata.com}"
+      api-key: "${MARKET_DATA_API_KEY}"
+      timeout-seconds: "${API_TIMEOUT:10}"
+      rate-limit-per-minute: "${API_RATE_LIMIT:1000}"
+
+    currency-service:
+      base-url: "${CURRENCY_API_URL:https://api.currency.com}"
+      api-key: "${CURRENCY_API_KEY}"
+
+  # File system configuration
+  file-systems:
+    data-files:
+      base-path: "${DATA_FILES_PATH:/data/apex}"
+      backup-path: "${BACKUP_PATH:/backup/apex}"
+      temp-path: "${TEMP_PATH:/tmp/apex}"
+
+  # Cache configuration
+  caching:
+    default-ttl-seconds: "${CACHE_TTL:3600}"
+    max-size: "${CACHE_MAX_SIZE:10000}"
+    enabled: "${CACHE_ENABLED:true}"
+
+enrichments:
+  - id: "customer-database-enrichment"
+    name: "Customer Database Lookup"
+    type: "lookup-enrichment"
+    condition: "#data.customerId != null"
+    lookup-config:
+      lookup-dataset:
+        type: "database"
+        connection-config:
+          host: "#config.databases.customer-db.host"
+          port: "#config.databases.customer-db.port"
+          database: "#config.databases.customer-db.database"
+          schema: "#config.databases.customer-db.schema"
+          connection-pool-size: "#config.databases.customer-db.connection-pool-size"
+        query: |
+          SELECT customer_name, tier, credit_limit, status
+          FROM customers
+          WHERE customer_id = ?
+          AND environment = ?
+        parameters:
+          - field: "customerId"
+          - value: "#config.environment.name"
+        cache-enabled: "#config.caching.enabled"
+        cache-ttl-seconds: "#config.caching.default-ttl-seconds"
+    field-mappings:
+      - source-field: "customer_name"
+        target-field: "customerName"
+      - source-field: "tier"
+        target-field: "customerTier"
+      - source-field: "credit_limit"
+        target-field: "creditLimit"
+      - source-field: "status"
+        target-field: "customerStatus"
+
+  - id: "market-data-enrichment"
+    name: "Real-time Market Data"
+    type: "lookup-enrichment"
+    condition: "#data.symbol != null"
+    lookup-config:
+      lookup-dataset:
+        type: "rest-api"
+        base-url: "#config.external-apis.market-data.base-url"
+        endpoint: "/v1/quotes/{symbol}"
+        headers:
+          Authorization: "Bearer #config.external-apis.market-data.api-key"
+          X-Environment: "#config.environment.name"
+        timeout-seconds: "#config.external-apis.market-data.timeout-seconds"
+        parameters:
+          - field: "symbol"
+        cache-enabled: "#config.caching.enabled"
+        cache-ttl-seconds: 60  # Market data cached for 1 minute
+    field-mappings:
+      - source-field: "price"
+        target-field: "currentPrice"
+      - source-field: "volume"
+        target-field: "tradingVolume"
+
+  - id: "reference-file-enrichment"
+    name: "Reference File Data"
+    type: "lookup-enrichment"
+    condition: "#data.countryCode != null"
+    lookup-config:
+      lookup-dataset:
+        type: "file-system"
+        file-path: "#config.file-systems.data-files.base-path/reference/countries-#config.environment.name.yaml"
+        format: "yaml"
+        key-field: "code"
+        cache-enabled: "#config.caching.enabled"
+        watch-for-changes: true
+    field-mappings:
+      - source-field: "name"
+        target-field: "countryName"
+      - source-field: "region"
+        target-field: "countryRegion"
+
+rules:
+  - id: "environment-validation"
+    name: "Environment Configuration Validation"
+    condition: "#config.environment.name != null"
+    message: "Processing in environment: {{#config.environment.name}} ({{#config.environment.region}})"
+    severity: "INFO"
+
+  - id: "customer-status-check"
+    name: "Customer Status Validation"
+    condition: "#customerStatus == 'ACTIVE'"
+    message: "Customer {{#customerName}} is active in {{#config.environment.name}} environment"
+    severity: "ERROR"
+```
+
+**Environment-specific deployment:**
+
+```bash
+# Development environment
+export ENVIRONMENT_NAME=development
+export CUSTOMER_DB_HOST=dev-db.company.com
+export MARKET_DATA_API_URL=https://dev-api.marketdata.com
+
+# Production environment
+export ENVIRONMENT_NAME=production
+export CUSTOMER_DB_HOST=prod-db.company.com
+export MARKET_DATA_API_URL=https://api.marketdata.com
+```
+
+**Benefits:**
+- Single configuration works across all environments
+- Environment-specific parameters externalized
+- Easy deployment and configuration management
+- Centralized parameter management
+- Support for default values
+
+### 3. REST API Data Parameters
+
+**What it is:** Use parameterized REST API endpoints for dynamic data enrichment, where URL parameters, headers, and query parameters are substituted at runtime based on your data context.
+
+**When to use:**
+- Real-time data enrichment from external services
+- Dynamic API calls based on data attributes
+- Integration with microservices and external APIs
+- Scenarios requiring fresh data for each evaluation
+- Third-party service integration with varying parameters
+
+**Example: Dynamic Financial Data Integration**
+
+```yaml
+# rules/financial-api-integration.yaml
+metadata:
+  type: "rule-config"
+  name: "Dynamic Financial API Integration"
+  version: "1.0.0"
+  description: "Financial data enrichment with parameterized API calls"
+
+enrichments:
+  - id: "real-time-pricing-enrichment"
+    name: "Real-time Instrument Pricing"
+    type: "lookup-enrichment"
+    condition: "#data.instrumentId != null && #data.market != null && #data.currency != null"
+    lookup-config:
+      lookup-dataset:
+        type: "rest-api"
+        base-url: "https://api.financial-data.com"
+        endpoint: "/v2/instruments/{instrumentId}/pricing"
+        method: "GET"
+        headers:
+          Authorization: "Bearer ${FINANCIAL_API_TOKEN}"
+          X-Market: "{market}"
+          X-Currency: "{currency}"
+          X-Client-Id: "${CLIENT_ID}"
+        query-parameters:
+          market: "{market}"
+          currency: "{currency}"
+          real-time: "true"
+          include-history: "{includeHistory}"
+        timeout-seconds: 5
+        parameter-names:
+          - "instrumentId"
+          - "market"
+          - "currency"
+          - "includeHistory"
+        cache-enabled: true
+        cache-ttl-seconds: 30  # Financial data cached for 30 seconds
+    field-mappings:
+      - source-field: "current_price"
+        target-field: "currentPrice"
+      - source-field: "bid_price"
+        target-field: "bidPrice"
+      - source-field: "ask_price"
+        target-field: "askPrice"
+      - source-field: "volume"
+        target-field: "tradingVolume"
+      - source-field: "last_updated"
+        target-field: "priceTimestamp"
+
+  - id: "risk-assessment-enrichment"
+    name: "Dynamic Risk Assessment"
+    type: "lookup-enrichment"
+    condition: "#data.customerId != null && #data.portfolioId != null"
+    lookup-config:
+      lookup-dataset:
+        type: "rest-api"
+        base-url: "https://risk-api.company.com"
+        endpoint: "/v1/customers/{customerId}/portfolios/{portfolioId}/risk-assessment"
+        method: "POST"
+        headers:
+          Authorization: "Bearer ${RISK_API_TOKEN}"
+          Content-Type: "application/json"
+        request-body: |
+          {
+            "assessment_type": "{assessmentType}",
+            "time_horizon": "{timeHorizon}",
+            "confidence_level": "{confidenceLevel}",
+            "include_stress_tests": {includeStressTests},
+            "market_conditions": "{marketConditions}"
+          }
+        timeout-seconds: 10
+        parameter-names:
+          - "customerId"
+          - "portfolioId"
+          - "assessmentType"
+          - "timeHorizon"
+          - "confidenceLevel"
+          - "includeStressTests"
+          - "marketConditions"
+        cache-enabled: true
+        cache-ttl-seconds: 300  # Risk data cached for 5 minutes
+    field-mappings:
+      - source-field: "risk_score"
+        target-field: "portfolioRiskScore"
+      - source-field: "var_95"
+        target-field: "valueAtRisk95"
+      - source-field: "expected_shortfall"
+        target-field: "expectedShortfall"
+      - source-field: "stress_test_results"
+        target-field: "stressTestResults"
+
+  - id: "regulatory-data-enrichment"
+    name: "Regulatory Compliance Data"
+    type: "lookup-enrichment"
+    condition: "#data.jurisdiction != null && #data.instrumentType != null"
+    lookup-config:
+      lookup-dataset:
+        type: "rest-api"
+        base-url: "https://regulatory-api.company.com"
+        endpoint: "/v1/jurisdictions/{jurisdiction}/instruments/{instrumentType}/regulations"
+        method: "GET"
+        headers:
+          Authorization: "Bearer ${REGULATORY_API_TOKEN}"
+          X-Effective-Date: "{effectiveDate}"
+        query-parameters:
+          effective_date: "{effectiveDate}"
+          include_pending: "{includePending}"
+          regulation_type: "{regulationType}"
+        parameter-names:
+          - "jurisdiction"
+          - "instrumentType"
+          - "effectiveDate"
+          - "includePending"
+          - "regulationType"
+        cache-enabled: true
+        cache-ttl-seconds: 3600  # Regulatory data cached for 1 hour
+    field-mappings:
+      - source-field: "position_limits"
+        target-field: "regulatoryPositionLimits"
+      - source-field: "reporting_requirements"
+        target-field: "reportingRequirements"
+      - source-field: "margin_requirements"
+        target-field: "marginRequirements"
+
+rules:
+  - id: "pricing-validation"
+    name: "Real-time Pricing Validation"
+    condition: "#currentPrice != null && #currentPrice > 0"
+    message: "Current price for instrument: {{#currentPrice}} ({{#data.currency}}) at {{#priceTimestamp}}"
+    severity: "INFO"
+
+  - id: "risk-threshold-check"
+    name: "Portfolio Risk Threshold Check"
+    condition: "#portfolioRiskScore <= #data.maxRiskScore"
+    message: "Portfolio risk score {{#portfolioRiskScore}} within threshold {{#data.maxRiskScore}}"
+    severity: "ERROR"
+
+  - id: "regulatory-compliance-check"
+    name: "Regulatory Position Limits"
+    condition: "#data.positionSize <= #regulatoryPositionLimits.max_position"
+    message: "Position size {{#data.positionSize}} within regulatory limit {{#regulatoryPositionLimits.max_position}}"
+    severity: "ERROR"
+```
+
+**Usage in Java:**
+
+```java
+// Financial data with API parameters
+Map<String, Object> tradingData = Map.of(
+    "instrumentId", "AAPL",
+    "market", "NASDAQ",
+    "currency", "USD",
+    "includeHistory", "false",
+    "customerId", "CUST123",
+    "portfolioId", "PORT456",
+    "assessmentType", "COMPREHENSIVE",
+    "timeHorizon", "1D",
+    "confidenceLevel", "95",
+    "includeStressTests", true,
+    "marketConditions", "NORMAL",
+    "jurisdiction", "US",
+    "instrumentType", "EQUITY",
+    "effectiveDate", "2024-01-15",
+    "includePending", "false",
+    "regulationType", "POSITION_LIMITS",
+    "positionSize", 10000,
+    "maxRiskScore", 75.0
+);
+
+// API calls will be made to:
+// https://api.financial-data.com/v2/instruments/AAPL/pricing?market=NASDAQ&currency=USD&real-time=true&include-history=false
+// https://risk-api.company.com/v1/customers/CUST123/portfolios/PORT456/risk-assessment
+// https://regulatory-api.company.com/v1/jurisdictions/US/instruments/EQUITY/regulations?effective_date=2024-01-15
+
+RuleResult result = engine.evaluate(tradingData);
+```
+
+**Benefits:**
+- Real-time data integration with dynamic parameters
+- Flexible API endpoint construction
+- Support for complex request bodies and headers
+- Built-in caching and error handling
+- Perfect for financial services and real-time scenarios
+
+### 4. Database Query Parameters
+
+**What it is:** Use parameterized SQL queries for dynamic database lookups, where query parameters are substituted based on your data context to create flexible, reusable database integrations.
+
+**When to use:**
+- Dynamic database queries with varying WHERE clauses
+- Multi-tenant database architectures
+- Time-based data queries (historical vs. current)
+- Complex joins based on runtime parameters
+- Performance optimization through parameterized queries
+
+**Example: Dynamic Financial Database Queries**
+
+```yaml
+# rules/database-parameter-integration.yaml
+metadata:
+  type: "rule-config"
+  name: "Parameterized Database Integration"
+  version: "1.0.0"
+  description: "Database enrichment with dynamic query parameters"
+
+enrichments:
+  - id: "customer-portfolio-enrichment"
+    name: "Customer Portfolio Analysis"
+    type: "lookup-enrichment"
+    condition: "#data.customerId != null && #data.asOfDate != null && #data.portfolioType != null"
+    lookup-config:
+      lookup-dataset:
+        type: "database"
+        connection-name: "portfolio-db"
+        query: |
+          SELECT
+            p.portfolio_id,
+            p.portfolio_name,
+            p.total_value,
+            p.currency,
+            p.risk_profile,
+            COUNT(h.holding_id) as holding_count,
+            SUM(h.market_value) as total_market_value,
+            AVG(h.weight_percent) as avg_weight
+          FROM portfolios p
+          LEFT JOIN holdings h ON p.portfolio_id = h.portfolio_id
+          WHERE p.customer_id = ?
+            AND p.portfolio_type = ?
+            AND p.as_of_date <= ?
+            AND p.status = 'ACTIVE'
+            AND (? IS NULL OR p.region = ?)
+          GROUP BY p.portfolio_id, p.portfolio_name, p.total_value, p.currency, p.risk_profile
+          ORDER BY p.total_value DESC
+          LIMIT ?
+        parameters:
+          - field: "customerId"
+          - field: "portfolioType"
+          - field: "asOfDate"
+          - field: "region"           # Optional parameter
+          - field: "region"           # Repeated for IS NULL check
+          - field: "maxResults"
+        cache-enabled: true
+        cache-ttl-seconds: 600
+    field-mappings:
+      - source-field: "portfolio_id"
+        target-field: "portfolioId"
+      - source-field: "portfolio_name"
+        target-field: "portfolioName"
+      - source-field: "total_value"
+        target-field: "portfolioValue"
+      - source-field: "currency"
+        target-field: "portfolioCurrency"
+      - source-field: "risk_profile"
+        target-field: "riskProfile"
+      - source-field: "holding_count"
+        target-field: "numberOfHoldings"
+      - source-field: "total_market_value"
+        target-field: "totalMarketValue"
+
+  - id: "transaction-history-enrichment"
+    name: "Transaction History Analysis"
+    type: "lookup-enrichment"
+    condition: "#data.accountId != null && #data.lookbackDays != null"
+    lookup-config:
+      lookup-dataset:
+        type: "database"
+        connection-name: "transaction-db"
+        query: |
+          SELECT
+            COUNT(*) as transaction_count,
+            SUM(CASE WHEN amount > 0 THEN amount ELSE 0 END) as total_credits,
+            SUM(CASE WHEN amount < 0 THEN ABS(amount) ELSE 0 END) as total_debits,
+            AVG(ABS(amount)) as average_amount,
+            MAX(ABS(amount)) as max_amount,
+            MIN(transaction_date) as first_transaction,
+            MAX(transaction_date) as last_transaction,
+            COUNT(DISTINCT transaction_type) as unique_transaction_types
+          FROM transactions
+          WHERE account_id = ?
+            AND transaction_date >= CURRENT_DATE - INTERVAL ? DAY
+            AND status = 'COMPLETED'
+            AND (? IS NULL OR transaction_type = ?)
+            AND (? IS NULL OR amount >= ?)
+            AND (? IS NULL OR amount <= ?)
+        parameters:
+          - field: "accountId"
+          - field: "lookbackDays"
+          - field: "transactionType"    # Optional filter
+          - field: "transactionType"    # Repeated for IS NULL check
+          - field: "minAmount"          # Optional filter
+          - field: "minAmount"          # Repeated for IS NULL check
+          - field: "maxAmount"          # Optional filter
+          - field: "maxAmount"          # Repeated for IS NULL check
+        cache-enabled: true
+        cache-ttl-seconds: 300
+    field-mappings:
+      - source-field: "transaction_count"
+        target-field: "recentTransactionCount"
+      - source-field: "total_credits"
+        target-field: "totalCredits"
+      - source-field: "total_debits"
+        target-field: "totalDebits"
+      - source-field: "average_amount"
+        target-field: "averageTransactionAmount"
+      - source-field: "max_amount"
+        target-field: "maxTransactionAmount"
+      - source-field: "unique_transaction_types"
+        target-field: "transactionTypeCount"
+
+  - id: "risk-metrics-enrichment"
+    name: "Historical Risk Metrics"
+    type: "lookup-enrichment"
+    condition: "#data.instrumentId != null && #data.timeframe != null"
+    lookup-config:
+      lookup-dataset:
+        type: "database"
+        connection-name: "market-data-db"
+        query: |
+          WITH price_data AS (
+            SELECT
+              price_date,
+              close_price,
+              LAG(close_price) OVER (ORDER BY price_date) as prev_price
+            FROM market_prices
+            WHERE instrument_id = ?
+              AND price_date >= CURRENT_DATE - INTERVAL ? DAY
+              AND price_date <= ?
+            ORDER BY price_date
+          ),
+          returns AS (
+            SELECT
+              price_date,
+              close_price,
+              CASE
+                WHEN prev_price IS NOT NULL AND prev_price > 0
+                THEN (close_price - prev_price) / prev_price
+                ELSE NULL
+              END as daily_return
+            FROM price_data
+          )
+          SELECT
+            COUNT(*) as observation_count,
+            AVG(daily_return) as mean_return,
+            STDDEV(daily_return) as volatility,
+            MIN(daily_return) as min_return,
+            MAX(daily_return) as max_return,
+            PERCENTILE_CONT(0.05) WITHIN GROUP (ORDER BY daily_return) as var_95,
+            PERCENTILE_CONT(0.01) WITHIN GROUP (ORDER BY daily_return) as var_99
+          FROM returns
+          WHERE daily_return IS NOT NULL
+        parameters:
+          - field: "instrumentId"
+          - field: "timeframe"
+          - field: "endDate"
+        cache-enabled: true
+        cache-ttl-seconds: 1800
+    field-mappings:
+      - source-field: "observation_count"
+        target-field: "historicalObservations"
+      - source-field: "mean_return"
+        target-field: "meanDailyReturn"
+      - source-field: "volatility"
+        target-field: "historicalVolatility"
+      - source-field: "var_95"
+        target-field: "valueAtRisk95"
+      - source-field: "var_99"
+        target-field: "valueAtRisk99"
+
+rules:
+  - id: "portfolio-validation"
+    name: "Portfolio Data Validation"
+    condition: "#portfolioId != null && #portfolioValue > 0"
+    message: "Portfolio {{#portfolioName}} ({{#portfolioId}}) validated with value {{#portfolioValue}} {{#portfolioCurrency}}"
+    severity: "INFO"
+
+  - id: "transaction-pattern-analysis"
+    name: "Transaction Pattern Analysis"
+    condition: "#recentTransactionCount > 0"
+    message: "Account has {{#recentTransactionCount}} transactions, avg amount: {{#averageTransactionAmount}}"
+    severity: "INFO"
+
+  - id: "risk-assessment"
+    name: "Historical Risk Assessment"
+    condition: "#historicalVolatility != null"
+    message: "Instrument volatility: {{#historicalVolatility}}, VaR 95%: {{#valueAtRisk95}}"
+    severity: "INFO"
+```
+
+**Usage in Java:**
+
+```java
+// Configure database connections
+ExternalDataSourceConfiguration portfolioDbConfig = ExternalDataSourceConfiguration.builder()
+    .connectionName("portfolio-db")
+    .jdbcUrl("jdbc:postgresql://portfolio-db.company.com:5432/portfolios")
+    .username("${PORTFOLIO_DB_USER}")
+    .password("${PORTFOLIO_DB_PASSWORD}")
+    .build();
+
+// Data with database query parameters
+Map<String, Object> analysisData = Map.of(
+    "customerId", "CUST123",
+    "portfolioType", "EQUITY",
+    "asOfDate", "2024-01-15",
+    "region", "US",                    // Optional parameter
+    "maxResults", 10,
+    "accountId", "ACC456",
+    "lookbackDays", 30,
+    "transactionType", "TRADE",        // Optional filter
+    "minAmount", 1000.0,               // Optional filter
+    "maxAmount", null,                 // Optional filter (null = no limit)
+    "instrumentId", "AAPL",
+    "timeframe", 252,                  // 1 year of trading days
+    "endDate", "2024-01-15"
+);
+
+// Register data sources and evaluate
+engine.registerDataSource("portfolio-db", portfolioDbConfig);
+engine.registerDataSource("transaction-db", transactionDbConfig);
+engine.registerDataSource("market-data-db", marketDataDbConfig);
+
+RuleResult result = engine.evaluate(analysisData);
+```
+
+**Benefits:**
+- Complex SQL queries with dynamic parameters
+- Support for optional parameters and conditional logic
+- Performance optimization through parameterized queries
+- Built-in connection pooling and caching
+- Perfect for financial analytics and reporting
+
+### 5. File System Path Parameters
+
+**What it is:** Use parameterized file paths for dynamic file system access, where file paths are constructed at runtime based on data context for environment-specific or time-based data files.
+
+**When to use:**
+- Environment-specific data files (dev, test, prod)
+- Time-based data files (daily, monthly, yearly)
+- Regional or tenant-specific data files
+- Dynamic batch processing with varying file sources
+- Archive and historical data access
+
+**Example: Dynamic File System Data Access**
+
+```yaml
+# rules/file-system-parameters.yaml
+metadata:
+  type: "rule-config"
+  name: "Parameterized File System Data Access"
+  version: "1.0.0"
+  description: "Dynamic file access with parameterized paths"
+
+enrichments:
+  - id: "daily-market-data-enrichment"
+    name: "Daily Market Data Files"
+    type: "lookup-enrichment"
+    condition: "#data.tradingDate != null && #data.market != null && #data.dataType != null"
+    lookup-config:
+      lookup-dataset:
+        type: "file-system"
+        file-path: "/data/market-data/{market}/{dataType}/daily/{tradingDate}.csv"
+        format: "csv"
+        key-field: "symbol"
+        delimiter: ","
+        has-header: true
+        parameters:
+          - field: "market"        # NYSE, NASDAQ, LSE, etc.
+          - field: "dataType"      # prices, volumes, trades, etc.
+          - field: "tradingDate"   # YYYY-MM-DD format
+        cache-enabled: true
+        cache-ttl-seconds: 3600
+        watch-for-changes: true
+    field-mappings:
+      - source-field: "open_price"
+        target-field: "openPrice"
+      - source-field: "close_price"
+        target-field: "closePrice"
+      - source-field: "high_price"
+        target-field: "highPrice"
+      - source-field: "low_price"
+        target-field: "lowPrice"
+      - source-field: "volume"
+        target-field: "tradingVolume"
+
+  - id: "regulatory-filing-enrichment"
+    name: "Regulatory Filing Data"
+    type: "lookup-enrichment"
+    condition: "#data.jurisdiction != null && #data.filingType != null && #data.filingDate != null"
+    lookup-config:
+      lookup-dataset:
+        type: "file-system"
+        file-path: "/regulatory-data/{jurisdiction}/{filingType}/{year}/{month}/{filingDate}-{filingType}.json"
+        format: "json"
+        key-field: "entity_id"
+        parameters:
+          - field: "jurisdiction"   # US, EU, UK, etc.
+          - field: "filingType"     # 10K, 10Q, 8K, etc.
+          - field: "year"           # Extracted from filingDate
+          - field: "month"          # Extracted from filingDate
+          - field: "filingDate"     # YYYY-MM-DD format
+        cache-enabled: true
+        cache-ttl-seconds: 7200
+    field-mappings:
+      - source-field: "entity_name"
+        target-field: "entityName"
+      - source-field: "filing_status"
+        target-field: "filingStatus"
+      - source-field: "total_assets"
+        target-field: "totalAssets"
+      - source-field: "total_liabilities"
+        target-field: "totalLiabilities"
+
+  - id: "environment-config-enrichment"
+    name: "Environment-Specific Configuration"
+    type: "lookup-enrichment"
+    condition: "#data.environment != null && #data.configType != null"
+    lookup-config:
+      lookup-dataset:
+        type: "file-system"
+        file-path: "/config/{environment}/{configType}-config.yaml"
+        format: "yaml"
+        key-field: "config_key"
+        parameters:
+          - field: "environment"   # dev, test, staging, prod
+          - field: "configType"    # limits, thresholds, rates, etc.
+        cache-enabled: true
+        watch-for-changes: true
+    field-mappings:
+      - source-field: "value"
+        target-field: "configValue"
+      - source-field: "description"
+        target-field: "configDescription"
+      - source-field: "last_updated"
+        target-field: "configLastUpdated"
+
+rules:
+  - id: "market-data-validation"
+    name: "Market Data Validation"
+    condition: "#openPrice != null && #closePrice != null && #tradingVolume > 0"
+    message: "Market data loaded for {{#data.tradingDate}}: Open {{#openPrice}}, Close {{#closePrice}}, Volume {{#tradingVolume}}"
+    severity: "INFO"
+
+  - id: "regulatory-compliance-check"
+    name: "Regulatory Filing Compliance"
+    condition: "#filingStatus == 'FILED' && #totalAssets > 0"
+    message: "Entity {{#entityName}} has filed {{#data.filingType}} with assets {{#totalAssets}}"
+    severity: "INFO"
+```
+
+**Usage in Java:**
+
+```java
+// Market data with file path parameters
+Map<String, Object> marketData = Map.of(
+    "tradingDate", "2024-01-15",
+    "market", "NYSE",
+    "dataType", "prices",
+    "symbol", "AAPL"
+);
+
+// Regulatory data with date-based path parameters
+Map<String, Object> regulatoryData = Map.of(
+    "jurisdiction", "US",
+    "filingType", "10K",
+    "filingDate", "2024-01-15",
+    "year", "2024",           // Can be extracted from filingDate
+    "month", "01",            // Can be extracted from filingDate
+    "entity_id", "ENTITY123"
+);
+
+// Environment-specific configuration
+Map<String, Object> configData = Map.of(
+    "environment", "production",
+    "configType", "trading-limits",
+    "config_key", "max_position_size"
+);
+
+// Files will be accessed from:
+// /data/market-data/NYSE/prices/daily/2024-01-15.csv
+// /regulatory-data/US/10K/2024/01/2024-01-15-10K.json
+// /config/production/trading-limits-config.yaml
+
+RuleResult result = engine.evaluate(marketData);
+```
+
+**Benefits:**
+- Dynamic file path construction
+- Environment and time-based file organization
+- Support for multiple file formats (CSV, JSON, YAML, XML)
+- Built-in file watching for real-time updates
+- Perfect for batch processing and data archival scenarios
+
+### 6. Template-Based Data Generation
+
+**What it is:** Use SpEL expressions in templates for dynamic data creation and transformation, allowing parameterized data generation that adapts based on context.
+
+**When to use:**
+- Dynamic data transformation and formatting
+- Conditional data generation based on parameters
+- Complex calculated fields and derived data
+- Template-based reporting and document generation
+- Data normalization and standardization
+
+**Example: Dynamic Data Transformation Templates**
+
+```yaml
+# rules/template-data-generation.yaml
+metadata:
+  type: "rule-config"
+  name: "Template-Based Data Generation"
+  version: "1.0.0"
+  description: "Dynamic data generation using SpEL templates"
+
+enrichments:
+  - id: "calculated-fields-enrichment"
+    name: "Calculated Financial Fields"
+    type: "calculation-enrichment"
+    condition: "#data.baseAmount != null && #data.currency != null"
+    calculation-config:
+      calculations:
+        - target-field: "formattedAmount"
+          expression: |
+            #{#data.currency == 'JPY' ?
+              T(java.text.NumberFormat).getNumberInstance().format(#data.baseAmount) :
+              T(java.text.NumberFormat).getCurrencyInstance().format(#data.baseAmount)}
+
+        - target-field: "amountInWords"
+          expression: |
+            #{#data.baseAmount < 1000 ? 'Small Amount' :
+              (#data.baseAmount < 10000 ? 'Medium Amount' :
+               (#data.baseAmount < 100000 ? 'Large Amount' : 'Very Large Amount'))}
+
+        - target-field: "riskCategory"
+          expression: |
+            #{#data.customerTier == 'PREMIUM' ?
+              (#data.baseAmount > 100000 ? 'HIGH_VALUE_PREMIUM' : 'STANDARD_PREMIUM') :
+              (#data.baseAmount > 50000 ? 'HIGH_VALUE_STANDARD' : 'STANDARD')}
+
+        - target-field: "processingFee"
+          expression: |
+            #{#data.customerTier == 'PREMIUM' ?
+              T(java.lang.Math).max(5.0, #data.baseAmount * 0.001) :
+              T(java.lang.Math).max(10.0, #data.baseAmount * 0.002)}
+
+        - target-field: "approvalRequired"
+          expression: |
+            #{#data.baseAmount > (#data.customerTier == 'PREMIUM' ? 100000 : 50000) ||
+              #data.riskScore > 75 ||
+              #data.jurisdiction == 'HIGH_RISK'}
+
+  - id: "dynamic-message-generation"
+    name: "Dynamic Message Templates"
+    type: "calculation-enrichment"
+    condition: "true"
+    calculation-config:
+      calculations:
+        - target-field: "transactionSummary"
+          expression: |
+            #{'Transaction Summary:\n' +
+              'Customer: ' + (#data.customerName ?: 'Unknown') + '\n' +
+              'Amount: ' + #formattedAmount + '\n' +
+              'Risk Category: ' + #riskCategory + '\n' +
+              'Processing Fee: ' + T(java.text.NumberFormat).getCurrencyInstance().format(#processingFee) + '\n' +
+              'Approval Required: ' + (#approvalRequired ? 'YES' : 'NO') + '\n' +
+              'Processing Date: ' + T(java.time.LocalDateTime).now().format(T(java.time.format.DateTimeFormatter).ofPattern('yyyy-MM-dd HH:mm:ss'))}
+
+        - target-field: "riskAssessmentReport"
+          expression: |
+            #{'Risk Assessment Report\n' +
+              '========================\n' +
+              'Customer Tier: ' + #data.customerTier + '\n' +
+              'Risk Score: ' + #data.riskScore + '/100\n' +
+              'Risk Level: ' + (#data.riskScore > 80 ? 'HIGH' : (#data.riskScore > 50 ? 'MEDIUM' : 'LOW')) + '\n' +
+              'Jurisdiction: ' + #data.jurisdiction + '\n' +
+              'Recommended Action: ' +
+              (#data.riskScore > 80 ? 'IMMEDIATE_REVIEW' :
+               (#data.riskScore > 50 ? 'ENHANCED_MONITORING' : 'STANDARD_PROCESSING')) + '\n' +
+              'Next Review Date: ' +
+              T(java.time.LocalDate).now().plusDays(#data.riskScore > 80 ? 7 : (#data.riskScore > 50 ? 30 : 90)).toString()}
+
+        - target-field: "complianceChecklist"
+          expression: |
+            #{T(java.util.Arrays).asList(
+              'KYC Status: ' + (#data.kycCompleted ? 'COMPLETED' : 'PENDING'),
+              'AML Check: ' + (#data.amlCleared ? 'CLEARED' : 'UNDER_REVIEW'),
+              'Sanctions Check: ' + (#data.sanctionsCleared ? 'CLEARED' : 'FLAGGED'),
+              'PEP Status: ' + (#data.isPep ? 'POLITICALLY_EXPOSED' : 'STANDARD'),
+              'Document Verification: ' + (#data.documentsVerified ? 'VERIFIED' : 'PENDING'),
+              'Risk Assessment: ' + (#data.riskScore <= 50 ? 'LOW_RISK' : 'HIGH_RISK')
+            ).stream().collect(T(java.util.stream.Collectors).joining('\n'))}
+
+  - id: "conditional-data-enrichment"
+    name: "Conditional Data Based on Parameters"
+    type: "calculation-enrichment"
+    condition: "#data.dataProfile != null"
+    calculation-config:
+      calculations:
+        - target-field: "enrichedData"
+          expression: |
+            #{#data.dataProfile == 'FULL' ?
+              T(java.util.Map).of(
+                'detailedAnalysis', true,
+                'historicalData', true,
+                'predictiveModeling', true,
+                'stressTestResults', true,
+                'regulatoryReporting', true
+              ) :
+              (#data.dataProfile == 'STANDARD' ?
+                T(java.util.Map).of(
+                  'detailedAnalysis', true,
+                  'historicalData', true,
+                  'predictiveModeling', false,
+                  'stressTestResults', false,
+                  'regulatoryReporting', true
+                ) :
+                T(java.util.Map).of(
+                  'detailedAnalysis', false,
+                  'historicalData', false,
+                  'predictiveModeling', false,
+                  'stressTestResults', false,
+                  'regulatoryReporting', false
+                ))}
+
+rules:
+  - id: "template-validation"
+    name: "Template Data Validation"
+    condition: "#formattedAmount != null && #riskCategory != null"
+    message: "Generated data: {{#formattedAmount}} ({{#riskCategory}})"
+    severity: "INFO"
+
+  - id: "approval-workflow"
+    name: "Approval Workflow Trigger"
+    condition: "#approvalRequired == true"
+    message: "Approval required for {{#amountInWords}} transaction: {{#transactionSummary}}"
+    severity: "WARNING"
+
+  - id: "compliance-report"
+    name: "Compliance Report Generation"
+    condition: "true"
+    message: "Compliance Status:\n{{#complianceChecklist}}"
+    severity: "INFO"
+```
+
+**Usage in Java:**
+
+```java
+// Data for template-based generation
+Map<String, Object> templateData = Map.of(
+    "baseAmount", 75000.0,
+    "currency", "USD",
+    "customerName", "John Smith",
+    "customerTier", "PREMIUM",
+    "riskScore", 65,
+    "jurisdiction", "US",
+    "kycCompleted", true,
+    "amlCleared", true,
+    "sanctionsCleared", true,
+    "isPep", false,
+    "documentsVerified", true,
+    "dataProfile", "FULL"
+);
+
+RuleResult result = engine.evaluate(templateData);
+
+// Access generated template data
+String transactionSummary = (String) result.getEnrichedData().get("transactionSummary");
+String riskReport = (String) result.getEnrichedData().get("riskAssessmentReport");
+String complianceChecklist = (String) result.getEnrichedData().get("complianceChecklist");
+Map<String, Object> enrichedData = (Map<String, Object>) result.getEnrichedData().get("enrichedData");
+```
+
+**Benefits:**
+- Complex conditional logic in templates
+- Dynamic data transformation and formatting
+- Integration with Java utility classes and functions
+- Perfect for reporting and document generation
+- Flexible data normalization and standardization
+
+### Choosing the Right Data Management Parameterization Approach
+
+| Approach | Best For | Flexibility | Performance | Complexity |
+|----------|----------|-------------|-------------|------------|
+| **Dynamic Data Context** | Multi-tenant, regional variations | High | High | Low |
+| **Configuration-Driven** | Environment-specific deployments | Medium | High | Low |
+| **REST API Parameters** | Real-time external data | High | Medium | Medium |
+| **Database Query Parameters** | Complex analytics, reporting | Medium | Medium | High |
+| **File System Path Parameters** | Batch processing, archives | Medium | High | Low |
+| **Template-Based Generation** | Data transformation, reporting | High | High | Medium |
+
+### Best Practices for Data Management Parameterization
+
+1. **Start with Data Context Parameters**: Most flexible for business logic variations
+2. **Use Configuration for Infrastructure**: Database connections, API endpoints, file paths
+3. **Cache External Data Appropriately**: Balance freshness with performance
+4. **Document Parameter Dependencies**: Clear documentation of required vs. optional parameters
+5. **Validate Parameters Early**: Check parameter validity before expensive operations
+6. **Monitor Parameter Usage**: Track which parameters are used most frequently
+7. **Version Control Parameter Changes**: Keep parameter changes in version control
+8. **Test with Multiple Parameter Sets**: Ensure robustness across different scenarios
+
+---
+
 # Part 4: Advanced Topics
 
-## 13. Scenario-Based Configuration Management
+## 14. Scenario-Based Configuration Management
 
 ### Introduction to Scenarios
 
