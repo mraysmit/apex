@@ -328,7 +328,7 @@ public class GlobalExceptionHandler {
         errorResponse.setCorrelationId(correlationId);
         
         testAwareLogger.error(logger, "Unexpected error [{}]: {} for {}",
-                            ex, correlationId, ex.getMessage(), instance);
+                            correlationId, ex.getMessage(), instance, ex);
         
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }

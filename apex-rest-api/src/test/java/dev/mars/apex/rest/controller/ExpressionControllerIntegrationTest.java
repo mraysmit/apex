@@ -45,7 +45,7 @@ public class ExpressionControllerIntegrationTest extends BaseIntegrationTest {
     void shouldEvaluateExpressionWithContextVariables() {
         // Arrange
         Map<String, Object> request = new HashMap<>();
-        request.put("expression", "amount * taxRate");
+        request.put("expression", "#amount * #taxRate");
         
         Map<String, Object> context = new HashMap<>();
         context.put("amount", 1000.0);

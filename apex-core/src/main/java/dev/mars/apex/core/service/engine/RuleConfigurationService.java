@@ -67,7 +67,7 @@ public class RuleConfigurationService {
      * @param priority The priority of the rule
      * @return The created rule
      */
-    public Rule registerRule(String id, String category, String name, String condition, 
+    public Rule registerRule(String id, String category, String name, String condition,
                           String message, String description, int priority) {
         Rule rule = createRule(id, category, name, condition, message, description, priority);
         return configuration.registerRule(rule);

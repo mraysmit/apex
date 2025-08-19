@@ -1232,7 +1232,8 @@ public class CommoditySwapValidationBootstrap {
                 enabled: true
                 priority: 200
                 configuration:
-                  accumulative-rules:
+                  accumulator-variable: "businessRuleScore"
+                  accumulation-rules:
                     - id: "maturity-eligibility"
                       condition: "maturityDate != null && maturityDate.isBefore(tradeDate.plusYears(5))"
                       weight: 25

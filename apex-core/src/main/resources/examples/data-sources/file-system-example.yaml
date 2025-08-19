@@ -1,9 +1,14 @@
 # Example YAML configuration for file system data sources
 # This demonstrates various file format configurations including CSV, JSON, XML, and fixed-width
 
-name: "File System Data Sources Example"
-description: "Example configuration showing different file system data source setups"
-version: "1.0.0"
+metadata:
+  name: "File System Data Sources Example"
+  version: "1.0.0"
+  description: "Example configuration showing different file system data source setups"
+  type: "external-data-config"
+  author: "apex.examples@company.com"
+  created: "2025-08-02"
+  tags: ["examples", "file-system", "data-sources", "csv", "json", "xml"]
 
 dataSources:
   # CSV file data source

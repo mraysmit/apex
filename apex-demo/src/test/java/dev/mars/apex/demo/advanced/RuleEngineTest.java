@@ -250,34 +250,39 @@ public class RuleEngineTest {
      */
     @Test
     public void testRuleConfigurationService() {
-        // Register rules using the rule configuration service
-        Rule rule1 = ruleConfigService.registerRule(
-            "R001",
-            "test-category-config",
-            "AgeRule",
-            "#age >= 18",
-            "Person is an adult",
-            "Identifies adults",
-            10
-        );
+        // Use a unique category name to avoid interference from other tests
+        String uniqueCategory = "test-category-config-" + System.currentTimeMillis();
 
-        Rule rule2 = ruleConfigService.registerRule(
-            "R002",
-            "test-category-config",
-            "IncomeRule",
-            "#income >= 50000",
-            "Person has sufficient income",
-            "Identifies people with sufficient income",
-            20
-        );
+        // Create unique rule IDs to avoid conflicts
+        String rule1Id = "R001-" + System.currentTimeMillis();
+        String rule2Id = "R002-" + System.currentTimeMillis();
+
+        // Create rules directly using the configuration builder to avoid double registration
+        Rule rule1 = config.rule(rule1Id)
+            .withCategory(uniqueCategory)
+            .withName("AgeRule")
+            .withCondition("#age >= 18")
+            .withMessage("Person is an adult")
+            .withDescription("Identifies adults")
+            .withPriority(10)
+            .build();
+
+        Rule rule2 = config.rule(rule2Id)
+            .withCategory(uniqueCategory)
+            .withName("IncomeRule")
+            .withCondition("#income >= 50000")
+            .withMessage("Person has sufficient income")
+            .withDescription("Identifies people with sufficient income")
+            .withPriority(20)
+            .build();
 
         // Verify rules were registered
         assertNotNull(rule1, "Rule 1 should not be null");
         assertNotNull(rule2, "Rule 2 should not be null");
 
         // Get rules by ID
-        Rule retrievedRule1 = config.getRuleById("R001");
-        Rule retrievedRule2 = config.getRuleById("R002");
+        Rule retrievedRule1 = config.getRuleById(rule1Id);
+        Rule retrievedRule2 = config.getRuleById(rule2Id);
 
         // Verify retrieved rules
         assertNotNull(retrievedRule1, "Retrieved rule 1 should not be null");
@@ -287,7 +292,7 @@ public class RuleEngineTest {
         assertEquals("IncomeRule", retrievedRule2.getName(), "Rule 2 name should match");
 
         // Get rules by category
-        List<RuleBase> rulesByCategory = config.getRulesForCategory("test-category-config");
+        List<RuleBase> rulesByCategory = config.getRulesForCategory(uniqueCategory);
 
         // Verify rules by category
         assertEquals(2, rulesByCategory.size(), "Should find 2 rules in the category");

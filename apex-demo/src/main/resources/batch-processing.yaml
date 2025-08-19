@@ -75,9 +75,7 @@ metadata:
 # Licensed under the Apache License, Version 2.0
 # ============================================================================
 
-name: "Batch Processing Rules"
-description: "High-performance rules optimized for batch processing scenarios"
-version: "1.0"
+# Metadata is defined at the top of the file - removing duplicate entries
 
 # ============================================================================
 # PERFORMANCE-OPTIMIZED VALIDATION RULES

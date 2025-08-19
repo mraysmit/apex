@@ -291,6 +291,40 @@ public class RulesController {
     }
 
     /**
+     * Get available rule functions.
+     */
+    @GetMapping("/functions")
+    @Operation(
+        summary = "Get available rule functions",
+        description = "Returns a list of all available functions that can be used in rule expressions."
+    )
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved available functions")
+    public ResponseEntity<Map<String, Object>> getAvailableRuleFunctions() {
+        // Add common SpEL functions and operators
+        List<String> functions = Arrays.asList(
+            // Mathematical functions
+            "abs", "ceil", "floor", "round", "max", "min", "pow", "sqrt",
+            // String functions
+            "length", "substring", "indexOf", "toLowerCase", "toUpperCase", "trim", "replace",
+            // Collection functions
+            "size", "isEmpty", "contains", "containsKey",
+            // Date/Time functions
+            "now", "today", "format",
+            // Logical operators
+            "and", "or", "not", "eq", "ne", "lt", "le", "gt", "ge",
+            // Conditional
+            "if", "matches"
+        );
+
+        return ResponseEntity.ok(Map.of(
+            "functions", functions,
+            "count", functions.size(),
+            "description", "Available functions for use in rule expressions",
+            "timestamp", java.time.Instant.now()
+        ));
+    }
+
+    /**
      * Execute a rule directly with provided facts.
      */
     @PostMapping("/execute")

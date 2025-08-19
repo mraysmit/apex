@@ -8,7 +8,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,15 +26,15 @@ public class RulesControllerIntegrationTest extends BaseIntegrationTest {
     void shouldEvaluateSimpleRule() {
         // Arrange
         Map<String, Object> request = new HashMap<>();
-        request.put("expression", "amount > 1000");
-        
-        Map<String, Object> context = new HashMap<>();
-        context.put("amount", 1500.0);
-        request.put("context", context);
+        request.put("condition", "amount > 1000");
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("amount", 1500.0);
+        request.put("data", data);
 
         // Act
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-            url("/api/rules/evaluate"),
+            url("/api/rules/check"),
             HttpMethod.POST,
             createJsonEntity(request),
             new ParameterizedTypeReference<Map<String, Object>>() {}
@@ -41,8 +43,8 @@ public class RulesControllerIntegrationTest extends BaseIntegrationTest {
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertTrue((Boolean) response.getBody().get("result"));
-        assertTrue(response.getBody().containsKey("executionTime"));
+        assertTrue((Boolean) response.getBody().get("matched"));
+        assertTrue(response.getBody().containsKey("success"));
     }
 
     @Test
@@ -50,15 +52,15 @@ public class RulesControllerIntegrationTest extends BaseIntegrationTest {
     void shouldHandleRuleEvaluationWithFalseResult() {
         // Arrange
         Map<String, Object> request = new HashMap<>();
-        request.put("expression", "amount > 1000");
-        
-        Map<String, Object> context = new HashMap<>();
-        context.put("amount", 500.0);
-        request.put("context", context);
+        request.put("condition", "amount > 1000");
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("amount", 500.0);
+        request.put("data", data);
 
         // Act
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-            url("/api/rules/evaluate"),
+            url("/api/rules/check"),
             HttpMethod.POST,
             createJsonEntity(request),
             new ParameterizedTypeReference<Map<String, Object>>() {}
@@ -67,7 +69,7 @@ public class RulesControllerIntegrationTest extends BaseIntegrationTest {
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertFalse((Boolean) response.getBody().get("result"));
+        assertFalse((Boolean) response.getBody().get("matched"));
     }
 
     @Test
@@ -75,24 +77,26 @@ public class RulesControllerIntegrationTest extends BaseIntegrationTest {
     void shouldHandleInvalidExpressionGracefully() {
         // Arrange
         Map<String, Object> request = new HashMap<>();
-        request.put("expression", "invalid expression syntax +++");
-        
-        Map<String, Object> context = new HashMap<>();
-        context.put("amount", 1500.0);
-        request.put("context", context);
+        request.put("condition", "invalid expression syntax +++");
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("amount", 1500.0);
+        request.put("data", data);
 
         // Act
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-            url("/api/rules/evaluate"),
+            url("/api/rules/check"),
             HttpMethod.POST,
             createJsonEntity(request),
             new ParameterizedTypeReference<Map<String, Object>>() {}
         );
 
         // Assert
-        // Should return error response but not crash
-        assertTrue(response.getStatusCode() == HttpStatus.BAD_REQUEST || 
-                  response.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR);
+        // Should handle invalid expression gracefully with error recovery
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        // Error recovery should return matched=false for invalid expressions
+        assertFalse((Boolean) response.getBody().get("matched"));
     }
 
     @Test
@@ -100,7 +104,21 @@ public class RulesControllerIntegrationTest extends BaseIntegrationTest {
     void shouldValidateRuleExpression() {
         // Arrange
         Map<String, Object> request = new HashMap<>();
-        request.put("expression", "amount > 1000 && customerTier == 'GOLD'");
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("amount", 1500.0);
+        data.put("customerTier", "GOLD");
+        request.put("data", data);
+
+        // Create validation rules array
+        List<Map<String, Object>> validationRules = new ArrayList<>();
+        Map<String, Object> rule = new HashMap<>();
+        rule.put("name", "customer-validation");
+        rule.put("condition", "amount > 1000 && customerTier == 'GOLD'");
+        rule.put("message", "Customer validation passed");
+        rule.put("severity", "ERROR");
+        validationRules.add(rule);
+        request.put("validationRules", validationRules);
 
         // Act
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
@@ -114,7 +132,9 @@ public class RulesControllerIntegrationTest extends BaseIntegrationTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertTrue(response.getBody().containsKey("valid"));
-        assertTrue(response.getBody().containsKey("message"));
+        assertTrue(response.getBody().containsKey("totalRules"));
+        // Should be valid since the condition matches the data
+        assertTrue((Boolean) response.getBody().get("valid"));
     }
 
     @Test

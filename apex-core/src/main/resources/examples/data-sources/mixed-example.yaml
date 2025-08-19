@@ -1,9 +1,14 @@
 # Example YAML configuration for mixed data sources
 # This demonstrates cache data sources and a complete multi-source setup
 
-name: "Mixed Data Sources Example"
-description: "Complete example with cache, database, API, and file sources working together"
-version: "1.0.0"
+metadata:
+  name: "Mixed Data Sources Example"
+  version: "1.0.0"
+  description: "Complete example with cache, database, API, and file sources working together"
+  type: "external-data-config"
+  author: "apex.examples@company.com"
+  created: "2025-08-02"
+  tags: ["examples", "mixed-sources", "cache", "database", "api", "file-system"]
 
 dataSources:
   # Primary cache for frequently accessed data

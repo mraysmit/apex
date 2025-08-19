@@ -1,9 +1,14 @@
 # Example YAML configuration for REST API data sources
 # This demonstrates various REST API configurations with different authentication methods
 
-name: "REST API Data Sources Example"
-description: "Example configuration showing different REST API data source setups"
-version: "1.0.0"
+metadata:
+  name: "REST API Data Sources Example"
+  version: "1.0.0"
+  description: "Example configuration showing different REST API data source setups"
+  type: "external-data-config"
+  author: "apex.examples@company.com"
+  created: "2025-08-02"
+  tags: ["examples", "rest-api", "data-sources", "authentication", "external-apis"]
 
 dataSources:
   # Public API with API key authentication

@@ -1,9 +1,14 @@
 # Example YAML configuration for database data sources
 # This demonstrates various database configurations including PostgreSQL, MySQL, and H2
 
-name: "Database Data Sources Example"
-description: "Example configuration showing different database data source setups"
-version: "1.0.0"
+metadata:
+  name: "Database Data Sources Example"
+  version: "1.0.0"
+  description: "Example configuration showing different database data source setups"
+  type: "external-data-config"
+  author: "apex.examples@company.com"
+  created: "2025-08-02"
+  tags: ["examples", "database", "data-sources", "postgresql", "mysql", "h2"]
 
 # Data source configurations
 dataSources:
