@@ -317,10 +317,639 @@ Rules use Spring Expression Language (SpEL) for conditions:
 - **Required fields**: `#email != null` (email must exist)
 - **Pattern matching**: `#email.contains('@')` (email must contain @)
 - **Complex logic**: `#amount > 1000 ? #approvalRequired == true : true` (amounts over 1000 need approval)
+- **If-Then-Else**: `#age >= 18 ? 'ADULT' : 'MINOR'` (simple conditional assignment)
+- **Case Statement**: `#status == 'ACTIVE' ? 'Processing' : (#status == 'PENDING' ? 'Waiting' : 'Inactive')` (multiple conditions)
+
+#### If-Then-Else Statements
+
+For simple conditional logic, use ternary expressions in calculation enrichments:
+
+```yaml
+enrichments:
+  - id: "age-category"
+    type: "calculation-enrichment"
+    name: "Age Category Assignment"
+    condition: "#age != null"
+    calculations:
+      - field: "ageCategory"
+        expression: "#age >= 18 ? 'ADULT' : 'MINOR'"
+      - field: "eligibleForCredit"
+        expression: "#age >= 21 && #accountBalance >= 1000 ? true : false"
+      - field: "discountRate"
+        expression: "#age >= 65 ? 0.15 : (#age >= 18 ? 0.05 : 0.0)"
+```
+
+#### Case Statement (Multiple Conditions)
+
+For multiple conditions, use nested ternary expressions to simulate case statements:
+
+```yaml
+enrichments:
+  - id: "customer-tier-case"
+    type: "calculation-enrichment"
+    name: "Customer Tier Case Logic"
+    condition: "#accountBalance != null"
+    calculations:
+      - field: "customerTier"
+        expression: "#accountBalance >= 100000 ? 'PLATINUM' : (#accountBalance >= 50000 ? 'GOLD' : (#accountBalance >= 10000 ? 'SILVER' : 'BRONZE'))"
+      - field: "discountRate"
+        expression: "#customerTier == 'PLATINUM' ? 0.20 : (#customerTier == 'GOLD' ? 0.15 : (#customerTier == 'SILVER' ? 0.10 : 0.05))"
+      - field: "creditLimit"
+        expression: "#customerTier == 'PLATINUM' ? 500000 : (#customerTier == 'GOLD' ? 250000 : (#customerTier == 'SILVER' ? 100000 : 25000))"
+```
+
+**Advanced Case Statement with Status Logic:**
+
+```yaml
+enrichments:
+  - id: "order-status-case"
+    type: "calculation-enrichment"
+    name: "Order Status Processing"
+    condition: "#orderStatus != null"
+    calculations:
+      - field: "nextAction"
+        expression: "#orderStatus == 'NEW' ? 'VALIDATE' : (#orderStatus == 'VALIDATED' ? 'PROCESS' : (#orderStatus == 'PROCESSING' ? 'SHIP' : (#orderStatus == 'SHIPPED' ? 'DELIVER' : 'COMPLETE')))"
+      - field: "canCancel"
+        expression: "#orderStatus == 'NEW' || #orderStatus == 'VALIDATED' ? true : false"
+      - field: "estimatedDays"
+        expression: "#orderStatus == 'NEW' ? 1 : (#orderStatus == 'VALIDATED' ? 2 : (#orderStatus == 'PROCESSING' ? 3 : (#orderStatus == 'SHIPPED' ? 1 : 0)))"
+```
+
+#### Financial Services Examples
+
+**Risk Assessment with Multiple Factors:**
+
+```yaml
+enrichments:
+  - id: "risk-assessment"
+    type: "calculation-enrichment"
+    name: "Multi-Factor Risk Assessment"
+    condition: "#creditScore != null && #income != null"
+    calculations:
+      - field: "creditRiskScore"
+        expression: "#creditScore >= 750 ? 10 : (#creditScore >= 700 ? 20 : (#creditScore >= 650 ? 40 : 60))"
+      - field: "incomeRiskScore"
+        expression: "#income >= 100000 ? 5 : (#income >= 75000 ? 15 : (#income >= 50000 ? 25 : 35))"
+      - field: "totalRiskScore"
+        expression: "#creditRiskScore + #incomeRiskScore"
+      - field: "riskCategory"
+        expression: "#totalRiskScore <= 20 ? 'LOW' : (#totalRiskScore <= 40 ? 'MEDIUM' : (#totalRiskScore <= 60 ? 'HIGH' : 'VERY_HIGH'))"
+      - field: "approvalStatus"
+        expression: "#riskCategory == 'LOW' ? 'AUTO_APPROVE' : (#riskCategory == 'MEDIUM' ? 'REVIEW' : 'DECLINE')"
+```
+
+**Trading Limits Based on Account Type:**
+
+```yaml
+enrichments:
+  - id: "trading-limits"
+    type: "calculation-enrichment"
+    name: "Dynamic Trading Limits"
+    condition: "#accountType != null && #netWorth != null"
+    calculations:
+      - field: "dailyLimit"
+        expression: "#accountType == 'INSTITUTIONAL' ? 10000000 : (#accountType == 'HIGH_NET_WORTH' ? 1000000 : (#accountType == 'RETAIL' ? 100000 : 10000))"
+      - field: "leverageRatio"
+        expression: "#accountType == 'INSTITUTIONAL' ? 10.0 : (#accountType == 'HIGH_NET_WORTH' ? 5.0 : (#accountType == 'RETAIL' ? 2.0 : 1.0))"
+      - field: "marginRequirement"
+        expression: "#accountType == 'INSTITUTIONAL' ? 0.05 : (#accountType == 'HIGH_NET_WORTH' ? 0.10 : (#accountType == 'RETAIL' ? 0.25 : 0.50))"
+      - field: "canTradeOptions"
+        expression: "#accountType == 'INSTITUTIONAL' || (#accountType == 'HIGH_NET_WORTH' && #netWorth >= 1000000) ? true : false"
+```
+
+#### Data Validation Patterns
+
+**Comprehensive Field Validation:**
+
+```yaml
+rules:
+  - id: "email-validation"
+    name: "Email Format Validation"
+    condition: "#email != null && #email.matches('^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$')"
+    message: "Email address must be in valid format"
+    severity: "ERROR"
+
+  - id: "phone-validation"
+    name: "Phone Number Validation"
+    condition: "#phone != null && (#phone.matches('^\\+?[1-9]\\d{1,14}$') || #phone.matches('^\\(\\d{3}\\)\\s?\\d{3}-\\d{4}$'))"
+    message: "Phone number must be in valid format"
+    severity: "ERROR"
+
+  - id: "date-range-validation"
+    name: "Date Range Validation"
+    condition: "#startDate != null && #endDate != null && #startDate.isBefore(#endDate)"
+    message: "Start date must be before end date"
+    severity: "ERROR"
+
+  - id: "amount-precision-validation"
+    name: "Amount Precision Validation"
+    condition: "#amount != null && T(java.math.BigDecimal).valueOf(#amount).scale() <= 2"
+    message: "Amount cannot have more than 2 decimal places"
+    severity: "ERROR"
+```
+
+**Business Logic Validation:**
+
+```yaml
+rules:
+  - id: "business-hours-check"
+    name: "Business Hours Validation"
+    condition: "T(java.time.LocalTime).now().isAfter(T(java.time.LocalTime).of(9, 0)) && T(java.time.LocalTime).now().isBefore(T(java.time.LocalTime).of(17, 0))"
+    message: "Transaction must be processed during business hours (9 AM - 5 PM)"
+    severity: "WARNING"
+
+  - id: "weekend-restriction"
+    name: "Weekend Transaction Restriction"
+    condition: "!T(java.time.LocalDate).now().getDayOfWeek().toString().matches('SATURDAY|SUNDAY') || #amount <= 10000"
+    message: "Large transactions (>$10,000) are not allowed on weekends"
+    severity: "ERROR"
+
+  - id: "holiday-processing"
+    name: "Holiday Processing Check"
+    condition: "#isHoliday != true || #urgentProcessing == true"
+    message: "Non-urgent transactions cannot be processed on holidays"
+    severity: "WARNING"
+```
+
+#### Mathematical and String Operations
+
+**Complex Calculations:**
+
+```yaml
+enrichments:
+  - id: "financial-calculations"
+    type: "calculation-enrichment"
+    name: "Financial Metrics Calculation"
+    condition: "#principal != null && #rate != null && #years != null"
+    calculations:
+      - field: "simpleInterest"
+        expression: "#principal * #rate * #years / 100"
+      - field: "compoundInterest"
+        expression: "#principal * T(java.lang.Math).pow(1 + #rate/100, #years) - #principal"
+      - field: "monthlyPayment"
+        expression: "#principal * (#rate/1200) / (1 - T(java.lang.Math).pow(1 + #rate/1200, -#years*12))"
+      - field: "totalPayment"
+        expression: "#monthlyPayment * #years * 12"
+      - field: "totalInterest"
+        expression: "#totalPayment - #principal"
+```
+
+**String Manipulation:**
+
+```yaml
+enrichments:
+  - id: "string-processing"
+    type: "calculation-enrichment"
+    name: "String Data Processing"
+    condition: "#customerName != null && #accountNumber != null"
+    calculations:
+      - field: "nameUpperCase"
+        expression: "#customerName.toUpperCase()"
+      - field: "initials"
+        expression: "#customerName.split(' ')[0].substring(0,1) + #customerName.split(' ')[1].substring(0,1)"
+      - field: "maskedAccount"
+        expression: "'****' + #accountNumber.substring(#accountNumber.length() - 4)"
+      - field: "accountPrefix"
+        expression: "#accountNumber.substring(0, 3)"
+      - field: "isVipName"
+        expression: "#customerName.toLowerCase().contains('vip') || #customerName.toLowerCase().contains('premium')"
+```
+
+**Collection and Array Operations:**
+
+```yaml
+enrichments:
+  - id: "collection-processing"
+    type: "calculation-enrichment"
+    name: "Collection Data Analysis"
+    condition: "#transactions != null && #transactions.size() > 0"
+    calculations:
+      - field: "transactionCount"
+        expression: "#transactions.size()"
+      - field: "totalAmount"
+        expression: "#transactions.![amount].sum()"
+      - field: "averageAmount"
+        expression: "#transactions.![amount].sum() / #transactions.size()"
+      - field: "maxAmount"
+        expression: "#transactions.![amount].max()"
+      - field: "minAmount"
+        expression: "#transactions.![amount].min()"
+      - field: "hasLargeTransactions"
+        expression: "#transactions.?[amount > 10000].size() > 0"
+      - field: "largeTransactionCount"
+        expression: "#transactions.?[amount > 10000].size()"
+```
+
+#### Date and Time Operations
+
+**Date Calculations:**
+
+```yaml
+enrichments:
+  - id: "date-calculations"
+    type: "calculation-enrichment"
+    name: "Date and Time Processing"
+    condition: "#birthDate != null"
+    calculations:
+      - field: "age"
+        expression: "T(java.time.Period).between(#birthDate, T(java.time.LocalDate).now()).getYears()"
+      - field: "isAdult"
+        expression: "#age >= 18"
+      - field: "daysSinceBirth"
+        expression: "T(java.time.temporal.ChronoUnit).DAYS.between(#birthDate, T(java.time.LocalDate).now())"
+      - field: "nextBirthday"
+        expression: "#birthDate.withYear(T(java.time.LocalDate).now().getYear() + (#birthDate.withYear(T(java.time.LocalDate).now().getYear()).isBefore(T(java.time.LocalDate).now()) ? 1 : 0))"
+      - field: "zodiacSign"
+        expression: "#birthDate.getMonthValue() == 1 ? 'Capricorn/Aquarius' : (#birthDate.getMonthValue() == 2 ? 'Aquarius/Pisces' : 'Other')"
+```
+
+**Business Date Logic:**
+
+```yaml
+enrichments:
+  - id: "business-date-logic"
+    type: "calculation-enrichment"
+    name: "Business Date Calculations"
+    condition: "true"
+    calculations:
+      - field: "currentBusinessDay"
+        expression: "T(java.time.LocalDate).now().getDayOfWeek().getValue() <= 5"
+      - field: "nextBusinessDay"
+        expression: "T(java.time.LocalDate).now().getDayOfWeek().getValue() == 5 ? T(java.time.LocalDate).now().plusDays(3) : (T(java.time.LocalDate).now().getDayOfWeek().getValue() == 6 ? T(java.time.LocalDate).now().plusDays(2) : T(java.time.LocalDate).now().plusDays(1))"
+      - field: "isQuarterEnd"
+        expression: "T(java.time.LocalDate).now().getMonthValue() % 3 == 0 && T(java.time.LocalDate).now().getDayOfMonth() >= 28"
+      - field: "daysUntilMonthEnd"
+        expression: "T(java.time.LocalDate).now().lengthOfMonth() - T(java.time.LocalDate).now().getDayOfMonth()"
+```
+
+#### Advanced Conditional Logic
+
+**Multi-Criteria Decision Making:**
+
+```yaml
+enrichments:
+  - id: "loan-approval-logic"
+    type: "calculation-enrichment"
+    name: "Complex Loan Approval Logic"
+    condition: "#creditScore != null && #income != null && #debtToIncome != null"
+    calculations:
+      - field: "creditScoreCategory"
+        expression: "#creditScore >= 800 ? 'EXCELLENT' : (#creditScore >= 740 ? 'VERY_GOOD' : (#creditScore >= 670 ? 'GOOD' : (#creditScore >= 580 ? 'FAIR' : 'POOR')))"
+      - field: "incomeCategory"
+        expression: "#income >= 150000 ? 'HIGH' : (#income >= 75000 ? 'MEDIUM' : 'LOW')"
+      - field: "debtCategory"
+        expression: "#debtToIncome <= 0.28 ? 'LOW' : (#debtToIncome <= 0.36 ? 'MODERATE' : 'HIGH')"
+      - field: "approvalScore"
+        expression: "(#creditScoreCategory == 'EXCELLENT' ? 40 : (#creditScoreCategory == 'VERY_GOOD' ? 35 : (#creditScoreCategory == 'GOOD' ? 25 : (#creditScoreCategory == 'FAIR' ? 15 : 5)))) + (#incomeCategory == 'HIGH' ? 30 : (#incomeCategory == 'MEDIUM' ? 20 : 10)) + (#debtCategory == 'LOW' ? 30 : (#debtCategory == 'MODERATE' ? 20 : 5))"
+      - field: "loanDecision"
+        expression: "#approvalScore >= 80 ? 'APPROVED' : (#approvalScore >= 60 ? 'CONDITIONAL' : (#approvalScore >= 40 ? 'REVIEW_REQUIRED' : 'DECLINED'))"
+      - field: "interestRate"
+        expression: "#loanDecision == 'APPROVED' ? (#creditScoreCategory == 'EXCELLENT' ? 3.5 : (#creditScoreCategory == 'VERY_GOOD' ? 4.0 : 4.5)) : (#loanDecision == 'CONDITIONAL' ? 5.5 : 0.0)"
+```
+
+**Geographic and Regional Logic:**
+
+```yaml
+enrichments:
+  - id: "geographic-processing"
+    type: "calculation-enrichment"
+    name: "Geographic and Regional Processing"
+    condition: "#country != null && #state != null"
+    calculations:
+      - field: "region"
+        expression: "#country == 'US' ? (#state.matches('CA|OR|WA|NV|AZ') ? 'WEST' : (#state.matches('NY|NJ|CT|MA|PA') ? 'NORTHEAST' : (#state.matches('TX|FL|GA|NC|SC') ? 'SOUTH' : 'MIDWEST'))) : (#country == 'CA' ? 'CANADA' : 'INTERNATIONAL')"
+      - field: "timeZone"
+        expression: "#region == 'WEST' ? 'PST' : (#region == 'NORTHEAST' ? 'EST' : (#region == 'SOUTH' ? 'EST/CST' : 'CST'))"
+      - field: "taxRate"
+        expression: "#country == 'US' ? (#state == 'CA' ? 0.0725 : (#state == 'NY' ? 0.08 : (#state == 'TX' ? 0.0625 : 0.05))) : (#country == 'CA' ? 0.13 : 0.20)"
+      - field: "shippingZone"
+        expression: "#region == 'WEST' ? 1 : (#region == 'NORTHEAST' ? 2 : (#region == 'SOUTH' ? 3 : 4))"
+      - field: "isHighTaxState"
+        expression: "#taxRate > 0.07"
+```
 
 #### 3.2 Enrichments: Adding Smart Data
 
+#### Error Handling and Null Safety
+
+**Safe Navigation and Default Values:**
+
+```yaml
+enrichments:
+  - id: "safe-calculations"
+    type: "calculation-enrichment"
+    name: "Null-Safe Calculations"
+    condition: "true"
+    calculations:
+      - field: "safeAge"
+        expression: "#birthDate != null ? T(java.time.Period).between(#birthDate, T(java.time.LocalDate).now()).getYears() : 0"
+      - field: "safeEmail"
+        expression: "#email != null ? #email.toLowerCase() : 'no-email@unknown.com'"
+      - field: "safeBalance"
+        expression: "#accountBalance != null ? #accountBalance : 0.0"
+      - field: "safeName"
+        expression: "#firstName != null && #lastName != null ? #firstName + ' ' + #lastName : (#firstName != null ? #firstName : (#lastName != null ? #lastName : 'Unknown'))"
+      - field: "safePhoneFormatted"
+        expression: "#phone != null && #phone.length() >= 10 ? '(' + #phone.substring(0,3) + ') ' + #phone.substring(3,6) + '-' + #phone.substring(6) : 'No Phone'"
+```
+
+**Validation with Error Messages:**
+
+```yaml
+rules:
+  - id: "comprehensive-validation"
+    name: "Comprehensive Data Validation"
+    condition: "#email != null && #email.length() > 0 && #age != null && #age >= 0 && #phone != null && #phone.matches('^\\d{10}$')"
+    message: "All required fields are valid: email={{#email}}, age={{#age}}, phone={{#phone}}"
+    severity: "INFO"
+
+  - id: "email-null-check"
+    name: "Email Null Validation"
+    condition: "#email != null"
+    message: "Email field is required and cannot be null"
+    severity: "ERROR"
+
+  - id: "age-range-validation"
+    name: "Age Range Validation"
+    condition: "#age != null && #age >= 0 && #age <= 120"
+    message: "Age must be between 0 and 120, provided: {{#age}}"
+    severity: "ERROR"
+
+  - id: "conditional-validation"
+    name: "Conditional Field Validation"
+    condition: "#accountType == 'PREMIUM' ? (#creditLimit != null && #creditLimit > 0) : true"
+    message: "Premium accounts must have a valid credit limit"
+    severity: "ERROR"
+```
+
+#### Industry-Specific Examples
+
+**Healthcare/Insurance:**
+
+```yaml
+enrichments:
+  - id: "healthcare-processing"
+    type: "calculation-enrichment"
+    name: "Healthcare Data Processing"
+    condition: "#patientAge != null && #diagnosis != null"
+    calculations:
+      - field: "ageGroup"
+        expression: "#patientAge < 18 ? 'PEDIATRIC' : (#patientAge < 65 ? 'ADULT' : 'SENIOR')"
+      - field: "riskCategory"
+        expression: "#diagnosis.toLowerCase().contains('diabetes') || #diagnosis.toLowerCase().contains('heart') ? 'HIGH_RISK' : (#diagnosis.toLowerCase().contains('hypertension') ? 'MEDIUM_RISK' : 'LOW_RISK')"
+      - field: "copayAmount"
+        expression: "#riskCategory == 'HIGH_RISK' ? 50.0 : (#riskCategory == 'MEDIUM_RISK' ? 30.0 : 20.0)"
+      - field: "requiresPreAuth"
+        expression: "#riskCategory == 'HIGH_RISK' || #procedureCost > 5000"
+      - field: "coveragePercentage"
+        expression: "#ageGroup == 'SENIOR' ? 0.90 : (#ageGroup == 'PEDIATRIC' ? 0.95 : 0.80)"
+```
+
+**E-commerce/Retail:**
+
+```yaml
+enrichments:
+  - id: "ecommerce-processing"
+    type: "calculation-enrichment"
+    name: "E-commerce Order Processing"
+    condition: "#orderValue != null && #customerTier != null"
+    calculations:
+      - field: "shippingCost"
+        expression: "#orderValue >= 100 ? 0.0 : (#customerTier == 'PREMIUM' ? 5.0 : 10.0)"
+      - field: "discountPercentage"
+        expression: "#customerTier == 'PLATINUM' ? 0.15 : (#customerTier == 'GOLD' ? 0.10 : (#customerTier == 'SILVER' ? 0.05 : 0.0))"
+      - field: "discountAmount"
+        expression: "#orderValue * #discountPercentage"
+      - field: "finalAmount"
+        expression: "#orderValue - #discountAmount + #shippingCost"
+      - field: "loyaltyPoints"
+        expression: "T(java.lang.Math).floor(#finalAmount / 10)"
+      - field: "expeditedShipping"
+        expression: "#customerTier == 'PLATINUM' || #customerTier == 'GOLD'"
+      - field: "freeReturns"
+        expression: "#customerTier != 'BASIC' || #orderValue >= 50"
+```
+
+**Manufacturing/Supply Chain:**
+
+```yaml
+enrichments:
+  - id: "manufacturing-processing"
+    type: "calculation-enrichment"
+    name: "Manufacturing Quality Control"
+    condition: "#productionDate != null && #qualityScore != null"
+    calculations:
+      - field: "productAge"
+        expression: "T(java.time.temporal.ChronoUnit).DAYS.between(#productionDate, T(java.time.LocalDate).now())"
+      - field: "qualityGrade"
+        expression: "#qualityScore >= 95 ? 'A' : (#qualityScore >= 85 ? 'B' : (#qualityScore >= 75 ? 'C' : 'D'))"
+      - field: "shelfLife"
+        expression: "#productType == 'FOOD' ? 30 : (#productType == 'ELECTRONICS' ? 365 : (#productType == 'CLOTHING' ? 180 : 90))"
+      - field: "isExpired"
+        expression: "#productAge > #shelfLife"
+      - field: "discountRequired"
+        expression: "#productAge > (#shelfLife * 0.8) && !#isExpired"
+      - field: "clearancePrice"
+        expression: "#discountRequired ? #originalPrice * 0.7 : #originalPrice"
+```
+
+**Real Estate:**
+
+```yaml
+enrichments:
+  - id: "real-estate-processing"
+    type: "calculation-enrichment"
+    name: "Real Estate Valuation"
+    condition: "#squareFootage != null && #bedrooms != null && #location != null"
+    calculations:
+      - field: "pricePerSqFt"
+        expression: "#location == 'DOWNTOWN' ? 500 : (#location == 'SUBURBAN' ? 300 : (#location == 'RURAL' ? 150 : 200))"
+      - field: "baseValue"
+        expression: "#squareFootage * #pricePerSqFt"
+      - field: "bedroomBonus"
+        expression: "#bedrooms > 3 ? (#bedrooms - 3) * 10000 : 0"
+      - field: "bathroomBonus"
+        expression: "#bathrooms > 2 ? (#bathrooms - 2) * 5000 : 0"
+      - field: "ageAdjustment"
+        expression: "#yearBuilt != null ? (#yearBuilt < 1980 ? -20000 : (#yearBuilt > 2010 ? 15000 : 0)) : 0"
+      - field: "estimatedValue"
+        expression: "#baseValue + #bedroomBonus + #bathroomBonus + #ageAdjustment"
+      - field: "marketCategory"
+        expression: "#estimatedValue >= 1000000 ? 'LUXURY' : (#estimatedValue >= 500000 ? 'PREMIUM' : (#estimatedValue >= 250000 ? 'STANDARD' : 'AFFORDABLE'))"
+```
+
 Enrichments automatically add related information to your data during rule evaluation. Think of them as smart lookups that happen behind the scenes before your rules are evaluated.
+
+#### Performance Optimization Patterns
+
+**Conditional Execution for Expensive Operations:**
+
+```yaml
+enrichments:
+  - id: "expensive-calculation"
+    type: "calculation-enrichment"
+    name: "Conditional Expensive Calculations"
+    condition: "#amount > 10000 && #requiresDetailedAnalysis == true"  # Only run for high-value transactions
+    calculations:
+      - field: "complexRiskScore"
+        expression: "#creditScore * 0.4 + #incomeScore * 0.3 + #historyScore * 0.2 + #geographicScore * 0.1"
+      - field: "fraudProbability"
+        expression: "T(java.lang.Math).min(1.0, (#complexRiskScore < 50 ? 0.8 : (#complexRiskScore < 70 ? 0.4 : 0.1)))"
+      - field: "requiresManualReview"
+        expression: "#fraudProbability > 0.5 || #amount > 100000"
+
+  - id: "lightweight-screening"
+    type: "calculation-enrichment"
+    name: "Fast Screening for Small Transactions"
+    condition: "#amount <= 10000"  # Quick processing for small amounts
+    calculations:
+      - field: "basicRiskLevel"
+        expression: "#amount > 1000 ? 'MEDIUM' : 'LOW'"
+      - field: "autoApprove"
+        expression: "#basicRiskLevel == 'LOW' && #customerStatus == 'GOOD_STANDING'"
+```
+
+**Caching and Lookup Optimization:**
+
+```yaml
+enrichments:
+  - id: "cached-customer-data"
+    type: "lookup-enrichment"
+    name: "High-Performance Customer Lookup"
+    condition: "['customerId'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "database"
+        connection-name: "customer-cache"
+        query: "SELECT * FROM customer_cache WHERE customer_id = ?"
+        parameters:
+          - field: "customerId"
+        cache-enabled: true
+        cache-ttl-seconds: 3600  # Cache for 1 hour
+        cache-max-size: 10000    # Keep up to 10K customers in cache
+    field-mappings:
+      - source-field: "risk_profile"
+        target-field: "cachedRiskProfile"
+      - source-field: "credit_limit"
+        target-field: "cachedCreditLimit"
+```
+
+#### Complex Business Workflow Examples
+
+**Multi-Stage Approval Workflow:**
+
+```yaml
+rule-chains:
+  - id: "loan-approval-workflow"
+    pattern: "sequential-dependency"
+    configuration:
+      stages:
+        - stage: 1
+          name: "Initial Screening"
+          rule:
+            condition: "#creditScore >= 600 && #income >= 30000 && #debtToIncome <= 0.5"
+            message: "Initial screening passed"
+          output-variable: "initialScreeningPassed"
+
+        - stage: 2
+          name: "Document Verification"
+          rule:
+            condition: "#initialScreeningPassed && #documentsComplete == true && #identityVerified == true"
+            message: "Document verification completed"
+          output-variable: "documentsVerified"
+
+        - stage: 3
+          name: "Risk Assessment"
+          rule:
+            condition: "#documentsVerified && (#riskScore = #creditScore * 0.4 + #incomeStability * 0.3 + #collateralValue * 0.3) >= 70"
+            message: "Risk assessment completed with score: {{#riskScore}}"
+          output-variable: "riskAssessmentScore"
+
+        - stage: 4
+          name: "Final Approval Decision"
+          rule:
+            condition: "#riskAssessmentScore >= 80 ? 'AUTO_APPROVED' : (#riskAssessmentScore >= 70 ? 'MANAGER_APPROVAL' : 'DECLINED')"
+            message: "Final decision: {{#riskAssessmentScore >= 80 ? 'AUTO_APPROVED' : (#riskAssessmentScore >= 70 ? 'MANAGER_APPROVAL' : 'DECLINED')}}"
+          output-variable: "finalDecision"
+```
+
+**Dynamic Pricing Workflow:**
+
+```yaml
+rule-chains:
+  - id: "dynamic-pricing-engine"
+    pattern: "accumulative-chaining"
+    configuration:
+      accumulator-variable: "finalPrice"
+      initial-value: "#basePrice"
+      accumulation-rules:
+        - id: "volume-discount"
+          condition: "#quantity >= 100 ? #finalPrice * 0.9 : (#quantity >= 50 ? #finalPrice * 0.95 : #finalPrice)"
+          message: "Volume discount applied"
+          weight: 1.0
+
+        - id: "customer-tier-discount"
+          condition: "#customerTier == 'PLATINUM' ? #finalPrice * 0.85 : (#customerTier == 'GOLD' ? #finalPrice * 0.90 : (#customerTier == 'SILVER' ? #finalPrice * 0.95 : #finalPrice))"
+          message: "Customer tier discount applied"
+          weight: 1.0
+
+        - id: "seasonal-adjustment"
+          condition: "#season == 'HOLIDAY' ? #finalPrice * 1.1 : (#season == 'CLEARANCE' ? #finalPrice * 0.8 : #finalPrice)"
+          message: "Seasonal pricing adjustment"
+          weight: 1.0
+
+        - id: "market-demand-adjustment"
+          condition: "#demandLevel == 'HIGH' ? #finalPrice * 1.05 : (#demandLevel == 'LOW' ? #finalPrice * 0.95 : #finalPrice)"
+          message: "Market demand adjustment"
+          weight: 1.0
+
+      final-decision-rule:
+        id: "price-validation"
+        condition: "#finalPrice >= #minimumPrice && #finalPrice <= #maximumPrice"
+        message: "Final price validated: {{#finalPrice}}"
+```
+
+**Fraud Detection Pipeline:**
+
+```yaml
+rule-chains:
+  - id: "fraud-detection-pipeline"
+    pattern: "conditional-chaining"
+    configuration:
+      rules:
+        - id: "basic-fraud-check"
+          condition: "#amount <= 5000 && #merchantCategory != 'HIGH_RISK'"
+          message: "Basic fraud check passed - low risk transaction"
+          next-rule: "velocity-check"
+
+        - id: "velocity-check"
+          condition: "#dailyTransactionCount <= 10 && #dailyTransactionAmount <= 50000"
+          message: "Velocity check passed"
+          next-rule: "geo-location-check"
+
+        - id: "geo-location-check"
+          condition: "#transactionLocation == #customerHomeLocation || #travelNotificationActive == true"
+          message: "Geographic location check passed"
+          next-rule: "final-approval"
+
+        - id: "enhanced-fraud-check"
+          condition: "#amount > 5000 || #merchantCategory == 'HIGH_RISK'"
+          message: "Enhanced fraud screening required"
+          next-rule: "ml-fraud-score"
+
+        - id: "ml-fraud-score"
+          condition: "#mlFraudScore < 0.7"
+          message: "Machine learning fraud score acceptable: {{#mlFraudScore}}"
+          next-rule: "manual-review"
+
+        - id: "manual-review"
+          condition: "#mlFraudScore >= 0.7 ? 'MANUAL_REVIEW_REQUIRED' : 'APPROVED'"
+          message: "Transaction requires manual review due to high fraud score"
+
+        - id: "final-approval"
+          condition: "'APPROVED'"
+          message: "Transaction approved through automated screening"
+```
 
 **Why use enrichments?**
 Instead of just having a status code like "A", enrichments can automatically add the full description "Active Customer" to your data, which your rules can then use.
