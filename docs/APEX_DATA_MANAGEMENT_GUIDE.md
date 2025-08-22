@@ -1,7 +1,7 @@
 # APEX - Data Management Guide
 
 **Version:** 1.0
-**Date:** 2025-08-02
+**Date:** 2025-08-22
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
 ## Overview
@@ -6618,6 +6618,1011 @@ data:
 ### Overview
 
 External data source integration is crucial for enterprise rule processing, especially in financial services where transactions must be validated against custody instructions, fund manager data, market information, and regulatory databases. APEX provides comprehensive support for integrating with external systems through a flexible, configuration-driven approach that supports multiple data source types including databases, REST APIs, message queues, and file systems.
+
+### Advanced Lookup Operations and Data Integration
+
+APEX's lookup system provides sophisticated capabilities that go far beyond simple key-value matching. The system supports complex data transformations, conditional processing, multi-field matching, hierarchical lookups, and advanced caching strategies designed for enterprise-scale operations.
+
+#### Core Lookup Architecture
+
+The APEX lookup system is built on a three-layer architecture that separates data access, transformation, and caching concerns:
+
+```mermaid
+graph TB
+    subgraph "Lookup Architecture"
+        A[Lookup Request] --> B[Key Resolution]
+        B --> C[Data Source Selection]
+        C --> D[Cache Check]
+        D --> E{Cache Hit?}
+        E -->|Yes| F[Return Cached Data]
+        E -->|No| G[Execute Lookup]
+        G --> H[Data Transformation]
+        H --> I[Field Mapping]
+        I --> J[Cache Update]
+        J --> K[Return Enriched Data]
+    end
+```
+
+**Key Components:**
+- **Lookup Engine**: Orchestrates the entire lookup process
+- **Data Source Manager**: Manages connections to various data sources
+- **Cache Manager**: Handles intelligent caching strategies
+- **Transformation Engine**: Applies field mappings and transformations
+- **Monitoring System**: Tracks performance and health metrics
+
+#### Multi-Source Lookup Strategies
+
+##### 1. Composite Key Lookups
+
+Handle complex lookups requiring multiple fields for unique identification:
+
+```yaml
+enrichments:
+  - id: "market-data-composite-lookup"
+    type: "lookup-enrichment"
+    condition: "['symbol'] != null && ['exchange'] != null && ['currency'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "database"
+        connection-name: "market-data-db"
+        query: |
+          SELECT price, volume, last_updated, market_status
+          FROM market_data
+          WHERE symbol = :symbol
+            AND exchange = :exchange
+            AND currency = :currency
+            AND date = CURRENT_DATE
+
+        # Composite key configuration
+        composite-key:
+          enabled: true
+          key-fields: ["symbol", "exchange", "currency"]
+          separator: "|"
+
+      field-mappings:
+        - source-field: "price"
+          target-field: "currentPrice"
+          transformation: "T(java.math.BigDecimal).valueOf(#{price}).setScale(4, T(java.math.RoundingMode).HALF_UP)"
+        - source-field: "volume"
+          target-field: "tradingVolume"
+        - source-field: "last_updated"
+          target-field: "priceTimestamp"
+        - source-field: "market_status"
+          target-field: "marketStatus"
+          conditional-mappings:
+            - condition: "#{market_status} == 'OPEN'"
+              value: "Trading Active"
+            - condition: "#{market_status} == 'CLOSED'"
+              value: "Market Closed"
+            - default: true
+              value: "Status Unknown"
+```
+
+##### 2. Hierarchical Lookup Chains
+
+Perform cascading lookups where results from one lookup trigger additional lookups:
+
+```yaml
+enrichments:
+  - id: "hierarchical-customer-enrichment"
+    type: "lookup-enrichment"
+    condition: "['customerId'] != null"
+    lookup-config:
+      # Primary lookup - Customer basic information
+      primary-lookup:
+        lookup-dataset:
+          type: "database"
+          connection-name: "customer-db"
+          query: |
+            SELECT customer_id, name, account_manager_id, risk_profile,
+                   jurisdiction, customer_type, onboarding_date
+            FROM customers
+            WHERE customer_id = :customerId
+        field-mappings:
+          - source-field: "name"
+            target-field: "customerName"
+          - source-field: "account_manager_id"
+            target-field: "accountManagerId"
+          - source-field: "risk_profile"
+            target-field: "riskProfile"
+          - source-field: "jurisdiction"
+            target-field: "customerJurisdiction"
+          - source-field: "customer_type"
+            target-field: "customerType"
+          - source-field: "onboarding_date"
+            target-field: "onboardingDate"
+
+      # Secondary lookups triggered by primary results
+      secondary-lookups:
+        # Account Manager Information
+        - condition: "['accountManagerId'] != null"
+          lookup-dataset:
+            type: "database"
+            connection-name: "employee-db"
+            query: |
+              SELECT emp_id, name, email, phone, department,
+                     authorization_level, active_status
+              FROM employees
+              WHERE emp_id = :accountManagerId
+          field-mappings:
+            - source-field: "name"
+              target-field: "accountManagerName"
+            - source-field: "email"
+              target-field: "accountManagerEmail"
+            - source-field: "phone"
+              target-field: "accountManagerPhone"
+            - source-field: "authorization_level"
+              target-field: "managerAuthLevel"
+
+        # Risk Profile Configuration
+        - condition: "['riskProfile'] != null"
+          lookup-dataset:
+            type: "yaml-file"
+            file-path: "datasets/risk-profiles.yaml"
+            key-field: "profile"
+          field-mappings:
+            - source-field: "maxTransactionAmount"
+              target-field: "transactionLimit"
+            - source-field: "approvalRequired"
+              target-field: "requiresApproval"
+            - source-field: "monitoringLevel"
+              target-field: "riskMonitoringLevel"
+
+        # Jurisdiction-Specific Rules
+        - condition: "['customerJurisdiction'] != null"
+          lookup-dataset:
+            type: "rest-api"
+            base-url: "https://api.regulatory.com"
+            endpoint: "/jurisdictions/{customerJurisdiction}/rules"
+            headers:
+              Authorization: "Bearer ${REGULATORY_API_TOKEN}"
+          field-mappings:
+            - source-field: "reportingRequirements"
+              target-field: "regulatoryReporting"
+            - source-field: "taxWithholding"
+              target-field: "taxWithholdingRate"
+```
+
+##### 3. Conditional Lookup Routing
+
+Route lookups to different data sources based on runtime conditions:
+
+```yaml
+enrichments:
+  - id: "conditional-pricing-lookup"
+    type: "lookup-enrichment"
+    condition: "['instrumentType'] != null && ['tradingVenue'] != null"
+    lookup-config:
+      # Conditional routing based on instrument type and venue
+      conditional-routing:
+        - condition: "['instrumentType'] == 'EQUITY' && ['tradingVenue'] == 'NYSE'"
+          lookup-dataset:
+            type: "rest-api"
+            base-url: "https://api.nyse.com"
+            endpoint: "/quotes/{symbol}"
+            headers:
+              X-API-Key: "${NYSE_API_KEY}"
+            timeout-ms: 2000
+
+        - condition: "['instrumentType'] == 'EQUITY' && ['tradingVenue'] == 'NASDAQ'"
+          lookup-dataset:
+            type: "rest-api"
+            base-url: "https://api.nasdaq.com"
+            endpoint: "/market-data/{symbol}"
+            headers:
+              Authorization: "Bearer ${NASDAQ_TOKEN}"
+            timeout-ms: 2000
+
+        - condition: "['instrumentType'] == 'BOND'"
+          lookup-dataset:
+            type: "database"
+            connection-name: "bond-pricing-db"
+            query: |
+              SELECT cusip, price, yield, duration, rating, last_updated
+              FROM bond_prices
+              WHERE cusip = :cusip
+                AND price_date = CURRENT_DATE
+
+        - condition: "['instrumentType'] == 'DERIVATIVE'"
+          lookup-dataset:
+            type: "yaml-file"
+            file-path: "datasets/derivative-pricing-{environment}.yaml"
+            key-field: "productId"
+
+        # Default fallback for unknown instruments
+        - default: true
+          lookup-dataset:
+            type: "inline"
+            key-field: "default"
+            data:
+              - default: "unknown"
+                price: 0.0
+                status: "Price Not Available"
+                source: "Default"
+
+      # Common field mappings applied to all routes
+      field-mappings:
+        - source-field: "price"
+          target-field: "currentPrice"
+          transformation: "T(java.math.BigDecimal).valueOf(#{price ?: 0.0})"
+        - source-field: "timestamp"
+          target-field: "priceTimestamp"
+          transformation: "T(java.time.Instant).now()"
+        - source-field: "source"
+          target-field: "priceSource"
+```
+
+#### Advanced Field Mapping and Transformation
+
+##### 1. Expression-Based Transformations
+
+Use Spring Expression Language (SpEL) for complex data transformations:
+
+```yaml
+field-mappings:
+  # String manipulation and formatting
+  - source-field: "firstName"
+    target-field: "displayName"
+    transformation: "#{firstName?.toUpperCase()} #{lastName?.toUpperCase()}"
+
+  # Mathematical calculations
+  - source-field: "notionalAmount"
+    target-field: "riskAmount"
+    transformation: "#{notionalAmount} * #{riskFactor ?: 1.0} * #{currencyMultiplier ?: 1.0}"
+
+  # Date and time operations
+  - source-field: "tradeDate"
+    target-field: "settlementDate"
+    transformation: |
+      T(java.time.LocalDate).parse(#{tradeDate})
+        .plusDays(#{settlementDays ?: 2})
+        .format(T(java.time.format.DateTimeFormatter).ISO_LOCAL_DATE)
+
+  # Conditional logic with complex expressions
+  - source-field: "creditRating"
+    target-field: "riskCategory"
+    transformation: |
+      #{creditRating} >= 700 ? 'LOW' :
+      (#{creditRating} >= 600 ? 'MEDIUM' :
+      (#{creditRating} >= 500 ? 'HIGH' : 'VERY_HIGH'))
+
+  # JSON and object manipulation
+  - source-field: "metadata"
+    target-field: "parsedMetadata"
+    transformation: |
+      T(com.fasterxml.jackson.databind.ObjectMapper).new()
+        .readValue(#{metadata}, T(java.util.Map))
+```
+
+##### 2. Multi-Level Nested Object Mapping
+
+Handle complex nested data structures with deep mapping:
+
+```yaml
+field-mappings:
+  # Top-level object mapping
+  - source-field: "counterparty"
+    target-field: "enrichedCounterparty"
+    nested-mappings:
+      # First level nesting
+      - source-field: "identification"
+        target-field: "counterpartyId"
+        nested-mappings:
+          # Second level nesting
+          - source-field: "lei"
+            target-field: "legalEntityId"
+            transformation: "#{lei?.toUpperCase()}"
+          - source-field: "bic"
+            target-field: "bankIdentifier"
+            transformation: "#{bic?.toUpperCase()}"
+
+      # Address mapping with validation
+      - source-field: "address"
+        target-field: "businessAddress"
+        nested-mappings:
+          - source-field: "street"
+            target-field: "streetAddress"
+            validation:
+              required: true
+              max-length: 100
+          - source-field: "city"
+            target-field: "cityName"
+            transformation: "#{city?.trim()?.toUpperCase()}"
+          - source-field: "postalCode"
+            target-field: "zipCode"
+            validation:
+              pattern: "^[0-9]{5}(-[0-9]{4})?$"
+          - source-field: "country"
+            target-field: "countryCode"
+            transformation: "#{country?.toUpperCase()}"
+            validation:
+              enum: ["US", "CA", "GB", "DE", "FR", "JP"]
+
+      # Contact information with multiple formats
+      - source-field: "contacts"
+        target-field: "contactInformation"
+        array-mapping:
+          element-mappings:
+            - source-field: "type"
+              target-field: "contactType"
+            - source-field: "value"
+              target-field: "contactValue"
+              conditional-transformations:
+                - condition: "#{type} == 'EMAIL'"
+                  transformation: "#{value?.toLowerCase()}"
+                - condition: "#{type} == 'PHONE'"
+                  transformation: "#{value?.replaceAll('[^0-9+]', '')}"
+```
+
+#### Performance Optimization and Caching Strategies
+
+##### 1. Intelligent Multi-Level Caching
+
+Configure sophisticated caching strategies for optimal performance:
+
+```yaml
+lookup-config:
+  caching:
+    # L1 Cache - In-memory, fastest access
+    l1-cache:
+      enabled: true
+      strategy: "LRU"
+      max-entries: 10000
+      ttl-seconds: 300
+
+    # L2 Cache - Distributed cache (Redis)
+    l2-cache:
+      enabled: true
+      type: "REDIS"
+      connection:
+        host: "${REDIS_HOST:localhost}"
+        port: "${REDIS_PORT:6379}"
+        password: "${REDIS_PASSWORD}"
+      ttl-seconds: 3600
+      key-prefix: "apex:lookup:"
+
+    # Cache warming strategies
+    cache-warming:
+      enabled: true
+      strategies:
+        - type: "PRELOAD"
+          query: "SELECT * FROM reference_data WHERE active = true"
+          schedule: "0 0 6 * * ?" # Daily at 6 AM
+        - type: "PREDICTIVE"
+          ml-model: "lookup-prediction-model"
+          confidence-threshold: 0.8
+
+    # Cache invalidation
+    invalidation:
+      strategies:
+        - type: "TTL"
+        - type: "EVENT_DRIVEN"
+          events: ["DATA_UPDATE", "SCHEMA_CHANGE"]
+        - type: "MANUAL"
+          api-endpoint: "/cache/invalidate/{key}"
+```
+
+##### 2. Connection Pool Optimization
+
+Optimize database connections for high-performance lookups:
+
+```yaml
+data-sources:
+  - name: "high-performance-db"
+    type: "database"
+    jdbc-url: "jdbc:postgresql://db-cluster:5432/reference_data"
+
+    # Advanced connection pool configuration
+    connection-pool:
+      # Pool sizing
+      initial-size: 10
+      max-active: 50
+      max-idle: 20
+      min-idle: 5
+
+      # Performance tuning
+      max-wait-millis: 5000
+      validation-query: "SELECT 1"
+      test-on-borrow: true
+      test-on-return: false
+      test-while-idle: true
+
+      # Connection lifecycle management
+      time-between-eviction-runs-millis: 30000
+      min-evictable-idle-time-millis: 60000
+      max-connection-lifetime-millis: 1800000  # 30 minutes
+
+      # Prepared statement caching
+      prepared-statement-cache-size: 250
+      prepared-statement-cache-sql-limit: 2048
+
+      # Monitoring and alerting
+      jmx-enabled: true
+      log-slow-queries: true
+      slow-query-threshold-ms: 1000
+```
+
+##### 3. Batch Processing and Bulk Operations
+
+Optimize for high-volume processing with intelligent batching:
+
+```yaml
+lookup-config:
+  batch-processing:
+    enabled: true
+
+    # Batch configuration
+    batch-size: 100
+    max-wait-time-ms: 50
+    parallel-processing: true
+    thread-pool-size: 10
+
+    # Batch query optimization
+    batch-queries:
+      customer-lookup:
+        query: |
+          SELECT customer_id, name, status, risk_profile, jurisdiction
+          FROM customers
+          WHERE customer_id = ANY(:customerIds)
+        result-mapping:
+          key-field: "customer_id"
+
+      market-data-lookup:
+        query: |
+          SELECT symbol, price, volume, last_updated
+          FROM market_data
+          WHERE symbol = ANY(:symbols)
+            AND date = CURRENT_DATE
+        result-mapping:
+          key-field: "symbol"
+
+    # Batch result processing
+    result-processing:
+      parallel-mapping: true
+      error-handling: "PARTIAL_SUCCESS"  # Continue processing even if some lookups fail
+      missing-data-strategy: "NULL_VALUES"  # How to handle missing lookup results
+```
+
+#### Enterprise Integration Patterns
+
+##### 1. Multi-Tenant Lookup Architecture
+
+Support multiple tenants with isolated lookup configurations:
+
+```yaml
+lookup-config:
+  multi-tenant:
+    enabled: true
+
+    # Tenant resolution strategy
+    tenant-resolution:
+      strategy: "HEADER"  # HEADER, JWT_CLAIM, CONTEXT, or CUSTOM
+      header-name: "X-Tenant-ID"
+      default-tenant: "default"
+
+    # Tenant-specific configurations
+    tenant-configurations:
+      "tenant-financial-corp":
+        data-sources:
+          - name: "tenant-customer-db"
+            type: "database"
+            jdbc-url: "jdbc:postgresql://tenant-db:5432/financial_corp"
+            schema: "customer_data"
+        lookup-datasets:
+          customer-lookup:
+            query: "SELECT * FROM customer_data.customers WHERE id = :customerId"
+
+      "tenant-investment-bank":
+        data-sources:
+          - name: "tenant-trading-db"
+            type: "database"
+            jdbc-url: "jdbc:postgresql://trading-db:5432/investment_bank"
+            schema: "trading_data"
+        lookup-datasets:
+          trader-lookup:
+            query: "SELECT * FROM trading_data.traders WHERE trader_id = :traderId"
+
+      # Default configuration for unknown tenants
+      "default":
+        data-sources:
+          - name: "shared-reference-db"
+            type: "database"
+            jdbc-url: "jdbc:postgresql://shared-db:5432/reference"
+        lookup-datasets:
+          generic-lookup:
+            type: "yaml-file"
+            file-path: "datasets/default-reference-data.yaml"
+```
+
+##### 2. Microservices Integration with Service Discovery
+
+Integrate with microservices architecture and service discovery:
+
+```yaml
+lookup-config:
+  microservices:
+    # Service discovery configuration
+    service-discovery:
+      enabled: true
+      registry-type: "CONSUL"  # CONSUL, EUREKA, KUBERNETES, or ZOOKEEPER
+      registry-url: "http://consul:8500"
+      service-name: "reference-data-service"
+      health-check-interval: 30
+
+    # Load balancing and failover
+    load-balancing:
+      strategy: "ROUND_ROBIN"  # ROUND_ROBIN, LEAST_CONNECTIONS, WEIGHTED, or RANDOM
+      health-check-enabled: true
+      circuit-breaker:
+        enabled: true
+        failure-threshold: 5
+        recovery-timeout-ms: 60000
+
+    # Service mesh integration
+    service-mesh:
+      enabled: true
+      mesh-type: "ISTIO"  # ISTIO, LINKERD, or CONSUL_CONNECT
+      mutual-tls: true
+      retry-policy:
+        max-retries: 3
+        retry-on: ["5xx", "gateway-error", "connect-failure"]
+
+    # API versioning and compatibility
+    api-versioning:
+      strategy: "HEADER"  # HEADER, PATH, or QUERY_PARAM
+      version-header: "API-Version"
+      supported-versions: ["v1", "v2", "v3"]
+      default-version: "v2"
+      backward-compatibility: true
+```
+
+##### 3. Event-Driven Data Synchronization
+
+Keep lookup data synchronized with event-driven patterns:
+
+```yaml
+lookup-config:
+  event-driven-sync:
+    enabled: true
+
+    # Event sources
+    event-sources:
+      - name: "customer-updates"
+        type: "KAFKA"
+        bootstrap-servers: "kafka:9092"
+        topic: "customer.updates"
+        consumer-group: "apex-lookup-sync"
+
+      - name: "market-data-stream"
+        type: "RABBITMQ"
+        connection-url: "amqp://rabbitmq:5672"
+        queue: "market.data.updates"
+
+      - name: "regulatory-changes"
+        type: "AWS_SQS"
+        queue-url: "${AWS_SQS_REGULATORY_QUEUE_URL}"
+        region: "${AWS_REGION}"
+
+    # Event processing
+    event-processing:
+      parallel-processing: true
+      batch-size: 50
+      max-wait-time-ms: 1000
+
+      # Event handlers
+      event-handlers:
+        customer-update:
+          event-type: "CUSTOMER_UPDATE"
+          handler-class: "com.apex.handlers.CustomerUpdateHandler"
+          cache-invalidation:
+            - pattern: "customer:*"
+            - specific-keys: ["customer:${customerId}"]
+
+        market-data-update:
+          event-type: "MARKET_DATA_UPDATE"
+          handler-class: "com.apex.handlers.MarketDataUpdateHandler"
+          cache-refresh:
+            - dataset: "market-prices"
+            - keys: ["${symbol}:${exchange}"]
+
+    # Dead letter queue handling
+    dead-letter-handling:
+      enabled: true
+      max-retries: 3
+      retry-delay-ms: 5000
+      dead-letter-topic: "apex.lookup.dlq"
+```
+
+#### Monitoring, Observability, and Compliance
+
+##### 1. Comprehensive Metrics and Monitoring
+
+Monitor lookup performance and business metrics:
+
+```yaml
+lookup-config:
+  monitoring:
+    enabled: true
+
+    # Performance metrics
+    performance-metrics:
+      - name: "lookup.execution.time"
+        type: "TIMER"
+        tags: ["source", "tenant", "operation"]
+        percentiles: [0.5, 0.75, 0.95, 0.99]
+
+      - name: "lookup.cache.hit.ratio"
+        type: "GAUGE"
+        tags: ["cache-level", "dataset"]
+        alert-threshold: 0.8
+
+      - name: "lookup.throughput"
+        type: "COUNTER"
+        tags: ["source", "success"]
+        rate-window: "1m"
+
+      - name: "lookup.batch.size"
+        type: "HISTOGRAM"
+        tags: ["operation"]
+        buckets: [1, 5, 10, 25, 50, 100, 250, 500]
+
+    # Business metrics
+    business-metrics:
+      - name: "high.value.lookups"
+        condition: "#{amount} > 1000000"
+        type: "COUNTER"
+        tags: ["currency", "instrument-type"]
+
+      - name: "regulatory.lookups"
+        condition: "#{jurisdiction} in {'US', 'EU', 'UK'}"
+        type: "COUNTER"
+        tags: ["jurisdiction", "regulation"]
+
+      - name: "failed.enrichments"
+        condition: "#{enrichmentStatus} == 'FAILED'"
+        type: "COUNTER"
+        tags: ["failure-reason", "dataset"]
+
+    # Custom dashboards
+    dashboards:
+      - name: "Lookup Performance Dashboard"
+        metrics: ["lookup.execution.time", "lookup.throughput", "lookup.cache.hit.ratio"]
+        refresh-interval: 30
+
+      - name: "Business Operations Dashboard"
+        metrics: ["high.value.lookups", "regulatory.lookups"]
+        refresh-interval: 60
+```
+
+##### 2. Audit Trail and Compliance Logging
+
+Maintain comprehensive audit trails for regulatory compliance:
+
+```yaml
+lookup-config:
+  audit:
+    enabled: true
+
+    # Audit scope configuration
+    audit-scope:
+      include-operations: ["LOOKUP_REQUEST", "LOOKUP_RESULT", "CACHE_HIT", "CACHE_MISS", "FALLBACK_USED"]
+      include-data-sources: ["database", "rest-api", "file-system"]
+      include-sensitive-data: false  # Mask sensitive fields
+
+    # Audit storage
+    audit-storage:
+      primary:
+        type: "DATABASE"
+        connection-name: "audit-db"
+        table-name: "lookup_audit_log"
+        batch-size: 100
+        flush-interval-ms: 5000
+
+      secondary:
+        type: "FILE"
+        file-path: "/var/log/apex/lookup-audit-{date}.log"
+        rotation-policy: "DAILY"
+        compression: true
+
+    # Retention and archival
+    retention:
+      primary-retention-days: 2555  # 7 years for financial compliance
+      archive-after-days: 365
+      archive-storage:
+        type: "S3"
+        bucket: "${AUDIT_ARCHIVE_BUCKET}"
+        encryption: "AES256"
+
+    # Sensitive data handling
+    data-protection:
+      field-masking:
+        - field: "ssn"
+          mask-pattern: "XXX-XX-####"
+        - field: "account-number"
+          mask-pattern: "****-####"
+        - field: "email"
+          hash-algorithm: "SHA-256"
+
+      encryption:
+        enabled: true
+        algorithm: "AES-256-GCM"
+        key-rotation-days: 90
+```
+
+#### Practical Implementation Examples
+
+##### 1. Complete Financial Services Lookup Configuration
+
+Here's a comprehensive example showing multiple lookup patterns in a single configuration:
+
+```yaml
+metadata:
+  name: "Comprehensive Financial Services Lookup Configuration"
+  version: "2.0.0"
+  description: "Advanced lookup patterns for financial services processing"
+  type: "rule-config"
+  compliance-reviewed: true
+  regulatory-scope: "MiFID II, EMIR, Dodd-Frank"
+
+# Data source configurations
+data-sources:
+  - name: "customer-master-db"
+    type: "database"
+    jdbc-url: "jdbc:postgresql://customer-db:5432/customer_master"
+    connection-pool:
+      max-active: 20
+      initial-size: 5
+
+  - name: "market-data-api"
+    type: "rest-api"
+    base-url: "https://api.marketdata.com"
+    headers:
+      Authorization: "Bearer ${MARKET_DATA_TOKEN}"
+    timeout-ms: 3000
+
+  - name: "regulatory-cache"
+    type: "redis"
+    connection:
+      host: "${REDIS_HOST}"
+      port: 6379
+
+# Comprehensive enrichment configuration
+enrichments:
+  # 1. Hierarchical customer lookup with multiple data sources
+  - id: "comprehensive-customer-enrichment"
+    type: "lookup-enrichment"
+    condition: "['customerId'] != null"
+    lookup-config:
+      # Primary customer data lookup
+      primary-lookup:
+        lookup-dataset:
+          type: "database"
+          connection-name: "customer-master-db"
+          query: |
+            SELECT c.customer_id, c.name, c.type, c.jurisdiction, c.risk_profile,
+                   c.account_manager_id, c.onboarding_date, c.kyc_status,
+                   a.account_number, a.account_type, a.currency, a.status as account_status
+            FROM customers c
+            LEFT JOIN accounts a ON c.customer_id = a.customer_id
+            WHERE c.customer_id = :customerId
+        field-mappings:
+          - source-field: "name"
+            target-field: "customerName"
+          - source-field: "type"
+            target-field: "customerType"
+          - source-field: "jurisdiction"
+            target-field: "customerJurisdiction"
+          - source-field: "risk_profile"
+            target-field: "riskProfile"
+          - source-field: "account_manager_id"
+            target-field: "accountManagerId"
+          - source-field: "kyc_status"
+            target-field: "kycStatus"
+          - source-field: "account_number"
+            target-field: "primaryAccountNumber"
+          - source-field: "account_type"
+            target-field: "primaryAccountType"
+          - source-field: "currency"
+            target-field: "baseCurrency"
+
+      # Secondary lookups based on primary results
+      secondary-lookups:
+        # Account manager details
+        - condition: "['accountManagerId'] != null"
+          lookup-dataset:
+            type: "database"
+            connection-name: "customer-master-db"
+            query: |
+              SELECT emp_id, name, email, phone, department, authorization_limits
+              FROM employees
+              WHERE emp_id = :accountManagerId AND active = true
+          field-mappings:
+            - source-field: "name"
+              target-field: "accountManagerName"
+            - source-field: "email"
+              target-field: "accountManagerEmail"
+            - source-field: "authorization_limits"
+              target-field: "managerAuthLimits"
+
+        # Risk profile configuration
+        - condition: "['riskProfile'] != null"
+          lookup-dataset:
+            type: "redis"
+            connection-name: "regulatory-cache"
+            key-pattern: "risk-profile:{riskProfile}"
+          field-mappings:
+            - source-field: "maxTransactionAmount"
+              target-field: "transactionLimit"
+            - source-field: "approvalRequired"
+              target-field: "requiresApproval"
+            - source-field: "monitoringLevel"
+              target-field: "riskMonitoringLevel"
+
+        # Jurisdiction-specific regulatory requirements
+        - condition: "['customerJurisdiction'] != null"
+          lookup-dataset:
+            type: "rest-api"
+            connection-name: "regulatory-api"
+            endpoint: "/jurisdictions/{customerJurisdiction}/requirements"
+          field-mappings:
+            - source-field: "reportingRequirements"
+              target-field: "regulatoryReporting"
+            - source-field: "taxWithholding"
+              target-field: "taxWithholdingRate"
+            - source-field: "tradingRestrictions"
+              target-field: "tradingLimitations"
+
+  # 2. Real-time market data lookup with fallback
+  - id: "market-data-enrichment"
+    type: "lookup-enrichment"
+    condition: "['symbol'] != null && ['exchange'] != null"
+    lookup-config:
+      # Primary market data source
+      primary-lookup:
+        lookup-dataset:
+          type: "rest-api"
+          connection-name: "market-data-api"
+          endpoint: "/quotes/{symbol}?exchange={exchange}"
+          timeout-ms: 2000
+        field-mappings:
+          - source-field: "price"
+            target-field: "currentPrice"
+            transformation: "T(java.math.BigDecimal).valueOf(#{price}).setScale(4)"
+          - source-field: "volume"
+            target-field: "tradingVolume"
+          - source-field: "timestamp"
+            target-field: "priceTimestamp"
+          - source-field: "bid"
+            target-field: "bidPrice"
+          - source-field: "ask"
+            target-field: "askPrice"
+
+      # Fallback to cached data if API fails
+      fallback-lookup:
+        lookup-dataset:
+          type: "redis"
+          connection-name: "market-data-cache"
+          key-pattern: "price:{symbol}:{exchange}"
+          ttl-seconds: 300
+        field-mappings:
+          - source-field: "price"
+            target-field: "cachedPrice"
+          - source-field: "timestamp"
+            target-field: "cacheTimestamp"
+
+      # Error handling configuration
+      error-handling:
+        strategy: "FALLBACK_THEN_DEFAULT"
+        default-values:
+          currentPrice: 0.0
+          priceSource: "UNAVAILABLE"
+          priceTimestamp: "#{T(java.time.Instant).now()}"
+
+  # 3. Composite key instrument lookup
+  - id: "instrument-reference-lookup"
+    type: "lookup-enrichment"
+    condition: "['instrumentId'] != null || (['symbol'] != null && ['exchange'] != null)"
+    lookup-config:
+      # Conditional routing based on available identifiers
+      conditional-routing:
+        # Use instrument ID if available
+        - condition: "['instrumentId'] != null"
+          lookup-dataset:
+            type: "database"
+            connection-name: "reference-data-db"
+            query: |
+              SELECT instrument_id, symbol, exchange, instrument_type,
+                     currency, country, sector, industry, market_cap
+              FROM instruments
+              WHERE instrument_id = :instrumentId
+
+        # Use symbol + exchange as composite key
+        - condition: "['symbol'] != null && ['exchange'] != null"
+          lookup-dataset:
+            type: "database"
+            connection-name: "reference-data-db"
+            query: |
+              SELECT instrument_id, symbol, exchange, instrument_type,
+                     currency, country, sector, industry, market_cap
+              FROM instruments
+              WHERE symbol = :symbol AND exchange = :exchange
+
+      # Common field mappings for all routes
+      field-mappings:
+        - source-field: "instrument_id"
+          target-field: "instrumentId"
+        - source-field: "symbol"
+          target-field: "instrumentSymbol"
+        - source-field: "exchange"
+          target-field: "tradingExchange"
+        - source-field: "instrument_type"
+          target-field: "instrumentType"
+        - source-field: "currency"
+          target-field: "instrumentCurrency"
+        - source-field: "country"
+          target-field: "instrumentCountry"
+        - source-field: "sector"
+          target-field: "businessSector"
+        - source-field: "industry"
+          target-field: "industryClassification"
+        - source-field: "market_cap"
+          target-field: "marketCapitalization"
+          transformation: "T(java.math.BigDecimal).valueOf(#{market_cap ?: 0})"
+
+# Performance and monitoring configuration
+performance:
+  caching:
+    enabled: true
+    default-ttl-seconds: 300
+    max-cache-size: 50000
+
+  monitoring:
+    metrics-enabled: true
+    slow-query-threshold-ms: 100
+
+  batch-processing:
+    enabled: true
+    batch-size: 50
+    max-wait-time-ms: 100
+```
+
+##### 2. Best Practices Summary
+
+**Configuration Organization:**
+- Use descriptive IDs and names for all lookup configurations
+- Group related lookups logically within enrichment sections
+- Implement consistent field naming conventions across all lookups
+- Document business purpose and data sources for each lookup
+
+**Performance Optimization:**
+- Implement multi-level caching strategies (L1 in-memory, L2 distributed)
+- Use connection pooling for database sources
+- Configure appropriate timeouts for external API calls
+- Enable batch processing for high-volume operations
+
+**Error Handling and Resilience:**
+- Always configure fallback strategies for critical lookups
+- Implement circuit breaker patterns for external dependencies
+- Use retry mechanisms with exponential backoff
+- Log all lookup failures for monitoring and debugging
+
+**Security and Compliance:**
+- Encrypt sensitive data in transit and at rest
+- Implement proper authentication for all external data sources
+- Maintain comprehensive audit trails for regulatory compliance
+- Use field masking for sensitive information in logs
+
+**Monitoring and Observability:**
+- Track key performance metrics (execution time, cache hit ratio, throughput)
+- Monitor business metrics (high-value transactions, regulatory lookups)
+- Set up alerting for performance degradation and failures
+- Create dashboards for operational visibility
+
+**Data Quality and Validation:**
+- Implement data validation rules for all lookup results
+- Use schema validation for structured data sources
+- Handle missing or null data gracefully
+- Implement data freshness checks for time-sensitive information
 
 ---
 

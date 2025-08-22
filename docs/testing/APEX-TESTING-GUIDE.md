@@ -1,6 +1,29 @@
 # APEX Rules Engine - Comprehensive Testing Guide
 
+**Version:** 1.0
+**Date:** 2025-08-22
+**Author:** Mark Andrew Ray-Smith Cityline Ltd
+
 This guide provides complete testing strategies for the APEX Rules Engine, covering granular test execution, performance optimization, and permanent logging for analysis and compliance.
+
+## Quick Navigation
+
+For a high-level overview of the APEX testing framework, see the **[APEX Testing Overview](../APEX_TESTING_OVERVIEW.md)**.
+
+### Related Testing Documentation
+- **[Engine Executor Testing Methodology](engine-executor-testing-methodology.md)**: Detailed testing strategies for rule executors
+- **[Service Layer Testing Guide](service-layer-testing-guide.md)**: Comprehensive service testing patterns
+- **[Executor Testing Examples](executor-testing-examples.md)**: Practical testing examples and code samples
+- **[Testing Quick Reference](executor-testing-quick-reference.md)**: Quick reference for common testing scenarios
+
+### Bootstrap Demo Testing
+The APEX bootstrap demonstrations include comprehensive testing examples that showcase real-world testing patterns:
+- **Custody Auto-Repair Bootstrap**: Performance testing with sub-100ms targets
+- **Commodity Swap Validation Bootstrap**: Multi-layered validation testing
+- **OTC Options Bootstrap Demo**: Integration testing with multiple data sources
+- **Scenario-Based Processing Demo**: Configuration and routing testing
+
+See the **[Bootstrap Demos Guide](../APEX_BOOTSTRAP_DEMOS_GUIDE.md)** for detailed information on bootstrap testing patterns.
 
 ## Table of Contents
 

@@ -9,12 +9,18 @@ This module provides a complete REST API interface for APEX, enabling rule evalu
 ## Features
 
 - **Rule Evaluation**: Simple rule checking and complex validation scenarios
+- **Expression Evaluation**: SpEL expression processing with context management
+- **Data Transformation**: Transform and normalize data using configurable rules
+- **Object Enrichment**: Enrich objects with data from external sources and datasets
+- **Template Processing**: Generate dynamic content using templates with SpEL expressions
+- **Data Source Management**: Manage and interact with external data sources
 - **Configuration Management**: Load and manage YAML configurations via API
 - **Performance Monitoring**: System health checks and performance metrics
 - **OpenAPI Documentation**: Interactive API documentation with Swagger UI
 - **Spring Boot Actuator**: Production-ready monitoring and management endpoints
 - **Comprehensive Error Handling**: Detailed error responses and validation
 - **Named Rules Management**: Define and reuse named rules
+- **Bootstrap Integration**: Complete integration with APEX bootstrap demonstrations
 
 ## Quick Start
 
@@ -25,7 +31,7 @@ This module provides a complete REST API interface for APEX, enabling rule evalu
 mvn clean package
 
 # Run the application
-java -jar target/rules-engine-rest-api-1.0-SNAPSHOT.jar
+java -jar target/apex-rest-api-1.0-SNAPSHOT.jar
 
 # Or run with Maven
 mvn spring-boot:run
@@ -75,6 +81,51 @@ Response:
 | POST | `/api/rules/test/{name}` | Test a previously defined rule |
 | GET | `/api/rules/defined` | Get all defined rules |
 
+### Expression Operations
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/expressions/evaluate` | Evaluate SpEL expressions with context |
+| POST | `/api/expressions/validate` | Validate SpEL expression syntax |
+| POST | `/api/expressions/batch` | Evaluate multiple expressions |
+| GET | `/api/expressions/functions` | Get available SpEL functions |
+
+### Transformation Operations
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/transformations/apply` | Apply transformation rules to data |
+| POST | `/api/transformations/register` | Register a new transformer |
+| POST | `/api/transformations/batch` | Transform multiple objects |
+| GET | `/api/transformations/registered` | Get registered transformers |
+
+### Enrichment Operations
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/enrichments/enrich` | Enrich objects with external data |
+| POST | `/api/enrichments/batch` | Enrich multiple objects |
+| POST | `/api/enrichments/configure` | Configure enrichment rules |
+| GET | `/api/enrichments/sources` | Get available enrichment sources |
+
+### Template Operations
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/templates/process` | Process templates with SpEL expressions |
+| POST | `/api/templates/batch` | Process multiple templates |
+| POST | `/api/templates/validate` | Validate template syntax |
+| GET | `/api/templates/variables` | Get available template variables |
+
+### Data Source Operations
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/datasources/list` | List available data sources |
+| GET | `/api/datasources/{name}/health` | Check data source health |
+| POST | `/api/datasources/{name}/query` | Execute query on data source |
+| GET | `/api/datasources/{name}/stats` | Get data source statistics |
+
 ### Configuration Management
 
 | Method | Endpoint | Description |
@@ -98,6 +149,65 @@ Response:
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/actuator/health` | Spring Boot health check |
+
+## Bootstrap Demo Integration
+
+The REST API is fully integrated with APEX bootstrap demonstrations, providing real-world examples of API usage:
+
+### Available Bootstrap Demos
+
+#### 1. Custody Auto-Repair Bootstrap
+Demonstrates custody settlement auto-repair using the REST API:
+```bash
+# Start the API server
+mvn spring-boot:run
+
+# Run the bootstrap demo (uses REST API internally)
+cd ../apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap"
+```
+
+#### 2. Commodity Swap Validation Bootstrap
+Shows progressive API usage from simple to advanced:
+```bash
+# Example API calls demonstrated in the bootstrap
+curl -X POST http://localhost:8080/api/rules/check \
+  -H "Content-Type: application/json" \
+  -d '{"condition": "#notionalAmount > 1000000", "data": {"notionalAmount": 5000000}}'
+
+curl -X POST http://localhost:8080/api/enrichments/enrich \
+  -H "Content-Type: application/json" \
+  -d '{"data": {"currency": "USD"}, "enrichmentConfig": "currency-enrichment"}'
+```
+
+#### 3. OTC Options Bootstrap Demo
+Demonstrates multiple data source integration via API:
+```bash
+# Data source health check
+curl -X GET http://localhost:8080/api/datasources/counterparty-db/health
+
+# Query external data source
+curl -X POST http://localhost:8080/api/datasources/counterparty-db/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "getCounterpartyById", "parameters": {"id": "GOLDMAN_SACHS"}}'
+```
+
+#### 4. Scenario-Based Processing Demo
+Shows automatic routing and processing via API:
+```bash
+# Process different data types automatically
+curl -X POST http://localhost:8080/api/rules/validate \
+  -H "Content-Type: application/json" \
+  -d '{"data": {"dataType": "OTC_OPTION", "underlying": "Natural Gas"}, "scenario": "auto-detect"}'
+```
+
+### Learning Path with REST API
+
+1. **Start the API Server**: `mvn spring-boot:run`
+2. **Explore Swagger UI**: http://localhost:8080/swagger-ui.html
+3. **Run Bootstrap Demos**: Each demo shows different API usage patterns
+4. **Try Interactive Examples**: Use Swagger UI to test endpoints
+5. **Review Demo Source Code**: See how demos integrate with the API
 | GET | `/actuator/info` | Application information |
 | GET | `/actuator/metrics` | Application metrics |
 

@@ -1,7 +1,7 @@
 # APEX - Technical Reference Guide
 
 **Version:** 1.0
-**Date:** 2025-08-02
+**Date:** 2025-08-22
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
 Welcome to the APEX Technical Reference Guide! This document provides detailed technical information for developers, architects, and system integrators working with APEX. While the User Guide focuses on getting started and common use cases, this reference dives deep into the technical architecture, advanced patterns, implementation details, scenario-based configuration management, and enterprise YAML validation systems.
@@ -639,6 +639,107 @@ RuleResult result = engine.evaluate(facts);
 - **Line 23**: Add inventory data to the facts map using the key "inventory"
 - **Line 26**: Create a rules engine instance with the provided configuration
 - **Line 27**: Evaluate all rules against the facts map and return the combined result
+
+## Bootstrap Demo Architecture
+
+### Overview
+
+APEX includes four comprehensive bootstrap demonstrations that showcase complete end-to-end scenarios with real-world financial data and infrastructure. These demos are architected as self-contained applications that demonstrate different aspects of APEX capabilities while providing practical learning experiences.
+
+### Bootstrap Demo Architecture Pattern
+
+All bootstrap demos follow a consistent architectural pattern that includes infrastructure setup, configuration loading, scenario execution, and results analysis. Each demo is designed to be completely self-contained with automatic environment detection and graceful fallback mechanisms.
+
+**Key Architectural Principles:**
+- **Self-Contained Execution**: All dependencies and data sources included
+- **Progressive Complexity**: Each scenario builds on previous concepts
+- **Real-World Data**: Authentic financial services data and conventions
+- **Performance Monitoring**: Comprehensive metrics and benchmarking
+- **Educational Focus**: Clear documentation and learning objectives
+
+### Individual Bootstrap Architectures
+
+#### 1. Custody Auto-Repair Bootstrap
+**Technical Focus**: Weighted rule-based decision making with sub-100ms processing
+
+**Architecture Highlights:**
+- PostgreSQL database with comprehensive settlement tables
+- Asian markets data (Japan, Hong Kong, Singapore)
+- 5 progressive scenarios from premium clients to exception handling
+- Weighted scoring algorithm across client, market, and instrument factors
+- Complete audit trail for regulatory compliance
+
+#### 2. Commodity Swap Validation Bootstrap
+**Technical Focus**: Progressive API complexity and multi-layered validation
+
+**Architecture Highlights:**
+- 5 comprehensive database tables with realistic market data
+- Energy (WTI, Brent), Metals (Gold, Silver), Agricultural (Corn) markets
+- 6 learning scenarios demonstrating API progression
+- Ultra-simple → Template-based → Advanced configuration patterns
+- Performance monitoring with sub-100ms targets
+
+#### 3. OTC Options Bootstrap Demo
+**Technical Focus**: Multiple data integration methods and Spring Boot integration
+
+**Architecture Highlights:**
+- Three different data lookup approaches (inline, database, external files)
+- PostgreSQL counterparty data with external YAML datasets
+- Major commodity coverage (Natural Gas, Oil, Metals, Agricultural)
+- Complete Spring Boot application with dependency injection
+- Realistic OTC Options structures and market conventions
+
+#### 4. Scenario-Based Processing Demo
+**Technical Focus**: Automatic data type routing and centralized configuration
+
+**Architecture Highlights:**
+- Intelligent data type detection and routing
+- Centralized scenario registry with lightweight configuration
+- Support for OTC Options, Commodity Swaps, Settlement Instructions
+- Graceful degradation for unknown data types
+- Flexible routing with multiple scenarios per data type
+
+### Common Technical Patterns
+
+All bootstrap demos implement these common patterns:
+
+**Infrastructure Setup Pattern:**
+```java
+// Phase 1: Environment Detection and Setup
+detectEnvironment();
+createDatabaseTables();
+generateSampleData();
+loadConfiguration();
+validateSetup();
+
+// Phase 2: APEX Integration
+loadYamlConfiguration();
+createRulesEngine();
+setupEnrichmentServices();
+configurePerformanceMonitoring();
+
+// Phase 3: Scenario Execution
+executeScenarios();
+collectMetrics();
+generateReports();
+```
+
+**Performance Monitoring Pattern:**
+- Start/end timing for all operations
+- Sub-100ms processing targets
+- Comprehensive metrics collection
+- Success rate analysis
+- Throughput calculations
+
+**Configuration Loading Pattern:**
+- YAML configuration validation
+- Metadata verification
+- Dependency checking
+- Business rule validation
+
+### Integration with APEX Core
+
+Bootstrap demos demonstrate deep integration with APEX core components including RulesEngineService, EnrichmentService, ExpressionEvaluatorService, and comprehensive performance monitoring systems.
 
 ## Architecture Overview
 

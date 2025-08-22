@@ -67,33 +67,13 @@ curl -X POST http://localhost:8080/api/expressions/evaluate \
 
 ## API Capabilities
 
-### Data Transformation
-Transform and normalize data using configurable rules
-- **Dynamic Rules** - Apply transformation rules on-the-fly
-- **Registered Transformers** - Use pre-configured transformation logic
-- **Batch Processing** - Transform multiple objects efficiently
-- **SpEL Integration** - Powerful expression-based transformations
-
-### Object Enrichment
-Enrich objects with additional data from external sources
-- **YAML Configuration** - Flexible enrichment definitions
-- **Multiple Sources** - Integrate data from various external systems
-- **Batch Enrichment** - Process multiple objects simultaneously
-- **Conditional Logic** - Apply enrichment based on conditions
-
-### Template Processing
-Generate dynamic content using templates with SpEL expressions
-- **Multi-Format Support** - JSON, XML, and text templates
-- **Expression Evaluation** - Dynamic content generation
-- **Batch Processing** - Process multiple templates together
-- **Context-Aware** - Rich context data for template rendering
-
-### Data Source Management
-Manage and interact with external data sources
-- **Source Discovery** - List and inspect available data sources
-- **Connectivity Testing** - Verify data source health and performance
-- **Standardized Lookups** - Consistent data retrieval interface
-- **Performance Monitoring** - Track lookup times and success rates
+### Rules Execution
+Execute business rules individually or in batches
+- **Single Rule Execution** - Test and execute individual rules
+- **Batch Processing** - Apply multiple rules to the same facts
+- **Named Rules Management** - Define and reuse named rules
+- **Detailed Results** - Comprehensive execution information
+- **Performance Metrics** - Track rule execution performance
 
 ### Expression Evaluation
 Evaluate Spring Expression Language (SpEL) expressions
@@ -101,31 +81,110 @@ Evaluate Spring Expression Language (SpEL) expressions
 - **Batch Evaluation** - Process multiple expressions efficiently
 - **Function Discovery** - Explore available SpEL functions
 - **Type-Safe Results** - Strongly typed expression results
+- **Context-Aware Processing** - Rich context data for expression evaluation
 
-### Rules Execution
-Execute business rules individually or in batches
-- **Single Rule Execution** - Test and execute individual rules
-- **Batch Processing** - Apply multiple rules to the same facts
-- **Detailed Results** - Comprehensive execution information
-- **Performance Metrics** - Track rule execution performance
+### Data Transformation
+Transform and normalize data using configurable rules
+- **Dynamic Rules** - Apply transformation rules on-the-fly
+- **Registered Transformers** - Use pre-configured transformation logic
+- **Batch Processing** - Transform multiple objects efficiently
+- **SpEL Integration** - Powerful expression-based transformations
+- **Field Mapping** - Flexible source-to-target field transformations
+
+### Object Enrichment
+Enrich objects with additional data from external sources
+- **YAML Configuration** - Flexible enrichment definitions
+- **Multiple Sources** - Integrate data from various external systems
+- **Batch Enrichment** - Process multiple objects simultaneously
+- **Conditional Logic** - Apply enrichment based on conditions
+- **Dataset Integration** - Inline and external dataset support
+
+### Template Processing
+Generate dynamic content using templates with SpEL expressions
+- **Multi-Format Support** - JSON, XML, and text templates
+- **Expression Evaluation** - Dynamic content generation
+- **Batch Processing** - Process multiple templates together
+- **Context-Aware** - Rich context data for template rendering
+- **Variable Substitution** - Dynamic variable replacement
+
+### Data Source Management
+Manage and interact with external data sources
+- **Source Discovery** - List and inspect available data sources
+- **Connectivity Testing** - Verify data source health and performance
+- **Standardized Lookups** - Consistent data retrieval interface
+- **Performance Monitoring** - Track lookup times and success rates
+- **Health Checks** - Real-time data source health monitoring
 
 ## Architecture Overview
 
 ### REST API Layer
-- **6 Specialized Controllers** - Each focused on specific functionality
-- **Consistent Response Format** - Standardized JSON responses
+- **6 Specialized Controllers** - Rules, Expressions, Transformations, Enrichments, Templates, Data Sources
+- **Consistent Response Format** - Standardized JSON responses with comprehensive metadata
 - **Comprehensive Validation** - Input validation using Jakarta Bean Validation
-- **Error Handling** - Detailed error responses with troubleshooting info
+- **Error Handling** - Detailed error responses with troubleshooting info and context
+- **Performance Monitoring** - Built-in response time tracking and metrics collection
 
 ### Service Layer
-- **ExpressionEvaluationService** - High-level SpEL expression processing
-- **Enhanced DataServiceManager** - Improved data source management
+- **ExpressionEvaluationService** - High-level SpEL expression processing with context management
+- **EnrichmentService** - Object enrichment with YAML dataset integration
+- **TransformationService** - Data transformation with configurable rules
+- **TemplateService** - Dynamic content generation with SpEL expressions
+- **Enhanced DataServiceManager** - Improved data source management with health monitoring
 - **Core Integration** - Seamless integration with APEX core services
 
 ### Integration Points
-- **Swagger/OpenAPI** - Interactive API documentation
-- **Spring Boot Actuator** - Health checks and metrics
-- **Comprehensive Testing** - Unit, integration, and demo tests
+- **Swagger/OpenAPI** - Interactive API documentation with live testing capabilities
+- **Spring Boot Actuator** - Health checks, metrics, and operational endpoints
+- **Bootstrap Demos** - Complete end-to-end demonstration scenarios
+- **Comprehensive Testing** - Unit, integration, performance, and demo tests
+
+## Bootstrap Demonstrations
+
+APEX includes comprehensive bootstrap demonstrations that showcase complete end-to-end scenarios with real-world data and infrastructure setup:
+
+### Available Bootstrap Demos
+
+#### 1. Custody Auto-Repair Bootstrap
+**Complete custody settlement auto-repair demonstration for Asian markets**
+- **Infrastructure**: PostgreSQL database with comprehensive settlement data
+- **Scenarios**: 5 progressive scenarios from premium clients to exception handling
+- **Features**: Weighted rule-based decision making, instruction enrichment, sub-100ms processing
+- **Business Value**: Demonstrates 66% auto-repair success rate vs industry average 20-40%
+
+#### 2. Commodity Swap Validation Bootstrap
+**End-to-end commodity derivatives validation with static data enrichment**
+- **Infrastructure**: 5 comprehensive database tables with realistic market data
+- **Scenarios**: 6 learning scenarios from ultra-simple API to performance monitoring
+- **Features**: Multi-layered validation, comprehensive enrichment, performance metrics
+- **Coverage**: Energy (WTI, Brent), Metals (Gold, Silver), Agricultural (Corn) markets
+
+#### 3. OTC Options Bootstrap Demo
+**Comprehensive OTC Options processing with multiple data lookup methods**
+- **Infrastructure**: PostgreSQL counterparty data, external YAML datasets, XML sample data
+- **Features**: Three different data lookup approaches (inline, database, external files)
+- **Coverage**: Major commodity classes (Natural Gas, Oil, Metals, Agricultural)
+- **Integration**: Complete Spring Boot integration with realistic financial data
+
+#### 4. Scenario-Based Processing Demo
+**Automatic data type routing and scenario-specific processing**
+- **Features**: Automatic data type detection, scenario-specific pipeline configuration
+- **Coverage**: OTC Options, Commodity Swaps, Settlement Instructions
+- **Architecture**: Centralized scenario registry with lightweight routing
+
+### Running Bootstrap Demos
+
+```bash
+# Run all bootstrap demos
+cd apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.ScenarioBasedProcessingDemo"
+
+# Or use the provided scripts
+./scripts/run-demos.bat    # Windows
+./scripts/run-demos.sh     # Linux/Mac
+```
 
 ## Real-World Use Cases
 

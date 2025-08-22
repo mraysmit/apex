@@ -1,7 +1,7 @@
 # APEX - Complete User Guide
 
 **Version:** 1.0
-**Date:** 2025-08-02
+**Date:** 2025-08-22
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
 ## Overview
@@ -181,7 +181,7 @@ The `#` symbol in expressions refers to data you provide. For example, `#age >= 
 This is the easiest way to get started. You can evaluate a single rule with just one line of code:
 
 ```java
-import dev.mars.rulesengine.core.api.Rules;
+import dev.mars.apex.core.api.Rules;
 
 // Check if someone is an adult (age 18 or older)
 boolean isAdult = Rules.check("#age >= 18", Map.of("age", 25)); // returns true
@@ -205,7 +205,7 @@ boolean valid = Rules.check("#data.age >= 18 && #data.email != null", customer);
 When you need multiple related rules, templates provide a cleaner approach:
 
 ```java
-import dev.mars.rulesengine.core.api.RuleSet;
+import dev.mars.apex.core.api.RuleSet;
 
 // Create a set of validation rules using pre-built templates
 RulesEngine validation = RuleSet.validation()
@@ -1168,6 +1168,168 @@ if (result.isSuccess()) {
 - **Enterprise integration**: Connect to existing systems using the [APEX External Data Sources Guide](APEX_EXTERNAL_DATA_SOURCES_GUIDE.md)
 
 You can start with the one-liner approach and gradually move to more sophisticated approaches as your needs grow!
+
+## Bootstrap Demonstrations
+
+APEX includes four comprehensive bootstrap demonstrations that showcase complete end-to-end scenarios with real-world financial data, infrastructure setup, and comprehensive processing pipelines. These demos are designed to help you understand APEX capabilities through practical, runnable examples.
+
+### Why Bootstrap Demos Matter
+
+Bootstrap demos provide:
+- **Complete Infrastructure Setup**: Automatic database creation, sample data generation, and configuration loading
+- **Real-World Scenarios**: Authentic financial services use cases with realistic data and business logic
+- **Progressive Learning**: Each demo builds on concepts from previous ones
+- **Self-Contained Execution**: Everything needed to run is included - no external dependencies
+- **Performance Benchmarking**: Real-time metrics and performance analysis
+
+### Available Bootstrap Demonstrations
+
+#### 1. Custody Auto-Repair Bootstrap
+**Complete custody settlement auto-repair for Asian markets**
+
+```bash
+cd apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap"
+```
+
+**What You'll Learn:**
+- Weighted rule-based decision making with sophisticated scoring
+- Sub-100ms processing with comprehensive performance metrics
+- Business-user maintainable YAML configuration
+- Real-world exception handling and edge cases
+
+**Key Features:**
+- **5 Progressive Scenarios**: From premium clients to exception handling
+- **66% Auto-Repair Success Rate**: Significantly above industry average (20-40%)
+- **Asian Markets Focus**: Japan, Hong Kong, Singapore with authentic market conventions
+- **Complete Audit Trail**: Regulatory compliance with detailed processing logs
+
+#### 2. Commodity Swap Validation Bootstrap
+**End-to-end commodity derivatives validation with static data enrichment**
+
+```bash
+cd apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap"
+```
+
+**What You'll Learn:**
+- Progressive API complexity from ultra-simple to advanced configuration
+- Multi-layered validation with 4 distinct approaches
+- Static data enrichment from multiple sources
+- Performance monitoring and optimization techniques
+
+**Key Features:**
+- **6 Learning Scenarios**: Each building on the previous one
+- **Realistic Market Data**: Energy (WTI, Brent), Metals (Gold, Silver), Agricultural (Corn)
+- **Complete Database Setup**: 5 comprehensive tables with production-ready structure
+- **API Progression**: Ultra-simple → Template-based → Advanced configuration
+
+#### 3. OTC Options Bootstrap Demo
+**Comprehensive OTC Options processing with multiple data lookup methods**
+
+```bash
+cd apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo"
+```
+
+**What You'll Learn:**
+- Three different data lookup approaches (inline, database, external files)
+- When to use each data integration method
+- Complete Spring Boot integration patterns
+- Realistic financial data structures and conventions
+
+**Key Features:**
+- **Multiple Data Sources**: PostgreSQL database, external YAML files, inline datasets
+- **Major Commodity Coverage**: Natural Gas, Oil, Metals, Agricultural products
+- **Authentic Financial Data**: Real OTC Options structures and market conventions
+- **Complete Integration**: Full Spring Boot application with dependency injection
+
+#### 4. Scenario-Based Processing Demo
+**Automatic data type routing and scenario-specific processing**
+
+```bash
+cd apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.ScenarioBasedProcessingDemo"
+```
+
+**What You'll Learn:**
+- Automatic data type detection and routing
+- Scenario-specific processing pipeline configuration
+- Centralized configuration management
+- Fallback handling for unknown data types
+
+**Key Features:**
+- **Intelligent Routing**: Automatic detection based on data structure
+- **Multiple Data Types**: OTC Options, Commodity Swaps, Settlement Instructions
+- **Centralized Registry**: Single configuration point for all scenarios
+- **Graceful Degradation**: Proper handling of edge cases and unknown types
+
+### Recommended Learning Path
+
+**For New Users:**
+1. **Start with OTC Options Bootstrap** (15-20 minutes)
+   - Learn basic data integration patterns
+   - Understand different data source approaches
+   - See complete end-to-end processing
+
+2. **Progress to Commodity Swap Validation** (20-30 minutes)
+   - Experience API progression from simple to advanced
+   - Learn multi-layered validation techniques
+   - Understand performance monitoring
+
+3. **Explore Custody Auto-Repair** (25-35 minutes)
+   - See real-world business logic in action
+   - Experience weighted rule-based decision making
+   - Understand exception handling and edge cases
+
+4. **Finish with Scenario-Based Processing** (15-20 minutes)
+   - Learn advanced routing and configuration management
+   - Understand centralized scenario management
+   - See how different data types are handled
+
+**Total Learning Time:** 75-105 minutes for comprehensive understanding
+
+### Running All Bootstrap Demos
+
+```bash
+# Navigate to demo module
+cd apex-demo
+
+# Run all demos in sequence (recommended for learning)
+./scripts/run-demos.sh     # Linux/Mac
+./scripts/run-demos.bat    # Windows
+
+# Or run individual demos
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.ScenarioBasedProcessingDemo"
+```
+
+### What to Expect
+
+Each bootstrap demo provides:
+- **Startup Messages**: Clear indication of what's being demonstrated
+- **Infrastructure Setup**: Automatic creation of databases, files, and configuration
+- **Progressive Scenarios**: Multiple scenarios showing different aspects
+- **Performance Metrics**: Real-time processing times and success rates
+- **Comprehensive Output**: Detailed logging of all processing steps
+- **Summary Reports**: Final analysis of results and key learnings
+
+### Integration with REST API
+
+All bootstrap demos integrate with the APEX REST API, providing examples of:
+- Rule evaluation via HTTP endpoints
+- Configuration management through API calls
+- Performance monitoring through actuator endpoints
+- Interactive testing through Swagger UI
+
+Start the REST API server and explore the interactive documentation:
+```bash
+cd apex-rest-api
+mvn spring-boot:run
+# Then visit: http://localhost:8080/swagger-ui.html
+```
 
 ## Core Concepts
 
@@ -2348,6 +2510,607 @@ This is just an introduction to external data sources. For comprehensive coverag
 - **Enterprise patterns and best practices**
 
 See the **[APEX External Data Sources Guide](APEX_EXTERNAL_DATA_SOURCES_GUIDE.md)** - the authoritative resource for external data integration.
+
+## Comprehensive Lookup Configuration Guide
+
+### Understanding Lookup Operations
+
+APEX provides sophisticated lookup capabilities that go far beyond simple key-value matching. The lookup system supports complex data transformations, conditional processing, multi-field matching, and advanced caching strategies.
+
+#### Core Lookup Concepts
+
+**Lookup Dataset Structure:**
+Every lookup operation requires a dataset with a consistent structure. The dataset can contain any number of fields, and APEX will intelligently map and transform the data based on your configuration.
+
+```yaml
+lookup-dataset:
+  type: "inline"
+  key-field: "primaryKey"        # The field to match against
+  data:
+    - primaryKey: "KEY1"
+      field1: "Value 1"
+      field2: "Additional Data"
+      nested:
+        subfield: "Nested Value"
+    - primaryKey: "KEY2"
+      field1: "Value 2"
+      field2: "More Data"
+      calculated: "#{field1} - #{field2}"  # SpEL expressions supported
+```
+
+**Lookup Process Flow:**
+1. **Key Extraction**: Extract the lookup key from the input data
+2. **Dataset Search**: Find matching record(s) in the dataset
+3. **Field Mapping**: Map source fields to target fields
+4. **Transformation**: Apply any configured transformations
+5. **Enrichment**: Add the mapped data to the original object
+
+### Advanced Lookup Patterns
+
+#### 1. Multi-Field Composite Keys
+
+For complex lookups that require matching on multiple fields:
+
+```yaml
+lookup-config:
+  lookup-dataset:
+    type: "inline"
+    key-field: "compositeKey"
+    key-expression: "#{country}_#{currency}_#{productType}"  # Composite key formula
+    data:
+      - compositeKey: "US_USD_EQUITY"
+        marketHours: "09:30-16:00"
+        tradingCalendar: "NYSE"
+        settlementDays: 2
+      - compositeKey: "UK_GBP_EQUITY"
+        marketHours: "08:00-16:30"
+        tradingCalendar: "LSE"
+        settlementDays: 2
+  field-mappings:
+    - source-field: "marketHours"
+      target-field: "tradingHours"
+    - source-field: "tradingCalendar"
+      target-field: "exchangeCalendar"
+```
+
+#### 2. Conditional Lookup Logic
+
+Apply different lookup strategies based on data conditions:
+
+```yaml
+enrichments:
+  - id: "conditional-pricing-lookup"
+    type: "lookup-enrichment"
+    condition: "['instrumentType'] != null"
+    lookup-config:
+      conditional-lookups:
+        - condition: "['instrumentType'] == 'EQUITY'"
+          lookup-dataset:
+            type: "database"
+            connection-name: "equity-pricing-db"
+            query: "SELECT * FROM equity_prices WHERE symbol = :symbol"
+        - condition: "['instrumentType'] == 'BOND'"
+          lookup-dataset:
+            type: "rest-api"
+            base-url: "https://api.bondpricing.com"
+            endpoint: "/prices/{cusip}"
+        - condition: "['instrumentType'] == 'DERIVATIVE'"
+          lookup-dataset:
+            type: "yaml-file"
+            file-path: "datasets/derivative-pricing.yaml"
+            key-field: "productId"
+      field-mappings:
+        - source-field: "price"
+          target-field: "currentPrice"
+        - source-field: "timestamp"
+          target-field: "priceTimestamp"
+```
+
+#### 3. Hierarchical Lookups
+
+Perform cascading lookups where one lookup result triggers additional lookups:
+
+```yaml
+enrichments:
+  - id: "hierarchical-customer-lookup"
+    type: "lookup-enrichment"
+    condition: "['customerId'] != null"
+    lookup-config:
+      primary-lookup:
+        lookup-dataset:
+          type: "database"
+          connection-name: "customer-db"
+          query: "SELECT * FROM customers WHERE id = :customerId"
+        field-mappings:
+          - source-field: "accountManagerId"
+            target-field: "accountManagerId"
+          - source-field: "riskProfile"
+            target-field: "customerRiskProfile"
+
+      secondary-lookups:
+        - condition: "['accountManagerId'] != null"
+          lookup-dataset:
+            type: "database"
+            connection-name: "employee-db"
+            query: "SELECT name, email, phone FROM employees WHERE id = :accountManagerId"
+          field-mappings:
+            - source-field: "name"
+              target-field: "accountManagerName"
+            - source-field: "email"
+              target-field: "accountManagerEmail"
+
+        - condition: "['customerRiskProfile'] != null"
+          lookup-dataset:
+            type: "inline"
+            key-field: "profile"
+            data:
+              - profile: "LOW"
+                maxTransactionAmount: 100000
+                approvalRequired: false
+              - profile: "HIGH"
+                maxTransactionAmount: 10000
+                approvalRequired: true
+          field-mappings:
+            - source-field: "maxTransactionAmount"
+              target-field: "transactionLimit"
+            - source-field: "approvalRequired"
+              target-field: "requiresApproval"
+```
+
+#### 4. Dynamic Dataset Selection
+
+Choose datasets dynamically based on runtime conditions:
+
+```yaml
+lookup-config:
+  dynamic-dataset-selection:
+    selection-expression: "#{environment}_#{region}_#{businessUnit}"
+    datasets:
+      "PROD_US_TRADING":
+        type: "database"
+        connection-name: "prod-us-trading-db"
+        query: "SELECT * FROM trading_limits WHERE trader_id = :traderId"
+      "PROD_EU_TRADING":
+        type: "database"
+        connection-name: "prod-eu-trading-db"
+        query: "SELECT * FROM trading_limits WHERE trader_id = :traderId"
+      "DEV_*_*":  # Wildcard pattern matching
+        type: "yaml-file"
+        file-path: "datasets/dev-trading-limits.yaml"
+        key-field: "traderId"
+  field-mappings:
+    - source-field: "dailyLimit"
+      target-field: "maxDailyAmount"
+    - source-field: "positionLimit"
+      target-field: "maxPositionSize"
+```
+
+### Advanced Field Mapping and Transformation
+
+#### 1. Expression-Based Transformations
+
+Use SpEL expressions for complex data transformations:
+
+```yaml
+field-mappings:
+  - source-field: "firstName"
+    target-field: "fullName"
+    transformation: "#{firstName} #{lastName}"
+
+  - source-field: "amount"
+    target-field: "formattedAmount"
+    transformation: "T(java.text.NumberFormat).getCurrencyInstance().format(#{amount})"
+
+  - source-field: "timestamp"
+    target-field: "businessDate"
+    transformation: "T(java.time.LocalDateTime).parse(#{timestamp}).toLocalDate()"
+
+  - source-field: "riskScore"
+    target-field: "riskCategory"
+    transformation: "#{riskScore} > 80 ? 'HIGH' : (#{riskScore} > 50 ? 'MEDIUM' : 'LOW')"
+```
+
+#### 2. Conditional Field Mapping
+
+Apply different mappings based on conditions:
+
+```yaml
+field-mappings:
+  - source-field: "status"
+    target-field: "displayStatus"
+    conditional-mappings:
+      - condition: "#{status} == 'A'"
+        value: "Active"
+      - condition: "#{status} == 'I'"
+        value: "Inactive"
+      - condition: "#{status} == 'P'"
+        value: "Pending"
+      - default: true
+        value: "Unknown Status"
+
+  - source-field: "amount"
+    target-field: "processedAmount"
+    conditional-mappings:
+      - condition: "#{currency} == 'USD'"
+        transformation: "#{amount}"
+      - condition: "#{currency} == 'EUR'"
+        transformation: "#{amount} * 1.1"  # Example conversion
+      - condition: "#{currency} == 'GBP'"
+        transformation: "#{amount} * 1.25"
+```
+
+#### 3. Nested Object Mapping
+
+Handle complex nested data structures:
+
+```yaml
+field-mappings:
+  - source-field: "address"
+    target-field: "customerAddress"
+    nested-mappings:
+      - source-field: "street"
+        target-field: "streetAddress"
+      - source-field: "city"
+        target-field: "cityName"
+      - source-field: "postalCode"
+        target-field: "zipCode"
+
+  - source-field: "contact"
+    target-field: "primaryContact"
+    nested-mappings:
+      - source-field: "email"
+        target-field: "emailAddress"
+        transformation: "#{email}.toLowerCase()"
+      - source-field: "phone"
+        target-field: "phoneNumber"
+        transformation: "#{phone}.replaceAll('[^0-9]', '')"
+```
+
+### Performance Optimization Strategies
+
+#### 1. Intelligent Caching
+
+Configure sophisticated caching strategies for optimal performance:
+
+```yaml
+lookup-config:
+  lookup-dataset:
+    type: "database"
+    connection-name: "reference-data"
+    query: "SELECT * FROM currency_rates WHERE currency = :currency"
+
+    # Advanced caching configuration
+    cache-config:
+      enabled: true
+      strategy: "LRU"                    # LRU, LFU, FIFO, or TIME_BASED
+      max-entries: 10000                 # Maximum cache entries
+      ttl-seconds: 300                   # Time to live (5 minutes)
+      refresh-ahead-seconds: 60          # Refresh 1 minute before expiry
+
+      # Cache warming
+      preload-enabled: true
+      preload-query: "SELECT * FROM currency_rates WHERE active = true"
+
+      # Cache monitoring
+      metrics-enabled: true
+      hit-ratio-threshold: 0.8           # Alert if hit ratio drops below 80%
+```
+
+#### 2. Connection Pooling and Optimization
+
+Optimize database connections for high-performance lookups:
+
+```yaml
+data-sources:
+  reference-data:
+    type: "database"
+    jdbc-url: "jdbc:postgresql://localhost:5432/reference"
+    username: "${DB_USERNAME}"
+    password: "${DB_PASSWORD}"
+
+    # Connection pool configuration
+    connection-pool:
+      initial-size: 5
+      max-active: 20
+      max-idle: 10
+      min-idle: 2
+      max-wait-millis: 30000
+
+      # Performance tuning
+      test-on-borrow: true
+      test-on-return: false
+      test-while-idle: true
+      validation-query: "SELECT 1"
+
+      # Connection lifecycle
+      time-between-eviction-runs-millis: 30000
+      min-evictable-idle-time-millis: 60000
+```
+
+#### 3. Batch Lookup Operations
+
+Optimize for high-volume processing with batch operations:
+
+```yaml
+lookup-config:
+  batch-processing:
+    enabled: true
+    batch-size: 100                      # Process 100 lookups at once
+    max-wait-time-ms: 50                 # Maximum wait time for batch
+
+    # Batch query optimization
+    batch-query: |
+      SELECT customer_id, name, status, credit_rating
+      FROM customers
+      WHERE customer_id IN (:customerIds)
+
+    # Result processing
+    result-mapping:
+      key-field: "customer_id"
+      field-mappings:
+        - source-field: "name"
+          target-field: "customerName"
+        - source-field: "status"
+          target-field: "accountStatus"
+        - source-field: "credit_rating"
+          target-field: "creditRating"
+```
+
+### Error Handling and Resilience
+
+#### 1. Lookup Failure Strategies
+
+Configure how APEX handles lookup failures:
+
+```yaml
+lookup-config:
+  error-handling:
+    strategy: "FALLBACK"                 # FAIL_FAST, FALLBACK, IGNORE, or RETRY
+
+    # Fallback configuration
+    fallback-dataset:
+      type: "inline"
+      key-field: "code"
+      data:
+        - code: "DEFAULT"
+          name: "Default Value"
+          description: "Fallback when lookup fails"
+
+    # Retry configuration
+    retry-config:
+      max-attempts: 3
+      initial-delay-ms: 100
+      backoff-multiplier: 2.0
+      max-delay-ms: 5000
+
+    # Timeout configuration
+    timeout-ms: 5000
+
+    # Logging and monitoring
+    log-failures: true
+    metrics-enabled: true
+    alert-on-failure-rate: 0.1           # Alert if failure rate > 10%
+```
+
+#### 2. Circuit Breaker Pattern
+
+Protect against cascading failures with circuit breaker:
+
+```yaml
+lookup-config:
+  circuit-breaker:
+    enabled: true
+    failure-threshold: 5                 # Open circuit after 5 failures
+    success-threshold: 3                 # Close circuit after 3 successes
+    timeout-ms: 60000                    # Keep circuit open for 1 minute
+
+    # Fallback behavior when circuit is open
+    fallback-strategy: "CACHE_ONLY"      # Use cached data only
+    fallback-ttl-seconds: 3600           # Cache valid for 1 hour when circuit open
+```
+
+#### 3. Data Validation and Quality Checks
+
+Ensure lookup data quality with validation rules:
+
+```yaml
+lookup-config:
+  data-validation:
+    enabled: true
+
+    # Field validation rules
+    field-validations:
+      - field: "email"
+        pattern: "^[A-Za-z0-9+_.-]+@(.+)$"
+        required: true
+      - field: "amount"
+        min-value: 0
+        max-value: 1000000
+        data-type: "NUMBER"
+      - field: "date"
+        date-format: "yyyy-MM-dd"
+        not-null: true
+
+    # Cross-field validation
+    cross-field-validations:
+      - condition: "#{startDate} <= #{endDate}"
+        error-message: "Start date must be before end date"
+      - condition: "#{amount} > 0 || #{status} == 'CANCELLED'"
+        error-message: "Amount must be positive unless cancelled"
+
+    # Validation failure handling
+    on-validation-failure: "LOG_AND_CONTINUE"  # LOG_AND_CONTINUE, FAIL_FAST, or SKIP_RECORD
+```
+
+### Monitoring and Observability
+
+#### 1. Comprehensive Metrics Collection
+
+Monitor lookup performance and health:
+
+```yaml
+lookup-config:
+  monitoring:
+    metrics-enabled: true
+
+    # Performance metrics
+    performance-metrics:
+      - "lookup.execution.time"
+      - "lookup.cache.hit.ratio"
+      - "lookup.batch.size"
+      - "lookup.throughput.per.second"
+
+    # Business metrics
+    business-metrics:
+      - "lookup.success.rate"
+      - "lookup.data.freshness"
+      - "lookup.validation.failures"
+      - "lookup.fallback.usage"
+
+    # Custom metrics
+    custom-metrics:
+      - name: "high.value.lookups"
+        condition: "#{amount} > 1000000"
+        description: "Count of high-value transaction lookups"
+```
+
+#### 2. Audit Trail and Compliance
+
+Maintain comprehensive audit trails for regulatory compliance:
+
+```yaml
+lookup-config:
+  audit:
+    enabled: true
+
+    # Audit scope
+    audit-scope:
+      - "LOOKUP_REQUESTS"
+      - "LOOKUP_RESULTS"
+      - "CACHE_OPERATIONS"
+      - "FALLBACK_USAGE"
+      - "VALIDATION_FAILURES"
+
+    # Audit storage
+    audit-storage:
+      type: "DATABASE"
+      connection-name: "audit-db"
+      table-name: "lookup_audit_log"
+
+      # Retention policy
+      retention-days: 2555                # 7 years for financial compliance
+      archive-after-days: 365
+
+    # Sensitive data handling
+    sensitive-fields:
+      - field: "ssn"
+        mask-pattern: "XXX-XX-####"
+      - field: "creditCardNumber"
+        hash-algorithm: "SHA-256"
+```
+
+#### 3. Real-Time Alerting
+
+Configure alerts for operational issues:
+
+```yaml
+lookup-config:
+  alerting:
+    enabled: true
+
+    # Performance alerts
+    performance-alerts:
+      - metric: "lookup.execution.time"
+        threshold: 100                    # Alert if lookup takes > 100ms
+        severity: "WARNING"
+      - metric: "lookup.cache.hit.ratio"
+        threshold: 0.8                    # Alert if cache hit ratio < 80%
+        severity: "CRITICAL"
+
+    # Business alerts
+    business-alerts:
+      - metric: "lookup.failure.rate"
+        threshold: 0.05                   # Alert if failure rate > 5%
+        severity: "CRITICAL"
+      - metric: "lookup.validation.failures"
+        threshold: 10                     # Alert if > 10 validation failures/hour
+        severity: "WARNING"
+
+    # Alert channels
+    alert-channels:
+      - type: "EMAIL"
+        recipients: ["ops-team@company.com"]
+      - type: "SLACK"
+        webhook-url: "${SLACK_WEBHOOK_URL}"
+      - type: "PAGERDUTY"
+        service-key: "${PAGERDUTY_SERVICE_KEY}"
+```
+
+### Enterprise Integration Patterns
+
+#### 1. Multi-Tenant Lookup Configuration
+
+Support multiple tenants with isolated lookup configurations:
+
+```yaml
+lookup-config:
+  multi-tenant:
+    enabled: true
+    tenant-resolution: "HEADER"          # HEADER, JWT_CLAIM, or CUSTOM
+    tenant-header: "X-Tenant-ID"
+
+    # Tenant-specific configurations
+    tenant-configs:
+      "tenant-a":
+        lookup-dataset:
+          type: "database"
+          connection-name: "tenant-a-db"
+          query: "SELECT * FROM tenant_a.reference_data WHERE key = :key"
+
+      "tenant-b":
+        lookup-dataset:
+          type: "rest-api"
+          base-url: "https://tenant-b-api.company.com"
+          endpoint: "/reference/{key}"
+
+      # Default configuration for unknown tenants
+      "default":
+        lookup-dataset:
+          type: "yaml-file"
+          file-path: "datasets/default-reference-data.yaml"
+          key-field: "key"
+```
+
+#### 2. Microservices Integration
+
+Integrate with microservices architecture:
+
+```yaml
+lookup-config:
+  microservices:
+    service-discovery:
+      enabled: true
+      registry-type: "CONSUL"            # CONSUL, EUREKA, or KUBERNETES
+      service-name: "reference-data-service"
+
+    # Load balancing
+    load-balancing:
+      strategy: "ROUND_ROBIN"            # ROUND_ROBIN, LEAST_CONNECTIONS, or WEIGHTED
+      health-check-enabled: true
+      health-check-interval-ms: 30000
+
+    # Service mesh integration
+    service-mesh:
+      enabled: true
+      mesh-type: "ISTIO"                 # ISTIO, LINKERD, or CONSUL_CONNECT
+      mutual-tls: true
+
+    # API versioning
+    api-versioning:
+      strategy: "HEADER"                 # HEADER, PATH, or QUERY_PARAM
+      version-header: "API-Version"
+      default-version: "v1"
+```
 
 ### Performance Optimization
 
