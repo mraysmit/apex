@@ -1,0 +1,166 @@
+# Simple Field Lookup Example Configuration
+# Demonstrates basic lookup-key usage with currency code enrichment
+# Use Case: Enrich currency transactions with detailed currency information
+
+name: "Simple Field Lookup Demo"
+description: "Demonstrates basic field lookup using currency codes"
+version: "1.0"
+
+# Define the enrichment rules
+enrichments:
+  - id: "currency-details-enrichment"
+    name: "Currency Details Lookup"
+    description: "Enrich transactions with currency details using simple field lookup"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#currencyCode != null && #currencyCode.length() == 3"
+    
+    lookup-config:
+      # Simple field reference - extract currency code from transaction
+      lookup-key: "#currencyCode"
+      
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        data:
+          - code: "USD"
+            name: "US Dollar"
+            symbol: "$"
+            decimalPlaces: 2
+            countryCode: "US"
+            isBaseCurrency: true
+            region: "North America"
+            
+          - code: "EUR"
+            name: "Euro"
+            symbol: "€"
+            decimalPlaces: 2
+            countryCode: "EU"
+            isBaseCurrency: true
+            region: "Europe"
+            
+          - code: "GBP"
+            name: "British Pound Sterling"
+            symbol: "£"
+            decimalPlaces: 2
+            countryCode: "GB"
+            isBaseCurrency: true
+            region: "Europe"
+            
+          - code: "JPY"
+            name: "Japanese Yen"
+            symbol: "¥"
+            decimalPlaces: 0
+            countryCode: "JP"
+            isBaseCurrency: true
+            region: "Asia"
+            
+          - code: "CHF"
+            name: "Swiss Franc"
+            symbol: "CHF"
+            decimalPlaces: 2
+            countryCode: "CH"
+            isBaseCurrency: true
+            region: "Europe"
+            
+          - code: "CAD"
+            name: "Canadian Dollar"
+            symbol: "C$"
+            decimalPlaces: 2
+            countryCode: "CA"
+            isBaseCurrency: true
+            region: "North America"
+            
+          - code: "AUD"
+            name: "Australian Dollar"
+            symbol: "A$"
+            decimalPlaces: 2
+            countryCode: "AU"
+            isBaseCurrency: true
+            region: "Oceania"
+            
+          - code: "CNY"
+            name: "Chinese Yuan"
+            symbol: "¥"
+            decimalPlaces: 2
+            countryCode: "CN"
+            isBaseCurrency: false
+            region: "Asia"
+            
+          - code: "INR"
+            name: "Indian Rupee"
+            symbol: "₹"
+            decimalPlaces: 2
+            countryCode: "IN"
+            isBaseCurrency: false
+            region: "Asia"
+            
+          - code: "BRL"
+            name: "Brazilian Real"
+            symbol: "R$"
+            decimalPlaces: 2
+            countryCode: "BR"
+            isBaseCurrency: false
+            region: "South America"
+    
+    # Map the lookup results to target fields
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+        required: true
+        
+      - source-field: "symbol"
+        target-field: "currencySymbol"
+        required: true
+        
+      - source-field: "decimalPlaces"
+        target-field: "decimalPlaces"
+        required: true
+        
+      - source-field: "countryCode"
+        target-field: "countryCode"
+        required: false
+        
+      - source-field: "isBaseCurrency"
+        target-field: "isBaseCurrency"
+        required: false
+        
+      - source-field: "region"
+        target-field: "currencyRegion"
+        required: false
+
+# Optional validation rules to ensure data quality
+validations:
+  - id: "currency-code-format"
+    name: "Currency Code Format Validation"
+    description: "Ensure currency code is 3 characters uppercase"
+    type: "field-validation"
+    enabled: true
+    condition: "#currencyCode != null"
+    
+    validation-config:
+      field: "currencyCode"
+      rules:
+        - type: "regex"
+          pattern: "^[A-Z]{3}$"
+          message: "Currency code must be 3 uppercase letters"
+          
+  - id: "amount-positive"
+    name: "Positive Amount Validation"
+    description: "Ensure transaction amount is positive"
+    type: "field-validation"
+    enabled: true
+    condition: "#amount != null"
+    
+    validation-config:
+      field: "amount"
+      rules:
+        - type: "range"
+          min: 0.01
+          message: "Transaction amount must be positive"
+
+# Processing configuration
+processing:
+  continue-on-error: true
+  max-errors: 10
+  error-handling: "log-and-continue"

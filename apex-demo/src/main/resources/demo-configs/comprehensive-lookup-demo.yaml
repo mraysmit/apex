@@ -23,18 +23,6 @@ enrichments:
     lookup-config:
       lookup-service: "demo-inline-service"
       lookup-key: "#customerId"
-      lookup-dataset:
-        type: "inline"
-        key-field: "id"
-        data:
-          - id: "CUST123"
-            name: "John Doe"
-            status: "ACTIVE"
-            tier: "GOLD"
-          - id: "CUST456"
-            name: "Jane Smith"
-            status: "ACTIVE"
-            tier: "PLATINUM"
     field-mappings:
       - source-field: "name"
         target-field: "customerName"
@@ -50,18 +38,6 @@ enrichments:
     lookup-config:
       lookup-service: "demo-inline-service"
       lookup-key: "#customer?.id ?: #transaction.counterparty.partyId"
-      lookup-dataset:
-        type: "inline"
-        key-field: "id"
-        data:
-          - id: "CUST456"
-            name: "Jane Smith"
-            type: "INDIVIDUAL"
-            jurisdiction: "US"
-          - id: "PARTY789"
-            name: "ABC Corporation"
-            type: "CORPORATE"
-            jurisdiction: "UK"
     field-mappings:
       - source-field: "name"
         target-field: "entityName"
@@ -75,7 +51,6 @@ enrichments:
     type: "lookup-enrichment"
     condition: "#customerId != null && #region != null"
     lookup-config:
-      lookup-service: "demo-inline-service"
       lookup-key: "#customerId + '-' + #region"
       lookup-dataset:
         type: "inline"
@@ -102,7 +77,6 @@ enrichments:
     type: "lookup-enrichment"
     condition: "#type != null && (#customerId != null || #vendorId != null)"
     lookup-config:
-      lookup-service: "demo-inline-service"
       lookup-key: "#type == 'CUSTOMER' ? #customerId : #vendorId"
       lookup-dataset:
         type: "inline"
@@ -129,7 +103,6 @@ enrichments:
     type: "lookup-enrichment"
     condition: "#baseCurrency != null && #quoteCurrency != null"
     lookup-config:
-      lookup-service: "demo-inline-service"
       lookup-key: "#baseCurrency.toUpperCase() + '/' + #quoteCurrency.toUpperCase()"
       lookup-dataset:
         type: "inline"
@@ -160,7 +133,6 @@ enrichments:
     type: "lookup-enrichment"
     condition: "#trade?.instrument?.symbol != null && #trade?.counterparty?.id != null"
     lookup-config:
-      lookup-service: "demo-inline-service"
       lookup-key: "#trade.instrument.symbol + ':' + #trade.counterparty.id + ':' + #trade.settlementDate.toString()"
       lookup-dataset:
         type: "inline"
@@ -191,7 +163,6 @@ enrichments:
     type: "lookup-enrichment"
     condition: "#portfolio != null && #asOfDate != null"
     lookup-config:
-      lookup-service: "demo-inline-service"
       lookup-key: "T(java.lang.String).valueOf((#portfolio.id + #portfolio.strategy + #asOfDate.toString()).hashCode())"
       lookup-dataset:
         type: "inline"
@@ -218,7 +189,6 @@ enrichments:
     type: "lookup-enrichment"
     condition: "#product != null && #customer != null"
     lookup-config:
-      lookup-service: "demo-inline-service"
       lookup-key: "#product.category + '|' + #product.id + '|' + #customer.tier + '|' + #customer.region"
       lookup-dataset:
         type: "inline"
@@ -249,7 +219,6 @@ enrichments:
     type: "lookup-enrichment"
     condition: "#customerId != null"
     lookup-config:
-      lookup-service: "demo-inline-service"
       lookup-key: "#customer?.id ?: #customerId"
       lookup-dataset:
         type: "inline"
@@ -272,7 +241,6 @@ enrichments:
     type: "lookup-enrichment"
     condition: "#id != null && #instrument != null && #counterparty != null"
     lookup-config:
-      lookup-service: "demo-inline-service"
       lookup-key: "#instrument.symbol + ':' + #counterparty.type + ':' + #customer.tier + ':' + (#notionalAmount > 1000000 ? 'HIGH_VALUE' : 'STANDARD')"
       lookup-dataset:
         type: "inline"

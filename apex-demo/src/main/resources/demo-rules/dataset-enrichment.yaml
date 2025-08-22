@@ -159,6 +159,7 @@ enrichments:
     description: "Enrich currency codes with comprehensive reference data"
     condition: "['currency'] != null"
     lookup-config:
+      lookup-key: "currency"
       lookup-dataset:
         type: "inline"
         key-field: "code"
@@ -257,6 +258,7 @@ enrichments:
     description: "Enrich country codes with regional and regulatory information"
     condition: "['countryCode'] != null"
     lookup-config:
+      lookup-key: "countryCode"
       lookup-dataset:
         type: "inline"
         key-field: "code"
@@ -321,6 +323,7 @@ enrichments:
     description: "Enrich customer tier codes with benefits and requirements"
     condition: "['customerTier'] != null"
     lookup-config:
+      lookup-key: "customerTier"
       lookup-dataset:
         type: "inline"
         key-field: "tier"
@@ -385,6 +388,7 @@ enrichments:
     description: "Enrich product categories with risk and regulatory information"
     condition: "['productCategory'] != null"
     lookup-config:
+      lookup-key: "productCategory"
       lookup-dataset:
         type: "inline"
         key-field: "category"
@@ -443,6 +447,7 @@ enrichments:
     description: "Additional enrichment for high-value transactions"
     condition: "['transactionAmount'] != null && ['transactionAmount'] > 1000000"
     lookup-config:
+      lookup-key: "'HIGH_VALUE'"
       lookup-dataset:
         type: "inline"
         key-field: "type"

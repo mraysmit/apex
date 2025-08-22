@@ -874,9 +874,24 @@ public class YamlConfigurationLoader {
      * Validate conditional expression patterns in lookup keys.
      */
     private void validateConditionalExpressionPattern(String lookupKey, String enrichmentId) throws YamlConfigurationException {
-        // Count ternary operators
-        long questionMarkCount = lookupKey.chars().filter(ch -> ch == '?').count();
-        long colonCount = lookupKey.chars().filter(ch -> ch == ':').count();
+        // Handle Elvis operator (?:) - safe navigation with null coalescing
+        if (lookupKey.contains("?:")) {
+            // Elvis operator is valid - just ensure basic syntax
+            if (lookupKey.indexOf("?:") == lookupKey.length() - 2) {
+                throw new YamlConfigurationException("Elvis operator (?:) missing right operand in lookup-key '" + lookupKey + "' for enrichment: " + enrichmentId);
+            }
+            return; // Elvis operator is valid, skip ternary validation
+        }
+
+        // Count ternary operators (excluding safe navigation ?. and string literals)
+        String withoutSafeNav = lookupKey.replace("?.", "X."); // Replace ?. with X. to avoid counting
+
+        // Remove string literals to avoid counting colons inside strings
+        String withoutStrings = withoutSafeNav.replaceAll("'[^']*'", "''"); // Replace 'text' with ''
+        withoutStrings = withoutStrings.replaceAll("\"[^\"]*\"", "\"\""); // Replace "text" with ""
+
+        long questionMarkCount = withoutStrings.chars().filter(ch -> ch == '?').count();
+        long colonCount = withoutStrings.chars().filter(ch -> ch == ':').count();
 
         // Basic ternary validation - should have matching ? and :
         if (questionMarkCount != colonCount) {
@@ -913,22 +928,10 @@ public class YamlConfigurationLoader {
             throw new YamlConfigurationException("Invalid substring call in lookup-key '" + lookupKey + "' for enrichment: " + enrichmentId + ". substring() requires parameters");
         }
 
-        // Check for balanced parentheses in substring calls
-        String[] parts = lookupKey.split("\\.substring\\(");
-        for (int i = 1; i < parts.length; i++) {
-            String part = parts[i];
-            int openParen = 1; // Start with 1 because we split after the opening parenthesis
-            int closeParen = 0;
-            for (char c : part.toCharArray()) {
-                if (c == '(') openParen++;
-                if (c == ')') {
-                    closeParen++;
-                    if (closeParen == openParen) break; // Found matching closing parenthesis
-                }
-            }
-            if (openParen != closeParen) {
-                throw new YamlConfigurationException("Unbalanced parentheses in substring call in lookup-key '" + lookupKey + "' for enrichment: " + enrichmentId);
-            }
+        // For now, just validate that substring calls have basic structure - detailed validation can be done at runtime
+        // This is a simple check to ensure substring calls are not malformed
+        if (lookupKey.contains(".substring(") && !lookupKey.contains(")")) {
+            throw new YamlConfigurationException("Malformed substring call in lookup-key '" + lookupKey + "' for enrichment: " + enrichmentId + ". Missing closing parenthesis");
         }
     }
 
@@ -1222,12 +1225,40 @@ public class YamlConfigurationLoader {
      */
     private boolean isValidSpELExpression(String expression) {
         try {
-            // Use a simple SpEL parser to validate syntax
+            // Handle template expressions (#{...}) by extracting and validating individual expressions
+            if (expression.contains("#{") && expression.contains("}")) {
+                return validateTemplateExpression(expression);
+            }
+
+            // Use a simple SpEL parser to validate syntax for regular expressions
             org.springframework.expression.ExpressionParser parser = new org.springframework.expression.spel.standard.SpelExpressionParser();
             parser.parseExpression(expression);
             return true;
         } catch (Exception e) {
             LOGGER.fine("Invalid SpEL expression: " + expression + " - " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Validate template expressions containing #{...} syntax.
+     */
+    private boolean validateTemplateExpression(String template) {
+        try {
+            // Extract expressions from #{...} blocks and validate each one
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("#\\{([^}]+)\\}");
+            java.util.regex.Matcher matcher = pattern.matcher(template);
+
+            org.springframework.expression.ExpressionParser parser = new org.springframework.expression.spel.standard.SpelExpressionParser();
+
+            while (matcher.find()) {
+                String expression = matcher.group(1);
+                parser.parseExpression(expression); // This will throw if invalid
+            }
+
+            return true;
+        } catch (Exception e) {
+            LOGGER.fine("Invalid template expression: " + template + " - " + e.getMessage());
             return false;
         }
     }

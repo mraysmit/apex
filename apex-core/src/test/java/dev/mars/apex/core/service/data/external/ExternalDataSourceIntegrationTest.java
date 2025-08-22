@@ -86,8 +86,13 @@ class ExternalDataSourceIntegrationTest {
 
         } catch (DataSourceException e) {
             // If external service is unavailable (502, 503, timeout, etc.), skip the test
-            if (e.getMessage().contains("502") || e.getMessage().contains("503") ||
-                e.getMessage().contains("timeout") || e.getMessage().contains("failed with status")) {
+            String errorMsg = e.getMessage().toLowerCase();
+            String causeMsg = e.getCause() != null ? e.getCause().getMessage().toLowerCase() : "";
+
+            if (errorMsg.contains("502") || errorMsg.contains("503") ||
+                errorMsg.contains("timeout") || errorMsg.contains("timed out") ||
+                errorMsg.contains("failed with status") || errorMsg.contains("rest api call failed") ||
+                causeMsg.contains("timeout") || causeMsg.contains("timed out")) {
                 org.junit.jupiter.api.Assumptions.assumeTrue(false,
                     "Skipping REST API test - external service error: " + e.getMessage());
                 return;

@@ -152,10 +152,23 @@ enrichments:
     priority: 10
     condition: "#counterpartyId != null"
     lookup-config:
-      lookup-service: "counterpartyLookupService"
       lookup-key: "#counterpartyId"
-      cache-enabled: true
-      cache-ttl-seconds: 3600
+      lookup-dataset:
+        type: "inline"
+        key-field: "id"
+        data:
+          - id: "CP001"
+            name: "Goldman Sachs"
+            rating: "A+"
+            riskWeight: 0.20
+          - id: "CP002"
+            name: "JP Morgan"
+            rating: "A+"
+            riskWeight: 0.18
+          - id: "CP003"
+            name: "Deutsche Bank"
+            rating: "A"
+            riskWeight: 0.25
     field-mappings:
       - source-field: "name"
         target-field: "counterpartyName"
@@ -180,10 +193,23 @@ enrichments:
     priority: 11
     condition: "#notionalCurrency != null"
     lookup-config:
-      lookup-service: "currencyLookupService"
       lookup-key: "#notionalCurrency"
-      cache-enabled: true
-      cache-ttl-seconds: 7200
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        data:
+          - code: "USD"
+            name: "US Dollar"
+            symbol: "$"
+            decimalPlaces: 2
+          - code: "EUR"
+            name: "Euro"
+            symbol: "€"
+            decimalPlaces: 2
+          - code: "GBP"
+            name: "British Pound"
+            symbol: "£"
+            decimalPlaces: 2
     field-mappings:
       - source-field: "name"
         target-field: "currencyName"
@@ -205,10 +231,26 @@ enrichments:
     priority: 12
     condition: "#referenceIndex != null"
     lookup-config:
-      lookup-service: "commodityLookupService"
       lookup-key: "#referenceIndex"
-      cache-enabled: true
-      cache-ttl-seconds: 1800
+      lookup-dataset:
+        type: "inline"
+        key-field: "index"
+        data:
+          - index: "WTI_CRUDE"
+            indexName: "WTI Crude Oil"
+            category: "Energy"
+            exchange: "NYMEX"
+            currency: "USD"
+          - index: "BRENT_CRUDE"
+            indexName: "Brent Crude Oil"
+            category: "Energy"
+            exchange: "ICE"
+            currency: "USD"
+          - index: "GOLD_SPOT"
+            indexName: "Gold Spot"
+            category: "Precious Metals"
+            exchange: "COMEX"
+            currency: "USD"
     field-mappings:
       - source-field: "indexName"
         target-field: "referenceIndexName"
@@ -240,6 +282,10 @@ enrichments:
         #notionalAmount.multiply(T(java.math.BigDecimal).new('0.0015'))
       result-field: "brokerCommission"
       dependencies: ["notionalAmount", "productType"]
+    field-mappings:
+      - source-field: "brokerCommission"
+        target-field: "brokerCommission"
+        required: true
     tags: ["fee-calculation", "commission"]
 
   - id: "risk-metrics-calculation"
@@ -256,6 +302,10 @@ enrichments:
         #notionalAmount.doubleValue() / 365.0
       result-field: "timeWeightedExposure"
       dependencies: ["notionalAmount", "maturityDate", "tradeDate"]
+    field-mappings:
+      - source-field: "timeWeightedExposure"
+        target-field: "timeWeightedExposure"
+        required: true
     tags: ["risk-calculation", "exposure"]
 
 # Define transformation configurations

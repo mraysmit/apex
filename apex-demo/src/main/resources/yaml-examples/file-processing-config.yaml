@@ -132,6 +132,7 @@ enrichments:
     condition: "#country != null"
     enabled: true
     lookup-config:
+      lookup-key: "country"
       lookup-dataset:
         type: "yaml-file"
         file-path: "yaml-examples/datasets/countries.yaml"
@@ -160,8 +161,13 @@ enrichments:
     condition: "#accountBalance != null"
     enabled: true
     calculation-config:
-      target-field: "customerTier"
+      result-field: "customerTier"
       expression: "#accountBalance >= 50000 ? 'PLATINUM' : (#accountBalance >= 25000 ? 'GOLD' : (#accountBalance >= 10000 ? 'SILVER' : 'BRONZE'))"
+      dependencies: ["accountBalance"]
+    field-mappings:
+      - source-field: "customerTier"
+        target-field: "customerTier"
+        required: true
     metadata:
       owner: "Business Team"
       purpose: "Customer tier classification"
@@ -173,8 +179,13 @@ enrichments:
     enabled: true
     depends-on: ["customer-tier-enrichment"]
     calculation-config:
-      target-field: "discountRate"
+      result-field: "discountRate"
       expression: "#age >= 65 ? 0.20 : (#age >= 50 ? 0.15 : (#customerTier == 'PLATINUM' ? 0.15 : (#customerTier == 'GOLD' ? 0.12 : 0.10)))"
+      dependencies: ["age", "customerTier"]
+    field-mappings:
+      - source-field: "discountRate"
+        target-field: "discountRate"
+        required: true
     metadata:
       owner: "Business Team"
       purpose: "Age and tier-based discount calculation"

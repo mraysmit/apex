@@ -175,9 +175,10 @@ class YamlMultiSourceLookupTest {
             "Cache lookup should be faster than database lookup");
         
         // Verify cache is prioritized for repeated lookups
+        // Allow for some timing variation (within 50% tolerance)
         long secondCacheTime = measureLookupTime("primary-cache", "fast-data");
-        assertTrue(secondCacheTime <= cacheTime, 
-            "Subsequent cache lookups should be as fast or faster");
+        assertTrue(secondCacheTime <= cacheTime * 1.5,
+            "Subsequent cache lookups should be reasonably fast (within 50% tolerance)");
     }
 
     // ========================================

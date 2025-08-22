@@ -83,8 +83,68 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
+                    <!-- Default main class - can be overridden with -Dexec.mainClass -->
                     <mainClass>dev.mars.apex.demo.DemoRunner</mainClass>
                 </configuration>
+                <executions>
+                    <!-- Default execution for DemoRunner -->
+                    <execution>
+                        <id>default</id>
+                        <configuration>
+                            <mainClass>dev.mars.apex.demo.DemoRunner</mainClass>
+                        </configuration>
+                    </execution>
+                    <!-- Lookup Examples -->
+                    <execution>
+                        <id>simple-field-lookup</id>
+                        <configuration>
+                            <mainClass>dev.mars.apex.demo.examples.lookups.SimpleFieldLookupDemo</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>compound-key-lookup</id>
+                        <configuration>
+                            <mainClass>dev.mars.apex.demo.examples.lookups.CompoundKeyLookupDemo</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>nested-field-lookup</id>
+                        <configuration>
+                            <mainClass>dev.mars.apex.demo.examples.lookups.NestedFieldLookupDemo</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>conditional-expression-lookup</id>
+                        <configuration>
+                            <mainClass>dev.mars.apex.demo.examples.lookups.ConditionalExpressionLookupDemo</mainClass>
+                        </configuration>
+                    </execution>
+                    <!-- Bootstrap Demos -->
+                    <execution>
+                        <id>otc-options-bootstrap</id>
+                        <configuration>
+                            <mainClass>dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>commodity-swap-bootstrap</id>
+                        <configuration>
+                            <mainClass>dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>custody-auto-repair-bootstrap</id>
+                        <configuration>
+                            <mainClass>dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>scenario-based-processing</id>
+                        <configuration>
+                            <mainClass>dev.mars.apex.demo.bootstrap.ScenarioBasedProcessingDemo</mainClass>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -165,6 +165,7 @@ enrichments:
     priority: 100
     condition: "#instruction.clientId != null"
     lookup-config:
+      lookup-key: "#instruction.clientId"
       lookup-dataset:
         type: "inline"
         key-field: "clientId"
@@ -237,6 +238,7 @@ enrichments:
     priority: 200
     condition: "#instruction.market != null"
     lookup-config:
+      lookup-key: "#instruction.market"
       lookup-dataset:
         type: "inline"
         key-field: "market"
@@ -333,6 +335,7 @@ enrichments:
     priority: 300
     condition: "#instruction.instrumentType != null"
     lookup-config:
+      lookup-key: "#instruction.instrumentType"
       lookup-dataset:
         type: "inline"
         key-field: "instrumentType"
@@ -406,6 +409,7 @@ enrichments:
     priority: 400
     condition: "#instruction.counterpartyId == null && #instruction.market != null"
     lookup-config:
+      lookup-key: "#instruction.market + '_' + #instruction.clientId"
       lookup-dataset:
         type: "inline"
         key-field: "marketAndClientKey"
@@ -444,6 +448,7 @@ enrichments:
     priority: 500
     condition: "#instruction.custodianId != null && #instruction.safekeepingAccount == null"
     lookup-config:
+      lookup-key: "#instruction.custodianId + '_' + #instruction.clientId"
       lookup-dataset:
         type: "inline"
         key-field: "custodianAndClientKey"

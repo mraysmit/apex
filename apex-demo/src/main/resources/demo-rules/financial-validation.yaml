@@ -268,6 +268,7 @@ enrichments:
     type: "lookup-enrichment"
     condition: "['notionalCurrency'] != null"
     lookup-config:
+      lookup-key: "notionalCurrency"
       lookup-dataset:
         type: "inline"
         key-field: "code"
@@ -313,6 +314,7 @@ enrichments:
     type: "lookup-enrichment"
     condition: "['commodityType'] != null"
     lookup-config:
+      lookup-key: "commodityType"
       lookup-dataset:
         type: "inline"
         key-field: "type"

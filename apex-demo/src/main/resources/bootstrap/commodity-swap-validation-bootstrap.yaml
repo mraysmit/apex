@@ -147,7 +147,8 @@ rule-chains:
     enabled: true
     priority: 200
     configuration:
-      accumulative-rules:
+      accumulator-variable: "businessRuleScore"
+      accumulation-rules:
         - id: "maturity-eligibility"
           condition: "maturityDate != null && maturityDate.isBefore(tradeDate.plusYears(5))"
           weight: 25
@@ -223,7 +224,8 @@ rule-chains:
     enabled: true
     priority: 400
     configuration:
-      accumulative-rules:
+      accumulator-variable: "riskManagementScore"
+      accumulation-rules:
         - id: "client-credit-limit"
           condition: "notionalAmount <= 250000000"
           weight: 40
@@ -248,14 +250,23 @@ enrichments:
   - id: "client-enrichment"
     name: "Client Data Enrichment"
     description: "Enrich trade with client information"
-    type: "lookup"
+    type: "lookup-enrichment"
     enabled: true
-    source: "client_data"
-    key-field: "clientId"
-    mappings:
+    condition: "#clientId != null"
+    lookup-config:
+      lookup-key: "clientId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "clientId"
+        data:
+          - clientId: "CLIENT001"
+            client_name: "ABC Corporation"
+            client_rating: "A+"
+            client_tier: "PREMIUM"
+    field-mappings:
       - source-field: "client_name"
         target-field: "clientName"
-        description: "Client name lookup"
+        required: true
       - source-field: "regulatory_classification"
         target-field: "clientRegulatoryClassification"
         description: "Client regulatory classification"
@@ -267,14 +278,23 @@ enrichments:
   - id: "counterparty-enrichment"
     name: "Counterparty Data Enrichment"
     description: "Enrich trade with counterparty information"
-    type: "lookup"
+    type: "lookup-enrichment"
     enabled: true
-    source: "counterparty_data"
-    key-field: "counterpartyId"
-    mappings:
+    condition: "#counterpartyId != null"
+    lookup-config:
+      lookup-key: "counterpartyId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "counterpartyId"
+        data:
+          - counterpartyId: "CP001"
+            counterparty_name: "Goldman Sachs"
+            counterparty_rating: "A+"
+            counterparty_tier: "TIER1"
+    field-mappings:
       - source-field: "counterparty_name"
         target-field: "counterpartyName"
-        description: "Counterparty name lookup"
+        required: true
       - source-field: "credit_rating"
         target-field: "counterpartyCreditRating"
         description: "Counterparty credit rating"
@@ -286,14 +306,23 @@ enrichments:
   - id: "commodity-enrichment"
     name: "Commodity Reference Data Enrichment"
     description: "Enrich trade with commodity reference data"
-    type: "lookup"
+    type: "lookup-enrichment"
     enabled: true
-    source: "commodity_reference_data"
-    key-field: "referenceIndex"
-    mappings:
+    condition: "#referenceIndex != null"
+    lookup-config:
+      lookup-key: "referenceIndex"
+      lookup-dataset:
+        type: "inline"
+        key-field: "referenceIndex"
+        data:
+          - referenceIndex: "WTI_CRUDE"
+            index_provider: "CME Group"
+            index_category: "Energy"
+            index_currency: "USD"
+    field-mappings:
       - source-field: "index_provider"
         target-field: "indexProvider"
-        description: "Index provider lookup"
+        required: true
       - source-field: "quote_currency"
         target-field: "commodityQuoteCurrency"
         description: "Commodity quote currency"

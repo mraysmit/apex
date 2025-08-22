@@ -126,13 +126,24 @@ class RestApiIntegrationTest {
               version: "1.0.0"
             
             enrichments:
-              - name: "customer-lookup"
+              - id: "customer-lookup"
+                name: "customer-lookup"
+                type: "lookup-enrichment"
                 condition: "#customerId != null"
-                enrichmentType: "lookup"
-                sourceField: "customerId"
-                targetFields:
-                  - "customerName"
-                  - "customerTier"
+                lookup-config:
+                  lookup-key: "#customerId"
+                  lookup-dataset:
+                    type: "inline"
+                    key-field: "customerId"
+                    data:
+                      - customerId: "CUST123"
+                        customerName: "Test Customer"
+                        customerTier: "GOLD"
+                field-mappings:
+                  - source-field: "customerName"
+                    target-field: "customerName"
+                  - source-field: "customerTier"
+                    target-field: "customerTier"
             """;
         request.put("yamlConfiguration", yamlConfig);
 

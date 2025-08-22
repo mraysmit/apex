@@ -194,24 +194,30 @@ enrichments:
     type: "calculation-enrichment"
     name: "Customer Tier Calculation"
     condition: "#accountBalance != null"
-    calculations:
-      - field: "customerTier"
-        expression: "#accountBalance >= 50000 ? 'PLATINUM' : (#accountBalance >= 25000 ? 'GOLD' : (#accountBalance >= 10000 ? 'SILVER' : 'BRONZE'))"
-      - field: "tierDescription"
-        expression: "#customerTier == 'PLATINUM' ? 'Premium customer with exclusive benefits' : (#customerTier == 'GOLD' ? 'High-value customer with special perks' : (#customerTier == 'SILVER' ? 'Valued customer with standard benefits' : 'Standard customer'))"
+    calculation-config:
+      expression: "#accountBalance >= 50000 ? 'PLATINUM' : (#accountBalance >= 25000 ? 'GOLD' : (#accountBalance >= 10000 ? 'SILVER' : 'BRONZE'))"
+      result-field: "customerTier"
+      dependencies: ["accountBalance"]
+    field-mappings:
+      - source-field: "customerTier"
+        target-field: "customerTier"
+        required: true
 
   # Discount Rate Enrichment
   - id: "discount-rate-enrichment"
     type: "calculation-enrichment"
     name: "Discount Rate Calculation"
     condition: "#age != null && #customerTier != null"
-    calculations:
-      - field: "baseDiscountRate"
-        expression: "#age >= 30 ? 0.15 : (#age >= 21 ? 0.10 : 0.05)"
-      - field: "tierBonus"
-        expression: "#customerTier == 'PLATINUM' ? 0.10 : (#customerTier == 'GOLD' ? 0.05 : (#customerTier == 'SILVER' ? 0.02 : 0.0))"
-      - field: "finalDiscountRate"
-        expression: "#baseDiscountRate + #tierBonus"
+    calculation-config:
+      expression: |
+        (#age >= 30 ? 0.15 : (#age >= 21 ? 0.10 : 0.05)) +
+        (#customerTier == 'PLATINUM' ? 0.10 : (#customerTier == 'GOLD' ? 0.05 : (#customerTier == 'SILVER' ? 0.02 : 0.0)))
+      result-field: "finalDiscountRate"
+      dependencies: ["age", "customerTier"]
+    field-mappings:
+      - source-field: "finalDiscountRate"
+        target-field: "finalDiscountRate"
+        required: true
 
   # Country Information Enrichment
   - id: "country-info-enrichment"
@@ -219,6 +225,7 @@ enrichments:
     name: "Country Information Lookup"
     condition: "#country != null"
     lookup-config:
+      lookup-key: "country"
       lookup-dataset:
         type: "inline"
         key-field: "countryCode"
@@ -277,32 +284,33 @@ enrichments:
     type: "calculation-enrichment"
     name: "Credit Limit Calculation"
     condition: "#accountBalance != null && #age != null && #customerTier != null"
-    calculations:
-      - field: "baseCreditMultiplier"
-        expression: "#age >= 40 ? 3.0 : (#age >= 30 ? 2.5 : 2.0)"
-      - field: "tierMultiplier"
-        expression: "#customerTier == 'PLATINUM' ? 1.5 : (#customerTier == 'GOLD' ? 1.3 : (#customerTier == 'SILVER' ? 1.1 : 1.0))"
-      - field: "creditLimit"
-        expression: "#accountBalance * #baseCreditMultiplier * #tierMultiplier"
-      - field: "creditLimitFormatted"
-        expression: "'$' + #creditLimit.toString()"
+    calculation-config:
+      expression: |
+        #accountBalance *
+        (#age >= 40 ? 3.0 : (#age >= 30 ? 2.5 : 2.0)) *
+        (#customerTier == 'PLATINUM' ? 1.5 : (#customerTier == 'GOLD' ? 1.3 : (#customerTier == 'SILVER' ? 1.1 : 1.0)))
+      result-field: "creditLimit"
+      dependencies: ["accountBalance", "age", "customerTier"]
+    field-mappings:
+      - source-field: "creditLimit"
+        target-field: "creditLimit"
+        required: true
 
   # Risk Assessment Enrichment
   - id: "risk-assessment-enrichment"
     type: "calculation-enrichment"
     name: "Risk Assessment Calculation"
     condition: "#age != null && #accountBalance != null"
-    calculations:
-      - field: "ageRiskScore"
-        expression: "#age >= 40 ? 10 : (#age >= 30 ? 20 : 30)"
-      - field: "balanceRiskScore"
-        expression: "#accountBalance >= 50000 ? 5 : (#accountBalance >= 25000 ? 15 : (#accountBalance >= 10000 ? 25 : 35))"
-      - field: "totalRiskScore"
-        expression: "#ageRiskScore + #balanceRiskScore"
-      - field: "riskCategory"
-        expression: "#totalRiskScore <= 20 ? 'LOW' : (#totalRiskScore <= 40 ? 'MEDIUM' : 'HIGH')"
-      - field: "riskDescription"
-        expression: "#riskCategory == 'LOW' ? 'Low risk customer - approved for all services' : (#riskCategory == 'MEDIUM' ? 'Medium risk customer - standard approval process' : 'High risk customer - requires additional verification')"
+    calculation-config:
+      expression: |
+        (#age >= 40 ? 10 : (#age >= 30 ? 20 : 30)) +
+        (#accountBalance >= 50000 ? 5 : (#accountBalance >= 25000 ? 15 : (#accountBalance >= 10000 ? 25 : 35)))
+      result-field: "totalRiskScore"
+      dependencies: ["age", "accountBalance"]
+    field-mappings:
+      - source-field: "totalRiskScore"
+        target-field: "totalRiskScore"
+        required: true
 
 # ============================================================================
 # RULE GROUPS SECTION

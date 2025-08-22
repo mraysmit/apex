@@ -137,6 +137,7 @@ enrichments:
     type: "lookup-enrichment"
     condition: "['statusCode'] != null"
     lookup-config:
+      lookup-key: "statusCode"
       lookup-dataset:
         type: "inline"
         key-field: "code"

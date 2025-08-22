@@ -105,7 +105,8 @@ metadata:
 #
 rules:
   # Customer validation rule optimized for batch processing
-  - name: "batch-customer-validation"
+  - id: "batch-customer-validation"
+    name: "batch-customer-validation"
     description: "Fast customer validation for batch processing"
     condition: "#data.age >= 18 && #data.email != null && #data.name != null"
     message: "Customer validation passed"
@@ -116,7 +117,8 @@ rules:
       batch_friendly: true
 
   # Trade validation rule for financial batch processing
-  - name: "batch-trade-validation"
+  - id: "batch-trade-validation"
+    name: "batch-trade-validation"
     description: "High-speed trade validation for settlement processing"
     condition: "#data.amount > 0 && #data.currency != null && #data.counterparty != null"
     message: "Trade ready for settlement"
@@ -127,7 +129,8 @@ rules:
       batch_friendly: true
 
   # Risk threshold rule for batch risk calculations
-  - name: "batch-risk-threshold"
+  - id: "batch-risk-threshold"
+    name: "batch-risk-threshold"
     description: "Risk threshold check for batch risk calculations"
     condition: "#data.amount <= 1000000"
     message: "Trade within risk limits"
@@ -138,7 +141,8 @@ rules:
       batch_friendly: true
 
   # Data quality rule for batch data processing
-  - name: "batch-data-quality"
+  - id: "batch-data-quality"
+    name: "batch-data-quality"
     description: "Data quality validation for batch processing"
     condition: "#data.id != null && #data.timestamp != null"
     message: "Data quality check passed"

@@ -170,6 +170,7 @@ enrichments:
     enabled: true
     
     lookup-config:
+      lookup-key: "#underlyingAsset.commodity"
       lookup-dataset:
         type: "inline"
         key-field: "commodity"
@@ -258,13 +259,21 @@ enrichments:
     enabled: true
     
     lookup-config:
-      lookup-service: "postgresLookupService"
       lookup-key: "#buyerParty"
-      cache-enabled: true
-      cache-ttl-seconds: 1800
-      database-config:
-        table: "counterparty_reference"
-        key-column: "party_id"
+      lookup-dataset:
+        type: "inline"
+        key-field: "party_id"
+        data:
+          - party_id: "BUYER001"
+            party_name: "ABC Investment Bank"
+            party_type: "BANK"
+            credit_rating: "AA-"
+            jurisdiction: "US"
+          - party_id: "BUYER002"
+            party_name: "XYZ Hedge Fund"
+            party_type: "FUND"
+            credit_rating: "A+"
+            jurisdiction: "UK"
         select-columns: ["legal_name", "credit_rating", "lei", "jurisdiction", "settlement_preference"]
     
     field-mappings:
@@ -288,13 +297,21 @@ enrichments:
     enabled: true
     
     lookup-config:
-      lookup-service: "postgresLookupService"
       lookup-key: "#sellerParty"
-      cache-enabled: true
-      cache-ttl-seconds: 1800
-      database-config:
-        table: "counterparty_reference"
-        key-column: "party_id"
+      lookup-dataset:
+        type: "inline"
+        key-field: "party_id"
+        data:
+          - party_id: "SELLER001"
+            party_name: "DEF Trading House"
+            party_type: "BROKER"
+            credit_rating: "A"
+            jurisdiction: "US"
+          - party_id: "SELLER002"
+            party_name: "GHI Capital Markets"
+            party_type: "BANK"
+            credit_rating: "AA"
+            jurisdiction: "EU"
         select-columns: ["legal_name", "credit_rating", "lei", "jurisdiction", "settlement_preference"]
     
     field-mappings:
@@ -326,6 +343,7 @@ enrichments:
     enabled: true
 
     lookup-config:
+      lookup-key: "strikeCurrency"
       lookup-dataset:
         type: "yaml-file"
         file-path: "bootstrap/datasets/market-data.yaml"
@@ -367,10 +385,14 @@ enrichments:
     priority: 40
     enabled: true
 
-    calculations:
-      - target-field: "daysToExpiry"
-        expression: "T(java.time.temporal.ChronoUnit).DAYS.between(#tradeDate, #expiryDate)"
-        description: "Number of days from trade date to expiry"
+    calculation-config:
+      result-field: "daysToExpiry"
+      expression: "T(java.time.temporal.ChronoUnit).DAYS.between(#tradeDate, #expiryDate)"
+      dependencies: ["tradeDate", "expiryDate"]
+    field-mappings:
+      - source-field: "daysToExpiry"
+        target-field: "daysToExpiry"
+        required: true
 
   - id: "risk-exposure-calculation"
     type: "calculation-enrichment"
@@ -380,10 +402,14 @@ enrichments:
     priority: 41
     enabled: true
 
-    calculations:
-      - target-field: "riskExposure"
-        expression: "#notionalQuantity * #strikePrice * #marginRate"
-        description: "Calculated risk exposure amount"
+    calculation-config:
+      result-field: "riskExposure"
+      expression: "#notionalQuantity * #strikePrice * #marginRate"
+      dependencies: ["notionalQuantity", "strikePrice", "marginRate"]
+    field-mappings:
+      - source-field: "riskExposure"
+        target-field: "riskExposure"
+        required: true
 
   - id: "moneyness-calculation"
     type: "calculation-enrichment"
@@ -393,10 +419,14 @@ enrichments:
     priority: 42
     enabled: true
 
-    calculations:
-      - target-field: "moneyness"
-        expression: "#strikePrice > 100 ? 'OTM' : (#strikePrice < 50 ? 'ITM' : 'ATM')"
-        description: "Option moneyness classification (simplified)"
+    calculation-config:
+      result-field: "moneyness"
+      expression: "#strikePrice > 100 ? 'OTM' : (#strikePrice < 50 ? 'ITM' : 'ATM')"
+      dependencies: ["strikePrice"]
+    field-mappings:
+      - source-field: "moneyness"
+        target-field: "moneyness"
+        required: true
 
 # ============================================================================
 # PROCESSING CONFIGURATION

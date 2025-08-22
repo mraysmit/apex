@@ -107,6 +107,7 @@ public class ConfigurationApiIntegrationTest {
                     condition: "['code'] != null"
                     enabled: true
                     lookup-config:
+                      lookup-key: "code"
                       lookup-dataset:
                         type: "inline"
                         key-field: "code"
