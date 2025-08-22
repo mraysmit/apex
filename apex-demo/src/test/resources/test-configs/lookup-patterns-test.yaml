@@ -1,0 +1,326 @@
+metadata:
+  name: "Lookup Patterns Test Configuration"
+  version: "1.0.0"
+  description: "Test configuration for all lookup patterns from lookups.md"
+  type: "rule-config"
+  author: "APEX Test Team"
+  created-date: "2025-08-22"
+
+# Test enrichments covering all documented lookup patterns
+enrichments:
+  # Test 1: Simple field reference
+  - id: "test-simple-field-reference"
+    type: "lookup-enrichment"
+    condition: "#customerId != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "id"
+        data:
+          - id: "CUST123"
+            name: "Test Customer"
+            status: "ACTIVE"
+      lookup-key: "#customerId"
+    field-mappings:
+      - source-field: "name"
+        target-field: "customerName"
+
+  # Test 2: Nested field reference
+  - id: "test-nested-field-reference"
+    type: "lookup-enrichment"
+    condition: "#customer?.id != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "id"
+        data:
+          - id: "NESTED123"
+            name: "Nested Customer"
+            type: "PREMIUM"
+      lookup-key: "#customer.id"
+    field-mappings:
+      - source-field: "name"
+        target-field: "customerName"
+      - source-field: "type"
+        target-field: "customerType"
+
+  # Test 3: Complex nested field reference
+  - id: "test-complex-nested-reference"
+    type: "lookup-enrichment"
+    condition: "#transaction?.counterparty?.partyId != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "id"
+        data:
+          - id: "PARTY789"
+            name: "Test Counterparty"
+            jurisdiction: "US"
+      lookup-key: "#transaction.counterparty.partyId"
+    field-mappings:
+      - source-field: "name"
+        target-field: "counterpartyName"
+      - source-field: "jurisdiction"
+        target-field: "counterpartyJurisdiction"
+
+  # Test 4: Conditional expression
+  - id: "test-conditional-expression"
+    type: "lookup-enrichment"
+    condition: "#type != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "id"
+        data:
+          - id: "CUST123"
+            name: "Customer Entity"
+            entity_type: "CUSTOMER"
+          - id: "VEND456"
+            name: "Vendor Entity"
+            entity_type: "VENDOR"
+      lookup-key: "#type == 'CUSTOMER' ? #customerId : #vendorId"
+    field-mappings:
+      - source-field: "name"
+        target-field: "entityName"
+      - source-field: "entity_type"
+        target-field: "entityType"
+
+  # Test 5: String manipulation
+  - id: "test-string-manipulation"
+    type: "lookup-enrichment"
+    condition: "#accountNumber != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "currency_code"
+        data:
+          - currency_code: "USD"
+            name: "US Dollar"
+            symbol: "$"
+          - currency_code: "EUR"
+            name: "Euro"
+            symbol: "€"
+      lookup-key: "#accountNumber.substring(0, 3)"
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+      - source-field: "symbol"
+        target-field: "currencySymbol"
+
+  # Test 6: Compound key with string concatenation
+  - id: "test-compound-key-concatenation"
+    type: "lookup-enrichment"
+    condition: "#customerId != null && #region != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "compound_key"
+        data:
+          - compound_key: "CUST123-US"
+            pricing_tier: "STANDARD"
+            discount: 0.05
+          - compound_key: "CUST123-EU"
+            pricing_tier: "PREMIUM"
+            discount: 0.10
+      lookup-key: "#customerId + '-' + #region"
+    field-mappings:
+      - source-field: "pricing_tier"
+        target-field: "pricingTier"
+      - source-field: "discount"
+        target-field: "discountRate"
+
+  # Test 7: Trading pair compound key
+  - id: "test-trading-pair-key"
+    type: "lookup-enrichment"
+    condition: "#baseCurrency != null && #quoteCurrency != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "pair"
+        data:
+          - pair: "EUR/USD"
+            spread: 0.0002
+            min_size: 1000
+          - pair: "GBP/USD"
+            spread: 0.0003
+            min_size: 1000
+      lookup-key: "#baseCurrency.toUpperCase() + '/' + #quoteCurrency.toUpperCase()"
+    field-mappings:
+      - source-field: "spread"
+        target-field: "bidAskSpread"
+      - source-field: "min_size"
+        target-field: "minimumSize"
+
+  # Test 8: Conditional compound key
+  - id: "test-conditional-compound-key"
+    type: "lookup-enrichment"
+    condition: "#partyType != null && #partyId != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "party_key"
+        data:
+          - party_key: "CUST-12345"
+            legal_name: "Customer Corp"
+            credit_rating: "AAA"
+          - party_key: "VEND-67890"
+            legal_name: "Vendor Inc"
+            credit_rating: "AA"
+          - party_key: "UNKN-99999"
+            legal_name: "Unknown Entity"
+            credit_rating: "NR"
+      lookup-key: "#partyType == 'CUSTOMER' ? 'CUST-' + #partyId : (#partyType == 'VENDOR' ? 'VEND-' + #partyId : 'UNKN-' + #partyId)"
+    field-mappings:
+      - source-field: "legal_name"
+        target-field: "legalName"
+      - source-field: "credit_rating"
+        target-field: "creditRating"
+
+  # Test 9: Hierarchical compound key
+  - id: "test-hierarchical-compound-key"
+    type: "lookup-enrichment"
+    condition: "#trade?.instrument?.symbol != null && #trade?.counterparty?.id != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "settlement_key"
+        data:
+          - settlement_key: "AAPL:GOLDMAN:2025-08-25"
+            settlement_instructions: "DVP"
+            custodian: "BNY Mellon"
+            account_number: "ACC123456"
+      lookup-key: "#trade.instrument.symbol + ':' + #trade.counterparty.id + ':' + #trade.settlementDate.toString()"
+    field-mappings:
+      - source-field: "settlement_instructions"
+        target-field: "settlementInstructions"
+      - source-field: "custodian"
+        target-field: "custodian"
+      - source-field: "account_number"
+        target-field: "accountNumber"
+
+  # Test 10: Hash-based compound key
+  - id: "test-hash-based-compound-key"
+    type: "lookup-enrichment"
+    condition: "#portfolio != null && #asOfDate != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "hash_key"
+        data:
+          - hash_key: "1234567890"
+            risk_limit: 10000000
+            var_limit: 500000
+          - hash_key: "-987654321"
+            risk_limit: 5000000
+            var_limit: 250000
+      lookup-key: "T(java.lang.String).valueOf((#portfolio.id + #portfolio.strategy + #portfolio.region + #asOfDate.toString()).hashCode())"
+    field-mappings:
+      - source-field: "risk_limit"
+        target-field: "riskLimit"
+      - source-field: "var_limit"
+        target-field: "varLimit"
+
+  # Test 11: Multi-dimensional product lookup
+  - id: "test-multi-dimensional-lookup"
+    type: "lookup-enrichment"
+    condition: "#product != null && #customer != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "product_key"
+        data:
+          - product_key: "ELECTRONICS|PROD456|GOLD|US"
+            base_price: 999.99
+            discount_rate: 0.15
+            currency: "USD"
+      lookup-key: "#product.category + '|' + #product.id + '|' + #customer.tier + '|' + #customer.region"
+    field-mappings:
+      - source-field: "base_price"
+        target-field: "basePrice"
+      - source-field: "discount_rate"
+        target-field: "discountRate"
+      - source-field: "currency"
+        target-field: "currency"
+
+  # Test 12: Safe navigation with null handling
+  - id: "test-safe-navigation"
+    type: "lookup-enrichment"
+    condition: "#customerId != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "id"
+        data:
+          - id: "CUST123"
+            name: "Safe Navigation Customer"
+            status: "ACTIVE"
+      lookup-key: "#customer?.id ?: #customerId"
+    field-mappings:
+      - source-field: "name"
+        target-field: "customerName"
+      - source-field: "status"
+        target-field: "customerStatus"
+
+  # Test 13: Complex date operations
+  - id: "test-date-operations"
+    type: "lookup-enrichment"
+    condition: "#tradeDate != null && #settlementDays != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "settlement_date"
+        data:
+          - settlement_date: "2025-08-24"
+            settlement_type: "REGULAR"
+            cutoff_time: "15:00"
+      lookup-key: "T(java.time.LocalDate).parse(#tradeDate).plusDays(#settlementDays).toString()"
+    field-mappings:
+      - source-field: "settlement_type"
+        target-field: "settlementType"
+      - source-field: "cutoff_time"
+        target-field: "cutoffTime"
+
+  # Test 14: Mathematical operations
+  - id: "test-mathematical-operations"
+    type: "lookup-enrichment"
+    condition: "#baseAmount != null && #multiplier != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "amount_tier"
+        data:
+          - amount_tier: "1500"
+            tier_name: "HIGH_VALUE"
+            processing_priority: "URGENT"
+      lookup-key: "T(java.lang.String).valueOf((#baseAmount * #multiplier).intValue())"
+    field-mappings:
+      - source-field: "tier_name"
+        target-field: "amountTier"
+      - source-field: "processing_priority"
+        target-field: "processingPriority"
+
+  # Test 15: Field mapping with transformations
+  - id: "test-field-transformations"
+    type: "lookup-enrichment"
+    condition: "#customerId != null"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        key-field: "id"
+        data:
+          - id: "CUST123"
+            first_name: "john"
+            last_name: "doe"
+            amount: 1000.50
+            timestamp: "2025-08-22T10:30:00"
+      lookup-key: "#customerId"
+    field-mappings:
+      - source-field: "first_name"
+        target-field: "displayName"
+        transformation: "#{first_name?.toUpperCase()} #{last_name?.toUpperCase()}"
+      - source-field: "amount"
+        target-field: "formattedAmount"
+        transformation: "T(java.text.NumberFormat).getCurrencyInstance().format(#{amount})"
+      - source-field: "timestamp"
+        target-field: "businessDate"
+        transformation: "T(java.time.LocalDateTime).parse(#{timestamp}).toLocalDate()"

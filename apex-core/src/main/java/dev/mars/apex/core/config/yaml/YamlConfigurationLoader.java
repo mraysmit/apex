@@ -307,9 +307,11 @@ public class YamlConfigurationLoader {
         validateCategories(config);
         validateDataSources(config);
         validateRuleChains(config);
+        validateEnrichments(config);
 
         // Step 2: Validate cross-component references
         validateCrossComponentReferences(config);
+        validateEnrichmentReferences(config);
 
         // Step 3: Validate for duplicates
         validateDuplicates(config);
@@ -636,7 +638,602 @@ public class YamlConfigurationLoader {
     }
 
     /**
-     * Validate cross-component references in the configuration.
+     * Validate enrichments in the configuration.
+     * Validates all enrichment attributes according to patterns documented in lookups.md.
+     */
+    private void validateEnrichments(YamlRuleConfiguration config) throws YamlConfigurationException {
+        if (config.getEnrichments() == null || config.getEnrichments().isEmpty()) {
+            LOGGER.fine("No enrichments to validate");
+            return;
+        }
+
+        LOGGER.fine("Validating " + config.getEnrichments().size() + " enrichments");
+
+        for (YamlEnrichment enrichment : config.getEnrichments()) {
+            validateEnrichment(enrichment);
+        }
+
+        LOGGER.fine("Enrichment validation completed successfully");
+    }
+
+    /**
+     * Validate a single enrichment configuration.
+     */
+    private void validateEnrichment(YamlEnrichment enrichment) throws YamlConfigurationException {
+        String enrichmentId = enrichment.getId();
+
+        // Validate basic enrichment structure
+        validateEnrichmentBasicStructure(enrichment);
+
+        // Validate enrichment type and type-specific requirements
+        validateEnrichmentType(enrichment);
+
+        // Validate condition expression if present
+        validateEnrichmentCondition(enrichment);
+
+        // Validate lookup configuration for lookup enrichments
+        if ("lookup-enrichment".equals(enrichment.getType())) {
+            validateLookupConfiguration(enrichment);
+        }
+
+        // Validate field mappings
+        validateFieldMappings(enrichment.getFieldMappings(), enrichmentId);
+
+        LOGGER.fine("Validated enrichment: " + enrichmentId);
+    }
+
+    /**
+     * Validate basic enrichment structure (required fields).
+     */
+    private void validateEnrichmentBasicStructure(YamlEnrichment enrichment) throws YamlConfigurationException {
+        if (enrichment.getId() == null || enrichment.getId().trim().isEmpty()) {
+            throw new YamlConfigurationException("Enrichment ID is required");
+        }
+
+        String enrichmentId = enrichment.getId();
+
+        if (enrichment.getType() == null || enrichment.getType().trim().isEmpty()) {
+            throw new YamlConfigurationException("Enrichment type is required for enrichment: " + enrichmentId);
+        }
+
+        // Validate ID format (alphanumeric, hyphens, underscores only)
+        if (!enrichmentId.matches("^[a-zA-Z0-9_-]+$")) {
+            throw new YamlConfigurationException("Enrichment ID '" + enrichmentId + "' contains invalid characters. Use only letters, numbers, hyphens, and underscores");
+        }
+    }
+
+    /**
+     * Validate enrichment type and type-specific requirements.
+     */
+    private void validateEnrichmentType(YamlEnrichment enrichment) throws YamlConfigurationException {
+        String type = enrichment.getType();
+        String enrichmentId = enrichment.getId();
+
+        Set<String> validTypes = Set.of("lookup-enrichment", "field-enrichment", "calculation-enrichment");
+        if (!validTypes.contains(type)) {
+            throw new YamlConfigurationException("Invalid enrichment type '" + type + "' for enrichment: " + enrichmentId + ". Valid types: " + validTypes);
+        }
+
+        // Type-specific validation
+        switch (type) {
+            case "lookup-enrichment":
+                if (enrichment.getLookupConfig() == null) {
+                    throw new YamlConfigurationException("lookup-enrichment type requires 'lookup-config' for enrichment: " + enrichmentId);
+                }
+                break;
+            case "field-enrichment":
+                if (enrichment.getFieldMappings() == null || enrichment.getFieldMappings().isEmpty()) {
+                    throw new YamlConfigurationException("field-enrichment type requires 'field-mappings' for enrichment: " + enrichmentId);
+                }
+                break;
+            case "calculation-enrichment":
+                // Calculation enrichments should have field mappings with transformations
+                if (enrichment.getFieldMappings() == null || enrichment.getFieldMappings().isEmpty()) {
+                    throw new YamlConfigurationException("calculation-enrichment type requires 'field-mappings' for enrichment: " + enrichmentId);
+                }
+                break;
+        }
+    }
+
+    /**
+     * Validate enrichment condition expression.
+     */
+    private void validateEnrichmentCondition(YamlEnrichment enrichment) throws YamlConfigurationException {
+        String condition = enrichment.getCondition();
+        String enrichmentId = enrichment.getId();
+
+        if (condition != null && !condition.trim().isEmpty()) {
+            // Validate SpEL syntax
+            if (!isValidSpELExpression(condition)) {
+                throw new YamlConfigurationException("Invalid SpEL expression in condition '" + condition + "' for enrichment: " + enrichmentId);
+            }
+
+            // Validate common condition patterns
+            validateConditionPatterns(condition, enrichmentId);
+        }
+    }
+
+    /**
+     * Validate lookup configuration for lookup enrichments.
+     */
+    private void validateLookupConfiguration(YamlEnrichment enrichment) throws YamlConfigurationException {
+        YamlEnrichment.LookupConfig lookupConfig = enrichment.getLookupConfig();
+        String enrichmentId = enrichment.getId();
+
+        if (lookupConfig == null) {
+            throw new YamlConfigurationException("lookup-config is required for lookup enrichment: " + enrichmentId);
+        }
+
+        // Validate lookup configuration structure
+        validateLookupConfigStructure(lookupConfig, enrichmentId);
+
+        // Validate lookup key expression
+        validateLookupKeyExpression(lookupConfig.getLookupKey(), enrichmentId);
+
+        // Validate dataset configuration if present
+        if (lookupConfig.getLookupDataset() != null) {
+            validateLookupDataset(lookupConfig.getLookupDataset(), enrichmentId);
+        }
+
+        // Validate caching configuration
+        validateCachingConfiguration(lookupConfig, enrichmentId);
+    }
+
+    /**
+     * Validate lookup configuration structure.
+     */
+    private void validateLookupConfigStructure(YamlEnrichment.LookupConfig lookupConfig, String enrichmentId) throws YamlConfigurationException {
+        // Must have either lookup-service OR lookup-dataset
+        boolean hasService = lookupConfig.getLookupService() != null && !lookupConfig.getLookupService().trim().isEmpty();
+        boolean hasDataset = lookupConfig.getLookupDataset() != null;
+
+        if (!hasService && !hasDataset) {
+            throw new YamlConfigurationException("lookup-config must specify either 'lookup-service' or 'lookup-dataset' for enrichment: " + enrichmentId);
+        }
+
+        // Cannot have both (this is a design decision - could be relaxed if needed)
+        if (hasService && hasDataset) {
+            throw new YamlConfigurationException("lookup-config cannot specify both 'lookup-service' and 'lookup-dataset' for enrichment: " + enrichmentId + ". Choose one approach");
+        }
+
+        // Validate lookup-key is present
+        if (lookupConfig.getLookupKey() == null || lookupConfig.getLookupKey().trim().isEmpty()) {
+            throw new YamlConfigurationException("lookup-key is required in lookup-config for enrichment: " + enrichmentId);
+        }
+    }
+
+    /**
+     * Validate lookup key expression according to patterns from lookups.md.
+     */
+    private void validateLookupKeyExpression(String lookupKey, String enrichmentId) throws YamlConfigurationException {
+        if (lookupKey == null || lookupKey.trim().isEmpty()) {
+            throw new YamlConfigurationException("lookup-key is required for lookup enrichment: " + enrichmentId);
+        }
+
+        // Validate SpEL syntax
+        if (!isValidSpELExpression(lookupKey)) {
+            throw new YamlConfigurationException("Invalid SpEL expression in lookup-key '" + lookupKey + "' for enrichment: " + enrichmentId);
+        }
+
+        // Validate lookup key patterns from lookups.md
+        validateLookupKeyPatterns(lookupKey, enrichmentId);
+    }
+
+    /**
+     * Validate complex lookup key patterns documented in lookups.md.
+     */
+    private void validateLookupKeyPatterns(String lookupKey, String enrichmentId) throws YamlConfigurationException {
+        // Pattern 1: String concatenation (compound keys)
+        if (lookupKey.contains("+") && lookupKey.contains("'")) {
+            validateStringConcatenationPattern(lookupKey, enrichmentId);
+        }
+
+        // Pattern 2: Conditional expressions (ternary operators)
+        if (lookupKey.contains("?") && lookupKey.contains(":")) {
+            validateConditionalExpressionPattern(lookupKey, enrichmentId);
+        }
+
+        // Pattern 3: String manipulation methods
+        if (lookupKey.contains(".substring(") || lookupKey.contains(".toUpperCase(") || lookupKey.contains(".toLowerCase(")) {
+            validateStringManipulationPattern(lookupKey, enrichmentId);
+        }
+
+        // Pattern 4: Hash-based compound keys
+        if (lookupKey.contains("T(java.lang.String).valueOf") || lookupKey.contains(".hashCode()")) {
+            validateHashBasedKeyPattern(lookupKey, enrichmentId);
+        }
+
+        // Pattern 5: Hierarchical field access
+        if (lookupKey.contains(".") && !lookupKey.contains("(")) {
+            validateHierarchicalFieldAccess(lookupKey, enrichmentId);
+        }
+
+        // Pattern 6: Safe navigation operator
+        if (lookupKey.contains("?.")) {
+            validateSafeNavigationPattern(lookupKey, enrichmentId);
+        }
+    }
+
+    /**
+     * Validate string concatenation patterns in lookup keys.
+     */
+    private void validateStringConcatenationPattern(String lookupKey, String enrichmentId) throws YamlConfigurationException {
+        // Check for balanced quotes in concatenation
+        long singleQuoteCount = lookupKey.chars().filter(ch -> ch == '\'').count();
+        if (singleQuoteCount % 2 != 0) {
+            throw new YamlConfigurationException("Unbalanced single quotes in lookup-key '" + lookupKey + "' for enrichment: " + enrichmentId);
+        }
+
+        // Check for proper concatenation syntax
+        if (lookupKey.contains("++") || lookupKey.contains("+ +")) {
+            throw new YamlConfigurationException("Invalid concatenation syntax in lookup-key '" + lookupKey + "' for enrichment: " + enrichmentId + ". Use single '+' for concatenation");
+        }
+    }
+
+    /**
+     * Validate conditional expression patterns in lookup keys.
+     */
+    private void validateConditionalExpressionPattern(String lookupKey, String enrichmentId) throws YamlConfigurationException {
+        // Count ternary operators
+        long questionMarkCount = lookupKey.chars().filter(ch -> ch == '?').count();
+        long colonCount = lookupKey.chars().filter(ch -> ch == ':').count();
+
+        // Basic ternary validation - should have matching ? and :
+        if (questionMarkCount != colonCount) {
+            throw new YamlConfigurationException("Unbalanced ternary operators in lookup-key '" + lookupKey + "' for enrichment: " + enrichmentId + ". Each '?' must have a matching ':'");
+        }
+
+        // Check for nested ternary complexity (warn if too complex)
+        if (questionMarkCount > 2) {
+            LOGGER.warning("Complex nested ternary expression in lookup-key for enrichment: " + enrichmentId + ". Consider simplifying for maintainability");
+        }
+    }
+
+    /**
+     * Validate string manipulation patterns in lookup keys.
+     */
+    private void validateStringManipulationPattern(String lookupKey, String enrichmentId) throws YamlConfigurationException {
+        // Validate substring calls
+        if (lookupKey.contains(".substring(")) {
+            validateSubstringCalls(lookupKey, enrichmentId);
+        }
+
+        // Validate case conversion calls
+        if (lookupKey.contains(".toUpperCase(") || lookupKey.contains(".toLowerCase(")) {
+            validateCaseConversionCalls(lookupKey, enrichmentId);
+        }
+    }
+
+    /**
+     * Validate substring method calls in lookup keys.
+     */
+    private void validateSubstringCalls(String lookupKey, String enrichmentId) throws YamlConfigurationException {
+        // Check for proper substring syntax
+        if (lookupKey.contains(".substring()")) {
+            throw new YamlConfigurationException("Invalid substring call in lookup-key '" + lookupKey + "' for enrichment: " + enrichmentId + ". substring() requires parameters");
+        }
+
+        // Check for balanced parentheses in substring calls
+        String[] parts = lookupKey.split("\\.substring\\(");
+        for (int i = 1; i < parts.length; i++) {
+            String part = parts[i];
+            int openParen = 1; // Start with 1 because we split after the opening parenthesis
+            int closeParen = 0;
+            for (char c : part.toCharArray()) {
+                if (c == '(') openParen++;
+                if (c == ')') {
+                    closeParen++;
+                    if (closeParen == openParen) break; // Found matching closing parenthesis
+                }
+            }
+            if (openParen != closeParen) {
+                throw new YamlConfigurationException("Unbalanced parentheses in substring call in lookup-key '" + lookupKey + "' for enrichment: " + enrichmentId);
+            }
+        }
+    }
+
+    /**
+     * Validate case conversion method calls in lookup keys.
+     */
+    private void validateCaseConversionCalls(String lookupKey, String enrichmentId) throws YamlConfigurationException {
+        // Check for proper method call syntax
+        if (lookupKey.contains(".toUpperCase") && !lookupKey.contains(".toUpperCase()")) {
+            throw new YamlConfigurationException("Invalid toUpperCase call in lookup-key '" + lookupKey + "' for enrichment: " + enrichmentId + ". Use toUpperCase()");
+        }
+
+        if (lookupKey.contains(".toLowerCase") && !lookupKey.contains(".toLowerCase()")) {
+            throw new YamlConfigurationException("Invalid toLowerCase call in lookup-key '" + lookupKey + "' for enrichment: " + enrichmentId + ". Use toLowerCase()");
+        }
+    }
+
+    /**
+     * Validate hash-based compound key patterns.
+     */
+    private void validateHashBasedKeyPattern(String lookupKey, String enrichmentId) throws YamlConfigurationException {
+        // Validate T(java.lang.String).valueOf usage
+        if (lookupKey.contains("T(java.lang.String).valueOf") && !lookupKey.contains("T(java.lang.String).valueOf(")) {
+            throw new YamlConfigurationException("Invalid T(java.lang.String).valueOf usage in lookup-key '" + lookupKey + "' for enrichment: " + enrichmentId + ". Must include opening parenthesis");
+        }
+
+        // Validate hashCode usage
+        if (lookupKey.contains(".hashCode") && !lookupKey.contains(".hashCode()")) {
+            throw new YamlConfigurationException("Invalid hashCode call in lookup-key '" + lookupKey + "' for enrichment: " + enrichmentId + ". Use hashCode()");
+        }
+
+        // Warn about hash collision potential
+        if (lookupKey.contains(".hashCode()")) {
+            LOGGER.warning("Hash-based lookup key in enrichment: " + enrichmentId + ". Be aware of potential hash collisions in production data");
+        }
+    }
+
+    /**
+     * Validate hierarchical field access patterns.
+     */
+    private void validateHierarchicalFieldAccess(String lookupKey, String enrichmentId) throws YamlConfigurationException {
+        // Check for excessive nesting depth
+        long dotCount = lookupKey.chars().filter(ch -> ch == '.').count();
+        if (dotCount > 5) {
+            LOGGER.warning("Deep hierarchical field access in lookup-key for enrichment: " + enrichmentId + ". Consider flattening data structure for better performance");
+        }
+
+        // Check for field access on potentially null objects without safe navigation
+        if (lookupKey.contains(".") && !lookupKey.contains("?.") && !lookupKey.contains("!= null")) {
+            LOGGER.info("Consider using safe navigation operator (?.) in lookup-key for enrichment: " + enrichmentId + " to handle null values gracefully");
+        }
+    }
+
+    /**
+     * Validate safe navigation operator patterns.
+     */
+    private void validateSafeNavigationPattern(String lookupKey, String enrichmentId) throws YamlConfigurationException {
+        // Check for proper safe navigation syntax
+        if (lookupKey.contains("? .")) {
+            throw new YamlConfigurationException("Invalid safe navigation syntax in lookup-key '" + lookupKey + "' for enrichment: " + enrichmentId + ". Use '?.' without space");
+        }
+
+        // Validate that safe navigation is used consistently
+        if (lookupKey.contains("?.") && lookupKey.contains(".") && !lookupKey.contains("?:")) {
+            LOGGER.info("Mixed safe and unsafe navigation in lookup-key for enrichment: " + enrichmentId + ". Consider using consistent safe navigation or null checks");
+        }
+    }
+
+    /**
+     * Validate condition patterns in enrichment conditions.
+     */
+    private void validateConditionPatterns(String condition, String enrichmentId) throws YamlConfigurationException {
+        // Check for common condition patterns
+        if (condition.contains("!= null") || condition.contains("== null")) {
+            // Good - explicit null checks
+        } else if (condition.contains(".") && !condition.contains("?.")) {
+            LOGGER.info("Consider adding null checks in condition for enrichment: " + enrichmentId + " to prevent NullPointerException");
+        }
+
+        // Check for boolean logic complexity
+        long andCount = condition.split("&&").length - 1;
+        long orCount = condition.split("\\|\\|").length - 1;
+        if (andCount + orCount > 3) {
+            LOGGER.warning("Complex boolean logic in condition for enrichment: " + enrichmentId + ". Consider simplifying for maintainability");
+        }
+    }
+
+    /**
+     * Validate lookup dataset configuration.
+     */
+    private void validateLookupDataset(YamlEnrichment.LookupDataset dataset, String enrichmentId) throws YamlConfigurationException {
+        if (dataset.getType() == null || dataset.getType().trim().isEmpty()) {
+            throw new YamlConfigurationException("Dataset type is required for enrichment: " + enrichmentId);
+        }
+
+        String type = dataset.getType().toLowerCase();
+        Set<String> validTypes = Set.of("inline", "yaml-file", "csv-file", "database", "rest-api");
+
+        if (!validTypes.contains(type)) {
+            throw new YamlConfigurationException("Invalid dataset type '" + type + "' for enrichment: " + enrichmentId + ". Valid types: " + validTypes);
+        }
+
+        // Type-specific validation
+        switch (type) {
+            case "inline":
+                validateInlineDataset(dataset, enrichmentId);
+                break;
+            case "yaml-file":
+            case "csv-file":
+                validateFileDataset(dataset, enrichmentId, type);
+                break;
+            case "database":
+                validateDatabaseDataset(dataset, enrichmentId);
+                break;
+            case "rest-api":
+                validateRestApiDataset(dataset, enrichmentId);
+                break;
+        }
+    }
+
+    /**
+     * Validate inline dataset configuration.
+     */
+    private void validateInlineDataset(YamlEnrichment.LookupDataset dataset, String enrichmentId) throws YamlConfigurationException {
+        if (dataset.getData() == null || dataset.getData().isEmpty()) {
+            throw new YamlConfigurationException("Inline dataset must have 'data' array for enrichment: " + enrichmentId);
+        }
+
+        if (dataset.getKeyField() == null || dataset.getKeyField().trim().isEmpty()) {
+            throw new YamlConfigurationException("Inline dataset must specify 'key-field' for enrichment: " + enrichmentId);
+        }
+
+        // Validate that all data records have the key field
+        String keyField = dataset.getKeyField();
+        for (int i = 0; i < dataset.getData().size(); i++) {
+            Map<String, Object> record = dataset.getData().get(i);
+            if (!record.containsKey(keyField)) {
+                throw new YamlConfigurationException("Data record at index " + i + " missing key field '" + keyField + "' for enrichment: " + enrichmentId);
+            }
+
+            Object keyValue = record.get(keyField);
+            if (keyValue == null) {
+                throw new YamlConfigurationException("Data record at index " + i + " has null value for key field '" + keyField + "' for enrichment: " + enrichmentId);
+            }
+        }
+
+        // Check for duplicate keys
+        Set<Object> keyValues = new HashSet<>();
+        for (int i = 0; i < dataset.getData().size(); i++) {
+            Object keyValue = dataset.getData().get(i).get(keyField);
+            if (!keyValues.add(keyValue)) {
+                throw new YamlConfigurationException("Duplicate key value '" + keyValue + "' found in inline dataset for enrichment: " + enrichmentId);
+            }
+        }
+    }
+
+    /**
+     * Validate file-based dataset configuration.
+     */
+    private void validateFileDataset(YamlEnrichment.LookupDataset dataset, String enrichmentId, String type) throws YamlConfigurationException {
+        if (dataset.getFilePath() == null || dataset.getFilePath().trim().isEmpty()) {
+            throw new YamlConfigurationException(type + " dataset must specify 'file-path' for enrichment: " + enrichmentId);
+        }
+
+        if (dataset.getKeyField() == null || dataset.getKeyField().trim().isEmpty()) {
+            throw new YamlConfigurationException(type + " dataset must specify 'key-field' for enrichment: " + enrichmentId);
+        }
+
+        // Validate file extension matches type
+        String filePath = dataset.getFilePath().toLowerCase();
+        if ("yaml-file".equals(type) && !filePath.endsWith(".yaml") && !filePath.endsWith(".yml")) {
+            LOGGER.warning("YAML dataset file path should end with .yaml or .yml for enrichment: " + enrichmentId);
+        }
+
+        if ("csv-file".equals(type) && !filePath.endsWith(".csv")) {
+            LOGGER.warning("CSV dataset file path should end with .csv for enrichment: " + enrichmentId);
+        }
+    }
+
+    /**
+     * Validate database dataset configuration.
+     */
+    private void validateDatabaseDataset(YamlEnrichment.LookupDataset dataset, String enrichmentId) throws YamlConfigurationException {
+        // Database datasets typically don't use key-field (they use SQL queries)
+        // This is a placeholder for future database-specific validation
+        LOGGER.fine("Database dataset validation for enrichment: " + enrichmentId);
+    }
+
+    /**
+     * Validate REST API dataset configuration.
+     */
+    private void validateRestApiDataset(YamlEnrichment.LookupDataset dataset, String enrichmentId) throws YamlConfigurationException {
+        // REST API datasets typically don't use key-field (they use URL patterns)
+        // This is a placeholder for future REST API-specific validation
+        LOGGER.fine("REST API dataset validation for enrichment: " + enrichmentId);
+    }
+
+    /**
+     * Validate caching configuration.
+     */
+    private void validateCachingConfiguration(YamlEnrichment.LookupConfig lookupConfig, String enrichmentId) throws YamlConfigurationException {
+        if (lookupConfig.getCacheTtlSeconds() != null) {
+            Integer ttl = lookupConfig.getCacheTtlSeconds();
+            if (ttl < 0) {
+                throw new YamlConfigurationException("Cache TTL cannot be negative for enrichment: " + enrichmentId);
+            }
+
+            if (ttl > 86400) { // 24 hours
+                LOGGER.warning("Cache TTL is very long (" + ttl + " seconds) for enrichment: " + enrichmentId + ". Consider if this is appropriate for your use case");
+            }
+        }
+    }
+
+    /**
+     * Validate field mappings configuration.
+     */
+    private void validateFieldMappings(List<YamlEnrichment.FieldMapping> fieldMappings, String enrichmentId) throws YamlConfigurationException {
+        if (fieldMappings == null || fieldMappings.isEmpty()) {
+            // Field mappings are optional for some enrichment types
+            return;
+        }
+
+        Set<String> targetFields = new HashSet<>();
+
+        for (int i = 0; i < fieldMappings.size(); i++) {
+            YamlEnrichment.FieldMapping mapping = fieldMappings.get(i);
+
+            // Validate required fields
+            if (mapping.getSourceField() == null || mapping.getSourceField().trim().isEmpty()) {
+                throw new YamlConfigurationException("Field mapping at index " + i + " missing 'source-field' for enrichment: " + enrichmentId);
+            }
+
+            if (mapping.getTargetField() == null || mapping.getTargetField().trim().isEmpty()) {
+                throw new YamlConfigurationException("Field mapping at index " + i + " missing 'target-field' for enrichment: " + enrichmentId);
+            }
+
+            // Check for duplicate target fields
+            String targetField = mapping.getTargetField();
+            if (!targetFields.add(targetField)) {
+                throw new YamlConfigurationException("Duplicate target field '" + targetField + "' in field mappings for enrichment: " + enrichmentId);
+            }
+
+            // Validate transformation expressions if present
+            if (mapping.getTransformation() != null && !mapping.getTransformation().trim().isEmpty()) {
+                String transformation = mapping.getTransformation();
+                if (!isValidSpELExpression(transformation)) {
+                    throw new YamlConfigurationException("Invalid transformation expression '" + transformation + "' in field mapping for enrichment: " + enrichmentId);
+                }
+
+                // Validate transformation patterns
+                validateTransformationPatterns(transformation, enrichmentId, i);
+            }
+
+            // Validate conditional mappings if present
+            validateConditionalMappings(mapping, enrichmentId, i);
+        }
+    }
+
+    /**
+     * Validate transformation patterns in field mappings.
+     */
+    private void validateTransformationPatterns(String transformation, String enrichmentId, int mappingIndex) throws YamlConfigurationException {
+        // Check for common transformation patterns
+        if (transformation.contains("T(java.") && !transformation.contains("T(java.lang.") && !transformation.contains("T(java.time.") && !transformation.contains("T(java.math.")) {
+            LOGGER.warning("Transformation uses Java type reference in field mapping " + mappingIndex + " for enrichment: " + enrichmentId + ". Ensure the class is available at runtime");
+        }
+
+        // Check for potentially unsafe operations
+        if (transformation.contains(".getClass()") || transformation.contains("T(java.lang.Class)")) {
+            LOGGER.warning("Transformation uses reflection in field mapping " + mappingIndex + " for enrichment: " + enrichmentId + ". This may have security implications");
+        }
+
+        // Check for null safety
+        if (transformation.contains(".") && !transformation.contains("?.") && !transformation.contains("!= null")) {
+            LOGGER.info("Consider adding null safety to transformation in field mapping " + mappingIndex + " for enrichment: " + enrichmentId);
+        }
+    }
+
+    /**
+     * Validate conditional mappings in field mappings.
+     */
+    private void validateConditionalMappings(YamlEnrichment.FieldMapping mapping, String enrichmentId, int mappingIndex) throws YamlConfigurationException {
+        // This is a placeholder for future conditional mapping validation
+        // The current YamlEnrichment.FieldMapping class doesn't have conditional mapping support
+        // but this method is here for future extensibility
+        LOGGER.finest("Conditional mapping validation for field mapping " + mappingIndex + " in enrichment: " + enrichmentId);
+    }
+
+    /**
+     * Validate SpEL expression syntax.
+     */
+    private boolean isValidSpELExpression(String expression) {
+        try {
+            // Use a simple SpEL parser to validate syntax
+            org.springframework.expression.ExpressionParser parser = new org.springframework.expression.spel.standard.SpelExpressionParser();
+            parser.parseExpression(expression);
+            return true;
+        } catch (Exception e) {
+            LOGGER.fine("Invalid SpEL expression: " + expression + " - " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Cross-component references in the configuration.
      */
     private void validateCrossComponentReferences(YamlRuleConfiguration config) throws YamlConfigurationException {
         // Build reference maps for validation
@@ -654,6 +1251,85 @@ public class YamlConfigurationLoader {
 
         // Validate circular dependencies in rule chains
         validateCircularDependencies(config);
+    }
+
+    /**
+     * Validate enrichment references to data sources and other components.
+     */
+    private void validateEnrichmentReferences(YamlRuleConfiguration config) throws YamlConfigurationException {
+        if (config.getEnrichments() == null || config.getEnrichments().isEmpty()) {
+            return;
+        }
+
+        // Build reference maps for validation
+        Set<String> dataSourceNames = buildDataSourceNameSet(config);
+        Set<String> ruleIds = buildRuleIdSet(config);
+
+        for (YamlEnrichment enrichment : config.getEnrichments()) {
+            String enrichmentId = enrichment.getId();
+
+            // Validate lookup service references
+            if (enrichment.getLookupConfig() != null && enrichment.getLookupConfig().getLookupService() != null) {
+                String serviceName = enrichment.getLookupConfig().getLookupService();
+                if (!dataSourceNames.contains(serviceName)) {
+                    throw new YamlConfigurationException("Enrichment '" + enrichmentId + "' references unknown lookup service: " + serviceName);
+                }
+            }
+
+            // Validate file path references for file-based datasets
+            if (enrichment.getLookupConfig() != null && enrichment.getLookupConfig().getLookupDataset() != null) {
+                YamlEnrichment.LookupDataset dataset = enrichment.getLookupConfig().getLookupDataset();
+                if (dataset.getFilePath() != null && !dataset.getFilePath().trim().isEmpty()) {
+                    validateFilePathReference(dataset.getFilePath(), enrichmentId);
+                }
+            }
+
+            // Validate target type references if specified
+            if (enrichment.getTargetType() != null && !enrichment.getTargetType().trim().isEmpty()) {
+                validateTargetTypeReference(enrichment.getTargetType(), enrichmentId);
+            }
+        }
+
+        LOGGER.fine("Enrichment reference validation completed successfully");
+    }
+
+    /**
+     * Validate file path references in enrichments.
+     */
+    private void validateFilePathReference(String filePath, String enrichmentId) throws YamlConfigurationException {
+        // Check for absolute vs relative paths
+        if (filePath.startsWith("/") || filePath.matches("^[A-Za-z]:.*")) {
+            LOGGER.warning("Enrichment '" + enrichmentId + "' uses absolute file path: " + filePath + ". Consider using relative paths for portability");
+        }
+
+        // Check for potentially problematic path patterns
+        if (filePath.contains("..")) {
+            LOGGER.warning("Enrichment '" + enrichmentId + "' uses parent directory references in file path: " + filePath + ". This may cause security or portability issues");
+        }
+
+        // Check for common file path issues
+        if (filePath.contains("\\")) {
+            LOGGER.info("Enrichment '" + enrichmentId + "' uses backslashes in file path: " + filePath + ". Consider using forward slashes for cross-platform compatibility");
+        }
+    }
+
+    /**
+     * Validate target type references in enrichments.
+     */
+    private void validateTargetTypeReference(String targetType, String enrichmentId) throws YamlConfigurationException {
+        // Check for valid Java class name format
+        if (!targetType.matches("^[a-zA-Z_$][a-zA-Z\\d_$]*(?:\\.[a-zA-Z_$][a-zA-Z\\d_$]*)*$")) {
+            throw new YamlConfigurationException("Invalid target type format '" + targetType + "' for enrichment: " + enrichmentId + ". Must be a valid Java class name");
+        }
+
+        // Warn about common issues
+        if (targetType.contains("..")) {
+            throw new YamlConfigurationException("Invalid target type '" + targetType + "' for enrichment: " + enrichmentId + ". Contains consecutive dots");
+        }
+
+        if (targetType.startsWith(".") || targetType.endsWith(".")) {
+            throw new YamlConfigurationException("Invalid target type '" + targetType + "' for enrichment: " + enrichmentId + ". Cannot start or end with dot");
+        }
     }
 
     /**
@@ -868,6 +1544,7 @@ public class YamlConfigurationLoader {
      */
     private void validateDuplicates(YamlRuleConfiguration config) throws YamlConfigurationException {
         validateDuplicateRuleIds(config);
+        validateDuplicateEnrichmentIds(config);
         validateDuplicateDataSourceNames(config);
         validateDuplicateRuleGroupIds(config);
         validateDuplicateRuleChainIds(config);
@@ -888,6 +1565,25 @@ public class YamlConfigurationLoader {
                             "'. Rule IDs must be unique within the configuration.");
                     }
                     seenIds.add(ruleId);
+                }
+            }
+        }
+    }
+
+    /**
+     * Validate for duplicate enrichment IDs.
+     */
+    private void validateDuplicateEnrichmentIds(YamlRuleConfiguration config) throws YamlConfigurationException {
+        if (config.getEnrichments() == null) {
+            return;
+        }
+
+        Set<String> enrichmentIds = new HashSet<>();
+        for (YamlEnrichment enrichment : config.getEnrichments()) {
+            String id = enrichment.getId();
+            if (id != null) {
+                if (!enrichmentIds.add(id)) {
+                    throw new YamlConfigurationException("Duplicate enrichment ID found: " + id);
                 }
             }
         }

@@ -1,0 +1,297 @@
+metadata:
+  name: "Comprehensive Lookup Patterns Demo Configuration"
+  version: "1.0.0"
+  description: "Demonstrates all lookup patterns documented in lookups.md"
+  type: "rule-config"
+  author: "APEX Demo Team"
+  created-date: "2025-08-22"
+  business-domain: "Financial Services"
+  compliance-reviewed: true
+
+# Data sources for lookup demonstrations
+data-sources:
+  - name: "demo-inline-service"
+    type: "inline"
+    description: "Inline data service for demo purposes"
+
+# Comprehensive enrichment configurations demonstrating all lookup patterns
+enrichments:
+  # 1. Simple Field Reference Lookup
+  - id: "simple-field-reference"
+    type: "lookup-enrichment"
+    condition: "#customerId != null"
+    lookup-config:
+      lookup-service: "demo-inline-service"
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "id"
+        data:
+          - id: "CUST123"
+            name: "John Doe"
+            status: "ACTIVE"
+            tier: "GOLD"
+          - id: "CUST456"
+            name: "Jane Smith"
+            status: "ACTIVE"
+            tier: "PLATINUM"
+    field-mappings:
+      - source-field: "name"
+        target-field: "customerName"
+      - source-field: "status"
+        target-field: "customerStatus"
+      - source-field: "tier"
+        target-field: "customerTier"
+
+  # 2. Nested Field Reference Lookup
+  - id: "nested-field-reference"
+    type: "lookup-enrichment"
+    condition: "#customer?.id != null || #transaction?.counterparty?.partyId != null"
+    lookup-config:
+      lookup-service: "demo-inline-service"
+      lookup-key: "#customer?.id ?: #transaction.counterparty.partyId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "id"
+        data:
+          - id: "CUST456"
+            name: "Jane Smith"
+            type: "INDIVIDUAL"
+            jurisdiction: "US"
+          - id: "PARTY789"
+            name: "ABC Corporation"
+            type: "CORPORATE"
+            jurisdiction: "UK"
+    field-mappings:
+      - source-field: "name"
+        target-field: "entityName"
+      - source-field: "type"
+        target-field: "entityType"
+      - source-field: "jurisdiction"
+        target-field: "entityJurisdiction"
+
+  # 3. Compound Key Lookup with String Concatenation
+  - id: "compound-key-concatenation"
+    type: "lookup-enrichment"
+    condition: "#customerId != null && #region != null"
+    lookup-config:
+      lookup-service: "demo-inline-service"
+      lookup-key: "#customerId + '-' + #region"
+      lookup-dataset:
+        type: "inline"
+        key-field: "compound_key"
+        data:
+          - compound_key: "CUST123-US"
+            pricing_tier: "STANDARD"
+            discount_rate: 0.05
+            currency: "USD"
+          - compound_key: "CUST123-EU"
+            pricing_tier: "PREMIUM"
+            discount_rate: 0.10
+            currency: "EUR"
+    field-mappings:
+      - source-field: "pricing_tier"
+        target-field: "pricingTier"
+      - source-field: "discount_rate"
+        target-field: "discountRate"
+      - source-field: "currency"
+        target-field: "baseCurrency"
+
+  # 4. Conditional Lookup Key with Ternary Operators
+  - id: "conditional-lookup-key"
+    type: "lookup-enrichment"
+    condition: "#type != null && (#customerId != null || #vendorId != null)"
+    lookup-config:
+      lookup-service: "demo-inline-service"
+      lookup-key: "#type == 'CUSTOMER' ? #customerId : #vendorId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "entity_id"
+        data:
+          - entity_id: "CUST123"
+            entity_name: "John Doe"
+            entity_type: "CUSTOMER"
+            credit_rating: "AAA"
+          - entity_id: "VEND456"
+            entity_name: "Supplier Corp"
+            entity_type: "VENDOR"
+            credit_rating: "AA"
+    field-mappings:
+      - source-field: "entity_name"
+        target-field: "entityName"
+      - source-field: "entity_type"
+        target-field: "entityType"
+      - source-field: "credit_rating"
+        target-field: "creditRating"
+
+  # 5. String Manipulation in Lookup Keys
+  - id: "string-manipulation"
+    type: "lookup-enrichment"
+    condition: "#baseCurrency != null && #quoteCurrency != null"
+    lookup-config:
+      lookup-service: "demo-inline-service"
+      lookup-key: "#baseCurrency.toUpperCase() + '/' + #quoteCurrency.toUpperCase()"
+      lookup-dataset:
+        type: "inline"
+        key-field: "currency_pair"
+        data:
+          - currency_pair: "EUR/USD"
+            spread: 0.0002
+            min_size: 1000
+            trading_hours: "24/5"
+            volatility: "LOW"
+          - currency_pair: "GBP/USD"
+            spread: 0.0003
+            min_size: 1000
+            trading_hours: "24/5"
+            volatility: "MEDIUM"
+    field-mappings:
+      - source-field: "spread"
+        target-field: "bidAskSpread"
+      - source-field: "min_size"
+        target-field: "minimumTradeSize"
+      - source-field: "trading_hours"
+        target-field: "tradingHours"
+      - source-field: "volatility"
+        target-field: "volatilityLevel"
+
+  # 6. Hierarchical Compound Key Lookup
+  - id: "hierarchical-compound-key"
+    type: "lookup-enrichment"
+    condition: "#trade?.instrument?.symbol != null && #trade?.counterparty?.id != null"
+    lookup-config:
+      lookup-service: "demo-inline-service"
+      lookup-key: "#trade.instrument.symbol + ':' + #trade.counterparty.id + ':' + #trade.settlementDate.toString()"
+      lookup-dataset:
+        type: "inline"
+        key-field: "settlement_key"
+        data:
+          - settlement_key: "AAPL:GOLDMAN:2025-08-25"
+            settlement_instructions: "DVP"
+            custodian: "BNY Mellon"
+            account_number: "ACC123456"
+            settlement_currency: "USD"
+          - settlement_key: "MSFT:JPMORGAN:2025-08-25"
+            settlement_instructions: "FOP"
+            custodian: "State Street"
+            account_number: "ACC789012"
+            settlement_currency: "USD"
+    field-mappings:
+      - source-field: "settlement_instructions"
+        target-field: "settlementInstructions"
+      - source-field: "custodian"
+        target-field: "custodianBank"
+      - source-field: "account_number"
+        target-field: "settlementAccount"
+      - source-field: "settlement_currency"
+        target-field: "settlementCurrency"
+
+  # 7. Hash-Based Compound Key Lookup
+  - id: "hash-based-compound-key"
+    type: "lookup-enrichment"
+    condition: "#portfolio != null && #asOfDate != null"
+    lookup-config:
+      lookup-service: "demo-inline-service"
+      lookup-key: "T(java.lang.String).valueOf((#portfolio.id + #portfolio.strategy + #asOfDate.toString()).hashCode())"
+      lookup-dataset:
+        type: "inline"
+        key-field: "hash_key"
+        data:
+          - hash_key: "1234567890"  # Example hash value
+            risk_limit: 10000000
+            var_limit: 500000
+            stress_test_result: "PASS"
+          - hash_key: "-987654321"  # Example hash value
+            risk_limit: 5000000
+            var_limit: 250000
+            stress_test_result: "PASS"
+    field-mappings:
+      - source-field: "risk_limit"
+        target-field: "portfolioRiskLimit"
+      - source-field: "var_limit"
+        target-field: "valueAtRiskLimit"
+      - source-field: "stress_test_result"
+        target-field: "stressTestStatus"
+
+  # 8. Multi-Dimensional Product Lookup
+  - id: "multi-dimensional-lookup"
+    type: "lookup-enrichment"
+    condition: "#product != null && #customer != null"
+    lookup-config:
+      lookup-service: "demo-inline-service"
+      lookup-key: "#product.category + '|' + #product.id + '|' + #customer.tier + '|' + #customer.region"
+      lookup-dataset:
+        type: "inline"
+        key-field: "product_key"
+        data:
+          - product_key: "ELECTRONICS|PROD456|GOLD|US"
+            base_price: 999.99
+            discount_rate: 0.15
+            minimum_quantity: 1
+            currency: "USD"
+          - product_key: "ELECTRONICS|PROD456|PLATINUM|US"
+            base_price: 999.99
+            discount_rate: 0.25
+            minimum_quantity: 1
+            currency: "USD"
+    field-mappings:
+      - source-field: "base_price"
+        target-field: "productBasePrice"
+      - source-field: "discount_rate"
+        target-field: "customerDiscountRate"
+      - source-field: "minimum_quantity"
+        target-field: "minimumOrderQuantity"
+      - source-field: "currency"
+        target-field: "pricingCurrency"
+
+  # 9. Safe Navigation Pattern
+  - id: "safe-navigation-pattern"
+    type: "lookup-enrichment"
+    condition: "#customerId != null"
+    lookup-config:
+      lookup-service: "demo-inline-service"
+      lookup-key: "#customer?.id ?: #customerId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "id"
+        data:
+          - id: "CUST123"
+            name: "John Doe (Safe Navigation)"
+            status: "ACTIVE"
+            fallback_used: true
+    field-mappings:
+      - source-field: "name"
+        target-field: "customerName"
+      - source-field: "status"
+        target-field: "customerStatus"
+      - source-field: "fallback_used"
+        target-field: "usedFallbackKey"
+
+  # 10. Complex Business Scenario
+  - id: "complex-business-scenario"
+    type: "lookup-enrichment"
+    condition: "#id != null && #instrument != null && #counterparty != null"
+    lookup-config:
+      lookup-service: "demo-inline-service"
+      lookup-key: "#instrument.symbol + ':' + #counterparty.type + ':' + #customer.tier + ':' + (#notionalAmount > 1000000 ? 'HIGH_VALUE' : 'STANDARD')"
+      lookup-dataset:
+        type: "inline"
+        key-field: "business_key"
+        data:
+          - business_key: "AAPL:PRIME_BROKER:PLATINUM:HIGH_VALUE"
+            processing_priority: "HIGH"
+            stp_eligible: true
+            regulatory_reporting: "REQUIRED"
+            margin_requirement: 0.02
+            settlement_cycle: "T+1"
+    field-mappings:
+      - source-field: "processing_priority"
+        target-field: "processingPriority"
+      - source-field: "stp_eligible"
+        target-field: "straightThroughProcessing"
+      - source-field: "regulatory_reporting"
+        target-field: "regulatoryReporting"
+      - source-field: "margin_requirement"
+        target-field: "marginRequirement"
+      - source-field: "settlement_cycle"
+        target-field: "settlementCycle"
