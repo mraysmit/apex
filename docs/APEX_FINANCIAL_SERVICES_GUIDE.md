@@ -1,7 +1,7 @@
 # APEX - Financial Services Guide
 
 **Version:** 1.0
-**Date:** 2025-08-02
+**Date:** 2025-08-23
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
 ## Overview
@@ -946,6 +946,178 @@ rules:
     action: "#initialMargin = #notionalAmount * #initialMarginRate"
     depends-on: ["margin-enrichment"]
 ```
+
+## Financial Services Demonstrations & Examples
+
+APEX includes comprehensive demonstrations specifically designed for financial services, showcasing real-world scenarios and best practices.
+
+### 🎮 Interactive Playground for Financial Services
+
+The APEX Playground provides an ideal environment for experimenting with financial services configurations:
+
+```bash
+# Start the playground
+cd apex-playground
+mvn spring-boot:run
+
+# Access at http://localhost:8081/playground
+```
+
+**Financial Services Templates Available:**
+- **OTC Derivatives Validation**: Complete validation rules for derivatives
+- **Counterparty Risk Assessment**: Credit scoring and risk evaluation
+- **Regulatory Compliance**: EMIR, MiFID II, and Dodd-Frank examples
+- **Settlement Processing**: Trade settlement and repair workflows
+
+### 🚀 Bootstrap Demonstrations
+
+#### 1. OTC Options Bootstrap Demo
+**File**: `OtcOptionsBootstrapDemo.java`
+**Focus**: Complete OTC Options processing with multi-source enrichment
+
+```bash
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo" -pl apex-demo
+```
+
+**What it demonstrates:**
+- **Three data lookup methods**: Inline YAML, PostgreSQL database, external files
+- **Complete infrastructure setup**: Automated database creation and data loading
+- **Real-world financial instruments**: Natural gas, crude oil, precious metals options
+- **Multi-layered validation**: Structural, business logic, and regulatory compliance
+- **Performance optimization**: Sub-100ms processing with comprehensive metrics
+
+#### 2. Commodity Swaps Bootstrap Demo
+**File**: `CommoditySwapBootstrapDemo.java`
+**Focus**: OTC Commodity Total Return Swaps processing
+
+```bash
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CommoditySwapBootstrapDemo" -pl apex-demo
+```
+
+**What it demonstrates:**
+- **Complex derivatives validation**: Multi-tier validation framework
+- **Regulatory compliance**: CFTC and EMIR reporting requirements
+- **Risk management**: VaR calculation and position limit monitoring
+- **Market data integration**: Real-time pricing and volatility data
+
+#### 3. Trade Settlement Bootstrap Demo
+**File**: `TradeSettlementBootstrapDemo.java`
+**Focus**: Post-trade settlement processing and auto-repair
+
+```bash
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.TradeSettlementBootstrapDemo" -pl apex-demo
+```
+
+**What it demonstrates:**
+- **Settlement validation**: DVP, FOP, and custody instruction processing
+- **Auto-repair workflows**: Failed settlement detection and correction
+- **Multi-currency support**: Global settlement processing
+- **Counterparty management**: LEI validation and credit assessment
+
+#### 4. Risk Assessment Bootstrap Demo
+**File**: `RiskAssessmentBootstrapDemo.java`
+**Focus**: Comprehensive risk assessment and scoring
+
+```bash
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.RiskAssessmentBootstrapDemo" -pl apex-demo
+```
+
+**What it demonstrates:**
+- **Credit risk scoring**: Multi-factor credit assessment
+- **Market risk calculation**: VaR and stress testing
+- **Operational risk**: Settlement and counterparty risk
+- **Regulatory capital**: Basel III and capital requirement calculations
+
+### 🔍 Lookup Pattern Examples
+
+#### 1. Simple Field Lookup - Currency Enrichment
+**File**: `SimpleFieldLookupDemo.java`
+**Pattern**: `#currencyCode`
+
+```bash
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.SimpleFieldLookupDemo" -pl apex-demo
+```
+
+**Financial Services Use Case**: Enrich transactions with currency details, exchange rates, and regional information.
+
+#### 2. Computed Expression Lookup - Risk Scoring
+**File**: `ComputedExpressionLookupDemo.java`
+**Pattern**: `#amount > 1000000 ? 'HIGH_VALUE' : 'STANDARD'`
+
+```bash
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.ComputedExpressionLookupDemo" -pl apex-demo
+```
+
+**Financial Services Use Case**: Dynamic risk categorization based on transaction amounts and counterparty ratings.
+
+#### 3. Concatenated Field Lookup - Counterparty Identification
+**File**: `ConcatenatedFieldLookupDemo.java`
+**Pattern**: `#counterpartyLEI + '_' + #currency`
+
+```bash
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.ConcatenatedFieldLookupDemo" -pl apex-demo
+```
+
+**Financial Services Use Case**: Lookup settlement instructions using combined counterparty and currency keys.
+
+#### 4. Conditional Expression Lookup - Regulatory Reporting
+**File**: `ConditionalExpressionLookupDemo.java`
+**Pattern**: `#jurisdiction == 'EU' ? #emirCode : #cftcCode`
+
+```bash
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.ConditionalExpressionLookupDemo" -pl apex-demo
+```
+
+**Financial Services Use Case**: Jurisdiction-specific regulatory reporting requirements and compliance rules.
+
+### ⚡ Advanced Financial Services Demos
+
+#### 1. Dynamic Method Execution - Pricing Models
+**File**: `DynamicMethodExecutionDemo.java`
+
+```bash
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.advanced.DynamicMethodExecutionDemo" -pl apex-demo
+```
+
+**Financial Services Application**: Dynamic pricing model selection based on instrument type and market conditions.
+
+#### 2. Performance and Exception Handling - High-Frequency Trading
+**File**: `PerformanceAndExceptionDemo.java`
+
+```bash
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.advanced.PerformanceAndExceptionDemo" -pl apex-demo
+```
+
+**Financial Services Application**: Sub-millisecond processing requirements with comprehensive error recovery.
+
+#### 3. Data Service Manager - Market Data Integration
+**File**: `DataServiceManagerDemo.java`
+
+```bash
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.advanced.DataServiceManagerDemo" -pl apex-demo
+```
+
+**Financial Services Application**: Real-time market data feeds, reference data management, and failover handling.
+
+### 📊 Financial Services Learning Path
+
+#### **🎓 Beginner Path (2-3 hours)**
+1. **APEX Playground** (45 minutes) - Try financial services templates
+2. **Simple Field Lookup Demo** (15 minutes) - Currency enrichment
+3. **OTC Options Bootstrap Demo** (45 minutes) - Complete derivatives workflow
+4. **Trade Settlement Bootstrap Demo** (30 minutes) - Settlement processing
+
+#### **🏗️ Developer Path (3-4 hours)**
+1. **All Lookup Pattern Examples** (60 minutes) - Master data enrichment
+2. **All Bootstrap Demonstrations** (120 minutes) - Complete financial workflows
+3. **Dynamic Method Execution Demo** (30 minutes) - Advanced pricing models
+4. **Performance Demo** (30 minutes) - High-frequency trading optimization
+
+#### **🏢 Financial Services Architect Path (4-5 hours)**
+1. **All Bootstrap Demonstrations** (150 minutes) - Complete scenario understanding
+2. **All Advanced Demos** (120 minutes) - Technical architecture patterns
+3. **Data Service Manager Demo** (45 minutes) - Market data integration
+4. **Regulatory compliance examples** (45 minutes) - EMIR, MiFID II, Dodd-Frank
 
 ## Financial Services Templates
 
@@ -2097,6 +2269,263 @@ The current `rules-engine-demo` module has evolved organically and contains valu
 - Complete migration to new patterns
 - Remove legacy dependencies
 - Optimize for new capabilities
+
+## Updated YAML Specification & Best Practices
+
+### YAML Specification Changes in Version 2.0
+
+The YAML specification has been updated to provide better structure, validation, and maintainability. Here are the key changes:
+
+#### **Expression Syntax Updates**
+
+**Old Specification (v1.0):**
+```yaml
+condition: "['fieldName'] != null"
+lookup-key: "['counterpartyLEI']"
+```
+
+**New Specification (v2.0):**
+```yaml
+condition: "#fieldName != null"
+lookup-key: "#counterpartyLEI"
+```
+
+**Key Changes:**
+- ✅ **SpEL Expression Prefix**: Use `#` instead of `['fieldName']` for field references
+- ✅ **Cleaner Syntax**: More readable and consistent with SpEL standards
+- ✅ **Better Validation**: Improved syntax validation and error reporting
+
+#### **Enhanced Enrichment Configuration**
+
+**Old Specification:**
+```yaml
+enrichments:
+  - id: "lei-enrichment"
+    type: "lookup-enrichment"
+    condition: "['counterpartyLEI'] != null"
+    lookup-config:
+      lookup-dataset:
+        type: "yaml-file"
+        file-path: "datasets/lei-registry.yaml"
+        key-field: "lei"
+```
+
+**New Specification:**
+```yaml
+enrichments:
+  - id: "lei-enrichment"
+    name: "LEI Registry Enrichment"
+    description: "Enrich counterparty data with Legal Entity Identifier information"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#counterpartyLEI != null && #counterpartyLEI.length() == 20"
+    priority: 10
+
+    lookup-config:
+      lookup-key: "#counterpartyLEI"
+      lookup-dataset:
+        type: "yaml-file"
+        file-path: "datasets/lei-registry.yaml"
+        key-field: "lei"
+        cache-enabled: true
+        cache-ttl-seconds: 86400
+
+    field-mappings:
+      - source-field: "legalName"
+        target-field: "counterpartyName"
+        required: true
+```
+
+**Key Enhancements:**
+- ✅ **Descriptive Metadata**: `name` and `description` fields for better documentation
+- ✅ **Enable/Disable Control**: `enabled` flag for runtime control
+- ✅ **Priority Ordering**: `priority` field for execution order control
+- ✅ **Enhanced Validation**: More sophisticated condition expressions
+- ✅ **Explicit Lookup Keys**: `lookup-key` field for complex key expressions
+- ✅ **Cache Configuration**: Detailed caching control with TTL
+- ✅ **Field Requirements**: `required` flag for field mappings
+
+### Financial Services Best Practices
+
+#### **1. Expression Design Patterns**
+
+**✅ Defensive Programming:**
+```yaml
+condition: "#counterpartyLEI != null && #counterpartyLEI.length() == 20"
+```
+
+**✅ Multi-Condition Validation:**
+```yaml
+condition: "#amount > 0 && #currency != null && #currency.matches('[A-Z]{3}')"
+```
+
+**✅ Complex Business Logic:**
+```yaml
+condition: |
+  #instrumentType == 'DERIVATIVE' &&
+  #notionalAmount > 1000000 &&
+  (#jurisdiction == 'EU' || #jurisdiction == 'US')
+```
+
+#### **2. Lookup Key Strategies**
+
+**✅ Simple Field Lookup:**
+```yaml
+lookup-key: "#currencyCode"
+```
+
+**✅ Computed Expression Lookup:**
+```yaml
+lookup-key: "#amount > 1000000 ? 'HIGH_VALUE' : 'STANDARD'"
+```
+
+**✅ Concatenated Field Lookup:**
+```yaml
+lookup-key: "#counterpartyLEI + '_' + #currency"
+```
+
+**✅ Conditional Expression Lookup:**
+```yaml
+lookup-key: "#jurisdiction == 'EU' ? #emirCode : #cftcCode"
+```
+
+#### **3. Performance Optimization**
+
+**✅ Cache Configuration:**
+```yaml
+lookup-config:
+  lookup-dataset:
+    cache-enabled: true
+    cache-ttl-seconds: 3600  # 1 hour for reference data
+```
+
+**✅ Priority Ordering:**
+```yaml
+enrichments:
+  - id: "critical-enrichment"
+    priority: 10  # High priority
+  - id: "optional-enrichment"
+    priority: 50  # Lower priority
+```
+
+**✅ Conditional Execution:**
+```yaml
+condition: "#tradeType == 'DERIVATIVE' && #notionalAmount > 1000000"
+```
+
+#### **4. Error Handling and Validation**
+
+**✅ Comprehensive Validation:**
+```yaml
+rules:
+  - id: "lei-format-validation"
+    name: "LEI Format Validation"
+    condition: "#counterpartyLEI == null || #counterpartyLEI.matches('[A-Z0-9]{20}')"
+    message: "LEI must be 20 alphanumeric characters"
+    severity: "ERROR"
+```
+
+**✅ Dependency Management:**
+```yaml
+rules:
+  - id: "counterparty-risk-check"
+    name: "Counterparty Risk Assessment"
+    condition: "#counterpartyRisk in {'A', 'B', 'C'}"
+    message: "Counterparty risk rating must be acceptable"
+    severity: "WARNING"
+    depends-on: ["counterparty-enrichment"]
+```
+
+#### **5. Regulatory Compliance Patterns**
+
+**✅ EMIR Compliance:**
+```yaml
+rules:
+  - id: "emir-reporting-required"
+    name: "EMIR Reporting Requirement"
+    condition: |
+      #jurisdiction == 'EU' &&
+      #instrumentType == 'DERIVATIVE' &&
+      #notionalAmount > 100000
+    message: "Trade requires EMIR reporting"
+    severity: "INFO"
+```
+
+**✅ MiFID II Compliance:**
+```yaml
+enrichments:
+  - id: "mifid-classification"
+    name: "MiFID II Client Classification"
+    condition: "#jurisdiction == 'EU'"
+    enrichmentType: "computed"
+    computedFields:
+      mifidClassification: |
+        #clientType == 'PROFESSIONAL' ? 'PROFESSIONAL' :
+        (#portfolioValue > 500000 ? 'ELECTIVE_PROFESSIONAL' : 'RETAIL')
+```
+
+### Migration Guide from v1.0 to v2.0
+
+#### **Step 1: Update Expression Syntax**
+```bash
+# Find and replace in your YAML files
+sed -i "s/\['\([^']*\)'\]/#\1/g" *.yaml
+```
+
+#### **Step 2: Add Required Metadata**
+```yaml
+# Add to each enrichment
+name: "Descriptive Name"
+description: "Clear description of purpose"
+enabled: true
+priority: 10
+```
+
+#### **Step 3: Update Lookup Configuration**
+```yaml
+# Add explicit lookup-key
+lookup-config:
+  lookup-key: "#fieldName"  # Add this line
+  lookup-dataset:
+    # existing configuration
+```
+
+#### **Step 4: Enhance Field Mappings**
+```yaml
+field-mappings:
+  - source-field: "fieldName"
+    target-field: "targetField"
+    required: true  # Add this line
+```
+
+#### **Step 5: Test and Validate**
+```bash
+# Use the playground to test updated configurations
+cd apex-playground
+mvn spring-boot:run
+# Access http://localhost:8081/playground
+```
+
+### Testing Your Updated Configurations
+
+#### **1. YAML Validation**
+```bash
+# Validate YAML syntax
+cd apex-demo
+mvn test -Dtest="**/*YamlValidation*Test"
+```
+
+#### **2. Integration Testing**
+```bash
+# Run bootstrap demos to test complete workflows
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo" -pl apex-demo
+```
+
+#### **3. Performance Testing**
+```bash
+# Run performance tests
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.advanced.PerformanceAndExceptionDemo" -pl apex-demo
+```
 
 ## Conclusion
 

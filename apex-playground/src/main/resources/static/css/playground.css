@@ -1,0 +1,196 @@
+/* APEX Playground Custom Styles */
+
+/* Main layout */
+.playground-panels {
+    min-height: 400px;
+}
+
+.playground-panels .card {
+    min-height: 400px;
+}
+
+/* Editor styling */
+.playground-panels textarea {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 14px;
+    line-height: 1.4;
+    border: none;
+    resize: none;
+    min-height: 350px;
+}
+
+.playground-panels textarea:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Results panels */
+.results-panel {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 13px;
+    line-height: 1.4;
+    max-height: 350px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+}
+
+/* Status indicators */
+.badge {
+    font-size: 0.75em;
+}
+
+/* Toolbar styling */
+.btn-toolbar {
+    padding: 10px 0;
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 15px;
+}
+
+/* Card headers */
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 10px 15px;
+}
+
+.card-header h6 {
+    color: #495057;
+    font-weight: 600;
+}
+
+/* Format selector buttons */
+.btn-group-sm .btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Processing status */
+.processing {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.processing::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #007bff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Validation status colors */
+.yaml-valid {
+    background-color: #d4edda !important;
+    color: #155724 !important;
+}
+
+.yaml-invalid {
+    background-color: #f8d7da !important;
+    color: #721c24 !important;
+}
+
+/* Results styling */
+.validation-success {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.validation-error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.validation-warning {
+    color: #856404;
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+/* Metrics display */
+.metrics-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.metrics-item:last-child {
+    border-bottom: none;
+}
+
+.metrics-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.metrics-value {
+    color: #007bff;
+    font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .playground-panels .card {
+        min-height: 300px;
+    }
+    
+    .playground-panels textarea {
+        min-height: 250px;
+    }
+    
+    .results-panel {
+        max-height: 250px;
+    }
+    
+    .btn-toolbar {
+        flex-wrap: wrap;
+    }
+    
+    .btn-group {
+        margin-bottom: 5px;
+    }
+}
+
+/* Dark theme support (optional) */
+@media (prefers-color-scheme: dark) {
+    .results-panel {
+        background-color: #2d3748;
+        color: #e2e8f0;
+    }
+    
+    .card {
+        background-color: #2d3748;
+        border-color: #4a5568;
+    }
+    
+    .card-header {
+        background-color: #4a5568;
+        border-color: #4a5568;
+        color: #e2e8f0;
+    }
+}

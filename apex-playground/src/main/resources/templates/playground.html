@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">APEX Playground</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- CodeMirror CSS for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.0.1/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.0.1/theme/monokai.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/playground.css}">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#" th:text="${title}">APEX Playground</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/playground">Playground</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/playground/examples">Examples</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/playground/help">Help</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/swagger-ui.html" target="_blank">API Docs</a>
+                    </li>
+                </ul>
+                <span class="navbar-text" th:text="'Version ' + ${version}">Version 1.0.0</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid mt-3">
+        <!-- Toolbar -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="btn-toolbar" role="toolbar">
+                    <div class="btn-group me-2" role="group">
+                        <button type="button" class="btn btn-success" id="processBtn">
+                            <i class="fas fa-play"></i> Process
+                        </button>
+                        <button type="button" class="btn btn-warning" id="validateBtn">
+                            <i class="fas fa-check"></i> Validate
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="clearBtn">
+                            <i class="fas fa-trash"></i> Clear
+                        </button>
+                    </div>
+                    <div class="btn-group me-2" role="group">
+                        <button type="button" class="btn btn-outline-primary" id="loadExampleBtn">
+                            <i class="fas fa-file-import"></i> Load Example
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" id="saveConfigBtn">
+                            <i class="fas fa-save"></i> Save Config
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4-Panel Layout -->
+        <div class="row playground-panels">
+            <!-- Top Left: Source Data -->
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Source Data</h6>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <input type="radio" class="btn-check" name="dataFormat" id="jsonFormat" value="JSON" checked>
+                            <label class="btn btn-outline-secondary" for="jsonFormat">JSON</label>
+                            <input type="radio" class="btn-check" name="dataFormat" id="xmlFormat" value="XML">
+                            <label class="btn btn-outline-secondary" for="xmlFormat">XML</label>
+                            <input type="radio" class="btn-check" name="dataFormat" id="csvFormat" value="CSV">
+                            <label class="btn btn-outline-secondary" for="csvFormat">CSV</label>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <textarea id="sourceDataEditor" class="form-control h-100" 
+                                  placeholder="Enter your source data here (JSON, XML, or CSV)..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Right: YAML Rules -->
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">YAML Rules Configuration</h6>
+                        <span class="badge bg-success" id="yamlStatus">Valid</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <textarea id="yamlRulesEditor" class="form-control h-100" 
+                                  placeholder="Enter your YAML rules configuration here..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row playground-panels">
+            <!-- Bottom Left: Validation Results -->
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h6 class="mb-0">Validation Results</h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="validationResults" class="results-panel">
+                            <p class="text-muted">Click "Process" to see validation results...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Right: Enrichment Results -->
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Enrichment Results & Metrics</h6>
+                        <small class="text-muted" id="processingTime">Processing time: --</small>
+                    </div>
+                    <div class="card-body">
+                        <div id="enrichmentResults" class="results-panel">
+                            <p class="text-muted">Click "Process" to see enrichment results and performance metrics...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- CodeMirror JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.0.1/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.0.1/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.0.1/mode/yaml/yaml.min.js"></script>
+    
+    <!-- Font Awesome for icons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script th:src="@{/js/playground.js}"></script>
+    
+    <script th:inline="javascript">
+        // Pass configuration to JavaScript
+        window.playgroundConfig = {
+            apiBaseUrl: /*[[${apiBaseUrl}]]*/ '/playground/api',
+            version: /*[[${version}]]*/ '1.0.0'
+        };
+    </script>
+</body>
+</html>

@@ -37,14 +37,18 @@ APEX (Advanced Processing Engine for eXpressions) provides comprehensive data ma
 14. [Scenario-Based Configuration Management](#14-scenario-based-configuration-management)
 15. [YAML Validation and Quality Assurance](#15-yaml-validation-and-quality-assurance)
 16. [External Data Source Integration](#16-external-data-source-integration)
-17. [Financial Services Data Patterns](#17-financial-services-data-patterns)
-18. [Performance and Optimization](#18-performance-and-optimization)
-19. [Enterprise Data Architecture](#19-enterprise-data-architecture)
+17. [Database Integration](#17-database-integration)
+18. [REST API Integration](#18-rest-api-integration)
+19. [File System Data Sources](#19-file-system-data-sources)
+20. [Cache Data Sources](#20-cache-data-sources)
+21. [Financial Services Data Patterns](#21-financial-services-data-patterns)
+22. [Performance and Optimization](#22-performance-and-optimization)
+23. [Enterprise Data Architecture](#23-enterprise-data-architecture)
 
 **Part 5: Reference and Examples**
-20. [Complete Examples and Use Cases](#20-complete-examples-and-use-cases)
-21. [Best Practices and Patterns](#21-best-practices-and-patterns)
-22. [Troubleshooting Common Issues](#22-troubleshooting-common-issues)
+24. [Complete Examples and Use Cases](#24-complete-examples-and-use-cases)
+25. [Best Practices and Patterns](#25-best-practices-and-patterns)
+26. [Troubleshooting Common Issues](#26-troubleshooting-common-issues)
 
 ---
 
@@ -8050,7 +8054,1411 @@ performance:
 
 ---
 
-## 16. Financial Services Data Patterns
+## 16. External Data Source Integration
+
+### Overview
+
+APEX's external data source integration is designed to make connecting to your existing systems as simple and reliable as possible. Think of it as a universal adapter that lets your rules talk to any system in your organization.
+
+External data source integration enables APEX to connect to live data from databases, REST APIs, file systems, and other external systems. This means your rules can make decisions based on current customer information, real-time market data, or any other external information your business needs.
+
+### What External Data Sources Give You
+
+**Multiple Data Source Types** - Connect to the systems you already use:
+- **Databases**: PostgreSQL, MySQL, Oracle, SQL Server, H2 - all with connection pooling and optimization
+- **REST APIs**: Any HTTP/HTTPS service with authentication, retries, and circuit breakers
+- **File Systems**: CSV, JSON, XML files with automatic parsing and monitoring
+- **Caches**: High-speed in-memory storage for frequently accessed data
+- **Custom Sources**: Build your own connectors for specialized systems
+
+**Unified Interface** - Learn once, use everywhere:
+All data sources work the same way in your rules, regardless of whether you're connecting to a database, API, or file. This means less complexity and more consistency in your code.
+
+**Enterprise Features** - Production-ready from day one:
+- **Connection pooling**: Efficiently manage database connections for high performance
+- **Health monitoring**: Automatically detect and handle system failures
+- **Caching**: Store frequently accessed data in memory for faster access
+- **Circuit breakers**: Protect your systems from cascading failures
+- **Load balancing**: Distribute requests across multiple data sources
+- **Automatic recovery**: Reconnect automatically when systems come back online
+
+**YAML Configuration** - Simple, readable setup:
+Configure everything in human-readable YAML files with environment-specific overrides. No complex programming required for basic setups.
+
+### Quick Start with External Data Sources
+
+Let's get you connected to your first external data source in just a few minutes! This example shows how to connect to a PostgreSQL database.
+
+#### 1. Add Dependencies
+
+First, make sure you have the APEX core dependency in your project:
+
+```xml
+<dependency>
+    <groupId>dev.mars.rulesengine</groupId>
+    <artifactId>rules-engine-core</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+#### 2. Create Your Configuration File
+
+Create a YAML file that describes your data source:
+
+```yaml
+# data-sources.yaml
+metadata:
+  name: "My Application"
+  version: "1.0.0"
+  type: "rule-config"
+  description: "External data source configuration"
+
+dataSources:
+  - name: "user-database"
+    type: "database"
+    sourceType: "postgresql"
+    enabled: true
+
+    connection:
+      host: "localhost"
+      port: 5432
+      database: "myapp"
+      username: "app_user"
+      password: "${DB_PASSWORD}"
+
+    queries:
+      getUserById: "SELECT * FROM users WHERE id = :id"
+      getAllUsers: "SELECT * FROM users ORDER BY created_at DESC"
+
+    parameterNames:
+      - "id"
+
+    cache:
+      enabled: true
+      ttlSeconds: 300
+      maxSize: 1000
+```
+
+#### 3. Initialize and Use in Your Code
+
+Now you can use your data source in Java code:
+
+```java
+// Step 1: Load your configuration file
+DataSourceConfigurationService configService = DataSourceConfigurationService.getInstance();
+YamlRuleConfiguration yamlConfig = loadYamlConfiguration("data-sources.yaml");
+configService.initialize(yamlConfig);
+
+// Step 2: Get your data source by name
+ExternalDataSource userDb = configService.getDataSource("user-database");
+
+// Step 3: Execute queries with parameters
+Map<String, Object> parameters = Map.of("id", 123);
+List<Object> results = userDb.query("getUserById", parameters);
+
+// Step 4: Get a single result (useful when you expect one record)
+Object user = userDb.queryForObject("getUserById", parameters);
+```
+
+### Supported Data Sources
+
+APEX supports a wide variety of data sources, each optimized for different use cases:
+
+#### Database Sources - For Structured Data
+Perfect for accessing your existing business data stored in relational databases.
+
+**Supported Databases:**
+- **PostgreSQL**: Full-featured support with connection pooling, SSL, and advanced features
+- **MySQL**: Complete integration with SSL support and MySQL-specific optimizations
+- **Oracle**: Enterprise-grade Oracle database connectivity with connection pooling
+- **SQL Server**: Microsoft SQL Server integration with Windows authentication support
+- **H2**: Lightweight in-memory and file-based database, perfect for testing and development
+
+**When to use database sources:**
+- Customer information, transaction records, product catalogs
+- Any structured data you already store in databases
+- When you need ACID transactions and data consistency
+- For complex queries with joins and aggregations
+
+**Key features:** Connection pooling, prepared statements, transaction support, SSL encryption
+
+#### REST API Sources - For External Services
+Connect to web services, microservices, and third-party APIs.
+
+**Authentication Methods:**
+- **Bearer tokens**: For modern APIs with JWT or similar tokens
+- **API keys**: Simple key-based authentication in headers or query parameters
+- **Basic auth**: Username/password authentication for legacy systems
+- **OAuth2**: Full OAuth2 flow support for secure integrations
+
+**HTTP Methods:** GET, POST, PUT, DELETE, PATCH - all the standard REST operations
+
+**Enterprise Features:**
+- **Circuit breakers**: Protect your system when external APIs fail
+- **Retry logic**: Automatically retry failed requests with exponential backoff
+- **Response caching**: Cache API responses to improve performance and reduce API calls
+- **JSON parsing**: Automatic parsing with JSONPath support for extracting specific data
+
+**When to use REST API sources:**
+- Third-party services (payment processors, address validation, etc.)
+- Microservices in your architecture
+- Real-time data that changes frequently
+- When you need to send data to external systems
+
+#### File System Sources - For File-Based Data
+Process data from files on your local system or network drives.
+
+**Supported File Formats:**
+- **CSV Files**: Configurable delimiters, headers, automatic data type conversion
+- **JSON Files**: JSONPath extraction, nested object handling, array processing
+- **XML Files**: XPath queries, namespace support, attribute extraction
+- **Fixed-Width**: Legacy mainframe file formats with column definitions
+- **Plain Text**: Log files, unstructured text, custom parsing
+
+**Advanced Features:**
+- **File watching**: Automatically detect when files change
+- **Batch processing**: Handle large files efficiently
+- **Error handling**: Skip malformed records and continue processing
+- **Encoding support**: Handle different character encodings (UTF-8, ISO-8859-1, etc.)
+
+**When to use file system sources:**
+- Daily batch files from other systems
+- Configuration files that change periodically
+- Log file analysis and monitoring
+- Legacy system integration where files are the only interface
+
+#### Cache Sources - For High-Speed Data Access
+Store frequently accessed data in memory for ultra-fast retrieval.
+
+**Cache Types:**
+- **In-Memory**: High-performance local caching with LRU (Least Recently Used) eviction
+- **Distributed**: Ready for Redis/Hazelcast integration for multi-server deployments
+
+**Key Features:**
+- **TTL support**: Automatic expiration of cached data
+- **Pattern matching**: Find cached items using wildcards
+- **Statistics collection**: Monitor cache hit rates and performance
+- **Multiple eviction policies**: LRU, LFU, FIFO, and more
+
+**When to use cache sources:**
+- Frequently accessed lookup data (currency rates, product categories)
+- Expensive calculation results that don't change often
+- Session data and user preferences
+- Any data where speed is more important than absolute freshness
+
+## 17. Database Integration
+
+### Supported Databases
+
+APEX provides robust integration with all major relational databases. Each database type has its own specific configuration options and best practices, but they all share common features like connection pooling, query management, caching, health monitoring, and security.
+
+**What you get with database integration:**
+- **Connection pooling**: Efficiently manage database connections for high performance
+- **Query management**: Define named queries in YAML for better maintainability
+- **Automatic caching**: Cache query results to reduce database load
+- **Health monitoring**: Continuously monitor database connectivity and performance
+- **Security**: SSL/TLS encryption, credential management, and access control
+- **Transaction support**: Handle database transactions properly
+- **Prepared statements**: Automatic SQL injection protection
+
+#### PostgreSQL - The Popular Open Source Choice
+
+PostgreSQL is a powerful, open-source relational database that's popular for its reliability, performance, and rich feature set.
+
+**When to choose PostgreSQL:**
+- You need a reliable, ACID-compliant database
+- You want advanced features like JSON support, full-text search, and custom data types
+- You're building a new application and want a modern database
+- You need good performance with complex queries
+
+```yaml
+dataSources:
+  - name: "postgres-db"
+    type: "database"
+    sourceType: "postgresql"
+    connection:
+      host: "localhost"
+      port: 5432
+      database: "myapp"
+      username: "app_user"
+      password: "${DB_PASSWORD}"
+      schema: "public"
+      sslEnabled: true
+      sslMode: "require"
+
+      # PostgreSQL-specific settings
+      applicationName: "APEX-Rules-Engine"
+      connectTimeout: 10000
+      socketTimeout: 30000
+
+      # Connection pool settings
+      maxPoolSize: 20
+      minPoolSize: 5
+      connectionTimeout: 30000
+      idleTimeout: 600000
+      maxLifetime: 1800000
+
+    queries:
+      getUserById: "SELECT * FROM users WHERE id = $1"
+      getUsersByStatus: "SELECT * FROM users WHERE status = $1 ORDER BY created_at DESC"
+      createUser: "INSERT INTO users (username, email, status) VALUES ($1, $2, $3) RETURNING id"
+
+    parameterNames:
+      - "id"
+      - "status"
+      - "username"
+      - "email"
+```
+
+**PostgreSQL-specific tips:**
+- **Parameter syntax**: Use `$1, $2, $3` instead of `:name` syntax
+- **SSL modes**: Use `require` for production, `prefer` for development
+- **RETURNING clause**: Great for getting generated IDs after INSERT operations
+- **Application name**: Helps identify your application in PostgreSQL logs
+
+#### MySQL - The World's Most Popular Database
+
+MySQL is known for its speed, reliability, and ease of use. It's particularly popular for web applications.
+
+**When to choose MySQL:**
+- You're building web applications or content management systems
+- You need fast read performance and simple queries
+- You want a database with a huge community and lots of hosting options
+
+```yaml
+dataSources:
+  - name: "mysql-db"
+    type: "database"
+    sourceType: "mysql"
+    connection:
+      host: "localhost"
+      port: 3306
+      database: "myapp"
+      username: "app_user"
+      password: "${DB_PASSWORD}"
+      useSSL: true
+      requireSSL: true
+
+      # MySQL-specific settings
+      serverTimezone: "UTC"
+      useUnicode: true
+      characterEncoding: "utf8mb4"
+      autoReconnect: true
+
+      # Connection pool settings
+      maxPoolSize: 25
+      minPoolSize: 5
+      connectionTimeout: 20000
+      idleTimeout: 300000
+
+    queries:
+      getUserById: "SELECT * FROM users WHERE id = ?"
+      getUsersByStatus: "SELECT * FROM users WHERE status = ? ORDER BY created_at DESC"
+      updateUserStatus: "UPDATE users SET status = ?, updated_at = NOW() WHERE id = ?"
+
+    parameterNames:
+      - "id"
+      - "status"
+```
+
+**MySQL-specific tips:**
+- **Parameter syntax**: Use `?` placeholders for parameters
+- **Character encoding**: Always use `utf8mb4` for full Unicode support
+- **Timezone handling**: Set `serverTimezone` to avoid timezone issues
+- **SSL configuration**: Use `useSSL` and `requireSSL` for secure connections
+
+#### Oracle - Enterprise Database
+
+Oracle Database is the enterprise standard for mission-critical applications requiring high performance, scalability, and advanced features.
+
+**When to choose Oracle:**
+- You have enterprise-scale requirements
+- You need advanced features like partitioning, advanced analytics, or RAC
+- You're working in a large organization that already uses Oracle
+
+```yaml
+dataSources:
+  - name: "oracle-db"
+    type: "database"
+    sourceType: "oracle"
+    connection:
+      host: "localhost"
+      port: 1521
+      database: "ORCL"  # SID or Service Name
+      username: "app_user"
+      password: "${DB_PASSWORD}"
+
+      # Oracle-specific settings
+      connectionType: "SID"  # or "SERVICE_NAME"
+      schema: "APP_SCHEMA"
+
+      # Connection pool settings
+      maxPoolSize: 30
+      minPoolSize: 10
+      connectionTimeout: 30000
+      idleTimeout: 900000
+
+    queries:
+      getUserById: "SELECT * FROM users WHERE id = :id"
+      getUsersByStatus: "SELECT * FROM users WHERE status = :status ORDER BY created_at DESC"
+      createUser: "INSERT INTO users (id, username, email, status) VALUES (user_seq.NEXTVAL, :username, :email, :status)"
+
+    parameterNames:
+      - "id"
+      - "status"
+      - "username"
+      - "email"
+```
+
+**Oracle-specific tips:**
+- **Parameter syntax**: Use `:name` syntax for named parameters
+- **Sequences**: Use Oracle sequences for auto-incrementing IDs
+- **Schema specification**: Specify the schema if not using the default
+- **Connection types**: Choose between SID and SERVICE_NAME based on your setup
+
+#### SQL Server - Microsoft's Database
+
+SQL Server is Microsoft's enterprise database solution, popular in Windows-centric environments.
+
+**When to choose SQL Server:**
+- You're in a Microsoft-centric environment
+- You need tight integration with other Microsoft products
+- You want enterprise features with Windows authentication
+
+```yaml
+dataSources:
+  - name: "sqlserver-db"
+    type: "database"
+    sourceType: "sqlserver"
+    connection:
+      host: "localhost"
+      port: 1433
+      database: "MyApp"
+      username: "app_user"
+      password: "${DB_PASSWORD}"
+      encrypt: true
+      trustServerCertificate: false
+
+      # SQL Server-specific settings
+      instanceName: "SQLEXPRESS"  # Optional
+      integratedSecurity: false   # Set to true for Windows auth
+
+      # Connection pool settings
+      maxPoolSize: 20
+      minPoolSize: 5
+      connectionTimeout: 30000
+
+    queries:
+      getUserById: "SELECT * FROM users WHERE id = ?"
+      getUsersByStatus: "SELECT * FROM users WHERE status = ? ORDER BY created_at DESC"
+      createUser: "INSERT INTO users (username, email, status) OUTPUT INSERTED.id VALUES (?, ?, ?)"
+
+    parameterNames:
+      - "id"
+      - "status"
+      - "username"
+      - "email"
+```
+
+**SQL Server-specific tips:**
+- **Parameter syntax**: Use `?` placeholders for parameters
+- **OUTPUT clause**: Use `OUTPUT INSERTED.id` to get generated IDs
+- **Encryption**: Always use `encrypt: true` for production
+- **Windows authentication**: Set `integratedSecurity: true` for Windows auth
+
+#### H2 - Lightweight Database
+
+H2 is a lightweight, fast database perfect for development, testing, and embedded applications.
+
+**When to choose H2:**
+- Development and testing environments
+- Embedded applications
+- Quick prototyping
+- When you need a database without installation
+
+```yaml
+dataSources:
+  - name: "h2-db"
+    type: "database"
+    sourceType: "h2"
+    connection:
+      # In-memory database
+      url: "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE"
+
+      # Or file-based database
+      # url: "jdbc:h2:file:./data/myapp;AUTO_SERVER=TRUE"
+
+      username: "sa"
+      password: ""
+
+      # H2-specific settings
+      autoServer: true
+      mixedMode: false
+
+    queries:
+      getUserById: "SELECT * FROM users WHERE id = ?"
+      createUser: "INSERT INTO users (username, email, status) VALUES (?, ?, ?)"
+      initSchema: |
+        CREATE TABLE IF NOT EXISTS users (
+          id BIGINT AUTO_INCREMENT PRIMARY KEY,
+          username VARCHAR(255) NOT NULL,
+          email VARCHAR(255) NOT NULL,
+          status VARCHAR(50) NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+
+    parameterNames:
+      - "id"
+      - "username"
+      - "email"
+      - "status"
+```
+
+**H2-specific tips:**
+- **In-memory vs file**: Choose based on whether you need persistence
+- **Schema initialization**: Use `initSchema` to create tables automatically
+- **Auto server mode**: Allows multiple connections to file databases
+- **Perfect for testing**: Fast startup and no installation required
+
+## 18. REST API Integration
+
+### Overview
+
+REST API integration allows APEX to connect to web services, microservices, and third-party APIs. This enables your rules to access real-time data from external systems, validate information against external services, and integrate with modern cloud-based applications.
+
+### Authentication Methods
+
+APEX supports all major authentication methods for REST APIs:
+
+#### Bearer Token Authentication
+Perfect for modern APIs that use JWT tokens or similar bearer tokens.
+
+```yaml
+dataSources:
+  - name: "user-service-api"
+    type: "rest-api"
+    connection:
+      baseUrl: "https://api.example.com"
+      timeout: 30000
+
+    authentication:
+      type: "bearer"
+      token: "${API_TOKEN}"
+      tokenHeader: "Authorization"
+      tokenPrefix: "Bearer "
+
+    endpoints:
+      getUserProfile:
+        method: "GET"
+        path: "/users/{userId}"
+        parameters: ["userId"]
+
+      createUser:
+        method: "POST"
+        path: "/users"
+        contentType: "application/json"
+
+    parameterNames:
+      - "userId"
+```
+
+#### API Key Authentication
+Simple and widely used authentication method.
+
+```yaml
+dataSources:
+  - name: "payment-service"
+    type: "rest-api"
+    connection:
+      baseUrl: "https://payments.example.com"
+
+    authentication:
+      type: "api-key"
+      apiKey: "${PAYMENT_API_KEY}"
+      apiKeyHeader: "X-API-Key"
+
+    endpoints:
+      validatePayment:
+        method: "POST"
+        path: "/validate"
+        contentType: "application/json"
+
+      processPayment:
+        method: "POST"
+        path: "/process"
+        contentType: "application/json"
+```
+
+#### Basic Authentication
+Username/password authentication for legacy systems.
+
+```yaml
+dataSources:
+  - name: "legacy-system"
+    type: "rest-api"
+    connection:
+      baseUrl: "https://legacy.example.com"
+
+    authentication:
+      type: "basic"
+      username: "${LEGACY_USERNAME}"
+      password: "${LEGACY_PASSWORD}"
+
+    endpoints:
+      getCustomerData:
+        method: "GET"
+        path: "/customers/{customerId}"
+        parameters: ["customerId"]
+```
+
+#### OAuth2 Authentication
+Full OAuth2 flow support for secure integrations.
+
+```yaml
+dataSources:
+  - name: "oauth-service"
+    type: "rest-api"
+    connection:
+      baseUrl: "https://secure-api.example.com"
+
+    authentication:
+      type: "oauth2"
+      clientId: "${OAUTH_CLIENT_ID}"
+      clientSecret: "${OAUTH_CLIENT_SECRET}"
+      tokenUrl: "https://auth.example.com/oauth/token"
+      scope: "read write"
+      grantType: "client_credentials"
+
+      # Token refresh configuration
+      autoRefresh: true
+      refreshThresholdSeconds: 300
+
+    endpoints:
+      getSecureData:
+        method: "GET"
+        path: "/secure/data/{id}"
+        parameters: ["id"]
+```
+
+### HTTP Methods and Endpoints
+
+APEX supports all standard HTTP methods:
+
+#### GET Requests - Retrieving Data
+
+```yaml
+endpoints:
+  getUserProfile:
+    method: "GET"
+    path: "/users/{userId}"
+    parameters: ["userId"]
+    responseMapping:
+      jsonPath: "$.data"  # Extract data from response
+
+  searchUsers:
+    method: "GET"
+    path: "/users/search"
+    queryParameters:
+      - name: "query"
+        required: true
+      - name: "limit"
+        required: false
+        defaultValue: "10"
+```
+
+#### POST Requests - Sending Data
+
+```yaml
+endpoints:
+  createUser:
+    method: "POST"
+    path: "/users"
+    contentType: "application/json"
+    requestTemplate: |
+      {
+        "username": "{{username}}",
+        "email": "{{email}}",
+        "profile": {
+          "firstName": "{{firstName}}",
+          "lastName": "{{lastName}}"
+        }
+      }
+
+  validateTransaction:
+    method: "POST"
+    path: "/transactions/validate"
+    contentType: "application/json"
+    requestMapping:
+      - source: "transactionId"
+        target: "id"
+      - source: "amount"
+        target: "value"
+      - source: "currency"
+        target: "currencyCode"
+```
+
+#### PUT and PATCH Requests - Updating Data
+
+```yaml
+endpoints:
+  updateUser:
+    method: "PUT"
+    path: "/users/{userId}"
+    parameters: ["userId"]
+    contentType: "application/json"
+
+  partialUpdateUser:
+    method: "PATCH"
+    path: "/users/{userId}"
+    parameters: ["userId"]
+    contentType: "application/json"
+```
+
+### Enterprise Features
+
+#### Circuit Breakers
+Protect your system when external APIs fail:
+
+```yaml
+dataSources:
+  - name: "external-api"
+    type: "rest-api"
+    connection:
+      baseUrl: "https://api.example.com"
+
+    circuitBreaker:
+      enabled: true
+      failureThreshold: 5      # Open circuit after 5 failures
+      recoveryTimeout: 30000   # Try again after 30 seconds
+      halfOpenMaxCalls: 3      # Test with 3 calls when recovering
+
+    healthCheck:
+      enabled: true
+      endpoint: "/health"
+      intervalSeconds: 60
+      timeoutSeconds: 10
+```
+
+#### Retry Logic
+Automatically retry failed requests with exponential backoff:
+
+```yaml
+connection:
+  retryAttempts: 3
+  retryDelay: 1000         # Start with 1 second
+  retryMultiplier: 2.0     # Double the delay each time
+  maxRetryDelay: 30000     # Cap at 30 seconds
+  retryOnStatus: [500, 502, 503, 504]  # Retry on these HTTP status codes
+```
+
+#### Response Caching
+Cache API responses to improve performance:
+
+```yaml
+cache:
+  enabled: true
+  ttlSeconds: 300          # Cache for 5 minutes
+  maxSize: 1000           # Store up to 1000 responses
+  keyPrefix: "api-cache"
+
+  # Cache based on request parameters
+  cacheKeyFields: ["userId", "dataType"]
+```
+
+#### JSON Response Processing
+Extract specific data from JSON responses:
+
+```yaml
+endpoints:
+  getUserData:
+    method: "GET"
+    path: "/users/{userId}"
+    responseMapping:
+      jsonPath: "$.data.user"     # Extract user object from nested response
+      fieldMappings:
+        - source: "id"
+          target: "userId"
+        - source: "profile.name"
+          target: "userName"
+        - source: "profile.email"
+          target: "userEmail"
+```
+
+### Complete REST API Example
+
+Here's a comprehensive example showing REST API integration:
+
+```yaml
+# Complete REST API configuration
+metadata:
+  name: "Customer Service API Integration"
+  version: "1.0.0"
+  type: "rule-config"
+
+dataSources:
+  - name: "customer-api"
+    type: "rest-api"
+    description: "Customer management API"
+    enabled: true
+
+    connection:
+      baseUrl: "https://customers.example.com/api/v1"
+      timeout: 30000
+      connectTimeout: 10000
+      readTimeout: 25000
+
+      # Custom headers for all requests
+      headers:
+        User-Agent: "APEX-Rules-Engine/1.0"
+        Accept: "application/json"
+
+    authentication:
+      type: "bearer"
+      token: "${CUSTOMER_API_TOKEN}"
+      autoRefresh: true
+      refreshThresholdSeconds: 300
+
+    # Circuit breaker configuration
+    circuitBreaker:
+      enabled: true
+      failureThreshold: 5
+      recoveryTimeout: 60000
+      halfOpenMaxCalls: 3
+
+    # Retry configuration
+    retry:
+      enabled: true
+      maxAttempts: 3
+      initialDelay: 1000
+      multiplier: 2.0
+      maxDelay: 10000
+      retryOnStatus: [429, 500, 502, 503, 504]
+
+    # Response caching
+    cache:
+      enabled: true
+      ttlSeconds: 600
+      maxSize: 5000
+      keyPrefix: "customer-api"
+
+    # Health monitoring
+    healthCheck:
+      enabled: true
+      endpoint: "/health"
+      intervalSeconds: 30
+      timeoutSeconds: 5
+      expectedStatus: 200
+
+    endpoints:
+      # Get customer profile
+      getCustomerProfile:
+        method: "GET"
+        path: "/customers/{customerId}"
+        parameters: ["customerId"]
+        responseMapping:
+          jsonPath: "$.data"
+          fieldMappings:
+            - source: "id"
+              target: "customerId"
+            - source: "profile.name"
+              target: "customerName"
+            - source: "profile.tier"
+              target: "customerTier"
+            - source: "limits.credit"
+              target: "creditLimit"
+
+      # Validate customer transaction
+      validateTransaction:
+        method: "POST"
+        path: "/customers/{customerId}/transactions/validate"
+        parameters: ["customerId"]
+        contentType: "application/json"
+        requestTemplate: |
+          {
+            "transactionId": "{{transactionId}}",
+            "amount": {{amount}},
+            "currency": "{{currency}}",
+            "type": "{{transactionType}}"
+          }
+        responseMapping:
+          jsonPath: "$.validation"
+          fieldMappings:
+            - source: "isValid"
+              target: "transactionValid"
+            - source: "riskScore"
+              target: "riskScore"
+            - source: "approvalRequired"
+              target: "requiresApproval"
+
+    parameterNames:
+      - "customerId"
+      - "transactionId"
+      - "amount"
+      - "currency"
+      - "transactionType"
+
+# Use the API in enrichments
+enrichments:
+  - id: "customer-profile-enrichment"
+    type: "external-lookup-enrichment"
+    condition: "#transaction.customerId != null"
+    dataSource: "customer-api"
+    operation: "getCustomerProfile"
+    parameters:
+      customerId: "#transaction.customerId"
+
+  - id: "transaction-validation-enrichment"
+    type: "external-lookup-enrichment"
+    condition: "#transaction.customerId != null && #transaction.amount != null"
+    dataSource: "customer-api"
+    operation: "validateTransaction"
+    parameters:
+      customerId: "#transaction.customerId"
+      transactionId: "#transaction.id"
+      amount: "#transaction.amount"
+      currency: "#transaction.currency"
+      transactionType: "#transaction.type"
+
+# Use enriched data in rules
+rules:
+  - id: "customer-exists"
+    name: "Customer Must Exist"
+    condition: "#customerName != null"
+    message: "Customer found: {{#customerName}} ({{#customerTier}})"
+    severity: "ERROR"
+
+  - id: "transaction-valid"
+    name: "Transaction Must Be Valid"
+    condition: "#transactionValid == true"
+    message: "Transaction validation passed (Risk Score: {{#riskScore}})"
+    severity: "ERROR"
+
+  - id: "approval-check"
+    name: "Check Approval Requirement"
+    condition: "#requiresApproval == true"
+    message: "Transaction requires approval due to risk assessment"
+    severity: "WARNING"
+```
+
+### Best Practices for REST API Integration
+
+1. **Use Environment Variables**: Keep API keys and tokens secure
+2. **Enable Circuit Breakers**: Protect against cascading failures
+3. **Configure Retries**: Handle transient network issues
+4. **Cache Responses**: Improve performance and reduce API calls
+5. **Monitor Health**: Use health checks to detect API issues
+6. **Handle Errors Gracefully**: Provide fallback behavior when APIs fail
+7. **Use Appropriate Timeouts**: Balance responsiveness with reliability
+8. **Log API Calls**: Maintain audit trails for debugging and compliance
+
+## 19. File System Data Sources
+
+### Overview
+
+File system data sources allow APEX to process data from files on your local system or network drives. This is particularly useful for batch processing, legacy system integration, and scenarios where data is provided as files rather than through APIs or databases.
+
+### Supported File Formats
+
+#### CSV Files
+Process comma-separated value files with configurable delimiters and headers.
+
+```yaml
+dataSources:
+  - name: "customer-csv"
+    type: "file-system"
+    sourceType: "csv"
+
+    connection:
+      filePath: "/data/customers.csv"
+      # Or use pattern matching
+      # filePattern: "/data/customers-*.csv"
+
+    fileFormat:
+      delimiter: ","
+      hasHeader: true
+      encoding: "UTF-8"
+      skipLines: 0
+
+      # Column definitions
+      columns:
+        - name: "customerId"
+          type: "string"
+          index: 0
+        - name: "customerName"
+          type: "string"
+          index: 1
+        - name: "creditLimit"
+          type: "decimal"
+          index: 2
+        - name: "status"
+          type: "string"
+          index: 3
+
+    # File monitoring
+    fileWatcher:
+      enabled: true
+      pollInterval: 30000  # Check every 30 seconds
+
+    cache:
+      enabled: true
+      ttlSeconds: 1800
+      reloadOnFileChange: true
+
+    queries:
+      getCustomerById: "customerId"
+      getActiveCustomers: "status = 'ACTIVE'"
+```
+
+#### JSON Files
+Process JSON files with JSONPath extraction capabilities.
+
+```yaml
+dataSources:
+  - name: "product-json"
+    type: "file-system"
+    sourceType: "json"
+
+    connection:
+      filePath: "/data/products.json"
+
+    fileFormat:
+      encoding: "UTF-8"
+      rootPath: "$.products[*]"  # JSONPath to array of products
+
+      # Field mappings from JSON
+      fieldMappings:
+        - jsonPath: "$.id"
+          fieldName: "productId"
+          fieldType: "string"
+        - jsonPath: "$.name"
+          fieldName: "productName"
+          fieldType: "string"
+        - jsonPath: "$.price.amount"
+          fieldName: "price"
+          fieldType: "decimal"
+        - jsonPath: "$.price.currency"
+          fieldName: "currency"
+          fieldType: "string"
+        - jsonPath: "$.inventory.available"
+          fieldName: "inStock"
+          fieldType: "boolean"
+
+    queries:
+      getProductById: "productId"
+      getAvailableProducts: "inStock = true"
+```
+
+#### XML Files
+Process XML files with XPath queries and namespace support.
+
+```yaml
+dataSources:
+  - name: "orders-xml"
+    type: "file-system"
+    sourceType: "xml"
+
+    connection:
+      filePath: "/data/orders.xml"
+
+    fileFormat:
+      encoding: "UTF-8"
+      rootXPath: "//order"  # XPath to order elements
+
+      # Namespace definitions
+      namespaces:
+        ord: "http://example.com/orders"
+        cust: "http://example.com/customers"
+
+      # Field mappings from XML
+      fieldMappings:
+        - xpath: "@id"
+          fieldName: "orderId"
+          fieldType: "string"
+        - xpath: "ord:customer/@id"
+          fieldName: "customerId"
+          fieldType: "string"
+        - xpath: "ord:amount/text()"
+          fieldName: "amount"
+          fieldType: "decimal"
+        - xpath: "ord:status/text()"
+          fieldName: "status"
+          fieldType: "string"
+
+    queries:
+      getOrderById: "orderId"
+      getOrdersByStatus: "status"
+```
+
+#### Fixed-Width Files
+Process legacy mainframe-style fixed-width files.
+
+```yaml
+dataSources:
+  - name: "mainframe-data"
+    type: "file-system"
+    sourceType: "fixed-width"
+
+    connection:
+      filePath: "/data/mainframe-export.txt"
+
+    fileFormat:
+      encoding: "UTF-8"
+      recordLength: 120
+
+      # Field definitions with positions
+      fields:
+        - name: "accountNumber"
+          startPosition: 1
+          length: 12
+          type: "string"
+          trim: true
+        - name: "customerName"
+          startPosition: 13
+          length: 30
+          type: "string"
+          trim: true
+        - name: "balance"
+          startPosition: 43
+          length: 15
+          type: "decimal"
+          decimalPlaces: 2
+        - name: "status"
+          startPosition: 58
+          length: 1
+          type: "string"
+
+    queries:
+      getAccountByNumber: "accountNumber"
+      getActiveAccounts: "status = 'A'"
+```
+
+### File Monitoring and Processing
+
+#### Automatic File Watching
+Monitor files for changes and automatically reload data:
+
+```yaml
+fileWatcher:
+  enabled: true
+  pollInterval: 30000      # Check every 30 seconds
+  watchDirectory: true     # Watch entire directory
+  filePattern: "*.csv"     # Only watch CSV files
+
+  # Actions on file change
+  onFileChange:
+    - action: "reload-cache"
+    - action: "notify"
+      webhook: "https://monitoring.example.com/file-changed"
+```
+
+#### Batch Processing
+Handle large files efficiently:
+
+```yaml
+batchProcessing:
+  enabled: true
+  batchSize: 1000         # Process 1000 records at a time
+  maxMemoryUsage: "512MB" # Limit memory usage
+
+  # Error handling
+  errorHandling:
+    skipMalformedRecords: true
+    maxErrors: 100
+    errorLogFile: "/logs/file-processing-errors.log"
+```
+
+### Advanced File Processing Features
+
+#### Multi-File Processing
+Process multiple files as a single data source:
+
+```yaml
+dataSources:
+  - name: "daily-transactions"
+    type: "file-system"
+    sourceType: "csv"
+
+    connection:
+      # Process all CSV files matching pattern
+      filePattern: "/data/transactions/daily-*.csv"
+      sortOrder: "filename"  # Process in filename order
+
+    fileFormat:
+      delimiter: ","
+      hasHeader: true
+
+      # Merge strategy for multiple files
+      mergeStrategy: "append"  # or "replace", "merge"
+
+    # File archiving after processing
+    archiving:
+      enabled: true
+      archiveDirectory: "/data/processed"
+      deleteOriginal: false
+```
+
+#### Data Transformation
+Transform data during file processing:
+
+```yaml
+dataTransformation:
+  enabled: true
+
+  # Field transformations
+  transformations:
+    - field: "customerName"
+      operation: "uppercase"
+    - field: "email"
+      operation: "lowercase"
+    - field: "phone"
+      operation: "regex-replace"
+      pattern: "[^0-9]"
+      replacement: ""
+    - field: "amount"
+      operation: "multiply"
+      factor: 100  # Convert dollars to cents
+
+  # Data validation
+  validation:
+    - field: "email"
+      rule: "matches"
+      pattern: "^[A-Za-z0-9+_.-]+@(.+)$"
+    - field: "amount"
+      rule: "range"
+      min: 0
+      max: 1000000
+```
+
+## 20. Cache Data Sources
+
+### Overview
+
+Cache data sources provide high-speed in-memory storage for frequently accessed data. They're perfect for storing lookup data, calculation results, and any information where speed is more important than absolute freshness.
+
+### In-Memory Caching
+
+#### Basic Cache Configuration
+
+```yaml
+dataSources:
+  - name: "lookup-cache"
+    type: "cache"
+    sourceType: "in-memory"
+
+    cache:
+      maxSize: 10000
+      ttlSeconds: 3600        # 1 hour expiration
+      evictionPolicy: "LRU"   # Least Recently Used
+
+      # Statistics collection
+      statisticsEnabled: true
+
+    operations:
+      put: "put"
+      get: "get"
+      getAll: "getAll"
+      remove: "remove"
+      clear: "clear"
+      keys: "keys"
+
+    parameterNames:
+      - "key"
+      - "value"
+      - "pattern"
+```
+
+#### Advanced Cache Features
+
+```yaml
+dataSources:
+  - name: "advanced-cache"
+    type: "cache"
+    sourceType: "in-memory"
+
+    cache:
+      maxSize: 50000
+      ttlSeconds: 1800
+      maxIdleSeconds: 900     # Remove if not accessed for 15 minutes
+      evictionPolicy: "LRU"
+
+      # Preloading
+      preloadEnabled: true
+      preloadSource: "database-lookup"
+      preloadQuery: "getAllActiveRecords"
+
+      # Refresh ahead
+      refreshAhead: true
+      refreshAheadFactor: 75  # Refresh when 75% of TTL elapsed
+
+      # Compression
+      compressionEnabled: true
+      compressionThreshold: 1024  # Compress values > 1KB
+
+      # Serialization
+      serializationFormat: "json"  # or "binary", "xml"
+
+    # Cache warming strategies
+    warmupStrategies:
+      - name: "currency-warmup"
+        source: "currency-database"
+        query: "getAllActiveCurrencies"
+        schedule: "0 0 6 * * ?"  # Daily at 6 AM
+
+      - name: "customer-warmup"
+        source: "customer-api"
+        operation: "getFrequentCustomers"
+        schedule: "0 */4 * * * ?"  # Every 4 hours
+```
+
+### Cache Operations
+
+#### Basic Operations
+
+```java
+// Store data in cache
+Map<String, Object> params = Map.of(
+    "key", "user:123",
+    "value", userData
+);
+cacheSource.query("put", params);
+
+// Retrieve data from cache
+Map<String, Object> getParams = Map.of("key", "user:123");
+Object cachedData = cacheSource.queryForObject("get", getParams);
+
+// Check if data exists
+boolean exists = cacheSource.queryForObject("exists", getParams) != null;
+```
+
+#### Pattern-Based Operations
+
+```java
+// Find all keys matching pattern
+Map<String, Object> patternParams = Map.of("pattern", "user:*");
+List<Object> userKeys = cacheSource.query("keys", patternParams);
+
+// Get multiple values at once
+Map<String, Object> batchParams = Map.of(
+    "keys", List.of("user:1", "user:2", "user:3")
+);
+Map<String, Object> batchResults =
+    (Map<String, Object>) cacheSource.queryForObject("getAll", batchParams);
+
+// Remove multiple keys
+Map<String, Object> removeParams = Map.of(
+    "keys", List.of("user:1", "user:2")
+);
+cacheSource.query("removeAll", removeParams);
+```
+
+### Cache Integration with Other Data Sources
+
+#### Cache-Aside Pattern
+
+```yaml
+enrichments:
+  - id: "cached-customer-lookup"
+    type: "multi-source-enrichment"
+    condition: "#transaction.customerId != null"
+
+    # Try cache first
+    primarySource:
+      dataSource: "customer-cache"
+      operation: "get"
+      parameters:
+        key: "customer:#{#transaction.customerId}"
+
+    # Fallback to database if cache miss
+    fallbackSource:
+      dataSource: "customer-database"
+      operation: "getCustomerById"
+      parameters:
+        id: "#transaction.customerId"
+
+      # Store result in cache for next time
+      cacheResult:
+        dataSource: "customer-cache"
+        operation: "put"
+        parameters:
+          key: "customer:#{#transaction.customerId}"
+          value: "#result"
+          ttl: 1800
+```
+
+#### Write-Through Cache
+
+```yaml
+enrichments:
+  - id: "write-through-update"
+    type: "multi-source-enrichment"
+    condition: "#updateCustomer != null"
+
+    # Update database first
+    primarySource:
+      dataSource: "customer-database"
+      operation: "updateCustomer"
+      parameters:
+        id: "#updateCustomer.id"
+        data: "#updateCustomer"
+
+    # Then update cache
+    secondarySource:
+      dataSource: "customer-cache"
+      operation: "put"
+      parameters:
+        key: "customer:#{#updateCustomer.id}"
+        value: "#updateCustomer"
+```
+
+### Cache Monitoring and Management
+
+#### Performance Metrics
+
+```java
+// Get cache statistics
+CacheMetrics metrics = cacheSource.getMetrics();
+
+System.out.println("Hit ratio: " + metrics.getHitRatio());
+System.out.println("Miss count: " + metrics.getMissCount());
+System.out.println("Eviction count: " + metrics.getEvictionCount());
+System.out.println("Average load time: " + metrics.getAverageLoadTime());
+```
+
+#### Cache Management Operations
+
+```yaml
+# Cache management endpoints
+management:
+  endpoints:
+    - name: "cache-stats"
+      operation: "getStatistics"
+
+    - name: "cache-clear"
+      operation: "clear"
+
+    - name: "cache-warmup"
+      operation: "warmup"
+      parameters:
+        source: "primary-database"
+
+    - name: "cache-evict-pattern"
+      operation: "evictPattern"
+      parameters:
+        pattern: "user:*"
+```
+
+### Best Practices for Cache Data Sources
+
+1. **Choose Appropriate TTL**: Balance data freshness with performance
+2. **Monitor Hit Ratios**: Aim for >80% hit ratio for effective caching
+3. **Use Appropriate Eviction Policies**: LRU for general use, LFU for stable access patterns
+4. **Implement Cache Warming**: Preload frequently accessed data
+5. **Handle Cache Failures Gracefully**: Always have fallback to primary data source
+6. **Monitor Memory Usage**: Prevent out-of-memory issues with size limits
+7. **Use Compression**: For large cached values to save memory
+8. **Implement Cache Invalidation**: Remove stale data when source data changes
+
+## 21. Financial Services Data Patterns
 
 ### Overview
 
@@ -8532,7 +9940,7 @@ metadata:
 
 ---
 
-## 17. Performance and Optimization
+## 22. Performance and Optimization
 
 ### Overview
 
@@ -9069,7 +10477,7 @@ public class CapacityPlanningService {
 
 ---
 
-## 18. Enterprise Data Architecture
+## 23. Enterprise Data Architecture
 
 ### Overview
 
@@ -9665,7 +11073,7 @@ public class DataEncryptionService {
 
 ---
 
-## 19. Complete Examples and Use Cases
+## 24. Complete Examples and Use Cases
 
 ### Overview
 
@@ -10291,7 +11699,7 @@ class OTCDerivativesProcessingIntegrationTest {
 
 ---
 
-## 20. Best Practices and Patterns
+## 25. Best Practices and Patterns
 
 ### Overview
 
@@ -10703,7 +12111,7 @@ public class GracefulDegradationService {
 
 ---
 
-## 21. Troubleshooting Common Issues
+## 26. Troubleshooting Common Issues
 
 ### Overview
 

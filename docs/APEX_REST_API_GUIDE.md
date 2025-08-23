@@ -1,51 +1,90 @@
-# APEX Rules Engine REST API Guide
+# APEX Rules Engine REST API - Complete Guide
 
 **Version:** 1.0
-**Date:** 2025-08-02
+**Date:** 2025-08-23
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
+
+A comprehensive REST API for APEX (Advanced Processing Engine for eXpressions) with YAML Dataset Enrichment functionality.
 
 ## Table of Contents
 
-1. [Overview](#overview)
-2. [Getting Started](#getting-started)
-3. [Authentication & Security](#authentication--security)
-4. [API Endpoints](#api-endpoints)
-   - [Transformation API](#transformation-api)
-   - [Enrichment API](#enrichment-api)
-   - [Template Processing API](#template-processing-api)
-   - [Data Source Management API](#data-source-management-api)
-   - [Expression Evaluation API](#expression-evaluation-api)
-   - [Rules Execution API](#rules-execution-api)
-5. [Error Handling](#error-handling)
-6. [Best Practices](#best-practices)
-7. [Examples & Workflows](#examples--workflows)
+**Part 1: Getting Started**
+1. [Overview](#1-overview)
+2. [Quick Start](#2-quick-start)
+3. [Your First API Call](#3-your-first-api-call)
+4. [Understanding Responses](#4-understanding-responses)
 
-## Overview
+**Part 2: Core API Concepts**
+5. [Base URL and Content Types](#5-base-url-and-content-types)
+6. [Request/Response Models](#6-requestresponse-models)
+7. [HTTP Status Codes](#7-http-status-codes)
+8. [Error Handling](#8-error-handling)
 
-The APEX Rules Engine REST API provides comprehensive endpoints for:
+**Part 3: API Endpoints by Complexity**
+9. [Simple Operations - Rules API](#9-simple-operations---rules-api)
+10. [Expression Evaluation API](#10-expression-evaluation-api)
+11. [Data Transformation API](#11-data-transformation-api)
+12. [Object Enrichment API](#12-object-enrichment-api)
+13. [Template Processing API](#13-template-processing-api)
+14. [Data Source Management API](#14-data-source-management-api)
 
-- **Data Transformation** - Transform and normalize data using configurable rules
-- **Object Enrichment** - Enrich objects with additional data from external sources
-- **Template Processing** - Process JSON, XML, and text templates with SpEL expressions
-- **Data Source Management** - Manage and interact with external data sources
-- **Expression Evaluation** - Evaluate Spring Expression Language (SpEL) expressions
-- **Rules Execution** - Execute business rules individually or in batches
+**Part 4: Advanced Features**
+15. [Batch Operations](#15-batch-operations)
+16. [SpEL Expression Reference](#16-spel-expression-reference)
+17. [Authentication & Security](#17-authentication--security)
+18. [Performance & Optimization](#18-performance--optimization)
 
-### Base URL
+**Part 5: Real-World Usage**
+19. [Bootstrap Demo Integration](#19-bootstrap-demo-integration)
+20. [Complete Workflows & Examples](#20-complete-workflows--examples)
+21. [Configuration & Deployment](#21-configuration--deployment)
+22. [Monitoring & Troubleshooting](#22-monitoring--troubleshooting)
 
-```
-http://localhost:8080/api
-```
+**Part 6: Reference**
+23. [Best Practices](#23-best-practices)
+24. [Testing & Development](#24-testing--development)
+25. [Support & Resources](#25-support--resources)
 
-### Content Type
+## 1. Overview
 
-All API endpoints accept and return JSON unless otherwise specified:
+The APEX Rules Engine REST API provides a complete interface for APEX, enabling rule evaluation, validation, configuration management, and system monitoring through HTTP endpoints. The API is built with Spring Boot and includes OpenAPI/Swagger documentation.
 
-```
-Content-Type: application/json
-```
+### What You Can Do with the API
 
-## Getting Started
+The APEX REST API provides comprehensive endpoints for:
+
+- **Rule Evaluation**: Simple rule checking and complex validation scenarios
+- **Expression Evaluation**: SpEL expression processing with context management
+- **Data Transformation**: Transform and normalize data using configurable rules
+- **Object Enrichment**: Enrich objects with data from external sources and datasets
+- **Template Processing**: Generate dynamic content using templates with SpEL expressions
+- **Data Source Management**: Manage and interact with external data sources
+- **Configuration Management**: Load and manage YAML configurations via API
+- **Performance Monitoring**: System health checks and performance metrics
+
+### Key Features
+
+- **OpenAPI Documentation**: Interactive API documentation with Swagger UI
+- **Spring Boot Actuator**: Production-ready monitoring and management endpoints
+- **Comprehensive Error Handling**: Detailed error responses and validation
+- **Named Rules Management**: Define and reuse named rules
+- **Bootstrap Integration**: Complete integration with APEX bootstrap demonstrations
+- **Batch Operations**: Process multiple items efficiently
+- **Performance Metrics**: Built-in performance monitoring and optimization
+
+### Learning Path
+
+This guide is structured to provide a gradual learning curve:
+
+1. **Start Simple**: Begin with basic rule evaluation
+2. **Build Understanding**: Learn request/response patterns
+3. **Add Complexity**: Progress to transformations and enrichments
+4. **Master Advanced Features**: Batch operations, authentication, optimization
+5. **Real-World Usage**: Complete workflows and production deployment
+
+Let's start with your first API call!
+
+## 2. Quick Start
 
 ### Prerequisites
 
@@ -53,19 +92,878 @@ Content-Type: application/json
 - Spring Boot 3.x
 - APEX Rules Engine Core modules
 
-### Quick Start
+### Build and Run
 
-1. Start the APEX REST API application:
 ```bash
-mvn spring-boot:run -pl apex-rest-api
+# Build the project
+mvn clean package
+
+# Run the application
+java -jar target/apex-rest-api-1.0-SNAPSHOT.jar
+
+# Or run with Maven
+mvn spring-boot:run
 ```
 
-2. Access the Swagger UI documentation:
-```
-http://localhost:8080/swagger-ui.html
+### Access the API
+
+Once running, you can access:
+
+- **API Base URL**: http://localhost:8080/api/
+- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **API Documentation**: http://localhost:8080/api-docs
+- **Health Check**: http://localhost:8080/actuator/health
+
+### Verify Everything is Working
+
+Test the health endpoint to make sure the API is running:
+
+```bash
+curl http://localhost:8080/actuator/health
 ```
 
-3. Test a simple expression evaluation:
+You should see a response like:
+```json
+{
+  "status": "UP"
+}
+```
+
+Great! Now you're ready for your first real API call.
+
+## 3. Your First API Call
+
+Let's start with the simplest possible API call - checking if a rule condition is true.
+
+### Simple Rule Check
+
+This is the most basic operation - checking if a condition is met:
+
+```bash
+curl -X POST http://localhost:8080/api/rules/check \
+  -H "Content-Type: application/json" \
+  -d '{
+    "condition": "#age >= 18",
+    "data": {"age": 25},
+    "ruleName": "age-check",
+    "message": "User is an adult"
+  }'
+```
+
+### Understanding the Request
+
+Let's break down what we just sent:
+
+- **condition**: `"#age >= 18"` - A SpEL expression that checks if age is 18 or older
+- **data**: `{"age": 25}` - The data context containing the age value
+- **ruleName**: `"age-check"` - A friendly name for this rule
+- **message**: `"User is an adult"` - A message to return when the rule matches
+
+### Understanding the Response
+
+You should get a response like this:
+
+```json
+{
+  "success": true,
+  "matched": true,
+  "ruleName": "age-check",
+  "message": "User is an adult",
+  "timestamp": "2025-08-23T10:30:00Z",
+  "evaluationId": "uuid-here"
+}
+```
+
+**What each field means:**
+- **success**: `true` - The API call was successful
+- **matched**: `true` - The rule condition was met (age 25 is >= 18)
+- **ruleName**: The name we gave the rule
+- **message**: The message we specified
+- **timestamp**: When the evaluation happened
+- **evaluationId**: A unique ID for this evaluation (useful for debugging)
+
+### Try Different Values
+
+Now try changing the age to see what happens:
+
+```bash
+curl -X POST http://localhost:8080/api/rules/check \
+  -H "Content-Type: application/json" \
+  -d '{
+    "condition": "#age >= 18",
+    "data": {"age": 16},
+    "ruleName": "age-check",
+    "message": "User is an adult"
+  }'
+```
+
+This time you'll get `"matched": false` because 16 is not >= 18.
+
+Congratulations! You've made your first successful API call. Let's learn more about how responses work.
+
+## 4. Understanding Responses
+
+All APEX API responses follow consistent patterns. Understanding these patterns will help you work with any endpoint.
+
+### Standard Success Response
+
+Every successful API call returns a response with this basic structure:
+
+```json
+{
+  "success": true,
+  "data": { /* response data */ },
+  "timestamp": "2025-08-23T10:30:00Z"
+}
+```
+
+### Detailed Success Response (with metrics)
+
+When you include `"includeMetrics": true` in your request, you get additional performance information:
+
+```json
+{
+  "success": true,
+  "data": { /* response data */ },
+  "timestamp": "2025-08-23T10:30:00Z",
+  "metrics": {
+    "executionTimeMs": 45,
+    "memoryUsedBytes": 1024,
+    "rulesEvaluated": 3
+  }
+}
+```
+
+### Error Response
+
+When something goes wrong, you'll get a response like this:
+
+```json
+{
+  "success": false,
+  "error": "VALIDATION_ERROR",
+  "message": "Detailed error description",
+  "details": {
+    "field": "condition",
+    "rejectedValue": "invalid expression",
+    "reason": "SpEL syntax error"
+  },
+  "correlationId": "abc123-def456",
+  "timestamp": "2025-08-23T10:30:00Z"
+}
+```
+
+**Key points about error responses:**
+- **success**: Always `false` for errors
+- **error**: A category code (like `VALIDATION_ERROR`, `EXPRESSION_ERROR`)
+- **message**: Human-readable description of what went wrong
+- **details**: Specific information about the error
+- **correlationId**: Unique ID for tracking this error
+
+### Response Patterns to Remember
+
+1. **Always check `success` first** - This tells you if the call worked
+2. **Look for `data`** - This contains the actual results
+3. **Use `timestamp`** - Helpful for debugging and logging
+4. **Include metrics when optimizing** - Add `"includeMetrics": true` to requests
+
+Now that you understand responses, let's learn about the different types of requests you can make.
+
+## 5. Base URL and Content Types
+
+### Base URL
+
+All API endpoints use this base URL:
+
+```
+http://localhost:8080/api
+```
+
+### Content Type
+
+All endpoints accept and return JSON:
+
+```
+Content-Type: application/json
+Accept: application/json
+```
+
+### Example Request Headers
+
+```bash
+curl -X POST http://localhost:8080/api/rules/check \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{"condition": "#value > 0", "data": {"value": 10}}'
+```
+
+## 6. Request/Response Models
+
+Understanding the data structures used by the API will help you build requests correctly and interpret responses.
+
+### Core Request Models
+
+#### `RuleEvaluationRequest`
+Used for basic rule checking:
+
+```json
+{
+  "condition": "SpEL expression",     // @NotBlank - Required
+  "data": { /* evaluation context */ }, // @NotNull - Required
+  "ruleName": "optional-name",        // Optional friendly name
+  "message": "optional message",      // Optional message for matches
+  "includeMetrics": false            // Optional performance metrics
+}
+```
+
+#### `RuleExecutionRequest`
+Used for more advanced rule execution:
+
+```json
+{
+  "rule": {
+    "name": "rule-name",        // @NotBlank - Required
+    "condition": "SpEL expression", // @NotBlank - Required
+    "message": "optional message",  // Optional
+    "priority": "HIGH|MEDIUM|LOW"   // Optional priority level
+  },
+  "facts": { /* context data */ } // @NotNull - Required
+}
+```
+
+#### `ValidationRequest`
+Used for validating data against multiple rules:
+
+```json
+{
+  "data": { /* data to validate */ }, // @NotNull - Required
+  "rules": [
+    {
+      "name": "validation-rule",      // Rule name
+      "condition": "SpEL expression", // Rule condition
+      "message": "error message",     // Error message
+      "severity": "ERROR|WARNING|INFO" // Severity level
+    }
+  ]
+}
+```
+
+#### `ExpressionEvaluationRequest`
+Used for evaluating SpEL expressions:
+
+```json
+{
+  "expression": "SpEL expression",    // @NotBlank - Required
+  "context": { /* variables */ },    // @NotNull - Required
+  "includeMetrics": false,           // Optional metrics
+  "validateSyntax": true             // Optional syntax validation
+}
+```
+
+### Batch Request Models
+
+#### `BatchRuleExecutionRequest`
+Execute multiple rules with shared context:
+
+```json
+{
+  "rules": [
+    {
+      "name": "rule-name",
+      "condition": "SpEL expression",
+      "message": "optional message"
+    }
+  ],
+  "facts": { /* shared context data */ }
+}
+```
+
+#### `BatchExpressionRequest`
+Evaluate multiple expressions:
+
+```json
+{
+  "expressions": [
+    {
+      "name": "expression-name",
+      "expression": "SpEL expression"
+    }
+  ],
+  "context": { /* shared context variables */ }
+}
+```
+
+### Transformation and Enrichment Models
+
+#### `DynamicTransformationRequest`
+Transform data with dynamic rules:
+
+```json
+{
+  "data": { /* object to transform */ },
+  "transformerRules": [
+    {
+      "name": "rule-name",           // @NotBlank
+      "condition": "SpEL expression", // @NotBlank
+      "transformation": "SpEL expression", // @NotBlank
+      "targetField": "field-name"    // @NotBlank
+    }
+  ]
+}
+```
+
+#### `EnrichmentRequest`
+Enrich objects with YAML configuration:
+
+```json
+{
+  "targetObject": { /* object to enrich */ },
+  "yamlConfiguration": "YAML config string"
+}
+```
+
+#### `BatchEnrichmentRequest`
+Enrich multiple objects:
+
+```json
+{
+  "yamlConfiguration": "YAML config string", // @NotNull
+  "targetObjects": [ /* array of objects */ ] // @NotNull
+}
+```
+
+### Template Processing Models
+
+#### `TemplateProcessingRequest`
+Process templates with SpEL expressions:
+
+```json
+{
+  "template": "template string with #{expressions}", // @NotBlank
+  "context": { /* context variables */ }             // @NotNull
+}
+```
+
+#### `BatchTemplateProcessingRequest`
+Process multiple templates:
+
+```json
+{
+  "templates": [
+    {
+      "name": "template-name",
+      "type": "JSON|XML|TEXT",
+      "template": "template string"
+    }
+  ],
+  "context": { /* shared context variables */ }
+}
+```
+
+### Response Models
+
+#### Rule Execution Response
+```json
+{
+  "success": true,
+  "rule": {
+    "name": "rule-name",
+    "condition": "SpEL expression",
+    "message": "rule message",
+    "priority": "HIGH"
+  },
+  "result": {
+    "triggered": true,
+    "ruleName": "rule-name",
+    "message": "rule message",
+    "resultType": "SUCCESS",
+    "timestamp": "2025-08-23T10:30:00Z"
+  },
+  "timestamp": "2025-08-23T10:30:00Z"
+}
+```
+
+#### Batch Response
+```json
+{
+  "success": true,
+  "results": [
+    { /* individual result 1 */ },
+    { /* individual result 2 */ }
+  ],
+  "summary": {
+    "total": 2,
+    "successful": 2,
+    "failed": 0
+  },
+  "timestamp": "2025-08-23T10:30:00Z"
+}
+```
+
+Now let's look at HTTP status codes and error handling.
+
+## 7. HTTP Status Codes
+
+The API uses standard HTTP status codes to indicate the success or failure of requests.
+
+### Success Codes
+- `200 OK` - Request successful, data returned
+- `201 Created` - Resource created successfully (e.g., rule defined)
+
+### Client Error Codes
+- `400 Bad Request` - Invalid request format or validation error
+- `404 Not Found` - Resource not found (e.g., rule name, transformer)
+- `409 Conflict` - Resource already exists (e.g., rule name conflict)
+- `422 Unprocessable Entity` - Valid request format but business logic error
+
+### Server Error Codes
+- `500 Internal Server Error` - Unexpected server error
+- `503 Service Unavailable` - Service temporarily unavailable
+
+### Error Categories
+
+The API groups errors into categories to help you understand what went wrong:
+
+- `VALIDATION_ERROR` - Request validation failed
+- `RULE_EVALUATION_ERROR` - Error evaluating rule condition
+- `EXPRESSION_ERROR` - SpEL expression syntax or evaluation error
+- `TRANSFORMATION_ERROR` - Data transformation failed
+- `ENRICHMENT_ERROR` - Object enrichment failed
+- `TEMPLATE_ERROR` - Template processing failed
+- `DATA_SOURCE_ERROR` - Data source lookup failed
+- `CONFIGURATION_ERROR` - Configuration parsing error
+
+## 8. Error Handling
+
+Understanding how to handle errors is crucial for building robust applications.
+
+### Standard Error Response Format
+
+All errors follow this format:
+
+```json
+{
+  "success": false,
+  "error": "ERROR_CATEGORY",
+  "message": "Human-readable description",
+  "timestamp": "2025-08-23T10:30:00Z",
+  "correlationId": "unique-id-for-tracking"
+}
+```
+
+### Validation Error Response
+
+When request validation fails, you get additional details:
+
+```json
+{
+  "success": false,
+  "error": "VALIDATION_ERROR",
+  "message": "Request validation failed",
+  "validationErrors": [
+    {
+      "field": "rule.condition",
+      "message": "Condition cannot be blank",
+      "rejectedValue": null
+    }
+  ],
+  "correlationId": "abc123-def456",
+  "timestamp": "2025-08-23T10:30:00Z"
+}
+```
+
+### Common Error Scenarios
+
+#### Expression Syntax Error
+```json
+{
+  "success": false,
+  "error": "EXPRESSION_ERROR",
+  "message": "SpEL syntax error: Unexpected token 'invalid' at position 5",
+  "details": {
+    "expression": "#invalid && syntax >",
+    "position": 5,
+    "token": "invalid"
+  }
+}
+```
+
+#### Rule Evaluation Error
+```json
+{
+  "success": false,
+  "error": "RULE_EVALUATION_ERROR",
+  "message": "Cannot resolve property 'nonExistentField' on object",
+  "details": {
+    "field": "nonExistentField",
+    "availableFields": ["age", "name", "email"]
+  }
+}
+```
+
+#### Resource Not Found
+```json
+{
+  "success": false,
+  "error": "RESOURCE_NOT_FOUND",
+  "message": "No transformer found with name: invalid-transformer",
+  "details": {
+    "resourceType": "transformer",
+    "resourceName": "invalid-transformer"
+  }
+}
+```
+
+### Error Handling Best Practices
+
+1. **Always check the `success` field first**
+2. **Use the `error` category to determine error type**
+3. **Show the `message` to users (it's human-readable)**
+4. **Log the `correlationId` for debugging**
+5. **Use `details` for programmatic error handling**
+
+### Example Error Handling in JavaScript
+
+```javascript
+async function callAPI(endpoint, data) {
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      console.error(`API Error [${result.correlationId}]: ${result.message}`);
+
+      // Handle specific error types
+      switch (result.error) {
+        case 'VALIDATION_ERROR':
+          // Show validation errors to user
+          break;
+        case 'EXPRESSION_ERROR':
+          // Help user fix expression syntax
+          break;
+        default:
+          // Generic error handling
+          break;
+      }
+
+      return null;
+    }
+
+    return result.data;
+  } catch (error) {
+    console.error('Network error:', error);
+    return null;
+  }
+}
+```
+
+Now that you understand the basics, let's explore the API endpoints, starting with the simplest ones.
+
+## 9. Simple Operations - Rules API
+
+The Rules API is the perfect place to start because it handles the most fundamental operations. We'll progress from simple to more complex operations.
+
+### Base Path: `/api/rules`
+
+All rules operations use this base path. Here's what you can do:
+
+| Method | Endpoint | Description | Complexity |
+|--------|----------|-------------|------------|
+| POST | `/check` | Check a single rule condition | ⭐ Beginner |
+| POST | `/validate` | Validate data against multiple rules | ⭐⭐ Intermediate |
+| POST | `/define/{name}` | Define a named rule for reuse | ⭐⭐ Intermediate |
+| POST | `/test/{name}` | Test a previously defined rule | ⭐⭐ Intermediate |
+| GET | `/defined` | Get all defined rules | ⭐ Beginner |
+| POST | `/execute` | Execute single rule with full details | ⭐⭐⭐ Advanced |
+| POST | `/batch` | Execute multiple rules | ⭐⭐⭐ Advanced |
+
+### ⭐ Beginner: Simple Rule Check
+
+You've already seen this in our first example. Let's explore it more:
+
+```bash
+curl -X POST http://localhost:8080/api/rules/check \
+  -H "Content-Type: application/json" \
+  -d '{
+    "condition": "#balance > 1000",
+    "data": {"balance": 1500, "currency": "USD"},
+    "ruleName": "minimum-balance-check",
+    "message": "Account has sufficient balance"
+  }'
+```
+
+**When to use:** Perfect for simple yes/no decisions.
+
+### ⭐ Beginner: Get Defined Rules
+
+See what named rules are available:
+
+```bash
+curl -X GET http://localhost:8080/api/rules/defined
+```
+
+Response:
+```json
+{
+  "success": true,
+  "rules": [
+    {
+      "name": "adult-check",
+      "condition": "#age >= 18",
+      "message": "Customer is an adult"
+    }
+  ],
+  "count": 1,
+  "timestamp": "2025-08-23T10:30:00Z"
+}
+```
+
+### ⭐⭐ Intermediate: Define Named Rules
+
+Create reusable rules that you can reference by name:
+
+```bash
+curl -X POST http://localhost:8080/api/rules/define/high-value-customer \
+  -H "Content-Type: application/json" \
+  -d '{
+    "condition": "#accountBalance > 50000 && #customerTier == '\''GOLD'\''",
+    "message": "High value gold customer identified"
+  }'
+```
+
+**Benefits of named rules:**
+- Reusable across different API calls
+- Centralized rule management
+- Easier to maintain and update
+
+### ⭐⭐ Intermediate: Test Named Rules
+
+Once you've defined a rule, test it with different data:
+
+```bash
+curl -X POST http://localhost:8080/api/rules/test/high-value-customer \
+  -H "Content-Type: application/json" \
+  -d '{
+    "accountBalance": 75000,
+    "customerTier": "GOLD",
+    "customerId": "CUST001"
+  }'
+```
+
+### ⭐⭐ Intermediate: Validate Data Against Multiple Rules
+
+Check data against several rules at once:
+
+```bash
+curl -X POST http://localhost:8080/api/rules/validate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "age": 25,
+      "email": "john@example.com",
+      "balance": 1500,
+      "country": "US"
+    },
+    "rules": [
+      {
+        "name": "age-validation",
+        "condition": "#data.age >= 18",
+        "message": "Age must be at least 18",
+        "severity": "ERROR"
+      },
+      {
+        "name": "email-validation",
+        "condition": "#data.email != null && #data.email.contains('\''@'\'')",
+        "message": "Valid email required",
+        "severity": "ERROR"
+      },
+      {
+        "name": "balance-warning",
+        "condition": "#data.balance < 1000",
+        "message": "Low account balance",
+        "severity": "WARNING"
+      }
+    ]
+  }'
+```
+
+**Response shows all rule results:**
+```json
+{
+  "success": true,
+  "validationResults": [
+    {
+      "ruleName": "age-validation",
+      "passed": true,
+      "message": "Age must be at least 18",
+      "severity": "ERROR"
+    },
+    {
+      "ruleName": "email-validation",
+      "passed": true,
+      "message": "Valid email required",
+      "severity": "ERROR"
+    },
+    {
+      "ruleName": "balance-warning",
+      "passed": true,
+      "message": "Low account balance",
+      "severity": "WARNING"
+    }
+  ],
+  "overallResult": "PASSED",
+  "timestamp": "2025-08-23T10:30:00Z"
+}
+```
+
+### ⭐⭐⭐ Advanced: Execute Single Rule with Full Details
+
+For more complex scenarios, use the execute endpoint:
+
+```bash
+curl -X POST http://localhost:8080/api/rules/execute \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rule": {
+      "name": "high-value-trade",
+      "condition": "#amount > 10000 && #currency == '\''USD'\''",
+      "message": "High value USD trade detected",
+      "priority": "HIGH"
+    },
+    "facts": {
+      "amount": 15000.0,
+      "currency": "USD",
+      "customerId": "CUST001",
+      "tradeType": "EQUITY"
+    }
+  }'
+```
+
+**This gives you more detailed results:**
+```json
+{
+  "success": true,
+  "rule": {
+    "name": "high-value-trade",
+    "condition": "#amount > 10000 && #currency == 'USD'",
+    "message": "High value USD trade detected",
+    "priority": "HIGH"
+  },
+  "result": {
+    "triggered": true,
+    "ruleName": "high-value-trade",
+    "message": "High value USD trade detected",
+    "resultType": "SUCCESS",
+    "timestamp": "2025-08-23T10:30:00Z"
+  },
+  "facts": {
+    "amount": 15000.0,
+    "currency": "USD",
+    "customerId": "CUST001",
+    "tradeType": "EQUITY"
+  },
+  "timestamp": "2025-08-23T10:30:00Z"
+}
+```
+
+### ⭐⭐⭐ Advanced: Batch Rule Execution
+
+Execute multiple rules against the same data:
+
+```bash
+curl -X POST http://localhost:8080/api/rules/batch \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rules": [
+      {
+        "name": "high-value-check",
+        "condition": "#amount > 1000",
+        "message": "High value transaction"
+      },
+      {
+        "name": "gold-tier-check",
+        "condition": "#tier == '\''GOLD'\''",
+        "message": "Gold tier customer"
+      },
+      {
+        "name": "risk-assessment",
+        "condition": "#amount > 10000 && #country != '\''US'\''",
+        "message": "High risk international transaction"
+      }
+    ],
+    "facts": {
+      "amount": 1500,
+      "tier": "GOLD",
+      "country": "US",
+      "customerId": "CUST001"
+    }
+  }'
+```
+
+**Batch responses show results for all rules:**
+```json
+{
+  "success": true,
+  "results": [
+    {
+      "triggered": true,
+      "ruleName": "high-value-check",
+      "message": "High value transaction"
+    },
+    {
+      "triggered": true,
+      "ruleName": "gold-tier-check",
+      "message": "Gold tier customer"
+    },
+    {
+      "triggered": false,
+      "ruleName": "risk-assessment",
+      "message": "High risk international transaction"
+    }
+  ],
+  "summary": {
+    "total": 3,
+    "successful": 3,
+    "triggered": 2,
+    "failed": 0
+  },
+  "timestamp": "2025-08-23T10:30:00Z"
+}
+```
+
+### Rules API Summary
+
+- **Start with `/check`** for simple rule evaluation
+- **Use `/validate`** when you need to check multiple conditions
+- **Define named rules** with `/define/{name}` for reusability
+- **Use `/execute`** when you need detailed rule information
+- **Use `/batch`** for processing multiple rules efficiently
+
+Ready to move on to expression evaluation? That's our next topic!
+
+## 10. Expression Evaluation API
+
+The Expression Evaluation API lets you evaluate SpEL (Spring Expression Language) expressions with context data. This is the foundation that powers rules, transformations, and templates.
+
+### Base Path: `/api/expressions`
+
+| Method | Endpoint | Description | Complexity |
+|--------|----------|-------------|------------|
+| POST | `/evaluate` | Evaluate single expression | ⭐ Beginner |
+| POST | `/evaluate/detailed` | Evaluate with detailed result | ⭐⭐ Intermediate |
+| POST | `/batch` | Evaluate multiple expressions | ⭐⭐⭐ Advanced |
+| POST | `/validate` | Validate expression syntax | ⭐ Beginner |
+| GET | `/functions` | Get available functions | ⭐ Beginner |
+
+### ⭐ Beginner: Simple Expression Evaluation
+
+Start with basic mathematical expressions:
+
 ```bash
 curl -X POST http://localhost:8080/api/expressions/evaluate \
   -H "Content-Type: application/json" \
@@ -79,52 +977,350 @@ curl -X POST http://localhost:8080/api/expressions/evaluate \
   }'
 ```
 
-## Authentication & Security
+**Response:**
+```json
+{
+  "success": true,
+  "expression": "#amount * #rate + #fee",
+  "context": {
+    "amount": 1000,
+    "rate": 0.05,
+    "fee": 25
+  },
+  "result": 75.0,
+  "resultType": "Double",
+  "timestamp": "2025-08-23T10:30:00Z"
+}
+```
 
-Currently, the API operates without authentication for development purposes. For production deployments:
+### ⭐ Beginner: Validate Expression Syntax
 
-- Implement OAuth 2.0 or JWT-based authentication
-- Use HTTPS for all communications
-- Implement rate limiting
-- Validate and sanitize all inputs
+Before using complex expressions, validate them first:
 
-## API Endpoints
+```bash
+curl -X POST http://localhost:8080/api/expressions/validate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "expression": "#customer.tier == '\''GOLD'\'' && #transaction.amount > 1000"
+  }'
+```
 
-### Transformation API
+**Response for valid expression:**
+```json
+{
+  "success": true,
+  "expression": "#customer.tier == 'GOLD' && #transaction.amount > 1000",
+  "valid": true,
+  "message": "Expression syntax is valid",
+  "timestamp": "2025-08-23T10:30:00Z"
+}
+```
 
-Transform data using registered transformers or dynamic rules.
+**Response for invalid expression:**
+```json
+{
+  "success": false,
+  "expression": "#invalid && syntax >",
+  "valid": false,
+  "error": "Unexpected token at position 15",
+  "suggestions": [
+    "Check for missing operators",
+    "Verify parentheses are balanced"
+  ],
+  "timestamp": "2025-08-23T10:30:00Z"
+}
+```
 
-#### Base Path: `/api/transformations`
+### ⭐ Beginner: Get Available Functions
 
-#### Get Registered Transformers
+See what functions you can use in expressions:
 
-```http
-GET /api/transformations/transformers
+```bash
+curl -X GET http://localhost:8080/api/expressions/functions
 ```
 
 **Response:**
 ```json
 {
   "success": true,
-  "transformers": ["customer-normalizer", "address-formatter"],
-  "count": 2,
-  "timestamp": "2024-01-15T10:30:00Z"
+  "functions": {
+    "mathematical": [
+      "abs(number) - Absolute value",
+      "ceil(number) - Ceiling",
+      "floor(number) - Floor",
+      "round(number) - Round to nearest integer",
+      "max(a, b) - Maximum of two values",
+      "min(a, b) - Minimum of two values"
+    ],
+    "string": [
+      "length() - String length",
+      "substring(start, end) - Extract substring",
+      "toLowerCase() - Convert to lowercase",
+      "toUpperCase() - Convert to uppercase",
+      "trim() - Remove whitespace",
+      "contains(substring) - Check if contains",
+      "startsWith(prefix) - Check if starts with",
+      "endsWith(suffix) - Check if ends with"
+    ],
+    "logical": ["&&", "||", "!"],
+    "comparison": ["==", "!=", "<", ">", "<=", ">="],
+    "date": [
+      "T(java.time.LocalDate).now() - Current date",
+      "T(java.time.Instant).now() - Current timestamp"
+    ]
+  },
+  "timestamp": "2025-08-23T10:30:00Z"
 }
 ```
 
-#### Transform Data with Registered Transformer
+### ⭐⭐ Intermediate: Complex Expressions
 
-```http
-POST /api/transformations/{transformerName}
+Try more complex expressions with nested objects:
+
+```bash
+curl -X POST http://localhost:8080/api/expressions/evaluate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "expression": "#customer.tier == '\''GOLD'\'' && #transaction.amount > #customer.limits.daily",
+    "context": {
+      "customer": {
+        "id": "CUST001",
+        "tier": "GOLD",
+        "limits": {
+          "daily": 5000,
+          "monthly": 50000
+        }
+      },
+      "transaction": {
+        "amount": 7500,
+        "currency": "USD"
+      }
+    }
+  }'
 ```
 
-**Request Body:**
+### ⭐⭐ Intermediate: String Operations
+
+Work with text data:
+
+```bash
+curl -X POST http://localhost:8080/api/expressions/evaluate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "expression": "#firstName.substring(0,1).toUpperCase() + #firstName.substring(1).toLowerCase() + '\'' '\'' + #lastName.toUpperCase()",
+    "context": {
+      "firstName": "john",
+      "lastName": "doe"
+    }
+  }'
+```
+
+**Result:** `"John DOE"`
+
+### ⭐⭐ Intermediate: Conditional Logic
+
+Use ternary operators for conditional logic:
+
+```bash
+curl -X POST http://localhost:8080/api/expressions/evaluate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "expression": "#amount > 10000 ? '\''HIGH'\'' : (#amount > 1000 ? '\''MEDIUM'\'' : '\''LOW'\'')",
+    "context": {
+      "amount": 5000
+    }
+  }'
+```
+
+**Result:** `"MEDIUM"`
+
+### ⭐⭐ Intermediate: Detailed Evaluation
+
+Get more information about the evaluation process:
+
+```bash
+curl -X POST http://localhost:8080/api/expressions/evaluate/detailed \
+  -H "Content-Type: application/json" \
+  -d '{
+    "expression": "#amount * #rate + #fee",
+    "context": {
+      "amount": 1000,
+      "rate": 0.05,
+      "fee": 25
+    },
+    "includeMetrics": true
+  }'
+```
+
+**Response includes performance metrics:**
 ```json
 {
-  "firstName": "john",
-  "lastName": "doe",
-  "email": "JOHN.DOE@EXAMPLE.COM"
+  "success": true,
+  "expression": "#amount * #rate + #fee",
+  "result": 75.0,
+  "resultType": "Double",
+  "evaluationSteps": [
+    {"step": 1, "operation": "#amount", "result": 1000},
+    {"step": 2, "operation": "#rate", "result": 0.05},
+    {"step": 3, "operation": "1000 * 0.05", "result": 50.0},
+    {"step": 4, "operation": "#fee", "result": 25},
+    {"step": 5, "operation": "50.0 + 25", "result": 75.0}
+  ],
+  "metrics": {
+    "executionTimeMs": 12,
+    "memoryUsedBytes": 256
+  },
+  "timestamp": "2025-08-23T10:30:00Z"
 }
+```
+
+### ⭐⭐⭐ Advanced: Batch Expression Evaluation
+
+Evaluate multiple expressions with shared context:
+
+```bash
+curl -X POST http://localhost:8080/api/expressions/batch \
+  -H "Content-Type: application/json" \
+  -d '{
+    "expressions": [
+      {
+        "name": "total-calculation",
+        "expression": "#amount * #rate + #fee"
+      },
+      {
+        "name": "age-check",
+        "expression": "#age >= 18"
+      },
+      {
+        "name": "risk-score",
+        "expression": "#amount > 10000 ? 10 : (#amount > 1000 ? 5 : 1)"
+      },
+      {
+        "name": "full-name",
+        "expression": "#firstName + '\'' '\'' + #lastName"
+      }
+    ],
+    "context": {
+      "amount": 1000.0,
+      "rate": 0.05,
+      "fee": 25.0,
+      "age": 25,
+      "firstName": "John",
+      "lastName": "Doe"
+    }
+  }'
+```
+
+**Batch response:**
+```json
+{
+  "success": true,
+  "results": [
+    {
+      "name": "total-calculation",
+      "expression": "#amount * #rate + #fee",
+      "result": 75.0,
+      "resultType": "Double",
+      "success": true
+    },
+    {
+      "name": "age-check",
+      "expression": "#age >= 18",
+      "result": true,
+      "resultType": "Boolean",
+      "success": true
+    },
+    {
+      "name": "risk-score",
+      "expression": "#amount > 10000 ? 10 : (#amount > 1000 ? 5 : 1)",
+      "result": 5,
+      "resultType": "Integer",
+      "success": true
+    },
+    {
+      "name": "full-name",
+      "expression": "#firstName + ' ' + #lastName",
+      "result": "John Doe",
+      "resultType": "String",
+      "success": true
+    }
+  ],
+  "summary": {
+    "total": 4,
+    "successful": 4,
+    "failed": 0
+  },
+  "timestamp": "2025-08-23T10:30:00Z"
+}
+```
+
+### Expression API Tips
+
+1. **Always validate complex expressions first** using `/validate`
+2. **Use meaningful names** in batch operations for easier debugging
+3. **Include metrics** when optimizing performance
+4. **Test with sample data** before using in production
+5. **Check available functions** with `/functions` when building expressions
+
+Next, let's explore data transformation - where expressions really shine!
+
+## 11. Data Transformation API
+
+The Transformation API lets you clean, normalize, and transform data using either pre-registered transformers or dynamic rules. This is perfect for data preparation and normalization.
+
+### Base Path: `/api/transformations`
+
+| Method | Endpoint | Description | Complexity |
+|--------|----------|-------------|------------|
+| GET | `/transformers` | Get registered transformers | ⭐ Beginner |
+| POST | `/{transformerName}` | Transform with registered transformer | ⭐⭐ Intermediate |
+| POST | `/dynamic` | Transform with dynamic rules | ⭐⭐⭐ Advanced |
+| POST | `/{transformerName}/detailed` | Transform with detailed result | ⭐⭐⭐ Advanced |
+
+### ⭐ Beginner: Get Available Transformers
+
+See what pre-built transformers are available:
+
+```bash
+curl -X GET http://localhost:8080/api/transformations/transformers
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "transformers": [
+    {
+      "name": "customer-normalizer",
+      "description": "Normalizes customer names and email addresses",
+      "inputFields": ["firstName", "lastName", "email"],
+      "outputFields": ["firstName", "lastName", "email"]
+    },
+    {
+      "name": "address-formatter",
+      "description": "Formats and validates addresses",
+      "inputFields": ["street", "city", "state", "zip"],
+      "outputFields": ["formattedAddress", "isValid"]
+    }
+  ],
+  "count": 2,
+  "timestamp": "2025-08-23T10:30:00Z"
+}
+```
+
+### ⭐⭐ Intermediate: Use Registered Transformer
+
+Apply a pre-built transformer to your data:
+
+```bash
+curl -X POST http://localhost:8080/api/transformations/customer-normalizer \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "john",
+    "lastName": "DOE",
+    "email": "JOHN.DOE@EXAMPLE.COM",
+    "phone": "1234567890"
+  }'
 ```
 
 **Response:**
@@ -134,7 +1330,205 @@ POST /api/transformations/{transformerName}
   "transformerName": "customer-normalizer",
   "originalData": {
     "firstName": "john",
+    "lastName": "DOE",
+    "email": "JOHN.DOE@EXAMPLE.COM",
+    "phone": "1234567890"
+  },
+  "transformedData": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@example.com",
+    "phone": "1234567890"
+  },
+  "transformationsApplied": [
+    "firstName: capitalized first letter",
+    "lastName: proper case formatting",
+    "email: converted to lowercase"
+  ],
+  "timestamp": "2025-08-23T10:30:00Z"
+}
+```
+
+### ⭐⭐⭐ Advanced: Dynamic Transformation
+
+Create custom transformation rules on the fly:
+
+```bash
+curl -X POST http://localhost:8080/api/transformations/dynamic \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "firstName": "john",
+      "lastName": "doe",
+      "email": "JOHN.DOE@EXAMPLE.COM",
+      "phone": "1-234-567-8900",
+      "amount": "1500.50"
+    },
+    "transformerRules": [
+      {
+        "name": "normalize-firstName",
+        "condition": "#firstName != null",
+        "transformation": "#firstName.substring(0,1).toUpperCase() + #firstName.substring(1).toLowerCase()",
+        "targetField": "firstName"
+      },
+      {
+        "name": "normalize-lastName",
+        "condition": "#lastName != null",
+        "transformation": "#lastName.substring(0,1).toUpperCase() + #lastName.substring(1).toLowerCase()",
+        "targetField": "lastName"
+      },
+      {
+        "name": "normalize-email",
+        "condition": "#email != null",
+        "transformation": "#email.toLowerCase().trim()",
+        "targetField": "email"
+      },
+      {
+        "name": "clean-phone",
+        "condition": "#phone != null",
+        "transformation": "#phone.replaceAll('\''[^0-9]'\'', '\'''\'')",
+        "targetField": "cleanPhone"
+      },
+      {
+        "name": "parse-amount",
+        "condition": "#amount != null",
+        "transformation": "T(java.lang.Double).parseDouble(#amount)",
+        "targetField": "numericAmount"
+      }
+    ]
+  }'
+```
+
+**Response shows all transformations:**
+```json
+{
+  "success": true,
+  "originalData": {
+    "firstName": "john",
     "lastName": "doe",
+    "email": "JOHN.DOE@EXAMPLE.COM",
+    "phone": "1-234-567-8900",
+    "amount": "1500.50"
+  },
+  "transformedData": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@example.com",
+    "phone": "1-234-567-8900",
+    "cleanPhone": "12345678900",
+    "amount": "1500.50",
+    "numericAmount": 1500.5
+  },
+  "transformationResults": [
+    {
+      "ruleName": "normalize-firstName",
+      "applied": true,
+      "originalValue": "john",
+      "transformedValue": "John"
+    },
+    {
+      "ruleName": "normalize-lastName",
+      "applied": true,
+      "originalValue": "doe",
+      "transformedValue": "Doe"
+    },
+    {
+      "ruleName": "normalize-email",
+      "applied": true,
+      "originalValue": "JOHN.DOE@EXAMPLE.COM",
+      "transformedValue": "john.doe@example.com"
+    },
+    {
+      "ruleName": "clean-phone",
+      "applied": true,
+      "originalValue": "1-234-567-8900",
+      "transformedValue": "12345678900"
+    },
+    {
+      "ruleName": "parse-amount",
+      "applied": true,
+      "originalValue": "1500.50",
+      "transformedValue": 1500.5
+    }
+  ],
+  "timestamp": "2025-08-23T10:30:00Z"
+}
+```
+
+### Common Transformation Patterns
+
+#### Name Normalization
+```json
+{
+  "name": "normalize-name",
+  "condition": "#name != null && #name.length() > 0",
+  "transformation": "#name.substring(0,1).toUpperCase() + #name.substring(1).toLowerCase().trim()",
+  "targetField": "name"
+}
+```
+
+#### Email Cleaning
+```json
+{
+  "name": "clean-email",
+  "condition": "#email != null",
+  "transformation": "#email.toLowerCase().trim()",
+  "targetField": "email"
+}
+```
+
+#### Phone Number Cleaning
+```json
+{
+  "name": "clean-phone",
+  "condition": "#phone != null",
+  "transformation": "#phone.replaceAll('[^0-9]', '')",
+  "targetField": "cleanPhone"
+}
+```
+
+#### Currency Formatting
+```json
+{
+  "name": "format-currency",
+  "condition": "#amount != null",
+  "transformation": "T(java.text.NumberFormat).getCurrencyInstance().format(#amount)",
+  "targetField": "formattedAmount"
+}
+```
+
+#### Date Parsing
+```json
+{
+  "name": "parse-date",
+  "condition": "#dateString != null",
+  "transformation": "T(java.time.LocalDate).parse(#dateString)",
+  "targetField": "parsedDate"
+}
+```
+
+### ⭐⭐⭐ Advanced: Detailed Transformation Results
+
+Get detailed information about the transformation process:
+
+```bash
+curl -X POST http://localhost:8080/api/transformations/customer-normalizer/detailed \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "john",
+    "lastName": "DOE",
+    "email": "JOHN.DOE@EXAMPLE.COM"
+  }'
+```
+
+**Detailed response includes step-by-step information:**
+```json
+{
+  "success": true,
+  "transformerName": "customer-normalizer",
+  "originalData": {
+    "firstName": "john",
+    "lastName": "DOE",
     "email": "JOHN.DOE@EXAMPLE.COM"
   },
   "transformedData": {
@@ -142,44 +1536,56 @@ POST /api/transformations/{transformerName}
     "lastName": "Doe",
     "email": "john.doe@example.com"
   },
-  "timestamp": "2024-01-15T10:30:00Z"
-}
-```
-
-#### Transform with Dynamic Rules
-
-```http
-POST /api/transformations/dynamic
-```
-
-**Request Body:**
-```json
-{
-  "data": {
-    "firstName": "john",
-    "lastName": "doe",
-    "email": "JOHN.DOE@EXAMPLE.COM"
+  "detailedResults": {
+    "totalRulesApplied": 3,
+    "executionTimeMs": 15,
+    "transformationSteps": [
+      {
+        "step": 1,
+        "ruleName": "firstName-capitalization",
+        "condition": "#firstName != null",
+        "transformation": "#firstName.substring(0,1).toUpperCase() + #firstName.substring(1).toLowerCase()",
+        "beforeValue": "john",
+        "afterValue": "John",
+        "executionTimeMs": 3
+      },
+      {
+        "step": 2,
+        "ruleName": "lastName-capitalization",
+        "condition": "#lastName != null",
+        "transformation": "#lastName.substring(0,1).toUpperCase() + #lastName.substring(1).toLowerCase()",
+        "beforeValue": "DOE",
+        "afterValue": "Doe",
+        "executionTimeMs": 2
+      },
+      {
+        "step": 3,
+        "ruleName": "email-normalization",
+        "condition": "#email != null",
+        "transformation": "#email.toLowerCase()",
+        "beforeValue": "JOHN.DOE@EXAMPLE.COM",
+        "afterValue": "john.doe@example.com",
+        "executionTimeMs": 1
+      }
+    ]
   },
-  "transformerRules": [
-    {
-      "name": "normalize-firstName",
-      "condition": "#firstName != null",
-      "transformation": "#firstName.substring(0,1).toUpperCase() + #firstName.substring(1).toLowerCase()",
-      "targetField": "firstName"
-    },
-    {
-      "name": "normalize-email",
-      "condition": "#email != null",
-      "transformation": "#email.toLowerCase()",
-      "targetField": "email"
-    }
-  ]
+  "timestamp": "2025-08-23T10:30:00Z"
 }
 ```
 
-### Enrichment API
+### Transformation API Tips
 
-Enrich objects with additional data using YAML configurations.
+1. **Start with registered transformers** for common operations
+2. **Use dynamic rules** for custom or one-off transformations
+3. **Test transformations** with sample data first
+4. **Chain transformations** by using the output of one as input to another
+5. **Include detailed results** when debugging transformation logic
+
+Ready to learn about enriching data with external information? That's next!
+
+## 12. Object Enrichment API
+
+The Enrichment API adds additional data to your objects from external sources, datasets, or computed values. This is perfect for adding context, lookup data, or calculated fields.
 
 #### Base Path: `/api/enrichment`
 

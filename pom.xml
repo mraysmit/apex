@@ -31,6 +31,7 @@
         <module>apex-core</module>
         <module>apex-demo</module>
         <module>apex-rest-api</module>
+        <module>apex-playground</module>
     </modules>
 
     <dependencyManagement>

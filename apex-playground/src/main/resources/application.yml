@@ -1,0 +1,132 @@
+# Spring Boot Configuration for APEX Playground
+spring:
+  application:
+    name: apex-playground
+
+  # Jackson configuration for JSON processing
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+      indent-output: true
+    deserialization:
+      fail-on-unknown-properties: false
+    default-property-inclusion: NON_NULL
+  
+  # Multipart file upload configuration
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+      enabled: true
+
+  # Thymeleaf configuration
+  thymeleaf:
+    cache: false
+    mode: HTML
+    encoding: UTF-8
+    prefix: classpath:/templates/
+    suffix: .html
+
+# Server configuration
+server:
+  port: 8081
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain,application/javascript,text/css
+
+# Management endpoints configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: always
+    info:
+      enabled: true
+    metrics:
+      enabled: true
+  info:
+    env:
+      enabled: true
+    java:
+      enabled: true
+    os:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
+      slo:
+        http.server.requests: 10ms, 50ms, 100ms, 200ms, 500ms
+
+# OpenAPI/Swagger configuration for Spring Boot 3.x
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+    display-request-duration: true
+    display-operation-id: true
+  show-actuator: true
+
+# Logging configuration
+logging:
+  level:
+    "[dev.mars.apex]": INFO
+    "[org.springframework.web]": INFO
+    "[org.springframework.security]": INFO
+    "[org.springdoc]": INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# Application information
+info:
+  app:
+    name: APEX Playground
+    description: Interactive web-based playground for APEX Rules Engine with 4-panel JSFiddle-style interface
+    version: 1.0.0
+    encoding: UTF-8
+    java:
+      version: ${java.version}
+  build:
+    artifact: ${project.artifactId:apex-playground}
+    name: ${project.name:APEX Playground}
+    description: ${project.description:Interactive APEX Rules Engine Playground}
+    version: ${project.version:1.0.0}
+  api:
+    version: v1
+    majorVersion: 1
+    minorVersion: 0
+    patchVersion: 0
+    status: stable
+    releaseDate: "2025-08-23"
+
+# APEX Playground specific configuration
+apex:
+  playground:
+    # Maximum file size for uploads (in bytes)
+    max-file-size: 10485760  # 10MB
+    # Maximum number of rules per configuration
+    max-rules-per-config: 100
+    # Maximum processing timeout (in milliseconds)
+    processing-timeout: 30000  # 30 seconds
+    # Enable/disable example templates
+    examples-enabled: true
+    # Directory for storing temporary files
+    temp-directory: ${java.io.tmpdir}/apex-playground
+    # Enable/disable performance metrics collection
+    metrics-enabled: true
