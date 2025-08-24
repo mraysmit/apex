@@ -1,0 +1,396 @@
+# ============================================================================
+# APEX Rules Engine - Financial Enrichment Rules Configuration
+# ============================================================================
+#
+# This YAML configuration demonstrates advanced financial data enrichment
+# patterns using external service lookups, sophisticated caching strategies,
+# and comprehensive field mapping for post-trade processing systems.
+#
+# OVERVIEW:
+# This configuration implements enterprise-grade data enrichment for
+# financial instruments and trading data, showcasing integration with
+# external reference data services, intelligent caching, and robust
+# error handling for mission-critical financial operations.
+#
+# ENRICHMENT ARCHITECTURE:
+# This configuration demonstrates production-ready patterns for:
+# - External service integration with fallback mechanisms
+# - Intelligent caching with configurable TTL settings
+# - Comprehensive field mapping with validation
+# - Error handling and default value management
+# - Performance optimization for high-volume processing
+#
+# EXTERNAL SERVICE INTEGRATION:
+# Unlike inline datasets, this configuration integrates with external
+# reference data services, providing:
+# - Real-time data updates from authoritative sources
+# - Scalable architecture for large reference datasets
+# - Integration with enterprise data management systems
+# - Centralized data governance and quality control
+#
+# ENRICHMENT CATEGORIES:
+# 1. COUNTERPARTY ENRICHMENT - Trading counterparty information
+#    - Legal entity data and regulatory identifiers
+#    - Credit ratings and risk classifications
+#    - Settlement instructions and preferences
+#    - Compliance status and regulatory approvals
+#
+# 2. CURRENCY ENRICHMENT - Foreign exchange reference data
+#    - ISO 4217 currency codes and specifications
+#    - Exchange rates and conversion factors
+#    - Regional classifications and central bank data
+#    - Trading conventions and market hours
+#
+# 3. INSTRUMENT ENRICHMENT - Financial instrument reference data
+#    - Security identifiers (ISIN, CUSIP, Bloomberg)
+#    - Asset class classifications and risk factors
+#    - Market data and pricing information
+#    - Corporate actions and lifecycle events
+#
+# 4. MARKET ENRICHMENT - Trading venue and market data
+#    - Exchange identifiers and operating hours
+#    - Settlement cycles and market conventions
+#    - Regulatory oversight and compliance requirements
+#    - Holiday calendars and business day rules
+#
+# TECHNICAL FEATURES:
+# - External service lookup with configurable endpoints
+# - Multi-level caching with TTL and refresh strategies
+# - Comprehensive field mapping with validation rules
+# - Error handling with default values and fallbacks
+# - Performance monitoring and alerting capabilities
+#
+# PERFORMANCE OPTIMIZATION:
+# - Intelligent caching reduces external service calls
+# - Batch processing support for high-volume scenarios
+# - Connection pooling and circuit breaker patterns
+# - Asynchronous processing for non-critical enrichments
+#
+# BUSINESS VALUE:
+# - Real-time access to authoritative reference data
+# - Reduced operational risk through data validation
+# - Improved straight-through processing rates
+# - Enhanced regulatory compliance and reporting
+# - Scalable architecture for growing data volumes
+#
+# INTEGRATION SCENARIOS:
+# - Post-trade settlement and clearing systems
+# - Risk management and exposure calculation
+# - Regulatory reporting and compliance platforms
+# - Market data distribution and pricing systems
+# - Client reporting and portfolio management
+#
+# ============================================================================
+
+metadata:
+  name: "Financial Enrichment Rules"
+  version: "1.0.0"
+  description: "Data enrichment and transformation rules for financial instruments"
+  type: "rule-config"
+  author: "Rules Engine Team"
+  created: "2024-01-15"
+  last-modified: "2024-01-15"
+  tags:
+    - "financial"
+    - "enrichment"
+    - "transformation"
+    - "static-data"
+
+# ============================================================================
+# EXTERNAL SERVICE ENRICHMENT CONFIGURATIONS
+# ============================================================================
+#
+# This section defines enrichment rules that integrate with external
+# reference data services to provide real-time, authoritative data
+# enhancement for financial trading and settlement operations.
+#
+# EXTERNAL SERVICE ARCHITECTURE:
+# Each enrichment rule integrates with dedicated microservices or
+# external data providers, offering:
+# - Real-time data access from authoritative sources
+# - Scalable architecture for large reference datasets
+# - Centralized data governance and quality control
+# - Integration with enterprise data management platforms
+#
+# LOOKUP SERVICE INTEGRATION:
+# - lookup-service: Spring bean name for the external service
+# - lookup-key: SpEL expression defining the lookup key
+# - cache-enabled: Enables intelligent caching for performance
+# - cache-ttl-seconds: Time-to-live for cached data entries
+#
+# FIELD MAPPING FEATURES:
+# - source-field: Field name from the external service response
+# - target-field: Field name added to the enriched record
+# - required: Whether the field must be present (validation)
+# - default-value: Fallback value when data is unavailable
+#
+# ERROR HANDLING STRATEGY:
+# - Graceful degradation when external services are unavailable
+# - Default values ensure processing continues with partial data
+# - Comprehensive logging and monitoring for service health
+# - Circuit breaker patterns for resilience and fault tolerance
+#
+# PERFORMANCE CONSIDERATIONS:
+# - Intelligent caching reduces external service dependency
+# - Batch processing optimizes service call efficiency
+# - Connection pooling and timeout management
+# - Asynchronous processing for non-critical enrichments
+#
+# BUSINESS CONTINUITY:
+# - Fallback mechanisms ensure continuous operation
+# - Default values maintain processing flow during outages
+# - Comprehensive monitoring and alerting for service health
+# - Disaster recovery support with cached data persistence
+#
+enrichments:
+  - id: "counterparty-enrichment"
+    name: "Counterparty Data Enrichment"
+    description: "Enriches trade with counterparty static data"
+    type: "lookup-enrichment"
+    target-type: "Trade"
+    enabled: true
+    priority: 10
+    condition: "#counterpartyId != null"
+    lookup-config:
+      lookup-key: "#counterpartyId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "id"
+        data:
+          - id: "CP001"
+            name: "Goldman Sachs"
+            rating: "A+"
+            riskWeight: 0.20
+          - id: "CP002"
+            name: "JP Morgan"
+            rating: "A+"
+            riskWeight: 0.18
+          - id: "CP003"
+            name: "Deutsche Bank"
+            rating: "A"
+            riskWeight: 0.25
+    field-mappings:
+      - source-field: "name"
+        target-field: "counterpartyName"
+        required: true
+      - source-field: "rating"
+        target-field: "counterpartyRating"
+        default-value: "NR"
+      - source-field: "lei"
+        target-field: "counterpartyLei"
+        required: false
+      - source-field: "jurisdiction"
+        target-field: "counterpartyJurisdiction"
+        default-value: "UNKNOWN"
+    tags: ["counterparty", "static-data", "lookup"]
+
+  - id: "currency-enrichment"
+    name: "Currency Data Enrichment"
+    description: "Enriches trade with currency static data"
+    type: "lookup-enrichment"
+    target-type: "Trade"
+    enabled: true
+    priority: 11
+    condition: "#notionalCurrency != null"
+    lookup-config:
+      lookup-key: "#notionalCurrency"
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        data:
+          - code: "USD"
+            name: "US Dollar"
+            symbol: "$"
+            decimalPlaces: 2
+          - code: "EUR"
+            name: "Euro"
+            symbol: "€"
+            decimalPlaces: 2
+          - code: "GBP"
+            name: "British Pound"
+            symbol: "£"
+            decimalPlaces: 2
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+        required: true
+      - source-field: "decimalPlaces"
+        target-field: "currencyDecimalPlaces"
+        default-value: 2
+      - source-field: "isActive"
+        target-field: "currencyActive"
+        default-value: true
+    tags: ["currency", "static-data", "lookup"]
+
+  - id: "commodity-enrichment"
+    name: "Commodity Reference Data Enrichment"
+    description: "Enriches commodity swap with reference index data"
+    type: "lookup-enrichment"
+    target-type: "CommodityTotalReturnSwap"
+    enabled: true
+    priority: 12
+    condition: "#referenceIndex != null"
+    lookup-config:
+      lookup-key: "#referenceIndex"
+      lookup-dataset:
+        type: "inline"
+        key-field: "index"
+        data:
+          - index: "WTI_CRUDE"
+            indexName: "WTI Crude Oil"
+            category: "Energy"
+            exchange: "NYMEX"
+            currency: "USD"
+          - index: "BRENT_CRUDE"
+            indexName: "Brent Crude Oil"
+            category: "Energy"
+            exchange: "ICE"
+            currency: "USD"
+          - index: "GOLD_SPOT"
+            indexName: "Gold Spot"
+            category: "Precious Metals"
+            exchange: "COMEX"
+            currency: "USD"
+    field-mappings:
+      - source-field: "indexName"
+        target-field: "referenceIndexName"
+        required: true
+      - source-field: "commodityType"
+        target-field: "commodityType"
+        required: true
+      - source-field: "unit"
+        target-field: "commodityUnit"
+        default-value: "BBL"
+      - source-field: "exchange"
+        target-field: "referenceExchange"
+        required: false
+    tags: ["commodity", "reference-data", "lookup"]
+
+  - id: "fee-calculation"
+    name: "Fee Calculation Enrichment"
+    description: "Calculates various fees and commissions for trades"
+    type: "calculation-enrichment"
+    target-type: "Trade"
+    enabled: true
+    priority: 20
+    condition: "#notionalAmount != null && #productType != null"
+    calculation-config:
+      expression: |
+        #productType == 'EQUITY' ? #notionalAmount.multiply(T(java.math.BigDecimal).new('0.001')) :
+        #productType == 'BOND' ? #notionalAmount.multiply(T(java.math.BigDecimal).new('0.0005')) :
+        #productType == 'OPTION' ? #notionalAmount.multiply(T(java.math.BigDecimal).new('0.002')) :
+        #notionalAmount.multiply(T(java.math.BigDecimal).new('0.0015'))
+      result-field: "brokerCommission"
+      dependencies: ["notionalAmount", "productType"]
+    field-mappings:
+      - source-field: "brokerCommission"
+        target-field: "brokerCommission"
+        required: true
+    tags: ["fee-calculation", "commission"]
+
+  - id: "risk-metrics-calculation"
+    name: "Risk Metrics Calculation"
+    description: "Calculates basic risk metrics for the trade"
+    type: "calculation-enrichment"
+    target-type: "Trade"
+    enabled: true
+    priority: 21
+    condition: "#notionalAmount != null && #maturityDate != null && #tradeDate != null"
+    calculation-config:
+      expression: |
+        T(java.time.temporal.ChronoUnit).DAYS.between(#tradeDate, #maturityDate) *
+        #notionalAmount.doubleValue() / 365.0
+      result-field: "timeWeightedExposure"
+      dependencies: ["notionalAmount", "maturityDate", "tradeDate"]
+    field-mappings:
+      - source-field: "timeWeightedExposure"
+        target-field: "timeWeightedExposure"
+        required: true
+    tags: ["risk-calculation", "exposure"]
+
+# Define transformation configurations
+transformations:
+  - id: "trade-standardization"
+    name: "Trade Data Standardization"
+    description: "Standardizes trade data formats and values"
+    type: "field-transformation"
+    target-type: "Trade"
+    enabled: true
+    priority: 30
+    transformation-rules:
+      - condition: "#productType != null"
+        actions:
+          - type: "set-field"
+            field: "productType"
+            expression: "#productType.toUpperCase()"
+      - condition: "#notionalCurrency != null"
+        actions:
+          - type: "set-field"
+            field: "notionalCurrency"
+            expression: "#notionalCurrency.toUpperCase()"
+      - condition: "#counterpartyId != null"
+        actions:
+          - type: "set-field"
+            field: "counterpartyId"
+            expression: "#counterpartyId.trim().toUpperCase()"
+    tags: ["standardization", "data-quality"]
+
+  - id: "commodity-swap-enrichment"
+    name: "Commodity Swap Specific Enrichment"
+    description: "Applies commodity swap specific transformations"
+    type: "conditional-transformation"
+    target-type: "CommodityTotalReturnSwap"
+    enabled: true
+    priority: 31
+    condition: "#commodityType != null"
+    transformation-rules:
+      - condition: "#commodityType == 'ENERGY'"
+        actions:
+          - type: "set-field"
+            field: "riskCategory"
+            value: "HIGH"
+          - type: "set-field"
+            field: "regulatoryCategory"
+            value: "ENERGY_DERIVATIVE"
+        else-actions:
+          - type: "set-field"
+            field: "riskCategory"
+            value: "MEDIUM"
+          - type: "set-field"
+            field: "regulatoryCategory"
+            value: "COMMODITY_DERIVATIVE"
+      - condition: "#notionalAmount != null && #notionalAmount.compareTo(T(java.math.BigDecimal).new('50000000')) > 0"
+        actions:
+          - type: "set-field"
+            field: "approvalRequired"
+            value: true
+          - type: "set-field"
+            field: "approvalLevel"
+            value: "SENIOR_MANAGEMENT"
+    tags: ["commodity-swap", "conditional-logic"]
+
+  - id: "audit-trail-enrichment"
+    name: "Audit Trail Enrichment"
+    description: "Adds audit trail information to trades"
+    type: "field-transformation"
+    target-type: "Trade"
+    enabled: true
+    priority: 40
+    transformation-rules:
+      - condition: "true"  # Always apply
+        actions:
+          - type: "set-field"
+            field: "enrichmentTimestamp"
+            expression: "T(java.time.Instant).now()"
+          - type: "set-field"
+            field: "enrichmentVersion"
+            value: "1.0.0"
+          - type: "calculate-field"
+            field: "dataQualityScore"
+            expression: |
+              (#tradeId != null ? 20 : 0) +
+              (#counterpartyId != null ? 20 : 0) +
+              (#notionalAmount != null ? 20 : 0) +
+              (#tradeDate != null ? 20 : 0) +
+              (#maturityDate != null ? 20 : 0)
+    tags: ["audit", "data-quality", "metadata"]

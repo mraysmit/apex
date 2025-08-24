@@ -1,0 +1,215 @@
+# ============================================================================
+# COMMODITY SWAPS PROCESSING SCENARIO
+# ============================================================================
+#
+# This scenario configuration defines the processing pipeline for Commodity
+# Swaps data types. It provides lightweight routing to the comprehensive
+# commodity swap validation bootstrap configuration.
+#
+# PURPOSE:
+# - Associates Commodity Swaps data types with their processing pipeline
+# - Provides scenario-specific metadata and routing information
+# - Enables data type-based automatic routing to appropriate rule configurations
+# - Supports business domain organization and ownership tracking
+#
+# ARCHITECTURE:
+# - Scenario files provide lightweight routing and metadata
+# - Bootstrap files contain the complete rule definitions and datasets
+# - This separation enables flexible scenario management and reuse
+#
+# ============================================================================
+
+metadata:
+  name: "Commodity Swaps Processing Scenario"
+  version: "1.0.0"
+  description: "Associates Commodity Swaps with existing rule configurations for multi-layered validation"
+  type: "scenario"
+  business-domain: "Commodity Derivatives"
+  regulatory-scope: "EMIR, CFTC, REMIT"
+  owner: "commodity.trading@company.com"
+  created-by: "Mark Andrew Ray-Smith Cityline Ltd"
+  created: "2025-08-02"
+  last-modified: "2025-08-02"
+  compliance-reviewed: true
+  compliance-reviewer: "compliance.commodities@company.com"
+  compliance-date: "2025-08-01"
+  risk-approved: true
+  risk-reviewer: "risk.commodities@company.com"
+  risk-date: "2025-08-01"
+
+# ============================================================================
+# SCENARIO CONFIGURATION
+# ============================================================================
+
+scenario:
+  # Scenario identification
+  scenario-id: "commodity-swaps-standard"
+  name: "Commodity Swaps Standard Processing"
+  description: "Multi-layered validation for commodity total return swaps"
+  
+  # Data types handled by this scenario
+  data-types:
+    - "dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap.CommodityTotalReturnSwap"
+    - "CommodityTotalReturnSwap"
+    - "CommoditySwap"
+    - "TotalReturnSwap"
+  
+  # Business context
+  business-domain: "Commodity Derivatives"
+  business-process: "Commodity Swap Validation and Enrichment"
+  regulatory-requirements:
+    - "EMIR Trade Reporting"
+    - "CFTC Swap Data Repository"
+    - "REMIT Energy Trading"
+    - "Basel III Capital Requirements"
+  
+  # Rule configuration files to load for this scenario
+  rule-configurations:
+    - "demos/bootstrap/commodity-swap/bootstrap-config.yaml"
+  
+  # Processing settings
+  processing:
+    enabled: true
+    priority: "high"
+    timeout-ms: 7500
+    retry-attempts: 3
+    
+  # Routing conditions (optional - used for complex routing logic)
+  routing-conditions:
+    - condition: "#data.class.simpleName.contains('CommoditySwap')"
+      description: "Route commodity swaps by class name"
+    - condition: "#data.productType == 'TOTAL_RETURN_SWAP'"
+      description: "Route by product type field"
+    - condition: "#data.assetClass == 'COMMODITY'"
+      description: "Route commodity derivatives"
+    - condition: "#data.underlyingType in {'OIL', 'GAS', 'METALS', 'AGRICULTURE'}"
+      description: "Route by underlying commodity type"
+
+# ============================================================================
+# SCENARIO DEPENDENCIES
+# ============================================================================
+
+dependencies:
+  # Required configuration files
+  required-configs:
+    - path: "demos/bootstrap/commodity-swap/bootstrap-config.yaml"
+      description: "Complete commodity swap validation configuration"
+      type: "bootstrap"
+    
+  # Optional configuration files
+  optional-configs:
+    - path: "demos/fundamentals/rules/financial-enrichment-rules.yaml"
+      description: "Reusable financial data enrichment rules"
+      type: "rules"
+      fallback-behavior: "continue"
+
+# ============================================================================
+# BUSINESS METADATA
+# ============================================================================
+
+business:
+  # Ownership and responsibility
+  owner: "commodity.trading@company.com"
+  business-analyst: "ba.commodities@company.com"
+  technical-lead: "tech.commodities@company.com"
+  
+  # Business context
+  business-domain: "Commodity Derivatives"
+  business-process: "Commodity Swap Processing"
+  business-criticality: "high"
+  
+  # Regulatory context
+  regulatory-scope: "EMIR, CFTC, REMIT"
+  compliance-requirements:
+    - requirement: "EMIR Trade Reporting"
+      deadline: "T+1"
+      criticality: "mandatory"
+    - requirement: "CFTC Swap Data Repository"
+      deadline: "T+1"
+      criticality: "mandatory"
+    - requirement: "REMIT Energy Trading Reporting"
+      deadline: "T+1"
+      criticality: "mandatory"
+  
+  # SLA requirements
+  sla:
+    processing-time-target: "< 150ms"
+    availability-target: "99.9%"
+    error-rate-target: "< 0.1%"
+
+# ============================================================================
+# TECHNICAL METADATA
+# ============================================================================
+
+technical:
+  # Performance characteristics
+  performance:
+    expected-volume: "5,000 trades/day"
+    peak-volume: "25,000 trades/day"
+    processing-time-p95: "75ms"
+    processing-time-p99: "150ms"
+  
+  # Integration points
+  integrations:
+    - system: "Commodity Trading System"
+      interface: "REST API"
+      data-format: "JSON"
+    - system: "Risk Management"
+      interface: "Message Queue"
+      data-format: "XML"
+    - system: "Regulatory Reporting"
+      interface: "File Transfer"
+      data-format: "CSV"
+    - system: "Market Data Provider"
+      interface: "WebSocket"
+      data-format: "JSON"
+  
+  # Monitoring and alerting
+  monitoring:
+    metrics:
+      - "processing.time"
+      - "error.rate"
+      - "throughput"
+      - "validation.failures"
+    alerts:
+      - condition: "processing.time > 300ms"
+        severity: "warning"
+      - condition: "error.rate > 1%"
+        severity: "critical"
+      - condition: "validation.failures > 5%"
+        severity: "warning"
+
+# ============================================================================
+# SCENARIO EXECUTION SETTINGS
+# ============================================================================
+
+execution:
+  # Execution mode
+  mode: "synchronous"
+  
+  # Error handling
+  error-handling:
+    strategy: "fail-fast"
+    retry-policy:
+      max-attempts: 3
+      backoff-strategy: "exponential"
+      initial-delay-ms: 100
+    
+  # Audit and logging
+  audit:
+    enabled: true
+    log-level: "INFO"
+    include-sensitive-data: false
+    retention-days: 90
+  
+  # Commodity-specific settings
+  commodity-settings:
+    price-validation:
+      enabled: true
+      tolerance-percentage: 5.0
+    reference-data-validation:
+      enabled: true
+      required-fields: ["underlyingCommodity", "deliveryLocation", "qualitySpecs"]
+    market-data-enrichment:
+      enabled: true
+      sources: ["Bloomberg", "Refinitiv", "ICE"]

@@ -1,0 +1,385 @@
+# ============================================================================
+# APEX Rules Engine - Commodity Swap Validation Bootstrap
+# ============================================================================
+#
+# This YAML configuration provides a complete, self-contained demonstration
+# of commodity derivatives validation and enrichment using the APEX Rules Engine.
+# It serves as a bootstrap configuration for commodity trading systems.
+#
+# OVERVIEW:
+# This configuration implements comprehensive validation and enrichment logic
+# for commodity swap transactions, covering all aspects from basic field
+# validation to complex business rules and regulatory compliance.
+#
+# BOOTSTRAP DESIGN PHILOSOPHY:
+# - Complete end-to-end demonstration in a single configuration
+# - Self-contained with all necessary reference data included
+# - Production-ready patterns and best practices
+# - Comprehensive coverage of commodity derivatives scenarios
+# - Educational value for developers and business analysts
+#
+# COMMODITY DERIVATIVES COVERAGE:
+# - Energy commodities (Oil, Gas, Power)
+# - Agricultural commodities (Wheat, Corn, Soybeans)
+# - Metals (Gold, Silver, Copper, Aluminum)
+# - Soft commodities (Coffee, Sugar, Cotton)
+# - Weather derivatives and carbon credits
+#
+# VALIDATION LAYERS:
+# 1. ULTRA-SIMPLE API - Basic field validation
+#    - Required field presence checks
+#    - Data type and format validation
+#    - Simple business rule enforcement
+#
+# 2. TEMPLATE-BASED RULES - Business logic validation
+#    - Maturity date validation
+#    - Notional amount limits
+#    - Counterparty eligibility
+#    - Currency and settlement validation
+#
+# 3. ADVANCED CONFIGURATION - Complex business rules
+#    - Multi-factor risk assessment
+#    - Regulatory compliance checking
+#    - Market-specific validation rules
+#    - Cross-validation between related fields
+#
+# ENRICHMENT CAPABILITIES:
+# - Commodity reference data lookup
+# - Market convention application
+# - Risk factor calculation
+# - Regulatory classification
+# - Settlement instruction generation
+#
+# BUSINESS VALUE:
+# - Reduces trade settlement failures
+# - Ensures regulatory compliance
+# - Automates risk assessment
+# - Standardizes validation across systems
+# - Provides audit trail for compliance
+#
+# INTEGRATION SCENARIOS:
+# - Trading platform pre-trade validation
+# - Middle office trade processing
+# - Risk management system integration
+# - Regulatory reporting preparation
+# - Settlement system preparation
+#
+# ============================================================================
+
+metadata:
+  name: "Commodity Swap Validation Bootstrap"
+  version: "1.0"
+  description: "Complete commodity derivatives validation and enrichment demonstration"
+  type: "bootstrap"
+  created-by: "financial.admin@company.com"
+  business-domain: "Commodity Derivatives"
+  business-owner: "Trading Desk"
+  created-date: "2025-07-31"
+  last-modified: "2025-07-31"
+
+# ============================================================================
+# COMMODITY DERIVATIVES VALIDATION RULE CHAINS
+# ============================================================================
+#
+# These rule chains implement a comprehensive validation pipeline for
+# commodity swap transactions, demonstrating all three API layers of
+# the APEX Rules Engine in a realistic financial services context.
+#
+# VALIDATION PIPELINE ARCHITECTURE:
+# 1. BASIC VALIDATION (Priority 100) - Essential field validation
+# 2. BUSINESS RULES (Priority 200) - Financial business logic
+# 3. ADVANCED RULES (Priority 300) - Complex compliance and risk rules
+#
+# CHAINING PATTERNS USED:
+# - Conditional Chaining: Execute different rule sets based on conditions
+# - Accumulative Chaining: Build risk scores and compliance ratings
+# - Sequential Chaining: Step-by-step validation with early termination
+#
+# COMMODITY-SPECIFIC FEATURES:
+# - Multi-asset class support (Energy, Agriculture, Metals)
+# - Market convention validation
+# - Seasonal adjustment factors
+# - Storage and delivery specifications
+# - Weather derivative support
+#
+# REGULATORY COMPLIANCE:
+# - Position limit monitoring
+# - Large trader reporting thresholds
+# - Market manipulation detection
+# - Cross-border transaction rules
+# - Environmental compliance (carbon credits)
+#
+rule-chains:
+  # Ultra-Simple API validation chain
+  - id: "ultra-simple-validation"
+    name: "Ultra-Simple Validation Rules"
+    description: "Basic field validation using ultra-simple API"
+    pattern: "conditional-chaining"
+    enabled: true
+    priority: 100
+    configuration:
+      trigger-rule:
+        id: "basic-fields-check"
+        condition: "tradeId != null && counterpartyId != null && clientId != null"
+        message: "Basic required fields validation"
+        description: "Ensures all essential trade identifiers are present"
+      conditional-rules:
+        on-trigger:
+          - id: "notional-positive"
+            condition: "notionalAmount != null && notionalAmount > 0"
+            message: "Notional amount must be positive"
+            description: "Validates notional amount is greater than zero"
+          - id: "commodity-type-required"
+            condition: "commodityType != null && commodityType.trim().length() > 0"
+            message: "Commodity type is required"
+            description: "Ensures commodity type is specified"
+        on-no-trigger:
+          - id: "basic-validation-failure"
+            condition: "true"
+            message: "Basic field validation failed"
+            description: "One or more required fields are missing"
+
+  # Template-based business rules chain
+  - id: "template-business-rules"
+    name: "Template-Based Business Rules"
+    description: "Business logic validation using template-based rules"
+    pattern: "accumulative-chaining"
+    enabled: true
+    priority: 200
+    configuration:
+      accumulator-variable: "businessRuleScore"
+      accumulation-rules:
+        - id: "maturity-eligibility"
+          condition: "maturityDate != null && maturityDate.isBefore(tradeDate.plusYears(5))"
+          weight: 25
+          message: "Trade maturity within 5 years"
+          description: "Validates trade maturity is within acceptable range"
+        - id: "currency-consistency"
+          condition: "notionalCurrency == paymentCurrency && paymentCurrency == settlementCurrency"
+          weight: 20
+          message: "All currencies must match"
+          description: "Ensures currency consistency across trade legs"
+        - id: "settlement-terms"
+          condition: "settlementDays != null && settlementDays >= 0 && settlementDays <= 5"
+          weight: 15
+          message: "Settlement within 5 days"
+          description: "Validates settlement period is within acceptable range"
+        - id: "energy-commodity-validation"
+          condition: "commodityType == 'ENERGY' && (referenceIndex == 'WTI' || referenceIndex == 'BRENT' || referenceIndex == 'HENRY_HUB')"
+          weight: 30
+          message: "Valid energy commodity and index"
+          description: "Ensures energy commodities use valid reference indices"
+        - id: "metals-commodity-validation"
+          condition: "commodityType == 'METALS' && (referenceIndex == 'GOLD' || referenceIndex == 'SILVER' || referenceIndex == 'COPPER')"
+          weight: 30
+          message: "Valid metals commodity and index"
+          description: "Ensures metals commodities use valid reference indices"
+        - id: "agricultural-commodity-validation"
+          condition: "commodityType == 'AGRICULTURAL' && (referenceIndex == 'CORN' || referenceIndex == 'WHEAT' || referenceIndex == 'SOYBEANS')"
+          weight: 30
+          message: "Valid agricultural commodity and index"
+          description: "Ensures agricultural commodities use valid reference indices"
+      thresholds:
+        approval-score: 70
+        warning-score: 50
+
+  # Advanced configuration chain
+  - id: "advanced-validation"
+    name: "Advanced Configuration Rules"
+    description: "Complex validation using advanced configuration"
+    pattern: "conditional-chaining"
+    enabled: true
+    priority: 300
+    configuration:
+      trigger-rule:
+        id: "advanced-eligibility"
+        condition: "tradeId != null && tradeId.matches('^TRS[0-9]{3}$')"
+        message: "Trade ID format validation"
+        description: "Validates trade ID follows TRS### format"
+      conditional-rules:
+        on-trigger:
+          - id: "notional-range-check"
+            condition: "notionalAmount >= 1000000 && notionalAmount <= 100000000"
+            message: "Notional must be between $1M and $100M"
+            description: "Validates notional amount is within acceptable range"
+          - id: "regulatory-compliance"
+            condition: "jurisdiction != null && regulatoryRegime != null"
+            message: "Regulatory information required"
+            description: "Ensures regulatory compliance fields are populated"
+          - id: "funding-spread-validation"
+            condition: "fundingSpread != null && fundingSpread >= 0 && fundingSpread <= 1000"
+            message: "Funding spread within acceptable range"
+            description: "Validates funding spread is between 0 and 1000 basis points"
+        on-no-trigger:
+          - id: "format-validation-failure"
+            condition: "true"
+            message: "Trade ID format validation failed"
+            description: "Trade ID does not follow required format"
+
+  # Risk management chain
+  - id: "risk-management-rules"
+    name: "Risk Management Rules"
+    description: "Risk-based validation and limits"
+    pattern: "accumulative-chaining"
+    enabled: true
+    priority: 400
+    configuration:
+      accumulator-variable: "riskManagementScore"
+      accumulation-rules:
+        - id: "client-credit-limit"
+          condition: "notionalAmount <= 250000000"
+          weight: 40
+          message: "Within client credit limit"
+          description: "Trade notional is within client credit limit"
+        - id: "counterparty-exposure"
+          condition: "notionalAmount <= 1000000000"
+          weight: 35
+          message: "Within counterparty exposure limit"
+          description: "Trade notional is within counterparty exposure limit"
+        - id: "commodity-concentration"
+          condition: "true"
+          weight: 25
+          message: "Commodity concentration acceptable"
+          description: "Commodity concentration is within risk limits"
+      thresholds:
+        approval-score: 80
+        warning-score: 60
+
+enrichments:
+  # Client data enrichment
+  - id: "client-enrichment"
+    name: "Client Data Enrichment"
+    description: "Enrich trade with client information"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#clientId != null"
+    lookup-config:
+      lookup-key: "clientId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "clientId"
+        data:
+          - clientId: "CLIENT001"
+            client_name: "ABC Corporation"
+            client_rating: "A+"
+            client_tier: "PREMIUM"
+    field-mappings:
+      - source-field: "client_name"
+        target-field: "clientName"
+        required: true
+      - source-field: "regulatory_classification"
+        target-field: "clientRegulatoryClassification"
+        description: "Client regulatory classification"
+      - source-field: "risk_rating"
+        target-field: "clientRiskRating"
+        description: "Client risk rating"
+
+  # Counterparty data enrichment
+  - id: "counterparty-enrichment"
+    name: "Counterparty Data Enrichment"
+    description: "Enrich trade with counterparty information"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#counterpartyId != null"
+    lookup-config:
+      lookup-key: "counterpartyId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "counterpartyId"
+        data:
+          - counterpartyId: "CP001"
+            counterparty_name: "Goldman Sachs"
+            counterparty_rating: "A+"
+            counterparty_tier: "TIER1"
+    field-mappings:
+      - source-field: "counterparty_name"
+        target-field: "counterpartyName"
+        required: true
+      - source-field: "credit_rating"
+        target-field: "counterpartyCreditRating"
+        description: "Counterparty credit rating"
+      - source-field: "regulatory_status"
+        target-field: "counterpartyRegulatoryStatus"
+        description: "Counterparty regulatory status"
+
+  # Commodity reference data enrichment
+  - id: "commodity-enrichment"
+    name: "Commodity Reference Data Enrichment"
+    description: "Enrich trade with commodity reference data"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#referenceIndex != null"
+    lookup-config:
+      lookup-key: "referenceIndex"
+      lookup-dataset:
+        type: "inline"
+        key-field: "referenceIndex"
+        data:
+          - referenceIndex: "WTI_CRUDE"
+            index_provider: "CME Group"
+            index_category: "Energy"
+            index_currency: "USD"
+    field-mappings:
+      - source-field: "index_provider"
+        target-field: "indexProvider"
+        required: true
+      - source-field: "quote_currency"
+        target-field: "commodityQuoteCurrency"
+        description: "Commodity quote currency"
+      - source-field: "unit_of_measure"
+        target-field: "commodityUnitOfMeasure"
+        description: "Unit of measure"
+      - source-field: "commodity_name"
+        target-field: "commodityName"
+        description: "Commodity name"
+
+configuration:
+  # Processing thresholds
+  thresholds:
+    minNotionalAmount: 1000000      # $1M minimum
+    maxNotionalAmount: 100000000    # $100M maximum
+    maxMaturityYears: 5             # 5 years maximum maturity
+    validationScore: 70             # Minimum validation score
+    riskScore: 80                   # Minimum risk score
+  
+  # Performance settings
+  performance:
+    maxProcessingTimeMs: 100        # Target processing time
+    cacheEnabled: true
+    auditEnabled: true
+    metricsEnabled: true
+    batchSize: 100
+  
+  # Business rules
+  businessRules:
+    requireRegulatoryInfo: true
+    validateCurrencyConsistency: true
+    enforceNotionalLimits: true
+    auditAllValidations: true
+    enableRiskChecks: true
+    requireClientValidation: true
+  
+  # Supported commodity types
+  commodityTypes:
+    supportedTypes: ["ENERGY", "METALS", "AGRICULTURAL"]
+    energyIndices: ["WTI", "BRENT", "HENRY_HUB"]
+    metalsIndices: ["GOLD", "SILVER", "COPPER", "PLATINUM"]
+    agriculturalIndices: ["CORN", "WHEAT", "SOYBEANS", "SUGAR"]
+  
+  # Regulatory regimes
+  regulatoryRegimes:
+    supportedRegimes: ["DODD_FRANK", "EMIR", "CFTC", "MiFID_II"]
+    jurisdictions: ["US", "EU", "UK", "ASIA"]
+  
+  # Currency settings
+  currencies:
+    supportedCurrencies: ["USD", "EUR", "GBP", "JPY", "CHF", "CAD"]
+    baseCurrency: "USD"
+    
+  # Audit settings
+  audit:
+    enabled: true
+    logLevel: "INFO"
+    includeRuleDetails: true
+    includePerformanceMetrics: true
+    retentionDays: 90

@@ -1,0 +1,388 @@
+# ============================================================================
+# PRODUCTION DEMO CONFIGURATION
+# ============================================================================
+#
+# Configuration for ProductionDemoDataServiceManager that demonstrates
+# proper usage of production ExternalDataSource implementations instead
+# of MockDataSource for testing.
+#
+# This configuration shows:
+# - How to configure real data sources for demos
+# - Proper connection settings and resource management
+# - Performance tuning for demo scenarios
+# - Error handling and monitoring configuration
+#
+# ============================================================================
+
+metadata:
+  name: "Production Demo Configuration"
+  type: "rule-config"
+  version: "2.0.0"
+  description: "Configuration for production-ready demo data sources"
+  author: "apex-demo-team@company.com"
+  environment: "demo"
+  created-by: "apex-demo-team@company.com"
+
+# ============================================================================
+# DEMO DATA SERVICE MANAGER CONFIGURATION
+# ============================================================================
+
+demo-data-service:
+  manager-class: "dev.mars.apex.demo.data.ProductionDemoDataServiceManager"
+  
+  # Data directories for demo files
+  data-directories:
+    base-dir: "demo-data"
+    json-dir: "demo-data/json"
+    xml-dir: "demo-data/xml"
+    csv-dir: "demo-data/csv"
+    batch-dir: "demo-data/batch"
+    
+  # Auto-create demo data structure
+  auto-create-structure: true
+  auto-populate-data: true
+  
+  # Performance settings for demos
+  performance:
+    enable-caching: true
+    cache-size: 1000
+    cache-ttl-seconds: 3600
+    parallel-processing: true
+    max-threads: 4
+
+# ============================================================================
+# FILE-BASED DATA SOURCES
+# ============================================================================
+
+file-data-sources:
+  
+  json-source:
+    name: "demo-json-files"
+    type: "FILE_SYSTEM"
+    base-path: "demo-data/json"
+    file-pattern: "*.json"
+    
+    settings:
+      auto-reload: true
+      watch-changes: true
+      cache-parsed: true
+      encoding: "UTF-8"
+      
+    sample-files:
+      - name: "products.json"
+        content-type: "product-catalog"
+        auto-generate: true
+        
+      - name: "customers.json"
+        content-type: "customer-data"
+        auto-generate: true
+        
+      - name: "trades.json"
+        content-type: "trading-data"
+        auto-generate: true
+
+  xml-source:
+    name: "demo-xml-files"
+    type: "FILE_SYSTEM"
+    base-path: "demo-data/xml"
+    file-pattern: "*.xml"
+    
+    settings:
+      auto-reload: true
+      watch-changes: true
+      cache-parsed: true
+      validate-schema: false
+      encoding: "UTF-8"
+      
+    sample-files:
+      - name: "inventory.xml"
+        content-type: "inventory-data"
+        auto-generate: true
+        
+      - name: "settlements.xml"
+        content-type: "settlement-data"
+        auto-generate: true
+
+  csv-source:
+    name: "demo-csv-files"
+    type: "FILE_SYSTEM"
+    base-path: "demo-data/csv"
+    file-pattern: "*.csv"
+    
+    settings:
+      auto-reload: true
+      watch-changes: true
+      has-header: true
+      delimiter: ","
+      quote-char: "\""
+      encoding: "UTF-8"
+      
+    sample-files:
+      - name: "customers.csv"
+        content-type: "customer-batch"
+        auto-generate: true
+        record-count: 1000
+        
+      - name: "trades.csv"
+        content-type: "trade-batch"
+        auto-generate: true
+        record-count: 5000
+
+# ============================================================================
+# CACHE-BASED DATA SOURCES
+# ============================================================================
+
+cache-data-sources:
+  
+  products-cache:
+    name: "demo-products-cache"
+    type: "CACHE"
+    
+    settings:
+      max-size: 1000
+      ttl-seconds: 3600
+      eviction-policy: "LRU"
+      statistics: true
+      
+    preload-data:
+      enabled: true
+      data-types:
+        - "products"
+        - "product-categories"
+        - "pricing-tiers"
+
+  customer-cache:
+    name: "demo-customer-cache"
+    type: "CACHE"
+    
+    settings:
+      max-size: 500
+      ttl-seconds: 1800
+      eviction-policy: "LRU"
+      statistics: true
+      
+    preload-data:
+      enabled: true
+      data-types:
+        - "customers"
+        - "customer-tiers"
+        - "preferred-categories"
+
+  lookup-cache:
+    name: "demo-lookup-cache"
+    type: "CACHE"
+    
+    settings:
+      max-size: 2000
+      ttl-seconds: 7200
+      eviction-policy: "LFU"
+      statistics: true
+      
+    preload-data:
+      enabled: true
+      data-types:
+        - "instrument-types"
+        - "asset-classes"
+        - "currencies"
+        - "countries"
+        - "status-codes"
+
+# ============================================================================
+# DEMO DATA GENERATION
+# ============================================================================
+
+demo-data-generation:
+  
+  # Customer data generation
+  customers:
+    count: 1000
+    fields:
+      - name: "customerId"
+        type: "sequence"
+        prefix: "CUST"
+        padding: 6
+        
+      - name: "firstName"
+        type: "random-choice"
+        values: ["John", "Jane", "Bob", "Alice", "Charlie", "Diana", "Frank", "Grace"]
+        
+      - name: "lastName"
+        type: "random-choice"
+        values: ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis"]
+        
+      - name: "email"
+        type: "computed"
+        formula: "${firstName}.${lastName}@example.com"
+        
+      - name: "age"
+        type: "random-range"
+        min: 18
+        max: 80
+        
+      - name: "tier"
+        type: "weighted-choice"
+        values:
+          Bronze: 40
+          Silver: 30
+          Gold: 20
+          Platinum: 10
+          
+      - name: "accountBalance"
+        type: "random-decimal"
+        min: 1000.0
+        max: 100000.0
+        precision: 2
+
+  # Product data generation
+  products:
+    count: 100
+    fields:
+      - name: "productId"
+        type: "sequence"
+        prefix: "PROD"
+        padding: 4
+        
+      - name: "name"
+        type: "random-choice"
+        values: ["US Treasury Bond", "Apple Stock", "Gold ETF", "Silver ETF", "Corporate Bond", "Bitcoin ETF", "Microsoft Corp", "Amazon Stock"]
+        
+      - name: "price"
+        type: "random-decimal"
+        min: 10.0
+        max: 2000.0
+        precision: 2
+        
+      - name: "category"
+        type: "random-choice"
+        values: ["Equity", "FixedIncome", "ETF", "Commodity", "Currency"]
+
+  # Trade data generation
+  trades:
+    count: 5000
+    fields:
+      - name: "tradeId"
+        type: "sequence"
+        prefix: "TRD"
+        padding: 6
+        
+      - name: "customerId"
+        type: "reference"
+        source: "customers"
+        field: "customerId"
+        
+      - name: "productId"
+        type: "reference"
+        source: "products"
+        field: "productId"
+        
+      - name: "amount"
+        type: "random-decimal"
+        min: 1000.0
+        max: 1000000.0
+        precision: 2
+        
+      - name: "currency"
+        type: "weighted-choice"
+        values:
+          USD: 60
+          EUR: 20
+          GBP: 10
+          JPY: 5
+          CAD: 3
+          AUD: 2
+          
+      - name: "tradeDate"
+        type: "random-date"
+        start: "2025-01-01"
+        end: "2025-12-31"
+        
+      - name: "status"
+        type: "weighted-choice"
+        values:
+          SETTLED: 70
+          PENDING: 20
+          FAILED: 5
+          CANCELLED: 5
+
+# ============================================================================
+# MONITORING AND HEALTH CHECKS
+# ============================================================================
+
+monitoring:
+  enabled: true
+  
+  health-checks:
+    enabled: true
+    interval-seconds: 30
+    timeout-seconds: 5
+    
+  metrics:
+    enabled: true
+    collection-interval-seconds: 60
+    
+    # Metrics to collect
+    include:
+      - data-source-health
+      - cache-hit-ratios
+      - file-processing-times
+      - error-rates
+      - throughput-rates
+      
+  logging:
+    level: "INFO"
+    include-performance-logs: true
+    include-data-source-logs: true
+
+# ============================================================================
+# ERROR HANDLING
+# ============================================================================
+
+error-handling:
+  
+  # Retry configuration
+  retry:
+    enabled: true
+    max-attempts: 3
+    backoff-multiplier: 2
+    initial-delay-ms: 100
+    
+  # Circuit breaker for external sources
+  circuit-breaker:
+    enabled: true
+    failure-threshold: 5
+    recovery-timeout-seconds: 60
+    
+  # Fallback strategies
+  fallbacks:
+    enabled: true
+    
+    # Use cache when file source fails
+    file-to-cache: true
+    
+    # Use default values when all sources fail
+    use-defaults: true
+    
+    # Continue processing with partial data
+    partial-processing: true
+
+# ============================================================================
+# DEMO SCENARIOS
+# ============================================================================
+
+demo-scenarios:
+  
+  basic-demo:
+    description: "Basic demo using file and cache sources"
+    data-sources: ["demo-json-files", "demo-products-cache"]
+    
+  batch-processing:
+    description: "Batch processing with CSV files and caching"
+    data-sources: ["demo-csv-files", "demo-customer-cache", "demo-lookup-cache"]
+    
+  file-processing:
+    description: "Multi-format file processing"
+    data-sources: ["demo-json-files", "demo-xml-files", "demo-lookup-cache"]
+    
+  performance-demo:
+    description: "High-performance processing with caching"
+    data-sources: ["demo-csv-files", "demo-products-cache", "demo-customer-cache", "demo-lookup-cache"]

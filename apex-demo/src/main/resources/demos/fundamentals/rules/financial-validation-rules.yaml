@@ -1,0 +1,357 @@
+# ============================================================================
+# APEX Rules Engine - Financial Validation Rules Configuration
+# ============================================================================
+#
+# This YAML configuration provides comprehensive validation rules for
+# financial instruments, with specialized focus on OTC (Over-The-Counter)
+# commodity derivatives and total return swaps. It demonstrates enterprise-grade
+# validation patterns for complex financial products.
+#
+# OVERVIEW:
+# This configuration implements multi-layered validation for OTC commodity
+# derivatives, covering structural validation, business logic enforcement,
+# regulatory compliance, and risk management requirements. It serves as a
+# comprehensive example of financial services rule configuration.
+#
+# FINANCIAL PRODUCT FOCUS:
+# - OTC Commodity Total Return Swaps
+# - Energy derivatives (Oil, Gas, Power)
+# - Agricultural commodities (Grains, Livestock)
+# - Metals and mining derivatives
+# - Environmental products (Carbon credits, Weather derivatives)
+#
+# VALIDATION ARCHITECTURE:
+# This configuration implements a four-tier validation framework:
+#
+# 1. STRUCTURAL VALIDATION - Data integrity and format validation
+#    - Required field presence and format validation
+#    - Data type consistency and range validation
+#    - Cross-field dependency validation
+#    - Reference data integrity checks
+#
+# 2. BUSINESS LOGIC VALIDATION - Financial business rules
+#    - Notional amount limits and thresholds
+#    - Maturity date and tenor validation
+#    - Currency and settlement validation
+#    - Counterparty eligibility and credit limits
+#
+# 3. REGULATORY COMPLIANCE - Regulatory and compliance rules
+#    - Position limit monitoring and enforcement
+#    - Large trader reporting thresholds
+#    - Cross-border transaction compliance
+#    - Market manipulation detection rules
+#
+# 4. RISK MANAGEMENT - Risk assessment and control
+#    - Credit risk and exposure calculation
+#    - Market risk and volatility assessment
+#    - Operational risk and settlement validation
+#    - Concentration risk and diversification rules
+#
+# ENTERPRISE FEATURES:
+# - Category-based rule organization with execution control
+# - Priority-based execution with configurable ordering
+# - Parallel execution support for performance optimization
+# - Stop-on-failure configuration for critical validations
+# - Comprehensive audit trail and compliance reporting
+#
+# REGULATORY COMPLIANCE:
+# - Dodd-Frank Act compliance for US commodity derivatives
+# - EMIR (European Market Infrastructure Regulation)
+# - MiFID II transaction reporting and best execution
+# - CFTC (Commodity Futures Trading Commission) rules
+# - Local jurisdiction regulatory requirements
+#
+# BUSINESS VALUE:
+# - Reduces trade settlement failures and operational risk
+# - Ensures regulatory compliance and audit readiness
+# - Automates complex validation logic for efficiency
+# - Provides comprehensive risk assessment and monitoring
+# - Enables straight-through processing for qualified trades
+#
+# INTEGRATION SCENARIOS:
+# - Pre-trade validation in trading platforms
+# - Post-trade processing and settlement systems
+# - Risk management and exposure monitoring
+# - Regulatory reporting and compliance systems
+# - Client onboarding and credit assessment
+#
+# ============================================================================
+
+metadata:
+  name: "Financial Validation Rules"
+  version: "1.0.0"
+  description: "Comprehensive validation rules for financial instruments, particularly OTC Commodity Total Return Swaps"
+  type: "rule-config"
+  author: "Rules Engine Team"
+  created: "2024-01-15"
+  last-modified: "2024-01-15"
+  tags:
+    - "financial"
+    - "validation"
+    - "commodity-swaps"
+    - "otc"
+
+# ============================================================================
+# FINANCIAL VALIDATION RULE CATEGORIES
+# ============================================================================
+#
+# This section defines the four-tier validation framework that organizes
+# financial validation rules into logical, business-aligned categories
+# with specific execution characteristics and business purposes.
+#
+# CATEGORY ARCHITECTURE:
+# Each category represents a distinct validation layer with:
+# - Specific business purpose and scope
+# - Configurable execution order and priority
+# - Performance optimization settings
+# - Error handling and failure management
+#
+# EXECUTION CONTROL FEATURES:
+# - execution-order: Sequential processing order (1-4)
+# - priority: Business importance and resource allocation
+# - stop-on-first-failure: Whether to halt on validation failures
+# - parallel-execution: Whether rules can execute concurrently
+#
+# VALIDATION TIERS:
+# 1. VALIDATION (Order 1) - Fundamental data integrity
+# 2. BUSINESS-LOGIC (Order 2) - Financial business rules
+# 3. REGULATORY (Order 3) - Compliance and reporting
+# 4. RISK-MANAGEMENT (Order 4) - Risk assessment and control
+#
+# PERFORMANCE OPTIMIZATION:
+# - Sequential execution ensures data dependencies are met
+# - Parallel execution within categories for performance
+# - Stop-on-failure prevents unnecessary processing
+# - Priority-based resource allocation for critical validations
+#
+# BUSINESS ALIGNMENT:
+# Categories map to organizational responsibilities and regulatory
+# requirements, ensuring clear accountability and audit trails.
+#
+categories:
+  - name: "validation"
+    display-name: "Validation Rules"
+    description: "Basic field and data validation rules"
+    priority: 10
+    enabled: true
+    execution-order: 1
+    stop-on-first-failure: false
+    parallel-execution: false
+
+  - name: "business-logic"
+    display-name: "Business Logic Rules"
+    description: "Business logic and constraint validation rules"
+    priority: 20
+    enabled: true
+    execution-order: 2
+    stop-on-first-failure: false
+    parallel-execution: false
+
+  - name: "regulatory"
+    display-name: "Regulatory Compliance"
+    description: "Regulatory compliance and reporting rules"
+    priority: 30
+    enabled: true
+    execution-order: 3
+    stop-on-first-failure: false
+    parallel-execution: false
+
+  - name: "risk-management"
+    display-name: "Risk Management"
+    description: "Risk assessment and management rules"
+    priority: 40
+    enabled: true
+    execution-order: 4
+    stop-on-first-failure: false
+    parallel-execution: false
+
+# Define individual rules
+rules:
+  # Basic Field Validation Rules
+  - id: "trade-id-required"
+    name: "Trade ID Required"
+    description: "Validates that trade ID is present and not empty"
+    category: "validation"
+    condition: "#tradeId != null && #tradeId.trim().length() > 0"
+    message: "Trade ID is required"
+    priority: 10
+    enabled: true
+    tags: ["required-field", "trade-identification"]
+
+  - id: "trade-id-format"
+    name: "Trade ID Format"
+    description: "Validates trade ID format: 3 letters + 3-6 digits"
+    category: "validation"
+    condition: "#tradeId != null && #tradeId.matches('^[A-Z]{3}[0-9]{3,6}$')"
+    message: "Trade ID must follow format: 3 letters + 3-6 digits"
+    priority: 11
+    enabled: true
+    tags: ["format-validation", "trade-identification"]
+
+  - id: "trade-date-required"
+    name: "Trade Date Required"
+    description: "Validates that trade date is present"
+    category: "validation"
+    condition: "#tradeDate != null"
+    message: "Trade date is required"
+    priority: 12
+    enabled: true
+    tags: ["required-field", "date-validation"]
+
+  - id: "effective-date-required"
+    name: "Effective Date Required"
+    description: "Validates that effective date is present"
+    category: "validation"
+    condition: "#effectiveDate != null"
+    message: "Effective date is required"
+    priority: 13
+    enabled: true
+    tags: ["required-field", "date-validation"]
+
+  - id: "maturity-date-required"
+    name: "Maturity Date Required"
+    description: "Validates that maturity date is present"
+    category: "validation"
+    condition: "#maturityDate != null"
+    message: "Maturity date is required"
+    priority: 14
+    enabled: true
+    tags: ["required-field", "date-validation"]
+
+  - id: "date-sequence-valid"
+    name: "Date Sequence Validation"
+    description: "Validates that dates are in correct sequence"
+    category: "validation"
+    condition: "#tradeDate != null && #effectiveDate != null && #maturityDate != null && #effectiveDate.compareTo(#tradeDate) >= 0 && #maturityDate.isAfter(#effectiveDate)"
+    message: "Dates must be in sequence: trade date <= effective date < maturity date"
+    priority: 15
+    enabled: true
+    tags: ["date-validation", "sequence-validation"]
+
+  # Business Logic Rules
+  - id: "notional-amount-positive"
+    name: "Notional Amount Positive"
+    description: "Validates that notional amount is positive"
+    category: "business-logic"
+    condition: "#notionalAmount != null && #notionalAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0"
+    message: "Notional amount must be positive"
+    priority: 20
+    enabled: true
+    tags: ["amount-validation", "business-rule"]
+
+  - id: "notional-amount-limit"
+    name: "Notional Amount Limit"
+    description: "Validates notional amount against maximum limit"
+    category: "business-logic"
+    condition: "#notionalAmount != null && #notionalAmount.compareTo(T(java.math.BigDecimal).new('1000000000')) <= 0"
+    message: "Notional amount cannot exceed 1 billion"
+    priority: 21
+    enabled: true
+    tags: ["amount-validation", "limit-check"]
+
+  - id: "currency-supported"
+    name: "Currency Supported"
+    description: "Validates that the currency is supported"
+    category: "business-logic"
+    condition: "#notionalCurrency != null && (#notionalCurrency == 'USD' || #notionalCurrency == 'EUR' || #notionalCurrency == 'GBP' || #notionalCurrency == 'JPY')"
+    message: "Currency must be one of: USD, EUR, GBP, JPY"
+    priority: 22
+    enabled: true
+    tags: ["currency-validation", "supported-values"]
+
+  # Regulatory Compliance Rules
+  - id: "counterparty-lei-required"
+    name: "Counterparty LEI Required"
+    description: "Validates that counterparty LEI is present for regulatory reporting"
+    category: "regulatory"
+    condition: "#counterpartyLei != null && #counterpartyLei.trim().length() > 0"
+    message: "Counterparty LEI is required for regulatory reporting"
+    priority: 30
+    enabled: true
+    tags: ["regulatory", "lei", "counterparty"]
+
+  - id: "counterparty-lei-format"
+    name: "Counterparty LEI Format"
+    description: "Validates LEI format (20 alphanumeric characters)"
+    category: "regulatory"
+    condition: "#counterpartyLei != null && #counterpartyLei.matches('^[A-Z0-9]{20}$')"
+    message: "Counterparty LEI must be 20 alphanumeric characters"
+    priority: 31
+    enabled: true
+    tags: ["regulatory", "lei", "format-validation"]
+
+  # Risk Management Rules
+  - id: "high-risk-counterparty"
+    name: "High Risk Counterparty Check"
+    description: "Flags trades with high-risk counterparties"
+    category: "risk-management"
+    condition: "#counterpartyRating != null && (#counterpartyRating == 'C' || #counterpartyRating == 'D')"
+    message: "High risk counterparty detected - additional approval required"
+    priority: 40
+    enabled: true
+    tags: ["risk-assessment", "counterparty-risk"]
+
+  - id: "large-exposure-check"
+    name: "Large Exposure Check"
+    description: "Flags large exposures requiring additional oversight"
+    category: "risk-management"
+    condition: "#notionalAmount != null && #notionalAmount.compareTo(T(java.math.BigDecimal).new('100000000')) > 0"
+    message: "Large exposure detected - risk committee approval required"
+    priority: 41
+    enabled: true
+    tags: ["risk-assessment", "exposure-limit"]
+
+# Define rule groups for organized execution
+rule-groups:
+  - id: "basic-validation"
+    name: "Basic Field Validation"
+    description: "Essential field validation rules that must pass before further processing"
+    category: "validation"
+    priority: 10
+    enabled: true
+    stop-on-first-failure: true
+    parallel-execution: false
+    rule-ids:
+      - "trade-id-required"
+      - "trade-id-format"
+      - "trade-date-required"
+      - "effective-date-required"
+      - "maturity-date-required"
+      - "date-sequence-valid"
+
+  - id: "business-validation"
+    name: "Business Logic Validation"
+    description: "Business rules and constraints validation"
+    category: "business-logic"
+    priority: 20
+    enabled: true
+    stop-on-first-failure: false
+    parallel-execution: true
+    rule-ids:
+      - "notional-amount-positive"
+      - "notional-amount-limit"
+      - "currency-supported"
+
+  - id: "regulatory-compliance"
+    name: "Regulatory Compliance Checks"
+    description: "Regulatory and compliance validation rules"
+    category: "regulatory"
+    priority: 30
+    enabled: true
+    stop-on-first-failure: false
+    parallel-execution: true
+    rule-ids:
+      - "counterparty-lei-required"
+      - "counterparty-lei-format"
+
+  - id: "risk-assessment"
+    name: "Risk Assessment Rules"
+    description: "Risk management and assessment rules"
+    category: "risk-management"
+    priority: 40
+    enabled: true
+    stop-on-first-failure: false
+    parallel-execution: true
+    rule-ids:
+      - "high-risk-counterparty"
+      - "large-exposure-check"

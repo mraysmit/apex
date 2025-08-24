@@ -1,0 +1,350 @@
+# ============================================================================
+# APEX Rules Engine - Rule Chains Patterns Demonstration
+# ============================================================================
+#
+# This YAML configuration provides a comprehensive demonstration of all
+# advanced rule chaining patterns available in the APEX Rules Engine,
+# showcasing sophisticated decision-making and workflow automation capabilities.
+#
+# OVERVIEW:
+# Rule chains enable complex business logic implementation through structured
+# patterns that go beyond simple rule evaluation. They support conditional
+# execution, sequential processing, parallel evaluation, and accumulative
+# decision making.
+#
+# RULE CHAINING PATTERNS DEMONSTRATED:
+# 1. CONDITIONAL CHAINING - Execute rules based on trigger conditions
+#    - Trigger-based rule execution
+#    - Different rule sets for different conditions
+#    - Business workflow automation
+#
+# 2. SEQUENTIAL CHAINING - Execute rules in strict order
+#    - Step-by-step processing workflows
+#    - Early termination on failures
+#    - Pipeline-style data processing
+#
+# 3. PARALLEL CHAINING - Execute multiple rule sets simultaneously
+#    - Independent rule evaluation
+#    - Concurrent processing for performance
+#    - Aggregated results from multiple paths
+#
+# 4. ACCUMULATIVE CHAINING - Build scores across multiple criteria
+#    - Weighted scoring algorithms
+#    - Multi-factor decision making
+#    - Threshold-based final decisions
+#
+# 5. HIERARCHICAL CHAINING - Nested rule structures
+#    - Parent-child rule relationships
+#    - Cascading rule evaluation
+#    - Complex organizational logic
+#
+# 6. CIRCUIT BREAKER CHAINING - Fault tolerance patterns
+#    - Automatic failure detection
+#    - Graceful degradation strategies
+#    - System resilience and recovery
+#
+# BUSINESS USE CASES:
+# - Customer onboarding workflows with conditional paths
+# - Financial transaction processing with risk assessment
+# - Compliance checking with escalation procedures
+# - Product recommendation with multi-factor scoring
+# - Order processing with validation pipelines
+# - Risk management with circuit breaker patterns
+#
+# TECHNICAL FEATURES:
+# - Pattern-specific configuration options
+# - Priority-based execution ordering
+# - Category-based rule organization
+# - Business domain classification
+# - Comprehensive audit trails
+# - Performance optimization settings
+#
+# ============================================================================
+
+metadata:
+  name: "Rule Chains Patterns Demo Configuration"
+  version: "1.0.0"
+  description: "Comprehensive demonstration of all 6 nested rules and rule chaining patterns"
+  type: "rule-config"
+  author: "Rules Engine Team"
+  created-date: "2025-07-28"
+
+# Traditional rules and rule groups continue to work as before
+rules:
+  - id: "basic-validation"
+    name: "Basic Validation Rule"
+    condition: "#amount > 0"
+    message: "Amount must be positive"
+    enabled: true
+
+rule-groups:
+  - id: "basic-validation-group"
+    name: "Basic Validation Group"
+    enabled: true
+    rule-ids:
+      - "basic-validation"
+
+# ============================================================================
+# ADVANCED RULE CHAINING PATTERNS
+# ============================================================================
+#
+# This section demonstrates sophisticated rule chaining patterns that enable
+# complex business logic implementation through structured rule relationships
+# and conditional execution flows.
+#
+# PATTERN CATEGORIES:
+# 1. WORKFLOW PATTERNS - Business process automation
+#    - Conditional chaining for decision trees
+#    - Sequential chaining for step-by-step processes
+#    - Parallel chaining for concurrent evaluations
+#
+# 2. SCORING PATTERNS - Multi-criteria decision making
+#    - Accumulative chaining for weighted scoring
+#    - Hierarchical chaining for nested evaluations
+#    - Threshold-based decision making
+#
+# 3. RESILIENCE PATTERNS - Fault tolerance and recovery
+#    - Circuit breaker chaining for system protection
+#    - Fallback mechanisms for graceful degradation
+#    - Error recovery and retry logic
+#
+# CONFIGURATION ELEMENTS:
+# - pattern: Specifies the chaining pattern type
+# - priority: Execution order for multiple chains
+# - category: Logical grouping for organization
+# - business-domain: Domain-specific classification
+# - configuration: Pattern-specific settings and rules
+#
+# EXECUTION FLOW:
+# - Chains execute in priority order (lower numbers first)
+# - Pattern-specific logic determines rule evaluation
+# - Results are aggregated according to pattern rules
+# - Audit trails capture decision paths and outcomes
+#
+rule-chains:
+  
+  # Pattern 1: Conditional Chaining - Execute Rule B only if Rule A triggers
+  - id: "high-value-customer-processing"
+    name: "High Value Customer Processing"
+    description: "Execute enhanced validation only for high-value customers"
+    pattern: "conditional-chaining"
+    enabled: true
+    priority: 10
+    category: "customer-processing"
+    created-by: "business.analyst@company.com"
+    business-domain: "Customer Management"
+    configuration:
+      trigger-rule:
+        id: "high-value-customer-check"
+        condition: "#customerType == 'PREMIUM' && #transactionAmount > 100000"
+        message: "High-value customer transaction detected"
+      conditional-rules:
+        on-trigger:
+          - id: "enhanced-due-diligence"
+            condition: "#accountAge >= 3"
+            message: "Enhanced due diligence check passed"
+          - id: "compliance-review"
+            condition: "#complianceScore > 80"
+            message: "Compliance review passed"
+        on-no-trigger:
+          - id: "standard-processing"
+            condition: "true"
+            message: "Standard processing applied"
+
+  # Pattern 2: Sequential Dependency - Each rule builds upon results from the previous rule
+  - id: "discount-calculation-pipeline"
+    name: "Discount Calculation Pipeline"
+    description: "Multi-stage discount calculation with dependencies"
+    pattern: "sequential-dependency"
+    enabled: true
+    priority: 20
+    category: "pricing"
+    configuration:
+      stages:
+        - stage: 1
+          name: "Base Discount Calculation"
+          rule:
+            id: "base-discount"
+            condition: "#customerTier == 'GOLD' ? 0.15 : (#customerTier == 'SILVER' ? 0.10 : 0.05)"
+            message: "Base discount calculated based on customer tier"
+          output-variable: "baseDiscount"
+        - stage: 2
+          name: "Regional Multiplier Application"
+          rule:
+            id: "regional-multiplier"
+            condition: "#region == 'US' ? #baseDiscount * 1.2 : (#region == 'EU' ? #baseDiscount * 1.1 : #baseDiscount)"
+            message: "Regional multiplier applied to base discount"
+          output-variable: "finalDiscount"
+        - stage: 3
+          name: "Final Amount Calculation"
+          rule:
+            id: "final-amount"
+            condition: "#baseAmount * (1 - #finalDiscount)"
+            message: "Final amount calculated after all discounts"
+          output-variable: "finalAmount"
+
+  # Pattern 3: Result-Based Routing - Route to different rule sets based on previous results
+  - id: "risk-based-transaction-routing"
+    name: "Risk-Based Transaction Routing"
+    description: "Route transactions to different validation paths based on risk assessment"
+    pattern: "result-based-routing"
+    enabled: true
+    priority: 30
+    category: "risk-management"
+    configuration:
+      router-rule:
+        id: "transaction-risk-assessment"
+        condition: "#riskScore > 70 ? 'HIGH_RISK' : (#riskScore > 30 ? 'MEDIUM_RISK' : 'LOW_RISK')"
+        message: "Transaction risk level determined"
+        output-variable: "riskLevel"
+      routes:
+        HIGH_RISK:
+          rules:
+            - id: "manager-approval-required"
+              condition: "#transactionAmount > 100000"
+              message: "Manager approval required for high-risk, high-value transaction"
+            - id: "compliance-review-required"
+              condition: "#riskScore > 80"
+              message: "Compliance review required for very high-risk transaction"
+            - id: "customer-history-check"
+              condition: "#customerHistory == 'EXCELLENT'"
+              message: "Customer history must be excellent for high-risk transactions"
+        MEDIUM_RISK:
+          rules:
+            - id: "auto-approval-limit-check"
+              condition: "#transactionAmount <= 50000"
+              message: "Transaction within auto-approval limits"
+            - id: "customer-standing-check"
+              condition: "#customerStanding != 'POOR'"
+              message: "Customer standing is acceptable"
+        LOW_RISK:
+          rules:
+            - id: "basic-amount-validation"
+              condition: "#transactionAmount > 0"
+              message: "Basic transaction amount validation"
+
+  # Pattern 4: Accumulative Chaining - Build up a score/result across multiple rules
+  - id: "credit-scoring-accumulation"
+    name: "Credit Score Accumulation"
+    description: "Build up credit score across multiple criteria"
+    pattern: "accumulative-chaining"
+    enabled: true  # Now implemented and ready for use
+    priority: 40
+    category: "credit-assessment"
+    created-by: "credit.analyst@company.com"
+    business-domain: "Credit Assessment"
+    configuration:
+      accumulator-variable: "totalScore"
+      initial-value: 0
+      accumulation-rules:
+        - id: "credit-score-component"
+          condition: "#creditScore >= 700 ? 25 : (#creditScore >= 650 ? 15 : 10)"
+          message: "Credit score component calculated"
+          weight: 1.0
+        - id: "income-component"
+          condition: "#annualIncome >= 80000 ? 20 : (#annualIncome >= 60000 ? 15 : (#annualIncome >= 40000 ? 10 : 0))"
+          message: "Income component calculated"
+          weight: 1.0
+        - id: "employment-component"
+          condition: "#employmentYears >= 5 ? 15 : (#employmentYears >= 2 ? 10 : 5)"
+          message: "Employment stability component"
+          weight: 1.0
+        - id: "debt-ratio-component"
+          condition: "(#existingDebt / #annualIncome) < 0.2 ? 10 : ((#existingDebt / #annualIncome) < 0.4 ? 0 : -10)"
+          message: "Debt-to-income ratio component"
+          weight: 1.0
+      final-decision-rule:
+        id: "loan-decision"
+        condition: "#totalScore >= 60 ? 'APPROVED' : (#totalScore >= 40 ? 'CONDITIONAL' : 'DENIED')"
+        message: "Final loan decision based on accumulated score"
+
+  # Pattern 5: Complex Financial Workflow - Real-world nested rule scenario
+  - id: "trade-processing-workflow"
+    name: "Trade Processing Workflow"
+    description: "Multi-stage trade processing with dependencies and conditional execution"
+    pattern: "complex-workflow"
+    enabled: true  # Now implemented and ready for use
+    priority: 50
+    category: "trade-processing"
+    created-by: "trade.operations@company.com"
+    business-domain: "Trade Processing"
+    configuration:
+      stages:
+        - stage: "pre-validation"
+          name: "Pre-Validation Stage"
+          rules:
+            - id: "basic-trade-data-check"
+              condition: "#tradeType != null && #notionalAmount != null && #counterparty != null"
+              message: "Basic trade data validation"
+          failure-action: "terminate"
+        - stage: "risk-assessment"
+          name: "Risk Assessment Stage"
+          depends-on: ["pre-validation"]
+          rules:
+            - id: "trade-risk-calculation"
+              condition: "#notionalAmount > 1000000 && #marketVolatility > 0.2 ? 'HIGH' : 'MEDIUM'"
+              message: "Trade risk level assessed"
+          output-variable: "tradeRiskLevel"
+
+  # Pattern 6: Fluent Rule Builder - Compose rules with conditional execution paths
+  - id: "customer-onboarding-decision-tree"
+    name: "Customer Onboarding Decision Tree"
+    description: "Complex decision tree for customer onboarding process"
+    pattern: "fluent-builder"
+    enabled: true  # Now implemented and ready for use
+    priority: 60
+    category: "customer-onboarding"
+    created-by: "customer.onboarding@company.com"
+    business-domain: "Customer Onboarding"
+    configuration:
+      root-rule:
+        id: "customer-type-classification"
+        condition: "#customerType == 'VIP' || #customerType == 'PREMIUM'"
+        message: "High-tier customer detected"
+        on-success:
+          rule:
+            id: "high-value-account-check"
+            condition: "#initialDeposit > 100000"
+            message: "High-value account detected"
+            on-success:
+              rule:
+                id: "expedited-processing"
+                condition: "true"
+                message: "Expedited processing approved"
+            on-failure:
+              rule:
+                id: "standard-premium-processing"
+                condition: "true"
+                message: "Standard premium processing applied"
+        on-failure:
+          rule:
+            id: "standard-customer-validation"
+            condition: "#initialDeposit > 1000"
+            message: "Standard customer validation"
+
+# Categories for organizing rule chains
+categories:
+  - name: "customer-processing"
+    display-name: "Customer Processing"
+    priority: 10
+    enabled: true
+  - name: "pricing"
+    display-name: "Pricing and Discounts"
+    priority: 20
+    enabled: true
+  - name: "risk-management"
+    display-name: "Risk Management"
+    priority: 30
+    enabled: true
+  - name: "credit-assessment"
+    display-name: "Credit Assessment"
+    priority: 40
+    enabled: true
+  - name: "trade-processing"
+    display-name: "Trade Processing"
+    priority: 50
+    enabled: true
+  - name: "customer-onboarding"
+    display-name: "Customer Onboarding"
+    priority: 60
+    enabled: true

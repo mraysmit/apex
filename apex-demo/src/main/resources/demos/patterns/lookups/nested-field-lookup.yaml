@@ -1,0 +1,249 @@
+# Nested Field Reference Lookup Example Configuration
+# Demonstrates nested field navigation in lookup-key expressions
+# Use Case: Country-specific settlement information lookup using nested counterparty data
+
+metadata:
+  type: "enrichment"
+  name: "Nested Field Reference Lookup Demo"
+  description: "Demonstrates nested field navigation '#trade.counterparty.countryCode' for settlement enrichment"
+  version: "1.0"
+  author: "APEX Demo Team"
+  category: "patterns"
+  subcategory: "lookups"
+  difficulty: "intermediate"
+  estimated-time: "10-15 minutes"
+
+# Define the enrichment rules
+enrichments:
+  - id: "country-settlement-enrichment"
+    name: "Country Settlement Information Lookup"
+    description: "Enrich trade settlements with country-specific settlement information using nested field navigation"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#trade != null && #trade.counterparty != null && #trade.counterparty.countryCode != null"
+    
+    lookup-config:
+      # Nested field reference - navigates through trade -> counterparty -> countryCode
+      lookup-key: "#trade.counterparty.countryCode"
+      
+      lookup-dataset:
+        type: "inline"
+        key-field: "countryCode"
+        data:
+          # Major financial centers
+          - countryCode: "US"
+            countryName: "United States"
+            regulatoryZone: "AMERICAS"
+            timeZone: "EST"
+            settlementSystem: "DTC"
+            standardSettlementDays: 2
+            holidayCalendar: "NYSE"
+            settlementFee: 5.00
+            custodianBank: "Bank of New York Mellon"
+            
+          - countryCode: "GB"
+            countryName: "United Kingdom"
+            regulatoryZone: "EMEA"
+            timeZone: "GMT"
+            settlementSystem: "CREST"
+            standardSettlementDays: 2
+            holidayCalendar: "LSE"
+            settlementFee: 3.50
+            custodianBank: "HSBC Custody Services"
+            
+          - countryCode: "DE"
+            countryName: "Germany"
+            regulatoryZone: "EMEA"
+            timeZone: "CET"
+            settlementSystem: "CBF"
+            standardSettlementDays: 2
+            holidayCalendar: "XETRA"
+            settlementFee: 4.00
+            custodianBank: "Deutsche Bank AG"
+            
+          - countryCode: "JP"
+            countryName: "Japan"
+            regulatoryZone: "APAC"
+            timeZone: "JST"
+            settlementSystem: "JASDEC"
+            standardSettlementDays: 2
+            holidayCalendar: "TSE"
+            settlementFee: 8.00
+            custodianBank: "Mizuho Trust & Banking"
+            
+          - countryCode: "HK"
+            countryName: "Hong Kong"
+            regulatoryZone: "APAC"
+            timeZone: "HKT"
+            settlementSystem: "CCASS"
+            standardSettlementDays: 2
+            holidayCalendar: "HKEX"
+            settlementFee: 6.00
+            custodianBank: "Standard Chartered Bank"
+            
+          - countryCode: "SG"
+            countryName: "Singapore"
+            regulatoryZone: "APAC"
+            timeZone: "SGT"
+            settlementSystem: "CDP"
+            standardSettlementDays: 2
+            holidayCalendar: "SGX"
+            settlementFee: 5.50
+            custodianBank: "DBS Bank"
+            
+          - countryCode: "FR"
+            countryName: "France"
+            regulatoryZone: "EMEA"
+            timeZone: "CET"
+            settlementSystem: "EUROCLEAR"
+            standardSettlementDays: 2
+            holidayCalendar: "EURONEXT"
+            settlementFee: 3.75
+            custodianBank: "BNP Paribas Securities Services"
+            
+          - countryCode: "CH"
+            countryName: "Switzerland"
+            regulatoryZone: "EMEA"
+            timeZone: "CET"
+            settlementSystem: "SIX SIS"
+            standardSettlementDays: 2
+            holidayCalendar: "SIX"
+            settlementFee: 7.50
+            custodianBank: "UBS Switzerland AG"
+            
+          - countryCode: "CA"
+            countryName: "Canada"
+            regulatoryZone: "AMERICAS"
+            timeZone: "EST"
+            settlementSystem: "CDS"
+            standardSettlementDays: 2
+            holidayCalendar: "TSX"
+            settlementFee: 4.50
+            custodianBank: "Royal Bank of Canada"
+            
+          - countryCode: "AU"
+            countryName: "Australia"
+            regulatoryZone: "APAC"
+            timeZone: "AEST"
+            settlementSystem: "CHESS"
+            standardSettlementDays: 2
+            holidayCalendar: "ASX"
+            settlementFee: 6.50
+            custodianBank: "Commonwealth Bank of Australia"
+            
+          # Emerging markets
+          - countryCode: "BR"
+            countryName: "Brazil"
+            regulatoryZone: "AMERICAS"
+            timeZone: "BRT"
+            settlementSystem: "SELIC"
+            standardSettlementDays: 3
+            holidayCalendar: "B3"
+            settlementFee: 12.00
+            custodianBank: "Banco do Brasil"
+            
+          - countryCode: "IN"
+            countryName: "India"
+            regulatoryZone: "APAC"
+            timeZone: "IST"
+            settlementSystem: "NSDL"
+            standardSettlementDays: 2
+            holidayCalendar: "NSE"
+            settlementFee: 10.00
+            custodianBank: "HDFC Bank"
+    
+    # Map the lookup results to target fields
+    field-mappings:
+      - source-field: "countryName"
+        target-field: "countryName"
+        required: true
+        
+      - source-field: "regulatoryZone"
+        target-field: "regulatoryZone"
+        required: true
+        
+      - source-field: "timeZone"
+        target-field: "timeZone"
+        required: true
+        
+      - source-field: "settlementSystem"
+        target-field: "settlementSystem"
+        required: true
+        
+      - source-field: "standardSettlementDays"
+        target-field: "standardSettlementDays"
+        required: true
+        
+      - source-field: "holidayCalendar"
+        target-field: "holidayCalendar"
+        required: true
+        
+      - source-field: "settlementFee"
+        target-field: "settlementFee"
+        required: true
+        
+      - source-field: "custodianBank"
+        target-field: "custodianBank"
+        required: true
+
+# Optional validation rules
+validations:
+  - id: "trade-exists"
+    name: "Trade Object Validation"
+    description: "Ensure trade object exists"
+    type: "field-validation"
+    enabled: true
+    condition: "true"
+    
+    validation-config:
+      field: "trade"
+      rules:
+        - type: "not-null"
+          message: "Trade object must not be null"
+          
+  - id: "counterparty-exists"
+    name: "Counterparty Object Validation"
+    description: "Ensure counterparty object exists within trade"
+    type: "field-validation"
+    enabled: true
+    condition: "#trade != null"
+    
+    validation-config:
+      field: "trade.counterparty"
+      rules:
+        - type: "not-null"
+          message: "Trade counterparty must not be null"
+          
+  - id: "country-code-format"
+    name: "Country Code Format Validation"
+    description: "Ensure country code follows ISO format"
+    type: "field-validation"
+    enabled: true
+    condition: "#trade != null && #trade.counterparty != null"
+    
+    validation-config:
+      field: "trade.counterparty.countryCode"
+      rules:
+        - type: "regex"
+          pattern: "^[A-Z]{2}$"
+          message: "Country code must be 2-letter ISO format (e.g., US, GB, DE)"
+          
+  - id: "settlement-amount-positive"
+    name: "Settlement Amount Validation"
+    description: "Ensure settlement amount is positive"
+    type: "field-validation"
+    enabled: true
+    condition: "#settlementAmount != null"
+    
+    validation-config:
+      field: "settlementAmount"
+      rules:
+        - type: "range"
+          min: 0.01
+          message: "Settlement amount must be positive"
+
+# Processing configuration
+processing:
+  continue-on-error: true
+  max-errors: 10
+  error-handling: "log-and-continue"

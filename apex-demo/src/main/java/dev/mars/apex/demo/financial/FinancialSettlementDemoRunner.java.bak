@@ -1,0 +1,124 @@
+package dev.mars.apex.demo.financial;
+
+import dev.mars.apex.core.config.ApexConfiguration;
+import dev.mars.apex.core.engine.ApexRulesEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+
+/**
+ * Financial Settlement Demo Runner
+ * 
+ * This runner executes the comprehensive financial settlement enrichment demo
+ * showcasing real-world examples from the "Types of Enrichment Relevant for 
+ * Financial Services Post-Trade Settlement" guide.
+ * 
+ * DEMO FEATURES:
+ * - Reference Data Enrichment (LEI, ISIN, MIC, BIC, SSI)
+ * - Counterparty Enrichment (Credit ratings, classifications)
+ * - Regulatory Enrichment (UTI generation, MiFID II, EMIR)
+ * - Risk Enrichment (VaR calculations, stress testing)
+ * - Settlement Enrichment (Dates, priorities, methods)
+ * - Fee Calculation Enrichment (Commissions, regulatory fees)
+ * 
+ * USAGE:
+ * Run this class to execute the comprehensive demo with multiple trade examples:
+ * - UK Equity Trade (Royal Dutch Shell PLC)
+ * - US Government Bond Trade (10Y Treasury Note)
+ * - German Equity Trade (SAP SE)
+ * - High-Value US Equity Trade (Apple Inc) - triggers stress testing
+ */
+@SpringBootApplication
+@ComponentScan(basePackages = {"dev.mars.apex"})
+public class FinancialSettlementDemoRunner implements CommandLineRunner {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FinancialSettlementDemoRunner.class);
+
+    private final ComprehensiveFinancialSettlementDemo demo;
+
+    public FinancialSettlementDemoRunner(ApexRulesEngine rulesEngine, ApexConfiguration configuration) {
+        this.demo = new ComprehensiveFinancialSettlementDemo(rulesEngine, configuration);
+    }
+
+    public static void main(String[] args) {
+        LOGGER.info("Starting Financial Settlement Enrichment Demo...");
+        SpringApplication.run(FinancialSettlementDemoRunner.class, args);
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        try {
+            LOGGER.info("Executing Comprehensive Financial Settlement Enrichment Demo");
+            LOGGER.info("This demo showcases real-world settlement enrichment examples");
+            LOGGER.info("from the 'Types of Enrichment Relevant for Financial Services Post-Trade Settlement' guide");
+            
+            // Run the comprehensive demo
+            demo.runComprehensiveDemo();
+            
+            LOGGER.info("Demo completed successfully!");
+            
+        } catch (Exception e) {
+            LOGGER.error("Error running financial settlement demo", e);
+            throw e;
+        }
+    }
+}
+
+/**
+ * Alternative standalone demo runner that can be used without Spring Boot
+ */
+class StandaloneFinancialSettlementDemo {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(StandaloneFinancialSettlementDemo.class);
+    
+    public static void main(String[] args) {
+        LOGGER.info("=".repeat(80));
+        LOGGER.info("STANDALONE FINANCIAL SETTLEMENT ENRICHMENT DEMO");
+        LOGGER.info("=".repeat(80));
+        LOGGER.info("This demo showcases the YAML configuration and model structure");
+        LOGGER.info("for comprehensive financial settlement enrichment.");
+        LOGGER.info("");
+        LOGGER.info("CONFIGURATION FILE:");
+        LOGGER.info("  financial-settlement/comprehensive-settlement-enrichment.yaml");
+        LOGGER.info("");
+        LOGGER.info("ENRICHMENT CATEGORIES DEMONSTRATED:");
+        LOGGER.info("  ✓ Reference Data Enrichment (LEI, ISIN, MIC, BIC, SSI)");
+        LOGGER.info("  ✓ Counterparty Enrichment (Credit ratings, classifications)");
+        LOGGER.info("  ✓ Regulatory Enrichment (UTI generation, MiFID II, EMIR)");
+        LOGGER.info("  ✓ Risk Enrichment (VaR calculations, stress testing)");
+        LOGGER.info("  ✓ Settlement Enrichment (Dates, priorities, methods)");
+        LOGGER.info("  ✓ Fee Calculation Enrichment (Commissions, regulatory fees)");
+        LOGGER.info("");
+        LOGGER.info("TRADE EXAMPLES:");
+        LOGGER.info("  1. UK Equity Trade - Royal Dutch Shell PLC (GB00B03MLX29)");
+        LOGGER.info("     Counterparty: Deutsche Bank AG, Venue: XLON");
+        LOGGER.info("     Value: £27,505,000 (10,000 shares @ £2,750.50)");
+        LOGGER.info("");
+        LOGGER.info("  2. US Government Bond Trade - 10Y Treasury Note (US912828XG93)");
+        LOGGER.info("     Counterparty: JPMorgan Chase, Venue: BONDDESK");
+        LOGGER.info("     Value: $98,750,000 (1,000,000 bonds @ $98.75)");
+        LOGGER.info("");
+        LOGGER.info("  3. German Equity Trade - SAP SE (DE0007164600)");
+        LOGGER.info("     Counterparty: Barclays Bank PLC, Venue: XPAR");
+        LOGGER.info("     Value: €603,750 (5,000 shares @ €120.75)");
+        LOGGER.info("");
+        LOGGER.info("  4. High-Value US Equity Trade - Apple Inc (US0378331005)");
+        LOGGER.info("     Counterparty: Goldman Sachs, Venue: XNAS");
+        LOGGER.info("     Value: $95,000,000 (500,000 shares @ $190.00)");
+        LOGGER.info("     * Triggers high-priority settlement and stress testing");
+        LOGGER.info("");
+        LOGGER.info("INDUSTRY STANDARDS COVERED:");
+        LOGGER.info("  • ISO 20022: Financial messaging standards");
+        LOGGER.info("  • FpML: Financial Products Markup Language");
+        LOGGER.info("  • EMIR/MiFID II: European regulatory requirements");
+        LOGGER.info("  • Dodd-Frank: US derivatives regulation");
+        LOGGER.info("  • ISDA: Risk and legal documentation standards");
+        LOGGER.info("");
+        LOGGER.info("To run the full interactive demo with the APEX Rules Engine,");
+        LOGGER.info("execute the FinancialSettlementDemoRunner class or run the tests.");
+        LOGGER.info("=".repeat(80));
+    }
+}
