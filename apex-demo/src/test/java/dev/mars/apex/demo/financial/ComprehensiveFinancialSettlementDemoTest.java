@@ -5,29 +5,21 @@ import dev.mars.apex.demo.financial.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.lenient;
 
 /**
  * Test class for Comprehensive Financial Settlement Enrichment Demo
- * 
+ *
  * This test demonstrates the working functionality of the comprehensive
  * financial settlement enrichment using the APEX Rules Engine with
  * real-world examples from the settlement guide.
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("Comprehensive Financial Settlement Enrichment Demo Tests")
 class ComprehensiveFinancialSettlementDemoTest {
 
@@ -295,15 +287,7 @@ class ComprehensiveFinancialSettlementDemoTest {
     }
 
     private RuleResult createMockRuleResult() {
-        // Create a mock RuleResult using Mockito
-        RuleResult mockResult = mock(RuleResult.class);
-
-        // Configure the mock to return expected values using lenient stubbing
-        lenient().when(mockResult.isTriggered()).thenReturn(true);
-        lenient().when(mockResult.getRuleName()).thenReturn("settlement-enrichment-rule");
-        lenient().when(mockResult.getMessage()).thenReturn("Settlement enrichment completed successfully");
-        lenient().when(mockResult.getTimestamp()).thenReturn(java.time.Instant.now());
-
-        return mockResult;
+        // Create a test RuleResult using the static factory method
+        return RuleResult.match("settlement-enrichment-rule", "Settlement enrichment completed successfully");
     }
 }

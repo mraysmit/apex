@@ -6,6 +6,8 @@ module dev.mars.apex.playground {
 
     // APEX dependencies
     requires transitive dev.mars.apex.core;
+    requires transitive dev.mars.apex.demo;
+    requires spring.core;
     requires spring.expression;
     requires spring.context;
     requires spring.beans;

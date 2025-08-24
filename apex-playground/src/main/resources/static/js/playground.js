@@ -188,11 +188,17 @@ function clearAll() {
 async function loadExample() {
     try {
         const response = await fetch(window.playgroundConfig.apiBaseUrl + '/examples');
-        const examples = await response.json();
-        
-        // For now, load a simple example (will be enhanced in Phase 2)
-        loadDefaultExample();
-        
+        const data = await response.json();
+
+        if (data.error) {
+            console.error('Error from server:', data.error);
+            loadDefaultExample();
+            return;
+        }
+
+        // Show example selection dialog
+        showExampleSelectionDialog(data);
+
     } catch (error) {
         console.error('Error loading examples:', error);
         loadDefaultExample();
@@ -231,6 +237,116 @@ rules:
     yamlRulesEditor.value = exampleYaml;
     
     validateYamlRealtime(exampleYaml);
+}
+
+/**
+ * Show example selection dialog
+ */
+function showExampleSelectionDialog(examplesData) {
+    // Create modal dialog
+    const modal = document.createElement('div');
+    modal.className = 'example-modal';
+    modal.innerHTML = `
+        <div class="example-modal-content">
+            <div class="example-modal-header">
+                <h3>Select Example</h3>
+                <button class="example-modal-close">&times;</button>
+            </div>
+            <div class="example-modal-body">
+                ${createExampleCategoriesHTML(examplesData)}
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Add event listeners
+    modal.querySelector('.example-modal-close').addEventListener('click', () => {
+        document.body.removeChild(modal);
+    });
+
+    // Close on background click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            document.body.removeChild(modal);
+        }
+    });
+}
+
+/**
+ * Create HTML for example categories
+ */
+function createExampleCategoriesHTML(examplesData) {
+    let html = '';
+
+    Object.keys(examplesData).forEach(category => {
+        if (category === 'timestamp' || category === 'message') return;
+
+        const examples = examplesData[category];
+        if (Array.isArray(examples)) {
+            html += `
+                <div class="example-category">
+                    <h4>${category.charAt(0).toUpperCase() + category.slice(1)}</h4>
+                    <div class="example-list">
+                        ${examples.map(example => `
+                            <div class="example-item ${example.available ? '' : 'unavailable'}"
+                                 data-category="${category}"
+                                 data-id="${example.id}">
+                                <div class="example-name">${example.name}</div>
+                                <div class="example-description">${example.description}</div>
+                                ${!example.available ? '<div class="example-error">Not available</div>' : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+    });
+
+    // Add event listeners for example selection
+    setTimeout(() => {
+        document.querySelectorAll('.example-item.available, .example-item:not(.unavailable)').forEach(item => {
+            item.addEventListener('click', () => {
+                const category = item.dataset.category;
+                const id = item.dataset.id;
+                loadSpecificExample(category, id);
+                document.querySelector('.example-modal').remove();
+            });
+        });
+    }, 100);
+
+    return html;
+}
+
+/**
+ * Load a specific example by category and ID
+ */
+async function loadSpecificExample(category, id) {
+    try {
+        const response = await fetch(`${window.playgroundConfig.apiBaseUrl}/examples/${category}/${id}`);
+        const example = await response.json();
+
+        if (example.error) {
+            console.error('Error loading example:', example.error);
+            loadDefaultExample();
+            return;
+        }
+
+        // Load the example data
+        if (example.yaml) {
+            yamlRulesEditor.value = example.yaml;
+        }
+
+        if (example.sampleData) {
+            sourceDataEditor.value = JSON.stringify(example.sampleData, null, 2);
+        }
+
+        showAlert(`Example "${example.name}" loaded successfully`, 'success');
+
+    } catch (error) {
+        console.error('Error loading specific example:', error);
+        loadDefaultExample();
+    }
 }
 
 /**

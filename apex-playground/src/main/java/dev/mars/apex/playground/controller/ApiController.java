@@ -5,6 +5,7 @@ import dev.mars.apex.playground.model.PlaygroundResponse;
 import dev.mars.apex.playground.model.YamlValidationResponse;
 import dev.mars.apex.playground.service.PlaygroundService;
 import dev.mars.apex.playground.service.YamlValidationService;
+import dev.mars.apex.playground.service.ExampleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -38,11 +39,13 @@ public class ApiController {
 
     private final PlaygroundService playgroundService;
     private final YamlValidationService yamlValidationService;
+    private final ExampleService exampleService;
 
     @Autowired
-    public ApiController(PlaygroundService playgroundService, YamlValidationService yamlValidationService) {
+    public ApiController(PlaygroundService playgroundService, YamlValidationService yamlValidationService, ExampleService exampleService) {
         this.playgroundService = playgroundService;
         this.yamlValidationService = yamlValidationService;
+        this.exampleService = exampleService;
     }
 
     /**
@@ -125,24 +128,63 @@ public class ApiController {
     }
 
     /**
-     * Get available example templates.
-     * This is a placeholder implementation that will be expanded in Phase 2.
+     * Get available example templates from apex-demo module.
      */
     @GetMapping("/examples")
     @Operation(
         summary = "Get example templates",
-        description = "Retrieve available example data and YAML rules templates."
+        description = "Retrieve available example data and YAML rules templates from apex-demo module."
     )
     @ApiResponse(responseCode = "200", description = "Examples retrieved successfully")
     public ResponseEntity<Map<String, Object>> getExamples() {
-        logger.info("Examples request received");
-        
-        // Placeholder response - will be implemented in Phase 2
-        Map<String, Object> response = new HashMap<>();
-        response.put("examples", new String[]{"customer-validation", "financial-rules", "data-enrichment"});
-        response.put("message", "Examples endpoint ready - implementation coming in Phase 2");
-        response.put("timestamp", System.currentTimeMillis());
-        
-        return ResponseEntity.ok(response);
+        logger.info("Loading examples from apex-demo module");
+
+        try {
+            Map<String, Object> examples = exampleService.getAllExamples();
+            examples.put("timestamp", System.currentTimeMillis());
+            examples.put("message", "Examples loaded from apex-demo module");
+
+            return ResponseEntity.ok(examples);
+
+        } catch (Exception e) {
+            logger.error("Error loading examples", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to load examples: " + e.getMessage());
+            errorResponse.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.status(500).body(errorResponse);
+        }
+    }
+
+    /**
+     * Get a specific example by category and name.
+     */
+    @GetMapping("/examples/{category}/{name}")
+    @Operation(
+        summary = "Get specific example",
+        description = "Retrieve a specific example configuration by category and name."
+    )
+    @ApiResponse(responseCode = "200", description = "Example retrieved successfully")
+    @ApiResponse(responseCode = "404", description = "Example not found")
+    public ResponseEntity<Map<String, Object>> getExample(
+            @PathVariable String category,
+            @PathVariable String name) {
+        logger.info("Loading example: {}/{}", category, name);
+
+        try {
+            Map<String, Object> example = exampleService.getExample(category, name);
+
+            if (example.containsKey("error")) {
+                return ResponseEntity.notFound().build();
+            }
+
+            example.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.ok(example);
+
+        } catch (Exception e) {
+            logger.error("Error loading example {}/{}", category, name, e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to load example: " + e.getMessage());
+            return ResponseEntity.status(500).body(errorResponse);
+        }
     }
 }
