@@ -631,6 +631,472 @@ transformations:
     targetField: "cleanPhone"
 ```
 
+## Testing External Data Sources in APEX Playground
+
+If PostgreSQL or REST APIs are accessible, you can test external data source enrichments directly in the APEX Playground. This section provides comprehensive guidance on configuring and testing external data sources for real-world data enrichment scenarios.
+
+### Prerequisites for External Data Source Testing
+
+Before testing external data sources in the playground, ensure you have:
+
+#### **Database Prerequisites**
+- **PostgreSQL Server**: Running instance with proper connection configuration
+- **Database Access**: Valid credentials with read permissions
+- **Network Connectivity**: Accessible from the playground application
+- **Sample Data**: Test tables with realistic data for enrichment testing
+
+#### **REST API Prerequisites**
+- **API Endpoint**: Accessible REST API with proper authentication
+- **Authentication Tokens**: Valid API keys, bearer tokens, or basic auth credentials
+- **Network Access**: API endpoints reachable from the playground environment
+- **Environment Variables**: Properly configured API tokens and connection details
+
+### Database Enrichment Testing
+
+#### **1. PostgreSQL Database Enrichment Example**
+
+In the YAML configuration panel, use this comprehensive database enrichment configuration:
+
+```yaml
+metadata:
+  name: "Database Enrichment Test"
+  version: "1.0.0"
+  description: "PostgreSQL database lookup enrichment example"
+
+# External data source configuration
+dataSources:
+  - name: "customer-database"
+    type: "database"
+    sourceType: "postgresql"
+    enabled: true
+    description: "Customer database for enrichment"
+
+    connection:
+      host: "localhost"
+      port: 5432
+      database: "apex_demo"
+      username: "apex_user"
+      password: "${DB_PASSWORD}"
+      schema: "public"
+
+      # Connection pool settings
+      maxPoolSize: 10
+      minPoolSize: 2
+      connectionTimeout: 30000
+
+      # SSL configuration (if required)
+      sslEnabled: false
+      sslMode: "disable"
+
+    # Predefined queries for enrichment
+    queries:
+      getCustomerById: "SELECT customer_name, credit_rating, tier, region FROM customers WHERE customer_id = :customerId"
+      getCustomerProfile: "SELECT * FROM customer_profiles WHERE customer_id = :customerId"
+      default: "SELECT 1 as health_check"
+
+    # Parameter definitions
+    parameterNames:
+      - "customerId"
+
+    # Caching configuration
+    cache:
+      enabled: true
+      ttlSeconds: 300
+      maxSize: 1000
+      keyPrefix: "customer"
+
+    # Health check configuration
+    healthCheck:
+      enabled: true
+      intervalSeconds: 30
+      timeoutSeconds: 5
+      query: "SELECT 1"
+
+# Enrichment rules using database lookup
+enrichments:
+  - id: "customer-db-lookup"
+    name: "Customer Database Enrichment"
+    type: "lookup-enrichment"
+    condition: "#customerId != null"
+    lookup-config:
+      lookup-dataset:
+        type: "database"
+        connection-name: "customer-database"
+        query: "getCustomerById"
+        parameters:
+          - field: "customerId"
+        cache-enabled: true
+        cache-ttl-seconds: 300
+    field-mappings:
+      - source-field: "customer_name"
+        target-field: "customerName"
+      - source-field: "credit_rating"
+        target-field: "creditRating"
+      - source-field: "tier"
+        target-field: "customerTier"
+      - source-field: "region"
+        target-field: "customerRegion"
+
+# Validation rules
+rules:
+  - id: "customer-id-validation"
+    name: "Customer ID Format Validation"
+    condition: "#customerId != null && #customerId.matches('CUST[0-9]{3}')"
+    message: "Customer ID must be in format CUST### (e.g., CUST001)"
+    severity: "ERROR"
+```
+
+#### **Sample Test Data for Database Enrichment**
+
+Use this JSON data in the Source Data panel:
+
+```json
+{
+  "customerId": "CUST001",
+  "transactionAmount": 15000.00,
+  "currency": "USD",
+  "transactionDate": "2025-08-24",
+  "description": "Large transaction requiring customer enrichment"
+}
+```
+
+#### **Expected Database Enrichment Results**
+
+After processing, you should see enriched data like:
+
+```json
+{
+  "customerId": "CUST001",
+  "transactionAmount": 15000.00,
+  "currency": "USD",
+  "transactionDate": "2025-08-24",
+  "description": "Large transaction requiring customer enrichment",
+  "customerName": "Premium Financial Corp",
+  "creditRating": "AAA",
+  "customerTier": "PLATINUM",
+  "customerRegion": "NORTH_AMERICA"
+}
+```
+
+### REST API Enrichment Testing
+
+#### **2. REST API Enrichment Example**
+
+Configure REST API enrichment in the YAML configuration panel:
+
+```yaml
+metadata:
+  name: "REST API Enrichment Test"
+  version: "1.0.0"
+  description: "External REST API enrichment example"
+
+# External REST API data source
+dataSources:
+  - name: "customer-api"
+    type: "rest-api"
+    enabled: true
+    description: "Customer profile API service"
+
+    connection:
+      baseUrl: "https://api.customer.com"
+      timeout: 10000
+      retryAttempts: 2
+      retryDelay: 1000
+
+      # HTTP/2 support for better performance
+      httpVersion: "HTTP_2"
+      maxConnections: 20
+
+    # Bearer token authentication
+    authentication:
+      type: "bearer"
+      token: "${API_TOKEN}"
+
+    # API endpoints
+    endpoints:
+      getCustomerProfile: "/v1/customers/{customerId}/profile"
+      getCustomerRisk: "/v1/customers/{customerId}/risk-assessment"
+      default: "/v1/health"
+
+    # Parameter definitions
+    parameterNames:
+      - "customerId"
+
+    # Response caching
+    cache:
+      enabled: true
+      ttlSeconds: 600  # 10 minutes for API data
+      maxSize: 500
+      keyPrefix: "api"
+
+    # Circuit breaker for resilience
+    circuitBreaker:
+      enabled: true
+      failureThreshold: 3
+      recoveryTimeout: 30000
+
+# API-based enrichment configuration
+enrichments:
+  - id: "api-enrichment"
+    name: "Customer API Enrichment"
+    type: "lookup-enrichment"
+    condition: "#customerId != null"
+    lookup-config:
+      lookup-dataset:
+        type: "rest-api"
+        connection-name: "customer-api"
+        endpoint: "getCustomerProfile"
+        method: "GET"
+        headers:
+          Authorization: "Bearer ${API_TOKEN}"
+          Content-Type: "application/json"
+        timeout-seconds: 5
+        cache-enabled: true
+        parameter-names:
+          - "customerId"
+    field-mappings:
+      - source-field: "creditRating"
+        target-field: "customerCreditRating"
+      - source-field: "riskScore"
+        target-field: "customerRiskScore"
+      - source-field: "accountStatus"
+        target-field: "customerStatus"
+      - source-field: "preferredCurrency"
+        target-field: "customerCurrency"
+
+# Validation rules for API enrichment
+rules:
+  - id: "api-response-validation"
+    name: "API Response Validation"
+    condition: "#customerCreditRating != null"
+    message: "Customer credit rating successfully retrieved from API"
+    severity: "INFO"
+
+  - id: "risk-score-validation"
+    name: "Risk Score Validation"
+    condition: "#customerRiskScore != null && #customerRiskScore >= 0 && #customerRiskScore <= 100"
+    message: "Customer risk score must be between 0 and 100"
+    severity: "WARNING"
+```
+
+#### **Sample Test Data for API Enrichment**
+
+Use this JSON data in the Source Data panel:
+
+```json
+{
+  "customerId": "CUST001",
+  "transactionType": "WIRE_TRANSFER",
+  "amount": 25000.00,
+  "currency": "USD",
+  "destinationCountry": "UK",
+  "requestedDate": "2025-08-24T10:30:00Z"
+}
+```
+
+#### **Expected API Enrichment Results**
+
+After processing, you should see enriched data like:
+
+```json
+{
+  "customerId": "CUST001",
+  "transactionType": "WIRE_TRANSFER",
+  "amount": 25000.00,
+  "currency": "USD",
+  "destinationCountry": "UK",
+  "requestedDate": "2025-08-24T10:30:00Z",
+  "customerCreditRating": "A+",
+  "customerRiskScore": 15,
+  "customerStatus": "ACTIVE",
+  "customerCurrency": "USD"
+}
+```
+
+### Environment Configuration
+
+#### **Setting Up Environment Variables**
+
+Before testing external data sources, configure the required environment variables:
+
+#### **Database Environment Variables**
+```bash
+# PostgreSQL connection
+export DB_PASSWORD="your_database_password"
+export DB_HOST="localhost"
+export DB_PORT="5432"
+export DB_NAME="apex_demo"
+export DB_USER="apex_user"
+
+# Connection pool settings
+export DB_MAX_POOL_SIZE="10"
+export DB_MIN_POOL_SIZE="2"
+```
+
+#### **API Environment Variables**
+```bash
+# REST API authentication
+export API_TOKEN="your_bearer_token_here"
+export CUSTOMER_API_KEY="your_api_key_here"
+export MARKET_DATA_TOKEN="your_market_data_token"
+
+# API configuration
+export API_BASE_URL="https://api.customer.com"
+export API_TIMEOUT="10000"
+export API_RETRY_ATTEMPTS="2"
+```
+
+#### **Spring Boot Configuration**
+
+Add these properties to your `application.yml` or `application.properties`:
+
+```yaml
+# Database configuration
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/apex_demo
+    username: ${DB_USER:apex_user}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+    # Connection pool
+    hikari:
+      maximum-pool-size: ${DB_MAX_POOL_SIZE:10}
+      minimum-idle: ${DB_MIN_POOL_SIZE:2}
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+# External API configuration
+apex:
+  external-apis:
+    customer-api:
+      base-url: ${API_BASE_URL:https://api.customer.com}
+      timeout: ${API_TIMEOUT:10000}
+      retry-attempts: ${API_RETRY_ATTEMPTS:2}
+
+  # Caching configuration
+  cache:
+    enabled: true
+    default-ttl: 300
+    max-size: 1000
+```
+
+### Testing Workflow in Playground
+
+#### **Step-by-Step Testing Process**
+
+1. **Environment Setup**
+   - Ensure PostgreSQL is running (if testing database enrichment)
+   - Verify API endpoints are accessible (if testing REST API enrichment)
+   - Set all required environment variables
+   - Start the APEX Playground application
+
+2. **Load Configuration**
+   - Open the APEX Playground at http://localhost:8081/playground
+   - Paste the external data source YAML configuration in the top-right panel
+   - Click "Validate" to ensure YAML syntax is correct
+
+3. **Prepare Test Data**
+   - Enter sample JSON data in the top-left Source Data panel
+   - Ensure the data contains the required fields for lookup (e.g., customerId)
+   - Verify data format matches the expected structure
+
+4. **Execute Processing**
+   - Click the "Process" button to execute the enrichment
+   - Monitor the Validation Results panel (bottom-left) for rule execution status
+   - Check the Enrichment Results panel (bottom-right) for enriched data
+
+5. **Analyze Results**
+   - Verify that external data has been successfully retrieved and merged
+   - Check performance metrics for response times and caching effectiveness
+   - Review any error messages or warnings in the validation results
+
+#### **Troubleshooting External Data Source Issues**
+
+**Common Database Issues:**
+- **Connection Refused**: Verify PostgreSQL is running and accessible
+- **Authentication Failed**: Check username, password, and database permissions
+- **Query Timeout**: Increase connection timeout or optimize database queries
+- **No Data Found**: Verify test data exists in the database tables
+
+**Common API Issues:**
+- **401 Unauthorized**: Verify API token is valid and properly configured
+- **404 Not Found**: Check API endpoint URLs and parameter formatting
+- **Timeout**: Increase timeout settings or check network connectivity
+- **Rate Limiting**: Implement proper retry logic and respect API rate limits
+
+**Performance Optimization:**
+- **Enable Caching**: Configure appropriate TTL values for your use case
+- **Connection Pooling**: Optimize pool sizes based on expected load
+- **Circuit Breakers**: Implement resilience patterns for external dependencies
+- **Monitoring**: Use health checks to monitor external data source availability
+
+### Advanced External Data Source Patterns
+
+#### **Multi-Source Enrichment**
+
+Combine multiple external data sources in a single configuration:
+
+```yaml
+metadata:
+  name: "Multi-Source Enrichment"
+  version: "1.0.0"
+
+dataSources:
+  - name: "customer-db"
+    type: "database"
+    sourceType: "postgresql"
+    # ... database configuration
+
+  - name: "risk-api"
+    type: "rest-api"
+    # ... API configuration
+
+enrichments:
+  - id: "customer-data-enrichment"
+    type: "lookup-enrichment"
+    condition: "#customerId != null"
+    lookup-config:
+      lookup-dataset:
+        type: "database"
+        connection-name: "customer-db"
+        # ... database lookup config
+
+  - id: "risk-assessment-enrichment"
+    type: "lookup-enrichment"
+    condition: "#customerId != null && #customerTier != null"
+    lookup-config:
+      lookup-dataset:
+        type: "rest-api"
+        connection-name: "risk-api"
+        # ... API lookup config
+```
+
+#### **Conditional External Data Access**
+
+Use conditional logic to determine when to access external data sources:
+
+```yaml
+enrichments:
+  - id: "conditional-enrichment"
+    type: "lookup-enrichment"
+    condition: "#amount > 10000 && #customerTier == 'PREMIUM'"
+    lookup-config:
+      lookup-dataset:
+        type: "rest-api"
+        connection-name: "premium-api"
+        endpoint: "/v1/premium-customers/{customerId}/profile"
+        # Only call expensive API for high-value premium customers
+```
+
+This comprehensive external data source testing capability in the APEX Playground enables you to:
+- **Test Real Integration**: Validate actual database and API connections
+- **Performance Analysis**: Monitor response times and caching effectiveness
+- **Error Handling**: Test resilience patterns and error recovery
+- **Configuration Validation**: Ensure external data source configurations work correctly
+- **Development Workflow**: Iterate quickly on external data integration patterns
+
 ---
 
 # Bootstrap Demonstrations & Examples
