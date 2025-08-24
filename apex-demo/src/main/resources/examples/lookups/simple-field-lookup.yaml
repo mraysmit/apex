@@ -2,9 +2,12 @@
 # Demonstrates basic lookup-key usage with currency code enrichment
 # Use Case: Enrich currency transactions with detailed currency information
 
-name: "Simple Field Lookup Demo"
-description: "Demonstrates basic field lookup using currency codes"
-version: "1.0"
+metadata:
+  name: "Simple Field Lookup Demo"
+  description: "Demonstrates basic field lookup using currency codes"
+  version: "1.0.0"
+  type: "enrichment"
+  author: "APEX Demo Team"
 
 # Define the enrichment rules
 enrichments:

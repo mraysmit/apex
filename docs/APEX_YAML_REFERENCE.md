@@ -129,6 +129,94 @@ metadata:
     cache-ttl: 3600  # seconds
 ```
 
+### Document Types
+
+APEX supports several document types, each with specific purposes and validation requirements:
+
+| Type | Purpose | Required Fields | Top-level Sections |
+|------|---------|----------------|-------------------|
+| `rule-config` | Business rules and validation logic | `author` | `rules`, `enrichments` |
+| `enrichment` | Data enrichment configurations | `author` | `enrichments` |
+| `dataset` | Reference data and lookup tables | `source` | `data` |
+| `scenario` | End-to-end processing scenarios | `business-domain`, `owner` | `scenario`, `data-types`, `rule-configurations` |
+| `scenario-registry` | Scenario collection management | `created-by` | `scenarios` |
+| `bootstrap` | Demo and initialization configurations | `business-domain`, `created-by` | `bootstrap`, `data-sources` |
+| `rule-chain` | Sequential rule execution definitions | `author` | `rule-chains` |
+| `external-data-config` | External data source configurations | `author` | `dataSources`, `configuration` |
+
+#### External Data Configuration
+
+External data configuration files define how APEX connects to and interacts with external data sources such as databases, REST APIs, file systems, and message queues.
+
+**Example: Database Configuration**
+```yaml
+metadata:
+  name: "Production Database Sources"
+  version: "1.0.0"
+  description: "Database connections for production environment"
+  type: "external-data-config"
+  author: "data.team@company.com"
+  tags: ["database", "production", "postgresql"]
+
+dataSources:
+  - name: "user-database"
+    type: "database"
+    sourceType: "postgresql"
+    enabled: true
+    description: "Primary user database"
+
+    connection:
+      host: "prod-db.company.com"
+      port: 5432
+      database: "userdb"
+      username: "app_user"
+      password: "${DB_PASSWORD}"
+
+    queries:
+      getUserById: "SELECT * FROM users WHERE id = :id"
+      getActiveUsers: "SELECT * FROM users WHERE status = 'ACTIVE'"
+
+    cache:
+      enabled: true
+      ttlSeconds: 300
+      maxSize: 1000
+
+configuration:
+  defaultConnectionTimeout: 30000
+  monitoring:
+    enabled: true
+    healthCheckLogging: true
+```
+
+**Example: REST API Configuration**
+```yaml
+metadata:
+  name: "External API Sources"
+  version: "1.0.0"
+  description: "REST API connections for data enrichment"
+  type: "external-data-config"
+  author: "integration.team@company.com"
+
+dataSources:
+  - name: "currency-rates-api"
+    type: "rest-api"
+    enabled: true
+    description: "Real-time currency exchange rates"
+
+    connection:
+      baseUrl: "https://api.exchangerates.com/v1"
+      timeout: 5000
+
+    endpoints:
+      getCurrentRate: "/rates/{currency}"
+      getHistoricalRate: "/rates/{currency}/{date}"
+
+    authentication:
+      type: "api-key"
+      keyHeader: "X-API-Key"
+      keyValue: "${EXCHANGE_API_KEY}"
+```
+
 ---
 
 ## 3. Core Syntax Elements

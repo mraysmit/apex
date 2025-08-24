@@ -2,9 +2,12 @@
 # Demonstrates conditional expression evaluation in lookup-key
 # Use Case: Risk-based loan assessment with conditional credit score categorization
 
-name: "Conditional Expression Lookup Demo"
-description: "Demonstrates conditional expression lookup using credit score-based risk categorization"
-version: "1.0"
+metadata:
+  name: "Conditional Expression Lookup Demo"
+  description: "Demonstrates conditional expression lookup using credit score-based risk categorization"
+  version: "1.0.0"
+  type: "enrichment"
+  author: "APEX Demo Team"
 
 # Define the enrichment rules
 enrichments:

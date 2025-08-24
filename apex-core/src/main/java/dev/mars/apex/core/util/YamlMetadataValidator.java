@@ -48,12 +48,13 @@ public class YamlMetadataValidator {
     // Valid file types
     private static final Set<String> VALID_FILE_TYPES = Set.of(
         "scenario",
-        "scenario-registry", 
+        "scenario-registry",
         "bootstrap",
         "rule-config",
         "dataset",
         "enrichment",
-        "rule-chain"
+        "rule-chain",
+        "external-data-config"
     );
     
     // Type-specific required fields
@@ -64,7 +65,8 @@ public class YamlMetadataValidator {
         "rule-config", Set.of("author"),
         "dataset", Set.of("source"),
         "enrichment", Set.of("author"),
-        "rule-chain", Set.of("author")
+        "rule-chain", Set.of("author"),
+        "external-data-config", Set.of("author")
     );
     
     private final YamlConfigurationLoader configLoader;

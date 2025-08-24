@@ -7,7 +7,7 @@ to the APEX system's YAML format requirements.
 
 Requirements:
 - All YAML files must have metadata section with: name, version, description, type
-- Valid types: scenario, scenario-registry, bootstrap, rule-config, dataset, enrichment, rule-chain
+- Valid types: scenario, scenario-registry, bootstrap, rule-config, dataset, enrichment, rule-chain, external-data-config
 - Type-specific required fields:
   - scenario: business-domain, owner
   - scenario-registry: created-by
@@ -16,6 +16,7 @@ Requirements:
   - dataset: source
   - enrichment: author
   - rule-chain: author
+  - external-data-config: author
 """
 
 import os
@@ -27,8 +28,8 @@ from typing import Dict, List, Set, Any, Optional
 # APEX YAML format requirements
 REQUIRED_METADATA_FIELDS = {"name", "version", "description", "type"}
 VALID_FILE_TYPES = {
-    "scenario", "scenario-registry", "bootstrap", "rule-config", 
-    "dataset", "enrichment", "rule-chain"
+    "scenario", "scenario-registry", "bootstrap", "rule-config",
+    "dataset", "enrichment", "rule-chain", "external-data-config"
 }
 TYPE_SPECIFIC_REQUIRED_FIELDS = {
     "scenario": {"business-domain", "owner"},
@@ -37,7 +38,8 @@ TYPE_SPECIFIC_REQUIRED_FIELDS = {
     "rule-config": {"author"},
     "dataset": {"source"},
     "enrichment": {"author"},
-    "rule-chain": {"author"}
+    "rule-chain": {"author"},
+    "external-data-config": {"author"}
 }
 
 # Files to exclude from validation (Spring Boot configs, etc.)
@@ -108,10 +110,7 @@ def validate_yaml_file(file_path: str) -> ValidationResult:
         result.add_error("Failed to parse YAML file - invalid syntax")
         return result
     
-    # Check if this is a data source example (different format)
-    if "dataSources" in content and "examples" in file_path:
-        result.add_warning("Data source example file - using different format")
-        return result
+
     
     # Check for metadata section
     metadata = content.get("metadata")

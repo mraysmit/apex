@@ -1,0 +1,316 @@
+# ============================================================================
+# APEX Rules Engine - Dataset Types Configuration Demo
+# ============================================================================
+#
+# This configuration demonstrates different dataset types including inline
+# and external datasets with various configuration options.
+#
+# COVERAGE: This example covers the following APEX YAML keywords:
+# - inline, external, endpoint, cache-ttl, timeout
+# - bootstrap, scenarios, counterpartyLEI, creditRating, settlementMethod
+#
+# ============================================================================
+
+metadata:
+  name: "Dataset Types Configuration Demo"
+  version: "1.0.0"
+  description: "Comprehensive demonstration of inline and external dataset configurations"
+  type: "dataset"
+  author: "APEX Demo Team"
+  created: "2025-08-24"
+  source: "APEX Demo Generator"
+  tags: ["datasets", "inline", "external", "bootstrap", "scenarios"]
+
+# Bootstrap configuration for demo scenarios
+bootstrap:
+  enabled: true
+  loadOnStartup: true
+  scenarios: ["trade-processing", "counterparty-validation", "settlement-processing"]
+  
+  # Bootstrap data sources
+  dataSources:
+    - name: "reference-data"
+      type: "inline"
+      description: "Core reference data for bootstrap"
+    - name: "market-data"
+      type: "external"
+      description: "Live market data feed"
+
+# Scenario definitions
+scenarios:
+  - name: "trade-processing"
+    description: "Complete trade processing workflow"
+    enabled: true
+    
+  - name: "counterparty-validation"
+    description: "Counterparty validation and enrichment"
+    enabled: true
+    
+  - name: "settlement-processing"
+    description: "Trade settlement processing"
+    enabled: true
+
+# Inline dataset examples
+data:
+  # Inline currency reference data
+  currencies:
+    type: "inline"
+    description: "Currency reference data with rates and metadata"
+    keyField: "code"
+    
+    # Inline data directly embedded in configuration
+    inline:
+      - code: "USD"
+        name: "US Dollar"
+        symbol: "$"
+        decimalPlaces: 2
+        isBaseCurrency: true
+        region: "North America"
+        
+      - code: "EUR"
+        name: "Euro"
+        symbol: "€"
+        decimalPlaces: 2
+        isBaseCurrency: false
+        region: "Europe"
+        
+      - code: "GBP"
+        name: "British Pound"
+        symbol: "£"
+        decimalPlaces: 2
+        isBaseCurrency: false
+        region: "Europe"
+        
+      - code: "JPY"
+        name: "Japanese Yen"
+        symbol: "¥"
+        decimalPlaces: 0
+        isBaseCurrency: false
+        region: "Asia"
+
+  # Inline counterparty data with LEI codes
+  counterparties:
+    type: "inline"
+    description: "Counterparty reference data with LEI and credit ratings"
+    keyField: "counterpartyId"
+    
+    inline:
+      - counterpartyId: "CP001"
+        name: "Goldman Sachs International"
+        counterpartyLEI: "W22LROWP2IHZNBB6K528"
+        creditRating: "A+"
+        country: "GB"
+        sector: "Investment Banking"
+        isActive: true
+        
+      - counterpartyId: "CP002"
+        name: "JPMorgan Chase Bank"
+        counterpartyLEI: "7H6GLXDRUGQFU57RNE97"
+        creditRating: "AA-"
+        country: "US"
+        sector: "Commercial Banking"
+        isActive: true
+        
+      - counterpartyId: "CP003"
+        name: "Deutsche Bank AG"
+        counterpartyLEI: "7LTWFZYICNSX8D621K86"
+        creditRating: "BBB+"
+        country: "DE"
+        sector: "Investment Banking"
+        isActive: true
+
+  # Inline settlement methods
+  settlementMethods:
+    type: "inline"
+    description: "Available settlement methods and configurations"
+    keyField: "methodCode"
+    
+    inline:
+      - methodCode: "DVP"
+        name: "Delivery versus Payment"
+        settlementMethod: "DVP"
+        description: "Simultaneous exchange of securities and cash"
+        settlementDays: 2
+        supportedCurrencies: ["USD", "EUR", "GBP"]
+        
+      - methodCode: "FOP"
+        name: "Free of Payment"
+        settlementMethod: "FOP"
+        description: "Transfer of securities without cash exchange"
+        settlementDays: 1
+        supportedCurrencies: ["USD", "EUR", "GBP", "JPY"]
+        
+      - methodCode: "RVP"
+        name: "Receive versus Payment"
+        settlementMethod: "RVP"
+        description: "Receipt of securities against cash payment"
+        settlementDays: 2
+        supportedCurrencies: ["USD", "EUR"]
+
+# External dataset examples
+externalDatasets:
+  # External market data feed
+  marketData:
+    type: "external"
+    description: "Real-time market data from external provider"
+    keyField: "symbol"
+    
+    external:
+      endpoint: "https://api.marketdata.com/v1/quotes"
+      method: "GET"
+      timeout: 5000
+      
+      # Authentication for external service
+      authentication:
+        type: "bearer-token"
+        token: "${MARKET_DATA_TOKEN}"
+      
+      # Response mapping
+      responseMapping:
+        symbol: "$.symbol"
+        price: "$.last_price"
+        volume: "$.volume"
+        timestamp: "$.timestamp"
+      
+      # Caching configuration
+      cache:
+        enabled: true
+        cache-ttl: 60  # 1 minute cache
+        maxSize: 10000
+        keyPrefix: "market"
+      
+      # Error handling
+      retryCount: 3
+      retryDelay: 1000
+      fallbackEnabled: true
+
+  # External credit ratings service
+  creditRatings:
+    type: "external"
+    description: "Credit ratings from external rating agency"
+    keyField: "entityId"
+    
+    external:
+      endpoint: "https://api.ratings.com/v2/ratings/{entityId}"
+      method: "GET"
+      timeout: 10000
+      
+      # Path parameters
+      pathParameters:
+        entityId: "#{lookup-key}"
+      
+      # Query parameters
+      queryParameters:
+        includeHistory: "false"
+        format: "json"
+      
+      # Headers
+      headers:
+        Accept: "application/json"
+        User-Agent: "APEX-Rules-Engine/1.0"
+      
+      # Response processing
+      responseMapping:
+        rating: "$.current_rating.grade"
+        outlook: "$.current_rating.outlook"
+        lastUpdated: "$.current_rating.date"
+        agency: "$.agency.name"
+      
+      # Caching for expensive external calls
+      cache:
+        enabled: true
+        cache-ttl: 3600  # 1 hour cache for ratings
+        maxSize: 5000
+        keyPrefix: "ratings"
+      
+      # Circuit breaker for resilience
+      circuitBreaker:
+        enabled: true
+        failureThreshold: 5
+        recoveryTimeout: 30000
+
+  # External regulatory data
+  regulatoryData:
+    type: "external"
+    description: "Regulatory reference data from compliance service"
+    keyField: "jurisdiction"
+    
+    external:
+      endpoint: "https://api.compliance.com/v1/regulations"
+      method: "POST"
+      timeout: 15000
+      
+      # Request body template
+      requestBody: |
+        {
+          "jurisdiction": "#{lookup-key}",
+          "dataTypes": ["mifid", "emir", "dodd-frank"],
+          "effectiveDate": "#{T(java.time.LocalDate).now()}"
+        }
+      
+      # Content type
+      contentType: "application/json"
+      
+      # Response validation
+      responseValidation:
+        required: ["jurisdiction", "regulations"]
+        statusCodes: [200, 201]
+      
+      # Advanced caching with tags
+      cache:
+        enabled: true
+        cache-ttl: 7200  # 2 hours for regulatory data
+        maxSize: 1000
+        keyPrefix: "regulatory"
+        tags: ["compliance", "regulations"]
+      
+      # Monitoring
+      monitoring:
+        enabled: true
+        logRequests: true
+        logResponses: false  # Don't log sensitive regulatory data
+        trackLatency: true
+
+# Dataset validation rules
+validation:
+  # Inline data validation
+  inline:
+    required: true
+    minRecords: 1
+    maxRecords: 10000
+    validateSchema: true
+    
+  # External data validation
+  external:
+    required: true
+    validateEndpoint: true
+    validateAuthentication: true
+    testConnection: true
+    
+    # Response validation
+    validateResponse: true
+    requiredFields: ["keyField"]
+    maxResponseSize: "10MB"
+    
+    # Performance validation
+    maxTimeout: 30000
+    maxCacheTtl: 86400  # 24 hours max cache
+
+# Performance optimization
+optimization:
+  # Preloading configuration
+  preload:
+    enabled: true
+    datasets: ["currencies", "counterparties", "settlementMethods"]
+    parallel: true
+    
+  # Lazy loading for external datasets
+  lazyLoad:
+    enabled: true
+    datasets: ["marketData", "creditRatings", "regulatoryData"]
+    
+  # Memory management
+  memory:
+    maxInlineDataSize: "50MB"
+    maxCacheSize: "200MB"
+    gcHints: true

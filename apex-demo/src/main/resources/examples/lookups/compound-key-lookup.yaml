@@ -2,9 +2,12 @@
 # Demonstrates compound lookup-key using string concatenation
 # Use Case: Customer-region specific pricing and tier information lookup
 
-name: "Compound Key Lookup Demo"
-description: "Demonstrates compound key lookup using customer ID and region concatenation"
-version: "1.0"
+metadata:
+  name: "Compound Key Lookup Demo"
+  description: "Demonstrates compound key lookup using customer ID and region concatenation"
+  version: "1.0.0"
+  type: "enrichment"
+  author: "APEX Demo Team"
 
 # Define the enrichment rules
 enrichments:
