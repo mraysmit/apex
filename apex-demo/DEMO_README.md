@@ -6,7 +6,24 @@ This comprehensive demo suite showcases the full power of APEX (Advanced Process
 
 ## Quick Start
 
-### Interactive Demo Runner (Recommended for First-Time Users)
+### Interactive Playground (Recommended for First-Time Users)
+```bash
+# Start the APEX Playground web interface
+cd ../apex-playground
+mvn spring-boot:run
+
+# Open in browser
+http://localhost:8081/playground
+```
+
+**Features:**
+- **Interactive Example Browser:** Browse 11+ categorized YAML examples
+- **One-Click Loading:** Load any configuration with sample data instantly
+- **Real-Time Testing:** Test configurations immediately in the browser
+- **Professional UI:** Modal dialog with organized categories
+- **Complete Integration:** Access to all 113 YAML resources from this demo suite
+
+### Interactive Demo Runner (Command Line)
 ```bash
 # Interactive mode with menu - curated 5-demo experience
 java -cp target/classes dev.mars.apex.demo.DemoRunner
@@ -47,18 +64,105 @@ java -cp target/classes dev.mars.apex.demo.DemoRunner financial
 java -cp target/classes dev.mars.apex.demo.DemoRunner performance
 ```
 
+### Alternative Demo Running Options
+
+#### Option 1: Complete Learning Path
+Run all demos in sequence for a comprehensive learning experience:
+
+```bash
+java -cp target/classes dev.mars.apex.demo.AllDemosRunner
+```
+
+#### Option 2: Individual Categories
+Run specific demo categories based on your learning needs:
+
+```bash
+# Quick introduction (5-10 minutes)
+java -cp target/classes dev.mars.apex.demo.runners.quickstart.QuickStartRunner
+
+# Core concepts deep dive (15-20 minutes)
+java -cp target/classes dev.mars.apex.demo.runners.fundamentals.FundamentalsRunner
+
+# Implementation patterns (20-30 minutes)
+java -cp target/classes dev.mars.apex.demo.runners.patterns.PatternsRunner
+
+# Real-world applications (30-45 minutes)
+java -cp target/classes dev.mars.apex.demo.runners.industry.IndustryRunner
+
+# Advanced techniques (45+ minutes)
+java -cp target/classes dev.mars.apex.demo.runners.advanced.AdvancedRunner
+```
+
+#### Option 3: Individual Demos
+Run specific demos for focused learning:
+
+```bash
+# Lookup pattern examples
+java -cp target/classes dev.mars.apex.demo.examples.lookups.SimpleFieldLookupDemo
+java -cp target/classes dev.mars.apex.demo.examples.lookups.ConditionalExpressionLookupDemo
+java -cp target/classes dev.mars.apex.demo.examples.lookups.NestedFieldLookupDemo
+java -cp target/classes dev.mars.apex.demo.examples.lookups.CompoundKeyLookupDemo
+
+# Financial services examples
+java -cp target/classes dev.mars.apex.demo.financial.ComprehensiveFinancialSettlementDemo
+java -cp target/classes dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap
+```
+
+## Interactive Playground Integration
+
+All YAML configurations in this demo suite are now accessible through the **APEX Playground** web interface, providing an intuitive way to explore and test configurations.
+
+### Available Example Categories in Playground
+
+#### Quickstart (2 examples)
+- **Quick Start Demo** - 5-minute introduction with validation rules
+- **File Processing Configuration** - YAML configuration for file processing workflows
+
+#### Financial (3 examples)
+- **Financial Validation Rules** - Trading system validation and compliance
+- **Financial Enrichment Rules** - Data enrichment for financial instruments
+- **Settlement Validation Rules** - Post-trade settlement processing
+
+#### Validation (2 examples)
+- **Custody Auto Repair Rules** - Automated custody processing and repair
+- **Derivatives Validation Rules** - OTC derivatives validation patterns
+
+#### Lookup (2 examples)
+- **Comprehensive Lookup Demo** - Advanced lookup patterns and enrichment
+- **Compound Key Lookup** - Multi-field lookup configurations
+
+#### Advanced (3 examples)
+- **Batch Processing Demo** - Large-scale batch data processing
+- **Dataset Enrichment Rules** - Advanced data enrichment patterns
+- **Rule Chains Patterns** - Complex rule chaining and orchestration
+
+### Playground Usage
+1. **Start playground:** `cd ../apex-playground && mvn spring-boot:run`
+2. **Open browser:** http://localhost:8081/playground
+3. **Click "Load Example"** to browse all available configurations
+4. **Select any example** to load YAML rules and sample data
+5. **Test immediately** with the integrated rules engine
+
 ## Demo Organization
 
-### Two Demo Runners Available
+### Three Demo Access Methods Available
 
-#### 1. Interactive Demo Runner (`DemoRunner`)
-**Perfect for:** First-time users, guided exploration, presentations
+#### 1. Interactive Playground (`apex-playground`)
+**Perfect for:** First-time users, visual exploration, immediate testing
+- **Web Interface:** Professional browser-based experience
+- **Visual Example Browser:** Categorized YAML configurations
+- **Instant Testing:** Load and test configurations immediately
+- **Complete Integration:** Access to all 113 YAML resources
+- **No Setup Required:** Just start and browse
+
+#### 2. Interactive Demo Runner (`DemoRunner`)
+**Perfect for:** Command-line users, guided exploration, presentations
 - **Curated Experience:** 5 focused demonstrations
 - **Interactive Menu:** User-friendly navigation
 - **Progressive Learning:** From basic concepts to advanced features
 - **Documentation Aligned:** Matches user guide examples exactly
 
-#### 2. Automatic Demo Discovery (`AllDemosRunner`)
+#### 3. Automatic Demo Discovery (`AllDemosRunner`)
 **Perfect for:** Comprehensive testing, development, CI/CD integration
 - **Complete Coverage:** 25+ demos across all packages
 - **Auto-Discovery:** No manual registration required
@@ -219,6 +323,220 @@ Layer 3: Advanced Config (2%)  → Full YAML configuration
 - **Package Filtering:** Can run demos from specific packages
 - **Clear Reporting:** Provides execution summary with success/failure counts
 
+## YAML Configuration Resources (113 files)
+
+### Core Rule Configurations
+```
+demo-rules/                          # Primary rule demonstrations (5 files)
+├── quick-start.yaml                 # 5-minute introduction example (6,036 chars)
+├── financial-validation.yaml       # Financial trading rules (13,019 chars)
+├── custody-auto-repair-rules.yaml  # Custody processing (20,019 chars)
+├── dataset-enrichment.yaml         # Data enrichment patterns (18,509 chars)
+└── rule-chains-patterns.yaml       # Complex rule chaining (14,147 chars)
+```
+
+### Production-Ready Configurations
+```
+config/                              # Enterprise-grade configurations (9 files)
+├── financial-enrichment-rules.yaml # Financial data enrichment (14,990 chars)
+├── settlement-validation-rules.yaml # Settlement processing (11,082 chars)
+├── derivatives-validation-rules.yaml # Derivatives validation (8,213 chars)
+├── data-type-scenarios.yaml        # Data type handling scenarios
+├── demo-data-sources.yaml          # Data source configurations
+├── enhanced-enterprise-rules.yaml  # Enterprise rule patterns
+├── financial-dataset-enrichment-rules.yaml # Dataset enrichment
+├── financial-validation-rules.yaml # Financial validation patterns
+└── production-demo-config.yaml     # Production configuration template
+```
+
+### Specialized Examples
+```
+demo-configs/                       # Advanced demonstration configs
+├── comprehensive-lookup-demo.yaml  # Advanced lookup patterns (9,598 chars)
+
+examples/lookups/                   # Lookup enrichment examples
+├── compound-key-lookup.yaml       # Multi-field lookup (6,750 chars)
+
+scenarios/                          # Business scenario configurations
+├── commodity-swaps-scenario.yaml  # Commodity swap processing
+├── otc-options-scenario.yaml      # OTC options validation
+└── settlement-auto-repair-scenario.yaml # Settlement repair scenarios
+
+yaml-examples/                      # Template and processing examples
+├── file-processing-config.yaml    # File processing workflows (10,801 chars)
+└── datasets/                      # Dataset configuration examples
+
+bootstrap/                          # Infrastructure and setup configurations
+├── otc-options-bootstrap.yaml     # OTC options bootstrap
+├── commodity-swap-validation-bootstrap.yaml # Commodity validation
+├── custody-auto-repair-bootstrap.yaml # Custody repair setup
+└── [XML files and SQL scripts]
+```
+
+### Resource Access Methods
+- **Playground UI:** Browse and test all configurations at http://localhost:8081/playground
+- **Direct File Access:** All files available in `src/main/resources/`
+- **Java Integration:** Load via `YamlRulesEngineService.loadFromResource()`
+
+## Demo Structure Guide
+
+### Learning Path
+
+The demos are organized in a progressive learning path:
+
+```
+QUICKSTART (5-10 min) → FUNDAMENTALS (15-20 min) → PATTERNS (20-30 min) → INDUSTRY (30-45 min) → ADVANCED (45+ min)
+```
+
+### Organized Directory Structure
+
+```
+apex-demo/src/main/resources/demos/
+├── quickstart/                    # Getting started (5-10 minutes)
+│   └── quick-start.yaml          # Basic validation and enrichment
+├── fundamentals/                  # Core concepts (15-20 minutes)
+│   ├── rules/                    # Validation and business logic
+│   │   └── financial-validation-rules.yaml
+│   ├── enrichments/              # Data transformation patterns
+│   └── datasets/                 # Reference data management
+├── patterns/                      # Implementation patterns (20-30 minutes)
+│   ├── lookups/                  # Data lookup strategies
+│   │   ├── simple-field-lookup.yaml
+│   │   ├── conditional-expression-lookup.yaml
+│   │   ├── nested-field-lookup.yaml
+│   │   ├── compound-key-lookup.yaml
+│   │   └── comprehensive-lookup-demo.yaml
+│   ├── calculations/             # Mathematical operations
+│   └── validations/              # Validation patterns
+├── industry/                      # Real-world applications (30-45 minutes)
+│   └── financial-services/       # Financial industry examples
+│       ├── settlement/           # Trade settlement processing
+│       │   └── comprehensive-settlement-enrichment.yaml
+│       ├── trading/              # Trading operations
+│       └── custody/              # Custody and safekeeping
+│           └── custody-auto-repair-rules.yaml
+├── bootstrap/                     # Bootstrap configurations
+│   ├── custody-auto-repair/      # Custody auto-repair bootstrap
+│   │   ├── bootstrap-config.yaml
+│   │   ├── datasets/
+│   │   └── sql/
+│   └── commodity-swap/           # Commodity swap bootstrap
+│       ├── datasets/
+│       └── schemas/
+└── advanced/                      # Advanced techniques (45+ minutes)
+    ├── performance/              # Optimization strategies
+    ├── integration/              # System integration
+    └── complex-scenarios/        # Multi-step workflows
+
+reference/                         # Reference materials
+└── syntax-examples/              # YAML syntax examples
+    └── file-processing-config.yaml
+```
+
+### Demo Categories Explained
+
+#### QuickStart (5-10 minutes)
+**Purpose**: Get up and running quickly with basic concepts
+**Content**:
+- Basic validation rules using SpEL expressions
+- Simple enrichment patterns
+- YAML configuration fundamentals
+- Core API usage
+
+**Files**:
+- `demos/quickstart/quick-start.yaml`
+
+#### Fundamentals (15-20 minutes)
+**Purpose**: Deep dive into core rules engine concepts
+**Content**:
+- Rules: Validation, business logic, compliance
+- Enrichments: Lookup, calculation, transformation
+- Datasets: Inline, external, compound keys
+- Rule chains and orchestration
+
+**Files**:
+- `demos/fundamentals/rules/financial-validation-rules.yaml`
+- Additional fundamental examples
+
+#### Patterns (20-30 minutes)
+**Purpose**: Learn common implementation patterns
+**Content**:
+- **Lookups**: Simple, conditional, nested, compound key strategies
+- **Calculations**: Mathematical, string, date operations
+- **Validations**: Format, business rules, cross-field validation
+
+**Files**:
+- `demos/patterns/lookups/simple-field-lookup.yaml`
+- `demos/patterns/lookups/conditional-expression-lookup.yaml`
+- `demos/patterns/lookups/nested-field-lookup.yaml`
+- `demos/patterns/lookups/compound-key-lookup.yaml`
+- `demos/patterns/lookups/comprehensive-lookup-demo.yaml`
+
+#### Industry (30-45 minutes)
+**Purpose**: Real-world industry applications
+**Content**:
+- **Financial Services**: Settlement, trading, custody operations
+- Regulatory compliance scenarios
+- Production-ready configurations
+- Industry-specific patterns
+
+**Files**:
+- `demos/industry/financial-services/settlement/comprehensive-settlement-enrichment.yaml`
+- `demos/industry/financial-services/custody/custody-auto-repair-rules.yaml`
+
+#### Advanced (45+ minutes)
+**Purpose**: Advanced techniques and optimization
+**Content**:
+- Performance optimization strategies
+- Complex integration patterns
+- Multi-step workflow orchestration
+- Advanced configuration techniques
+
+**Files**:
+- Advanced scenario configurations
+- Performance optimization examples
+- Integration pattern demonstrations
+
+### Backward Compatibility
+
+The reorganization maintains **100% backward compatibility** through the `ResourcePathResolver` utility:
+
+```java
+// Old path automatically resolves to new location
+String configPath = ResourcePathResolver.resolvePath("demo-rules/quick-start.yaml");
+// Returns: "demos/quickstart/quick-start.yaml"
+
+// Check if a path has been migrated
+boolean hasMigration = ResourcePathResolver.hasMigration("config/financial-validation-rules.yaml");
+// Returns: true
+
+// Get all migrations
+Map<String, String> allMigrations = ResourcePathResolver.getAllMigrations();
+```
+
+### Development Guidelines
+
+#### Adding New Demos
+1. Choose the appropriate category based on complexity and learning objectives
+2. Follow the naming convention: `descriptive-name.yaml`
+3. Include comprehensive metadata in YAML files
+4. Add corresponding Java demo classes
+5. Update the appropriate runner class
+6. Add path mapping to `ResourcePathResolver` if needed
+
+#### YAML Configuration Best Practices
+1. **Metadata**: Always include name, version, description, and author
+2. **Documentation**: Use comments to explain complex logic
+3. **Organization**: Group related rules in rule chains
+4. **Naming**: Use descriptive IDs and meaningful names
+5. **Validation**: Test configurations thoroughly
+
+#### Testing New Demos
+1. Run the validation script: `python validate_migration.py`
+2. Test individual demo classes
+3. Verify runner integration
+4. Check backward compatibility
+
 ## Project Structure
 
 ```
@@ -252,10 +570,16 @@ apex-demo/
 │   ├── data/                        # Data providers and mock services
 │   ├── model/                       # Demo model classes
 │   └── support/                     # Utility and support classes
-├── src/main/resources/
-│   ├── demo-rules/                  # YAML rule configurations
-│   ├── bootstrap/                   # Bootstrap configurations
-│   └── demo-data/                   # Sample data files
+├── src/main/resources/              # 113 YAML configuration files
+│   ├── demo-rules/                  # Core rule configurations (5 files)
+│   ├── config/                      # Production configurations (9 files)
+│   ├── demo-configs/                # Advanced demo configs
+│   ├── examples/lookups/            # Lookup examples
+│   ├── scenarios/                   # Business scenarios
+│   ├── yaml-examples/               # Template examples
+│   ├── bootstrap/                   # Infrastructure configs
+│   ├── batch-processing.yaml        # Batch processing demo
+│   └── file-processing-rules.yaml  # File processing rules
 └── src/test/java/                   # Comprehensive tests
     ├── AllDemosRunnerTest.java
     ├── AllDemosRunnerIntegrationTest.java
@@ -331,7 +655,7 @@ Successful: 25
 Failed: 0
 Skipped: 0
 
-🎉 All demos completed successfully!
+All demos completed successfully!
 ```
 
 ## Testing
@@ -371,6 +695,23 @@ To add a new demo to the automatic discovery:
 - Maven 3.6 or higher
 
 ### Build and Run
+
+#### Interactive Playground (Recommended)
+```bash
+# Build both projects
+mvn clean compile -f ../pom.xml
+
+# Start the playground web interface
+cd ../apex-playground
+mvn spring-boot:run
+
+# Open in browser
+http://localhost:8081/playground
+
+# Click "Load Example" to browse all 113 YAML configurations
+```
+
+#### Command Line Demos
 ```bash
 # Build the project
 mvn clean compile
@@ -398,6 +739,13 @@ java -cp target/classes dev.mars.apex.demo.AllDemosRunner --list
 - **Data Management Guide:** `docs/APEX_DATA_MANAGEMENT_GUIDE.md`
 - **README First:** `docs/APEX_README_FIRST.md`
 
+### Additional Resources
+
+- **YAML Reference**: `reference/syntax-examples/`
+- **API Documentation**: See JavaDoc in demo classes
+- **Best Practices**: Embedded in runner classes and demo code
+- **Troubleshooting**: Check logs and error messages for guidance
+
 ## Key Innovations
 
 ### 1. Three-Layer API Design
@@ -420,8 +768,15 @@ Seamless integration with existing systems.
 
 ## Next Steps
 
-### For First-Time Users
-1. **Start with Interactive Runner:** `java -cp target/classes dev.mars.apex.demo.DemoRunner`
+### For First-Time Users (Recommended Path)
+1. **Start with Playground:** http://localhost:8081/playground
+2. **Browse Examples:** Click "Load Example" to see all 11 categories
+3. **Try Quick Start:** Load the "Quick Start Demo" example
+4. **Explore Financial:** Load financial validation and enrichment examples
+5. **Test Advanced:** Try batch processing and rule chains
+
+### For Command-Line Exploration
+1. **Interactive Runner:** `java -cp target/classes dev.mars.apex.demo.DemoRunner`
 2. **QuickStart Demo:** Get familiar with core concepts (5 minutes)
 3. **Explore Layered API:** Understand the design philosophy
 4. **Try YAML Datasets:** See the enrichment approach
@@ -452,11 +807,25 @@ Seamless integration with existing systems.
 - **Graceful Handling:** Missing or broken demo classes handled gracefully
 - **Performance Analysis:** Execution timing for performance insights
 
+## Demo Structure Design Philosophy
+
+*This structure was designed to provide a clear learning path from basic concepts to advanced real-world applications, making the APEX Rules Engine accessible to developers at all skill levels.*
+
+The progressive learning approach ensures that:
+- **Beginners** can start with simple concepts and build understanding gradually
+- **Experienced developers** can jump to relevant patterns and industry examples
+- **Enterprise teams** can focus on production-ready configurations and advanced techniques
+- **All users** benefit from 100% backward compatibility during the transition
+
 ---
 
 **Ready to improve your business rules management?**
 
+**Interactive Playground (Recommended):** http://localhost:8081/playground
+
 **First-time users:** `java -cp target/classes dev.mars.apex.demo.DemoRunner quickstart`
 
 **Comprehensive exploration:** `java -cp target/classes dev.mars.apex.demo.AllDemosRunner --list`
+
+**💡ro Tip:** The playground provides instant access to all 113 YAML configurations with professional UI and immediate testing capabilities!
 
