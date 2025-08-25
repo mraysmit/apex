@@ -68,6 +68,50 @@
                             <i class="fas fa-save"></i> Save Config
                         </button>
                     </div>
+                    <div class="btn-group me-2" role="group">
+                        <button type="button" class="btn btn-outline-success" id="uploadDataBtn">
+                            <i class="fas fa-upload"></i> Upload Data
+                        </button>
+                        <button type="button" class="btn btn-outline-success" id="uploadYamlBtn">
+                            <i class="fas fa-file-upload"></i> Upload YAML
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden File Input Elements -->
+        <input type="file" id="dataFileInput" accept=".json,.xml,.csv,.txt" style="display: none;">
+        <input type="file" id="yamlFileInput" accept=".yaml,.yml" style="display: none;">
+        <input type="file" id="configFileInput" accept=".json" style="display: none;">
+
+        <!-- Upload Progress Modal -->
+        <div class="modal fade" id="uploadProgressModal" tabindex="-1" aria-labelledby="uploadProgressModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="uploadProgressModalLabel">
+                            <i class="fas fa-upload"></i> Uploading File
+                        </h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span id="uploadFileName">Uploading...</span>
+                                <span id="uploadFileSize" class="text-muted"></span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                     id="uploadProgressBar" role="progressbar"
+                                     style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                    <span id="uploadProgressText">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="uploadStatus" class="text-center">
+                            <small class="text-muted">Please wait while your file is being processed...</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -88,9 +132,16 @@
                             <label class="btn btn-outline-secondary" for="csvFormat">CSV</label>
                         </div>
                     </div>
-                    <div class="card-body p-0">
-                        <textarea id="sourceDataEditor" class="form-control h-100" 
-                                  placeholder="Enter your source data here (JSON, XML, or CSV)..."></textarea>
+                    <div class="card-body p-0 position-relative">
+                        <div id="dataDropZone" class="drop-zone position-absolute w-100 h-100 d-none">
+                            <div class="drop-zone-content">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                                <h5>Drop your data file here</h5>
+                                <p class="text-muted">Supports JSON, XML, CSV, and TXT files</p>
+                            </div>
+                        </div>
+                        <textarea id="sourceDataEditor" class="form-control h-100"
+                                  placeholder="Enter your source data here (JSON, XML, or CSV) or drag and drop a file..."></textarea>
                     </div>
                 </div>
             </div>
@@ -102,9 +153,16 @@
                         <h6 class="mb-0">YAML Rules Configuration</h6>
                         <span class="badge bg-success" id="yamlStatus">Valid</span>
                     </div>
-                    <div class="card-body p-0">
-                        <textarea id="yamlRulesEditor" class="form-control h-100" 
-                                  placeholder="Enter your YAML rules configuration here..."></textarea>
+                    <div class="card-body p-0 position-relative">
+                        <div id="yamlDropZone" class="drop-zone position-absolute w-100 h-100 d-none">
+                            <div class="drop-zone-content">
+                                <i class="fas fa-file-code fa-3x text-success mb-3"></i>
+                                <h5>Drop your YAML file here</h5>
+                                <p class="text-muted">Supports YAML and YML files</p>
+                            </div>
+                        </div>
+                        <textarea id="yamlRulesEditor" class="form-control h-100"
+                                  placeholder="Enter your YAML rules configuration here or drag and drop a YAML file..."></textarea>
                     </div>
                 </div>
             </div>

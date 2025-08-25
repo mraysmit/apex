@@ -7,6 +7,7 @@ import dev.mars.apex.playground.service.PlaygroundService;
 import dev.mars.apex.playground.service.YamlValidationService;
 import dev.mars.apex.playground.service.ExampleService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -16,7 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -185,6 +188,189 @@ public class ApiController {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", "Failed to load example: " + e.getMessage());
             return ResponseEntity.status(500).body(errorResponse);
+        }
+    }
+
+    /**
+     * Upload data file.
+     */
+    @PostMapping("/upload/data")
+    @Operation(
+        summary = "Upload data file",
+        description = "Upload a data file (JSON, XML, CSV, or TXT) to be used as source data."
+    )
+    @ApiResponse(responseCode = "200", description = "Data file uploaded successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid file or file format")
+    @ApiResponse(responseCode = "413", description = "File size exceeds limit")
+    public ResponseEntity<Map<String, Object>> uploadDataFile(
+            @Parameter(description = "Data file to upload")
+            @RequestParam("file") MultipartFile file) {
+
+        logger.info("Uploading data file: {}", file.getOriginalFilename());
+
+        try {
+            // Validate file
+            validateDataFile(file);
+
+            // Read file content
+            String content = new String(file.getBytes(), StandardCharsets.UTF_8);
+
+            // Auto-detect format
+            String format = detectDataFormat(file.getOriginalFilename());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Data file uploaded successfully");
+            response.put("fileName", file.getOriginalFilename());
+            response.put("fileSize", file.getSize());
+            response.put("content", content);
+            response.put("detectedFormat", format);
+            response.put("timestamp", System.currentTimeMillis());
+
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            logger.warn("Invalid data file upload: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+
+        } catch (Exception e) {
+            logger.error("Error uploading data file", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Failed to upload file: " + e.getMessage());
+            return ResponseEntity.status(500).body(errorResponse);
+        }
+    }
+
+    /**
+     * Upload YAML configuration file.
+     */
+    @PostMapping("/upload/yaml")
+    @Operation(
+        summary = "Upload YAML file",
+        description = "Upload a YAML configuration file to be used as rules configuration."
+    )
+    @ApiResponse(responseCode = "200", description = "YAML file uploaded successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid file or YAML format")
+    @ApiResponse(responseCode = "413", description = "File size exceeds limit")
+    public ResponseEntity<Map<String, Object>> uploadYamlFile(
+            @Parameter(description = "YAML file to upload")
+            @RequestParam("file") MultipartFile file) {
+
+        logger.info("Uploading YAML file: {}", file.getOriginalFilename());
+
+        try {
+            // Validate file
+            validateYamlFile(file);
+
+            // Read file content
+            String content = new String(file.getBytes(), StandardCharsets.UTF_8);
+
+            // Validate YAML syntax
+            YamlValidationResponse validationResult = yamlValidationService.validateYaml(content);
+            if (!validationResult.isValid()) {
+                throw new IllegalArgumentException("Invalid YAML syntax: " + validationResult.getMessage());
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "YAML file uploaded successfully");
+            response.put("fileName", file.getOriginalFilename());
+            response.put("fileSize", file.getSize());
+            response.put("content", content);
+            response.put("timestamp", System.currentTimeMillis());
+
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            logger.warn("Invalid YAML file upload: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+
+        } catch (Exception e) {
+            logger.error("Error uploading YAML file", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Failed to upload file: " + e.getMessage());
+            return ResponseEntity.status(500).body(errorResponse);
+        }
+    }
+
+    // Private helper methods for file validation
+
+    /**
+     * Validate data file.
+     */
+    private void validateDataFile(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty");
+        }
+
+        // Check file size (10MB limit)
+        long maxSize = 10 * 1024 * 1024;
+        if (file.getSize() > maxSize) {
+            throw new IllegalArgumentException("File size exceeds maximum allowed size (10MB)");
+        }
+
+        // Check file extension
+        String fileName = file.getOriginalFilename();
+        if (fileName == null) {
+            throw new IllegalArgumentException("File name is required");
+        }
+
+        String extension = fileName.toLowerCase();
+        if (!extension.endsWith(".json") && !extension.endsWith(".xml") &&
+            !extension.endsWith(".csv") && !extension.endsWith(".txt")) {
+            throw new IllegalArgumentException("Invalid file type. Allowed types: .json, .xml, .csv, .txt");
+        }
+    }
+
+    /**
+     * Validate YAML file.
+     */
+    private void validateYamlFile(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty");
+        }
+
+        // Check file size (10MB limit)
+        long maxSize = 10 * 1024 * 1024;
+        if (file.getSize() > maxSize) {
+            throw new IllegalArgumentException("File size exceeds maximum allowed size (10MB)");
+        }
+
+        // Check file extension
+        String fileName = file.getOriginalFilename();
+        if (fileName == null) {
+            throw new IllegalArgumentException("File name is required");
+        }
+
+        String extension = fileName.toLowerCase();
+        if (!extension.endsWith(".yaml") && !extension.endsWith(".yml")) {
+            throw new IllegalArgumentException("Invalid file type. Allowed types: .yaml, .yml");
+        }
+    }
+
+    /**
+     * Detect data format based on file extension.
+     */
+    private String detectDataFormat(String fileName) {
+        if (fileName == null) {
+            return "JSON";
+        }
+
+        String extension = fileName.toLowerCase();
+        if (extension.endsWith(".xml")) {
+            return "XML";
+        } else if (extension.endsWith(".csv")) {
+            return "CSV";
+        } else {
+            return "JSON"; // Default for .json and .txt files
         }
     }
 }

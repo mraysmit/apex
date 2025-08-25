@@ -57,6 +57,23 @@ function setupEventListeners() {
             updateDataFormat(this.value);
         });
     });
+
+    // File upload buttons
+    document.getElementById('uploadDataBtn').addEventListener('click', () => {
+        document.getElementById('dataFileInput').click();
+    });
+
+    document.getElementById('uploadYamlBtn').addEventListener('click', () => {
+        document.getElementById('yamlFileInput').click();
+    });
+
+    // File input change handlers
+    document.getElementById('dataFileInput').addEventListener('change', handleDataFileUpload);
+    document.getElementById('yamlFileInput').addEventListener('change', handleYamlFileUpload);
+    document.getElementById('configFileInput').addEventListener('change', handleConfigFileUpload);
+
+    // Drag and drop event listeners
+    setupDragAndDrop();
     
     // Real-time YAML validation (debounced)
     let yamlValidationTimeout;
@@ -436,4 +453,379 @@ function showAlert(message, type = 'info') {
             alert.remove();
         }
     }, 5000);
+}
+
+// File Upload Functions
+
+/**
+ * Setup drag and drop functionality
+ */
+function setupDragAndDrop() {
+    const dataDropZone = document.getElementById('dataDropZone');
+    const yamlDropZone = document.getElementById('yamlDropZone');
+    const sourceDataEditor = document.getElementById('sourceDataEditor');
+    const yamlRulesEditor = document.getElementById('yamlRulesEditor');
+
+    // Data editor drag and drop
+    setupDropZone(sourceDataEditor, dataDropZone, handleDataFileDrop);
+
+    // YAML editor drag and drop
+    setupDropZone(yamlRulesEditor, yamlDropZone, handleYamlFileDrop);
+}
+
+/**
+ * Setup drop zone for an editor
+ */
+function setupDropZone(editor, dropZone, dropHandler) {
+    // Prevent default drag behaviors
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        editor.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    // Highlight drop zone when item is dragged over it
+    ['dragenter', 'dragover'].forEach(eventName => {
+        editor.addEventListener(eventName, () => {
+            dropZone.classList.remove('d-none');
+            dropZone.classList.add('drag-over');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        editor.addEventListener(eventName, () => {
+            dropZone.classList.add('d-none');
+            dropZone.classList.remove('drag-over');
+        }, false);
+    });
+
+    // Handle dropped files
+    editor.addEventListener('drop', dropHandler, false);
+}
+
+/**
+ * Prevent default drag behaviors
+ */
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+/**
+ * Handle data file drop
+ */
+function handleDataFileDrop(e) {
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        const file = files[0];
+        if (validateDataFile(file)) {
+            readFileContent(file, (content) => {
+                sourceDataEditor.value = content;
+                showAlert(`Data file "${file.name}" loaded successfully!`, 'success');
+
+                // Auto-detect format based on file extension
+                autoDetectDataFormat(file.name);
+            });
+        }
+    }
+}
+
+/**
+ * Handle YAML file drop
+ */
+function handleYamlFileDrop(e) {
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        const file = files[0];
+        if (validateYamlFile(file)) {
+            readFileContent(file, (content) => {
+                yamlRulesEditor.value = content;
+                showAlert(`YAML file "${file.name}" loaded successfully!`, 'success');
+
+                // Trigger YAML validation
+                validateYaml();
+            });
+        }
+    }
+}
+
+/**
+ * Handle data file upload via button
+ */
+function handleDataFileUpload(event) {
+    const file = event.target.files[0];
+    if (file && validateDataFile(file)) {
+        showUploadProgress(file);
+
+        readFileContent(file, (content) => {
+            sourceDataEditor.value = content;
+            hideUploadProgress();
+            showAlert(`Data file "${file.name}" uploaded successfully!`, 'success');
+
+            // Auto-detect format
+            autoDetectDataFormat(file.name);
+
+            // Clear the input
+            event.target.value = '';
+        });
+    }
+}
+
+/**
+ * Handle YAML file upload via button
+ */
+function handleYamlFileUpload(event) {
+    const file = event.target.files[0];
+    if (file && validateYamlFile(file)) {
+        showUploadProgress(file);
+
+        readFileContent(file, (content) => {
+            yamlRulesEditor.value = content;
+            hideUploadProgress();
+            showAlert(`YAML file "${file.name}" uploaded successfully!`, 'success');
+
+            // Trigger validation
+            validateYaml();
+
+            // Clear the input
+            event.target.value = '';
+        });
+    }
+}
+
+/**
+ * Handle configuration file upload
+ */
+function handleConfigFileUpload(event) {
+    const file = event.target.files[0];
+    if (file && validateConfigFile(file)) {
+        showUploadProgress(file);
+
+        readFileContent(file, (content) => {
+            try {
+                const config = JSON.parse(content);
+
+                if (config.sourceData) {
+                    sourceDataEditor.value = config.sourceData;
+                }
+
+                if (config.yamlRules) {
+                    yamlRulesEditor.value = config.yamlRules;
+                }
+
+                if (config.dataFormat) {
+                    updateDataFormat(config.dataFormat);
+                    // Update radio button
+                    const formatRadio = document.getElementById(config.dataFormat.toLowerCase() + 'Format');
+                    if (formatRadio) {
+                        formatRadio.checked = true;
+                    }
+                }
+
+                hideUploadProgress();
+                showAlert(`Configuration "${file.name}" loaded successfully!`, 'success');
+
+                // Trigger validation
+                validateYaml();
+
+            } catch (error) {
+                hideUploadProgress();
+                showAlert(`Error parsing configuration file: ${error.message}`, 'danger');
+            }
+
+            // Clear the input
+            event.target.value = '';
+        });
+    }
+}
+
+// File Validation Functions
+
+/**
+ * Validate data file
+ */
+function validateDataFile(file) {
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const allowedTypes = ['.json', '.xml', '.csv', '.txt'];
+
+    // Check file size
+    if (file.size > maxSize) {
+        showAlert(`File size (${formatFileSize(file.size)}) exceeds maximum allowed size (10MB)`, 'danger');
+        return false;
+    }
+
+    // Check file type
+    const fileName = file.name.toLowerCase();
+    const isValidType = allowedTypes.some(type => fileName.endsWith(type));
+
+    if (!isValidType) {
+        showAlert(`Invalid file type. Allowed types: ${allowedTypes.join(', ')}`, 'danger');
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Validate YAML file
+ */
+function validateYamlFile(file) {
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const allowedTypes = ['.yaml', '.yml'];
+
+    // Check file size
+    if (file.size > maxSize) {
+        showAlert(`File size (${formatFileSize(file.size)}) exceeds maximum allowed size (10MB)`, 'danger');
+        return false;
+    }
+
+    // Check file type
+    const fileName = file.name.toLowerCase();
+    const isValidType = allowedTypes.some(type => fileName.endsWith(type));
+
+    if (!isValidType) {
+        showAlert(`Invalid file type. Allowed types: ${allowedTypes.join(', ')}`, 'danger');
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Validate configuration file
+ */
+function validateConfigFile(file) {
+    const maxSize = 10 * 1024 * 1024; // 10MB
+
+    // Check file size
+    if (file.size > maxSize) {
+        showAlert(`File size (${formatFileSize(file.size)}) exceeds maximum allowed size (10MB)`, 'danger');
+        return false;
+    }
+
+    // Check file type
+    if (!file.name.toLowerCase().endsWith('.json')) {
+        showAlert('Configuration file must be a JSON file (.json)', 'danger');
+        return false;
+    }
+
+    return true;
+}
+
+// Utility Functions
+
+/**
+ * Read file content
+ */
+function readFileContent(file, callback) {
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        callback(e.target.result);
+    };
+
+    reader.onerror = function() {
+        hideUploadProgress();
+        showAlert(`Error reading file: ${file.name}`, 'danger');
+    };
+
+    reader.readAsText(file);
+}
+
+/**
+ * Auto-detect data format based on file extension
+ */
+function autoDetectDataFormat(fileName) {
+    const extension = fileName.toLowerCase().split('.').pop();
+
+    let format = 'JSON'; // default
+
+    switch (extension) {
+        case 'xml':
+            format = 'XML';
+            break;
+        case 'csv':
+            format = 'CSV';
+            break;
+        case 'json':
+        case 'txt':
+        default:
+            format = 'JSON';
+            break;
+    }
+
+    // Update the radio button
+    const formatRadio = document.getElementById(format.toLowerCase() + 'Format');
+    if (formatRadio) {
+        formatRadio.checked = true;
+        updateDataFormat(format);
+    }
+}
+
+/**
+ * Format file size for display
+ */
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+/**
+ * Show upload progress modal
+ */
+function showUploadProgress(file) {
+    const modal = new bootstrap.Modal(document.getElementById('uploadProgressModal'));
+    const fileName = document.getElementById('uploadFileName');
+    const fileSize = document.getElementById('uploadFileSize');
+    const progressBar = document.getElementById('uploadProgressBar');
+    const progressText = document.getElementById('uploadProgressText');
+
+    fileName.textContent = file.name;
+    fileSize.textContent = formatFileSize(file.size);
+
+    // Simulate progress (since FileReader doesn't provide real progress for small files)
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += Math.random() * 30;
+        if (progress > 90) progress = 90;
+
+        progressBar.style.width = progress + '%';
+        progressBar.setAttribute('aria-valuenow', progress);
+        progressText.textContent = Math.round(progress) + '%';
+    }, 100);
+
+    // Store interval ID for cleanup
+    modal._progressInterval = interval;
+
+    modal.show();
+}
+
+/**
+ * Hide upload progress modal
+ */
+function hideUploadProgress() {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('uploadProgressModal'));
+    if (modal) {
+        // Complete the progress bar
+        const progressBar = document.getElementById('uploadProgressBar');
+        const progressText = document.getElementById('uploadProgressText');
+
+        progressBar.style.width = '100%';
+        progressBar.setAttribute('aria-valuenow', 100);
+        progressText.textContent = '100%';
+
+        // Clear interval
+        if (modal._progressInterval) {
+            clearInterval(modal._progressInterval);
+        }
+
+        // Hide modal after a brief delay
+        setTimeout(() => {
+            modal.hide();
+        }, 500);
+    }
 }

@@ -321,3 +321,133 @@
     margin-top: 8px;
     font-style: italic;
 }
+
+/* File Upload and Drag-and-Drop Styles */
+.drop-zone {
+    background: rgba(0, 123, 255, 0.05);
+    border: 2px dashed #007bff;
+    border-radius: 8px;
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+.drop-zone.drag-over {
+    background: rgba(0, 123, 255, 0.1);
+    border-color: #0056b3;
+    transform: scale(1.02);
+}
+
+.drop-zone-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: none;
+}
+
+.drop-zone-content h5 {
+    color: #007bff;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.drop-zone-content p {
+    font-size: 14px;
+    margin-bottom: 0;
+}
+
+/* YAML Drop Zone Specific Styles */
+#yamlDropZone {
+    border-color: #28a745;
+    background: rgba(40, 167, 69, 0.05);
+}
+
+#yamlDropZone.drag-over {
+    background: rgba(40, 167, 69, 0.1);
+    border-color: #1e7e34;
+}
+
+#yamlDropZone .drop-zone-content h5 {
+    color: #28a745;
+}
+
+/* Upload Progress Styles */
+.progress {
+    height: 8px;
+    border-radius: 4px;
+}
+
+.progress-bar {
+    transition: width 0.3s ease;
+}
+
+#uploadProgressText {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Upload Button Styles */
+#uploadDataBtn:hover,
+#uploadYamlBtn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* File Input Styling */
+.file-input-wrapper {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.file-input-wrapper input[type=file] {
+    position: absolute;
+    left: -9999px;
+}
+
+/* Animation for successful upload */
+@keyframes uploadSuccess {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.upload-success {
+    animation: uploadSuccess 0.5s ease-in-out;
+}
+
+/* Error state for drag zones */
+.drop-zone.error {
+    border-color: #dc3545;
+    background: rgba(220, 53, 69, 0.05);
+}
+
+.drop-zone.error .drop-zone-content h5 {
+    color: #dc3545;
+}
+
+/* Loading state */
+.uploading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.uploading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #007bff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 1000;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
