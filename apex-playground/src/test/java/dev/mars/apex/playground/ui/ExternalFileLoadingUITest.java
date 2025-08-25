@@ -282,8 +282,8 @@ class ExternalFileLoadingUITest {
         clearBtn.click();
 
         // Then
-        assertEquals("", sourceEditor.getAttribute("value"), "Source editor should be cleared");
-        assertEquals("", yamlEditor.getAttribute("value"), "YAML editor should be cleared");
+        assertEquals("", sourceEditor.getDomAttribute("value"), "Source editor should be cleared");
+        assertEquals("", yamlEditor.getDomAttribute("value"), "YAML editor should be cleared");
     }
 
     // Helper methods
@@ -302,3 +302,4 @@ class ExternalFileLoadingUITest {
         element.sendKeys(text);
     }
 }
+

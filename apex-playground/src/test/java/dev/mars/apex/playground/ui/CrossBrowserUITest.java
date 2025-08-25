@@ -241,7 +241,7 @@ class CrossBrowserUITest {
         ));
         
         String statusText = statusBadge.getText().toLowerCase();
-        String statusClass = statusBadge.getAttribute("class");
+        String statusClass = statusBadge.getDomAttribute("class");
         
         assertTrue(statusText.contains("valid") || statusClass.contains("bg-success"), 
                   "YAML validation should work in " + browser + 
@@ -295,3 +295,4 @@ class CrossBrowserUITest {
         element.sendKeys(text);
     }
 }
+

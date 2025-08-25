@@ -89,7 +89,7 @@ class DragDropFileUploadUITest {
         WebElement dataDropZone = driver.findElement(By.id("dataDropZone"));
 
         // Initially drop zone should be hidden
-        assertTrue(dataDropZone.getAttribute("class").contains("d-none"), 
+        assertTrue(dataDropZone.getDomAttribute("class").contains("d-none"), 
                   "Drop zone should be initially hidden");
 
         // When - Simulate drag enter event
@@ -99,7 +99,7 @@ class DragDropFileUploadUITest {
 
         // Then - Drop zone should become visible
         wait.until(ExpectedConditions.not(ExpectedConditions.attributeContains(dataDropZone, "class", "d-none")));
-        assertFalse(dataDropZone.getAttribute("class").contains("d-none"), 
+        assertFalse(dataDropZone.getDomAttribute("class").contains("d-none"), 
                    "Drop zone should be visible when dragging over editor");
     }
 
@@ -113,7 +113,7 @@ class DragDropFileUploadUITest {
         WebElement yamlDropZone = driver.findElement(By.id("yamlDropZone"));
 
         // Initially drop zone should be hidden
-        assertTrue(yamlDropZone.getAttribute("class").contains("d-none"), 
+        assertTrue(yamlDropZone.getDomAttribute("class").contains("d-none"), 
                   "YAML drop zone should be initially hidden");
 
         // When - Simulate drag enter event
@@ -123,7 +123,7 @@ class DragDropFileUploadUITest {
 
         // Then - Drop zone should become visible
         wait.until(ExpectedConditions.not(ExpectedConditions.attributeContains(yamlDropZone, "class", "d-none")));
-        assertFalse(yamlDropZone.getAttribute("class").contains("d-none"), 
+        assertFalse(yamlDropZone.getDomAttribute("class").contains("d-none"), 
                    "YAML drop zone should be visible when dragging over editor");
     }
 
@@ -150,7 +150,7 @@ class DragDropFileUploadUITest {
 
         // Then - Drop zone should be hidden again
         wait.until(ExpectedConditions.attributeContains(dataDropZone, "class", "d-none"));
-        assertTrue(dataDropZone.getAttribute("class").contains("d-none"), 
+        assertTrue(dataDropZone.getDomAttribute("class").contains("d-none"), 
                   "Drop zone should be hidden when drag leaves editor");
     }
 
@@ -177,7 +177,7 @@ class DragDropFileUploadUITest {
         jsExecutor.executeScript("arguments[0].checked = true;", jsonFormatRadio);
 
         // Then - Verify content was loaded
-        String editorContent = sourceEditor.getAttribute("value");
+        String editorContent = sourceEditor.getDomAttribute("value");
         assertTrue(editorContent.contains("John Doe"), "Editor should contain JSON content");
         assertTrue(editorContent.contains("john.doe@example.com"), "Editor should contain email");
         assertTrue(jsonFormatRadio.isSelected(), "JSON format should be selected");
@@ -202,7 +202,7 @@ class DragDropFileUploadUITest {
             yamlEditor, fileContent);
 
         // Then - Verify content was loaded
-        String editorContent = yamlEditor.getAttribute("value");
+        String editorContent = yamlEditor.getDomAttribute("value");
         assertTrue(editorContent.contains("metadata:"), "Editor should contain YAML metadata");
         assertTrue(editorContent.contains("Test Configuration"), "Editor should contain YAML name");
         assertTrue(editorContent.contains("test-rule"), "Editor should contain rule ID");
@@ -231,7 +231,7 @@ class DragDropFileUploadUITest {
             "arguments[0].classList.add('drag-over');", dataDropZone);
 
         // Then - Verify drag-over styling is applied
-        assertTrue(dataDropZone.getAttribute("class").contains("drag-over"), 
+        assertTrue(dataDropZone.getDomAttribute("class").contains("drag-over"), 
                   "Drop zone should have drag-over styling");
     }
 
@@ -249,7 +249,7 @@ class DragDropFileUploadUITest {
         jsExecutor.executeScript(
             "arguments[0].value = arguments[1]; arguments[0].dispatchEvent(new Event('input'));",
             sourceEditor, jsonContent);
-        assertTrue(sourceEditor.getAttribute("value").contains("John Doe"), "Should handle JSON");
+        assertTrue(sourceEditor.getDomAttribute("value").contains("John Doe"), "Should handle JSON");
 
         // Test XML file
         File xmlFile = createTestXmlFile();
@@ -257,7 +257,7 @@ class DragDropFileUploadUITest {
         jsExecutor.executeScript(
             "arguments[0].value = arguments[1]; arguments[0].dispatchEvent(new Event('input'));",
             sourceEditor, xmlContent);
-        assertTrue(sourceEditor.getAttribute("value").contains("<person>"), "Should handle XML");
+        assertTrue(sourceEditor.getDomAttribute("value").contains("<person>"), "Should handle XML");
 
         // Test CSV file
         File csvFile = createTestCsvFile();
@@ -265,7 +265,7 @@ class DragDropFileUploadUITest {
         jsExecutor.executeScript(
             "arguments[0].value = arguments[1]; arguments[0].dispatchEvent(new Event('input'));",
             sourceEditor, csvContent);
-        assertTrue(sourceEditor.getAttribute("value").contains("name,age,email"), "Should handle CSV");
+        assertTrue(sourceEditor.getDomAttribute("value").contains("name,age,email"), "Should handle CSV");
     }
 
     // Helper methods for creating test files
@@ -333,3 +333,4 @@ class DragDropFileUploadUITest {
         return csvFile;
     }
 }
+

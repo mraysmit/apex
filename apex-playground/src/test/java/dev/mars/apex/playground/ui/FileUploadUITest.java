@@ -163,7 +163,7 @@ class FileUploadUITest {
             // If no alert appears, the file input might have been rejected by browser
             // Verify that the editor content hasn't changed
             WebElement sourceEditor = driver.findElement(By.id("sourceDataEditor"));
-            String editorContent = sourceEditor.getAttribute("value");
+            String editorContent = sourceEditor.getDomAttribute("value");
             assertTrue(editorContent.isEmpty() || !editorContent.contains("This is not a valid data file"),
                       "Invalid file content should not be loaded into editor");
         }
@@ -186,7 +186,7 @@ class FileUploadUITest {
         } catch (Exception e) {
             // If no alert appears, verify the file wasn't processed
             WebElement sourceEditor = driver.findElement(By.id("sourceDataEditor"));
-            String editorContent = sourceEditor.getAttribute("value");
+            String editorContent = sourceEditor.getDomAttribute("value");
             // Large file content should not be loaded (would be too much text)
             assertTrue(editorContent.length() < 1000000,
                       "Large file content should not be loaded into editor");
@@ -228,8 +228,8 @@ class FileUploadUITest {
         WebElement dataDropZone = driver.findElement(By.id("dataDropZone"));
         WebElement yamlDropZone = driver.findElement(By.id("yamlDropZone"));
         
-        assertTrue(dataDropZone.getAttribute("class").contains("d-none"), "Data drop zone should be initially hidden");
-        assertTrue(yamlDropZone.getAttribute("class").contains("d-none"), "YAML drop zone should be initially hidden");
+        assertTrue(dataDropZone.getDomAttribute("class").contains("d-none"), "Data drop zone should be initially hidden");
+        assertTrue(yamlDropZone.getDomAttribute("class").contains("d-none"), "YAML drop zone should be initially hidden");
     }
 
     // Helper methods
@@ -337,7 +337,7 @@ class FileUploadUITest {
 
         // Then
         WebElement sourceEditor = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("sourceDataEditor")));
-        String editorContent = sourceEditor.getAttribute("value");
+        String editorContent = sourceEditor.getDomAttribute("value");
 
         assertTrue(editorContent.contains("<person>"), "Editor should contain uploaded XML data");
         assertTrue(editorContent.contains("<name>Jane Smith</name>"), "Editor should contain XML content");
@@ -360,7 +360,7 @@ class FileUploadUITest {
 
         // Then
         WebElement sourceEditor = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("sourceDataEditor")));
-        String editorContent = sourceEditor.getAttribute("value");
+        String editorContent = sourceEditor.getDomAttribute("value");
 
         assertTrue(editorContent.contains("name,age,email"), "Editor should contain CSV headers");
         assertTrue(editorContent.contains("Bob Johnson,25"), "Editor should contain CSV data");
@@ -387,7 +387,7 @@ class FileUploadUITest {
         } catch (Exception e) {
             // If no alert appears, verify the editor remains empty
             WebElement sourceEditor = driver.findElement(By.id("sourceDataEditor"));
-            String editorContent = sourceEditor.getAttribute("value");
+            String editorContent = sourceEditor.getDomAttribute("value");
             assertTrue(editorContent.isEmpty(), "Editor should remain empty when empty file is uploaded");
         }
     }
@@ -407,7 +407,7 @@ class FileUploadUITest {
         // The file should upload but YAML validation should show error
         WebElement yamlStatus = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("yamlStatus")));
         assertTrue(yamlStatus.getText().toLowerCase().contains("invalid") ||
-                  yamlStatus.getAttribute("class").contains("bg-danger"),
+                  yamlStatus.getDomAttribute("class").contains("bg-danger"),
                   "YAML should be marked as invalid");
     }
 
@@ -424,7 +424,7 @@ class FileUploadUITest {
 
         // Then
         WebElement fileInput = driver.findElement(By.id("dataFileInput"));
-        assertEquals("", fileInput.getAttribute("value"), "File input should be cleared after upload");
+        assertEquals("", fileInput.getDomAttribute("value"), "File input should be cleared after upload");
     }
 
     // Additional helper methods for new test files
@@ -484,3 +484,4 @@ class FileUploadUITest {
         return invalidYamlFile;
     }
 }
+

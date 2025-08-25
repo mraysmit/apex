@@ -270,3 +270,4 @@ public class PlaygroundScreenshotUtil {
         public boolean shouldProcess() { return process; }
     }
 }
+

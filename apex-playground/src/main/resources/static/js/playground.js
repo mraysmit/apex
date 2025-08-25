@@ -196,6 +196,10 @@ function clearAll() {
         document.getElementById('enrichmentResults').innerHTML = '<p class="text-muted">Click "Process" to see enrichment results and performance metrics...</p>';
         updateYamlStatus(true, 'Valid');
         updateProcessingTime(0);
+
+        // Clear file name displays
+        clearSourceDataFileName();
+        clearYamlRulesFileName();
     }
 }
 
@@ -252,7 +256,11 @@ rules:
     
     sourceDataEditor.value = JSON.stringify(exampleData, null, 2);
     yamlRulesEditor.value = exampleYaml;
-    
+
+    // Update file name displays for example
+    updateSourceDataFileName('example-data.json', JSON.stringify(exampleData, null, 2).length);
+    updateYamlRulesFileName('example-rules.yaml', exampleYaml.length);
+
     validateYamlRealtime(exampleYaml);
 }
 
@@ -352,10 +360,12 @@ async function loadSpecificExample(category, id) {
         // Load the example data
         if (example.yaml) {
             yamlRulesEditor.value = example.yaml;
+            updateYamlRulesFileName(`${example.name.toLowerCase().replace(/\s+/g, '-')}.yaml`, example.yaml.length);
         }
 
         if (example.sampleData) {
             sourceDataEditor.value = JSON.stringify(example.sampleData, null, 2);
+            updateSourceDataFileName(`${example.name.toLowerCase().replace(/\s+/g, '-')}-data.json`, JSON.stringify(example.sampleData, null, 2).length);
         }
 
         showAlert(`Example "${example.name}" loaded successfully`, 'success');
@@ -522,6 +532,9 @@ function handleDataFileDrop(e) {
                 sourceDataEditor.value = content;
                 showAlert(`Data file "${file.name}" loaded successfully!`, 'success');
 
+                // Update file name display
+                updateSourceDataFileName(file.name, file.size);
+
                 // Auto-detect format based on file extension
                 autoDetectDataFormat(file.name);
             });
@@ -540,6 +553,9 @@ function handleYamlFileDrop(e) {
             readFileContent(file, (content) => {
                 yamlRulesEditor.value = content;
                 showAlert(`YAML file "${file.name}" loaded successfully!`, 'success');
+
+                // Update file name display
+                updateYamlRulesFileName(file.name, file.size);
 
                 // Trigger YAML validation
                 validateYaml();
@@ -560,6 +576,9 @@ function handleDataFileUpload(event) {
             sourceDataEditor.value = content;
             hideUploadProgress();
             showAlert(`Data file "${file.name}" uploaded successfully!`, 'success');
+
+            // Update file name display
+            updateSourceDataFileName(file.name, file.size);
 
             // Auto-detect format
             autoDetectDataFormat(file.name);
@@ -582,6 +601,9 @@ function handleYamlFileUpload(event) {
             yamlRulesEditor.value = content;
             hideUploadProgress();
             showAlert(`YAML file "${file.name}" uploaded successfully!`, 'success');
+
+            // Update file name display
+            updateYamlRulesFileName(file.name, file.size);
 
             // Trigger validation
             validateYaml();
@@ -606,10 +628,12 @@ function handleConfigFileUpload(event) {
 
                 if (config.sourceData) {
                     sourceDataEditor.value = config.sourceData;
+                    updateSourceDataFileName('loaded-data.json', config.sourceData.length);
                 }
 
                 if (config.yamlRules) {
                     yamlRulesEditor.value = config.yamlRules;
+                    updateYamlRulesFileName('loaded-rules.yaml', config.yamlRules.length);
                 }
 
                 if (config.dataFormat) {
@@ -772,6 +796,60 @@ function formatFileSize(bytes) {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+/**
+ * Update source data file name display
+ */
+function updateSourceDataFileName(fileName, fileSize) {
+    const fileNameElement = document.getElementById('sourceDataFileName');
+    const fileSizeElement = document.getElementById('sourceDataFileSize');
+
+    if (fileName) {
+        fileNameElement.textContent = fileName;
+        fileNameElement.className = 'text-success fw-bold';
+        if (fileSize) {
+            fileSizeElement.textContent = `(${formatFileSize(fileSize)})`;
+        }
+    } else {
+        fileNameElement.textContent = 'No file loaded';
+        fileNameElement.className = '';
+        fileSizeElement.textContent = '';
+    }
+}
+
+/**
+ * Update YAML rules file name display
+ */
+function updateYamlRulesFileName(fileName, fileSize) {
+    const fileNameElement = document.getElementById('yamlRulesFileName');
+    const fileSizeElement = document.getElementById('yamlRulesFileSize');
+
+    if (fileName) {
+        fileNameElement.textContent = fileName;
+        fileNameElement.className = 'text-success fw-bold';
+        if (fileSize) {
+            fileSizeElement.textContent = `(${formatFileSize(fileSize)})`;
+        }
+    } else {
+        fileNameElement.textContent = 'No file loaded';
+        fileNameElement.className = '';
+        fileSizeElement.textContent = '';
+    }
+}
+
+/**
+ * Clear source data file name display
+ */
+function clearSourceDataFileName() {
+    updateSourceDataFileName(null);
+}
+
+/**
+ * Clear YAML rules file name display
+ */
+function clearYamlRulesFileName() {
+    updateYamlRulesFileName(null);
 }
 
 /**

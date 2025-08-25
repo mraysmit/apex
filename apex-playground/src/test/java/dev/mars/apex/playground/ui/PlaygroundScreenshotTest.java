@@ -278,3 +278,4 @@ class PlaygroundScreenshotTest {
         assertNotNull(step3);
     }
 }
+

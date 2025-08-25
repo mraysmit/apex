@@ -300,3 +300,4 @@ public class MultiFormatScreenshotTest {
         System.out.println("CSV format processing screenshot: " + screenshotPath);
     }
 }
+

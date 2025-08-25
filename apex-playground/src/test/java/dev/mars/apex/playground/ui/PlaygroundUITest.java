@@ -129,7 +129,7 @@ class PlaygroundUITest {
 
         // Verify validation success in status badge
         String statusText = statusBadge.getText().toLowerCase();
-        String statusClass = statusBadge.getAttribute("class");
+        String statusClass = statusBadge.getDomAttribute("class");
 
         assertTrue(statusText.contains("valid") || statusClass.contains("bg-success"),
                   "Validation status should indicate success. Status: " + statusText + ", Class: " + statusClass);
@@ -364,7 +364,7 @@ class PlaygroundUITest {
         ));
 
         String statusText = statusBadge.getText().toLowerCase();
-        String statusClass = statusBadge.getAttribute("class");
+        String statusClass = statusBadge.getDomAttribute("class");
 
         assertTrue(statusText.contains("invalid") || statusText.contains("error") ||
                   statusClass.contains("bg-danger"),
@@ -513,3 +513,4 @@ class PlaygroundUITest {
         return element.getText();
     }
 }
+

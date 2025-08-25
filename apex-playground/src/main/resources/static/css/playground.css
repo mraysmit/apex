@@ -41,6 +41,23 @@
     font-size: 0.75em;
 }
 
+/* File name display */
+.card-header small {
+    font-size: 0.8em;
+}
+
+.card-header small i {
+    opacity: 0.7;
+}
+
+.card-header small .text-success {
+    font-weight: 600;
+}
+
+.card-header small .text-muted {
+    color: #6c757d !important;
+}
+
 /* Toolbar styling */
 .btn-toolbar {
     padding: 10px 0;

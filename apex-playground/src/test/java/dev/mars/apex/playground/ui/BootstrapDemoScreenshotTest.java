@@ -588,3 +588,4 @@ class BootstrapDemoScreenshotTest {
         System.out.println("Mobile bootstrap demo screenshot: " + screenshotPath);
     }
 }
+
