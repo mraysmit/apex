@@ -106,7 +106,7 @@ class FileUploadUITest {
 
         // Then
         WebElement sourceEditor = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("sourceDataEditor")));
-        String editorContent = sourceEditor.getAttribute("value");
+        String editorContent = sourceEditor.getDomAttribute("value");
         
         assertTrue(editorContent.contains("John Doe"), "Editor should contain uploaded JSON data");
         assertTrue(editorContent.contains("john.doe@example.com"), "Editor should contain email from JSON");
@@ -132,7 +132,7 @@ class FileUploadUITest {
 
         // Then
         WebElement yamlEditor = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("yamlRulesEditor")));
-        String editorContent = yamlEditor.getAttribute("value");
+        String editorContent = yamlEditor.getDomAttribute("value");
         
         assertTrue(editorContent.contains("metadata:"), "Editor should contain uploaded YAML metadata");
         assertTrue(editorContent.contains("Test Configuration"), "Editor should contain YAML name");
