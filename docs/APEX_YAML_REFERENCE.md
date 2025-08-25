@@ -1,5 +1,9 @@
 # APEX YAML Syntax Reference Guide
 
+**Version:** 1.0
+**Date:** 2025-08-25
+**Author:** Mark Andrew Ray-Smith Cityline Ltd
+
 ## Table of Contents
 
 1. [Introduction & Overview](#1-introduction--overview)

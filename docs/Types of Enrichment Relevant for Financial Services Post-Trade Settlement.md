@@ -1,6 +1,10 @@
 
 # Types of Enrichment Relevant for Financial Services Post-Trade Settlement
 
+**Version:** 1.0
+**Date:** 2025-08-25
+**Author:** Mark Andrew Ray-Smith Cityline Ltd
+
 This comprehensive guide demonstrates various types of enrichment that are essential for financial services post-trade settlement, with detailed XML examples and YAML enrichment rules based on industry standards including ISO 20022, FIX Protocol, FpML, and SWIFT messaging formats.
 
 ## 1. Reference Data Enrichment

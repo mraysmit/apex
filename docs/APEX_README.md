@@ -1,21 +1,21 @@
 # APEX - Advanced Processing Engine for eXpressions
 
-**Version:** 2.0
+**Version:** 1.0
 **Date:** 2025-08-23
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
 A powerful expression processor for Java applications with comprehensive data source integration, scenario-based configuration management, and enterprise-grade YAML validation that provides seamless access to databases, REST APIs, file systems, caches, and more.
 
-### 🎉 What's New in Version 2.0
+### What's New in Version 1.0
 
-- **🎮 APEX Playground**: Interactive 4-panel web interface for real-time rule development and testing
-- **🚀 Enhanced Bootstrap Demos**: 4 complete financial services scenarios with infrastructure setup
-- **🔍 Advanced Lookup Patterns**: 4 comprehensive lookup pattern examples with real-world use cases
-- **⚡ 8 Advanced Feature Demos**: Specialized demonstrations of sophisticated APEX capabilities
-- **📝 Updated YAML Specification**: Modern syntax with enhanced validation and performance features
-- **🌐 Complete REST API**: Comprehensive HTTP API with OpenAPI/Swagger documentation
-- **🧪 100% Test Coverage**: Complete test coverage with cross-browser UI testing
-- **📚 Consolidated Documentation**: Streamlined guides for better user experience
+- **APEX Playground**: Interactive 4-panel web interface for real-time rule development and testing
+- **Enhanced Bootstrap Demos**: 4 complete financial services scenarios with infrastructure setup
+- **Advanced Lookup Patterns**: 4 comprehensive lookup pattern examples with real-world use cases
+- **8 Advanced Feature Demos**: Specialized demonstrations of sophisticated APEX capabilities
+- **Updated YAML Specification**: Modern syntax with enhanced validation and performance features
+- **Complete REST API**: Comprehensive HTTP API with OpenAPI/Swagger documentation
+- **100% Test Coverage**: Complete test coverage with cross-browser UI testing
+- **Consolidated Documentation**: Streamlined guides for better user experience
 
 ## System Architecture Overview
 
@@ -110,7 +110,7 @@ graph TB
     style U fill:#e8f5e8
 ```
 
-## 🎮 APEX Playground - Interactive Development Environment
+## APEX Playground - Interactive Development Environment
 
 The APEX Playground is a **revolutionary interactive web-based development environment** that provides a JSFiddle-style 4-panel interface for experimenting with and testing APEX rules engine capabilities in real-time.
 
@@ -127,19 +127,19 @@ open http://localhost:8081/playground
 
 ### Key Features
 
-- **⚡ Real-Time Processing**: See results instantly as you type YAML rules and data
-- **🎨 4-Panel Interface**: Source data, YAML rules, validation results, and enrichment output
-- **📝 Syntax Highlighting**: YAML and JSON editors with real-time validation
-- **💾 Save & Load**: Save configurations and load example templates
-- **📱 Responsive Design**: Works on desktop, tablet, and mobile devices
-- **🧪 100% Test Coverage**: 89 backend tests + 7 UI tests with cross-browser support
+- **Real-Time Processing**: See results instantly as you type YAML rules and data
+- **4-Panel Interface**: Source data, YAML rules, validation results, and enrichment output
+- **Syntax Highlighting**: YAML and JSON editors with real-time validation
+- **Save & Load**: Save configurations and load example templates
+- **Responsive Design**: Works on desktop, tablet, and mobile devices
+- **100% Test Coverage**: 89 backend tests + 7 UI tests with cross-browser support
 
 ### Why Start with the Playground?
 
-1. **🎯 Immediate Feedback** - No setup required, start experimenting immediately
-2. **📚 Built-in Examples** - Financial services templates and real-world scenarios
-3. **🔍 Visual Debugging** - See exactly how rules are processed step-by-step
-4. **📖 Learning Tool** - Perfect for understanding APEX capabilities interactively
+1. **Immediate Feedback** - No setup required, start experimenting immediately
+2. **Built-in Examples** - Financial services templates and real-world scenarios
+3. **Visual Debugging** - See exactly how rules are processed step-by-step
+4. **Learning Tool** - Perfect for understanding APEX capabilities interactively
 
 ### Playground Learning Path
 
@@ -157,7 +157,7 @@ Welcome to the comprehensive documentation for APEX (Advanced Processing Engine 
 
 ### The Complete APEX Ecosystem
 
-#### **🎮 [APEX Playground](http://localhost:8081/playground) - Start Here!**
+#### **[APEX Playground](http://localhost:8081/playground) - Start Here!**
 **Target Audience:** Everyone - the perfect starting point for all users
 **What it provides:**
 - Interactive 4-panel web interface for real-time experimentation
@@ -169,7 +169,7 @@ Welcome to the comprehensive documentation for APEX (Advanced Processing Engine 
 **Who should use:** Everyone new to APEX - provides immediate hands-on experience
 **Time to get started:** 5-10 minutes
 
-#### **📚 The 6 Essential Guides**
+#### **The 6 Essential Guides**
 
 #### **1. [Rules Engine User Guide](APEX_RULES_ENGINE_USER_GUIDE.md)**
 **Target Audience:** All users - business users, developers, and implementers
@@ -207,7 +207,7 @@ Welcome to the comprehensive documentation for APEX (Advanced Processing Engine 
 - Regulatory compliance features (MiFID II, EMIR, Dodd-Frank)
 - **Complete demo ecosystem** (4 bootstrap + 4 lookup + 8 advanced demos)
 - Financial services templates and production-ready examples
-- Migration guide from v1.0 to v2.0 YAML specification
+- Migration guide for YAML specification
 
 **Who should read:** Financial services teams and domain experts
 **Time to read:** 45-60 minutes (expanded with comprehensive demo coverage)
@@ -326,11 +326,11 @@ metadata:
 - **Commodity Swaps Standard Processing**: Multi-layered validation for commodity derivatives
 - **Settlement Auto-Repair**: Intelligent auto-repair for failed settlement instructions
 
-## 🚀 Complete APEX Demonstration Ecosystem
+## Complete APEX Demonstration Ecosystem
 
 APEX provides the most comprehensive demonstration ecosystem in the rules engine space, with **16 complete demonstrations** covering every aspect of financial services processing, from basic concepts to advanced enterprise implementations.
 
-### 🎮 Interactive Learning with APEX Playground
+### Interactive Learning with APEX Playground
 
 **Start Here for Immediate Hands-On Experience:**
 ```bash
@@ -345,7 +345,7 @@ mvn spring-boot:run
 - **Built-in Financial Templates**: OTC derivatives, risk assessment, regulatory compliance
 - **100% Test Coverage**: 89 backend tests + 7 UI tests with cross-browser support
 
-### 🏗️ 4 Bootstrap Demonstrations - Complete End-to-End Scenarios
+### 4 Bootstrap Demonstrations - Complete End-to-End Scenarios
 
 #### 1. **OTC Options Bootstrap Demo** - Multi-Source Data Integration
 ```bash
@@ -392,7 +392,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.RiskAssessmentBoots
 - **Operational Risk**: Settlement and counterparty risk
 - **Regulatory Capital**: Basel III and capital requirement calculations
 
-### 🔍 4 Lookup Pattern Examples - Data Enrichment Mastery
+### 4 Lookup Pattern Examples - Data Enrichment Mastery
 
 #### 1. **Simple Field Lookup** - Currency Enrichment
 ```bash
@@ -418,7 +418,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.ConditionalE
 ```
 **Pattern**: `#jurisdiction == 'EU' ? #emirCode : #cftcCode` → Jurisdiction-specific compliance
 
-### ⚡ 8 Advanced Feature Demonstrations - Technical Deep Dive
+### 8 Advanced Feature Demonstrations - Technical Deep Dive
 
 #### **Performance & Scalability**
 - **Dynamic Method Execution Demo** - Pricing model selection
@@ -434,27 +434,27 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.ConditionalE
 - **Spring Boot Integration Demo** - Complete application integration
 - **Microservices Pattern Demo** - Distributed processing patterns
 
-### 📊 Learning Paths by Role
+### Learning Paths by Role
 
-#### **🎓 Beginner Path (2-3 hours)**
+#### **Beginner Path (2-3 hours)**
 1. **APEX Playground** (45 minutes) - Interactive experimentation
 2. **Simple Field Lookup Demo** (15 minutes) - Basic data enrichment
 3. **OTC Options Bootstrap Demo** (45 minutes) - Complete workflow
 4. **Trade Settlement Bootstrap Demo** (30 minutes) - Real-world processing
 
-#### **🏗️ Developer Path (3-4 hours)**
+#### **Developer Path (3-4 hours)**
 1. **All Lookup Pattern Examples** (60 minutes) - Master data enrichment
 2. **All Bootstrap Demonstrations** (120 minutes) - Complete financial workflows
 3. **Dynamic Method Execution Demo** (30 minutes) - Advanced pricing models
 4. **Performance Demo** (30 minutes) - High-frequency trading optimization
 
-#### **🏢 Financial Services Architect Path (4-5 hours)**
+#### **Financial Services Architect Path (4-5 hours)**
 1. **All Bootstrap Demonstrations** (150 minutes) - Complete scenario understanding
 2. **All Advanced Demos** (120 minutes) - Technical architecture patterns
 3. **Data Service Manager Demo** (45 minutes) - Market data integration
 4. **Regulatory compliance examples** (45 minutes) - EMIR, MiFID II, Dodd-Frank
 
-### 🚀 Quick Start Commands
+### Quick Start Commands
 
 #### **Start with APEX Playground (Recommended)**
 ```bash
@@ -500,19 +500,19 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.advanced.DataServiceManagerDe
 ./scripts/run-advanced-demos.sh      # 8 advanced features
 ```
 
-### 📚 Recommended Learning Sequence
+### Recommended Learning Sequence
 
-#### **🎯 Quick Start (30 minutes)**
+#### **Quick Start (30 minutes)**
 1. **APEX Playground** (15 minutes) - Interactive experimentation
 2. **Simple Field Lookup Demo** (5 minutes) - Basic concept
 3. **OTC Options Bootstrap Demo** (10 minutes) - Complete workflow
 
-#### **🏗️ Developer Track (3-4 hours)**
+#### **Developer Track (3-4 hours)**
 1. **All Lookup Pattern Examples** (60 minutes) - Master data enrichment patterns
 2. **All Bootstrap Demonstrations** (120 minutes) - Complete financial workflows
 3. **Advanced Feature Demos** (60-90 minutes) - Technical deep dive
 
-#### **🏢 Production Implementation (4-6 hours)**
+#### **Production Implementation (4-6 hours)**
 1. **Complete Demo Ecosystem** (180 minutes) - All 16 demonstrations
 2. **Documentation Deep Dive** (120-180 minutes) - All 6 guides
 3. **Custom Implementation** (varies) - Build your own configurations
@@ -650,14 +650,14 @@ enrichments:
         required: false
 ```
 
-### Key v2.0 Specification Improvements
+### Key Specification Improvements
 
-- ✅ **Modern Expression Syntax**: Use `#fieldName` instead of `['fieldName']`
-- ✅ **Enhanced Metadata**: Required `name`, `description`, and `type` fields
-- ✅ **Explicit Lookup Keys**: `lookup-key` field for complex expressions
-- ✅ **Performance Control**: `priority` ordering and `cache-ttl-seconds`
-- ✅ **Field Requirements**: `required` flag for field mappings
-- ✅ **Enable/Disable Control**: `enabled` flag for runtime control
+- **Modern Expression Syntax**: Use `#fieldName` instead of `['fieldName']`
+- **Enhanced Metadata**: Required `name`, `description`, and `type` fields
+- **Explicit Lookup Keys**: `lookup-key` field for complex expressions
+- **Performance Control**: `priority` ordering and `cache-ttl-seconds`
+- **Field Requirements**: `required` flag for field mappings
+- **Enable/Disable Control**: `enabled` flag for runtime control
 
 **Enterprise-ready data integration!** Access any data source through unified YAML configuration.
 
@@ -740,47 +740,47 @@ Start here if you're migrating from external services to datasets:
 - **Market Data Integration**: MIC codes and market information
 - **Regulatory Compliance**: Jurisdiction and compliance data
 
-## 📚 Quick Reference & Getting Started
+## Quick Reference & Getting Started
 
-### **🎯 Start Here - The Fastest Path to Success**
+### **Start Here - The Fastest Path to Success**
 
-#### **⚡ 5-Minute Quick Start**
+#### **5-Minute Quick Start**
 1. **[APEX Playground](http://localhost:8081/playground)** - Interactive web interface (start here!)
 2. **Load a financial services template** - See immediate results
 3. **Modify data and rules** - Experiment with real-time feedback
 4. **Export working configuration** - Save for production use
 
-#### **📖 Essential Documentation (6 Guides)**
+#### **Essential Documentation (6 Guides)**
 1. **[APEX Playground](http://localhost:8081/playground)** - Interactive development environment
-2. **[Rules Engine User Guide](APEX_RULES_ENGINE_USER_GUIDE.md)** - Complete user documentation (v2.0 YAML spec)
+2. **[Rules Engine User Guide](APEX_RULES_ENGINE_USER_GUIDE.md)** - Complete user documentation (YAML spec)
 3. **[Technical Reference](APEX_TECHNICAL_REFERENCE.md)** - Architecture and implementation details
 4. **[Financial Services Guide](APEX_FINANCIAL_SERVICES_GUIDE.md)** - Domain-specific patterns and compliance
 5. **[Bootstrap Demos Guide](APEX_BOOTSTRAP_DEMOS_GUIDE.md)** - 16 comprehensive demonstrations
 6. **[REST API Guide](APEX_REST_API_GUIDE.md)** - Complete HTTP API reference
 7. **[Data Management Guide](APEX_DATA_MANAGEMENT_GUIDE.md)** - Data integration and management
 
-### **🚀 Learning Paths by Time Investment**
+### **Learning Paths by Time Investment**
 
-#### **⚡ Quick Start Path (30 minutes)**
+#### **Quick Start Path (30 minutes)**
 1. **APEX Playground** (15 minutes) - Interactive experimentation with built-in templates
 2. **Simple Field Lookup Demo** (5 minutes) - Basic data enrichment concept
 3. **OTC Options Bootstrap Demo** (10 minutes) - Complete financial workflow
 4. **Result**: Understanding of core concepts and capabilities
 
-#### **🏗️ Developer Path (3-4 hours)**
+#### **Developer Path (3-4 hours)**
 1. **All Lookup Pattern Examples** (60 minutes) - Master 4 data enrichment patterns
 2. **All Bootstrap Demonstrations** (120 minutes) - 4 complete financial scenarios
 3. **Advanced Feature Demos** (60-90 minutes) - 8 technical deep dive demonstrations
 4. **Result**: Production-ready implementation knowledge
 
-#### **🏢 Production Implementation Path (4-6 hours)**
+#### **Production Implementation Path (4-6 hours)**
 1. **Complete Demo Ecosystem** (180 minutes) - All 16 demonstrations
 2. **Documentation Deep Dive** (120-180 minutes) - All 6 comprehensive guides
 3. **Custom Implementation** (varies) - Build your own configurations
 4. **Result**: Complete mastery and production deployment readiness
 
-### **🔄 Migration Path from v1.0 to v2.0**
-1. **Review v2.0 changes** in [Financial Services Guide](APEX_FINANCIAL_SERVICES_GUIDE.md) (15 minutes)
+### **Migration Path**
+1. **Review changes** in [Financial Services Guide](APEX_FINANCIAL_SERVICES_GUIDE.md) (15 minutes)
 2. **Use APEX Playground** to test updated YAML syntax (20 minutes)
 3. **Run migration scripts** for automated syntax updates (10 minutes)
 4. **Test updated configurations** using bootstrap demos (30 minutes)
@@ -845,7 +845,7 @@ Start here if you're migrating from external services to datasets:
 <dependency>
     <groupId>dev.mars</groupId>
     <artifactId>rules-engine-core</artifactId>
-    <version>2.0.0</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
@@ -908,8 +908,8 @@ dataSources:
 # config/enrichment-rules.yaml
 metadata:
   name: "Financial Trade Enrichment"
-  version: "2.0.0"
-  description: "Modern financial trade enrichment with enhanced validation"
+  version: "1.0.0"
+  description: "Financial trade enrichment with enhanced validation"
   type: "enrichment-config"
   created-by: "trading.team@company.com"
   business-domain: "Financial Services"
