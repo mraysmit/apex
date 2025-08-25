@@ -43,6 +43,27 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.SimpleFieldL
 - **Enterprise Features**: Connection pooling, health monitoring, caching, circuit breakers
 - **100% Test Coverage**: Comprehensive testing with cross-browser UI support
 
+## Screenshots
+
+The APEX Playground provides a JSFiddle-style interactive development environment for experimenting with rules and data processing in real-time.
+
+### APEX Playground - Interactive Development Environment
+
+**4-Panel Interface with Real-Time Processing**
+![APEX Playground Interface](docs/screenshots/playground_initial_interface_with_file_names_20250825_174757.png)
+
+**Financial Services Demo - OTC Options Processing**
+![OTC Options Demo](docs/screenshots/playground_chrome_desktop_view_otc_options_empty_playground_20250823_214748.png)
+
+**JSON Format Processing with Results**
+![JSON Processing Results](docs/screenshots/playground_chrome_desktop_view_json_format_processing_20250824_000920.png)
+
+**Commodity Swap Validation Demo**
+![Commodity Swap Demo](docs/screenshots/playground_chrome_desktop_view_commodity_swap_demo_20250823_214816.png)
+
+**Mobile-Responsive Design**
+![Mobile View](docs/screenshots/playground_chrome_mobile_view_bootstrap_demo_mobile_20250823_233003.png)
+
 ## Architecture
 
 ```mermaid
