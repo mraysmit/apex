@@ -2,8 +2,11 @@ package dev.mars.apex.demo.lookup;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.yaml.YamlEnrichment;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -83,10 +86,10 @@ public class ComprehensiveLookupDemo {
         LOGGER.info("Input data: {}", data);
         
         try {
-            // In a real implementation, this would use the enrichment service
-            // For demo purposes, we're showing the pattern validation works
-            LOGGER.info("✓ Simple field reference lookup pattern validated successfully");
-            LOGGER.info("Expected enriched data would include customer details from lookup");
+            // Actually execute the lookup using APEX engine
+            Map<String, Object> enrichedData = executeApexLookup(config, data, "simple-field-reference");
+            LOGGER.info("✓ Simple field reference lookup executed successfully");
+            LOGGER.info("Enriched data: {}", enrichedData);
         } catch (Exception e) {
             LOGGER.error("✗ Simple field reference lookup failed", e);
         }
@@ -368,6 +371,74 @@ public class ComprehensiveLookupDemo {
             LOGGER.info("Expected enriched data would include comprehensive trade processing details");
         } catch (Exception e) {
             LOGGER.error("✗ Complex business scenario failed", e);
+        }
+    }
+
+    /**
+     * Execute APEX lookup enrichment on the provided data.
+     * This method actually uses the APEX rules engine instead of just logging expected behavior.
+     */
+    private Map<String, Object> executeApexLookup(YamlRuleConfiguration config, Map<String, Object> data, String enrichmentName) throws Exception {
+        // Create a copy of the input data for enrichment
+        Map<String, Object> enrichedData = new HashMap<>(data);
+
+        // Apply enrichments using the APEX rules engine
+        if (config != null && config.getEnrichments() != null) {
+            for (YamlEnrichment enrichment : config.getEnrichments()) {
+                if (enrichment.getEnabled() != null && enrichment.getEnabled() &&
+                    (enrichmentName == null || enrichmentName.equals(enrichment.getName()))) {
+                    applyEnrichmentToData(enrichment, enrichedData);
+                }
+            }
+        }
+
+        return enrichedData;
+    }
+
+    /**
+     * Apply enrichment to data using APEX engine.
+     */
+    private void applyEnrichmentToData(YamlEnrichment enrichment, Map<String, Object> data) throws Exception {
+        // Create evaluation context
+        StandardEvaluationContext context = new StandardEvaluationContext();
+        data.forEach(context::setVariable);
+
+        // Evaluate condition
+        if (enrichment.getCondition() != null) {
+            ExpressionEvaluatorService evaluator = new ExpressionEvaluatorService();
+            Boolean conditionResult = evaluator.evaluate(enrichment.getCondition(), context, Boolean.class);
+            if (conditionResult == null || !conditionResult) {
+                return; // Condition not met, skip enrichment
+            }
+        }
+
+        // Apply lookup enrichment using the dataset from YAML
+        if (enrichment.getLookupConfig() != null && enrichment.getLookupConfig().getLookupDataset() != null) {
+            String lookupKey = enrichment.getLookupConfig().getLookupKey();
+            if (lookupKey != null) {
+                ExpressionEvaluatorService evaluator = new ExpressionEvaluatorService();
+                String keyValue = evaluator.evaluate(lookupKey, context, String.class);
+
+                // Find matching data in the lookup dataset
+                var dataset = enrichment.getLookupConfig().getLookupDataset();
+                if (dataset.getData() != null) {
+                    String keyField = dataset.getKeyField();
+                    for (Map<String, Object> dataRow : dataset.getData()) {
+                        if (keyValue != null && keyValue.equals(dataRow.get(keyField))) {
+                            // Apply field mappings
+                            if (enrichment.getFieldMappings() != null) {
+                                for (var mapping : enrichment.getFieldMappings()) {
+                                    Object sourceValue = dataRow.get(mapping.getSourceField());
+                                    if (sourceValue != null) {
+                                        data.put(mapping.getTargetField(), sourceValue);
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
         }
     }
 }

@@ -1,11 +1,17 @@
 package dev.mars.apex.demo.examples.lookups;
 
 import dev.mars.apex.demo.model.lookups.RiskAssessment;
+import dev.mars.apex.core.config.yaml.YamlEnrichment;
+import dev.mars.apex.core.config.yaml.YamlRule;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Demonstrates conditional expression lookup using ternary operators.
@@ -231,28 +237,27 @@ public class ConditionalExpressionLookupDemo extends AbstractLookupDemo {
     @Override
     protected List<RiskAssessment> processData(List<?> data) throws Exception {
         System.out.println("⚙️  Processing assessments with conditional expression enrichment...");
-        
+
         List<RiskAssessment> results = new ArrayList<>();
-        
+
         for (Object item : data) {
             if (item instanceof RiskAssessment) {
                 RiskAssessment assessment = (RiskAssessment) item;
-                
-                // Simulate enrichment based on conditional expression lookup
-                RiskAssessment enriched = simulateConditionalExpressionEnrichment(assessment);
+
+                // Use actual APEX rules engine to process the assessment
+                RiskAssessment enriched = processAssessmentWithApexEngine(assessment);
                 results.add(enriched);
-                
+
                 // Log the lookup process
-                String category = evaluateConditionalExpression(assessment.getCreditScore());
-                System.out.println("   🔍 Processed " + assessment.getAssessmentId() + 
+                System.out.println("   🔍 Processed " + assessment.getAssessmentId() +
                                  " (Score: " + assessment.getCreditScore() + ") -> " +
-                                 "Category: " + category + 
-                                 ", Rate: " + (enriched.getInterestRate() != null ? 
+                                 "Category: " + enriched.getRiskCategory() +
+                                 ", Rate: " + (enriched.getInterestRate() != null ?
                                      String.format("%.2f%%", enriched.getInterestRate().doubleValue()) : "N/A") +
                                  ", Status: " + enriched.getApprovalStatus());
             }
         }
-        
+
         return results;
     }
 
@@ -278,10 +283,11 @@ public class ConditionalExpressionLookupDemo extends AbstractLookupDemo {
     }
 
     /**
-     * Simulate conditional expression enrichment based on the lookup configuration.
-     * This demonstrates what the YAML configuration would do.
+     * Process assessment using the actual APEX rules engine with the loaded YAML configuration.
+     * This replaces the previous simulation approach with real APEX functionality.
      */
-    private RiskAssessment simulateConditionalExpressionEnrichment(RiskAssessment original) {
+    private RiskAssessment processAssessmentWithApexEngine(RiskAssessment original) throws Exception {
+        // Create a copy of the original assessment to enrich
         RiskAssessment enriched = new RiskAssessment(
             original.getAssessmentId(),
             original.getCustomerId(),
@@ -295,77 +301,29 @@ public class ConditionalExpressionLookupDemo extends AbstractLookupDemo {
             original.getStatus()
         );
 
-        // Evaluate conditional expression to get risk category
-        String riskCategory = evaluateConditionalExpression(original.getCreditScore());
+        // Convert assessment to Map for APEX processing
+        Map<String, Object> assessmentData = convertAssessmentToMap(enriched);
 
-        // Simulate lookup based on conditional expression result
-        switch (riskCategory) {
-            case "EXCELLENT":
-                enriched.setRiskCategory("EXCELLENT");
-                enriched.setRiskLevel("LOW");
-                enriched.setInterestRate(new BigDecimal("3.25"));
-                enriched.setMaxLoanAmount(new BigDecimal("1000000.00"));
-                enriched.setApprovalStatus("AUTO_APPROVED");
-                enriched.setRequiredDocuments("Income verification only");
-                enriched.setProcessingDays(1);
-                enriched.setRiskMitigationActions("None required");
-                enriched.setCollateralRequirement(new BigDecimal("0.00"));
-                enriched.setReviewerLevel("JUNIOR");
-                break;
-
-            case "GOOD":
-                enriched.setRiskCategory("GOOD");
-                enriched.setRiskLevel("LOW_MEDIUM");
-                enriched.setInterestRate(new BigDecimal("4.75"));
-                enriched.setMaxLoanAmount(new BigDecimal("750000.00"));
-                enriched.setApprovalStatus("FAST_TRACK");
-                enriched.setRequiredDocuments("Income verification, employment letter");
-                enriched.setProcessingDays(2);
-                enriched.setRiskMitigationActions("Employment verification");
-                enriched.setCollateralRequirement(new BigDecimal("0.10"));
-                enriched.setReviewerLevel("JUNIOR");
-                break;
-
-            case "FAIR":
-                enriched.setRiskCategory("FAIR");
-                enriched.setRiskLevel("MEDIUM");
-                enriched.setInterestRate(new BigDecimal("7.25"));
-                enriched.setMaxLoanAmount(new BigDecimal("500000.00"));
-                enriched.setApprovalStatus("MANUAL_REVIEW");
-                enriched.setRequiredDocuments("Income verification, employment letter, bank statements (3 months)");
-                enriched.setProcessingDays(5);
-                enriched.setRiskMitigationActions("Enhanced due diligence, co-signer evaluation");
-                enriched.setCollateralRequirement(new BigDecimal("0.25"));
-                enriched.setReviewerLevel("SENIOR");
-                break;
-
-            case "POOR":
-                enriched.setRiskCategory("POOR");
-                enriched.setRiskLevel("HIGH");
-                enriched.setInterestRate(new BigDecimal("12.50"));
-                enriched.setMaxLoanAmount(new BigDecimal("250000.00"));
-                enriched.setApprovalStatus("DETAILED_REVIEW");
-                enriched.setRequiredDocuments("Full financial disclosure, tax returns (2 years), bank statements (6 months), references");
-                enriched.setProcessingDays(10);
-                enriched.setRiskMitigationActions("Mandatory co-signer, asset verification, debt consolidation plan");
-                enriched.setCollateralRequirement(new BigDecimal("0.50"));
-                enriched.setReviewerLevel("EXECUTIVE");
-                break;
-
-            default:
-                // Unknown category - set defaults
-                enriched.setRiskCategory("UNKNOWN");
-                enriched.setRiskLevel("HIGH");
-                enriched.setInterestRate(new BigDecimal("15.00"));
-                enriched.setMaxLoanAmount(new BigDecimal("100000.00"));
-                enriched.setApprovalStatus("REJECTED");
-                enriched.setRequiredDocuments("Complete financial review required");
-                enriched.setProcessingDays(15);
-                enriched.setRiskMitigationActions("Full risk assessment required");
-                enriched.setCollateralRequirement(new BigDecimal("0.75"));
-                enriched.setReviewerLevel("EXECUTIVE");
-                break;
+        // Apply enrichments using the APEX rules engine
+        if (ruleConfiguration != null && ruleConfiguration.getEnrichments() != null) {
+            for (YamlEnrichment enrichment : ruleConfiguration.getEnrichments()) {
+                if (enrichment.getEnabled() != null && enrichment.getEnabled()) {
+                    applyEnrichmentToAssessment(enrichment, assessmentData);
+                }
+            }
         }
+
+        // Apply validation rules using the APEX rules engine
+        if (ruleConfiguration != null && ruleConfiguration.getRules() != null) {
+            for (YamlRule rule : ruleConfiguration.getRules()) {
+                if (rule.getEnabled() != null && rule.getEnabled()) {
+                    applyValidationRuleToAssessment(rule, assessmentData);
+                }
+            }
+        }
+
+        // Convert enriched data back to RiskAssessment object
+        updateAssessmentFromMap(enriched, assessmentData);
 
         return enriched;
     }
@@ -498,5 +456,159 @@ public class ConditionalExpressionLookupDemo extends AbstractLookupDemo {
         System.out.println("✅ Generated " + errorAssessments.size() + " error scenario assessments");
 
         return errorAssessments;
+    }
+
+    /**
+     * Convert RiskAssessment to Map for APEX processing.
+     */
+    private Map<String, Object> convertAssessmentToMap(RiskAssessment assessment) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("assessmentId", assessment.getAssessmentId());
+        map.put("customerId", assessment.getCustomerId());
+        map.put("creditScore", assessment.getCreditScore());
+        map.put("annualIncome", assessment.getAnnualIncome());
+        map.put("requestedAmount", assessment.getRequestedAmount());
+        map.put("employmentStatus", assessment.getEmploymentStatus());
+        map.put("yearsEmployed", assessment.getYearsEmployed());
+        map.put("industryType", assessment.getIndustryType());
+        map.put("assessmentDate", assessment.getAssessmentDate());
+        map.put("status", assessment.getStatus());
+
+        // Add existing enriched fields if present
+        if (assessment.getRiskCategory() != null) map.put("riskCategory", assessment.getRiskCategory());
+        if (assessment.getRiskLevel() != null) map.put("riskLevel", assessment.getRiskLevel());
+        if (assessment.getInterestRate() != null) map.put("interestRate", assessment.getInterestRate());
+        if (assessment.getMaxLoanAmount() != null) map.put("maxLoanAmount", assessment.getMaxLoanAmount());
+        if (assessment.getApprovalStatus() != null) map.put("approvalStatus", assessment.getApprovalStatus());
+        if (assessment.getRequiredDocuments() != null) map.put("requiredDocuments", assessment.getRequiredDocuments());
+        if (assessment.getProcessingDays() != null) map.put("processingDays", assessment.getProcessingDays());
+        if (assessment.getRiskMitigationActions() != null) map.put("riskMitigationActions", assessment.getRiskMitigationActions());
+        if (assessment.getCollateralRequirement() != null) map.put("collateralRequirement", assessment.getCollateralRequirement());
+        if (assessment.getReviewerLevel() != null) map.put("reviewerLevel", assessment.getReviewerLevel());
+
+        return map;
+    }
+
+    /**
+     * Apply enrichment to assessment data using APEX engine.
+     */
+    private void applyEnrichmentToAssessment(YamlEnrichment enrichment, Map<String, Object> assessmentData) throws Exception {
+        // Apply lookup enrichment directly using the YAML configuration
+        if (enrichment.getLookupConfig() != null) {
+            applyLookupEnrichmentToAssessment(enrichment, assessmentData);
+        }
+    }
+
+    /**
+     * Apply lookup enrichment using the APEX engine.
+     */
+    private void applyLookupEnrichmentToAssessment(YamlEnrichment enrichment, Map<String, Object> assessmentData) throws Exception {
+        // Create evaluation context
+        StandardEvaluationContext context = new StandardEvaluationContext();
+        assessmentData.forEach(context::setVariable);
+
+        // Evaluate condition
+        if (enrichment.getCondition() != null) {
+            ExpressionEvaluatorService evaluator = new ExpressionEvaluatorService();
+            Boolean conditionResult = evaluator.evaluate(enrichment.getCondition(), context, Boolean.class);
+            if (conditionResult == null || !conditionResult) {
+                return; // Condition not met, skip enrichment
+            }
+        }
+
+        // Apply lookup enrichment using the dataset from YAML
+        if (enrichment.getLookupConfig() != null && enrichment.getLookupConfig().getLookupDataset() != null) {
+            String lookupKey = enrichment.getLookupConfig().getLookupKey();
+            if (lookupKey != null) {
+                ExpressionEvaluatorService evaluator = new ExpressionEvaluatorService();
+                String keyValue = evaluator.evaluate(lookupKey, context, String.class);
+
+                // Find matching data in the lookup dataset
+                var dataset = enrichment.getLookupConfig().getLookupDataset();
+                if (dataset.getData() != null) {
+                    String keyField = dataset.getKeyField();
+                    for (Map<String, Object> dataRow : dataset.getData()) {
+                        if (keyValue != null && keyValue.equals(dataRow.get(keyField))) {
+                            // Apply field mappings
+                            if (enrichment.getFieldMappings() != null) {
+                                for (var mapping : enrichment.getFieldMappings()) {
+                                    Object sourceValue = dataRow.get(mapping.getSourceField());
+                                    if (sourceValue != null) {
+                                        assessmentData.put(mapping.getTargetField(), sourceValue);
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Apply validation rule to assessment data.
+     */
+    private void applyValidationRuleToAssessment(YamlRule rule, Map<String, Object> assessmentData) throws Exception {
+        if (rule.getCondition() != null) {
+            StandardEvaluationContext context = new StandardEvaluationContext();
+            assessmentData.forEach(context::setVariable);
+
+            ExpressionEvaluatorService evaluator = new ExpressionEvaluatorService();
+            Boolean result = evaluator.evaluate(rule.getCondition(), context, Boolean.class);
+
+            if (result == null || !result) {
+                System.out.println("   ⚠️  Validation failed: " + rule.getName() + " - " + rule.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Update RiskAssessment from enriched Map data.
+     */
+    private void updateAssessmentFromMap(RiskAssessment assessment, Map<String, Object> assessmentData) {
+        // Update enriched fields
+        if (assessmentData.containsKey("riskCategory")) {
+            assessment.setRiskCategory((String) assessmentData.get("riskCategory"));
+        }
+        if (assessmentData.containsKey("riskLevel")) {
+            assessment.setRiskLevel((String) assessmentData.get("riskLevel"));
+        }
+        if (assessmentData.containsKey("interestRate")) {
+            Object interestRate = assessmentData.get("interestRate");
+            if (interestRate instanceof Number) {
+                assessment.setInterestRate(new BigDecimal(interestRate.toString()));
+            }
+        }
+        if (assessmentData.containsKey("maxLoanAmount")) {
+            Object maxLoanAmount = assessmentData.get("maxLoanAmount");
+            if (maxLoanAmount instanceof Number) {
+                assessment.setMaxLoanAmount(new BigDecimal(maxLoanAmount.toString()));
+            }
+        }
+        if (assessmentData.containsKey("approvalStatus")) {
+            assessment.setApprovalStatus((String) assessmentData.get("approvalStatus"));
+        }
+        if (assessmentData.containsKey("requiredDocuments")) {
+            assessment.setRequiredDocuments((String) assessmentData.get("requiredDocuments"));
+        }
+        if (assessmentData.containsKey("processingDays")) {
+            Object processingDays = assessmentData.get("processingDays");
+            if (processingDays instanceof Number) {
+                assessment.setProcessingDays(((Number) processingDays).intValue());
+            }
+        }
+        if (assessmentData.containsKey("riskMitigationActions")) {
+            assessment.setRiskMitigationActions((String) assessmentData.get("riskMitigationActions"));
+        }
+        if (assessmentData.containsKey("collateralRequirement")) {
+            Object collateralRequirement = assessmentData.get("collateralRequirement");
+            if (collateralRequirement instanceof Number) {
+                assessment.setCollateralRequirement(new BigDecimal(collateralRequirement.toString()));
+            }
+        }
+        if (assessmentData.containsKey("reviewerLevel")) {
+            assessment.setReviewerLevel((String) assessmentData.get("reviewerLevel"));
+        }
     }
 }

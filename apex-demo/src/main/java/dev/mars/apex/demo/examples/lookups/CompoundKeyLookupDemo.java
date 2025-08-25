@@ -1,11 +1,18 @@
 package dev.mars.apex.demo.examples.lookups;
 
 import dev.mars.apex.demo.model.lookups.CustomerOrder;
+import dev.mars.apex.core.config.yaml.YamlEnrichment;
+import dev.mars.apex.core.config.yaml.YamlRule;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import dev.mars.apex.core.util.TypeSafeDataExtractor;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Demonstrates compound key lookup using string concatenation.
@@ -190,35 +197,36 @@ public class CompoundKeyLookupDemo extends AbstractLookupDemo {
     @Override
     protected List<CustomerOrder> processData(List<?> data) throws Exception {
         System.out.println("⚙️  Processing orders with customer-region pricing enrichment...");
-        
+
         List<CustomerOrder> results = new ArrayList<>();
-        
+
         for (Object item : data) {
             if (item instanceof CustomerOrder) {
                 CustomerOrder order = (CustomerOrder) item;
-                
-                // Simulate enrichment based on compound key lookup
-                CustomerOrder enriched = simulateCompoundKeyEnrichment(order);
+
+                // Use actual APEX rules engine to process the order
+                CustomerOrder enriched = processOrderWithApexEngine(order);
                 results.add(enriched);
-                
+
                 // Log the lookup process
                 String compoundKey = order.getCustomerId() + "-" + order.getRegion();
-                System.out.println("   🔍 Processed " + order.getOrderId() + 
+                System.out.println("   🔍 Processed " + order.getOrderId() +
                                  " (Key: " + compoundKey + ") -> " +
-                                 "Tier: " + enriched.getCustomerTier() + 
-                                 ", Discount: " + (enriched.getRegionalDiscount() != null ? 
+                                 "Tier: " + enriched.getCustomerTier() +
+                                 ", Discount: " + (enriched.getRegionalDiscount() != null ?
                                      String.format("%.1f%%", enriched.getRegionalDiscount().multiply(BigDecimal.valueOf(100)).doubleValue()) : "N/A"));
             }
         }
-        
+
         return results;
     }
 
     /**
-     * Simulate compound key enrichment based on the lookup configuration.
-     * This demonstrates what the YAML configuration would do.
+     * Process order using the actual APEX rules engine with the loaded YAML configuration.
+     * This replaces the previous simulation approach with real APEX functionality.
      */
-    private CustomerOrder simulateCompoundKeyEnrichment(CustomerOrder original) {
+    private CustomerOrder processOrderWithApexEngine(CustomerOrder original) throws Exception {
+        // Create a copy of the original order to enrich
         CustomerOrder enriched = new CustomerOrder(
             original.getOrderId(),
             original.getCustomerId(),
@@ -230,122 +238,29 @@ public class CompoundKeyLookupDemo extends AbstractLookupDemo {
             original.getStatus()
         );
 
-        // Create compound key
-        String compoundKey = original.getCustomerId() + "-" + original.getRegion();
+        // Convert order to Map for APEX processing
+        Map<String, Object> orderData = convertOrderToMap(enriched);
 
-        // Simulate lookup based on compound key
-        switch (compoundKey) {
-            case "CUST001-NA":
-                enriched.setCustomerTier("PLATINUM");
-                enriched.setRegionalDiscount(new BigDecimal("0.15"));
-                enriched.setSpecialPricing("VOLUME_DISCOUNT");
-                enriched.setCustomerName("TechCorp Solutions");
-                enriched.setRegionName("North America");
-                enriched.setCurrency("USD");
-                enriched.setTaxRate(new BigDecimal("0.08"));
-                break;
-
-            case "CUST002-NA":
-                enriched.setCustomerTier("GOLD");
-                enriched.setRegionalDiscount(new BigDecimal("0.12"));
-                enriched.setSpecialPricing("STANDARD_DISCOUNT");
-                enriched.setCustomerName("InnovateTech Inc");
-                enriched.setRegionName("North America");
-                enriched.setCurrency("USD");
-                enriched.setTaxRate(new BigDecimal("0.08"));
-                break;
-
-            case "CUST001-EU":
-                enriched.setCustomerTier("GOLD");
-                enriched.setRegionalDiscount(new BigDecimal("0.10"));
-                enriched.setSpecialPricing("EU_PRICING");
-                enriched.setCustomerName("TechCorp Solutions Europe");
-                enriched.setRegionName("Europe");
-                enriched.setCurrency("EUR");
-                enriched.setTaxRate(new BigDecimal("0.20"));
-                break;
-
-            case "CUST003-EU":
-                enriched.setCustomerTier("SILVER");
-                enriched.setRegionalDiscount(new BigDecimal("0.08"));
-                enriched.setSpecialPricing("STANDARD_DISCOUNT");
-                enriched.setCustomerName("EuroTech GmbH");
-                enriched.setRegionName("Europe");
-                enriched.setCurrency("EUR");
-                enriched.setTaxRate(new BigDecimal("0.19"));
-                break;
-
-            case "CUST004-APAC":
-                enriched.setCustomerTier("PLATINUM");
-                enriched.setRegionalDiscount(new BigDecimal("0.18"));
-                enriched.setSpecialPricing("APAC_PREMIUM");
-                enriched.setCustomerName("Asia Pacific Technologies");
-                enriched.setRegionName("Asia Pacific");
-                enriched.setCurrency("USD");
-                enriched.setTaxRate(new BigDecimal("0.10"));
-                break;
-
-            case "CUST005-APAC":
-                enriched.setCustomerTier("GOLD");
-                enriched.setRegionalDiscount(new BigDecimal("0.14"));
-                enriched.setSpecialPricing("VOLUME_DISCOUNT");
-                enriched.setCustomerName("Singapore Tech Solutions");
-                enriched.setRegionName("Asia Pacific");
-                enriched.setCurrency("SGD");
-                enriched.setTaxRate(new BigDecimal("0.07"));
-                break;
-
-            case "CUST006-LATAM":
-                enriched.setCustomerTier("SILVER");
-                enriched.setRegionalDiscount(new BigDecimal("0.12"));
-                enriched.setSpecialPricing("EMERGING_MARKET");
-                enriched.setCustomerName("LatAm Technology Partners");
-                enriched.setRegionName("Latin America");
-                enriched.setCurrency("USD");
-                enriched.setTaxRate(new BigDecimal("0.15"));
-                break;
-
-            case "CUST007-ME":
-                enriched.setCustomerTier("GOLD");
-                enriched.setRegionalDiscount(new BigDecimal("0.13"));
-                enriched.setSpecialPricing("REGIONAL_PARTNER");
-                enriched.setCustomerName("Middle East Tech Hub");
-                enriched.setRegionName("Middle East");
-                enriched.setCurrency("USD");
-                enriched.setTaxRate(new BigDecimal("0.05"));
-                break;
-
-            case "CUST002-EU":
-                enriched.setCustomerTier("GOLD");
-                enriched.setRegionalDiscount(new BigDecimal("0.11"));
-                enriched.setSpecialPricing("EU_PRICING");
-                enriched.setCustomerName("InnovateTech Europe");
-                enriched.setRegionName("Europe");
-                enriched.setCurrency("EUR");
-                enriched.setTaxRate(new BigDecimal("0.21"));
-                break;
-
-            case "CUST004-NA":
-                enriched.setCustomerTier("PLATINUM");
-                enriched.setRegionalDiscount(new BigDecimal("0.16"));
-                enriched.setSpecialPricing("CROSS_REGION_PREMIUM");
-                enriched.setCustomerName("Asia Pacific Technologies USA");
-                enriched.setRegionName("North America");
-                enriched.setCurrency("USD");
-                enriched.setTaxRate(new BigDecimal("0.09"));
-                break;
-
-            default:
-                // Unknown compound key - set defaults
-                enriched.setCustomerTier("BRONZE");
-                enriched.setRegionalDiscount(new BigDecimal("0.05"));
-                enriched.setSpecialPricing("STANDARD");
-                enriched.setCustomerName("Unknown Customer");
-                enriched.setRegionName("Unknown Region");
-                enriched.setCurrency("USD");
-                enriched.setTaxRate(new BigDecimal("0.10"));
-                break;
+        // Apply enrichments using the APEX rules engine
+        if (ruleConfiguration != null && ruleConfiguration.getEnrichments() != null) {
+            for (YamlEnrichment enrichment : ruleConfiguration.getEnrichments()) {
+                if (enrichment.getEnabled() != null && enrichment.getEnabled()) {
+                    applyEnrichmentToOrder(enrichment, orderData);
+                }
+            }
         }
+
+        // Apply validation rules using the APEX rules engine
+        if (ruleConfiguration != null && ruleConfiguration.getRules() != null) {
+            for (YamlRule rule : ruleConfiguration.getRules()) {
+                if (rule.getEnabled() != null && rule.getEnabled()) {
+                    applyValidationRuleToOrder(rule, orderData);
+                }
+            }
+        }
+
+        // Convert enriched data back to CustomerOrder object
+        updateOrderFromMap(enriched, orderData);
 
         return enriched;
     }
@@ -416,5 +331,151 @@ public class CompoundKeyLookupDemo extends AbstractLookupDemo {
         System.out.println("✅ Generated " + errorOrders.size() + " error scenario orders");
 
         return errorOrders;
+    }
+
+    /**
+     * Convert CustomerOrder to Map for APEX processing.
+     */
+    private Map<String, Object> convertOrderToMap(CustomerOrder order) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("orderId", order.getOrderId());
+        map.put("customerId", order.getCustomerId());
+        map.put("region", order.getRegion());
+        map.put("productId", order.getProductId());
+        map.put("quantity", order.getQuantity());
+        map.put("unitPrice", order.getUnitPrice());
+        map.put("orderDate", order.getOrderDate());
+        map.put("status", order.getStatus());
+
+        // Add existing enriched fields if present
+        if (order.getCustomerTier() != null) map.put("customerTier", order.getCustomerTier());
+        if (order.getRegionalDiscount() != null) map.put("regionalDiscount", order.getRegionalDiscount());
+        if (order.getSpecialPricing() != null) map.put("specialPricing", order.getSpecialPricing());
+        if (order.getCustomerName() != null) map.put("customerName", order.getCustomerName());
+        if (order.getRegionName() != null) map.put("regionName", order.getRegionName());
+        if (order.getCurrency() != null) map.put("currency", order.getCurrency());
+        if (order.getTaxRate() != null) map.put("taxRate", order.getTaxRate());
+
+        return map;
+    }
+
+    /**
+     * Apply enrichment to order data using APEX engine.
+     */
+    private void applyEnrichmentToOrder(YamlEnrichment enrichment, Map<String, Object> orderData) throws Exception {
+        // Apply lookup enrichment directly using the YAML configuration
+        if (enrichment.getLookupConfig() != null) {
+            applyLookupEnrichment(enrichment, orderData);
+        }
+    }
+
+    /**
+     * Apply lookup enrichment using the APEX engine.
+     */
+    private void applyLookupEnrichment(YamlEnrichment enrichment, Map<String, Object> orderData) throws Exception {
+        // Create evaluation context
+        StandardEvaluationContext context = new StandardEvaluationContext();
+        orderData.forEach(context::setVariable);
+
+        // Evaluate condition
+        if (enrichment.getCondition() != null) {
+            ExpressionEvaluatorService evaluator = new ExpressionEvaluatorService();
+            Boolean conditionResult = evaluator.evaluate(enrichment.getCondition(), context, Boolean.class);
+            if (conditionResult == null || !conditionResult) {
+                return; // Condition not met, skip enrichment
+            }
+        }
+
+        // Apply lookup enrichment using the dataset from YAML
+        if (enrichment.getLookupConfig() != null && enrichment.getLookupConfig().getLookupDataset() != null) {
+            String lookupKey = enrichment.getLookupConfig().getLookupKey();
+            if (lookupKey != null) {
+                ExpressionEvaluatorService evaluator = new ExpressionEvaluatorService();
+                String keyValue = evaluator.evaluate(lookupKey, context, String.class);
+
+                // Find matching data in the lookup dataset with type safety
+                var dataset = enrichment.getLookupConfig().getLookupDataset();
+                if (dataset.getData() != null) {
+                    String keyField = dataset.getKeyField();
+
+                    // Validate dataset structure before processing
+                    if (!TypeSafeDataExtractor.validateDatasetStructure(dataset.getData(), keyField, "compound-key-lookup")) {
+                        System.out.println("   ⚠️  Invalid dataset structure, skipping enrichment");
+                        return;
+                    }
+
+                    // Safe iteration over validated dataset
+                    var dataList = TypeSafeDataExtractor.safeListMapCast(dataset.getData(), "compound-key-lookup-data");
+                    if (dataList.isPresent()) {
+                        for (Map<String, Object> dataRow : dataList.get()) {
+                            String rowKeyValue = TypeSafeDataExtractor.safeGetString(dataRow, keyField, null);
+                            if (keyValue != null && keyValue.equals(rowKeyValue)) {
+                                // Apply field mappings
+                                if (enrichment.getFieldMappings() != null) {
+                                    for (var mapping : enrichment.getFieldMappings()) {
+                                        Object sourceValue = dataRow.get(mapping.getSourceField());
+                                        if (sourceValue != null) {
+                                            orderData.put(mapping.getTargetField(), sourceValue);
+                                        }
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Apply validation rule to order data.
+     */
+    private void applyValidationRuleToOrder(YamlRule rule, Map<String, Object> orderData) throws Exception {
+        if (rule.getCondition() != null) {
+            StandardEvaluationContext context = new StandardEvaluationContext();
+            orderData.forEach(context::setVariable);
+
+            ExpressionEvaluatorService evaluator = new ExpressionEvaluatorService();
+            Boolean result = evaluator.evaluate(rule.getCondition(), context, Boolean.class);
+
+            if (result == null || !result) {
+                System.out.println("   ⚠️  Validation failed: " + rule.getName() + " - " + rule.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Update CustomerOrder from enriched Map data.
+     */
+    private void updateOrderFromMap(CustomerOrder order, Map<String, Object> orderData) {
+        // Update enriched fields
+        if (orderData.containsKey("customerTier")) {
+            order.setCustomerTier((String) orderData.get("customerTier"));
+        }
+        if (orderData.containsKey("regionalDiscount")) {
+            Object discount = orderData.get("regionalDiscount");
+            if (discount instanceof Number) {
+                order.setRegionalDiscount(new BigDecimal(discount.toString()));
+            }
+        }
+        if (orderData.containsKey("specialPricing")) {
+            order.setSpecialPricing((String) orderData.get("specialPricing"));
+        }
+        if (orderData.containsKey("customerName")) {
+            order.setCustomerName((String) orderData.get("customerName"));
+        }
+        if (orderData.containsKey("regionName")) {
+            order.setRegionName((String) orderData.get("regionName"));
+        }
+        if (orderData.containsKey("currency")) {
+            order.setCurrency((String) orderData.get("currency"));
+        }
+        if (orderData.containsKey("taxRate")) {
+            Object taxRate = orderData.get("taxRate");
+            if (taxRate instanceof Number) {
+                order.setTaxRate(new BigDecimal(taxRate.toString()));
+            }
+        }
     }
 }

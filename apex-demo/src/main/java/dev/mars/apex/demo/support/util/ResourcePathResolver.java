@@ -7,26 +7,6 @@ import java.util.HashMap;
  * ResourcePathResolver provided backward compatibility during the apex-demo
  * resource reorganization by mapping old resource paths to new organized paths.
  *
- * ⚠️ DEPRECATED: This class is no longer needed as of Phase 4 completion.
- * All Java classes now use the new organized paths directly.
- *
- * MIGRATION COMPLETED:
- * ✅ Phase 1: Created new structure alongside old structure
- * ✅ Phase 2: Used this resolver to map old paths to new paths
- * ✅ Phase 3: Updated Java classes to use new paths directly
- * ✅ Phase 4: Removed old structure - this resolver is now obsolete
- *
- * FINAL DIRECTORY ORGANIZATION:
- * demos/
- * ├── quickstart/          # 5-10 min introduction
- * ├── fundamentals/        # Core concepts (rules, enrichments, datasets)
- * ├── patterns/            # Implementation patterns (lookups, calculations, validations)
- * ├── industry/            # Real-world applications (financial-services)
- * ├── bootstrap/           # Bootstrap configurations
- * └── advanced/            # Advanced techniques (performance, integration, complex-scenarios)
- *
- * reference/
- * └── syntax-examples/     # YAML syntax reference materials
  *
  * This class is kept for historical reference and documentation purposes.
  * It shows the complete migration path from the old disorganized structure

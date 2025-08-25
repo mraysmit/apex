@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.util;
 
-import dev.mars.apex.core.util.YamlDependencyAnalyzer;
+import dev.mars.apex.core.service.yaml.YamlDependencyService;
 import dev.mars.apex.core.util.YamlDependencyGraph;
 import dev.mars.apex.core.util.YamlNode;
 import org.slf4j.Logger;
@@ -66,34 +66,34 @@ public class YamlDependencyAnalysisDemo {
     private void runDemo() {
         logger.info("Starting YAML dependency analysis demonstration...");
         
-        YamlDependencyAnalyzer analyzer = new YamlDependencyAnalyzer();
-        
+        YamlDependencyService dependencyService = new YamlDependencyService();
+
         // List of scenario files to analyze
         String[] scenarioFiles = {
             "scenarios/otc-options-scenario.yaml",
-            "scenarios/commodity-swaps-scenario.yaml", 
+            "scenarios/commodity-swaps-scenario.yaml",
             "scenarios/settlement-auto-repair-scenario.yaml"
         };
-        
+
         System.out.println("\nAnalyzing scenario files...\n");
-        
+
         for (String scenarioFile : scenarioFiles) {
-            analyzeScenarioFile(analyzer, scenarioFile);
+            analyzeScenarioFile(dependencyService, scenarioFile);
             System.out.println(); // Add spacing between analyses
         }
-        
+
         // Demonstrate additional analysis features
-        demonstrateAdvancedFeatures(analyzer);
+        demonstrateAdvancedFeatures(dependencyService);
     }
     
-    private void analyzeScenarioFile(YamlDependencyAnalyzer analyzer, String scenarioFile) {
+    private void analyzeScenarioFile(YamlDependencyService dependencyService, String scenarioFile) {
         System.out.println("--- Analyzing: " + scenarioFile + " ---");
         
         try {
             long startTime = System.currentTimeMillis();
             
             // Perform dependency analysis
-            YamlDependencyGraph graph = analyzer.analyzeYamlDependencies(scenarioFile);
+            YamlDependencyGraph graph = dependencyService.analyzeDependencies(scenarioFile);
             
             long endTime = System.currentTimeMillis();
             long duration = endTime - startTime;
@@ -149,20 +149,27 @@ public class YamlDependencyAnalysisDemo {
         }
     }
     
-    private void demonstrateAdvancedFeatures(YamlDependencyAnalyzer analyzer) {
+    private void demonstrateAdvancedFeatures(YamlDependencyService dependencyService) {
         System.out.println("--- Advanced Analysis Features ---");
         
         try {
             // Analyze one scenario in detail
             String detailedScenario = "scenarios/otc-options-scenario.yaml";
-            YamlDependencyGraph graph = analyzer.analyzeYamlDependencies(detailedScenario);
-            
+            YamlDependencyGraph graph = dependencyService.analyzeDependencies(detailedScenario);
+
             System.out.println("\nDetailed Analysis for: " + detailedScenario);
-            
-            // Generate full text report
-            String textReport = analyzer.generateTextReport(graph);
+
+            // Generate dependency report using the service
+            var dependencyReport = dependencyService.generateDependencyReport(detailedScenario);
             System.out.println("\nFull Dependency Report:");
-            System.out.println(textReport);
+            System.out.println("File: " + dependencyReport.getFilePath());
+            System.out.println("Statistics: " + dependencyReport.getStatistics());
+            System.out.println("Missing Files: " + dependencyReport.getMissingFiles());
+            System.out.println("Circular Dependencies: " + dependencyReport.getCircularDependencies());
+            System.out.println("Dependency Tree:");
+            for (String treeLine : dependencyReport.getDependencyTree()) {
+                System.out.println("  " + treeLine);
+            }
             
             // Demonstrate reverse dependency lookup
             System.out.println("Reverse Dependency Analysis:");

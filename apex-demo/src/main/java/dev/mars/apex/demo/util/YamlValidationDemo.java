@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.util;
 
-import dev.mars.apex.core.util.YamlMetadataValidator;
+import dev.mars.apex.core.service.yaml.YamlValidationService;
 import dev.mars.apex.core.util.YamlValidationResult;
 import dev.mars.apex.core.util.YamlValidationSummary;
 import org.slf4j.Logger;
@@ -71,24 +71,24 @@ public class YamlValidationDemo {
     
     private void runDemo() {
         logger.info("Starting YAML metadata validation demonstration...");
-        
-        YamlMetadataValidator validator = new YamlMetadataValidator("src/main/resources");
-        
+
+        YamlValidationService validationService = new YamlValidationService("src/main/resources");
+
         // Discover all YAML files in the project
-        List<String> yamlFiles = discoverYamlFiles("src/main/resources");
-        
+        List<String> yamlFiles = validationService.discoverYamlFiles("src/main/resources");
+
         System.out.println("\nDiscovered YAML Files:");
         System.out.println("======================");
         for (String file : yamlFiles) {
             System.out.println("  " + file);
         }
         System.out.println("Total files found: " + yamlFiles.size());
-        
+
         // Validate all files
         System.out.println("\nValidating YAML Files...");
         System.out.println("=========================");
-        
-        YamlValidationSummary summary = validator.validateFiles(yamlFiles);
+
+        YamlValidationSummary summary = validationService.validateFiles(yamlFiles);
         
         // Display summary
         System.out.println("\nValidation Summary:");
@@ -137,7 +137,7 @@ public class YamlValidationDemo {
         }
         
         // Demonstrate individual file validation
-        demonstrateIndividualValidation(validator);
+        demonstrateIndividualValidation(validationService);
         
         // Show recommendations
         showRecommendations(summary);
@@ -176,7 +176,7 @@ public class YamlValidationDemo {
     /**
      * Demonstrates individual file validation with detailed output.
      */
-    private void demonstrateIndividualValidation(YamlMetadataValidator validator) {
+    private void demonstrateIndividualValidation(YamlValidationService validationService) {
         System.out.println("\nIndividual File Validation Example:");
         System.out.println("===================================");
         
@@ -185,7 +185,7 @@ public class YamlValidationDemo {
         
         System.out.println("Validating: " + exampleFile);
         
-        YamlValidationResult result = validator.validateFile(exampleFile);
+        YamlValidationResult result = validationService.validateFile(exampleFile);
         
         System.out.println("Result Summary:");
         System.out.println(result.getSummary());

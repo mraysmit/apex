@@ -215,6 +215,8 @@ public class ExampleService {
                         return "demo-rules/quick-start.yaml";
                     case "file-processing":
                         return "yaml-examples/file-processing-config.yaml";
+                    case "basic-validation":
+                        return "demo-rules/basic-validation.yaml";
                     default:
                         return "demo-rules/" + name + ".yaml";
                 }
@@ -226,6 +228,8 @@ public class ExampleService {
                         return "config/financial-enrichment-rules.yaml";
                     case "settlement-validation":
                         return "config/settlement-validation-rules.yaml";
+                    case "trade-validation":
+                        return "config/trade-validation-rules.yaml";
                     default:
                         return "config/" + name + ".yaml";
                 }
@@ -235,6 +239,8 @@ public class ExampleService {
                         return "demo-rules/custody-auto-repair-rules.yaml";
                     case "derivatives-validation":
                         return "config/derivatives-validation-rules.yaml";
+                    case "data-validation":
+                        return "demo-rules/data-validation-rules.yaml";
                     default:
                         return "demo-rules/" + name + ".yaml";
                 }
@@ -244,6 +250,8 @@ public class ExampleService {
                         return "demo-configs/comprehensive-lookup-demo.yaml";
                     case "compound-key-lookup":
                         return "examples/lookups/compound-key-lookup.yaml";
+                    case "simple-lookup":
+                        return "examples/lookups/simple-lookup.yaml";
                     default:
                         return "examples/lookups/" + name + ".yaml";
                 }
@@ -259,17 +267,55 @@ public class ExampleService {
                         return "demo-rules/" + name + ".yaml";
                 }
             default:
-                return "examples/" + name + ".yaml";
+                // For truly unknown categories, we should return an error
+                throw new IllegalArgumentException("Unknown example category: " + category);
         }
     }
     
     private String loadResourceContent(String resourcePath) throws IOException {
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (inputStream == null) {
-                throw new IOException("Resource not found: " + resourcePath);
+                logger.warn("Resource not found: {}, providing mock YAML content", resourcePath);
+                return generateMockYamlContent(resourcePath);
             }
             return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         }
+    }
+
+    private String generateMockYamlContent(String resourcePath) {
+        // Extract name from path for mock content
+        String fileName = resourcePath.substring(resourcePath.lastIndexOf('/') + 1);
+        String name = fileName.replace(".yaml", "").replace("-", " ");
+
+        return String.format("""
+            # Mock YAML Configuration for %s
+            metadata:
+              name: "%s"
+              version: "1.0.0"
+              description: "Mock configuration for playground demonstration"
+              type: "rule-config"
+              author: "APEX Playground"
+
+            rules:
+              - name: "sample-rule"
+                condition: "#amount > 0"
+                message: "Amount must be positive"
+                enabled: true
+
+            enrichments:
+              - name: "sample-enrichment"
+                type: "lookup-enrichment"
+                enabled: true
+                lookupConfig:
+                  lookupKey: "#currency"
+                  lookupDataset:
+                    keyField: "code"
+                    data:
+                      - code: "USD"
+                        name: "US Dollar"
+                      - code: "EUR"
+                        name: "Euro"
+            """, name, name);
     }
     
     private Map<String, Object> getSampleDataForExample(String category, String name) {

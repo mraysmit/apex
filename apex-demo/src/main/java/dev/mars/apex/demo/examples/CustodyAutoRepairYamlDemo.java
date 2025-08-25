@@ -3,9 +3,12 @@ package dev.mars.apex.demo.examples;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
+import dev.mars.apex.core.config.yaml.YamlRule;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.demo.model.SettlementInstruction;
 import dev.mars.apex.demo.model.StandingInstruction;
 import dev.mars.apex.demo.model.SIRepairResult;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -203,15 +206,22 @@ public class CustodyAutoRepairYamlDemo {
         System.out.println("    Message: Instrument-level SI evaluation");
         System.out.println();
 
-        // Simulate weighted scoring
+        // Use actual APEX rules engine for weighted scoring
         SettlementInstruction instruction = new SettlementInstruction(
             "SI_YAML_002", "CLIENT_B", "HONG_KONG", "EQUITY",
             new BigDecimal("3000000"), "HKD", LocalDate.now().plusDays(2)
         );
 
-        SIRepairResult result = simulateWeightedScoring(instruction);
+        SIRepairResult result;
+        try {
+            result = processInstructionWithApexEngine(instruction);
+        } catch (Exception e) {
+            System.out.println("Error processing with APEX engine: " + e.getMessage());
+            result = new SIRepairResult(instruction.getInstructionId());
+            result.markAsFailed("APEX processing failed: " + e.getMessage());
+        }
 
-        System.out.println("Weighted Scoring Simulation:");
+        System.out.println("APEX Engine Weighted Scoring:");
         System.out.println("  Total Score: " + String.format("%.1f", result.getWeightedScore()));
         System.out.println("  Decision: " + (result.getWeightedScore() >= 50 ? "REPAIR_APPROVED" : "MANUAL_REVIEW_REQUIRED"));
     }
@@ -422,53 +432,98 @@ public class CustodyAutoRepairYamlDemo {
     }
 
     /**
-     * Simulate weighted scoring using hardcoded rule logic.
+     * Process settlement instruction using the actual APEX rules engine with weighted scoring.
+     * This replaces the previous simulation approach with real APEX functionality.
      */
-    private SIRepairResult simulateWeightedScoring(SettlementInstruction instruction) {
+    private SIRepairResult processInstructionWithApexEngine(SettlementInstruction instruction) throws Exception {
         SIRepairResult result = new SIRepairResult(instruction.getInstructionId());
-        result.setProcessedBy("CustodyAutoRepairYamlDemo");
+        result.setProcessedBy("CustodyAutoRepairYamlDemo-APEX");
+
+        // Convert instruction to Map for APEX processing
+        Map<String, Object> instructionData = convertInstructionToMap(instruction);
 
         double totalScore = 0.0;
 
-        // Simulate client-level rule
-        double clientScore = simulateRuleEvaluation("client-level-si-rule", instruction);
-        double clientWeight = 0.6;
-        totalScore += clientScore * clientWeight;
-        result.addRuleScore("client-level-si-rule", clientScore, clientWeight);
-
-        // Simulate market-level rule
-        double marketScore = simulateRuleEvaluation("market-level-si-rule", instruction);
-        double marketWeight = 0.3;
-        totalScore += marketScore * marketWeight;
-        result.addRuleScore("market-level-si-rule", marketScore, marketWeight);
-
-        // Simulate instrument-level rule
-        double instrumentScore = simulateRuleEvaluation("instrument-level-si-rule", instruction);
-        double instrumentWeight = 0.1;
-        totalScore += instrumentScore * instrumentWeight;
-        result.addRuleScore("instrument-level-si-rule", instrumentScore, instrumentWeight);
+        // Apply rules using the APEX rules engine
+        if (ruleConfiguration != null && ruleConfiguration.getRules() != null) {
+            for (YamlRule rule : ruleConfiguration.getRules()) {
+                if (rule.getEnabled() != null && rule.getEnabled()) {
+                    double ruleScore = evaluateRuleWithApexEngine(rule, instructionData);
+                    double ruleWeight = getRuleWeight(rule);
+                    totalScore += ruleScore * ruleWeight;
+                    result.addRuleScore(rule.getName(), ruleScore, ruleWeight);
+                }
+            }
+        }
 
         result.setWeightedScore(totalScore);
 
         if (totalScore >= 50) {
-            result.markAsSuccessful("Weighted scoring approved repair");
+            result.markAsSuccessful("APEX weighted scoring approved repair");
         } else {
-            result.markAsFailed("Weighted scoring below threshold");
+            result.markAsFailed("APEX weighted scoring below threshold");
         }
 
         return result;
     }
 
     /**
-     * Simulate rule evaluation for demonstration.
+     * Convert SettlementInstruction to Map for APEX processing.
      */
-    private double simulateRuleEvaluation(String ruleId, SettlementInstruction instruction) {
-        return switch (ruleId) {
-            case "client-level-si-rule" -> instruction.getClientId() != null ? 60.0 : 0.0;
-            case "market-level-si-rule" -> instruction.getMarket() != null ? 30.0 : 0.0;
-            case "instrument-level-si-rule" -> instruction.getInstrumentType() != null ? 10.0 : 0.0;
-            default -> 0.0;
-        };
+    private Map<String, Object> convertInstructionToMap(SettlementInstruction instruction) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("instructionId", instruction.getInstructionId());
+        map.put("clientId", instruction.getClientId());
+        map.put("market", instruction.getMarket());
+        map.put("instrumentType", instruction.getInstrumentType());
+        map.put("settlementAmount", instruction.getSettlementAmount());
+        map.put("currency", instruction.getCurrency());
+        map.put("settlementDate", instruction.getSettlementDate());
+        return map;
+    }
+
+    /**
+     * Evaluate rule using the APEX engine.
+     */
+    private double evaluateRuleWithApexEngine(YamlRule rule, Map<String, Object> instructionData) throws Exception {
+        if (rule.getCondition() != null) {
+            StandardEvaluationContext context = new StandardEvaluationContext();
+            instructionData.forEach(context::setVariable);
+
+            ExpressionEvaluatorService evaluator = new ExpressionEvaluatorService();
+            Object result = evaluator.evaluate(rule.getCondition(), context, Object.class);
+
+            if (result instanceof Number) {
+                return ((Number) result).doubleValue();
+            } else if (result instanceof Boolean) {
+                return ((Boolean) result) ? 100.0 : 0.0;
+            }
+        }
+        return 0.0;
+    }
+
+    /**
+     * Get rule weight from metadata or custom properties.
+     */
+    private double getRuleWeight(YamlRule rule) {
+        // Try to get weight from metadata
+        if (rule.getMetadata() != null && rule.getMetadata().containsKey("weight")) {
+            Object weight = rule.getMetadata().get("weight");
+            if (weight instanceof Number) {
+                return ((Number) weight).doubleValue();
+            }
+        }
+
+        // Try to get weight from custom properties
+        if (rule.getCustomProperties() != null && rule.getCustomProperties().containsKey("weight")) {
+            Object weight = rule.getCustomProperties().get("weight");
+            if (weight instanceof Number) {
+                return ((Number) weight).doubleValue();
+            }
+        }
+
+        // Default weight
+        return 1.0;
     }
 
     /**

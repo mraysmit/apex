@@ -1,12 +1,18 @@
 package dev.mars.apex.demo.examples.lookups;
 
 import dev.mars.apex.demo.model.lookups.TradeSettlement;
+import dev.mars.apex.core.config.yaml.YamlEnrichment;
+import dev.mars.apex.core.config.yaml.YamlRule;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Demonstrates nested field reference lookup using object navigation.
@@ -248,37 +254,38 @@ public class NestedFieldLookupDemo extends AbstractLookupDemo {
     @Override
     protected List<TradeSettlement> processData(List<?> data) throws Exception {
         System.out.println("⚙️  Processing settlements with country-specific enrichment...");
-        
+
         List<TradeSettlement> results = new ArrayList<>();
-        
+
         for (Object item : data) {
             if (item instanceof TradeSettlement) {
                 TradeSettlement settlement = (TradeSettlement) item;
-                
-                // Simulate enrichment based on nested field lookup
-                TradeSettlement enriched = simulateNestedFieldEnrichment(settlement);
+
+                // Use actual APEX rules engine to process the settlement
+                TradeSettlement enriched = processSettlementWithApexEngine(settlement);
                 results.add(enriched);
-                
+
                 // Log the lookup process
-                String countryCode = settlement.getTrade() != null && 
+                String countryCode = settlement.getTrade() != null &&
                                    settlement.getTrade().getCounterparty() != null ?
                                    settlement.getTrade().getCounterparty().getCountryCode() : "NULL";
-                System.out.println("   🔍 Processed " + settlement.getSettlementId() + 
+                System.out.println("   🔍 Processed " + settlement.getSettlementId() +
                                  " (Country: " + countryCode + ") -> " +
-                                 "System: " + enriched.getSettlementSystem() + 
+                                 "System: " + enriched.getSettlementSystem() +
                                  ", Days: " + enriched.getStandardSettlementDays() +
                                  ", Zone: " + enriched.getRegulatoryZone());
             }
         }
-        
+
         return results;
     }
 
     /**
-     * Simulate nested field enrichment based on the lookup configuration.
-     * This demonstrates what the YAML configuration would do.
+     * Process settlement using the actual APEX rules engine with the loaded YAML configuration.
+     * This replaces the previous simulation approach with real APEX functionality.
      */
-    private TradeSettlement simulateNestedFieldEnrichment(TradeSettlement original) {
+    private TradeSettlement processSettlementWithApexEngine(TradeSettlement original) throws Exception {
+        // Create a copy of the original settlement to enrich
         TradeSettlement enriched = new TradeSettlement(
             original.getSettlementId(),
             original.getTrade(),
@@ -288,117 +295,29 @@ public class NestedFieldLookupDemo extends AbstractLookupDemo {
             original.getCurrency()
         );
 
-        // Extract country code from nested structure
-        String countryCode = null;
-        if (original.getTrade() != null &&
-            original.getTrade().getCounterparty() != null) {
-            countryCode = original.getTrade().getCounterparty().getCountryCode();
-        }
+        // Convert settlement to Map for APEX processing
+        Map<String, Object> settlementData = convertSettlementToMap(enriched);
 
-        // Simulate lookup based on nested field value
-        if (countryCode != null) {
-            switch (countryCode) {
-                case "US":
-                    enriched.setCountryName("United States");
-                    enriched.setRegulatoryZone("AMERICAS");
-                    enriched.setTimeZone("EST");
-                    enriched.setSettlementSystem("DTC");
-                    enriched.setStandardSettlementDays(2);
-                    enriched.setHolidayCalendar("NYSE");
-                    enriched.setSettlementFee(new BigDecimal("5.00"));
-                    enriched.setCustodianBank("Bank of New York Mellon");
-                    break;
-
-                case "GB":
-                    enriched.setCountryName("United Kingdom");
-                    enriched.setRegulatoryZone("EMEA");
-                    enriched.setTimeZone("GMT");
-                    enriched.setSettlementSystem("CREST");
-                    enriched.setStandardSettlementDays(2);
-                    enriched.setHolidayCalendar("LSE");
-                    enriched.setSettlementFee(new BigDecimal("3.50"));
-                    enriched.setCustodianBank("HSBC Custody Services");
-                    break;
-
-                case "DE":
-                    enriched.setCountryName("Germany");
-                    enriched.setRegulatoryZone("EMEA");
-                    enriched.setTimeZone("CET");
-                    enriched.setSettlementSystem("CBF");
-                    enriched.setStandardSettlementDays(2);
-                    enriched.setHolidayCalendar("XETRA");
-                    enriched.setSettlementFee(new BigDecimal("4.00"));
-                    enriched.setCustodianBank("Deutsche Bank AG");
-                    break;
-
-                case "JP":
-                    enriched.setCountryName("Japan");
-                    enriched.setRegulatoryZone("APAC");
-                    enriched.setTimeZone("JST");
-                    enriched.setSettlementSystem("JASDEC");
-                    enriched.setStandardSettlementDays(2);
-                    enriched.setHolidayCalendar("TSE");
-                    enriched.setSettlementFee(new BigDecimal("8.00"));
-                    enriched.setCustodianBank("Mizuho Trust & Banking");
-                    break;
-
-                case "HK":
-                    enriched.setCountryName("Hong Kong");
-                    enriched.setRegulatoryZone("APAC");
-                    enriched.setTimeZone("HKT");
-                    enriched.setSettlementSystem("CCASS");
-                    enriched.setStandardSettlementDays(2);
-                    enriched.setHolidayCalendar("HKEX");
-                    enriched.setSettlementFee(new BigDecimal("6.00"));
-                    enriched.setCustodianBank("Standard Chartered Bank");
-                    break;
-
-                case "SG":
-                    enriched.setCountryName("Singapore");
-                    enriched.setRegulatoryZone("APAC");
-                    enriched.setTimeZone("SGT");
-                    enriched.setSettlementSystem("CDP");
-                    enriched.setStandardSettlementDays(2);
-                    enriched.setHolidayCalendar("SGX");
-                    enriched.setSettlementFee(new BigDecimal("5.50"));
-                    enriched.setCustodianBank("DBS Bank");
-                    break;
-
-                case "FR":
-                    enriched.setCountryName("France");
-                    enriched.setRegulatoryZone("EMEA");
-                    enriched.setTimeZone("CET");
-                    enriched.setSettlementSystem("EUROCLEAR");
-                    enriched.setStandardSettlementDays(2);
-                    enriched.setHolidayCalendar("EURONEXT");
-                    enriched.setSettlementFee(new BigDecimal("3.75"));
-                    enriched.setCustodianBank("BNP Paribas Securities Services");
-                    break;
-
-                case "CH":
-                    enriched.setCountryName("Switzerland");
-                    enriched.setRegulatoryZone("EMEA");
-                    enriched.setTimeZone("CET");
-                    enriched.setSettlementSystem("SIX SIS");
-                    enriched.setStandardSettlementDays(2);
-                    enriched.setHolidayCalendar("SIX");
-                    enriched.setSettlementFee(new BigDecimal("7.50"));
-                    enriched.setCustodianBank("UBS Switzerland AG");
-                    break;
-
-                default:
-                    // Unknown country - set defaults
-                    enriched.setCountryName("Unknown Country");
-                    enriched.setRegulatoryZone("OTHER");
-                    enriched.setTimeZone("UTC");
-                    enriched.setSettlementSystem("MANUAL");
-                    enriched.setStandardSettlementDays(3);
-                    enriched.setHolidayCalendar("GENERIC");
-                    enriched.setSettlementFee(new BigDecimal("10.00"));
-                    enriched.setCustodianBank("Local Custodian");
-                    break;
+        // Apply enrichments using the APEX rules engine
+        if (ruleConfiguration != null && ruleConfiguration.getEnrichments() != null) {
+            for (YamlEnrichment enrichment : ruleConfiguration.getEnrichments()) {
+                if (enrichment.getEnabled() != null && enrichment.getEnabled()) {
+                    applyEnrichmentToSettlement(enrichment, settlementData);
+                }
             }
         }
+
+        // Apply validation rules using the APEX rules engine
+        if (ruleConfiguration != null && ruleConfiguration.getRules() != null) {
+            for (YamlRule rule : ruleConfiguration.getRules()) {
+                if (rule.getEnabled() != null && rule.getEnabled()) {
+                    applyValidationRuleToSettlement(rule, settlementData);
+                }
+            }
+        }
+
+        // Convert enriched data back to TradeSettlement object
+        updateSettlementFromMap(enriched, settlementData);
 
         return enriched;
     }
@@ -543,5 +462,162 @@ public class NestedFieldLookupDemo extends AbstractLookupDemo {
         System.out.println("✅ Generated " + errorSettlements.size() + " error scenario settlements");
 
         return errorSettlements;
+    }
+
+    /**
+     * Convert TradeSettlement to Map for APEX processing.
+     */
+    private Map<String, Object> convertSettlementToMap(TradeSettlement settlement) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("settlementId", settlement.getSettlementId());
+        map.put("settlementDate", settlement.getSettlementDate());
+        map.put("status", settlement.getStatus());
+        map.put("settlementAmount", settlement.getSettlementAmount());
+        map.put("currency", settlement.getCurrency());
+
+        // Add trade information
+        if (settlement.getTrade() != null) {
+            Map<String, Object> tradeMap = new HashMap<>();
+            tradeMap.put("tradeId", settlement.getTrade().getTradeId());
+            tradeMap.put("instrumentId", settlement.getTrade().getInstrumentId());
+            tradeMap.put("quantity", settlement.getTrade().getQuantity());
+            tradeMap.put("price", settlement.getTrade().getPrice());
+            tradeMap.put("tradeDate", settlement.getTrade().getTradeDate());
+
+            // Add counterparty information
+            if (settlement.getTrade().getCounterparty() != null) {
+                Map<String, Object> counterpartyMap = new HashMap<>();
+                counterpartyMap.put("counterpartyId", settlement.getTrade().getCounterparty().getCounterpartyId());
+                counterpartyMap.put("name", settlement.getTrade().getCounterparty().getName());
+                counterpartyMap.put("countryCode", settlement.getTrade().getCounterparty().getCountryCode());
+                counterpartyMap.put("city", settlement.getTrade().getCounterparty().getCity());
+                counterpartyMap.put("legalEntityIdentifier", settlement.getTrade().getCounterparty().getLegalEntityIdentifier());
+                tradeMap.put("counterparty", counterpartyMap);
+            }
+            map.put("trade", tradeMap);
+        }
+
+        // Add existing enriched fields if present
+        if (settlement.getCountryName() != null) map.put("countryName", settlement.getCountryName());
+        if (settlement.getRegulatoryZone() != null) map.put("regulatoryZone", settlement.getRegulatoryZone());
+        if (settlement.getTimeZone() != null) map.put("timeZone", settlement.getTimeZone());
+        if (settlement.getSettlementSystem() != null) map.put("settlementSystem", settlement.getSettlementSystem());
+        if (settlement.getStandardSettlementDays() != null) map.put("standardSettlementDays", settlement.getStandardSettlementDays());
+        if (settlement.getHolidayCalendar() != null) map.put("holidayCalendar", settlement.getHolidayCalendar());
+        if (settlement.getSettlementFee() != null) map.put("settlementFee", settlement.getSettlementFee());
+        if (settlement.getCustodianBank() != null) map.put("custodianBank", settlement.getCustodianBank());
+
+        return map;
+    }
+
+    /**
+     * Apply enrichment to settlement data using APEX engine.
+     */
+    private void applyEnrichmentToSettlement(YamlEnrichment enrichment, Map<String, Object> settlementData) throws Exception {
+        // Apply lookup enrichment directly using the YAML configuration
+        if (enrichment.getLookupConfig() != null) {
+            applyLookupEnrichmentToSettlement(enrichment, settlementData);
+        }
+    }
+
+    /**
+     * Apply lookup enrichment using the APEX engine.
+     */
+    private void applyLookupEnrichmentToSettlement(YamlEnrichment enrichment, Map<String, Object> settlementData) throws Exception {
+        // Create evaluation context
+        StandardEvaluationContext context = new StandardEvaluationContext();
+        settlementData.forEach(context::setVariable);
+
+        // Evaluate condition
+        if (enrichment.getCondition() != null) {
+            ExpressionEvaluatorService evaluator = new ExpressionEvaluatorService();
+            Boolean conditionResult = evaluator.evaluate(enrichment.getCondition(), context, Boolean.class);
+            if (conditionResult == null || !conditionResult) {
+                return; // Condition not met, skip enrichment
+            }
+        }
+
+        // Apply lookup enrichment using the dataset from YAML
+        if (enrichment.getLookupConfig() != null && enrichment.getLookupConfig().getLookupDataset() != null) {
+            String lookupKey = enrichment.getLookupConfig().getLookupKey();
+            if (lookupKey != null) {
+                ExpressionEvaluatorService evaluator = new ExpressionEvaluatorService();
+                String keyValue = evaluator.evaluate(lookupKey, context, String.class);
+
+                // Find matching data in the lookup dataset
+                var dataset = enrichment.getLookupConfig().getLookupDataset();
+                if (dataset.getData() != null) {
+                    String keyField = dataset.getKeyField();
+                    for (Map<String, Object> dataRow : dataset.getData()) {
+                        if (keyValue != null && keyValue.equals(dataRow.get(keyField))) {
+                            // Apply field mappings
+                            if (enrichment.getFieldMappings() != null) {
+                                for (var mapping : enrichment.getFieldMappings()) {
+                                    Object sourceValue = dataRow.get(mapping.getSourceField());
+                                    if (sourceValue != null) {
+                                        settlementData.put(mapping.getTargetField(), sourceValue);
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Apply validation rule to settlement data.
+     */
+    private void applyValidationRuleToSettlement(YamlRule rule, Map<String, Object> settlementData) throws Exception {
+        if (rule.getCondition() != null) {
+            StandardEvaluationContext context = new StandardEvaluationContext();
+            settlementData.forEach(context::setVariable);
+
+            ExpressionEvaluatorService evaluator = new ExpressionEvaluatorService();
+            Boolean result = evaluator.evaluate(rule.getCondition(), context, Boolean.class);
+
+            if (result == null || !result) {
+                System.out.println("   ⚠️  Validation failed: " + rule.getName() + " - " + rule.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Update TradeSettlement from enriched Map data.
+     */
+    private void updateSettlementFromMap(TradeSettlement settlement, Map<String, Object> settlementData) {
+        // Update enriched fields
+        if (settlementData.containsKey("countryName")) {
+            settlement.setCountryName((String) settlementData.get("countryName"));
+        }
+        if (settlementData.containsKey("regulatoryZone")) {
+            settlement.setRegulatoryZone((String) settlementData.get("regulatoryZone"));
+        }
+        if (settlementData.containsKey("timeZone")) {
+            settlement.setTimeZone((String) settlementData.get("timeZone"));
+        }
+        if (settlementData.containsKey("settlementSystem")) {
+            settlement.setSettlementSystem((String) settlementData.get("settlementSystem"));
+        }
+        if (settlementData.containsKey("standardSettlementDays")) {
+            Object standardSettlementDays = settlementData.get("standardSettlementDays");
+            if (standardSettlementDays instanceof Number) {
+                settlement.setStandardSettlementDays(((Number) standardSettlementDays).intValue());
+            }
+        }
+        if (settlementData.containsKey("holidayCalendar")) {
+            settlement.setHolidayCalendar((String) settlementData.get("holidayCalendar"));
+        }
+        if (settlementData.containsKey("settlementFee")) {
+            Object settlementFee = settlementData.get("settlementFee");
+            if (settlementFee instanceof Number) {
+                settlement.setSettlementFee(new BigDecimal(settlementFee.toString()));
+            }
+        }
+        if (settlementData.containsKey("custodianBank")) {
+            settlement.setCustodianBank((String) settlementData.get("custodianBank"));
+        }
     }
 }

@@ -127,8 +127,9 @@ public class QuickStartRunner {
         
         try {
             // Run the existing QuickStartDemo
-            QuickStartDemo.main(new String[]{});
-            
+            QuickStartDemo demo = new QuickStartDemo();
+            demo.run();
+
         } catch (Exception e) {
             logger.warn("Core QuickStart demo encountered issues: {}", e.getMessage());
             logger.info("This is expected if core dependencies are not available.");

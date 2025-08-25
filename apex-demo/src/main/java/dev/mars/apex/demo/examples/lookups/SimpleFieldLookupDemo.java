@@ -1,11 +1,17 @@
 package dev.mars.apex.demo.examples.lookups;
 
 import dev.mars.apex.demo.model.lookups.CurrencyTransaction;
+import dev.mars.apex.core.config.yaml.YamlEnrichment;
+import dev.mars.apex.core.config.yaml.YamlRule;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Demonstrates simple field lookup using currency codes.
@@ -182,9 +188,8 @@ public class SimpleFieldLookupDemo extends AbstractLookupDemo {
             if (item instanceof CurrencyTransaction) {
                 CurrencyTransaction transaction = (CurrencyTransaction) item;
 
-                // For now, simulate enrichment by copying the transaction
-                // In a real implementation, this would use the rules engine
-                CurrencyTransaction enriched = simulateEnrichment(transaction);
+                // Use actual APEX rules engine to process the transaction
+                CurrencyTransaction enriched = processTransactionWithApexEngine(transaction);
                 results.add(enriched);
 
                 // Log the lookup process
@@ -198,10 +203,11 @@ public class SimpleFieldLookupDemo extends AbstractLookupDemo {
     }
 
     /**
-     * Simulate currency enrichment based on the lookup configuration.
-     * This demonstrates what the YAML configuration would do.
+     * Process transaction using the actual APEX rules engine with the loaded YAML configuration.
+     * This replaces the previous simulation approach with real APEX functionality.
      */
-    private CurrencyTransaction simulateEnrichment(CurrencyTransaction original) {
+    private CurrencyTransaction processTransactionWithApexEngine(CurrencyTransaction original) throws Exception {
+        // Create a copy of the original transaction to enrich
         CurrencyTransaction enriched = new CurrencyTransaction(
             original.getTransactionId(),
             original.getAmount(),
@@ -212,44 +218,29 @@ public class SimpleFieldLookupDemo extends AbstractLookupDemo {
             original.getCategory()
         );
 
-        // Simulate lookup based on currency code
-        switch (original.getCurrencyCode()) {
-            case "USD":
-                enriched.setCurrencyName("US Dollar");
-                enriched.setCurrencySymbol("$");
-                enriched.setDecimalPlaces(2);
-                enriched.setCountryCode("US");
-                enriched.setIsBaseCurrency(true);
-                break;
-            case "EUR":
-                enriched.setCurrencyName("Euro");
-                enriched.setCurrencySymbol("€");
-                enriched.setDecimalPlaces(2);
-                enriched.setCountryCode("EU");
-                enriched.setIsBaseCurrency(true);
-                break;
-            case "GBP":
-                enriched.setCurrencyName("British Pound Sterling");
-                enriched.setCurrencySymbol("£");
-                enriched.setDecimalPlaces(2);
-                enriched.setCountryCode("GB");
-                enriched.setIsBaseCurrency(true);
-                break;
-            case "JPY":
-                enriched.setCurrencyName("Japanese Yen");
-                enriched.setCurrencySymbol("¥");
-                enriched.setDecimalPlaces(0);
-                enriched.setCountryCode("JP");
-                enriched.setIsBaseCurrency(true);
-                break;
-            default:
-                // For other currencies, set basic info
-                enriched.setCurrencyName("Unknown Currency");
-                enriched.setCurrencySymbol(original.getCurrencyCode());
-                enriched.setDecimalPlaces(2);
-                enriched.setIsBaseCurrency(false);
-                break;
+        // Convert transaction to Map for APEX processing
+        Map<String, Object> transactionData = convertTransactionToMap(enriched);
+
+        // Apply enrichments using the APEX rules engine
+        if (ruleConfiguration != null && ruleConfiguration.getEnrichments() != null) {
+            for (YamlEnrichment enrichment : ruleConfiguration.getEnrichments()) {
+                if (enrichment.getEnabled() != null && enrichment.getEnabled()) {
+                    applyEnrichmentToTransaction(enrichment, transactionData);
+                }
+            }
         }
+
+        // Apply validation rules using the APEX rules engine
+        if (ruleConfiguration != null && ruleConfiguration.getRules() != null) {
+            for (YamlRule rule : ruleConfiguration.getRules()) {
+                if (rule.getEnabled() != null && rule.getEnabled()) {
+                    applyValidationRuleToTransaction(rule, transactionData);
+                }
+            }
+        }
+
+        // Convert enriched data back to CurrencyTransaction object
+        updateTransactionFromMap(enriched, transactionData);
 
         return enriched;
     }
@@ -336,6 +327,131 @@ public class SimpleFieldLookupDemo extends AbstractLookupDemo {
                     tx.getCurrencyCode(),
                     tx.getCurrencyName() != null ? tx.getCurrencyName() : "Not enriched",
                     tx.getCurrencySymbol() != null ? tx.getCurrencySymbol() : "No symbol");
+            }
+        }
+    }
+
+    /**
+     * Convert CurrencyTransaction to Map for APEX processing.
+     */
+    private Map<String, Object> convertTransactionToMap(CurrencyTransaction transaction) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("transactionId", transaction.getTransactionId());
+        map.put("amount", transaction.getAmount());
+        map.put("currencyCode", transaction.getCurrencyCode());
+        map.put("description", transaction.getDescription());
+        map.put("transactionDate", transaction.getTransactionDate());
+        map.put("merchantName", transaction.getMerchantName());
+        map.put("category", transaction.getCategory());
+
+        // Add existing enriched fields if present
+        if (transaction.getCurrencyName() != null) map.put("currencyName", transaction.getCurrencyName());
+        if (transaction.getCurrencySymbol() != null) map.put("currencySymbol", transaction.getCurrencySymbol());
+        if (transaction.getDecimalPlaces() != null) map.put("decimalPlaces", transaction.getDecimalPlaces());
+        if (transaction.getCountryCode() != null) map.put("countryCode", transaction.getCountryCode());
+        if (transaction.getIsBaseCurrency() != null) map.put("isBaseCurrency", transaction.getIsBaseCurrency());
+
+        return map;
+    }
+
+    /**
+     * Apply enrichment to transaction data using APEX engine.
+     */
+    private void applyEnrichmentToTransaction(YamlEnrichment enrichment, Map<String, Object> transactionData) throws Exception {
+        // Apply lookup enrichment directly using the YAML configuration
+        if (enrichment.getLookupConfig() != null) {
+            applyLookupEnrichmentToTransaction(enrichment, transactionData);
+        }
+    }
+
+    /**
+     * Apply lookup enrichment using the APEX engine.
+     */
+    private void applyLookupEnrichmentToTransaction(YamlEnrichment enrichment, Map<String, Object> transactionData) throws Exception {
+        // Create evaluation context
+        StandardEvaluationContext context = new StandardEvaluationContext();
+        transactionData.forEach(context::setVariable);
+
+        // Evaluate condition
+        if (enrichment.getCondition() != null) {
+            ExpressionEvaluatorService evaluator = new ExpressionEvaluatorService();
+            Boolean conditionResult = evaluator.evaluate(enrichment.getCondition(), context, Boolean.class);
+            if (conditionResult == null || !conditionResult) {
+                return; // Condition not met, skip enrichment
+            }
+        }
+
+        // Apply lookup enrichment using the dataset from YAML
+        if (enrichment.getLookupConfig() != null && enrichment.getLookupConfig().getLookupDataset() != null) {
+            String lookupKey = enrichment.getLookupConfig().getLookupKey();
+            if (lookupKey != null) {
+                ExpressionEvaluatorService evaluator = new ExpressionEvaluatorService();
+                String keyValue = evaluator.evaluate(lookupKey, context, String.class);
+
+                // Find matching data in the lookup dataset
+                var dataset = enrichment.getLookupConfig().getLookupDataset();
+                if (dataset.getData() != null) {
+                    String keyField = dataset.getKeyField();
+                    for (Map<String, Object> dataRow : dataset.getData()) {
+                        if (keyValue != null && keyValue.equals(dataRow.get(keyField))) {
+                            // Apply field mappings
+                            if (enrichment.getFieldMappings() != null) {
+                                for (var mapping : enrichment.getFieldMappings()) {
+                                    Object sourceValue = dataRow.get(mapping.getSourceField());
+                                    if (sourceValue != null) {
+                                        transactionData.put(mapping.getTargetField(), sourceValue);
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Apply validation rule to transaction data.
+     */
+    private void applyValidationRuleToTransaction(YamlRule rule, Map<String, Object> transactionData) throws Exception {
+        if (rule.getCondition() != null) {
+            StandardEvaluationContext context = new StandardEvaluationContext();
+            transactionData.forEach(context::setVariable);
+
+            ExpressionEvaluatorService evaluator = new ExpressionEvaluatorService();
+            Boolean result = evaluator.evaluate(rule.getCondition(), context, Boolean.class);
+
+            if (result == null || !result) {
+                System.out.println("   ⚠️  Validation failed: " + rule.getName() + " - " + rule.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Update CurrencyTransaction from enriched Map data.
+     */
+    private void updateTransactionFromMap(CurrencyTransaction transaction, Map<String, Object> transactionData) {
+        // Update enriched fields
+        if (transactionData.containsKey("currencyName")) {
+            transaction.setCurrencyName((String) transactionData.get("currencyName"));
+        }
+        if (transactionData.containsKey("currencySymbol")) {
+            transaction.setCurrencySymbol((String) transactionData.get("currencySymbol"));
+        }
+        if (transactionData.containsKey("decimalPlaces")) {
+            Object decimalPlaces = transactionData.get("decimalPlaces");
+            if (decimalPlaces instanceof Number) {
+                transaction.setDecimalPlaces(((Number) decimalPlaces).intValue());
+            }
+        }
+        if (transactionData.containsKey("countryCode")) {
+            transaction.setCountryCode((String) transactionData.get("countryCode"));
+        }
+        if (transactionData.containsKey("isBaseCurrency")) {
+            Object isBaseCurrency = transactionData.get("isBaseCurrency");
+            if (isBaseCurrency instanceof Boolean) {
+                transaction.setIsBaseCurrency((Boolean) isBaseCurrency);
             }
         }
     }

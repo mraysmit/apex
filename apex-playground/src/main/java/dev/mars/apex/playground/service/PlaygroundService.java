@@ -1,9 +1,14 @@
 package dev.mars.apex.playground.service;
 
 import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
+import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.playground.model.PlaygroundRequest;
 import dev.mars.apex.playground.model.PlaygroundResponse;
 import dev.mars.apex.playground.model.RuleExecutionResult;
@@ -13,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Core service for APEX Playground operations.
@@ -35,6 +41,9 @@ public class PlaygroundService {
     private final DataProcessingService dataProcessingService;
     private final YamlValidationService yamlValidationService;
     private final YamlRulesEngineService yamlRulesEngineService;
+    private final YamlEnrichmentProcessor enrichmentProcessor;
+    private final LookupServiceRegistry lookupServiceRegistry;
+    private final ExpressionEvaluatorService expressionEvaluatorService;
 
     @Autowired
     public PlaygroundService(DataProcessingService dataProcessingService,
@@ -42,6 +51,11 @@ public class PlaygroundService {
         this.dataProcessingService = dataProcessingService;
         this.yamlValidationService = yamlValidationService;
         this.yamlRulesEngineService = new YamlRulesEngineService();
+
+        // Initialize services needed for real APEX engine integration
+        this.lookupServiceRegistry = new LookupServiceRegistry();
+        this.expressionEvaluatorService = new ExpressionEvaluatorService();
+        this.enrichmentProcessor = new YamlEnrichmentProcessor(lookupServiceRegistry, expressionEvaluatorService);
     }
 
     /**
@@ -91,7 +105,7 @@ public class PlaygroundService {
             response.getMetrics().setRulesExecutionTimeMs(System.currentTimeMillis() - rulesStartTime);
 
             // Step 4: Process results
-            processRuleResults(ruleResult, parsedData, response);
+            processRuleResults(ruleResult, parsedData, response, request);
 
             // Step 5: Set final metrics and status
             response.getMetrics().setTotalTimeMs(System.currentTimeMillis() - startTime);
@@ -136,7 +150,7 @@ public class PlaygroundService {
     /**
      * Process rule execution results and populate the response.
      */
-    private void processRuleResults(RuleResult ruleResult, Map<String, Object> originalData, PlaygroundResponse response) {
+    private void processRuleResults(RuleResult ruleResult, Map<String, Object> originalData, PlaygroundResponse response, PlaygroundRequest request) {
         // Process validation results
         PlaygroundResponse.ValidationResult validation = response.getValidation();
 
@@ -170,17 +184,48 @@ public class PlaygroundService {
             validation.addResult(executionResult);
         }
 
-        // Process enrichment results
+        // Process enrichment results using real APEX engine
         PlaygroundResponse.EnrichmentResult enrichment = response.getEnrichment();
 
-        // For now, we'll show the original data as "enriched" data
-        // In a full implementation, this would include actual enrichment results
-        enrichment.setEnrichedData(originalData);
+        try {
+            // Parse YAML configuration to get enrichments
+            YamlConfigurationLoader configLoader = new YamlConfigurationLoader();
+            YamlRuleConfiguration yamlConfig = configLoader.fromYamlString(request.getYamlRules());
 
-        // Check if data was actually enriched (simplified check)
-        if (originalData.size() > 0) {
-            enrichment.setEnriched(true);
-            enrichment.setFieldsAdded(originalData.size());
+            if (yamlConfig.getEnrichments() != null && !yamlConfig.getEnrichments().isEmpty()) {
+                // Create a copy of original data for enrichment
+                Map<String, Object> dataToEnrich = new HashMap<>(originalData);
+
+                // Apply real enrichments using APEX engine
+                Object enrichedResult = enrichmentProcessor.processEnrichments(yamlConfig.getEnrichments(), dataToEnrich);
+
+                // Set the actual enriched data
+                if (enrichedResult instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> enrichedMap = (Map<String, Object>) enrichedResult;
+                    enrichment.setEnrichedData(enrichedMap);
+
+                    // Calculate how many fields were added
+                    int fieldsAdded = enrichedMap.size() - originalData.size();
+                    enrichment.setFieldsAdded(Math.max(0, fieldsAdded));
+                    enrichment.setEnriched(fieldsAdded > 0 || !enrichedMap.equals(originalData));
+                } else {
+                    enrichment.setEnrichedData(originalData);
+                    enrichment.setEnriched(false);
+                    enrichment.setFieldsAdded(0);
+                }
+            } else {
+                // No enrichments defined in YAML
+                enrichment.setEnrichedData(originalData);
+                enrichment.setEnriched(false);
+                enrichment.setFieldsAdded(0);
+            }
+        } catch (Exception e) {
+            logger.error("Error processing enrichments: {}", e.getMessage(), e);
+            // Fallback to original data on error
+            enrichment.setEnrichedData(originalData);
+            enrichment.setEnriched(false);
+            enrichment.setFieldsAdded(0);
         }
 
         logger.debug("Processed rule results: triggered={}, message={}",

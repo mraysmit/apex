@@ -32,6 +32,7 @@ module dev.mars.apex.core {
 
     // YAML configuration exports
     exports dev.mars.apex.core.config.yaml;
+    exports dev.mars.apex.core.service.yaml;
 
     // New exports for performance monitoring
     exports dev.mars.apex.core.service.monitoring;

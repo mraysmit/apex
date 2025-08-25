@@ -359,5 +359,6 @@ A simplified XSD schema you can expand upon might look like this:
 * XML/XSD are widely supported, flexible, extensible, and clear.
 * Can easily interface with systems for validation, messaging, storage, and transmission.
 
-You can further customize or extend the schema to suit more complex or specific business logic as required.
+
+Mark A Ray-Smith May 2025
 

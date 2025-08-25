@@ -5,7 +5,7 @@
 # External YAML dataset containing currency and market reference data
 # for OTC Options Bootstrap Demo enrichment processing.
 #
-# Generated on: 2025-08-24
+# Generated on: 2025-08-25
 # Used by: OTC Options Bootstrap Demo
 # Purpose: Currency enrichment and market data lookup
 #
@@ -15,7 +15,9 @@ metadata:
   name: "Market Data Reference Dataset"
   version: "1.0.0"
   description: "Currency and market reference data for OTC Options processing"
-  created-date: "2025-08-24"
+  type: "external-data-config"
+  author: "Mark Andrew Ray-Smith Cityline Ltd"
+  created-date: "2025-08-25"
   source: "OTC Options Bootstrap Demo Generator"
   coverage: "Major trading currencies and market data"
 

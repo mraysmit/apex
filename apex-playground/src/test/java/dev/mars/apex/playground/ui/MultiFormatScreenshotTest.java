@@ -8,6 +8,7 @@ import org.springframework.test.context.TestPropertySource;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * Screenshot tests for different data formats (JSON, XML, CSV) in APEX Playground.
@@ -31,8 +32,23 @@ public class MultiFormatScreenshotTest {
 
     @BeforeEach
     void setUp() {
+        // Skip screenshot tests in headless environments (CI/CD)
+        if (isHeadlessEnvironment()) {
+            assumeFalse(true, "Skipping screenshot tests in headless environment");
+        }
+
         String baseUrl = "http://localhost:" + port;
         screenshotUtil = new PlaygroundScreenshotUtil(baseUrl);
+    }
+
+    private boolean isHeadlessEnvironment() {
+        // Check for common CI environment variables
+        return System.getenv("CI") != null ||
+               System.getenv("GITHUB_ACTIONS") != null ||
+               System.getenv("JENKINS_URL") != null ||
+               System.getProperty("java.awt.headless", "false").equals("true") ||
+               System.getProperty("os.name", "").toLowerCase().contains("linux") &&
+               System.getenv("DISPLAY") == null;
     }
 
     @AfterEach
