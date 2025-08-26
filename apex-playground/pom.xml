@@ -14,6 +14,8 @@
     <name>APEX Playground</name>
     <description>Interactive web-based playground for APEX Rules Engine with 4-panel JSFiddle-style interface</description>
 
+
+
     <dependencies>
         <!-- APEX Core -->
         <dependency>
@@ -211,9 +213,31 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <!--
+                    UI AND SCREENSHOT TESTS DISABLED BY DEFAULT
+
+                    These tests require Chrome browser and WebDriver to be installed and can be resource-intensive.
+                    They are disabled by default to ensure builds work in environments without browsers.
+
+                    TO RUN UI TESTS:
+                    1. Install Chrome browser
+                    2. Run: mvn test -Dtest="**/*UITest"
+
+                    TO RUN SCREENSHOT TESTS:
+                    1. Install Chrome browser
+                    2. Run: mvn test -Dtest="**/*ScreenshotTest"
+
+                    TO RUN ALL TESTS INCLUDING UI:
+                    mvn test -Dtest="*Test"
+                    -->
                     <excludes>
-                        <!-- Exclude E2E tests - functionality covered by comprehensive backend + UI tests -->
-                        <exclude>**/e2e/**</exclude>
+                        <!-- Exclude all UI tests - require browser drivers -->
+                        <exclude>**/ui/**/*UITest.java</exclude>
+                        <!-- Exclude screenshot tests - require browser drivers and can be resource intensive -->
+                        <exclude>**/ui/*ScreenshotTest.java</exclude>
+                        <exclude>**/ui/ManualScreenshotTest.java</exclude>
+                        <exclude>**/ui/MultiFormatScreenshotTest.java</exclude>
+                        <exclude>**/ui/NewScreenshotGenerationTest.java</exclude>
                         <!-- Exclude cross-browser tests - require additional browser drivers -->
                         <exclude>**/ui/CrossBrowserUITest.java</exclude>
                     </excludes>
@@ -221,4 +245,6 @@
             </plugin>
         </plugins>
     </build>
+
+
 </project>
