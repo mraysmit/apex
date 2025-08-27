@@ -5,7 +5,7 @@ import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
-import dev.mars.apex.demo.examples.CommodityTotalReturnSwap;
+import dev.mars.apex.demo.bootstrap.model.CommodityTotalReturnSwap;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

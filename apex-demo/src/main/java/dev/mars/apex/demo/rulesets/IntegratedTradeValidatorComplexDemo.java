@@ -10,8 +10,8 @@ import dev.mars.apex.core.service.lookup.LookupService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.validation.Validator;
 import dev.mars.apex.core.util.RuleParameterExtractor;
-import dev.mars.apex.demo.model.EnhancedTrade;
-import dev.mars.apex.demo.model.Trade;
+import dev.mars.apex.demo.bootstrap.model.EnhancedTrade;
+import dev.mars.apex.demo.bootstrap.model.Trade;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

@@ -3,7 +3,7 @@ package dev.mars.apex.demo.rulesets;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.lookup.RecordMatcher;
-import dev.mars.apex.demo.model.Trade;
+import dev.mars.apex.demo.bootstrap.model.Trade;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.validation.Validator;
 import dev.mars.apex.core.engine.config.RulesEngine;
@@ -134,11 +134,11 @@ public class TradeRecordMatcherDemo implements RecordMatcher<Trade> {
      */
     private static void registerValidators(LookupServiceRegistry registry, RulesEngine rulesEngine) {
         // Create and register validators for different trade types
-        registry.registerService(new TradeTypeValidator("equityValidator", PostTradeProcessingServiceDemoConfig.TYPE_EQUITY));
-        registry.registerService(new TradeTypeValidator("fixedIncomeValidator", PostTradeProcessingServiceDemoConfig.TYPE_FIXED_INCOME));
-        registry.registerService(new TradeTypeValidator("derivativeValidator", PostTradeProcessingServiceDemoConfig.TYPE_DERIVATIVE));
-        registry.registerService(new TradeTypeValidator("forexValidator", PostTradeProcessingServiceDemoConfig.TYPE_FOREX));
-        registry.registerService(new TradeTypeValidator("commodityValidator", PostTradeProcessingServiceDemoConfig.TYPE_COMMODITY));
+        registry.registerService(new TradeTypeValidator("equityValidator", PostTradeProcessingServiceDemo.TYPE_EQUITY));
+        registry.registerService(new TradeTypeValidator("fixedIncomeValidator", PostTradeProcessingServiceDemo.TYPE_FIXED_INCOME));
+        registry.registerService(new TradeTypeValidator("derivativeValidator", PostTradeProcessingServiceDemo.TYPE_DERIVATIVE));
+        registry.registerService(new TradeTypeValidator("forexValidator", PostTradeProcessingServiceDemo.TYPE_FOREX));
+        registry.registerService(new TradeTypeValidator("commodityValidator", PostTradeProcessingServiceDemo.TYPE_COMMODITY));
     }
 
     /**
@@ -148,11 +148,11 @@ public class TradeRecordMatcherDemo implements RecordMatcher<Trade> {
      */
     private static List<Trade> createTestTrades() {
         return Arrays.asList(
-            new Trade("T1001", PostTradeProcessingServiceDemoConfig.TYPE_EQUITY, "Stock"),
-            new Trade("T1002", PostTradeProcessingServiceDemoConfig.TYPE_FIXED_INCOME, "Bond"),
-            new Trade("T1003", PostTradeProcessingServiceDemoConfig.TYPE_DERIVATIVE, "Option"),
-            new Trade("T1004", PostTradeProcessingServiceDemoConfig.TYPE_FOREX, "Spot"),
-            new Trade("T1005", PostTradeProcessingServiceDemoConfig.TYPE_COMMODITY, "Future")
+            new Trade("T1001", PostTradeProcessingServiceDemo.TYPE_EQUITY, "Stock"),
+            new Trade("T1002", PostTradeProcessingServiceDemo.TYPE_FIXED_INCOME, "Bond"),
+            new Trade("T1003", PostTradeProcessingServiceDemo.TYPE_DERIVATIVE, "Option"),
+            new Trade("T1004", PostTradeProcessingServiceDemo.TYPE_FOREX, "Spot"),
+            new Trade("T1005", PostTradeProcessingServiceDemo.TYPE_COMMODITY, "Future")
         );
     }
 

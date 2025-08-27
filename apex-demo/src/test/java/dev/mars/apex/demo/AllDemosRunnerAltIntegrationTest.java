@@ -1,5 +1,6 @@
 package dev.mars.apex.demo;
 
+import dev.mars.apex.demo.runners.AllDemosRunner;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
@@ -32,18 +33,18 @@ public class AllDemosRunnerAltIntegrationTest {
         AllDemosRunner runner = new AllDemosRunner();
         runner.discoverDemos();
         
-        // Find QuickStartDemoB
+        // Find QuickStartDemo
         AllDemosRunner.DemoInfo quickStartDemo = runner.discoveredDemos.stream()
-                .filter(demo -> demo.getClassName().equals("QuickStartDemoB"))
+                .filter(demo -> demo.getClassName().equals("QuickStartDemo"))
                 .findFirst()
                 .orElse(null);
-        
-        assertNotNull(quickStartDemo, "QuickStartDemoB should be discovered");
+
+        assertNotNull(quickStartDemo, "QuickStartDemo should be discovered");
         
         // Run the demo
         assertDoesNotThrow(() -> {
             runner.runSingleDemo(quickStartDemo);
-        }, "QuickStartDemoB should run without exceptions");
+        }, "QuickStartDemo should run without exceptions");
         
         // Verify some output was produced
         String output = outContent.toString();

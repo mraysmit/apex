@@ -4,6 +4,7 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.demo.bootstrap.model.CommodityTotalReturnSwap;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

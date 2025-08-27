@@ -1,15 +1,15 @@
 package dev.mars.apex.demo.bootstrap;
 
-import dev.mars.apex.demo.model.Customer;
-import dev.mars.apex.demo.model.Product;
-import dev.mars.apex.demo.model.Trade;
+import dev.mars.apex.demo.bootstrap.model.Customer;
+import dev.mars.apex.demo.bootstrap.model.Product;
+import dev.mars.apex.demo.bootstrap.model.Trade;
 import dev.mars.apex.core.service.data.CustomDataSource;
 import dev.mars.apex.core.service.data.DataServiceManager;
-import dev.mars.apex.demo.data.ProductionDemoDataServiceManager;
 import dev.mars.apex.core.service.lookup.LookupService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.lookup.RecordMatcher;
 import dev.mars.apex.demo.rulesets.TradeRecordMatcherDemo;
+import dev.mars.apex.demo.data.ProductionDemoDataServiceManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -411,7 +411,7 @@ public class DataServiceManagerDemo {
             // Demonstrate performance monitoring
             System.out.println("\n1. Performance Monitoring:");
             try {
-                Map<String, Object> metrics = dataServiceManager.getPerformanceMetrics();
+                Map<String, Object> metrics = java.util.Collections.emptyMap(); // metrics not implemented in demo manager
                 if (metrics != null && !metrics.isEmpty()) {
                     System.out.println("   Performance Metrics:");
                     for (Map.Entry<String, Object> entry : metrics.entrySet()) {
@@ -427,7 +427,7 @@ public class DataServiceManagerDemo {
             // Demonstrate data source health checking
             System.out.println("\n2. Data Source Health Checking:");
             try {
-                Map<String, String> healthStatus = dataServiceManager.getDataSourceHealthStatus();
+                Map<String, String> healthStatus = java.util.Collections.emptyMap(); // health status not implemented in demo manager
                 if (healthStatus != null && !healthStatus.isEmpty()) {
                     System.out.println("   Data Source Health Status:");
                     for (Map.Entry<String, String> entry : healthStatus.entrySet()) {

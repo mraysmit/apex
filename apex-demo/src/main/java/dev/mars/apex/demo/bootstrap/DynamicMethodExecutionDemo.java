@@ -2,7 +2,7 @@ package dev.mars.apex.demo.bootstrap;
 
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.demo.model.Trade;
+import dev.mars.apex.demo.bootstrap.model.Trade;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 

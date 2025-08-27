@@ -1,9 +1,9 @@
 package dev.mars.apex.demo.data;
 
-import dev.mars.apex.demo.model.Customer;
-import dev.mars.apex.demo.model.Product;
-import dev.mars.apex.demo.model.Trade;
-import dev.mars.apex.demo.model.FinancialTrade;
+import dev.mars.apex.demo.bootstrap.model.Customer;
+import dev.mars.apex.demo.bootstrap.model.Product;
+import dev.mars.apex.demo.bootstrap.model.Trade;
+import dev.mars.apex.demo.bootstrap.model.FinancialTrade;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

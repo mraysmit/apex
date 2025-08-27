@@ -11,8 +11,8 @@ import dev.mars.apex.core.service.data.DataSource;
 import dev.mars.apex.core.service.lookup.LookupService;
 import dev.mars.apex.core.service.data.DataServiceManager;
 import dev.mars.apex.demo.rulesets.PricingServiceDemo;
-import dev.mars.apex.demo.model.Customer;
-import dev.mars.apex.demo.model.Product;
+import dev.mars.apex.demo.bootstrap.model.Customer;
+import dev.mars.apex.demo.bootstrap.model.Product;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.*;

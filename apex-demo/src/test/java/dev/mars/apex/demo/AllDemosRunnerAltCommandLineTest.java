@@ -1,5 +1,6 @@
 package dev.mars.apex.demo;
 
+import dev.mars.apex.demo.runners.AllDemosRunner;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
@@ -144,9 +145,9 @@ public class AllDemosRunnerAltCommandLineTest {
         System.out.println("🎉 All command line options are working correctly!");
         System.out.println();
         System.out.println("Usage examples:");
-        System.out.println("  java dev.mars.apex.demo.AllDemosRunnerAlt");
-        System.out.println("  java dev.mars.apex.demo.AllDemosRunnerAlt --list");
-        System.out.println("  java dev.mars.apex.demo.AllDemosRunnerAlt --package core");
-        System.out.println("  java dev.mars.apex.demo.AllDemosRunnerAlt --package examples");
+        System.out.println("  java dev.mars.apex.demo.runners.AllDemosRunnerAlt");
+        System.out.println("  java dev.mars.apex.demo.runners.AllDemosRunnerAlt --list");
+        System.out.println("  java dev.mars.apex.demo.runners.AllDemosRunnerAlt --package core");
+        System.out.println("  java dev.mars.apex.demo.runners.AllDemosRunnerAlt --package examples");
     }
 }

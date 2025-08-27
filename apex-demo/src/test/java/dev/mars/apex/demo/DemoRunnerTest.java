@@ -1,5 +1,6 @@
 package dev.mars.apex.demo;
 
+import dev.mars.apex.demo.runners.DemoRunner;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

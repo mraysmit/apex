@@ -2,8 +2,8 @@ package dev.mars.apex.demo;
 
 import dev.mars.apex.demo.bootstrap.ApexAdvancedFeaturesDemo;
 import dev.mars.apex.demo.data.MockDataSources;
-import dev.mars.apex.demo.model.Product;
-import dev.mars.apex.demo.model.Trade;
+import dev.mars.apex.demo.bootstrap.model.Product;
+import dev.mars.apex.demo.bootstrap.model.Trade;
 import dev.mars.apex.demo.rulesets.PricingServiceDemo;
 
 import org.junit.jupiter.api.BeforeEach;

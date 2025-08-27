@@ -5,7 +5,7 @@ import dev.mars.apex.core.config.yaml.YamlEnrichment;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.demo.DemoRunner;
+import dev.mars.apex.demo.runners.DemoRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

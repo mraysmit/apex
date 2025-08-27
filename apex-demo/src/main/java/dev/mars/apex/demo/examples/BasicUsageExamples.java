@@ -1,9 +1,9 @@
 package dev.mars.apex.demo.examples;
 
 import dev.mars.apex.core.api.RulesService;
-import dev.mars.apex.demo.model.Customer;
-import dev.mars.apex.demo.model.Product;
-import dev.mars.apex.demo.model.Trade;
+import dev.mars.apex.demo.bootstrap.model.Customer;
+import dev.mars.apex.demo.bootstrap.model.Product;
+import dev.mars.apex.demo.bootstrap.model.Trade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

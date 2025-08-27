@@ -4,7 +4,7 @@ import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.demo.model.Trade;
+import dev.mars.apex.demo.bootstrap.model.Trade;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,25 +69,25 @@ public class RiskManagementService {
      */
     private void initializeDefaultValues() {
         // Initialize market risk factors by trade type
-        marketRiskFactors.put(PostTradeProcessingServiceDemoConfig.TYPE_EQUITY, 0.15);
-        marketRiskFactors.put(PostTradeProcessingServiceDemoConfig.TYPE_FIXED_INCOME, 0.08);
-        marketRiskFactors.put(PostTradeProcessingServiceDemoConfig.TYPE_DERIVATIVE, 0.25);
-        marketRiskFactors.put(PostTradeProcessingServiceDemoConfig.TYPE_FOREX, 0.12);
-        marketRiskFactors.put(PostTradeProcessingServiceDemoConfig.TYPE_COMMODITY, 0.18);
+        marketRiskFactors.put(PostTradeProcessingServiceDemo.TYPE_EQUITY, 0.15);
+        marketRiskFactors.put(PostTradeProcessingServiceDemo.TYPE_FIXED_INCOME, 0.08);
+        marketRiskFactors.put(PostTradeProcessingServiceDemo.TYPE_DERIVATIVE, 0.25);
+        marketRiskFactors.put(PostTradeProcessingServiceDemo.TYPE_FOREX, 0.12);
+        marketRiskFactors.put(PostTradeProcessingServiceDemo.TYPE_COMMODITY, 0.18);
 
         // Initialize credit risk factors by trade type
-        creditRiskFactors.put(PostTradeProcessingServiceDemoConfig.TYPE_EQUITY, 0.10);
-        creditRiskFactors.put(PostTradeProcessingServiceDemoConfig.TYPE_FIXED_INCOME, 0.15);
-        creditRiskFactors.put(PostTradeProcessingServiceDemoConfig.TYPE_DERIVATIVE, 0.20);
-        creditRiskFactors.put(PostTradeProcessingServiceDemoConfig.TYPE_FOREX, 0.12);
-        creditRiskFactors.put(PostTradeProcessingServiceDemoConfig.TYPE_COMMODITY, 0.08);
+        creditRiskFactors.put(PostTradeProcessingServiceDemo.TYPE_EQUITY, 0.10);
+        creditRiskFactors.put(PostTradeProcessingServiceDemo.TYPE_FIXED_INCOME, 0.15);
+        creditRiskFactors.put(PostTradeProcessingServiceDemo.TYPE_DERIVATIVE, 0.20);
+        creditRiskFactors.put(PostTradeProcessingServiceDemo.TYPE_FOREX, 0.12);
+        creditRiskFactors.put(PostTradeProcessingServiceDemo.TYPE_COMMODITY, 0.08);
 
         // Initialize liquidity risk factors by trade type
-        liquidityRiskFactors.put(PostTradeProcessingServiceDemoConfig.TYPE_EQUITY, 0.05);
-        liquidityRiskFactors.put(PostTradeProcessingServiceDemoConfig.TYPE_FIXED_INCOME, 0.12);
-        liquidityRiskFactors.put(PostTradeProcessingServiceDemoConfig.TYPE_DERIVATIVE, 0.18);
-        liquidityRiskFactors.put(PostTradeProcessingServiceDemoConfig.TYPE_FOREX, 0.03);
-        liquidityRiskFactors.put(PostTradeProcessingServiceDemoConfig.TYPE_COMMODITY, 0.15);
+        liquidityRiskFactors.put(PostTradeProcessingServiceDemo.TYPE_EQUITY, 0.05);
+        liquidityRiskFactors.put(PostTradeProcessingServiceDemo.TYPE_FIXED_INCOME, 0.12);
+        liquidityRiskFactors.put(PostTradeProcessingServiceDemo.TYPE_DERIVATIVE, 0.18);
+        liquidityRiskFactors.put(PostTradeProcessingServiceDemo.TYPE_FOREX, 0.03);
+        liquidityRiskFactors.put(PostTradeProcessingServiceDemo.TYPE_COMMODITY, 0.15);
     }
 
     /**
@@ -117,11 +117,11 @@ public class RiskManagementService {
         riskRules.put("OperationalRisk", new Rule(
             "OperationalRiskRule",
             "#trade != null ? " +
-            "(#trade.value == '" + PostTradeProcessingServiceDemoConfig.TYPE_EQUITY + "' ? 0.05 : " +
-            "(#trade.value == '" + PostTradeProcessingServiceDemoConfig.TYPE_FIXED_INCOME + "' ? 0.08 : " +
-            "(#trade.value == '" + PostTradeProcessingServiceDemoConfig.TYPE_DERIVATIVE + "' ? 0.15 : " +
-            "(#trade.value == '" + PostTradeProcessingServiceDemoConfig.TYPE_FOREX + "' ? 0.07 : " +
-            "(#trade.value == '" + PostTradeProcessingServiceDemoConfig.TYPE_COMMODITY + "' ? 0.10 : 0.08))))) : 0.0",
+            "(#trade.value == '" + PostTradeProcessingServiceDemo.TYPE_EQUITY + "' ? 0.05 : " +
+            "(#trade.value == '" + PostTradeProcessingServiceDemo.TYPE_FIXED_INCOME + "' ? 0.08 : " +
+            "(#trade.value == '" + PostTradeProcessingServiceDemo.TYPE_DERIVATIVE + "' ? 0.15 : " +
+            "(#trade.value == '" + PostTradeProcessingServiceDemo.TYPE_FOREX + "' ? 0.07 : " +
+            "(#trade.value == '" + PostTradeProcessingServiceDemo.TYPE_COMMODITY + "' ? 0.10 : 0.08))))) : 0.0",
             "Operational risk calculation"
         ));
 
@@ -129,11 +129,11 @@ public class RiskManagementService {
         riskRules.put("SettlementRisk", new Rule(
             "SettlementRiskRule",
             "#trade != null ? " +
-            "(#settlementMethod == '" + PostTradeProcessingServiceDemoConfig.METHOD_DTC + "' ? 0.03 : " +
-            "(#settlementMethod == '" + PostTradeProcessingServiceDemoConfig.METHOD_FEDWIRE + "' ? 0.04 : " +
-            "(#settlementMethod == '" + PostTradeProcessingServiceDemoConfig.METHOD_EUROCLEAR + "' ? 0.05 : " +
-            "(#settlementMethod == '" + PostTradeProcessingServiceDemoConfig.METHOD_CLEARSTREAM + "' ? 0.05 : " +
-            "(#settlementMethod == '" + PostTradeProcessingServiceDemoConfig.METHOD_MANUAL + "' ? 0.10 : 0.07))))) * #settlementDays : 0.0",
+            "(#settlementMethod == '" + PostTradeProcessingServiceDemo.METHOD_DTC + "' ? 0.03 : " +
+            "(#settlementMethod == '" + PostTradeProcessingServiceDemo.METHOD_FEDWIRE + "' ? 0.04 : " +
+            "(#settlementMethod == '" + PostTradeProcessingServiceDemo.METHOD_EUROCLEAR + "' ? 0.05 : " +
+            "(#settlementMethod == '" + PostTradeProcessingServiceDemo.METHOD_CLEARSTREAM + "' ? 0.05 : " +
+            "(#settlementMethod == '" + PostTradeProcessingServiceDemo.METHOD_MANUAL + "' ? 0.10 : 0.07))))) * #settlementDays : 0.0",
             "Settlement risk calculation"
         ));
 
@@ -291,15 +291,15 @@ public class RiskManagementService {
         // Operational risk is often based on complexity of the trade type
         String type = trade.getValue();
         switch (type) {
-            case PostTradeProcessingServiceDemoConfig.TYPE_EQUITY:
+            case PostTradeProcessingServiceDemo.TYPE_EQUITY:
                 return 0.05;
-            case PostTradeProcessingServiceDemoConfig.TYPE_FIXED_INCOME:
+            case PostTradeProcessingServiceDemo.TYPE_FIXED_INCOME:
                 return 0.08;
-            case PostTradeProcessingServiceDemoConfig.TYPE_DERIVATIVE:
+            case PostTradeProcessingServiceDemo.TYPE_DERIVATIVE:
                 return 0.15;
-            case PostTradeProcessingServiceDemoConfig.TYPE_FOREX:
+            case PostTradeProcessingServiceDemo.TYPE_FOREX:
                 return 0.07;
-            case PostTradeProcessingServiceDemoConfig.TYPE_COMMODITY:
+            case PostTradeProcessingServiceDemo.TYPE_COMMODITY:
                 return 0.10;
             default:
                 return 0.08;
@@ -318,9 +318,9 @@ public class RiskManagementService {
         }
 
         // Get settlement method and days
-        PostTradeProcessingServiceDemoConfig postTradeConfig = new PostTradeProcessingServiceDemoConfig(rulesEngine);
-        String settlementMethod = postTradeConfig.determineSettlementMethod(trade);
-        int settlementDays = postTradeConfig.calculateSettlementDays(trade);
+        PostTradeProcessingServiceDemo postTradeDemo = new PostTradeProcessingServiceDemo(rulesEngine);
+        String settlementMethod = postTradeDemo.determineSettlementMethod(trade);
+        int settlementDays = postTradeDemo.calculateSettlementDays(trade);
 
         Map<String, Object> facts = new HashMap<>();
         facts.put("trade", trade);
@@ -342,25 +342,25 @@ public class RiskManagementService {
 
         // Use direct calculation for now, as RuleResult doesn't provide a way to get the actual value
         // Settlement risk is often based on settlement method and days
-        PostTradeProcessingServiceDemoConfig postTradeConfig = new PostTradeProcessingServiceDemoConfig(rulesEngine);
-        String method = postTradeConfig.determineSettlementMethod(trade);
-        int days = postTradeConfig.calculateSettlementDays(trade);
+        PostTradeProcessingServiceDemo postTradeDemo = new PostTradeProcessingServiceDemo(rulesEngine);
+        String method = postTradeDemo.determineSettlementMethod(trade);
+        int days = postTradeDemo.calculateSettlementDays(trade);
 
         double methodFactor;
         switch (method) {
-            case PostTradeProcessingServiceDemoConfig.METHOD_DTC:
+            case PostTradeProcessingServiceDemo.METHOD_DTC:
                 methodFactor = 0.03;
                 break;
-            case PostTradeProcessingServiceDemoConfig.METHOD_FEDWIRE:
+            case PostTradeProcessingServiceDemo.METHOD_FEDWIRE:
                 methodFactor = 0.04;
                 break;
-            case PostTradeProcessingServiceDemoConfig.METHOD_EUROCLEAR:
+            case PostTradeProcessingServiceDemo.METHOD_EUROCLEAR:
                 methodFactor = 0.05;
                 break;
-            case PostTradeProcessingServiceDemoConfig.METHOD_CLEARSTREAM:
+            case PostTradeProcessingServiceDemo.METHOD_CLEARSTREAM:
                 methodFactor = 0.05;
                 break;
-            case PostTradeProcessingServiceDemoConfig.METHOD_MANUAL:
+            case PostTradeProcessingServiceDemo.METHOD_MANUAL:
                 methodFactor = 0.10;
                 break;
             default:

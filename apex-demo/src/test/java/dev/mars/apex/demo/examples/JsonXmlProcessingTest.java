@@ -8,18 +8,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Test class for JSON/XML processing examples.
- * 
- * This test verifies that the examples work correctly and demonstrates
- * how to test APEX rule processing functionality.
+ * Test class for consolidated file processing demo.
+ *
+ * This test verifies that the consolidated FileProcessingDemo works correctly
+ * and demonstrates how to test APEX rule processing functionality.
  */
 public class JsonXmlProcessingTest {
-    
-    private JsonXmlFileProcessingDemo demo;
-    
+
+    private FileProcessingDemo demo;
+
     @BeforeEach
     void setUp() throws Exception {
-        demo = new JsonXmlFileProcessingDemo();
+        demo = new FileProcessingDemo();
     }
     
     @Test
@@ -64,10 +64,10 @@ public class JsonXmlProcessingTest {
     }
     
     @Test
-    void testFileBasedProcessingDemo() {
-        // Test that FileBasedProcessingDemo can be instantiated
+    void testFileProcessingDemo() {
+        // Test that FileProcessingDemo can be instantiated
         assertDoesNotThrow(() -> {
-            FileBasedProcessingDemo fileDemo = new FileBasedProcessingDemo();
+            FileProcessingDemo fileDemo = new FileProcessingDemo();
             assertNotNull(fileDemo);
         });
     }
@@ -77,7 +77,7 @@ public class JsonXmlProcessingTest {
         // Test that ConfigurationBasedProcessingDemo can be instantiated
         // This might fail if the YAML file is not found, which is expected
         try {
-            ConfigurationBasedProcessingDemo configDemo = new ConfigurationBasedProcessingDemo();
+            YamlDatasetDemo.ConfigurationBasedProcessingDemo configDemo = new YamlDatasetDemo.ConfigurationBasedProcessingDemo();
             assertNotNull(configDemo);
         } catch (Exception e) {
             // Expected if YAML configuration file is not found

@@ -1,5 +1,6 @@
 package dev.mars.apex.demo;
 
+import dev.mars.apex.demo.runners.AllDemosRunner;
 import org.junit.jupiter.api.Test;
 
 /**

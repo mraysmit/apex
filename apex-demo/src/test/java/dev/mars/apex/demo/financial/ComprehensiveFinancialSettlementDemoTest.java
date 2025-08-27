@@ -1,9 +1,8 @@
 package dev.mars.apex.demo.financial;
 
 import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.demo.bootstrap.model.*;
 import dev.mars.apex.demo.examples.ComprehensiveFinancialSettlementDemo;
-import dev.mars.apex.demo.model.TradeB;
-import dev.mars.apex.demo.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

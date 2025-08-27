@@ -3,8 +3,8 @@ package dev.mars.apex.demo.examples;
 import dev.mars.apex.core.api.RulesService;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
-import dev.mars.apex.demo.model.Customer;
-import dev.mars.apex.demo.model.FinancialTrade;
+import dev.mars.apex.demo.bootstrap.model.Customer;
+import dev.mars.apex.demo.bootstrap.model.FinancialTrade;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

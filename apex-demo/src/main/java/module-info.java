@@ -25,14 +25,13 @@ module dev.mars.apex.demo {
     requires jdk.compiler;
 
     // Export packages for Spring Expression Language access and general use
-    exports dev.mars.apex.demo.model;
 
     // Export main demo packages for external access
-    exports dev.mars.apex.demo;
     exports dev.mars.apex.demo.rulesets;
     exports dev.mars.apex.demo.data to spring.expression;
     exports dev.mars.apex.demo.examples;
     exports dev.mars.apex.demo.bootstrap;
-    exports dev.mars.apex.demo.bootstrap.model to spring.expression;
-    exports dev.mars.apex.demo.examples.lookups;
+    exports dev.mars.apex.demo.lookups;
+    exports dev.mars.apex.demo.bootstrap.model;
+    exports dev.mars.apex.demo.runners;
 }

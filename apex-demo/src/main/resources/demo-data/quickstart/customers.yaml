@@ -1,0 +1,196 @@
+# QuickStart Demo - Customer Data
+# This file contains sample customer data for the QuickStart demonstration
+# Business users can modify this data to test different scenarios
+
+metadata:
+  version: "1.0"
+  description: "Sample customer data for QuickStart demonstrations"
+  lastUpdated: "2025-07-28"
+  author: "APEX Demo Team"
+
+# Configuration for customer data generation and validation
+configuration:
+  validation:
+    minAge: 18
+    maxAge: 120
+    requiredFields: ["customerId", "firstName", "lastName", "email"]
+    validCountries: ["US", "GB", "CA", "DE", "FR", "JP", "AU"]
+    validStatuses: ["ACTIVE", "INACTIVE", "PENDING", "SUSPENDED"]
+    validTiers: ["BASIC", "SILVER", "GOLD", "PLATINUM"]
+  
+  business-rules:
+    minAccountBalance: 0.0
+    maxAccountBalance: 1000000.0
+    emailValidationRequired: true
+    ageValidationRequired: true
+
+# Sample customer data for demonstrations
+customers:
+  # Valid customer - should pass all validations
+  - customerId: "CUST001"
+    firstName: "John"
+    lastName: "Smith"
+    email: "john.smith@example.com"
+    age: 35
+    country: "US"
+    accountBalance: 15000.50
+    status: "ACTIVE"
+    tier: "GOLD"
+    description: "Valid customer for positive test cases"
+    
+  # Valid customer - different tier
+  - customerId: "CUST002"
+    firstName: "Sarah"
+    lastName: "Johnson"
+    email: "sarah.johnson@example.com"
+    age: 28
+    country: "GB"
+    accountBalance: 8750.25
+    status: "ACTIVE"
+    tier: "SILVER"
+    description: "Valid customer with different profile"
+    
+  # Edge case - minimum age
+  - customerId: "CUST003"
+    firstName: "Young"
+    lastName: "Adult"
+    email: "young.adult@example.com"
+    age: 18
+    country: "CA"
+    accountBalance: 1000.0
+    status: "ACTIVE"
+    tier: "BASIC"
+    description: "Edge case - minimum valid age"
+    
+  # Edge case - high balance
+  - customerId: "CUST004"
+    firstName: "Wealthy"
+    lastName: "Client"
+    email: "wealthy.client@example.com"
+    age: 55
+    country: "DE"
+    accountBalance: 500000.0
+    status: "ACTIVE"
+    tier: "PLATINUM"
+    description: "Edge case - high account balance"
+    
+  # Invalid customer - underage (should fail age validation)
+  - customerId: "CUST005"
+    firstName: "Under"
+    lastName: "Age"
+    email: "under.age@example.com"
+    age: 16
+    country: "US"
+    accountBalance: 5000.0
+    status: "PENDING"
+    tier: "BASIC"
+    description: "Invalid customer - underage for testing validation failures"
+    
+  # Invalid customer - bad email (should fail email validation)
+  - customerId: "CUST006"
+    firstName: "Invalid"
+    lastName: "Email"
+    email: "invalid-email-format"
+    age: 30
+    country: "GB"
+    accountBalance: 2500.0
+    status: "ACTIVE"
+    tier: "SILVER"
+    description: "Invalid customer - bad email format for testing validation failures"
+    
+  # Invalid customer - negative balance (should fail balance validation)
+  - customerId: "CUST007"
+    firstName: "Negative"
+    lastName: "Balance"
+    email: "negative.balance@example.com"
+    age: 40
+    country: "CA"
+    accountBalance: -1000.0
+    status: "SUSPENDED"
+    tier: "BASIC"
+    description: "Invalid customer - negative balance for testing validation failures"
+    
+  # Invalid customer - invalid country (should fail country validation)
+  - customerId: "CUST008"
+    firstName: "Invalid"
+    lastName: "Country"
+    email: "invalid.country@example.com"
+    age: 25
+    country: "XX"
+    accountBalance: 3000.0
+    status: "ACTIVE"
+    tier: "BASIC"
+    description: "Invalid customer - invalid country code for testing validation failures"
+
+# Test scenarios for different validation outcomes
+test-scenarios:
+  all-valid:
+    description: "All customers should pass validation"
+    customerIds: ["CUST001", "CUST002", "CUST003", "CUST004"]
+    expectedResult: "PASS"
+    
+  mixed-validation:
+    description: "Mix of valid and invalid customers"
+    customerIds: ["CUST001", "CUST005", "CUST002", "CUST006"]
+    expectedValidCount: 2
+    expectedInvalidCount: 2
+    
+  all-invalid:
+    description: "All customers should fail validation"
+    customerIds: ["CUST005", "CUST006", "CUST007", "CUST008"]
+    expectedResult: "FAIL"
+    
+  edge-cases:
+    description: "Test edge cases and boundary conditions"
+    customerIds: ["CUST003", "CUST004"]
+    expectedResult: "PASS"
+
+# Business rules for customer validation
+business-rules:
+  age-validation:
+    rule: "#age != null && #age >= 18 && #age <= 120"
+    description: "Customer must be between 18 and 120 years old"
+    errorMessage: "Customer age must be between 18 and 120"
+    
+  email-validation:
+    rule: "#email != null && #email.contains('@') && #email.contains('.')"
+    description: "Customer must have a valid email address"
+    errorMessage: "Customer email must be in valid format"
+    
+  balance-validation:
+    rule: "#accountBalance != null && #accountBalance >= 0"
+    description: "Customer account balance must be non-negative"
+    errorMessage: "Customer account balance cannot be negative"
+    
+  country-validation:
+    rule: "#country != null && #country in {'US', 'GB', 'CA', 'DE', 'FR', 'JP', 'AU'}"
+    description: "Customer must be from a supported country"
+    errorMessage: "Customer country must be from supported list"
+    
+  tier-validation:
+    rule: "#tier != null && #tier in {'BASIC', 'SILVER', 'GOLD', 'PLATINUM'}"
+    description: "Customer tier must be valid"
+    errorMessage: "Customer tier must be BASIC, SILVER, GOLD, or PLATINUM"
+
+# Enrichment rules for customer data
+enrichment-rules:
+  tier-assignment:
+    condition: "#accountBalance >= 100000"
+    action: "set-field"
+    field: "tier"
+    value: "PLATINUM"
+    description: "Assign PLATINUM tier for high-balance customers"
+    
+  discount-rate:
+    condition: "#tier == 'PLATINUM'"
+    action: "set-field"
+    field: "discountRate"
+    value: 0.15
+    description: "15% discount for PLATINUM customers"
+    
+  risk-rating:
+    condition: "#accountBalance < 5000"
+    action: "set-field"
+    field: "riskRating"
+    value: "LOW"
+    description: "Low risk rating for small balance customers"

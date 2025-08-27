@@ -6,7 +6,7 @@ import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.util.RuleParameterExtractor;
-import dev.mars.apex.demo.model.Customer;
+import dev.mars.apex.demo.bootstrap.model.Customer;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -85,39 +85,39 @@
                 <version>3.1.0</version>
                 <configuration>
                     <!-- Default main class - can be overridden with -Dexec.mainClass -->
-                    <mainClass>dev.mars.apex.demo.DemoRunner</mainClass>
+                    <mainClass>dev.mars.apex.demo.runners.DemoRunner</mainClass>
                 </configuration>
                 <executions>
                     <!-- Default execution for DemoRunner -->
                     <execution>
                         <id>default</id>
                         <configuration>
-                            <mainClass>dev.mars.apex.demo.DemoRunner</mainClass>
+                            <mainClass>dev.mars.apex.demo.runners.DemoRunner</mainClass>
                         </configuration>
                     </execution>
                     <!-- Lookup Examples -->
                     <execution>
                         <id>simple-field-lookup</id>
                         <configuration>
-                            <mainClass>dev.mars.apex.demo.examples.lookups.SimpleFieldLookupDemo</mainClass>
+                            <mainClass>dev.mars.apex.demo.lookups.SimpleFieldLookupDemo</mainClass>
                         </configuration>
                     </execution>
                     <execution>
                         <id>compound-key-lookup</id>
                         <configuration>
-                            <mainClass>dev.mars.apex.demo.examples.lookups.CompoundKeyLookupDemo</mainClass>
+                            <mainClass>dev.mars.apex.demo.lookups.CompoundKeyLookupDemo</mainClass>
                         </configuration>
                     </execution>
                     <execution>
                         <id>nested-field-lookup</id>
                         <configuration>
-                            <mainClass>dev.mars.apex.demo.examples.lookups.NestedFieldLookupDemo</mainClass>
+                            <mainClass>dev.mars.apex.demo.lookups.NestedFieldLookupDemo</mainClass>
                         </configuration>
                     </execution>
                     <execution>
                         <id>conditional-expression-lookup</id>
                         <configuration>
-                            <mainClass>dev.mars.apex.demo.examples.ConditionalExpressionLookupDemo</mainClass>
+                            <mainClass>dev.mars.apex.demo.examples.YamlDatasetDemo.ConditionalExpressionLookupDemo</mainClass>
                         </configuration>
                     </execution>
                     <!-- Bootstrap Demos -->
@@ -154,7 +154,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>dev.mars.apex.demo.DemoRunner</mainClass>
+                            <mainClass>dev.mars.apex.demo.runners.DemoRunner</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -169,7 +169,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>dev.mars.apex.demo.DemoRunner</mainClass>
+                            <mainClass>dev.mars.apex.demo.runners.DemoRunner</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

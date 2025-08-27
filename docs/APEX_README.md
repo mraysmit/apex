@@ -396,7 +396,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.RiskAssessmentBoots
 
 #### 1. **Simple Field Lookup** - Currency Enrichment
 ```bash
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.SimpleFieldLookupDemo" -pl apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo" -pl apex-demo
 ```
 **Pattern**: `#currencyCode` → Currency details and regional information
 
@@ -414,7 +414,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.Concatenated
 
 #### 4. **Conditional Expression Lookup** - Regulatory Reporting
 ```bash
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.ConditionalExpressionLookupDemo" -pl apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.YamlDatasetDemo.ConditionalExpressionLookupDemo" -pl apex-demo
 ```
 **Pattern**: `#jurisdiction == 'EU' ? #emirCode : #cftcCode` → Jurisdiction-specific compliance
 
@@ -476,10 +476,10 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.TradeSettlementBoot
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.RiskAssessmentBootstrapDemo"
 
 # Lookup Pattern Examples (Data Enrichment)
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.SimpleFieldLookupDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo"
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.ComputedExpressionLookupDemo"
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.ConcatenatedFieldLookupDemo"
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.ConditionalExpressionLookupDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.YamlDatasetDemo.ConditionalExpressionLookupDemo"
 
 # Advanced Feature Demonstrations (Technical Deep Dive)
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.DynamicMethodExecutionDemo"

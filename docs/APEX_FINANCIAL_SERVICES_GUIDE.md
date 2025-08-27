@@ -1035,7 +1035,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.RiskAssessmentBoots
 **Pattern**: `#currencyCode`
 
 ```bash
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.SimpleFieldLookupDemo" -pl apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo" -pl apex-demo
 ```
 
 **Financial Services Use Case**: Enrich transactions with currency details, exchange rates, and regional information.
@@ -1065,7 +1065,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.Concatenated
 **Pattern**: `#jurisdiction == 'EU' ? #emirCode : #cftcCode`
 
 ```bash
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.ConditionalExpressionLookupDemo" -pl apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.YamlDatasetDemo.ConditionalExpressionLookupDemo" -pl apex-demo
 ```
 
 **Financial Services Use Case**: Jurisdiction-specific regulatory reporting requirements and compliance rules.

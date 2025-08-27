@@ -1,0 +1,259 @@
+# ============================================================================
+# APEX Demo Data Bootstrap Configuration
+# ============================================================================
+# Generated: 2025-08-27
+# Purpose: Main configuration for data-driven demo data management
+# ============================================================================
+
+metadata:
+  name: "Demo Data Bootstrap Configuration"
+  version: "1.0.0"
+  description: "Comprehensive demo data management using APEX bootstrap patterns"
+  created-date: "2025-08-27"
+  author: "APEX Bootstrap Demo Generator"
+
+# Data source configurations
+data_sources:
+  database:
+    type: "postgresql"
+    url: "jdbc:postgresql://localhost:5432/apex_demo_data"
+    username: "postgres"
+    password: "postgres"
+    tables:
+      - "demo_customers"
+      - "demo_products"
+      - "demo_trades"
+      - "demo_audit"
+    
+  external_files:
+    - "bootstrap/datasets/customer-profiles.yaml"
+    - "bootstrap/datasets/product-catalog.yaml"
+    - "bootstrap/datasets/trading-scenarios.yaml"
+
+# Customer segmentation configuration
+customer_segments:
+  platinum:
+    name: "Platinum Members"
+    min_balance: 500000.00
+    features:
+      - "Private Wealth Management"
+      - "Dedicated Relationship Manager"
+      - "Priority Trading Access"
+      - "Exclusive Investment Opportunities"
+    risk_profiles: ["LOW", "MEDIUM"]
+    
+  gold:
+    name: "Gold Members"
+    min_balance: 100000.00
+    features:
+      - "Premium Trading Account"
+      - "Advanced Analytics"
+      - "Priority Support"
+      - "Structured Products Access"
+    risk_profiles: ["LOW", "MEDIUM", "HIGH"]
+    
+  silver:
+    name: "Silver Members"
+    min_balance: 25000.00
+    features:
+      - "Standard Trading Account"
+      - "Basic Analytics"
+      - "Standard Support"
+      - "Core Investment Products"
+    risk_profiles: ["MEDIUM", "HIGH"]
+    
+  basic:
+    name: "Basic Members"
+    min_balance: 1000.00
+    features:
+      - "Basic Banking Services"
+      - "Limited Trading Access"
+      - "Self-Service Support"
+      - "Standard Savings Products"
+    risk_profiles: ["MEDIUM", "HIGH"]
+
+# Product categories configuration
+product_categories:
+  investment:
+    name: "Investment Products"
+    description: "Wealth management and investment services"
+    target_segments: ["Platinum", "Gold"]
+    min_balance_required: 100000.00
+    
+  trading:
+    name: "Trading Services"
+    description: "Active trading platforms and services"
+    target_segments: ["Platinum", "Gold", "Silver"]
+    min_balance_required: 25000.00
+    
+  savings:
+    name: "Savings Products"
+    description: "Deposit and savings account products"
+    target_segments: ["Platinum", "Gold", "Silver", "Basic"]
+    min_balance_required: 1000.00
+    
+  corporate:
+    name: "Corporate Services"
+    description: "Business and corporate banking services"
+    target_segments: ["Platinum", "Gold"]
+    min_balance_required: 500000.00
+    
+  digital:
+    name: "Digital Banking"
+    description: "Online and mobile banking services"
+    target_segments: ["Gold", "Silver", "Basic"]
+    min_balance_required: 5000.00
+
+# Trading scenarios configuration
+trading_scenarios:
+  equity_trading:
+    asset_class: "Equity"
+    currencies: ["USD", "EUR", "GBP"]
+    counterparties: ["Goldman Sachs", "Morgan Stanley", "JP Morgan"]
+    min_amount: 100000.00
+    max_amount: 10000000.00
+    
+  fixed_income:
+    asset_class: "Fixed Income"
+    currencies: ["USD", "EUR", "CHF"]
+    counterparties: ["Deutsche Bank", "Barclays", "Credit Suisse"]
+    min_amount: 500000.00
+    max_amount: 50000000.00
+    
+  fx_trading:
+    asset_class: "FX"
+    currencies: ["USD", "EUR", "GBP", "JPY", "CHF"]
+    counterparties: ["Barclays", "UBS", "HSBC"]
+    min_amount: 50000.00
+    max_amount: 5000000.00
+    
+  commodity_trading:
+    asset_class: "Commodity"
+    currencies: ["USD", "EUR"]
+    counterparties: ["JP Morgan", "Goldman Sachs", "Morgan Stanley"]
+    min_amount: 250000.00
+    max_amount: 25000000.00
+    
+  derivatives:
+    asset_class: "Derivative"
+    currencies: ["USD", "EUR", "GBP", "CHF"]
+    counterparties: ["UBS", "Credit Suisse", "Deutsche Bank"]
+    min_amount: 100000.00
+    max_amount: 15000000.00
+
+# Data validation rules
+validation_rules:
+  customer_validation:
+    - rule_id: "CV001"
+      name: "valid-email-format"
+      condition: "#email != null && #email.matches('^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$')"
+      message: "Customer email must be in valid format"
+      
+    - rule_id: "CV002"
+      name: "valid-age-range"
+      condition: "#age >= 18 && #age <= 100"
+      message: "Customer age must be between 18 and 100"
+      
+    - rule_id: "CV003"
+      name: "valid-balance"
+      condition: "#balance >= 0"
+      message: "Customer balance cannot be negative"
+      
+    - rule_id: "CV004"
+      name: "membership-balance-consistency"
+      condition: "(#membershipLevel == 'Platinum' && #balance >= 500000) || (#membershipLevel == 'Gold' && #balance >= 100000) || (#membershipLevel == 'Silver' && #balance >= 25000) || (#membershipLevel == 'Basic' && #balance >= 1000)"
+      message: "Customer balance must meet minimum requirements for membership level"
+  
+  product_validation:
+    - rule_id: "PV001"
+      name: "valid-product-price"
+      condition: "#price > 0"
+      message: "Product price must be positive"
+      
+    - rule_id: "PV002"
+      name: "valid-category"
+      condition: "#category != null && #category.length() > 0"
+      message: "Product must have a valid category"
+      
+    - rule_id: "PV003"
+      name: "min-balance-consistency"
+      condition: "#minBalance >= 0 && #minBalance <= #price"
+      message: "Minimum balance must be non-negative and not exceed product price"
+  
+  trade_validation:
+    - rule_id: "TV001"
+      name: "valid-trade-amount"
+      condition: "#amount > 0"
+      message: "Trade amount must be positive"
+      
+    - rule_id: "TV002"
+      name: "valid-currency"
+      condition: "#currency != null && #currency.matches('^[A-Z]{3}$')"
+      message: "Currency must be a valid 3-letter ISO code"
+      
+    - rule_id: "TV003"
+      name: "valid-asset-class"
+      condition: "#assetClass != null && #assetClass.length() > 0"
+      message: "Trade must have a valid asset class"
+
+# Performance and monitoring configuration
+performance:
+  database_connection:
+    max_connections: 10
+    connection_timeout_ms: 5000
+    query_timeout_ms: 30000
+    
+  caching:
+    enabled: true
+    cache_size: 1000
+    cache_ttl_seconds: 3600
+    
+  monitoring:
+    metrics_enabled: true
+    audit_enabled: true
+    performance_logging: true
+    
+  thresholds:
+    max_processing_time_ms: 100
+    max_memory_usage_mb: 512
+    max_concurrent_operations: 50
+
+# Demo scenarios configuration
+demo_scenarios:
+  - name: "customer_profile_management"
+    description: "Demonstrates customer profile loading and validation"
+    data_sources: ["database.demo_customers", "external.customer-profiles.yaml"]
+    validation_rules: ["customer_validation"]
+    
+  - name: "product_catalog_integration"
+    description: "Demonstrates product catalog management and eligibility"
+    data_sources: ["database.demo_products", "external.product-catalog.yaml"]
+    validation_rules: ["product_validation"]
+    
+  - name: "trading_data_processing"
+    description: "Demonstrates trade processing and validation"
+    data_sources: ["database.demo_trades", "external.trading-scenarios.yaml"]
+    validation_rules: ["trade_validation"]
+    
+  - name: "comprehensive_integration"
+    description: "Demonstrates full integration across all data sources"
+    data_sources: ["database.*", "external.*"]
+    validation_rules: ["customer_validation", "product_validation", "trade_validation"]
+
+# Audit and compliance configuration
+audit:
+  enabled: true
+  log_all_operations: true
+  retention_days: 90
+  
+  tracked_operations:
+    - "data_load"
+    - "validation_execution"
+    - "rule_processing"
+    - "error_handling"
+    
+  compliance_requirements:
+    - "data_privacy"
+    - "financial_regulations"
+    - "audit_trail_integrity"
+    - "performance_monitoring"

@@ -8,7 +8,7 @@ import dev.mars.apex.core.engine.model.RuleResult;
 
 import dev.mars.apex.core.service.validation.Validator;
 import dev.mars.apex.core.util.RuleParameterExtractor;
-import dev.mars.apex.demo.model.Trade;
+import dev.mars.apex.demo.bootstrap.model.Trade;
 
 import java.util.ArrayList;
 import java.util.Arrays;

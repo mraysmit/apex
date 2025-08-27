@@ -2,7 +2,7 @@ package dev.mars.apex.demo.advanced;
 
 
 import dev.mars.apex.demo.bootstrap.DynamicMethodExecutionDemo;
-import dev.mars.apex.demo.model.Trade;
+import dev.mars.apex.demo.bootstrap.model.Trade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.expression.spel.support.StandardEvaluationContext;

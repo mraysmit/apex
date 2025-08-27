@@ -2,7 +2,6 @@ package dev.mars.apex.demo;
 
 
 import dev.mars.apex.demo.examples.FinancialServicesDemo;
-import dev.mars.apex.demo.model.CommodityTotalReturnSwap;
 import dev.mars.apex.demo.examples.StaticDataEntities.*;
 import dev.mars.apex.demo.data.FinancialStaticDataProvider;
 import org.junit.jupiter.api.Test;

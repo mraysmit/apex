@@ -1,10 +1,10 @@
 package dev.mars.apex.demo.util;
 
-import dev.mars.apex.demo.model.Customer;
-import dev.mars.apex.demo.model.Product;
-import dev.mars.apex.demo.model.Trade;
-import dev.mars.apex.demo.model.FinancialTrade;
-import dev.mars.apex.demo.model.CommodityTotalReturnSwap;
+import dev.mars.apex.demo.bootstrap.model.Customer;
+import dev.mars.apex.demo.bootstrap.model.Product;
+import dev.mars.apex.demo.bootstrap.model.Trade;
+import dev.mars.apex.demo.bootstrap.model.FinancialTrade;
+import dev.mars.apex.demo.bootstrap.model.CommodityTotalReturnSwap;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

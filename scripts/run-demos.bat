@@ -17,7 +17,7 @@ echo === Running Main Demo Runner ===
 echo.
 
 echo 3. Running All Demos via DemoRunner...
-java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" dev.mars.apex.demo.DemoRunner all
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" dev.mars.apex.demo.runners.DemoRunner all
 echo.
 
 echo === Demo Execution Completed ===

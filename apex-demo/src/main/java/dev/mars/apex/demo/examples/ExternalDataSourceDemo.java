@@ -10,7 +10,7 @@ import dev.mars.apex.core.service.data.external.DataSourceException;
 import dev.mars.apex.core.service.data.external.DataSourceMetrics;
 import dev.mars.apex.core.service.data.external.ConnectionStatus;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
-import dev.mars.apex.demo.DemoRunner;
+import dev.mars.apex.demo.runners.DemoRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

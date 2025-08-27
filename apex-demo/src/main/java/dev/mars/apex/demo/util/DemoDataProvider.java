@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.util;
 
-import dev.mars.apex.demo.model.Customer;
-import dev.mars.apex.demo.model.Product;
+import dev.mars.apex.demo.bootstrap.model.Customer;
+import dev.mars.apex.demo.bootstrap.model.Product;
 
 import java.util.ArrayList;
 import java.util.Arrays;

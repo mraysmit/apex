@@ -1,7 +1,7 @@
 package dev.mars.apex.demo;
 
-import dev.mars.apex.demo.model.Customer;
-import dev.mars.apex.demo.model.Product;
+import dev.mars.apex.demo.bootstrap.model.Customer;
+import dev.mars.apex.demo.bootstrap.model.Product;
 import dev.mars.apex.demo.util.DemoDataProvider;
 import dev.mars.apex.demo.util.MockDataSources;
 import dev.mars.apex.demo.util.TestUtilities;
