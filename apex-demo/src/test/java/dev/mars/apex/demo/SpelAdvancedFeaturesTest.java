@@ -1,7 +1,6 @@
 package dev.mars.apex.demo;
 
 import dev.mars.apex.demo.bootstrap.ApexAdvancedFeaturesDemo;
-import dev.mars.apex.demo.bootstrap.ApexAdvancedFeaturesDemoConfig;
 import dev.mars.apex.demo.data.MockDataSources;
 import dev.mars.apex.demo.model.Product;
 import dev.mars.apex.demo.model.Trade;
@@ -54,7 +53,6 @@ public class SpelAdvancedFeaturesTest {
     private dev.mars.apex.core.service.engine.RuleEngineService ruleEngineService;
     private dev.mars.apex.core.service.engine.TemplateProcessorService templateProcessorService;
     private dev.mars.apex.core.engine.config.RulesEngine rulesEngine;
-    private ApexAdvancedFeaturesDemoConfig config;
     private ApexAdvancedFeaturesDemo demo;
     private PricingServiceDemo pricingService;
     private StandardEvaluationContext context;
@@ -70,16 +68,8 @@ public class SpelAdvancedFeaturesTest {
         rulesEngine = new dev.mars.apex.core.engine.config.RulesEngine(new dev.mars.apex.core.engine.config.RulesEngineConfiguration());
         pricingService = new PricingServiceDemo();
 
-        // Initialize config
-        config = new ApexAdvancedFeaturesDemoConfig(
-            rulesEngine,
-            evaluatorService,
-            ruleEngineService,
-            templateProcessorService
-        );
-
-        // Initialize demo
-        demo = new ApexAdvancedFeaturesDemo(config);
+        // Initialize demo with merged class (no config needed)
+        demo = new ApexAdvancedFeaturesDemo();
 
         // Initialize context
         context = new StandardEvaluationContext();
@@ -105,8 +95,8 @@ public class SpelAdvancedFeaturesTest {
      */
     @Test
     public void testCollectionOperations() {
-        // Use the field context and populate it with config data
-        context = config.createContext();
+        // Use the field context and populate it with demo data
+        context = demo.createContext();
 
         // Add price threshold variable
         context.setVariable("priceThreshold", 500.0);
@@ -178,11 +168,11 @@ public class SpelAdvancedFeaturesTest {
      */
     @Test
     public void testAdvancedRuleEngine() {
-        // Use the field context and populate it with config data
-        context = config.createContext();
+        // Use the field context and populate it with demo data
+        context = demo.createContext();
 
-        // Get rules from config
-        List<dev.mars.apex.core.engine.model.Rule> rules = config.createInvestmentRules();
+        // Get rules from demo
+        List<dev.mars.apex.core.engine.model.Rule> rules = demo.createInvestmentRules();
 
         // Test investment recommendations rule
         dev.mars.apex.core.engine.model.Rule investmentRecommendationsRule = rules.stream()
@@ -329,8 +319,8 @@ public class SpelAdvancedFeaturesTest {
      */
     @Test
     public void testTemplateExpressions() {
-        // Use the field context and populate it with template config data
-        context = config.createTemplateContext();
+        // Use the field context and populate it with template demo data
+        context = demo.createTemplateContext();
 
         // Add additional variables for this test
         context.setVariable("orderTotal", 350.0);
@@ -378,8 +368,8 @@ public class SpelAdvancedFeaturesTest {
      */
     @Test
     public void testXmlTemplateExpressions() {
-        // Use the field context and populate it with template config data
-        context = config.createTemplateContext();
+        // Use the field context and populate it with template demo data
+        context = demo.createTemplateContext();
 
         // Add additional variables for this test
         context.setVariable("orderTotal", 350.0);
@@ -457,8 +447,8 @@ public class SpelAdvancedFeaturesTest {
      */
     @Test
     public void testJsonTemplateExpressions() {
-        // Use the field context and populate it with template config data
-        context = config.createTemplateContext();
+        // Use the field context and populate it with template demo data
+        context = demo.createTemplateContext();
 
         // Add additional variables for this test
         context.setVariable("orderTotal", 350.0);
@@ -530,8 +520,8 @@ public class SpelAdvancedFeaturesTest {
      */
     @Test
     public void testDynamicLookupService() {
-        // Use the field context and populate it with config data
-        context = config.createContext();
+        // Use the field context and populate it with demo data
+        context = demo.createContext();
 
         // Create lookup services
         List<dev.mars.apex.core.service.lookup.LookupService> lookupServices = MockDataSources.createLookupServices();

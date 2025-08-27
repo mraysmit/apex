@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.advanced;
 
 
-import dev.mars.apex.demo.bootstrap.DynamicMethodExecutionDemoConfig;
+import dev.mars.apex.demo.bootstrap.DynamicMethodExecutionDemo;
 import dev.mars.apex.demo.model.Trade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,28 +12,25 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test class for DynamicMethodExecutionDemoConfig to verify the new functionality.
+ * Test class for DynamicMethodExecutionDemo to verify the merged functionality.
  */
 public class DynamicMethodExecutionDemoConfigTest {
 
-    private DynamicMethodExecutionDemoConfig config;
+    private DynamicMethodExecutionDemo demo;
     private StandardEvaluationContext context;
 
     @BeforeEach
     void setUp() {
-        // Create mock services
-        dev.mars.apex.core.service.engine.ExpressionEvaluatorService evaluatorService = new dev.mars.apex.core.service.engine.ExpressionEvaluatorService();
-        
-        // Create config
-        config = new DynamicMethodExecutionDemoConfig(evaluatorService);
-        
+        // Create demo with merged functionality
+        demo = new DynamicMethodExecutionDemo();
+
         // Create context
-        context = config.createContext();
+        context = demo.createContext();
     }
 
     @Test
     void testGetAvailableRules() {
-        Map<String, String> rules = config.getAvailableRules();
+        Map<String, String> rules = demo.getAvailableRules();
         
         assertNotNull(rules);
         assertTrue(rules.containsKey("SettlementDays"));
@@ -53,7 +50,7 @@ public class DynamicMethodExecutionDemoConfigTest {
     @Test
     void testDemonstratePricingVariations() {
         double basePrice = 100.0;
-        Map<String, Double> pricingResults = config.demonstratePricingVariations(basePrice, context);
+        Map<String, Double> pricingResults = demo.demonstratePricingVariations(basePrice, context);
         
         assertNotNull(pricingResults);
         assertEquals(4, pricingResults.size());
@@ -74,7 +71,7 @@ public class DynamicMethodExecutionDemoConfigTest {
     @Test
     void testValidateValidTrade() {
         Trade validTrade = new Trade("T001", "Equity", "InstrumentType");
-        Map<String, Object> validationResults = config.validateTrade(validTrade, context);
+        Map<String, Object> validationResults = demo.validateTrade(validTrade, context);
         
         assertNotNull(validationResults);
         assertEquals(true, validationResults.get("hasId"));
@@ -91,7 +88,7 @@ public class DynamicMethodExecutionDemoConfigTest {
         invalidTrade.setCategory("InstrumentType");
         // Default constructor sets ID to "Unknown", so this trade actually has an ID
 
-        Map<String, Object> validationResults = config.validateTrade(invalidTrade, context);
+        Map<String, Object> validationResults = demo.validateTrade(invalidTrade, context);
 
         assertNotNull(validationResults);
         assertEquals(true, validationResults.get("hasId")); // Default constructor sets ID to "Unknown"
@@ -108,7 +105,7 @@ public class DynamicMethodExecutionDemoConfigTest {
         invalidTrade.setValue(""); // Empty value
         invalidTrade.setCategory(null); // Null category
 
-        Map<String, Object> validationResults = config.validateTrade(invalidTrade, context);
+        Map<String, Object> validationResults = demo.validateTrade(invalidTrade, context);
 
         assertNotNull(validationResults);
         assertEquals(false, validationResults.get("hasId"));
@@ -121,7 +118,7 @@ public class DynamicMethodExecutionDemoConfigTest {
     void testValidateNullTrade() {
         System.out.println("TEST: Triggering intentional error - testing validation of null trade object");
 
-        Map<String, Object> validationResults = config.validateTrade(null, context);
+        Map<String, Object> validationResults = demo.validateTrade(null, context);
 
         assertNotNull(validationResults);
         assertEquals(false, validationResults.get("hasId"));
@@ -139,15 +136,15 @@ public class DynamicMethodExecutionDemoConfigTest {
         context.setVariable("trade", equityTrade);
         
         // Test settlement days rule
-        Integer settlementDays = config.executeRule("SettlementDays", context, Integer.class);
+        Integer settlementDays = demo.executeRule("SettlementDays", context, Integer.class);
         assertEquals(2, settlementDays); // Equity should have 2 settlement days
         
         // Test settlement method rule
-        String settlementMethod = config.executeRule("SettlementMethod", context, String.class);
+        String settlementMethod = demo.executeRule("SettlementMethod", context, String.class);
         assertEquals("DTC", settlementMethod); // Equity should use DTC
         
         // Test market risk rule
-        Double marketRisk = config.executeRule("MarketRisk", context, Double.class);
+        Double marketRisk = demo.executeRule("MarketRisk", context, Double.class);
         assertEquals(0.15, marketRisk, 0.01); // Equity market risk factor
     }
 
@@ -160,7 +157,7 @@ public class DynamicMethodExecutionDemoConfigTest {
         context.setVariable("trade", derivativeTrade);
         context.setVariable("basePrice", 500.0);
         
-        Map<String, Object> results = config.executeAllRules(context);
+        Map<String, Object> results = demo.executeAllRules(context);
         
         assertNotNull(results);
         assertTrue(results.size() >= 4); // At least the original 4 rules

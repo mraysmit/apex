@@ -5,9 +5,11 @@ import dev.mars.apex.core.api.RuleSet;
 import dev.mars.apex.core.api.SimpleRulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.yaml.YamlEnrichment;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 
@@ -173,7 +175,8 @@ public class CommoditySwapValidationBootstrap {
     // APEX components
     private RulesService rulesService;
     private YamlRuleConfiguration yamlConfig;
-    
+    private EnrichmentService enrichmentService;
+
     // Database connection
     private Connection connection;
     
@@ -1150,6 +1153,7 @@ public class CommoditySwapValidationBootstrap {
             System.out.println("     Configuration includes: validation chains + enrichment patterns + thresholds");
 
             System.out.println("   Loading YAML configuration into APEX...");
+
             // Load the YAML configuration
             YamlConfigurationLoader loader = new YamlConfigurationLoader();
             this.yamlConfig = loader.fromYamlString(yamlContent);
@@ -1287,41 +1291,7 @@ public class CommoditySwapValidationBootstrap {
                         message: "TradeB ID format validation failed"
                         description: "TradeB ID does not follow required format"
 
-            enrichments:
-              # Client data enrichment
-              - id: "client-enrichment"
-                name: "Client Data Enrichment"
-                description: "Enrich trade with client information"
-                type: "lookup"
-                enabled: true
-                source: "client_data"
-                key-field: "clientId"
-                mappings:
-                  - source-field: "client_name"
-                    target-field: "clientName"
-                    description: "Client name lookup"
-                  - source-field: "regulatory_classification"
-                    target-field: "clientRegulatoryClassification"
-                    description: "Client regulatory classification"
-
-              # Commodity reference data enrichment
-              - id: "commodity-enrichment"
-                name: "Commodity Reference Data Enrichment"
-                description: "Enrich trade with commodity reference data"
-                type: "lookup"
-                enabled: true
-                source: "commodity_reference_data"
-                key-field: "referenceIndex"
-                mappings:
-                  - source-field: "index_provider"
-                    target-field: "indexProvider"
-                    description: "Index provider lookup"
-                  - source-field: "quote_currency"
-                    target-field: "commodityQuoteCurrency"
-                    description: "Commodity quote currency"
-                  - source-field: "unit_of_measure"
-                    target-field: "commodityUnitOfMeasure"
-                    description: "Unit of measure"
+            enrichments: []
 
             configuration:
               # Processing thresholds
@@ -1386,8 +1356,8 @@ public class CommoditySwapValidationBootstrap {
             ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
             System.out.println("     Expression Evaluator Service created - ready for rule expression evaluation");
 
-            // EnrichmentService initialized but not stored - used for demonstration purposes
-            new EnrichmentService(serviceRegistry, evaluatorService);
+            // Initialize and store EnrichmentService for real enrichment operations
+            this.enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
             System.out.println("     Enrichment Service initialized - ready for data enrichment operations");
 
             long apexInitEnd = System.currentTimeMillis();
@@ -1623,13 +1593,32 @@ public class CommoditySwapValidationBootstrap {
             .customRule("Currency Required", "#notionalCurrency != null && #notionalCurrency.trim().length() > 0", "Notional currency is required")
             .build();
 
-        // Actually use the validation engine
+        // Execute validation rules and get real results
         System.out.println("   Engine created successfully: " + validationEngine.getClass().getSimpleName());
-        boolean validationSuccess = true; // In a real implementation, you would call validationEngine.evaluate(swap)
+        Map<String, Object> context = convertSwapToMap(swap);
+        RuleResult validationResult = validationEngine.executeRulesForCategory("commodity-validation", context);
+        boolean validationSuccess = validationResult.isTriggered();
 
         System.out.println("   ✓ Validation result: " + (validationSuccess ? "PASS" : "FAIL"));
-        System.out.println("   ✓ Rules passed: 7");
-        System.out.println("   ✓ Rules failed: 0");
+        if (validationResult.getRuleName() != null) {
+            System.out.println("   ✓ Triggered rule: " + validationResult.getRuleName());
+            System.out.println("   ✓ Rule message: " + validationResult.getMessage());
+        }
+
+        // Get detailed rule execution statistics
+        Map<String, Boolean> ruleResults = executeIndividualValidationRules(context);
+        int passedRules = (int) ruleResults.values().stream().mapToInt(result -> result ? 1 : 0).sum();
+        int failedRules = ruleResults.size() - passedRules;
+
+        System.out.println("   ✓ Rules passed: " + passedRules);
+        System.out.println("   ✓ Rules failed: " + failedRules);
+
+        // Show individual rule results
+        ruleResults.forEach((ruleName, result) ->
+            System.out.println("     - " + ruleName + ": " + (result ? "PASS" : "FAIL")));
+
+        // Update overall success based on detailed results
+        validationSuccess = failedRules == 0;
 
         // Business Rules validation
         RulesEngine businessEngine = RuleSet.category("commodity-business")
@@ -1641,22 +1630,50 @@ public class CommoditySwapValidationBootstrap {
             .customRule("Settlement Terms", "#settlementDays != null && #settlementDays >= 0 && #settlementDays <= 5", "Settlement within 5 days")
             .build();
 
-        // Actually use the business engine
+        // Execute business rules and get real results
         System.out.println("   Business engine created: " + businessEngine.getClass().getSimpleName());
-        boolean businessSuccess = true; // In a real implementation, you would call businessEngine.evaluate(swap)
+        RuleResult businessResult = businessEngine.executeRulesForCategory("commodity-business", context);
+        boolean businessSuccess = businessResult.isTriggered();
 
         System.out.println("   ✓ Business rules result: " + (businessSuccess ? "PASS" : "FAIL"));
-        System.out.println("   ✓ Business rules passed: 3");
-        System.out.println("   ✓ Business rules failed: 0");
+        if (businessResult.getRuleName() != null) {
+            System.out.println("   ✓ Triggered business rule: " + businessResult.getRuleName());
+            System.out.println("   ✓ Business rule message: " + businessResult.getMessage());
+        }
+
+        // Get detailed business rule execution statistics
+        Map<String, Boolean> businessRuleResults = executeIndividualBusinessRules(context);
+        int passedBusinessRules = (int) businessRuleResults.values().stream().mapToInt(result -> result ? 1 : 0).sum();
+        int failedBusinessRules = businessRuleResults.size() - passedBusinessRules;
+
+        System.out.println("   ✓ Business rules passed: " + passedBusinessRules);
+        System.out.println("   ✓ Business rules failed: " + failedBusinessRules);
+
+        // Show individual business rule results
+        businessRuleResults.forEach((ruleName, result) ->
+            System.out.println("     - " + ruleName + ": " + (result ? "PASS" : "FAIL")));
+
+        // Update overall success based on detailed results
+        businessSuccess = failedBusinessRules == 0;
 
         long processingTime = System.currentTimeMillis() - startTime;
         performanceMetrics.put("Scenario2_ProcessingTime", processingTime);
 
         System.out.println("   ✓ Processing time: " + processingTime + "ms");
 
-        // Store audit record
+        // Store audit record with real validation results
         boolean overallValid = validationSuccess && businessSuccess;
-        storeValidationAudit(swap.getTradeId(), "TEMPLATE_BASED_RULES", overallValid ? "PASS" : "FAIL", processingTime);
+        String auditResult = overallValid ? "PASS" : "FAIL";
+        if (!overallValid) {
+            // Add details about which rules failed
+            if (!validationSuccess && validationResult.getRuleName() != null) {
+                auditResult += " (Validation: " + validationResult.getRuleName() + ")";
+            }
+            if (!businessSuccess && businessResult.getRuleName() != null) {
+                auditResult += " (Business: " + businessResult.getRuleName() + ")";
+            }
+        }
+        storeValidationAudit(swap.getTradeId(), "TEMPLATE_BASED_RULES", auditResult, processingTime);
 
         logExecution("Scenario 2 completed");
     }
@@ -1682,22 +1699,39 @@ public class CommoditySwapValidationBootstrap {
         // Execute advanced rules
         Map<String, Object> context = convertSwapToMap(swap);
 
+        int passedAdvancedRules = 0;
+        int failedAdvancedRules = 0;
+        boolean overallAdvancedSuccess = true;
+        StringBuilder failureDetails = new StringBuilder();
+
         for (Rule rule : advancedRules) {
             boolean result = rulesService.check(rule.getCondition(), context);
             System.out.println("   ✓ " + rule.getName() + ": " + (result ? "PASS" : "FAIL"));
 
-            if (!result) {
+            if (result) {
+                passedAdvancedRules++;
+            } else {
+                failedAdvancedRules++;
+                overallAdvancedSuccess = false;
                 System.out.println("     - " + rule.getDescription());
+                if (failureDetails.length() > 0) failureDetails.append(", ");
+                failureDetails.append(rule.getName());
             }
         }
+
+        System.out.println("   ✓ Advanced rules summary: " + passedAdvancedRules + " passed, " + failedAdvancedRules + " failed");
 
         long processingTime = System.currentTimeMillis() - startTime;
         performanceMetrics.put("Scenario3_ProcessingTime", processingTime);
 
         System.out.println("   ✓ Processing time: " + processingTime + "ms");
 
-        // Store audit record
-        storeValidationAudit(swap.getTradeId(), "ADVANCED_CONFIGURATION", "PASS", processingTime);
+        // Store audit record with real results
+        String auditResult = overallAdvancedSuccess ? "PASS" : "FAIL";
+        if (!overallAdvancedSuccess) {
+            auditResult += " (Failed: " + failureDetails.toString() + ")";
+        }
+        storeValidationAudit(swap.getTradeId(), "ADVANCED_CONFIGURATION", auditResult, processingTime);
 
         logExecution("Scenario 3 completed");
     }
@@ -1724,9 +1758,27 @@ public class CommoditySwapValidationBootstrap {
             System.out.println("   ✓ Client type: " + client.getClientType());
             System.out.println("   ✓ Regulatory classification: " + client.getRegulatoryClassification());
 
-            // Enrich swap with client data
-            swap.setClientName(client.getClientName());
-            System.out.println("   ✓ Swap enriched with client name");
+            // Enrich swap with client data using EnrichmentService
+            try {
+                // Create client enrichment configuration
+                YamlEnrichment clientEnrichment = createClientEnrichment();
+                Object enrichedSwap = enrichmentService.enrichObject(clientEnrichment, swap);
+                System.out.println("   ✓ Swap enriched with client data using EnrichmentService");
+
+                // Verify enrichment worked
+                if (swap.getClientName() != null) {
+                    System.out.println("   ✓ Client name enriched: " + swap.getClientName());
+                } else {
+                    // Fallback to manual enrichment if service enrichment failed
+                    swap.setClientName(client.getClientName());
+                    System.out.println("   ✓ Client name enriched (fallback): " + client.getClientName());
+                }
+            } catch (Exception e) {
+                // Fallback to manual enrichment if service enrichment failed
+                swap.setClientName(client.getClientName());
+                System.out.println("   ✓ Client name enriched (fallback due to error): " + client.getClientName());
+                System.out.println("   ⚠ EnrichmentService error: " + e.getMessage());
+            }
         } else {
             System.out.println("   ✗ Client not found: " + swap.getClientId());
         }
@@ -1764,9 +1816,27 @@ public class CommoditySwapValidationBootstrap {
             System.out.println("   ✓ Index provider: " + commodity.getIndexProvider());
             System.out.println("   ✓ Quote currency: " + commodity.getQuoteCurrency());
 
-            // Enrich swap with commodity data
-            swap.setIndexProvider(commodity.getIndexProvider());
-            System.out.println("   ✓ Swap enriched with index provider");
+            // Enrich swap with commodity data using EnrichmentService
+            try {
+                // Create commodity enrichment configuration
+                YamlEnrichment commodityEnrichment = createCommodityEnrichment();
+                Object enrichedSwap = enrichmentService.enrichObject(commodityEnrichment, swap);
+                System.out.println("   ✓ Swap enriched with commodity data using EnrichmentService");
+
+                // Verify enrichment worked
+                if (swap.getIndexProvider() != null) {
+                    System.out.println("   ✓ Index provider enriched: " + swap.getIndexProvider());
+                } else {
+                    // Fallback to manual enrichment if service enrichment failed
+                    swap.setIndexProvider(commodity.getIndexProvider());
+                    System.out.println("   ✓ Index provider enriched (fallback): " + commodity.getIndexProvider());
+                }
+            } catch (Exception e) {
+                // Fallback to manual enrichment if service enrichment failed
+                swap.setIndexProvider(commodity.getIndexProvider());
+                System.out.println("   ✓ Index provider enriched (fallback due to error): " + commodity.getIndexProvider());
+                System.out.println("   ⚠ EnrichmentService error: " + e.getMessage());
+            }
         } else {
             System.out.println("   ✗ Commodity not found: " + swap.getReferenceIndex());
         }
@@ -2099,5 +2169,146 @@ public class CommoditySwapValidationBootstrap {
         } catch (SQLException e) {
             System.err.println("⚠️  Error during cleanup: " + e.getMessage());
         }
+    }
+
+    /**
+     * Execute individual validation rules to get detailed statistics.
+     * This provides accurate rule-by-rule execution results.
+     */
+    private Map<String, Boolean> executeIndividualValidationRules(Map<String, Object> context) {
+        Map<String, Boolean> results = new HashMap<>();
+
+        // Define the validation rules individually
+        String[][] validationRules = {
+            {"TradeB ID Required", "#tradeId != null && #tradeId.trim().length() > 0"},
+            {"Counterparty ID Required", "#counterpartyId != null && #counterpartyId.trim().length() > 0"},
+            {"Client ID Required", "#clientId != null && #clientId.trim().length() > 0"},
+            {"Commodity Type Required", "#commodityType != null && #commodityType.trim().length() > 0"},
+            {"Reference Index Required", "#referenceIndex != null && #referenceIndex.trim().length() > 0"},
+            {"Notional Amount Positive", "#notionalAmount != null && #notionalAmount > 0"},
+            {"Currency Required", "#notionalCurrency != null && #notionalCurrency.trim().length() > 0"}
+        };
+
+        // Execute each rule individually
+        for (String[] rule : validationRules) {
+            String ruleName = rule[0];
+            String condition = rule[1];
+            try {
+                boolean result = rulesService.check(condition, context);
+                results.put(ruleName, result);
+            } catch (Exception e) {
+                System.out.println("     ⚠ Error executing rule '" + ruleName + "': " + e.getMessage());
+                results.put(ruleName, false);
+            }
+        }
+
+        return results;
+    }
+
+    /**
+     * Execute individual business rules to get detailed statistics.
+     * This provides accurate rule-by-rule execution results.
+     */
+    private Map<String, Boolean> executeIndividualBusinessRules(Map<String, Object> context) {
+        Map<String, Boolean> results = new HashMap<>();
+
+        // Define the business rules individually
+        String[][] businessRules = {
+            {"Maturity Eligibility", "#maturityDate != null && #maturityDate.isBefore(#tradeDate.plusYears(5))"},
+            {"Currency Consistency", "#notionalCurrency == #paymentCurrency && #paymentCurrency == #settlementCurrency"},
+            {"Settlement Terms", "#settlementDays != null && #settlementDays >= 0 && #settlementDays <= 5"}
+        };
+
+        // Execute each rule individually
+        for (String[] rule : businessRules) {
+            String ruleName = rule[0];
+            String condition = rule[1];
+            try {
+                boolean result = rulesService.check(condition, context);
+                results.put(ruleName, result);
+            } catch (Exception e) {
+                System.out.println("     ⚠ Error executing business rule '" + ruleName + "': " + e.getMessage());
+                results.put(ruleName, false);
+            }
+        }
+
+        return results;
+    }
+
+    /**
+     * Create client enrichment configuration based on YAML definition.
+     * This creates a programmatic enrichment that matches the YAML configuration.
+     */
+    private YamlEnrichment createClientEnrichment() {
+        YamlEnrichment enrichment = new YamlEnrichment();
+        enrichment.setId("client-enrichment");
+        enrichment.setName("Client Data Enrichment");
+        enrichment.setDescription("Enrich trade with client information");
+        enrichment.setType("lookup-enrichment");
+        enrichment.setEnabled(true);
+
+        // Create lookup configuration
+        YamlEnrichment.LookupConfig lookupConfig = new YamlEnrichment.LookupConfig();
+        lookupConfig.setLookupService("client_data");
+        lookupConfig.setLookupKey("#clientId");
+
+        // Create field mappings
+        List<YamlEnrichment.FieldMapping> mappings = new ArrayList<>();
+
+        YamlEnrichment.FieldMapping clientNameMapping = new YamlEnrichment.FieldMapping();
+        clientNameMapping.setSourceField("client_name");
+        clientNameMapping.setTargetField("clientName");
+        mappings.add(clientNameMapping);
+
+        YamlEnrichment.FieldMapping regulatoryMapping = new YamlEnrichment.FieldMapping();
+        regulatoryMapping.setSourceField("regulatory_classification");
+        regulatoryMapping.setTargetField("clientRegulatoryClassification");
+        mappings.add(regulatoryMapping);
+
+        enrichment.setFieldMappings(mappings);
+        enrichment.setLookupConfig(lookupConfig);
+
+        return enrichment;
+    }
+
+    /**
+     * Create commodity enrichment configuration based on YAML definition.
+     * This creates a programmatic enrichment that matches the YAML configuration.
+     */
+    private YamlEnrichment createCommodityEnrichment() {
+        YamlEnrichment enrichment = new YamlEnrichment();
+        enrichment.setId("commodity-enrichment");
+        enrichment.setName("Commodity Reference Data Enrichment");
+        enrichment.setDescription("Enrich trade with commodity reference data");
+        enrichment.setType("lookup-enrichment");
+        enrichment.setEnabled(true);
+
+        // Create lookup configuration
+        YamlEnrichment.LookupConfig lookupConfig = new YamlEnrichment.LookupConfig();
+        lookupConfig.setLookupService("commodity_reference_data");
+        lookupConfig.setLookupKey("#referenceIndex");
+
+        // Create field mappings
+        List<YamlEnrichment.FieldMapping> mappings = new ArrayList<>();
+
+        YamlEnrichment.FieldMapping providerMapping = new YamlEnrichment.FieldMapping();
+        providerMapping.setSourceField("index_provider");
+        providerMapping.setTargetField("indexProvider");
+        mappings.add(providerMapping);
+
+        YamlEnrichment.FieldMapping currencyMapping = new YamlEnrichment.FieldMapping();
+        currencyMapping.setSourceField("quote_currency");
+        currencyMapping.setTargetField("commodityQuoteCurrency");
+        mappings.add(currencyMapping);
+
+        YamlEnrichment.FieldMapping unitMapping = new YamlEnrichment.FieldMapping();
+        unitMapping.setSourceField("unit_of_measure");
+        unitMapping.setTargetField("commodityUnitOfMeasure");
+        mappings.add(unitMapping);
+
+        enrichment.setFieldMappings(mappings);
+        enrichment.setLookupConfig(lookupConfig);
+
+        return enrichment;
     }
 }
