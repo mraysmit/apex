@@ -126,10 +126,10 @@ public class ComplianceServiceDemo {
         RuleResult result = config.requiresMiFIDReportingWithResult(trade);
 
         if (result.isTriggered()) {
-            LOGGER.info("Trade requires MiFID II reporting");
+            LOGGER.info("TradeB requires MiFID II reporting");
             LOGGER.info("Report: " + config.generateMiFIDReport(trade));
         } else {
-            LOGGER.info("Trade does not require MiFID II reporting");
+            LOGGER.info("TradeB does not require MiFID II reporting");
         }
     }
 
@@ -143,10 +143,10 @@ public class ComplianceServiceDemo {
         RuleResult result = config.requiresEMIRReportingWithResult(trade);
 
         if (result.isTriggered()) {
-            LOGGER.info("Trade requires EMIR reporting");
+            LOGGER.info("TradeB requires EMIR reporting");
             LOGGER.info("Report: " + config.generateEMIRReport(trade));
         } else {
-            LOGGER.info("Trade does not require EMIR reporting");
+            LOGGER.info("TradeB does not require EMIR reporting");
         }
     }
 
@@ -160,10 +160,10 @@ public class ComplianceServiceDemo {
         RuleResult result = config.requiresDoddFrankReportingWithResult(trade);
 
         if (result.isTriggered()) {
-            LOGGER.info("Trade requires Dodd-Frank reporting");
+            LOGGER.info("TradeB requires Dodd-Frank reporting");
             LOGGER.info("Report: " + config.generateDoddFrankReport(trade));
         } else {
-            LOGGER.info("Trade does not require Dodd-Frank reporting");
+            LOGGER.info("TradeB does not require Dodd-Frank reporting");
         }
     }
 
@@ -177,10 +177,10 @@ public class ComplianceServiceDemo {
         RuleResult result = config.requiresBaselReportingWithResult(trade);
 
         if (result.isTriggered()) {
-            LOGGER.info("Trade requires Basel III reporting");
+            LOGGER.info("TradeB requires Basel III reporting");
             LOGGER.info("Report: " + config.generateBaselReport(trade));
         } else {
-            LOGGER.info("Trade does not require Basel III reporting");
+            LOGGER.info("TradeB does not require Basel III reporting");
         }
     }
 
@@ -194,10 +194,10 @@ public class ComplianceServiceDemo {
         RuleResult result = config.requiresSFTRReportingWithResult(trade);
 
         if (result.isTriggered()) {
-            LOGGER.info("Trade requires SFTR reporting");
+            LOGGER.info("TradeB requires SFTR reporting");
             LOGGER.info("Report: " + config.generateSFTRReport(trade));
         } else {
-            LOGGER.info("Trade does not require SFTR reporting");
+            LOGGER.info("TradeB does not require SFTR reporting");
         }
     }
 
@@ -211,9 +211,9 @@ public class ComplianceServiceDemo {
         RuleResult result = config.hasComplianceIssuesWithResult(trade);
 
         if (result.isTriggered()) {
-            LOGGER.info("Trade has compliance issues");
+            LOGGER.info("TradeB has compliance issues");
         } else {
-            LOGGER.info("Trade has no compliance issues");
+            LOGGER.info("TradeB has no compliance issues");
         }
     }
 

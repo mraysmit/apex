@@ -173,7 +173,7 @@ public class RiskManagementService {
         riskRules.put("AdditionalRiskReview", new Rule(
             "AdditionalRiskReviewRule",
             "#riskLevel == '" + RISK_HIGH + "' || #riskLevel == '" + RISK_EXTREME + "'",
-            "Trade requires additional risk review"
+            "TradeB requires additional risk review"
         ));
     }
 

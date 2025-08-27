@@ -61,7 +61,7 @@ scenario-registry:
       - "dev.mars.apex.demo.bootstrap.model.BootstrapSettlementInstruction"
       - "SettlementInstruction"
     description: "Intelligent auto-repair for failed settlement instructions"
-    business-domain: "Post-Trade Settlement"
+    business-domain: "Post-TradeB Settlement"
     owner: "settlement.operations@company.com"
 
 # ============================================================================

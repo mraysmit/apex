@@ -169,31 +169,31 @@ categories:
 rules:
   # Basic Field Validation Rules
   - id: "trade-id-required"
-    name: "Trade ID Required"
+    name: "TradeB ID Required"
     description: "Validates that trade ID is present and not empty"
     category: "validation"
     condition: "#tradeId != null && #tradeId.trim().length() > 0"
-    message: "Trade ID is required"
+    message: "TradeB ID is required"
     priority: 10
     enabled: true
     tags: ["required-field", "trade-identification"]
 
   - id: "trade-id-format"
-    name: "Trade ID Format"
+    name: "TradeB ID Format"
     description: "Validates trade ID format: 3 letters + 3-6 digits"
     category: "validation"
     condition: "#tradeId != null && #tradeId.matches('^[A-Z]{3}[0-9]{3,6}$')"
-    message: "Trade ID must follow format: 3 letters + 3-6 digits"
+    message: "TradeB ID must follow format: 3 letters + 3-6 digits"
     priority: 11
     enabled: true
     tags: ["format-validation", "trade-identification"]
 
   - id: "trade-date-required"
-    name: "Trade Date Required"
+    name: "TradeB Date Required"
     description: "Validates that trade date is present"
     category: "validation"
     condition: "#tradeDate != null"
-    message: "Trade date is required"
+    message: "TradeB date is required"
     priority: 12
     enabled: true
     tags: ["required-field", "date-validation"]

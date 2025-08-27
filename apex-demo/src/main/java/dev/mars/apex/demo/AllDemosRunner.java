@@ -5,7 +5,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * AllDemosRunner - Automatically discovers and runs all demo classes.
+ * AllDemosRunnerAlt - Automatically discovers and runs all demo classes.
  * 
  * This runner scans the demo package structure and automatically executes all demos
  * without requiring any interface implementation or ceremony. It works with demos that have:
@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
  * - Both (prioritizes run() for consistency)
  * 
  * Usage:
- * - java AllDemosRunner                # Run all demos
- * - java AllDemosRunner --list         # List all discovered demos
- * - java AllDemosRunner --package core # Run demos from specific package
+ * - java AllDemosRunnerAlt                # Run all demos
+ * - java AllDemosRunnerAlt --list         # List all discovered demos
+ * - java AllDemosRunnerAlt --package core # Run demos from specific package
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-28
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class AllDemosRunner {
     
     private static final String[] EXCLUDED_CLASSES = {
-        "AllDemosRunner", "DemoRunner", "DemoFramework", "Demo", "DemoCategory"
+        "AllDemosRunnerAlt", "DemoRunner", "DemoFramework", "Demo", "DemoCategory"
     };
     
     final List<DemoInfo> discoveredDemos = new ArrayList<>();
@@ -77,8 +77,8 @@ public class AllDemosRunner {
      */
     private void registerKnownDemoClasses() {
         // Core demos
-        registerDemoClass("dev.mars.apex.demo.QuickStartDemo");
-        registerDemoClass("dev.mars.apex.demo.LayeredAPIDemo");
+        registerDemoClass("dev.mars.apex.demo.examples.QuickStartDemoB");
+        registerDemoClass("dev.mars.apex.demo.examples.LayeredAPIDemo");
 
         // Examples demos
         registerDemoClass("dev.mars.apex.demo.examples.YamlDatasetDemo");
@@ -102,10 +102,10 @@ public class AllDemosRunner {
         registerDemoClass("dev.mars.apex.demo.examples.FluentRuleBuilderExample");
 
         // Advanced demos
-        registerDemoClass("dev.mars.apex.demo.advanced.DataServiceManagerDemo");
-        registerDemoClass("dev.mars.apex.demo.advanced.DynamicMethodExecutionDemo");
-        registerDemoClass("dev.mars.apex.demo.advanced.PerformanceAndExceptionDemo");
-        registerDemoClass("dev.mars.apex.demo.advanced.ApexAdvancedFeaturesDemo");
+        registerDemoClass("dev.mars.apex.demo.bootstrap.DataServiceManagerDemo");
+        registerDemoClass("dev.mars.apex.demo.bootstrap.DynamicMethodExecutionDemo");
+        registerDemoClass("dev.mars.apex.demo.bootstrap.PerformanceAndExceptionDemo");
+        registerDemoClass("dev.mars.apex.demo.bootstrap.ApexAdvancedFeaturesDemo");
 
         // Bootstrap demos
         registerDemoClass("dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo");

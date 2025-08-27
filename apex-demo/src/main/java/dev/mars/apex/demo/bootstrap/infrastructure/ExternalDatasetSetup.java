@@ -185,7 +185,7 @@ public class ExternalDatasetSetup {
         
         // CBOT
         yaml.append("  - exchange: \"CBOT\"\n");
-        yaml.append("    fullName: \"Chicago Board of Trade\"\n");
+        yaml.append("    fullName: \"Chicago Board of TradeB\"\n");
         yaml.append("    location: \"Chicago\"\n");
         yaml.append("    timezone: \"CST\"\n");
         yaml.append("    tradingHours: \"08:30-13:15\"\n");

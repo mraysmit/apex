@@ -152,7 +152,7 @@ rule-chains:
         - id: "maturity-eligibility"
           condition: "maturityDate != null && maturityDate.isBefore(tradeDate.plusYears(5))"
           weight: 25
-          message: "Trade maturity within 5 years"
+          message: "TradeB maturity within 5 years"
           description: "Validates trade maturity is within acceptable range"
         - id: "currency-consistency"
           condition: "notionalCurrency == paymentCurrency && paymentCurrency == settlementCurrency"
@@ -194,7 +194,7 @@ rule-chains:
       trigger-rule:
         id: "advanced-eligibility"
         condition: "tradeId != null && tradeId.matches('^TRS[0-9]{3}$')"
-        message: "Trade ID format validation"
+        message: "TradeB ID format validation"
         description: "Validates trade ID follows TRS### format"
       conditional-rules:
         on-trigger:
@@ -213,8 +213,8 @@ rule-chains:
         on-no-trigger:
           - id: "format-validation-failure"
             condition: "true"
-            message: "Trade ID format validation failed"
-            description: "Trade ID does not follow required format"
+            message: "TradeB ID format validation failed"
+            description: "TradeB ID does not follow required format"
 
   # Risk management chain
   - id: "risk-management-rules"
@@ -230,12 +230,12 @@ rule-chains:
           condition: "notionalAmount <= 250000000"
           weight: 40
           message: "Within client credit limit"
-          description: "Trade notional is within client credit limit"
+          description: "TradeB notional is within client credit limit"
         - id: "counterparty-exposure"
           condition: "notionalAmount <= 1000000000"
           weight: 35
           message: "Within counterparty exposure limit"
-          description: "Trade notional is within counterparty exposure limit"
+          description: "TradeB notional is within counterparty exposure limit"
         - id: "commodity-concentration"
           condition: "true"
           weight: 25

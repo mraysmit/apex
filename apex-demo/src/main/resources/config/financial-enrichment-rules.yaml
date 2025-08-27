@@ -147,7 +147,7 @@ enrichments:
     name: "Counterparty Data Enrichment"
     description: "Enriches trade with counterparty static data"
     type: "lookup-enrichment"
-    target-type: "Trade"
+    target-type: "TradeB"
     enabled: true
     priority: 10
     condition: "#counterpartyId != null"
@@ -188,7 +188,7 @@ enrichments:
     name: "Currency Data Enrichment"
     description: "Enriches trade with currency static data"
     type: "lookup-enrichment"
-    target-type: "Trade"
+    target-type: "TradeB"
     enabled: true
     priority: 11
     condition: "#notionalCurrency != null"
@@ -270,7 +270,7 @@ enrichments:
     name: "Fee Calculation Enrichment"
     description: "Calculates various fees and commissions for trades"
     type: "calculation-enrichment"
-    target-type: "Trade"
+    target-type: "TradeB"
     enabled: true
     priority: 20
     condition: "#notionalAmount != null && #productType != null"
@@ -292,7 +292,7 @@ enrichments:
     name: "Risk Metrics Calculation"
     description: "Calculates basic risk metrics for the trade"
     type: "calculation-enrichment"
-    target-type: "Trade"
+    target-type: "TradeB"
     enabled: true
     priority: 21
     condition: "#notionalAmount != null && #maturityDate != null && #tradeDate != null"
@@ -311,10 +311,10 @@ enrichments:
 # Define transformation configurations
 transformations:
   - id: "trade-standardization"
-    name: "Trade Data Standardization"
+    name: "TradeB Data Standardization"
     description: "Standardizes trade data formats and values"
     type: "field-transformation"
-    target-type: "Trade"
+    target-type: "TradeB"
     enabled: true
     priority: 30
     transformation-rules:
@@ -373,7 +373,7 @@ transformations:
     name: "Audit Trail Enrichment"
     description: "Adds audit trail information to trades"
     type: "field-transformation"
-    target-type: "Trade"
+    target-type: "TradeB"
     enabled: true
     priority: 40
     transformation-rules:

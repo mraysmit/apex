@@ -129,9 +129,9 @@ public class CommoditySwapValidationDemo {
             "commodityType", swap.getCommodityType()
         );
 
-        // Trade ID validation using simple engine
+        // TradeB ID validation using simple engine
         boolean hasTradeId = simpleEngine.evaluate("#tradeId != null && #tradeId.length() > 0", swapData);
-        System.out.println("   ✓ Trade ID present: " + hasTradeId);
+        System.out.println("   ✓ TradeB ID present: " + hasTradeId);
 
         // Notional amount validation using simple engine
         boolean validNotional = simpleEngine.evaluate("#notionalAmount != null && #notionalAmount > 0", swapData);
@@ -178,7 +178,7 @@ public class CommoditySwapValidationDemo {
             .withCreatedBy("financial.admin@company.com")
             .withBusinessDomain("Financial Instruments")
             .withBusinessOwner("Trading Desk")
-            .customRule("Trade ID Required", "#tradeId != null && #tradeId.trim().length() > 0", "Trade ID is required")
+            .customRule("TradeB ID Required", "#tradeId != null && #tradeId.trim().length() > 0", "TradeB ID is required")
             .customRule("Counterparty ID Required", "#counterpartyId != null && #counterpartyId.trim().length() > 0", "Counterparty ID is required")
             .customRule("Client ID Required", "#clientId != null && #clientId.trim().length() > 0", "Client ID is required")
             .customRule("Commodity Type Required", "#commodityType != null && #commodityType.trim().length() > 0", "Commodity type is required")
@@ -194,7 +194,7 @@ public class CommoditySwapValidationDemo {
             .withCreatedBy("financial.admin@company.com")
             .withBusinessDomain("Financial Instruments")
             .withBusinessOwner("Trading Desk")
-            .customRule("Maturity Eligibility", "#maturityDate.isBefore(#tradeDate.plusYears(5))", "Trade maturity within 5 years")
+            .customRule("Maturity Eligibility", "#maturityDate.isBefore(#tradeDate.plusYears(5))", "TradeB maturity within 5 years")
             .customRule("Currency Consistency", "#notionalCurrency == #paymentCurrency && #paymentCurrency == #settlementCurrency", "All currencies must match")
             .customRule("Settlement Terms", "#settlementDays != null && #settlementDays >= 0 && #settlementDays <= 5", "Settlement within 5 days")
             .build();
@@ -376,7 +376,7 @@ public class CommoditySwapValidationDemo {
         // Create rules using the traditional API for advanced scenarios
         rules.add(new Rule("trade-id-format", 
                           "#tradeId != null && #tradeId.matches('^TRS[0-9]{3}$')", 
-                          "Trade ID must follow TRS### format"));
+                          "TradeB ID must follow TRS### format"));
         
         rules.add(new Rule("notional-range", 
                           "#notionalAmount >= 1000000 && #notionalAmount <= 100000000", 

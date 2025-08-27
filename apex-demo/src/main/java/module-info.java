@@ -32,7 +32,7 @@ module dev.mars.apex.demo {
     exports dev.mars.apex.demo.rulesets;
     exports dev.mars.apex.demo.data to spring.expression;
     exports dev.mars.apex.demo.examples;
-    exports dev.mars.apex.demo.advanced;
     exports dev.mars.apex.demo.bootstrap;
     exports dev.mars.apex.demo.bootstrap.model to spring.expression;
+    exports dev.mars.apex.demo.examples.lookups;
 }

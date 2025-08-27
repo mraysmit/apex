@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.examples.lookups;
 
-import dev.mars.apex.demo.model.lookups.TradeSettlement;
+import dev.mars.apex.demo.model.TradeSettlement;
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
 import dev.mars.apex.core.config.yaml.YamlRule;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
@@ -41,7 +41,7 @@ public class NestedFieldLookupDemo extends AbstractLookupDemo {
     protected String getDemoDescription() {
         return "Demonstrates nested field navigation pattern '#trade.counterparty.countryCode' to enrich\n" +
                "   trade settlements with country-specific settlement information. This pattern shows how to\n" +
-               "   navigate through nested object hierarchies (TradeSettlement -> Trade -> Counterparty -> countryCode)\n" +
+               "   navigate through nested object hierarchies (TradeSettlement -> TradeB -> Counterparty -> countryCode)\n" +
                "   to create lookup keys that match against country-specific settlement data including\n" +
                "   regulatory zones, settlement systems, standard settlement days, and custodian banks.";
     }
@@ -229,7 +229,7 @@ public class NestedFieldLookupDemo extends AbstractLookupDemo {
     }
     
     /**
-     * Helper method to create a TradeSettlement with nested Trade and Counterparty objects
+     * Helper method to create a TradeSettlement with nested TradeB and Counterparty objects
      */
     private TradeSettlement createTradeSettlement(String settlementId, String tradeId, String instrumentId,
                                                  BigDecimal quantity, BigDecimal price, LocalDateTime tradeDate,
@@ -341,7 +341,7 @@ public class NestedFieldLookupDemo extends AbstractLookupDemo {
         );
         errorSettlements.add(nullTrade);
 
-        // Trade with null counterparty
+        // TradeB with null counterparty
         TradeSettlement.Trade tradeWithNullCounterparty = new TradeSettlement.Trade(
             "TRD-ERR-002",
             "TEST-INST",

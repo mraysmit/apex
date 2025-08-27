@@ -34,7 +34,7 @@ import dev.mars.apex.core.util.RulesEngineLogger;
  */
 
 /**
- * Demonstration of how to use RecordMatcher for Trade objects.
+ * Demonstration of how to use RecordMatcher for TradeB objects.
  *
 * This class is part of the APEX A powerful expression processor for Java applications.
  *
@@ -43,11 +43,11 @@ import dev.mars.apex.core.util.RulesEngineLogger;
  * @version 1.0
  */
 /**
- * Demonstration of how to use RecordMatcher for Trade objects.
+ * Demonstration of how to use RecordMatcher for TradeB objects.
  * This class shows the step-by-step process of creating and using a RecordMatcher
  * for finding trades that match specific validation criteria.
  *
- * This class implements RecordMatcher<Trade> to provide matching functionality.
+ * This class implements RecordMatcher<TradeB> to provide matching functionality.
  */
 public class TradeRecordMatcherDemo implements RecordMatcher<Trade> {
     private static final RulesEngineLogger logger = new RulesEngineLogger(TradeRecordMatcherDemo.class);
@@ -123,7 +123,7 @@ public class TradeRecordMatcherDemo implements RecordMatcher<Trade> {
             logger.info("- {}", trade);
         }
 
-        logger.info("Trade record matcher demonstration completed");
+        logger.info("TradeB record matcher demonstration completed");
     }
 
     /**
@@ -228,7 +228,7 @@ public class TradeRecordMatcherDemo implements RecordMatcher<Trade> {
             return new Rule(
                 "TradeTypeValidationRule",
                 "#value != null && #value.equals(#tradeType)",
-                "Trade type matches " + tradeType
+                "TradeB type matches " + tradeType
             );
         }
 

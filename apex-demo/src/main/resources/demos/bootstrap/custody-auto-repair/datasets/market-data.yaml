@@ -119,7 +119,7 @@ markets:
     currency: "USD"
 
   - exchange: "CBOT"
-    fullName: "Chicago Board of Trade"
+    fullName: "Chicago Board of TradeB"
     location: "Chicago"
     timezone: "CST"
     tradingHours: "08:30-13:15"

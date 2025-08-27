@@ -414,7 +414,7 @@ This chain uses a different approach - instead of simple pass/fail, it builds up
         - id: "maturity-eligibility"                   # Rule 1: Check maturity date
           condition: "maturityDate != null && maturityDate.isBefore(tradeDate.plusYears(5))"
           weight: 25                                   # Worth 25 points if it passes
-          message: "Trade maturity within 5 years"
+          message: "TradeB maturity within 5 years"
           description: "Validates trade maturity is within acceptable range"
 ```
 
@@ -1100,7 +1100,7 @@ The **Template-Based Business Rules Chain** demonstrates APEX's intermediate API
       - id: "maturity-eligibility"
         condition: "maturityDate != null && maturityDate.isBefore(tradeDate.plusYears(5))"
         weight: 25
-        message: "Trade maturity within 5 years"
+        message: "TradeB maturity within 5 years"
         description: "Validates trade maturity is within acceptable range"
       - id: "currency-consistency"
         condition: "notionalCurrency == paymentCurrency && paymentCurrency == settlementCurrency"
@@ -1253,7 +1253,7 @@ The **Advanced Configuration Chain** demonstrates APEX's most sophisticated API 
     trigger-rule:
       id: "advanced-eligibility"
       condition: "tradeId != null && tradeId.matches('^TRS[0-9]{3}$')"
-      message: "Trade ID format validation"
+      message: "TradeB ID format validation"
       description: "Validates trade ID follows TRS### format"
     conditional-rules:
       on-trigger:
@@ -1272,8 +1272,8 @@ The **Advanced Configuration Chain** demonstrates APEX's most sophisticated API 
       on-no-trigger:
         - id: "format-validation-failure"
           condition: "true"
-          message: "Trade ID format validation failed"
-          description: "Trade ID does not follow required format"
+          message: "TradeB ID format validation failed"
+          description: "TradeB ID does not follow required format"
 ```
 
 **Understanding Advanced SpEL Expressions:**

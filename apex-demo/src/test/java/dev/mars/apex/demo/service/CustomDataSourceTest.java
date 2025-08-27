@@ -142,7 +142,7 @@ public class CustomDataSourceTest {
                 break;
             }
         }
-        assertTrue(foundCustomTrade1, "Custom Trade 1 should be in the trades list");
+        assertTrue(foundCustomTrade1, "Custom TradeB 1 should be in the trades list");
     }
 
     @Test

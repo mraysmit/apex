@@ -185,7 +185,7 @@ enrichments:
 # Optional validation rules
 validations:
   - id: "trade-exists"
-    name: "Trade Object Validation"
+    name: "TradeB Object Validation"
     description: "Ensure trade object exists"
     type: "field-validation"
     enabled: true
@@ -195,7 +195,7 @@ validations:
       field: "trade"
       rules:
         - type: "not-null"
-          message: "Trade object must not be null"
+          message: "TradeB object must not be null"
           
   - id: "counterparty-exists"
     name: "Counterparty Object Validation"
@@ -208,7 +208,7 @@ validations:
       field: "trade.counterparty"
       rules:
         - type: "not-null"
-          message: "Trade counterparty must not be null"
+          message: "TradeB counterparty must not be null"
           
   - id: "country-code-format"
     name: "Country Code Format Validation"

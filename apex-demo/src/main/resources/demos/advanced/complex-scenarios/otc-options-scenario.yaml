@@ -56,9 +56,9 @@ scenario:
   
   # Business context
   business-domain: "Derivatives Trading"
-  business-process: "Trade Validation and Enrichment"
+  business-process: "TradeB Validation and Enrichment"
   regulatory-requirements:
-    - "EMIR Trade Reporting"
+    - "EMIR TradeB Reporting"
     - "Dodd-Frank Compliance"
     - "MiFID II Best Execution"
     - "Basel III Capital Requirements"
@@ -119,7 +119,7 @@ business:
   # Regulatory context
   regulatory-scope: "EMIR, Dodd-Frank, MiFID II"
   compliance-requirements:
-    - requirement: "EMIR Trade Reporting"
+    - requirement: "EMIR TradeB Reporting"
       deadline: "T+1"
       criticality: "mandatory"
     - requirement: "Dodd-Frank Swap Data Repository"

@@ -150,7 +150,7 @@ import java.util.logging.Logger;
  * Standalone Execution:
  * java -cp apex-demo.jar dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap
  *
- * Through AllDemosRunner:
+ * Through AllDemosRunnerAlt:
  * java -jar apex-demo.jar --package bootstrap
  * java -jar apex-demo.jar --demo CommoditySwapValidationBootstrap
  *
@@ -735,7 +735,7 @@ public class CommoditySwapValidationBootstrap {
      * Commodity Total Return Swap data model.
      */
     public static class CommodityTotalReturnSwap {
-        // Trade Identification
+        // TradeB Identification
         private String tradeId;
         private String counterpartyId;
         private String clientId;
@@ -1237,7 +1237,7 @@ public class CommoditySwapValidationBootstrap {
                     - id: "maturity-eligibility"
                       condition: "maturityDate != null && maturityDate.isBefore(tradeDate.plusYears(5))"
                       weight: 25
-                      message: "Trade maturity within 5 years"
+                      message: "TradeB maturity within 5 years"
                       description: "Validates trade maturity is within acceptable range"
                     - id: "currency-consistency"
                       condition: "notionalCurrency == paymentCurrency && paymentCurrency == settlementCurrency"
@@ -1269,7 +1269,7 @@ public class CommoditySwapValidationBootstrap {
                   trigger-rule:
                     id: "advanced-eligibility"
                     condition: "tradeId != null && tradeId.matches('^TRS[0-9]{3}$')"
-                    message: "Trade ID format validation"
+                    message: "TradeB ID format validation"
                     description: "Validates trade ID follows TRS### format"
                   conditional-rules:
                     on-trigger:
@@ -1284,8 +1284,8 @@ public class CommoditySwapValidationBootstrap {
                     on-no-trigger:
                       - id: "format-validation-failure"
                         condition: "true"
-                        message: "Trade ID format validation failed"
-                        description: "Trade ID does not follow required format"
+                        message: "TradeB ID format validation failed"
+                        description: "TradeB ID does not follow required format"
 
             enrichments:
               # Client data enrichment
@@ -1505,7 +1505,7 @@ public class CommoditySwapValidationBootstrap {
      * with minimal configuration and maximum simplicity.
      *
      * VALIDATION CHECKS:
-     * 1. Trade ID presence and format
+     * 1. TradeB ID presence and format
      * 2. Counterparty ID validation
      * 3. Client ID validation
      * 4. Notional amount positivity check
@@ -1547,7 +1547,7 @@ public class CommoditySwapValidationBootstrap {
             long validationStart = System.currentTimeMillis();
 
             boolean tradeIdValid = rulesService.check("#tradeId != null && #tradeId.trim().length() > 0", context);
-            System.out.printf("   Trade ID validation: %s (%s)%n", tradeIdValid ? "PASS" : "FAIL", swap.getTradeId());
+            System.out.printf("   TradeB ID validation: %s (%s)%n", tradeIdValid ? "PASS" : "FAIL", swap.getTradeId());
 
             boolean counterpartyValid = rulesService.check("#counterpartyId != null && #counterpartyId.trim().length() > 0", context);
             System.out.printf("   Counterparty validation: %s (%s)%n", counterpartyValid ? "PASS" : "FAIL", swap.getCounterpartyId());
@@ -1571,7 +1571,7 @@ public class CommoditySwapValidationBootstrap {
             System.out.println("VALIDATION RESULTS SUMMARY:");
             System.out.printf("   Overall Result: %s (%d/5 checks passed)%n", overallValid ? "PASS" : "FAIL", passedChecks);
             System.out.printf("   Validation Time: %d ms%n", validationDuration);
-            System.out.printf("   Trade Status: %s%n", overallValid ? "APPROVED for further processing" : "REJECTED - requires correction");
+            System.out.printf("   TradeB Status: %s%n", overallValid ? "APPROVED for further processing" : "REJECTED - requires correction");
 
             long processingTime = System.currentTimeMillis() - startTime;
             performanceMetrics.put("Scenario1_ProcessingTime", processingTime);
@@ -1607,14 +1607,14 @@ public class CommoditySwapValidationBootstrap {
         CommodityTotalReturnSwap swap = createSampleMetalsSwap();
 
         System.out.println("Testing Template-Based Rules validation:");
-        System.out.println("Trade: " + swap.getTradeId() + " (" + swap.getCommodityType() + " - " + swap.getReferenceIndex() + ")");
+        System.out.println("TradeB: " + swap.getTradeId() + " (" + swap.getCommodityType() + " - " + swap.getReferenceIndex() + ")");
 
         // Template-Based Rules validation
         RulesEngine validationEngine = RuleSet.category("commodity-validation")
             .withCreatedBy("financial.admin@company.com")
             .withBusinessDomain("Commodity Derivatives")
             .withBusinessOwner("Trading Desk")
-            .customRule("Trade ID Required", "#tradeId != null && #tradeId.trim().length() > 0", "Trade ID is required")
+            .customRule("TradeB ID Required", "#tradeId != null && #tradeId.trim().length() > 0", "TradeB ID is required")
             .customRule("Counterparty ID Required", "#counterpartyId != null && #counterpartyId.trim().length() > 0", "Counterparty ID is required")
             .customRule("Client ID Required", "#clientId != null && #clientId.trim().length() > 0", "Client ID is required")
             .customRule("Commodity Type Required", "#commodityType != null && #commodityType.trim().length() > 0", "Commodity type is required")
@@ -1636,7 +1636,7 @@ public class CommoditySwapValidationBootstrap {
             .withCreatedBy("financial.admin@company.com")
             .withBusinessDomain("Commodity Derivatives")
             .withBusinessOwner("Trading Desk")
-            .customRule("Maturity Eligibility", "#maturityDate != null && #maturityDate.isBefore(#tradeDate.plusYears(5))", "Trade maturity within 5 years")
+            .customRule("Maturity Eligibility", "#maturityDate != null && #maturityDate.isBefore(#tradeDate.plusYears(5))", "TradeB maturity within 5 years")
             .customRule("Currency Consistency", "#notionalCurrency == #paymentCurrency && #paymentCurrency == #settlementCurrency", "All currencies must match")
             .customRule("Settlement Terms", "#settlementDays != null && #settlementDays >= 0 && #settlementDays <= 5", "Settlement within 5 days")
             .build();
@@ -1672,7 +1672,7 @@ public class CommoditySwapValidationBootstrap {
         CommodityTotalReturnSwap swap = createSampleAgriculturalSwap();
 
         System.out.println("Testing Advanced Configuration validation:");
-        System.out.println("Trade: " + swap.getTradeId() + " (" + swap.getCommodityType() + " - " + swap.getReferenceIndex() + ")");
+        System.out.println("TradeB: " + swap.getTradeId() + " (" + swap.getCommodityType() + " - " + swap.getReferenceIndex() + ")");
 
         // Advanced validation rules
         List<Rule> advancedRules = createAdvancedValidationRules();
@@ -1713,7 +1713,7 @@ public class CommoditySwapValidationBootstrap {
         CommodityTotalReturnSwap swap = createSampleEnergySwap();
 
         System.out.println("Testing Static Data validation and enrichment:");
-        System.out.println("Trade: " + swap.getTradeId() + " (" + swap.getCommodityType() + " - " + swap.getReferenceIndex() + ")");
+        System.out.println("TradeB: " + swap.getTradeId() + " (" + swap.getCommodityType() + " - " + swap.getReferenceIndex() + ")");
 
         // Client validation and enrichment
         System.out.println("\n1. Client Validation:");
@@ -1834,13 +1834,13 @@ public class CommoditySwapValidationBootstrap {
         System.out.println("Testing Exception handling scenarios:");
 
         // Test 1: Invalid trade ID format
-        System.out.println("\n1. Invalid Trade ID Format:");
+        System.out.println("\n1. Invalid TradeB ID Format:");
         CommodityTotalReturnSwap invalidSwap1 = createSampleEnergySwap();
         invalidSwap1.setTradeId("INVALID_ID");
 
         try {
             boolean result = rulesService.check("#tradeId.matches('^TRS[0-9]{3}$')", invalidSwap1);
-            System.out.println("   ✓ Trade ID format validation: " + (result ? "PASS" : "FAIL"));
+            System.out.println("   ✓ TradeB ID format validation: " + (result ? "PASS" : "FAIL"));
         } catch (Exception e) {
             System.out.println("   ✗ Exception caught: " + e.getMessage());
         }
@@ -1990,7 +1990,7 @@ public class CommoditySwapValidationBootstrap {
         // Create rules using the traditional API for advanced scenarios
         rules.add(new Rule("trade-id-format",
                           "#tradeId != null && #tradeId.matches('^TRS[0-9]{3}$')",
-                          "Trade ID must follow TRS### format"));
+                          "TradeB ID must follow TRS### format"));
 
         rules.add(new Rule("notional-range",
                           "#notionalAmount >= 1000000 && #notionalAmount <= 100000000",

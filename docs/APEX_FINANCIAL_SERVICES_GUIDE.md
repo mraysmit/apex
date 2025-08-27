@@ -1065,7 +1065,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.Concatenated
 **Pattern**: `#jurisdiction == 'EU' ? #emirCode : #cftcCode`
 
 ```bash
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.ConditionalExpressionLookupDemo" -pl apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.ConditionalExpressionLookupDemo" -pl apex-demo
 ```
 
 **Financial Services Use Case**: Jurisdiction-specific regulatory reporting requirements and compliance rules.
@@ -1076,7 +1076,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.ConditionalE
 **File**: `DynamicMethodExecutionDemo.java`
 
 ```bash
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.advanced.DynamicMethodExecutionDemo" -pl apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.DynamicMethodExecutionDemo" -pl apex-demo
 ```
 
 **Financial Services Application**: Dynamic pricing model selection based on instrument type and market conditions.
@@ -1085,7 +1085,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.advanced.DynamicMethodExecuti
 **File**: `PerformanceAndExceptionDemo.java`
 
 ```bash
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.advanced.PerformanceAndExceptionDemo" -pl apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.PerformanceAndExceptionDemo" -pl apex-demo
 ```
 
 **Financial Services Application**: Sub-millisecond processing requirements with comprehensive error recovery.
@@ -1094,7 +1094,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.advanced.PerformanceAndExcept
 **File**: `DataServiceManagerDemo.java`
 
 ```bash
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.advanced.DataServiceManagerDemo" -pl apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.DataServiceManagerDemo" -pl apex-demo
 ```
 
 **Financial Services Application**: Real-time market data feeds, reference data management, and failover handling.
@@ -2524,7 +2524,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.OtcOptionsBootstrap
 #### **3. Performance Testing**
 ```bash
 # Run performance tests
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.advanced.PerformanceAndExceptionDemo" -pl apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.PerformanceAndExceptionDemo" -pl apex-demo
 ```
 
 ## Conclusion

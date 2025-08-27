@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 /**
  * Demonstration of how to use the TradeTransformerDemoConfig class with GenericTransformer.
  * This class shows the step-by-step process of creating and using a GenericTransformer
- * for Trade objects using the TradeTransformerDemoConfig to define transformation rules.
+ * for TradeB objects using the TradeTransformerDemoConfig to define transformation rules.
  *
  * This is a demo class with no public constructors or methods except for the main method.
  */
@@ -134,7 +134,7 @@ public class TradeTransformerDemo {
             LOGGER.info("----------------------------------------");
         }
 
-        LOGGER.info("Trade transformation demonstration completed");
+        LOGGER.info("TradeB transformation demonstration completed");
     }
 
     /**

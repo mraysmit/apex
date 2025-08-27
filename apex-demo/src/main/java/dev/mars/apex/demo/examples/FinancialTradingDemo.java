@@ -73,7 +73,7 @@ public class FinancialTradingDemo {
      * Demonstrate comprehensive trade validation.
      */
     private void demonstrateTradeValidation() {
-        System.out.println(" Trade Validation");
+        System.out.println(" TradeB Validation");
         System.out.println("-".repeat(30));
 
         // Create sample trades
@@ -119,7 +119,7 @@ public class FinancialTradingDemo {
         FinancialTrade lowRiskTrade = createTrade("TRD004", new BigDecimal("100000"), "USD", "Goldman Sachs");
 
         // Test high-risk trade
-        System.out.println("High-Risk Trade Analysis:");
+        System.out.println("High-Risk TradeB Analysis:");
         Map<String, Object> highRiskContext = new HashMap<>();
         highRiskContext.put("trade", highRiskTrade);
         highRiskContext.put("counterpartyRating", "B");
@@ -133,7 +133,7 @@ public class FinancialTradingDemo {
         System.out.println("  High-risk limit check: " + highRiskLimitValid);
 
         // Test low-risk trade
-        System.out.println("Low-Risk Trade Analysis:");
+        System.out.println("Low-Risk TradeB Analysis:");
         Map<String, Object> lowRiskContext = new HashMap<>();
         lowRiskContext.put("trade", lowRiskTrade);
         lowRiskContext.put("counterpartyRating", "AAA");
@@ -209,7 +209,7 @@ public class FinancialTradingDemo {
      * Demonstrate post-trade processing rules.
      */
     private void demonstratePostTradeProcessing() {
-        System.out.println("  Post-Trade Processing");
+        System.out.println("  Post-TradeB Processing");
         System.out.println("-".repeat(30));
 
         FinancialTrade trade = createTrade("TRD006", new BigDecimal("750000"), "EUR", "Deutsche Bank");

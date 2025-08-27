@@ -17,7 +17,7 @@ metadata:
   version: "1.0.0"
   description: "Associates settlement instructions with existing rule configurations"
   type: "scenario"
-  business-domain: "Post-Trade Settlement"
+  business-domain: "Post-TradeB Settlement"
   owner: "settlement.operations@company.com"
 
 # ============================================================================

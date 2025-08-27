@@ -629,7 +629,7 @@ public class ApexRulesEngineDemo {
         context.put("clientTier", "INSTITUTIONAL");
         context.put("marketVolatility", 0.25);
 
-        System.out.println("\n   Trade Details: " + context);
+        System.out.println("\n   TradeB Details: " + context);
         System.out.println("   → Processing through nested validation workflow...");
 
         // Stage 1: Pre-validation
@@ -744,7 +744,7 @@ public class ApexRulesEngineDemo {
         Integer settlementDays = evaluatorService.evaluate(settlementRule.getCondition(), evalContext, Integer.class);
 
         System.out.println("   → Settlement Days: " + settlementDays);
-        System.out.println("   ✓ WORKFLOW COMPLETE: Trade approved and scheduled for settlement");
+        System.out.println("   ✓ WORKFLOW COMPLETE: TradeB approved and scheduled for settlement");
         System.out.println("     Final Status: " + context.get("approvalStatus") +
                          " (" + context.get("approvalLevel") + " level)");
     }

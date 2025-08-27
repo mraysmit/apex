@@ -1,9 +1,7 @@
 package dev.mars.apex.demo;
 
-import dev.mars.apex.core.engine.model.RuleResult;
-
-import dev.mars.apex.demo.advanced.ApexAdvancedFeaturesDemo;
-import dev.mars.apex.demo.advanced.ApexAdvancedFeaturesDemoConfig;
+import dev.mars.apex.demo.bootstrap.ApexAdvancedFeaturesDemo;
+import dev.mars.apex.demo.bootstrap.ApexAdvancedFeaturesDemoConfig;
 import dev.mars.apex.demo.data.MockDataSources;
 import dev.mars.apex.demo.model.Product;
 import dev.mars.apex.demo.model.Trade;
@@ -563,7 +561,7 @@ public class SpelAdvancedFeaturesTest {
                     break;
                 }
             }
-            assertTrue(hasMatch, "Trade " + trade.getValue() + " should match a lookup service");
+            assertTrue(hasMatch, "TradeB " + trade.getValue() + " should match a lookup service");
         }
 
         // Use MockDataSources to find non-matching records directly
@@ -579,7 +577,7 @@ public class SpelAdvancedFeaturesTest {
                     break;
                 }
             }
-            assertFalse(hasMatch, "Trade " + trade.getValue() + " should not match any lookup service");
+            assertFalse(hasMatch, "TradeB " + trade.getValue() + " should not match any lookup service");
         }
 
         // Test dynamic matching with complex conditions

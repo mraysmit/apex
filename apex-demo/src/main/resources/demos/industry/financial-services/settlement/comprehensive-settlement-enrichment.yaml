@@ -4,7 +4,7 @@
 #
 # This YAML configuration demonstrates comprehensive enrichment for financial
 # services post-trade settlement using the exact examples from the
-# "Types of Enrichment Relevant for Financial Services Post-Trade Settlement" guide.
+# "Types of Enrichment Relevant for Financial Services Post-TradeB Settlement" guide.
 #
 # OVERVIEW:
 # This demo implements all major enrichment categories for trade settlement:
@@ -32,7 +32,7 @@ metadata:
   author: "financial-settlement@rulesengine.dev"
   created-by: "financial-settlement@rulesengine.dev"
   created-date: "2024-12-24"
-  domain: "Financial Services - Post-Trade Settlement"
+  domain: "Financial Services - Post-TradeB Settlement"
   tags: ["finance", "settlement", "enrichment", "demo", "comprehensive"]
 
 # ============================================================================
@@ -41,9 +41,9 @@ metadata:
 
 rules:
   - id: "trade-header-validation"
-    name: "Trade Header Validation"
+    name: "TradeB Header Validation"
     condition: "#data.trade != null && #data.trade.tradeHeader != null && #data.trade.tradeHeader.partyTradeIdentifier != null && #data.trade.tradeHeader.partyTradeIdentifier.tradeId != null"
-    message: "Trade header and trade ID are required"
+    message: "TradeB header and trade ID are required"
     severity: "ERROR"
     priority: 1
 
@@ -62,9 +62,9 @@ rules:
     priority: 1
 
   - id: "trade-value-positive"
-    name: "Trade Value Must Be Positive"
+    name: "TradeB Value Must Be Positive"
     condition: "#data.trade != null && #data.trade.quantity != null && #data.trade.price != null && (#data.trade.quantity * #data.trade.price) > 0"
-    message: "Trade value must be positive"
+    message: "TradeB value must be positive"
     severity: "ERROR"
     priority: 1
 
@@ -449,7 +449,7 @@ enrichments:
 # RISK ENRICHMENT
 # ============================================================================
 
-  # Trade Value Calculation
+  # TradeB Value Calculation
   - id: "trade-value-calculation"
     type: "calculation-enrichment"
     condition: "#data.trade != null && #data.trade.quantity != null && #data.trade.price != null"

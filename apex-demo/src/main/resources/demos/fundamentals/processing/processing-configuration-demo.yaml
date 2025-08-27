@@ -87,9 +87,9 @@ performance:
 # Rules with advanced error handling
 rules:
   - id: "trade-validation-with-retry"
-    name: "Trade Validation with Retry Logic"
+    name: "TradeB Validation with Retry Logic"
     condition: "#data.tradeId != null && #data.tradeId.trim().length() > 0"
-    message: "Trade ID is required and cannot be empty"
+    message: "TradeB ID is required and cannot be empty"
     severity: "ERROR"
     priority: 1
     

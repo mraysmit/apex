@@ -106,7 +106,7 @@ class ComplianceServiceDemoConfig {
                 "MiFIDReportingRule",
                 "#trade != null && #regulatoryRequirements.containsKey(#trade.value) && " +
                         "#regulatoryRequirements.get(#trade.value).contains('" + REG_MIFID_II + "')",
-                "Trade requires MiFID II reporting"
+                "TradeB requires MiFID II reporting"
         ));
 
         // Rule for EMIR reporting
@@ -114,7 +114,7 @@ class ComplianceServiceDemoConfig {
                 "EMIRReportingRule",
                 "#trade != null && #regulatoryRequirements.containsKey(#trade.value) && " +
                         "#regulatoryRequirements.get(#trade.value).contains('" + REG_EMIR + "')",
-                "Trade requires EMIR reporting"
+                "TradeB requires EMIR reporting"
         ));
 
         // Rule for Dodd-Frank reporting
@@ -122,7 +122,7 @@ class ComplianceServiceDemoConfig {
                 "DoddFrankReportingRule",
                 "#trade != null && #regulatoryRequirements.containsKey(#trade.value) && " +
                         "#regulatoryRequirements.get(#trade.value).contains('" + REG_DODD_FRANK + "')",
-                "Trade requires Dodd-Frank reporting"
+                "TradeB requires Dodd-Frank reporting"
         ));
 
         // Rule for Basel III reporting
@@ -130,7 +130,7 @@ class ComplianceServiceDemoConfig {
                 "BaselReportingRule",
                 "#trade != null && #regulatoryRequirements.containsKey(#trade.value) && " +
                         "#regulatoryRequirements.get(#trade.value).contains('" + REG_BASEL_III + "')",
-                "Trade requires Basel III reporting"
+                "TradeB requires Basel III reporting"
         ));
 
         // Rule for SFTR reporting
@@ -138,7 +138,7 @@ class ComplianceServiceDemoConfig {
                 "SFTRReportingRule",
                 "#trade != null && #regulatoryRequirements.containsKey(#trade.value) && " +
                         "#regulatoryRequirements.get(#trade.value).contains('" + REG_SFTR + "')",
-                "Trade requires SFTR reporting"
+                "TradeB requires SFTR reporting"
         ));
 
         // Rule for compliance issues
@@ -148,7 +148,7 @@ class ComplianceServiceDemoConfig {
                         "#trade.value == null || #trade.value.isEmpty() || " +
                         "#trade.category == null || #trade.category.isEmpty() || " +
                         "(#riskService != null && (#riskLevel == 'High' || #riskLevel == 'Extreme'))",
-                "Trade has compliance issues"
+                "TradeB has compliance issues"
         ));
     }
 
@@ -284,7 +284,7 @@ class ComplianceServiceDemoConfig {
         RuleResult result = requiresMiFIDReportingWithResult(trade);
         if (!result.isTriggered()) return "Error: MiFID II reporting not required";
 
-        return "MiFID II Transaction Report for Trade ID: " + trade.getId() +
+        return "MiFID II Transaction Report for TradeB ID: " + trade.getId() +
                 "\nInstrument: " + trade.getValue() +
                 "\nCategory: " + trade.getCategory() +
                 "\nReporting Deadline: " + getReportingDeadline(REG_MIFID_II) + " hours";
@@ -302,7 +302,7 @@ class ComplianceServiceDemoConfig {
         RuleResult result = requiresEMIRReportingWithResult(trade);
         if (!result.isTriggered()) return "Error: EMIR reporting not required";
 
-        return "EMIR Transaction Report for Trade ID: " + trade.getId() +
+        return "EMIR Transaction Report for TradeB ID: " + trade.getId() +
                 "\nInstrument: " + trade.getValue() +
                 "\nCategory: " + trade.getCategory() +
                 "\nReporting Deadline: " + getReportingDeadline(REG_EMIR) + " hours";
@@ -320,7 +320,7 @@ class ComplianceServiceDemoConfig {
         RuleResult result = requiresDoddFrankReportingWithResult(trade);
         if (!result.isTriggered()) return "Error: Dodd-Frank reporting not required";
 
-        return "Dodd-Frank Transaction Report for Trade ID: " + trade.getId() +
+        return "Dodd-Frank Transaction Report for TradeB ID: " + trade.getId() +
                 "\nInstrument: " + trade.getValue() +
                 "\nCategory: " + trade.getCategory() +
                 "\nReporting Deadline: " + getReportingDeadline(REG_DODD_FRANK) + " hours";
@@ -338,7 +338,7 @@ class ComplianceServiceDemoConfig {
         RuleResult result = requiresBaselReportingWithResult(trade);
         if (!result.isTriggered()) return "Error: Basel III reporting not required";
 
-        return "Basel III Transaction Report for Trade ID: " + trade.getId() +
+        return "Basel III Transaction Report for TradeB ID: " + trade.getId() +
                 "\nInstrument: " + trade.getValue() +
                 "\nCategory: " + trade.getCategory() +
                 "\nReporting Deadline: " + getReportingDeadline(REG_BASEL_III) + " hours";
@@ -356,7 +356,7 @@ class ComplianceServiceDemoConfig {
         RuleResult result = requiresSFTRReportingWithResult(trade);
         if (!result.isTriggered()) return "Error: SFTR reporting not required";
 
-        return "SFTR Transaction Report for Trade ID: " + trade.getId() +
+        return "SFTR Transaction Report for TradeB ID: " + trade.getId() +
                 "\nInstrument: " + trade.getValue() +
                 "\nCategory: " + trade.getCategory() +
                 "\nReporting Deadline: " + getReportingDeadline(REG_SFTR) + " hours";

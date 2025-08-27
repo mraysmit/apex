@@ -260,14 +260,14 @@ rule-chains:
 
   # Pattern 5: Complex Financial Workflow - Real-world nested rule scenario
   - id: "trade-processing-workflow"
-    name: "Trade Processing Workflow"
+    name: "TradeB Processing Workflow"
     description: "Multi-stage trade processing with dependencies and conditional execution"
     pattern: "complex-workflow"
     enabled: true  # Now implemented and ready for use
     priority: 50
     category: "trade-processing"
     created-by: "trade.operations@company.com"
-    business-domain: "Trade Processing"
+    business-domain: "TradeB Processing"
     configuration:
       stages:
         - stage: "pre-validation"
@@ -283,7 +283,7 @@ rule-chains:
           rules:
             - id: "trade-risk-calculation"
               condition: "#notionalAmount > 1000000 && #marketVolatility > 0.2 ? 'HIGH' : 'MEDIUM'"
-              message: "Trade risk level assessed"
+              message: "TradeB risk level assessed"
           output-variable: "tradeRiskLevel"
 
   # Pattern 6: Fluent Rule Builder - Compose rules with conditional execution paths
@@ -341,7 +341,7 @@ categories:
     priority: 40
     enabled: true
   - name: "trade-processing"
-    display-name: "Trade Processing"
+    display-name: "TradeB Processing"
     priority: 50
     enabled: true
   - name: "customer-onboarding"

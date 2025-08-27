@@ -133,7 +133,7 @@ enrichments:
     name: "Currency Data Enrichment (Inline Dataset)"
     description: "Enrich trades with currency information from inline YAML dataset"
     type: "lookup-enrichment"
-    target-type: "Trade"
+    target-type: "TradeB"
     condition: "#notionalCurrency != null"
     priority: 10
     enabled: true
@@ -218,7 +218,7 @@ enrichments:
     name: "Market Identifier Code Enrichment (Inline Dataset)"
     description: "Enrich trades with trading venue information"
     type: "lookup-enrichment"
-    target-type: "Trade"
+    target-type: "TradeB"
     condition: "#tradingVenue != null"
     priority: 11
     enabled: true
@@ -296,7 +296,7 @@ enrichments:
     name: "Jurisdiction Enrichment (Inline Dataset)"
     description: "Enrich counterparty data with jurisdiction information"
     type: "lookup-enrichment"
-    target-type: "Trade"
+    target-type: "TradeB"
     condition: "#counterpartyJurisdiction != null"
     priority: 12
     enabled: true
@@ -380,7 +380,7 @@ enrichments:
     name: "Settlement Instruction Code Enrichment"
     description: "Enrich trades with settlement instruction details"
     type: "lookup-enrichment"
-    target-type: "Trade"
+    target-type: "TradeB"
     condition: "#settlementInstructionCode != null"
     priority: 13
     enabled: true

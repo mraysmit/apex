@@ -35,15 +35,15 @@ java -cp target/classes dev.mars.apex.demo.DemoRunner all
 ### Automatic Demo Discovery (Complete Suite)
 ```bash
 # Run ALL available demos automatically (25+ demos)
-java -cp target/classes dev.mars.apex.demo.AllDemosRunner
+java -cp target/classes dev.mars.apex.demo.AllDemosRunnerAlt
 
 # List all discovered demos without running
-java -cp target/classes dev.mars.apex.demo.AllDemosRunner --list
+java -cp target/classes dev.mars.apex.demo.AllDemosRunnerAlt --list
 
 # Run demos from specific package
-java -cp target/classes dev.mars.apex.demo.AllDemosRunner --package examples
-java -cp target/classes dev.mars.apex.demo.AllDemosRunner --package advanced
-java -cp target/classes dev.mars.apex.demo.AllDemosRunner --package bootstrap
+java -cp target/classes dev.mars.apex.demo.AllDemosRunnerAlt --package examples
+java -cp target/classes dev.mars.apex.demo.AllDemosRunnerAlt --package advanced
+java -cp target/classes dev.mars.apex.demo.AllDemosRunnerAlt --package bootstrap
 ```
 
 ### Run Specific Demo (Interactive Runner)
@@ -70,7 +70,7 @@ java -cp target/classes dev.mars.apex.demo.DemoRunner performance
 Run all demos in sequence for a comprehensive learning experience:
 
 ```bash
-java -cp target/classes dev.mars.apex.demo.AllDemosRunner
+java -cp target/classes dev.mars.apex.demo.AllDemosRunnerAlt
 ```
 
 #### Option 2: Individual Categories
@@ -78,19 +78,19 @@ Run specific demo categories based on your learning needs:
 
 ```bash
 # Quick introduction (5-10 minutes)
-java -cp target/classes dev.mars.apex.demo.runners.quickstart.QuickStartRunner
+java -cp target/classes dev.mars.apex.demo.QuickStartRunner
 
 # Core concepts deep dive (15-20 minutes)
-java -cp target/classes dev.mars.apex.demo.runners.fundamentals.FundamentalsRunner
+java -cp target/classes dev.mars.apex.demo.FundamentalsRunner
 
 # Implementation patterns (20-30 minutes)
-java -cp target/classes dev.mars.apex.demo.runners.patterns.PatternsRunner
+java -cp target/classes dev.mars.apex.demo.PatternsRunner
 
 # Real-world applications (30-45 minutes)
-java -cp target/classes dev.mars.apex.demo.runners.industry.IndustryRunner
+java -cp target/classes dev.mars.apex.demo.IndustryRunner
 
 # Advanced techniques (45+ minutes)
-java -cp target/classes dev.mars.apex.demo.runners.advanced.AdvancedRunner
+java -cp target/classes dev.mars.apex.demo.AdvancedRunner
 ```
 
 #### Option 3: Individual Demos
@@ -99,12 +99,12 @@ Run specific demos for focused learning:
 ```bash
 # Lookup pattern examples
 java -cp target/classes dev.mars.apex.demo.examples.lookups.SimpleFieldLookupDemo
-java -cp target/classes dev.mars.apex.demo.examples.lookups.ConditionalExpressionLookupDemo
+java -cp target/classes dev.mars.apex.demo.examples.ConditionalExpressionLookupDemo
 java -cp target/classes dev.mars.apex.demo.examples.lookups.NestedFieldLookupDemo
 java -cp target/classes dev.mars.apex.demo.examples.lookups.CompoundKeyLookupDemo
 
 # Financial services examples
-java -cp target/classes dev.mars.apex.demo.financial.ComprehensiveFinancialSettlementDemo
+java -cp target/classes dev.mars.apex.demo.examples.ComprehensiveFinancialSettlementDemo
 java -cp target/classes dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap
 ```
 
@@ -618,12 +618,12 @@ java -cp target/classes dev.mars.apex.demo.DemoRunner finance   # Same as financ
 java -cp target/classes dev.mars.apex.demo.DemoRunner perf      # Same as performance
 
 # Automatic Demo Discovery commands
-java -cp target/classes dev.mars.apex.demo.AllDemosRunner --list
-java -cp target/classes dev.mars.apex.demo.AllDemosRunner --package core
-java -cp target/classes dev.mars.apex.demo.AllDemosRunner --package examples
-java -cp target/classes dev.mars.apex.demo.AllDemosRunner --package advanced
-java -cp target/classes dev.mars.apex.demo.AllDemosRunner --package bootstrap
-java -cp target/classes dev.mars.apex.demo.AllDemosRunner --package rulesets
+java -cp target/classes dev.mars.apex.demo.AllDemosRunnerAlt --list
+java -cp target/classes dev.mars.apex.demo.AllDemosRunnerAlt --package core
+java -cp target/classes dev.mars.apex.demo.AllDemosRunnerAlt --package examples
+java -cp target/classes dev.mars.apex.demo.AllDemosRunnerAlt --package advanced
+java -cp target/classes dev.mars.apex.demo.AllDemosRunnerAlt --package bootstrap
+java -cp target/classes dev.mars.apex.demo.AllDemosRunnerAlt --package rulesets
 ```
 
 ### Automatic Demo Discovery Output
@@ -632,7 +632,7 @@ java -cp target/classes dev.mars.apex.demo.AllDemosRunner --package rulesets
 Automatically discovering and running all available demos...
 
 Discovered 25 runnable demos:
-  - dev.mars.apex.demo.QuickStartDemo (run())
+  - dev.mars.apex.demo.examples.QuickStartDemoB (run())
   - dev.mars.apex.demo.examples.BasicUsageExamples (run())
   ...
 
@@ -640,7 +640,7 @@ Discovered 25 runnable demos:
 PACKAGE: CORE
 ════════════════════════════════════════════════════════════════════════════════
 
-▶ Running: dev.mars.apex.demo.QuickStartDemo
+▶ Running: dev.mars.apex.demo.examples.QuickStartDemoB
   Method: run()
   ------------------------------------------------------------
   [Demo output...]
@@ -720,7 +720,7 @@ mvn clean compile
 java -cp target/classes dev.mars.apex.demo.DemoRunner
 
 # Run automatic demo discovery (all 25+ demos)
-java -cp target/classes dev.mars.apex.demo.AllDemosRunner
+java -cp target/classes dev.mars.apex.demo.AllDemosRunnerAlt
 
 # Run specific demo (interactive runner)
 java -cp target/classes dev.mars.apex.demo.DemoRunner quickstart
@@ -729,7 +729,7 @@ java -cp target/classes dev.mars.apex.demo.DemoRunner quickstart
 java -cp target/classes dev.mars.apex.demo.DemoRunner all
 
 # List all available demos
-java -cp target/classes dev.mars.apex.demo.AllDemosRunner --list
+java -cp target/classes dev.mars.apex.demo.AllDemosRunnerAlt --list
 ```
 
 ## Documentation References

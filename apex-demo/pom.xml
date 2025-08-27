@@ -117,7 +117,7 @@
                     <execution>
                         <id>conditional-expression-lookup</id>
                         <configuration>
-                            <mainClass>dev.mars.apex.demo.examples.lookups.ConditionalExpressionLookupDemo</mainClass>
+                            <mainClass>dev.mars.apex.demo.examples.ConditionalExpressionLookupDemo</mainClass>
                         </configuration>
                     </execution>
                     <!-- Bootstrap Demos -->

@@ -1,7 +1,9 @@
 package dev.mars.apex.demo.financial;
 
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.demo.financial.model.*;
+import dev.mars.apex.demo.examples.ComprehensiveFinancialSettlementDemo;
+import dev.mars.apex.demo.model.TradeB;
+import dev.mars.apex.demo.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,9 +37,9 @@ class ComprehensiveFinancialSettlementDemoTest {
     }
 
     @Test
-    @DisplayName("Should create UK Equity Trade with correct structure")
+    @DisplayName("Should create UK Equity TradeB with correct structure")
     void shouldCreateUKEquityTradeWithCorrectStructure() {
-        LOGGER.info("Testing UK Equity Trade creation...");
+        LOGGER.info("Testing UK Equity TradeB creation...");
 
         // Create a UK equity trade using reflection to access private method
         TradeConfirmation trade = createUKEquityTradeForTest();
@@ -53,7 +55,7 @@ class ComprehensiveFinancialSettlementDemoTest {
         assertEquals("DEUTDEFF", trade.getHeader().getSendTo());
 
         // Verify trade details
-        Trade tradeDetails = trade.getTrade();
+        TradeB tradeDetails = trade.getTrade();
         assertEquals("TRD-001-2024", tradeDetails.getTradeHeader().getPartyTradeIdentifier().getTradeId());
         assertEquals(LocalDate.of(2024, 12, 24), tradeDetails.getTradeHeader().getTradeDate());
         
@@ -71,13 +73,13 @@ class ComprehensiveFinancialSettlementDemoTest {
         assertEquals(new BigDecimal("2750.50"), tradeDetails.getPrice());
         assertEquals("GBP", tradeDetails.getCurrency());
 
-        LOGGER.info("✓ UK Equity Trade structure validated successfully");
+        LOGGER.info("✓ UK Equity TradeB structure validated successfully");
     }
 
     @Test
-    @DisplayName("Should create US Government Bond Trade with correct structure")
+    @DisplayName("Should create US Government Bond TradeB with correct structure")
     void shouldCreateUSBondTradeWithCorrectStructure() {
-        LOGGER.info("Testing US Government Bond Trade creation...");
+        LOGGER.info("Testing US Government Bond TradeB creation...");
 
         TradeConfirmation trade = createUSBondTradeForTest();
 
@@ -92,7 +94,7 @@ class ComprehensiveFinancialSettlementDemoTest {
         assertEquals("GSCCUS33", trade.getHeader().getSendTo());
 
         // Verify trade details
-        Trade tradeDetails = trade.getTrade();
+        TradeB tradeDetails = trade.getTrade();
         assertEquals("BOND-002-2024", tradeDetails.getTradeHeader().getPartyTradeIdentifier().getTradeId());
         
         // Verify security (US Treasury Bond)
@@ -109,28 +111,28 @@ class ComprehensiveFinancialSettlementDemoTest {
         assertEquals(new BigDecimal("98.75"), tradeDetails.getPrice());
         assertEquals("USD", tradeDetails.getCurrency());
 
-        LOGGER.info("✓ US Government Bond Trade structure validated successfully");
+        LOGGER.info("✓ US Government Bond TradeB structure validated successfully");
     }
 
     @Test
-    @DisplayName("Should create High-Value Trade for stress testing")
+    @DisplayName("Should create High-Value TradeB for stress testing")
     void shouldCreateHighValueTradeForStressTesting() {
-        LOGGER.info("Testing High-Value Trade creation for stress testing...");
+        LOGGER.info("Testing High-Value TradeB creation for stress testing...");
 
         TradeConfirmation trade = createHighValueUSEquityTradeForTest();
 
         // Verify this is a high-value trade
-        Trade tradeDetails = trade.getTrade();
+        TradeB tradeDetails = trade.getTrade();
         BigDecimal tradeValue = tradeDetails.getQuantity().multiply(tradeDetails.getPrice());
         
-        // Trade value should be $95M (500,000 * $190)
+        // TradeB value should be $95M (500,000 * $190)
         assertEquals(new BigDecimal("95000000.00"), tradeValue);
         
         // This should trigger high-priority settlement and stress testing
         assertTrue(tradeValue.compareTo(new BigDecimal("50000000")) > 0, 
-                  "Trade value should exceed $50M threshold for stress testing");
+                  "TradeB value should exceed $50M threshold for stress testing");
 
-        LOGGER.info("✓ High-Value Trade (${}) created for stress testing", tradeValue);
+        LOGGER.info("✓ High-Value TradeB (${}) created for stress testing", tradeValue);
     }
 
     @Test
@@ -171,7 +173,7 @@ class ComprehensiveFinancialSettlementDemoTest {
 
             // Validate required fields for enrichment
             assertNotNull(trade.getTrade().getTradeHeader().getPartyTradeIdentifier().getTradeId(),
-                         "Trade ID required for UTI generation");
+                         "TradeB ID required for UTI generation");
             assertNotNull(trade.getTrade().getSecurity().getInstrumentId(),
                          "Instrument ID required for ISIN enrichment");
             assertNotNull(trade.getTrade().getCounterparty().getPartyName(),
@@ -185,7 +187,7 @@ class ComprehensiveFinancialSettlementDemoTest {
             assertNotNull(trade.getTrade().getCurrency(),
                          "Currency required for settlement");
 
-            LOGGER.info("✓ Trade example {} validation passed", i + 1);
+            LOGGER.info("✓ TradeB example {} validation passed", i + 1);
         }
 
         LOGGER.info("✓ All {} trade examples validated successfully", trades.length);
@@ -252,12 +254,12 @@ class ComprehensiveFinancialSettlementDemoTest {
         return header;
     }
 
-    private Trade createTradeForTest(String tradeId, LocalDate tradeDate, String instrumentId, 
-                                   String instrumentType, String issuer, String counterpartyName, 
-                                   String tradingVenue, BigDecimal quantity, BigDecimal price, String currency) {
-        Trade trade = new Trade();
+    private TradeB createTradeForTest(String tradeId, LocalDate tradeDate, String instrumentId,
+                                      String instrumentType, String issuer, String counterpartyName,
+                                      String tradingVenue, BigDecimal quantity, BigDecimal price, String currency) {
+        TradeB trade = new TradeB();
         
-        // Trade Header
+        // TradeB Header
         TradeHeader tradeHeader = new TradeHeader();
         PartyTradeIdentifier partyTradeIdentifier = new PartyTradeIdentifier();
         partyTradeIdentifier.setTradeId(tradeId);
@@ -277,7 +279,7 @@ class ComprehensiveFinancialSettlementDemoTest {
         counterparty.setPartyName(counterpartyName);
         trade.setCounterparty(counterparty);
         
-        // Trade details
+        // TradeB details
         trade.setTradingVenue(tradingVenue);
         trade.setQuantity(quantity);
         trade.setPrice(price);

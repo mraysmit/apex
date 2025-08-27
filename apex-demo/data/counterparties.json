@@ -1,0 +1,58 @@
+{
+  "counterparties": [
+    {
+      "partyId": "GOLDMAN_SACHS",
+      "legalName": "Goldman Sachs & Co. LLC",
+      "creditRating": "AAA",
+      "lei": "784F5XWPLTWKTBV3E584",
+      "jurisdiction": "United States",
+      "sector": "Investment Banking",
+      "active": true
+    },
+    {
+      "partyId": "JP_MORGAN",
+      "legalName": "JPMorgan Chase Bank, N.A.",
+      "creditRating": "AAA",
+      "lei": "7H6GLXDRUGQFU57RNE97",
+      "jurisdiction": "United States",
+      "sector": "Commercial Banking",
+      "active": true
+    },
+    {
+      "partyId": "MORGAN_STANLEY",
+      "legalName": "Morgan Stanley & Co. LLC",
+      "creditRating": "AA+",
+      "lei": "IGJSJL3JD5P30I6NJZ34",
+      "jurisdiction": "United States",
+      "sector": "Investment Banking",
+      "active": true
+    },
+    {
+      "partyId": "CITI",
+      "legalName": "Citigroup Global Markets Inc.",
+      "creditRating": "AA-",
+      "lei": "6SHGI4ZSSLCXXQSBB395",
+      "jurisdiction": "United States",
+      "sector": "Investment Banking",
+      "active": true
+    },
+    {
+      "partyId": "BARCLAYS",
+      "legalName": "Barclays Bank PLC",
+      "creditRating": "A+",
+      "lei": "G5GSEF7VJP5I7OUK5573",
+      "jurisdiction": "United Kingdom",
+      "sector": "Commercial Banking",
+      "active": true
+    },
+    {
+      "partyId": "DEUTSCHE_BANK",
+      "legalName": "Deutsche Bank AG",
+      "creditRating": "BBB+",
+      "lei": "7LTWFZYICNSX8D621K86",
+      "jurisdiction": "Germany",
+      "sector": "Commercial Banking",
+      "active": true
+    }
+  ]
+}

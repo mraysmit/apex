@@ -83,7 +83,7 @@
 # ============================================================================
 
 metadata:
-  name: "Financial Services Post-Trade Settlement Rules"
+  name: "Financial Services Post-TradeB Settlement Rules"
   version: "2.0.0"
   description: "Comprehensive post-trade settlement enrichment rules with full audit support"
   type: "rule-config"
@@ -133,8 +133,8 @@ categories:
     description: "Rules for enriching trade data with settlement information"
     priority: 10
     enabled: true
-    business-domain: "Financial Services Post-Trade"
-    business-owner: "Head of Post-Trade Operations"
+    business-domain: "Financial Services Post-TradeB"
+    business-owner: "Head of Post-TradeB Operations"
     created-by: "settlement.admin@financialservices.com"
 
   - name: "counterparty-enrichment"
@@ -142,7 +142,7 @@ categories:
     description: "Rules for enriching counterparty information and validation"
     priority: 20
     enabled: true
-    business-domain: "Financial Services Post-Trade"
+    business-domain: "Financial Services Post-TradeB"
     business-owner: "Head of Counterparty Management"
     created-by: "counterparty.admin@financialservices.com"
 
@@ -151,7 +151,7 @@ categories:
     description: "Rules for regulatory reporting and compliance enrichment"
     priority: 30
     enabled: true
-    business-domain: "Financial Services Post-Trade"
+    business-domain: "Financial Services Post-TradeB"
     business-owner: "Chief Compliance Officer"
     created-by: "compliance.officer@financialservices.com"
 
@@ -160,11 +160,11 @@ categories:
     description: "Rules for calculating fees, commissions, and charges"
     priority: 40
     enabled: true
-    business-domain: "Financial Services Post-Trade"
+    business-domain: "Financial Services Post-TradeB"
     business-owner: "Head of Operations"
     created-by: "operations.manager@financialservices.com"
 
-# Financial Services Post-Trade Settlement Rules with comprehensive enterprise metadata
+# Financial Services Post-TradeB Settlement Rules with comprehensive enterprise metadata
 rules:
   # Settlement Enrichment Rules
   - id: "settlement-date-validation"
@@ -179,15 +179,15 @@ rules:
 
     # Enterprise metadata
     created-by: "settlement.admin@financialservices.com"
-    business-domain: "Financial Services Post-Trade"
-    business-owner: "Head of Post-Trade Operations"
+    business-domain: "Financial Services Post-TradeB"
+    business-owner: "Head of Post-TradeB Operations"
     source-system: "SETTLEMENT_MANAGEMENT_SYSTEM"
     effective-date: "2024-01-01T00:00:00Z"
     expiration-date: "2025-01-01T00:00:00Z"
 
     # Custom properties for domain-specific needs
     custom-properties:
-      department: "Post-Trade Operations"
+      department: "Post-TradeB Operations"
       compliance-level: "HIGH"
       review-frequency: "QUARTERLY"
       regulatory-requirement: "T+2_SETTLEMENT"
@@ -203,8 +203,8 @@ rules:
     tags: ["ssi", "custodian-validation"]
 
     created-by: "settlement.admin@financialservices.com"
-    business-domain: "Financial Services Post-Trade"
-    business-owner: "Head of Post-Trade Operations"
+    business-domain: "Financial Services Post-TradeB"
+    business-owner: "Head of Post-TradeB Operations"
     source-system: "SSI_MANAGEMENT_SYSTEM"
     effective-date: "2024-01-01T00:00:00Z"
 
@@ -225,7 +225,7 @@ rules:
     tags: ["lei", "counterparty", "regulatory-compliance"]
 
     created-by: "counterparty.admin@financialservices.com"
-    business-domain: "Financial Services Post-Trade"
+    business-domain: "Financial Services Post-TradeB"
     business-owner: "Head of Counterparty Management"
     source-system: "COUNTERPARTY_MANAGEMENT_SYSTEM"
     effective-date: "2024-01-01T00:00:00Z"
@@ -246,7 +246,7 @@ rules:
     tags: ["credit-rating", "risk-assessment", "counterparty"]
 
     created-by: "counterparty.admin@financialservices.com"
-    business-domain: "Financial Services Post-Trade"
+    business-domain: "Financial Services Post-TradeB"
     business-owner: "Head of Counterparty Management"
     source-system: "CREDIT_RATING_SYSTEM"
     effective-date: "2024-01-01T00:00:00Z"
@@ -268,7 +268,7 @@ rules:
     tags: ["uti", "regulatory-reporting", "compliance"]
 
     created-by: "compliance.officer@financialservices.com"
-    business-domain: "Financial Services Post-Trade"
+    business-domain: "Financial Services Post-TradeB"
     business-owner: "Chief Compliance Officer"
     source-system: "REGULATORY_REPORTING_SYSTEM"
     effective-date: "2024-01-01T00:00:00Z"
@@ -289,7 +289,7 @@ rules:
     tags: ["mifid", "reporting-flags", "compliance"]
 
     created-by: "compliance.officer@financialservices.com"
-    business-domain: "Financial Services Post-Trade"
+    business-domain: "Financial Services Post-TradeB"
     business-owner: "Chief Compliance Officer"
     source-system: "MIFID_REPORTING_SYSTEM"
     effective-date: "2024-01-01T00:00:00Z"
@@ -311,7 +311,7 @@ rules:
     tags: ["commission", "fee-validation", "broker"]
 
     created-by: "operations.manager@financialservices.com"
-    business-domain: "Financial Services Post-Trade"
+    business-domain: "Financial Services Post-TradeB"
     business-owner: "Head of Operations"
     source-system: "FEE_CALCULATION_SYSTEM"
     effective-date: "2024-01-01T00:00:00Z"
@@ -333,7 +333,7 @@ rules:
     tags: ["clearing-fee", "fee-validation", "post-trade"]
 
     created-by: "operations.manager@financialservices.com"
-    business-domain: "Financial Services Post-Trade"
+    business-domain: "Financial Services Post-TradeB"
     business-owner: "Head of Operations"
     source-system: "CLEARING_FEE_SYSTEM"
     effective-date: "2024-01-01T00:00:00Z"

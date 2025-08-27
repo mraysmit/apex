@@ -332,7 +332,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
         complianceIssueTrade.addComplianceFlag("highRiskCountry", "CountryX");
         trades.add(complianceIssueTrade);
 
-        // Trade with sanctions issues
+        // TradeB with sanctions issues
         EnhancedTrade sanctionsIssueTrade = new EnhancedTrade(
                 "T004",
                 "Option",
@@ -446,7 +446,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
         Rule nullCheckRule = new Rule(
                 "NullCheckRule",
                 "#trade != null",
-                "Trade must not be null"
+                "TradeB must not be null"
         );
         ruleGroup.addRule(nullCheckRule, 1);
 
@@ -454,7 +454,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
         Rule enhancedTradeCheckRule = new Rule(
                 "EnhancedTradeCheckRule",
                 "#trade instanceof T(model.dev.mars.apex.demo.EnhancedTrade)",
-                "Trade must be an EnhancedTrade"
+                "TradeB must be an EnhancedTrade"
         );
         ruleGroup.addRule(enhancedTradeCheckRule, 2);
 
@@ -462,7 +462,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
         Rule settlementStatusRule = new Rule(
                 "SettlementStatusRule",
                 "#trade.settlementStatus != null && #trade.settlementStatus != 'Failed'",
-                "Trade settlement status must not be Failed"
+                "TradeB settlement status must not be Failed"
         );
         ruleGroup.addRule(settlementStatusRule, 3);
 
@@ -475,7 +475,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
             Rule settlementMethodRule = new Rule(
                     "SettlementMethodRule",
                     "#trade.settlementMethod != null && (#allowedSettlementMethods.isEmpty() || #allowedSettlementMethods.contains(#trade.settlementMethod))",
-                    "Trade settlement method must be in the allowed methods list"
+                    "TradeB settlement method must be in the allowed methods list"
             );
             ruleGroup.addRule(settlementMethodRule, 4);
         }
@@ -489,7 +489,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
             Rule settlementLocationRule = new Rule(
                     "SettlementLocationRule",
                     "#trade.settlementLocation != null && (#allowedSettlementLocations.isEmpty() || #allowedSettlementLocations.contains(#trade.settlementLocation))",
-                    "Trade settlement location must be in the allowed locations list"
+                    "TradeB settlement location must be in the allowed locations list"
             );
             ruleGroup.addRule(settlementLocationRule, 5);
         }
@@ -503,7 +503,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
             Rule currencyRule = new Rule(
                     "CurrencyRule",
                     "#trade.settlementCurrency != null && (#allowedCurrencies.isEmpty() || #allowedCurrencies.contains(#trade.settlementCurrency))",
-                    "Trade settlement currency must be in the allowed currencies list"
+                    "TradeB settlement currency must be in the allowed currencies list"
             );
             ruleGroup.addRule(currencyRule, 6);
         }
@@ -515,7 +515,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
         Rule settlementAmountRule = new Rule(
                 "SettlementAmountRule",
                 "#trade.settlementAmount >= #minSettlementAmount",
-                "Trade settlement amount must be at least " + minSettlementAmount
+                "TradeB settlement amount must be at least " + minSettlementAmount
         );
         ruleGroup.addRule(settlementAmountRule, 7);
 
@@ -526,7 +526,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
         Rule settlementDateRule = new Rule(
                 "SettlementDateRule",
                 "#trade.settlementDate != null && T(java.time.temporal.ChronoUnit).DAYS.between(#trade.tradeDate, #trade.settlementDate) <= #maxSettlementDays",
-                "Trade settlement date must be within " + maxSettlementDays + " days of trade date"
+                "TradeB settlement date must be within " + maxSettlementDays + " days of trade date"
         );
         ruleGroup.addRule(settlementDateRule, 8);
 
@@ -570,7 +570,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
         Rule nullCheckRule = new Rule(
                 "NullCheckRule",
                 "#trade != null",
-                "Trade must not be null"
+                "TradeB must not be null"
         );
         ruleGroup.addRule(nullCheckRule, 1);
 
@@ -578,7 +578,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
         Rule enhancedTradeCheckRule = new Rule(
                 "EnhancedTradeCheckRule",
                 "#trade instanceof T(model.dev.mars.apex.demo.EnhancedTrade)",
-                "Trade must be an EnhancedTrade"
+                "TradeB must be an EnhancedTrade"
         );
         ruleGroup.addRule(enhancedTradeCheckRule, 2);
 
@@ -586,7 +586,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
         Rule amlCheckRule = new Rule(
                 "AmlCheckRule",
                 "#trade.amlCheckPassed == true",
-                "Trade must pass AML check"
+                "TradeB must pass AML check"
         );
         ruleGroup.addRule(amlCheckRule, 3);
 
@@ -594,7 +594,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
         Rule sanctionsCheckRule = new Rule(
                 "SanctionsCheckRule",
                 "#trade.sanctionsCheckPassed == true",
-                "Trade must pass sanctions check"
+                "TradeB must pass sanctions check"
         );
         ruleGroup.addRule(sanctionsCheckRule, 4);
 
@@ -607,7 +607,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
             Rule highRiskCountryRule = new Rule(
                     "HighRiskCountryRule",
                     "!#trade.complianceFlags.containsKey('highRiskCountry') || !#highRiskCountries.contains(#trade.complianceFlags.get('highRiskCountry'))",
-                    "Trade must not involve a high risk country"
+                    "TradeB must not involve a high risk country"
             );
             ruleGroup.addRule(highRiskCountryRule, 5);
         }
@@ -621,7 +621,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
             Rule restrictedEntityRule = new Rule(
                     "RestrictedEntityRule",
                     "!#trade.complianceFlags.containsKey('restrictedEntity') || !#restrictedEntities.contains(#trade.complianceFlags.get('restrictedEntity'))",
-                    "Trade must not involve a restricted entity"
+                    "TradeB must not involve a restricted entity"
             );
             ruleGroup.addRule(restrictedEntityRule, 6);
         }
@@ -674,7 +674,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
         Rule nullCheckRule = new Rule(
                 "NullCheckRule",
                 "#trade != null",
-                "Trade must not be null"
+                "TradeB must not be null"
         );
         mainRuleGroup.addRule(nullCheckRule, 1);
 
@@ -682,7 +682,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
         Rule enhancedTradeCheckRule = new Rule(
                 "EnhancedTradeCheckRule",
                 "#trade instanceof T(model.dev.mars.apex.demo.EnhancedTrade)",
-                "Trade must be an EnhancedTrade"
+                "TradeB must be an EnhancedTrade"
         );
         mainRuleGroup.addRule(enhancedTradeCheckRule, 2);
 
@@ -701,7 +701,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
         Rule alreadySettledRule = new Rule(
                 "AlreadySettledRule",
                 "#trade.settlementStatus == 'Settled'",
-                "Trade is already settled"
+                "TradeB is already settled"
         );
         settlementRuleGroup.addRule(alreadySettledRule, 1);
 
@@ -719,7 +719,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
         Rule pendingStatusRule = new Rule(
                 "PendingStatusRule",
                 "#trade.settlementStatus == 'Pending'",
-                "Trade is pending settlement"
+                "TradeB is pending settlement"
         );
         pendingSettlementRuleGroup.addRule(pendingStatusRule, 1);
 
@@ -732,7 +732,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
             Rule settlementMethodRule = new Rule(
                     "SettlementMethodRule",
                     "#trade.settlementMethod != null && (#allowedSettlementMethods.isEmpty() || #allowedSettlementMethods.contains(#trade.settlementMethod))",
-                    "Trade settlement method must be in the allowed methods list"
+                    "TradeB settlement method must be in the allowed methods list"
             );
             pendingSettlementRuleGroup.addRule(settlementMethodRule, 2);
         }
@@ -746,7 +746,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
             Rule currencyRule = new Rule(
                     "CurrencyRule",
                     "#trade.settlementCurrency != null && (#allowedCurrencies.isEmpty() || #allowedCurrencies.contains(#trade.settlementCurrency))",
-                    "Trade settlement currency must be in the allowed currencies list"
+                    "TradeB settlement currency must be in the allowed currencies list"
             );
             pendingSettlementRuleGroup.addRule(currencyRule, 3);
         }
@@ -794,7 +794,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
         Rule lowRiskRule = new Rule(
                 "LowRiskRule",
                 "#trade.riskRating == 'Low'",
-                "Trade has low risk rating"
+                "TradeB has low risk rating"
         );
         riskRatingRuleGroup.addRule(lowRiskRule, 1);
 
@@ -812,7 +812,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
         Rule highRiskCheckRule = new Rule(
                 "HighRiskCheckRule",
                 "#trade.riskRating == 'Medium' || #trade.riskRating == 'High'",
-                "Trade has medium or high risk rating"
+                "TradeB has medium or high risk rating"
         );
         highRiskRuleGroup.addRule(highRiskCheckRule, 1);
 
@@ -820,7 +820,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
         Rule amlCheckRule = new Rule(
                 "AmlCheckRule",
                 "#trade.amlCheckPassed == true",
-                "Trade must pass AML check"
+                "TradeB must pass AML check"
         );
         highRiskRuleGroup.addRule(amlCheckRule, 2);
 
@@ -828,7 +828,7 @@ public class IntegratedTradeValidatorComplexDemo implements Validator<Trade> {
         Rule sanctionsCheckRule = new Rule(
                 "SanctionsCheckRule",
                 "#trade.sanctionsCheckPassed == true",
-                "Trade must pass sanctions check"
+                "TradeB must pass sanctions check"
         );
         highRiskRuleGroup.addRule(sanctionsCheckRule, 3);
 

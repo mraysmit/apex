@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.examples.lookups;
 
-import dev.mars.apex.demo.model.lookups.CustomerOrder;
+import dev.mars.apex.demo.model.CustomerOrder;
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
 import dev.mars.apex.core.config.yaml.YamlRule;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;

@@ -36,7 +36,7 @@ import java.util.logging.Logger;
  */
 
 /**
- * Configuration factory for Trade transformers.
+ * Configuration factory for TradeB transformers.
  *
 * This class is part of the APEX A powerful expression processor for Java applications.
  *
@@ -45,7 +45,7 @@ import java.util.logging.Logger;
  * @version 1.0
  */
 /**
- * Configuration factory for Trade transformers.
+ * Configuration factory for TradeB transformers.
  * This class creates configurations for the functionality of the TradeTransformerDemo class
  * using the GenericTransformer for processing.
  */
@@ -71,11 +71,11 @@ public class TradeTransformerDemoConfig {
     }
 
     /**
-     * Create a GenericTransformer for Trade objects using the GenericTransformerService.
+     * Create a GenericTransformer for TradeB objects using the GenericTransformerService.
      *
      * @param name The name of the transformer
      * @param transformerService The GenericTransformerService to use
-     * @return A GenericTransformer for Trade objects
+     * @return A GenericTransformer for TradeB objects
      */
     public GenericTransformer<Trade> createTradeTransformer(String name, GenericTransformerService transformerService) {
         List<TransformerRule<Trade>> rules = new ArrayList<>();

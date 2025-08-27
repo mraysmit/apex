@@ -70,7 +70,7 @@ rules:
     
     validations:
       - condition: "#data.tradeDate.isAfter(T(java.time.LocalDate).now().minusYears(1))"
-        message: "Trade is within last year using LocalDate.now() and minusYears()"
+        message: "TradeB is within last year using LocalDate.now() and minusYears()"
         
       - condition: "#data.settlementDate.isBefore(T(java.time.LocalDate).now().plusDays(30))"
         message: "Settlement within 30 days using LocalDate.now() and plusDays()"

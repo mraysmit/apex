@@ -182,7 +182,7 @@ import java.util.logging.Logger;
  * Standalone Execution:
  * java -cp apex-demo.jar dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap
  *
- * Through AllDemosRunner:
+ * Through AllDemosRunnerAlt:
  * java -jar apex-demo.jar --package bootstrap
  * java -jar apex-demo.jar --demo CustodyAutoRepairBootstrap
  *

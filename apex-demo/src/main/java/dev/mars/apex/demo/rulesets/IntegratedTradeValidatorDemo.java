@@ -298,7 +298,7 @@ public class IntegratedTradeValidatorDemo implements Validator<Trade> {
         Rule nullCheckRule = new Rule(
                 "NullCheckRule",
                 "#trade != null",
-                "Trade must not be null"
+                "TradeB must not be null"
         );
         ruleGroup.addRule(nullCheckRule, 1);
 
@@ -312,7 +312,7 @@ public class IntegratedTradeValidatorDemo implements Validator<Trade> {
             Rule valueValidationRule = new Rule(
                     "ValueValidationRule",
                     condition,
-                    "Trade value must be in the allowed values list"
+                    "TradeB value must be in the allowed values list"
             );
             ruleGroup.addRule(valueValidationRule, 2);
         }
@@ -327,7 +327,7 @@ public class IntegratedTradeValidatorDemo implements Validator<Trade> {
             Rule categoryValidationRule = new Rule(
                     "CategoryValidationRule",
                     condition,
-                    "Trade category must be in the allowed categories list"
+                    "TradeB category must be in the allowed categories list"
             );
             ruleGroup.addRule(categoryValidationRule, 3);
         }

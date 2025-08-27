@@ -2,7 +2,9 @@ package dev.mars.apex.demo;
 
 import dev.mars.apex.demo.model.Customer;
 import dev.mars.apex.demo.model.Product;
-import dev.mars.apex.demo.support.DemoDataProvider;
+import dev.mars.apex.demo.util.DemoDataProvider;
+import dev.mars.apex.demo.util.MockDataSources;
+import dev.mars.apex.demo.util.TestUtilities;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;
@@ -68,17 +70,17 @@ public class ReorganizationTest {
     @DisplayName("Mock data sources should provide consistent data")
     void testMockDataSources() {
         // Test customer lookup
-        var customerData = dev.mars.apex.demo.support.MockDataSources.lookupCustomer("CUST001");
+        var customerData = MockDataSources.lookupCustomer("CUST001");
         assertNotNull(customerData, "Customer lookup should return data");
         assertEquals("CUST001", customerData.get("id"), "Customer ID should match");
 
         // Test product lookup
-        var productData = dev.mars.apex.demo.support.MockDataSources.lookupProduct("PROD001");
+        var productData = MockDataSources.lookupProduct("PROD001");
         assertNotNull(productData, "Product lookup should return data");
         assertEquals("PROD001", productData.get("id"), "Product ID should match");
 
         // Test reference data lookup
-        var currencyData = dev.mars.apex.demo.support.MockDataSources.lookupReferenceData("CURRENCY", "USD");
+        var currencyData = MockDataSources.lookupReferenceData("CURRENCY", "USD");
         assertNotNull(currencyData, "Currency lookup should return data");
         assertEquals("USD", currencyData.get("code"), "Currency code should match");
     }
@@ -87,13 +89,13 @@ public class ReorganizationTest {
     @DisplayName("Test utilities should provide helper functions")
     void testUtilityFunctions() {
         // Test customer creation
-        List<Customer> customers = dev.mars.apex.demo.support.TestUtilities.createSampleCustomers();
+        List<Customer> customers = TestUtilities.createSampleCustomers();
         assertNotNull(customers, "Sample customers should not be null");
         assertFalse(customers.isEmpty(), "Sample customers should not be empty");
 
         // Test object to map conversion
         Customer testCustomer = customers.get(0);
-        var customerMap = dev.mars.apex.demo.support.TestUtilities.objectToMap(testCustomer);
+        var customerMap = TestUtilities.objectToMap(testCustomer);
         assertNotNull(customerMap, "Customer map should not be null");
         assertTrue(customerMap.containsKey("name"), "Customer map should contain name");
         assertTrue(customerMap.containsKey("age"), "Customer map should contain age");
@@ -154,7 +156,7 @@ public class ReorganizationTest {
     @Test
     @DisplayName("Data source statistics should be accurate")
     void testDataSourceStatistics() {
-        var stats = dev.mars.apex.demo.support.MockDataSources.getDataSourceStats();
+        var stats = MockDataSources.getDataSourceStats();
 
         assertNotNull(stats, "Statistics should not be null");
         assertTrue(stats.containsKey("customers"), "Statistics should include customer count");

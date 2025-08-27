@@ -414,7 +414,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.Concatenated
 
 #### 4. **Conditional Expression Lookup** - Regulatory Reporting
 ```bash
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.ConditionalExpressionLookupDemo" -pl apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.ConditionalExpressionLookupDemo" -pl apex-demo
 ```
 **Pattern**: `#jurisdiction == 'EU' ? #emirCode : #cftcCode` → Jurisdiction-specific compliance
 
@@ -479,12 +479,12 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.RiskAssessmentBoots
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.SimpleFieldLookupDemo"
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.ComputedExpressionLookupDemo"
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.ConcatenatedFieldLookupDemo"
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.ConditionalExpressionLookupDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.ConditionalExpressionLookupDemo"
 
 # Advanced Feature Demonstrations (Technical Deep Dive)
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.advanced.DynamicMethodExecutionDemo"
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.advanced.PerformanceAndExceptionDemo"
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.advanced.DataServiceManagerDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.DynamicMethodExecutionDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.PerformanceAndExceptionDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.DataServiceManagerDemo"
 # ... and 5 more advanced demos
 ```
 

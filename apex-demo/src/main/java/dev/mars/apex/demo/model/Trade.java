@@ -133,7 +133,7 @@ public class Trade implements Serializable {
 
     @Override
     public String toString() {
-        return "Trade{" +
+        return "TradeB{" +
                 "id='" + id + '\'' +
                 ", value='" + value + '\'' +
                 ", category='" + category + '\'' +

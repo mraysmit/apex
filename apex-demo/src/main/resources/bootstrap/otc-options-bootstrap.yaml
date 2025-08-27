@@ -61,9 +61,9 @@ metadata:
 rules:
   # Structural Validation Rules
   - id: "trade-date-required"
-    name: "Trade Date Required"
+    name: "TradeB Date Required"
     condition: "#tradeDate != null"
-    message: "Trade date is required for all OTC options"
+    message: "TradeB date is required for all OTC options"
     severity: "ERROR"
     priority: 1
     categories: ["structural", "required-fields"]
@@ -110,7 +110,7 @@ rules:
     categories: ["financial", "sizing"]
 
   - id: "expiry-after-trade"
-    name: "Expiry After Trade Date"
+    name: "Expiry After TradeB Date"
     condition: "#expiryDate != null && #tradeDate != null && #expiryDate.isAfter(#tradeDate)"
     message: "Expiry date must be after trade date"
     severity: "ERROR"

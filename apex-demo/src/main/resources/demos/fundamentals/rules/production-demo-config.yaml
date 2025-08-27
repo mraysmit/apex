@@ -256,7 +256,7 @@ demo-data-generation:
         type: "random-choice"
         values: ["Equity", "FixedIncome", "ETF", "Commodity", "Currency"]
 
-  # Trade data generation
+  # TradeB data generation
   trades:
     count: 5000
     fields:

@@ -21,7 +21,7 @@
 #
 # VALIDATION CATEGORIES:
 # 1. STRUCTURAL VALIDATION - Basic trade data integrity
-#    - Trade ID format and uniqueness
+#    - TradeB ID format and uniqueness
 #    - Required field presence validation
 #    - Data type and format validation
 #
@@ -31,7 +31,7 @@
 #    - Counterparty eligibility checks
 #
 # 3. TEMPORAL VALIDATION - Date and time constraints
-#    - Trade date vs maturity date relationships
+#    - TradeB date vs maturity date relationships
 #    - Minimum and maximum maturity periods
 #    - Settlement date calculations
 #
@@ -51,7 +51,7 @@
 # - Post-trade processing and settlement
 # - Regulatory reporting and compliance
 # - Risk management and exposure calculation
-# - Trade booking and confirmation systems
+# - TradeB booking and confirmation systems
 #
 # INTEGRATION POINTS:
 # - Trading platforms and order management systems
@@ -93,7 +93,7 @@ metadata:
 # - INFO: Informational alerts for monitoring and reporting
 #
 # VALIDATION CATEGORIES:
-# - Basic Trade Structure: ID, counterparty, fundamental data integrity
+# - Basic TradeB Structure: ID, counterparty, fundamental data integrity
 # - Financial Amounts: Notional validation, currency checks, limits
 # - Temporal Validation: Date relationships and maturity constraints
 # - Commodity-Specific: Asset class validation and reference data
@@ -109,16 +109,16 @@ metadata:
 rules:
   # Basic trade structure validation
   - id: "trade-id-required"
-    name: "Trade ID Required"
+    name: "TradeB ID Required"
     condition: "#data.tradeId != null && #data.tradeId.trim().length() > 0"
-    message: "Trade ID is required and cannot be empty"
+    message: "TradeB ID is required and cannot be empty"
     severity: "ERROR"
     priority: 1
     
   - id: "trade-id-format"
-    name: "Trade ID Format"
+    name: "TradeB ID Format"
     condition: "#data.tradeId != null && #data.tradeId.matches('^[A-Z]{3}[0-9]{3,6}$')"
-    message: "Trade ID must follow format: 3 letters + 3-6 digits (e.g., TRS001234)"
+    message: "TradeB ID must follow format: 3 letters + 3-6 digits (e.g., TRS001234)"
     severity: "ERROR"
     priority: 1
     
@@ -162,9 +162,9 @@ rules:
     
   # Date validation
   - id: "trade-date-required"
-    name: "Trade Date Required"
+    name: "TradeB Date Required"
     condition: "#data.tradeDate != null"
-    message: "Trade date is required"
+    message: "TradeB date is required"
     severity: "ERROR"
     priority: 1
     
@@ -176,7 +176,7 @@ rules:
     priority: 1
     
   - id: "maturity-after-trade"
-    name: "Maturity After Trade Date"
+    name: "Maturity After TradeB Date"
     condition: "#data.maturityDate != null && #data.tradeDate != null && #data.maturityDate.isAfter(#data.tradeDate)"
     message: "Maturity date must be after trade date"
     severity: "ERROR"

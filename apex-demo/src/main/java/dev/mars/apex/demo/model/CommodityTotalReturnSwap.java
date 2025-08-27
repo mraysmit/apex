@@ -32,7 +32,7 @@ import java.util.Objects;
  */
 public class CommodityTotalReturnSwap {
 
-    // Trade Identification
+    // TradeB Identification
     private String tradeId;
     private String externalTradeId;
     private LocalDate tradeDate;

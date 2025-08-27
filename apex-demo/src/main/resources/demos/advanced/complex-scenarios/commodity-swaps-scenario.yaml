@@ -58,7 +58,7 @@ scenario:
   business-domain: "Commodity Derivatives"
   business-process: "Commodity Swap Validation and Enrichment"
   regulatory-requirements:
-    - "EMIR Trade Reporting"
+    - "EMIR TradeB Reporting"
     - "CFTC Swap Data Repository"
     - "REMIT Energy Trading"
     - "Basel III Capital Requirements"
@@ -121,7 +121,7 @@ business:
   # Regulatory context
   regulatory-scope: "EMIR, CFTC, REMIT"
   compliance-requirements:
-    - requirement: "EMIR Trade Reporting"
+    - requirement: "EMIR TradeB Reporting"
       deadline: "T+1"
       criticality: "mandatory"
     - requirement: "CFTC Swap Data Repository"

@@ -25,7 +25,7 @@ metadata:
 # BATCH PROCESSING PIPELINE:
 # 1. VALIDATION STAGE - High-speed validation of incoming data records
 #    - Customer validation for account processing
-#    - Trade validation for settlement systems
+#    - TradeB validation for settlement systems
 #    - Risk threshold checks for compliance
 #    - Data quality validation for ETL pipelines
 #
@@ -116,12 +116,12 @@ rules:
       performance_optimized: true
       batch_friendly: true
 
-  # Trade validation rule for financial batch processing
+  # TradeB validation rule for financial batch processing
   - id: "batch-trade-validation"
     name: "batch-trade-validation"
     description: "High-speed trade validation for settlement processing"
     condition: "#data.amount > 0 && #data.currency != null && #data.counterparty != null"
-    message: "Trade ready for settlement"
+    message: "TradeB ready for settlement"
     priority: 2
     metadata:
       category: "financial"
@@ -133,7 +133,7 @@ rules:
     name: "batch-risk-threshold"
     description: "Risk threshold check for batch risk calculations"
     condition: "#data.amount <= 1000000"
-    message: "Trade within risk limits"
+    message: "TradeB within risk limits"
     priority: 3
     metadata:
       category: "risk"

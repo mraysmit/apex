@@ -1,0 +1,70 @@
+{
+  "currencies": [
+    {
+      "currency": "USD",
+      "currencyName": "US Dollar",
+      "currencyRegion": "North America",
+      "timezone": "EST",
+      "tradingHours": "09:00-17:00",
+      "symbol": "$",
+      "decimalPlaces": 2,
+      "active": true,
+      "majorCurrency": true
+    },
+    {
+      "currency": "EUR",
+      "currencyName": "Euro",
+      "currencyRegion": "Europe",
+      "timezone": "CET",
+      "tradingHours": "08:00-16:00",
+      "symbol": "€",
+      "decimalPlaces": 2,
+      "active": true,
+      "majorCurrency": true
+    },
+    {
+      "currency": "GBP",
+      "currencyName": "British Pound",
+      "currencyRegion": "Europe",
+      "timezone": "GMT",
+      "tradingHours": "08:00-16:00",
+      "symbol": "£",
+      "decimalPlaces": 2,
+      "active": true,
+      "majorCurrency": true
+    },
+    {
+      "currency": "JPY",
+      "currencyName": "Japanese Yen",
+      "currencyRegion": "Asia Pacific",
+      "timezone": "JST",
+      "tradingHours": "09:00-15:00",
+      "symbol": "¥",
+      "decimalPlaces": 0,
+      "active": true,
+      "majorCurrency": true
+    },
+    {
+      "currency": "CHF",
+      "currencyName": "Swiss Franc",
+      "currencyRegion": "Europe",
+      "timezone": "CET",
+      "tradingHours": "08:00-16:00",
+      "symbol": "CHF",
+      "decimalPlaces": 2,
+      "active": true,
+      "majorCurrency": true
+    },
+    {
+      "currency": "CAD",
+      "currencyName": "Canadian Dollar",
+      "currencyRegion": "North America",
+      "timezone": "EST",
+      "tradingHours": "09:00-17:00",
+      "symbol": "C$",
+      "decimalPlaces": 2,
+      "active": true,
+      "majorCurrency": true
+    }
+  ]
+}

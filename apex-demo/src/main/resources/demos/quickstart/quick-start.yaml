@@ -33,7 +33,7 @@
 #
 # USAGE:
 # This configuration is used by:
-# - QuickStartDemo.java - 5-minute introduction to the rules engine
+# - QuickStartDemoB.java - 5-minute introduction to the rules engine
 # - YamlDatasetDemo.java - YAML configuration demonstration
 # - New developer onboarding and training
 # - Rule engine proof-of-concept implementations

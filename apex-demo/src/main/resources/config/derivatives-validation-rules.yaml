@@ -39,17 +39,17 @@ metadata:
 # required fields for processing and risk management.
 #
 rules:
-  # Trade Identification Rules
+  # TradeB Identification Rules
   - id: "trade-id-format"
-    name: "Trade ID Format Validation"
+    name: "TradeB ID Format Validation"
     condition: "#tradeId != null && #tradeId.matches('^[A-Z]{2}[0-9]{8}$')"
-    message: "Trade ID must follow format: 2 letters followed by 8 digits"
+    message: "TradeB ID must follow format: 2 letters followed by 8 digits"
     severity: "ERROR"
     priority: 1
     categories: ["structural", "identification"]
 
   - id: "unique-trade-reference"
-    name: "Unique Trade Reference"
+    name: "Unique TradeB Reference"
     condition: "#uniqueTradeReference != null && #uniqueTradeReference.length() >= 10"
     message: "Unique trade reference must be at least 10 characters"
     severity: "ERROR"
@@ -133,7 +133,7 @@ rules:
   - id: "high-risk-counterparty"
     name: "High Risk Counterparty Check"
     condition: "#counterpartyCreditRating == null || !#counterpartyCreditRating in {'CCC', 'CC', 'C', 'D'}"
-    message: "Trade with high-risk counterparty requires additional approval"
+    message: "TradeB with high-risk counterparty requires additional approval"
     severity: "INFO"
     priority: 5
     categories: ["risk-management", "credit-risk", "approval"]
@@ -158,7 +158,7 @@ rules:
   - id: "regulatory-reporting-required"
     name: "Regulatory Reporting Required"
     condition: "#notionalAmount != null && #notionalAmount >= 50000"
-    message: "Trade requires regulatory reporting due to notional amount threshold"
+    message: "TradeB requires regulatory reporting due to notional amount threshold"
     severity: "INFO"
     priority: 5
     categories: ["regulatory", "reporting"]
@@ -166,7 +166,7 @@ rules:
   - id: "clearing-requirement"
     name: "Central Clearing Requirement"
     condition: "#productType != null && #productType in {'IRS', 'CDS'} && #notionalAmount >= 1000000"
-    message: "Trade may be subject to central clearing requirements"
+    message: "TradeB may be subject to central clearing requirements"
     severity: "INFO"
     priority: 4
     categories: ["regulatory", "clearing"]

@@ -70,23 +70,23 @@ public class FinancialValidationRuleSet {
     private static List<Rule> createBasicFieldValidationRules() {
         List<Rule> rules = new ArrayList<>();
         
-        // Trade identification rules
+        // TradeB identification rules
         rules.add(new Rule("trade-id-required", 
                           "#tradeId != null && #tradeId.trim().length() > 0", 
-                          "Trade ID is required"));
+                          "TradeB ID is required"));
         
         rules.add(new Rule("trade-id-format", 
                           "#tradeId != null && #tradeId.matches('^[A-Z]{3}[0-9]{3,6}$')", 
-                          "Trade ID must follow format: 3 letters + 3-6 digits"));
+                          "TradeB ID must follow format: 3 letters + 3-6 digits"));
         
         rules.add(new Rule("external-trade-id-unique", 
                           "#externalTradeId == null || (#externalTradeId != null && #externalTradeId.trim().length() > 0)", 
-                          "External Trade ID must be non-empty if provided"));
+                          "External TradeB ID must be non-empty if provided"));
         
         // Date validation rules
         rules.add(new Rule("trade-date-required", 
                           "#tradeDate != null", 
-                          "Trade date is required"));
+                          "TradeB date is required"));
         
         rules.add(new Rule("effective-date-required", 
                           "#effectiveDate != null", 
@@ -360,12 +360,12 @@ public class FinancialValidationRuleSet {
     public static RuleGroup createPostTradeProcessingRules() {
         List<Rule> rules = new ArrayList<>();
         
-        // Trade status validation
+        // TradeB status validation
         rules.add(new Rule("trade-status-valid", 
                           "#tradeStatus != null && " +
                           "(#tradeStatus == 'PENDING' || #tradeStatus == 'CONFIRMED' || " +
                           "#tradeStatus == 'SETTLED' || #tradeStatus == 'CANCELLED')", 
-                          "Trade status must be PENDING, CONFIRMED, SETTLED, or CANCELLED"));
+                          "TradeB status must be PENDING, CONFIRMED, SETTLED, or CANCELLED"));
         
         // Booking status validation
         rules.add(new Rule("booking-status-valid", 
@@ -378,7 +378,7 @@ public class FinancialValidationRuleSet {
                           "#settlementCurrency == null || #settlementCurrency == #paymentCurrency", 
                           "Settlement currency must match payment currency"));
         
-        RuleGroup ruleGroup = new RuleGroup("post-trade-processing", "business", "Post-Trade Processing Rules", "Rules for post-trade processing and settlement", 30, true);
+        RuleGroup ruleGroup = new RuleGroup("post-trade-processing", "business", "Post-TradeB Processing Rules", "Rules for post-trade processing and settlement", 30, true);
 
         // Add all rules to the group
         int sequenceNumber = 1;

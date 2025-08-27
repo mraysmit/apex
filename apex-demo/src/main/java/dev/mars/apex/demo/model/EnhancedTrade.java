@@ -21,8 +21,8 @@ import java.util.Map;
  */
 
 /**
- * Enhanced Trade model with settlement and custody domain concepts.
- * This class extends the basic Trade model with additional properties
+ * Enhanced TradeB model with settlement and custody domain concepts.
+ * This class extends the basic TradeB model with additional properties
  * relevant to financial services domains including settlement, custody,
  * compliance, and risk management capabilities.
  *

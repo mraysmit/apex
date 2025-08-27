@@ -24,7 +24,7 @@ metadata:
   version: "1.0.0"
   description: "Associates settlement instructions with custody auto-repair processing for intelligent failure resolution"
   type: "scenario"
-  business-domain: "Post-Trade Settlement"
+  business-domain: "Post-TradeB Settlement"
   regulatory-scope: "Asian Markets (Japan, Hong Kong, Singapore, Korea)"
   owner: "settlements.asia@company.com"
   created-by: "Mark Andrew Ray-Smith Cityline Ltd"
@@ -55,7 +55,7 @@ scenario:
     - "DeliveryInstruction"
   
   # Business context
-  business-domain: "Post-Trade Settlement"
+  business-domain: "Post-TradeB Settlement"
   business-process: "Settlement Instruction Auto-Repair"
   regulatory-requirements:
     - "Asian Markets Settlement Rules"
@@ -114,7 +114,7 @@ business:
   technical-lead: "tech.settlements@company.com"
   
   # Business context
-  business-domain: "Post-Trade Settlement"
+  business-domain: "Post-TradeB Settlement"
   business-process: "Settlement Auto-Repair"
   business-criticality: "critical"
   

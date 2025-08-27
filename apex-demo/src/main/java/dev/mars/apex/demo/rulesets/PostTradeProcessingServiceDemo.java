@@ -124,9 +124,9 @@ public class PostTradeProcessingServiceDemo {
         RuleResult result = config.validateTradeForSettlementWithResult(trade);
 
         if (result.isTriggered()) {
-            LOGGER.info("Trade is valid for settlement");
+            LOGGER.info("TradeB is valid for settlement");
         } else {
-            LOGGER.info("Trade is not valid for settlement");
+            LOGGER.info("TradeB is not valid for settlement");
         }
     }
 
@@ -140,9 +140,9 @@ public class PostTradeProcessingServiceDemo {
         RuleResult result = config.matchTradeWithCounterpartyWithResult(trade);
 
         if (result.isTriggered()) {
-            LOGGER.info("Trade is matched with counterparty");
+            LOGGER.info("TradeB is matched with counterparty");
         } else {
-            LOGGER.info("Trade is not matched with counterparty");
+            LOGGER.info("TradeB is not matched with counterparty");
         }
     }
 
@@ -156,9 +156,9 @@ public class PostTradeProcessingServiceDemo {
         RuleResult result = config.affirmTradeWithResult(trade);
 
         if (result.isTriggered()) {
-            LOGGER.info("Trade is affirmed");
+            LOGGER.info("TradeB is affirmed");
         } else {
-            LOGGER.info("Trade is not affirmed");
+            LOGGER.info("TradeB is not affirmed");
         }
     }
 
@@ -172,9 +172,9 @@ public class PostTradeProcessingServiceDemo {
         RuleResult result = config.confirmTradeWithResult(trade);
 
         if (result.isTriggered()) {
-            LOGGER.info("Trade is confirmed");
+            LOGGER.info("TradeB is confirmed");
         } else {
-            LOGGER.info("Trade is not confirmed");
+            LOGGER.info("TradeB is not confirmed");
         }
     }
 
@@ -188,9 +188,9 @@ public class PostTradeProcessingServiceDemo {
         RuleResult result = config.settleTradeWithResult(trade);
 
         if (result.isTriggered()) {
-            LOGGER.info("Trade is settled");
+            LOGGER.info("TradeB is settled");
         } else {
-            LOGGER.info("Trade is not settled");
+            LOGGER.info("TradeB is not settled");
         }
     }
 

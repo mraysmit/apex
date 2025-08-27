@@ -47,7 +47,7 @@ scenarios:
     enabled: true
     
   - name: "settlement-processing"
-    description: "Trade settlement processing"
+    description: "TradeB settlement processing"
     enabled: true
 
 # Inline dataset examples

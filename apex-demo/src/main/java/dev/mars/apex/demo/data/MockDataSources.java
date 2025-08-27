@@ -105,7 +105,7 @@ public class MockDataSources {
     /**
      * Creates a list of source records for demonstration.
      * 
-     * @return List of Trade objects
+     * @return List of TradeB objects
      */
     public static List<Trade> createSourceRecords() {
         return Arrays.asList(

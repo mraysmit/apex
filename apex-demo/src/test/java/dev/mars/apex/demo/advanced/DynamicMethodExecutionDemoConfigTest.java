@@ -1,6 +1,7 @@
 package dev.mars.apex.demo.advanced;
 
 
+import dev.mars.apex.demo.bootstrap.DynamicMethodExecutionDemoConfig;
 import dev.mars.apex.demo.model.Trade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

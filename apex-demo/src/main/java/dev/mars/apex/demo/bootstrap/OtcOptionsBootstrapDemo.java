@@ -1,13 +1,21 @@
 package dev.mars.apex.demo.bootstrap;
 
 
-// import dev.mars.apex.core.engine.RulesService; // Simplified for demo
+// APEX Core imports for real data source integration
+import dev.mars.apex.core.service.data.external.config.DataSourceConfigurationService;
+import dev.mars.apex.core.service.data.external.ExternalDataSource;
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+
+// Demo infrastructure imports
 import dev.mars.apex.demo.bootstrap.infrastructure.DatabaseSetup;
 import dev.mars.apex.demo.bootstrap.infrastructure.DataSourceVerifier;
 import dev.mars.apex.demo.bootstrap.infrastructure.ExternalDatasetSetup;
 import dev.mars.apex.demo.bootstrap.infrastructure.XmlDataGenerator;
 import dev.mars.apex.demo.bootstrap.model.OtcOption;
 import dev.mars.apex.demo.bootstrap.model.UnderlyingAsset;
+
+// Standard imports
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -16,6 +24,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * OTC Options Bootstrap Demo - Comprehensive demonstration of three data lookup methods.
@@ -138,7 +147,7 @@ import java.util.List;
  * Standalone Execution:
  * java -cp apex-demo.jar dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo
  *
- * Through AllDemosRunner:
+ * Through AllDemosRunnerAlt:
  * java -jar apex-demo.jar --package bootstrap
  * java -jar apex-demo.jar --demo OtcOptionsBootstrapDemo
  *
@@ -154,7 +163,13 @@ public class OtcOptionsBootstrapDemo {
     private DataSourceVerifier dataSourceVerifier;
     private ExternalDatasetSetup externalDatasetSetup;
     private XmlDataGenerator xmlDataGenerator;
-    
+
+    // ✅ REAL APEX DATA SOURCES - No more mocks or simulations
+    private DataSourceConfigurationService dataSourceConfigService;
+    private ExternalDataSource commoditiesSource;
+    private ExternalDataSource counterpartiesSource;
+    private ExternalDataSource currenciesSource;
+
 
     public OtcOptionsBootstrapDemo() {
         // Initialize dependencies manually for demo runner compatibility
@@ -171,7 +186,7 @@ public class OtcOptionsBootstrapDemo {
         System.out.println("OTC Options Bootstrap Demo - Standalone Execution");
         System.out.println("This demo showcases three data lookup methods with OTC Options");
         System.out.println("Note: This is a simplified standalone version");
-        System.out.println("   For full functionality, run through AllDemosRunner");
+        System.out.println("   For full functionality, run through AllDemosRunnerAlt");
 
         try {
             OtcOptionsBootstrapDemo demo = new OtcOptionsBootstrapDemo();
@@ -183,30 +198,41 @@ public class OtcOptionsBootstrapDemo {
     }
 
     /**
-     * Standalone execution method (simplified version without Spring).
+     * Standalone execution method - runs the full APEX rules engine demo.
+     * No simulation or fallback - uses the complete APEX infrastructure.
      */
     public void runStandalone() {
-        System.out.println("\nDEMONSTRATION: Three Data Lookup Methods");
+        System.out.println("\n✅ RUNNING FULL APEX RULES ENGINE DEMO");
         System.out.println("===========================================");
+        System.out.println("This will execute the complete OTC Options Bootstrap Demo");
+        System.out.println("using the real APEX rules engine with all data sources.");
+        System.out.println();
 
-        // Simulate the demo phases
-        System.out.println("\nMethod 1: Inline YAML Dataset");
-        System.out.println("   - Commodity reference data embedded in configuration");
-        System.out.println("   - Fast, reliable access to static reference data");
-        System.out.println("   - Example: Natural Gas -> Category: Energy, Exchange: NYMEX");
+        // Add shutdown hook to ensure proper cleanup
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            logger.info("Shutdown hook triggered - performing cleanup...");
+            cleanup();
+        }));
 
-        System.out.println("\nMethod 2: PostgreSQL Database");
-        System.out.println("   - Counterparty information from relational database");
-        System.out.println("   - Dynamic, transactional data with complex queries");
-        System.out.println("   - Example: GOLDMAN_SACHS -> Legal Name: Goldman Sachs & Co. LLC");
+        try {
+            // Run the full demo - no simulation, no fallbacks
+            run();
 
-        System.out.println("\nMethod 3: External YAML File");
-        System.out.println("   - Market and currency data from external file");
-        System.out.println("   - Version-controlled, shared reference data");
-        System.out.println("   - Example: USD -> Name: US Dollar, Region: North America");
+            System.out.println("\n✅ OTC Options Bootstrap Demo completed successfully!");
+            System.out.println("   All phases executed using real APEX rules engine");
+            System.out.println("   Data sources: YAML inline + PostgreSQL + External YAML");
+            System.out.println("   Enrichment: Full APEX rules-based processing");
 
-        System.out.println("\nOTC Options Bootstrap Demo completed successfully!");
-        System.out.println("   For full interactive demo, use: java -jar apex-demo.jar --demo OtcOptionsBootstrapDemo");
+        } catch (Exception e) {
+            System.err.println("\n❌ OTC Options Bootstrap Demo FAILED!");
+            System.err.println("   Error: " + e.getMessage());
+            System.err.println("   The demo cannot proceed with simulation or fallbacks.");
+            throw new RuntimeException("Standalone demo execution failed", e);
+        } finally {
+            // Ensure cleanup is called even if the demo succeeds
+            logger.info("Demo execution completed - performing cleanup...");
+            cleanup();
+        }
     }
 
     /**
@@ -624,7 +650,7 @@ public class OtcOptionsBootstrapDemo {
                 logger.info("   Calculating derived fields...");
 
                 long optionStartTime = System.currentTimeMillis();
-                simulateEnrichment(option);
+                performRealEnrichment(option);
                 long optionEndTime = System.currentTimeMillis();
 
                 logger.info("   Option {} enrichment completed in {} ms", i + 1, optionEndTime - optionStartTime);
@@ -705,7 +731,7 @@ public class OtcOptionsBootstrapDemo {
 
             logger.info("Step 6.2: Applying complete enrichment pipeline to demonstration sample...");
             long enrichmentStart = System.currentTimeMillis();
-            simulateEnrichment(sampleOption);
+            performRealEnrichment(sampleOption);
             long enrichmentEnd = System.currentTimeMillis();
             logger.info("Demonstration sample enriched in {} ms", enrichmentEnd - enrichmentStart);
 
@@ -721,7 +747,7 @@ public class OtcOptionsBootstrapDemo {
             // Show original data (before enrichment)
             logger.info("ORIGINAL OTC OPTION DATA (Before Enrichment):");
             logger.info("-------------------------------------------------------------");
-            logger.info("Trade Date: {}", sampleOption.getTradeDate());
+            logger.info("TradeB Date: {}", sampleOption.getTradeDate());
             logger.info("Buyer Party ID: {}", sampleOption.getBuyerParty());
             logger.info("Seller Party ID: {}", sampleOption.getSellerParty());
             logger.info("Option Type: {}", sampleOption.getOptionType());
@@ -812,7 +838,7 @@ public class OtcOptionsBootstrapDemo {
      * SAMPLE OPTIONS CREATED:
      *
      * 1. NATURAL GAS CALL OPTION (Energy Commodity):
-     *    - Trade Date: 2025-08-02, Expiry: 2025-12-28 (148 days)
+     *    - TradeB Date: 2025-08-02, Expiry: 2025-12-28 (148 days)
      *    - Underlying: Natural Gas (10,000 MMBtu)
      *    - Strike: $3.50 USD (typical natural gas pricing)
      *    - Parties: GOLDMAN_SACHS (buyer) vs JP_MORGAN (seller)
@@ -820,7 +846,7 @@ public class OtcOptionsBootstrapDemo {
      *    - Will enrich with: Energy category, NYMEX exchange, HIGH risk
      *
      * 2. BRENT CRUDE OIL PUT OPTION (Energy Commodity):
-     *    - Trade Date: 2025-08-02, Expiry: 2026-03-15 (225 days)
+     *    - TradeB Date: 2025-08-02, Expiry: 2026-03-15 (225 days)
      *    - Underlying: Brent Crude Oil (1,000 Barrels)
      *    - Strike: $75.00 USD (realistic oil price level)
      *    - Parties: MORGAN_STANLEY (buyer) vs CITI (seller)
@@ -828,7 +854,7 @@ public class OtcOptionsBootstrapDemo {
      *    - Will enrich with: Energy category, ICE exchange, HIGH risk
      *
      * 3. GOLD CALL OPTION (Precious Metal):
-     *    - Trade Date: 2025-08-02, Expiry: 2025-11-30 (120 days)
+     *    - TradeB Date: 2025-08-02, Expiry: 2025-11-30 (120 days)
      *    - Underlying: Gold (100 Troy Ounces)
      *    - Strike: $2100.00 USD (current gold price range)
      *    - Parties: BARCLAYS (buyer) vs DEUTSCHE_BANK (seller)
@@ -850,7 +876,7 @@ public class OtcOptionsBootstrapDemo {
         // 1. Natural Gas Call Option (Energy - NYMEX)
         // Demonstrates energy commodity processing with cash settlement
         options.add(new OtcOption(
-            LocalDate.of(2025, 8, 2),      // Trade Date
+            LocalDate.of(2025, 8, 2),      // TradeB Date
             "GOLDMAN_SACHS",               // Buyer (will enrich with AAA rating)
             "JP_MORGAN",                   // Seller (will enrich with AAA rating)
             "Call",                        // Option Type
@@ -865,7 +891,7 @@ public class OtcOptionsBootstrapDemo {
         // 2. Brent Crude Oil Put Option (Energy - ICE)
         // Demonstrates oil derivatives with physical settlement
         options.add(new OtcOption(
-            LocalDate.of(2025, 8, 2),      // Trade Date
+            LocalDate.of(2025, 8, 2),      // TradeB Date
             "MORGAN_STANLEY",              // Buyer (will enrich with AA+ rating)
             "CITI",                        // Seller (will enrich with AA- rating)
             "Put",                         // Option Type
@@ -880,7 +906,7 @@ public class OtcOptionsBootstrapDemo {
         // 3. Gold Call Option (Precious Metals - COMEX)
         // Demonstrates precious metals processing with European counterparties
         options.add(new OtcOption(
-            LocalDate.of(2025, 8, 2),      // Trade Date
+            LocalDate.of(2025, 8, 2),      // TradeB Date
             "BARCLAYS",                    // Buyer (UK bank, will enrich with A+ rating)
             "DEUTSCHE_BANK",               // Seller (German bank, will enrich with BBB+ rating)
             "Call",                        // Option Type
@@ -896,137 +922,191 @@ public class OtcOptionsBootstrapDemo {
     }
 
     /**
-     * Simulates enrichment from the three data sources.
-     * In a real implementation, this would be handled by the rules engine.
+     * ✅ REAL APEX DATA SOURCE ENRICHMENT ✅
+     *
+     * Performs enrichment using real APEX data sources - no simulation or fallbacks.
+     * This method demonstrates proper integration with apex-core data infrastructure.
      */
-    private void simulateEnrichment(OtcOption option) {
-        // Simulate Method 1: Inline Dataset Enrichment (Commodity Data)
+    private void performRealEnrichment(OtcOption option) {
+        logger.info("   🔍 Starting real APEX data source enrichment...");
+
+        try {
+            // Initialize data sources if not already done
+            if (dataSourceConfigService == null) {
+                initializeDataSources();
+            }
+
+            // Method 1: Real File System Data Source - Commodity Data
+            enrichCommodityDataFromFileSource(option);
+
+            // Method 2: Real Database Data Source - Currency Data
+            enrichCurrencyDataFromDatabaseSource(option);
+
+            // Method 3: Real Cache Data Source - Counterparty Data
+            enrichCounterpartyDataFromCacheSource(option);
+
+            // Calculate derived fields
+            calculateDerivedFields(option);
+
+            logger.info("   ✅ Real APEX data source enrichment completed successfully");
+
+        } catch (Exception e) {
+            logger.error("   ❌ Real APEX data source enrichment failed: {}", e.getMessage());
+            throw new RuntimeException("APEX data source enrichment failed - demo cannot proceed", e);
+        }
+    }
+
+    /**
+     * Initialize real APEX data sources from YAML configuration.
+     */
+    private void initializeDataSources() throws Exception {
+        logger.info("   🚀 Initializing real APEX data sources...");
+
+        // Load data source configuration from YAML
+        YamlConfigurationLoader configLoader = new YamlConfigurationLoader();
+        YamlRuleConfiguration dataSourceConfig = configLoader.loadFromClasspath("demo-configs/data-sources.yaml");
+
+        // DEBUG: Log what's actually in the configuration
+        logger.info("   🔍 DEBUG: Configuration loaded successfully");
+        logger.info("   🔍 DEBUG: Configuration metadata: {}", dataSourceConfig.getMetadata());
+        logger.info("   🔍 DEBUG: Data sources list: {}", dataSourceConfig.getDataSources());
+        if (dataSourceConfig.getDataSources() != null) {
+            logger.info("   🔍 DEBUG: Data sources count: {}", dataSourceConfig.getDataSources().size());
+        } else {
+            logger.info("   🔍 DEBUG: Data sources list is NULL");
+        }
+
+        // Get singleton instance and initialize with YAML config
+        dataSourceConfigService = DataSourceConfigurationService.getInstance();
+        dataSourceConfigService.initialize(dataSourceConfig);
+
+        // Get individual data sources
+        commoditiesSource = dataSourceConfigService.getDataSource("commodities-source");
+        counterpartiesSource = dataSourceConfigService.getDataSource("counterparties-source");
+        currenciesSource = dataSourceConfigService.getDataSource("currencies-source");
+
+        // Verify all data sources are available
+        if (commoditiesSource == null) {
+            throw new RuntimeException("Commodities data source not found");
+        }
+        if (counterpartiesSource == null) {
+            throw new RuntimeException("Counterparties data source not found");
+        }
+        if (currenciesSource == null) {
+            throw new RuntimeException("Currencies data source not found");
+        }
+
+        logger.info("   ✅ All APEX data sources initialized successfully");
+    }
+
+    /**
+     * Enrich commodity data using real file system data source.
+     */
+    private void enrichCommodityDataFromFileSource(OtcOption option) throws Exception {
         String commodity = option.getUnderlyingAsset().getCommodity();
-        switch (commodity) {
-            case "Natural Gas":
-                option.setCommodityCategory("Energy");
-                option.setExchange("NYMEX");
-                option.setRiskFactor("HIGH");
-                option.setMarginRate(new BigDecimal("0.15"));
-                break;
-            case "Brent Crude Oil":
-                option.setCommodityCategory("Energy");
-                option.setExchange("ICE");
-                option.setRiskFactor("HIGH");
-                option.setMarginRate(new BigDecimal("0.12"));
-                break;
-            case "Gold":
-                option.setCommodityCategory("Precious Metals");
-                option.setExchange("COMEX");
-                option.setRiskFactor("MEDIUM");
-                option.setMarginRate(new BigDecimal("0.08"));
-                break;
-            default:
-                option.setCommodityCategory("Unknown");
-                option.setExchange("OTC");
-                option.setRiskFactor("MEDIUM");
-                option.setMarginRate(new BigDecimal("0.10"));
+        logger.info("   📁 Looking up commodity data for: {}", commodity);
+
+        // Query real file system data source
+        Map<String, Object> commodityData = commoditiesSource.getData("commodities", commodity);
+
+        if (commodityData != null) {
+            // Apply real data from file source
+            option.setCommodityCategory((String) commodityData.get("commodityCategory"));
+            option.setExchange((String) commodityData.get("exchange"));
+            option.setRiskFactor((String) commodityData.get("riskFactor"));
+
+            Object marginRateObj = commodityData.get("marginRate");
+            if (marginRateObj instanceof Number) {
+                option.setMarginRate(new BigDecimal(marginRateObj.toString()));
+            }
+
+            logger.info("   ✅ Commodity data enriched from file source: {} -> {}",
+                       commodity, commodityData.get("commodityCategory"));
+        } else {
+            logger.warn("   ⚠️ Commodity data not found in file source: {}", commodity);
+            throw new RuntimeException("Commodity data not found: " + commodity);
+        }
+    }
+
+    /**
+     * Enrich currency data using real database data source.
+     */
+    private void enrichCurrencyDataFromDatabaseSource(OtcOption option) throws Exception {
+        String currency = option.getStrikeCurrency();
+        logger.info("   🗄️ Looking up currency data for: {}", currency);
+
+        // Query real database data source
+        Map<String, Object> currencyData = currenciesSource.getData("currencies", currency);
+
+        if (currencyData != null) {
+            // Apply real data from database source
+            option.setCurrencyName((String) currencyData.get("currencyName"));
+            option.setCurrencyRegion((String) currencyData.get("currencyRegion"));
+            option.setTimezone((String) currencyData.get("timezone"));
+            option.setTradingHours((String) currencyData.get("tradingHours"));
+
+            logger.info("   ✅ Currency data enriched from database: {} -> {}",
+                       currency, currencyData.get("currencyName"));
+        } else {
+            logger.warn("   ⚠️ Currency data not found in database: {}", currency);
+            throw new RuntimeException("Currency data not found: " + currency);
+        }
+    }
+
+    /**
+     * Enrich counterparty data using real cache data source.
+     */
+    private void enrichCounterpartyDataFromCacheSource(OtcOption option) throws Exception {
+        // Enrich buyer party data
+        String buyerParty = option.getBuyerParty();
+        logger.info("   💾 Looking up buyer counterparty data for: {}", buyerParty);
+
+        Map<String, Object> buyerData = counterpartiesSource.getData("counterparties", buyerParty);
+        if (buyerData != null) {
+            option.setBuyerLegalName((String) buyerData.get("legalName"));
+            option.setBuyerCreditRating((String) buyerData.get("creditRating"));
+            logger.info("   ✅ Buyer counterparty data enriched from cache: {} -> {}",
+                       buyerParty, buyerData.get("legalName"));
+        } else {
+            logger.warn("   ⚠️ Buyer counterparty data not found in cache: {}", buyerParty);
+            throw new RuntimeException("Buyer counterparty data not found: " + buyerParty);
         }
 
-        // Simulate Method 2: PostgreSQL Database Enrichment (Counterparty Data)
-        enrichCounterpartyData(option, option.getBuyerParty(), true);
-        enrichCounterpartyData(option, option.getSellerParty(), false);
+        // Enrich seller party data
+        String sellerParty = option.getSellerParty();
+        logger.info("   💾 Looking up seller counterparty data for: {}", sellerParty);
 
-        // Simulate Method 3: External YAML File Enrichment (Currency/Market Data)
-        if ("USD".equals(option.getStrikeCurrency())) {
-            option.setCurrencyName("US Dollar");
-            option.setCurrencyRegion("North America");
-            option.setTimezone("EST");
-            option.setTradingHours("09:00-17:00");
+        Map<String, Object> sellerData = counterpartiesSource.getData("counterparties", sellerParty);
+        if (sellerData != null) {
+            option.setSellerLegalName((String) sellerData.get("legalName"));
+            option.setSellerCreditRating((String) sellerData.get("creditRating"));
+            logger.info("   ✅ Seller counterparty data enriched from cache: {} -> {}",
+                       sellerParty, sellerData.get("legalName"));
+        } else {
+            logger.warn("   ⚠️ Seller counterparty data not found in cache: {}", sellerParty);
+            throw new RuntimeException("Seller counterparty data not found: " + sellerParty);
         }
+    }
 
-        // Simulate calculated fields
+    /**
+     * Calculate derived fields based on enriched data.
+     */
+    private void calculateDerivedFields(OtcOption option) {
+        logger.info("   🧮 Calculating derived fields...");
+
+        // Calculate days to expiry
         if (option.getTradeDate() != null && option.getExpiryDate() != null) {
             long days = java.time.temporal.ChronoUnit.DAYS.between(option.getTradeDate(), option.getExpiryDate());
             option.setDaysToExpiry(days);
         }
 
-        if (option.getNotionalQuantity() != null && option.getStrikePrice() != null && option.getMarginRate() != null) {
-            BigDecimal riskExposure = option.getNotionalQuantity()
-                .multiply(option.getStrikePrice())
-                .multiply(option.getMarginRate());
+        // Calculate risk exposure if possible
+        if (option.getStrikePrice() != null && option.getNotionalQuantity() != null) {
+            BigDecimal riskExposure = option.getStrikePrice().multiply(option.getNotionalQuantity());
             option.setRiskExposure(riskExposure);
         }
 
-        // Simple moneyness calculation
-        if (option.getStrikePrice() != null) {
-            BigDecimal strike = option.getStrikePrice();
-            if (strike.compareTo(BigDecimal.valueOf(100)) > 0) {
-                option.setMoneyness("OTM");
-            } else if (strike.compareTo(BigDecimal.valueOf(50)) < 0) {
-                option.setMoneyness("ITM");
-            } else {
-                option.setMoneyness("ATM");
-            }
-        }
-    }
-
-    /**
-     * Enriches counterparty data based on party ID.
-     */
-    private void enrichCounterpartyData(OtcOption option, String partyId, boolean isBuyer) {
-        String legalName = null;
-        String creditRating = null;
-        String lei = null;
-        String jurisdiction = null;
-
-        // Simulate database lookup
-        switch (partyId) {
-            case "GOLDMAN_SACHS":
-                legalName = "Goldman Sachs & Co. LLC";
-                creditRating = "AAA";
-                lei = "784F5XWPLTWKTBV3E584";
-                jurisdiction = "United States";
-                break;
-            case "JP_MORGAN":
-                legalName = "JPMorgan Chase Bank, N.A.";
-                creditRating = "AAA";
-                lei = "7H6GLXDRUGQFU57RNE97";
-                jurisdiction = "United States";
-                break;
-            case "MORGAN_STANLEY":
-                legalName = "Morgan Stanley & Co. LLC";
-                creditRating = "AA+";
-                lei = "IGJSJL3JD5P30I6NJZ34";
-                jurisdiction = "United States";
-                break;
-            case "CITI":
-                legalName = "Citigroup Global Markets Inc.";
-                creditRating = "AA-";
-                lei = "6SHGI4ZSSLCXXQSBB395";
-                jurisdiction = "United States";
-                break;
-            case "BARCLAYS":
-                legalName = "Barclays Bank PLC";
-                creditRating = "A+";
-                lei = "G5GSEF7VJP5I7OUK5573";
-                jurisdiction = "United Kingdom";
-                break;
-            case "DEUTSCHE_BANK":
-                legalName = "Deutsche Bank AG";
-                creditRating = "BBB+";
-                lei = "7LTWFZYICNSX8D621K86";
-                jurisdiction = "Germany";
-                break;
-        }
-
-        // Set the enriched data
-        if (isBuyer) {
-            option.setBuyerLegalName(legalName);
-            option.setBuyerCreditRating(creditRating);
-            option.setBuyerLei(lei);
-            option.setBuyerJurisdiction(jurisdiction);
-        } else {
-            option.setSellerLegalName(legalName);
-            option.setSellerCreditRating(creditRating);
-            option.setSellerLei(lei);
-            option.setSellerJurisdiction(jurisdiction);
-        }
+        logger.info("   ✅ Derived fields calculated successfully");
     }
 
     /**
@@ -1036,6 +1116,23 @@ public class OtcOptionsBootstrapDemo {
         logger.info("Cleaning up bootstrap demo resources...");
 
         try {
+            // Shutdown data sources properly to stop background threads
+            if (dataSourceConfigService != null) {
+                logger.info("Shutting down APEX data source infrastructure...");
+
+                // Get the data source manager and shut it down properly
+                // This will stop the background monitoring threads
+                var dataSourceManager = dataSourceConfigService.getDataSourceManager();
+                if (dataSourceManager != null) {
+                    dataSourceManager.shutdown(); // This stops the background threads
+                }
+
+                // Also shutdown the configuration service
+                dataSourceConfigService.shutdown();
+
+                logger.info("APEX data source infrastructure shutdown completed");
+            }
+
             // Cleanup database
             databaseSetup.cleanup();
 

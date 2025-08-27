@@ -84,8 +84,8 @@ public class FinancialServicesDemo {
         // Create a sample commodity swap
         CommodityTotalReturnSwap swap = createSampleCommoditySwap();
         
-        System.out.println("Trade Details:");
-        System.out.println("  Trade ID: " + swap.getTradeId());
+        System.out.println("TradeB Details:");
+        System.out.println("  TradeB ID: " + swap.getTradeId());
         System.out.println("  Counterparty: " + swap.getCounterpartyId());
         System.out.println("  Commodity: " + swap.getCommodityType() + " (" + swap.getReferenceIndex() + ")");
         System.out.println("  Notional: " + swap.getNotionalCurrency() + " " + swap.getNotionalAmount());
@@ -93,7 +93,7 @@ public class FinancialServicesDemo {
         System.out.println();
         
         // Basic validation rules
-        System.out.println("// Basic Trade Validation");
+        System.out.println("// Basic TradeB Validation");
         boolean basicValidation = rulesService.check(
             "#data.tradeId != null && #data.notionalAmount > 0 && #data.tradeDate != null",
             swap
@@ -294,7 +294,7 @@ public class FinancialServicesDemo {
             System.out.println("  Risk Rating: " + client.getRiskRating());
             System.out.println("  Credit Limit: " + client.getCreditLimit());
         }
-        System.out.println("  Trade Notional: " + swap.getNotionalAmount());
+        System.out.println("  TradeB Notional: " + swap.getNotionalAmount());
         System.out.println();
         
         Map<String, Object> facts = new HashMap<>();
@@ -344,20 +344,20 @@ public class FinancialServicesDemo {
         
         CommodityTotalReturnSwap swap = createSampleCommoditySwap();
         
-        System.out.println(" Trade Lifecycle Stages:");
+        System.out.println(" TradeB Lifecycle Stages:");
         
         // Stage 1: Pre-trade validation
-        System.out.println("\n1. Pre-Trade Validation:");
+        System.out.println("\n1. Pre-TradeB Validation:");
         ValidationResult preTradeResult = rulesService.validate(swap)
-            .that("#data.tradeId != null", "Trade ID required")
+            .that("#data.tradeId != null", "TradeB ID required")
             .that("#data.counterpartyId != null", "Counterparty required")
             .that("#data.notionalAmount > 0", "Positive notional required")
             .validate();
         
         System.out.println("   Status: " + (preTradeResult.isValid() ? " READY" : " BLOCKED"));
         
-        // Stage 2: Trade execution
-        System.out.println("\n2. Trade Execution:");
+        // Stage 2: TradeB execution
+        System.out.println("\n2. TradeB Execution:");
         swap.setTradeStatus("CONFIRMED");
         boolean executionReady = rulesService.check("#data.tradeStatus == 'CONFIRMED'", swap);
         System.out.println("   Status: " + (executionReady ? " EXECUTED" : " PENDING"));

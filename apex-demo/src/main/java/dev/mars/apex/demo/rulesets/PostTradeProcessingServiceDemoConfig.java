@@ -51,7 +51,7 @@ class PostTradeProcessingServiceDemoConfig {
     public static final String STATUS_FAILED = "Failed";
     public static final String STATUS_CANCELLED = "Cancelled";
 
-    // Trade types
+    // TradeB types
     public static final String TYPE_EQUITY = "Equity";
     public static final String TYPE_FIXED_INCOME = "FixedIncome";
     public static final String TYPE_DERIVATIVE = "Derivative";
@@ -112,66 +112,66 @@ class PostTradeProcessingServiceDemoConfig {
         settlementRules.put("TradeValidation", new Rule(
                 "TradeValidationRule",
                 "#trade != null && #trade.id != null && !#trade.id.isEmpty()",
-                "Trade is valid for settlement"
+                "TradeB is valid for settlement"
         ));
 
         // Rule for trade matching
         settlementRules.put("TradeMatching", new Rule(
                 "TradeMatchingRule",
                 "#trade != null && !#trade.id.equals('Unknown')",
-                "Trade is matched with counterparty"
+                "TradeB is matched with counterparty"
         ));
 
         // Rule for trade affirmation
         settlementRules.put("TradeAffirmation", new Rule(
                 "TradeAffirmationRule",
                 "#trade != null && !#trade.id.equals('Unknown')",
-                "Trade is affirmed"
+                "TradeB is affirmed"
         ));
 
         // Rule for trade confirmation
         settlementRules.put("TradeConfirmation", new Rule(
                 "TradeConfirmationRule",
                 "#trade != null && !#trade.id.equals('Unknown')",
-                "Trade is confirmed"
+                "TradeB is confirmed"
         ));
 
         // Rule for trade settlement
         settlementRules.put("TradeSettlement", new Rule(
                 "TradeSettlementRule",
                 "#trade != null && !#trade.id.equals('Unknown')",
-                "Trade is settled"
+                "TradeB is settled"
         ));
 
         // Rules for settlement method determination
         settlementRules.put(METHOD_DTC, new Rule(
                 "DTCSettlementRule",
                 "#trade != null && #trade.value == '" + TYPE_EQUITY + "'",
-                "Trade should use DTC settlement method"
+                "TradeB should use DTC settlement method"
         ));
 
         settlementRules.put(METHOD_FEDWIRE, new Rule(
                 "FedwireSettlementRule",
                 "#trade != null && #trade.value == '" + TYPE_FIXED_INCOME + "'",
-                "Trade should use Fedwire settlement method"
+                "TradeB should use Fedwire settlement method"
         ));
 
         settlementRules.put(METHOD_CLEARSTREAM, new Rule(
                 "ClearstreamSettlementRule",
                 "#trade != null && #trade.value == '" + TYPE_DERIVATIVE + "'",
-                "Trade should use Clearstream settlement method"
+                "TradeB should use Clearstream settlement method"
         ));
 
         settlementRules.put(METHOD_EUROCLEAR, new Rule(
                 "EuroclearSettlementRule",
                 "#trade != null && #trade.value == '" + TYPE_FOREX + "'",
-                "Trade should use Euroclear settlement method"
+                "TradeB should use Euroclear settlement method"
         ));
 
         settlementRules.put(METHOD_MANUAL, new Rule(
                 "ManualSettlementRule",
                 "#trade != null && #trade.value == '" + TYPE_COMMODITY + "'",
-                "Trade should use Manual settlement method"
+                "TradeB should use Manual settlement method"
         ));
 
         // Rules for fee calculations
@@ -322,7 +322,7 @@ class PostTradeProcessingServiceDemoConfig {
      */
     public RuleResult determineSettlementMethodWithResult(Trade trade) {
         if (trade == null) {
-            return RuleResult.match("SettlementMethodRule", "Trade should use Manual settlement method");
+            return RuleResult.match("SettlementMethodRule", "TradeB should use Manual settlement method");
         }
 
         Map<String, Object> facts = new HashMap<>();
@@ -341,7 +341,7 @@ class PostTradeProcessingServiceDemoConfig {
         }
 
         // Default to manual if no rule matches
-        return RuleResult.match("DefaultSettlementRule", "Trade should use Manual settlement method");
+        return RuleResult.match("DefaultSettlementRule", "TradeB should use Manual settlement method");
     }
 
     /**

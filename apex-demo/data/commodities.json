@@ -1,0 +1,64 @@
+{
+  "commodities": [
+    {
+      "commodity": "Natural Gas",
+      "commodityCategory": "Energy",
+      "exchange": "NYMEX",
+      "riskFactor": "HIGH",
+      "marginRate": 0.15,
+      "unit": "MMBtu",
+      "sector": "Energy",
+      "volatility": "HIGH"
+    },
+    {
+      "commodity": "Brent Crude Oil",
+      "commodityCategory": "Energy",
+      "exchange": "ICE",
+      "riskFactor": "HIGH",
+      "marginRate": 0.12,
+      "unit": "Barrel",
+      "sector": "Energy",
+      "volatility": "HIGH"
+    },
+    {
+      "commodity": "Gold",
+      "commodityCategory": "Precious Metals",
+      "exchange": "COMEX",
+      "riskFactor": "MEDIUM",
+      "marginRate": 0.08,
+      "unit": "Troy Ounce",
+      "sector": "Metals",
+      "volatility": "MEDIUM"
+    },
+    {
+      "commodity": "Silver",
+      "commodityCategory": "Precious Metals",
+      "exchange": "COMEX",
+      "riskFactor": "MEDIUM",
+      "marginRate": 0.10,
+      "unit": "Troy Ounce",
+      "sector": "Metals",
+      "volatility": "HIGH"
+    },
+    {
+      "commodity": "Copper",
+      "commodityCategory": "Base Metals",
+      "exchange": "COMEX",
+      "riskFactor": "MEDIUM",
+      "marginRate": 0.09,
+      "unit": "Pound",
+      "sector": "Metals",
+      "volatility": "MEDIUM"
+    },
+    {
+      "commodity": "Wheat",
+      "commodityCategory": "Agricultural",
+      "exchange": "CBOT",
+      "riskFactor": "MEDIUM",
+      "marginRate": 0.07,
+      "unit": "Bushel",
+      "sector": "Agriculture",
+      "volatility": "MEDIUM"
+    }
+  ]
+}

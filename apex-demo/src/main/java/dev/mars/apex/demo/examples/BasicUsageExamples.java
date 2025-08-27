@@ -38,7 +38,7 @@ import java.util.Map;
  * 1. Simple field validations - Basic null checks and range validations
  * 2. Customer validation - Domain object validation patterns
  * 3. Product validation - Business rule enforcement
- * 4. Trade validation - Financial domain examples
+ * 4. TradeB validation - Financial domain examples
  * 5. Numeric operations - Mathematical expressions and calculations
  * 6. Date operations - Temporal logic and date comparisons
  * 7. String operations - Text processing and pattern matching
@@ -86,7 +86,7 @@ public class BasicUsageExamples {
         executeTimedSection("Simple Validations", this::demonstrateSimpleValidations);
         executeTimedSection("Customer Validation", this::demonstrateCustomerValidation);
         executeTimedSection("Product Validation", this::demonstrateProductValidation);
-        executeTimedSection("Trade Validation", this::demonstrateTradeValidation);
+        executeTimedSection("TradeB Validation", this::demonstrateTradeValidation);
         executeTimedSection("Numeric Operations", this::demonstrateNumericOperations);
         executeTimedSection("Date Operations", this::demonstrateDateOperations);
         executeTimedSection("String Operations", this::demonstrateStringOperations);
@@ -272,26 +272,26 @@ public class BasicUsageExamples {
      * Demonstrate trade validation.
      */
     private void demonstrateTradeValidation() {
-        System.out.println("\n4. Trade Validation:");
+        System.out.println("\n4. TradeB Validation:");
 
         Trade trade = new Trade();
         trade.setId("TRD001");
         trade.setValue("10000");
         trade.setCategory("Equity");
         
-        // Trade value validation
+        // TradeB value validation
         boolean validValue = rulesService.check(
             "#trade.value != null && #trade.value.length() > 0",
             Map.of("trade", trade)
         );
-        System.out.println("   ✓ Trade value: " + validValue);
+        System.out.println("   ✓ TradeB value: " + validValue);
 
-        // Trade ID validation
+        // TradeB ID validation
         boolean validId = rulesService.check(
             "#trade.id != null && #trade.id.startsWith('TRD')",
             Map.of("trade", trade)
         );
-        System.out.println("   ✓ Trade ID format: " + validId);
+        System.out.println("   ✓ TradeB ID format: " + validId);
 
         // Large trade validation (convert string to number)
         boolean isLargeTrade = rulesService.check(

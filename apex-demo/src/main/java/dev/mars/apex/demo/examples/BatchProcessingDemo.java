@@ -304,7 +304,7 @@ public class BatchProcessingDemo {
      * Demonstrate trade settlement batch processing.
      */
     private void demonstrateTradeSettlementBatch() {
-        System.out.println(" End-of-Day Trade Settlement Processing");
+        System.out.println(" End-of-Day TradeB Settlement Processing");
 
         List<FinancialTrade> trades = generateTradeBatch(500);
         System.out.println("Processing " + trades.size() + " trades for settlement...");

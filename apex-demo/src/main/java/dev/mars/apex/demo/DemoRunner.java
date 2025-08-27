@@ -212,7 +212,7 @@ public class DemoRunner {
                 System.out.println("Quick Start (5 Minutes)");
                 System.out.println("=======================");
             }
-            new QuickStartDemo().run();
+            new QuickStartDemoB().run();
         } catch (Exception e) {
             System.out.println("Error running QuickStart demo: " + e.getMessage());
         }
