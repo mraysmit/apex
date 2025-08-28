@@ -9,8 +9,7 @@ import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -106,7 +105,6 @@ public class PostgreSQLLookupDemo {
             demonstrateSimpleEnrichmentYaml();
             demonstrateMultiParameterEnrichmentYaml();
             demonstratePerformanceOptimization();
-            demonstrateFallbackStrategies();
 
             logger.info("=".repeat(80));
             logger.info("APEX YAML Processing Demonstration completed successfully!");
@@ -126,31 +124,28 @@ public class PostgreSQLLookupDemo {
         logger.info("=".repeat(60));
 
         try {
-            // Create sample transaction data
-            Map<String, Object> transaction = createSampleTransaction();
-            transaction.put("customerId", "CUST000001");
+            // Create minimal input data for YAML processing - no hardcoded business logic
+            Map<String, Object> inputData = new HashMap<>();
+            inputData.put("customerId", "CUST000001"); // Only the lookup key, no other hardcoded data
 
-            logger.info("Input Transaction Data:");
-            logger.info("  Customer ID: {}", transaction.get("customerId"));
-            logger.info("  Amount: {}", transaction.get("amount"));
-            logger.info("  Currency: {}", transaction.get("currency"));
+            logger.info("Input Data for YAML Processing:");
+            logger.info("  Customer ID: {}", inputData.get("customerId"));
 
-            // Apply YAML enrichment processing using APEX
+            // Apply YAML enrichment processing using real APEX services
             String configPath = "examples/lookups/customer-profile-enrichment.yaml";
-            Map<String, Object> enrichedData = performEnrichmentWithYaml(transaction, configPath);
+            Map<String, Object> enrichedData = performEnrichmentWithYaml(inputData, configPath);
 
-            logger.info("\nEnriched Data from YAML Processing:");
+            logger.info("\nCustomer Profile from YAML Processing:");
             logger.info("  Customer Name: {}", enrichedData.get("customerName"));
             logger.info("  Customer Type: {}", enrichedData.get("customerType"));
             logger.info("  Customer Tier: {}", enrichedData.get("customerTier"));
             logger.info("  Customer Region: {}", enrichedData.get("customerRegion"));
             logger.info("  Customer Status: {}", enrichedData.get("customerStatus"));
-            logger.info("  Customer Created: {}", enrichedData.get("customerCreatedDate"));
 
-            // Demonstrate processing performance
+            // Demonstrate processing performance with same input
             logger.info("\nDemonstrating YAML Processing Performance:");
             long startTime = System.currentTimeMillis();
-            performEnrichmentWithYaml(transaction, configPath);
+            performEnrichmentWithYaml(inputData, configPath);
             long cachedTime = System.currentTimeMillis() - startTime;
             logger.info("  Second processing time: {} ms", cachedTime);
 
@@ -168,22 +163,16 @@ public class PostgreSQLLookupDemo {
         logger.info("=".repeat(60));
         
         try {
-            // Create sample trade data
-            Map<String, Object> trade = createSampleTrade();
-            Map<String, Object> tradeData = new HashMap<>();
-            tradeData.put("trade", trade);
-            
-            logger.info("Input Trade Data:");
-            logger.info("  Trade ID: {}", trade.get("tradeId"));
-            logger.info("  Counterparty: {}", trade.get("counterpartyId"));
-            logger.info("  Instrument Type: {}", trade.get("instrumentType"));
-            logger.info("  Currency: {}", trade.get("currency"));
-            logger.info("  Market: {}", trade.get("market"));
-            logger.info("  Amount: {}", trade.get("amount"));
-            
-            // Apply YAML multi-parameter enrichment processing using APEX
+            // Create minimal input data for YAML processing - no hardcoded business logic
+            Map<String, Object> inputData = new HashMap<>();
+            inputData.put("counterpartyId", "CP_GS"); // Only the lookup key, no other hardcoded data
+
+            logger.info("Input Data for YAML Processing:");
+            logger.info("  Counterparty ID: {}", inputData.get("counterpartyId"));
+
+            // Apply YAML multi-parameter enrichment processing using real APEX services
             String configPath = "examples/lookups/settlement-instruction-enrichment.yaml";
-            Map<String, Object> enrichedData = performEnrichmentWithYaml(tradeData, configPath);
+            Map<String, Object> enrichedData = performEnrichmentWithYaml(inputData, configPath);
             
             logger.info("\nSettlement Instructions from PostgreSQL:");
             logger.info("  Settlement Instruction ID: {}", enrichedData.get("settlementInstructionId"));
@@ -218,41 +207,42 @@ public class PostgreSQLLookupDemo {
         logger.info("=".repeat(60));
         
         try {
-            // Test multiple concurrent lookups to demonstrate connection pooling
-            logger.info("Testing Connection Pooling with Multiple Concurrent Lookups:");
-            
+            // Test multiple lookups with minimal input data - no hardcoded business logic
+            logger.info("Testing YAML Processing Performance with Multiple Lookups:");
+
             String[] customerIds = {"CUST000001", "CUST000002", "CUST000003", "CUST000004", "CUST000005"};
             long totalTime = 0;
-            
+
             for (String customerId : customerIds) {
-                Map<String, Object> transaction = createSampleTransaction();
-                transaction.put("customerId", customerId);
+                // Create minimal input data for each lookup
+                Map<String, Object> inputData = new HashMap<>();
+                inputData.put("customerId", customerId);
 
                 long startTime = System.currentTimeMillis();
-                Map<String, Object> result = performEnrichmentWithYaml(transaction, "examples/lookups/customer-profile-enrichment.yaml");
+                Map<String, Object> result = performEnrichmentWithYaml(inputData, "examples/lookups/customer-profile-enrichment.yaml");
                 long lookupTime = System.currentTimeMillis() - startTime;
                 totalTime += lookupTime;
 
                 logger.info("  Customer {}: {} ms - {}",
                     customerId, lookupTime, result.get("customerName"));
             }
-            
+
             logger.info("Total lookup time for 5 customers: {} ms", totalTime);
             logger.info("Average lookup time: {} ms", totalTime / customerIds.length);
-            
-            // Demonstrate cache effectiveness
+
+            // Demonstrate cache effectiveness with minimal input data
             logger.info("\nTesting Cache Effectiveness:");
-            Map<String, Object> transaction = createSampleTransaction();
-            transaction.put("customerId", "CUST000001");
-            
+            Map<String, Object> inputData = new HashMap<>();
+            inputData.put("customerId", "CUST000001");
+
             // First lookup (cache miss)
             long startTime = System.currentTimeMillis();
-            performEnrichmentWithYaml(transaction, "examples/lookups/customer-profile-enrichment.yaml");
+            performEnrichmentWithYaml(inputData, "examples/lookups/customer-profile-enrichment.yaml");
             long firstLookup = System.currentTimeMillis() - startTime;
 
             // Second lookup (cache hit)
             startTime = System.currentTimeMillis();
-            performEnrichmentWithYaml(transaction, "examples/lookups/customer-profile-enrichment.yaml");
+            performEnrichmentWithYaml(inputData, "examples/lookups/customer-profile-enrichment.yaml");
             long secondLookup = System.currentTimeMillis() - startTime;
             
             logger.info("  First lookup (cache miss): {} ms", firstLookup);
@@ -265,49 +255,7 @@ public class PostgreSQLLookupDemo {
         }
     }
     
-    /**
-     * Demonstrate fallback strategies when database lookups fail.
-     */
-    private void demonstrateFallbackStrategies() {
-        logger.info("\n" + "=".repeat(60));
-        logger.info("4. FALLBACK STRATEGIES - Error Handling & Resilience");
-        logger.info("=".repeat(60));
-        
-        try {
-            // Test with non-existent customer ID to trigger fallback
-            Map<String, Object> transaction = createSampleTransaction();
-            transaction.put("customerId", "CUST999999"); // Non-existent customer
-            
-            logger.info("Testing Fallback with Non-Existent Customer ID: CUST999999");
-            
-            Map<String, Object> result = performEnrichmentWithYaml(transaction, "examples/lookups/customer-profile-enrichment.yaml");
-            
-            logger.info("Fallback Data Applied:");
-            logger.info("  Customer Name: {}", result.get("customerName"));
-            logger.info("  Customer Type: {}", result.get("customerType"));
-            logger.info("  Customer Tier: {}", result.get("customerTier"));
-            logger.info("  Customer Region: {}", result.get("customerRegion"));
-            logger.info("  Customer Status: {}", result.get("customerStatus"));
-            
-            // Test cascade fallback for settlement instructions
-            logger.info("\nTesting Cascade Fallback for Settlement Instructions:");
-            Map<String, Object> trade = createSampleTrade();
-            trade.put("counterpartyId", "CP_UNKNOWN"); // Non-existent counterparty
 
-            Map<String, Object> tradeData = new HashMap<>();
-            tradeData.put("trade", trade);
-            
-            Map<String, Object> settlementResult = performEnrichmentWithYaml(tradeData, "examples/lookups/postgresql-multi-param-lookup.yaml");
-            
-            logger.info("Cascade Fallback Result:");
-            logger.info("  Settlement Instruction ID: {}", settlementResult.get("settlementInstructionId"));
-            logger.info("  Counterparty Name: {}", settlementResult.get("counterpartyName"));
-            logger.info("  Settlement Method: {}", settlementResult.get("settlementMethod"));
-            
-        } catch (Exception e) {
-            logger.error("Error in fallback strategies demonstration", e);
-        }
-    }
 
     // ========================================
     // YAML PROCESSING METHODS
@@ -349,7 +297,9 @@ public class PostgreSQLLookupDemo {
 
                 // Convert back to Map if needed
                 if (enrichedObject instanceof Map) {
-                    enrichedResult = (Map<String, Object>) enrichedObject;
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> enrichedMap = (Map<String, Object>) enrichedObject;
+                    enrichedResult = enrichedMap;
                 } else {
                     // If enrichment returns a different type, merge it back
                     logger.info("  Enrichment returned type: {}", enrichedObject.getClass().getSimpleName());
@@ -377,32 +327,7 @@ public class PostgreSQLLookupDemo {
     // HELPER METHODS
     // ========================================
 
-    /**
-     * Create sample transaction data for demonstrations.
-     */
-    private Map<String, Object> createSampleTransaction() {
-        Map<String, Object> transaction = new HashMap<>();
-        transaction.put("transactionId", "TXN" + System.currentTimeMillis());
-        transaction.put("amount", new BigDecimal("50000.00"));
-        transaction.put("currency", "USD");
-        transaction.put("transactionDate", LocalDate.now().toString());
-        return transaction;
-    }
 
-    /**
-     * Create sample financial trade for demonstrations.
-     */
-    private Map<String, Object> createSampleTrade() {
-        Map<String, Object> trade = new HashMap<>();
-        trade.put("tradeId", "TRD" + System.currentTimeMillis());
-        trade.put("amount", new BigDecimal("5000000.00"));
-        trade.put("currency", "USD");
-        trade.put("counterpartyId", "CP_GS");
-        trade.put("instrumentType", "EQUITY");
-        trade.put("tradeDate", LocalDate.now().toString());
-        trade.put("market", "NYSE"); // Will be determined via YAML processing
-        return trade;
-    }
 
     // ========================================
     // SETUP AND INITIALIZATION METHODS
