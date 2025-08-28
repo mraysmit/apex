@@ -1,5 +1,292 @@
 ## Refactoring Principles To Apply Consistently
 
+Here's a clear and concise prompt based on the lessons learned:
+
+---
+
+**APEX YAML Configuration Prompt:**
+
+When working with APEX YAML configurations:
+
+1. **ALWAYS verify syntax against apex-core source code FIRST** - Check YamlDataSource.java, YamlRuleConfiguration.java, and existing working examples before creating any YAML
+2. **Never assume or invent configuration properties** - Only use properties that exist in the actual apex-core implementation
+3. **Distinguish configuration types clearly**:
+    - `type: "external-data-config"` = Data source configurations (dataSources, connection pools, queries)
+    - `type: "rule-config"` = Enrichment rules (enrichments, validations, processing)
+4. **Use correct APEX enrichment syntax**:
+    - `type: "lookup-enrichment"` (not "lookup")
+    - Conditions use `#field` syntax
+    - Field mappings use `source-field` and `target-field`
+    - Inline datasets use `type: "inline"` with `key-field` and `data` array
+5. **Focus on YAML processing demonstration** - APEX is about processing YAML configurations, not simulating them
+6. **Test configurations are functional** - Ensure YAML examples actually work with the APEX system
+7. **Separate concerns properly** - Don't mix data source configs with enrichment rules in the same file
+
+**Key Memory**: Always examine actual apex-core codebase syntax and existing examples BEFORE creating any YAML configuration examples.
+
+---
+
+This prompt encapsulates the critical lessons about verifying against source code, using correct syntax, and focusing on real YAML processing rather than assumptions or simulations.
+
+## CRITICAL: Use Real APEX Services, Never Hardcode Simulation
+
+**FUNDAMENTAL PRINCIPLE**: Demos must use actual APEX core services, not hardcoded simulation logic.
+
+### ❌ **NEVER DO - Hardcoded Simulation:**
+```java
+// WRONG - Hardcoded enrichment logic
+private void applyEnrichmentToData(Object enrichment, Map<String, Object> data) {
+    if (data.containsKey("customerId")) {
+        // Hardcoded values - violates principles!
+        data.put("customerName", "Acme Corporation");
+        data.put("customerType", "CORPORATE");
+    }
+}
+```
+
+### ✅ **ALWAYS DO - Real APEX Services:**
+```java
+// CORRECT - Use real APEX enrichment service
+private final EnrichmentService enrichmentService;
+private final LookupServiceRegistry serviceRegistry;
+
+public void processWithRealApex(Map<String, Object> data, YamlRuleConfiguration config) {
+    // Use actual APEX enrichment processor
+    Object enrichedResult = enrichmentService.enrichObject(config, data);
+}
+```
+
+### **Required APEX Service Integration:**
+1. **EnrichmentService** - Real enrichment processing
+2. **YamlEnrichmentProcessor** - Real YAML rule processing
+3. **DatasetLookupService** - Real dataset lookups
+4. **ExpressionEvaluatorService** - Real SpEL expression evaluation
+5. **YamlConfigurationLoader** - Real YAML loading (already used correctly)
+
+### **Evidence of Real APEX Integration:**
+Look for these logs to confirm real services:
+```
+INFO: EnrichmentService initialized
+INFO: YamlEnrichmentProcessor initialized with service registry
+INFO: DatasetLookupService created with X records, key field: Y
+INFO: Processing N enrichments for object type: HashMap
+```
+
+### **Why This Matters:**
+- **Authentic Demonstration**: Shows actual APEX functionality, not fake simulation
+- **Real Performance Metrics**: Timing reflects actual APEX processing
+- **Proper Error Handling**: Real APEX error messages and validation
+- **SpEL Expression Processing**: Actual Spring Expression Language evaluation
+- **YAML Validation**: Real APEX configuration validation and warnings
+
+### **Key Validation Points:**
+- ✅ Demo uses `EnrichmentService.enrichObject()` method
+- ✅ YAML processing handled by `YamlEnrichmentProcessor`
+- ✅ Dataset lookups use `DatasetLookupService`
+- ✅ SpEL expressions evaluated by `ExpressionEvaluatorService`
+- ❌ No hardcoded field assignments in demo code
+- ❌ No switch statements for business logic
+- ❌ No manual parsing of YAML enrichment rules
+
+**REMEMBER**: If you find yourself writing hardcoded business logic in demo code, you're violating the principles. Use the real APEX services instead.
+
+## CRITICAL: Use DataProviderComplianceTest for Validation
+
+**FUNDAMENTAL PRINCIPLE**: Always validate data provider classes against APEX design principles using the compliance test utility.
+
+### **Compliance Test Utility:**
+```bash
+# Run the APEX-compliant validation tool
+java -cp "apex-demo/target/classes;apex-core/target/classes;[dependencies...]" \
+     dev.mars.apex.demo.data.DataProviderComplianceTest
+```
+
+### **What the Compliance Test Validates:**
+1. **Real APEX Service Integration**: Ensures classes use actual APEX services, not hardcoded simulation
+2. **Data-Driven Implementation**: Detects hardcoded data vs external data sources
+3. **Infrastructure Integration**: Identifies database/service dependencies and setup
+4. **External Configuration**: Finds YAML/config-driven vs fixed implementations
+
+### **Evidence of Real Analysis:**
+Look for these logs to confirm authentic validation:
+```
+INFO: ExpressionEvaluatorService initialized
+INFO: YamlEnrichmentProcessor initialized with service registry
+INFO: EnrichmentService initialized
+📋 Analyzing [ClassName] using real reflection...
+```
+
+### **Sample Compliance Results:**
+```
+SCORE SUMMARY:
+┌─────────────────────────────────────┬───────┬─────────────────┐
+│ Class Name                          │ Score │ Compliance      │
+├─────────────────────────────────────┼───────┼─────────────────┤
+│ DemoDataProvider                    │ 1/4   │ ✅❌❌❌         │
+│ FinancialStaticDataProvider         │ 0/4   │ ❌❌❌❌         │
+│ DemoDataBootstrap                   │ 3/4   │ ❌✅✅✅         │
+└─────────────────────────────────────┴───────┴─────────────────┘
+```
+
+### **When to Run Compliance Test:**
+- ✅ **Before committing new data providers** - Ensure APEX compliance
+- ✅ **After refactoring existing classes** - Validate improvements
+- ✅ **During code reviews** - Verify adherence to principles
+- ✅ **When adding new demo classes** - Prevent regression to hardcoded simulation
+
+### **Key Validation Points:**
+- ✅ Uses real reflection-based analysis (not hardcoded assessments)
+- ✅ Employs actual APEX services for validation
+- ✅ Provides actionable recommendations for improvement
+- ✅ Detects violations of all 4 APEX design principles
+- ❌ No hardcoded test results or assumptions
+- ❌ No simulation of compliance analysis
+
+### **Integration with Development Workflow:**
+```bash
+# 1. Develop/refactor data provider class
+# 2. Compile the project
+mvn compile -pl apex-demo
+
+# 3. Run compliance validation
+java -cp [classpath] dev.mars.apex.demo.data.DataProviderComplianceTest
+
+# 4. Address any violations identified
+# 5. Re-run test to confirm compliance improvements
+```
+
+**REMEMBER**: The DataProviderComplianceTest itself follows APEX principles - it uses real APEX services and reflection-based analysis instead of hardcoded simulation. Use it as both a validation tool and an example of proper APEX integration.
+
+## CRITICAL: SpEL Expression and Data Structure Alignment
+
+**FUNDAMENTAL PRINCIPLE**: YAML SpEL expressions must match the actual data structure field names.
+
+### ❌ **COMMON ERROR - Field Name Mismatch:**
+```yaml
+# YAML expects this field structure
+condition: "#trade != null && #trade.counterpartyId != null"
+lookup-key: "#trade.counterpartyId + '_' + #trade.instrumentType"
+```
+
+```java
+// But Java code provides this structure
+Map<String, Object> trade = Map.of(
+    "counterparty", "CP_GS",        // Field name mismatch!
+    "instrumentType", "EQUITY"
+);
+```
+
+**Result**: `Property or field 'counterpartyId' cannot be found on object of type 'java.util.HashMap'`
+
+### ✅ **CORRECT - Aligned Field Names:**
+```yaml
+# YAML matches actual data structure
+condition: "#trade != null && #trade.counterparty != null"
+lookup-key: "#trade.counterparty + '_' + #trade.instrumentType"
+```
+
+```java
+// Java code provides matching structure
+Map<String, Object> trade = Map.of(
+    "counterparty", "CP_GS",        // Matches YAML expectation
+    "instrumentType", "EQUITY"
+);
+```
+
+### **SpEL Expression Best Practices:**
+1. **HashMap Access**: Use `#fieldName` for direct HashMap key access
+2. **Nested Objects**: Use `#object.field` for nested field access
+3. **Safe Navigation**: Use `#object?.field` to handle null objects
+4. **Validation**: Always test SpEL expressions with actual data structures
+
+### **Field Name Validation Checklist:**
+- ✅ YAML `lookup-key` field names match HashMap keys
+- ✅ YAML `condition` field names match data structure
+- ✅ SpEL expressions use correct `#` prefix for variables
+- ✅ Nested field access uses proper dot notation
+- ❌ No assumptions about field names without verification
+- ❌ No copy-paste of SpEL expressions without field validation
+
+### **Debugging SpEL Errors:**
+When you see `Property or field 'X' cannot be found`:
+1. **Check actual data structure** - Print/log the HashMap keys
+2. **Verify YAML field names** - Ensure they match exactly
+3. **Test SpEL syntax** - Use simple expressions first
+4. **Validate data types** - Ensure objects are the expected type
+
+**REMEMBER**: SpEL expression failures indicate a mismatch between YAML expectations and actual data structure. Always align field names exactly.
+
+## CRITICAL: Database Integration vs Inline Datasets
+
+**FUNDAMENTAL PRINCIPLE**: Understand when to use database integration vs inline datasets in APEX demos.
+
+### **Database Integration Approach:**
+```java
+// Initialize database with test data
+private void initializeDatabase() {
+    String jdbcUrl = "jdbc:h2:mem:apex_demo;MODE=PostgreSQL;DB_CLOSE_DELAY=-1";
+    // Create tables and insert test data
+}
+```
+
+```yaml
+# External data source configuration
+type: "external-data-config"
+dataSources:
+  - id: "customer-database"
+    type: "database"
+    connection-pool:
+      driver-class-name: "org.h2.Driver"
+      jdbc-url: "jdbc:h2:mem:apex_demo;MODE=PostgreSQL"
+    queries:
+      customerProfile: "SELECT * FROM customers WHERE customer_id = ?"
+```
+
+### **Inline Dataset Approach:**
+```yaml
+# Enrichment with inline dataset
+type: "rule-config"
+enrichments:
+  - id: "customer-profile-enrichment"
+    type: "lookup-enrichment"
+    data-source:
+      type: "inline"
+      key-field: "customer_id"
+      data:
+        - customer_id: "CUST000001"
+          customer_name: "Acme Corporation"
+          customer_type: "CORPORATE"
+```
+
+### **When to Use Each Approach:**
+
+#### **Use Database Integration When:**
+- ✅ Demonstrating real database connectivity
+- ✅ Showing connection pooling and caching
+- ✅ Testing database performance and fallback strategies
+- ✅ Simulating production-like data access patterns
+
+#### **Use Inline Datasets When:**
+- ✅ Simple lookup demonstrations
+- ✅ Self-contained YAML examples
+- ✅ Quick prototyping and testing
+- ✅ Scenarios where database setup is unnecessary
+
+### **Key Implementation Notes:**
+1. **H2 in PostgreSQL Mode**: Use `MODE=PostgreSQL` for PostgreSQL compatibility
+2. **Database Persistence**: Use `DB_CLOSE_DELAY=-1` to keep in-memory database alive
+3. **APEX Integration**: Both approaches work with real `EnrichmentService`
+4. **Performance**: Database approach shows real connection pooling benefits
+
+### **Common Pitfalls:**
+- ❌ **Don't mix approaches** - Choose one per demo for clarity
+- ❌ **Don't hardcode database logic** - Use APEX services for both approaches
+- ❌ **Don't ignore connection management** - Properly initialize and manage database connections
+- ❌ **Don't assume database availability** - Always include database initialization in demos
+
+**REMEMBER**: Both approaches should use real APEX services. The choice depends on what you want to demonstrate - database integration patterns or simple YAML processing.
+
+
 ### 1) Single Source of Truth for Domain Models
 - Choose one canonical package for shared demo domain models (e.g., Customer, Product, Trade)
 - Remove duplicates; if variants are needed, prefer:

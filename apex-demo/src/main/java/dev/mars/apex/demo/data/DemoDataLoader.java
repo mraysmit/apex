@@ -129,8 +129,9 @@ public class DemoDataLoader {
      * @param defaultDataSupplier Supplier for default data
      * @return Loaded data as Map
      */
+    @SuppressWarnings("unchecked")
     public static Map<String, Object> loadYamlMap(String resourcePath, java.util.function.Supplier<Map<String, Object>> defaultDataSupplier) {
-        return loadYamlData(resourcePath, defaultDataSupplier, Map.class);
+        return DemoDataLoader.<Map<String, Object>>loadYamlData(resourcePath, defaultDataSupplier, (Class<Map<String, Object>>) (Class<?>) Map.class);
     }
     
     /**
@@ -140,8 +141,9 @@ public class DemoDataLoader {
      * @param defaultDataSupplier Supplier for default data
      * @return Loaded data as List
      */
+    @SuppressWarnings("unchecked")
     public static List<Object> loadYamlList(String resourcePath, java.util.function.Supplier<List<Object>> defaultDataSupplier) {
-        return loadYamlData(resourcePath, defaultDataSupplier, List.class);
+        return DemoDataLoader.<List<Object>>loadYamlData(resourcePath, defaultDataSupplier, (Class<List<Object>>) (Class<?>) List.class);
     }
     
     /**
@@ -166,8 +168,9 @@ public class DemoDataLoader {
      * @param resourcePath Path to the customer data file
      * @return List of customer data
      */
+    @SuppressWarnings("unchecked")
     public static List<Map<String, Object>> loadCustomerData(String resourcePath) {
-        return loadYamlData(resourcePath, DemoDataLoader::createDefaultCustomerData, List.class);
+        return (List<Map<String, Object>>) loadYamlData(resourcePath, DemoDataLoader::createDefaultCustomerData, List.class);
     }
     
     /**
@@ -176,8 +179,9 @@ public class DemoDataLoader {
      * @param resourcePath Path to the trade data file
      * @return List of trade data
      */
+    @SuppressWarnings("unchecked")
     public static List<Map<String, Object>> loadTradeData(String resourcePath) {
-        return loadYamlData(resourcePath, DemoDataLoader::createDefaultTradeData, List.class);
+        return (List<Map<String, Object>>) loadYamlData(resourcePath, DemoDataLoader::createDefaultTradeData, List.class);
     }
     
     /**

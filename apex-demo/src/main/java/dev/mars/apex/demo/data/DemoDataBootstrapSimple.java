@@ -324,7 +324,7 @@ public class DemoDataBootstrapSimple {
     public List<Product> getProductsByCategory(String category) {
         if (products == null) return new ArrayList<>();
         return products.stream()
-                .filter(p -> category.equals(p.category))
+                .filter(p -> category.equals(p.getCategory()))
                 .toList();
     }
     

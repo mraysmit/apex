@@ -14,9 +14,11 @@ module dev.mars.apex.demo {
     requires org.postgresql.jdbc;
     requires java.sql.rowset;
 
-    // Jackson dependencies for JSON processing
+    // Jackson dependencies for JSON and YAML processing
     requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.databind;
+    requires com.fasterxml.jackson.core;
+    requires com.fasterxml.jackson.dataformat.yaml;
 
     // Logging dependencies
     requires org.slf4j;

@@ -242,7 +242,9 @@ public class DemoRunner {
         try {
             System.out.println("Financial Services Demo");
             System.out.println("=======================");
-            new FinancialServicesDemo().run();
+            // TODO: FinancialServicesDemo class is missing - commented out for now
+            // new FinancialServicesDemo().run();
+            System.out.println("FinancialServicesDemo not implemented yet");
         } catch (Exception e) {
             System.out.println("Error running Financial Services demo: " + e.getMessage());
         }

@@ -1,19 +1,19 @@
-# Self-Contained Database Multi-Parameter Lookup Example Configuration
-# Demonstrates complex database lookup with multiple parameters and advanced SQL queries
-# Use Case: Trade settlement instruction lookup with multiple business parameters
+# Self-Contained Database Multi-Parameter Data Source Configuration
+# Demonstrates complex database data source with multiple parameters and advanced SQL queries
+# Use Case: Trade settlement instruction data source for multi-parameter lookups
 
 metadata:
-  name: "Self-Contained Database Multi-Parameter Lookup Demo"
-  description: "Demonstrates complex database lookup with multiple parameters, joins, and conditional logic using embedded H2 database"
+  name: "Self-Contained Database Multi-Parameter Data Source Demo"
+  description: "Data source configuration for complex database lookups with multiple parameters using embedded H2 database"
   version: "1.0.0"
-  type: "enrichment"
+  type: "external-data-config"
   author: "APEX Demo Team"
 
 # External data source configuration
-data-sources:
+dataSources:
   - name: "trading-database"
     type: "database"
-    source-type: "h2"
+    sourceType: "h2"
     enabled: true
     description: "Trading and settlement data from self-contained H2 database"
 
@@ -21,351 +21,100 @@ data-sources:
       url: "jdbc:h2:mem:apex_demo;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
       username: "apex_user"
       password: "apex_password"
-      driver-class: "org.h2.Driver"
-      
-      # Advanced connection pool configuration
+
+      # Advanced connection pool configuration (verified against YamlDataSource.java)
       connection-pool:
-        max-pool-size: 50
-        min-pool-size: 10
+        max-size: 50
+        min-size: 10
         initial-size: 15
-        max-idle-time: 300000
-        max-lifetime: 1800000
         connection-timeout: 30000
         idle-timeout: 600000
+        max-lifetime: 1800000
         leak-detection-threshold: 60000
-        
-        # PostgreSQL-specific optimizations
-        connection-init-sql: "SET search_path TO trading_data, public"
-        validation-query: "SELECT 1"
+        connection-test-query: "SELECT 1"
         test-on-borrow: true
         test-while-idle: true
         
-    # Multi-level caching strategy
+    # Caching configuration
     cache:
       enabled: true
-      ttl-seconds: 1800  # 30 minutes
-      max-size: 50000
-      
-      # Cache partitioning for better performance
-      partitions:
-        settlement-instructions: 
-          ttl-seconds: 3600  # 1 hour for settlement instructions
-          max-size: 20000
-        counterparty-data:
-          ttl-seconds: 7200  # 2 hours for counterparty data
-          max-size: 10000
-        market-data:
-          ttl-seconds: 900   # 15 minutes for market data
-          max-size: 5000
-          
+      ttlSeconds: 1800  # 30 minutes
+      maxSize: 50000
+
     # Health monitoring
-    health-check:
+    healthCheck:
       enabled: true
-      test-query: "SELECT COUNT(*) FROM settlement_instructions LIMIT 1"
-      interval-seconds: 30
-      timeout-seconds: 10
+      query: "SELECT COUNT(*) FROM settlement_instructions LIMIT 1"
+      intervalSeconds: 30
+      timeoutSeconds: 10
       
-    # Complex query definitions with multiple parameters
+    # Query definitions for this data source
     queries:
-      settlementInstructions:
-        sql: |
-          SELECT
-            si.instruction_id,
-            si.counterparty_id,
-            si.custodian_id,
-            si.settlement_method,
-            si.delivery_instruction,
-            si.special_instructions,
-            cp.counterparty_name,
-            cp.counterparty_type,
-            cp.credit_rating,
-            cp.jurisdiction,
-            cust.custodian_name,
-            cust.custodian_bic,
-            cust.custodian_address,
-            mk.market_name,
-            mk.settlement_cycle,
-            mk.cut_off_time,
-            mk.time_zone,
-            inst.instrument_name,
-            inst.instrument_class,
-            inst.settlement_currency
-          FROM settlement_instructions si
-          LEFT JOIN counterparties cp ON si.counterparty_id = cp.counterparty_id
-          LEFT JOIN custodians cust ON si.custodian_id = cust.custodian_id
-          LEFT JOIN markets mk ON si.market = mk.market_code
-          LEFT JOIN instruments inst ON si.instrument_type = inst.instrument_type
-          WHERE si.counterparty_id = :counterpartyId
-            AND si.instrument_type = :instrumentType
-            AND si.currency = :currency
-            AND si.market = :market
-            AND si.status = 'ACTIVE'
-            AND (:minAmount IS NULL OR si.min_amount <= :minAmount)
-            AND (:maxAmount IS NULL OR si.max_amount >= :maxAmount)
-          ORDER BY si.priority ASC, si.created_date DESC
-          LIMIT 1
-        parameters:
-          - name: "counterpartyId"
-            type: "string"
-            required: true
-          - name: "instrumentType"
-            type: "string"
-            required: true
-          - name: "currency"
-            type: "string"
-            required: true
-          - name: "market"
-            type: "string"
-            required: true
-          - name: "minAmount"
-            type: "decimal"
-            required: false
-          - name: "maxAmount"
-            type: "decimal"
-            required: false
-        cache-enabled: true
-        cache-ttl: 1800
-        cache-partition: "settlement-instructions"
-        
-      riskAssessment:
-        sql: |
-          SELECT 
-            ra.risk_category,
-            ra.risk_score,
-            ra.max_exposure,
-            ra.approval_required,
-            ra.monitoring_level,
-            cp.credit_rating,
-            cp.credit_limit,
-            mk.volatility_rating,
-            mk.liquidity_rating
-          FROM risk_assessments ra
-          JOIN counterparties cp ON ra.counterparty_id = cp.counterparty_id
-          JOIN markets mk ON ra.market = mk.market_code
-          WHERE ra.counterparty_id = :counterpartyId
-            AND ra.instrument_type = :instrumentType
-            AND ra.market = :market
-            AND (:tradeAmount IS NULL OR ra.max_single_trade >= :tradeAmount)
-            AND ra.effective_date <= CURRENT_DATE
-            AND (ra.expiry_date IS NULL OR ra.expiry_date > CURRENT_DATE)
-          ORDER BY ra.effective_date DESC
-          LIMIT 1
-        parameters:
-          - name: "counterpartyId"
-            type: "string"
-            required: true
-          - name: "instrumentType"
-            type: "string"
-            required: true
-          - name: "market"
-            type: "string"
-            required: true
-          - name: "tradeAmount"
-            type: "decimal"
-            required: false
-        cache-enabled: true
-        cache-ttl: 900  # 15 minutes for risk data
-        cache-partition: "risk-data"
+      settlementInstructions: |
+        SELECT
+          si.instruction_id,
+          si.counterparty_id,
+          si.custodian_id,
+          si.settlement_method,
+          si.delivery_instruction,
+          si.special_instructions,
+          cp.counterparty_name,
+          cp.counterparty_type,
+          cp.credit_rating,
+          cp.jurisdiction,
+          cust.custodian_name,
+          cust.custodian_bic,
+          cust.custodian_address,
+          mk.market_name,
+          mk.settlement_cycle,
+          mk.cut_off_time,
+          mk.time_zone,
+          inst.instrument_name,
+          inst.instrument_class,
+          inst.settlement_currency
+        FROM settlement_instructions si
+        LEFT JOIN counterparties cp ON si.counterparty_id = cp.counterparty_id
+        LEFT JOIN custodians cust ON si.custodian_id = cust.custodian_id
+        LEFT JOIN markets mk ON si.market = mk.market_code
+        LEFT JOIN instruments inst ON si.instrument_type = inst.instrument_type
+        WHERE si.counterparty_id = :counterpartyId
+          AND si.instrument_type = :instrumentType
+          AND si.currency = :currency
+          AND si.market = :market
+          AND si.status = 'ACTIVE'
+          AND (:minAmount IS NULL OR si.min_amount <= :minAmount)
+          AND (:maxAmount IS NULL OR si.max_amount >= :maxAmount)
+        ORDER BY si.priority ASC, si.created_date DESC
+        LIMIT 1
+      riskAssessment: |
+        SELECT
+          ra.risk_category,
+          ra.risk_score,
+          ra.max_exposure,
+          ra.approval_required,
+          ra.monitoring_level,
+          cp.credit_rating,
+          cp.credit_limit,
+          mk.volatility_rating,
+          mk.liquidity_rating
+        FROM risk_assessments ra
+        JOIN counterparties cp ON ra.counterparty_id = cp.counterparty_id
+        JOIN markets mk ON ra.market = mk.market_code
+        WHERE ra.counterparty_id = :counterpartyId
+          AND ra.instrument_type = :instrumentType
+          AND ra.market = :market
+          AND (:tradeAmount IS NULL OR ra.max_single_trade >= :tradeAmount)
+          AND ra.effective_date <= CURRENT_DATE
+          AND (ra.expiry_date IS NULL OR ra.expiry_date > CURRENT_DATE)
+        ORDER BY ra.effective_date DESC
+        LIMIT 1
 
-# Define the enrichment rules
-enrichments:
-  - id: "settlement-instruction-enrichment"
-    name: "Settlement Instruction Multi-Parameter Lookup"
-    description: "Enrich trades with settlement instructions using complex multi-parameter database lookup"
-    type: "external-lookup-enrichment"
-    enabled: true
-    condition: "#trade != null && #trade.counterpartyId != null && #trade.instrumentType != null && #trade.currency != null && #trade.market != null"
-    
-    external-lookup-config:
-      data-source: "trading-database"
-      query-name: "settlementInstructions"
-      
-      # Multiple parameters with different data types
-      parameters:
-        - name: "counterpartyId"
-          source: "#trade.counterpartyId"
-          type: "string"
-          
-        - name: "instrumentType"
-          source: "#trade.instrumentType"
-          type: "string"
-          
-        - name: "currency"
-          source: "#trade.currency"
-          type: "string"
-          
-        - name: "market"
-          source: "#trade.market"
-          type: "string"
-          
-        - name: "minAmount"
-          source: "#trade.amount"
-          type: "decimal"
-          required: false
-          
-        - name: "maxAmount"
-          source: "#trade.amount"
-          type: "decimal"
-          required: false
-          
-      # Advanced fallback strategy
-      fallback:
-        enabled: true
-        strategy: "cascade"
-        cascade-queries:
-          - query-name: "settlementInstructions"
-            parameters:
-              - name: "counterpartyId"
-                source: "#trade.counterpartyId"
-              - name: "instrumentType"
-                source: "'DEFAULT'"
-              - name: "currency"
-                source: "#trade.currency"
-              - name: "market"
-                source: "#trade.market"
-          - query-name: "settlementInstructions"
-            parameters:
-              - name: "counterpartyId"
-                source: "'DEFAULT'"
-              - name: "instrumentType"
-                source: "#trade.instrumentType"
-              - name: "currency"
-                source: "#trade.currency"
-              - name: "market"
-                source: "#trade.market"
-    
-    # Comprehensive field mappings
-    field-mappings:
-      - source-field: "instruction_id"
-        target-field: "settlementInstructionId"
-        required: true
-        
-      - source-field: "counterparty_name"
-        target-field: "counterpartyName"
-        required: true
-        
-      - source-field: "counterparty_type"
-        target-field: "counterpartyType"
-        required: true
-        
-      - source-field: "credit_rating"
-        target-field: "counterpartyCreditRating"
-        required: false
-        
-      - source-field: "jurisdiction"
-        target-field: "counterpartyJurisdiction"
-        required: false
-        
-      - source-field: "custodian_name"
-        target-field: "custodianName"
-        required: true
-        
-      - source-field: "custodian_bic"
-        target-field: "custodianBic"
-        required: true
-        
-      - source-field: "custodian_address"
-        target-field: "custodianAddress"
-        required: false
-        
-      - source-field: "settlement_method"
-        target-field: "settlementMethod"
-        required: true
-        
-      - source-field: "delivery_instruction"
-        target-field: "deliveryInstruction"
-        required: true
-        
-      - source-field: "special_instructions"
-        target-field: "specialInstructions"
-        required: false
-        
-      - source-field: "market_name"
-        target-field: "marketName"
-        required: true
-        
-      - source-field: "settlement_cycle"
-        target-field: "settlementCycle"
-        required: true
-        
-      - source-field: "cut_off_time"
-        target-field: "cutOffTime"
-        required: false
-        
-      - source-field: "time_zone"
-        target-field: "timeZone"
-        required: false
-        
-      - source-field: "instrument_name"
-        target-field: "instrumentName"
-        required: false
-        
-      - source-field: "instrument_class"
-        target-field: "instrumentClass"
-        required: false
-        
-      - source-field: "settlement_currency"
-        target-field: "settlementCurrency"
-        required: false
-
-  - id: "risk-assessment-enrichment"
-    name: "Risk Assessment Multi-Parameter Lookup"
-    description: "Enrich trades with risk assessment data using multi-parameter database lookup"
-    type: "external-lookup-enrichment"
-    enabled: true
-    condition: "#trade != null && #trade.counterpartyId != null && #trade.instrumentType != null && #trade.market != null"
-    
-    external-lookup-config:
-      data-source: "trading-database"
-      query-name: "riskAssessment"
-      
-      parameters:
-        - name: "counterpartyId"
-          source: "#trade.counterpartyId"
-          type: "string"
-          
-        - name: "instrumentType"
-          source: "#trade.instrumentType"
-          type: "string"
-          
-        - name: "market"
-          source: "#trade.market"
-          type: "string"
-          
-        - name: "tradeAmount"
-          source: "#trade.amount"
-          type: "decimal"
-          required: false
-    
-    field-mappings:
-      - source-field: "risk_category"
-        target-field: "riskCategory"
-        required: true
-        
-      - source-field: "risk_score"
-        target-field: "riskScore"
-        required: true
-        
-      - source-field: "max_exposure"
-        target-field: "maxExposure"
-        required: false
-        
-      - source-field: "approval_required"
-        target-field: "approvalRequired"
-        required: true
-        
-      - source-field: "monitoring_level"
-        target-field: "monitoringLevel"
-        required: true
-        
-      - source-field: "credit_limit"
-        target-field: "creditLimit"
-        required: false
-        
-      - source-field: "volatility_rating"
-        target-field: "volatilityRating"
-        required: false
-        
-      - source-field: "liquidity_rating"
-        target-field: "liquidityRating"
-        required: false
+    # Parameter definitions
+    parameterNames:
+      - "counterpartyId"
+      - "instrumentType"
+      - "currency"
+      - "market"
+      - "minAmount"
+      - "maxAmount"
+      - "tradeAmount"

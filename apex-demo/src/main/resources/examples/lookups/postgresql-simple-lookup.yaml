@@ -1,19 +1,19 @@
-# Self-Contained Database Simple Lookup Example Configuration
-# Demonstrates external database lookup using embedded H2 database (PostgreSQL compatible mode)
-# Use Case: Customer profile enrichment from self-contained database
+# Self-Contained Database Data Source Configuration
+# Demonstrates external database data source using embedded H2 database (PostgreSQL compatible mode)
+# Use Case: Customer profile data source for enrichment lookups
 
 metadata:
-  name: "Self-Contained Database Simple Lookup Demo"
-  description: "Demonstrates external database lookup using embedded H2 database with connection pooling and caching"
+  name: "Self-Contained Database Data Source Demo"
+  description: "Data source configuration for embedded H2 database with connection pooling and caching"
   version: "1.0.0"
-  type: "enrichment"
+  type: "external-data-config"
   author: "APEX Demo Team"
 
 # External data source configuration
-data-sources:
+dataSources:
   - name: "customer-database"
     type: "database"
-    source-type: "h2"
+    sourceType: "h2"
     enabled: true
     description: "Customer master data from self-contained H2 database"
 
@@ -21,173 +21,63 @@ data-sources:
       url: "jdbc:h2:mem:apex_demo;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
       username: "apex_user"
       password: "apex_password"
-      driver-class: "org.h2.Driver"
-      
-      # SSL configuration
-      ssl-enabled: true
-      ssl-mode: "prefer"
-      
-      # Connection timeout settings
-      connect-timeout: 10000
-      socket-timeout: 30000
-      
-      # Connection pool configuration using HikariCP
+
+      # Connection pool configuration (verified against YamlDataSource.java)
       connection-pool:
-        max-pool-size: 20
-        min-pool-size: 5
+        max-size: 20
+        min-size: 5
         initial-size: 5
-        max-idle-time: 300000
-        max-lifetime: 1800000
         connection-timeout: 30000
         idle-timeout: 600000
+        max-lifetime: 1800000
         leak-detection-threshold: 60000
+        connection-test-query: "SELECT 1"
+        test-on-borrow: true
+        test-while-idle: true
         
     # Caching configuration for performance
     cache:
       enabled: true
-      ttl-seconds: 3600  # 1 hour cache
-      max-size: 10000
-      
+      ttlSeconds: 3600  # 1 hour cache
+      maxSize: 10000
+
     # Health check configuration
-    health-check:
+    healthCheck:
       enabled: true
-      test-query: "SELECT 1"
-      interval-seconds: 30
-      timeout-seconds: 5
+      query: "SELECT 1"
+      intervalSeconds: 30
+      timeoutSeconds: 5
       
+    # Database initialization (for demo purposes)
+    initialization:
+      enabled: true
+      scripts:
+        - |
+          CREATE TABLE IF NOT EXISTS customers (
+            customer_id VARCHAR(20) PRIMARY KEY,
+            customer_name VARCHAR(100) NOT NULL,
+            customer_type VARCHAR(20) NOT NULL,
+            tier VARCHAR(20) NOT NULL,
+            region VARCHAR(10) NOT NULL,
+            status VARCHAR(20) NOT NULL,
+            created_date DATE,
+            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+        - |
+          INSERT INTO customers (customer_id, customer_name, customer_type, tier, region, status, created_date) VALUES
+          ('CUST000001', 'Acme Corporation', 'CORPORATE', 'PLATINUM', 'NA', 'ACTIVE', '2023-01-15'),
+          ('CUST000002', 'Beta Industries', 'CORPORATE', 'GOLD', 'EU', 'ACTIVE', '2023-02-20'),
+          ('CUST000003', 'Gamma Holdings', 'INSTITUTIONAL', 'PLATINUM', 'APAC', 'ACTIVE', '2023-03-10'),
+          ('CUST000004', 'Delta Partners', 'CORPORATE', 'SILVER', 'NA', 'ACTIVE', '2023-04-05'),
+          ('CUST000005', 'Epsilon Fund', 'INSTITUTIONAL', 'GOLD', 'EU', 'ACTIVE', '2023-05-12')
+          ON DUPLICATE KEY UPDATE customer_name = VALUES(customer_name);
+
     # Query definitions for this data source
     queries:
-      customerProfile:
-        sql: "SELECT customer_id, customer_name, customer_type, tier, region, status, created_date, last_updated FROM customers WHERE customer_id = :customerId"
-        parameters:
-          - name: "customerId"
-            type: "string"
-            required: true
-        cache-enabled: true
-        cache-ttl: 1800  # 30 minutes
+      customerProfile: "SELECT customer_id, customer_name, customer_type, tier, region, status, created_date, last_updated FROM customers WHERE customer_id = ?"
 
-# Define the enrichment rules
-enrichments:
-  - id: "customer-profile-enrichment"
-    name: "Customer Profile Database Lookup"
-    description: "Enrich transactions with customer profile data from PostgreSQL database"
-    type: "external-lookup-enrichment"
-    enabled: true
-    condition: "#customerId != null && #customerId.length() > 0"
-    
-    # External lookup configuration
-    external-lookup-config:
-      data-source: "customer-database"
-      query-name: "customerProfile"
-      
-      # Parameters to pass to the database query
-      parameters:
-        - name: "customerId"
-          source: "#customerId"
-          type: "string"
-          
-      # Fallback behavior when lookup fails
-      fallback:
-        enabled: true
-        strategy: "default-values"
-        default-values:
-          customerName: "Unknown Customer"
-          customerType: "STANDARD"
-          tier: "BASIC"
-          region: "UNKNOWN"
-          status: "INACTIVE"
-    
-    # Map database columns to target fields
-    field-mappings:
-      - source-field: "customer_name"
-        target-field: "customerName"
-        required: true
-        
-      - source-field: "customer_type"
-        target-field: "customerType"
-        required: true
-        
-      - source-field: "tier"
-        target-field: "customerTier"
-        required: true
-        
-      - source-field: "region"
-        target-field: "customerRegion"
-        required: true
-        
-      - source-field: "status"
-        target-field: "customerStatus"
-        required: true
-        
-      - source-field: "created_date"
-        target-field: "customerCreatedDate"
-        required: false
-        
-      - source-field: "last_updated"
-        target-field: "customerLastUpdated"
-        required: false
+    # Parameter definitions
+    parameterNames:
+      - "customerId"
 
-# Validation rules
-validations:
-  - id: "customer-id-format"
-    name: "Customer ID Format Validation"
-    description: "Ensure customer ID follows expected format"
-    type: "field-validation"
-    enabled: true
-    condition: "#customerId != null"
-    
-    validation-config:
-      field: "customerId"
-      rules:
-        - type: "regex"
-          pattern: "^CUST[0-9]{6}$"
-          message: "Customer ID must be in format CUST###### (e.g., CUST000001)"
-          
-  - id: "database-connection-health"
-    name: "Database Connection Health Check"
-    description: "Ensure database connection is healthy before processing"
-    type: "system-validation"
-    enabled: true
-    condition: "true"
-    
-    validation-config:
-      system: "customer-database"
-      rules:
-        - type: "health-check"
-          message: "Customer database is not available"
 
-# Processing configuration
-processing:
-  continue-on-error: true
-  max-errors: 5
-  error-handling: "log-and-continue"
-  
-  # Performance settings
-  performance:
-    enable-metrics: true
-    enable-tracing: true
-    log-slow-queries: true
-    slow-query-threshold-ms: 1000
-    
-  # Retry configuration for database failures
-  retry:
-    enabled: true
-    max-attempts: 3
-    initial-delay-ms: 1000
-    max-delay-ms: 5000
-    backoff-multiplier: 2.0
-
-# Monitoring and alerting
-monitoring:
-  metrics:
-    enabled: true
-    include-query-timing: true
-    include-connection-pool-stats: true
-    include-cache-stats: true
-    
-  alerts:
-    enabled: true
-    slow-query-threshold-ms: 2000
-    connection-pool-exhaustion-threshold: 0.9
-    cache-miss-rate-threshold: 0.5
-    error-rate-threshold: 0.1
