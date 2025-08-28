@@ -4,11 +4,11 @@
 [![Maven](https://img.shields.io/badge/Maven-3.8+-blue.svg)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-**Version:** 1.0
-**Date:** 2025-05-12
+**Version:** 2.1
+**Date:** 2025-08-28
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
-A powerful expression processor for Java applications with comprehensive data source integration, scenario-based configuration management, and enterprise-grade YAML validation.
+A powerful expression processor for Java applications with comprehensive data source integration, **external data-source reference system**, scenario-based configuration management, and enterprise-grade YAML validation.
 
 ## Quick Start
 
@@ -29,6 +29,11 @@ mvn spring-boot:run
 ### Run Demonstrations
 ```bash
 cd apex-demo
+# 🆕 External Data-Source Reference Demos (APEX 2.1)
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.SimplePostgreSQLLookupDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.PostgreSQLLookupDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.ExternalDataSourceWorkingDemo"
+
 # Bootstrap demos (complete end-to-end scenarios)
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo"
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CommoditySwapBootstrapDemo"
@@ -39,6 +44,13 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo
 
 ## Key Features
 
+### 🆕 APEX 2.1 - External Data-Source Reference System
+- **Clean Architecture**: Separation of infrastructure and business logic configurations
+- **Configuration Caching**: Automatic caching of external configurations for performance
+- **Reusable Components**: Share data-source configurations across multiple rule sets
+- **Enterprise Scalability**: Environment-specific infrastructure with shared business logic
+
+### Core Features
 - **Interactive Playground**: 4-panel web interface for real-time rule development and testing
 - **Scenario-Based Configuration**: Centralized management and routing of data processing pipelines
 - **External Data Integration**: Connect to databases, REST APIs, file systems, and caches
@@ -47,6 +59,89 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo
 - **Enterprise Features**: Connection pooling, health monitoring, caching, circuit breakers
 - **100% Test Coverage**: Comprehensive testing with cross-browser UI support
 
+## 🚀 External Data-Source Reference System
+
+APEX 2.1 introduces a revolutionary **external data-source reference system** that enables clean architecture and enterprise-grade configuration management.
+
+### Clean Separation of Concerns
+
+**Traditional Approach (Mixed Configuration):**
+```yaml
+# Everything mixed together - infrastructure + business logic
+metadata:
+  name: "Legacy Configuration"
+
+data-sources:  # Infrastructure mixed with business logic
+  - name: "customer-database"
+    type: "database"
+    connection:
+      url: "jdbc:postgresql://localhost:5432/customers"
+      username: "user"
+      password: "pass"
+
+enrichments:  # Business logic
+  - id: "customer-lookup"
+    type: "lookup-enrichment"
+    # ... business logic configuration
+```
+
+**Modern Approach (Clean Architecture):**
+```yaml
+# Business Logic Configuration (Clean and Focused)
+metadata:
+  name: "Modern Configuration"
+  version: "2.1.0"
+
+# External data-source references (infrastructure configuration - reusable)
+data-source-refs:
+  - name: "customer-database"
+    source: "data-sources/customer-database.yaml"  # External infrastructure file
+    enabled: true
+
+# Business logic enrichments (lean and focused)
+enrichments:
+  - id: "customer-lookup"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-dataset:
+        data-source-ref: "customer-database"  # References external data-source
+        query-ref: "getActiveCustomer"        # Named query from external config
+```
+
+```yaml
+# External Infrastructure Configuration (Reusable)
+# File: data-sources/customer-database.yaml
+metadata:
+  name: "Customer Database Configuration"
+  type: "external-data-config"
+
+connection:
+  type: "database"
+  driver: "postgresql"
+  url: "jdbc:postgresql://localhost:5432/customers"
+  username: "${DB_USERNAME}"
+  password: "${DB_PASSWORD}"
+  pool:
+    initial-size: 5
+    max-size: 20
+
+queries:
+  getActiveCustomer:
+    sql: "SELECT * FROM customers WHERE customer_id = :customerId AND status = 'ACTIVE'"
+    parameters:
+      - name: "customerId"
+        type: "string"
+        required: true
+```
+
+### Key Benefits
+
+- **🏗️ Clean Architecture**: Infrastructure and business logic cleanly separated
+- **♻️ Reusable Components**: External data-source configurations shared across multiple rule sets
+- **⚡ Performance**: Configuration caching and connection pooling
+- **🌍 Environment Management**: Different infrastructure configurations for dev/test/prod
+- **📈 Enterprise Scalability**: Production-ready configuration management
+
 ## Architecture
 
 ```mermaid
@@ -54,57 +149,81 @@ graph TB
     subgraph "Business Layer"
         A[Business Rules]
         B[YAML Configuration]
-        C[Dataset Definitions]
+        C[External Data-Source References]
     end
 
     subgraph "Rules Engine Core"
         D[Expression Evaluator]
         E[Rule Engine Service]
         F[Context Manager]
+        G[DataSource Resolver]
+    end
+
+    subgraph "External Data-Source Layer"
+        H[External Database Configs]
+        I[External API Configs]
+        J[External File Configs]
+        K[Configuration Cache]
     end
 
     subgraph "Data Layer"
-        G[YAML Datasets]
-        H[External APIs]
-        I[Database Lookups]
+        L[YAML Datasets]
+        M[External APIs]
+        N[Database Lookups]
+        O[File Systems]
     end
 
     subgraph "Integration Layer"
-        J[Spring Boot]
-        K[REST APIs]
-        L[Microservices]
+        P[Spring Boot]
+        Q[REST APIs]
+        R[Microservices]
     end
 
     A --> D
     B --> E
     C --> G
+    G --> H
+    G --> I
+    G --> J
+    G --> K
+    H --> N
+    I --> M
+    J --> O
     D --> F
-    E --> H
-    E --> I
-    F --> J
-    F --> K
-    F --> L
+    E --> L
+    E --> M
+    E --> N
+    F --> P
+    F --> Q
+    F --> R
 ```
 
 ## Project Structure
 
-- **apex-core**: Core rules engine and data integration components
-- **apex-demo**: 16 comprehensive demonstrations covering financial services scenarios
+- **apex-core**: Core rules engine and **external data-source reference system**
+- **apex-demo**: 16+ comprehensive demonstrations including **external data-source reference examples**
 - **apex-playground**: Interactive web-based development environment
 - **apex-rest-api**: Complete REST API with OpenAPI/Swagger documentation
-- **docs**: Comprehensive documentation and guides
+- **docs**: Comprehensive documentation and guides including **external data-source reference guide**
 
 ## Learning Paths
 
 ### Quick Start (30 minutes)
 1. **APEX Playground** (15 minutes) - Interactive experimentation
-2. **Simple Field Lookup Demo** (5 minutes) - Basic data enrichment
+2. **Simple PostgreSQL Lookup Demo** (5 minutes) - External data-source references
 3. **OTC Options Bootstrap Demo** (10 minutes) - Complete workflow
 
 ### Developer Path (3-4 hours)
-1. **All Lookup Pattern Examples** (60 minutes) - Master data enrichment
-2. **All Bootstrap Demonstrations** (120 minutes) - Complete financial workflows
-3. **Advanced Feature Demos** (60-90 minutes) - Technical deep dive
+1. **External Data-Source Reference Demos** (45 minutes) - Modern clean architecture
+2. **All Lookup Pattern Examples** (60 minutes) - Master data enrichment
+3. **All Bootstrap Demonstrations** (120 minutes) - Complete financial workflows
+4. **Advanced Feature Demos** (60-90 minutes) - Technical deep dive
+
+### 🆕 External Data-Source Reference Path (1-2 hours)
+1. **SimplePostgreSQLLookupDemo** (20 minutes) - Basic external references
+2. **PostgreSQLLookupDemo** (30 minutes) - Advanced multi-table lookups
+3. **ExternalDataSourceWorkingDemo** (30 minutes) - Production-ready patterns
+4. **Documentation Review** (30 minutes) - APEX YAML Reference and Data Management Guide
 
 ### Production Implementation (4-6 hours)
 1. **Complete Demo Ecosystem** (180 minutes) - All 16 demonstrations
@@ -138,9 +257,10 @@ graph TB
 
 ### Data Integration
 - **Static Reference Data** (< 100 records): Use YAML Datasets
-- **Transactional Data**: Use Database Sources (PostgreSQL, MySQL, Oracle)
-- **Real-time Data**: Use API Sources with caching
-- **Batch Data**: Use File Sources (CSV, JSON, XML)
+- **Transactional Data**: Use **External Database References** (PostgreSQL, MySQL, Oracle)
+- **Real-time Data**: Use **External API References** with caching
+- **Batch Data**: Use **External File References** (CSV, JSON, XML)
+- **🆕 Clean Architecture**: Use **External Data-Source References** for separation of concerns
 
 ## Requirements
 
@@ -154,11 +274,17 @@ Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for detai
 
 ## Getting Help
 
+### 🆕 External Data-Source Reference System
+1. **[APEX YAML Reference Guide](docs/APEX_YAML_REFERENCE.md)** - Complete external data-source reference syntax
+2. **[APEX Data Management Guide](docs/APEX_DATA_MANAGEMENT_GUIDE.md)** - Section 16: External Data Source Integration
+3. **External Data-Source Reference Demos** - SimplePostgreSQLLookupDemo, PostgreSQLLookupDemo, ExternalDataSourceWorkingDemo
+
+### General Documentation
 1. Start with the **[APEX Playground](http://localhost:8081/playground)** for hands-on experience
 2. Review the **[Bootstrap Demos Guide](docs/APEX_BOOTSTRAP_DEMOS_GUIDE.md)** for practical examples
 3. Check the **[Rules Engine User Guide](docs/APEX_RULES_ENGINE_USER_GUIDE.md)** for comprehensive documentation
-4. Explore the **16 demonstrations** in the `apex-demo` module
+4. Explore the **16+ demonstrations** in the `apex-demo` module
 
 ---
 
-**Version:** 1.0 | **Author:** Mark Andrew Ray-Smith Cityline Ltd | **Date:** 2025-08-23
+**Version:** 2.1 | **Author:** Mark Andrew Ray-Smith Cityline Ltd | **Date:** 2025-08-28

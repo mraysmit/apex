@@ -1,12 +1,17 @@
 # APEX - Data Management Guide
 
-**Version:** 2.0
-**Date:** 2025-08-22
+**Version:** 2.1
+**Date:** 2025-08-28
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
 ## Overview
 
-APEX (Advanced Processing Engine for eXpressions) provides comprehensive data management capabilities designed for enterprise-grade applications, including scenario-based configuration management and enterprise YAML validation. This guide takes you on a journey from basic data concepts to advanced enterprise implementations, ensuring you understand each concept thoroughly before moving to the next level.
+APEX (Advanced Processing Engine for eXpressions) provides comprehensive data management capabilities designed for enterprise-grade applications, including scenario-based configuration management, enterprise YAML validation, and the revolutionary **external data-source reference system**. This guide takes you on a journey from basic data concepts to advanced enterprise implementations, ensuring you understand each concept thoroughly before moving to the next level.
+
+**🆕 APEX 2.1 Features:**
+- **External Data-Source Reference System**: Clean separation of infrastructure and business logic
+- **Configuration Caching**: Automatic caching of external configurations for performance
+- **Enterprise Architecture**: Production-ready patterns for scalable configuration management
 
 **All YAML examples in this guide are validated and tested** through the apex-demo module demonstration suite. Each configuration has been verified to work correctly with the APEX Rules Engine.
 
@@ -36,7 +41,7 @@ APEX (Advanced Processing Engine for eXpressions) provides comprehensive data ma
 **Part 4: Advanced Topics**
 14. [Scenario-Based Configuration Management](#14-scenario-based-configuration-management)
 15. [YAML Validation and Quality Assurance](#15-yaml-validation-and-quality-assurance)
-16. [External Data Source Integration](#16-external-data-source-integration)
+16. [External Data Source Integration](#16-external-data-source-integration) **🆕 Enhanced with External References**
 17. [Database Integration](#17-database-integration)
 18. [REST API Integration](#18-rest-api-integration)
 19. [File System Data Sources](#19-file-system-data-sources)
@@ -8085,6 +8090,169 @@ All data sources work the same way in your rules, regardless of whether you're c
 **YAML Configuration** - Simple, readable setup:
 Configure everything in human-readable YAML files with environment-specific overrides. No complex programming required for basic setups.
 
+### 🆕 APEX 2.0: External Data-Source Reference System
+
+**APEX 2.0** introduces a revolutionary **external data-source reference system** that enables **clean architecture** and **enterprise-grade configuration management**. This system provides **separation of concerns** by splitting configurations into:
+
+- **Infrastructure Configuration**: External, reusable data-source configurations
+- **Business Logic Configuration**: Lean, focused enrichment and validation rules
+
+#### Benefits of External Data-Source References
+
+**Clean Architecture:**
+- **Separation of Concerns**: Infrastructure and business logic cleanly separated
+- **Reusable Components**: External data-source configurations shared across multiple rule configurations
+- **Maintainable Code**: Lean business logic configurations easy to understand and modify
+
+**Enterprise Scalability:**
+- **Configuration Caching**: External configurations cached for performance
+- **Connection Pooling**: Shared database connections across multiple enrichments
+- **Environment Management**: Different infrastructure configurations for dev/test/prod
+
+**Production Readiness:**
+- **Named Parameter Binding**: Enhanced database integration with parameter validation
+- **Field Mapping Case Sensitivity**: Production-ready field handling
+- **Error Handling**: Comprehensive error handling and fallback mechanisms
+
+#### External Data-Source Reference Architecture
+
+```yaml
+# Business Logic Configuration (Lean and Focused)
+metadata:
+  name: "Customer Processing Rules"
+  version: "2.0.0"
+  description: "Business logic using external data-source references"
+
+# External data-source references (infrastructure configuration - reusable)
+data-source-refs:
+  - name: "customer-database"
+    source: "data-sources/customer-database.yaml"  # External infrastructure file
+    enabled: true
+    description: "Customer database for profile enrichment"
+
+# Business logic enrichments (lean and focused)
+enrichments:
+  - id: "customer-profile-lookup"
+    type: "lookup-enrichment"
+    condition: "#customerId != null"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "customer-database"  # References external data-source
+        query-ref: "getActiveCustomerById"    # Named query from external config
+        parameters:
+          - field: "customerId"
+            type: "string"
+    field-mappings:
+      - source-field: "CUSTOMER_NAME"
+        target-field: "customerName"
+        required: true
+```
+
+```yaml
+# External Infrastructure Configuration (Reusable)
+# File: data-sources/customer-database.yaml
+metadata:
+  name: "Customer Database Configuration"
+  version: "1.0.0"
+  type: "external-data-config"
+  description: "PostgreSQL customer database infrastructure configuration"
+
+# Database connection configuration
+connection:
+  type: "database"
+  driver: "postgresql"
+  url: "jdbc:postgresql://localhost:5432/customers"
+  username: "${DB_USERNAME:sa}"
+  password: "${DB_PASSWORD:}"
+  pool:
+    initial-size: 5
+    max-size: 20
+    timeout: 30000
+
+# Named queries for reuse across multiple enrichments
+queries:
+  getActiveCustomerById:
+    sql: |
+      SELECT
+        customer_id,
+        customer_name,
+        customer_type,
+        tier,
+        region,
+        status,
+        created_date
+      FROM customers
+      WHERE customer_id = :customerId
+        AND status = 'ACTIVE'
+    parameters:
+      - name: "customerId"
+        type: "string"
+        required: true
+        description: "Customer identifier"
+
+# Connection health check
+health-check:
+  query: "SELECT 1"
+  timeout: 5000
+  interval: 30000
+```
+
+#### Migration from Legacy to External References
+
+**Legacy Approach (APEX 1.x):**
+```yaml
+# Old: Everything in one file (infrastructure + business logic mixed)
+metadata:
+  name: "Legacy Configuration"
+  version: "1.0.0"
+
+data-sources:  # Infrastructure mixed with business logic
+  - name: "customer-database"
+    type: "database"
+    connection:
+      url: "jdbc:postgresql://localhost:5432/customers"
+      username: "user"
+      password: "pass"
+    queries:
+      getCustomer:
+        sql: "SELECT * FROM customers WHERE id = :id"
+
+enrichments:  # Business logic
+  - id: "customer-lookup"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-dataset:
+        type: "database"
+        data-source: "customer-database"  # Direct reference
+        query: "getCustomer"
+```
+
+**Modern Approach (APEX 2.0):**
+```yaml
+# New: Clean separation of concerns
+metadata:
+  name: "Modern Configuration"
+  version: "2.0.0"
+
+# Clean separation: Infrastructure references only
+data-source-refs:
+  - name: "customer-database"
+    source: "data-sources/customer-database.yaml"  # External infrastructure file
+    enabled: true
+
+# Clean separation: Business logic only
+enrichments:
+  - id: "customer-lookup"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "customer-database"  # External reference
+        query-ref: "getCustomer"              # Named query from external config
+```
+
 ### Quick Start with External Data Sources
 
 Let's get you connected to your first external data source in just a few minutes! This example shows how to connect to a PostgreSQL database.
@@ -8245,6 +8413,255 @@ Store frequently accessed data in memory for ultra-fast retrieval.
 - Expensive calculation results that don't change often
 - Session data and user preferences
 - Any data where speed is more important than absolute freshness
+
+### 🚀 External Data-Source Reference Performance and Best Practices
+
+#### Configuration Caching and Performance Optimization
+
+The external data-source reference system provides significant performance benefits through automatic configuration caching:
+
+**Automatic Configuration Caching:**
+```yaml
+# External configurations are loaded once and cached automatically
+data-source-refs:
+  - name: "shared-customer-database"
+    source: "data-sources/customer-database.yaml"  # Loaded once, cached
+    enabled: true
+
+# Multiple enrichments can reference the same external configuration
+enrichments:
+  - id: "customer-profile-enrichment"
+    lookup-config:
+      lookup-dataset:
+        data-source-ref: "shared-customer-database"  # Uses cached configuration
+
+  - id: "customer-validation-enrichment"
+    lookup-config:
+      lookup-dataset:
+        data-source-ref: "shared-customer-database"  # Uses cached configuration
+
+  - id: "customer-risk-enrichment"
+    lookup-config:
+      lookup-dataset:
+        data-source-ref: "shared-customer-database"  # Uses cached configuration
+```
+
+**Performance Benefits:**
+- **Configuration Loading**: External configurations loaded once and cached for the application lifecycle
+- **Connection Pooling**: Database connections shared across all enrichments using the same external reference
+- **Query Preparation**: Named queries prepared once and reused across multiple enrichments
+- **Memory Efficiency**: Reduced memory footprint through shared configurations
+- **Startup Performance**: Faster application startup through lazy loading of external configurations
+
+#### Production-Ready Field Mapping
+
+External data-source references support case-sensitive field mapping for production environments:
+
+```yaml
+# External data-source reference configuration
+data-source-refs:
+  - name: "production-database"
+    source: "data-sources/production-database.yaml"
+    enabled: true
+
+enrichments:
+  - id: "production-lookup"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-dataset:
+        data-source-ref: "production-database"
+        query-ref: "getCustomerRecord"
+
+    # Production-ready field mappings handle case sensitivity
+    field-mappings:
+      - source-field: "CUSTOMER_NAME"      # Uppercase database column
+        target-field: "customerName"       # camelCase target field
+        required: true
+      - source-field: "CUSTOMER_TYPE"      # Uppercase database column
+        target-field: "customerType"       # camelCase target field
+        required: true
+      - source-field: "ACCOUNT_BALANCE"    # Uppercase database column
+        target-field: "accountBalance"     # camelCase target field
+        required: false
+        default-value: 0.0
+```
+
+#### Best Practices for External Data-Source References
+
+**1. Configuration Organization:**
+```yaml
+# Organize external configurations by environment and purpose
+data-source-refs:
+  # Production databases
+  - name: "prod-customer-database"
+    source: "data-sources/prod/customer-database.yaml"
+    enabled: true
+
+  # Shared reference data
+  - name: "reference-data-service"
+    source: "data-sources/shared/reference-data.yaml"
+    enabled: true
+
+  # Environment-specific APIs
+  - name: "market-data-api"
+    source: "data-sources/${ENVIRONMENT:dev}/market-data-api.yaml"
+    enabled: true
+```
+
+**2. Error Handling and Resilience:**
+```yaml
+# External data-source configuration with error handling
+# File: data-sources/resilient-database.yaml
+metadata:
+  name: "Resilient Database Configuration"
+  type: "external-data-config"
+
+connection:
+  type: "database"
+  driver: "postgresql"
+  url: "jdbc:postgresql://localhost:5432/customers"
+  username: "${DB_USERNAME}"
+  password: "${DB_PASSWORD}"
+
+  # Connection pool with resilience settings
+  pool:
+    initial-size: 5
+    max-size: 20
+    timeout: 30000
+    retry-attempts: 3
+    retry-delay: 1000
+
+  # Health check configuration
+  health-check:
+    query: "SELECT 1"
+    timeout: 5000
+    interval: 30000
+    failure-threshold: 3
+    recovery-threshold: 2
+
+# Named queries with error handling
+queries:
+  getCustomerWithFallback:
+    sql: |
+      SELECT
+        customer_id,
+        COALESCE(customer_name, 'UNKNOWN') as customer_name,
+        COALESCE(customer_type, 'STANDARD') as customer_type,
+        COALESCE(status, 'ACTIVE') as status
+      FROM customers
+      WHERE customer_id = :customerId
+    parameters:
+      - name: "customerId"
+        type: "string"
+        required: true
+        validation: "^[A-Z0-9]{6,12}$"
+    timeout: 10000
+    retry-attempts: 2
+```
+
+**3. Environment-Specific Configuration Management:**
+```yaml
+# Business logic configuration (environment-agnostic)
+metadata:
+  name: "Customer Processing Rules"
+  version: "2.0.0"
+
+# Environment-specific external references
+data-source-refs:
+  - name: "customer-database"
+    source: "data-sources/${ENVIRONMENT:dev}/customer-database.yaml"
+    enabled: true
+  - name: "audit-service"
+    source: "data-sources/${ENVIRONMENT:dev}/audit-service.yaml"
+    enabled: "${AUDIT_ENABLED:true}"
+
+# Business logic remains the same across environments
+enrichments:
+  - id: "customer-enrichment"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-dataset:
+        data-source-ref: "customer-database"  # Same reference, different implementation
+        query-ref: "getActiveCustomer"
+```
+
+**4. Monitoring and Observability:**
+```yaml
+# External data-source configuration with monitoring
+# File: data-sources/monitored-database.yaml
+metadata:
+  name: "Monitored Database Configuration"
+  type: "external-data-config"
+
+connection:
+  type: "database"
+  driver: "postgresql"
+  url: "jdbc:postgresql://localhost:5432/customers"
+
+  # Monitoring configuration
+  monitoring:
+    enabled: true
+    metrics:
+      - "connection-pool-usage"
+      - "query-execution-time"
+      - "error-rate"
+      - "cache-hit-ratio"
+    alerts:
+      - condition: "connection-pool-usage > 80%"
+        severity: "WARNING"
+        message: "Database connection pool usage is high"
+      - condition: "error-rate > 5%"
+        severity: "ERROR"
+        message: "Database error rate is too high"
+
+# Query-level monitoring
+queries:
+  getCustomer:
+    sql: "SELECT * FROM customers WHERE customer_id = :customerId"
+    monitoring:
+      enabled: true
+      slow-query-threshold: 1000  # milliseconds
+      log-parameters: false       # Don't log sensitive data
+```
+
+#### Enterprise Architecture Patterns
+
+**Multi-Environment Configuration Pattern:**
+```
+project/
+├── src/main/resources/
+│   ├── enrichments/
+│   │   ├── customer-processing.yaml      # Business logic (environment-agnostic)
+│   │   └── transaction-validation.yaml   # Business logic (environment-agnostic)
+│   └── data-sources/
+│       ├── dev/
+│       │   ├── customer-database.yaml    # Development infrastructure
+│       │   └── market-data-api.yaml      # Development infrastructure
+│       ├── test/
+│       │   ├── customer-database.yaml    # Test infrastructure
+│       │   └── market-data-api.yaml      # Test infrastructure
+│       └── prod/
+│           ├── customer-database.yaml    # Production infrastructure
+│           └── market-data-api.yaml      # Production infrastructure
+```
+
+**Shared Infrastructure Pattern:**
+```yaml
+# Multiple business logic configurations can share infrastructure
+# File: enrichments/customer-onboarding.yaml
+data-source-refs:
+  - name: "customer-database"
+    source: "data-sources/shared/customer-database.yaml"  # Shared infrastructure
+  - name: "compliance-service"
+    source: "data-sources/shared/compliance-service.yaml" # Shared infrastructure
+
+# File: enrichments/customer-maintenance.yaml
+data-source-refs:
+  - name: "customer-database"
+    source: "data-sources/shared/customer-database.yaml"  # Same shared infrastructure
+  - name: "audit-service"
+    source: "data-sources/shared/audit-service.yaml"      # Different shared infrastructure
+```
 
 ## 17. Database Integration
 

@@ -1,10 +1,16 @@
 # APEX - Technical Reference Guide
 
-**Version:** 1.0
-**Date:** 2025-08-22
+**Version:** 2.1
+**Date:** 2025-08-28
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
-Welcome to the APEX Technical Reference Guide! This document provides detailed technical information for developers, architects, and system integrators working with APEX. While the User Guide focuses on getting started and common use cases, this reference dives deep into the technical architecture, advanced patterns, implementation details, scenario-based configuration management, and enterprise YAML validation systems.
+Welcome to the APEX Technical Reference Guide! This document provides detailed technical information for developers, architects, and system integrators working with APEX. While the User Guide focuses on getting started and common use cases, this reference dives deep into the technical architecture, advanced patterns, implementation details, scenario-based configuration management, **external data-source reference system**, and enterprise YAML validation systems.
+
+**🆕 APEX 2.1 Technical Features:**
+- **External Data-Source Reference Architecture**: Clean separation of infrastructure and business logic
+- **DataSource Resolver Component**: Advanced external configuration resolution
+- **Configuration Caching System**: Performance optimization through intelligent caching
+- **Enterprise Architecture Patterns**: Production-ready scalable configuration management
 
 ## Scenario-Based Configuration Architecture
 
@@ -32,6 +38,12 @@ graph TD
         EnrichmentFiles["Enrichment Files<br/>enrichments/*.yaml<br/>• Data enrichment logic<br/>• External lookups<br/>• Calculation rules"]
     end
 
+    subgraph "🆕 External Data-Source Reference Layer"
+        DataSourceResolver["DataSource Resolver<br/>• External config resolution<br/>• Reference validation<br/>• Configuration caching"]
+        ExternalConfigs["External Data-Source Configs<br/>data-sources/*.yaml<br/>• Infrastructure definitions<br/>• Connection management<br/>• Named queries"]
+        ConfigCache["Configuration Cache<br/>• Cached external configs<br/>• Performance optimization<br/>• Lazy loading"]
+    end
+
     subgraph "Data Layer"
         InlineData["Inline Datasets<br/>• Embedded data<br/>• Static references"]
         ExternalYAML["External YAML<br/>• Shared reference data"]
@@ -43,10 +55,14 @@ graph TD
     ScenarioFiles -->|"references"| ConfigFiles
     ScenarioFiles -->|"references"| BootstrapFiles
     ConfigFiles -.->|"may reference"| EnrichmentFiles
+    ConfigFiles -->|"🆕 data-source-refs"| DataSourceResolver
+    EnrichmentFiles -->|"🆕 data-source-refs"| DataSourceResolver
+    DataSourceResolver -->|"resolves"| ExternalConfigs
+    DataSourceResolver -->|"caches"| ConfigCache
     BootstrapFiles -->|"contains"| InlineData
     ConfigFiles -->|"references"| ExternalYAML
-    EnrichmentFiles -->|"queries"| DatabaseSources
-    EnrichmentFiles -->|"calls"| APISources
+    ExternalConfigs -->|"connects to"| DatabaseSources
+    ExternalConfigs -->|"connects to"| APISources
 ```
 
 ### Core Components
@@ -341,6 +357,237 @@ Instead of having to write custom code to fetch data from different systems, APE
 - **Caching**: Stores frequently accessed data in memory for faster access
 - **Automatic failover**: If one data source fails, APEX can automatically try backup sources
 - **Load balancing**: Distributes requests across multiple data sources for better performance
+
+### 🆕 APEX 2.1: External Data-Source Reference System
+
+**APEX 2.1** introduces a revolutionary **external data-source reference system** that provides **clean architecture** and **enterprise-grade configuration management**. This system represents a fundamental shift from traditional inline configuration to a modern, scalable approach.
+
+#### Technical Architecture Overview
+
+The external data-source reference system consists of four key components:
+
+```mermaid
+graph TB
+    subgraph "Business Logic Layer"
+        BL[Business Logic Configuration<br/>enrichments/*.yaml<br/>• Lean configurations<br/>• External references<br/>• Business rules only]
+    end
+
+    subgraph "Reference Resolution Layer"
+        DSR[DataSource Resolver<br/>• Reference validation<br/>• Configuration loading<br/>• Dependency management]
+        CC[Configuration Cache<br/>• Cached external configs<br/>• Performance optimization<br/>• Lazy loading]
+    end
+
+    subgraph "Infrastructure Layer"
+        EDC[External Data-Source Configs<br/>data-sources/*.yaml<br/>• Infrastructure definitions<br/>• Connection management<br/>• Named queries]
+    end
+
+    subgraph "Data Access Layer"
+        DB[(Database)]
+        API[REST API]
+        FS[File System]
+        CACHE[Cache]
+    end
+
+    BL -->|"data-source-refs"| DSR
+    DSR -->|"resolves"| EDC
+    DSR -->|"caches"| CC
+    CC -->|"serves cached"| DSR
+    EDC -->|"connects to"| DB
+    EDC -->|"connects to"| API
+    EDC -->|"connects to"| FS
+    EDC -->|"connects to"| CACHE
+```
+
+#### Core Components
+
+**1. DataSource Resolver Component**
+
+The `DataSourceResolver` is the central component responsible for resolving external data-source references:
+
+```java
+@Component
+public class DataSourceResolver {
+
+    private final ConfigurationCache configurationCache;
+    private final YamlDataSourceLoader yamlLoader;
+    private final DataSourceFactory dataSourceFactory;
+
+    /**
+     * Resolve external data-source reference to actual DataSource instance
+     */
+    public DataSource resolveDataSourceReference(DataSourceReference reference) {
+        // 1. Check configuration cache first
+        String cacheKey = generateCacheKey(reference);
+        DataSourceConfiguration config = configurationCache.get(cacheKey);
+
+        if (config == null) {
+            // 2. Load external configuration file
+            config = yamlLoader.loadFromClasspath(reference.getSource());
+
+            // 3. Validate configuration
+            validateConfiguration(config);
+
+            // 4. Cache for future use
+            configurationCache.put(cacheKey, config);
+        }
+
+        // 5. Create DataSource instance
+        return dataSourceFactory.createDataSource(config);
+    }
+
+    /**
+     * Resolve named query from external configuration
+     */
+    public QueryDefinition resolveNamedQuery(String dataSourceRef, String queryRef) {
+        DataSourceConfiguration config = getConfigurationByReference(dataSourceRef);
+        return config.getQueries().get(queryRef);
+    }
+
+    /**
+     * Validate external data-source reference
+     */
+    public ValidationResult validateReference(DataSourceReference reference) {
+        try {
+            // Check if external file exists
+            if (!yamlLoader.exists(reference.getSource())) {
+                return ValidationResult.error("External configuration file not found: " + reference.getSource());
+            }
+
+            // Load and validate configuration
+            DataSourceConfiguration config = yamlLoader.loadFromClasspath(reference.getSource());
+            return validateConfiguration(config);
+
+        } catch (Exception e) {
+            return ValidationResult.error("Failed to validate reference: " + e.getMessage());
+        }
+    }
+}
+```
+
+**2. Configuration Cache System**
+
+The configuration cache provides intelligent caching of external configurations:
+
+```java
+@Component
+public class ConfigurationCache {
+
+    private final Map<String, DataSourceConfiguration> cache = new ConcurrentHashMap<>();
+    private final Map<String, Long> lastModified = new ConcurrentHashMap<>();
+
+    /**
+     * Get cached configuration with automatic invalidation
+     */
+    public DataSourceConfiguration get(String cacheKey) {
+        // Check if configuration has been modified
+        if (isConfigurationModified(cacheKey)) {
+            invalidate(cacheKey);
+            return null;
+        }
+
+        return cache.get(cacheKey);
+    }
+
+    /**
+     * Cache configuration with metadata
+     */
+    public void put(String cacheKey, DataSourceConfiguration config) {
+        cache.put(cacheKey, config);
+        lastModified.put(cacheKey, System.currentTimeMillis());
+
+        // Log cache statistics
+        logCacheStatistics();
+    }
+
+    /**
+     * Get cache statistics for monitoring
+     */
+    public CacheStatistics getStatistics() {
+        return CacheStatistics.builder()
+            .totalEntries(cache.size())
+            .hitRatio(calculateHitRatio())
+            .memoryUsage(calculateMemoryUsage())
+            .build();
+    }
+}
+```
+
+**3. External Data-Source Configuration Structure**
+
+External data-source configurations follow a standardized structure:
+
+```java
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class DataSourceConfiguration {
+
+    private Metadata metadata;
+    private ConnectionConfig connection;
+    private Map<String, QueryDefinition> queries;
+    private HealthCheckConfig healthCheck;
+    private MonitoringConfig monitoring;
+
+    @Data
+    public static class Metadata {
+        private String name;
+        private String version;
+        private String type; // "external-data-config"
+        private String description;
+        private List<String> tags;
+    }
+
+    @Data
+    public static class ConnectionConfig {
+        private String type; // "database", "api", "file", "cache"
+        private String driver;
+        private String url;
+        private String username;
+        private String password;
+        private PoolConfig pool;
+        private Map<String, Object> properties;
+    }
+
+    @Data
+    public static class QueryDefinition {
+        private String sql;
+        private List<ParameterDefinition> parameters;
+        private Integer timeout;
+        private Integer retryAttempts;
+        private String description;
+    }
+
+    @Data
+    public static class ParameterDefinition {
+        private String name;
+        private String type;
+        private boolean required;
+        private String validation;
+        private String description;
+    }
+}
+```
+
+#### Performance Optimization Features
+
+**1. Configuration Caching**
+- External configurations loaded once and cached for application lifecycle
+- Automatic cache invalidation when external files are modified
+- Memory-efficient caching with configurable TTL
+
+**2. Connection Pooling**
+- Shared database connections across all enrichments using the same external reference
+- Configurable pool sizes and timeout settings
+- Automatic connection health monitoring
+
+**3. Lazy Loading**
+- External configurations loaded only when first referenced
+- Reduces application startup time
+- Minimizes memory footprint for unused configurations
+
+**4. Query Preparation**
+- Named queries prepared once and reused across multiple enrichments
+- Parameter validation and type checking
+- SQL injection protection through prepared statements
 
 ### Supported Data Source Types
 
