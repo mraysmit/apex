@@ -43,7 +43,7 @@ import java.util.Map;
  *
  * PREREQUISITES: None - completely self-contained with H2 database initialization
  *
- * @author APEX Demo Team
+ * @author Mark A Ray-Smith Cityline Ltd
  * @version 2.0 - Now using real APEX services instead of hardcoded simulation
  * @since 2025-08-28
  */

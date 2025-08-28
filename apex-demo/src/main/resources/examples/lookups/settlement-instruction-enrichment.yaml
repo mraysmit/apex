@@ -1,0 +1,387 @@
+# Settlement Instruction Multi-Parameter Enrichment Rules
+# Demonstrates complex multi-parameter lookup enrichment using APEX YAML processing
+# Use Case: Enrich trades with settlement instructions and risk assessment data
+
+metadata:
+  name: "Settlement Instruction Multi-Parameter Enrichment Demo"
+  description: "Demonstrates complex multi-parameter lookup enrichment using APEX YAML processing"
+  version: "1.0.0"
+  type: "rule-config"
+  author: "APEX Demo Team"
+
+# Multi-step enrichment rules using verified APEX syntax
+enrichments:
+  # Step 1: Settlement Instruction Lookup
+  - id: "settlement-instruction-enrichment"
+    type: "lookup-enrichment"
+    description: "Enrich trades with settlement instructions using multi-parameter lookup"
+    condition: "#trade != null && #trade.counterpartyId != null && #trade.instrumentType != null && #trade.currency != null && #trade.market != null"
+    
+    lookup-config:
+      # Compound lookup key using multiple trade parameters
+      lookup-key: "#trade.counterpartyId + '|' + #trade.instrumentType + '|' + #trade.currency + '|' + #trade.market"
+      lookup-dataset:
+        type: "inline"
+        key-field: "lookup_key"
+        data:
+          # Goldman Sachs settlement instructions
+          - lookup_key: "CP_GS|EQUITY|USD|NYSE"
+            instruction_id: "SI_GS_EQUITY_USD_NYSE"
+            counterparty_id: "CP_GS"
+            counterparty_name: "Goldman Sachs"
+            counterparty_type: "BANK"
+            credit_rating: "A+"
+            custodian_name: "Goldman Sachs Custody"
+            custodian_bic: "GSCCUS33XXX"
+            settlement_method: "DVP"
+            delivery_instruction: "DELIVER"
+            special_instructions: "Standard equity settlement"
+            market_name: "New York Stock Exchange"
+            settlement_cycle: "T+2"
+            cut_off_time: "16:00:00"
+            time_zone: "America/New_York"
+            
+          - lookup_key: "CP_GS|BOND|USD|NYSE"
+            instruction_id: "SI_GS_BOND_USD_NYSE"
+            counterparty_id: "CP_GS"
+            counterparty_name: "Goldman Sachs"
+            counterparty_type: "BANK"
+            credit_rating: "A+"
+            custodian_name: "Goldman Sachs Custody"
+            custodian_bic: "GSCCUS33XXX"
+            settlement_method: "DVP"
+            delivery_instruction: "DELIVER"
+            special_instructions: "Fixed income settlement"
+            market_name: "New York Stock Exchange"
+            settlement_cycle: "T+2"
+            cut_off_time: "16:00:00"
+            time_zone: "America/New_York"
+            
+          # Deutsche Bank settlement instructions
+          - lookup_key: "CP_DB|EQUITY|EUR|XETRA"
+            instruction_id: "SI_DB_EQUITY_EUR_XETRA"
+            counterparty_id: "CP_DB"
+            counterparty_name: "Deutsche Bank"
+            counterparty_type: "BANK"
+            credit_rating: "A-"
+            custodian_name: "Deutsche Bank Custody"
+            custodian_bic: "DEUTDEFFXXX"
+            settlement_method: "DVP"
+            delivery_instruction: "DELIVER"
+            special_instructions: "European equity settlement"
+            market_name: "XETRA"
+            settlement_cycle: "T+2"
+            cut_off_time: "17:30:00"
+            time_zone: "Europe/Berlin"
+            
+          # JP Morgan settlement instructions
+          - lookup_key: "CP_JPM|EQUITY|USD|NYSE"
+            instruction_id: "SI_JPM_EQUITY_USD_NYSE"
+            counterparty_id: "CP_JPM"
+            counterparty_name: "JP Morgan"
+            counterparty_type: "BANK"
+            credit_rating: "AA-"
+            custodian_name: "JP Morgan Custody"
+            custodian_bic: "CHASUS33XXX"
+            settlement_method: "DVP"
+            delivery_instruction: "DELIVER"
+            special_instructions: "Prime brokerage equity"
+            market_name: "New York Stock Exchange"
+            settlement_cycle: "T+2"
+            cut_off_time: "16:00:00"
+            time_zone: "America/New_York"
+            
+          - lookup_key: "CP_JPM|COMMODITY_SWAP|USD|NYSE"
+            instruction_id: "SI_JPM_COMMODITY_SWAP_USD_NYSE"
+            counterparty_id: "CP_JPM"
+            counterparty_name: "JP Morgan"
+            counterparty_type: "BANK"
+            credit_rating: "AA-"
+            custodian_name: "JP Morgan Custody"
+            custodian_bic: "CHASUS33XXX"
+            settlement_method: "DVP_PREMIUM"
+            delivery_instruction: "DELIVER"
+            special_instructions: "Commodity swap settlement"
+            market_name: "New York Stock Exchange"
+            settlement_cycle: "T+2"
+            cut_off_time: "16:00:00"
+            time_zone: "America/New_York"
+            
+          # Barclays settlement instructions
+          - lookup_key: "CP_BARC|EQUITY|GBP|LSE"
+            instruction_id: "SI_BARC_EQUITY_GBP_LSE"
+            counterparty_id: "CP_BARC"
+            counterparty_name: "Barclays"
+            counterparty_type: "BANK"
+            credit_rating: "A"
+            custodian_name: "Barclays Custody"
+            custodian_bic: "BARCGB22XXX"
+            settlement_method: "DVP"
+            delivery_instruction: "DELIVER"
+            special_instructions: "UK equity settlement"
+            market_name: "London Stock Exchange"
+            settlement_cycle: "T+2"
+            cut_off_time: "16:30:00"
+            time_zone: "Europe/London"
+            
+          # UBS settlement instructions
+          - lookup_key: "CP_UBS|EQUITY|CHF|SIX"
+            instruction_id: "SI_UBS_EQUITY_CHF_SIX"
+            counterparty_id: "CP_UBS"
+            counterparty_name: "UBS"
+            counterparty_type: "BANK"
+            credit_rating: "A+"
+            custodian_name: "UBS Custody"
+            custodian_bic: "UBSWCHZH80A"
+            settlement_method: "DVP_PREMIUM"
+            delivery_instruction: "DELIVER"
+            special_instructions: "Premium Swiss equity"
+            market_name: "SIX Swiss Exchange"
+            settlement_cycle: "T+2"
+            cut_off_time: "17:30:00"
+            time_zone: "Europe/Zurich"
+            
+        # Fallback data when lookup fails
+        default-values:
+          instruction_id: "SI_DEFAULT"
+          counterparty_name: "Default Counterparty"
+          counterparty_type: "BANK"
+          credit_rating: "A"
+          custodian_name: "Default Custodian"
+          custodian_bic: "DEFAULTXXX"
+          settlement_method: "DVP"
+          delivery_instruction: "DELIVER"
+          special_instructions: "Default settlement instruction"
+          market_name: "Default Market"
+          settlement_cycle: "T+2"
+          cut_off_time: "16:00:00"
+          time_zone: "UTC"
+    
+    # Map lookup results to enriched data fields
+    field-mappings:
+      - source-field: "instruction_id"
+        target-field: "settlementInstructionId"
+        required: true
+        
+      - source-field: "counterparty_name"
+        target-field: "counterpartyName"
+        required: true
+        
+      - source-field: "counterparty_type"
+        target-field: "counterpartyType"
+        required: true
+        
+      - source-field: "credit_rating"
+        target-field: "counterpartyCreditRating"
+        required: false
+        
+      - source-field: "custodian_name"
+        target-field: "custodianName"
+        required: true
+        
+      - source-field: "custodian_bic"
+        target-field: "custodianBic"
+        required: true
+        
+      - source-field: "settlement_method"
+        target-field: "settlementMethod"
+        required: true
+        
+      - source-field: "delivery_instruction"
+        target-field: "deliveryInstruction"
+        required: true
+        
+      - source-field: "special_instructions"
+        target-field: "specialInstructions"
+        required: false
+        
+      - source-field: "market_name"
+        target-field: "marketName"
+        required: true
+        
+      - source-field: "settlement_cycle"
+        target-field: "settlementCycle"
+        required: true
+        
+      - source-field: "cut_off_time"
+        target-field: "cutOffTime"
+        required: false
+        
+      - source-field: "time_zone"
+        target-field: "timeZone"
+        required: false
+
+  # Step 2: Risk Assessment Lookup
+  - id: "risk-assessment-enrichment"
+    type: "lookup-enrichment"
+    description: "Enrich trades with risk assessment data using multi-parameter lookup"
+    condition: "#trade != null && #trade.counterpartyId != null && #trade.instrumentType != null && #trade.market != null"
+
+    lookup-config:
+      # Risk assessment lookup key
+      lookup-key: "#trade.counterpartyId + '|' + #trade.instrumentType + '|' + #trade.market"
+      lookup-dataset:
+        type: "inline"
+        key-field: "risk_key"
+        data:
+          # Goldman Sachs risk assessments
+          - risk_key: "CP_GS|EQUITY|NYSE"
+            risk_category: "LOW"
+            risk_score: 15.50
+            max_exposure: 500000000.00
+            max_single_trade: 100000000.00
+            approval_required: false
+            monitoring_level: "STANDARD"
+
+          - risk_key: "CP_GS|BOND|NYSE"
+            risk_category: "LOW"
+            risk_score: 12.25
+            max_exposure: 750000000.00
+            max_single_trade: 200000000.00
+            approval_required: false
+            monitoring_level: "STANDARD"
+
+          - risk_key: "CP_GS|DERIVATIVE|NYSE"
+            risk_category: "MEDIUM"
+            risk_score: 35.75
+            max_exposure: 1000000000.00
+            max_single_trade: 500000000.00
+            approval_required: true
+            monitoring_level: "ENHANCED"
+
+          # Deutsche Bank risk assessments
+          - risk_key: "CP_DB|EQUITY|XETRA"
+            risk_category: "MEDIUM"
+            risk_score: 25.80
+            max_exposure: 300000000.00
+            max_single_trade: 50000000.00
+            approval_required: false
+            monitoring_level: "STANDARD"
+
+          - risk_key: "CP_DB|BOND|XETRA"
+            risk_category: "LOW"
+            risk_score: 18.90
+            max_exposure: 400000000.00
+            max_single_trade: 100000000.00
+            approval_required: false
+            monitoring_level: "STANDARD"
+
+          # JP Morgan risk assessments
+          - risk_key: "CP_JPM|EQUITY|NYSE"
+            risk_category: "LOW"
+            risk_score: 10.25
+            max_exposure: 750000000.00
+            max_single_trade: 200000000.00
+            approval_required: false
+            monitoring_level: "STANDARD"
+
+          - risk_key: "CP_JPM|COMMODITY_SWAP|NYSE"
+            risk_category: "HIGH"
+            risk_score: 65.30
+            max_exposure: 500000000.00
+            max_single_trade: 100000000.00
+            approval_required: true
+            monitoring_level: "INTENSIVE"
+
+          # Barclays risk assessments
+          - risk_key: "CP_BARC|EQUITY|LSE"
+            risk_category: "MEDIUM"
+            risk_score: 22.60
+            max_exposure: 400000000.00
+            max_single_trade: 75000000.00
+            approval_required: false
+            monitoring_level: "STANDARD"
+
+          # UBS risk assessments
+          - risk_key: "CP_UBS|EQUITY|SIX"
+            risk_category: "LOW"
+            risk_score: 14.20
+            max_exposure: 600000000.00
+            max_single_trade: 100000000.00
+            approval_required: false
+            monitoring_level: "STANDARD"
+
+        # Fallback risk data
+        default-values:
+          risk_category: "HIGH"
+          risk_score: 75.00
+          max_exposure: 10000000.00
+          max_single_trade: 1000000.00
+          approval_required: true
+          monitoring_level: "INTENSIVE"
+
+    # Map risk assessment fields to enriched data
+    field-mappings:
+      - source-field: "risk_category"
+        target-field: "riskCategory"
+        required: true
+
+      - source-field: "risk_score"
+        target-field: "riskScore"
+        required: true
+
+      - source-field: "max_exposure"
+        target-field: "maxExposure"
+        required: false
+
+      - source-field: "max_single_trade"
+        target-field: "maxSingleTrade"
+        required: false
+
+      - source-field: "approval_required"
+        target-field: "approvalRequired"
+        required: true
+
+      - source-field: "monitoring_level"
+        target-field: "monitoringLevel"
+        required: true
+
+# Validation rules
+validations:
+  - id: "trade-data-validation"
+    name: "Trade Data Validation"
+    description: "Ensure trade data is complete for multi-parameter lookup"
+    type: "field-validation"
+    enabled: true
+    condition: "#trade != null"
+
+    validation-config:
+      field: "trade"
+      rules:
+        - type: "required-fields"
+          fields: ["counterpartyId", "instrumentType", "currency", "market"]
+          message: "Trade must have counterpartyId, instrumentType, currency, and market"
+
+# Processing configuration
+processing:
+  continue-on-error: true
+  max-errors: 10
+  error-handling: "log-and-continue"
+
+  # Performance settings
+  performance:
+    enable-metrics: true
+    enable-tracing: true
+    log-slow-lookups: true
+    slow-lookup-threshold-ms: 200
+
+  # Retry configuration for lookup failures
+  retry:
+    enabled: true
+    max-attempts: 3
+    initial-delay-ms: 200
+    max-delay-ms: 2000
+    backoff-multiplier: 2.0
+
+# Monitoring and alerting
+monitoring:
+  metrics:
+    enabled: true
+    include-lookup-timing: true
+    include-cache-stats: true
+
+  alerts:
+    enabled: true
+    slow-lookup-threshold-ms: 1000
+    cache-miss-rate-threshold: 0.4
+    error-rate-threshold: 0.1

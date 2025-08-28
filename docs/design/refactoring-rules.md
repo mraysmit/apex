@@ -1,3 +1,88 @@
+# APEX Rules Engine - Refactoring Rules
+
+This document contains critical refactoring rules and principles for the APEX rules engine project.
+
+## 🚨 **MOST CRITICAL: ELIMINATE HARDCODED SIMULATIONS**
+
+**FUNDAMENTAL PRINCIPLE**: The #1 priority in all refactoring is removing hardcoded simulation logic and replacing it with real APEX services.
+
+### **Why This Is Most Critical:**
+- **Authenticity**: Hardcoded simulations provide fake demonstrations, not real APEX functionality
+- **Trust**: Users need to see actual APEX processing, not fabricated results
+- **Accuracy**: Only real APEX services provide correct processing behavior
+- **Maintainability**: Hardcoded logic becomes outdated and inconsistent with real APEX evolution
+
+### ❌ **HIGHEST PRIORITY VIOLATION - Hardcoded Business Logic:**
+```java
+// WRONG - Hardcoded simulation that must be eliminated immediately
+private void applyEnrichmentToData(Object enrichment, Map<String, Object> data) {
+    if (data.containsKey("customerId")) {
+        // This is fake processing - violates core principles!
+        data.put("customerName", "Acme Corporation");
+        data.put("customerType", "CORPORATE");
+        data.put("tier", "PLATINUM");
+    }
+}
+```
+
+### ✅ **HIGHEST PRIORITY FIX - Real APEX Services:**
+```java
+// CORRECT - Use actual APEX enrichment processor
+private final EnrichmentService enrichmentService;
+private final LookupServiceRegistry serviceRegistry;
+
+public void processWithRealApex(Map<String, Object> data, YamlRuleConfiguration config) {
+    // Use real APEX enrichment service - authentic processing
+    Object enrichedResult = enrichmentService.enrichObject(config, data);
+}
+```
+
+### **Hardcoded Simulation Detection Checklist:**
+- ❌ **Switch statements** for business logic processing
+- ❌ **If-then-else chains** that manually assign field values
+- ❌ **Hardcoded data arrays** with business data (customers, products, trades)
+- ❌ **Manual field assignments** like `data.put("field", "hardcoded_value")`
+- ❌ **Fake processing methods** that simulate APEX behavior
+- ❌ **Static data blocks** that pretend to be dynamic processing
+
+### **Evidence of Real APEX Integration:**
+- ✅ **EnrichmentService.enrichObject()** method calls
+- ✅ **YamlEnrichmentProcessor** handling rule processing
+- ✅ **DatasetLookupService** performing actual lookups
+- ✅ **ExpressionEvaluatorService** evaluating SpEL expressions
+- ✅ **Service initialization logs** showing real APEX services starting
+
+**REMEMBER**: If you see hardcoded business logic anywhere in demo code, stop everything and replace it with real APEX services first. This is the most critical refactoring priority.
+
+### **MANDATORY: Use DataProviderComplianceTest to Detect Hardcoded Simulations**
+
+**Run this test immediately to identify hardcoded simulation violations:**
+```bash
+# Detect hardcoded simulations across all data providers
+java -cp [classpath] dev.mars.apex.demo.data.DataProviderComplianceTest
+```
+
+**Look for these critical violation indicators:**
+- ❌ **"Contains hardcoded data patterns - detected via reflection analysis"**
+- ❌ **"Uses synthetic/test data patterns - detected via method analysis"**
+- ❌ **"No infrastructure integration detected - static methods only"**
+- ❌ **"Fixed implementation - requires code changes for modifications"**
+
+**Success indicators (what you want to see):**
+- ✅ **"Uses external data sources - verified via reflection"**
+- ✅ **"Uses realistic business data patterns - detected via class analysis"**
+- ✅ **"Demonstrates infrastructure setup and integration - verified via reflection"**
+- ✅ **"Configurable via external sources - detected via field analysis"**
+
+**Compliance scores to target:**
+- **4/4**: Fully compliant - no hardcoded simulations
+- **3/4**: Mostly compliant - minor cleanup needed
+- **0-2/4**: Major violations - immediate refactoring required
+
+**CRITICAL**: Any class scoring 0-2/4 contains hardcoded simulations that must be eliminated immediately.
+
+---
+
 ## Refactoring Principles To Apply Consistently
 
 Here's a clear and concise prompt based on the lessons learned:
@@ -384,3 +469,85 @@ flowchart TD
 - DO update YAML manager-class strings and docs; DON’T leave stale class names
 
 If you want, I can codify this as a CONTRIBUTING.md “Refactoring Guide” in apex-demo and apex-core and add a short checklist to PR templates.
+
+---
+
+## 🚨 **CRITICAL REFACTORING WORKFLOW: HARDCODED SIMULATION ELIMINATION**
+
+**MANDATORY WORKFLOW**: Follow this exact sequence when refactoring any demo or data provider class:
+
+### **Step 1: IMMEDIATE - Detect Hardcoded Simulations**
+```bash
+# Run compliance test to identify violations
+java -cp [classpath] dev.mars.apex.demo.data.DataProviderComplianceTest
+
+# Look for critical violations:
+# ❌ "Contains hardcoded data patterns"
+# ❌ "Uses synthetic/test data patterns"
+# ❌ "No infrastructure integration detected"
+```
+
+### **Step 2: PRIORITY 1 - Eliminate Hardcoded Business Logic**
+```java
+// FIND AND REMOVE these patterns immediately:
+❌ if (customerId.equals("CUST001")) { data.put("name", "Acme Corp"); }
+❌ switch (productType) { case "PREMIUM": return "Gold"; }
+❌ Object[][] customerData = {{"CUST001", "John", "Premium"}};
+❌ data.put("enrichedField", "hardcodedValue");
+
+// REPLACE with real APEX services:
+✅ Object enrichedResult = enrichmentService.enrichObject(yamlConfig, data);
+```
+
+### **Step 3: PRIORITY 2 - Add Real APEX Service Integration**
+```java
+// Add these required services:
+private final EnrichmentService enrichmentService;
+private final LookupServiceRegistry serviceRegistry;
+private final ExpressionEvaluatorService expressionEvaluator;
+
+// Initialize in constructor:
+this.enrichmentService = new EnrichmentService(serviceRegistry, new ExpressionEvaluatorService());
+```
+
+### **Step 4: PRIORITY 3 - Convert to YAML-Driven Processing**
+```java
+// Load real YAML configurations:
+YamlRuleConfiguration config = yamlLoader.loadFromClasspath("path/to/enrichment.yaml");
+
+// Process with real APEX services:
+Object result = enrichmentService.enrichObject(config, inputData);
+```
+
+### **Step 5: VERIFICATION - Confirm Elimination**
+```bash
+# Re-run compliance test to verify improvement
+java -cp [classpath] dev.mars.apex.demo.data.DataProviderComplianceTest
+
+# Target scores:
+# ✅ 4/4: Fully compliant - no hardcoded simulations
+# ✅ 3/4: Mostly compliant - acceptable
+# ❌ 0-2/4: Still contains violations - continue refactoring
+```
+
+### **Step 6: FINAL - Update Documentation**
+```java
+// Update class comments to reflect real APEX integration:
+/**
+ * Uses real APEX services for authentic demonstration:
+ * - EnrichmentService: Real APEX enrichment processor
+ * - YamlEnrichmentProcessor: Real YAML rule processing
+ * - DatasetLookupService: Real dataset lookups
+ *
+ * NO hardcoded simulation logic - all processing via APEX core services.
+ */
+```
+
+### **CRITICAL SUCCESS CRITERIA:**
+- ✅ **No hardcoded business logic** anywhere in the class
+- ✅ **Real APEX services** handling all processing
+- ✅ **YAML-driven configuration** for all rules and data
+- ✅ **Compliance score 3/4 or higher** in validation test
+- ✅ **Evidence logs** showing real APEX service initialization
+
+**REMEMBER**: Hardcoded simulation elimination is the #1 priority. Everything else is secondary until all fake processing is replaced with real APEX services.
