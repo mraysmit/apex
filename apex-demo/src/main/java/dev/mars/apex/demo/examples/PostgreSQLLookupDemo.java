@@ -26,7 +26,35 @@ import java.util.Map;
  * - ExpressionEvaluatorService: Real Spring Expression Language evaluation
  * - YamlConfigurationLoader: Real YAML configuration loading and validation
  *
- * DEMONSTRATION SCENARIOS:
+ * ============================================================================
+ * REQUIRED YAML CONFIGURATION FILES
+ * ============================================================================
+ *
+ * This demo requires the following YAML files to be present in the classpath:
+ *
+ * ENRICHMENT CONFIGURATIONS:
+ * ├── examples/lookups/customer-profile-enrichment.yaml
+ * │   ├── Customer profile enrichment rules with inline dataset
+ * │   ├── Contains: customer lookup data, field mappings, fallback values
+ * │   └── Used for: Simple customer profile enrichment demonstrations
+ * │
+ * ├── examples/lookups/settlement-instruction-enrichment.yaml
+ * │   ├── Settlement instruction enrichment rules
+ * │   ├── Contains: settlement data, counterparty mappings, complex SpEL expressions
+ * │   └── Used for: Multi-parameter settlement instruction processing
+ * │
+ * └── examples/lookups/postgresql-multi-param-lookup.yaml
+ *     ├── Multi-parameter lookup configuration with cascade fallback
+ *     ├── Contains: complex lookup rules, multiple parameter handling
+ *     └── Used for: Advanced lookup scenarios and fallback testing
+ *
+ * CRITICAL: All YAML files must be present and valid. The demo will fail fast
+ * if any required configuration is missing. No hardcoded fallback data is provided.
+ *
+ * ============================================================================
+ * DEMONSTRATION SCENARIOS
+ * ============================================================================
+ *
  * 1. Simple Customer Profile Enrichment - Single parameter lookup with inline dataset
  * 2. Multi-Parameter Settlement Instructions - Complex SpEL expressions (shows field mismatch errors)
  * 3. Performance Testing - Multiple enrichment calls with timing metrics

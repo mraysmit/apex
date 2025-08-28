@@ -16,17 +16,44 @@ import java.util.*;
  * Unlike hardcoded simulation, this test:
  *
  * - Uses real reflection and code analysis via APEX services
- * - Loads test criteria from external YAML configuration
+ * - Loads test criteria from external YAML configuration (when available)
  * - Performs actual class inspection using Java reflection
  * - Generates data-driven compliance reports
  *
- * APEX Design Principles Tested:
+ * ============================================================================
+ * YAML CONFIGURATION FILES (OPTIONAL)
+ * ============================================================================
+ *
+ * This test can optionally use YAML configuration files for enhanced testing:
+ *
+ * OPTIONAL CONFIGURATIONS:
+ * ├── compliance/test-criteria.yaml
+ * │   ├── Custom compliance test criteria and thresholds
+ * │   ├── Contains: scoring weights, violation patterns, success criteria
+ * │   └── Used for: Customizing compliance evaluation rules
+ * │
+ * └── compliance/class-patterns.yaml
+ *     ├── Class pattern definitions for hardcoded detection
+ *     ├── Contains: method patterns, field patterns, violation signatures
+ *     └── Used for: Enhanced hardcoded simulation detection
+ *
+ * NOTE: If YAML files are not present, the test uses built-in reflection analysis.
+ * No hardcoded fallback data is used - only reflection-based pattern detection.
+ *
+ * ============================================================================
+ * APEX DESIGN PRINCIPLES TESTED
+ * ============================================================================
+ *
  * 1. DATA_DRIVEN: 100% data-driven from external sources, not hardcoded in Java
  * 2. REAL_WORLD_SCENARIOS: Real-world scenarios with actual business data
  * 3. INFRASTRUCTURE_DEMO: Infrastructure setup and data source integration
  * 4. REUSABILITY: Reusable without code changes via external configuration
  *
  * This test follows APEX principles by using real services instead of hardcoded simulation.
+ *
+ * @author APEX Compliance Test Generator
+ * @since 2025-08-28
+ * @version 2.0
  */
 public class DataProviderComplianceTest {
     

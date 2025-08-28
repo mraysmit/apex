@@ -54,6 +54,74 @@ public void processWithRealApex(Map<String, Object> data, YamlRuleConfiguration 
 
 **REMEMBER**: If you see hardcoded business logic anywhere in demo code, stop everything and replace it with real APEX services first. This is the most critical refactoring priority.
 
+## 🚨 **CRITICAL: NO "FALLBACK SCENARIOS" WITH HARDCODED DATA**
+
+**FUNDAMENTAL VIOLATION**: There is no such concept as a "fallback scenario" in APEX. Any fallback that depends on hardcoded data in Java is the **#1 violation** of APEX core principles.
+
+### ❌ **NEVER DO - "Fallback" with Hardcoded Data:**
+```java
+// WRONG - This is NOT a valid fallback, it's hardcoded simulation!
+private List<Customer> createFallbackCustomers() {
+    List<Customer> fallback = new ArrayList<>();
+    fallback.add(new Customer("Demo Customer", 30, "demo@example.com"));
+    return fallback; // This is hardcoded simulation - FORBIDDEN!
+}
+
+// WRONG - Default values are hardcoded business logic
+enrichedData.getOrDefault("balance", "50000.00")  // Hardcoded business value
+enrichedData.getOrDefault("membershipLevel", "Silver")  // Hardcoded business logic
+enrichedData.getOrDefault("currency", "USD")  // Hardcoded business constant
+
+// WRONG - "Minimal fallback" is still hardcoded simulation
+Map<String, Object> customer = new HashMap<>();
+customer.put("customerId", "DEMO_CUST");  // Hardcoded simulation
+customer.put("name", "Demo Customer");    // Hardcoded simulation
+```
+
+### ✅ **CORRECT - Proper Error Handling:**
+```java
+// CORRECT - Fail fast when YAML is missing
+private List<Customer> loadCustomersFromYaml() {
+    YamlRuleConfiguration config = yamlLoader.loadFromClasspath("customers.yaml");
+    if (config == null) {
+        throw new IllegalStateException("Required YAML configuration not found: customers.yaml");
+    }
+    return processWithApex(config);
+}
+
+// CORRECT - Return empty collections, not hardcoded data
+public List<Customer> getCustomers() {
+    return customers != null ? customers : Collections.emptyList();
+}
+
+// CORRECT - All defaults come from YAML configuration
+YamlRuleConfiguration defaults = yamlLoader.loadFromClasspath("defaults.yaml");
+String defaultBalance = extractFromYaml(defaults, "customer.defaultBalance");
+String defaultLevel = extractFromYaml(defaults, "customer.defaultMembershipLevel");
+```
+
+### **Why "Fallback Scenarios" Violate APEX Principles:**
+
+1. **Data-Driven Violation**: Hardcoded fallback data makes the system NOT data-driven
+2. **Configuration Violation**: Business logic embedded in Java code instead of YAML
+3. **Authenticity Violation**: Fallback provides fake demonstration, not real APEX processing
+4. **Maintainability Violation**: Hardcoded values become stale and inconsistent
+
+### **Proper APEX Error Handling:**
+
+- ✅ **Fail Fast**: Throw exceptions when required YAML files are missing
+- ✅ **Empty Collections**: Return empty lists/maps instead of hardcoded data
+- ✅ **YAML Defaults**: Load all default values from YAML configuration files
+- ✅ **Graceful Degradation**: Disable features rather than provide fake data
+
+### **Detection Patterns for "Fallback" Violations:**
+- ❌ **Methods named**: `createFallback*`, `createMinimal*`, `createDefault*`
+- ❌ **Comments containing**: "fallback", "minimal", "default", "when YAML fails"
+- ❌ **getOrDefault() calls**: with hardcoded business values
+- ❌ **Exception handling**: that creates hardcoded objects instead of failing
+
+**CRITICAL RULE**: If YAML configuration is missing or invalid, the system should fail fast or return empty collections. There is NO scenario where hardcoded business data is acceptable in APEX.
+
 ### **MANDATORY: Use DataProviderComplianceTest to Detect Hardcoded Simulations**
 
 **Run this test immediately to identify hardcoded simulation violations:**
@@ -495,8 +563,16 @@ java -cp [classpath] dev.mars.apex.demo.data.DataProviderComplianceTest
 ❌ Object[][] customerData = {{"CUST001", "John", "Premium"}};
 ❌ data.put("enrichedField", "hardcodedValue");
 
+// CRITICAL: NO "FALLBACK" WITH HARDCODED DATA:
+❌ enrichedData.getOrDefault("balance", "50000.00")  // Hardcoded business value
+❌ customer.put("customerId", "DEMO_CUST");  // Hardcoded "fallback" data
+❌ new Customer("Demo Customer", 30, "demo@example.com");  // Hardcoded objects
+❌ private List<Customer> createFallbackCustomers() { ... }  // Hardcoded "fallback"
+
 // REPLACE with real APEX services:
 ✅ Object enrichedResult = enrichmentService.enrichObject(yamlConfig, data);
+✅ return Collections.emptyList(); // Instead of hardcoded fallback
+✅ throw new IllegalStateException("Required YAML not found"); // Fail fast
 ```
 
 ### **Step 3: PRIORITY 2 - Add Real APEX Service Integration**
@@ -545,9 +621,12 @@ java -cp [classpath] dev.mars.apex.demo.data.DataProviderComplianceTest
 
 ### **CRITICAL SUCCESS CRITERIA:**
 - ✅ **No hardcoded business logic** anywhere in the class
+- ✅ **No "fallback scenarios"** with hardcoded data - fail fast instead
 - ✅ **Real APEX services** handling all processing
 - ✅ **YAML-driven configuration** for all rules and data
-- ✅ **Compliance score 3/4 or higher** in validation test
+- ✅ **Compliance score 4/4** in validation test (not 3/4 - that indicates remaining hardcoded patterns)
 - ✅ **Evidence logs** showing real APEX service initialization
+- ✅ **Empty collections** returned instead of hardcoded fallback objects
+- ✅ **All default values** loaded from YAML configuration, not getOrDefault() with hardcoded values
 
-**REMEMBER**: Hardcoded simulation elimination is the #1 priority. Everything else is secondary until all fake processing is replaced with real APEX services.
+**REMEMBER**: There is NO acceptable "fallback scenario" with hardcoded data. Any hardcoded business value is a #1 priority violation that must be eliminated immediately.
