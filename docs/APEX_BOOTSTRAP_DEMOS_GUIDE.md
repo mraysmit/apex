@@ -7,7 +7,7 @@
 ## Overview
 This guide documents the **APEX Bootstrap Demos** featuring the revolutionary **external data-source reference system** introduced in APEX 2.1. These demos showcase clean architecture patterns, enterprise-grade configuration management, and production-ready external data-source integration.
 
-**🆕 APEX 2.1 Features Demonstrated:**
+**APEX 2.1 Features Demonstrated:**
 - **External Data-Source Reference System**: Clean separation of infrastructure and business logic
 - **Validated YAML Configurations**: 100% validated external data-source reference examples
 - **Enterprise Architecture Patterns**: Production-ready configuration management
@@ -15,19 +15,19 @@ This guide documents the **APEX Bootstrap Demos** featuring the revolutionary **
 
 The APEX Playground provides a **comprehensive interactive web-based development environment** with a professional 4-panel interface for developing, testing, and demonstrating these advanced APEX capabilities.
 ### What's New in APEX 2.1 Bootstrap Demos
-- **🆕 External Data-Source Reference System**: Revolutionary clean architecture with infrastructure/business logic separation
-- **✅ 100% Validated YAML Configurations**: All external data-source reference examples fully validated
-- **🏗️ Enterprise Architecture Patterns**: Production-ready multi-environment configuration management
-- **🔄 Refactored PostgreSQL Demos**: Real database integration using external data-source references
-- **📊 Performance Optimization**: Configuration caching, connection pooling, and lazy loading
-- **🎯 Clean Code Examples**: Lean business logic configurations with external infrastructure references
+- **External Data-Source Reference System**: Revolutionary clean architecture with infrastructure/business logic separation
+- **100% Validated YAML Configurations**: All external data-source reference examples fully validated
+- **Enterprise Architecture Patterns**: Production-ready multi-environment configuration management
+- **Refactored PostgreSQL Demos**: Real database integration using external data-source references
+- **Performance Optimization**: Configuration caching, connection pooling, and lazy loading
+- **Clean Code Examples**: Lean business logic configurations with external infrastructure references
 ### External Data-Source Reference Demo Features
-- **🏗️ Clean Architecture Demos**: Infrastructure and business logic cleanly separated
-- **🔄 External Configuration Management**: Reusable data-source configurations across multiple demos
-- **📊 Real Database Integration**: PostgreSQL demos using H2 in PostgreSQL compatibility mode
-- **⚡ Performance Optimization**: Configuration caching, connection pooling, and lazy loading
-- **✅ Validated Configurations**: 100% YAML validation compliance for all demo files
-- **🎯 Production-Ready Examples**: Enterprise-grade patterns for multi-environment deployments
+- **Clean Architecture Demos**: Infrastructure and business logic cleanly separated
+- **External Configuration Management**: Reusable data-source configurations across multiple demos
+- **Real Database Integration**: PostgreSQL demos using H2 in PostgreSQL compatibility mode
+- **Performance Optimization**: Configuration caching, connection pooling, and lazy loading
+- **Validated Configurations**: 100% YAML validation compliance for all demo files
+- **Production-Ready Examples**: Enterprise-grade patterns for multi-environment deployments
 
 ### Interactive Development Environment Features
 - **4-Panel Development Interface**: Source Data, YAML Rules, Validation Results, Enrichment Results
@@ -35,12 +35,12 @@ The APEX Playground provides a **comprehensive interactive web-based development
 - **Real-Time Processing**: Live APEX engine execution with external data-source resolution
 - **Configuration Management**: Save/load external reference configurations and examples
 ### External Data-Source Reference Learning Path
-1. **🚀 Simple External Reference Demo** - Start with basic external data-source reference patterns
-2. **🏗️ Clean Architecture Understanding** - Learn infrastructure vs. business logic separation
-3. **📊 PostgreSQL Integration Demo** - Explore real database integration with external references
-4. **⚡ Performance Optimization** - Understand configuration caching and connection pooling
-5. **🎯 Enterprise Patterns** - Master production-ready multi-environment configurations
-6. **✅ Validation & Testing** - Verify configurations with comprehensive YAML validation
+1. **Simple External Reference Demo** - Start with basic external data-source reference patterns
+2. **Clean Architecture Understanding** - Learn infrastructure vs. business logic separation
+3. **PostgreSQL Integration Demo** - Explore real database integration with external references
+4. **Performance Optimization** - Understand configuration caching and connection pooling
+5. **Enterprise Patterns** - Master production-ready multi-environment configurations
+6. **Validation & Testing** - Verify configurations with comprehensive YAML validation
 
 ### Interactive Development Learning Path
 1. **Load External Reference Examples** - Upload external data-source reference configurations
@@ -49,7 +49,7 @@ The APEX Playground provides a **comprehensive interactive web-based development
 4. **Experiment with Configurations** - Modify external references and see immediate results
 ---
 
-# 🆕 APEX 2.1: External Data-Source Reference System Demos
+# APEX 2.1: External Data-Source Reference System Demos
 
 ## Overview of External Data-Source Reference System
 
@@ -57,24 +57,24 @@ The **external data-source reference system** is APEX 2.1's revolutionary approa
 
 ### Key Benefits Demonstrated
 
-#### 🏗️ Clean Architecture
+#### Clean Architecture
 - **Separation of Concerns**: Infrastructure and business logic cleanly separated
 - **Lean Business Logic**: Focused enrichment configurations without infrastructure clutter
 - **Maintainable Code**: Easy to understand and modify business rules
 
-#### ♻️ Reusable Components
+#### Reusable Components
 - **Shared Infrastructure**: External data-source configurations used across multiple rule sets
 - **Environment Management**: Different infrastructure configurations for dev/test/prod
 - **Configuration Reuse**: Same database configuration shared by multiple enrichments
 
-#### ⚡ Performance Optimization
+#### Performance Optimization
 - **Configuration Caching**: External configurations loaded once and cached
 - **Connection Pooling**: Shared database connections across enrichments
 - **Lazy Loading**: External configurations loaded only when needed
 
 ## Available External Data-Source Reference Demos
 
-### 🚀 1. Simple PostgreSQL Customer Profile Demo (External Reference)
+### 1. Simple PostgreSQL Customer Profile Demo (External Reference)
 
 **File:** `enrichments/simple-postgresql-customer-profile-external-ref.yaml`
 
@@ -128,7 +128,7 @@ queries:
 - Named query usage from external configuration
 - Minimal business logic configuration
 
-### 🏗️ 2. Advanced PostgreSQL Customer Profile Demo (External Reference)
+### 2. Advanced PostgreSQL Customer Profile Demo (External Reference)
 
 **File:** `enrichments/postgresql-customer-profile-external-ref.yaml`
 
@@ -179,7 +179,7 @@ enrichments:
 - Case-sensitive field mapping for production environments
 - Comprehensive error handling patterns
 
-### 🎯 3. Multi-Source External Reference Demo
+### 3. Multi-Source External Reference Demo
 
 **File:** `enrichments/settlement-instruction-enrichment-lean.yaml`
 
@@ -223,7 +223,7 @@ enrichments:
 
 ## External Data-Source Configuration Files
 
-### 📊 Customer Database Configuration
+### Customer Database Configuration
 
 **File:** `data-sources/customer-database.yaml`
 
@@ -260,7 +260,7 @@ health-check:
   timeout: 5000
 ```
 
-### 🏦 Settlement Database Configuration
+### Settlement Database Configuration
 
 **File:** `data-sources/settlement-database.yaml`
 
@@ -294,7 +294,7 @@ queries:
 
 ## Running External Data-Source Reference Demos
 
-### 🚀 Quick Start Guide
+### Quick Start Guide
 
 1. **Load Simple Demo:**
    ```bash
@@ -314,7 +314,7 @@ queries:
    java -cp "..." dev.mars.apex.demo.ExternalDataSourceWorkingDemo
    ```
 
-### 📊 Expected Results
+### Expected Results
 
 **Simple Demo Output:**
 ```json
@@ -344,7 +344,7 @@ queries:
 }
 ```
 
-## ✅ Validation and Testing
+## Validation and Testing
 
 ### YAML Configuration Validation
 
@@ -352,22 +352,22 @@ All external data-source reference demos have been **100% validated** using the 
 
 **Validation Results:**
 ```
-✅ enrichments/simple-postgresql-customer-profile-external-ref.yaml - VALID
-✅ enrichments/postgresql-customer-profile-external-ref.yaml - VALID
-✅ enrichments/settlement-instruction-enrichment-lean.yaml - VALID
-✅ data-sources/postgresql-customer-database.yaml - VALID
-✅ data-sources/customer-database.yaml - VALID
-✅ data-sources/settlement-database.yaml - VALID
+VALID: enrichments/simple-postgresql-customer-profile-external-ref.yaml
+VALID: enrichments/postgresql-customer-profile-external-ref.yaml
+VALID: enrichments/settlement-instruction-enrichment-lean.yaml
+VALID: data-sources/postgresql-customer-database.yaml
+VALID: data-sources/customer-database.yaml
+VALID: data-sources/settlement-database.yaml
 
 Total Files Validated: 6
-Success Rate: 100% ✅
+Success Rate: 100%
 ```
 
 **Validation Features Confirmed:**
-- ✅ **Metadata Compliance**: All required fields (`type`, `author`, `name`, `version`, `description`)
-- ✅ **Type Validation**: Correct `rule-config` and `external-data-config` types
-- ✅ **Structure Validation**: Proper YAML syntax and APEX semantic validation
-- ✅ **Cross-Reference Validation**: External data-source references properly validated
+- **Metadata Compliance**: All required fields (`type`, `author`, `name`, `version`, `description`)
+- **Type Validation**: Correct `rule-config` and `external-data-config` types
+- **Structure Validation**: Proper YAML syntax and APEX semantic validation
+- **Cross-Reference Validation**: External data-source references properly validated
 
 ### Running Validation Tests
 
@@ -428,7 +428,7 @@ java -cp "apex-demo/target/classes:apex-core/target/classes:..." \
 - **Connection Pool**: ~50KB per database connection pool
 - **Total Overhead**: <1MB for typical external reference usage
 
-## 🎯 Best Practices Demonstrated
+## Best Practices Demonstrated
 
 ### 1. Clean Architecture Patterns
 - **Infrastructure Separation**: External data-source configurations completely separate from business logic
@@ -466,7 +466,7 @@ The APEX Playground now fully supports **external data-source reference configur
 - **Validation Results Panel** (Bottom Left): External reference resolution and validation output
 - **Enrichment Results Panel** (Bottom Right): Database query results via external references with performance metrics
 
-### 🆕 External Data-Source Reference Features
+### External Data-Source Reference Features
 - **External Configuration Loading**: Upload and test external data-source reference YAML files
 - **Real Database Integration**: Test actual database queries through external references
 - **Configuration Caching Visualization**: See configuration cache hits and performance metrics
@@ -600,7 +600,7 @@ The playground supports multiple data formats with intelligent auto-detection.
 - **Format Flexibility**: Handles various CSV formats and delimiters
 - **APEX Processing**: Full APEX engine support for CSV data
 
-## 🆕 3.4 External Data-Source Reference Examples
+## 3.4 External Data-Source Reference Examples
 
 The APEX Playground includes pre-loaded examples of external data-source reference configurations for immediate testing and learning.
 
@@ -662,11 +662,11 @@ enrichments:
 
 **Validation Results Panel:**
 ```
-✅ External data-source reference validation: PASSED
-✅ Configuration resolution: postgresql-customer-database → RESOLVED
-✅ Query reference validation: getActiveCustomerById → FOUND
-✅ Database connection: HEALTHY
-✅ All validations passed
+PASSED: External data-source reference validation
+RESOLVED: Configuration resolution: postgresql-customer-database
+FOUND: Query reference validation: getActiveCustomerById
+HEALTHY: Database connection
+PASSED: All validations
 ```
 
 **Enrichment Results Panel:**
