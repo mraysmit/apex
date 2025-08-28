@@ -391,8 +391,14 @@ public class YamlEnrichment {
         @JsonProperty("connection-name")
         private String connectionName; // Reference to data source in dataSources section
 
+        @JsonProperty("data-source-ref")
+        private String dataSourceRef; // Reference to external data-source configuration
+
         @JsonProperty("query")
         private String query; // SQL query to execute
+
+        @JsonProperty("query-ref")
+        private String queryRef; // Reference to named query in external data-source configuration
 
         @JsonProperty("parameters")
         private List<ParameterMapping> parameters; // Parameter mappings for the query
@@ -494,12 +500,28 @@ public class YamlEnrichment {
             this.connectionName = connectionName;
         }
 
+        public String getDataSourceRef() {
+            return dataSourceRef;
+        }
+
+        public void setDataSourceRef(String dataSourceRef) {
+            this.dataSourceRef = dataSourceRef;
+        }
+
         public String getQuery() {
             return query;
         }
 
         public void setQuery(String query) {
             this.query = query;
+        }
+
+        public String getQueryRef() {
+            return queryRef;
+        }
+
+        public void setQueryRef(String queryRef) {
+            this.queryRef = queryRef;
         }
 
         public List<ParameterMapping> getParameters() {

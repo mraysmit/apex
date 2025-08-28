@@ -41,6 +41,9 @@ public class YamlRuleConfiguration {
     @JsonProperty("data-sources")
     private List<YamlDataSource> dataSources;
 
+    @JsonProperty("data-source-refs")
+    private List<YamlDataSourceRef> dataSourceRefs;
+
     @JsonProperty("categories")
     private List<YamlCategory> categories;
     
@@ -77,6 +80,14 @@ public class YamlRuleConfiguration {
 
     public void setDataSources(List<YamlDataSource> dataSources) {
         this.dataSources = dataSources;
+    }
+
+    public List<YamlDataSourceRef> getDataSourceRefs() {
+        return dataSourceRefs;
+    }
+
+    public void setDataSourceRefs(List<YamlDataSourceRef> dataSourceRefs) {
+        this.dataSourceRefs = dataSourceRefs;
     }
 
     public List<YamlCategory> getCategories() {

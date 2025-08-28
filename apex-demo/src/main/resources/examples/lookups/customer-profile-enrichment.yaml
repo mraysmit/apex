@@ -1,189 +1,52 @@
-# Customer Profile Enrichment Rules
-# Demonstrates simple database lookup enrichment using APEX YAML processing
+# Customer Profile Enrichment Rules - Database Version
+# Demonstrates database lookup enrichment using APEX YAML processing with real H2 database
 # Use Case: Enrich transactions with customer profile data from database
 
 metadata:
-  name: "Customer Profile Enrichment Demo"
-  description: "Demonstrates simple database lookup enrichment using APEX YAML processing"
-  version: "1.0.0"
+  name: "Customer Profile Enrichment Demo - Database Version"
+  description: "Demonstrates database lookup enrichment using APEX YAML processing with real H2 database"
+  version: "2.0.0"
   type: "rule-config"
   author: "APEX Demo Team"
 
-# Enrichment rules using verified APEX syntax
+# Database configuration for customer data
+data-sources:
+  - name: "customer-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "apex_demo_shared"
+      username: "sa"
+      password: ""
+
+# Enrichment rules using verified APEX syntax with database lookups
 enrichments:
-  - id: "customer-profile-enrichment"
+  - id: "customer-profile-database-lookup"
     type: "lookup-enrichment"
-    description: "Enrich transactions with customer profile data from database"
-    condition: "#customerId != null && #customerId.length() > 0"
-    
+    description: "Enrich transactions with customer profile data from H2 database"
+    condition: "#customerId != null && #customerId != ''"
+
     lookup-config:
       lookup-key: "#customerId"
       lookup-dataset:
-        type: "inline"
-        key-field: "customer_id"
-        data:
-          # Sample customer data for demonstration
-          - customer_id: "CUST000001"
-            customer_name: "Acme Corporation"
-            customer_type: "CORPORATE"
-            tier: "PLATINUM"
-            region: "NA"
-            status: "ACTIVE"
-            created_date: "2024-01-15T10:30:00Z"
-            
-          - customer_id: "CUST000002"
-            customer_name: "Global Investment Partners"
-            customer_type: "INSTITUTIONAL"
-            tier: "GOLD"
-            region: "EU"
-            status: "ACTIVE"
-            created_date: "2024-02-20T14:15:00Z"
-            
-          - customer_id: "CUST000003"
-            customer_name: "Pacific Asset Management"
-            customer_type: "INSTITUTIONAL"
-            tier: "GOLD"
-            region: "APAC"
-            status: "ACTIVE"
-            created_date: "2024-03-10T09:45:00Z"
-            
-          - customer_id: "CUST000004"
-            customer_name: "John Smith"
-            customer_type: "INDIVIDUAL"
-            tier: "SILVER"
-            region: "NA"
-            status: "ACTIVE"
-            created_date: "2024-04-05T16:20:00Z"
-            
-          - customer_id: "CUST000005"
-            customer_name: "European Pension Fund"
-            customer_type: "INSTITUTIONAL"
-            tier: "PLATINUM"
-            region: "EU"
-            status: "ACTIVE"
-            created_date: "2024-01-30T11:00:00Z"
-            
-          - customer_id: "CUST000006"
-            customer_name: "Asia Trading Ltd"
-            customer_type: "CORPORATE"
-            tier: "GOLD"
-            region: "APAC"
-            status: "ACTIVE"
-            created_date: "2024-05-12T13:30:00Z"
-            
-          - customer_id: "CUST000007"
-            customer_name: "Sarah Johnson"
-            customer_type: "INDIVIDUAL"
-            tier: "BASIC"
-            region: "EU"
-            status: "ACTIVE"
-            created_date: "2024-06-01T08:15:00Z"
-            
-          - customer_id: "CUST000008"
-            customer_name: "Latin America Holdings"
-            customer_type: "CORPORATE"
-            tier: "SILVER"
-            region: "LATAM"
-            status: "ACTIVE"
-            created_date: "2024-02-28T15:45:00Z"
-            
-          - customer_id: "CUST000009"
-            customer_name: "Middle East Investment Co"
-            customer_type: "INSTITUTIONAL"
-            tier: "GOLD"
-            region: "ME"
-            status: "ACTIVE"
-            created_date: "2024-03-15T12:00:00Z"
-            
-          - customer_id: "CUST000010"
-            customer_name: "Test Customer Inactive"
-            customer_type: "INDIVIDUAL"
-            tier: "BASIC"
-            region: "NA"
-            status: "INACTIVE"
-            created_date: "2024-01-01T00:00:00Z"
-            
-        # Fallback data when lookup fails
-        default-values:
-          customer_name: "Unknown Customer"
-          customer_type: "STANDARD"
-          tier: "BASIC"
-          region: "UNKNOWN"
-          status: "INACTIVE"
-          created_date: "1970-01-01T00:00:00Z"
-    
-    # Map database fields to enriched data fields
-    field-mappings:
-      - source-field: "customer_name"
-        target-field: "customerName"
-        required: true
-        
-      - source-field: "customer_type"
-        target-field: "customerType"
-        required: true
-        
-      - source-field: "tier"
-        target-field: "customerTier"
-        required: true
-        
-      - source-field: "region"
-        target-field: "customerRegion"
-        required: true
-        
-      - source-field: "status"
-        target-field: "customerStatus"
-        required: true
-        
-      - source-field: "created_date"
-        target-field: "customerCreatedDate"
-        required: false
+        type: "database"
+        connection-name: "customer-database"
+        query: "SELECT customer_name, customer_type, tier, region, status, created_date FROM customers WHERE customer_id = :customerId"
+        parameters:
+          - field: "customerId"
+            type: "string"
 
-# Validation rules
-validations:
-  - id: "customer-id-format"
-    name: "Customer ID Format Validation"
-    description: "Ensure customer ID follows expected format"
-    type: "field-validation"
-    enabled: true
-    condition: "#customerId != null"
-    
-    validation-config:
-      field: "customerId"
-      rules:
-        - type: "regex"
-          pattern: "^CUST[0-9]{6}$"
-          message: "Customer ID must be in format CUST###### (e.g., CUST000001)"
-
-# Processing configuration
-processing:
-  continue-on-error: true
-  max-errors: 5
-  error-handling: "log-and-continue"
-  
-  # Performance settings
-  performance:
-    enable-metrics: true
-    enable-tracing: true
-    log-slow-lookups: true
-    slow-lookup-threshold-ms: 100
-    
-  # Retry configuration for lookup failures
-  retry:
-    enabled: true
-    max-attempts: 3
-    initial-delay-ms: 100
-    max-delay-ms: 1000
-    backoff-multiplier: 2.0
-
-# Monitoring and alerting
-monitoring:
-  metrics:
-    enabled: true
-    include-lookup-timing: true
-    include-cache-stats: true
-    
-  alerts:
-    enabled: true
-    slow-lookup-threshold-ms: 500
-    cache-miss-rate-threshold: 0.3
-    error-rate-threshold: 0.05
+      # Field mappings from database columns to enriched object fields
+      field-mappings:
+        - source-field: "customer_name"
+          target-field: "customerName"
+        - source-field: "customer_type"
+          target-field: "customerType"
+        - source-field: "tier"
+          target-field: "customerTier"
+        - source-field: "region"
+          target-field: "customerRegion"
+        - source-field: "status"
+          target-field: "customerStatus"
+        - source-field: "created_date"
+          target-field: "customerCreatedDate"

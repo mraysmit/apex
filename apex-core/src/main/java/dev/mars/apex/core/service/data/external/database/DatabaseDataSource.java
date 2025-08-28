@@ -384,6 +384,9 @@ public class DatabaseDataSource implements ExternalDataSource {
         String processedQuery = query;
         List<Object> paramValues = new ArrayList<>();
 
+        LOGGER.debug("Preparing statement with query: {}", query);
+        LOGGER.debug("Parameters: {}", parameters);
+
         // Find all parameter placeholders in order
         int searchIndex = 0;
         while (searchIndex < processedQuery.length()) {
@@ -399,22 +402,33 @@ public class DatabaseDataSource implements ExternalDataSource {
             }
 
             String paramName = processedQuery.substring(colonIndex + 1, endIndex);
+            LOGGER.debug("Found parameter: {} at position {}-{}", paramName, colonIndex, endIndex);
+
             if (parameters.containsKey(paramName)) {
+                Object paramValue = parameters.get(paramName);
+                LOGGER.debug("Replacing parameter {} with value: {}", paramName, paramValue);
+
                 // Replace this occurrence with ?
                 processedQuery = processedQuery.substring(0, colonIndex) + "?" +
                                processedQuery.substring(endIndex);
-                paramValues.add(parameters.get(paramName));
+                paramValues.add(paramValue);
                 searchIndex = colonIndex + 1;
             } else {
+                LOGGER.warn("Parameter {} not found in parameters map: {}", paramName, parameters.keySet());
                 searchIndex = endIndex;
             }
         }
+
+        LOGGER.debug("Processed query: {}", processedQuery);
+        LOGGER.debug("Parameter values: {}", paramValues);
 
         PreparedStatement statement = connection.prepareStatement(processedQuery);
 
         // Set parameter values
         for (int i = 0; i < paramValues.size(); i++) {
-            statement.setObject(i + 1, paramValues.get(i));
+            Object value = paramValues.get(i);
+            LOGGER.debug("Setting parameter {} to value: {}", i + 1, value);
+            statement.setObject(i + 1, value);
         }
 
         return statement;

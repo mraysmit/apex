@@ -29,19 +29,29 @@ import java.util.Map;
 import java.util.HashMap;
 
 /**
- * PostgreSQL Lookup Demo - Advanced Database Enrichment with Multi-Table Support
+ * PostgreSQL Lookup Demo - Advanced Database Enrichment with External Data-Source References
  *
- * This comprehensive demo showcases APEX's database lookup capabilities with:
+ * This comprehensive demo showcases APEX's external data-source reference system with:
  * - Multi-table database schema (customers, counterparties, settlement_instructions, risk_assessments)
+ * - External data-source configurations (reusable infrastructure)
+ * - Lean enrichment configurations (focused business logic)
  * - Complex multi-parameter database queries with joins
  * - Real-time database enrichment with connection pooling and caching
  * - Performance optimization demonstrations
+ * - Clean separation of concerns (infrastructure vs. business logic)
  * - Pure database-driven processing (no hardcoded data)
  *
+ * EXTERNAL DATA-SOURCE REFERENCE SYSTEM:
+ * - Infrastructure Configuration: External PostgreSQL data-source configurations (reusable)
+ * - Business Logic Configuration: Lean enrichment configurations with external references
+ * - Configuration Caching: External configurations cached for performance
+ * - Clean Architecture: Infrastructure and business logic cleanly separated
+ *
  * Features demonstrated:
- * 1. Simple customer profile lookups
- * 2. Complex multi-parameter settlement instruction lookups
- * 3. Performance optimization with database caching
+ * 1. Simple customer profile lookups with external data-source references
+ * 2. Complex multi-parameter settlement instruction lookups with external references
+ * 3. Performance optimization with database caching and configuration caching
+ * 4. Reusable external data-source configurations across multiple enrichments
  *
  * Database Schema:
  * - customers: Customer profile data
@@ -49,9 +59,30 @@ import java.util.HashMap;
  * - settlement_instructions: Settlement and delivery instructions
  * - risk_assessments: Risk scoring and monitoring data
  *
+ * REQUIRED YAML CONFIGURATION FILES:
+ * ============================================================================
+ *
+ * External Data-Source Configurations (Infrastructure - Reusable):
+ * └── data-sources/postgresql-customer-database.yaml
+ *     ├── PostgreSQL customer database connection and queries
+ *     └── Used for: Customer profile database operations
+ *
+ * └── data-sources/settlement-database.yaml
+ *     ├── PostgreSQL settlement database connection and queries
+ *     └── Used for: Settlement instruction and risk assessment operations
+ *
+ * Lean Enrichment Configurations (Business Logic - Focused):
+ * └── enrichments/customer-profile-enrichment-lean.yaml
+ *     ├── Customer profile enrichment with external data-source reference
+ *     └── Used for: Simple customer profile database enrichment
+ *
+ * └── enrichments/settlement-instruction-enrichment-lean.yaml
+ *     ├── Settlement instruction enrichment with external data-source reference
+ *     └── Used for: Complex multi-table settlement instruction enrichment
+ *
  * @author Mark A Ray-Smith
  * @since 2025-08-28
- * @version 2.0 - Advanced database lookups with multi-table support (Reference Template)
+ * @version 2.1 - External data-source reference system with clean separation of concerns
  */
 public class PostgreSQLLookupDemo {
 
@@ -75,7 +106,7 @@ public class PostgreSQLLookupDemo {
      */
     public void runDemo() {
         logger.info("=".repeat(80));
-        logger.info("APEX YAML Processing Demonstration - Database Lookup Enrichment");
+        logger.info("POSTGRESQL LOOKUP DEMONSTRATION - External Data-Source Reference System");
         logger.info("=".repeat(80));
 
         try {
@@ -85,7 +116,7 @@ public class PostgreSQLLookupDemo {
             demonstratePerformanceOptimization();
 
             logger.info("=".repeat(80));
-            logger.info("APEX YAML Processing Demonstration completed successfully!");
+            logger.info("POSTGRESQL LOOKUP DEMONSTRATION completed successfully!");
             logger.info("=".repeat(80));
 
         } catch (Exception e) {
@@ -94,11 +125,11 @@ public class PostgreSQLLookupDemo {
     }
     
     /**
-     * Demonstrate simple YAML enrichment processing for customer profile enrichment.
+     * Demonstrate simple YAML enrichment processing for customer profile enrichment using external data-source references.
      */
     private void demonstrateSimpleEnrichmentYaml() {
         logger.info("\n" + "=".repeat(60));
-        logger.info("1. SIMPLE YAML ENRICHMENT - Customer Profile Lookup");
+        logger.info("1. SIMPLE EXTERNAL DATA-SOURCE ENRICHMENT - Customer Profile Lookup");
         logger.info("=".repeat(60));
 
         try {
@@ -106,26 +137,26 @@ public class PostgreSQLLookupDemo {
             Map<String, Object> inputData = new HashMap<>();
             inputData.put("customerId", "CUST000001"); // Only the lookup key, no other hardcoded data
 
-            logger.info("Input Data for YAML Processing:");
+            logger.info("Input Data for External Data-Source Reference YAML Processing:");
             logger.info("  Customer ID: {}", inputData.get("customerId"));
 
-            // Apply YAML enrichment processing using real APEX services
-            String configPath = "examples/lookups/customer-profile-enrichment.yaml";
+            // Apply external data-source reference enrichment processing using real APEX services
+            String configPath = "enrichments/customer-profile-enrichment-lean.yaml";
             Map<String, Object> enrichedData = performEnrichmentWithYaml(inputData, configPath);
 
-            logger.info("\nCustomer Profile from YAML Processing:");
+            logger.info("\nCustomer Profile from External Data-Source Reference Processing:");
             logger.info("  Customer Name: {}", enrichedData.get("customerName"));
             logger.info("  Customer Type: {}", enrichedData.get("customerType"));
             logger.info("  Customer Tier: {}", enrichedData.get("customerTier"));
             logger.info("  Customer Region: {}", enrichedData.get("customerRegion"));
             logger.info("  Customer Status: {}", enrichedData.get("customerStatus"));
 
-            // Demonstrate processing performance with same input
-            logger.info("\nDemonstrating YAML Processing Performance:");
+            // Demonstrate processing performance with same input (configuration caching)
+            logger.info("\nDemonstrating External Data-Source Reference Processing Performance:");
             long startTime = System.currentTimeMillis();
             performEnrichmentWithYaml(inputData, configPath);
             long cachedTime = System.currentTimeMillis() - startTime;
-            logger.info("  Second processing time: {} ms", cachedTime);
+            logger.info("  Second external data-source processing time: {} ms (with configuration caching)", cachedTime);
 
         } catch (Exception e) {
             logger.error("Error in simple YAML enrichment demonstration", e);
@@ -133,11 +164,11 @@ public class PostgreSQLLookupDemo {
     }
     
     /**
-     * Demonstrate multi-parameter YAML enrichment processing for settlement instructions.
+     * Demonstrate multi-parameter YAML enrichment processing for settlement instructions using external data-source references.
      */
     private void demonstrateMultiParameterEnrichmentYaml() {
         logger.info("\n" + "=".repeat(60));
-        logger.info("2. MULTI-PARAMETER YAML ENRICHMENT - Settlement Instructions");
+        logger.info("2. MULTI-PARAMETER EXTERNAL DATA-SOURCE ENRICHMENT - Settlement Instructions");
         logger.info("=".repeat(60));
         
         try {
@@ -145,14 +176,14 @@ public class PostgreSQLLookupDemo {
             Map<String, Object> inputData = new HashMap<>();
             inputData.put("counterpartyId", "CP_GS"); // Only the lookup key, no other hardcoded data
 
-            logger.info("Input Data for YAML Processing:");
+            logger.info("Input Data for External Data-Source Reference YAML Processing:");
             logger.info("  Counterparty ID: {}", inputData.get("counterpartyId"));
 
-            // Apply YAML multi-parameter enrichment processing using real APEX services
-            String configPath = "examples/lookups/settlement-instruction-enrichment.yaml";
+            // Apply external data-source reference multi-parameter enrichment processing using real APEX services
+            String configPath = "enrichments/settlement-instruction-enrichment-lean.yaml";
             Map<String, Object> enrichedData = performEnrichmentWithYaml(inputData, configPath);
-            
-            logger.info("\nSettlement Instructions from PostgreSQL:");
+
+            logger.info("\nSettlement Instructions from External Data-Source Reference:");
             logger.info("  Settlement Instruction ID: {}", enrichedData.get("settlementInstructionId"));
             logger.info("  Counterparty Name: {}", enrichedData.get("counterpartyName"));
             logger.info("  Counterparty Type: {}", enrichedData.get("counterpartyType"));
@@ -164,7 +195,7 @@ public class PostgreSQLLookupDemo {
             logger.info("  Market Name: {}", enrichedData.get("marketName"));
             logger.info("  Settlement Cycle: {}", enrichedData.get("settlementCycle"));
             
-            logger.info("\nRisk Assessment from PostgreSQL:");
+            logger.info("\nRisk Assessment from External Data-Source Reference:");
             logger.info("  Risk Category: {}", enrichedData.get("riskCategory"));
             logger.info("  Risk Score: {}", enrichedData.get("riskScore"));
             logger.info("  Max Exposure: {}", enrichedData.get("maxExposure"));
@@ -181,12 +212,12 @@ public class PostgreSQLLookupDemo {
      */
     private void demonstratePerformanceOptimization() {
         logger.info("\n" + "=".repeat(60));
-        logger.info("3. PERFORMANCE OPTIMIZATION - Connection Pooling & Caching");
+        logger.info("3. EXTERNAL DATA-SOURCE PERFORMANCE OPTIMIZATION - Connection Pooling & Configuration Caching");
         logger.info("=".repeat(60));
         
         try {
             // Test multiple lookups with minimal input data - no hardcoded business logic
-            logger.info("Testing YAML Processing Performance with Multiple Lookups:");
+            logger.info("Testing External Data-Source Reference Processing Performance with Multiple Lookups:");
 
             String[] customerIds = {"CUST000001", "CUST000002", "CUST000003", "CUST000004", "CUST000005"};
             long totalTime = 0;
@@ -197,7 +228,7 @@ public class PostgreSQLLookupDemo {
                 inputData.put("customerId", customerId);
 
                 long startTime = System.currentTimeMillis();
-                Map<String, Object> result = performEnrichmentWithYaml(inputData, "examples/lookups/customer-profile-enrichment.yaml");
+                Map<String, Object> result = performEnrichmentWithYaml(inputData, "enrichments/customer-profile-enrichment-lean.yaml");
                 long lookupTime = System.currentTimeMillis() - startTime;
                 totalTime += lookupTime;
 
@@ -220,7 +251,7 @@ public class PostgreSQLLookupDemo {
 
             // Second lookup (cache hit)
             startTime = System.currentTimeMillis();
-            performEnrichmentWithYaml(inputData, "examples/lookups/customer-profile-enrichment.yaml");
+            performEnrichmentWithYaml(inputData, "enrichments/customer-profile-enrichment-lean.yaml");
             long secondLookup = System.currentTimeMillis() - startTime;
             
             logger.info("  First lookup (cache miss): {} ms", firstLookup);
@@ -245,17 +276,21 @@ public class PostgreSQLLookupDemo {
     // ========================================
 
     /**
-     * Perform enrichment using APEX YAML processing.
-     * This demonstrates real YAML enrichment rule processing with inline datasets.
+     * Perform enrichment using APEX YAML processing with external data-source references.
+     * This demonstrates real YAML enrichment rule processing with external data-source configurations.
      */
     private Map<String, Object> performEnrichmentWithYaml(Map<String, Object> inputData, String configPath) {
         try {
-            logger.info("Loading and processing YAML configuration: {}", configPath);
+            logger.info("Loading and processing external data-source reference YAML configuration: {}", configPath);
 
-            // Load YAML configuration from classpath (same pattern as working examples)
+            // Initialize H2 database with comprehensive multi-table data BEFORE loading YAML config
+            // This ensures the database is populated before APEX creates its connection
+            initializeDatabase();
+
+            // Load YAML configuration from classpath (with external data-source references)
             YamlRuleConfiguration yamlConfig = yamlLoader.loadFromClasspath(configPath);
 
-            logger.info("YAML configuration loaded successfully");
+            logger.info("External data-source reference YAML configuration loaded successfully");
             if (yamlConfig.getMetadata() != null) {
                 logger.info("  Configuration: {} (version {})",
                     yamlConfig.getMetadata().getName(),
@@ -264,13 +299,16 @@ public class PostgreSQLLookupDemo {
             if (yamlConfig.getEnrichments() != null) {
                 logger.info("  Found {} enrichment rules", yamlConfig.getEnrichments().size());
             }
+            if (yamlConfig.getDataSources() != null) {
+                logger.info("  Found {} external data sources", yamlConfig.getDataSources().size());
+            }
 
             // Process enrichments individually (same pattern as working examples)
             Map<String, Object> enrichedResult = new HashMap<>(inputData);
 
-            // Use real APEX enrichment service to process the data
+            // Use real APEX enrichment service to process external data-source enrichments
             if (yamlConfig.getEnrichments() != null) {
-                logger.info("  Using APEX EnrichmentService to process {} enrichments", yamlConfig.getEnrichments().size());
+                logger.info("  Using APEX EnrichmentService to process {} external data-source enrichments", yamlConfig.getEnrichments().size());
                 Object enrichedObject = enrichmentService.enrichObject(yamlConfig, enrichedResult);
 
                 // Convert back to Map if needed
@@ -295,7 +333,7 @@ public class PostgreSQLLookupDemo {
             }
 
         } catch (Exception e) {
-            logger.error("Error performing APEX YAML enrichment", e);
+            logger.error("Error performing APEX external data-source reference YAML enrichment", e);
             // Return original data if enrichment fails
             return new HashMap<>(inputData);
         }
@@ -314,13 +352,18 @@ public class PostgreSQLLookupDemo {
     /**
      * Initialize H2 database with comprehensive multi-table schema for advanced demo scenarios.
      * Creates tables: customers, counterparties, settlement_instructions, risk_assessments
+     * CRITICAL: Load H2 driver explicitly to ensure it's available for external data-source factory.
      */
     private void initializeDatabase() {
         logger.info("Initializing H2 database with comprehensive multi-table schema...");
 
         try {
+            // CRITICAL: Load H2 driver explicitly to ensure it's available for DataSourceFactory
+            Class.forName("org.h2.Driver");
+            logger.info("✅ H2 driver loaded successfully for external data-source reference");
+
             // Create H2 database connection with shared in-memory database (PostgreSQL compatibility mode)
-            String jdbcUrl = "jdbc:h2:mem:apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH";
+            String jdbcUrl = "jdbc:h2:mem:apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
 
             try (var connection = java.sql.DriverManager.getConnection(jdbcUrl, "sa", "")) {
 
@@ -491,19 +534,22 @@ public class PostgreSQLLookupDemo {
         }
     }
 
+    // ========================================
+    // MAIN METHOD
+    // ========================================
+
     /**
      * Main method for standalone execution.
      */
     public static void main(String[] args) {
-        logger.info("Starting APEX YAML Processing Demo...");
+        logger.info("Starting PostgreSQL Lookup Demo...");
 
         try {
-            // Create and run the YAML processing demo
             PostgreSQLLookupDemo demo = new PostgreSQLLookupDemo();
             demo.runDemo();
 
         } catch (Exception e) {
-            logger.error("Failed to run APEX YAML Processing Demo", e);
+            logger.error("Failed to run PostgreSQL Lookup Demo", e);
         }
     }
 }

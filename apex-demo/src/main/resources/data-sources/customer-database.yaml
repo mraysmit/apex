@@ -1,0 +1,94 @@
+apiVersion: "apex.dev/v1"
+kind: "DataSource"
+metadata:
+  name: "customer-database"
+  version: "1.0.0"
+  description: "Customer database configuration for H2 in PostgreSQL compatibility mode"
+  environment: "development"
+  labels:
+    team: "apex-demo"
+    purpose: "customer-lookup"
+
+spec:
+  type: "database"
+  source-type: "h2"
+  enabled: true
+  
+  connection:
+    # H2 in-memory database configuration with shared access
+    database: "apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+    username: "sa"
+    password: ""
+    
+    # Connection pool configuration
+    maxPoolSize: 10
+    minPoolSize: 2
+    connectionTimeout: 30000
+    idleTimeout: 600000
+    maxLifetime: 1800000
+  
+  # Named queries for reuse across multiple enrichments
+  queries:
+    # Basic customer lookup by ID
+    getCustomerById: |
+      SELECT 
+        customer_id,
+        customer_name,
+        customer_type,
+        tier,
+        region,
+        status,
+        created_date,
+        last_updated
+      FROM customers 
+      WHERE customer_id = :customerId
+    
+    # Customer lookup with active status filter
+    getActiveCustomerById: |
+      SELECT 
+        customer_id,
+        customer_name,
+        customer_type,
+        tier,
+        region,
+        status,
+        created_date
+      FROM customers 
+      WHERE customer_id = :customerId 
+        AND status = 'ACTIVE'
+    
+    # Customers by region
+    getCustomersByRegion: |
+      SELECT 
+        customer_id,
+        customer_name,
+        customer_type,
+        tier,
+        region,
+        status
+      FROM customers 
+      WHERE region = :region 
+        AND status = 'ACTIVE'
+      ORDER BY customer_name
+    
+    # Health check query
+    healthCheck: "SELECT 1 as health_check"
+
+  # Infrastructure settings
+  cache:
+    enabled: true
+    ttlSeconds: 300
+    maxSize: 1000
+    
+  # Parameter validation rules
+  parameters:
+    customerId:
+      type: "string"
+      required: true
+      pattern: "^CUST[0-9]{6}$"
+      description: "Customer ID in format CUST000001"
+    region:
+      type: "string"
+      required: true
+      enum: ["NA", "EU", "APAC", "LATAM"]
+      description: "Customer region code"

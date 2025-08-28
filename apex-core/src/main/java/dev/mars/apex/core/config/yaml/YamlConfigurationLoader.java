@@ -3,6 +3,8 @@ package dev.mars.apex.core.config.yaml;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import dev.mars.apex.core.service.data.external.DataSourceResolver;
+import dev.mars.apex.core.service.data.external.ExternalDataSourceConfig;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,16 +45,18 @@ import java.util.logging.Logger;
  * This class handles the parsing and validation of YAML configuration files.
  */
 public class YamlConfigurationLoader {
-    
+
     private static final Logger LOGGER = Logger.getLogger(YamlConfigurationLoader.class.getName());
-    
+
     private final ObjectMapper yamlMapper;
+    private final DataSourceResolver dataSourceResolver;
     
     /**
-     * Constructor that initializes the YAML object mapper.
+     * Constructor that initializes the YAML object mapper and data-source resolver.
      */
     public YamlConfigurationLoader() {
         this.yamlMapper = createYamlMapper();
+        this.dataSourceResolver = new DataSourceResolver();
     }
     
     /**
@@ -71,11 +75,14 @@ public class YamlConfigurationLoader {
             
             LOGGER.info("Loading YAML configuration from file: " + filePath);
             YamlRuleConfiguration config = yamlMapper.readValue(path.toFile(), YamlRuleConfiguration.class);
-            
+
+            // Process external data-source references
+            processDataSourceReferences(config);
+
             validateConfiguration(config);
-            LOGGER.info("Successfully loaded configuration: " + 
+            LOGGER.info("Successfully loaded configuration: " +
                        (config.getMetadata() != null ? config.getMetadata().getName() : "unnamed"));
-            
+
             return config;
             
         } catch (IOException e) {
@@ -121,11 +128,14 @@ public class YamlConfigurationLoader {
         try {
             LOGGER.info("Loading YAML configuration from input stream");
             YamlRuleConfiguration config = yamlMapper.readValue(inputStream, YamlRuleConfiguration.class);
-            
+
+            // Process external data-source references
+            processDataSourceReferences(config);
+
             validateConfiguration(config);
-            LOGGER.info("Successfully loaded configuration: " + 
+            LOGGER.info("Successfully loaded configuration: " +
                        (config.getMetadata() != null ? config.getMetadata().getName() : "unnamed"));
-            
+
             return config;
             
         } catch (IOException e) {
@@ -289,7 +299,96 @@ public class YamlConfigurationLoader {
         
         return mapper;
     }
-    
+
+    /**
+     * Process external data-source references and merge them into the configuration.
+     *
+     * This method resolves external data-source references defined in the 'data-source-refs'
+     * section and merges them with any existing inline data-sources.
+     *
+     * @param config The configuration to process
+     * @throws YamlConfigurationException if reference resolution fails
+     */
+    private void processDataSourceReferences(YamlRuleConfiguration config) throws YamlConfigurationException {
+        if (config.getDataSourceRefs() == null || config.getDataSourceRefs().isEmpty()) {
+            LOGGER.fine("No external data-source references to process");
+            return;
+        }
+
+        LOGGER.info("Processing " + config.getDataSourceRefs().size() + " external data-source references");
+
+        // Initialize data-sources list if it doesn't exist
+        if (config.getDataSources() == null) {
+            config.setDataSources(new ArrayList<>());
+        }
+
+        // Process each data-source reference
+        for (YamlDataSourceRef ref : config.getDataSourceRefs()) {
+            if (!ref.isEnabled()) {
+                LOGGER.info("Skipping disabled data-source reference: " + ref.getName());
+                continue;
+            }
+
+            try {
+                LOGGER.info("Resolving external data-source reference: " + ref.getName() + " from " + ref.getSource());
+
+                // Resolve the external configuration
+                ExternalDataSourceConfig externalConfig = dataSourceResolver.resolveDataSource(ref.getSource());
+
+                // Convert external configuration to YamlDataSource
+                YamlDataSource yamlDataSource = convertExternalToYamlDataSource(externalConfig, ref);
+
+                // Add to the configuration
+                config.getDataSources().add(yamlDataSource);
+
+                LOGGER.info("Successfully resolved and added data-source: " + ref.getName());
+
+            } catch (Exception e) {
+                throw new YamlConfigurationException(
+                    "Failed to resolve data-source reference '" + ref.getName() + "' from '" + ref.getSource() + "'", e);
+            }
+        }
+
+        LOGGER.info("Successfully processed all external data-source references");
+    }
+
+    /**
+     * Convert external data-source configuration to YamlDataSource.
+     */
+    private YamlDataSource convertExternalToYamlDataSource(ExternalDataSourceConfig externalConfig, YamlDataSourceRef ref) {
+        YamlDataSource yamlDataSource = new YamlDataSource();
+
+        // Use the reference name, not the external config name
+        yamlDataSource.setName(ref.getName());
+
+        // Map from external config spec
+        if (externalConfig.getSpec() != null) {
+            yamlDataSource.setType(externalConfig.getSpec().getType());
+            yamlDataSource.setSourceType(externalConfig.getSpec().getSourceType());
+            yamlDataSource.setEnabled(externalConfig.getSpec().getEnabled());
+            yamlDataSource.setConnection(externalConfig.getSpec().getConnection());
+            yamlDataSource.setQueries(externalConfig.getSpec().getQueries());
+            yamlDataSource.setCache(externalConfig.getSpec().getCache());
+
+            // Handle parameters - convert from Map to String array if needed
+            if (externalConfig.getSpec().getParameters() != null) {
+                Map<String, Object> params = externalConfig.getSpec().getParameters();
+                if (params.keySet() != null) {
+                    yamlDataSource.setParameterNames(params.keySet().toArray(new String[0]));
+                }
+            }
+        }
+
+        // Use description from reference if available, otherwise from external config
+        String description = ref.getDescription();
+        if (description == null && externalConfig.getMetadata() != null) {
+            description = externalConfig.getMetadata().getDescription();
+        }
+        yamlDataSource.setDescription(description);
+
+        return yamlDataSource;
+    }
+
     /**
      * Validate the loaded configuration.
      *

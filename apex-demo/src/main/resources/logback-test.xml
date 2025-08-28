@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Set debug level for DatabaseDataSource -->
+    <logger name="dev.mars.apex.core.service.data.external.database.DatabaseDataSource" level="DEBUG"/>
+    
+    <!-- Set debug level for DatabaseLookupService -->
+    <logger name="dev.mars.apex.core.service.lookup.DatabaseLookupService" level="DEBUG"/>
+    
+    <!-- Set info level for other APEX components -->
+    <logger name="dev.mars.apex" level="INFO"/>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>

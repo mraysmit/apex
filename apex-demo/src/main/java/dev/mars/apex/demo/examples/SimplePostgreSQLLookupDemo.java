@@ -32,13 +32,6 @@ import java.util.Map;
 /**
  * Simple PostgreSQL Lookup Demo - Basic Database Enrichment Template
  *
- * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2025-08-28
- * @version 1.0
- */
-/**
- * Simple PostgreSQL Lookup Demo - Basic Database Enrichment Template
- *
  * This is the simplest possible PostgreSQL lookup demonstration using real APEX services:
  * - Single customer lookup enrichment scenario using H2 database (PostgreSQL mode)
  * - Real database connection and SQL queries
@@ -55,26 +48,33 @@ import java.util.Map;
  * REQUIRED YAML CONFIGURATION FILES
  * ============================================================================
  *
- * This demo requires the following YAML file:
+ * This demo requires the following YAML files:
  *
- * └── examples/lookups/postgresql-simple-lookup.yaml
- *     ├── Database enrichment rules with H2 connection configuration
- *     ├── Contains: database connection, SQL queries, field mappings
+ * └── enrichments/simple-postgresql-customer-profile-external-ref.yaml
+ *     ├── Lean business logic configuration with external data-source reference
+ *     ├── Contains: enrichment rules, field mappings, external reference
  *     └── Used for: Simple customer profile database enrichment demonstration
  *
- * CRITICAL: The YAML file must be present and valid. The demo will fail fast
- * if the required configuration is missing. No hardcoded fallback data is provided.
+ * └── data-sources/postgresql-customer-database.yaml
+ *     ├── External infrastructure configuration (reusable)
+ *     ├── Contains: database connection, SQL queries, parameters
+ *     └── Used for: PostgreSQL database connection and query definitions
+ *
+ * CRITICAL: Both YAML files must be present and valid. The demo will fail fast
+ * if the required configurations are missing. No hardcoded fallback data is provided.
  *
  * ============================================================================
  * DEMONSTRATION SCENARIO
  * ============================================================================
  *
- * Single Customer Profile Database Enrichment:
+ * Single Customer Profile Database Enrichment with External Data-Source Reference:
  * - Input: Customer ID (e.g., "CUST000001")
  * - Process: YAML-driven database lookup via real APEX EnrichmentService
+ * - Infrastructure: External PostgreSQL data-source configuration (reusable)
+ * - Business Logic: Lean enrichment configuration with external reference
  * - Database: H2 in-memory database (PostgreSQL compatibility mode)
  * - Output: Customer name, type, tier, region, status from database query
- * - Performance: ~5-10ms lookup with database connection pooling
+ * - Performance: ~5-10ms lookup with database connection pooling and configuration caching
  *
  * ============================================================================
  * REFACTORING TEMPLATE USAGE
@@ -90,14 +90,15 @@ import java.util.Map;
  * 6. **Update @version to 2.0** only after achieving 100% compliance
  *
  * CRITICAL: This template demonstrates 100% compliant APEX integration with:
- * - ✅ Real APEX services (no hardcoded simulation)
- * - ✅ No fallback scenarios (fail-fast approach)
- * - ✅ Pure YAML-driven data sourcing with database lookups
- * - ✅ Minimal input data (lookup keys only)
- * - ✅ Real database infrastructure (H2 with PostgreSQL mode)
+ * - Real APEX services (no hardcoded simulation)
+ * - No fallback scenarios (fail-fast approach)
+ * - Pure YAML-driven data sourcing with database lookups
+ * - External data-source reference system (clean separation of concerns)
+ * - Minimal input data (lookup keys only)
+ * - Real database infrastructure (H2 with PostgreSQL mode)
  *
- * @author APEX Demo Team
- * @version 2.0 - Real APEX services with H2 database lookup (Perfect Template)
+ * @author Mark A Ray-SMith
+ * @version 2.0 - Real APEX services with H2 database lookup (Reference Template)
  * @since 2025-08-28
  */
 public class SimplePostgreSQLLookupDemo {
@@ -155,8 +156,8 @@ public class SimplePostgreSQLLookupDemo {
             logger.info("Input Data for Database YAML Processing:");
             logger.info("  Customer ID: {}", inputData.get("customerId"));
 
-            // Use the database-based enrichment configuration with H2 database
-            String configPath = "examples/lookups/postgresql-simple-database-enrichment.yaml";
+            // Use the external data-source reference enrichment configuration
+            String configPath = "enrichments/simple-postgresql-customer-profile-external-ref.yaml";
             Map<String, Object> enrichedData = performEnrichmentWithYaml(inputData, configPath);
 
             logger.info("\nCustomer Profile from YAML Processing:");
@@ -176,18 +177,19 @@ public class SimplePostgreSQLLookupDemo {
      */
     private Map<String, Object> performEnrichmentWithYaml(Map<String, Object> inputData, String configPath) {
         try {
-            logger.info("Loading and processing database YAML configuration: {}", configPath);
+            logger.info("Loading and processing external data-source reference YAML configuration: {}", configPath);
 
-            // Load YAML configuration using real APEX services
+            // Initialize H2 database with test data BEFORE loading YAML config
+            // This ensures the database is populated before APEX creates its connection
+            initializeDatabase();
+
+            // Load YAML configuration using real APEX services (with external data-source references)
             YamlRuleConfiguration config = yamlLoader.loadFromClasspath(configPath);
 
-            logger.info("Database YAML configuration loaded successfully");
+            logger.info("External data-source reference YAML configuration loaded successfully");
             logger.info("  Configuration: {} (version {})", config.getMetadata().getName(), config.getMetadata().getVersion());
             logger.info("  Found {} enrichment rules", config.getEnrichments() != null ? config.getEnrichments().size() : 0);
-
-            // Initialize H2 database with test data after YAML config is loaded
-            // This ensures the database is populated after APEX creates its connection
-            initializeDatabase();
+            logger.info("  Found {} external data sources", config.getDataSources() != null ? config.getDataSources().size() : 0);
 
             // Add a small delay to ensure database initialization completes
             try {
@@ -200,7 +202,7 @@ public class SimplePostgreSQLLookupDemo {
             Map<String, Object> enrichedResult = new HashMap<>(inputData);
 
             if (config.getEnrichments() != null) {
-                logger.info("  Using APEX EnrichmentService to process {} database enrichments", config.getEnrichments().size());
+                logger.info("  Using APEX EnrichmentService to process {} external data-source enrichments", config.getEnrichments().size());
                 Object enrichedObject = enrichmentService.enrichObject(config, enrichedResult);
 
                 // Convert back to Map if needed
@@ -218,18 +220,23 @@ public class SimplePostgreSQLLookupDemo {
             return enrichedResult;
 
         } catch (Exception e) {
-            logger.error("Error during database YAML enrichment processing: {}", e.getMessage());
+            logger.error("Error during external data-source reference YAML enrichment processing: {}", e.getMessage());
             return inputData; // Return original data on error
         }
     }
 
     /**
      * Initialize H2 database with test data for demo purposes.
+     * CRITICAL: Load H2 driver explicitly to ensure it's available for external data-source factory.
      */
     private void initializeDatabase() {
         try {
+            // CRITICAL: Load H2 driver explicitly to ensure it's available for DataSourceFactory
+            Class.forName("org.h2.Driver");
+            logger.info("✅ H2 driver loaded successfully for external data-source reference");
+
             // Create H2 database connection with shared in-memory database (PostgreSQL compatibility mode)
-            String jdbcUrl = "jdbc:h2:mem:apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH";
+            String jdbcUrl = "jdbc:h2:mem:apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
 
             try (var connection = java.sql.DriverManager.getConnection(jdbcUrl, "sa", "")) {
                 // Create customers table

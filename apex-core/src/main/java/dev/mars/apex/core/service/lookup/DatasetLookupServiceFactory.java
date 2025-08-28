@@ -189,19 +189,40 @@ public class DatasetLookupServiceFactory {
         LOGGER.fine("Creating database dataset service: " + serviceName);
 
         // Validate database-specific configuration
-        if (dataset.getConnectionName() == null || dataset.getConnectionName().trim().isEmpty()) {
-            throw new EnrichmentException("Database dataset must specify a connection-name");
+        // Support both connection-name (traditional) and data-source-ref (external reference)
+        String connectionName = dataset.getConnectionName();
+        String dataSourceRef = dataset.getDataSourceRef();
+
+        if ((connectionName == null || connectionName.trim().isEmpty()) &&
+            (dataSourceRef == null || dataSourceRef.trim().isEmpty())) {
+            throw new EnrichmentException("Database dataset must specify either a connection-name or data-source-ref");
         }
 
-        if (dataset.getQuery() == null || dataset.getQuery().trim().isEmpty()) {
-            throw new EnrichmentException("Database dataset must specify a query");
+        // For external data-source references, use the reference name as connection name
+        if (dataSourceRef != null && !dataSourceRef.trim().isEmpty()) {
+            connectionName = dataSourceRef;
         }
 
-        // Find the data source configuration
+        // Validate query configuration
+        // Support both inline query and query-ref (named query from external data-source)
+        String query = dataset.getQuery();
+        String queryRef = dataset.getQueryRef();
+
+        if ((query == null || query.trim().isEmpty()) &&
+            (queryRef == null || queryRef.trim().isEmpty())) {
+            throw new EnrichmentException("Database dataset must specify either a query or query-ref");
+        }
+
+        // For query references, resolve the named query from the data-source configuration
+        if (queryRef != null && !queryRef.trim().isEmpty()) {
+            query = resolveNamedQuery(connectionName, queryRef, configuration);
+        }
+
+        // Find the data source configuration using the resolved connection name
         dev.mars.apex.core.config.yaml.YamlDataSource dataSourceConfig = null;
         if (configuration.getDataSources() != null) {
             for (dev.mars.apex.core.config.yaml.YamlDataSource ds : configuration.getDataSources()) {
-                if (dataset.getConnectionName().equals(ds.getName())) {
+                if (connectionName.equals(ds.getName())) {
                     dataSourceConfig = ds;
                     break;
                 }
@@ -209,7 +230,7 @@ public class DatasetLookupServiceFactory {
         }
 
         if (dataSourceConfig == null) {
-            throw new EnrichmentException("Data source not found: " + dataset.getConnectionName() +
+            throw new EnrichmentException("Data source not found: " + connectionName +
                                         ". Available data sources: " + getAvailableDataSourceNames(configuration));
         }
 
@@ -229,11 +250,11 @@ public class DatasetLookupServiceFactory {
                 }
             }
 
-            // Create database lookup service
+            // Create database lookup service using resolved query
             DatabaseLookupService databaseService = new DatabaseLookupService(
                 serviceName,
                 dataSource,
-                dataset.getQuery(),
+                query,  // Use resolved query (either inline or from named query reference)
                 parameterFields,
                 dataset.getDefaultValues()
             );
@@ -422,6 +443,53 @@ public class DatasetLookupServiceFactory {
         }
         
         LOGGER.fine("Dataset configuration validation passed for type: " + type);
+    }
+
+    /**
+     * Resolve a named query from the data-source configuration.
+     *
+     * @param connectionName The connection/data-source name
+     * @param queryRef The named query reference
+     * @param configuration The YAML rule configuration containing data sources
+     * @return The resolved SQL query string
+     * @throws EnrichmentException if the named query cannot be resolved
+     */
+    private static String resolveNamedQuery(String connectionName, String queryRef,
+                                          dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
+        LOGGER.fine("Resolving named query '" + queryRef + "' from data-source '" + connectionName + "'");
+
+        // Find the data source configuration
+        dev.mars.apex.core.config.yaml.YamlDataSource dataSourceConfig = null;
+        if (configuration.getDataSources() != null) {
+            for (dev.mars.apex.core.config.yaml.YamlDataSource ds : configuration.getDataSources()) {
+                if (connectionName.equals(ds.getName())) {
+                    dataSourceConfig = ds;
+                    break;
+                }
+            }
+        }
+
+        if (dataSourceConfig == null) {
+            throw new EnrichmentException("Data source not found for named query resolution: " + connectionName);
+        }
+
+        // Look for the named query in the data source queries
+        if (dataSourceConfig.getQueries() == null || dataSourceConfig.getQueries().isEmpty()) {
+            throw new EnrichmentException("Data source '" + connectionName + "' has no named queries defined");
+        }
+
+        String resolvedQuery = dataSourceConfig.getQueries().get(queryRef);
+        if (resolvedQuery == null || resolvedQuery.trim().isEmpty()) {
+            // List available queries for better error message
+            String availableQueries = String.join(", ", dataSourceConfig.getQueries().keySet());
+            throw new EnrichmentException("Named query '" + queryRef + "' not found in data-source '" +
+                                        connectionName + "'. Available queries: " + availableQueries);
+        }
+
+        LOGGER.fine("Successfully resolved named query '" + queryRef + "' to: " +
+                   (resolvedQuery.length() > 100 ? resolvedQuery.substring(0, 100) + "..." : resolvedQuery));
+
+        return resolvedQuery;
     }
 
     /**
