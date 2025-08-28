@@ -1,61 +1,31 @@
 package dev.mars.apex.demo.runners;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * AdvancedRunner demonstrates advanced techniques and optimization strategies
- * for the APEX Rules Engine.
- * 
- * This runner focuses on sophisticated implementation patterns, performance
- * optimization, and advanced integration techniques for production systems:
- * 
- * ADVANCED TOPICS COVERED:
- * 1. Performance Optimization - Caching, parallel processing, tuning
- * 2. Integration Patterns - External systems, APIs, message queues
- * 3. Complex Scenarios - Multi-step workflows, state management
- * 4. Monitoring & Observability - Metrics, tracing, alerting
- * 5. Advanced Configuration - Dynamic rules, A/B testing, feature flags
- * 
- * LEARNING OBJECTIVES:
- * After completing these advanced demos, users will understand:
- * - How to optimize rules engine performance for high-volume processing
- * - Advanced integration patterns with external systems
- * - Complex workflow orchestration and state management
- * - Production monitoring and observability strategies
- * - Advanced configuration management techniques
- * 
- * DEMO CONTENT:
- * 
- * PERFORMANCE OPTIMIZATION:
- * - Caching strategies and cache invalidation
- * - Parallel rule execution patterns
- * - Memory optimization and garbage collection tuning
- * - Database connection pooling and optimization
- * 
- * INTEGRATION PATTERNS:
- * - REST API integration with circuit breakers
- * - Message queue integration for asynchronous processing
- * - Database integration with connection pooling
- * - File system integration with monitoring
- * 
- * COMPLEX SCENARIOS:
- * - Multi-step workflow orchestration
- * - State management and persistence
- * - Error handling and recovery strategies
- * - Transaction management and rollback
- * 
- * TIME ESTIMATE: 45+ minutes
- * 
- * PREREQUISITES:
- * - Complete all previous runners (QuickStart, Fundamentals, Patterns, Industry)
- * - Understanding of performance optimization concepts
- * - Familiarity with system integration patterns
- * - Experience with production system operations
- * 
- * @author apex-demo team
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-08-28
  * @version 1.0
- * @since 2025-08-24
  */
 public class AdvancedRunner {
     

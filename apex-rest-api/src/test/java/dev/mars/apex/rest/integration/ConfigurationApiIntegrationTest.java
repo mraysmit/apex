@@ -1,5 +1,22 @@
 package dev.mars.apex.rest.integration;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 import dev.mars.apex.rest.dto.ApiErrorResponse;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -22,15 +39,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Comprehensive integration tests for Configuration API endpoints using real Spring Boot context.
- * Uses plain JUnit 5 with real objects and advanced testing.
  *
- * Tests cover:
- * - Configuration info retrieval
- * - YAML configuration loading from content
- * - File upload functionality
- * - Configuration validation
- * - Error handling and edge cases
- * - Global exception handler integration
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-08-28
+ * @version 1.0
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = {dev.mars.apex.rest.ApexRestApiApplication.class,

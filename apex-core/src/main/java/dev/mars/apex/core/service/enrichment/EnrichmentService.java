@@ -61,7 +61,7 @@ public class EnrichmentService {
             return targetObject;
         }
         
-        return processor.processEnrichments(yamlConfig.getEnrichments(), targetObject);
+        return processor.processEnrichments(yamlConfig.getEnrichments(), targetObject, yamlConfig);
     }
     
     /**

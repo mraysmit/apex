@@ -363,11 +363,11 @@ public class YamlEnrichment {
 
     /**
      * Dataset configuration for lookup enrichments.
-     * Supports inline datasets, YAML files, and CSV files.
+     * Supports inline datasets, YAML files, CSV files, and database lookups.
      */
     public static class LookupDataset {
         @JsonProperty("type")
-        private String type; // "inline", "yaml-file", "csv-file"
+        private String type; // "inline", "yaml-file", "csv-file", "database"
 
         @JsonProperty("file-path")
         private String filePath; // For file-based datasets
@@ -386,6 +386,41 @@ public class YamlEnrichment {
 
         @JsonProperty("cache-ttl-seconds")
         private Integer cacheTtlSeconds;
+
+        // Database-specific fields
+        @JsonProperty("connection-name")
+        private String connectionName; // Reference to data source in dataSources section
+
+        @JsonProperty("query")
+        private String query; // SQL query to execute
+
+        @JsonProperty("parameters")
+        private List<ParameterMapping> parameters; // Parameter mappings for the query
+
+        /**
+         * Parameter mapping for database queries.
+         */
+        public static class ParameterMapping {
+            @JsonProperty("field")
+            private String field; // Field name from input data
+
+            @JsonProperty("type")
+            private String type; // Parameter type (string, integer, etc.)
+
+            @JsonProperty("name")
+            private String name; // Parameter name in query (optional, defaults to field)
+
+            public ParameterMapping() {}
+
+            public String getField() { return field; }
+            public void setField(String field) { this.field = field; }
+
+            public String getType() { return type; }
+            public void setType(String type) { this.type = type; }
+
+            public String getName() { return name != null ? name : field; }
+            public void setName(String name) { this.name = name; }
+        }
 
         // Default constructor
         public LookupDataset() {
@@ -448,6 +483,31 @@ public class YamlEnrichment {
 
         public void setCacheTtlSeconds(Integer cacheTtlSeconds) {
             this.cacheTtlSeconds = cacheTtlSeconds;
+        }
+
+        // Database-specific getters and setters
+        public String getConnectionName() {
+            return connectionName;
+        }
+
+        public void setConnectionName(String connectionName) {
+            this.connectionName = connectionName;
+        }
+
+        public String getQuery() {
+            return query;
+        }
+
+        public void setQuery(String query) {
+            this.query = query;
+        }
+
+        public List<ParameterMapping> getParameters() {
+            return parameters;
+        }
+
+        public void setParameters(List<ParameterMapping> parameters) {
+            this.parameters = parameters;
         }
     }
 }

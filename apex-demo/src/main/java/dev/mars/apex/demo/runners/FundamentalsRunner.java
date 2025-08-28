@@ -1,51 +1,31 @@
 package dev.mars.apex.demo.runners;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * FundamentalsRunner provides a deep dive into core APEX Rules Engine concepts.
- * 
- * This runner focuses on the fundamental building blocks that every developer
- * needs to understand to effectively use the APEX Rules Engine:
- * 
- * CORE CONCEPTS COVERED:
- * 1. Rules: Validation, business logic, and compliance rules
- * 2. Enrichments: Data transformation and lookup operations
- * 3. Datasets: Reference data management and organization
- * 4. Rule Chains: Orchestration and workflow management
- * 5. Configuration: YAML structure and best practices
- * 
- * LEARNING OBJECTIVES:
- * After completing these fundamentals, users will understand:
- * - How to design effective validation rules
- * - Different types of enrichment strategies
- * - Best practices for organizing reference data
- * - How to orchestrate multiple rules using rule chains
- * - YAML configuration patterns and conventions
- * 
- * DEMO CONTENT:
- * - Financial validation rules demonstration
- * - Data enrichment patterns and techniques
- * - Reference dataset organization strategies
- * - Rule chain orchestration examples
- * - Configuration management best practices
- * 
- * TIME ESTIMATE: 15-20 minutes
- * 
- * PREREQUISITES:
- * - Complete QuickStartRunner first
- * - Basic understanding of YAML syntax
- * - Familiarity with data validation concepts
- * 
- * NEXT STEPS:
- * After completing fundamentals, proceed to:
- * - PatternsRunner for implementation patterns
- * - IndustryRunner for real-world applications
- * 
- * @author apex-demo team
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-08-28
  * @version 1.0
- * @since 2025-08-24
  */
 public class FundamentalsRunner {
     

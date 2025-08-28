@@ -44,14 +44,30 @@ public class DatasetLookupServiceFactory {
     
     /**
      * Create a DatasetLookupService from a LookupDataset configuration.
-     * 
+     *
      * @param serviceName The name for the service
      * @param dataset The dataset configuration
      * @return A configured DatasetLookupService
      * @throws EnrichmentException if the dataset type is unsupported or configuration is invalid
      */
-    public static DatasetLookupService createDatasetLookupService(String serviceName, 
+    public static DatasetLookupService createDatasetLookupService(String serviceName,
                                                                   YamlEnrichment.LookupDataset dataset) {
+        return createDatasetLookupService(serviceName, dataset, null);
+    }
+
+    /**
+     * Create a DatasetLookupService from a LookupDataset configuration with full YAML configuration context.
+     * This method is required for database lookups that need access to dataSources configuration.
+     *
+     * @param serviceName The name for the service
+     * @param dataset The dataset configuration
+     * @param configuration The full YAML configuration (required for database lookups)
+     * @return A configured DatasetLookupService
+     * @throws EnrichmentException if the dataset type is unsupported or configuration is invalid
+     */
+    public static DatasetLookupService createDatasetLookupService(String serviceName,
+                                                                  YamlEnrichment.LookupDataset dataset,
+                                                                  dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
         if (dataset == null) {
             throw new EnrichmentException("Dataset configuration cannot be null");
         }
@@ -70,16 +86,22 @@ public class DatasetLookupServiceFactory {
         switch (datasetType.toLowerCase()) {
             case "inline":
                 return createInlineDatasetService(serviceName, dataset);
-                
+
             case "yaml-file":
                 return createYamlFileDatasetService(serviceName, dataset);
-                
+
             case "csv-file":
                 return createCsvFileDatasetService(serviceName, dataset);
-                
+
+            case "database":
+                if (configuration == null) {
+                    throw new EnrichmentException("Database lookups require configuration context. Use createDatasetLookupService(serviceName, dataset, configuration) method instead.");
+                }
+                return createDatabaseDatasetService(serviceName, dataset, configuration);
+
             default:
-                throw new EnrichmentException("Unsupported dataset type: " + datasetType + 
-                                            ". Supported types: inline, yaml-file, csv-file");
+                throw new EnrichmentException("Unsupported dataset type: " + datasetType +
+                                            ". Supported types: inline, yaml-file, csv-file, database");
         }
     }
     
@@ -152,7 +174,91 @@ public class DatasetLookupServiceFactory {
         YamlEnrichment.LookupDataset csvDataset = loadFromCsvFile(dataset);
         return new DatasetLookupService(serviceName, csvDataset);
     }
-    
+
+    /**
+     * Create a service for database datasets.
+     *
+     * @param serviceName The service name
+     * @param dataset The dataset configuration
+     * @param configuration The full YAML configuration containing dataSources
+     * @return A configured DatasetLookupService
+     */
+    private static DatasetLookupService createDatabaseDatasetService(String serviceName,
+                                                                     YamlEnrichment.LookupDataset dataset,
+                                                                     dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
+        LOGGER.fine("Creating database dataset service: " + serviceName);
+
+        // Validate database-specific configuration
+        if (dataset.getConnectionName() == null || dataset.getConnectionName().trim().isEmpty()) {
+            throw new EnrichmentException("Database dataset must specify a connection-name");
+        }
+
+        if (dataset.getQuery() == null || dataset.getQuery().trim().isEmpty()) {
+            throw new EnrichmentException("Database dataset must specify a query");
+        }
+
+        // Find the data source configuration
+        dev.mars.apex.core.config.yaml.YamlDataSource dataSourceConfig = null;
+        if (configuration.getDataSources() != null) {
+            for (dev.mars.apex.core.config.yaml.YamlDataSource ds : configuration.getDataSources()) {
+                if (dataset.getConnectionName().equals(ds.getName())) {
+                    dataSourceConfig = ds;
+                    break;
+                }
+            }
+        }
+
+        if (dataSourceConfig == null) {
+            throw new EnrichmentException("Data source not found: " + dataset.getConnectionName() +
+                                        ". Available data sources: " + getAvailableDataSourceNames(configuration));
+        }
+
+        try {
+            // Create database data source using existing infrastructure
+            dev.mars.apex.core.service.data.external.factory.DataSourceFactory factory =
+                dev.mars.apex.core.service.data.external.factory.DataSourceFactory.getInstance();
+
+            dev.mars.apex.core.service.data.external.ExternalDataSource dataSource =
+                factory.createDataSource(dataSourceConfig.toDataSourceConfiguration());
+
+            // Extract parameter field names from dataset configuration
+            java.util.List<String> parameterFields = new java.util.ArrayList<>();
+            if (dataset.getParameters() != null) {
+                for (YamlEnrichment.LookupDataset.ParameterMapping param : dataset.getParameters()) {
+                    parameterFields.add(param.getField());
+                }
+            }
+
+            // Create database lookup service
+            DatabaseLookupService databaseService = new DatabaseLookupService(
+                serviceName,
+                dataSource,
+                dataset.getQuery(),
+                parameterFields,
+                dataset.getDefaultValues()
+            );
+
+            // Create a simple wrapper that delegates to the database service
+            return new DatabaseDatasetLookupService(serviceName, databaseService, dataset);
+
+        } catch (Exception e) {
+            throw new EnrichmentException("Failed to create database dataset service '" + serviceName + "': " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Get available data source names for error messages.
+     */
+    private static String getAvailableDataSourceNames(dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
+        if (configuration.getDataSources() == null || configuration.getDataSources().isEmpty()) {
+            return "none";
+        }
+
+        return configuration.getDataSources().stream()
+            .map(dev.mars.apex.core.config.yaml.YamlDataSource::getName)
+            .collect(java.util.stream.Collectors.joining(", "));
+    }
+
     /**
      * Load dataset from YAML file.
      *
@@ -316,5 +422,50 @@ public class DatasetLookupServiceFactory {
         }
         
         LOGGER.fine("Dataset configuration validation passed for type: " + type);
+    }
+
+    /**
+     * Simple wrapper that extends DatasetLookupService to delegate to DatabaseLookupService.
+     * This allows database lookups to work with the existing DatasetLookupService interface.
+     */
+    private static class DatabaseDatasetLookupService extends DatasetLookupService {
+        private final DatabaseLookupService databaseService;
+
+        public DatabaseDatasetLookupService(String serviceName,
+                                          DatabaseLookupService databaseService,
+                                          YamlEnrichment.LookupDataset dataset) {
+            // Create a minimal dataset configuration for the parent constructor
+            super(serviceName, createEmptyDataset(dataset));
+            this.databaseService = databaseService;
+        }
+
+        private static YamlEnrichment.LookupDataset createEmptyDataset(YamlEnrichment.LookupDataset original) {
+            YamlEnrichment.LookupDataset emptyDataset = new YamlEnrichment.LookupDataset();
+            emptyDataset.setType("database");
+            emptyDataset.setKeyField("key"); // Placeholder
+            emptyDataset.setData(java.util.Collections.emptyList());
+            emptyDataset.setDefaultValues(original != null ? original.getDefaultValues() : null);
+            return emptyDataset;
+        }
+
+        @Override
+        public Object transform(Object key) {
+            // Delegate to the database service
+            return databaseService.transform(key);
+        }
+
+        @Override
+        public java.util.Map<String, java.util.Map<String, Object>> getAllRecords() {
+            // Database services don't preload all records
+            return java.util.Collections.emptyMap();
+        }
+
+        @Override
+        public String toString() {
+            return "DatabaseDatasetLookupService{" +
+                    "name='" + getName() + '\'' +
+                    ", databaseService=" + databaseService +
+                    '}';
+        }
     }
 }

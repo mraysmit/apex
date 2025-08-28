@@ -56,12 +56,15 @@ public class YamlEnrichmentProcessor {
     @SuppressWarnings("unused") // Reserved for future expression evaluation enhancements
     private final ExpressionEvaluatorService evaluatorService;
     private final SpelExpressionParser parser;
-    
+
     // Cache for compiled expressions to improve performance
     private final Map<String, Expression> expressionCache = new ConcurrentHashMap<>();
-    
+
     // Cache for lookup results (if caching is enabled)
     private final Map<String, CachedLookupResult> lookupCache = new ConcurrentHashMap<>();
+
+    // Current configuration context for database lookups
+    private dev.mars.apex.core.config.yaml.YamlRuleConfiguration currentConfiguration;
     
     public YamlEnrichmentProcessor(LookupServiceRegistry serviceRegistry,
                                    ExpressionEvaluatorService evaluatorService) {
@@ -74,17 +77,34 @@ public class YamlEnrichmentProcessor {
     
     /**
      * Process a list of enrichments on a target object.
-     * 
+     *
      * @param enrichments List of YAML enrichment configurations
      * @param targetObject The object to enrich
      * @return The enriched object
      */
     public Object processEnrichments(List<YamlEnrichment> enrichments, Object targetObject) {
+        return processEnrichments(enrichments, targetObject, null);
+    }
+
+    /**
+     * Process a list of enrichments on a target object with full configuration context.
+     * This method is required for database lookups that need access to dataSources configuration.
+     *
+     * @param enrichments The list of enrichments to apply
+     * @param targetObject The object to enrich
+     * @param configuration The full YAML configuration (required for database lookups)
+     * @return The enriched object
+     */
+    public Object processEnrichments(List<YamlEnrichment> enrichments, Object targetObject,
+                                   dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
+        // Set current configuration for database lookups
+        this.currentConfiguration = configuration;
+
         if (enrichments == null || enrichments.isEmpty()) {
             LOGGER.fine("No enrichments to process");
             return targetObject;
         }
-        
+
         LOGGER.info("Processing " + enrichments.size() + " enrichments for object type: " +
                    targetObject.getClass().getSimpleName());
         
@@ -635,7 +655,7 @@ public class YamlEnrichmentProcessor {
 
             try {
                 DatasetLookupService datasetService = DatasetLookupServiceFactory
-                    .createDatasetLookupService(datasetServiceName, dataset);
+                    .createDatasetLookupService(datasetServiceName, dataset, this.currentConfiguration);
 
                 LOGGER.fine("Created dataset lookup service: " + datasetServiceName +
                            " (type: " + dataset.getType() + ", records: " +

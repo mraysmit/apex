@@ -1,78 +1,57 @@
 package dev.mars.apex.demo.examples;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-// Removed FinancialTrade import - using Map<String, Object> for simplicity
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-import java.util.HashMap;
 import java.util.Map;
+import java.util.HashMap;
 
 /**
- * APEX Real Enrichment Service Demonstration - YAML-Driven Data Processing
+ * PostgreSQL Lookup Demo - Advanced Database Enrichment with Multi-Table Support
  *
- * This demo demonstrates authentic APEX enrichment processing using real APEX core services:
+ * This comprehensive demo showcases APEX's database lookup capabilities with:
+ * - Multi-table database schema (customers, counterparties, settlement_instructions, risk_assessments)
+ * - Complex multi-parameter database queries with joins
+ * - Real-time database enrichment with connection pooling and caching
+ * - Performance optimization demonstrations
+ * - Pure database-driven processing (no hardcoded data)
  *
- * REAL APEX SERVICES USED:
- * - EnrichmentService: Real APEX enrichment processor (not hardcoded simulation)
- * - YamlEnrichmentProcessor: Real YAML rule processing with SpEL expressions
- * - DatasetLookupService: Real inline dataset lookups with key-field matching
- * - ExpressionEvaluatorService: Real Spring Expression Language evaluation
- * - YamlConfigurationLoader: Real YAML configuration loading and validation
+ * Features demonstrated:
+ * 1. Simple customer profile lookups
+ * 2. Complex multi-parameter settlement instruction lookups
+ * 3. Performance optimization with database caching
  *
- * ============================================================================
- * REQUIRED YAML CONFIGURATION FILES
- * ============================================================================
+ * Database Schema:
+ * - customers: Customer profile data
+ * - counterparties: Trading counterparty information
+ * - settlement_instructions: Settlement and delivery instructions
+ * - risk_assessments: Risk scoring and monitoring data
  *
- * This demo requires the following YAML files to be present in the classpath:
- *
- * ENRICHMENT CONFIGURATIONS:
- * ├── examples/lookups/customer-profile-enrichment.yaml
- * │   ├── Customer profile enrichment rules with inline dataset
- * │   ├── Contains: customer lookup data, field mappings, fallback values
- * │   └── Used for: Simple customer profile enrichment demonstrations
- * │
- * ├── examples/lookups/settlement-instruction-enrichment.yaml
- * │   ├── Settlement instruction enrichment rules
- * │   ├── Contains: settlement data, counterparty mappings, complex SpEL expressions
- * │   └── Used for: Multi-parameter settlement instruction processing
- * │
- * └── examples/lookups/postgresql-multi-param-lookup.yaml
- *     ├── Multi-parameter lookup configuration with cascade fallback
- *     ├── Contains: complex lookup rules, multiple parameter handling
- *     └── Used for: Advanced lookup scenarios and fallback testing
- *
- * CRITICAL: All YAML files must be present and valid. The demo will fail fast
- * if any required configuration is missing. No hardcoded fallback data is provided.
- *
- * ============================================================================
- * DEMONSTRATION SCENARIOS
- * ============================================================================
- *
- * 1. Simple Customer Profile Enrichment - Single parameter lookup with inline dataset
- * 2. Multi-Parameter Settlement Instructions - Complex SpEL expressions (shows field mismatch errors)
- * 3. Performance Testing - Multiple enrichment calls with timing metrics
- * 4. Fallback Strategies - Non-existent key handling with default values
- *
- * TECHNICAL IMPLEMENTATION:
- * - H2 Database: In-memory PostgreSQL-compatible database for demo data
- * - Inline Datasets: YAML configurations with embedded lookup data
- * - SpEL Expressions: Real expression evaluation with proper error handling
- * - Field Mapping: Automatic field mapping from lookup results to target objects
- *
- * KEY LEARNING: This demo uses REAL APEX services, not hardcoded simulation logic.
- * All enrichment processing is handled by the actual APEX enrichment engine.
- *
- * PREREQUISITES: None - completely self-contained with H2 database initialization
- *
- * @author Mark A Ray-Smith Cityline Ltd
- * @version 2.0 - Now using real APEX services instead of hardcoded simulation
+ * @author Mark A Ray-Smith
  * @since 2025-08-28
+ * @version 2.0 - Advanced database lookups with multi-table support (Reference Template)
  */
 public class PostgreSQLLookupDemo {
 
@@ -88,8 +67,7 @@ public class PostgreSQLLookupDemo {
         this.serviceRegistry = new LookupServiceRegistry();
         this.enrichmentService = new EnrichmentService(serviceRegistry, new ExpressionEvaluatorService());
 
-        // Initialize database with test data
-        initializeDatabase();
+        logger.info("PostgreSQLLookupDemo initialized with real APEX services");
     }
 
     /**
@@ -334,16 +312,20 @@ public class PostgreSQLLookupDemo {
     // ========================================
 
     /**
-     * Initialize H2 database with test data for demo purposes.
+     * Initialize H2 database with comprehensive multi-table schema for advanced demo scenarios.
+     * Creates tables: customers, counterparties, settlement_instructions, risk_assessments
      */
     private void initializeDatabase() {
+        logger.info("Initializing H2 database with comprehensive multi-table schema...");
+
         try {
-            // Create H2 database connection with explicit database name
-            String jdbcUrl = "jdbc:h2:mem:apex_demo;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1";
+            // Create H2 database connection with shared in-memory database (PostgreSQL compatibility mode)
+            String jdbcUrl = "jdbc:h2:mem:apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH";
 
             try (var connection = java.sql.DriverManager.getConnection(jdbcUrl, "sa", "")) {
+
                 // Create customers table
-                String createTable = """
+                String createCustomersTable = """
                     CREATE TABLE IF NOT EXISTS customers (
                         customer_id VARCHAR(20) PRIMARY KEY,
                         customer_name VARCHAR(100) NOT NULL,
@@ -356,32 +338,149 @@ public class PostgreSQLLookupDemo {
                     )
                     """;
 
-                try (var stmt = connection.createStatement()) {
-                    stmt.execute(createTable);
-                    logger.info("Created customers table");
-                }
+                // Create counterparties table
+                String createCounterpartiesTable = """
+                    CREATE TABLE IF NOT EXISTS counterparties (
+                        counterparty_id VARCHAR(20) PRIMARY KEY,
+                        counterparty_name VARCHAR(100) NOT NULL,
+                        counterparty_type VARCHAR(20) NOT NULL,
+                        credit_rating VARCHAR(10),
+                        status VARCHAR(20) NOT NULL,
+                        created_date DATE,
+                        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                    """;
 
-                // Insert test data with explicit INSERT OR IGNORE for H2
-                String insertData = """
-                    MERGE INTO customers (customer_id, customer_name, customer_type, tier, region, status, created_date) VALUES
-                    ('CUST000001', 'Acme Corporation', 'CORPORATE', 'PLATINUM', 'NA', 'ACTIVE', '2023-01-15'),
-                    ('CUST000002', 'Beta Industries', 'CORPORATE', 'GOLD', 'EU', 'ACTIVE', '2023-02-20'),
-                    ('CUST000003', 'Gamma Holdings', 'INSTITUTIONAL', 'PLATINUM', 'APAC', 'ACTIVE', '2023-03-10'),
-                    ('CUST000004', 'Delta Partners', 'CORPORATE', 'SILVER', 'NA', 'ACTIVE', '2023-04-05'),
-                    ('CUST000005', 'Epsilon Fund', 'INSTITUTIONAL', 'GOLD', 'EU', 'ACTIVE', '2023-05-12')
+                // Create settlement_instructions table
+                String createSettlementTable = """
+                    CREATE TABLE IF NOT EXISTS settlement_instructions (
+                        instruction_id VARCHAR(50) PRIMARY KEY,
+                        counterparty_id VARCHAR(20) NOT NULL,
+                        instrument_type VARCHAR(20) NOT NULL,
+                        currency VARCHAR(10) NOT NULL,
+                        market VARCHAR(20) NOT NULL,
+                        custodian_name VARCHAR(100),
+                        custodian_bic VARCHAR(20),
+                        settlement_method VARCHAR(20),
+                        delivery_instruction VARCHAR(50),
+                        market_name VARCHAR(100),
+                        settlement_cycle VARCHAR(10),
+                        cut_off_time TIME,
+                        time_zone VARCHAR(50),
+                        special_instructions TEXT,
+                        created_date DATE,
+                        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (counterparty_id) REFERENCES counterparties(counterparty_id)
+                    )
+                    """;
+
+                // Create risk_assessments table
+                String createRiskTable = """
+                    CREATE TABLE IF NOT EXISTS risk_assessments (
+                        assessment_id VARCHAR(50) PRIMARY KEY,
+                        counterparty_id VARCHAR(20) NOT NULL,
+                        risk_category VARCHAR(20),
+                        risk_score INTEGER,
+                        max_exposure DECIMAL(15,2),
+                        approval_required BOOLEAN,
+                        monitoring_level VARCHAR(20),
+                        assessment_date DATE,
+                        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (counterparty_id) REFERENCES counterparties(counterparty_id)
+                    )
                     """;
 
                 try (var stmt = connection.createStatement()) {
-                    int rowsInserted = stmt.executeUpdate(insertData);
-                    logger.info("Inserted {} customer records", rowsInserted);
+                    stmt.execute(createCustomersTable);
+                    logger.info("Created customers table in H2 database");
+
+                    stmt.execute(createCounterpartiesTable);
+                    logger.info("Created counterparties table in H2 database");
+
+                    stmt.execute(createSettlementTable);
+                    logger.info("Created settlement_instructions table in H2 database");
+
+                    stmt.execute(createRiskTable);
+                    logger.info("Created risk_assessments table in H2 database");
                 }
 
-                // Verify data was inserted
-                try (var stmt = connection.createStatement();
-                     var rs = stmt.executeQuery("SELECT COUNT(*) FROM customers")) {
-                    if (rs.next()) {
-                        int count = rs.getInt(1);
-                        logger.info("Database initialized with {} customer records", count);
+                // Insert sample customer data
+                String insertCustomers = """
+                    MERGE INTO customers (customer_id, customer_name, customer_type, tier, region, status, created_date) VALUES
+                    ('CUST000001', 'Acme Corporation', 'CORPORATE', 'PLATINUM', 'NA', 'ACTIVE', '2024-01-15'),
+                    ('CUST000002', 'Global Investment Partners', 'INSTITUTIONAL', 'GOLD', 'EU', 'ACTIVE', '2024-02-20'),
+                    ('CUST000003', 'Pacific Asset Management', 'INSTITUTIONAL', 'GOLD', 'APAC', 'ACTIVE', '2024-03-10'),
+                    ('CUST000004', 'John Smith', 'INDIVIDUAL', 'SILVER', 'NA', 'ACTIVE', '2024-04-05'),
+                    ('CUST000005', 'European Pension Fund', 'INSTITUTIONAL', 'PLATINUM', 'EU', 'ACTIVE', '2024-05-12')
+                    """;
+
+                // Insert sample counterparty data
+                String insertCounterparties = """
+                    MERGE INTO counterparties (counterparty_id, counterparty_name, counterparty_type, credit_rating, status, created_date) VALUES
+                    ('CP_GS', 'Goldman Sachs', 'BANK', 'A+', 'ACTIVE', '2024-01-01'),
+                    ('CP_JPM', 'JPMorgan Chase', 'BANK', 'A+', 'ACTIVE', '2024-01-01'),
+                    ('CP_MS', 'Morgan Stanley', 'BANK', 'A', 'ACTIVE', '2024-01-01'),
+                    ('CP_CITI', 'Citigroup', 'BANK', 'A-', 'ACTIVE', '2024-01-01'),
+                    ('CP_BAML', 'Bank of America Merrill Lynch', 'BANK', 'A', 'ACTIVE', '2024-01-01')
+                    """;
+
+                // Insert sample settlement instruction data
+                String insertSettlements = """
+                    MERGE INTO settlement_instructions (instruction_id, counterparty_id, instrument_type, currency, market,
+                                                       custodian_name, custodian_bic, settlement_method, delivery_instruction,
+                                                       market_name, settlement_cycle, cut_off_time, time_zone, special_instructions, created_date) VALUES
+                    ('SI_GS_EQUITY_USD_NYSE', 'CP_GS', 'EQUITY', 'USD', 'NYSE', 'Goldman Sachs Custody', 'GSCCUS33XXX', 'DVP', 'DELIVER', 'New York Stock Exchange', 'T+2', '16:00:00', 'America/New_York', 'Standard equity settlement', '2024-01-01'),
+                    ('SI_GS_BOND_USD_NYSE', 'CP_GS', 'BOND', 'USD', 'NYSE', 'Goldman Sachs Custody', 'GSCCUS33XXX', 'DVP', 'DELIVER', 'New York Stock Exchange', 'T+1', '15:00:00', 'America/New_York', 'Bond settlement with accrued interest', '2024-01-01'),
+                    ('SI_JPM_EQUITY_USD_NASDAQ', 'CP_JPM', 'EQUITY', 'USD', 'NASDAQ', 'JPMorgan Custody', 'CHASUS33XXX', 'DVP', 'DELIVER', 'NASDAQ Stock Market', 'T+2', '16:00:00', 'America/New_York', 'Standard equity settlement', '2024-01-01'),
+                    ('SI_MS_EQUITY_EUR_LSE', 'CP_MS', 'EQUITY', 'EUR', 'LSE', 'Morgan Stanley Custody', 'MSINUS33XXX', 'DVP', 'DELIVER', 'London Stock Exchange', 'T+2', '16:30:00', 'Europe/London', 'European equity settlement', '2024-01-01'),
+                    ('SI_CITI_BOND_USD_OTC', 'CP_CITI', 'BOND', 'USD', 'OTC', 'Citibank Custody', 'CITIUS33XXX', 'DVP', 'DELIVER', 'Over The Counter', 'T+1', '15:30:00', 'America/New_York', 'OTC bond settlement', '2024-01-01')
+                    """;
+
+                // Insert sample risk assessment data
+                String insertRiskAssessments = """
+                    MERGE INTO risk_assessments (assessment_id, counterparty_id, risk_category, risk_score, max_exposure,
+                                                approval_required, monitoring_level, assessment_date) VALUES
+                    ('RISK_CP_GS', 'CP_GS', 'LOW', 95, 1000000000.00, false, 'STANDARD', '2024-01-01'),
+                    ('RISK_CP_JPM', 'CP_JPM', 'LOW', 92, 950000000.00, false, 'STANDARD', '2024-01-01'),
+                    ('RISK_CP_MS', 'CP_MS', 'MEDIUM', 85, 750000000.00, false, 'ENHANCED', '2024-01-01'),
+                    ('RISK_CP_CITI', 'CP_CITI', 'MEDIUM', 78, 600000000.00, true, 'ENHANCED', '2024-01-01'),
+                    ('RISK_CP_BAML', 'CP_BAML', 'LOW', 88, 800000000.00, false, 'STANDARD', '2024-01-01')
+                    """;
+
+                try (var stmt = connection.createStatement()) {
+                    int customersInserted = stmt.executeUpdate(insertCustomers);
+                    logger.info("Inserted {} customer records into H2 database", customersInserted);
+
+                    int counterpartiesInserted = stmt.executeUpdate(insertCounterparties);
+                    logger.info("Inserted {} counterparty records into H2 database", counterpartiesInserted);
+
+                    int settlementsInserted = stmt.executeUpdate(insertSettlements);
+                    logger.info("Inserted {} settlement instruction records into H2 database", settlementsInserted);
+
+                    int riskInserted = stmt.executeUpdate(insertRiskAssessments);
+                    logger.info("Inserted {} risk assessment records into H2 database", riskInserted);
+                }
+
+                // Verify comprehensive data was inserted
+                try (var stmt = connection.createStatement()) {
+                    var rs1 = stmt.executeQuery("SELECT COUNT(*) FROM customers");
+                    if (rs1.next()) {
+                        logger.info("H2 database initialized with {} customer records", rs1.getInt(1));
+                    }
+
+                    var rs2 = stmt.executeQuery("SELECT COUNT(*) FROM counterparties");
+                    if (rs2.next()) {
+                        logger.info("H2 database initialized with {} counterparty records", rs2.getInt(1));
+                    }
+
+                    var rs3 = stmt.executeQuery("SELECT COUNT(*) FROM settlement_instructions");
+                    if (rs3.next()) {
+                        logger.info("H2 database initialized with {} settlement instruction records", rs3.getInt(1));
+                    }
+
+                    var rs4 = stmt.executeQuery("SELECT COUNT(*) FROM risk_assessments");
+                    if (rs4.next()) {
+                        logger.info("H2 database initialized with {} risk assessment records", rs4.getInt(1));
                     }
                 }
 

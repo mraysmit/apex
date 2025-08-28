@@ -1,5 +1,22 @@
 package dev.mars.apex.demo.runners;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 import dev.mars.apex.demo.examples.QuickStartDemo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,36 +26,10 @@ import java.util.Scanner;
 
 /**
  * QuickStartRunner provides a 5-10 minute introduction to the APEX Rules Engine.
- * 
- * This runner demonstrates the most essential concepts needed to get started:
- * - Basic validation rules
- * - Simple enrichment patterns
- * - YAML configuration basics
- * - Core API usage
- * 
- * LEARNING OBJECTIVES:
- * After completing this quickstart, users will understand:
- * 1. How to write basic validation rules using SpEL expressions
- * 2. How to configure simple enrichments for data lookup
- * 3. How to load and use YAML configurations
- * 4. Basic patterns for rule execution and result handling
- * 
- * DEMO CONTENT:
- * - Customer validation example (age, email, phone format)
- * - Currency enrichment lookup
- * - Basic error handling and result processing
- * - Introduction to the organized demo structure
- * 
- * TIME ESTIMATE: 5-10 minutes
- * 
- * NEXT STEPS:
- * After completing this quickstart, proceed to:
- * - FundamentalsRunner for deeper concept exploration
- * - PatternsRunner for implementation patterns
- * 
- * @author apex-demo team
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-08-28
  * @version 1.0
- * @since 2025-08-24
  */
 public class QuickStartRunner {
     

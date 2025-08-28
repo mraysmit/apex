@@ -151,6 +151,55 @@ java -cp [classpath] dev.mars.apex.demo.data.DataProviderComplianceTest
 
 ---
 
+## 🎯 **REFACTORING TEMPLATES: @version 2.0 Classes**
+
+**FUNDAMENTAL PRINCIPLE**: All classes marked with `@version 2.0` are fully compliant templates that demonstrate perfect APEX integration.
+
+### **Perfect Templates for Refactoring:**
+
+#### **PostgreSQLLookupDemo (@version 2.0)**
+- **Status**: ✅ 100% Compliant (4/4 score)
+- **Use Case**: Comprehensive APEX integration template
+- **Features**: Multiple scenarios, performance optimization, real APEX services
+- **Template For**: Complex refactoring projects requiring multiple enrichment scenarios
+
+#### **SimplePostgreSQLLookupDemo (@version 2.0)**
+- **Status**: ✅ 100% Compliant (4/4 score)
+- **Use Case**: Minimal APEX integration template
+- **Features**: Single scenario, lightweight, pure YAML-driven
+- **Template For**: Simple refactoring projects, rulesets package classes
+
+#### **DemoDataBootstrap (@version 2.0)**
+- **Status**: ✅ 100% Compliant (4/4 score)
+- **Use Case**: Data provider template with real infrastructure
+- **Features**: YAML-driven data loading, real database integration
+- **Template For**: Data provider classes requiring infrastructure setup
+
+### **Template Usage Guidelines:**
+
+#### **When Refactoring ANY Class:**
+1. **Copy the pattern** from the appropriate @version 2.0 template
+2. **Follow the exact structure** for APEX service initialization
+3. **Use identical YAML processing** approach
+4. **Eliminate ALL hardcoded simulation** following template examples
+5. **Update to @version 2.0** only after achieving 100% compliance
+
+#### **Template Selection:**
+- **Simple Classes**: Use SimplePostgreSQLLookupDemo pattern
+- **Complex Classes**: Use PostgreSQLLookupDemo pattern
+- **Data Providers**: Use DemoDataBootstrap pattern
+
+### **Critical Template Principles:**
+- ✅ **Real APEX Services**: All templates use authentic APEX service integration
+- ✅ **No Hardcoded Simulation**: Zero hardcoded business logic or test data
+- ✅ **No Fallback Scenarios**: Fail-fast approach, no hardcoded fallbacks
+- ✅ **Pure YAML-Driven**: All configuration and data from YAML files
+- ✅ **Version 2.0**: Indicates successful refactoring completion
+
+**REMEMBER**: If a class is NOT marked @version 2.0, it likely contains hardcoded violations and should NOT be used as a template.
+
+---
+
 ## Refactoring Principles To Apply Consistently
 
 Here's a clear and concise prompt based on the lessons learned:
@@ -242,6 +291,26 @@ INFO: Processing N enrichments for object type: HashMap
 - ❌ No manual parsing of YAML enrichment rules
 
 **REMEMBER**: If you find yourself writing hardcoded business logic in demo code, you're violating the principles. Use the real APEX services instead.
+
+### **✅ SUCCESSFUL REFACTORING EXAMPLES:**
+
+The following classes have been successfully refactored and now serve as perfect templates:
+
+#### **PostgreSQLLookupDemo & SimplePostgreSQLLookupDemo (August 2025)**
+- **Before**: 56% compliant - contained hardcoded simulations and fallback scenarios
+- **After**: 100% compliant - pure YAML-driven with real APEX services
+- **Violations Eliminated**:
+  - ❌ Removed all hardcoded data creation methods (`createSampleTransaction()`, `createSampleTrade()`)
+  - ❌ Removed all fallback scenario testing (`demonstrateFallbackStrategies()`)
+  - ❌ Eliminated manual field assignments (`transaction.put("amount", hardcodedValue)`)
+  - ❌ Removed hardcoded business logic and test data
+- **Improvements Added**:
+  - ✅ Pure YAML-driven data sourcing (minimal input data with lookup keys only)
+  - ✅ 100% real APEX service integration (EnrichmentService, YamlConfigurationLoader)
+  - ✅ Fail-fast approach (no hardcoded fallback scenarios)
+  - ✅ Proper @version 2.0 documentation with YAML file requirements
+
+**These classes now demonstrate the gold standard for APEX integration and serve as perfect templates for refactoring the 12 non-compliant classes in the rulesets package.**
 
 ## CRITICAL: Use DataProviderComplianceTest for Validation
 

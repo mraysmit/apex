@@ -1,5 +1,22 @@
 package dev.mars.apex.demo.runners;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 import dev.mars.apex.demo.examples.ComprehensiveFinancialSettlementDemo;
 import dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap;
 
@@ -8,50 +25,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * IndustryRunner demonstrates real-world industry applications of the APEX Rules Engine.
- * 
- * This runner focuses on practical, production-ready examples from specific industries,
- * showing how the APEX Rules Engine solves real business problems:
- * 
- * INDUSTRY FOCUS AREAS:
- * 1. Financial Services - Trading, settlement, custody operations
- * 2. Regulatory Compliance - AML, KYC, reporting requirements
- * 3. Risk Management - Credit risk, operational risk, market risk
- * 4. Data Quality - Validation, standardization, enrichment
- * 5. Process Automation - Workflow orchestration, exception handling
- * 
- * LEARNING OBJECTIVES:
- * After completing these industry demos, users will understand:
- * - How to implement complex business processes using rules
- * - Real-world patterns for financial services operations
- * - Regulatory compliance implementation strategies
- * - Production-ready configuration patterns
- * - Integration with external systems and data sources
- * 
- * DEMO CONTENT:
- * 
- * FINANCIAL SERVICES:
- * - TradeB Settlement Processing: Complete settlement workflow
- * - Custody Auto-Repair: Automated exception handling
- * - Risk Assessment: Multi-factor risk calculation
- * - Regulatory Reporting: Compliance data preparation
- * 
- * REAL-WORLD SCENARIOS:
- * - High-volume transaction processing
- * - Complex data validation and enrichment
- * - Multi-system integration patterns
- * - Exception handling and repair workflows
- * - Audit trail and compliance reporting
- * 
- * TIME ESTIMATE: 30-45 minutes
- * 
- * PREREQUISITES:
- * - Complete QuickStartRunner, FundamentalsRunner, and PatternsRunner
- * - Understanding of financial services concepts (helpful but not required)
- * - Familiarity with complex business processes
- * 
- * @author apex-demo team
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-08-28
  * @version 1.0
- * @since 2025-08-24
  */
 public class IndustryRunner {
     

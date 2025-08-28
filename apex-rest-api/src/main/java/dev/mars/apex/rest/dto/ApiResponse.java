@@ -1,5 +1,22 @@
 package dev.mars.apex.rest.dto;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -10,10 +27,10 @@ import java.util.Map;
 
 /**
  * Standardized API response wrapper for all APEX REST API endpoints.
- * Provides consistent response format matching the documented API specifications.
  *
- * This format aligns with the APEX_REST_API_GUIDE.md and APEX_REST_API_QUICK_REFERENCE.md
- * documentation for consistent success and error responses.
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-08-28
+ * @version 1.0
  */
 @Schema(description = "Standard API response wrapper matching documented format")
 @JsonInclude(JsonInclude.Include.NON_NULL)

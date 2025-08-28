@@ -1,5 +1,22 @@
 package dev.mars.apex.demo.runners;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 import dev.mars.apex.demo.examples.YamlDatasetDemo;
 import dev.mars.apex.demo.lookups.SimpleFieldLookupDemo;
 import dev.mars.apex.demo.lookups.NestedFieldLookupDemo;
@@ -10,49 +27,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * PatternsRunner demonstrates common implementation patterns in the APEX Rules Engine.
- * 
- * This runner focuses on practical patterns that developers use frequently:
- * - Lookup patterns for data enrichment
- * - Calculation patterns for mathematical operations
- * - Validation patterns for data quality
- * 
- * LEARNING OBJECTIVES:
- * After completing these pattern demos, users will understand:
- * 1. Different lookup strategies and when to use each
- * 2. How to implement complex data transformations
- * 3. Best practices for validation rule design
- * 4. Performance considerations for different patterns
- * 
- * DEMO CATEGORIES:
- * 
- * LOOKUP PATTERNS (Primary Focus):
- * - Simple Field Lookup: Basic key-value lookups
- * - Conditional Expression Lookup: Dynamic lookup keys
- * - Nested Field Lookup: Complex object navigation
- * - Compound Key Lookup: Multi-field lookup keys
- * - Comprehensive Lookup: Advanced lookup scenarios
- * 
- * CALCULATION PATTERNS:
- * - Mathematical calculations and transformations
- * - String manipulation and formatting
- * - Date/time operations and calculations
- * 
- * VALIDATION PATTERNS:
- * - Format validation (email, phone, etc.)
- * - Business rule validation
- * - Cross-field validation
- * - Conditional validation logic
- * 
- * TIME ESTIMATE: 20-30 minutes
- * 
- * PREREQUISITES:
- * - Complete QuickStartRunner first
- * - Basic understanding of SpEL expressions
- * - Familiarity with YAML configuration
- * 
- * @author apex-demo team
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-08-28
  * @version 1.0
- * @since 2025-08-24
  */
 public class PatternsRunner {
     

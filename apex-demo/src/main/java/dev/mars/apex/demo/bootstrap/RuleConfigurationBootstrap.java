@@ -1,5 +1,22 @@
 package dev.mars.apex.demo.bootstrap;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 import dev.mars.apex.core.api.RulesService;
 import dev.mars.apex.core.api.RuleSet;
 import dev.mars.apex.core.api.SimpleRulesEngine;
@@ -13,94 +30,11 @@ import dev.mars.apex.core.config.yaml.YamlEnrichment;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 
-// Demo infrastructure imports
-import dev.mars.apex.demo.bootstrap.infrastructure.RuleConfigDatabaseSetup;
-import dev.mars.apex.demo.bootstrap.infrastructure.RuleConfigDataSourceVerifier;
-import dev.mars.apex.demo.bootstrap.infrastructure.RuleConfigExternalDatasetSetup;
-import dev.mars.apex.demo.bootstrap.model.LoanApplication;
-import dev.mars.apex.demo.bootstrap.model.CustomerProfile;
-import dev.mars.apex.demo.bootstrap.model.OrderProcessing;
-
-import java.math.BigDecimal;
-import java.sql.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.logging.Logger;
-
 /**
  * Complete Bootstrap Demonstration of APEX Rule Configuration & Processing.
  *
- * This comprehensive bootstrap demonstrates the APEX Rules Engine's capability to
- * process business rules using external YAML configurations and multiple data sources,
- * replacing hardcoded rule definitions with data-driven configurations.
- *
- * ============================================================================
- * BOOTSTRAP DEMO OVERVIEW
- * ============================================================================
- *
- * This demo processes three types of business scenarios through complete rule
- * configuration and processing pipelines using APEX's data-driven approach:
- *
- * 1. LOAN APPROVAL RULES - Automated loan decision processing with credit scoring
- * 2. ORDER DISCOUNT RULES - Dynamic discount calculation based on customer profiles
- * 3. COMBINED RULE PATTERNS - Complex rule combinations using AND/OR operators
- * 4. COMPREHENSIVE DATA INTEGRATION - PostgreSQL database + External YAML files
- *
- * ============================================================================
- * FILES AND CONFIGURATIONS USED
- * ============================================================================
- *
- * DATABASE SCHEMA (PostgreSQL):
- * ├── loan_applications - Loan application data with credit scores and ratios
- * │   └── Fields: application_id, customer_id, loan_amount, credit_score, etc.
- * ├── customer_profiles - Customer information and membership details
- * │   └── Fields: customer_id, membership_level, customer_since, total_spent, etc.
- * ├── order_processing - Order data for discount rule processing
- * │   └── Fields: order_id, customer_id, order_total, quantity, status, etc.
- * └── rule_execution_audit - Audit trail of rule executions and results
- *     └── Fields: entity_type, entity_id, rule_category, rule_result, etc.
- *
- * YAML RULE CONFIGURATIONS:
- * ├── bootstrap/rule-configuration-bootstrap.yaml - Main configuration file
- * ├── bootstrap/datasets/loan-approval-rules.yaml - Loan approval business rules
- * ├── bootstrap/datasets/discount-rules.yaml - Order discount calculation rules
- * └── bootstrap/datasets/combined-rules.yaml - Complex rule combination patterns
- *
- * JAVA MODEL CLASSES:
- * ├── model/LoanApplication.java - Loan application data model with enrichment
- * ├── model/CustomerProfile.java - Customer profile with loyalty information
- * └── model/OrderProcessing.java - Order processing with discount calculations
- *
- * INFRASTRUCTURE COMPONENTS:
- * ├── infrastructure/RuleConfigDatabaseSetup.java - PostgreSQL database setup
- * ├── infrastructure/RuleConfigDataSourceVerifier.java - Data source verification
- * └── infrastructure/RuleConfigExternalDatasetSetup.java - YAML file generation
- *
- * ============================================================================
- * DEMONSTRATION SCENARIOS
- * ============================================================================
- *
- * SCENARIO 1: Loan Approval Processing
- * - Loads loan applications from PostgreSQL database
- * - Applies credit scoring rules from external YAML configuration
- * - Demonstrates automated approval/rejection/referral decisions
- * - Shows rule priority handling and decision reasoning
- *
- * SCENARIO 2: Order Discount Calculation
- * - Processes customer orders with profile enrichment
- * - Applies discount rules based on membership level and loyalty
- * - Demonstrates percentage-based discount calculations
- * - Shows customer segmentation and special offers
- *
- * SCENARIO 3: Combined Rule Processing
- * - Demonstrates complex rule combinations using AND/OR operators
- * - Shows rule chaining and conditional processing
- * - Illustrates advanced rule pattern matching
- * - Demonstrates rule group processing and prioritization
- *
- * @author APEX Bootstrap Demo Generator
- * @since 2025-08-27
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-08-28
  * @version 1.0
  */
 public class RuleConfigurationBootstrap {

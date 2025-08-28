@@ -1,5 +1,22 @@
 package dev.mars.apex.demo.bootstrap;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 
 // APEX Core imports for real data source integration
 import dev.mars.apex.core.service.data.external.config.DataSourceConfigurationService;
@@ -7,151 +24,12 @@ import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 
-// Demo infrastructure imports
-import dev.mars.apex.demo.bootstrap.infrastructure.DatabaseSetup;
-import dev.mars.apex.demo.bootstrap.infrastructure.DataSourceVerifier;
-import dev.mars.apex.demo.bootstrap.infrastructure.ExternalDatasetSetup;
-import dev.mars.apex.demo.bootstrap.infrastructure.XmlDataGenerator;
-import dev.mars.apex.demo.bootstrap.model.OtcOption;
-import dev.mars.apex.demo.bootstrap.model.UnderlyingAsset;
-
-// Standard imports
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 /**
  * OTC Options Bootstrap Demo - Comprehensive demonstration of three data lookup methods.
  *
- * This bootstrap demo showcases the APEX Rules Engine's capability to integrate
- * with multiple data sources for validation and enrichment of Over-the-Counter
- * Options data, demonstrating real-world financial derivatives processing.
- *
- * ============================================================================
- * BOOTSTRAP DEMO OVERVIEW
- * ============================================================================
- *
- * This demo processes OTC Options through a complete validation and enrichment
- * pipeline using three different data lookup methods:
- *
- * 1. INLINE YAML DATASET - Commodity reference data embedded in configuration
- * 2. POSTGRESQL DATABASE - Counterparty information from relational database
- * 3. EXTERNAL YAML FILE - Market and currency data from external file
- *
- * ============================================================================
- * FILES AND CONFIGURATIONS USED
- * ============================================================================
- *
- * MAIN CONFIGURATION FILES:
- * ├── src/main/resources/bootstrap/otc-options-bootstrap.yaml
- * │   └── Complete YAML configuration with validation rules and enrichment patterns
- * │   └── Defines inline commodity dataset with 6 commodities
- * │   └── Configures PostgreSQL database lookup for counterparty data
- * │   └── Sets up external YAML file lookup for market data
- *
- * GENERATED DATA FILES (created during demo execution):
- * ├── src/main/resources/bootstrap/datasets/
- * │   ├── market-data.yaml (External YAML dataset)
- * │   │   └── Currency reference data (USD, EUR, GBP, JPY)
- * │   │   └── Market exchange information (NYMEX, ICE, COMEX, CBOT)
- * │   ├── sample-otc-options.xml (Combined XML data)
- * │   │   └── 6 sample OTC Options covering major commodity classes
- * │   ├── otc-option-1.xml (Natural Gas Call Option)
- * │   ├── otc-option-2.xml (Brent Crude Oil Put Option)
- * │   ├── otc-option-3.xml (Gold Call Option)
- * │   ├── otc-option-4.xml (Silver Put Option)
- * │   ├── otc-option-5.xml (Copper Call Option)
- * │   └── otc-option-6.xml (Wheat Put Option)
- *
- * DATABASE SCHEMA (simulated PostgreSQL):
- * ├── src/main/resources/bootstrap/sql/counterparty-setup.sql
- * │   └── CREATE TABLE counterparty_reference
- * │   └── Sample data for 20 major financial institutions
- * │   └── Includes legal names, credit ratings, LEI codes, jurisdictions
- *
- * JAVA MODEL CLASSES:
- * ├── model/OtcOption.java - Main OTC Option data model with enrichment fields
- * ├── model/UnderlyingAsset.java - Commodity and unit information
- * └── model/CounterpartyInfo.java - Counterparty enrichment data structure
- *
- * INFRASTRUCTURE COMPONENTS:
- * ├── infrastructure/DatabaseSetup.java - PostgreSQL table simulation
- * ├── infrastructure/DataSourceVerifier.java - Verification utilities
- * ├── infrastructure/ExternalDatasetSetup.java - External YAML file creation
- * └── infrastructure/XmlDataGenerator.java - Sample XML data generation
- *
- * ============================================================================
- * EXECUTION FLOW
- * ============================================================================
- *
- * Phase 1: Infrastructure Setup
- * - Creates PostgreSQL counterparty reference table (simulated)
- * - Generates external market data YAML file
- * - Creates sample OTC Options XML data files
- *
- * Phase 2: Data Source Verification
- * - Verifies inline YAML dataset configuration
- * - Tests PostgreSQL database connectivity (simulated)
- * - Validates external YAML file accessibility
- *
- * Phase 3: Sample Data Generation
- * - Verifies XML data file generation
- * - Confirms data structure and accessibility
- *
- * Phase 4: YAML Configuration Loading
- * - Loads bootstrap configuration from classpath
- * - Validates configuration structure
- *
- * Phase 5: OTC Options Processing
- * - Processes sample options through validation pipeline
- * - Applies enrichment from all three data sources
- * - Demonstrates business rule execution
- *
- * Phase 6: Results Demonstration
- * - Shows original vs enriched data comparison
- * - Displays data from all three lookup methods
- * - Demonstrates calculated fields and business logic
- *
- * ============================================================================
- * SAMPLE DATA COVERAGE
- * ============================================================================
- *
- * COMMODITIES (Inline Dataset):
- * - Natural Gas (Energy - NYMEX)
- * - Brent Crude Oil (Energy - ICE)
- * - Gold (Precious Metals - COMEX)
- * - Silver (Precious Metals - COMEX)
- * - Copper (Base Metals - COMEX)
- * - Wheat (Agriculture - CBOT)
- *
- * COUNTERPARTIES (PostgreSQL Database):
- * - Goldman Sachs, JPMorgan, Morgan Stanley, Citi
- * - Barclays, Deutsche Bank, UBS, Credit Suisse
- * - Major global financial institutions with realistic data
- *
- * CURRENCIES (External YAML File):
- * - USD, EUR, GBP, JPY with full market data
- * - Trading hours, timezones, holidays
- * - Exchange information and regional data
- *
- * ============================================================================
- * USAGE EXAMPLES
- * ============================================================================
- *
- * Standalone Execution:
- * java -cp apex-demo.jar dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo
- *
- * Through AllDemosRunnerAlt:
- * java -jar apex-demo.jar --package bootstrap
- * java -jar apex-demo.jar --demo OtcOptionsBootstrapDemo
- *
- * ============================================================================
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-08-28
+ * @version 1.0
  */
 @Component
 public class OtcOptionsBootstrapDemo {

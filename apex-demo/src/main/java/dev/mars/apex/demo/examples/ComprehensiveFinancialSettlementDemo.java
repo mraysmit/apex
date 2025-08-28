@@ -1,5 +1,22 @@
 package dev.mars.apex.demo.examples;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.api.ValidationResult;
@@ -20,25 +37,10 @@ import java.util.Map;
 
 /**
  * Comprehensive Financial Settlement Enrichment Demo
- * 
- * This demo showcases comprehensive post-trade settlement enrichment using the APEX Rules Engine
- * with real-world financial examples from the "Types of Enrichment Relevant for Financial 
- * Services Post-TradeB Settlement" guide.
- * 
- * ENRICHMENT CATEGORIES DEMONSTRATED:
- * - Reference Data Enrichment (LEI, ISIN, MIC, BIC, SSI)
- * - Counterparty Enrichment (Credit ratings, classifications, relationships)
- * - Regulatory Enrichment (UTI generation, MiFID II, EMIR, Dodd-Frank)
- * - Risk Enrichment (VaR, exposure, margin, stress testing)
- * - Settlement Enrichment (Dates, methods, priorities)
- * - Fee Calculation Enrichment (Commissions, taxes, regulatory fees)
- * 
- * INDUSTRY STANDARDS COVERED:
- * - ISO 20022: Financial messaging standards
- * - FpML: Financial Products Markup Language
- * - EMIR/MiFID II: European regulatory requirements
- * - Dodd-Frank: US derivatives regulation
- * - ISDA: Risk and legal documentation standards
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-08-28
+ * @version 1.0
  */
 public class ComprehensiveFinancialSettlementDemo {
 
