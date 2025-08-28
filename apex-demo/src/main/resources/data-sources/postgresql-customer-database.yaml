@@ -3,7 +3,9 @@ kind: "DataSource"
 metadata:
   name: "postgresql-customer-database"
   version: "1.0.0"
+  type: "external-data-config"
   description: "PostgreSQL customer database configuration for external reference testing"
+  author: "APEX Demo Team"
 
 spec:
   type: "database"

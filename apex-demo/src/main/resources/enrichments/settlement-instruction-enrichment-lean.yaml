@@ -6,7 +6,7 @@ metadata:
   name: "Settlement Instruction Enrichment - Lean Version"
   description: "Multi-table settlement enrichment using external data-source references"
   version: "2.1.0"
-  type: "enrichment-config"
+  type: "rule-config"
   author: "APEX Demo Team"
 
 # Reference to external data-source configurations

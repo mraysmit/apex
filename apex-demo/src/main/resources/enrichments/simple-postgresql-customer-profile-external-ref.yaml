@@ -1,6 +1,7 @@
 metadata:
   name: "Simple PostgreSQL Customer Profile Enrichment - External Reference"
   version: "2.1.0"
+  type: "rule-config"
   description: "Simple customer profile enrichment using external PostgreSQL data-source reference system"
   author: "Mark A Ray-Smith"
   created: "2025-08-28"
@@ -10,7 +11,7 @@ metadata:
     - "postgresql"
     - "external-reference"
     - "simple"
-    - "clean-architecture:-)"
+    - "clean-architecture"
 
 # External data-source references (infrastructure configuration - reusable)
 # This section references external infrastructure configurations that can be shared

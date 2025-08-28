@@ -1,6 +1,7 @@
 metadata:
   name: "Simple PostgreSQL Database Enrichment Demo"
   version: "1.0.0"
+  type: "rule-config"
   description: "Simple customer profile enrichment using H2 database (PostgreSQL mode) with real SQL queries"
   author: "APEX Demo Team"
   created: "2025-08-28"

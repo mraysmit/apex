@@ -1,6 +1,7 @@
 metadata:
   name: "PostgreSQL Customer Profile Enrichment - External Reference"
   version: "2.1.0"
+  type: "rule-config"
   description: "Customer profile enrichment using external PostgreSQL data-source reference"
   author: "APEX Demo Team"
   created: "2025-08-28"

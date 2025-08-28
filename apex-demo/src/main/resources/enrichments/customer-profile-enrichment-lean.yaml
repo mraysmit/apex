@@ -6,7 +6,7 @@ metadata:
   name: "Customer Profile Enrichment - Lean Version"
   description: "Demonstrates external data-source references for clean separation of concerns"
   version: "2.1.0"
-  type: "enrichment-config"
+  type: "rule-config"
   author: "APEX Demo Team"
 
 # Reference to external data-source configurations

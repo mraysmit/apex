@@ -589,6 +589,284 @@ public class DataSourceConfiguration {
 - Parameter validation and type checking
 - SQL injection protection through prepared statements
 
+#### Enterprise Architecture Patterns
+
+**1. Multi-Environment Configuration Pattern**
+
+The external data-source reference system supports sophisticated multi-environment deployments:
+
+```java
+@Configuration
+@Profile("production")
+public class ProductionDataSourceConfiguration {
+
+    @Bean
+    @Primary
+    public DataSourceResolver productionDataSourceResolver() {
+        return DataSourceResolver.builder()
+            .configurationBasePath("data-sources/prod/")
+            .cacheEnabled(true)
+            .cacheTtl(Duration.ofHours(1))
+            .healthCheckEnabled(true)
+            .monitoringEnabled(true)
+            .build();
+    }
+}
+
+@Configuration
+@Profile("development")
+public class DevelopmentDataSourceConfiguration {
+
+    @Bean
+    @Primary
+    public DataSourceResolver developmentDataSourceResolver() {
+        return DataSourceResolver.builder()
+            .configurationBasePath("data-sources/dev/")
+            .cacheEnabled(false)  // Disable caching for development
+            .healthCheckEnabled(false)
+            .monitoringEnabled(false)
+            .build();
+    }
+}
+```
+
+**2. Shared Infrastructure Pattern**
+
+External data-source configurations can be shared across multiple business logic configurations:
+
+```yaml
+# File: enrichments/customer-onboarding.yaml
+metadata:
+  name: "Customer Onboarding Rules"
+  version: "2.1.0"
+
+data-source-refs:
+  - name: "customer-database"
+    source: "data-sources/shared/customer-database.yaml"  # Shared infrastructure
+  - name: "compliance-service"
+    source: "data-sources/shared/compliance-service.yaml" # Shared infrastructure
+
+enrichments:
+  - id: "customer-validation"
+    lookup-config:
+      lookup-dataset:
+        data-source-ref: "customer-database"  # Uses shared infrastructure
+        query-ref: "validateCustomer"
+```
+
+```yaml
+# File: enrichments/customer-maintenance.yaml
+metadata:
+  name: "Customer Maintenance Rules"
+  version: "2.1.0"
+
+data-source-refs:
+  - name: "customer-database"
+    source: "data-sources/shared/customer-database.yaml"  # Same shared infrastructure
+  - name: "audit-service"
+    source: "data-sources/shared/audit-service.yaml"      # Different shared infrastructure
+
+enrichments:
+  - id: "customer-update"
+    lookup-config:
+      lookup-dataset:
+        data-source-ref: "customer-database"  # Uses same shared infrastructure
+        query-ref: "updateCustomer"
+```
+
+**3. Configuration Inheritance Pattern**
+
+External configurations support inheritance for common settings:
+
+```java
+@Component
+public class ConfigurationInheritanceProcessor {
+
+    /**
+     * Process configuration inheritance chain
+     */
+    public DataSourceConfiguration processInheritance(DataSourceConfiguration config) {
+        if (config.getInheritsFrom() != null) {
+            // Load parent configuration
+            DataSourceConfiguration parent = loadConfiguration(config.getInheritsFrom());
+
+            // Merge configurations (child overrides parent)
+            return mergeConfigurations(parent, config);
+        }
+
+        return config;
+    }
+
+    private DataSourceConfiguration mergeConfigurations(
+            DataSourceConfiguration parent,
+            DataSourceConfiguration child) {
+
+        return DataSourceConfiguration.builder()
+            .metadata(child.getMetadata() != null ? child.getMetadata() : parent.getMetadata())
+            .connection(mergeConnectionConfig(parent.getConnection(), child.getConnection()))
+            .queries(mergeQueries(parent.getQueries(), child.getQueries()))
+            .healthCheck(child.getHealthCheck() != null ? child.getHealthCheck() : parent.getHealthCheck())
+            .monitoring(child.getMonitoring() != null ? child.getMonitoring() : parent.getMonitoring())
+            .build();
+    }
+}
+```
+
+**4. Dynamic Configuration Reloading**
+
+The system supports dynamic reloading of external configurations without application restart:
+
+```java
+@Component
+public class DynamicConfigurationReloader {
+
+    private final DataSourceResolver dataSourceResolver;
+    private final ConfigurationCache configurationCache;
+    private final FileWatcher fileWatcher;
+
+    @PostConstruct
+    public void initializeFileWatching() {
+        // Watch external configuration directory
+        fileWatcher.watchDirectory("data-sources/", this::handleConfigurationChange);
+    }
+
+    /**
+     * Handle configuration file changes
+     */
+    public void handleConfigurationChange(FileChangeEvent event) {
+        String configPath = event.getFilePath();
+
+        switch (event.getType()) {
+            case MODIFIED:
+                reloadConfiguration(configPath);
+                break;
+            case DELETED:
+                invalidateConfiguration(configPath);
+                break;
+            case CREATED:
+                validateAndLoadConfiguration(configPath);
+                break;
+        }
+    }
+
+    private void reloadConfiguration(String configPath) {
+        try {
+            // Invalidate cache entry
+            configurationCache.invalidate(configPath);
+
+            // Preload new configuration
+            DataSourceConfiguration newConfig = yamlLoader.loadFromClasspath(configPath);
+            configurationCache.put(configPath, newConfig);
+
+            // Notify listeners
+            publishConfigurationReloadEvent(configPath, newConfig);
+
+        } catch (Exception e) {
+            logger.error("Failed to reload configuration: {}", configPath, e);
+        }
+    }
+}
+```
+
+#### Monitoring and Observability
+
+**1. Configuration Metrics**
+
+The system provides comprehensive metrics for monitoring external data-source references:
+
+```java
+@Component
+public class DataSourceMetricsCollector {
+
+    private final MeterRegistry meterRegistry;
+
+    /**
+     * Collect configuration resolution metrics
+     */
+    public void recordConfigurationResolution(String reference, Duration resolutionTime, boolean fromCache) {
+        Timer.Sample sample = Timer.start(meterRegistry);
+        sample.stop(Timer.builder("datasource.config.resolution.time")
+            .tag("reference", reference)
+            .tag("from_cache", String.valueOf(fromCache))
+            .register(meterRegistry));
+
+        Counter.builder("datasource.config.resolution.count")
+            .tag("reference", reference)
+            .tag("from_cache", String.valueOf(fromCache))
+            .register(meterRegistry)
+            .increment();
+    }
+
+    /**
+     * Collect cache performance metrics
+     */
+    public void recordCacheMetrics(CacheStatistics stats) {
+        Gauge.builder("datasource.config.cache.hit_ratio")
+            .register(meterRegistry, stats, CacheStatistics::getHitRatio);
+
+        Gauge.builder("datasource.config.cache.size")
+            .register(meterRegistry, stats, CacheStatistics::getTotalEntries);
+
+        Gauge.builder("datasource.config.cache.memory_usage")
+            .register(meterRegistry, stats, CacheStatistics::getMemoryUsage);
+    }
+}
+```
+
+**2. Health Check Integration**
+
+External data-source references integrate with Spring Boot Actuator for health monitoring:
+
+```java
+@Component
+public class ExternalDataSourceHealthIndicator implements HealthIndicator {
+
+    private final DataSourceResolver dataSourceResolver;
+
+    @Override
+    public Health health() {
+        Health.Builder builder = Health.up();
+
+        try {
+            // Check all registered external data-source references
+            List<DataSourceReference> references = dataSourceResolver.getAllReferences();
+
+            for (DataSourceReference reference : references) {
+                HealthStatus status = checkReferenceHealth(reference);
+                builder.withDetail(reference.getName(), status);
+
+                if (status.getStatus() == Status.DOWN) {
+                    builder.down();
+                }
+            }
+
+        } catch (Exception e) {
+            builder.down().withException(e);
+        }
+
+        return builder.build();
+    }
+
+    private HealthStatus checkReferenceHealth(DataSourceReference reference) {
+        try {
+            // Validate reference can be resolved
+            ValidationResult validation = dataSourceResolver.validateReference(reference);
+
+            if (validation.isValid()) {
+                // Check underlying data source health
+                DataSource dataSource = dataSourceResolver.resolveDataSourceReference(reference);
+                return dataSource.checkHealth();
+            } else {
+                return HealthStatus.down("Validation failed: " + validation.getErrorMessage());
+            }
+
+        } catch (Exception e) {
+            return HealthStatus.down("Health check failed: " + e.getMessage());
+        }
+    }
+}
+```
+
 ### Supported Data Source Types
 
 APEX supports five main types of data sources, each designed for different use cases. You can mix and match these types based on your needs:

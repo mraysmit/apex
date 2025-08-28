@@ -3,7 +3,9 @@ kind: "DataSource"
 metadata:
   name: "settlement-database"
   version: "1.0.0"
+  type: "external-data-config"
   description: "Settlement database configuration for multi-table lookups"
+  author: "APEX Demo Team"
   environment: "development"
   labels:
     team: "apex-demo"

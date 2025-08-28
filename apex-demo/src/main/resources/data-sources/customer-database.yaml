@@ -3,7 +3,9 @@ kind: "DataSource"
 metadata:
   name: "customer-database"
   version: "1.0.0"
+  type: "external-data-config"
   description: "Customer database configuration for H2 in PostgreSQL compatibility mode"
+  author: "APEX Demo Team"
   environment: "development"
   labels:
     team: "apex-demo"
