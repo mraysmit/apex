@@ -1,4 +1,4 @@
-package dev.mars.apex.demo.examples;
+package dev.mars.apex.demo.lookup;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
@@ -147,8 +147,8 @@ public class ExternalDataSourceReferenceDemo {
             logger.info("  Customer ID: " + inputData.get("customerId"));
             
             // Load lean enrichment configuration with external data-source reference
-            logger.info("Loading lean enrichment configuration: enrichments/customer-profile-enrichment-lean.yaml");
-            YamlRuleConfiguration config = configLoader.loadFromClasspath("enrichments/customer-profile-enrichment-lean.yaml");
+            logger.info("Loading lean enrichment configuration: lookup/enrichments/customer-profile-enrichment-lean.yaml");
+            YamlRuleConfiguration config = configLoader.loadFromClasspath("lookup/enrichments/customer-profile-enrichment-lean.yaml");
             
             logger.info("Configuration loaded successfully:");
             logger.info("  Configuration: " + config.getMetadata().getName() + " (version " + config.getMetadata().getVersion() + ")");
@@ -193,8 +193,8 @@ public class ExternalDataSourceReferenceDemo {
             logger.info("  Counterparty ID: " + inputData.get("counterpartyId"));
             
             // Load lean enrichment configuration with external data-source reference
-            logger.info("Loading lean enrichment configuration: enrichments/settlement-instruction-enrichment-lean.yaml");
-            YamlRuleConfiguration config = configLoader.loadFromClasspath("enrichments/settlement-instruction-enrichment-lean.yaml");
+            logger.info("Loading lean enrichment configuration: lookup/enrichments/settlement-instruction-enrichment-lean.yaml");
+            YamlRuleConfiguration config = configLoader.loadFromClasspath("lookup/enrichments/settlement-instruction-enrichment-lean.yaml");
             
             logger.info("Configuration loaded successfully:");
             logger.info("  Configuration: " + config.getMetadata().getName() + " (version " + config.getMetadata().getVersion() + ")");

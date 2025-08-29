@@ -18,9 +18,9 @@ package dev.mars.apex.demo.runners;
 
 
 import dev.mars.apex.demo.examples.YamlDatasetDemo;
-import dev.mars.apex.demo.lookups.SimpleFieldLookupDemo;
-import dev.mars.apex.demo.lookups.NestedFieldLookupDemo;
-import dev.mars.apex.demo.lookups.CompoundKeyLookupDemo;
+import dev.mars.apex.demo.lookup.SimpleFieldLookupDemo;
+import dev.mars.apex.demo.lookup.NestedFieldLookupDemo;
+import dev.mars.apex.demo.lookup.CompoundKeyLookupDemo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
