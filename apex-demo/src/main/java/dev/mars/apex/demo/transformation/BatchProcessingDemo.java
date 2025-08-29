@@ -1,4 +1,4 @@
-package dev.mars.apex.demo.examples;
+package dev.mars.apex.demo.transformation;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
@@ -48,8 +48,8 @@ import java.util.*;
  * NO HARDCODED OBJECTS: No manual data generation, BigDecimal values, or hardcoded batch scenarios.
  *
  * YAML FILES REQUIRED:
- * - batch-processing-demo-config.yaml: Batch processing configurations and rule definitions
- * - batch-processing-demo-data.yaml: Test data scenarios for demonstration
+ * - transformation/batch-processing-demo-config.yaml: Batch processing configurations and rule definitions
+ * - transformation/batch-processing-demo-data.yaml: Test data scenarios for demonstration
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-08-29
@@ -131,10 +131,10 @@ public class BatchProcessingDemo {
      */
     private YamlRuleConfiguration loadConfiguration() {
         try {
-            logger.info("Loading YAML configuration from batch-processing-demo-config.yaml");
-            
+            logger.info("Loading YAML configuration from transformation/batch-processing-demo-config.yaml");
+
             // Load configuration using real APEX YamlConfigurationLoader
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("batch-processing-demo-config.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("transformation/batch-processing-demo-config.yaml");
             
             if (config == null) {
                 throw new IllegalStateException("Failed to load YAML configuration - file not found or invalid");
