@@ -3,8 +3,13 @@
 # Business users can modify this data to test different scenarios
 
 metadata:
+  name: "Financial Services Demo - Trades Dataset"
   version: "1.0"
-  description: "Sample trade data for Financial demonstrations"
+  description: "Sample trade data for Financial services demonstrations (FinancialDemo.java)"
+  type: "dataset"
+  source: "generated"
+  associated-demo: "FinancialDemo"
+  file-purpose: "Provides realistic trade data for financial processing and validation demos"
   lastUpdated: "2025-07-28"
   author: "APEX Demo Team"
 

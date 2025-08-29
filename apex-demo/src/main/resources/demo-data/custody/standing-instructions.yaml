@@ -3,8 +3,13 @@
 # Business users can modify this data to customize repair behavior
 
 metadata:
+  name: "Custody Auto-Repair Demo - Standing Instructions Dataset"
   version: "1.0"
-  description: "Standing instruction data for Custody auto-repair demonstrations"
+  description: "Standing instruction data for Custody auto-repair demonstrations (CustodyAutoRepairBootstrap.java)"
+  type: "dataset"
+  source: "generated"
+  associated-demo: "CustodyAutoRepairBootstrap"
+  file-purpose: "Provides standing instruction templates for auto-repair functionality"
   lastUpdated: "2025-07-28"
   author: "APEX Demo Team"
 

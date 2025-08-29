@@ -1,8 +1,12 @@
 # Test configuration based on working example - UPDATED VERSION 2025-08-27 15:40
 metadata:
-  name: "OTC Options Data Sources"
+  name: "OTC Options Bootstrap Demo - Data Sources Configuration"
   version: "1.0.0"
-  description: "Data source configuration for OTC Options Bootstrap Demo"
+  description: "External data source configuration for OTC Options Bootstrap Demo (OtcOptionsBootstrapDemo.java)"
+  type: "external-data-config"
+  author: "APEX Demo Team"
+  associated-demo: "OtcOptionsBootstrapDemo"
+  file-purpose: "Configures external data sources for commodities, counterparties, and market data lookups"
 
 data-sources:
   - name: "commodities-source"

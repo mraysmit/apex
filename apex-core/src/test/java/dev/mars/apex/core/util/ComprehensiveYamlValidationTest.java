@@ -133,6 +133,12 @@ class ComprehensiveYamlValidationTest {
                      String fileName = path.toString().toLowerCase();
                      return fileName.endsWith(".yaml") || fileName.endsWith(".yml");
                  })
+                 .filter(path -> {
+                     // Exclude Docker Compose files and other non-APEX YAML files
+                     String fileName = path.getFileName().toString().toLowerCase();
+                     return !fileName.equals("docker-compose.yml") &&
+                            !fileName.equals("docker-compose.yaml");
+                 })
                  .forEach(path -> {
                      String relativePath = basePath.relativize(path).toString().replace('\\', '/');
                      yamlFiles.add(relativePath);

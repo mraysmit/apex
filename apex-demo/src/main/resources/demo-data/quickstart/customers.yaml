@@ -3,8 +3,13 @@
 # Business users can modify this data to test different scenarios
 
 metadata:
+  name: "QuickStart Getting Started Demo - Customer Dataset"
   version: "1.0"
-  description: "Sample customer data for QuickStart demonstrations"
+  description: "Sample customer data for QuickStart getting started demonstrations (QuickStartDemo.java)"
+  type: "dataset"
+  source: "generated"
+  associated-demo: "QuickStartDemo"
+  file-purpose: "Provides simple customer data for new users learning APEX basics"
   lastUpdated: "2025-07-28"
   author: "APEX Demo Team"
 

@@ -12,6 +12,15 @@
 # - Risk assessment rules
 # ============================================================================
 
+metadata:
+  name: "OTC Options Bootstrap Demo - Enrichment Configuration"
+  version: "1.0.0"
+  description: "Data enrichment and risk assessment configuration for OTC Options Bootstrap Demo (OtcOptionsBootstrapDemo.java)"
+  type: "enrichment"
+  author: "APEX Demo Team"
+  associated-demo: "OtcOptionsBootstrapDemo"
+  file-purpose: "Configures commodity, counterparty, and risk assessment enrichment rules"
+
 # Data Sources Configuration
 dataSources:
   - name: "commodity-data-source"

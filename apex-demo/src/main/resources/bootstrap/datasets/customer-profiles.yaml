@@ -6,9 +6,13 @@
 # ============================================================================
 
 metadata:
-  name: "Customer Profile Dataset"
+  name: "Bootstrap Demo - Customer Profiles Dataset"
   version: "1.0.0"
-  description: "Realistic customer profiles for financial services demonstrations"
+  description: "Realistic customer profiles for financial services demonstrations (used by DemoDataBootstrap.java and multiple bootstrap demos)"
+  type: "dataset"
+  source: "generated"
+  associated-demos: ["DemoDataBootstrap", "OtcOptionsBootstrapDemo", "CustodyAutoRepairBootstrap"]
+  file-purpose: "Provides customer profile data with demographics, financial info, and risk profiles"
   category: "customer-data"
   created-date: "2025-08-27"
 

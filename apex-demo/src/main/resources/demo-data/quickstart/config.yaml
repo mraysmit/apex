@@ -3,10 +3,14 @@
 # Business users can modify these settings to customize demo behavior
 
 metadata:
+  name: "QuickStart Getting Started Demo - Configuration"
   version: "1.0"
-  description: "Configuration settings for QuickStart demonstration"
-  lastUpdated: "2025-07-28"
+  description: "Configuration settings for QuickStart getting started demonstration (QuickStartDemo.java)"
+  type: "rule-config"
   author: "APEX Demo Team"
+  associated-demo: "QuickStartDemo"
+  file-purpose: "Basic APEX rules engine configuration for new users"
+  lastUpdated: "2025-07-28"
 
 # Demo execution configuration
 demo:

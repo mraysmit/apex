@@ -3,8 +3,13 @@
 # Business users can modify these scenarios to test different risk conditions
 
 metadata:
+  name: "Financial Services Demo - Risk Scenarios Dataset"
   version: "1.0"
-  description: "Risk management scenarios for Financial demonstrations"
+  description: "Risk management scenarios for Financial services demonstrations (FinancialDemo.java)"
+  type: "dataset"
+  source: "generated"
+  associated-demo: "FinancialDemo"
+  file-purpose: "Provides risk scenario test data for financial validation and assessment"
   lastUpdated: "2025-07-28"
   author: "APEX Demo Team"
 

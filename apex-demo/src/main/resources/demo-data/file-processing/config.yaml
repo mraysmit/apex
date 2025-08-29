@@ -3,10 +3,14 @@
 # Business users can modify these settings to customize demo behavior
 
 metadata:
+  name: "File Processing Demo - Configuration"
   version: "1.0"
-  description: "Configuration settings for File Processing demonstration"
-  lastUpdated: "2025-07-28"
+  description: "Configuration settings for File Processing demonstration (FileProcessingDemo.java)"
+  type: "rule-config"
   author: "APEX Demo Team"
+  associated-demo: "FileProcessingDemo"
+  file-purpose: "Configures multi-format file processing (JSON, XML, CSV) with validation rules"
+  lastUpdated: "2025-07-28"
 
 # Demo execution configuration
 demo:

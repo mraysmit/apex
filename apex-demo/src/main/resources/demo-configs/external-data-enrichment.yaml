@@ -16,6 +16,15 @@
 #
 # ============================================================================
 
+metadata:
+  name: "External Data Source Enrichment Demo Configuration"
+  version: "1.0.0"
+  description: "Demonstrates external data source enrichment patterns replacing hardcoded inline datasets (ExternalDataSourceReferenceDemo.java)"
+  type: "enrichment"
+  author: "APEX Demo Team"
+  associated-demo: "ExternalDataSourceReferenceDemo"
+  file-purpose: "Shows proper external data integration vs hardcoded data patterns"
+
 # External Data Sources Configuration
 dataSources:
   # Currency reference data from cache

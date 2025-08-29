@@ -3,8 +3,13 @@
 # Business users can modify this data to test different scenarios
 
 metadata:
+  name: "Custody Auto-Repair Demo - Settlement Instructions Dataset"
   version: "1.0"
-  description: "Sample settlement instruction data for Custody demonstrations"
+  description: "Sample settlement instruction data for Custody auto-repair demonstrations (CustodyAutoRepairBootstrap.java)"
+  type: "dataset"
+  source: "generated"
+  associated-demo: "CustodyAutoRepairBootstrap"
+  file-purpose: "Provides settlement instruction test data with various validation scenarios"
   lastUpdated: "2025-07-28"
   author: "APEX Demo Team"
 

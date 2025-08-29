@@ -3,10 +3,14 @@
 # Business users can modify these settings to customize demo behavior
 
 metadata:
+  name: "Financial Services Demo - Configuration"
   version: "1.0"
-  description: "Configuration settings for Financial demonstration"
-  lastUpdated: "2025-07-28"
+  description: "Configuration settings for Financial services demonstration (FinancialDemo.java)"
+  type: "rule-config"
   author: "APEX Demo Team"
+  associated-demo: "FinancialDemo"
+  file-purpose: "Configures financial validation rules, risk assessment, and trade processing"
+  lastUpdated: "2025-07-28"
 
 # Demo execution configuration
 demo:

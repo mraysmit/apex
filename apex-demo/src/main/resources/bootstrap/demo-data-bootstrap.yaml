@@ -6,9 +6,14 @@
 # ============================================================================
 
 metadata:
-  name: "Demo Data Bootstrap Configuration"
+  name: "APEX Demo Data Bootstrap - Main Configuration"
   version: "1.0.0"
-  description: "Comprehensive demo data management using APEX bootstrap patterns"
+  description: "Main bootstrap configuration for comprehensive demo data management (used by DemoDataBootstrap.java)"
+  type: "bootstrap"
+  business-domain: "demo-data"
+  created-by: "APEX Bootstrap Demo Generator"
+  associated-demo: "DemoDataBootstrap"
+  file-purpose: "Orchestrates loading of customer, product, and trading data for all bootstrap demos"
   created-date: "2025-08-27"
   author: "APEX Bootstrap Demo Generator"
 

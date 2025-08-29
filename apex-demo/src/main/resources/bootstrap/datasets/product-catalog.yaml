@@ -6,9 +6,13 @@
 # ============================================================================
 
 metadata:
-  name: "Financial Product Catalog"
+  name: "Bootstrap Demo - Financial Product Catalog Dataset"
   version: "1.0.0"
-  description: "Comprehensive financial products and services catalog"
+  description: "Comprehensive financial products and services catalog (used by DemoDataBootstrap.java for product lookups)"
+  type: "dataset"
+  source: "generated"
+  associated-demos: ["DemoDataBootstrap", "FinancialDemo"]
+  file-purpose: "Provides financial product definitions, pricing, and risk characteristics"
   category: "product-data"
   created-date: "2025-08-27"
 
