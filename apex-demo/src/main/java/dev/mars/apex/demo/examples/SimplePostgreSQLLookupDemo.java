@@ -87,7 +87,7 @@ import java.util.Map;
  * 3. **Use the performEnrichmentWithYaml() method pattern** for all processing
  * 4. **Replace hardcoded simulation** with minimal input data (lookup keys only)
  * 5. **Add database initialization** for data provider classes
- * 6. **Update @version to 2.0** only after achieving 100% compliance
+ * 6. **Update version tag to 2.0** only after achieving 100% compliance
  *
  * CRITICAL: This template demonstrates 100% compliant APEX integration with:
  * - Real APEX services (no hardcoded simulation)
