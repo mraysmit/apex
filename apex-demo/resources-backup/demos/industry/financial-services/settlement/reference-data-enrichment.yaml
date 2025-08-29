@@ -1,0 +1,258 @@
+# ============================================================================
+# APEX Rules Engine - Reference Data Enrichment for Financial Settlement
+# ============================================================================
+#
+# This YAML configuration demonstrates reference data enrichment for financial
+# services post-trade settlement, including LEI codes, ISIN validation, MIC codes,
+# BIC codes, and Standard Settlement Instructions (SSI).
+#
+# OVERVIEW:
+# This configuration implements industry-standard reference data enrichment
+# for trade settlement processing, ensuring proper identification and routing
+# for settlement operations using ISO standards and financial industry codes.
+#
+# INDUSTRY STANDARDS:
+# - ISO 17442: Legal Entity Identifier (LEI) codes
+# - ISO 6166: International Securities Identification Number (ISIN)
+# - ISO 10383: Market Identifier Codes (MIC)
+# - ISO 9362: Business Identifier Codes (BIC/SWIFT)
+# - ISO 20022: Financial messaging standards
+#
+# ENRICHMENT CATEGORIES:
+# 1. LEI ENRICHMENT - Legal Entity Identifier lookup
+# 2. ISIN VALIDATION - Security identifier validation and enrichment
+# 3. MIC CODE ENRICHMENT - Market venue identification
+# 4. BIC CODE ENRICHMENT - Bank identifier codes for settlement
+# 5. SSI ENRICHMENT - Standard Settlement Instructions
+#
+# ============================================================================
+
+metadata:
+  name: "Reference Data Enrichment for Financial Settlement"
+  version: "1.0.0"
+  description: "Reference data enrichment rules for post-trade settlement processing"
+  type: "rule-config"
+  author: "financial-settlement@rulesengine.dev"
+  created-by: "financial-settlement@rulesengine.dev"
+  created-date: "2024-12-24"
+  domain: "Financial Services - Settlement"
+  tags: ["finance", "settlement", "reference-data", "lei", "isin", "mic", "bic"]
+
+# ============================================================================
+# VALIDATION RULES
+# ============================================================================
+
+rules:
+  - id: "isin-format-validation"
+    name: "ISIN Format Validation"
+    condition: "#data.security != null && #data.security.instrumentId != null && #data.security.instrumentId.matches('^[A-Z]{2}[A-Z0-9]{9}[0-9]$')"
+    message: "ISIN must follow format: 2 country letters + 9 alphanumeric + 1 check digit"
+    severity: "ERROR"
+    priority: 1
+
+  - id: "counterparty-name-required"
+    name: "Counterparty Name Required"
+    condition: "#data.counterparty != null && #data.counterparty.partyName != null && #data.counterparty.partyName.trim().length() > 0"
+    message: "Counterparty name is required for LEI enrichment"
+    severity: "ERROR"
+    priority: 1
+
+  - id: "trading-venue-required"
+    name: "Trading Venue Required"
+    condition: "#data.tradingVenue != null && #data.tradingVenue.trim().length() > 0"
+    message: "Trading venue is required for MIC code enrichment"
+    severity: "WARNING"
+    priority: 2
+
+# ============================================================================
+# REFERENCE DATA ENRICHMENT
+# ============================================================================
+
+enrichments:
+  # LEI Enrichment
+  - id: "lei-enrichment"
+    type: "lookup-enrichment"
+    condition: "#data.counterparty != null && #data.counterparty.partyName != null"
+    lookup-config:
+      lookup-key: "counterparty.partyName"
+      lookup-dataset:
+        type: "inline"
+        key-field: "partyName"
+        data:
+          - partyName: "Deutsche Bank AG"
+            lei: "7LTWFZYICNSX8D621K86"
+            jurisdiction: "DE"
+            entityType: "BANK"
+          - partyName: "JPMorgan Chase"
+            lei: "8EE8DF3643E15DBFDA05"
+            jurisdiction: "US"
+            entityType: "BANK"
+          - partyName: "Goldman Sachs"
+            lei: "784F5XWPLTWKTBV3E584"
+            jurisdiction: "US"
+            entityType: "INVESTMENT_BANK"
+          - partyName: "Barclays Bank PLC"
+            lei: "G5GSEF7VJP5I7OUK5573"
+            jurisdiction: "GB"
+            entityType: "BANK"
+    field-mappings:
+      - source-field: "lei"
+        target-field: "counterparty.lei"
+      - source-field: "jurisdiction"
+        target-field: "counterparty.jurisdiction"
+      - source-field: "entityType"
+        target-field: "counterparty.entityType"
+
+  # ISIN Security Master Enrichment
+  - id: "isin-security-enrichment"
+    type: "lookup-enrichment"
+    condition: "#data.security != null && #data.security.instrumentId != null"
+    lookup-config:
+      lookup-key: "security.instrumentId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "isin"
+        data:
+          - isin: "GB00B03MLX29"
+            cusip: "780259206"
+            sedol: "B03MLX2"
+            name: "Royal Dutch Shell PLC"
+            assetClass: "EQUITY"
+            currency: "GBP"
+            country: "GB"
+          - isin: "US0378331005"
+            cusip: "037833100"
+            sedol: "2046251"
+            name: "Apple Inc"
+            assetClass: "EQUITY"
+            currency: "USD"
+            country: "US"
+          - isin: "DE0007164600"
+            cusip: "D1668R123"
+            sedol: "0716460"
+            name: "SAP SE"
+            assetClass: "EQUITY"
+            currency: "EUR"
+            country: "DE"
+    field-mappings:
+      - source-field: "cusip"
+        target-field: "security.cusip"
+      - source-field: "sedol"
+        target-field: "security.sedol"
+      - source-field: "name"
+        target-field: "security.name"
+      - source-field: "assetClass"
+        target-field: "security.assetClass"
+      - source-field: "currency"
+        target-field: "security.currency"
+      - source-field: "country"
+        target-field: "security.country"
+
+  # MIC Code Enrichment
+  - id: "mic-code-enrichment"
+    type: "lookup-enrichment"
+    condition: "#data.tradingVenue != null"
+    lookup-config:
+      lookup-key: "tradingVenue"
+      lookup-dataset:
+        type: "inline"
+        key-field: "micCode"
+        data:
+          - micCode: "XLON"
+            venueName: "London Stock Exchange"
+            country: "GB"
+            venueType: "REGULATED_MARKET"
+            operatingHours: "08:00-16:30 GMT"
+          - micCode: "XNYS"
+            venueName: "New York Stock Exchange"
+            country: "US"
+            venueType: "REGULATED_MARKET"
+            operatingHours: "09:30-16:00 EST"
+          - micCode: "XNAS"
+            venueName: "NASDAQ"
+            country: "US"
+            venueType: "REGULATED_MARKET"
+            operatingHours: "09:30-16:00 EST"
+          - micCode: "XPAR"
+            venueName: "Euronext Paris"
+            country: "FR"
+            venueType: "REGULATED_MARKET"
+            operatingHours: "09:00-17:30 CET"
+    field-mappings:
+      - source-field: "venueName"
+        target-field: "venue.venueName"
+      - source-field: "country"
+        target-field: "venue.country"
+      - source-field: "venueType"
+        target-field: "venue.venueType"
+      - source-field: "operatingHours"
+        target-field: "venue.operatingHours"
+
+  # BIC Code Enrichment
+  - id: "bic-code-enrichment"
+    type: "lookup-enrichment"
+    condition: "#data.counterparty != null && #data.counterparty.partyName != null"
+    lookup-config:
+      lookup-key: "counterparty.partyName"
+      lookup-dataset:
+        type: "inline"
+        key-field: "partyName"
+        data:
+          - partyName: "Deutsche Bank AG"
+            bic: "DEUTDEFF"
+            custodianBIC: "DEUTDEFF"
+            clearingBIC: "DEUTDEFF"
+          - partyName: "JPMorgan Chase"
+            bic: "CHASUS33"
+            custodianBIC: "CHASUS33"
+            clearingBIC: "CHASUS33"
+          - partyName: "Goldman Sachs"
+            bic: "GSCCUS33"
+            custodianBIC: "GSCCUS33"
+            clearingBIC: "GSCCUS33"
+          - partyName: "Barclays Bank PLC"
+            bic: "BARCGB22"
+            custodianBIC: "BARCGB22"
+            clearingBIC: "BARCGB22"
+    field-mappings:
+      - source-field: "bic"
+        target-field: "settlement.counterpartyBIC"
+      - source-field: "custodianBIC"
+        target-field: "settlement.custodianBIC"
+      - source-field: "clearingBIC"
+        target-field: "settlement.clearingBIC"
+
+  # Standard Settlement Instructions (SSI)
+  - id: "ssi-enrichment"
+    type: "lookup-enrichment"
+    condition: "#data.counterparty != null && #data.counterparty.lei != null && #data.venue != null && #data.venue.country != null"
+    lookup-config:
+      lookup-key: "counterparty.lei"
+      lookup-dataset:
+        type: "inline"
+        key-field: "lei"
+        data:
+          - lei: "7LTWFZYICNSX8D621K86"
+            gbMethod: "CREST"
+            gbAccount: "CREST001234"
+            usMethod: "DTC"
+            usAccount: "DTC567890"
+          - lei: "8EE8DF3643E15DBFDA05"
+            gbMethod: "CREST"
+            gbAccount: "CREST005678"
+            usMethod: "DTC"
+            usAccount: "DTC123456"
+          - lei: "784F5XWPLTWKTBV3E584"
+            gbMethod: "CREST"
+            gbAccount: "CREST009876"
+            usMethod: "DTC"
+            usAccount: "DTC654321"
+    field-mappings:
+      - source-field: "gbMethod"
+        target-field: "settlement.gbMethod"
+      - source-field: "gbAccount"
+        target-field: "settlement.gbAccount"
+      - source-field: "usMethod"
+        target-field: "settlement.usMethod"
+      - source-field: "usAccount"
+        target-field: "settlement.usAccount"

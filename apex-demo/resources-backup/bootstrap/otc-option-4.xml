@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OtcOption>
+    <tradeDate>2025-08-02</tradeDate>
+    <buyerParty>UBS</buyerParty>
+    <sellerParty>CREDIT_SUISSE</sellerParty>
+    <optionType>Put</optionType>
+    <underlyingAsset>
+        <commodity>Silver</commodity>
+        <unit>Troy Ounce</unit>
+    </underlyingAsset>
+    <strikePrice currency="USD">28.00</strikePrice>
+    <notionalQuantity>5000</notionalQuantity>
+    <expiryDate>2025-10-15</expiryDate>
+    <settlementType>Physical</settlementType>
+</OtcOption>

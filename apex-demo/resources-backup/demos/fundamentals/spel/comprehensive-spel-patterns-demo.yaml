@@ -1,0 +1,284 @@
+# ============================================================================
+# APEX Rules Engine - Comprehensive SpEL Patterns Demo
+# ============================================================================
+#
+# This configuration demonstrates all SpEL (Spring Expression Language) 
+# patterns and functions available in APEX rules and enrichments.
+#
+# COVERAGE: This example covers the following SpEL patterns:
+# - #root, #this, .endsWith(), .startsWith(), .toLowerCase()
+# - .minusYears(), .size(), LocalDate.now(), Math.max(), Math.min()
+# - UUID.randomUUID() and many more advanced patterns
+#
+# ============================================================================
+
+metadata:
+  name: "Comprehensive SpEL Patterns Demo"
+  version: "1.0.0"
+  description: "Complete demonstration of all SpEL patterns and functions in APEX"
+  type: "rule-config"
+  author: "APEX Demo Team"
+  created: "2025-08-24"
+  tags: ["spel", "expressions", "functions", "patterns", "comprehensive"]
+
+# Rules demonstrating various SpEL patterns
+rules:
+  # String manipulation patterns
+  - id: "string-patterns-demo"
+    name: "String Manipulation Patterns"
+    condition: "#data.customerName != null"
+    message: "Demonstrating string manipulation SpEL patterns"
+    severity: "INFO"
+    
+    # Using various string methods
+    validations:
+      - condition: "#data.customerName.startsWith('CORP')"
+        message: "Corporate customer detected using startsWith()"
+        
+      - condition: "#data.customerName.endsWith('LLC')"
+        message: "LLC entity detected using endsWith()"
+        
+      - condition: "#data.customerName.toLowerCase().contains('bank')"
+        message: "Banking institution detected using toLowerCase() and contains()"
+        
+      - condition: "#data.email != null && #data.email.toLowerCase().endsWith('@company.com')"
+        message: "Internal company email detected"
+
+  # Root and this context patterns
+  - id: "context-patterns-demo"
+    name: "Context Reference Patterns"
+    condition: "#root != null"
+    message: "Demonstrating #root and #this context patterns"
+    severity: "INFO"
+    
+    validations:
+      - condition: "#root.tradeId != null && #root.tradeId == #this.tradeId"
+        message: "Root context matches current context using #root and #this"
+        
+      - condition: "#root.portfolio.size() > 0"
+        message: "Portfolio has positions using #root context and size()"
+        
+      - condition: "#this.instruments != null && #this.instruments.size() > #root.minInstruments"
+        message: "Instrument count validation using #this and #root"
+
+  # Date manipulation patterns
+  - id: "date-patterns-demo"
+    name: "Date Manipulation Patterns"
+    condition: "#data.tradeDate != null"
+    message: "Demonstrating date manipulation SpEL patterns"
+    severity: "INFO"
+    
+    validations:
+      - condition: "#data.tradeDate.isAfter(T(java.time.LocalDate).now().minusYears(1))"
+        message: "TradeB is within last year using LocalDate.now() and minusYears()"
+        
+      - condition: "#data.settlementDate.isBefore(T(java.time.LocalDate).now().plusDays(30))"
+        message: "Settlement within 30 days using LocalDate.now() and plusDays()"
+        
+      - condition: "#data.maturityDate.isAfter(T(java.time.LocalDate).now())"
+        message: "Maturity date is in future using LocalDate.now()"
+
+  # Mathematical operations patterns
+  - id: "math-patterns-demo"
+    name: "Mathematical Operations Patterns"
+    condition: "#data.quantity != null && #data.price != null"
+    message: "Demonstrating mathematical SpEL patterns"
+    severity: "INFO"
+    
+    validations:
+      - condition: "T(java.lang.Math).max(#data.quantity, #data.minQuantity) == #data.quantity"
+        message: "Quantity meets minimum using Math.max()"
+        
+      - condition: "T(java.lang.Math).min(#data.price, #data.maxPrice) == #data.price"
+        message: "Price within maximum using Math.min()"
+        
+      - condition: "T(java.lang.Math).abs(#data.netAmount) > 1000"
+        message: "Significant net amount using Math.abs()"
+
+  # Collection operations patterns
+  - id: "collection-patterns-demo"
+    name: "Collection Operations Patterns"
+    condition: "#data.positions != null"
+    message: "Demonstrating collection manipulation SpEL patterns"
+    severity: "INFO"
+    
+    validations:
+      - condition: "#data.positions.size() > 0"
+        message: "Portfolio has positions using size()"
+        
+      - condition: "#data.positions.size() <= #root.maxPositions"
+        message: "Position count within limits using size()"
+        
+      - condition: "#data.tags != null && #data.tags.size() > 0"
+        message: "Entity has tags using size()"
+
+  # UUID generation patterns
+  - id: "uuid-patterns-demo"
+    name: "UUID Generation Patterns"
+    condition: "#data.correlationId == null"
+    message: "Demonstrating UUID generation SpEL patterns"
+    severity: "INFO"
+    
+    validations:
+      - condition: "T(java.util.UUID).randomUUID().toString().length() == 36"
+        message: "Generated UUID has correct length using UUID.randomUUID()"
+
+# Enrichments demonstrating SpEL patterns
+enrichments:
+  # String processing enrichment
+  - id: "string-processing-enrichment"
+    type: "calculation-enrichment"
+    condition: "#data.customerName != null"
+    
+    calculations:
+      # String transformations
+      - field: "customerNameUpper"
+        expression: "#data.customerName.toUpperCase()"
+        
+      - field: "customerNameLower"
+        expression: "#data.customerName.toLowerCase()"
+        
+      - field: "customerNameTrimmed"
+        expression: "#data.customerName.trim()"
+        
+      - field: "customerInitials"
+        expression: "#data.customerName.substring(0, T(java.lang.Math).min(3, #data.customerName.length()))"
+        
+      # String analysis
+      - field: "isCorpCustomer"
+        expression: "#data.customerName.toUpperCase().startsWith('CORP')"
+        
+      - field: "isLLCEntity"
+        expression: "#data.customerName.toUpperCase().endsWith('LLC')"
+        
+      - field: "customerNameLength"
+        expression: "#data.customerName.length()"
+
+  # Date processing enrichment
+  - id: "date-processing-enrichment"
+    type: "calculation-enrichment"
+    condition: "#data.tradeDate != null"
+    
+    calculations:
+      # Current date operations
+      - field: "currentDate"
+        expression: "T(java.time.LocalDate).now()"
+        
+      - field: "currentDateTime"
+        expression: "T(java.time.LocalDateTime).now()"
+        
+      # Date calculations
+      - field: "tradeAge"
+        expression: "T(java.time.Period).between(#data.tradeDate, T(java.time.LocalDate).now()).getDays()"
+        
+      - field: "settlementDateCalculated"
+        expression: "#data.tradeDate.plusDays(2)"
+        
+      - field: "oneYearAgo"
+        expression: "T(java.time.LocalDate).now().minusYears(1)"
+        
+      - field: "sixMonthsFromNow"
+        expression: "T(java.time.LocalDate).now().plusDays(180)"
+        
+      # Date comparisons
+      - field: "isRecentTrade"
+        expression: "#data.tradeDate.isAfter(T(java.time.LocalDate).now().minusYears(1))"
+        
+      - field: "isSettlementPending"
+        expression: "#data.settlementDate.isAfter(T(java.time.LocalDate).now())"
+
+  # Mathematical calculations enrichment
+  - id: "mathematical-calculations-enrichment"
+    type: "calculation-enrichment"
+    condition: "#data.quantity != null && #data.price != null"
+    
+    calculations:
+      # Basic math operations
+      - field: "tradeValue"
+        expression: "#data.quantity * #data.price"
+        
+      - field: "absoluteQuantity"
+        expression: "T(java.lang.Math).abs(#data.quantity)"
+        
+      - field: "maxTradeValue"
+        expression: "T(java.lang.Math).max(#tradeValue, #data.minTradeValue ?: 0)"
+        
+      - field: "minTradeValue"
+        expression: "T(java.lang.Math).min(#tradeValue, #data.maxTradeValue ?: 999999999)"
+        
+      # Advanced calculations
+      - field: "commission"
+        expression: "T(java.lang.Math).max(#tradeValue * 0.001, 5.0)"  # Min $5 commission
+        
+      - field: "netAmount"
+        expression: "#tradeValue + #commission"
+        
+      - field: "roundedAmount"
+        expression: "T(java.lang.Math).round(#netAmount * 100) / 100.0"
+
+  # Collection processing enrichment
+  - id: "collection-processing-enrichment"
+    type: "calculation-enrichment"
+    condition: "#data.positions != null"
+    
+    calculations:
+      # Collection size operations
+      - field: "positionCount"
+        expression: "#data.positions.size()"
+        
+      - field: "hasPositions"
+        expression: "#data.positions.size() > 0"
+        
+      - field: "isLargePortfolio"
+        expression: "#data.positions.size() > 100"
+        
+      # Collection filtering (using stream operations)
+      - field: "activePositionsCount"
+        expression: "#data.positions.stream().filter(p -> p.status == 'ACTIVE').count()"
+        
+      - field: "totalPortfolioValue"
+        expression: "#data.positions.stream().mapToDouble(p -> p.marketValue).sum()"
+
+  # UUID and identifier generation enrichment
+  - id: "identifier-generation-enrichment"
+    type: "calculation-enrichment"
+    condition: "true"  # Always execute
+    
+    calculations:
+      # UUID generation
+      - field: "correlationId"
+        expression: "T(java.util.UUID).randomUUID().toString()"
+        condition: "#data.correlationId == null"
+        
+      - field: "transactionId"
+        expression: "'TXN-' + T(java.util.UUID).randomUUID().toString().substring(0, 8).toUpperCase()"
+        
+      - field: "referenceNumber"
+        expression: "'REF' + T(java.time.LocalDate).now().format(T(java.time.format.DateTimeFormatter).ofPattern('yyyyMMdd')) + '-' + T(java.util.UUID).randomUUID().toString().substring(0, 6).toUpperCase()"
+
+  # Context and root reference enrichment
+  - id: "context-reference-enrichment"
+    type: "calculation-enrichment"
+    condition: "#root != null"
+    
+    calculations:
+      # Root context references
+      - field: "rootTradeId"
+        expression: "#root.tradeId"
+        
+      - field: "rootCustomerId"
+        expression: "#root.customerId"
+        
+      # This context references
+      - field: "currentObjectType"
+        expression: "#this.getClass().getSimpleName()"
+        
+      - field: "hasRootContext"
+        expression: "#root != null"
+        
+      - field: "contextMatches"
+        expression: "#root.tradeId == #this.tradeId"
+        
+      # Complex context operations
+      - field: "inheritedProperties"
+        expression: "#root.properties != null ? #root.properties.size() : 0"

@@ -1,0 +1,300 @@
+# Layered API Demo Data Configuration
+# Test data scenarios for LayeredAPIDemo.java
+# NO HARDCODED SIMULATION - Real APEX data processing
+
+metadata:
+  name: "Layered API Demo Data"
+  version: "2.0"
+  description: "Test data scenarios for real APEX layered API demonstration"
+  author: "APEX Demo Team"
+  created: "2025-01-29"
+
+# Layer 1: Simple Validation Test Scenarios
+layer1-scenarios:
+  - scenario: "valid-customer-data"
+    description: "Valid customer data for Layer 1 simple validation"
+    data:
+      name: "John Doe"
+      age: 25
+      email: "john.doe@example.com"
+      layerType: "LAYER_1"
+    expected-results:
+      nameValid: true
+      ageValid: true
+      emailValid: true
+      layer: "LAYER_1"
+      api-type: "SIMPLE_VALIDATION"
+
+  - scenario: "invalid-customer-data"
+    description: "Invalid customer data for Layer 1 validation testing"
+    data:
+      name: ""
+      age: 16
+      email: "invalid-email"
+      layerType: "LAYER_1"
+    expected-results:
+      nameValid: false
+      ageValid: false
+      emailValid: false
+      layer: "LAYER_1"
+      validation-errors: 3
+
+  - scenario: "partial-customer-data"
+    description: "Partial customer data for Layer 1 validation"
+    data:
+      name: "Jane Smith"
+      age: 30
+      layerType: "LAYER_1"
+    expected-results:
+      nameValid: true
+      ageValid: true
+      emailValid: false
+      layer: "LAYER_1"
+      validation-errors: 1
+
+# Layer 2: Business Rule Management Test Scenarios
+layer2-scenarios:
+  - scenario: "premium-customer-large-order"
+    description: "Premium customer with large order for Layer 2 business rule processing"
+    data:
+      orderAmount: 15000
+      customerType: "PREMIUM"
+      creditLimit: 50000
+      layerType: "LAYER_2"
+    expected-results:
+      orderApproved: true
+      discountEligible: true
+      premiumBenefits: "ENHANCED_SUPPORT"
+      layer: "LAYER_2"
+      api-type: "BUSINESS_RULE_MANAGEMENT"
+
+  - scenario: "standard-customer-small-order"
+    description: "Standard customer with small order for Layer 2 processing"
+    data:
+      orderAmount: 5000
+      customerType: "STANDARD"
+      creditLimit: 20000
+      layerType: "LAYER_2"
+    expected-results:
+      orderApproved: true
+      discountEligible: false
+      premiumBenefits: null
+      layer: "LAYER_2"
+
+  - scenario: "premium-customer-over-limit"
+    description: "Premium customer with order over credit limit"
+    data:
+      orderAmount: 60000
+      customerType: "PREMIUM"
+      creditLimit: 50000
+      layerType: "LAYER_2"
+    expected-results:
+      orderApproved: false
+      discountEligible: true
+      premiumBenefits: "ENHANCED_SUPPORT"
+      layer: "LAYER_2"
+
+# Layer 3: Advanced Features Test Scenarios
+layer3-scenarios:
+  - scenario: "compliant-high-value-transaction"
+    description: "Compliant high-value transaction for Layer 3 advanced processing"
+    data:
+      transactionAmount: 75000
+      transactionType: "WIRE_TRANSFER"
+      currency: "USD"
+      country: "US"
+      customerRiskRating: "LOW"
+      accountAge: 5
+      amlCheck: true
+      sanctionsCheck: true
+      layerType: "LAYER_3"
+    expected-results:
+      transactionApproved: true
+      approvalLevel: "AUTOMATED"
+      complianceStatus: "COMPLIANT"
+      requiresManualReview: false
+      layer: "LAYER_3"
+      api-type: "ADVANCED_FEATURES"
+
+  - scenario: "high-risk-transaction"
+    description: "High-risk transaction requiring manual review"
+    data:
+      transactionAmount: 150000
+      transactionType: "WIRE_TRANSFER"
+      currency: "USD"
+      country: "US"
+      customerRiskRating: "HIGH"
+      accountAge: 1
+      amlCheck: true
+      sanctionsCheck: true
+      layerType: "LAYER_3"
+    expected-results:
+      transactionApproved: false
+      requiresManualReview: true
+      escalationLevel: "SENIOR_COMPLIANCE"
+      additionalChecksRequired: true
+      layer: "LAYER_3"
+
+  - scenario: "cross-border-transaction"
+    description: "Cross-border transaction requiring additional compliance"
+    data:
+      transactionAmount: 30000
+      transactionType: "INTERNATIONAL_TRANSFER"
+      currency: "EUR"
+      country: "GERMANY"
+      customerRiskRating: "LOW"
+      accountAge: 3
+      amlCheck: true
+      sanctionsCheck: true
+      layerType: "LAYER_3"
+    expected-results:
+      crossBorderReporting: true
+      additionalDocumentation: "REQUIRED"
+      complianceStatus: "ADDITIONAL_CHECKS_REQUIRED"
+      layer: "LAYER_3"
+
+# Performance Comparison Test Scenarios
+performance-scenarios:
+  - scenario: "layer1-performance-test"
+    description: "Layer 1 performance testing with simple validation"
+    data:
+      name: "Performance Test User"
+      age: 30
+      email: "perf.test@example.com"
+      layerType: "LAYER_1"
+    expected-performance:
+      processing-time: "< 10ms"
+      memory-usage: "LOW"
+      throughput: "HIGH"
+
+  - scenario: "layer2-performance-test"
+    description: "Layer 2 performance testing with business rules"
+    data:
+      orderAmount: 12000
+      customerType: "PREMIUM"
+      creditLimit: 25000
+      layerType: "LAYER_2"
+    expected-performance:
+      processing-time: "< 50ms"
+      memory-usage: "MEDIUM"
+      throughput: "MEDIUM"
+
+  - scenario: "layer3-performance-test"
+    description: "Layer 3 performance testing with advanced features"
+    data:
+      transactionAmount: 85000
+      transactionType: "WIRE_TRANSFER"
+      currency: "USD"
+      country: "US"
+      customerRiskRating: "LOW"
+      amlCheck: true
+      sanctionsCheck: true
+      layerType: "LAYER_3"
+    expected-performance:
+      processing-time: "< 200ms"
+      memory-usage: "HIGH"
+      throughput: "LOW"
+      advanced-analytics: true
+
+# Integrated Workflow Test Scenarios
+integrated-scenarios:
+  - scenario: "complete-layered-workflow"
+    description: "Complete workflow demonstrating all three layers"
+    data:
+      # Layer 1 data
+      name: "Alice Johnson"
+      age: 32
+      email: "alice.johnson@example.com"
+      # Layer 2 data
+      orderAmount: 18000
+      customerType: "PREMIUM"
+      creditLimit: 40000
+      # Layer 3 data
+      transactionAmount: 18000
+      transactionType: "PURCHASE"
+      currency: "USD"
+      country: "US"
+      customerRiskRating: "LOW"
+      amlCheck: true
+      sanctionsCheck: true
+      layerType: "ALL_LAYERS"
+    expected-workflow:
+      layer1-validation: "PASSED"
+      layer2-business-rules: "APPROVED"
+      layer3-advanced-processing: "COMPLIANT"
+      final-status: "PROCESSED"
+
+# Error Handling Test Scenarios
+error-handling-scenarios:
+  - scenario: "layer1-validation-errors"
+    description: "Layer 1 validation errors handling"
+    data:
+      name: null
+      age: -5
+      email: null
+      layerType: "LAYER_1"
+    expected-results:
+      validation-status: "FAILED"
+      error-count: 3
+      error-handling: "FAIL_FAST"
+
+  - scenario: "layer2-business-rule-errors"
+    description: "Layer 2 business rule errors handling"
+    data:
+      orderAmount: null
+      customerType: "INVALID_TYPE"
+      creditLimit: -1000
+      layerType: "LAYER_2"
+    expected-results:
+      processing-status: "PARTIAL_FAILURE"
+      error-handling: "COLLECT_AND_CONTINUE"
+      business-rule-errors: 2
+
+  - scenario: "layer3-advanced-feature-errors"
+    description: "Layer 3 advanced feature errors handling"
+    data:
+      transactionAmount: null
+      transactionType: "INVALID_TYPE"
+      customerRiskRating: "UNKNOWN"
+      layerType: "LAYER_3"
+    expected-results:
+      processing-status: "FALLBACK_APPLIED"
+      error-handling: "COLLECT_WITH_FALLBACK"
+      advanced-feature-errors: 3
+
+# Reference Data for Validation
+reference-data:
+  customer-types:
+    - "STANDARD"
+    - "PREMIUM"
+    - "VIP"
+  
+  transaction-types:
+    - "WIRE_TRANSFER"
+    - "INTERNATIONAL_TRANSFER"
+    - "PURCHASE"
+    - "REFUND"
+  
+  currencies:
+    - "USD"
+    - "EUR"
+    - "GBP"
+    - "JPY"
+  
+  countries:
+    - "US"
+    - "GERMANY"
+    - "UK"
+    - "JAPAN"
+  
+  risk-ratings:
+    - "LOW"
+    - "MEDIUM"
+    - "HIGH"
+    - "CRITICAL"
+  
+  layer-types:
+    - "LAYER_1"
+    - "LAYER_2"
+    - "LAYER_3"
+    - "ALL_LAYERS"

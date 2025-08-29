@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- OTC Options Bootstrap Demo - Sample Data -->
+<!-- Generated on: 2025-08-02 -->
+<OtcOptions>
+    <!-- Option 1: Natural Gas Call -->
+    <OtcOption id="option-1">
+        <tradeDate>2025-08-02</tradeDate>
+        <buyerParty>GOLDMAN_SACHS</buyerParty>
+        <sellerParty>JP_MORGAN</sellerParty>
+        <optionType>Call</optionType>
+        <underlyingAsset>
+            <commodity>Natural Gas</commodity>
+            <unit>MMBtu</unit>
+        </underlyingAsset>
+        <strikePrice currency="USD">3.50</strikePrice>
+        <notionalQuantity>10000</notionalQuantity>
+        <expiryDate>2025-12-28</expiryDate>
+        <settlementType>Cash</settlementType>
+    </OtcOption>
+
+    <!-- Option 2: Brent Crude Oil Put -->
+    <OtcOption id="option-2">
+        <tradeDate>2025-08-02</tradeDate>
+        <buyerParty>MORGAN_STANLEY</buyerParty>
+        <sellerParty>CITI</sellerParty>
+        <optionType>Put</optionType>
+        <underlyingAsset>
+            <commodity>Brent Crude Oil</commodity>
+            <unit>Barrel</unit>
+        </underlyingAsset>
+        <strikePrice currency="USD">75.00</strikePrice>
+        <notionalQuantity>1000</notionalQuantity>
+        <expiryDate>2026-03-15</expiryDate>
+        <settlementType>Physical</settlementType>
+    </OtcOption>
+
+    <!-- Option 3: Gold Call -->
+    <OtcOption id="option-3">
+        <tradeDate>2025-08-02</tradeDate>
+        <buyerParty>BARCLAYS</buyerParty>
+        <sellerParty>DEUTSCHE_BANK</sellerParty>
+        <optionType>Call</optionType>
+        <underlyingAsset>
+            <commodity>Gold</commodity>
+            <unit>Troy Ounce</unit>
+        </underlyingAsset>
+        <strikePrice currency="USD">2100.00</strikePrice>
+        <notionalQuantity>100</notionalQuantity>
+        <expiryDate>2025-11-30</expiryDate>
+        <settlementType>Cash</settlementType>
+    </OtcOption>
+
+    <!-- Option 4: Silver Put -->
+    <OtcOption id="option-4">
+        <tradeDate>2025-08-02</tradeDate>
+        <buyerParty>UBS</buyerParty>
+        <sellerParty>CREDIT_SUISSE</sellerParty>
+        <optionType>Put</optionType>
+        <underlyingAsset>
+            <commodity>Silver</commodity>
+            <unit>Troy Ounce</unit>
+        </underlyingAsset>
+        <strikePrice currency="USD">28.00</strikePrice>
+        <notionalQuantity>5000</notionalQuantity>
+        <expiryDate>2025-10-15</expiryDate>
+        <settlementType>Physical</settlementType>
+    </OtcOption>
+
+    <!-- Option 5: Copper Call -->
+    <OtcOption id="option-5">
+        <tradeDate>2025-08-02</tradeDate>
+        <buyerParty>JP_MORGAN</buyerParty>
+        <sellerParty>GOLDMAN_SACHS</sellerParty>
+        <optionType>Call</optionType>
+        <underlyingAsset>
+            <commodity>Copper</commodity>
+            <unit>Pound</unit>
+        </underlyingAsset>
+        <strikePrice currency="USD">4.25</strikePrice>
+        <notionalQuantity>25000</notionalQuantity>
+        <expiryDate>2026-01-20</expiryDate>
+        <settlementType>Cash</settlementType>
+    </OtcOption>
+
+    <!-- Option 6: Wheat Put -->
+    <OtcOption id="option-6">
+        <tradeDate>2025-08-02</tradeDate>
+        <buyerParty>CITI</buyerParty>
+        <sellerParty>BARCLAYS</sellerParty>
+        <optionType>Put</optionType>
+        <underlyingAsset>
+            <commodity>Wheat</commodity>
+            <unit>Bushel</unit>
+        </underlyingAsset>
+        <strikePrice currency="USD">6.50</strikePrice>
+        <notionalQuantity>50000</notionalQuantity>
+        <expiryDate>2025-09-30</expiryDate>
+        <settlementType>Physical</settlementType>
+    </OtcOption>
+</OtcOptions>

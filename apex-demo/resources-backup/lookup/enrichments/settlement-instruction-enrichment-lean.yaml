@@ -1,0 +1,108 @@
+# Settlement Instruction Enrichment Rules - Lean Version with External Data-Source References
+# Demonstrates complex multi-table lookups using external data-source references
+# Use Case: Enrich trades with settlement instructions and risk assessments
+
+metadata:
+  name: "Settlement Instruction Enrichment - Lean Version"
+  description: "Multi-table settlement enrichment using external data-source references"
+  version: "2.1.0"
+  type: "rule-config"
+  author: "APEX Demo Team"
+
+# Reference to external data-source configurations
+data-source-refs:
+  - name: "settlement-database"
+    source: "data-sources/settlement-database.yaml"
+    enabled: true
+    description: "Settlement database for multi-table lookups"
+
+# Lean enrichment rules focused on business logic only
+enrichments:
+  - id: "settlement-instruction-lookup-lean"
+    type: "lookup-enrichment"
+    description: "Enrich trades with settlement instructions and risk data using external reference"
+    condition: "#counterpartyId != null && #counterpartyId != ''"
+
+    lookup-config:
+      lookup-key: "#counterpartyId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "settlement-database"
+        query-ref: "getSettlementInstructionsByCounterparty"  # Complex multi-table query
+        parameters:
+          - field: "counterpartyId"
+            type: "string"
+
+    # Comprehensive field mappings for multi-table result
+    field-mappings:
+        # Settlement instruction fields
+        - source-field: "INSTRUCTION_ID"
+          target-field: "settlementInstructionId"
+          required: true
+        - source-field: "CUSTODIAN_NAME"
+          target-field: "custodianName"
+          required: true
+        - source-field: "CUSTODIAN_BIC"
+          target-field: "custodianBic"
+          required: true
+        - source-field: "SETTLEMENT_METHOD"
+          target-field: "settlementMethod"
+          required: true
+        - source-field: "DELIVERY_INSTRUCTION"
+          target-field: "deliveryInstruction"
+          required: false
+        - source-field: "MARKET_NAME"
+          target-field: "marketName"
+          required: true
+        - source-field: "SETTLEMENT_CYCLE"
+          target-field: "settlementCycle"
+          required: true
+
+        # Counterparty fields
+        - source-field: "COUNTERPARTY_NAME"
+          target-field: "counterpartyName"
+          required: true
+        - source-field: "COUNTERPARTY_TYPE"
+          target-field: "counterpartyType"
+          required: true
+        - source-field: "CREDIT_RATING"
+          target-field: "creditRating"
+          required: false
+
+        # Risk assessment fields
+        - source-field: "RISK_CATEGORY"
+          target-field: "riskCategory"
+          required: false
+        - source-field: "RISK_SCORE"
+          target-field: "riskScore"
+          required: false
+        - source-field: "MAX_EXPOSURE"
+          target-field: "maxExposure"
+          required: false
+        - source-field: "APPROVAL_REQUIRED"
+          target-field: "approvalRequired"
+          required: false
+        - source-field: "MONITORING_LEVEL"
+          target-field: "monitoringLevel"
+          required: false
+
+  # Additional enrichment for market-specific settlement instructions
+  - id: "market-settlement-lookup"
+    type: "lookup-enrichment"
+    description: "Enrich with market-specific settlement instructions"
+    condition: "#marketName != null && #marketName != ''"
+
+    lookup-config:
+      lookup-key: "#marketName"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "settlement-database"
+        query-ref: "getSettlementInstructionsByMarket"  # Market-based query
+        parameters:
+          - field: "marketName"
+            type: "string"
+
+    field-mappings:
+      - source-field: "INSTRUCTION_ID"
+        target-field: "marketSettlementInstructions"
+        required: false

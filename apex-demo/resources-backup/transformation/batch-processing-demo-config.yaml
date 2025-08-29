@@ -1,0 +1,447 @@
+# Batch Processing Demo Configuration
+# Real APEX YAML configuration for BatchProcessingDemo.java
+# NO HARDCODED SIMULATION - Uses authentic APEX services
+
+metadata:
+  name: "Batch Processing Demo Configuration"
+  version: "2.0"
+  description: "Real APEX batch processing demonstration with sequential, parallel, memory-efficient, error handling, financial scenarios, and performance monitoring"
+  author: "APEX Demo Team"
+  created: "2025-08-29"
+
+# Batch Processing Enrichments
+enrichments:
+  - name: "sequential-batch-processing"
+    type: "sequential-batch-enrichment"
+    description: "Sequential batch processing with real APEX services"
+    conditions:
+      - condition: "#data.processingType == 'SEQUENTIAL'"
+        actions:
+          - type: "sequential-batch-processing"
+            batch-operations:
+              - operation: "batch-initialization"
+                condition: "#data.batchSize != null && #data.batchSize > 0"
+                action:
+                  type: "set-field"
+                  field: "batchInitialized"
+                  value: true
+                message: "Sequential batch initialization"
+              - operation: "validation-processing"
+                condition: "#data.validationRules == 'age_email_name_validation'"
+                action:
+                  type: "set-field"
+                  field: "validationApplied"
+                  value: "AGE_EMAIL_NAME_VALIDATION"
+                message: "Sequential validation processing"
+              - operation: "performance-tracking"
+                condition: "#data.performanceMonitoring == true"
+                actions:
+                  - type: "set-field"
+                    field: "performanceTracked"
+                    value: true
+                  - type: "set-field"
+                    field: "processingMode"
+                    value: "SEQUENTIAL"
+                  - type: "set-field"
+                    field: "expectedThroughput"
+                    value: "#data.batchSize < 500 ? 'HIGH' : (#data.batchSize < 1500 ? 'MEDIUM' : 'LOW')"
+                message: "Sequential performance tracking"
+            processing-metadata:
+              processing-type: "SEQUENTIAL"
+              complexity: "LOW"
+              batch-operations: 3
+
+  - name: "parallel-batch-processing"
+    type: "parallel-batch-enrichment"
+    description: "Parallel batch processing with performance optimization"
+    conditions:
+      - condition: "#data.processingType == 'PARALLEL'"
+        actions:
+          - type: "parallel-batch-processing"
+            parallel-operations:
+              - operation: "parallel-initialization"
+                condition: "#data.batchSize != null && #data.parallelThreads != null"
+                actions:
+                  - type: "set-field"
+                    field: "parallelBatchInitialized"
+                    value: true
+                  - type: "set-field"
+                    field: "threadCount"
+                    value: "#data.parallelThreads"
+                  - type: "set-field"
+                    field: "parallelismLevel"
+                    value: "#data.parallelThreads > 2 ? 'HIGH' : 'MEDIUM'"
+                message: "Parallel batch initialization"
+              - operation: "parallel-validation"
+                condition: "#data.validationRules == 'age_email_name_validation'"
+                action:
+                  type: "set-field"
+                  field: "parallelValidationApplied"
+                  value: "PARALLEL_AGE_EMAIL_NAME_VALIDATION"
+                message: "Parallel validation processing"
+              - operation: "parallel-performance-optimization"
+                condition: "#data.performanceMonitoring == true"
+                actions:
+                  - type: "set-field"
+                    field: "parallelPerformanceTracked"
+                    value: true
+                  - type: "set-field"
+                    field: "processingMode"
+                    value: "PARALLEL"
+                  - type: "set-field"
+                    field: "expectedSpeedup"
+                    value: "#data.parallelThreads * 0.8"
+                message: "Parallel performance optimization"
+            processing-metadata:
+              processing-type: "PARALLEL"
+              complexity: "MEDIUM"
+              parallel-operations: 3
+
+  - name: "memory-efficient-processing"
+    type: "memory-efficient-enrichment"
+    description: "Memory-efficient streaming processing for large datasets"
+    conditions:
+      - condition: "#data.processingType == 'MEMORY_EFFICIENT'"
+        actions:
+          - type: "memory-efficient-processing"
+            streaming-operations:
+              - operation: "streaming-initialization"
+                condition: "#data.totalRecords != null && #data.chunkSize != null"
+                actions:
+                  - type: "set-field"
+                    field: "streamingEnabled"
+                    value: true
+                  - type: "set-field"
+                    field: "chunkSize"
+                    value: "#data.chunkSize"
+                  - type: "set-field"
+                    field: "totalChunks"
+                    value: "#data.totalRecords / #data.chunkSize"
+                message: "Memory-efficient streaming initialization"
+              - operation: "chunk-processing"
+                condition: "#data.streamingEnabled == true"
+                action:
+                  type: "set-field"
+                  field: "chunkProcessingEnabled"
+                  value: true
+                message: "Chunk-based processing"
+              - operation: "memory-optimization"
+                condition: "#data.validationRules == 'age_email_validation'"
+                actions:
+                  - type: "set-field"
+                    field: "memoryOptimized"
+                    value: true
+                  - type: "set-field"
+                    field: "validationApplied"
+                    value: "STREAMING_AGE_EMAIL_VALIDATION"
+                  - type: "set-field"
+                    field: "memoryFootprint"
+                    value: "MINIMAL"
+                message: "Memory optimization with streaming validation"
+            processing-metadata:
+              processing-type: "MEMORY_EFFICIENT"
+              complexity: "HIGH"
+              streaming-operations: 3
+
+  - name: "error-handling-batch-processing"
+    type: "error-handling-enrichment"
+    description: "Error handling and resilience in batch operations"
+    conditions:
+      - condition: "#data.processingType == 'ERROR_HANDLING'"
+        actions:
+          - type: "error-handling-processing"
+            error-handling-operations:
+              - operation: "error-tolerance-setup"
+                condition: "#data.continueOnError == true"
+                actions:
+                  - type: "set-field"
+                    field: "errorToleranceEnabled"
+                    value: true
+                  - type: "set-field"
+                    field: "errorHandlingStrategy"
+                    value: "CONTINUE_ON_ERROR"
+                  - type: "set-field"
+                    field: "expectedErrorRate"
+                    value: "#data.errorRate"
+                message: "Error tolerance setup"
+              - operation: "error-reporting"
+                condition: "#data.errorReporting == true"
+                action:
+                  type: "set-field"
+                  field: "errorReportingEnabled"
+                  value: true
+                message: "Error reporting configuration"
+              - operation: "batch-resilience"
+                condition: "#data.batchSize != null"
+                actions:
+                  - type: "set-field"
+                    field: "batchResilienceEnabled"
+                    value: true
+                  - type: "set-field"
+                    field: "resilienceLevel"
+                    value: "#data.errorRate < 0.1 ? 'HIGH' : (#data.errorRate < 0.3 ? 'MEDIUM' : 'LOW')"
+                message: "Batch resilience configuration"
+            processing-metadata:
+              processing-type: "ERROR_HANDLING"
+              complexity: "HIGH"
+              error-handling-operations: 3
+
+  - name: "financial-batch-scenarios"
+    type: "financial-batch-enrichment"
+    description: "Financial batch scenarios with real-world patterns"
+    conditions:
+      - condition: "#data.processingType == 'FINANCIAL_BATCH'"
+        actions:
+          - type: "financial-batch-processing"
+            financial-operations:
+              - operation: "trade-validation"
+                condition: "#data.tradeValidation == true"
+                action:
+                  type: "set-field"
+                  field: "tradeValidationEnabled"
+                  value: true
+                message: "Financial trade validation"
+              - operation: "risk-assessment"
+                condition: "#data.riskAssessment == true"
+                actions:
+                  - type: "set-field"
+                    field: "riskAssessmentEnabled"
+                    value: true
+                  - type: "set-field"
+                    field: "riskLevel"
+                    value: "#data.batchSize > 1000 ? 'HIGH' : 'MEDIUM'"
+                message: "Financial risk assessment"
+              - operation: "compliance-checks"
+                condition: "#data.complianceChecks == true"
+                actions:
+                  - type: "set-field"
+                    field: "complianceChecksEnabled"
+                    value: true
+                  - type: "set-field"
+                    field: "regulatoryCompliance"
+                    value: "ENABLED"
+                  - type: "set-field"
+                    field: "auditTrail"
+                    value: true
+                message: "Financial compliance checks"
+              - operation: "currency-processing"
+                condition: "#data.currency != null"
+                action:
+                  type: "set-field"
+                  field: "currencyProcessing"
+                  value: "#data.currency == 'USD' ? 'USD_PROCESSING' : 'MULTI_CURRENCY_PROCESSING'"
+                message: "Financial currency processing"
+            processing-metadata:
+              processing-type: "FINANCIAL_BATCH"
+              complexity: "HIGH"
+              financial-operations: 4
+
+  - name: "performance-monitoring-processing"
+    type: "performance-monitoring-enrichment"
+    description: "Performance monitoring and throughput analysis"
+    conditions:
+      - condition: "#data.processingType == 'PERFORMANCE_MONITORING'"
+        actions:
+          - type: "performance-monitoring-processing"
+            monitoring-operations:
+              - operation: "metrics-collection"
+                condition: "#data.metricsEnabled == true"
+                actions:
+                  - type: "set-field"
+                    field: "metricsCollectionEnabled"
+                    value: true
+                  - type: "set-field"
+                    field: "metricsType"
+                    value: "COMPREHENSIVE"
+                message: "Performance metrics collection"
+              - operation: "throughput-tracking"
+                condition: "#data.throughputTracking == true"
+                action:
+                  type: "set-field"
+                  field: "throughputTrackingEnabled"
+                  value: true
+                message: "Throughput tracking"
+              - operation: "latency-tracking"
+                condition: "#data.latencyTracking == true"
+                action:
+                  type: "set-field"
+                  field: "latencyTrackingEnabled"
+                  value: true
+                message: "Latency tracking"
+              - operation: "memory-tracking"
+                condition: "#data.memoryTracking == true"
+                actions:
+                  - type: "set-field"
+                    field: "memoryTrackingEnabled"
+                    value: true
+                  - type: "set-field"
+                    field: "memoryProfiler"
+                    value: "ENABLED"
+                message: "Memory usage tracking"
+            processing-metadata:
+              processing-type: "PERFORMANCE_MONITORING"
+              complexity: "HIGH"
+              monitoring-operations: 4
+
+  - name: "batch-result-aggregation"
+    type: "result-aggregation-enrichment"
+    description: "Batch result aggregation and comprehensive reporting"
+    conditions:
+      - condition: "#data.processingType == 'RESULT_AGGREGATION'"
+        actions:
+          - type: "result-aggregation-processing"
+            aggregation-operations:
+              - operation: "aggregation-setup"
+                condition: "#data.aggregationEnabled == true"
+                actions:
+                  - type: "set-field"
+                    field: "aggregationEnabled"
+                    value: true
+                  - type: "set-field"
+                    field: "aggregationType"
+                    value: "COMPREHENSIVE"
+                message: "Result aggregation setup"
+              - operation: "report-generation"
+                condition: "#data.reportGeneration == true"
+                action:
+                  type: "set-field"
+                  field: "reportGenerationEnabled"
+                  value: true
+                message: "Batch report generation"
+              - operation: "success-rate-calculation"
+                condition: "#data.successRateCalculation == true"
+                action:
+                  type: "set-field"
+                  field: "successRateCalculationEnabled"
+                  value: true
+                message: "Success rate calculation"
+              - operation: "throughput-calculation"
+                condition: "#data.throughputCalculation == true"
+                actions:
+                  - type: "set-field"
+                    field: "throughputCalculationEnabled"
+                    value: true
+                  - type: "set-field"
+                    field: "performanceAnalysis"
+                    value: "ENABLED"
+                message: "Throughput calculation"
+            processing-metadata:
+              processing-type: "RESULT_AGGREGATION"
+              complexity: "HIGH"
+              aggregation-operations: 4
+
+# Batch Processing Configuration
+batch-processing-config:
+  sequential:
+    description: "Sequential batch processing configuration"
+    features:
+      - "single-threaded-processing"
+      - "ordered-execution"
+      - "simple-error-handling"
+      - "basic-performance-tracking"
+    performance:
+      target-latency: "VARIABLE"
+      throughput: "MEDIUM"
+      memory-usage: "LOW"
+      scalability: "LIMITED"
+    
+  parallel:
+    description: "Parallel batch processing configuration"
+    features:
+      - "multi-threaded-processing"
+      - "concurrent-execution"
+      - "thread-pool-management"
+      - "advanced-performance-tracking"
+    performance:
+      target-latency: "REDUCED"
+      throughput: "HIGH"
+      memory-usage: "MEDIUM"
+      scalability: "HIGH"
+    
+  memory-efficient:
+    description: "Memory-efficient streaming processing configuration"
+    features:
+      - "streaming-processing"
+      - "chunk-based-execution"
+      - "minimal-memory-footprint"
+      - "large-dataset-support"
+    performance:
+      target-latency: "VARIABLE"
+      throughput: "MEDIUM"
+      memory-usage: "MINIMAL"
+      scalability: "VERY_HIGH"
+    
+  error-handling:
+    description: "Error handling and resilience configuration"
+    features:
+      - "error-tolerance"
+      - "continue-on-error"
+      - "error-reporting"
+      - "batch-resilience"
+    resilience:
+      fault-tolerance: "HIGH"
+      error-recovery: "AUTOMATIC"
+      reporting: "COMPREHENSIVE"
+    
+  financial-batch:
+    description: "Financial batch scenarios configuration"
+    features:
+      - "trade-validation"
+      - "risk-assessment"
+      - "compliance-checks"
+      - "audit-trails"
+    compliance:
+      regulatory-compliance: "ENABLED"
+      audit-trail: "COMPREHENSIVE"
+      risk-management: "ADVANCED"
+    
+  performance-monitoring:
+    description: "Performance monitoring configuration"
+    features:
+      - "metrics-collection"
+      - "throughput-tracking"
+      - "latency-tracking"
+      - "memory-tracking"
+    monitoring:
+      real-time-metrics: true
+      historical-data: true
+      performance-analysis: "ADVANCED"
+    
+  result-aggregation:
+    description: "Result aggregation and reporting configuration"
+    features:
+      - "comprehensive-aggregation"
+      - "report-generation"
+      - "success-rate-calculation"
+      - "throughput-calculation"
+    reporting:
+      detailed-reports: true
+      performance-analysis: true
+      trend-analysis: true
+
+# Processing Configuration
+processing:
+  fail-fast: false
+  enable-logging: true
+  max-processing-time: 300000
+  batch-processing: true
+  performance-monitoring: true
+  error-handling: true
+  
+# Output Configuration
+output:
+  format: "json"
+  include-metadata: true
+  include-processing-time: true
+  include-processing-type: true
+  include-performance-metrics: true
+  include-batch-statistics: true
+
+# Error Handling Configuration
+error-handling:
+  sequential-errors: "collect-and-continue"
+  parallel-errors: "collect-and-continue"
+  memory-efficient-errors: "collect-with-fallback"
+  financial-batch-errors: "strict-validation"
+  performance-errors: "collect"
+  aggregation-errors: "collect-and-continue"

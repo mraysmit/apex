@@ -1,0 +1,52 @@
+# Customer Profile Enrichment Rules - Database Version
+# Demonstrates database lookup enrichment using APEX YAML processing with real H2 database
+# Use Case: Enrich transactions with customer profile data from database
+
+metadata:
+  name: "Customer Profile Enrichment Demo - Database Version"
+  description: "Demonstrates database lookup enrichment using APEX YAML processing with real H2 database"
+  version: "2.0.0"
+  type: "rule-config"
+  author: "APEX Demo Team"
+
+# Database configuration for customer data
+data-sources:
+  - name: "customer-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "apex_demo_shared"
+      username: "sa"
+      password: ""
+
+# Enrichment rules using verified APEX syntax with database lookups
+enrichments:
+  - id: "customer-profile-database-lookup"
+    type: "lookup-enrichment"
+    description: "Enrich transactions with customer profile data from H2 database"
+    condition: "#customerId != null && #customerId != ''"
+
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        connection-name: "customer-database"
+        query: "SELECT customer_name, customer_type, tier, region, status, created_date FROM customers WHERE customer_id = :customerId"
+        parameters:
+          - field: "customerId"
+            type: "string"
+
+      # Field mappings from database columns to enriched object fields
+      field-mappings:
+        - source-field: "customer_name"
+          target-field: "customerName"
+        - source-field: "customer_type"
+          target-field: "customerType"
+        - source-field: "tier"
+          target-field: "customerTier"
+        - source-field: "region"
+          target-field: "customerRegion"
+        - source-field: "status"
+          target-field: "customerStatus"
+        - source-field: "created_date"
+          target-field: "customerCreatedDate"

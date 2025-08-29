@@ -1,0 +1,362 @@
+# ============================================================================
+# APEX Demo Data Bootstrap - Product Catalog
+# ============================================================================
+# Generated: 2025-08-27
+# Purpose: Realistic financial product catalog for APEX demonstrations
+# ============================================================================
+
+metadata:
+  name: "Bootstrap Demo - Financial Product Catalog Dataset"
+  version: "1.0.0"
+  description: "Comprehensive financial products and services catalog (used by DemoDataBootstrap.java for product lookups)"
+  type: "dataset"
+  source: "generated"
+  associated-demos: ["DemoDataBootstrap", "FinancialDemo"]
+  file-purpose: "Provides financial product definitions, pricing, and risk characteristics"
+  category: "product-data"
+  created-date: "2025-08-27"
+
+# Financial products catalog
+products:
+  - product_id: "PROD001"
+    product_info:
+      name: "Private Wealth Management"
+      category: "Investment"
+      subcategory: "Wealth Management"
+      description: "Comprehensive wealth management services for high-net-worth individuals"
+      
+    pricing:
+      base_price: 250000.00
+      currency: "USD"
+      fee_structure: "PERCENTAGE"
+      annual_fee_percentage: 1.25
+      minimum_investment: 500000.00
+      
+    eligibility:
+      target_segments: ["Platinum"]
+      min_balance_required: 500000.00
+      min_annual_income: 300000.00
+      required_experience: ["ADVANCED", "EXPERT"]
+      kyc_required: true
+      
+    features:
+      - "Dedicated Relationship Manager"
+      - "Customized Investment Strategy"
+      - "Tax Optimization Planning"
+      - "Estate Planning Services"
+      - "Alternative Investment Access"
+      - "24/7 Concierge Support"
+      
+    risk_profile: "LOW_TO_MEDIUM"
+    active: true
+
+  - product_id: "PROD002"
+    product_info:
+      name: "Premium Trading Account"
+      category: "Trading"
+      subcategory: "Active Trading"
+      description: "Advanced trading platform with professional-grade tools and analytics"
+      
+    pricing:
+      base_price: 50000.00
+      currency: "USD"
+      fee_structure: "FLAT_PLUS_COMMISSION"
+      monthly_fee: 299.00
+      commission_per_trade: 9.95
+      minimum_investment: 100000.00
+      
+    eligibility:
+      target_segments: ["Platinum", "Gold"]
+      min_balance_required: 100000.00
+      min_annual_income: 150000.00
+      required_experience: ["INTERMEDIATE", "ADVANCED", "EXPERT"]
+      kyc_required: true
+      
+    features:
+      - "Advanced Charting Tools"
+      - "Real-time Market Data"
+      - "Options Trading"
+      - "Margin Trading"
+      - "API Access"
+      - "Priority Order Execution"
+      
+    risk_profile: "MEDIUM_TO_HIGH"
+    active: true
+
+  - product_id: "PROD003"
+    product_info:
+      name: "High-Yield Savings Plus"
+      category: "Savings"
+      subcategory: "Premium Savings"
+      description: "High-yield savings account with tiered interest rates and premium benefits"
+      
+    pricing:
+      base_price: 10000.00
+      currency: "USD"
+      fee_structure: "TIERED_INTEREST"
+      base_interest_rate: 4.25
+      premium_interest_rate: 4.75
+      minimum_investment: 25000.00
+      
+    eligibility:
+      target_segments: ["Platinum", "Gold", "Silver"]
+      min_balance_required: 25000.00
+      min_annual_income: 75000.00
+      required_experience: ["BEGINNER", "INTERMEDIATE", "ADVANCED"]
+      kyc_required: true
+      
+    features:
+      - "Tiered Interest Rates"
+      - "No Monthly Maintenance Fees"
+      - "Unlimited Transfers"
+      - "Mobile Banking"
+      - "ATM Fee Reimbursement"
+      - "Overdraft Protection"
+      
+    risk_profile: "LOW"
+    active: true
+
+  - product_id: "PROD004"
+    product_info:
+      name: "Corporate Treasury Services"
+      category: "Corporate"
+      subcategory: "Treasury Management"
+      description: "Comprehensive treasury management solutions for corporate clients"
+      
+    pricing:
+      base_price: 100000.00
+      currency: "USD"
+      fee_structure: "CUSTOM_PRICING"
+      setup_fee: 25000.00
+      monthly_service_fee: 2500.00
+      minimum_investment: 1000000.00
+      
+    eligibility:
+      target_segments: ["Platinum"]
+      min_balance_required: 1000000.00
+      min_annual_income: 5000000.00
+      required_experience: ["ADVANCED", "EXPERT"]
+      kyc_required: true
+      
+    features:
+      - "Cash Management"
+      - "Liquidity Management"
+      - "Risk Management Tools"
+      - "Multi-Currency Support"
+      - "Automated Reporting"
+      - "Dedicated Treasury Specialist"
+      
+    risk_profile: "LOW_TO_MEDIUM"
+    active: true
+
+  - product_id: "PROD005"
+    product_info:
+      name: "Structured Products Portfolio"
+      category: "Investment"
+      subcategory: "Structured Products"
+      description: "Diversified portfolio of structured investment products"
+      
+    pricing:
+      base_price: 500000.00
+      currency: "USD"
+      fee_structure: "PERCENTAGE"
+      annual_fee_percentage: 2.00
+      performance_fee_percentage: 15.00
+      minimum_investment: 250000.00
+      
+    eligibility:
+      target_segments: ["Platinum", "Gold"]
+      min_balance_required: 250000.00
+      min_annual_income: 200000.00
+      required_experience: ["ADVANCED", "EXPERT"]
+      kyc_required: true
+      
+    features:
+      - "Principal Protection Options"
+      - "Market-Linked Returns"
+      - "Diversified Underlying Assets"
+      - "Quarterly Performance Reports"
+      - "Tax-Efficient Structure"
+      - "Professional Portfolio Management"
+      
+    risk_profile: "MEDIUM"
+    active: true
+
+  - product_id: "PROD006"
+    product_info:
+      name: "FX Trading Platform"
+      category: "Trading"
+      subcategory: "Foreign Exchange"
+      description: "Professional foreign exchange trading platform with institutional pricing"
+      
+    pricing:
+      base_price: 25000.00
+      currency: "USD"
+      fee_structure: "SPREAD_BASED"
+      base_spread_pips: 1.5
+      premium_spread_pips: 0.8
+      minimum_investment: 50000.00
+      
+    eligibility:
+      target_segments: ["Platinum", "Gold", "Silver"]
+      min_balance_required: 50000.00
+      min_annual_income: 100000.00
+      required_experience: ["INTERMEDIATE", "ADVANCED", "EXPERT"]
+      kyc_required: true
+      
+    features:
+      - "Major Currency Pairs"
+      - "Exotic Currency Pairs"
+      - "Leverage up to 50:1"
+      - "Real-time Pricing"
+      - "Advanced Order Types"
+      - "Risk Management Tools"
+      
+    risk_profile: "HIGH"
+    active: true
+
+  - product_id: "PROD007"
+    product_info:
+      name: "Commodity Investment Fund"
+      category: "Investment"
+      subcategory: "Alternative Investments"
+      description: "Diversified commodity investment fund with exposure to energy, metals, and agriculture"
+      
+    pricing:
+      base_price: 150000.00
+      currency: "USD"
+      fee_structure: "PERCENTAGE"
+      annual_management_fee: 1.75
+      performance_fee_percentage: 20.00
+      minimum_investment: 100000.00
+      
+    eligibility:
+      target_segments: ["Platinum", "Gold"]
+      min_balance_required: 100000.00
+      min_annual_income: 150000.00
+      required_experience: ["ADVANCED", "EXPERT"]
+      kyc_required: true
+      
+    features:
+      - "Diversified Commodity Exposure"
+      - "Professional Fund Management"
+      - "Inflation Hedge"
+      - "Monthly Liquidity"
+      - "Transparent Reporting"
+      - "ESG Screening"
+      
+    risk_profile: "MEDIUM_TO_HIGH"
+    active: true
+
+  - product_id: "PROD008"
+    product_info:
+      name: "Digital Banking Suite"
+      category: "Digital"
+      subcategory: "Digital Services"
+      description: "Comprehensive digital banking platform with mobile and web access"
+      
+    pricing:
+      base_price: 5000.00
+      currency: "USD"
+      fee_structure: "SUBSCRIPTION"
+      monthly_fee: 29.99
+      transaction_fee: 0.50
+      minimum_investment: 10000.00
+      
+    eligibility:
+      target_segments: ["Gold", "Silver", "Basic"]
+      min_balance_required: 10000.00
+      min_annual_income: 40000.00
+      required_experience: ["BEGINNER", "INTERMEDIATE"]
+      kyc_required: true
+      
+    features:
+      - "Mobile Banking App"
+      - "Web Banking Portal"
+      - "Bill Pay Services"
+      - "P2P Transfers"
+      - "Budgeting Tools"
+      - "Financial Planning"
+      
+    risk_profile: "LOW"
+    active: true
+
+# Product eligibility rules
+eligibility_rules:
+  balance_requirements:
+    - rule_id: "ER001"
+      name: "minimum-balance-check"
+      condition: "#customerBalance >= #productMinBalance"
+      message: "Customer balance must meet minimum product requirement"
+      
+  income_requirements:
+    - rule_id: "ER002"
+      name: "minimum-income-check"
+      condition: "#customerIncome >= #productMinIncome"
+      message: "Customer income must meet minimum product requirement"
+      
+  experience_requirements:
+    - rule_id: "ER003"
+      name: "investment-experience-check"
+      condition: "#productRequiredExperience.contains(#customerExperience)"
+      message: "Customer must have required investment experience level"
+      
+  segment_requirements:
+    - rule_id: "ER004"
+      name: "membership-segment-check"
+      condition: "#productTargetSegments.contains(#customerMembershipLevel)"
+      message: "Product is only available to specific membership segments"
+
+# Product categories and features
+categories:
+  investment:
+    name: "Investment Products"
+    description: "Wealth building and investment management services"
+    risk_levels: ["LOW", "LOW_TO_MEDIUM", "MEDIUM", "MEDIUM_TO_HIGH"]
+    
+  trading:
+    name: "Trading Services"
+    description: "Active trading platforms and execution services"
+    risk_levels: ["MEDIUM", "MEDIUM_TO_HIGH", "HIGH"]
+    
+  savings:
+    name: "Savings Products"
+    description: "Deposit accounts and savings solutions"
+    risk_levels: ["LOW"]
+    
+  corporate:
+    name: "Corporate Services"
+    description: "Business banking and treasury management"
+    risk_levels: ["LOW", "LOW_TO_MEDIUM", "MEDIUM"]
+    
+  digital:
+    name: "Digital Banking"
+    description: "Online and mobile banking services"
+    risk_levels: ["LOW"]
+
+# Pricing models
+pricing_models:
+  percentage:
+    description: "Fee calculated as percentage of assets"
+    typical_range: "0.5% - 2.5% annually"
+    
+  flat_plus_commission:
+    description: "Fixed monthly fee plus per-transaction commission"
+    typical_monthly_fee: "$99 - $499"
+    typical_commission: "$4.95 - $19.95 per trade"
+    
+  tiered_interest:
+    description: "Interest rate varies by balance tier"
+    typical_range: "2.0% - 5.0% APY"
+    
+  custom_pricing:
+    description: "Negotiated pricing based on client needs"
+    minimum_relationship: "$1M+"
+    
+  spread_based:
+    description: "Revenue from bid-ask spread"
+    typical_spread: "0.5 - 3.0 pips"
+    
+  subscription:
+    description: "Fixed monthly or annual subscription fee"
+    typical_range: "$9.99 - $99.99 per month"

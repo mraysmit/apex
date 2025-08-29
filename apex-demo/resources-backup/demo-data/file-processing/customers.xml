@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  File Processing Demo - Customer Data (XML Format)
+  This file contains sample customer data for XML processing demonstrations
+  Business users can modify this data to test different scenarios
+  
+  Version: 1.0
+  Last Updated: 2025-07-28
+  Author: APEX Demo Team
+-->
+<customers>
+    <metadata>
+        <version>1.0</version>
+        <description>Sample customer data for File Processing demonstrations</description>
+        <lastUpdated>2025-07-28</lastUpdated>
+        <author>APEX Demo Team</author>
+        <format>XML</format>
+        <purpose>Demonstrate XML file processing with validation scenarios</purpose>
+    </metadata>
+    
+    <!-- Valid customers for positive test cases -->
+    <customer id="CUST001">
+        <name>
+            <first>Alice</first>
+            <last>Johnson</last>
+        </name>
+        <contact>
+            <email>alice.johnson@example.com</email>
+        </contact>
+        <age>32</age>
+        <country>CA</country>
+        <accountBalance>25000.00</accountBalance>
+        <status>ACTIVE</status>
+        <tier>GOLD</tier>
+        <description>Valid customer for positive test cases</description>
+    </customer>
+    
+    <customer id="CUST002">
+        <name>
+            <first>Bob</first>
+            <last>Wilson</last>
+        </name>
+        <contact>
+            <email>bob.wilson@example.com</email>
+        </contact>
+        <age>45</age>
+        <country>AU</country>
+        <accountBalance>18500.75</accountBalance>
+        <status>ACTIVE</status>
+        <tier>SILVER</tier>
+        <description>Valid customer from Australia</description>
+    </customer>
+    
+    <customer id="CUST003">
+        <name>
+            <first>Carol</first>
+            <last>Davis</last>
+        </name>
+        <contact>
+            <email>carol.davis@example.com</email>
+        </contact>
+        <age>38</age>
+        <country>DE</country>
+        <accountBalance>35000.50</accountBalance>
+        <status>ACTIVE</status>
+        <tier>PLATINUM</tier>
+        <description>High-value customer from Germany</description>
+    </customer>
+    
+    <customer id="CUST004">
+        <name>
+            <first>David</first>
+            <last>Miller</last>
+        </name>
+        <contact>
+            <email>david.miller@example.com</email>
+        </contact>
+        <age>29</age>
+        <country>GB</country>
+        <accountBalance>12750.25</accountBalance>
+        <status>ACTIVE</status>
+        <tier>SILVER</tier>
+        <description>Valid customer from United Kingdom</description>
+    </customer>
+    
+    <!-- Invalid customers for testing validation failures -->
+    <customer id="CUST005">
+        <name>
+            <first>Young</first>
+            <last>Person</last>
+        </name>
+        <contact>
+            <email>young.person@example.com</email>
+        </contact>
+        <age>16</age>
+        <country>US</country>
+        <accountBalance>8000.00</accountBalance>
+        <status>PENDING</status>
+        <tier>BASIC</tier>
+        <description>Invalid customer - underage for testing validation failures</description>
+    </customer>
+    
+    <customer id="CUST006">
+        <name>
+            <first>Invalid</first>
+            <last>Email</last>
+        </name>
+        <contact>
+            <email>invalid-email-format</email>
+        </contact>
+        <age>35</age>
+        <country>CA</country>
+        <accountBalance>5500.00</accountBalance>
+        <status>ACTIVE</status>
+        <tier>BASIC</tier>
+        <description>Invalid customer - bad email format for testing validation failures</description>
+    </customer>
+    
+    <customer id="CUST007">
+        <name>
+            <first>Negative</first>
+            <last>Balance</last>
+        </name>
+        <contact>
+            <email>negative.balance@example.com</email>
+        </contact>
+        <age>40</age>
+        <country>FR</country>
+        <accountBalance>-1500.00</accountBalance>
+        <status>SUSPENDED</status>
+        <tier>BASIC</tier>
+        <description>Invalid customer - negative balance for testing validation failures</description>
+    </customer>
+    
+    <customer id="CUST008">
+        <name>
+            <first>Invalid</first>
+            <last>Country</last>
+        </name>
+        <contact>
+            <email>invalid.country@example.com</email>
+        </contact>
+        <age>33</age>
+        <country>ZZ</country>
+        <accountBalance>7200.00</accountBalance>
+        <status>ACTIVE</status>
+        <tier>BASIC</tier>
+        <description>Invalid customer - invalid country code for testing validation failures</description>
+    </customer>
+    
+    <!-- Validation configuration -->
+    <validation-config>
+        <rules>
+            <rule name="age-validation">
+                <expression>#age != null &amp;&amp; #age &gt;= 18 &amp;&amp; #age &lt;= 120</expression>
+                <errorMessage>Age must be between 18 and 120</errorMessage>
+            </rule>
+            <rule name="email-validation">
+                <expression>#email != null &amp;&amp; #email.contains('@')</expression>
+                <errorMessage>Valid email address required</errorMessage>
+            </rule>
+            <rule name="balance-validation">
+                <expression>#accountBalance != null &amp;&amp; #accountBalance &gt;= 0</expression>
+                <errorMessage>Account balance cannot be negative</errorMessage>
+            </rule>
+            <rule name="country-validation">
+                <expression>#country != null &amp;&amp; #country in {'US', 'GB', 'CA', 'DE', 'FR', 'JP', 'AU'}</expression>
+                <errorMessage>Country must be from supported list</errorMessage>
+            </rule>
+        </rules>
+    </validation-config>
+    
+    <!-- Test scenarios -->
+    <test-scenarios>
+        <scenario name="all-valid">
+            <description>All customers should pass validation</description>
+            <customerIds>CUST001,CUST002,CUST003,CUST004</customerIds>
+            <expectedResult>PASS</expectedResult>
+        </scenario>
+        <scenario name="mixed-validation">
+            <description>Mix of valid and invalid customers</description>
+            <customerIds>CUST001,CUST005,CUST002,CUST006</customerIds>
+            <expectedValidCount>2</expectedValidCount>
+            <expectedInvalidCount>2</expectedInvalidCount>
+        </scenario>
+        <scenario name="all-invalid">
+            <description>All customers should fail validation</description>
+            <customerIds>CUST005,CUST006,CUST007,CUST008</customerIds>
+            <expectedResult>FAIL</expectedResult>
+        </scenario>
+    </test-scenarios>
+</customers>

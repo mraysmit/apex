@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OtcOption>
+    <tradeDate>2025-08-02</tradeDate>
+    <buyerParty>CITI</buyerParty>
+    <sellerParty>BARCLAYS</sellerParty>
+    <optionType>Put</optionType>
+    <underlyingAsset>
+        <commodity>Wheat</commodity>
+        <unit>Bushel</unit>
+    </underlyingAsset>
+    <strikePrice currency="USD">6.50</strikePrice>
+    <notionalQuantity>50000</notionalQuantity>
+    <expiryDate>2025-09-30</expiryDate>
+    <settlementType>Physical</settlementType>
+</OtcOption>

@@ -1,0 +1,302 @@
+# ============================================================================
+# OTC OPTIONS ENRICHMENT CONFIGURATION
+# ============================================================================
+# This YAML configuration replaces the hardcoded enrichment logic in 
+# OtcOptionsBootstrapDemo with proper APEX rules engine configuration.
+#
+# Features:
+# - Commodity data enrichment using inline datasets
+# - Counterparty data enrichment using lookup datasets
+# - Currency and market data enrichment
+# - Calculated fields using SpEL expressions
+# - Risk assessment rules
+# ============================================================================
+
+metadata:
+  name: "OTC Options Bootstrap Demo - Enrichment Configuration"
+  version: "1.0.0"
+  description: "Data enrichment and risk assessment configuration for OTC Options Bootstrap Demo (OtcOptionsBootstrapDemo.java)"
+  type: "enrichment"
+  author: "APEX Demo Team"
+  associated-demo: "OtcOptionsBootstrapDemo"
+  file-purpose: "Configures commodity, counterparty, and risk assessment enrichment rules"
+
+# Data Sources Configuration
+dataSources:
+  - name: "commodity-data-source"
+    type: "cache"
+    enabled: true
+    description: "Commodity reference data cache"
+    cache:
+      enabled: true
+      ttlSeconds: 3600
+      maxSize: 1000
+
+  - name: "counterparty-data-source"
+    type: "cache"
+    enabled: true
+    description: "Counterparty reference data cache"
+    cache:
+      enabled: true
+      ttlSeconds: 1800
+      maxSize: 500
+
+  - name: "currency-data-source"
+    type: "cache"
+    enabled: true
+    description: "Currency and market data cache"
+    cache:
+      enabled: true
+      ttlSeconds: 7200
+      maxSize: 200
+
+# Enrichment Rules
+enrichments:
+  # Commodity Data Enrichment
+  - id: "commodity-enrichment"
+    name: "Commodity Data Enrichment"
+    type: "lookup-enrichment"
+    target-type: "OtcOption"
+    enabled: true
+    priority: 100
+    condition: "#option.underlyingAsset?.commodity != null"
+    lookup-config:
+      lookup-key: "#option.underlyingAsset.commodity"
+      lookup-dataset:
+        type: "inline"
+        key-field: "commodity"
+        data:
+          - commodity: "Natural Gas"
+            commodityCategory: "Energy"
+            exchange: "NYMEX"
+            riskFactor: "HIGH"
+            marginRate: 0.15
+          - commodity: "Brent Crude Oil"
+            commodityCategory: "Energy"
+            exchange: "ICE"
+            riskFactor: "HIGH"
+            marginRate: 0.12
+          - commodity: "Gold"
+            commodityCategory: "Precious Metals"
+            exchange: "COMEX"
+            riskFactor: "MEDIUM"
+            marginRate: 0.08
+          - commodity: "Silver"
+            commodityCategory: "Precious Metals"
+            exchange: "COMEX"
+            riskFactor: "MEDIUM"
+            marginRate: 0.10
+          - commodity: "Copper"
+            commodityCategory: "Base Metals"
+            exchange: "LME"
+            riskFactor: "MEDIUM"
+            marginRate: 0.12
+    field-mappings:
+      - source-field: "commodityCategory"
+        target-field: "commodityCategory"
+      - source-field: "exchange"
+        target-field: "exchange"
+      - source-field: "riskFactor"
+        target-field: "riskFactor"
+      - source-field: "marginRate"
+        target-field: "marginRate"
+
+  # Counterparty Data Enrichment - Buyer
+  - id: "buyer-counterparty-enrichment"
+    name: "Buyer Counterparty Data Enrichment"
+    type: "lookup-enrichment"
+    target-type: "OtcOption"
+    enabled: true
+    priority: 200
+    condition: "#option.buyerParty != null"
+    lookup-config:
+      lookup-key: "#option.buyerParty"
+      lookup-dataset:
+        type: "inline"
+        key-field: "partyId"
+        data:
+          - partyId: "GOLDMAN_SACHS"
+            legalName: "Goldman Sachs & Co. LLC"
+            creditRating: "AAA"
+            lei: "784F5XWPLTWKTBV3E584"
+            jurisdiction: "United States"
+          - partyId: "JP_MORGAN"
+            legalName: "JPMorgan Chase Bank, N.A."
+            creditRating: "AAA"
+            lei: "7H6GLXDRUGQFU57RNE97"
+            jurisdiction: "United States"
+          - partyId: "MORGAN_STANLEY"
+            legalName: "Morgan Stanley & Co. LLC"
+            creditRating: "AA+"
+            lei: "IGJSJL3JD5P30I6NJZ34"
+            jurisdiction: "United States"
+          - partyId: "CITI"
+            legalName: "Citigroup Global Markets Inc."
+            creditRating: "AA-"
+            lei: "6SHGI4ZSSLCXXQSBB395"
+            jurisdiction: "United States"
+          - partyId: "BARCLAYS"
+            legalName: "Barclays Bank PLC"
+            creditRating: "A+"
+            lei: "G5GSEF7VJP5I7OUK5573"
+            jurisdiction: "United Kingdom"
+    field-mappings:
+      - source-field: "legalName"
+        target-field: "buyerLegalName"
+      - source-field: "creditRating"
+        target-field: "buyerCreditRating"
+      - source-field: "lei"
+        target-field: "buyerLei"
+      - source-field: "jurisdiction"
+        target-field: "buyerJurisdiction"
+
+  # Counterparty Data Enrichment - Seller
+  - id: "seller-counterparty-enrichment"
+    name: "Seller Counterparty Data Enrichment"
+    type: "lookup-enrichment"
+    target-type: "OtcOption"
+    enabled: true
+    priority: 210
+    condition: "#option.sellerParty != null"
+    lookup-config:
+      lookup-key: "#option.sellerParty"
+      lookup-dataset:
+        type: "inline"
+        key-field: "partyId"
+        data:
+          - partyId: "GOLDMAN_SACHS"
+            legalName: "Goldman Sachs & Co. LLC"
+            creditRating: "AAA"
+            lei: "784F5XWPLTWKTBV3E584"
+            jurisdiction: "United States"
+          - partyId: "JP_MORGAN"
+            legalName: "JPMorgan Chase Bank, N.A."
+            creditRating: "AAA"
+            lei: "7H6GLXDRUGQFU57RNE97"
+            jurisdiction: "United States"
+          - partyId: "MORGAN_STANLEY"
+            legalName: "Morgan Stanley & Co. LLC"
+            creditRating: "AA+"
+            lei: "IGJSJL3JD5P30I6NJZ34"
+            jurisdiction: "United States"
+          - partyId: "CITI"
+            legalName: "Citigroup Global Markets Inc."
+            creditRating: "AA-"
+            lei: "6SHGI4ZSSLCXXQSBB395"
+            jurisdiction: "United States"
+          - partyId: "BARCLAYS"
+            legalName: "Barclays Bank PLC"
+            creditRating: "A+"
+            lei: "G5GSEF7VJP5I7OUK5573"
+            jurisdiction: "United Kingdom"
+    field-mappings:
+      - source-field: "legalName"
+        target-field: "sellerLegalName"
+      - source-field: "creditRating"
+        target-field: "sellerCreditRating"
+      - source-field: "lei"
+        target-field: "sellerLei"
+      - source-field: "jurisdiction"
+        target-field: "sellerJurisdiction"
+
+  # Currency and Market Data Enrichment
+  - id: "currency-enrichment"
+    name: "Currency and Market Data Enrichment"
+    type: "lookup-enrichment"
+    target-type: "OtcOption"
+    enabled: true
+    priority: 300
+    condition: "#option.strikeCurrency != null"
+    lookup-config:
+      lookup-key: "#option.strikeCurrency"
+      lookup-dataset:
+        type: "inline"
+        key-field: "currency"
+        data:
+          - currency: "USD"
+            currencyName: "US Dollar"
+            currencyRegion: "North America"
+            timezone: "EST"
+            tradingHours: "09:00-17:00"
+          - currency: "EUR"
+            currencyName: "Euro"
+            currencyRegion: "Europe"
+            timezone: "CET"
+            tradingHours: "08:00-16:00"
+          - currency: "GBP"
+            currencyName: "British Pound"
+            currencyRegion: "Europe"
+            timezone: "GMT"
+            tradingHours: "08:00-16:00"
+          - currency: "JPY"
+            currencyName: "Japanese Yen"
+            currencyRegion: "Asia Pacific"
+            timezone: "JST"
+            tradingHours: "09:00-15:00"
+    field-mappings:
+      - source-field: "currencyName"
+        target-field: "currencyName"
+      - source-field: "currencyRegion"
+        target-field: "currencyRegion"
+      - source-field: "timezone"
+        target-field: "timezone"
+      - source-field: "tradingHours"
+        target-field: "tradingHours"
+
+# Validation and Calculation Rules
+rules:
+  # Calculate Days to Expiry
+  - id: "calculate-days-to-expiry"
+    name: "Calculate Days to Expiry"
+    condition: "#option.tradeDate != null && #option.expiryDate != null"
+    action: "#option.daysToExpiry = T(java.time.temporal.ChronoUnit).DAYS.between(#option.tradeDate, #option.expiryDate)"
+    enabled: true
+    priority: 400
+
+  # Calculate Risk Exposure
+  - id: "calculate-risk-exposure"
+    name: "Calculate Risk Exposure"
+    condition: "#option.notionalQuantity != null && #option.strikePrice != null && #option.marginRate != null"
+    action: "#option.riskExposure = #option.notionalQuantity.multiply(#option.strikePrice).multiply(#option.marginRate)"
+    enabled: true
+    priority: 410
+
+  # Calculate Moneyness - Out of the Money
+  - id: "calculate-moneyness-otm"
+    name: "Calculate Moneyness - OTM"
+    condition: "#option.strikePrice != null && #option.strikePrice.compareTo(T(java.math.BigDecimal).valueOf(100)) > 0"
+    action: "#option.moneyness = 'OTM'"
+    enabled: true
+    priority: 420
+
+  # Calculate Moneyness - In the Money
+  - id: "calculate-moneyness-itm"
+    name: "Calculate Moneyness - ITM"
+    condition: "#option.strikePrice != null && #option.strikePrice.compareTo(T(java.math.BigDecimal).valueOf(50)) < 0"
+    action: "#option.moneyness = 'ITM'"
+    enabled: true
+    priority: 421
+
+  # Calculate Moneyness - At the Money
+  - id: "calculate-moneyness-atm"
+    name: "Calculate Moneyness - ATM"
+    condition: "#option.strikePrice != null && #option.strikePrice.compareTo(T(java.math.BigDecimal).valueOf(50)) >= 0 && #option.strikePrice.compareTo(T(java.math.BigDecimal).valueOf(100)) <= 0"
+    action: "#option.moneyness = 'ATM'"
+    enabled: true
+    priority: 422
+
+# Rule Groups for organized execution
+ruleGroups:
+  - name: "otc-options-enrichment"
+    description: "Complete OTC Options enrichment workflow"
+    enabled: true
+    rules:
+      - "commodity-enrichment"
+      - "buyer-counterparty-enrichment"
+      - "seller-counterparty-enrichment"
+      - "currency-enrichment"
+      - "calculate-days-to-expiry"
+      - "calculate-risk-exposure"
+      - "calculate-moneyness-otm"
+      - "calculate-moneyness-itm"
+      - "calculate-moneyness-atm"

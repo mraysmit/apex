@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OtcOption>
+    <tradeDate>2025-08-02</tradeDate>
+    <buyerParty>JP_MORGAN</buyerParty>
+    <sellerParty>GOLDMAN_SACHS</sellerParty>
+    <optionType>Call</optionType>
+    <underlyingAsset>
+        <commodity>Copper</commodity>
+        <unit>Pound</unit>
+    </underlyingAsset>
+    <strikePrice currency="USD">4.25</strikePrice>
+    <notionalQuantity>25000</notionalQuantity>
+    <expiryDate>2026-01-20</expiryDate>
+    <settlementType>Cash</settlementType>
+</OtcOption>

@@ -1,0 +1,290 @@
+# File Processing Demo - Configuration
+# This file contains configuration settings for the File Processing demonstration
+# Business users can modify these settings to customize demo behavior
+
+metadata:
+  name: "File Processing Demo - Configuration"
+  version: "1.0"
+  description: "Configuration settings for File Processing demonstration (FileProcessingDemo.java)"
+  type: "rule-config"
+  author: "APEX Demo Team"
+  associated-demo: "FileProcessingDemo"
+  file-purpose: "Configures multi-format file processing (JSON, XML, CSV) with validation rules"
+  lastUpdated: "2025-07-28"
+
+# Demo execution configuration
+demo:
+  name: "File Processing Demo"
+  description: "Comprehensive file processing with multiple formats and execution modes"
+  version: "2.0"
+  modes:
+    - name: "PRODUCTION"
+      description: "Production-oriented file processing with FileSystemDataSource patterns"
+      enabled: true
+    - name: "LEGACY"
+      description: "Traditional file processing with embedded business logic"
+      enabled: true
+    - name: "YAML"
+      description: "External configuration with business-user maintainable rules"
+      enabled: true
+
+# File processing configuration
+fileProcessing:
+  # Supported file formats
+  supportedFormats: ["JSON", "XML", "CSV"]
+  
+  # Directory configuration
+  directories:
+    baseDir: "demo-data"
+    jsonDir: "demo-data/json"
+    xmlDir: "demo-data/xml"
+    csvDir: "demo-data/csv"
+    outputDir: "demo-output"
+    
+  # File creation settings
+  fileCreation:
+    autoCreate: true
+    overwriteExisting: true
+    createDirectories: true
+    
+  # Processing settings
+  processing:
+    batchSize: 100
+    maxFileSize: "10MB"
+    timeoutSeconds: 30
+    parallelProcessing: true
+    maxThreads: 4
+
+# Validation configuration
+validation:
+  # Customer validation rules
+  customer:
+    age:
+      enabled: true
+      minAge: 18
+      maxAge: 120
+      errorMessage: "Customer age must be between 18 and 120"
+      
+    email:
+      enabled: true
+      requireAtSymbol: true
+      requireDomain: true
+      errorMessage: "Customer email must be in valid format"
+      
+    balance:
+      enabled: true
+      minBalance: 0.0
+      maxBalance: 1000000.0
+      errorMessage: "Customer account balance must be between 0 and 1,000,000"
+      
+    country:
+      enabled: true
+      validCountries: ["US", "GB", "CA", "DE", "FR", "JP", "AU", "NZ", "CH"]
+      errorMessage: "Customer country must be from supported list"
+      
+    status:
+      enabled: true
+      validStatuses: ["ACTIVE", "INACTIVE", "PENDING", "SUSPENDED"]
+      errorMessage: "Customer status must be valid"
+
+# Data enrichment configuration
+enrichment:
+  # Customer tier enrichment
+  customerTier:
+    enabled: true
+    rules:
+      - condition: "#accountBalance >= 100000"
+        tier: "PLATINUM"
+        discountRate: 0.15
+        priority: 1
+      - condition: "#accountBalance >= 50000"
+        tier: "GOLD"
+        discountRate: 0.10
+        priority: 2
+      - condition: "#accountBalance >= 10000"
+        tier: "SILVER"
+        discountRate: 0.05
+        priority: 3
+      - condition: "#accountBalance >= 0"
+        tier: "BASIC"
+        discountRate: 0.00
+        priority: 4
+        
+  # Risk rating enrichment
+  riskRating:
+    enabled: true
+    rules:
+      - condition: "#accountBalance >= 50000 && #age >= 30"
+        rating: "LOW"
+        riskScore: 0.1
+      - condition: "#accountBalance >= 10000 && #age >= 25"
+        rating: "MEDIUM"
+        riskScore: 0.3
+      - condition: "true"
+        rating: "HIGH"
+        riskScore: 0.7
+
+# Performance configuration
+performance:
+  # Metrics collection
+  metrics:
+    enabled: true
+    collectProcessingTime: true
+    collectMemoryUsage: true
+    collectFileStats: true
+    reportingIntervalSeconds: 30
+    
+  # Caching settings
+  caching:
+    enabled: true
+    maxCacheSize: 1000
+    cacheTtlSeconds: 3600
+    cacheValidationResults: true
+    
+  # Optimization settings
+  optimization:
+    enableParallelProcessing: true
+    maxConcurrentFiles: 4
+    streamProcessing: true
+    lazyLoading: true
+
+# Error handling configuration
+errorHandling:
+  # File processing errors
+  fileProcessing:
+    continueOnError: true
+    logErrors: true
+    createErrorReport: true
+    maxErrorsPerFile: 10
+    
+  # Validation errors
+  validation:
+    stopOnFirstError: false
+    collectAllErrors: true
+    includeFieldNames: true
+    includeErrorCodes: true
+    
+  # Recovery settings
+  recovery:
+    retryOnFailure: true
+    maxRetries: 3
+    retryDelayMs: 1000
+    fallbackToDefaults: true
+
+# Logging configuration
+logging:
+  level: "INFO"
+  enableFileProcessingLogs: true
+  enableValidationLogs: true
+  enablePerformanceLogs: true
+  logSuccessfulProcessing: true
+  logFailedProcessing: true
+  logDirectory: "logs"
+
+# Business rules configuration
+businessRules:
+  # File processing rules
+  fileProcessing:
+    enabled: true
+    rules:
+      - name: "file-size-validation"
+        expression: "#fileSize <= 10485760"  # 10MB
+        errorCode: "FILE_TOO_LARGE"
+        severity: "ERROR"
+        
+      - name: "file-format-validation"
+        expression: "#fileFormat in {'JSON', 'XML', 'CSV'}"
+        errorCode: "UNSUPPORTED_FORMAT"
+        severity: "ERROR"
+        
+  # Data quality rules
+  dataQuality:
+    enabled: true
+    rules:
+      - name: "required-fields-validation"
+        expression: "#customerId != null && #firstName != null && #lastName != null && #email != null"
+        errorCode: "MISSING_REQUIRED_FIELDS"
+        severity: "ERROR"
+        
+      - name: "data-consistency-validation"
+        expression: "#age >= 0 && #accountBalance != null"
+        errorCode: "DATA_INCONSISTENCY"
+        severity: "WARNING"
+
+# Test scenarios configuration
+testScenarios:
+  # JSON processing scenario
+  jsonProcessing:
+    enabled: true
+    description: "Test JSON file processing"
+    inputFile: "demo-data/file-processing/customers.json"
+    expectedRecords: 8
+    expectedValidRecords: 4
+    expectedInvalidRecords: 4
+    
+  # XML processing scenario
+  xmlProcessing:
+    enabled: true
+    description: "Test XML file processing"
+    inputFile: "demo-data/file-processing/customers.xml"
+    expectedRecords: 8
+    expectedValidRecords: 4
+    expectedInvalidRecords: 4
+    
+  # Batch processing scenario
+  batchProcessing:
+    enabled: true
+    description: "Test batch file processing"
+    batchSize: 50
+    expectedTotalRecords: 16
+    maxProcessingTimeMs: 5000
+    
+  # Performance scenario
+  performanceTest:
+    enabled: true
+    description: "Test file processing performance"
+    fileCount: 10
+    recordsPerFile: 100
+    maxProcessingTimeMs: 10000
+
+# Integration configuration
+integration:
+  # External data sources
+  dataSources:
+    enabled: false
+    jsonDataSource: "demo-data/file-processing/customers.json"
+    xmlDataSource: "demo-data/file-processing/customers.xml"
+    configurationSource: "demo-data/file-processing/config.yaml"
+    
+  # File system integration
+  fileSystem:
+    watchDirectories: false
+    autoProcessNewFiles: false
+    moveProcessedFiles: false
+    archiveDirectory: "archive"
+
+# Output configuration
+output:
+  # Console output settings
+  console:
+    enabled: true
+    showProgress: true
+    showDetails: true
+    showTimings: true
+    showStatistics: true
+    colorOutput: true
+    
+  # File output settings
+  file:
+    enabled: true
+    outputDirectory: "demo-output/file-processing"
+    generateReports: true
+    includeMetrics: true
+    reportFormat: "JSON"
+    
+  # Report configuration
+  reports:
+    processingReport: true
+    validationReport: true
+    performanceReport: true
+    errorReport: true

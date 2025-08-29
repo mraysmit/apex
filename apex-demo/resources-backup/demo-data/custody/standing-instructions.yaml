@@ -1,0 +1,318 @@
+# Custody Auto-Repair Demo - Standing Instructions Data
+# This file contains standing instruction data for auto-repair functionality
+# Business users can modify this data to customize repair behavior
+
+metadata:
+  name: "Custody Auto-Repair Demo - Standing Instructions Dataset"
+  version: "1.0"
+  description: "Standing instruction data for Custody auto-repair demonstrations (CustodyAutoRepairBootstrap.java)"
+  type: "dataset"
+  source: "generated"
+  associated-demo: "CustodyAutoRepairBootstrap"
+  file-purpose: "Provides standing instruction templates for auto-repair functionality"
+  lastUpdated: "2025-07-28"
+  author: "APEX Demo Team"
+
+# Configuration for standing instructions
+configuration:
+  # Weighting system for standing instruction priority
+  weights:
+    CLIENT_SPECIFIC: 0.6    # Highest priority - client-specific instructions
+    MARKET_SPECIFIC: 0.3    # Medium priority - market-specific instructions
+    INSTRUMENT_SPECIFIC: 0.1 # Lowest priority - instrument-specific instructions
+    
+  # Confidence levels for different instruction types
+  confidenceLevels:
+    PREMIUM_CLIENT: 0.98
+    STANDARD_CLIENT: 0.90
+    MARKET_DEFAULT: 0.85
+    INSTRUMENT_DEFAULT: 0.75
+    
+  # Auto-repair thresholds
+  thresholds:
+    minConfidenceForAutoRepair: 0.70
+    minConfidenceForPartialRepair: 0.50
+    highValueApprovalThreshold: 10000000.0
+
+# Standing Instructions Data
+standingInstructions:
+  # Client-specific standing instructions (highest weight: 0.6)
+  client-specific:
+    - siId: "SI_CLIENT_A"
+      clientId: "CLIENT_A"
+      siName: "Client A Default SI"
+      description: "Default standing instruction for Client A"
+      scopeType: "CLIENT"
+      weight: 0.6
+      confidenceLevel: 0.90
+      defaultCounterpartyId: "CP_CLIENT_A_DEFAULT"
+      defaultCustodianId: "CUST_CLIENT_A"
+      defaultSettlementMethod: "DVP"
+      defaultDeliveryInstruction: "DELIVER"
+      enabled: true
+      
+    - siId: "SI_PREMIUM_X"
+      clientId: "PREMIUM_CLIENT_X"
+      siName: "Premium Client X SI"
+      description: "Premium client with special requirements"
+      scopeType: "CLIENT"
+      weight: 0.6
+      confidenceLevel: 0.98
+      defaultSettlementMethod: "DVP_PREMIUM"
+      defaultCustodianId: "CUST_PREMIUM_GLOBAL"
+      defaultCounterpartyId: "CP_PREMIUM_GLOBAL_CUSTODY"
+      defaultDeliveryInstruction: "DELIVER"
+      enabled: true
+      riskCategory: "LOW"
+      clientTier: "PREMIUM"
+      
+    - siId: "SI_CLIENT_B"
+      clientId: "CLIENT_B"
+      siName: "Client B High Value SI"
+      description: "High value client with enhanced monitoring"
+      scopeType: "CLIENT"
+      weight: 0.6
+      confidenceLevel: 0.95
+      defaultCounterpartyId: "CP_SG_PREMIUM"
+      defaultCustodianId: "CUST_SG_PREMIUM"
+      defaultSettlementMethod: "DVP"
+      defaultDeliveryInstruction: "DELIVER"
+      enabled: true
+      riskCategory: "MEDIUM"
+      clientTier: "PREMIUM"
+
+  # Market-specific standing instructions (medium weight: 0.3)
+  market-specific:
+    - siId: "SI_JAPAN"
+      market: "JAPAN"
+      siName: "Japan Market SI"
+      description: "Default standing instruction for Japan market"
+      scopeType: "MARKET"
+      weight: 0.3
+      confidenceLevel: 0.85
+      defaultCustodianId: "CUST_JAPAN_DEFAULT"
+      defaultCounterpartyId: "CP_JAPAN_STANDARD"
+      defaultSettlementMethod: "DVP"
+      defaultDeliveryInstruction: "DELIVER"
+      enabled: true
+      marketSpecific: true
+      
+    - siId: "SI_HONG_KONG"
+      market: "HONG_KONG"
+      siName: "Hong Kong Market SI"
+      description: "Default standing instruction for Hong Kong market"
+      scopeType: "MARKET"
+      weight: 0.3
+      confidenceLevel: 0.85
+      defaultCustodianId: "CUST_HK_STANDARD"
+      defaultCounterpartyId: "CP_HK_STANDARD"
+      defaultSettlementMethod: "DVP"
+      defaultDeliveryInstruction: "DELIVER"
+      enabled: true
+      marketSpecific: true
+      
+    - siId: "SI_SINGAPORE"
+      market: "SINGAPORE"
+      siName: "Singapore Market SI"
+      description: "Default standing instruction for Singapore market"
+      scopeType: "MARKET"
+      weight: 0.3
+      confidenceLevel: 0.85
+      defaultCustodianId: "CUST_SG_STANDARD"
+      defaultCounterpartyId: "CP_SG_STANDARD"
+      defaultSettlementMethod: "DVP"
+      defaultDeliveryInstruction: "DELIVER"
+      enabled: true
+      marketSpecific: true
+      
+    - siId: "SI_KOREA"
+      market: "KOREA"
+      siName: "Korea Market SI"
+      description: "Default standing instruction for Korea market"
+      scopeType: "MARKET"
+      weight: 0.3
+      confidenceLevel: 0.85
+      defaultCustodianId: "CUST_KR_STANDARD"
+      defaultCounterpartyId: "CP_KR_STANDARD"
+      defaultSettlementMethod: "DVP"
+      defaultDeliveryInstruction: "DELIVER"
+      enabled: true
+      marketSpecific: true
+
+  # Instrument-specific standing instructions (lowest weight: 0.1)
+  instrument-specific:
+    - siId: "SI_EQUITY_GLOBAL"
+      instrumentType: "EQUITY"
+      siName: "Global Equity SI"
+      description: "Default standing instruction for equity instruments"
+      scopeType: "INSTRUMENT"
+      weight: 0.1
+      confidenceLevel: 0.75
+      defaultSettlementMethod: "DVP"
+      defaultDeliveryInstruction: "DELIVER"
+      enabled: true
+      
+    - siId: "SI_FIXED_INCOME_GLOBAL"
+      instrumentType: "FIXED_INCOME"
+      siName: "Global Fixed Income SI"
+      description: "Default standing instruction for fixed income instruments"
+      scopeType: "INSTRUMENT"
+      weight: 0.1
+      confidenceLevel: 0.75
+      defaultSettlementMethod: "DVP"
+      defaultDeliveryInstruction: "DELIVER"
+      enabled: true
+
+# Repair configuration by scenario
+repairConfiguration:
+  # Basic repair scenarios
+  basic-repair:
+    description: "Standard auto-repair for missing fields"
+    applicableFields: ["counterpartyId", "custodianId", "settlementMethod"]
+    minConfidence: 0.70
+    autoApprove: true
+    
+  # Premium client repair
+  premium-repair:
+    description: "Enhanced repair for premium clients"
+    applicableClients: ["PREMIUM_CLIENT_X"]
+    applicableFields: ["settlementMethod", "custodianId", "counterpartyId"]
+    minConfidence: 0.90
+    autoApprove: true
+    enhancedMonitoring: true
+    
+  # Market-specific repair
+  market-repair:
+    description: "Market-specific auto-repair"
+    applicableMarkets: ["JAPAN", "HONG_KONG", "SINGAPORE", "KOREA"]
+    applicableFields: ["custodianId", "counterpartyId"]
+    minConfidence: 0.80
+    autoApprove: true
+    
+  # High-value repair
+  high-value-repair:
+    description: "High value transaction repair with approval"
+    amountThreshold: 10000000.0
+    applicableFields: ["counterpartyId", "custodianId", "settlementMethod"]
+    minConfidence: 0.85
+    autoApprove: false
+    requiresApproval: true
+    
+  # Opt-out handling
+  opt-out-handling:
+    description: "Handle client opt-out scenarios"
+    applicableClients: ["CLIENT_OPT_OUT"]
+    autoRepairEnabled: false
+    manualReviewRequired: true
+
+# Field repair priorities
+fieldRepairPriorities:
+  counterpartyId:
+    priority: 1
+    description: "Counterparty identification is critical for settlement"
+    sources: ["CLIENT_SI", "MARKET_SI"]
+    
+  custodianId:
+    priority: 2
+    description: "Custodian identification required for safekeeping"
+    sources: ["CLIENT_SI", "MARKET_SI"]
+    
+  settlementMethod:
+    priority: 3
+    description: "Settlement method determines processing flow"
+    sources: ["CLIENT_SI", "MARKET_SI", "INSTRUMENT_SI"]
+    
+  deliveryInstruction:
+    priority: 4
+    description: "Delivery instruction for physical settlement"
+    sources: ["CLIENT_SI", "MARKET_SI", "INSTRUMENT_SI"]
+
+# Confidence scoring rules
+confidenceScoring:
+  # Client-specific match
+  clientMatch:
+    baseScore: 0.6
+    premiumClientBonus: 0.1
+    exactMatchBonus: 0.2
+    
+  # Market-specific match
+  marketMatch:
+    baseScore: 0.3
+    regionalMatchBonus: 0.05
+    exactMatchBonus: 0.1
+    
+  # Instrument-specific match
+  instrumentMatch:
+    baseScore: 0.1
+    categoryMatchBonus: 0.02
+    exactMatchBonus: 0.05
+    
+  # Quality adjustments
+  qualityAdjustments:
+    recentDataBonus: 0.05
+    verifiedDataBonus: 0.03
+    frequentUseBonus: 0.02
+
+# Business rules for standing instruction application
+business-rules:
+  client-priority:
+    rule: "#clientId != null && #clientSI != null"
+    description: "Client-specific SIs take highest priority"
+    weight: 0.6
+    
+  market-fallback:
+    rule: "#market != null && #marketSI != null && #clientSI == null"
+    description: "Market SIs used when no client SI available"
+    weight: 0.3
+    
+  instrument-fallback:
+    rule: "#instrumentType != null && #instrumentSI != null && #clientSI == null && #marketSI == null"
+    description: "Instrument SIs used as last resort"
+    weight: 0.1
+    
+  confidence-threshold:
+    rule: "#totalConfidence >= 0.70"
+    description: "Minimum confidence required for auto-repair"
+    errorMessage: "Confidence below threshold for auto-repair"
+    
+  high-value-approval:
+    rule: "#settlementAmount < 10000000 || #requiresApproval == true"
+    description: "High value transactions require approval"
+    errorMessage: "High value transactions require manual approval"
+    
+  client-opt-out:
+    rule: "#clientOptOut != true || #autoRepairEnabled == false"
+    description: "Respect client opt-out preferences"
+    errorMessage: "Auto-repair disabled for opt-out clients"
+
+# Test scenarios for standing instruction matching
+test-scenarios:
+  client-specific-match:
+    description: "Test client-specific SI matching"
+    instruction: "SI001"
+    expectedSI: "SI_CLIENT_A"
+    expectedConfidence: 0.90
+    
+  premium-client-match:
+    description: "Test premium client SI matching"
+    instruction: "SI002"
+    expectedSI: "SI_PREMIUM_X"
+    expectedConfidence: 0.98
+    
+  market-specific-match:
+    description: "Test market-specific SI matching"
+    instruction: "SI_JAPAN_EQUITY"
+    expectedSI: "SI_JAPAN"
+    expectedConfidence: 0.85
+    
+  high-value-scenario:
+    description: "Test high value transaction handling"
+    instruction: "SI_HIGH_VALUE"
+    expectedResult: "REQUIRES_APPROVAL"
+    expectedConfidence: 0.85
+    
+  opt-out-scenario:
+    description: "Test client opt-out handling"
+    instruction: "SI_OPT_OUT"
+    expectedResult: "NO_REPAIR"
+    expectedReason: "CLIENT_OPTED_OUT"

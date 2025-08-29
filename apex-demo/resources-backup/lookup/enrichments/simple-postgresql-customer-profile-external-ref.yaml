@@ -1,0 +1,65 @@
+metadata:
+  name: "Simple PostgreSQL Customer Profile Enrichment - External Reference"
+  version: "2.1.0"
+  type: "rule-config"
+  description: "Simple customer profile enrichment using external PostgreSQL data-source reference system"
+  author: "Mark A Ray-Smith"
+  created: "2025-08-28"
+  tags:
+    - "customer"
+    - "database"
+    - "postgresql"
+    - "external-reference"
+    - "simple"
+    - "clean-architecture"
+
+# External data-source references (infrastructure configuration - reusable)
+# This section references external infrastructure configurations that can be shared
+# across multiple enrichments, providing clean separation of concerns.
+data-source-refs:
+  - name: "postgresql-customer-database"
+    source: "data-sources/postgresql-customer-database.yaml"
+    enabled: true
+    description: "PostgreSQL customer database for simple profile enrichment (external reference)"
+
+# Business logic enrichments (lean and focused)
+# This section contains only business logic - no infrastructure configuration.
+# All database connections, queries, and parameters are defined in external references.
+enrichments:
+  # Primary customer profile enrichment
+  - id: "simple-customer-profile-lookup"
+    type: "lookup-enrichment"
+    description: "Simple customer profile enrichment using external PostgreSQL data-source reference"
+    condition: "#customerId != null && #customerId != ''"
+
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "postgresql-customer-database"  # References external data-source
+        query-ref: "getActiveCustomerById"  # Named query from external config
+        parameters:
+          - field: "customerId"
+            type: "string"
+
+    # Field mappings from database columns to enriched object fields
+    # Note: Field names use uppercase to match H2 database column names
+    field-mappings:
+      - source-field: "CUSTOMER_NAME"
+        target-field: "customerName"
+        required: true
+      - source-field: "CUSTOMER_TYPE"
+        target-field: "customerType"
+        required: true
+      - source-field: "TIER"
+        target-field: "customerTier"
+        required: true
+      - source-field: "REGION"
+        target-field: "customerRegion"
+        required: true
+      - source-field: "STATUS"
+        target-field: "customerStatus"
+        required: true
+      - source-field: "CREATED_DATE"
+        target-field: "customerCreatedDate"
+        required: false

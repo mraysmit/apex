@@ -1,0 +1,249 @@
+# Simplified API Demo Configuration
+# Real APEX YAML configuration for SimplifiedAPIDemo.java
+# NO HARDCODED SIMULATION - Uses authentic APEX services
+
+metadata:
+  name: "Simplified API Demo Configuration"
+  version: "2.0"
+  description: "Real APEX simplified API demonstration with ultra-simple processing, one-liner rule evaluations, and template-based validation"
+  author: "APEX Demo Team"
+  created: "2025-01-29"
+
+# Ultra-Simple API Enrichments
+enrichments:
+  - name: "ultra-simple-api-processing"
+    type: "simple-enrichment"
+    description: "Ultra-simple API for 90% of use cases using real APEX processing"
+    conditions:
+      - condition: "#data.apiType == 'ULTRA_SIMPLE'"
+        actions:
+          - type: "simple-validation"
+            validations:
+              - field: "name"
+                rule: "#value != null && #value.length() > 0"
+                message: "Name must be present and non-empty"
+                result-field: "nameValid"
+              - field: "age"
+                rule: "#value != null && #value >= 18 && #value <= 120"
+                message: "Age must be between 18 and 120"
+                result-field: "ageValid"
+              - field: "email"
+                rule: "#value != null && #value.contains('@')"
+                message: "Email must contain @ symbol"
+                result-field: "emailValid"
+            processing-metadata:
+              api-type: "ULTRA_SIMPLE"
+              complexity: "LOW"
+              use-case-coverage: "90%"
+
+  - name: "one-liner-rule-evaluations"
+    type: "one-liner-enrichment"
+    description: "One-liner rule evaluations with simplified syntax"
+    conditions:
+      - condition: "#data.apiType == 'ONE_LINER'"
+        actions:
+          - type: "one-liner-processing"
+            rules:
+              - name: "order-approval"
+                expression: "#data.orderAmount <= #data.creditLimit && (#data.customerType == 'PREMIUM' || #data.orderAmount <= 10000)"
+                result-field: "orderApproved"
+                message: "Order approval based on credit limit and customer type"
+              - name: "discount-eligibility"
+                expression: "#data.customerType == 'PREMIUM' && #data.orderAmount > 10000"
+                result-field: "discountEligible"
+                message: "Premium customers with orders over $10,000 qualify for discounts"
+              - name: "amount-validation"
+                expression: "#data.orderAmount > 0 && #data.orderAmount <= 1000000"
+                result-field: "amountValid"
+                message: "Order amount must be positive and within limits"
+            processing-metadata:
+              api-type: "ONE_LINER"
+              complexity: "MEDIUM"
+              syntax: "SIMPLIFIED"
+
+  - name: "template-based-validation"
+    type: "template-enrichment"
+    description: "Template-based validation patterns for common scenarios"
+    conditions:
+      - condition: "#data.apiType == 'TEMPLATE_BASED'"
+        actions:
+          - type: "template-processing"
+            templates:
+              - template: "customer-validation"
+                validations:
+                  - field: "customerName"
+                    rule: "#value != null && #value.length() >= 2"
+                    message: "Customer name must be at least 2 characters"
+                    result-field: "customerNameValid"
+                  - field: "customerEmail"
+                    rule: "#value != null && #value.matches('.*@.*\\..+')"
+                    message: "Customer email must be valid format"
+                    result-field: "customerEmailValid"
+              - template: "transaction-validation"
+                validations:
+                  - field: "transactionAmount"
+                    rule: "#value != null && #value > 0"
+                    message: "Transaction amount must be positive"
+                    result-field: "transactionAmountValid"
+                  - field: "transactionType"
+                    rule: "#value != null && (#value == 'WIRE_TRANSFER' || #value == 'ACH' || #value == 'CHECK')"
+                    message: "Transaction type must be valid"
+                    result-field: "transactionTypeValid"
+              - template: "risk-assessment"
+                rules:
+                  - condition: "#data.customerRiskRating == 'LOW' && #data.transactionAmount <= 100000"
+                    action:
+                      type: "set-field"
+                      field: "riskAssessment"
+                      value: "LOW_RISK"
+                  - condition: "#data.customerRiskRating == 'MEDIUM' || (#data.transactionAmount > 100000 && #data.transactionAmount <= 500000)"
+                    action:
+                      type: "set-field"
+                      field: "riskAssessment"
+                      value: "MEDIUM_RISK"
+                  - condition: "#data.customerRiskRating == 'HIGH' || #data.transactionAmount > 500000"
+                    action:
+                      type: "set-field"
+                      field: "riskAssessment"
+                      value: "HIGH_RISK"
+            processing-metadata:
+              api-type: "TEMPLATE_BASED"
+              complexity: "HIGH"
+              reusability: "HIGH"
+
+# Simplified API Configuration
+simplified-api-config:
+  ultra-simple:
+    description: "Ultra-simple API for 90% of common use cases"
+    features:
+      - "one-line-validations"
+      - "simple-field-checks"
+      - "basic-business-rules"
+    performance:
+      target-latency: "< 5ms"
+      throughput: "HIGH"
+      memory-usage: "MINIMAL"
+    
+  one-liner:
+    description: "One-liner rule evaluations with simplified syntax"
+    features:
+      - "single-expression-rules"
+      - "inline-conditions"
+      - "immediate-results"
+    performance:
+      target-latency: "< 10ms"
+      throughput: "HIGH"
+      memory-usage: "LOW"
+    
+  template-based:
+    description: "Template-based validation patterns for reusability"
+    features:
+      - "reusable-templates"
+      - "pattern-matching"
+      - "complex-validations"
+    performance:
+      target-latency: "< 25ms"
+      throughput: "MEDIUM"
+      memory-usage: "MEDIUM"
+
+# Rule Templates for Simplified API
+rule-templates:
+  validation-templates:
+    - name: "required-field"
+      pattern: "#field != null && #field.length() > 0"
+      description: "Required field validation template"
+    - name: "numeric-range"
+      pattern: "#field >= #min && #field <= #max"
+      description: "Numeric range validation template"
+    - name: "email-format"
+      pattern: "#field != null && #field.contains('@')"
+      description: "Basic email format validation template"
+    - name: "positive-amount"
+      pattern: "#field > 0"
+      description: "Positive amount validation template"
+      
+  business-rule-templates:
+    - name: "approval-rule"
+      pattern: "#amount <= #limit && (#type == 'PREMIUM' || #amount <= #threshold)"
+      description: "Business approval rule template"
+    - name: "eligibility-rule"
+      pattern: "#customerType == #requiredType && #amount > #minimumAmount"
+      description: "Customer eligibility rule template"
+    - name: "risk-rule"
+      pattern: "#riskRating == 'LOW' && #amount <= #riskThreshold"
+      description: "Risk assessment rule template"
+      
+  performance-templates:
+    - name: "fast-validation"
+      pattern: "#field != null"
+      description: "Ultra-fast null check template"
+      performance: "< 1ms"
+    - name: "medium-validation"
+      pattern: "#field != null && #field.matches(#pattern)"
+      description: "Medium complexity validation template"
+      performance: "< 5ms"
+    - name: "complex-validation"
+      pattern: "#field != null && #customFunction(#field, #parameters)"
+      description: "Complex validation template"
+      performance: "< 15ms"
+
+# API Simplification Levels
+simplification-levels:
+  - level: 1
+    name: "Ultra-Simple"
+    description: "Single method calls with minimal parameters"
+    target-users: "Beginners, quick prototyping"
+    complexity: "MINIMAL"
+    
+  - level: 2
+    name: "One-Liner"
+    description: "Single expression evaluations with context"
+    target-users: "Intermediate developers, common use cases"
+    complexity: "LOW"
+    
+  - level: 3
+    name: "Template-Based"
+    description: "Reusable templates with parameterization"
+    target-users: "Advanced developers, enterprise applications"
+    complexity: "MEDIUM"
+
+# Performance Optimization
+performance-optimization:
+  caching:
+    enabled: true
+    cache-size: 1000
+    ttl: 300
+    
+  expression-compilation:
+    enabled: true
+    compilation-cache-size: 500
+    
+  result-caching:
+    enabled: true
+    result-cache-size: 200
+    result-ttl: 60
+
+# Processing Configuration
+processing:
+  fail-fast: true
+  enable-logging: true
+  max-processing-time: 5000
+  simplified-processing: true
+  template-caching: true
+  
+# Output Configuration
+output:
+  format: "json"
+  include-metadata: true
+  include-processing-time: true
+  include-api-type: true
+  include-simplification-level: true
+  include-performance-metrics: true
+
+# Error Handling Configuration
+error-handling:
+  ultra-simple-errors: "user-friendly"
+  one-liner-errors: "detailed"
+  template-errors: "comprehensive"
+  validation-errors: "collect"
+  business-rule-errors: "fail-fast"

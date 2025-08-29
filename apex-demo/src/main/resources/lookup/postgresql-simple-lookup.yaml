@@ -1,0 +1,83 @@
+# Self-Contained Database Data Source Configuration
+# Demonstrates external database data source using embedded H2 database (PostgreSQL compatible mode)
+# Use Case: Customer profile data source for enrichment lookups
+
+metadata:
+  name: "Self-Contained Database Data Source Demo"
+  description: "Data source configuration for embedded H2 database with connection pooling and caching"
+  version: "1.0.0"
+  type: "external-data-config"
+  author: "APEX Demo Team"
+
+# External data source configuration
+dataSources:
+  - name: "customer-database"
+    type: "database"
+    sourceType: "h2"
+    enabled: true
+    description: "Customer master data from self-contained H2 database"
+
+    connection:
+      url: "jdbc:h2:mem:apex_demo;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      username: "apex_user"
+      password: "apex_password"
+
+      # Connection pool configuration (verified against YamlDataSource.java)
+      connection-pool:
+        max-size: 20
+        min-size: 5
+        initial-size: 5
+        connection-timeout: 30000
+        idle-timeout: 600000
+        max-lifetime: 1800000
+        leak-detection-threshold: 60000
+        connection-test-query: "SELECT 1"
+        test-on-borrow: true
+        test-while-idle: true
+        
+    # Caching configuration for performance
+    cache:
+      enabled: true
+      ttlSeconds: 3600  # 1 hour cache
+      maxSize: 10000
+
+    # Health check configuration
+    healthCheck:
+      enabled: true
+      query: "SELECT 1"
+      intervalSeconds: 30
+      timeoutSeconds: 5
+      
+    # Database initialization (for demo purposes)
+    initialization:
+      enabled: true
+      scripts:
+        - |
+          CREATE TABLE IF NOT EXISTS customers (
+            customer_id VARCHAR(20) PRIMARY KEY,
+            customer_name VARCHAR(100) NOT NULL,
+            customer_type VARCHAR(20) NOT NULL,
+            tier VARCHAR(20) NOT NULL,
+            region VARCHAR(10) NOT NULL,
+            status VARCHAR(20) NOT NULL,
+            created_date DATE,
+            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+        - |
+          INSERT INTO customers (customer_id, customer_name, customer_type, tier, region, status, created_date) VALUES
+          ('CUST000001', 'Acme Corporation', 'CORPORATE', 'PLATINUM', 'NA', 'ACTIVE', '2023-01-15'),
+          ('CUST000002', 'Beta Industries', 'CORPORATE', 'GOLD', 'EU', 'ACTIVE', '2023-02-20'),
+          ('CUST000003', 'Gamma Holdings', 'INSTITUTIONAL', 'PLATINUM', 'APAC', 'ACTIVE', '2023-03-10'),
+          ('CUST000004', 'Delta Partners', 'CORPORATE', 'SILVER', 'NA', 'ACTIVE', '2023-04-05'),
+          ('CUST000005', 'Epsilon Fund', 'INSTITUTIONAL', 'GOLD', 'EU', 'ACTIVE', '2023-05-12')
+          ON DUPLICATE KEY UPDATE customer_name = VALUES(customer_name);
+
+    # Query definitions for this data source
+    queries:
+      customerProfile: "SELECT customer_id, customer_name, customer_type, tier, region, status, created_date, last_updated FROM customers WHERE customer_id = ?"
+
+    # Parameter definitions
+    parameterNames:
+      - "customerId"
+
+

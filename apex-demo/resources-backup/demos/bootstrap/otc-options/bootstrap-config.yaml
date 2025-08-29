@@ -1,0 +1,460 @@
+# ============================================================================
+# APEX Rules Engine - OTC Options Bootstrap Configuration
+# ============================================================================
+#
+# This YAML configuration demonstrates comprehensive OTC Options validation
+# and enrichment using three different data lookup methods, showcasing the
+# full spectrum of data source integration capabilities in the APEX Rules Engine.
+#
+# OVERVIEW:
+# This bootstrap configuration processes Over-the-Counter (OTC) Options data
+# through a sophisticated validation and enrichment pipeline that demonstrates
+# real-world financial derivatives processing with multiple data sources.
+#
+# THREE DATA LOOKUP METHODS DEMONSTRATED:
+# 1. INLINE YAML DATASET - Commodity reference data embedded in configuration
+# 2. POSTGRESQL DATABASE - Counterparty information from relational database
+# 3. EXTERNAL YAML FILE - Market and currency data from external file
+#
+# OTC OPTIONS PROCESSING PIPELINE:
+# 1. INFRASTRUCTURE SETUP - Automated database and file creation
+# 2. DATA SOURCE VERIFICATION - Comprehensive validation of all data sources
+# 3. XML DATA PROCESSING - Parse and validate OTC Options XML data
+# 4. MULTI-SOURCE ENRICHMENT - Enhance data using all three lookup methods
+# 5. BUSINESS VALIDATION - Apply financial business rules and compliance checks
+# 6. RESULTS DEMONSTRATION - Show enriched data with audit trails
+#
+# FINANCIAL INSTRUMENTS COVERED:
+# - Natural Gas Options (Energy commodities)
+# - Crude Oil Options (Energy derivatives)
+# - Precious Metals Options (Gold, Silver)
+# - Base Metals Options (Copper)
+# - Agricultural Options (Wheat)
+#
+# BUSINESS VALUE:
+# - Demonstrates enterprise-grade data integration patterns
+# - Shows real-world financial derivatives processing
+# - Provides comprehensive validation and enrichment examples
+# - Enables rapid prototyping of financial data pipelines
+# - Supports regulatory compliance and risk management requirements
+#
+# ============================================================================
+
+metadata:
+  name: "OTC Options Bootstrap Configuration"
+  version: "1.0.0"
+  description: "Complete OTC Options validation and enrichment with three data lookup methods"
+  type: "bootstrap"
+  created-by: "bootstrap.admin@company.com"
+  business-domain: "OTC Derivatives"
+  business-owner: "Derivatives Trading Desk"
+  created-date: "2025-08-02"
+  tags: ["bootstrap", "otc-options", "derivatives", "multi-source-enrichment"]
+
+# ============================================================================
+# VALIDATION RULES
+# ============================================================================
+#
+# These rules validate OTC Options data for structural integrity, business
+# logic compliance, and regulatory requirements before enrichment processing.
+#
+rules:
+  # Structural Validation Rules
+  - id: "trade-date-required"
+    name: "TradeB Date Required"
+    condition: "#tradeDate != null"
+    message: "TradeB date is required for all OTC options"
+    severity: "ERROR"
+    priority: 1
+    categories: ["structural", "required-fields"]
+
+  - id: "parties-required"
+    name: "Counterparties Required"
+    condition: "#buyerParty != null && #sellerParty != null && #buyerParty != #sellerParty"
+    message: "Both buyer and seller parties are required and must be different"
+    severity: "ERROR"
+    priority: 1
+    categories: ["structural", "counterparty"]
+
+  - id: "option-type-valid"
+    name: "Valid Option Type"
+    condition: "#optionType != null && (#optionType == 'Call' || #optionType == 'Put')"
+    message: "Option type must be either 'Call' or 'Put'"
+    severity: "ERROR"
+    priority: 1
+    categories: ["structural", "option-validation"]
+
+  - id: "underlying-asset-required"
+    name: "Underlying Asset Required"
+    condition: "#underlyingAsset != null && #underlyingAsset.commodity != null && #underlyingAsset.unit != null"
+    message: "Underlying asset with commodity and unit is required"
+    severity: "ERROR"
+    priority: 1
+    categories: ["structural", "underlying"]
+
+  # Financial Validation Rules
+  - id: "strike-price-positive"
+    name: "Positive Strike Price"
+    condition: "#strikePrice != null && #strikePrice > 0"
+    message: "Strike price must be positive"
+    severity: "ERROR"
+    priority: 2
+    categories: ["financial", "pricing"]
+
+  - id: "notional-quantity-positive"
+    name: "Positive Notional Quantity"
+    condition: "#notionalQuantity != null && #notionalQuantity > 0"
+    message: "Notional quantity must be positive"
+    severity: "ERROR"
+    priority: 2
+    categories: ["financial", "sizing"]
+
+  - id: "expiry-after-trade"
+    name: "Expiry After TradeB Date"
+    condition: "#expiryDate != null && #tradeDate != null && #expiryDate.isAfter(#tradeDate)"
+    message: "Expiry date must be after trade date"
+    severity: "ERROR"
+    priority: 2
+    categories: ["financial", "temporal"]
+
+  # Business Logic Validation Rules
+  - id: "settlement-type-valid"
+    name: "Valid Settlement Type"
+    condition: "#settlementType != null && (#settlementType == 'Cash' || #settlementType == 'Physical')"
+    message: "Settlement type must be either 'Cash' or 'Physical'"
+    severity: "WARNING"
+    priority: 3
+    categories: ["business-logic", "settlement"]
+
+  - id: "currency-supported"
+    name: "Supported Currency"
+    condition: "#strikeCurrency != null && #strikeCurrency in {'USD', 'EUR', 'GBP', 'JPY'}"
+    message: "Strike currency must be a supported major currency"
+    severity: "WARNING"
+    priority: 3
+    categories: ["business-logic", "currency"]
+
+  # Risk Management Rules
+  - id: "maximum-notional-limit"
+    name: "Maximum Notional Limit"
+    condition: "#notionalQuantity <= 1000000"
+    message: "Notional quantity exceeds maximum limit of 1,000,000 units"
+    severity: "INFO"
+    priority: 4
+    categories: ["risk-management", "limits"]
+
+# ============================================================================
+# ENRICHMENT RULES - THREE DATA LOOKUP METHODS
+# ============================================================================
+#
+# These enrichment rules demonstrate the three different data lookup methods
+# available in the APEX Rules Engine, each serving different use cases and
+# architectural patterns.
+#
+enrichments:
+  
+  # ========================================================================
+  # METHOD 1: INLINE YAML DATASET - Commodity Reference Data
+  # ========================================================================
+  #
+  # Inline datasets are embedded directly in the configuration file,
+  # providing fast, reliable access to static reference data that rarely
+  # changes. Ideal for small, stable datasets.
+  #
+  - id: "commodity-enrichment"
+    type: "lookup-enrichment"
+    name: "Commodity Reference Data Enrichment"
+    description: "Enrich options with commodity category, exchange, and risk information"
+    condition: "#underlyingAsset != null && #underlyingAsset.commodity != null"
+    priority: 10
+    enabled: true
+    
+    lookup-config:
+      lookup-key: "#underlyingAsset.commodity"
+      lookup-dataset:
+        type: "inline"
+        key-field: "commodity"
+        cache-enabled: true
+        cache-ttl-seconds: 3600
+        default-values:
+          category: "Unknown"
+          exchange: "OTC"
+          riskFactor: "MEDIUM"
+          marginRate: 0.10
+        data:
+          - commodity: "Natural Gas"
+            category: "Energy"
+            exchange: "NYMEX"
+            unit: "MMBtu"
+            riskFactor: "HIGH"
+            marginRate: 0.15
+            description: "Natural gas futures and derivatives"
+            
+          - commodity: "Brent Crude Oil"
+            category: "Energy"
+            exchange: "ICE"
+            unit: "Barrel"
+            riskFactor: "HIGH"
+            marginRate: 0.12
+            description: "Brent crude oil benchmark"
+            
+          - commodity: "Gold"
+            category: "Precious Metals"
+            exchange: "COMEX"
+            unit: "Troy Ounce"
+            riskFactor: "MEDIUM"
+            marginRate: 0.08
+            description: "Gold futures and options"
+            
+          - commodity: "Silver"
+            category: "Precious Metals"
+            exchange: "COMEX"
+            unit: "Troy Ounce"
+            riskFactor: "MEDIUM"
+            marginRate: 0.10
+            description: "Silver futures and options"
+            
+          - commodity: "Copper"
+            category: "Base Metals"
+            exchange: "COMEX"
+            unit: "Pound"
+            riskFactor: "MEDIUM"
+            marginRate: 0.09
+            description: "Copper futures and derivatives"
+            
+          - commodity: "Wheat"
+            category: "Agriculture"
+            exchange: "CBOT"
+            unit: "Bushel"
+            riskFactor: "MEDIUM"
+            marginRate: 0.11
+            description: "Wheat futures and agricultural derivatives"
+    
+    field-mappings:
+      - source-field: "category"
+        target-field: "commodityCategory"
+      - source-field: "exchange"
+        target-field: "exchange"
+      - source-field: "riskFactor"
+        target-field: "riskFactor"
+      - source-field: "marginRate"
+        target-field: "marginRate"
+      - source-field: "description"
+        target-field: "commodityDescription"
+
+  # ========================================================================
+  # METHOD 2: POSTGRESQL DATABASE - Counterparty Information
+  # ========================================================================
+  #
+  # Database lookups provide access to large, dynamic datasets stored in
+  # relational databases. Ideal for frequently updated reference data that
+  # requires transactional consistency and complex queries.
+  #
+  - id: "buyer-counterparty-enrichment"
+    type: "lookup-enrichment"
+    name: "Buyer Counterparty Information"
+    description: "Enrich options with buyer counterparty details from PostgreSQL database"
+    condition: "#buyerParty != null"
+    priority: 20
+    enabled: true
+    
+    lookup-config:
+      lookup-key: "#buyerParty"
+      lookup-dataset:
+        type: "inline"
+        key-field: "party_id"
+        data:
+          - party_id: "BUYER001"
+            party_name: "ABC Investment Bank"
+            party_type: "BANK"
+            credit_rating: "AA-"
+            jurisdiction: "US"
+          - party_id: "BUYER002"
+            party_name: "XYZ Hedge Fund"
+            party_type: "FUND"
+            credit_rating: "A+"
+            jurisdiction: "UK"
+        select-columns: ["legal_name", "credit_rating", "lei", "jurisdiction", "settlement_preference"]
+    
+    field-mappings:
+      - source-field: "legal_name"
+        target-field: "buyerLegalName"
+      - source-field: "credit_rating"
+        target-field: "buyerCreditRating"
+      - source-field: "lei"
+        target-field: "buyerLei"
+      - source-field: "jurisdiction"
+        target-field: "buyerJurisdiction"
+      - source-field: "settlement_preference"
+        target-field: "buyerSettlementPreference"
+
+  - id: "seller-counterparty-enrichment"
+    type: "lookup-enrichment"
+    name: "Seller Counterparty Information"
+    description: "Enrich options with seller counterparty details from PostgreSQL database"
+    condition: "#sellerParty != null"
+    priority: 21
+    enabled: true
+    
+    lookup-config:
+      lookup-key: "#sellerParty"
+      lookup-dataset:
+        type: "inline"
+        key-field: "party_id"
+        data:
+          - party_id: "SELLER001"
+            party_name: "DEF Trading House"
+            party_type: "BROKER"
+            credit_rating: "A"
+            jurisdiction: "US"
+          - party_id: "SELLER002"
+            party_name: "GHI Capital Markets"
+            party_type: "BANK"
+            credit_rating: "AA"
+            jurisdiction: "EU"
+        select-columns: ["legal_name", "credit_rating", "lei", "jurisdiction", "settlement_preference"]
+    
+    field-mappings:
+      - source-field: "legal_name"
+        target-field: "sellerLegalName"
+      - source-field: "credit_rating"
+        target-field: "sellerCreditRating"
+      - source-field: "lei"
+        target-field: "sellerLei"
+      - source-field: "jurisdiction"
+        target-field: "sellerJurisdiction"
+      - source-field: "settlement_preference"
+        target-field: "sellerSettlementPreference"
+
+  # ========================================================================
+  # METHOD 3: EXTERNAL YAML FILE - Market and Currency Data
+  # ========================================================================
+  #
+  # External file lookups provide access to reference data stored in separate
+  # files, enabling version control, external data management, and modular
+  # configuration. Ideal for shared reference data across multiple systems.
+  #
+  - id: "currency-market-enrichment"
+    type: "lookup-enrichment"
+    name: "Currency and Market Data Enrichment"
+    description: "Enrich options with currency and market details from external YAML file"
+    condition: "#strikeCurrency != null"
+    priority: 30
+    enabled: true
+
+    lookup-config:
+      lookup-key: "strikeCurrency"
+      lookup-dataset:
+        type: "yaml-file"
+        file-path: "bootstrap/datasets/market-data.yaml"
+        key-field: "code"
+        data-path: "currencies"
+        cache-enabled: true
+        cache-ttl-seconds: 7200
+        preload-enabled: true
+        default-values:
+          name: "Unknown Currency"
+          region: "Unknown"
+          timezone: "UTC"
+          tradingHours: "24/7"
+
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+      - source-field: "region"
+        target-field: "currencyRegion"
+      - source-field: "timezone"
+        target-field: "timezone"
+      - source-field: "tradingHours"
+        target-field: "tradingHours"
+      - source-field: "centralBank"
+        target-field: "centralBank"
+
+  # ========================================================================
+  # CALCULATED ENRICHMENTS - Business Logic Implementation
+  # ========================================================================
+  #
+  # Calculated enrichments add derived fields using SpEL expressions,
+  # implementing business logic and calculations based on existing data.
+  #
+  - id: "days-to-expiry-calculation"
+    type: "calculation-enrichment"
+    name: "Days to Expiry Calculation"
+    description: "Calculate the number of days between trade date and expiry date"
+    condition: "#tradeDate != null && #expiryDate != null"
+    priority: 40
+    enabled: true
+
+    calculation-config:
+      result-field: "daysToExpiry"
+      expression: "T(java.time.temporal.ChronoUnit).DAYS.between(#tradeDate, #expiryDate)"
+      dependencies: ["tradeDate", "expiryDate"]
+    field-mappings:
+      - source-field: "daysToExpiry"
+        target-field: "daysToExpiry"
+        required: true
+
+  - id: "risk-exposure-calculation"
+    type: "calculation-enrichment"
+    name: "Risk Exposure Calculation"
+    description: "Calculate risk exposure based on notional quantity, strike price, and margin rate"
+    condition: "#notionalQuantity != null && #strikePrice != null && #marginRate != null"
+    priority: 41
+    enabled: true
+
+    calculation-config:
+      result-field: "riskExposure"
+      expression: "#notionalQuantity * #strikePrice * #marginRate"
+      dependencies: ["notionalQuantity", "strikePrice", "marginRate"]
+    field-mappings:
+      - source-field: "riskExposure"
+        target-field: "riskExposure"
+        required: true
+
+  - id: "moneyness-calculation"
+    type: "calculation-enrichment"
+    name: "Option Moneyness Classification"
+    description: "Classify option as ITM, ATM, or OTM based on strike price"
+    condition: "#strikePrice != null"
+    priority: 42
+    enabled: true
+
+    calculation-config:
+      result-field: "moneyness"
+      expression: "#strikePrice > 100 ? 'OTM' : (#strikePrice < 50 ? 'ITM' : 'ATM')"
+      dependencies: ["strikePrice"]
+    field-mappings:
+      - source-field: "moneyness"
+        target-field: "moneyness"
+        required: true
+
+# ============================================================================
+# PROCESSING CONFIGURATION
+# ============================================================================
+#
+# Configuration settings for the OTC Options processing pipeline,
+# optimized for bootstrap demonstration scenarios.
+#
+processing:
+  # Error Handling
+  stopOnFirstError: false
+  enableValidation: true
+  enableEnrichment: true
+
+  # Performance Settings
+  batchSize: 100
+  maxFileSize: "10MB"
+
+  # Logging and Monitoring
+  logLevel: "INFO"
+  enablePerformanceTracking: true
+  generateReport: true
+
+  # Supported Formats
+  supportedFormats: ["XML", "JSON"]
+  outputFormat: "JSON"
+
+  # Bootstrap Specific Settings
+  verifyDataSources: true
+  setupInfrastructure: true
+  cleanupAfterDemo: false

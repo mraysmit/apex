@@ -1,0 +1,136 @@
+# Test configuration based on working example - UPDATED VERSION 2025-08-27 15:40
+metadata:
+  name: "OTC Options Bootstrap Demo - Data Sources Configuration"
+  version: "1.0.0"
+  description: "External data source configuration for OTC Options Bootstrap Demo (OtcOptionsBootstrapDemo.java)"
+  type: "external-data-config"
+  author: "APEX Demo Team"
+  associated-demo: "OtcOptionsBootstrapDemo"
+  file-purpose: "Configures external data sources for commodities, counterparties, and market data lookups"
+
+data-sources:
+  - name: "commodities-source"
+    type: "file-system"
+    enabled: true
+    connection:
+      base-path: "data"
+      file-pattern: "commodities.json"
+    file-format:
+      type: "json"
+      root-path: "$.commodities"
+      key-column: "commodity"
+    cache:
+      enabled: true
+      ttl-seconds: 3600
+      max-size: 100
+
+  - name: "counterparties-source"
+    type: "file-system"
+    enabled: true
+    connection:
+      base-path: "data"
+      file-pattern: "counterparties.json"
+    file-format:
+      type: "json"
+      root-path: "$.counterparties"
+      key-column: "partyId"
+    cache:
+      enabled: true
+      ttl-seconds: 1800
+      max-size: 500
+
+  - name: "currencies-source"
+    type: "file-system"
+    enabled: true
+    connection:
+      base-path: "data"
+      file-pattern: "currencies.json"
+    file-format:
+      type: "json"
+      root-path: "$.currencies"
+      key-column: "currency"
+    cache:
+      enabled: true
+      ttl-seconds: 7200
+      max-size: 200
+
+# Global Configuration
+configuration:
+  # Data source coordination
+  dataSourcePriorities:
+    commodityLookup:
+      - "commodities-source"
+    
+    counterpartyLookup:
+      - "counterparties-source"
+    
+    currencyLookup:
+      - "currencies-source"
+  
+  # Monitoring configuration
+  monitoring:
+    enabled: true
+    metrics:
+      - "cache-hit-ratio"
+      - "database-response-time"
+      - "file-processing-time"
+      - "health-check-status"
+    
+    alerts:
+      - condition: "cache-hit-ratio < 0.8"
+        message: "Cache hit ratio is below 80%"
+        severity: "warning"
+      
+      - condition: "database-response-time > 1000"
+        message: "Database response time is above 1 second"
+        severity: "critical"
+      
+      - condition: "health-check-status == false"
+        message: "Data source health check failed"
+        severity: "critical"
+  
+  # Performance tuning
+  performance:
+    # Connection pool tuning
+    connectionPooling:
+      enabled: true
+      validateOnBorrow: true
+      testWhileIdle: true
+    
+    # Cache optimization
+    caching:
+      enabled: true
+      preloadData: true
+      backgroundRefresh: true
+    
+    # File watching optimization
+    fileWatching:
+      enabled: true
+      debounceMs: 1000  # Wait 1 second before processing file changes
+
+# Environment-specific overrides
+environments:
+  development:
+    dataSources:
+      - name: "commodities-source"
+        cache:
+          ttlSeconds: 300  # 5 minutes for faster testing
+      - name: "currencies-source"
+        connection:
+          maxPoolSize: 5  # Smaller pool for development
+  
+  production:
+    dataSources:
+      - name: "commodities-source"
+        cache:
+          ttlSeconds: 7200  # 2 hours in production
+          maxSize: 500
+      - name: "counterparties-source"
+        cache:
+          ttlSeconds: 3600  # 1 hour in production
+          maxSize: 2000
+      - name: "currencies-source"
+        connection:
+          maxPoolSize: 20  # Larger pool for production
+        cache:
+          ttlSeconds: 14400  # 4 hours in production

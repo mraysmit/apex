@@ -1,0 +1,282 @@
+# Comprehensive Financial Settlement Demo Configuration
+# Real APEX YAML configuration for ComprehensiveFinancialSettlementDemo.java
+# NO HARDCODED SIMULATION - Uses authentic APEX services
+
+metadata:
+  name: "Comprehensive Financial Settlement Demo Configuration"
+  version: "2.0"
+  description: "Real APEX comprehensive financial settlement demonstration with multi-asset processing, cross-border settlement, and high-value transaction handling"
+  author: "APEX Demo Team"
+  created: "2025-01-29"
+
+# Multi-Asset Settlement Processing Enrichments
+enrichments:
+  - name: "multi-asset-settlement-processing"
+    type: "settlement-enrichment"
+    description: "Multi-asset settlement processing using real APEX services"
+    conditions:
+      - condition: "#data.tradeId != null && #data.assetClass != null"
+        actions:
+          - type: "settlement-processing"
+            asset-class-rules:
+              - asset-class: "EQUITY"
+                settlement-cycle: "T+2"
+                processing-rules:
+                  - condition: "#data.market == 'UK'"
+                    actions:
+                      - type: "set-field"
+                        field: "settlementSystem"
+                        value: "CREST"
+                      - type: "set-field"
+                        field: "clearingHouse"
+                        value: "LCH"
+                      - type: "set-field"
+                        field: "custodian"
+                        value: "EUROCLEAR_UK"
+                  - condition: "#data.market == 'US'"
+                    actions:
+                      - type: "set-field"
+                        field: "settlementSystem"
+                        value: "DTC"
+                      - type: "set-field"
+                        field: "clearingHouse"
+                        value: "NSCC"
+                      - type: "set-field"
+                        field: "custodian"
+                        value: "DTC"
+              - asset-class: "FIXED_INCOME"
+                settlement-cycle: "T+1"
+                processing-rules:
+                  - condition: "#data.market == 'US'"
+                    actions:
+                      - type: "set-field"
+                        field: "settlementSystem"
+                        value: "FEDWIRE"
+                      - type: "set-field"
+                        field: "clearingHouse"
+                        value: "FICC"
+                      - type: "set-field"
+                        field: "custodian"
+                        value: "FEDERAL_RESERVE"
+              - asset-class: "DERIVATIVES"
+                settlement-cycle: "T+0"
+                processing-rules:
+                  - condition: "true"
+                    actions:
+                      - type: "set-field"
+                        field: "settlementMethod"
+                        value: "CASH_SETTLEMENT"
+                      - type: "set-field"
+                        field: "clearingHouse"
+                        value: "CME_CLEARING"
+
+  - name: "cross-border-settlement-processing"
+    type: "cross-border-enrichment"
+    description: "Cross-border settlement processing with currency conversion and regulatory compliance"
+    conditions:
+      - condition: "#data.sourceMarket != null && #data.targetMarket != null && #data.sourceMarket != #data.targetMarket"
+        actions:
+          - type: "cross-border-processing"
+            currency-conversion:
+              - condition: "#data.sourceCurrency != #data.targetCurrency"
+                actions:
+                  - type: "lookup-exchange-rate"
+                    source-currency: "#data.sourceCurrency"
+                    target-currency: "#data.targetCurrency"
+                    target-field: "exchangeRate"
+                  - type: "calculate-converted-amount"
+                    expression: "#data.notional * #exchangeRate"
+                    target: "convertedAmount"
+            regulatory-compliance:
+              - condition: "#data.sourceMarket == 'US' || #data.targetMarket == 'US'"
+                actions:
+                  - type: "set-field"
+                    field: "regulatoryReporting"
+                    value: "SEC_REQUIRED"
+                  - type: "set-field"
+                    field: "complianceCheck"
+                    value: "OFAC_SCREENING"
+              - condition: "#data.sourceMarket == 'GERMANY' || #data.targetMarket == 'GERMANY'"
+                actions:
+                  - type: "set-field"
+                    field: "regulatoryReporting"
+                    value: "BAFIN_REQUIRED"
+                  - type: "set-field"
+                    field: "complianceCheck"
+                    value: "EU_SANCTIONS_SCREENING"
+
+  - name: "high-value-transaction-processing"
+    type: "high-value-enrichment"
+    description: "High-value transaction processing with enhanced risk assessment and approval workflows"
+    conditions:
+      - condition: "#data.totalValue != null && #data.totalValue > 10000000"
+        actions:
+          - type: "high-value-processing"
+            risk-assessment:
+              - condition: "#data.totalValue > 50000000"
+                actions:
+                  - type: "set-field"
+                    field: "riskLevel"
+                    value: "CRITICAL"
+                  - type: "set-field"
+                    field: "approvalRequired"
+                    value: true
+                  - type: "set-field"
+                    field: "approvalLevel"
+                    value: "SENIOR_MANAGEMENT"
+              - condition: "#data.totalValue > 10000000 && #data.totalValue <= 50000000"
+                actions:
+                  - type: "set-field"
+                    field: "riskLevel"
+                    value: "HIGH"
+                  - type: "set-field"
+                    field: "approvalRequired"
+                    value: true
+                  - type: "set-field"
+                    field: "approvalLevel"
+                    value: "OPERATIONS_MANAGER"
+            enhanced-monitoring:
+              - condition: "#data.riskLevel == 'CRITICAL' || #data.riskLevel == 'HIGH'"
+                actions:
+                  - type: "set-field"
+                    field: "enhancedMonitoring"
+                    value: true
+                  - type: "set-field"
+                    field: "auditTrailRequired"
+                    value: true
+                  - type: "set-field"
+                    field: "realTimeReporting"
+                    value: true
+
+# Market Conventions Dataset - Inline Reference Data
+datasets:
+  - name: "market-conventions"
+    description: "Market-specific settlement conventions embedded in YAML"
+    key-field: "market"
+    data:
+      - market: "UK"
+        settlementCycle: "T+2"
+        currency: "GBP"
+        timezone: "GMT"
+        settlementSystem: "CREST"
+        clearingHouse: "LCH"
+        custodian: "EUROCLEAR_UK"
+        businessDays: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"]
+        holidays: ["NEW_YEAR", "GOOD_FRIDAY", "EASTER_MONDAY", "CHRISTMAS"]
+      - market: "US"
+        settlementCycle: "T+2"
+        currency: "USD"
+        timezone: "EST"
+        settlementSystem: "DTC"
+        clearingHouse: "NSCC"
+        custodian: "DTC"
+        businessDays: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"]
+        holidays: ["NEW_YEAR", "INDEPENDENCE_DAY", "THANKSGIVING", "CHRISTMAS"]
+      - market: "GERMANY"
+        settlementCycle: "T+2"
+        currency: "EUR"
+        timezone: "CET"
+        settlementSystem: "CLEARSTREAM"
+        clearingHouse: "EUREX_CLEARING"
+        custodian: "CLEARSTREAM"
+        businessDays: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"]
+        holidays: ["NEW_YEAR", "GOOD_FRIDAY", "EASTER_MONDAY", "CHRISTMAS"]
+      - market: "JAPAN"
+        settlementCycle: "T+2"
+        currency: "JPY"
+        timezone: "JST"
+        settlementSystem: "JASDEC"
+        clearingHouse: "JSCC"
+        custodian: "JASDEC"
+        businessDays: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"]
+        holidays: ["NEW_YEAR", "GOLDEN_WEEK", "RESPECT_FOR_AGED_DAY"]
+      - market: "HONG_KONG"
+        settlementCycle: "T+2"
+        currency: "HKD"
+        timezone: "HKT"
+        settlementSystem: "CCASS"
+        clearingHouse: "HKCC"
+        custodian: "HKSCC"
+        businessDays: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"]
+        holidays: ["NEW_YEAR", "CHINESE_NEW_YEAR", "NATIONAL_DAY"]
+
+  - name: "asset-class-conventions"
+    description: "Asset class-specific settlement conventions"
+    key-field: "assetClass"
+    data:
+      - assetClass: "EQUITY"
+        settlementCycle: "T+2"
+        settlementMethod: "DVP"
+        marginRequired: false
+        clearingRequired: true
+      - assetClass: "FIXED_INCOME"
+        settlementCycle: "T+1"
+        settlementMethod: "DVP"
+        marginRequired: false
+        clearingRequired: true
+      - assetClass: "DERIVATIVES"
+        settlementCycle: "T+0"
+        settlementMethod: "CASH_SETTLEMENT"
+        marginRequired: true
+        clearingRequired: true
+      - assetClass: "COMMODITY"
+        settlementCycle: "T+3"
+        settlementMethod: "PHYSICAL_DELIVERY"
+        marginRequired: true
+        clearingRequired: false
+      - assetClass: "CURRENCY"
+        settlementCycle: "T+2"
+        settlementMethod: "DVP"
+        marginRequired: false
+        clearingRequired: false
+
+  - name: "counterparty-conventions"
+    description: "Counterparty-specific settlement conventions"
+    key-field: "counterparty"
+    data:
+      - counterparty: "Deutsche Bank AG"
+        creditRating: "A+"
+        settlementPreference: "DVP"
+        preferredCustodian: "EUROCLEAR"
+        riskLimit: 100000000
+      - counterparty: "JPMorgan Chase"
+        creditRating: "AA-"
+        settlementPreference: "DVP"
+        preferredCustodian: "DTC"
+        riskLimit: 500000000
+      - counterparty: "Goldman Sachs"
+        creditRating: "A+"
+        settlementPreference: "DVP"
+        preferredCustodian: "DTC"
+        riskLimit: 1000000000
+      - counterparty: "Barclays Bank PLC"
+        creditRating: "A"
+        settlementPreference: "DVP"
+        preferredCustodian: "EUROCLEAR_UK"
+        riskLimit: 200000000
+
+# Processing Configuration
+processing:
+  fail-fast: true
+  enable-logging: true
+  max-processing-time: 120000
+  settlement-processing-enabled: true
+  cross-border-processing-enabled: true
+  high-value-processing-enabled: true
+  
+# Risk Management Configuration
+risk-management:
+  high-value-threshold: 10000000
+  critical-value-threshold: 50000000
+  enhanced-monitoring-enabled: true
+  real-time-reporting-enabled: true
+  approval-workflow-enabled: true
+  
+# Output Configuration
+output:
+  format: "json"
+  include-metadata: true
+  include-processing-time: true
+  include-settlement-details: true
+  include-risk-assessment: true
+  include-regulatory-compliance: true

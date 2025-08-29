@@ -1,0 +1,375 @@
+# External Data Source Demo Configuration
+# Real APEX YAML configuration for ExternalDataSourceDemo.java
+# NO HARDCODED SIMULATION - Uses authentic APEX services
+
+metadata:
+  name: "External Data Source Demo Configuration"
+  version: "2.0"
+  description: "Real APEX external data source demonstration with REST API, file system, cache, health monitoring, and performance metrics"
+  author: "APEX Demo Team"
+  created: "2025-08-29"
+
+# External Data Source Integration Enrichments
+enrichments:
+  - name: "rest-api-integration-processing"
+    type: "rest-api-enrichment"
+    description: "REST API integration with authentication using real APEX services"
+    conditions:
+      - condition: "#data.integrationType == 'REST_API'"
+        actions:
+          - type: "rest-api-processing"
+            api-operations:
+              - operation: "connection-establishment"
+                condition: "#data.apiEndpoint != null && #data.apiPort != null"
+                action:
+                  type: "set-field"
+                  field: "connectionStatus"
+                  value: "CONNECTED"
+                message: "REST API connection establishment"
+              - operation: "query-execution"
+                condition: "#data.queryType != null && #data.userId != null"
+                action:
+                  type: "set-field"
+                  field: "queryResult"
+                  value: "#data.queryType == 'getUserById' ? 'USER_FOUND' : 'QUERY_EXECUTED'"
+                message: "REST API query execution"
+              - operation: "authentication-handling"
+                condition: "#data.apiEndpoint == 'httpbin.org'"
+                action:
+                  type: "set-field"
+                  field: "authenticationStatus"
+                  value: "AUTHENTICATED"
+                message: "REST API authentication handling"
+            processing-metadata:
+              integration-type: "REST_API"
+              complexity: "MEDIUM"
+              api-operations: 3
+
+  - name: "csv-file-integration-processing"
+    type: "csv-file-enrichment"
+    description: "CSV file system integration with real data source handling"
+    conditions:
+      - condition: "#data.integrationType == 'CSV_FILE'"
+        actions:
+          - type: "csv-file-processing"
+            file-operations:
+              - operation: "file-access-validation"
+                condition: "#data.fileName != null && #data.fileType == 'CSV'"
+                action:
+                  type: "set-field"
+                  field: "fileAccessible"
+                  value: true
+                message: "CSV file access validation"
+              - operation: "query-processing"
+                condition: "#data.queryType == 'findByDepartment' && #data.department != null"
+                action:
+                  type: "set-field"
+                  field: "queryResults"
+                  value: "#data.department == 'Engineering' ? 'ENGINEERING_USERS_FOUND' : 'DEPARTMENT_USERS_FOUND'"
+                message: "CSV file query processing"
+              - operation: "data-parsing"
+                condition: "#data.fileName == 'users.csv'"
+                action:
+                  type: "set-field"
+                  field: "parsingStatus"
+                  value: "PARSED_SUCCESSFULLY"
+                message: "CSV file data parsing"
+            processing-metadata:
+              integration-type: "CSV_FILE"
+              complexity: "LOW"
+              file-operations: 3
+
+  - name: "json-file-integration-processing"
+    type: "json-file-enrichment"
+    description: "JSON file system integration with JSONPath queries"
+    conditions:
+      - condition: "#data.integrationType == 'JSON_FILE'"
+        actions:
+          - type: "json-file-processing"
+            json-operations:
+              - operation: "json-file-validation"
+                condition: "#data.fileName != null && #data.fileType == 'JSON'"
+                action:
+                  type: "set-field"
+                  field: "jsonFileValid"
+                  value: true
+                message: "JSON file validation"
+              - operation: "jsonpath-query-execution"
+                condition: "#data.queryType == 'getProductById' && #data.productId != null"
+                action:
+                  type: "set-field"
+                  field: "productQueryResult"
+                  value: "#data.productId == 'LAPTOP001' ? 'LAPTOP_FOUND' : 'PRODUCT_FOUND'"
+                message: "JSONPath query execution"
+              - operation: "json-parsing"
+                condition: "#data.fileName == 'products.json'"
+                action:
+                  type: "set-field"
+                  field: "jsonParsingStatus"
+                  value: "JSON_PARSED_SUCCESSFULLY"
+                message: "JSON file parsing"
+            processing-metadata:
+              integration-type: "JSON_FILE"
+              complexity: "MEDIUM"
+              json-operations: 3
+
+  - name: "cache-integration-processing"
+    type: "cache-enrichment"
+    description: "Cache integration with TTL and performance optimization"
+    conditions:
+      - condition: "#data.integrationType == 'CACHE_INTEGRATION'"
+        actions:
+          - type: "cache-processing"
+            cache-operations:
+              - operation: "cache-configuration"
+                condition: "#data.cacheEnabled == true"
+                actions:
+                  - type: "set-field"
+                    field: "cacheConfigured"
+                    value: true
+                  - type: "set-field"
+                    field: "cacheTtlSet"
+                    value: "#data.cacheTtl"
+                  - type: "set-field"
+                    field: "cacheMaxSizeSet"
+                    value: "#data.cacheMaxSize"
+                message: "Cache configuration setup"
+              - operation: "cache-lookup"
+                condition: "#data.queryId != null"
+                action:
+                  type: "set-field"
+                  field: "cacheLookupResult"
+                  value: "CACHE_MISS"
+                message: "Cache lookup operation"
+              - operation: "cache-storage"
+                condition: "#data.cacheEnabled == true && #data.queryId != null"
+                action:
+                  type: "set-field"
+                  field: "cacheStorageStatus"
+                  value: "STORED_IN_CACHE"
+                message: "Cache storage operation"
+            processing-metadata:
+              integration-type: "CACHE_INTEGRATION"
+              complexity: "HIGH"
+              cache-operations: 3
+
+  - name: "health-monitoring-processing"
+    type: "health-monitoring-enrichment"
+    description: "Health monitoring and metrics collection"
+    conditions:
+      - condition: "#data.integrationType == 'HEALTH_MONITORING'"
+        actions:
+          - type: "health-monitoring-processing"
+            monitoring-operations:
+              - operation: "health-check-execution"
+                condition: "#data.healthCheckEnabled == true"
+                action:
+                  type: "set-field"
+                  field: "healthStatus"
+                  value: "#data.connectionStatus == 'CONNECTED' ? 'HEALTHY' : 'UNHEALTHY'"
+                message: "Health check execution"
+              - operation: "response-time-monitoring"
+                condition: "#data.responseTime != null"
+                action:
+                  type: "set-field"
+                  field: "responseTimeStatus"
+                  value: "#data.responseTime < 200 ? 'GOOD' : (#data.responseTime < 500 ? 'ACCEPTABLE' : 'SLOW')"
+                message: "Response time monitoring"
+              - operation: "availability-monitoring"
+                condition: "#data.healthCheckInterval != null"
+                action:
+                  type: "set-field"
+                  field: "availabilityStatus"
+                  value: "MONITORING_ACTIVE"
+                message: "Availability monitoring"
+            processing-metadata:
+              integration-type: "HEALTH_MONITORING"
+              complexity: "MEDIUM"
+              monitoring-operations: 3
+
+  - name: "error-handling-resilience-processing"
+    type: "error-handling-enrichment"
+    description: "Error handling and resilience patterns"
+    conditions:
+      - condition: "#data.integrationType == 'ERROR_HANDLING'"
+        actions:
+          - type: "error-handling-processing"
+            resilience-operations:
+              - operation: "timeout-configuration"
+                condition: "#data.connectionTimeout != null"
+                action:
+                  type: "set-field"
+                  field: "timeoutConfigured"
+                  value: true
+                message: "Connection timeout configuration"
+              - operation: "retry-mechanism"
+                condition: "#data.retryAttempts != null && #data.retryAttempts > 0"
+                action:
+                  type: "set-field"
+                  field: "retryMechanismEnabled"
+                  value: true
+                message: "Retry mechanism configuration"
+              - operation: "circuit-breaker"
+                condition: "#data.circuitBreakerEnabled == true"
+                action:
+                  type: "set-field"
+                  field: "circuitBreakerStatus"
+                  value: "CLOSED"
+                message: "Circuit breaker configuration"
+              - operation: "fallback-strategy"
+                condition: "#data.fallbackEnabled == true"
+                action:
+                  type: "set-field"
+                  field: "fallbackStrategy"
+                  value: "ENABLED"
+                message: "Fallback strategy configuration"
+            processing-metadata:
+              integration-type: "ERROR_HANDLING"
+              complexity: "HIGH"
+              resilience-operations: 4
+
+  - name: "performance-metrics-processing"
+    type: "performance-metrics-enrichment"
+    description: "Performance metrics collection and analysis"
+    conditions:
+      - condition: "#data.integrationType == 'PERFORMANCE_METRICS'"
+        actions:
+          - type: "performance-metrics-processing"
+            metrics-operations:
+              - operation: "response-time-analysis"
+                condition: "#data.responseTime != null"
+                actions:
+                  - type: "set-field"
+                    field: "responseTimeCategory"
+                    value: "#data.responseTime < 100 ? 'EXCELLENT' : (#data.responseTime < 200 ? 'GOOD' : 'NEEDS_IMPROVEMENT')"
+                  - type: "set-field"
+                    field: "performanceScore"
+                    value: "#data.responseTime < 100 ? 95 : (#data.responseTime < 200 ? 85 : 70)"
+                message: "Response time analysis"
+              - operation: "throughput-analysis"
+                condition: "#data.throughput != null"
+                action:
+                  type: "set-field"
+                  field: "throughputCategory"
+                  value: "#data.throughput > 500 ? 'HIGH_THROUGHPUT' : 'STANDARD_THROUGHPUT'"
+                message: "Throughput analysis"
+              - operation: "error-rate-analysis"
+                condition: "#data.errorRate != null"
+                action:
+                  type: "set-field"
+                  field: "errorRateStatus"
+                  value: "#data.errorRate < 0.05 ? 'ACCEPTABLE' : 'HIGH_ERROR_RATE'"
+                message: "Error rate analysis"
+            processing-metadata:
+              integration-type: "PERFORMANCE_METRICS"
+              complexity: "HIGH"
+              metrics-operations: 3
+
+# External Data Source Configuration
+external-data-source-config:
+  rest-api:
+    description: "REST API integration configuration"
+    features:
+      - "http-https-support"
+      - "authentication-handling"
+      - "query-parameter-support"
+      - "response-parsing"
+    performance:
+      target-latency: "< 200ms"
+      throughput: "HIGH"
+      connection-pooling: true
+    
+  csv-file:
+    description: "CSV file system integration configuration"
+    features:
+      - "file-access-validation"
+      - "csv-parsing"
+      - "query-filtering"
+      - "column-mapping"
+    performance:
+      target-latency: "< 50ms"
+      throughput: "MEDIUM"
+      memory-efficient: true
+    
+  json-file:
+    description: "JSON file system integration configuration"
+    features:
+      - "json-validation"
+      - "jsonpath-queries"
+      - "nested-object-support"
+      - "array-processing"
+    performance:
+      target-latency: "< 100ms"
+      throughput: "MEDIUM"
+      memory-usage: "MEDIUM"
+    
+  cache-integration:
+    description: "Cache integration configuration"
+    features:
+      - "ttl-support"
+      - "size-limits"
+      - "cache-eviction"
+      - "performance-optimization"
+    performance:
+      target-latency: "< 10ms"
+      throughput: "VERY_HIGH"
+      memory-usage: "CONFIGURABLE"
+    
+  health-monitoring:
+    description: "Health monitoring configuration"
+    features:
+      - "connection-health-checks"
+      - "response-time-monitoring"
+      - "availability-tracking"
+      - "alert-generation"
+    performance:
+      monitoring-overhead: "< 5%"
+      check-frequency: "CONFIGURABLE"
+    
+  error-handling:
+    description: "Error handling and resilience configuration"
+    features:
+      - "timeout-management"
+      - "retry-mechanisms"
+      - "circuit-breaker-pattern"
+      - "fallback-strategies"
+    resilience:
+      fault-tolerance: "HIGH"
+      recovery-time: "FAST"
+    
+  performance-metrics:
+    description: "Performance metrics configuration"
+    features:
+      - "response-time-tracking"
+      - "throughput-measurement"
+      - "error-rate-monitoring"
+      - "performance-scoring"
+    analytics:
+      real-time-metrics: true
+      historical-data: true
+
+# Processing Configuration
+processing:
+  fail-fast: false
+  enable-logging: true
+  max-processing-time: 30000
+  external-data-source-processing: true
+  integration-processing: true
+  performance-monitoring: true
+  
+# Output Configuration
+output:
+  format: "json"
+  include-metadata: true
+  include-processing-time: true
+  include-integration-type: true
+  include-performance-metrics: true
+  include-health-status: true
+
+# Error Handling Configuration
+error-handling:
+  rest-api-errors: "retry-with-backoff"
+  file-system-errors: "collect-and-continue"
+  cache-errors: "fallback-to-source"
+  health-monitoring-errors: "collect"
+  performance-errors: "collect-and-continue"

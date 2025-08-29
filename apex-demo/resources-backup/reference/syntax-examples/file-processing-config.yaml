@@ -1,0 +1,287 @@
+# ============================================================================
+# APEX Rules Engine - YAML-Configured File Processing Rules
+# ============================================================================
+#
+# This YAML configuration demonstrates a complete, YAML-driven approach to
+# customer data validation and enrichment for JSON/XML file processing,
+# showcasing external dataset integration and advanced enrichment patterns.
+#
+# OVERVIEW:
+# This configuration implements comprehensive customer data processing
+# using external YAML datasets for reference data lookups, demonstrating
+# how to build scalable, maintainable data processing pipelines with
+# the APEX Rules Engine.
+#
+# YAML-DRIVEN ARCHITECTURE:
+# This configuration showcases advanced YAML-based patterns:
+# - External dataset integration with file-based lookups
+# - Intelligent caching with configurable TTL settings
+# - Preloading strategies for performance optimization
+# - Default value management for missing reference data
+# - Comprehensive metadata and governance tracking
+#
+# FILE PROCESSING PIPELINE:
+# 1. DATA INGESTION - JSON/XML file parsing and validation
+#    - Multi-format support (JSON, XML, CSV)
+#    - Schema validation and data type checking
+#    - Error handling and data quality reporting
+#    - Batch processing with configurable chunk sizes
+#
+# 2. REFERENCE DATA ENRICHMENT - External dataset lookups
+#    - Country-based enrichment (currency, timezone, region)
+#    - Customer tier calculation based on account balance
+#    - Discount rate computation using business rules
+#    - Risk assessment and compliance scoring
+#
+# 3. BUSINESS LOGIC ENRICHMENT - Calculated field generation
+#    - Customer segmentation and tier assignment
+#    - Personalized discount rate calculation
+#    - Risk scoring using multiple factors
+#    - Compliance status determination
+#
+# 4. OUTPUT GENERATION - Enhanced data export
+#    - Enriched JSON/XML output with all calculated fields
+#    - Processing reports and data quality metrics
+#    - Error logs and exception handling reports
+#    - Audit trails for compliance and governance
+#
+# EXTERNAL DATASET INTEGRATION:
+# This configuration demonstrates integration with external YAML datasets:
+# - File-based reference data management
+# - Version-controlled dataset updates
+# - Intelligent caching for performance optimization
+# - Fallback mechanisms for missing data
+#
+# PERFORMANCE FEATURES:
+# - Preloading of reference datasets for fast access
+# - Intelligent caching with configurable TTL settings
+# - Batch processing support for large file volumes
+# - Memory optimization for high-throughput scenarios
+#
+# BUSINESS VALUE:
+# - Automated customer data enrichment and validation
+# - Consistent data quality across all processing pipelines
+# - Scalable architecture for growing data volumes
+# - Comprehensive audit trail for compliance requirements
+# - Reduced manual data processing and error rates
+#
+# INTEGRATION SCENARIOS:
+# - Customer onboarding and KYC processing
+# - Data migration and system integration projects
+# - Batch processing for nightly data updates
+# - Real-time data enrichment for web applications
+# - Regulatory reporting and compliance data preparation
+#
+# ============================================================================
+
+metadata:
+  name: "File Processing Rules"
+  version: "1.0.0"
+  description: "Complete validation and enrichment for customer file processing"
+  type: "rule-config"
+  author: "file.processing@company.com"
+  domain: "Customer Management"
+  tags: ["validation", "enrichment", "file-processing"]
+
+# ============================================================================
+# EXTERNAL DATASET ENRICHMENT CONFIGURATIONS
+# ============================================================================
+#
+# This section demonstrates advanced enrichment patterns using external
+# YAML datasets for reference data lookups, showcasing scalable approaches
+# to data enhancement with intelligent caching and error handling.
+#
+# ENRICHMENT ARCHITECTURE:
+# Each enrichment rule combines:
+# - External dataset integration with file-based lookups
+# - Intelligent caching with configurable refresh cycles
+# - Comprehensive field mapping for data enhancement
+# - Default value management for missing reference data
+# - Performance optimization with preloading strategies
+#
+# EXTERNAL DATASET FEATURES:
+# - type: "yaml-file" - External YAML file integration
+# - file-path: Relative path to the reference dataset
+# - key-field: Primary key for efficient lookups
+# - cache-enabled: In-memory caching for performance
+# - cache-ttl-seconds: Time-to-live for cache refresh
+# - preload-enabled: Dataset preloading for fast access
+# - default-values: Fallback data for missing entries
+#
+# ENRICHMENT TYPES:
+# 1. LOOKUP ENRICHMENT - External reference data integration
+#    - Country-based enrichment with geographic data
+#    - Multi-field mapping for comprehensive enhancement
+#    - Intelligent caching for performance optimization
+#
+# 2. CALCULATION ENRICHMENT - Business logic implementation
+#    - Customer tier calculation using SpEL expressions
+#    - Discount rate computation with complex business rules
+#    - Risk assessment using multiple data factors
+#
+# PERFORMANCE OPTIMIZATION:
+# - Preloading eliminates file I/O during processing
+# - Intelligent caching reduces dataset access overhead
+# - Default values ensure processing continues with partial data
+# - Batch processing support for high-volume scenarios
+#
+enrichments:
+  # Country-based enrichment for currency and timezone
+  - id: "country-enrichment"
+    type: "lookup-enrichment"
+    condition: "#country != null"
+    enabled: true
+    lookup-config:
+      lookup-key: "country"
+      lookup-dataset:
+        type: "yaml-file"
+        file-path: "yaml-examples/datasets/countries.yaml"
+        key-field: "code"
+        cache-enabled: true
+        cache-ttl-seconds: 3600
+        preload-enabled: true
+        default-values:
+          currency: "USD"
+          timezone: "UTC"
+          region: "Unknown"
+    field-mappings:
+      - source-field: "currency"
+        target-field: "currency"
+      - source-field: "timezone"
+        target-field: "timezone"
+      - source-field: "region"
+        target-field: "region"
+    metadata:
+      owner: "Data Team"
+      purpose: "Country-based data enrichment"
+
+  # Customer tier calculation based on account balance
+  - id: "customer-tier-enrichment"
+    type: "calculation-enrichment"
+    condition: "#accountBalance != null"
+    enabled: true
+    calculation-config:
+      result-field: "customerTier"
+      expression: "#accountBalance >= 50000 ? 'PLATINUM' : (#accountBalance >= 25000 ? 'GOLD' : (#accountBalance >= 10000 ? 'SILVER' : 'BRONZE'))"
+      dependencies: ["accountBalance"]
+    field-mappings:
+      - source-field: "customerTier"
+        target-field: "customerTier"
+        required: true
+    metadata:
+      owner: "Business Team"
+      purpose: "Customer tier classification"
+
+  # Discount rate calculation based on age and tier
+  - id: "discount-rate-enrichment"
+    type: "calculation-enrichment"
+    condition: "#age != null"
+    enabled: true
+    depends-on: ["customer-tier-enrichment"]
+    calculation-config:
+      result-field: "discountRate"
+      expression: "#age >= 65 ? 0.20 : (#age >= 50 ? 0.15 : (#customerTier == 'PLATINUM' ? 0.15 : (#customerTier == 'GOLD' ? 0.12 : 0.10)))"
+      dependencies: ["age", "customerTier"]
+    field-mappings:
+      - source-field: "discountRate"
+        target-field: "discountRate"
+        required: true
+    metadata:
+      owner: "Business Team"
+      purpose: "Age and tier-based discount calculation"
+
+# Validation rules
+rules:
+  # Required fields validation
+  - id: "required-fields"
+    name: "Required Fields Check"
+    condition: "#customerId != null && #firstName != null && #lastName != null && #email != null && #age != null && #country != null && #accountBalance != null && #status != null"
+    message: "All required fields must be present"
+    severity: "ERROR"
+    priority: 1
+    enabled: true
+    metadata:
+      owner: "Data Team"
+      purpose: "Data completeness validation"
+      tags: ["validation", "required-fields"]
+
+  # Age validation
+  - id: "age-validation"
+    name: "Age Validation"
+    condition: "#age >= 18 && #age <= 120"
+    message: "Customer must be between 18 and 120 years old"
+    severity: "ERROR"
+    priority: 2
+    enabled: true
+    metadata:
+      owner: "Business Team"
+      purpose: "Age eligibility check"
+      tags: ["validation", "age"]
+
+  # Email format validation
+  - id: "email-validation"
+    name: "Email Format Validation"
+    condition: "#email != null && #email.contains('@') && #email.contains('.')"
+    message: "Email must be in valid format"
+    severity: "ERROR"
+    priority: 3
+    enabled: true
+    metadata:
+      owner: "Data Team"
+      purpose: "Email format validation"
+      tags: ["validation", "email"]
+
+  # Account balance validation
+  - id: "balance-validation"
+    name: "Account Balance Validation"
+    condition: "#accountBalance >= 0"
+    message: "Account balance must be non-negative"
+    severity: "ERROR"
+    priority: 4
+    enabled: true
+    metadata:
+      owner: "Finance Team"
+      purpose: "Financial data validation"
+      tags: ["validation", "balance"]
+
+  # Status validation
+  - id: "status-validation"
+    name: "Status Validation"
+    condition: "#status == 'ACTIVE' || #status == 'INACTIVE' || #status == 'SUSPENDED'"
+    message: "Status must be ACTIVE, INACTIVE, or SUSPENDED"
+    severity: "ERROR"
+    priority: 5
+    enabled: true
+    metadata:
+      owner: "Operations Team"
+      purpose: "Status value validation"
+      tags: ["validation", "status"]
+
+  # Country code validation
+  - id: "country-validation"
+    name: "Country Code Validation"
+    condition: "#country != null && #country.length() == 2"
+    message: "Country must be a valid 2-letter ISO code"
+    severity: "WARNING"
+    priority: 6
+    enabled: true
+    metadata:
+      owner: "Data Team"
+      purpose: "Country code format validation"
+      tags: ["validation", "country"]
+
+# Rule execution configuration
+execution-config:
+  stop-on-first-failure: false
+  parallel-execution: false
+  max-execution-time-ms: 5000
+  enable-performance-monitoring: true
+  enable-audit-logging: true
+
+# Performance and monitoring settings
+performance-config:
+  cache-enabled: true
+  cache-size: 1000
+  cache-ttl-seconds: 1800
+  metrics-collection-enabled: true
+  metrics-collection-interval-seconds: 30

@@ -1,0 +1,119 @@
+apiVersion: "apex.dev/v1"
+kind: "DataSource"
+metadata:
+  name: "settlement-database"
+  version: "1.0.0"
+  type: "external-data-config"
+  description: "Settlement database configuration for multi-table lookups"
+  author: "APEX Demo Team"
+  environment: "development"
+  labels:
+    team: "apex-demo"
+    purpose: "settlement-lookup"
+
+spec:
+  type: "database"
+  source-type: "h2"
+  enabled: true
+  
+  connection:
+    # H2 in-memory database configuration with shared access
+    database: "apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+    username: "sa"
+    password: ""
+    
+    # Connection pool configuration
+    maxPoolSize: 15
+    minPoolSize: 3
+    connectionTimeout: 30000
+    idleTimeout: 600000
+    maxLifetime: 1800000
+  
+  # Named queries for complex multi-table operations
+  queries:
+    # Complex multi-table settlement instruction lookup
+    getSettlementInstructionsByCounterparty: |
+      SELECT
+        si.instruction_id,
+        cp.counterparty_name,
+        cp.counterparty_type,
+        cp.credit_rating,
+        si.custodian_name,
+        si.custodian_bic,
+        si.settlement_method,
+        si.delivery_instruction,
+        si.market_name,
+        si.settlement_cycle,
+        ra.risk_category,
+        ra.risk_score,
+        ra.max_exposure,
+        ra.approval_required,
+        ra.monitoring_level
+      FROM counterparties cp
+      LEFT JOIN settlement_instructions si ON cp.counterparty_id = si.counterparty_id
+      LEFT JOIN risk_assessments ra ON cp.counterparty_id = ra.counterparty_id
+      WHERE cp.counterparty_id = :counterpartyId
+        AND cp.status = 'ACTIVE'
+    
+    # Counterparty basic info lookup
+    getCounterpartyById: |
+      SELECT 
+        counterparty_id,
+        counterparty_name,
+        counterparty_type,
+        credit_rating,
+        status,
+        created_date
+      FROM counterparties 
+      WHERE counterparty_id = :counterpartyId
+    
+    # Risk assessment lookup
+    getRiskAssessmentByCounterparty: |
+      SELECT 
+        counterparty_id,
+        risk_category,
+        risk_score,
+        max_exposure,
+        approval_required,
+        monitoring_level,
+        last_assessment_date
+      FROM risk_assessments 
+      WHERE counterparty_id = :counterpartyId
+    
+    # Settlement instructions by market
+    getSettlementInstructionsByMarket: |
+      SELECT 
+        instruction_id,
+        counterparty_id,
+        custodian_name,
+        custodian_bic,
+        settlement_method,
+        delivery_instruction,
+        market_name,
+        settlement_cycle
+      FROM settlement_instructions 
+      WHERE market_name = :marketName
+        AND status = 'ACTIVE'
+      ORDER BY counterparty_id
+    
+    # Health check query
+    healthCheck: "SELECT COUNT(*) as table_count FROM information_schema.tables WHERE table_schema = 'PUBLIC'"
+
+  # Infrastructure settings
+  cache:
+    enabled: true
+    ttlSeconds: 600  # Longer cache for settlement data
+    maxSize: 2000
+    
+  # Parameter validation rules
+  parameters:
+    counterpartyId:
+      type: "string"
+      required: true
+      pattern: "^CP_[A-Z]{2,4}$"
+      description: "Counterparty ID in format CP_GS, CP_MS, etc."
+    marketName:
+      type: "string"
+      required: true
+      enum: ["NYSE", "NASDAQ", "LSE", "TSE", "HKEX"]
+      description: "Market name code"

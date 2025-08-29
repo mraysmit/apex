@@ -1,0 +1,628 @@
+# ============================================================================
+# APEX Rules Engine - Comprehensive Financial Settlement Enrichment Demo
+# ============================================================================
+#
+# This YAML configuration demonstrates comprehensive enrichment for financial
+# services post-trade settlement using the exact examples from the
+# "Types of Enrichment Relevant for Financial Services Post-TradeB Settlement" guide.
+#
+# OVERVIEW:
+# This demo implements all major enrichment categories for trade settlement:
+# - Reference Data Enrichment (LEI, ISIN, MIC, BIC, SSI)
+# - Counterparty Enrichment (Credit ratings, classifications, relationships)
+# - Regulatory Enrichment (UTI generation, MiFID II, EMIR, Dodd-Frank)
+# - Risk Enrichment (VaR, exposure, margin, stress testing)
+# - Settlement Enrichment (Dates, methods, priorities)
+# - Fee Calculation Enrichment (Commissions, taxes, regulatory fees)
+#
+# INDUSTRY STANDARDS:
+# - ISO 20022: Financial messaging standards
+# - FpML: Financial Products Markup Language
+# - EMIR/MiFID II: European regulatory requirements
+# - Dodd-Frank: US derivatives regulation
+# - ISDA: Risk and legal documentation standards
+#
+# ============================================================================
+
+metadata:
+  name: "Comprehensive Financial Settlement Enrichment Demo"
+  version: "1.0.0"
+  description: "Complete settlement enrichment demo using real-world financial examples"
+  type: "rule-config"
+  author: "financial-settlement@rulesengine.dev"
+  created-by: "financial-settlement@rulesengine.dev"
+  created-date: "2024-12-24"
+  domain: "Financial Services - Post-TradeB Settlement"
+  tags: ["finance", "settlement", "enrichment", "demo", "comprehensive"]
+
+# ============================================================================
+# VALIDATION RULES
+# ============================================================================
+
+rules:
+  - id: "trade-header-validation"
+    name: "TradeB Header Validation"
+    condition: "#data.trade != null && #data.trade.tradeHeader != null && #data.trade.tradeHeader.partyTradeIdentifier != null && #data.trade.tradeHeader.partyTradeIdentifier.tradeId != null"
+    message: "TradeB header and trade ID are required"
+    severity: "ERROR"
+    priority: 1
+
+  - id: "isin-format-validation"
+    name: "ISIN Format Validation"
+    condition: "#data.trade != null && #data.trade.security != null && #data.trade.security.instrumentId != null && #data.trade.security.instrumentId.matches('^[A-Z]{2}[A-Z0-9]{9}[0-9]$')"
+    message: "ISIN must follow format: 2 country letters + 9 alphanumeric + 1 check digit"
+    severity: "ERROR"
+    priority: 1
+
+  - id: "counterparty-required"
+    name: "Counterparty Information Required"
+    condition: "#data.trade != null && #data.trade.counterparty != null && #data.trade.counterparty.partyName != null"
+    message: "Counterparty name is required for enrichment"
+    severity: "ERROR"
+    priority: 1
+
+  - id: "trade-value-positive"
+    name: "TradeB Value Must Be Positive"
+    condition: "#data.trade != null && #data.trade.quantity != null && #data.trade.price != null && (#data.trade.quantity * #data.trade.price) > 0"
+    message: "TradeB value must be positive"
+    severity: "ERROR"
+    priority: 1
+
+# ============================================================================
+# REFERENCE DATA ENRICHMENT
+# ============================================================================
+
+enrichments:
+  # LEI Enrichment - Legal Entity Identifiers
+  - id: "lei-enrichment"
+    type: "lookup-enrichment"
+    condition: "#data.trade != null && #data.trade.counterparty != null && #data.trade.counterparty.partyName != null"
+    lookup-config:
+      lookup-key: "trade.counterparty.partyName"
+      lookup-dataset:
+        type: "inline"
+        key-field: "partyName"
+        data:
+          - partyName: "Deutsche Bank AG"
+            lei: "7LTWFZYICNSX8D621K86"
+            jurisdiction: "DE"
+            entityType: "BANK"
+          - partyName: "JPMorgan Chase"
+            lei: "8EE8DF3643E15DBFDA05"
+            jurisdiction: "US"
+            entityType: "BANK"
+          - partyName: "Goldman Sachs"
+            lei: "784F5XWPLTWKTBV3E584"
+            jurisdiction: "US"
+            entityType: "INVESTMENT_BANK"
+          - partyName: "Barclays Bank PLC"
+            lei: "G5GSEF7VJP5I7OUK5573"
+            jurisdiction: "GB"
+            entityType: "BANK"
+          - partyName: "BlackRock Fund Advisors"
+            lei: "549300E9W2RQMQRQZ748"
+            jurisdiction: "US"
+            entityType: "ASSET_MANAGER"
+          - partyName: "Bridgewater Associates LP"
+            lei: "5493000F4ZG1KEXQJL62"
+            jurisdiction: "US"
+            entityType: "HEDGE_FUND"
+    field-mappings:
+      - source-field: "lei"
+        target-field: "trade.counterparty.lei"
+      - source-field: "jurisdiction"
+        target-field: "trade.counterparty.jurisdiction"
+      - source-field: "entityType"
+        target-field: "trade.counterparty.entityType"
+
+  # ISIN Security Master Enrichment
+  - id: "isin-security-enrichment"
+    type: "lookup-enrichment"
+    condition: "#data.trade != null && #data.trade.security != null && #data.trade.security.instrumentId != null"
+    lookup-config:
+      lookup-key: "trade.security.instrumentId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "isin"
+        data:
+          - isin: "GB00B03MLX29"
+            cusip: "780259206"
+            sedol: "B03MLX2"
+            name: "Royal Dutch Shell PLC"
+            assetClass: "EQUITY"
+            currency: "GBP"
+            country: "GB"
+          - isin: "US0378331005"
+            cusip: "037833100"
+            sedol: "2046251"
+            name: "Apple Inc"
+            assetClass: "EQUITY"
+            currency: "USD"
+            country: "US"
+          - isin: "DE0007164600"
+            cusip: "D1668R123"
+            sedol: "0716460"
+            name: "SAP SE"
+            assetClass: "EQUITY"
+            currency: "EUR"
+            country: "DE"
+          - isin: "US912828XG93"
+            cusip: "912828XG9"
+            sedol: "BYQY8G8"
+            name: "US Treasury Note 10Y"
+            assetClass: "GOVERNMENT_BOND"
+            currency: "USD"
+            country: "US"
+    field-mappings:
+      - source-field: "cusip"
+        target-field: "trade.security.cusip"
+      - source-field: "sedol"
+        target-field: "trade.security.sedol"
+      - source-field: "name"
+        target-field: "trade.security.name"
+      - source-field: "assetClass"
+        target-field: "trade.security.assetClass"
+      - source-field: "currency"
+        target-field: "trade.security.currency"
+      - source-field: "country"
+        target-field: "trade.security.country"
+
+  # MIC Code Enrichment - Market Identifier Codes
+  - id: "mic-code-enrichment"
+    type: "lookup-enrichment"
+    condition: "#data.trade != null && #data.trade.tradingVenue != null"
+    lookup-config:
+      lookup-key: "trade.tradingVenue"
+      lookup-dataset:
+        type: "inline"
+        key-field: "micCode"
+        data:
+          - micCode: "XLON"
+            venueName: "London Stock Exchange"
+            country: "GB"
+            venueType: "REGULATED_MARKET"
+            operatingHours: "08:00-16:30 GMT"
+          - micCode: "XNYS"
+            venueName: "New York Stock Exchange"
+            country: "US"
+            venueType: "REGULATED_MARKET"
+            operatingHours: "09:30-16:00 EST"
+          - micCode: "XNAS"
+            venueName: "NASDAQ"
+            country: "US"
+            venueType: "REGULATED_MARKET"
+            operatingHours: "09:30-16:00 EST"
+          - micCode: "XPAR"
+            venueName: "Euronext Paris"
+            country: "FR"
+            venueType: "REGULATED_MARKET"
+            operatingHours: "09:00-17:30 CET"
+    field-mappings:
+      - source-field: "venueName"
+        target-field: "trade.venue.venueName"
+      - source-field: "country"
+        target-field: "trade.venue.country"
+      - source-field: "venueType"
+        target-field: "trade.venue.venueType"
+      - source-field: "operatingHours"
+        target-field: "trade.venue.operatingHours"
+
+  # BIC Code Enrichment - Bank Identifier Codes
+  - id: "bic-code-enrichment"
+    type: "lookup-enrichment"
+    condition: "#data.trade != null && #data.trade.counterparty != null && #data.trade.counterparty.partyName != null"
+    lookup-config:
+      lookup-key: "trade.counterparty.partyName"
+      lookup-dataset:
+        type: "inline"
+        key-field: "partyName"
+        data:
+          - partyName: "Deutsche Bank AG"
+            bic: "DEUTDEFF"
+            custodianBIC: "DEUTDEFF"
+            clearingBIC: "DEUTDEFF"
+          - partyName: "JPMorgan Chase"
+            bic: "CHASUS33"
+            custodianBIC: "CHASUS33"
+            clearingBIC: "CHASUS33"
+          - partyName: "Goldman Sachs"
+            bic: "GSCCUS33"
+            custodianBIC: "GSCCUS33"
+            clearingBIC: "GSCCUS33"
+          - partyName: "Barclays Bank PLC"
+            bic: "BARCGB22"
+            custodianBIC: "BARCGB22"
+            clearingBIC: "BARCGB22"
+    field-mappings:
+      - source-field: "bic"
+        target-field: "trade.settlement.counterpartyBIC"
+      - source-field: "custodianBIC"
+        target-field: "trade.settlement.custodianBIC"
+      - source-field: "clearingBIC"
+        target-field: "trade.settlement.clearingBIC"
+
+  # Standard Settlement Instructions (SSI)
+  - id: "ssi-enrichment"
+    type: "lookup-enrichment"
+    condition: "#data.trade != null && #data.trade.counterparty != null && #data.trade.counterparty.lei != null && #data.trade.venue != null && #data.trade.venue.country != null"
+    lookup-config:
+      lookup-key: "#trade.counterparty.lei + '_' + #trade.venue.country"
+      lookup-dataset:
+        type: "inline"
+        key-field: "key"
+        data:
+          - key: "7LTWFZYICNSX8D621K86_GB"
+            method: "CREST"
+            account: "CREST001234"
+            custodian: "Euroclear UK & Ireland"
+            cutoffTime: "16:00 GMT"
+          - key: "7LTWFZYICNSX8D621K86_US"
+            method: "DTC"
+            account: "DTC567890"
+            custodian: "The Depository Trust Company"
+            cutoffTime: "15:00 EST"
+          - key: "8EE8DF3643E15DBFDA05_US"
+            method: "DTC"
+            account: "DTC123456"
+            custodian: "The Depository Trust Company"
+            cutoffTime: "15:00 EST"
+          - key: "G5GSEF7VJP5I7OUK5573_GB"
+            method: "CREST"
+            account: "CREST998877"
+            custodian: "Euroclear UK & Ireland"
+            cutoffTime: "16:00 GMT"
+    field-mappings:
+      - source-field: "method"
+        target-field: "trade.settlement.method"
+      - source-field: "account"
+        target-field: "trade.settlement.accountNumber"
+      - source-field: "custodian"
+        target-field: "trade.settlement.custodian"
+      - source-field: "cutoffTime"
+        target-field: "trade.settlement.cutoffTime"
+
+# ============================================================================
+# COUNTERPARTY ENRICHMENT
+# ============================================================================
+
+  # Credit Rating Enrichment
+  - id: "credit-rating-enrichment"
+    type: "lookup-enrichment"
+    condition: "#data.trade != null && #data.trade.counterparty != null && #data.trade.counterparty.lei != null"
+    lookup-config:
+      lookup-key: "trade.counterparty.lei"
+      lookup-dataset:
+        type: "inline"
+        key-field: "lei"
+        data:
+          - lei: "7LTWFZYICNSX8D621K86"
+            moodys: "A1"
+            sp: "A+"
+            fitch: "A+"
+            lastUpdated: "2024-12-01"
+          - lei: "8EE8DF3643E15DBFDA05"
+            moodys: "A2"
+            sp: "A"
+            fitch: "A"
+            lastUpdated: "2024-12-01"
+          - lei: "784F5XWPLTWKTBV3E584"
+            moodys: "A1"
+            sp: "A+"
+            fitch: "A"
+            lastUpdated: "2024-12-01"
+          - lei: "G5GSEF7VJP5I7OUK5573"
+            moodys: "A1"
+            sp: "A"
+            fitch: "A+"
+            lastUpdated: "2024-12-01"
+    field-mappings:
+      - source-field: "moodys"
+        target-field: "trade.counterparty.creditRating.moodys"
+      - source-field: "sp"
+        target-field: "trade.counterparty.creditRating.sp"
+      - source-field: "fitch"
+        target-field: "trade.counterparty.creditRating.fitch"
+      - source-field: "lastUpdated"
+        target-field: "trade.counterparty.creditRating.lastUpdated"
+
+  # Counterparty Classification
+  - id: "counterparty-classification"
+    type: "lookup-enrichment"
+    condition: "#data.trade != null && #data.trade.counterparty != null && #data.trade.counterparty.lei != null"
+    lookup-config:
+      lookup-key: "trade.counterparty.lei"
+      lookup-dataset:
+        type: "inline"
+        key-field: "lei"
+        data:
+          - lei: "7LTWFZYICNSX8D621K86"
+            businessModel: "UNIVERSAL_BANK"
+            regulatoryStatus: "SYSTEMICALLY_IMPORTANT"
+            clientTier: "TIER_1"
+          - lei: "8EE8DF3643E15DBFDA05"
+            businessModel: "COMMERCIAL_BANK"
+            regulatoryStatus: "SYSTEMICALLY_IMPORTANT"
+            clientTier: "TIER_1"
+          - lei: "784F5XWPLTWKTBV3E584"
+            businessModel: "INVESTMENT_BANK"
+            regulatoryStatus: "SYSTEMICALLY_IMPORTANT"
+            clientTier: "TIER_2"
+          - lei: "549300E9W2RQMQRQZ748"
+            businessModel: "ASSET_MANAGER"
+            regulatoryStatus: "NON_BANK_SIFI"
+            clientTier: "TIER_1"
+          - lei: "5493000F4ZG1KEXQJL62"
+            businessModel: "HEDGE_FUND"
+            regulatoryStatus: "PRIVATE_FUND"
+            clientTier: "TIER_2"
+    field-mappings:
+      - source-field: "businessModel"
+        target-field: "trade.counterparty.classification.businessModel"
+      - source-field: "regulatoryStatus"
+        target-field: "trade.counterparty.classification.regulatoryStatus"
+      - source-field: "clientTier"
+        target-field: "trade.counterparty.relationship.tier"
+
+  # Netting Agreement Status
+  - id: "netting-agreement-status"
+    type: "lookup-enrichment"
+    condition: "#data.trade != null && #data.trade.counterparty != null && #data.trade.counterparty.lei != null"
+    lookup-config:
+      lookup-key: "trade.counterparty.lei"
+      lookup-dataset:
+        type: "inline"
+        key-field: "lei"
+        data:
+          - lei: "7LTWFZYICNSX8D621K86"
+            isdaMasterAgreement: true
+            nettingEligible: true
+            csaAgreement: true
+            csaThreshold: 50000000
+            minimumTransferAmount: 1000000
+          - lei: "8EE8DF3643E15DBFDA05"
+            isdaMasterAgreement: true
+            nettingEligible: true
+            csaAgreement: true
+            csaThreshold: 25000000
+            minimumTransferAmount: 500000
+          - lei: "784F5XWPLTWKTBV3E584"
+            isdaMasterAgreement: true
+            nettingEligible: true
+            csaAgreement: false
+            csaThreshold: 0
+            minimumTransferAmount: 0
+    field-mappings:
+      - source-field: "isdaMasterAgreement"
+        target-field: "trade.counterparty.legalAgreements.isdaMasterAgreement"
+      - source-field: "nettingEligible"
+        target-field: "trade.counterparty.legalAgreements.nettingEligible"
+      - source-field: "csaAgreement"
+        target-field: "trade.counterparty.legalAgreements.csaAgreement"
+      - source-field: "csaThreshold"
+        target-field: "trade.counterparty.legalAgreements.csaThreshold"
+      - source-field: "minimumTransferAmount"
+        target-field: "trade.counterparty.legalAgreements.minimumTransferAmount"
+
+# ============================================================================
+# REGULATORY ENRICHMENT
+# ============================================================================
+
+  # UTI Generation - Unique Transaction Identifier
+  - id: "uti-generation"
+    type: "calculation-enrichment"
+    condition: "#data.trade != null && #data.trade.tradeHeader != null && #data.trade.tradeHeader.partyTradeIdentifier != null && #data.trade.counterparty != null && #data.trade.counterparty.lei != null"
+    calculations:
+      - field: "trade.regulatory.uti"
+        expression: "#trade.counterparty.lei + '-' + #trade.tradeHeader.partyTradeIdentifier.tradeId + '-' + T(java.time.LocalDate).now().format(T(java.time.format.DateTimeFormatter).ofPattern('yyyyMMdd'))"
+      - field: "trade.regulatory.utiPrefix"
+        expression: "#trade.counterparty.lei"
+      - field: "trade.regulatory.utiGenerationTimestamp"
+        expression: "T(java.time.Instant).now().toString()"
+
+  # Regulatory Jurisdiction Flags
+  - id: "regulatory-jurisdiction-flags"
+    type: "calculation-enrichment"
+    condition: "#data.trade != null && #data.trade.counterparty != null && #data.trade.counterparty.jurisdiction != null"
+    calculations:
+      - field: "trade.regulatory.mifidII.applicable"
+        expression: "#trade.counterparty.jurisdiction == 'GB' || #trade.counterparty.jurisdiction == 'DE' || #trade.counterparty.jurisdiction == 'FR'"
+      - field: "trade.regulatory.emir.applicable"
+        expression: "#trade.counterparty.jurisdiction == 'GB' || #trade.counterparty.jurisdiction == 'DE' || #trade.counterparty.jurisdiction == 'FR'"
+      - field: "trade.regulatory.doddFrank.applicable"
+        expression: "#trade.counterparty.jurisdiction == 'US'"
+      - field: "trade.regulatory.mifidII.venueReporting"
+        expression: "#trade.tradingVenue == 'XLON' || #trade.tradingVenue == 'XPAR'"
+
+  # MiFID II Specific Fields
+  - id: "mifid-ii-fields"
+    type: "calculation-enrichment"
+    condition: "#data.trade != null && #data.trade.regulatory != null && #data.trade.regulatory.mifidII != null && #data.trade.regulatory.mifidII.applicable == true"
+    calculations:
+      - field: "trade.regulatory.mifidII.transactionReferenceNumber"
+        expression: "T(java.util.UUID).randomUUID().toString()"
+      - field: "trade.regulatory.mifidII.reportingFlag"
+        expression: "true"
+      - field: "trade.regulatory.mifidII.commodityDerivativeIndicator"
+        expression: "false"
+
+# ============================================================================
+# RISK ENRICHMENT
+# ============================================================================
+
+  # TradeB Value Calculation
+  - id: "trade-value-calculation"
+    type: "calculation-enrichment"
+    condition: "#data.trade != null && #data.trade.quantity != null && #data.trade.price != null"
+    calculations:
+      - field: "trade.tradeValue"
+        expression: "#trade.quantity * #trade.price"
+      - field: "trade.tradeValueUSD"
+        expression: "#trade.currency == 'USD' ? #trade.tradeValue : (#trade.currency == 'GBP' ? #trade.tradeValue * 1.25 : (#trade.currency == 'EUR' ? #trade.tradeValue * 1.10 : #trade.tradeValue))"
+
+  # VaR Calculation
+  - id: "var-calculation"
+    type: "calculation-enrichment"
+    condition: "#data.trade != null && #data.trade.tradeValue != null"
+    calculations:
+      - field: "trade.riskMetrics.var1Day99"
+        expression: "#trade.tradeValue * 0.025"  # 2.5% VaR
+      - field: "trade.riskMetrics.var10Day99"
+        expression: "#trade.riskMetrics.var1Day99 * T(java.lang.Math).sqrt(10)"
+
+  # Volatility Lookup
+  - id: "volatility-lookup"
+    type: "lookup-enrichment"
+    condition: "#data.trade != null && #data.trade.security != null && #data.trade.security.instrumentId != null"
+    lookup-config:
+      lookup-key: "trade.security.instrumentId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "instrumentId"
+        data:
+          - instrumentId: "GB00B03MLX29"
+            impliedVolatility: 0.28
+            historicalVolatility: 0.25
+            beta: 0.85
+          - instrumentId: "US0378331005"
+            impliedVolatility: 0.32
+            historicalVolatility: 0.30
+            beta: 1.20
+          - instrumentId: "DE0007164600"
+            impliedVolatility: 0.35
+            historicalVolatility: 0.33
+            beta: 1.15
+          - instrumentId: "US912828XG93"
+            impliedVolatility: 0.15
+            historicalVolatility: 0.12
+            duration: 8.5
+    field-mappings:
+      - source-field: "impliedVolatility"
+        target-field: "trade.riskMetrics.impliedVolatility"
+      - source-field: "historicalVolatility"
+        target-field: "trade.riskMetrics.historicalVolatility"
+      - source-field: "beta"
+        target-field: "trade.riskMetrics.beta"
+      - source-field: "duration"
+        target-field: "trade.riskMetrics.duration"
+
+  # Stress Test Calculations
+  - id: "stress-test-calculations"
+    type: "calculation-enrichment"
+    condition: "#data.trade != null && #data.trade.tradeValue != null"
+    calculations:
+      - field: "trade.stressTest.marketCrash.scenario"
+        expression: "#trade.tradeValue * -0.30"  # 30% market crash
+      - field: "trade.stressTest.volatilityShock.scenario"
+        expression: "#trade.riskMetrics != null && #trade.riskMetrics.var1Day99 != null ? #trade.riskMetrics.var1Day99 * 2.5 : 0"
+      - field: "trade.stressTest.riskLevel"
+        expression: "#trade.stressTest.marketCrash.scenario < -50000000 ? 'HIGH' : (#trade.stressTest.marketCrash.scenario < -10000000 ? 'MEDIUM' : 'LOW')"
+      - field: "trade.stressTest.actionRequired"
+        expression: "#trade.stressTest.riskLevel == 'HIGH' ? 'IMMEDIATE_REVIEW' : (#trade.stressTest.riskLevel == 'MEDIUM' ? 'MONITOR' : 'NONE')"
+
+# ============================================================================
+# SETTLEMENT ENRICHMENT
+# ============================================================================
+
+  # Settlement Cycle Lookup
+  - id: "settlement-cycle-lookup"
+    type: "lookup-enrichment"
+    condition: "#data.trade != null && #data.trade.venue != null && #data.trade.venue.country != null && #data.trade.security != null && #data.trade.security.assetClass != null"
+    lookup-config:
+      lookup-key: "#trade.venue.country + '_' + #trade.security.assetClass"
+      lookup-dataset:
+        type: "inline"
+        key-field: "key"
+        data:
+          - key: "GB_EQUITY"
+            cycle: "T+2"
+            cycleDays: 2
+          - key: "US_EQUITY"
+            cycle: "T+1"
+            cycleDays: 1
+          - key: "DE_EQUITY"
+            cycle: "T+2"
+            cycleDays: 2
+          - key: "FR_EQUITY"
+            cycle: "T+2"
+            cycleDays: 2
+          - key: "GB_GOVERNMENT_BOND"
+            cycle: "T+1"
+            cycleDays: 1
+          - key: "US_GOVERNMENT_BOND"
+            cycle: "T+1"
+            cycleDays: 1
+    field-mappings:
+      - source-field: "cycle"
+        target-field: "trade.settlement.cycle"
+      - source-field: "cycleDays"
+        target-field: "trade.settlement.cycleDays"
+
+  # Settlement Date Calculation
+  - id: "settlement-date-calculation"
+    type: "calculation-enrichment"
+    condition: "#data.trade != null && #data.trade.tradeHeader != null && #data.trade.tradeHeader.tradeDate != null && #data.trade.settlement != null && #data.trade.settlement.cycleDays != null"
+    calculations:
+      - field: "trade.settlement.settlementDate"
+        expression: "#trade.tradeHeader.tradeDate.plusDays(#trade.settlement.cycleDays)"
+
+  # Settlement Priority Assignment
+  - id: "settlement-priority-assignment"
+    type: "calculation-enrichment"
+    condition: "#data.trade != null && #data.trade.tradeValue != null"
+    calculations:
+      - field: "trade.settlement.priority"
+        expression: "#trade.tradeValue > 100000000 ? 'HIGH' : (#trade.tradeValue > 10000000 ? 'MEDIUM' : 'NORMAL')"
+      - field: "trade.settlement.priorityCode"
+        expression: "#trade.tradeValue > 100000000 ? 1 : (#trade.tradeValue > 10000000 ? 2 : 3)"
+
+# ============================================================================
+# FEE CALCULATION ENRICHMENT
+# ============================================================================
+
+  # Broker Commission Lookup
+  - id: "broker-commission-lookup"
+    type: "lookup-enrichment"
+    condition: "#data.trade != null && #data.trade.counterparty != null && #data.trade.counterparty.relationship != null && #data.trade.counterparty.relationship.tier != null"
+    lookup-config:
+      lookup-key: "#trade.counterparty.lei + '_' + #trade.counterparty.relationship.tier"
+      lookup-dataset:
+        type: "inline"
+        key-field: "key"
+        data:
+          - key: "7LTWFZYICNSX8D621K86_TIER_1"
+            brokerCommissionRate: 0.0008  # 8 bps
+            minimumCommission: 25.00
+            maximumCommission: 5000.00
+          - key: "8EE8DF3643E15DBFDA05_TIER_1"
+            brokerCommissionRate: 0.0010  # 10 bps
+            minimumCommission: 50.00
+            maximumCommission: 7500.00
+          - key: "784F5XWPLTWKTBV3E584_TIER_2"
+            brokerCommissionRate: 0.0015  # 15 bps
+            minimumCommission: 50.00
+            maximumCommission: 7500.00
+    field-mappings:
+      - source-field: "brokerCommissionRate"
+        target-field: "trade.fees.brokerCommissionRate"
+      - source-field: "minimumCommission"
+        target-field: "trade.fees.minimumCommission"
+      - source-field: "maximumCommission"
+        target-field: "trade.fees.maximumCommission"
+
+  # Fee Calculations
+  - id: "fee-calculations"
+    type: "calculation-enrichment"
+    condition: "#data.trade != null && #data.trade.fees != null && #data.trade.fees.brokerCommissionRate != null && #data.trade.tradeValue != null"
+    calculations:
+      - field: "trade.fees.brokerCommissionBase"
+        expression: "#trade.tradeValue * #trade.fees.brokerCommissionRate"
+      - field: "trade.fees.brokerCommission"
+        expression: "T(java.lang.Math).max(T(java.lang.Math).min(#trade.fees.brokerCommissionBase, #trade.fees.maximumCommission), #trade.fees.minimumCommission)"
+      - field: "trade.fees.exchangeFee"
+        expression: "#trade.tradeValue * 0.0001"  # 1 bp exchange fee
+      - field: "trade.fees.clearingFee"
+        expression: "#trade.tradeValue * 0.00005"  # 0.5 bp clearing fee
+      - field: "trade.fees.totalFees"
+        expression: "#trade.fees.brokerCommission + #trade.fees.exchangeFee + #trade.fees.clearingFee"
+      - field: "trade.fees.netSettlementAmount"
+        expression: "#trade.tradeValue + #trade.fees.totalFees"

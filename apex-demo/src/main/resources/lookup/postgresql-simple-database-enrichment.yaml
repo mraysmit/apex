@@ -1,0 +1,94 @@
+metadata:
+  name: "Simple PostgreSQL Database Enrichment Demo"
+  version: "1.0.0"
+  type: "rule-config"
+  description: "Simple customer profile enrichment using H2 database (PostgreSQL mode) with real SQL queries"
+  author: "APEX Demo Team"
+  created: "2025-08-28"
+
+# External data source configuration for H2 database
+data-sources:
+  - name: "customer-database"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "Customer database using H2 in PostgreSQL compatibility mode"
+
+    connection:
+      # H2 in-memory database configuration with shared access
+      database: "apex_demo_shared"
+      username: "sa"
+      password: ""
+
+      # Connection pool configuration
+      maxPoolSize: 10
+      minPoolSize: 2
+      connectionTimeout: 30000
+
+    # SQL queries for customer lookup
+    queries:
+      getCustomerById: |
+        SELECT
+          customer_id,
+          customer_name,
+          customer_type,
+          tier,
+          region,
+          status,
+          created_date,
+          last_updated
+        FROM customers
+        WHERE customer_id = :customerId
+
+      default: "SELECT 1 as health_check"
+
+    parameterNames:
+      - "customerId"
+
+    # Caching configuration
+    cache:
+      enabled: true
+      ttlSeconds: 300
+      maxSize: 1000
+
+# Enrichment rules using real database lookups
+enrichments:
+  - id: "customer-profile-database-lookup"
+    name: "customer-profile-database-lookup"
+    description: "Enrich customer data using H2 database lookup with real SQL queries"
+    type: "lookup-enrichment"
+
+    # Condition: Only process if customerId is present
+    condition: "#customerId != null && #customerId != ''"
+
+    # Database lookup configuration
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        connection-name: "customer-database"
+        query: "SELECT customer_name, customer_type, tier, region, status, created_date FROM customers WHERE customer_id = :customerId"
+        parameters:
+          - field: "customerId"
+            type: "string"
+
+    # Field mappings from lookup result to enriched object
+    field-mappings:
+      - source-field: "customer_name"
+        target-field: "customerName"
+        required: true
+      - source-field: "customer_type"
+        target-field: "customerType"
+        required: true
+      - source-field: "tier"
+        target-field: "customerTier"
+        required: true
+      - source-field: "region"
+        target-field: "customerRegion"
+        required: true
+      - source-field: "status"
+        target-field: "customerStatus"
+        required: true
+      - source-field: "created_date"
+        target-field: "customerCreatedDate"
+        required: false

@@ -1,0 +1,40 @@
+# ============================================================================
+# OTC OPTIONS PROCESSING SCENARIO
+# ============================================================================
+#
+# This scenario configuration associates OTC Options data types with
+# existing rule configuration files for processing.
+#
+# PURPOSE:
+# - Maps OTC Options data types to existing rule configurations
+# - References existing YAML rule files for validation and enrichment
+# - Lightweight routing configuration
+#
+# ============================================================================
+
+metadata:
+  name: "OTC Options Processing Scenario"
+  version: "1.0.0"
+  description: "Associates OTC Options with existing rule configurations"
+  type: "scenario"
+  business-domain: "Derivatives Trading"
+  owner: "derivatives.team@company.com"
+
+# ============================================================================
+# SCENARIO CONFIGURATION
+# ============================================================================
+
+scenario:
+  scenario-id: "otc-options-standard"
+  name: "OTC Options Standard Processing"
+  description: "Associates OTC Options with existing rule configurations"
+
+  # Data types this scenario applies to
+  data-types:
+    - "dev.mars.apex.demo.model.OtcOption"
+    - "OtcOption"  # Short name alias
+
+  # References to existing rule configuration files
+  rule-configurations:
+    - "bootstrap/otc-options-bootstrap.yaml"
+    - "config/derivatives-validation-rules.yaml"
