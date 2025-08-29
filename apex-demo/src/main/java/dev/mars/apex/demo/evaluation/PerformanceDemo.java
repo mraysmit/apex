@@ -1,4 +1,4 @@
-package dev.mars.apex.demo.examples;
+package dev.mars.apex.demo.evaluation;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
