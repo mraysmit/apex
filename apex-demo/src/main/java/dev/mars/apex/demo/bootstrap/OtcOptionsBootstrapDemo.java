@@ -24,6 +24,31 @@ import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 
+// Standard Java imports
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+// Logging
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+// Spring annotation
+import org.springframework.stereotype.Component;
+
+// Infrastructure classes
+import dev.mars.apex.demo.bootstrap.infrastructure.DatabaseSetup;
+import dev.mars.apex.demo.bootstrap.infrastructure.DataSourceVerifier;
+import dev.mars.apex.demo.bootstrap.infrastructure.ExternalDatasetSetup;
+import dev.mars.apex.demo.bootstrap.infrastructure.XmlDataGenerator;
+
+// Model classes
+import dev.mars.apex.demo.bootstrap.model.OtcOption;
+import dev.mars.apex.demo.bootstrap.model.UnderlyingAsset;
+
 /**
  * OTC Options Bootstrap Demo - Comprehensive demonstration of three data lookup methods.
  *

@@ -30,6 +30,29 @@ import dev.mars.apex.core.config.yaml.YamlEnrichment;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+
+// Model classes
+import dev.mars.apex.demo.bootstrap.model.CustomerProfile;
+import dev.mars.apex.demo.bootstrap.model.LoanApplication;
+import dev.mars.apex.demo.bootstrap.model.OrderProcessing;
+
+// Infrastructure classes
+import dev.mars.apex.demo.bootstrap.infrastructure.RuleConfigDatabaseSetup;
+import dev.mars.apex.demo.bootstrap.infrastructure.RuleConfigDataSourceVerifier;
+import dev.mars.apex.demo.bootstrap.infrastructure.RuleConfigExternalDatasetSetup;
+
 /**
  * Complete Bootstrap Demonstration of APEX Rule Configuration & Processing.
  *

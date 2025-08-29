@@ -17,7 +17,7 @@ package dev.mars.apex.demo.runners;
  */
 
 
-import dev.mars.apex.demo.examples.QuickStartDemo;
+import dev.mars.apex.demo.validation.QuickStartDemo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -16,7 +16,9 @@ package dev.mars.apex.demo.runners;
  * limitations under the License.
  */
 
-import dev.mars.apex.demo.examples.*;
+import dev.mars.apex.demo.validation.QuickStartDemo;
+import dev.mars.apex.demo.examples.LayeredAPIDemo;
+import dev.mars.apex.demo.examples.YamlDatasetDemo;
 
 import java.util.Scanner;
 

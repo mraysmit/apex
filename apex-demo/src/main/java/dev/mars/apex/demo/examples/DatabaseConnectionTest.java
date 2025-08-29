@@ -2,7 +2,8 @@ package dev.mars.apex.demo.examples;
 
 import dev.mars.apex.core.config.datasource.ConnectionConfig;
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
-import dev.mars.apex.core.service.data.external.database.JdbcTemplateFactory;
+// Note: JdbcTemplateFactory is not exported from apex-core module
+// Using direct JDBC connections instead
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,12 +114,15 @@ public class DatabaseConnectionTest {
         
         config.setConnection(connectionConfig);
         
-        // Create DataSource using APEX factory
-        DataSource dataSource = JdbcTemplateFactory.createDataSource(config);
-        logger.info("External DataSource created successfully");
-        
+        // Create direct JDBC connection (JdbcTemplateFactory not exported from apex-core)
+        // Build JDBC URL from ConnectionConfig properties
+        String jdbcUrl = "jdbc:h2:mem:" + connectionConfig.getDatabase() + ";DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+        String username = connectionConfig.getUsername();
+        String password = connectionConfig.getPassword();
+        logger.info("Creating direct JDBC connection to: " + jdbcUrl);
+
         // Test connection
-        try (Connection connection = dataSource.getConnection()) {
+        try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password)) {
             logger.info("External DataSource connection established");
             
             Statement statement = connection.createStatement();

@@ -1,4 +1,4 @@
-package dev.mars.apex.demo.examples;
+package dev.mars.apex.demo.validation;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
@@ -122,7 +122,7 @@ public class BasicUsageExamples {
             logger.info("Loading YAML configuration from basic-usage-examples-config.yaml");
             
             // Load configuration using real APEX YamlConfigurationLoader
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("basic-usage-examples-config.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("validation/basic-usage-examples-config.yaml");
             
             if (config == null) {
                 throw new IllegalStateException("Failed to load YAML configuration - file not found or invalid");

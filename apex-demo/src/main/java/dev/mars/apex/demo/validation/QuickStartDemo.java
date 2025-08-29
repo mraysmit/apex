@@ -1,4 +1,4 @@
-package dev.mars.apex.demo.examples;
+package dev.mars.apex.demo.validation;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -299,10 +299,10 @@ public class QuickStartDemo {
 
             // Load the quick-start YAML configuration
             long loadStart = System.nanoTime();
-            InputStream yamlStream = getClass().getResourceAsStream("/demo-rules/quick-start.yaml");
+            InputStream yamlStream = getClass().getResourceAsStream("/validation/demo-rules/quick-start.yaml");
 
             if (yamlStream != null) {
-                logger.debug("Found YAML configuration file at /demo-rules/quick-start.yaml");
+                logger.debug("Found YAML configuration file at /validation/demo-rules/quick-start.yaml");
 
                 YamlConfigurationLoader loader = new YamlConfigurationLoader();
                 YamlRuleConfiguration config = loader.loadFromStream(yamlStream);
@@ -355,9 +355,9 @@ public class QuickStartDemo {
                 System.out.println("  PASSED YAML configuration loaded and tested successfully!");
 
             } else {
-                logger.warn("YAML configuration file not found at /demo-rules/quick-start.yaml");
+                logger.warn("YAML configuration file not found at /validation/demo-rules/quick-start.yaml");
                 System.out.println("INFO: YAML configuration file not found");
-                System.out.println("   Expected location: /demo-rules/quick-start.yaml");
+                System.out.println("   Expected location: /validation/demo-rules/quick-start.yaml");
                 System.out.println("   This demonstrates graceful handling of missing configuration files");
                 System.out.println("   In production, you would typically have default rules or fallback behavior");
             }
