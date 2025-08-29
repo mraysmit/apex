@@ -17,7 +17,7 @@ package dev.mars.apex.demo.runners;
  */
 
 
-import dev.mars.apex.demo.examples.ComprehensiveFinancialSettlementDemo;
+import dev.mars.apex.demo.enrichment.ComprehensiveFinancialSettlementDemo;
 import dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap;
 
 import org.slf4j.Logger;

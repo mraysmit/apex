@@ -1,4 +1,4 @@
-package dev.mars.apex.demo.examples;
+package dev.mars.apex.demo.enrichment;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
@@ -47,8 +47,8 @@ import java.util.*;
  * NO HARDCODED OBJECTS: No manual Map.of(), HashMap creation, or hardcoded connection configurations.
  *
  * YAML FILES REQUIRED:
- * - external-data-source-demo-config.yaml: External data source configurations and integration definitions
- * - external-data-source-demo-data.yaml: Test data scenarios for demonstration
+ * - enrichment/external-data-source-demo-config.yaml: External data source configurations and integration definitions
+ * - enrichment/external-data-source-demo-data.yaml: Test data scenarios for demonstration
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-08-29
@@ -130,10 +130,10 @@ public class ExternalDataSourceDemo {
      */
     private YamlRuleConfiguration loadConfiguration() {
         try {
-            logger.info("Loading YAML configuration from external-data-source-demo-config.yaml");
-            
+            logger.info("Loading YAML configuration from enrichment/external-data-source-demo-config.yaml");
+
             // Load configuration using real APEX YamlConfigurationLoader
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("external-data-source-demo-config.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("enrichment/external-data-source-demo-config.yaml");
             
             if (config == null) {
                 throw new IllegalStateException("Failed to load YAML configuration - file not found or invalid");

@@ -17,7 +17,7 @@ package dev.mars.apex.demo.runners;
  */
 
 
-import dev.mars.apex.demo.examples.YamlDatasetDemo;
+import dev.mars.apex.demo.enrichment.YamlDatasetDemo;
 import dev.mars.apex.demo.lookup.SimpleFieldLookupDemo;
 import dev.mars.apex.demo.lookup.NestedFieldLookupDemo;
 import dev.mars.apex.demo.lookup.CompoundKeyLookupDemo;

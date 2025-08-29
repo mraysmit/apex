@@ -18,7 +18,7 @@ package dev.mars.apex.demo.runners;
 
 import dev.mars.apex.demo.validation.QuickStartDemo;
 import dev.mars.apex.demo.examples.LayeredAPIDemo;
-import dev.mars.apex.demo.examples.YamlDatasetDemo;
+import dev.mars.apex.demo.enrichment.YamlDatasetDemo;
 
 import java.util.Scanner;
 
