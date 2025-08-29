@@ -24,6 +24,9 @@ package dev.mars.apex.demo.rulesets;
  * @since 2025-08-28
  * @version 1.0
  */
+
+import dev.mars.apex.demo.evaluation.ComplianceServiceDemo;
+
 /**
  * Simple test class for the merged ComplianceServiceDemo.
  *
@@ -129,7 +132,7 @@ public class ComplianceServiceDemoTest {
         assertNotNull("STATUS_PENDING should be accessible", statusPending);
 
         // Basic validation that the class name is correct
-        assertEquals("dev.mars.apex.demo.rulesets.ComplianceServiceDemo", clazz.getName());
+        assertEquals("dev.mars.apex.demo.evaluation.ComplianceServiceDemo", clazz.getName());
     }
 
     private void assertNotNull(String name, Object value) {

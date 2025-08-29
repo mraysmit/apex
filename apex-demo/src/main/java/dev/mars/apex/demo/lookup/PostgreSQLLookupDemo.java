@@ -1,4 +1,4 @@
-package dev.mars.apex.demo.examples;
+package dev.mars.apex.demo.lookup;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -63,20 +63,20 @@ import java.util.HashMap;
  * ============================================================================
  *
  * External Data-Source Configurations (Infrastructure - Reusable):
- * └── data-sources/postgresql-customer-database.yaml
+ * └── infrastructure/database/postgresql-customer-database.yaml
  *     ├── PostgreSQL customer database connection and queries
  *     └── Used for: Customer profile database operations
  *
- * └── data-sources/settlement-database.yaml
+ * └── infrastructure/database/settlement-database.yaml
  *     ├── PostgreSQL settlement database connection and queries
  *     └── Used for: Settlement instruction and risk assessment operations
  *
- * Lean Enrichment Configurations (Business Logic - Focused):
- * └── enrichments/customer-profile-enrichment-lean.yaml
+ * Lookup Enrichment Configurations (Business Logic - Focused):
+ * └── lookup/customer-profile-enrichment.yaml
  *     ├── Customer profile enrichment with external data-source reference
  *     └── Used for: Simple customer profile database enrichment
  *
- * └── enrichments/settlement-instruction-enrichment-lean.yaml
+ * └── lookup/settlement-instruction-enrichment.yaml
  *     ├── Settlement instruction enrichment with external data-source reference
  *     └── Used for: Complex multi-table settlement instruction enrichment
  *
@@ -141,7 +141,7 @@ public class PostgreSQLLookupDemo {
             logger.info("  Customer ID: {}", inputData.get("customerId"));
 
             // Apply external data-source reference enrichment processing using real APEX services
-            String configPath = "enrichments/customer-profile-enrichment-lean.yaml";
+            String configPath = "lookup/customer-profile-enrichment.yaml";
             Map<String, Object> enrichedData = performEnrichmentWithYaml(inputData, configPath);
 
             logger.info("\nCustomer Profile from External Data-Source Reference Processing:");
@@ -180,7 +180,7 @@ public class PostgreSQLLookupDemo {
             logger.info("  Counterparty ID: {}", inputData.get("counterpartyId"));
 
             // Apply external data-source reference multi-parameter enrichment processing using real APEX services
-            String configPath = "enrichments/settlement-instruction-enrichment-lean.yaml";
+            String configPath = "lookup/settlement-instruction-enrichment.yaml";
             Map<String, Object> enrichedData = performEnrichmentWithYaml(inputData, configPath);
 
             logger.info("\nSettlement Instructions from External Data-Source Reference:");
@@ -228,7 +228,7 @@ public class PostgreSQLLookupDemo {
                 inputData.put("customerId", customerId);
 
                 long startTime = System.currentTimeMillis();
-                Map<String, Object> result = performEnrichmentWithYaml(inputData, "enrichments/customer-profile-enrichment-lean.yaml");
+                Map<String, Object> result = performEnrichmentWithYaml(inputData, "lookup/customer-profile-enrichment.yaml");
                 long lookupTime = System.currentTimeMillis() - startTime;
                 totalTime += lookupTime;
 
@@ -246,12 +246,12 @@ public class PostgreSQLLookupDemo {
 
             // First lookup (cache miss)
             long startTime = System.currentTimeMillis();
-            performEnrichmentWithYaml(inputData, "examples/lookups/customer-profile-enrichment.yaml");
+            performEnrichmentWithYaml(inputData, "lookup/customer-profile-enrichment.yaml");
             long firstLookup = System.currentTimeMillis() - startTime;
 
             // Second lookup (cache hit)
             startTime = System.currentTimeMillis();
-            performEnrichmentWithYaml(inputData, "enrichments/customer-profile-enrichment-lean.yaml");
+            performEnrichmentWithYaml(inputData, "lookup/customer-profile-enrichment.yaml");
             long secondLookup = System.currentTimeMillis() - startTime;
             
             logger.info("  First lookup (cache miss): {} ms", firstLookup);

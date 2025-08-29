@@ -87,9 +87,9 @@ public class YamlDependencyAnalysisDemo {
 
         // List of scenario files to analyze
         String[] scenarioFiles = {
-            "scenarios/otc-options-scenario.yaml",
-            "scenarios/commodity-swaps-scenario.yaml",
-            "scenarios/settlement-auto-repair-scenario.yaml"
+            "validation/otc-options-scenario.yaml",
+            "validation/commodity-swaps-scenario.yaml",
+            "validation/settlement-auto-repair-scenario.yaml"
         };
 
         System.out.println("\nAnalyzing scenario files...\n");
@@ -171,7 +171,7 @@ public class YamlDependencyAnalysisDemo {
         
         try {
             // Analyze one scenario in detail
-            String detailedScenario = "scenarios/otc-options-scenario.yaml";
+            String detailedScenario = "validation/otc-options-scenario.yaml";
             YamlDependencyGraph graph = dependencyService.analyzeDependencies(detailedScenario);
 
             System.out.println("\nDetailed Analysis for: " + detailedScenario);

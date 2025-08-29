@@ -23,8 +23,8 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.demo.bootstrap.model.Customer;
-import dev.mars.apex.demo.data.DemoDataLoader;
+import dev.mars.apex.demo.model.Customer;
+import dev.mars.apex.demo.infrastructure.DemoDataLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -299,10 +299,10 @@ public class QuickStartDemo {
 
             // Load the quick-start YAML configuration
             long loadStart = System.nanoTime();
-            InputStream yamlStream = getClass().getResourceAsStream("/validation/demo-rules/quick-start.yaml");
+            InputStream yamlStream = getClass().getResourceAsStream("/validation/basic-usage-examples-config.yaml");
 
             if (yamlStream != null) {
-                logger.debug("Found YAML configuration file at /validation/demo-rules/quick-start.yaml");
+                logger.debug("Found YAML configuration file at /validation/basic-usage-examples-config.yaml");
 
                 YamlConfigurationLoader loader = new YamlConfigurationLoader();
                 YamlRuleConfiguration config = loader.loadFromStream(yamlStream);
@@ -355,9 +355,9 @@ public class QuickStartDemo {
                 System.out.println("  PASSED YAML configuration loaded and tested successfully!");
 
             } else {
-                logger.warn("YAML configuration file not found at /validation/demo-rules/quick-start.yaml");
+                logger.warn("YAML configuration file not found at /validation/basic-usage-examples-config.yaml");
                 System.out.println("INFO: YAML configuration file not found");
-                System.out.println("   Expected location: /validation/demo-rules/quick-start.yaml");
+                System.out.println("   Expected location: /validation/basic-usage-examples-config.yaml");
                 System.out.println("   This demonstrates graceful handling of missing configuration files");
                 System.out.println("   In production, you would typically have default rules or fallback behavior");
             }
@@ -398,7 +398,7 @@ public class QuickStartDemo {
         logger.debug("Loading sample customer data from external configuration");
 
         // Load customer data from external YAML file
-        List<Map<String, Object>> customerData = DemoDataLoader.loadCustomerData("demo-data/quickstart/customers.yaml");
+        List<Map<String, Object>> customerData = DemoDataLoader.loadCustomerData("infrastructure/bootstrap/datasets/customer-profiles.yaml");
 
         // Use the first valid customer from the external data
         Map<String, Object> customerMap = customerData.stream()
@@ -427,7 +427,7 @@ public class QuickStartDemo {
      */
     private Map<String, Object> loadDemoConfiguration() {
         logger.debug("Loading demo configuration from external file");
-        return DemoDataLoader.loadConfiguration("demo-data/quickstart/config.yaml");
+        return DemoDataLoader.loadConfiguration("validation/basic-usage-examples-config.yaml");
     }
     
 

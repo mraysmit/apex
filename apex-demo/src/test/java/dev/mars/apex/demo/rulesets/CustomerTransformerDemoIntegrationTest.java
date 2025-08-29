@@ -20,7 +20,8 @@ package dev.mars.apex.demo.rulesets;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.TransformerRule;
-import dev.mars.apex.demo.bootstrap.model.Customer;
+import dev.mars.apex.demo.model.Customer;
+import dev.mars.apex.demo.enrichment.CustomerTransformerDemo;
 
 import java.util.ArrayList;
 import java.util.Map;

@@ -6,11 +6,11 @@ echo === Running Bootstrap Demos ===
 echo.
 
 echo 1. Running Custody Auto-Repair Bootstrap Demo...
-java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" dev.mars.apex.demo.enrichment.CustodyAutoRepairBootstrap
 echo.
 
 echo 2. Running Commodity Swap Validation Bootstrap Demo...
-java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" dev.mars.apex.demo.validation.CommoditySwapValidationBootstrap
 echo.
 
 echo === Running Main Demo Runner ===

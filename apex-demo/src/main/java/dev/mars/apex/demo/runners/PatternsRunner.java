@@ -21,6 +21,7 @@ import dev.mars.apex.demo.enrichment.YamlDatasetDemo;
 import dev.mars.apex.demo.lookup.SimpleFieldLookupDemo;
 import dev.mars.apex.demo.lookup.NestedFieldLookupDemo;
 import dev.mars.apex.demo.lookup.CompoundKeyLookupDemo;
+import dev.mars.apex.demo.lookup.PostgreSQLLookupDemo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,7 +108,7 @@ public class PatternsRunner {
         // Conditional Expression Lookup
         runLookupDemo("Conditional Expression Lookup",
                      "Dynamic lookup keys based on conditions",
-                     () -> YamlDatasetDemo.ConditionalExpressionLookupDemo.main(new String[]{}));
+                     () -> YamlDatasetDemo.main(new String[]{}));
         
         // Nested Field Lookup
         runLookupDemo("Nested Field Lookup",
@@ -122,7 +123,7 @@ public class PatternsRunner {
         // Comprehensive Lookup
         runLookupDemo("Comprehensive Lookup",
                      "Advanced lookup scenarios and techniques",
-                     () -> YamlDatasetDemo.ComprehensiveLookupDemo.main(new String[]{}));
+                     () -> PostgreSQLLookupDemo.main(new String[]{}));
         
         logger.info("");
         logger.info("📋 LOOKUP PATTERN SUMMARY:");

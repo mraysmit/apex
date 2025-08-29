@@ -17,7 +17,7 @@ package dev.mars.apex.demo.lookup;
  */
 
 
-import dev.mars.apex.demo.bootstrap.model.CustomerOrder;
+import dev.mars.apex.demo.model.CustomerOrder;
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
 import dev.mars.apex.core.config.yaml.YamlRule;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
@@ -65,7 +65,7 @@ public class CompoundKeyLookupDemo extends AbstractLookupDemo {
     
     @Override
     protected String getYamlConfigPath() {
-        return "examples/lookups/compound-key-lookup.yaml";
+        return "lookup/compound-key-lookup.yaml";
     }
     
     @Override

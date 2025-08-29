@@ -17,7 +17,7 @@ package dev.mars.apex.demo.lookup;
  */
 
 
-import dev.mars.apex.demo.bootstrap.model.CurrencyTransaction;
+import dev.mars.apex.demo.model.CurrencyTransaction;
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
 import dev.mars.apex.core.config.yaml.YamlRule;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
@@ -63,7 +63,7 @@ public class SimpleFieldLookupDemo extends AbstractLookupDemo {
     
     @Override
     protected String getYamlConfigPath() {
-        return "examples/lookups/simple-field-lookup.yaml";
+        return "lookup/simple-field-lookup.yaml";
     }
     
     @Override

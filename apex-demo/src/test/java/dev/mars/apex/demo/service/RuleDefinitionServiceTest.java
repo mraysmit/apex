@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.service;
 
 import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.demo.rulesets.RuleDefinitionServiceDemo;
+import dev.mars.apex.demo.evaluation.RuleDefinitionServiceDemo;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

@@ -1,0 +1,203 @@
+package dev.mars.apex.demo.evaluation;
+
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import dev.mars.apex.core.service.engine.RuleEngineService;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
+
+import java.math.BigDecimal;
+import java.util.*;
+
+// import static dev.mars.apex.demo.evaluation.ApexRulesEngineDemo.*; // Not needed for conceptual demo
+
+/**
+ * Standalone example demonstrating the Fluent Rule Builder pattern.
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-08-28
+ * @version 1.0
+ */
+public class FluentRuleBuilderExample {
+
+    public static void main(String[] args) {
+        System.out.println("=== FLUENT RULE BUILDER PATTERN EXAMPLE ===");
+        System.out.println("Demonstrating rule composition with conditional execution paths\n");
+
+        // Create services (simplified initialization)
+        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
+        RuleEngineService ruleEngineService = new RuleEngineService(evaluatorService);
+
+        // Example 1: VIP Customer Processing
+        demonstrateVIPProcessing(ruleEngineService, evaluatorService);
+
+        // Example 2: Standard Customer Processing  
+        demonstrateStandardProcessing(ruleEngineService, evaluatorService);
+
+        // Example 3: Complex Multi-Branch Processing
+        demonstrateComplexProcessing(ruleEngineService, evaluatorService);
+    }
+
+    /**
+     * Example 1: VIP Customer Processing - Success Path
+     */
+    private static void demonstrateVIPProcessing(RuleEngineService ruleEngineService, ExpressionEvaluatorService evaluatorService) {
+        System.out.println("1. VIP CUSTOMER PROCESSING EXAMPLE");
+        System.out.println("   " + "-".repeat(40));
+
+        Map<String, Object> context = Map.of(
+            "customerType", "VIP",
+            "transactionAmount", new BigDecimal("250000"),
+            "region", "US",
+            "accountAge", 8
+        );
+
+        System.out.println("   Context: " + context);
+
+        // TODO: Build rule chain using fluent API (not yet implemented)
+        // NOTE: This demonstrates what a fluent API could look like
+        // Actual implementation uses YAML configuration with YamlRuleChain
+        /*
+        RuleChain ruleChain = RuleChainBuilder
+            .start()
+            .withRule("CustomerTypeCheck", "#customerType == 'VIP' || #customerType == 'PREMIUM'", "High-tier customer detected")
+                .onSuccess()
+                    .executeRule("HighValueCheck", "#transactionAmount > 100000", "High-value transaction detected")
+                        .onSuccess()
+                            .executeRule("RegionalComplianceCheck", "#region == 'US' ? #accountAge >= 5 : #accountAge >= 3", "Regional compliance check")
+                        .onFailure()
+                            .executeRule("StandardProcessing", "true", "Standard processing applied")
+                .onFailure()
+                    .executeRule("BasicValidation", "#transactionAmount > 0", "Basic validation check")
+            .build();
+
+        // Execute the rule chain
+        RuleChainResult result = ruleChain.execute(createEvaluationContext(context), ruleEngineService, evaluatorService);
+
+        System.out.println("   → Execution Path: " + String.join(" → ", result.getExecutionPath()));
+        System.out.println("   → Final Result: " + result.getFinalOutcome());
+        */
+
+        // Conceptual demonstration of what would happen
+        System.out.println("   → Conceptual Execution Path: CustomerTypeCheck → HighValueCheck → RegionalComplianceCheck");
+        System.out.println("   → Conceptual Result: APPROVED");
+        System.out.println("   ✓ VIP customer successfully processed through high-value path\n");
+    }
+
+    /**
+     * Example 2: Standard Customer Processing - Failure Path
+     */
+    private static void demonstrateStandardProcessing(RuleEngineService ruleEngineService, ExpressionEvaluatorService evaluatorService) {
+        System.out.println("2. STANDARD CUSTOMER PROCESSING EXAMPLE");
+        System.out.println("   " + "-".repeat(40));
+
+        Map<String, Object> context = Map.of(
+            "customerType", "STANDARD",
+            "transactionAmount", new BigDecimal("75000"),
+            "region", "EU",
+            "accountAge", 3
+        );
+
+        System.out.println("   Context: " + context);
+
+        // TODO: Same rule chain as above - will follow different path (not yet implemented)
+        /*
+        RuleChain ruleChain = RuleChainBuilder
+            .start()
+            .withRule("CustomerTypeCheck", "#customerType == 'VIP' || #customerType == 'PREMIUM'", "High-tier customer detected")
+                .onSuccess()
+                    .executeRule("HighValueCheck", "#transactionAmount > 100000", "High-value transaction detected")
+                .onFailure()
+                    .executeRule("BasicValidation", "#transactionAmount > 0", "Basic validation check")
+            .build();
+
+        // Execute the rule chain
+        RuleChainResult result = ruleChain.execute(createEvaluationContext(context), ruleEngineService, evaluatorService);
+
+        System.out.println("   → Execution Path: " + String.join(" → ", result.getExecutionPath()));
+        System.out.println("   → Final Result: " + result.getFinalOutcome());
+        */
+
+        // Conceptual demonstration of what would happen
+        System.out.println("   → Conceptual Execution Path: CustomerTypeCheck → BasicValidation");
+        System.out.println("   → Conceptual Result: BASIC_VALIDATION_PASSED");
+        System.out.println("   ✓ Standard customer routed to basic validation path\n");
+    }
+
+    /**
+     * Example 3: Complex Multi-Branch Processing
+     */
+    private static void demonstrateComplexProcessing(RuleEngineService ruleEngineService, ExpressionEvaluatorService evaluatorService) {
+        System.out.println("3. COMPLEX MULTI-BRANCH PROCESSING EXAMPLE");
+        System.out.println("   " + "-".repeat(40));
+
+        Map<String, Object> context = Map.of(
+            "customerType", "PREMIUM",
+            "transactionAmount", new BigDecimal("150000"),
+            "region", "ASIA",
+            "accountAge", 1,
+            "riskScore", 85
+        );
+
+        System.out.println("   Context: " + context);
+
+        // TODO: Complex rule chain with multiple branches (not yet implemented)
+        /*
+        RuleChain ruleChain = RuleChainBuilder
+            .start()
+            .withRule("InitialRiskCheck", "#riskScore < 90", "Initial risk assessment")
+                .onSuccess()
+                    .executeRule("CustomerTierCheck", "#customerType == 'VIP' || #customerType == 'PREMIUM'", "Customer tier validation")
+                        .onSuccess()
+                            .executeRule("TransactionLimitCheck", "#transactionAmount <= 200000", "Transaction limit check")
+                                .onSuccess()
+                                    .executeRule("AccountMaturityCheck", "#accountAge >= 2", "Account maturity check")
+                                        .onSuccess()
+                                            .executeRule("FinalApproval", "true", "Final approval granted")
+                                        .onFailure()
+                                            .executeRule("ManualReview", "true", "Manual review required")
+                                .onFailure()
+                                    .executeRule("SeniorApproval", "true", "Senior approval required")
+                        .onFailure()
+                            .executeRule("StandardLimits", "#transactionAmount <= 50000", "Standard customer limits")
+                .onFailure()
+                    .executeRule("HighRiskReview", "true", "High risk review required")
+            .build();
+
+        // Execute the rule chain
+        RuleChainResult result = ruleChain.execute(createEvaluationContext(context), ruleEngineService, evaluatorService);
+
+        System.out.println("   → Execution Path: " + String.join(" → ", result.getExecutionPath()));
+        System.out.println("   → Final Result: " + result.getFinalOutcome());
+        */
+
+        // Conceptual demonstration of what would happen
+        System.out.println("   → Conceptual Execution Path: InitialRiskCheck → CustomerTierCheck → TransactionLimitCheck → AccountMaturityCheck → FinalApproval");
+        System.out.println("   → Conceptual Result: APPROVED");
+        System.out.println("   ✓ Complex processing completed (5 rules would be executed)");
+    }
+
+    /**
+     * Helper method to create evaluation context from a map.
+     */
+    private static StandardEvaluationContext createEvaluationContext(Map<String, Object> variables) {
+        StandardEvaluationContext context = new StandardEvaluationContext();
+        variables.forEach(context::setVariable);
+        return context;
+    }
+}

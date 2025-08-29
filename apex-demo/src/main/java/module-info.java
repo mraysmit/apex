@@ -49,11 +49,12 @@ module dev.mars.apex.demo {
     // Export packages for Spring Expression Language access and general use
 
     // Export main demo packages for external access
-    exports dev.mars.apex.demo.rulesets;
-    exports dev.mars.apex.demo.data to spring.expression;
-    exports dev.mars.apex.demo.examples;
-    exports dev.mars.apex.demo.bootstrap;
     exports dev.mars.apex.demo.lookup;
-    exports dev.mars.apex.demo.bootstrap.model;
+    exports dev.mars.apex.demo.model;
     exports dev.mars.apex.demo.runners;
+    exports dev.mars.apex.demo.evaluation;
+    exports dev.mars.apex.demo.validation;
+    exports dev.mars.apex.demo.enrichment;
+    exports dev.mars.apex.demo.infrastructure;
+    exports dev.mars.apex.demo.util;
 }

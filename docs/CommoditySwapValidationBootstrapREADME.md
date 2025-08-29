@@ -161,7 +161,7 @@ Choose the method that works best for your environment:
 **Option A: Using Maven (Recommended)**
 ```bash
 # From the project root directory
-mvn exec:java -pl apex-demo -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap"
+mvn exec:java -pl apex-demo -Dexec.mainClass="dev.mars.apex.demo.validation.CommoditySwapValidationBootstrap"
 ```
 
 **Option B: Direct Java Execution**
@@ -170,7 +170,7 @@ mvn exec:java -pl apex-demo -Dexec.mainClass="dev.mars.apex.demo.bootstrap.Commo
 cd apex-demo
 
 # Run directly with Java
-java -cp "target/classes:target/dependency/*" dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap
+java -cp "target/classes:target/dependency/*" dev.mars.apex.demo.validation.CommoditySwapValidationBootstrap
 ```
 
 **What to expect:** The bootstrap will start up, detect your environment, and begin running through all six demonstration scenarios automatically.

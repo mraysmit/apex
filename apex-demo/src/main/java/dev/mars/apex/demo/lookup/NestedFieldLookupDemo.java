@@ -17,7 +17,7 @@ package dev.mars.apex.demo.lookup;
  */
 
 
-import dev.mars.apex.demo.bootstrap.model.TradeSettlement;
+import dev.mars.apex.demo.model.TradeSettlement;
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
 import dev.mars.apex.core.config.yaml.YamlRule;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
@@ -65,7 +65,7 @@ public class NestedFieldLookupDemo extends AbstractLookupDemo {
     
     @Override
     protected String getYamlConfigPath() {
-        return "examples/lookups/nested-field-lookup.yaml";
+        return "lookup/nested-field-lookup.yaml";
     }
     
     @Override

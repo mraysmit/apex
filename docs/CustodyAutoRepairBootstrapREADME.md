@@ -58,11 +58,11 @@ mvn clean compile
 ### 2. Run the Bootstrap
 ```bash
 # From the project root
-mvn exec:java -pl apex-demo -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap"
+mvn exec:java -pl apex-demo -Dexec.mainClass="dev.mars.apex.demo.enrichment.CustodyAutoRepairBootstrap"
 
 # Or directly with Java
 cd apex-demo
-java -cp "target/classes:target/dependency/*" dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap
+java -cp "target/classes:target/dependency/*" dev.mars.apex.demo.enrichment.CustodyAutoRepairBootstrap
 ```
 
 ### 3. Expected Output
@@ -1661,13 +1661,13 @@ GRANT ALL PRIVILEGES ON DATABASE apex_custody_demo TO apex_demo;
 cd apex-rules-engine
 
 # Run the bootstrap demonstration
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap" -pl apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.CustodyAutoRepairBootstrap" -pl apex-demo
 
 # Alternative: Run with specific profile
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap" -Dexec.args="--profile=asian-markets" -pl apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.CustodyAutoRepairBootstrap" -Dexec.args="--profile=asian-markets" -pl apex-demo
 
 # Run with debug logging
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap" -Dexec.args="--debug" -pl apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.CustodyAutoRepairBootstrap" -Dexec.args="--debug" -pl apex-demo
 ```
 
 #### **Expected Output**

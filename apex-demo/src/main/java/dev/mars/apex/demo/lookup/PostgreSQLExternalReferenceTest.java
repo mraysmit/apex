@@ -1,4 +1,4 @@
-package dev.mars.apex.demo.examples;
+package dev.mars.apex.demo.lookup;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
@@ -34,7 +34,7 @@ import java.util.Map;
  * NO HARDCODED DATA: Database setup uses real SQL operations, enrichment uses real APEX services.
  *
  * EXTERNAL YAML FILE DEPENDENCIES:
- * - enrichments/postgresql-customer-profile-external-ref.yaml: Main enrichment configuration with external data-source references
+ * - lookup/postgresql-simple-database-enrichment.yaml: Main enrichment configuration with external data-source references
  * - data-sources/postgresql-customer-database.yaml: External data-source configuration with connection details and named queries
  *
  * ARCHITECTURE PATTERN:
@@ -76,7 +76,7 @@ public class PostgreSQLExternalReferenceTest {
         logger.info("POSTGRESQL EXTERNAL DATA-SOURCE REFERENCE TEST - REAL APEX SERVICES");
         logger.info("====================================================================================");
         logger.info("Testing external data-source reference pattern with real APEX services:");
-        logger.info("  • Main Config: enrichments/postgresql-customer-profile-external-ref.yaml");
+        logger.info("  • Main Config: lookup/postgresql-simple-database-enrichment.yaml");
         logger.info("  • External Data Source: data-sources/postgresql-customer-database.yaml");
         logger.info("  • Database: H2 in-memory (PostgreSQL mode) with real customer data");
         logger.info("  • Services: Real APEX enrichment, lookup, and expression evaluation");
@@ -168,13 +168,13 @@ public class PostgreSQLExternalReferenceTest {
 
         // Load main YAML configuration with external data-source references
         // This file contains enrichment rules that reference external data-source configurations
-        logger.info("📄 Loading main YAML configuration: enrichments/postgresql-customer-profile-external-ref.yaml");
+        logger.info("📄 Loading main YAML configuration: lookup/postgresql-simple-database-enrichment.yaml");
         logger.info("   • Contains: Enrichment rules with external data-source references");
         logger.info("   • References: data-sources/postgresql-customer-database.yaml");
         logger.info("   • Pattern: Infrastructure separation - business logic separate from connection details");
 
         YamlConfigurationLoader configLoader = new YamlConfigurationLoader();
-        YamlRuleConfiguration config = configLoader.loadFromClasspath("enrichments/postgresql-customer-profile-external-ref.yaml");
+        YamlRuleConfiguration config = configLoader.loadFromClasspath("lookup/postgresql-simple-database-enrichment.yaml");
 
         if (config == null) {
             throw new IllegalStateException("❌ Failed to load main YAML configuration - file not found or invalid");

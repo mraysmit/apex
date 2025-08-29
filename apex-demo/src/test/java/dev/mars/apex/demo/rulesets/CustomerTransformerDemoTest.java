@@ -17,7 +17,9 @@ package dev.mars.apex.demo.rulesets;
  */
 
 
-import dev.mars.apex.demo.bootstrap.model.Customer;
+import dev.mars.apex.demo.model.Customer;
+import dev.mars.apex.demo.enrichment.CustomerTransformerDemo;
+
 import java.util.ArrayList;
 
 /**
@@ -86,7 +88,7 @@ public class CustomerTransformerDemoTest {
         assertNotNull("Class should exist", clazz);
         
         // Verify the class name is correct
-        assertEquals("dev.mars.apex.demo.rulesets.CustomerTransformerDemo", clazz.getName());
+        assertEquals("dev.mars.apex.demo.enrichment.CustomerTransformerDemo", clazz.getName());
     }
 
     public void testDiscountCalculation() {
@@ -151,7 +153,7 @@ public class CustomerTransformerDemoTest {
         assertNotNull("Class should exist", clazz);
         
         // Basic validation that the class name is correct
-        assertEquals("dev.mars.apex.demo.rulesets.CustomerTransformerDemo", clazz.getName());
+        assertEquals("dev.mars.apex.demo.enrichment.CustomerTransformerDemo", clazz.getName());
         
         // Verify it's a public class (can be accessed)
         assertTrue("Class should be accessible", clazz != null);

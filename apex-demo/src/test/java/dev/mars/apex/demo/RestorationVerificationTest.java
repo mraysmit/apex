@@ -2,8 +2,8 @@ package dev.mars.apex.demo;
 
 
 import dev.mars.apex.demo.examples.FinancialServicesDemo;
-import dev.mars.apex.demo.examples.StaticDataEntities.*;
-import dev.mars.apex.demo.data.FinancialStaticDataProvider;
+import dev.mars.apex.demo.infrastructure.StaticDataEntities.*;
+import dev.mars.apex.demo.infrastructure.FinancialStaticDataProvider;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

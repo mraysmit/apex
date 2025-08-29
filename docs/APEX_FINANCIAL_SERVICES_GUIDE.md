@@ -976,7 +976,7 @@ mvn spring-boot:run
 **Focus**: Complete OTC Options processing with multi-source enrichment
 
 ```bash
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo" -pl apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.OtcOptionsBootstrapDemo" -pl apex-demo
 ```
 
 **What it demonstrates:**
@@ -1076,7 +1076,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.YamlDatasetDemo.Cond
 **File**: `DynamicMethodExecutionDemo.java`
 
 ```bash
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.DynamicMethodExecutionDemo" -pl apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.evaluation.DynamicMethodExecutionDemo" -pl apex-demo
 ```
 
 **Financial Services Application**: Dynamic pricing model selection based on instrument type and market conditions.
@@ -1085,7 +1085,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.DynamicMethodExecut
 **File**: `PerformanceAndExceptionDemo.java`
 
 ```bash
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.PerformanceAndExceptionDemo" -pl apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.evaluation.PerformanceAndExceptionDemo" -pl apex-demo
 ```
 
 **Financial Services Application**: Sub-millisecond processing requirements with comprehensive error recovery.
@@ -1094,7 +1094,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.PerformanceAndExcep
 **File**: `DataServiceManagerDemo.java`
 
 ```bash
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.DataServiceManagerDemo" -pl apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.infrastructure.DataServiceManagerDemo" -pl apex-demo
 ```
 
 **Financial Services Application**: Real-time market data feeds, reference data management, and failover handling.
@@ -2518,13 +2518,13 @@ mvn test -Dtest="**/*YamlValidation*Test"
 #### **2. Integration Testing**
 ```bash
 # Run bootstrap demos to test complete workflows
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo" -pl apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.OtcOptionsBootstrapDemo" -pl apex-demo
 ```
 
 #### **3. Performance Testing**
 ```bash
 # Run performance tests
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.PerformanceAndExceptionDemo" -pl apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.evaluation.PerformanceAndExceptionDemo" -pl apex-demo
 ```
 
 ## Conclusion

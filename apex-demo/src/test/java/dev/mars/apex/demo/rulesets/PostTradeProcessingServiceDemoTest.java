@@ -17,8 +17,8 @@ package dev.mars.apex.demo.rulesets;
  */
 
 
-import dev.mars.apex.demo.bootstrap.model.Trade;
-import java.util.ArrayList;
+import dev.mars.apex.demo.model.Trade;
+import dev.mars.apex.demo.evaluation.PostTradeProcessingServiceDemo;
 
 /**
  * Simple test class for the merged PostTradeProcessingServiceDemo.
@@ -144,7 +144,7 @@ public class PostTradeProcessingServiceDemoTest {
         assertNotNull("Class should exist", clazz);
         
         // Basic validation that the class name is correct
-        assertEquals("dev.mars.apex.demo.rulesets.PostTradeProcessingServiceDemo", clazz.getName());
+        assertEquals("dev.mars.apex.demo.evaluation.PostTradeProcessingServiceDemo", clazz.getName());
         
         // Verify it's a public class (can be accessed)
         assertTrue("Class should be accessible", clazz != null);

@@ -17,7 +17,8 @@ package dev.mars.apex.demo.rulesets;
  */
 
 
-import dev.mars.apex.demo.bootstrap.model.Trade;
+import dev.mars.apex.demo.enrichment.TradeTransformerDemo;
+import dev.mars.apex.demo.model.Trade;
 
 /**
  * Simple test class for the merged TradeTransformerDemo.
@@ -80,7 +81,7 @@ public class TradeTransformerDemoTest {
         assertTrue("Class should be accessible", clazz != null);
         
         // Basic validation that the class name is correct
-        assertEquals("dev.mars.apex.demo.rulesets.TradeTransformerDemo", clazz.getName());
+        assertEquals("dev.mars.apex.demo.enrichment.TradeTransformerDemo", clazz.getName());
     }
     
     public void testTradeRiskRatings() {

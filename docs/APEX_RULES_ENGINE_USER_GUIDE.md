@@ -1440,7 +1440,7 @@ Bootstrap demos provide:
 
 ```bash
 cd apex-demo
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.CustodyAutoRepairBootstrap"
 ```
 
 **What You'll Learn:**
@@ -1460,7 +1460,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CustodyAutoRepairBo
 
 ```bash
 cd apex-demo
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.validation.CommoditySwapValidationBootstrap"
 ```
 
 **What You'll Learn:**
@@ -1480,7 +1480,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CommoditySwapValida
 
 ```bash
 cd apex-demo
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.OtcOptionsBootstrapDemo"
 ```
 
 **What You'll Learn:**
@@ -1500,7 +1500,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.OtcOptionsBootstrap
 
 ```bash
 cd apex-demo
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.ScenarioBasedProcessingDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.evaluation.ScenarioBasedProcessingDemo"
 ```
 
 **What You'll Learn:**
@@ -1551,10 +1551,10 @@ cd apex-demo
 ./scripts/run-demos.bat    # Windows
 
 # Or run individual demos
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo"
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap"
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap"
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.ScenarioBasedProcessingDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.OtcOptionsBootstrapDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.validation.CommoditySwapValidationBootstrap"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.CustodyAutoRepairBootstrap"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.evaluation.ScenarioBasedProcessingDemo"
 ```
 
 ### What to Expect
@@ -3454,7 +3454,7 @@ Here's how to set up a scenario for processing OTC Options:
 scenario-registry:
   - scenario-id: "otc-options-standard"
     config-file: "scenarios/otc-options-scenario.yaml"
-    data-types: ["OtcOption", "dev.mars.apex.demo.bootstrap.model.OtcOption"]
+    data-types: ["OtcOption", "dev.mars.apex.demo.model.OtcOption"]
     description: "Standard validation and enrichment pipeline for OTC Options"
     business-domain: "Derivatives Trading"
     owner: "derivatives.team@company.com"
@@ -3477,7 +3477,7 @@ scenario:
 
   # Data types this scenario applies to
   data-types:
-    - "dev.mars.apex.demo.bootstrap.model.OtcOption"
+    - "dev.mars.apex.demo.model.OtcOption"
     - "OtcOption"  # Short name alias
 
   # References to existing rule configuration files
@@ -6199,9 +6199,9 @@ public class ScenarioAuditLogger {
 ### Bootstrap Demo Resources
 
 **Getting Started with Bootstrap Demos:**
-- **OTC Options Bootstrap**: `mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo -pl apex-demo`
-- **Commodity Swap Bootstrap**: `mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap -pl apex-demo`
-- **Custody Auto-Repair Bootstrap**: `mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap -pl apex-demo`
+- **OTC Options Bootstrap**: `mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.enrichment.OtcOptionsBootstrapDemo -pl apex-demo`
+- **Commodity Swap Bootstrap**: `mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.validation.CommoditySwapValidationBootstrap -pl apex-demo`
+- **Custody Auto-Repair Bootstrap**: `mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.enrichment.CustodyAutoRepairBootstrap -pl apex-demo`
 
 **Bootstrap Documentation:**
 - **Complete Implementation Guides**: Each bootstrap includes detailed README with business requirements and technical implementation

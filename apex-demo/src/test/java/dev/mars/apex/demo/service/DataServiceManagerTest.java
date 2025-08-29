@@ -4,9 +4,9 @@ import dev.mars.apex.core.service.data.CustomDataSource;
 import dev.mars.apex.core.service.data.DataServiceManager;
 import dev.mars.apex.core.service.data.DataSource;
 import dev.mars.apex.demo.test.data.TestDataSource;
-import dev.mars.apex.demo.bootstrap.model.Customer;
-import dev.mars.apex.demo.bootstrap.model.Product;
-import dev.mars.apex.demo.bootstrap.model.Trade;
+import dev.mars.apex.demo.model.Customer;
+import dev.mars.apex.demo.model.Product;
+import dev.mars.apex.demo.model.Trade;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,12 +1,12 @@
 package dev.mars.apex.demo;
 
-import dev.mars.apex.demo.bootstrap.ApexAdvancedFeaturesDemo;
+import dev.mars.apex.demo.evaluation.ApexAdvancedFeaturesDemo;
 import dev.mars.apex.core.service.lookup.LookupService;
-import dev.mars.apex.demo.bootstrap.model.Product;
+import dev.mars.apex.demo.model.Product;
 import java.util.Arrays;
 import java.util.ArrayList;
-import dev.mars.apex.demo.bootstrap.model.Trade;
-import dev.mars.apex.demo.rulesets.PricingServiceDemo;
+import dev.mars.apex.demo.model.Trade;
+import dev.mars.apex.demo.evaluation.PricingServiceDemo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -17,6 +17,7 @@ package dev.mars.apex.demo.bootstrap;
  */
 
 
+import dev.mars.apex.demo.validation.CommoditySwapValidationBootstrap;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;

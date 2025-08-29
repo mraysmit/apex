@@ -1,9 +1,9 @@
 package dev.mars.apex.demo.examples.financial;
 
 import dev.mars.apex.core.api.RulesService;
-import dev.mars.apex.demo.bootstrap.model.CommodityTotalReturnSwap;
-import dev.mars.apex.demo.examples.StaticDataEntities.*;
-import dev.mars.apex.demo.data.FinancialStaticDataProvider;
+import dev.mars.apex.demo.model.CommodityTotalReturnSwap;
+import dev.mars.apex.demo.infrastructure.StaticDataEntities.*;
+import dev.mars.apex.demo.infrastructure.FinancialStaticDataProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

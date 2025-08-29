@@ -32,10 +32,10 @@ cd apex-demo
 # 🆕 External Data-Source Reference Demos (APEX 2.1)
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.SimplePostgreSQLLookupDemo"
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.PostgreSQLLookupDemo"
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.ExternalDataSourceWorkingDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookup.ExternalDataSourceWorkingDemo"
 
 # Bootstrap demos (complete end-to-end scenarios)
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.OtcOptionsBootstrapDemo"
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CommoditySwapBootstrapDemo"
 
 # Lookup pattern examples

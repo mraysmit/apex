@@ -1,4 +1,4 @@
-package dev.mars.apex.demo.examples;
+package dev.mars.apex.demo.lookup;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -50,7 +50,7 @@ import java.util.Map;
  *
  * This demo requires the following YAML files:
  *
- * └── enrichments/simple-postgresql-customer-profile-external-ref.yaml
+ * └── lookup/postgresql-simple-lookup.yaml
  *     ├── Lean business logic configuration with external data-source reference
  *     ├── Contains: enrichment rules, field mappings, external reference
  *     └── Used for: Simple customer profile database enrichment demonstration
@@ -157,7 +157,7 @@ public class SimplePostgreSQLLookupDemo {
             logger.info("  Customer ID: {}", inputData.get("customerId"));
 
             // Use the external data-source reference enrichment configuration
-            String configPath = "enrichments/simple-postgresql-customer-profile-external-ref.yaml";
+            String configPath = "lookup/postgresql-simple-lookup.yaml";
             Map<String, Object> enrichedData = performEnrichmentWithYaml(inputData, configPath);
 
             logger.info("\nCustomer Profile from YAML Processing:");

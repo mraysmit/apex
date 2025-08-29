@@ -1,8 +1,9 @@
 package dev.mars.apex.demo.examples;
 
-import dev.mars.apex.demo.bootstrap.model.SettlementInstruction;
-import dev.mars.apex.demo.bootstrap.model.StandingInstruction;
-import dev.mars.apex.demo.bootstrap.model.SIRepairResult;
+import dev.mars.apex.demo.enrichment.CustodyAutoRepairDemo;
+import dev.mars.apex.demo.model.SettlementInstruction;
+import dev.mars.apex.demo.model.StandingInstruction;
+import dev.mars.apex.demo.model.SIRepairResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

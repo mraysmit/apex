@@ -22,7 +22,7 @@ import dev.mars.apex.core.api.RulesService;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMetrics;
 import dev.mars.apex.core.service.monitoring.PerformanceSnapshot;
-import dev.mars.apex.demo.bootstrap.model.Customer;
+import dev.mars.apex.demo.model.Customer;
 
 
 import java.math.BigDecimal;

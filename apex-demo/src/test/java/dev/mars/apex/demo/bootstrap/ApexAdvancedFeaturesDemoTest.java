@@ -18,9 +18,10 @@ package dev.mars.apex.demo.bootstrap;
 
 
 import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.demo.bootstrap.model.Customer;
-import dev.mars.apex.demo.bootstrap.model.Product;
+import dev.mars.apex.demo.model.Customer;
+import dev.mars.apex.demo.model.Product;
 import dev.mars.apex.core.service.lookup.LookupService;
+import dev.mars.apex.demo.evaluation.ApexAdvancedFeaturesDemo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -86,6 +86,13 @@ public class YamlDatasetDemo {
     }
 
     /**
+     * Standard run method for demo runner compatibility
+     */
+    public void run() {
+        runDemo();
+    }
+
+    /**
      * Main demo execution method using real APEX services - NO HARDCODED SIMULATION
      */
     public void runDemo() {

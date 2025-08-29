@@ -198,7 +198,7 @@ public class YamlValidationDemo {
         System.out.println("===================================");
         
         // Pick a scenario file for detailed validation
-        String exampleFile = "scenarios/otc-options-scenario.yaml";
+        String exampleFile = "validation/otc-options-scenario.yaml";
         
         System.out.println("Validating: " + exampleFile);
         
