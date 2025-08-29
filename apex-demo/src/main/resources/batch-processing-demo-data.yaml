@@ -1,0 +1,364 @@
+# Batch Processing Demo Data Configuration
+# Test data scenarios for BatchProcessingDemo.java
+# NO HARDCODED SIMULATION - Real APEX data processing
+
+metadata:
+  name: "Batch Processing Demo Data"
+  version: "2.0"
+  description: "Test data scenarios for real APEX batch processing demonstration"
+  author: "APEX Demo Team"
+  created: "2025-08-29"
+
+# Sequential Batch Processing Test Scenarios
+sequential-batch-scenarios:
+  - scenario: "small-sequential-batch"
+    description: "Small sequential batch processing with validation"
+    data:
+      batchSize: 500
+      processingType: "SEQUENTIAL"
+      validationRules: "age_email_name_validation"
+      performanceMonitoring: true
+    expected-results:
+      batchInitialized: true
+      validationApplied: "AGE_EMAIL_NAME_VALIDATION"
+      performanceTracked: true
+      processingMode: "SEQUENTIAL"
+      expectedThroughput: "HIGH"
+      processing-type: "SEQUENTIAL"
+      complexity: "LOW"
+      batch-operations: 3
+
+  - scenario: "large-sequential-batch"
+    description: "Large sequential batch processing"
+    data:
+      batchSize: 2000
+      processingType: "SEQUENTIAL"
+      validationRules: "age_email_name_validation"
+      performanceMonitoring: true
+    expected-results:
+      batchInitialized: true
+      validationApplied: "AGE_EMAIL_NAME_VALIDATION"
+      performanceTracked: true
+      processingMode: "SEQUENTIAL"
+      expectedThroughput: "LOW"
+      processing-type: "SEQUENTIAL"
+
+# Parallel Batch Processing Test Scenarios
+parallel-batch-scenarios:
+  - scenario: "high-parallelism-batch"
+    description: "High parallelism batch processing with 4 threads"
+    data:
+      batchSize: 1000
+      processingType: "PARALLEL"
+      parallelThreads: 4
+      validationRules: "age_email_name_validation"
+      performanceMonitoring: true
+    expected-results:
+      parallelBatchInitialized: true
+      threadCount: 4
+      parallelismLevel: "HIGH"
+      parallelValidationApplied: "PARALLEL_AGE_EMAIL_NAME_VALIDATION"
+      parallelPerformanceTracked: true
+      processingMode: "PARALLEL"
+      expectedSpeedup: 3.2
+      processing-type: "PARALLEL"
+      complexity: "MEDIUM"
+      parallel-operations: 3
+
+  - scenario: "medium-parallelism-batch"
+    description: "Medium parallelism batch processing with 2 threads"
+    data:
+      batchSize: 1500
+      processingType: "PARALLEL"
+      parallelThreads: 2
+      validationRules: "age_email_name_validation"
+      performanceMonitoring: true
+    expected-results:
+      parallelBatchInitialized: true
+      threadCount: 2
+      parallelismLevel: "MEDIUM"
+      parallelValidationApplied: "PARALLEL_AGE_EMAIL_NAME_VALIDATION"
+      parallelPerformanceTracked: true
+      processingMode: "PARALLEL"
+      expectedSpeedup: 1.6
+      processing-type: "PARALLEL"
+
+# Memory-Efficient Processing Test Scenarios
+memory-efficient-scenarios:
+  - scenario: "large-dataset-streaming"
+    description: "Large dataset processing with memory-efficient streaming"
+    data:
+      totalRecords: 10000
+      chunkSize: 500
+      processingType: "MEMORY_EFFICIENT"
+      streamingEnabled: true
+      validationRules: "age_email_validation"
+    expected-results:
+      streamingEnabled: true
+      chunkSize: 500
+      totalChunks: 20
+      chunkProcessingEnabled: true
+      memoryOptimized: true
+      validationApplied: "STREAMING_AGE_EMAIL_VALIDATION"
+      memoryFootprint: "MINIMAL"
+      processing-type: "MEMORY_EFFICIENT"
+      complexity: "HIGH"
+      streaming-operations: 3
+
+  - scenario: "very-large-dataset-streaming"
+    description: "Very large dataset processing with small chunks"
+    data:
+      totalRecords: 50000
+      chunkSize: 250
+      processingType: "MEMORY_EFFICIENT"
+      streamingEnabled: true
+      validationRules: "age_email_validation"
+    expected-results:
+      streamingEnabled: true
+      chunkSize: 250
+      totalChunks: 200
+      chunkProcessingEnabled: true
+      memoryOptimized: true
+      validationApplied: "STREAMING_AGE_EMAIL_VALIDATION"
+      memoryFootprint: "MINIMAL"
+      processing-type: "MEMORY_EFFICIENT"
+
+# Error Handling Batch Processing Test Scenarios
+error-handling-scenarios:
+  - scenario: "low-error-rate-batch"
+    description: "Batch processing with low error rate and error tolerance"
+    data:
+      batchSize: 1000
+      processingType: "ERROR_HANDLING"
+      errorRate: 0.05
+      continueOnError: true
+      errorReporting: true
+    expected-results:
+      errorToleranceEnabled: true
+      errorHandlingStrategy: "CONTINUE_ON_ERROR"
+      expectedErrorRate: 0.05
+      errorReportingEnabled: true
+      batchResilienceEnabled: true
+      resilienceLevel: "HIGH"
+      processing-type: "ERROR_HANDLING"
+      complexity: "HIGH"
+      error-handling-operations: 3
+
+  - scenario: "high-error-rate-batch"
+    description: "Batch processing with high error rate"
+    data:
+      batchSize: 800
+      processingType: "ERROR_HANDLING"
+      errorRate: 0.4
+      continueOnError: true
+      errorReporting: true
+    expected-results:
+      errorToleranceEnabled: true
+      errorHandlingStrategy: "CONTINUE_ON_ERROR"
+      expectedErrorRate: 0.4
+      errorReportingEnabled: true
+      batchResilienceEnabled: true
+      resilienceLevel: "LOW"
+      processing-type: "ERROR_HANDLING"
+
+# Financial Batch Scenarios Test Scenarios
+financial-batch-scenarios:
+  - scenario: "comprehensive-financial-batch"
+    description: "Comprehensive financial batch with all validations"
+    data:
+      batchSize: 500
+      processingType: "FINANCIAL_BATCH"
+      tradeValidation: true
+      riskAssessment: true
+      complianceChecks: true
+      currency: "USD"
+    expected-results:
+      tradeValidationEnabled: true
+      riskAssessmentEnabled: true
+      riskLevel: "MEDIUM"
+      complianceChecksEnabled: true
+      regulatoryCompliance: "ENABLED"
+      auditTrail: true
+      currencyProcessing: "USD_PROCESSING"
+      processing-type: "FINANCIAL_BATCH"
+      complexity: "HIGH"
+      financial-operations: 4
+
+  - scenario: "high-risk-financial-batch"
+    description: "High-risk financial batch processing"
+    data:
+      batchSize: 1500
+      processingType: "FINANCIAL_BATCH"
+      tradeValidation: true
+      riskAssessment: true
+      complianceChecks: true
+      currency: "EUR"
+    expected-results:
+      tradeValidationEnabled: true
+      riskAssessmentEnabled: true
+      riskLevel: "HIGH"
+      complianceChecksEnabled: true
+      regulatoryCompliance: "ENABLED"
+      auditTrail: true
+      currencyProcessing: "MULTI_CURRENCY_PROCESSING"
+      processing-type: "FINANCIAL_BATCH"
+
+# Performance Monitoring Test Scenarios
+performance-monitoring-scenarios:
+  - scenario: "comprehensive-performance-monitoring"
+    description: "Comprehensive performance monitoring with all metrics"
+    data:
+      batchSize: 2000
+      processingType: "PERFORMANCE_MONITORING"
+      metricsEnabled: true
+      throughputTracking: true
+      latencyTracking: true
+      memoryTracking: true
+    expected-results:
+      metricsCollectionEnabled: true
+      metricsType: "COMPREHENSIVE"
+      throughputTrackingEnabled: true
+      latencyTrackingEnabled: true
+      memoryTrackingEnabled: true
+      memoryProfiler: "ENABLED"
+      processing-type: "PERFORMANCE_MONITORING"
+      complexity: "HIGH"
+      monitoring-operations: 4
+
+  - scenario: "basic-performance-monitoring"
+    description: "Basic performance monitoring with essential metrics"
+    data:
+      batchSize: 1000
+      processingType: "PERFORMANCE_MONITORING"
+      metricsEnabled: true
+      throughputTracking: true
+      latencyTracking: false
+      memoryTracking: false
+    expected-results:
+      metricsCollectionEnabled: true
+      metricsType: "COMPREHENSIVE"
+      throughputTrackingEnabled: true
+      latencyTrackingEnabled: false
+      memoryTrackingEnabled: false
+      processing-type: "PERFORMANCE_MONITORING"
+
+# Batch Result Aggregation Test Scenarios
+result-aggregation-scenarios:
+  - scenario: "comprehensive-result-aggregation"
+    description: "Comprehensive result aggregation with all features"
+    data:
+      batchSize: 2000
+      processingType: "RESULT_AGGREGATION"
+      aggregationEnabled: true
+      reportGeneration: true
+      successRateCalculation: true
+      throughputCalculation: true
+    expected-results:
+      aggregationEnabled: true
+      aggregationType: "COMPREHENSIVE"
+      reportGenerationEnabled: true
+      successRateCalculationEnabled: true
+      throughputCalculationEnabled: true
+      performanceAnalysis: "ENABLED"
+      processing-type: "RESULT_AGGREGATION"
+      complexity: "HIGH"
+      aggregation-operations: 4
+
+  - scenario: "basic-result-aggregation"
+    description: "Basic result aggregation with essential features"
+    data:
+      batchSize: 1000
+      processingType: "RESULT_AGGREGATION"
+      aggregationEnabled: true
+      reportGeneration: false
+      successRateCalculation: true
+      throughputCalculation: false
+    expected-results:
+      aggregationEnabled: true
+      aggregationType: "COMPREHENSIVE"
+      reportGenerationEnabled: false
+      successRateCalculationEnabled: true
+      throughputCalculationEnabled: false
+      processing-type: "RESULT_AGGREGATION"
+
+# Performance Test Scenarios
+performance-scenarios:
+  - scenario: "sequential-performance-test"
+    description: "Performance testing for sequential batch processing"
+    data:
+      batchSize: 1000
+      processingType: "SEQUENTIAL"
+      validationRules: "age_email_name_validation"
+      performanceMonitoring: true
+    expected-performance:
+      target-latency: "VARIABLE"
+      throughput: "MEDIUM"
+      memory-usage: "LOW"
+      scalability: "LIMITED"
+
+  - scenario: "parallel-performance-test"
+    description: "Performance testing for parallel batch processing"
+    data:
+      batchSize: 1000
+      processingType: "PARALLEL"
+      parallelThreads: 4
+      validationRules: "age_email_name_validation"
+      performanceMonitoring: true
+    expected-performance:
+      target-latency: "REDUCED"
+      throughput: "HIGH"
+      memory-usage: "MEDIUM"
+      scalability: "HIGH"
+
+  - scenario: "memory-efficient-performance-test"
+    description: "Performance testing for memory-efficient processing"
+    data:
+      totalRecords: 10000
+      chunkSize: 500
+      processingType: "MEMORY_EFFICIENT"
+      streamingEnabled: true
+      validationRules: "age_email_validation"
+    expected-performance:
+      target-latency: "VARIABLE"
+      throughput: "MEDIUM"
+      memory-usage: "MINIMAL"
+      scalability: "VERY_HIGH"
+
+# Reference Data for Validation
+reference-data:
+  processing-types:
+    - "SEQUENTIAL"
+    - "PARALLEL"
+    - "MEMORY_EFFICIENT"
+    - "ERROR_HANDLING"
+    - "FINANCIAL_BATCH"
+    - "PERFORMANCE_MONITORING"
+    - "RESULT_AGGREGATION"
+  
+  validation-rules:
+    - "age_email_name_validation"
+    - "age_email_validation"
+    - "basic_validation"
+    - "comprehensive_validation"
+  
+  currencies:
+    - "USD"
+    - "EUR"
+    - "GBP"
+    - "JPY"
+  
+  batch-sizes:
+    - small: 500
+    - medium: 1000
+    - large: 2000
+    - very-large: 10000
+  
+  thread-counts:
+    - low: 2
+    - medium: 4
+    - high: 8
+  
+  chunk-sizes:
+    - small: 250
+    - medium: 500
+    - large: 1000
