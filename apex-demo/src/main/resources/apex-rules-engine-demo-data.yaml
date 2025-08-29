@@ -1,0 +1,196 @@
+# APEX Rules Engine Demo Data Configuration
+# Test data scenarios for ApexRulesEngineDemo.java
+# NO HARDCODED SIMULATION - Real APEX data processing
+
+metadata:
+  name: "APEX Rules Engine Demo Data"
+  version: "2.0"
+  description: "Test data scenarios for real APEX rules engine demonstration"
+  author: "APEX Demo Team"
+  created: "2025-01-29"
+
+# Investment Validation Test Scenarios
+investment-scenarios:
+  - scenario: "high-value-retirement-investment"
+    description: "High-value retirement account investment"
+    data:
+      investmentAmount: 150000
+      accountType: "retirement"
+      customerRiskProfile: "MODERATE"
+      customerAge: 45
+      investmentExperience: "EXPERIENCED"
+    expected-results:
+      validationStatus: "HIGH_VALUE"
+      requiresApproval: true
+      processingPath: "MEDIUM_RISK"
+
+  - scenario: "standard-investment"
+    description: "Standard investment scenario"
+    data:
+      investmentAmount: 75000
+      accountType: "standard"
+      customerRiskProfile: "CONSERVATIVE"
+      customerAge: 35
+      investmentExperience: "INTERMEDIATE"
+    expected-results:
+      validationStatus: "STANDARD"
+      requiresApproval: false
+      processingPath: "LOW_RISK"
+
+  - scenario: "aggressive-high-value-investment"
+    description: "Aggressive high-value investment"
+    data:
+      investmentAmount: 250000
+      accountType: "trading"
+      customerRiskProfile: "AGGRESSIVE"
+      customerAge: 28
+      investmentExperience: "EXPERIENCED"
+    expected-results:
+      validationStatus: "HIGH_VALUE"
+      requiresApproval: true
+      processingPath: "HIGH_RISK"
+
+# Risk Assessment Test Scenarios
+risk-scenarios:
+  - scenario: "experienced-moderate-risk"
+    description: "Experienced investor with moderate risk tolerance"
+    data:
+      customerAge: 45
+      investmentExperience: "EXPERIENCED"
+      riskTolerance: "MODERATE"
+      portfolioValue: 500000
+    expected-results:
+      riskScore: 70
+      experienceMultiplier: 1.2
+      finalRiskRating: "MEDIUM"
+      portfolioRecommendation: "STANDARD_PORTFOLIO"
+
+  - scenario: "young-aggressive-investor"
+    description: "Young aggressive investor"
+    data:
+      customerAge: 25
+      investmentExperience: "INTERMEDIATE"
+      riskTolerance: "AGGRESSIVE"
+      portfolioValue: 1500000
+    expected-results:
+      riskScore: 85
+      experienceMultiplier: 1.0
+      finalRiskRating: "HIGH"
+      portfolioRecommendation: "PREMIUM_PORTFOLIO"
+
+  - scenario: "conservative-senior-investor"
+    description: "Conservative senior investor"
+    data:
+      customerAge: 65
+      investmentExperience: "BEGINNER"
+      riskTolerance: "CONSERVATIVE"
+      portfolioValue: 300000
+    expected-results:
+      riskScore: 55
+      experienceMultiplier: 0.8
+      finalRiskRating: "LOW"
+      portfolioRecommendation: "STANDARD_PORTFOLIO"
+
+# Compliance Checking Test Scenarios
+compliance-scenarios:
+  - scenario: "us-high-value-transaction"
+    description: "US high-value transaction with full compliance"
+    data:
+      transactionAmount: 75000
+      customerCountry: "US"
+      sanctionsCheck: "CLEAR"
+      kycStatus: "VERIFIED"
+    expected-results:
+      complianceLevel: "ENHANCED"
+      sanctionsStatus: "APPROVED"
+      kycCompliance: "COMPLIANT"
+      regionalCompliance: "US_REGULATIONS"
+      finalComplianceStatus: "APPROVED"
+
+  - scenario: "eu-standard-transaction"
+    description: "EU standard transaction"
+    data:
+      transactionAmount: 25000
+      customerCountry: "EU"
+      sanctionsCheck: "CLEAR"
+      kycStatus: "VERIFIED"
+    expected-results:
+      complianceLevel: "STANDARD"
+      sanctionsStatus: "APPROVED"
+      kycCompliance: "COMPLIANT"
+      regionalCompliance: "EU_REGULATIONS"
+      finalComplianceStatus: "APPROVED"
+
+  - scenario: "international-requires-review"
+    description: "International transaction requiring manual review"
+    data:
+      transactionAmount: 100000
+      customerCountry: "ASIA"
+      sanctionsCheck: "PENDING"
+      kycStatus: "PENDING"
+    expected-results:
+      complianceLevel: "ENHANCED"
+      sanctionsStatus: "REQUIRES_REVIEW"
+      kycCompliance: "NON_COMPLIANT"
+      regionalCompliance: "INTERNATIONAL_REGULATIONS"
+      finalComplianceStatus: "REQUIRES_MANUAL_REVIEW"
+
+# Integrated Workflow Test Scenarios
+workflow-scenarios:
+  - scenario: "complete-investment-workflow"
+    description: "Complete investment processing workflow"
+    data:
+      # Investment data
+      investmentAmount: 200000
+      accountType: "retirement"
+      customerRiskProfile: "MODERATE"
+      # Risk data
+      customerAge: 50
+      investmentExperience: "EXPERIENCED"
+      riskTolerance: "MODERATE"
+      portfolioValue: 800000
+      # Compliance data
+      transactionAmount: 200000
+      customerCountry: "US"
+      sanctionsCheck: "CLEAR"
+      kycStatus: "VERIFIED"
+    expected-workflow:
+      step1: "investment-validation"
+      step2: "risk-assessment"
+      step3: "compliance-checking"
+      final-status: "APPROVED"
+
+# Lookup Data for Memory-based Services
+lookup-data:
+  investment-types:
+    - code: "EQUITY"
+      description: "Equity investments"
+      risk-level: "HIGH"
+    - code: "BOND"
+      description: "Bond investments"
+      risk-level: "LOW"
+    - code: "MIXED"
+      description: "Mixed portfolio"
+      risk-level: "MEDIUM"
+
+  risk-profiles:
+    - profile: "CONSERVATIVE"
+      max-equity: 30
+      min-bonds: 60
+    - profile: "MODERATE"
+      max-equity: 60
+      min-bonds: 30
+    - profile: "AGGRESSIVE"
+      max-equity: 90
+      min-bonds: 10
+
+  compliance-rules:
+    - country: "US"
+      max-transaction: 1000000
+      kyc-required: true
+    - country: "EU"
+      max-transaction: 500000
+      kyc-required: true
+    - country: "ASIA"
+      max-transaction: 250000
+      kyc-required: true

@@ -1,0 +1,243 @@
+# Basic Usage Examples Data Configuration
+# Test data scenarios for BasicUsageExamples.java
+# NO HARDCODED SIMULATION - Real APEX data processing
+
+metadata:
+  name: "Basic Usage Examples Data"
+  version: "2.0"
+  description: "Test data scenarios for real APEX basic usage demonstration"
+  author: "APEX Demo Team"
+  created: "2025-01-29"
+
+# Basic Validation Test Scenarios
+basic-validation-scenarios:
+  - scenario: "valid-user-data"
+    description: "Valid user data for basic field validation"
+    data:
+      name: "John Doe"
+      age: 25
+      email: "john.doe@example.com"
+    expected-results:
+      validation-status: "PASSED"
+      name-validation: "VALID"
+      age-validation: "VALID"
+      email-validation: "VALID"
+
+  - scenario: "invalid-user-data"
+    description: "Invalid user data for validation testing"
+    data:
+      name: ""
+      age: 15
+      email: "invalid-email"
+    expected-results:
+      validation-status: "FAILED"
+      name-validation: "REQUIRED_FIELD_MISSING"
+      age-validation: "BELOW_MINIMUM_AGE"
+      email-validation: "INVALID_FORMAT"
+
+  - scenario: "partial-user-data"
+    description: "Partial user data for optional field validation"
+    data:
+      name: "Jane Smith"
+      age: 30
+    expected-results:
+      validation-status: "PASSED"
+      name-validation: "VALID"
+      age-validation: "VALID"
+      email-validation: "NOT_PROVIDED"
+
+# Business Object Processing Test Scenarios
+business-object-scenarios:
+  - scenario: "premium-customer-electronics"
+    description: "Premium customer purchasing electronics"
+    data:
+      customerType: "PREMIUM"
+      productCategory: "ELECTRONICS"
+      tradeValue: 7500
+      membershipLevel: "GOLD"
+    expected-results:
+      customerBenefits: "PREMIUM_BENEFITS"
+      productWarranty: "EXTENDED_WARRANTY"
+      tradeClassification: "HIGH_VALUE_TRADE"
+      membershipBenefits: "GOLD_MEMBER_PERKS"
+
+  - scenario: "standard-customer-clothing"
+    description: "Standard customer purchasing clothing"
+    data:
+      customerType: "STANDARD"
+      productCategory: "CLOTHING"
+      tradeValue: 150
+      membershipLevel: "BRONZE"
+    expected-results:
+      customerBenefits: null
+      productWarranty: null
+      tradeClassification: null
+      membershipBenefits: null
+
+  - scenario: "vip-customer-books"
+    description: "VIP customer purchasing books"
+    data:
+      customerType: "VIP"
+      productCategory: "BOOKS"
+      tradeValue: 8000
+      membershipLevel: "PLATINUM"
+    expected-results:
+      customerBenefits: null
+      productWarranty: null
+      tradeClassification: "HIGH_VALUE_TRADE"
+      membershipBenefits: null
+
+# Expression Evaluation Test Scenarios
+expression-evaluation-scenarios:
+  - scenario: "interest-calculation"
+    description: "Interest calculation with amount and rate"
+    data:
+      amount: 1000
+      rate: 0.05
+    expected-results:
+      calculatedInterest: 50.0
+      discountAmount: 100.0
+
+  - scenario: "total-value-calculation"
+    description: "Total value calculation with quantity and price"
+    data:
+      quantity: 10
+      price: 99.99
+    expected-results:
+      totalValue: 999.9
+      taxAmount: 79.992
+      finalAmount: 1079.892
+
+  - scenario: "complete-calculation"
+    description: "Complete calculation with all fields"
+    data:
+      amount: 2000
+      rate: 0.03
+      quantity: 5
+      price: 199.99
+    expected-results:
+      calculatedInterest: 60.0
+      totalValue: 999.95
+      discountAmount: 200.0
+      taxAmount: 79.996
+      finalAmount: 1079.946
+
+  - scenario: "minimal-calculation"
+    description: "Minimal calculation with basic fields"
+    data:
+      amount: 500
+      rate: 0.02
+    expected-results:
+      calculatedInterest: 10.0
+      discountAmount: null
+
+# Integrated Workflow Test Scenarios
+integrated-scenarios:
+  - scenario: "complete-user-workflow"
+    description: "Complete user processing workflow"
+    data:
+      # Basic validation data
+      name: "Alice Johnson"
+      age: 32
+      email: "alice.johnson@example.com"
+      # Business object data
+      customerType: "PREMIUM"
+      productCategory: "ELECTRONICS"
+      tradeValue: 12000
+      membershipLevel: "GOLD"
+      # Expression evaluation data
+      amount: 1500
+      rate: 0.04
+      quantity: 3
+      price: 299.99
+    expected-workflow:
+      step1: "basic-field-validation"
+      step2: "business-object-processing"
+      step3: "expression-evaluation"
+      final-status: "PROCESSED"
+
+# Performance Test Data
+performance-scenarios:
+  - scenario: "bulk-validation-processing"
+    description: "Bulk validation processing for performance testing"
+    data:
+      users:
+        - name: "User1"
+          age: 25
+          email: "user1@example.com"
+        - name: "User2"
+          age: 30
+          email: "user2@example.com"
+        - name: "User3"
+          age: 35
+          email: "user3@example.com"
+        - name: "User4"
+          age: 40
+          email: "user4@example.com"
+        - name: "User5"
+          age: 45
+          email: "user5@example.com"
+    expected-performance:
+      processing-time: "< 50ms"
+      validation-count: 5
+      success-rate: "100%"
+
+# Error Handling Test Scenarios
+error-handling-scenarios:
+  - scenario: "null-field-handling"
+    description: "Handling null field values"
+    data:
+      name: null
+      age: null
+      email: null
+    expected-results:
+      validation-status: "PARTIAL_FAILURE"
+      error-count: 3
+      warning-count: 0
+
+  - scenario: "type-mismatch-handling"
+    description: "Handling type mismatches"
+    data:
+      name: "Valid Name"
+      age: "not-a-number"
+      email: "valid@example.com"
+    expected-results:
+      validation-status: "TYPE_ERROR"
+      error-type: "TYPE_CONVERSION_ERROR"
+      failed-field: "age"
+
+# Reference Data for Validation
+reference-data:
+  customer-types:
+    - "STANDARD"
+    - "PREMIUM"
+    - "VIP"
+  
+  product-categories:
+    - "ELECTRONICS"
+    - "CLOTHING"
+    - "BOOKS"
+    - "HOME"
+  
+  membership-levels:
+    - "BRONZE"
+    - "SILVER"
+    - "GOLD"
+    - "PLATINUM"
+  
+  validation-rules:
+    name:
+      min-length: 2
+      max-length: 100
+      required: true
+    age:
+      min-value: 18
+      max-value: 120
+      required: false
+    email:
+      pattern: "^[A-Za-z0-9+_.-]+@(.+)$"
+      required: false
+    trade-value:
+      min-value: 0
+      max-value: 1000000
+      required: false
