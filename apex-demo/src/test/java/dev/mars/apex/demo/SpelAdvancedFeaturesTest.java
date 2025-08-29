@@ -1,8 +1,10 @@
 package dev.mars.apex.demo;
 
 import dev.mars.apex.demo.bootstrap.ApexAdvancedFeaturesDemo;
-import dev.mars.apex.demo.data.MockDataSources;
+import dev.mars.apex.core.service.lookup.LookupService;
 import dev.mars.apex.demo.bootstrap.model.Product;
+import java.util.Arrays;
+import java.util.ArrayList;
 import dev.mars.apex.demo.bootstrap.model.Trade;
 import dev.mars.apex.demo.rulesets.PricingServiceDemo;
 
@@ -523,13 +525,27 @@ public class SpelAdvancedFeaturesTest {
         // Use the field context and populate it with demo data
         context = demo.createContext();
 
-        // Create lookup services
-        List<dev.mars.apex.core.service.lookup.LookupService> lookupServices = MockDataSources.createLookupServices();
+        // Create lookup services directly (replacing MockDataSources)
+        List<LookupService> lookupServices = Arrays.asList(
+            new LookupService("InstrumentTypes", Arrays.asList("Equity", "Bond", "Option", "Future", "Swap", "ETF")),
+            new LookupService("Markets", Arrays.asList("NYSE", "NASDAQ", "LSE", "TSE", "HKEX", "SGX")),
+            new LookupService("TradeStatuses", Arrays.asList("Executed", "Settled", "Failed", "Pending", "Cancelled"))
+        );
         assertNotNull(lookupServices, "Lookup services should not be null");
         assertTrue(lookupServices.size() > 0, "Should have at least one lookup service");
 
-        // Create source records
-        List<Trade> sourceTrades = MockDataSources.createSourceRecords();
+        // Create source records directly (replacing MockDataSources)
+        List<Trade> sourceTrades = Arrays.asList(
+            new Trade("T001", "Equity", "InstrumentType"),
+            new Trade("T002", "NASDAQ", "Market"),
+            new Trade("T003", "Executed", "TradeStatus"),
+            new Trade("T004", "Bond", "InstrumentType"),
+            new Trade("T005", "NYSE", "Market"),
+            new Trade("T006", "Pending", "TradeStatus"),
+            new Trade("T007", "Commodity", "InstrumentType"),
+            new Trade("T008", "OTC", "Market"),
+            new Trade("T009", "Rejected", "TradeStatus")
+        );
         assertNotNull(sourceTrades, "Source trades should not be null");
         assertTrue(sourceTrades.size() > 0, "Should have at least one source trade");
 
@@ -537,8 +553,16 @@ public class SpelAdvancedFeaturesTest {
         context.setVariable("lookupServices", lookupServices);
         context.setVariable("sourceRecords", sourceTrades);
 
-        // Use MockDataSources to find matching records directly
-        List<Trade> matchingTrades = MockDataSources.findMatchingRecords(sourceTrades, lookupServices);
+        // Find matching records directly (replacing MockDataSources logic)
+        List<Trade> matchingTrades = new ArrayList<>();
+        for (Trade trade : sourceTrades) {
+            for (LookupService service : lookupServices) {
+                if (service.getLookupValues().contains(trade.getValue())) {
+                    matchingTrades.add(trade);
+                    break;
+                }
+            }
+        }
         assertNotNull(matchingTrades, "Matching trades should not be null");
         assertTrue(matchingTrades.size() > 0, "Should find at least one matching trade");
 
@@ -554,8 +578,20 @@ public class SpelAdvancedFeaturesTest {
             assertTrue(hasMatch, "TradeB " + trade.getValue() + " should match a lookup service");
         }
 
-        // Use MockDataSources to find non-matching records directly
-        List<Trade> nonMatchingTrades = MockDataSources.findNonMatchingRecords(sourceTrades, lookupServices);
+        // Find non-matching records directly (replacing MockDataSources logic)
+        List<Trade> nonMatchingTrades = new ArrayList<>();
+        for (Trade trade : sourceTrades) {
+            boolean hasMatch = false;
+            for (LookupService service : lookupServices) {
+                if (service.getLookupValues().contains(trade.getValue())) {
+                    hasMatch = true;
+                    break;
+                }
+            }
+            if (!hasMatch) {
+                nonMatchingTrades.add(trade);
+            }
+        }
         assertNotNull(nonMatchingTrades, "Non-matching trades should not be null");
 
         // Verify all non-matching trades don't have values in lookup services

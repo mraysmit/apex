@@ -189,7 +189,6 @@ public class DataProviderComplianceTest {
         // Test each data provider class
         results.add(testDemoDataProvider());
         results.add(testFinancialStaticDataProvider());
-        results.add(testMockDataSources());
         results.add(testProductionDemoDataServiceManager());
         results.add(testDemoDataBootstrap());
         
@@ -260,13 +259,7 @@ public class DataProviderComplianceTest {
                                       "dev.mars.apex.demo.data.FinancialStaticDataProvider");
     }
     
-    /**
-     * Tests MockDataSources class using real reflection analysis.
-     */
-    private ComplianceResult testMockDataSources() {
-        return analyzeDataProviderClass("MockDataSources",
-                                      "dev.mars.apex.demo.data.MockDataSources");
-    }
+
 
     /**
      * Tests ProductionDemoDataServiceManager class using real reflection analysis.
@@ -608,9 +601,8 @@ public class DataProviderComplianceTest {
         System.out.println("\nSPECIFIC RECOMMENDATIONS:");
         System.out.println("1. 🔄 REPLACE DemoDataProvider with DemoDataBootstrap");
         System.out.println("2. 🔄 REPLACE FinancialStaticDataProvider with FinancialDataBootstrap");
-        System.out.println("3. 🔄 REPLACE MockDataSources with TestDataBootstrap");
-        System.out.println("4. 🔧 ENHANCE ProductionDemoDataServiceManager to eliminate hardcoded fallbacks");
-        System.out.println("5. ✅ USE DemoDataBootstrap as the template for all future data providers");
+        System.out.println("3. 🔧 ENHANCE ProductionDemoDataServiceManager to eliminate hardcoded fallbacks");
+        System.out.println("4. ✅ USE DemoDataBootstrap as the template for all future data providers");
         
         System.out.println("\nBENEFITS OF BOOTSTRAP APPROACH:");
         System.out.println("  🚀 100% Data-Driven: All data from external YAML files");
