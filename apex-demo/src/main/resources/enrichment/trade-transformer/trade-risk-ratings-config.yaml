@@ -1,0 +1,417 @@
+# APEX Trade Risk Ratings Configuration
+# External data source configuration for trade risk ratings processing
+# Replaces hardcoded trade risk rating logic from TradeTransformerDemo
+
+type: "external-data-config"
+name: "trade-risk-ratings-config"
+description: "Data-driven trade risk ratings configuration for trade transformation processing"
+
+# Trade risk ratings configuration by rating type
+data:
+  instrument-risk-ratings:
+    rating-type: "instrument-risk-ratings"
+    rating-name: "Instrument Risk Ratings"
+    description: "Risk ratings based on trade instrument types"
+    rating-characteristics:
+      rating-category: "INSTRUMENT_RISK"
+      assessment-scope: "INSTRUMENT_TYPE"
+      dynamic-updates: true
+    risk-ratings:
+      equity-risk-rating:
+        rating-id: "EQUITY_RISK_RATING"
+        rating-name: "Equity Risk Rating"
+        rating-description: "Risk rating for equity trades"
+        instrument-type: "Equity"
+        risk-assessment:
+          base-risk-level: "MEDIUM_HIGH"
+          volatility-factor: 0.75
+          liquidity-factor: 0.85
+          market-risk: "HIGH"
+        risk-criteria:
+          price-volatility: "HIGH"
+          market-correlation: "STRONG"
+          liquidity-risk: "MEDIUM"
+          credit-risk: "LOW"
+        risk-metrics:
+          var-95: 0.15
+          expected-shortfall: 0.22
+          beta: 1.2
+          sharpe-ratio: 0.8
+        rating-settings:
+          risk-tolerance: "MODERATE"
+          monitoring-frequency: "DAILY"
+          stress-testing: true
+        audit-requirements:
+          - "Log equity risk rating assignment"
+          - "Track instrument risk assessment"
+          
+      bond-risk-rating:
+        rating-id: "BOND_RISK_RATING"
+        rating-name: "Bond Risk Rating"
+        rating-description: "Risk rating for bond trades"
+        instrument-type: "Bond"
+        risk-assessment:
+          base-risk-level: "LOW_MEDIUM"
+          volatility-factor: 0.25
+          liquidity-factor: 0.70
+          market-risk: "MEDIUM"
+        risk-criteria:
+          price-volatility: "LOW"
+          market-correlation: "MEDIUM"
+          liquidity-risk: "MEDIUM"
+          credit-risk: "MEDIUM"
+        risk-metrics:
+          var-95: 0.05
+          expected-shortfall: 0.08
+          duration: 7.5
+          credit-spread: 150
+        rating-settings:
+          risk-tolerance: "CONSERVATIVE"
+          monitoring-frequency: "WEEKLY"
+          stress-testing: true
+        audit-requirements:
+          - "Log bond risk rating assignment"
+          - "Track fixed income risk assessment"
+          
+      etf-risk-rating:
+        rating-id: "ETF_RISK_RATING"
+        rating-name: "ETF Risk Rating"
+        rating-description: "Risk rating for ETF trades"
+        instrument-type: "ETF"
+        risk-assessment:
+          base-risk-level: "MEDIUM"
+          volatility-factor: 0.50
+          liquidity-factor: 0.90
+          market-risk: "MEDIUM"
+        risk-criteria:
+          price-volatility: "MEDIUM"
+          market-correlation: "MEDIUM"
+          liquidity-risk: "LOW"
+          credit-risk: "LOW"
+        risk-metrics:
+          var-95: 0.10
+          expected-shortfall: 0.15
+          tracking-error: 0.05
+          expense-ratio: 0.008
+        rating-settings:
+          risk-tolerance: "MODERATE"
+          monitoring-frequency: "DAILY"
+          stress-testing: true
+        audit-requirements:
+          - "Log ETF risk rating assignment"
+          - "Track diversified fund risk assessment"
+          
+      commodity-risk-rating:
+        rating-id: "COMMODITY_RISK_RATING"
+        rating-name: "Commodity Risk Rating"
+        rating-description: "Risk rating for commodity trades"
+        instrument-type: "Commodity"
+        risk-assessment:
+          base-risk-level: "HIGH"
+          volatility-factor: 0.90
+          liquidity-factor: 0.60
+          market-risk: "VERY_HIGH"
+        risk-criteria:
+          price-volatility: "VERY_HIGH"
+          market-correlation: "LOW"
+          liquidity-risk: "HIGH"
+          credit-risk: "MEDIUM"
+        risk-metrics:
+          var-95: 0.25
+          expected-shortfall: 0.35
+          contango-backwardation: 0.15
+          storage-cost: 0.03
+        rating-settings:
+          risk-tolerance: "AGGRESSIVE"
+          monitoring-frequency: "INTRADAY"
+          stress-testing: true
+        audit-requirements:
+          - "Log commodity risk rating assignment"
+          - "Track alternative asset risk assessment"
+    rating-settings:
+      rating-caching: true
+      dynamic-loading: true
+      risk-optimization: true
+    
+  trade-value-risk-ratings:
+    rating-type: "trade-value-risk-ratings"
+    rating-name: "Trade Value Risk Ratings"
+    description: "Risk ratings based on trade value ranges"
+    rating-characteristics:
+      rating-category: "VALUE_RISK"
+      assessment-scope: "TRADE_VALUE"
+      dynamic-updates: true
+    risk-ratings:
+      large-value-risk-rating:
+        rating-id: "LARGE_VALUE_RISK_RATING"
+        rating-name: "Large Value Risk Rating"
+        rating-description: "Risk rating for large value trades (>= $1M)"
+        value-range: "LARGE"
+        risk-assessment:
+          base-risk-level: "HIGH"
+          concentration-risk: "HIGH"
+          operational-risk: "MEDIUM"
+          market-impact: "HIGH"
+        risk-criteria:
+          position-size-risk: "HIGH"
+          liquidity-impact: "HIGH"
+          settlement-risk: "MEDIUM"
+          counterparty-risk: "MEDIUM"
+        risk-metrics:
+          concentration-limit: 0.05
+          market-impact-cost: 0.002
+          settlement-time: 3
+          counterparty-exposure: 0.10
+        rating-settings:
+          risk-tolerance: "LOW"
+          approval-required: true
+          enhanced-monitoring: true
+        audit-requirements:
+          - "Log large value risk rating assignment"
+          - "Track concentration risk assessment"
+          
+      medium-value-risk-rating:
+        rating-id: "MEDIUM_VALUE_RISK_RATING"
+        rating-name: "Medium Value Risk Rating"
+        rating-description: "Risk rating for medium value trades ($100K - $1M)"
+        value-range: "MEDIUM"
+        risk-assessment:
+          base-risk-level: "MEDIUM"
+          concentration-risk: "MEDIUM"
+          operational-risk: "LOW"
+          market-impact: "MEDIUM"
+        risk-criteria:
+          position-size-risk: "MEDIUM"
+          liquidity-impact: "MEDIUM"
+          settlement-risk: "LOW"
+          counterparty-risk: "LOW"
+        risk-metrics:
+          concentration-limit: 0.02
+          market-impact-cost: 0.001
+          settlement-time: 2
+          counterparty-exposure: 0.05
+        rating-settings:
+          risk-tolerance: "MODERATE"
+          approval-required: false
+          enhanced-monitoring: false
+        audit-requirements:
+          - "Log medium value risk rating assignment"
+          - "Track standard risk assessment"
+          
+      small-value-risk-rating:
+        rating-id: "SMALL_VALUE_RISK_RATING"
+        rating-name: "Small Value Risk Rating"
+        rating-description: "Risk rating for small value trades (< $100K)"
+        value-range: "SMALL"
+        risk-assessment:
+          base-risk-level: "LOW"
+          concentration-risk: "LOW"
+          operational-risk: "LOW"
+          market-impact: "LOW"
+        risk-criteria:
+          position-size-risk: "LOW"
+          liquidity-impact: "LOW"
+          settlement-risk: "LOW"
+          counterparty-risk: "LOW"
+        risk-metrics:
+          concentration-limit: 0.01
+          market-impact-cost: 0.0005
+          settlement-time: 1
+          counterparty-exposure: 0.02
+        rating-settings:
+          risk-tolerance: "HIGH"
+          approval-required: false
+          enhanced-monitoring: false
+        audit-requirements:
+          - "Log small value risk rating assignment"
+          - "Track routine risk assessment"
+    rating-settings:
+      rating-caching: true
+      value-verification: true
+      impact-assessment: true
+    
+  priority-risk-ratings:
+    rating-type: "priority-risk-ratings"
+    rating-name: "Priority Risk Ratings"
+    description: "Risk ratings based on trade priority levels"
+    rating-characteristics:
+      rating-category: "PRIORITY_RISK"
+      assessment-scope: "TRADE_PRIORITY"
+      dynamic-updates: true
+    risk-ratings:
+      urgent-priority-risk-rating:
+        rating-id: "URGENT_PRIORITY_RISK_RATING"
+        rating-name: "Urgent Priority Risk Rating"
+        rating-description: "Risk rating for urgent priority trades"
+        priority-level: "URGENT"
+        risk-assessment:
+          base-risk-level: "HIGH"
+          execution-risk: "HIGH"
+          timing-risk: "VERY_HIGH"
+          operational-risk: "HIGH"
+        risk-criteria:
+          time-pressure-risk: "VERY_HIGH"
+          execution-quality-risk: "HIGH"
+          error-probability: "MEDIUM"
+          oversight-risk: "HIGH"
+        risk-metrics:
+          execution-window: 0.25
+          error-rate: 0.02
+          oversight-coverage: 0.80
+          time-decay: 0.05
+        rating-settings:
+          risk-tolerance: "VERY_LOW"
+          enhanced-controls: true
+          real-time-monitoring: true
+        audit-requirements:
+          - "Log urgent priority risk rating assignment"
+          - "Track time-sensitive risk assessment"
+          
+      high-priority-risk-rating:
+        rating-id: "HIGH_PRIORITY_RISK_RATING"
+        rating-name: "High Priority Risk Rating"
+        rating-description: "Risk rating for high priority trades"
+        priority-level: "HIGH"
+        risk-assessment:
+          base-risk-level: "MEDIUM_HIGH"
+          execution-risk: "MEDIUM"
+          timing-risk: "HIGH"
+          operational-risk: "MEDIUM"
+        risk-criteria:
+          time-pressure-risk: "HIGH"
+          execution-quality-risk: "MEDIUM"
+          error-probability: "LOW"
+          oversight-risk: "MEDIUM"
+        risk-metrics:
+          execution-window: 0.5
+          error-rate: 0.01
+          oversight-coverage: 0.90
+          time-decay: 0.03
+        rating-settings:
+          risk-tolerance: "LOW"
+          enhanced-controls: true
+          real-time-monitoring: false
+        audit-requirements:
+          - "Log high priority risk rating assignment"
+          - "Track priority risk assessment"
+          
+      standard-priority-risk-rating:
+        rating-id: "STANDARD_PRIORITY_RISK_RATING"
+        rating-name: "Standard Priority Risk Rating"
+        rating-description: "Risk rating for standard priority trades"
+        priority-level: "MEDIUM"
+        risk-assessment:
+          base-risk-level: "MEDIUM"
+          execution-risk: "LOW"
+          timing-risk: "MEDIUM"
+          operational-risk: "LOW"
+        risk-criteria:
+          time-pressure-risk: "MEDIUM"
+          execution-quality-risk: "LOW"
+          error-probability: "LOW"
+          oversight-risk: "LOW"
+        risk-metrics:
+          execution-window: 1.0
+          error-rate: 0.005
+          oversight-coverage: 0.95
+          time-decay: 0.01
+        rating-settings:
+          risk-tolerance: "MODERATE"
+          enhanced-controls: false
+          real-time-monitoring: false
+        audit-requirements:
+          - "Log standard priority risk rating assignment"
+          - "Track routine risk assessment"
+    rating-settings:
+      rating-caching: true
+      priority-verification: true
+      timing-assessment: true
+    
+  combined-risk-assessments:
+    rating-type: "combined-risk-assessments"
+    rating-name: "Combined Risk Assessments"
+    description: "Combined risk assessments for comprehensive trade risk evaluation"
+    rating-characteristics:
+      rating-category: "COMBINED_RISK"
+      assessment-scope: "COMPREHENSIVE"
+      dynamic-updates: true
+    risk-ratings:
+      comprehensive-risk-assessment:
+        rating-id: "COMPREHENSIVE_RISK_ASSESSMENT"
+        rating-name: "Comprehensive Risk Assessment"
+        rating-description: "Combined risk assessment considering all factors"
+        assessment-factors:
+          instrument-weight: 0.4
+          value-weight: 0.3
+          priority-weight: 0.2
+          market-weight: 0.1
+        risk-assessment:
+          overall-risk-level: "CALCULATED"
+          risk-aggregation: "WEIGHTED_AVERAGE"
+          risk-correlation: "CONSIDERED"
+          risk-diversification: "EVALUATED"
+        risk-criteria:
+          combined-risk-score: "CALCULATED"
+          risk-concentration: "MONITORED"
+          risk-correlation: "ASSESSED"
+          risk-limits: "ENFORCED"
+        rating-settings:
+          comprehensive-monitoring: true
+          multi-factor-analysis: true
+          correlation-tracking: true
+        audit-requirements:
+          - "Log comprehensive risk assessment"
+          - "Track multi-factor risk evaluation"
+    rating-settings:
+      rating-caching: false
+      comprehensive-analysis: true
+      multi-factor-optimization: true
+    
+  default:
+    rating-type: "default"
+    rating-name: "Default Trade Risk Ratings"
+    description: "Default trade risk rating processing"
+    risk-ratings:
+      default-risk-rating:
+        rating-id: "DEFAULT_RISK_RATING"
+        rating-name: "Default Risk Rating"
+        base-risk-level: "MEDIUM"
+    rating-settings:
+      rating-caching: true
+
+# Risk assessment patterns
+assessment-patterns:
+  instrument-risk-pattern:
+    pattern-name: "Instrument Risk Pattern"
+    description: "Assess risk based on instrument characteristics"
+    assessment-factors: ["volatility", "liquidity", "market-correlation", "credit-quality"]
+    
+  value-risk-pattern:
+    pattern-name: "Value Risk Pattern"
+    description: "Assess risk based on trade value"
+    assessment-factors: ["concentration", "market-impact", "settlement-risk", "counterparty-exposure"]
+    
+  priority-risk-pattern:
+    pattern-name: "Priority Risk Pattern"
+    description: "Assess risk based on trade priority"
+    assessment-factors: ["time-pressure", "execution-quality", "oversight-coverage", "error-probability"]
+
+# Quality assurance
+quality-assurance:
+  rating-accuracy:
+    - "Risk ratings must be accurate and consistent"
+    - "Risk assessments must be comprehensive"
+    - "Risk metrics must be reliable"
+    - "Risk criteria must be appropriate"
+    
+  assessment-reliability:
+    - "Risk assessments must be repeatable"
+    - "Risk models must be validated"
+    - "Risk metrics must be calibrated"
+    - "Risk monitoring must be effective"
+    
+  business-alignment:
+    - "Risk ratings must reflect business risk appetite"
+    - "Risk assessments must support decision making"
+    - "Risk metrics must be actionable"
+    - "Risk monitoring must be timely"

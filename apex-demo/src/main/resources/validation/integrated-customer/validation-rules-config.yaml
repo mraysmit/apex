@@ -1,0 +1,342 @@
+# APEX Validation Rules Configuration
+# External data source configuration for validation rules processing
+# Replaces hardcoded validation rule creation from IntegratedCustomerValidatorDemo
+
+type: "external-data-config"
+name: "validation-rules-config"
+description: "Data-driven validation rules configuration for integrated customer validation processing"
+
+# Validation rules configuration by rule type
+data:
+  age-based-validation-rules:
+    rule-type: "age-based-validation-rules"
+    rule-name: "Age-Based Validation Rules"
+    description: "Validation rules based on customer age criteria"
+    rule-parameters:
+      priority-level: "high"
+      execution-order: 100
+      cache-results: true
+    validation-rules:
+      senior-customer-validation:
+        rule-id: "SENIOR_CUSTOMER_VALIDATION"
+        rule-name: "Senior Customer Validation"
+        rule-description: "Validate senior customers (60+ years)"
+        rule-condition: "#customer.age >= 60 && #customer.age <= 100"
+        rule-priority: 100
+        validation-criteria:
+          min-age: 60
+          max-age: 100
+          age-category: "SENIOR"
+          validation-type: "AGE_RANGE"
+        validation-logic:
+          - "Age must be between 60 and 100"
+          - "Customer must be classified as senior"
+          - "Age validation must pass"
+        validation-messages:
+          success: "Senior customer age validation passed"
+          failure: "Senior customer age validation failed"
+        audit-requirements:
+          - "Log senior customer validation"
+          - "Track age validation results"
+          
+      young-customer-validation:
+        rule-id: "YOUNG_CUSTOMER_VALIDATION"
+        rule-name: "Young Customer Validation"
+        rule-description: "Validate young customers (18-35 years)"
+        rule-condition: "#customer.age >= 18 && #customer.age <= 35"
+        rule-priority: 200
+        validation-criteria:
+          min-age: 18
+          max-age: 35
+          age-category: "YOUNG"
+          validation-type: "AGE_RANGE"
+        validation-logic:
+          - "Age must be between 18 and 35"
+          - "Customer must be classified as young"
+          - "Age validation must pass"
+        validation-messages:
+          success: "Young customer age validation passed"
+          failure: "Young customer age validation failed"
+        audit-requirements:
+          - "Log young customer validation"
+          - "Track age validation results"
+          
+      middle-aged-customer-validation:
+        rule-id: "MIDDLE_AGED_CUSTOMER_VALIDATION"
+        rule-name: "Middle-Aged Customer Validation"
+        rule-description: "Validate middle-aged customers (35-60 years)"
+        rule-condition: "#customer.age >= 35 && #customer.age < 60"
+        rule-priority: 300
+        validation-criteria:
+          min-age: 35
+          max-age: 59
+          age-category: "MIDDLE_AGED"
+          validation-type: "AGE_RANGE"
+        validation-logic:
+          - "Age must be between 35 and 59"
+          - "Customer must be classified as middle-aged"
+          - "Age validation must pass"
+        validation-messages:
+          success: "Middle-aged customer age validation passed"
+          failure: "Middle-aged customer age validation failed"
+        audit-requirements:
+          - "Log middle-aged customer validation"
+          - "Track age validation results"
+    rule-settings:
+      execution-timeout: 2000
+      parallel-execution: true
+      error-handling: "continue-on-warning"
+    
+  membership-based-validation-rules:
+    rule-type: "membership-based-validation-rules"
+    rule-name: "Membership-Based Validation Rules"
+    description: "Validation rules based on customer membership levels"
+    rule-parameters:
+      priority-level: "high"
+      execution-order: 200
+      cache-results: true
+    validation-rules:
+      gold-member-validation:
+        rule-id: "GOLD_MEMBER_VALIDATION"
+        rule-name: "Gold Member Validation"
+        rule-description: "Validate Gold membership customers"
+        rule-condition: "#customer.membershipLevel == 'Gold'"
+        rule-priority: 400
+        validation-criteria:
+          membership-level: "Gold"
+          membership-tier: "PREMIUM"
+          validation-type: "MEMBERSHIP_LEVEL"
+        validation-logic:
+          - "Membership level must be Gold"
+          - "Customer must have premium tier access"
+          - "Membership validation must pass"
+        validation-messages:
+          success: "Gold member validation passed"
+          failure: "Gold member validation failed"
+        audit-requirements:
+          - "Log Gold member validation"
+          - "Track membership validation results"
+          
+      silver-member-validation:
+        rule-id: "SILVER_MEMBER_VALIDATION"
+        rule-name: "Silver Member Validation"
+        rule-description: "Validate Silver membership customers"
+        rule-condition: "#customer.membershipLevel == 'Silver'"
+        rule-priority: 500
+        validation-criteria:
+          membership-level: "Silver"
+          membership-tier: "STANDARD"
+          validation-type: "MEMBERSHIP_LEVEL"
+        validation-logic:
+          - "Membership level must be Silver"
+          - "Customer must have standard tier access"
+          - "Membership validation must pass"
+        validation-messages:
+          success: "Silver member validation passed"
+          failure: "Silver member validation failed"
+        audit-requirements:
+          - "Log Silver member validation"
+          - "Track membership validation results"
+          
+      platinum-member-validation:
+        rule-id: "PLATINUM_MEMBER_VALIDATION"
+        rule-name: "Platinum Member Validation"
+        rule-description: "Validate Platinum membership customers"
+        rule-condition: "#customer.membershipLevel == 'Platinum'"
+        rule-priority: 600
+        validation-criteria:
+          membership-level: "Platinum"
+          membership-tier: "VIP"
+          validation-type: "MEMBERSHIP_LEVEL"
+        validation-logic:
+          - "Membership level must be Platinum"
+          - "Customer must have VIP tier access"
+          - "Membership validation must pass"
+        validation-messages:
+          success: "Platinum member validation passed"
+          failure: "Platinum member validation failed"
+        audit-requirements:
+          - "Log Platinum member validation"
+          - "Track membership validation results"
+          
+      basic-member-validation:
+        rule-id: "BASIC_MEMBER_VALIDATION"
+        rule-name: "Basic Member Validation"
+        rule-description: "Validate Basic membership customers"
+        rule-condition: "#customer.membershipLevel == 'Basic'"
+        rule-priority: 700
+        validation-criteria:
+          membership-level: "Basic"
+          membership-tier: "BASIC"
+          validation-type: "MEMBERSHIP_LEVEL"
+        validation-logic:
+          - "Membership level must be Basic"
+          - "Customer must have basic tier access"
+          - "Membership validation must pass"
+        validation-messages:
+          success: "Basic member validation passed"
+          failure: "Basic member validation failed"
+        audit-requirements:
+          - "Log Basic member validation"
+          - "Track membership validation results"
+    rule-settings:
+      execution-timeout: 1500
+      parallel-execution: true
+      error-handling: "continue-on-warning"
+    
+  category-based-validation-rules:
+    rule-type: "category-based-validation-rules"
+    rule-name: "Category-Based Validation Rules"
+    description: "Validation rules based on customer preferred categories"
+    rule-parameters:
+      priority-level: "medium"
+      execution-order: 300
+      cache-results: true
+    validation-rules:
+      equity-category-validation:
+        rule-id: "EQUITY_CATEGORY_VALIDATION"
+        rule-name: "Equity Category Validation"
+        rule-description: "Validate customers with Equity preferences"
+        rule-condition: "#customer.preferredCategories.contains('Equity')"
+        rule-priority: 800
+        validation-criteria:
+          category: "Equity"
+          category-type: "GROWTH"
+          validation-type: "CATEGORY_PREFERENCE"
+        validation-logic:
+          - "Customer must have Equity in preferred categories"
+          - "Equity category validation must pass"
+        validation-messages:
+          success: "Equity category validation passed"
+          failure: "Equity category validation failed"
+        audit-requirements:
+          - "Log Equity category validation"
+          - "Track category validation results"
+          
+      fixed-income-category-validation:
+        rule-id: "FIXED_INCOME_CATEGORY_VALIDATION"
+        rule-name: "Fixed Income Category Validation"
+        rule-description: "Validate customers with FixedIncome preferences"
+        rule-condition: "#customer.preferredCategories.contains('FixedIncome')"
+        rule-priority: 900
+        validation-criteria:
+          category: "FixedIncome"
+          category-type: "CONSERVATIVE"
+          validation-type: "CATEGORY_PREFERENCE"
+        validation-logic:
+          - "Customer must have FixedIncome in preferred categories"
+          - "FixedIncome category validation must pass"
+        validation-messages:
+          success: "FixedIncome category validation passed"
+          failure: "FixedIncome category validation failed"
+        audit-requirements:
+          - "Log FixedIncome category validation"
+          - "Track category validation results"
+          
+      etf-category-validation:
+        rule-id: "ETF_CATEGORY_VALIDATION"
+        rule-name: "ETF Category Validation"
+        rule-description: "Validate customers with ETF preferences"
+        rule-condition: "#customer.preferredCategories.contains('ETF')"
+        rule-priority: 1000
+        validation-criteria:
+          category: "ETF"
+          category-type: "DIVERSIFIED"
+          validation-type: "CATEGORY_PREFERENCE"
+        validation-logic:
+          - "Customer must have ETF in preferred categories"
+          - "ETF category validation must pass"
+        validation-messages:
+          success: "ETF category validation passed"
+          failure: "ETF category validation failed"
+        audit-requirements:
+          - "Log ETF category validation"
+          - "Track category validation results"
+    rule-settings:
+      execution-timeout: 1000
+      parallel-execution: true
+      error-handling: "continue-on-warning"
+    
+  dynamic-validation-rules:
+    rule-type: "dynamic-validation-rules"
+    rule-name: "Dynamic Validation Rules"
+    description: "Dynamic validation rules for flexible customer validation"
+    rule-parameters:
+      priority-level: "medium"
+      execution-order: 400
+      cache-results: false
+    validation-rules:
+      combined-age-membership-validation:
+        rule-id: "COMBINED_AGE_MEMBERSHIP_VALIDATION"
+        rule-name: "Combined Age and Membership Validation"
+        rule-description: "Validate customers based on combined age and membership criteria"
+        rule-condition: "(#customer.age >= #minAge && #customer.age <= #maxAge) && #allowedMembershipLevels.contains(#customer.membershipLevel)"
+        rule-priority: 1100
+        validation-criteria:
+          validation-type: "COMBINED_CRITERIA"
+          criteria-combination: "AGE_AND_MEMBERSHIP"
+        validation-logic:
+          - "Age must be within specified range"
+          - "Membership level must be in allowed list"
+          - "Combined validation must pass"
+        validation-messages:
+          success: "Combined age and membership validation passed"
+          failure: "Combined age and membership validation failed"
+        audit-requirements:
+          - "Log combined validation"
+          - "Track complex validation results"
+    rule-settings:
+      execution-timeout: 2500
+      parallel-execution: false
+      error-handling: "fail-on-error"
+    
+  default:
+    rule-type: "default"
+    rule-name: "Default Validation Rules"
+    description: "Default validation processing"
+    validation-rules:
+      default-validation:
+        rule-id: "DEFAULT_VALIDATION"
+        rule-name: "Default Validation"
+        rule-condition: "true"
+        validation-messages:
+          success: "Default validation passed"
+    rule-settings:
+      execution-timeout: 500
+
+# Rule execution patterns
+execution-patterns:
+  age-priority-pattern:
+    pattern-name: "Age Priority Pattern"
+    description: "Execute age-based rules in priority order"
+    execution-order: ["Senior", "MiddleAged", "Young"]
+    
+  membership-tier-pattern:
+    pattern-name: "Membership Tier Pattern"
+    description: "Execute membership rules by tier"
+    execution-order: ["Platinum", "Gold", "Silver", "Basic"]
+    
+  category-preference-pattern:
+    pattern-name: "Category Preference Pattern"
+    description: "Execute category-based rules by preference type"
+    execution-order: ["Equity", "FixedIncome", "ETF"]
+
+# Quality assurance
+quality-assurance:
+  rule-accuracy:
+    - "Validation rules must be logically correct"
+    - "Rule conditions must be syntactically valid"
+    - "Validation criteria must be appropriate"
+    - "Validation messages must be clear"
+    
+  performance-requirements:
+    - "Rule execution must be within timeout limits"
+    - "Complex rules must be optimized"
+    - "Parallel execution must be thread-safe"
+    - "Error handling must be robust"
+    
+  business-alignment:
+    - "Rules must reflect business requirements"
+    - "Customer validation must be accurate"
+    - "Age and membership criteria must be appropriate"
+    - "Category validation must be comprehensive"

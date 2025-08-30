@@ -1,0 +1,308 @@
+# APEX Test Data Generation Configuration
+# External data source configuration for test data generation
+# Replaces hardcoded test data generation from TestUtilities
+
+type: "external-data-config"
+name: "test-data-generation-config"
+description: "Data-driven test data generation configuration for test utilities"
+
+# Test data generation configuration by generation type
+data:
+  random-test-data:
+    generation-id: "GEN001"
+    generation-type: "random-test-data"
+    description: "Random test data generation with configurable patterns"
+    generation-parameters:
+      default-count: 100
+      max-count: 10000
+      seed-value: 42
+      reproducible: true
+    field-definitions:
+      id-field:
+        field-name: "id"
+        field-type: "string"
+        pattern: "TEST{counter:06d}"
+        description: "Unique test record identifier"
+        
+      amount-field:
+        field-name: "amount"
+        field-type: "decimal"
+        min-value: 0.01
+        max-value: 1000000.00
+        precision: 2
+        description: "Random monetary amount"
+        
+      currency-field:
+        field-name: "currency"
+        field-type: "enum"
+        values: ["USD", "EUR", "GBP", "JPY", "CHF", "CAD", "AUD"]
+        weights: [40, 25, 15, 10, 5, 3, 2]
+        description: "Currency code with weighted distribution"
+        
+      date-field:
+        field-name: "date"
+        field-type: "date"
+        start-date: "2025-01-01"
+        end-date: "2025-12-31"
+        format: "yyyy-MM-dd"
+        description: "Random date within range"
+        
+      status-field:
+        field-name: "status"
+        field-type: "enum"
+        values: ["ACTIVE", "INACTIVE", "PENDING", "CANCELLED"]
+        weights: [50, 20, 20, 10]
+        description: "Status with weighted distribution"
+        
+      category-field:
+        field-name: "category"
+        field-type: "enum"
+        values: ["EQUITY", "BOND", "OPTION", "FUTURE", "SWAP", "ETF"]
+        weights: [30, 25, 15, 15, 10, 5]
+        description: "Financial instrument category"
+    generation-rules:
+      - "All records must have unique IDs"
+      - "Amounts must be positive"
+      - "Dates must be within specified range"
+      - "Enum values must respect weight distributions"
+    
+  bulk-test-data:
+    generation-id: "GEN002"
+    generation-type: "bulk-test-data"
+    description: "Bulk test data generation for performance testing"
+    generation-parameters:
+      default-count: 1000
+      max-count: 100000
+      batch-size: 1000
+      parallel-generation: true
+    field-definitions:
+      record-id:
+        field-name: "recordId"
+        field-type: "string"
+        pattern: "BULK{counter:08d}"
+        description: "Bulk record identifier"
+        
+      transaction-amount:
+        field-name: "transactionAmount"
+        field-type: "decimal"
+        min-value: 1.00
+        max-value: 10000000.00
+        precision: 2
+        description: "Transaction amount for bulk processing"
+        
+      account-number:
+        field-name: "accountNumber"
+        field-type: "string"
+        pattern: "ACC{random:10d}"
+        description: "Random account number"
+        
+      transaction-type:
+        field-name: "transactionType"
+        field-type: "enum"
+        values: ["DEPOSIT", "WITHDRAWAL", "TRANSFER", "PAYMENT"]
+        weights: [30, 25, 25, 20]
+        description: "Transaction type distribution"
+        
+      processing-date:
+        field-name: "processingDate"
+        field-type: "datetime"
+        start-date: "2025-01-01T00:00:00"
+        end-date: "2025-12-31T23:59:59"
+        format: "yyyy-MM-dd'T'HH:mm:ss"
+        description: "Processing timestamp"
+    generation-rules:
+      - "Bulk records must be generated efficiently"
+      - "Memory usage must be optimized"
+      - "Generation must be parallelizable"
+      - "Data must be suitable for performance testing"
+    
+  performance-test-data:
+    generation-id: "GEN003"
+    generation-type: "performance-test-data"
+    description: "Specialized test data for performance benchmarking"
+    generation-parameters:
+      default-count: 10000
+      max-count: 1000000
+      memory-efficient: true
+      streaming-generation: true
+    field-definitions:
+      benchmark-id:
+        field-name: "benchmarkId"
+        field-type: "string"
+        pattern: "PERF{counter:08d}"
+        description: "Performance benchmark identifier"
+        
+      execution-time:
+        field-name: "executionTime"
+        field-type: "long"
+        min-value: 1
+        max-value: 10000
+        description: "Simulated execution time in milliseconds"
+        
+      memory-usage:
+        field-name: "memoryUsage"
+        field-type: "long"
+        min-value: 1024
+        max-value: 1073741824
+        description: "Simulated memory usage in bytes"
+        
+      cpu-utilization:
+        field-name: "cpuUtilization"
+        field-type: "double"
+        min-value: 0.0
+        max-value: 100.0
+        precision: 2
+        description: "CPU utilization percentage"
+        
+      throughput:
+        field-name: "throughput"
+        field-type: "double"
+        min-value: 1.0
+        max-value: 10000.0
+        precision: 2
+        description: "Operations per second"
+    generation-rules:
+      - "Performance data must be realistic"
+      - "Values must be within expected ranges"
+      - "Data must support benchmarking scenarios"
+      - "Generation must be memory efficient"
+    
+  variation-test-data:
+    generation-id: "GEN004"
+    generation-type: "variation-test-data"
+    description: "Test data with controlled variations for testing edge cases"
+    generation-parameters:
+      base-count: 100
+      variation-factor: 10
+      edge-case-percentage: 5
+    variation-patterns:
+      null-values:
+        description: "Generate records with null values in optional fields"
+        percentage: 10
+        affected-fields: ["optional-field-1", "optional-field-2"]
+        
+      boundary-values:
+        description: "Generate records with boundary values"
+        percentage: 15
+        patterns:
+          - "minimum-values"
+          - "maximum-values"
+          - "zero-values"
+          
+      invalid-formats:
+        description: "Generate records with invalid formats for negative testing"
+        percentage: 5
+        patterns:
+          - "invalid-email-formats"
+          - "invalid-date-formats"
+          - "invalid-number-formats"
+          
+      extreme-values:
+        description: "Generate records with extreme values"
+        percentage: 5
+        patterns:
+          - "very-large-numbers"
+          - "very-small-numbers"
+          - "very-long-strings"
+    generation-rules:
+      - "Variations must be controlled and predictable"
+      - "Edge cases must be realistic"
+      - "Invalid data must be clearly marked"
+      - "Variations must support comprehensive testing"
+    
+  default:
+    generation-id: "GEN000"
+    generation-type: "default"
+    description: "Default test data generation"
+    generation-parameters:
+      default-count: 10
+      max-count: 100
+    field-definitions:
+      default-id:
+        field-name: "id"
+        field-type: "string"
+        pattern: "DEFAULT{counter:03d}"
+        description: "Default record identifier"
+        
+      default-value:
+        field-name: "value"
+        field-type: "string"
+        default-value: "Default Value"
+        description: "Default field value"
+    generation-rules:
+      - "Basic test data generation"
+
+# Generation algorithms
+generation-algorithms:
+  random-algorithm:
+    algorithm-name: "Pseudo-Random Generation"
+    description: "Standard pseudo-random number generation with seed"
+    characteristics:
+      - "Reproducible with fixed seed"
+      - "Good distribution properties"
+      - "Suitable for most testing scenarios"
+    parameters:
+      seed: 42
+      algorithm: "Linear Congruential Generator"
+      
+  weighted-selection:
+    algorithm-name: "Weighted Random Selection"
+    description: "Random selection with weighted probabilities"
+    characteristics:
+      - "Respects probability distributions"
+      - "Suitable for realistic data patterns"
+      - "Configurable weight distributions"
+    parameters:
+      selection-method: "Cumulative Distribution"
+      normalization: "Automatic"
+      
+  pattern-based:
+    algorithm-name: "Pattern-Based Generation"
+    description: "Generation based on predefined patterns"
+    characteristics:
+      - "Consistent format generation"
+      - "Template-based field creation"
+      - "Supports complex patterns"
+    parameters:
+      pattern-syntax: "Java MessageFormat"
+      variable-substitution: "Enabled"
+
+# Performance optimization
+performance-optimization:
+  generation-performance:
+    parallel-generation: true
+    thread-pool-size: 4
+    batch-processing: true
+    batch-size: 1000
+    
+  memory-management:
+    streaming-generation: true
+    memory-threshold: "256MB"
+    garbage-collection-hints: true
+    object-pooling: false
+    
+  caching-strategy:
+    cache-generated-patterns: true
+    cache-size: 1000
+    cache-ttl: 3600
+    cache-eviction: "LRU"
+
+# Quality assurance
+quality-assurance:
+  data-validation:
+    - "Generated data must meet field constraints"
+    - "Unique fields must have no duplicates"
+    - "Enum values must be from allowed sets"
+    - "Numeric values must be within ranges"
+    
+  distribution-validation:
+    - "Weighted distributions must be respected"
+    - "Random distributions must be uniform"
+    - "Edge cases must be included appropriately"
+    - "Data patterns must be realistic"
+    
+  performance-validation:
+    - "Generation time must be within limits"
+    - "Memory usage must be controlled"
+    - "Parallel generation must be thread-safe"
+    - "Large datasets must be generated efficiently"

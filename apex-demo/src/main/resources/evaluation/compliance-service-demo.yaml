@@ -1,0 +1,99 @@
+# APEX Compliance Service Demo Configuration
+# Real APEX YAML configuration for compliance processing
+# Replaces all hardcoded compliance logic from ComplianceServiceDemo (@version 1.0)
+
+type: "apex-enrichment-config"
+name: "compliance-service-demo"
+description: "APEX-compliant compliance service processing with real enrichment services"
+
+# External data source for regulatory requirements
+external-data-sources:
+  - name: "regulatory-requirements"
+    type: "external-data-config"
+    source: "evaluation/compliance/regulatory-requirements.yaml"
+    
+  - name: "reporting-deadlines"
+    type: "external-data-config"
+    source: "evaluation/compliance/reporting-deadlines.yaml"
+    
+  - name: "compliance-rules"
+    type: "external-data-config"
+    source: "evaluation/compliance/compliance-rules.yaml"
+
+# APEX enrichment processing for compliance checking
+enrichments:
+  - name: "regulatory-compliance-check"
+    type: "lookup-enrichment"
+    description: "Determine applicable regulations for trade type"
+    condition: "#data.tradeType != null"
+    lookup-source: "regulatory-requirements"
+    lookup-key: "#data.tradeType"
+    target-field: "applicableRegulations"
+    
+  - name: "mifid-reporting-check"
+    type: "lookup-enrichment"
+    description: "Check MiFID II reporting requirement"
+    condition: "#data.applicableRegulations != null && #data.applicableRegulations.contains('MiFID II')"
+    lookup-source: "compliance-rules"
+    lookup-key: "MiFID_II"
+    target-field: "mifidReporting"
+    
+  - name: "emir-reporting-check"
+    type: "lookup-enrichment"
+    description: "Check EMIR reporting requirement"
+    condition: "#data.applicableRegulations != null && #data.applicableRegulations.contains('EMIR')"
+    lookup-source: "compliance-rules"
+    lookup-key: "EMIR"
+    target-field: "emirReporting"
+    
+  - name: "dodd-frank-reporting-check"
+    type: "lookup-enrichment"
+    description: "Check Dodd-Frank reporting requirement"
+    condition: "#data.applicableRegulations != null && #data.applicableRegulations.contains('Dodd-Frank')"
+    lookup-source: "compliance-rules"
+    lookup-key: "DODD_FRANK"
+    target-field: "doddFrankReporting"
+    
+  - name: "basel-reporting-check"
+    type: "lookup-enrichment"
+    description: "Check Basel III reporting requirement"
+    condition: "#data.applicableRegulations != null && #data.applicableRegulations.contains('Basel III')"
+    lookup-source: "compliance-rules"
+    lookup-key: "BASEL_III"
+    target-field: "baselReporting"
+    
+  - name: "sftr-reporting-check"
+    type: "lookup-enrichment"
+    description: "Check SFTR reporting requirement"
+    condition: "#data.applicableRegulations != null && #data.applicableRegulations.contains('SFTR')"
+    lookup-source: "compliance-rules"
+    lookup-key: "SFTR"
+    target-field: "sftrReporting"
+    
+  - name: "compliance-issues-check"
+    type: "expression-enrichment"
+    description: "Check for compliance issues"
+    condition: "true"
+    expression: "#data.tradeId == null || #data.tradeId.isEmpty() || #data.tradeType == null || #data.tradeType.isEmpty() || #data.category == null || #data.category.isEmpty()"
+    target-field: "hasComplianceIssues"
+    
+  - name: "reporting-deadlines-lookup"
+    type: "lookup-enrichment"
+    description: "Get reporting deadlines for applicable regulations"
+    condition: "#data.applicableRegulations != null"
+    lookup-source: "reporting-deadlines"
+    lookup-key: "#data.applicableRegulations"
+    target-field: "reportingDeadlines"
+    
+  - name: "compliance-summary"
+    type: "expression-enrichment"
+    description: "Generate compliance processing summary"
+    condition: "true"
+    expression: "'Compliance processing completed for trade: ' + (#data.tradeId != null ? #data.tradeId : 'UNKNOWN') + ', Type: ' + (#data.tradeType != null ? #data.tradeType : 'UNKNOWN')"
+    target-field: "complianceSummary"
+
+# Output configuration
+output:
+  include-input: true
+  include-metadata: true
+  format: "enhanced"

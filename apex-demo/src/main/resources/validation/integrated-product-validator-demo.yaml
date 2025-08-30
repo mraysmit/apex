@@ -1,0 +1,212 @@
+# APEX Integrated Product Validator Demo Configuration
+# Real APEX YAML configuration for integrated product validation processing
+# Replaces all hardcoded product validation logic from IntegratedProductValidatorDemo (@version 1.0)
+
+type: "apex-enrichment-config"
+name: "integrated-product-validator-demo"
+description: "APEX-compliant integrated product validator with real enrichment services"
+
+# External data source for integrated product validator configurations
+external-data-sources:
+  - name: "product-validation-rules-config"
+    type: "external-data-config"
+    source: "validation/integrated-product/product-validation-rules-config.yaml"
+    
+  - name: "product-samples-config"
+    type: "external-data-config"
+    source: "validation/integrated-product/product-samples-config.yaml"
+    
+  - name: "product-validation-parameters-config"
+    type: "external-data-config"
+    source: "validation/integrated-product/product-validation-parameters-config.yaml"
+
+# APEX enrichment processing for integrated product validator
+enrichments:
+  - name: "product-validation-rules-processing"
+    type: "lookup-enrichment"
+    description: "Process product validation rules using data-driven configuration"
+    condition: "#data.validatorType == 'product-validation-rules-processing'"
+    lookup-source: "product-validation-rules-config"
+    lookup-key: "#data.ruleType != null ? #data.ruleType : 'default'"
+    target-field: "productValidationRulesResult"
+    
+  - name: "product-samples-processing"
+    type: "lookup-enrichment"
+    description: "Process product samples using data-driven configuration"
+    condition: "#data.validatorType == 'product-samples-processing'"
+    lookup-source: "product-samples-config"
+    lookup-key: "#data.sampleType != null ? #data.sampleType : 'default'"
+    target-field: "productSamplesResult"
+    
+  - name: "product-validation-parameters-processing"
+    type: "lookup-enrichment"
+    description: "Process product validation parameters using data-driven configuration"
+    condition: "#data.validatorType == 'product-validation-parameters-processing'"
+    lookup-source: "product-validation-parameters-config"
+    lookup-key: "#data.parameterType != null ? #data.parameterType : 'default'"
+    target-field: "productValidationParametersResult"
+    
+  - name: "integrated-product-validator-summary"
+    type: "expression-enrichment"
+    description: "Generate integrated product validator summary"
+    condition: "true"
+    expression: "'Integrated product validator completed: ' + (#data.validatorType != null ? #data.validatorType : 'unknown') + ' using real APEX services'"
+    target-field: "integratedProductValidatorSummary"
+
+# Validator processing categories
+processing-categories:
+  - category: "product-validation-rules-processing"
+    description: "Product validation rules creation and management"
+    processing-type: "real-apex-enrichment"
+    rule-types:
+      - "Price-based validation rules"
+      - "Category-based validation rules"
+      - "Quality-based validation rules"
+      - "Dynamic validation rules"
+    
+  - category: "product-samples-processing"
+    description: "Product samples processing and validation"
+    processing-type: "real-apex-enrichment"
+    sample-types:
+      - "Valid product samples"
+      - "Invalid product samples"
+      - "Edge case product samples"
+      - "Comprehensive test samples"
+    
+  - category: "product-validation-parameters-processing"
+    description: "Product validation parameters processing"
+    processing-type: "real-apex-enrichment"
+    parameter-aspects:
+      - "Price range parameters"
+      - "Category validation parameters"
+      - "Quality validation parameters"
+      - "Dynamic validation parameters"
+
+# Product validation patterns
+validation-patterns:
+  price-based-validation-pattern:
+    pattern-name: "Price-Based Validation"
+    description: "Pattern for validating products based on price criteria"
+    price-ranges: ["LOW", "MEDIUM", "HIGH", "PREMIUM"]
+    validation-logic:
+      - "Low-priced products: $0-$100"
+      - "Medium-priced products: $100-$500"
+      - "High-priced products: $500-$2000"
+      - "Premium products: $2000+"
+    
+  category-based-validation-pattern:
+    pattern-name: "Category-Based Validation"
+    description: "Pattern for validating products based on category"
+    product-categories: ["EQUITY", "FIXED_INCOME", "ETF", "COMMODITY", "OPTIONS"]
+    validation-logic:
+      - "Equity products: Stock-based validation"
+      - "Fixed income products: Bond-based validation"
+      - "ETF products: Fund-based validation"
+      - "Commodity products: Asset-based validation"
+    
+  quality-based-validation-pattern:
+    pattern-name: "Quality-Based Validation"
+    description: "Pattern for validating products based on quality metrics"
+    quality-levels: ["BASIC", "STANDARD", "PREMIUM", "INSTITUTIONAL"]
+    validation-logic:
+      - "Basic products: Standard validation"
+      - "Standard products: Enhanced validation"
+      - "Premium products: Comprehensive validation"
+      - "Institutional products: Rigorous validation"
+
+# Performance settings
+performance-settings:
+  product-validation-rules-processing:
+    processing-timeout: 4000
+    parallel-processing: true
+    cache-results: true
+    
+  product-samples-processing:
+    processing-timeout: 3000
+    parallel-processing: true
+    sample-optimization: true
+    
+  product-validation-parameters-processing:
+    processing-timeout: 2000
+    parallel-processing: false
+    parameter-intensive: true
+
+# Demonstration scenarios
+demonstration-scenarios:
+  comprehensive-product-validation:
+    scenario-name: "Comprehensive Product Validation"
+    description: "Demonstrate comprehensive product validation processing"
+    steps:
+      - "Load product validation configurations"
+      - "Process product validation rules"
+      - "Process product samples"
+      - "Process product validation parameters"
+      - "Generate validation results"
+    expected-outcome: "Successful comprehensive product validation"
+    
+  price-based-validation:
+    scenario-name: "Price-Based Validation"
+    description: "Demonstrate price-based product validation"
+    steps:
+      - "Load price-based validation configurations"
+      - "Process fixed income product validations"
+      - "Process equity product validations"
+      - "Generate price-based validation results"
+    expected-outcome: "Successful price-based validation"
+    
+  category-based-validation:
+    scenario-name: "Category-Based Validation"
+    description: "Demonstrate category-based product validation"
+    steps:
+      - "Load category-based configurations"
+      - "Process FixedIncome category validations"
+      - "Process Equity category validations"
+      - "Generate category validation results"
+    expected-outcome: "Successful category-based validation"
+
+# Product validation configuration
+product-validation:
+  validation-criteria:
+    criteria-type: "Product Validation Criteria"
+    description: "Criteria for product validation processing"
+    validation-aspects:
+      - "Price range validation"
+      - "Category validation"
+      - "Quality validation"
+      - "Risk profile validation"
+    criteria-characteristics:
+      - "Rule-based validation"
+      - "Parameter-driven validation"
+      - "Dynamic validation"
+      - "Comprehensive validation"
+
+# Quality assurance
+quality-assurance:
+  validation-reliability:
+    - "Validation rules must be deterministic"
+    - "Product samples must be representative"
+    - "Validation parameters must be accurate"
+    - "Performance must meet SLA requirements"
+    
+  product-accuracy:
+    - "Product validation must be precise"
+    - "Price range validation must be correct"
+    - "Category validation must be appropriate"
+    - "Quality validation must be comprehensive"
+    
+  processing-requirements:
+    - "Validation time must be reasonable"
+    - "Memory usage must be controlled"
+    - "Rule execution must be efficient"
+    - "Parallel processing must be thread-safe"
+
+# Output configuration
+output:
+  include-input: true
+  include-metadata: true
+  format: "enhanced"
+  validation-summary: true
+  performance-metrics: true
+  rule-details: true
+  sample-details: true
+  parameter-analysis: true

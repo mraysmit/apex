@@ -1,0 +1,508 @@
+# APEX Fluent API Patterns Configuration
+# External data source configuration for fluent API patterns
+# Replaces hardcoded fluent API design patterns from FluentRuleBuilderExample
+
+type: "external-data-config"
+name: "fluent-api-patterns-config"
+description: "Data-driven fluent API patterns configuration for fluent rule builder processing"
+
+# Fluent API patterns configuration by pattern type
+data:
+  rule-chain-building-patterns:
+    pattern-type: "rule-chain-building-patterns"
+    pattern-name: "Rule Chain Building Patterns"
+    description: "Patterns for building rule chains using fluent API design"
+    pattern-characteristics:
+      api-style: "FLUENT"
+      method-chaining: "ENABLED"
+      builder-pattern: "INTEGRATED"
+    api-patterns:
+      basic-chain-building-pattern:
+        pattern-id: "BASIC_CHAIN_BUILDING"
+        pattern-name: "Basic Chain Building Pattern"
+        pattern-description: "Basic fluent API pattern for rule chain construction"
+        api-structure:
+          entry-point: "RuleChainBuilder.start()"
+          chain-methods:
+            - method-name: "withRule"
+              method-signature: "withRule(String name, String condition, String description)"
+              method-purpose: "Add a rule to the chain"
+              return-type: "RuleChainBuilder"
+            - method-name: "onSuccess"
+              method-signature: "onSuccess()"
+              method-purpose: "Define success branch"
+              return-type: "SuccessBranchBuilder"
+            - method-name: "onFailure"
+              method-signature: "onFailure()"
+              method-purpose: "Define failure branch"
+              return-type: "FailureBranchBuilder"
+            - method-name: "executeRule"
+              method-signature: "executeRule(String name, String condition, String description)"
+              method-purpose: "Execute a rule in the branch"
+              return-type: "RuleBranchBuilder"
+            - method-name: "build"
+              method-signature: "build()"
+              method-purpose: "Build the final rule chain"
+              return-type: "RuleChain"
+        usage-examples:
+          - example-name: "Simple Chain"
+            example-code: "RuleChainBuilder.start().withRule('Check1', 'condition1', 'desc1').build()"
+            example-description: "Build a simple single-rule chain"
+          - example-name: "Branched Chain"
+            example-code: "RuleChainBuilder.start().withRule('Check1', 'condition1', 'desc1').onSuccess().executeRule('Check2', 'condition2', 'desc2').build()"
+            example-description: "Build a chain with success branching"
+        design-principles:
+          - "Method chaining for fluent syntax"
+          - "Immutable builder pattern"
+          - "Type-safe API design"
+          - "Clear semantic naming"
+        audit-requirements:
+          - "Log basic chain building usage"
+          - "Track API pattern adoption"
+          
+      advanced-chain-building-pattern:
+        pattern-id: "ADVANCED_CHAIN_BUILDING"
+        pattern-name: "Advanced Chain Building Pattern"
+        pattern-description: "Advanced fluent API pattern with complex branching and conditions"
+        api-structure:
+          entry-point: "AdvancedRuleChainBuilder.create()"
+          chain-methods:
+            - method-name: "startWith"
+              method-signature: "startWith(RuleDefinition rule)"
+              method-purpose: "Start chain with a rule definition"
+              return-type: "AdvancedRuleChainBuilder"
+            - method-name: "when"
+              method-signature: "when(String condition)"
+              method-purpose: "Add conditional branching"
+              return-type: "ConditionalBranchBuilder"
+            - method-name: "then"
+              method-signature: "then(RuleAction action)"
+              method-purpose: "Define action for condition"
+              return-type: "ActionBranchBuilder"
+            - method-name: "otherwise"
+              method-signature: "otherwise(RuleAction action)"
+              method-purpose: "Define alternative action"
+              return-type: "ActionBranchBuilder"
+            - method-name: "andThen"
+              method-signature: "andThen(RuleDefinition rule)"
+              method-purpose: "Chain additional rule"
+              return-type: "AdvancedRuleChainBuilder"
+            - method-name: "finalize"
+              method-signature: "finalize()"
+              method-purpose: "Finalize the advanced chain"
+              return-type: "AdvancedRuleChain"
+        usage-examples:
+          - example-name: "Conditional Chain"
+            example-code: "AdvancedRuleChainBuilder.create().startWith(rule1).when('condition').then(action1).otherwise(action2).finalize()"
+            example-description: "Build a chain with conditional execution"
+          - example-name: "Complex Branching"
+            example-code: "AdvancedRuleChainBuilder.create().startWith(rule1).when('cond1').then(action1).andThen(rule2).when('cond2').then(action2).finalize()"
+            example-description: "Build a complex multi-branch chain"
+        design-principles:
+          - "Advanced conditional logic"
+          - "Complex branching support"
+          - "Action-based execution"
+          - "Flexible chain composition"
+        audit-requirements:
+          - "Log advanced chain building usage"
+          - "Track complex pattern adoption"
+          
+      declarative-chain-building-pattern:
+        pattern-id: "DECLARATIVE_CHAIN_BUILDING"
+        pattern-name: "Declarative Chain Building Pattern"
+        pattern-description: "Declarative fluent API pattern for rule chain specification"
+        api-structure:
+          entry-point: "DeclarativeRuleChain.define()"
+          chain-methods:
+            - method-name: "rule"
+              method-signature: "rule(String name)"
+              method-purpose: "Define a rule by name"
+              return-type: "RuleDefinitionBuilder"
+            - method-name: "condition"
+              method-signature: "condition(String expression)"
+              method-purpose: "Set rule condition"
+              return-type: "RuleDefinitionBuilder"
+            - method-name: "description"
+              method-signature: "description(String text)"
+              method-purpose: "Set rule description"
+              return-type: "RuleDefinitionBuilder"
+            - method-name: "priority"
+              method-signature: "priority(int value)"
+              method-purpose: "Set rule priority"
+              return-type: "RuleDefinitionBuilder"
+            - method-name: "successPath"
+              method-signature: "successPath()"
+              method-purpose: "Define success execution path"
+              return-type: "PathDefinitionBuilder"
+            - method-name: "failurePath"
+              method-signature: "failurePath()"
+              method-purpose: "Define failure execution path"
+              return-type: "PathDefinitionBuilder"
+            - method-name: "compile"
+              method-signature: "compile()"
+              method-purpose: "Compile the declarative chain"
+              return-type: "CompiledRuleChain"
+        usage-examples:
+          - example-name: "Declarative Definition"
+            example-code: "DeclarativeRuleChain.define().rule('CustomerCheck').condition('#customerType == \"VIP\"').description('VIP check').compile()"
+            example-description: "Declaratively define a rule chain"
+          - example-name: "Path Definition"
+            example-code: "DeclarativeRuleChain.define().rule('Check1').successPath().rule('Check2').failurePath().rule('Check3').compile()"
+            example-description: "Define execution paths declaratively"
+        design-principles:
+          - "Declarative rule specification"
+          - "Clear path definition"
+          - "Compilation-based optimization"
+          - "Metadata-driven execution"
+        audit-requirements:
+          - "Log declarative chain usage"
+          - "Track compilation patterns"
+    pattern-settings:
+      pattern-caching: true
+      api-optimization: true
+      method-chaining-validation: true
+    
+  conditional-execution-patterns:
+    pattern-type: "conditional-execution-patterns"
+    pattern-name: "Conditional Execution Patterns"
+    description: "Patterns for conditional rule execution using fluent API"
+    pattern-characteristics:
+      execution-model: "CONDITIONAL"
+      branching-support: "ADVANCED"
+      decision-logic: "FLUENT"
+    api-patterns:
+      if-then-else-pattern:
+        pattern-id: "IF_THEN_ELSE_PATTERN"
+        pattern-name: "If-Then-Else Pattern"
+        pattern-description: "Classic conditional execution pattern with fluent syntax"
+        api-structure:
+          entry-point: "ConditionalExecution.if(condition)"
+          conditional-methods:
+            - method-name: "if"
+              method-signature: "if(String condition)"
+              method-purpose: "Start conditional block"
+              return-type: "ConditionalBuilder"
+            - method-name: "then"
+              method-signature: "then(Runnable action)"
+              method-purpose: "Define action for true condition"
+              return-type: "ConditionalBuilder"
+            - method-name: "elseIf"
+              method-signature: "elseIf(String condition)"
+              method-purpose: "Add additional condition"
+              return-type: "ConditionalBuilder"
+            - method-name: "else"
+              method-signature: "else(Runnable action)"
+              method-purpose: "Define default action"
+              return-type: "ConditionalBuilder"
+            - method-name: "execute"
+              method-signature: "execute(ExecutionContext context)"
+              method-purpose: "Execute the conditional logic"
+              return-type: "ExecutionResult"
+        usage-examples:
+          - example-name: "Simple If-Then"
+            example-code: "ConditionalExecution.if('#amount > 1000').then(() -> processHighValue()).execute(context)"
+            example-description: "Simple conditional execution"
+          - example-name: "If-Then-Else"
+            example-code: "ConditionalExecution.if('#type == \"VIP\"').then(() -> processVIP()).else(() -> processStandard()).execute(context)"
+            example-description: "Conditional with alternative"
+        design-principles:
+          - "Intuitive conditional syntax"
+          - "Lambda-based actions"
+          - "Chainable conditions"
+          - "Context-aware execution"
+        audit-requirements:
+          - "Log conditional execution patterns"
+          - "Track branching decisions"
+          
+      switch-case-pattern:
+        pattern-id: "SWITCH_CASE_PATTERN"
+        pattern-name: "Switch-Case Pattern"
+        pattern-description: "Switch-case style conditional execution with fluent API"
+        api-structure:
+          entry-point: "SwitchExecution.on(expression)"
+          switch-methods:
+            - method-name: "on"
+              method-signature: "on(String expression)"
+              method-purpose: "Start switch block"
+              return-type: "SwitchBuilder"
+            - method-name: "case"
+              method-signature: "case(Object value, Runnable action)"
+              method-purpose: "Define case action"
+              return-type: "SwitchBuilder"
+            - method-name: "defaultCase"
+              method-signature: "defaultCase(Runnable action)"
+              method-purpose: "Define default action"
+              return-type: "SwitchBuilder"
+            - method-name: "execute"
+              method-signature: "execute(ExecutionContext context)"
+              method-purpose: "Execute the switch logic"
+              return-type: "ExecutionResult"
+        usage-examples:
+          - example-name: "Customer Type Switch"
+            example-code: "SwitchExecution.on('#customerType').case('VIP', () -> processVIP()).case('PREMIUM', () -> processPremium()).defaultCase(() -> processStandard()).execute(context)"
+            example-description: "Switch on customer type"
+        design-principles:
+          - "Switch-case semantics"
+          - "Value-based branching"
+          - "Default case handling"
+          - "Efficient case matching"
+        audit-requirements:
+          - "Log switch execution patterns"
+          - "Track case selections"
+          
+      guard-clause-pattern:
+        pattern-id: "GUARD_CLAUSE_PATTERN"
+        pattern-name: "Guard Clause Pattern"
+        pattern-description: "Guard clause pattern for early validation and exit"
+        api-structure:
+          entry-point: "GuardExecution.guard(condition)"
+          guard-methods:
+            - method-name: "guard"
+              method-signature: "guard(String condition)"
+              method-purpose: "Define guard condition"
+              return-type: "GuardBuilder"
+            - method-name: "orThrow"
+              method-signature: "orThrow(RuntimeException exception)"
+              method-purpose: "Throw exception if guard fails"
+              return-type: "GuardBuilder"
+            - method-name: "orReturn"
+              method-signature: "orReturn(Object value)"
+              method-purpose: "Return value if guard fails"
+              return-type: "GuardBuilder"
+            - method-name: "orExecute"
+              method-signature: "orExecute(Runnable action)"
+              method-purpose: "Execute action if guard fails"
+              return-type: "GuardBuilder"
+            - method-name: "validate"
+              method-signature: "validate(ExecutionContext context)"
+              method-purpose: "Validate the guard conditions"
+              return-type: "ValidationResult"
+        usage-examples:
+          - example-name: "Null Guard"
+            example-code: "GuardExecution.guard('#customer != null').orThrow(new IllegalArgumentException('Customer required')).validate(context)"
+            example-description: "Guard against null customer"
+          - example-name: "Range Guard"
+            example-code: "GuardExecution.guard('#amount > 0 && #amount <= 1000000').orReturn('INVALID_AMOUNT').validate(context)"
+            example-description: "Guard against invalid amount range"
+        design-principles:
+          - "Early validation and exit"
+          - "Clear error handling"
+          - "Fail-fast approach"
+          - "Readable guard conditions"
+        audit-requirements:
+          - "Log guard clause executions"
+          - "Track validation failures"
+    pattern-settings:
+      pattern-caching: true
+      conditional-optimization: true
+      execution-validation: true
+    
+  success-failure-handling-patterns:
+    pattern-type: "success-failure-handling-patterns"
+    pattern-name: "Success/Failure Handling Patterns"
+    description: "Patterns for handling success and failure scenarios in fluent API"
+    pattern-characteristics:
+      error-handling: "FLUENT"
+      result-processing: "CHAINABLE"
+      exception-management: "INTEGRATED"
+    api-patterns:
+      result-handling-pattern:
+        pattern-id: "RESULT_HANDLING_PATTERN"
+        pattern-name: "Result Handling Pattern"
+        pattern-description: "Pattern for handling execution results with fluent API"
+        api-structure:
+          entry-point: "ResultHandler.handle(result)"
+          result-methods:
+            - method-name: "handle"
+              method-signature: "handle(ExecutionResult result)"
+              method-purpose: "Start result handling"
+              return-type: "ResultHandler"
+            - method-name: "onSuccess"
+              method-signature: "onSuccess(Consumer<Object> action)"
+              method-purpose: "Handle successful result"
+              return-type: "ResultHandler"
+            - method-name: "onFailure"
+              method-signature: "onFailure(Consumer<Exception> action)"
+              method-purpose: "Handle failed result"
+              return-type: "ResultHandler"
+            - method-name: "onComplete"
+              method-signature: "onComplete(Runnable action)"
+              method-purpose: "Handle completion regardless of result"
+              return-type: "ResultHandler"
+            - method-name: "transform"
+              method-signature: "transform(Function<Object, Object> transformer)"
+              method-purpose: "Transform successful result"
+              return-type: "ResultHandler"
+            - method-name: "recover"
+              method-signature: "recover(Function<Exception, Object> recovery)"
+              method-purpose: "Recover from failure"
+              return-type: "ResultHandler"
+            - method-name: "get"
+              method-signature: "get()"
+              method-purpose: "Get final result"
+              return-type: "Object"
+        usage-examples:
+          - example-name: "Success Handling"
+            example-code: "ResultHandler.handle(result).onSuccess(value -> log.info('Success: {}', value)).onFailure(ex -> log.error('Failed', ex)).get()"
+            example-description: "Handle success and failure cases"
+          - example-name: "Result Transformation"
+            example-code: "ResultHandler.handle(result).transform(value -> value.toString().toUpperCase()).recover(ex -> 'DEFAULT').get()"
+            example-description: "Transform result with recovery"
+        design-principles:
+          - "Functional result handling"
+          - "Chainable transformations"
+          - "Exception recovery"
+          - "Completion callbacks"
+        audit-requirements:
+          - "Log result handling patterns"
+          - "Track success/failure rates"
+          
+      exception-handling-pattern:
+        pattern-id: "EXCEPTION_HANDLING_PATTERN"
+        pattern-name: "Exception Handling Pattern"
+        pattern-description: "Pattern for exception handling with fluent API"
+        api-structure:
+          entry-point: "ExceptionHandler.catching(exceptionType)"
+          exception-methods:
+            - method-name: "catching"
+              method-signature: "catching(Class<? extends Exception> exceptionType)"
+              method-purpose: "Catch specific exception type"
+              return-type: "ExceptionHandler"
+            - method-name: "handle"
+              method-signature: "handle(Consumer<Exception> handler)"
+              method-purpose: "Handle caught exception"
+              return-type: "ExceptionHandler"
+            - method-name: "retry"
+              method-signature: "retry(int maxAttempts)"
+              method-purpose: "Retry on exception"
+              return-type: "ExceptionHandler"
+            - method-name: "fallback"
+              method-signature: "fallback(Supplier<Object> fallbackSupplier)"
+              method-purpose: "Provide fallback value"
+              return-type: "ExceptionHandler"
+            - method-name: "rethrow"
+              method-signature: "rethrow()"
+              method-purpose: "Rethrow the exception"
+              return-type: "ExceptionHandler"
+            - method-name: "execute"
+              method-signature: "execute(Callable<Object> callable)"
+              method-purpose: "Execute with exception handling"
+              return-type: "Object"
+        usage-examples:
+          - example-name: "Exception Catching"
+            example-code: "ExceptionHandler.catching(ValidationException.class).handle(ex -> log.warn('Validation failed', ex)).fallback(() -> 'DEFAULT').execute(() -> validateCustomer())"
+            example-description: "Catch and handle validation exceptions"
+          - example-name: "Retry Pattern"
+            example-code: "ExceptionHandler.catching(NetworkException.class).retry(3).execute(() -> callExternalService())"
+            example-description: "Retry on network exceptions"
+        design-principles:
+          - "Type-safe exception handling"
+          - "Retry mechanisms"
+          - "Fallback strategies"
+          - "Fluent error recovery"
+        audit-requirements:
+          - "Log exception handling patterns"
+          - "Track retry attempts"
+    pattern-settings:
+      pattern-caching: true
+      error-optimization: true
+      exception-validation: true
+    
+  fluent-api-design-patterns:
+    pattern-type: "fluent-api-design-patterns"
+    pattern-name: "Fluent API Design Patterns"
+    description: "General design patterns for fluent API construction"
+    pattern-characteristics:
+      design-philosophy: "FLUENT"
+      usability: "INTUITIVE"
+      type-safety: "ENFORCED"
+    api-patterns:
+      builder-pattern:
+        pattern-id: "BUILDER_PATTERN"
+        pattern-name: "Builder Pattern"
+        pattern-description: "Builder pattern implementation for fluent API"
+        design-characteristics:
+          - "Immutable builders"
+          - "Method chaining"
+          - "Type-safe construction"
+          - "Validation at build time"
+        implementation-guidelines:
+          - "Return builder instance from each method"
+          - "Validate state before building"
+          - "Use generic types for type safety"
+          - "Provide clear method names"
+        audit-requirements:
+          - "Log builder pattern usage"
+          - "Track construction patterns"
+          
+      method-chaining-pattern:
+        pattern-id: "METHOD_CHAINING_PATTERN"
+        pattern-name: "Method Chaining Pattern"
+        pattern-description: "Method chaining pattern for fluent syntax"
+        design-characteristics:
+          - "Fluent method chaining"
+          - "Readable syntax"
+          - "Progressive disclosure"
+          - "Context preservation"
+        implementation-guidelines:
+          - "Return appropriate builder type"
+          - "Maintain context across calls"
+          - "Provide meaningful method names"
+          - "Support optional parameters"
+        audit-requirements:
+          - "Log method chaining usage"
+          - "Track chaining patterns"
+    pattern-settings:
+      pattern-caching: true
+      design-optimization: true
+      api-validation: true
+    
+  default:
+    pattern-type: "default"
+    pattern-name: "Default Fluent API Patterns"
+    description: "Default fluent API pattern processing"
+    api-patterns:
+      default-pattern:
+        pattern-id: "DEFAULT_PATTERN"
+        pattern-name: "Default Pattern"
+        api-structure:
+          entry-point: "DefaultBuilder.create()"
+    pattern-settings:
+      pattern-caching: true
+
+# API design principles
+design-principles:
+  fluent-syntax-principle:
+    principle-name: "Fluent Syntax Principle"
+    description: "Design APIs that read like natural language"
+    guidelines: ["Use verb-noun method names", "Chain methods logically", "Minimize required parameters"]
+    
+  type-safety-principle:
+    principle-name: "Type Safety Principle"
+    description: "Ensure compile-time type safety"
+    guidelines: ["Use generic types", "Validate at compile time", "Prevent invalid states"]
+    
+  usability-principle:
+    principle-name: "Usability Principle"
+    description: "Design for ease of use and discoverability"
+    guidelines: ["Provide clear method names", "Use progressive disclosure", "Include helpful documentation"]
+
+# Quality assurance
+quality-assurance:
+  pattern-accuracy:
+    - "API patterns must be syntactically correct"
+    - "Method signatures must be valid"
+    - "Usage examples must be executable"
+    - "Design principles must be followed"
+    
+  usability-requirements:
+    - "APIs must be intuitive to use"
+    - "Method chaining must be logical"
+    - "Error messages must be helpful"
+    - "Documentation must be comprehensive"
+    
+  performance-requirements:
+    - "Pattern execution must be efficient"
+    - "Method chaining must be optimized"
+    - "Builder creation must be fast"
+    - "Memory usage must be controlled"

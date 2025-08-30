@@ -1,0 +1,227 @@
+# APEX Pricing Service Configuration
+# External data source configuration for pricing service
+# Replaces hardcoded pricing logic from DynamicMethodExecutionDemo
+
+type: "external-data-config"
+name: "pricing-service-config"
+description: "Data-driven pricing service configuration for dynamic method execution"
+
+# Pricing configuration by pricing type
+data:
+  standard:
+    multiplier: 1.0
+    description: "Standard pricing - no adjustment"
+    pricing-category: "base-pricing"
+    margin: 0.0
+    discount: 0.0
+    applicable-fees: []
+    
+  premium:
+    multiplier: 1.20
+    description: "Premium pricing - 20% markup"
+    pricing-category: "enhanced-pricing"
+    margin: 0.20
+    discount: 0.0
+    applicable-fees: ["premium-service-fee"]
+    
+  sale:
+    multiplier: 0.80
+    description: "Sale pricing - 20% discount"
+    pricing-category: "promotional-pricing"
+    margin: 0.0
+    discount: 0.20
+    applicable-fees: []
+    
+  clearance:
+    multiplier: 0.50
+    description: "Clearance pricing - 50% discount"
+    pricing-category: "liquidation-pricing"
+    margin: 0.0
+    discount: 0.50
+    applicable-fees: ["clearance-processing-fee"]
+    
+  bulk:
+    multiplier: 0.85
+    description: "Bulk pricing - 15% discount for large orders"
+    pricing-category: "volume-pricing"
+    margin: 0.0
+    discount: 0.15
+    applicable-fees: ["bulk-handling-fee"]
+    
+  vip:
+    multiplier: 0.90
+    description: "VIP pricing - 10% discount for premium customers"
+    pricing-category: "customer-tier-pricing"
+    margin: 0.0
+    discount: 0.10
+    applicable-fees: []
+
+# Advanced pricing configurations
+advanced-pricing:
+  dynamic-pricing:
+    description: "Market-based dynamic pricing"
+    factors:
+      - "Market volatility"
+      - "Supply and demand"
+      - "Competitor pricing"
+      - "Customer segment"
+    adjustment-frequency: "real-time"
+    maximum-adjustment: 0.25
+    
+  tiered-pricing:
+    description: "Volume-based tiered pricing"
+    tiers:
+      - tier: 1
+        volume-min: 0
+        volume-max: 1000
+        discount: 0.0
+      - tier: 2
+        volume-min: 1001
+        volume-max: 10000
+        discount: 0.05
+      - tier: 3
+        volume-min: 10001
+        volume-max: 100000
+        discount: 0.10
+      - tier: 4
+        volume-min: 100001
+        volume-max: null
+        discount: 0.15
+        
+  seasonal-pricing:
+    description: "Time-based seasonal pricing"
+    seasons:
+      - season: "peak"
+        months: [11, 12, 1]
+        adjustment: 1.15
+      - season: "off-peak"
+        months: [6, 7, 8]
+        adjustment: 0.90
+      - season: "standard"
+        months: [2, 3, 4, 5, 9, 10]
+        adjustment: 1.0
+
+# Pricing rules and business logic
+pricing-rules:
+  minimum-price-rules:
+    enforce-minimum: true
+    minimum-margin: 0.05
+    override-authority: "manager-approval"
+    
+  maximum-discount-rules:
+    maximum-discount: 0.60
+    approval-required: true
+    approval-threshold: 0.30
+    
+  competitive-pricing-rules:
+    price-matching: true
+    competitor-monitoring: true
+    adjustment-frequency: "daily"
+    
+  customer-specific-rules:
+    vip-customers:
+      automatic-discount: 0.10
+      additional-services: true
+      priority-processing: true
+    bulk-customers:
+      volume-thresholds: [1000, 10000, 100000]
+      progressive-discounts: [0.05, 0.10, 0.15]
+    new-customers:
+      welcome-discount: 0.05
+      trial-period: 30
+
+# Fee structures
+fee-structures:
+  premium-service-fee:
+    fee-type: "fixed"
+    amount: 50.0
+    description: "Premium service handling fee"
+    
+  clearance-processing-fee:
+    fee-type: "percentage"
+    rate: 0.02
+    description: "Clearance processing fee (2%)"
+    
+  bulk-handling-fee:
+    fee-type: "tiered"
+    tiers:
+      - volume-min: 1000
+        volume-max: 10000
+        fee: 100.0
+      - volume-min: 10001
+        volume-max: null
+        fee: 200.0
+    description: "Bulk order handling fee"
+
+# Pricing validation and controls
+validation-controls:
+  price-reasonableness:
+    minimum-price-check: true
+    maximum-price-check: true
+    historical-comparison: true
+    
+  margin-protection:
+    minimum-margin-enforcement: true
+    negative-margin-alert: true
+    margin-erosion-monitoring: true
+    
+  competitive-analysis:
+    market-price-comparison: true
+    competitor-price-tracking: true
+    price-positioning-analysis: true
+
+# Performance metrics
+performance-metrics:
+  pricing-accuracy:
+    target-accuracy: 99.5
+    price-variance-threshold: 0.02
+    
+  response-time:
+    standard-pricing: "< 100ms"
+    dynamic-pricing: "< 500ms"
+    complex-pricing: "< 1000ms"
+    
+  throughput:
+    pricing-requests-per-second: 1000
+    concurrent-pricing-sessions: 100
+    
+  customer-satisfaction:
+    price-acceptance-rate: 85.0
+    price-complaint-rate: "< 2%"
+
+# Audit and compliance
+audit-requirements:
+  pricing-decisions:
+    log-all-decisions: true
+    decision-rationale: true
+    approval-tracking: true
+    
+  price-changes:
+    change-authorization: true
+    change-notification: true
+    change-history: true
+    
+  regulatory-compliance:
+    fair-pricing-practices: true
+    anti-discrimination-compliance: true
+    transparency-requirements: true
+
+# Integration specifications
+integration:
+  external-systems:
+    - "Market data feeds"
+    - "Competitor pricing services"
+    - "Customer relationship management"
+    - "Order management system"
+    
+  data-sources:
+    - "Real-time market prices"
+    - "Historical pricing data"
+    - "Customer purchase history"
+    - "Inventory levels"
+    
+  api-endpoints:
+    - "/pricing/calculate"
+    - "/pricing/validate"
+    - "/pricing/history"
+    - "/pricing/rules"

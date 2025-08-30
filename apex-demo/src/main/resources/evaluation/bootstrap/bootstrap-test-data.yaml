@@ -1,0 +1,202 @@
+# APEX Bootstrap Test Data Configuration
+# External data source configuration for bootstrap testing scenarios
+# Replaces hardcoded test data from RuleConfigurationHardcodedBootstrap
+
+type: "external-data-config"
+name: "bootstrap-test-data"
+description: "Test data scenarios for rule configuration bootstrap demonstration"
+
+# Loan application test scenarios
+loan-applications:
+  - application-id: "LA001"
+    description: "Excellent credit score application"
+    data:
+      applicationId: "LA001"
+      creditScore: 780
+      debtToIncomeRatio: 0.25
+      loanAmount: 300000
+      applicantName: "John Smith"
+      employmentYears: 8
+    expected-decision: "APPROVED"
+    expected-rule: "LA002"
+    
+  - application-id: "LA002"
+    description: "Good credit with acceptable DTI"
+    data:
+      applicationId: "LA002"
+      creditScore: 720
+      debtToIncomeRatio: 0.32
+      loanAmount: 250000
+      applicantName: "Jane Doe"
+      employmentYears: 5
+    expected-decision: "APPROVED"
+    expected-rule: "LA001"
+    
+  - application-id: "LA003"
+    description: "Poor credit score application"
+    data:
+      applicationId: "LA003"
+      creditScore: 580
+      debtToIncomeRatio: 0.45
+      loanAmount: 150000
+      applicantName: "Bob Johnson"
+      employmentYears: 2
+    expected-decision: "REJECTED"
+    expected-rule: "LA003"
+    
+  - application-id: "LA004"
+    description: "Moderate credit requiring manual review"
+    data:
+      applicationId: "LA004"
+      creditScore: 650
+      debtToIncomeRatio: 0.38
+      loanAmount: 200000
+      applicantName: "Alice Brown"
+      employmentYears: 3
+    expected-decision: "REFERRED"
+    expected-rule: "LA005"
+
+# Order processing test scenarios
+order-processing:
+  - order-id: "OP001"
+    description: "Large order qualifying for volume discount"
+    data:
+      orderId: "OP001"
+      orderTotal: 1250.00
+      customerId: "CUST001"
+      customerYears: 3
+      customerName: "Premium Corp"
+    expected-discount-percentage: 15
+    expected-rule: "OD001"
+    
+  - order-id: "OP002"
+    description: "Loyalty customer with 6 years"
+    data:
+      orderId: "OP002"
+      orderTotal: 750.00
+      customerId: "CUST002"
+      customerYears: 6
+      customerName: "Loyal Industries"
+    expected-discount-percentage: 10
+    expected-rule: "OD002"
+    
+  - order-id: "OP003"
+    description: "New customer welcome offer"
+    data:
+      orderId: "OP003"
+      orderTotal: 400.00
+      customerId: "CUST003"
+      customerYears: 0
+      customerName: "New Startup LLC"
+    expected-discount-percentage: 5
+    expected-rule: "OD003"
+    
+  - order-id: "OP004"
+    description: "Standard customer with no special discount"
+    data:
+      orderId: "OP004"
+      orderTotal: 300.00
+      customerId: "CUST004"
+      customerYears: 2
+      customerName: "Regular Business Inc"
+    expected-discount-percentage: 0
+    expected-rule: "OD004"
+
+# Bootstrap comparison scenarios
+bootstrap-comparisons:
+  - scenario-id: "hardcoded-vs-data-driven"
+    description: "Compare hardcoded approach vs data-driven approach"
+    test-cases:
+      - case: "loan-processing"
+        hardcoded-approach:
+          processing-time: "embedded-in-code"
+          maintainability: "low"
+          flexibility: "none"
+          testing: "difficult"
+        data-driven-approach:
+          processing-time: "configuration-driven"
+          maintainability: "high"
+          flexibility: "high"
+          testing: "easy"
+          
+      - case: "discount-calculation"
+        hardcoded-approach:
+          rule-changes: "code-modification-required"
+          deployment: "full-application-restart"
+          business-user-access: "none"
+        data-driven-approach:
+          rule-changes: "configuration-update"
+          deployment: "hot-reload-capable"
+          business-user-access: "yaml-editing"
+
+# Infrastructure setup scenarios
+infrastructure-scenarios:
+  - setup-id: "basic-setup"
+    description: "Basic infrastructure setup for rule processing"
+    components:
+      - "yaml-configuration-loader"
+      - "enrichment-service"
+      - "expression-evaluator"
+      - "lookup-service-registry"
+    setup-time: "immediate"
+    
+  - setup-id: "advanced-setup"
+    description: "Advanced infrastructure with monitoring and analytics"
+    components:
+      - "yaml-configuration-loader"
+      - "enrichment-service"
+      - "expression-evaluator"
+      - "lookup-service-registry"
+      - "performance-monitor"
+      - "rule-analytics"
+      - "audit-logger"
+    setup-time: "extended"
+
+# Performance benchmarks
+performance-benchmarks:
+  hardcoded-approach:
+    rule-execution-time: "0.1ms"
+    rule-modification-time: "2-4 hours"
+    deployment-time: "15-30 minutes"
+    testing-time: "1-2 hours"
+    
+  data-driven-approach:
+    rule-execution-time: "0.3ms"
+    rule-modification-time: "5-10 minutes"
+    deployment-time: "immediate"
+    testing-time: "10-15 minutes"
+
+# Migration scenarios
+migration-scenarios:
+  - phase: "assessment"
+    description: "Assess current hardcoded rules"
+    activities:
+      - "identify-hardcoded-logic"
+      - "catalog-business-rules"
+      - "analyze-dependencies"
+    duration: "1-2 weeks"
+    
+  - phase: "yaml-design"
+    description: "Design YAML configuration structure"
+    activities:
+      - "design-rule-schema"
+      - "create-test-configurations"
+      - "validate-rule-coverage"
+    duration: "1 week"
+    
+  - phase: "implementation"
+    description: "Implement APEX-based rule processing"
+    activities:
+      - "integrate-apex-services"
+      - "implement-yaml-loading"
+      - "create-enrichment-pipelines"
+    duration: "2-3 weeks"
+    
+  - phase: "testing"
+    description: "Test and validate new approach"
+    activities:
+      - "unit-testing"
+      - "integration-testing"
+      - "performance-testing"
+      - "user-acceptance-testing"
+    duration: "1-2 weeks"

@@ -1,0 +1,216 @@
+# APEX Customer Transformer Demo Configuration
+# Real APEX YAML configuration for customer transformer processing
+# Replaces all hardcoded customer transformer logic from CustomerTransformerDemo (@version 1.0)
+
+type: "apex-enrichment-config"
+name: "customer-transformer-demo"
+description: "APEX-compliant customer transformer with real enrichment services"
+
+# External data source for customer transformer configurations
+external-data-sources:
+  - name: "transformer-rules-config"
+    type: "external-data-config"
+    source: "enrichment/customer-transformer/transformer-rules-config.yaml"
+    
+  - name: "field-actions-config"
+    type: "external-data-config"
+    source: "enrichment/customer-transformer/field-actions-config.yaml"
+    
+  - name: "customer-segments-config"
+    type: "external-data-config"
+    source: "enrichment/customer-transformer/customer-segments-config.yaml"
+
+# APEX enrichment processing for customer transformer
+enrichments:
+  - name: "transformer-rules-processing"
+    type: "lookup-enrichment"
+    description: "Process transformer rules using data-driven configuration"
+    condition: "#data.transformerType == 'transformer-rules-processing'"
+    lookup-source: "transformer-rules-config"
+    lookup-key: "#data.ruleType != null ? #data.ruleType : 'default'"
+    target-field: "transformerRulesResult"
+    
+  - name: "field-actions-processing"
+    type: "lookup-enrichment"
+    description: "Process field actions using data-driven configuration"
+    condition: "#data.transformerType == 'field-actions-processing'"
+    lookup-source: "field-actions-config"
+    lookup-key: "#data.actionType != null ? #data.actionType : 'default'"
+    target-field: "fieldActionsResult"
+    
+  - name: "customer-segments-processing"
+    type: "lookup-enrichment"
+    description: "Process customer segments using data-driven configuration"
+    condition: "#data.transformerType == 'customer-segments-processing'"
+    lookup-source: "customer-segments-config"
+    lookup-key: "#data.segmentType != null ? #data.segmentType : 'default'"
+    target-field: "customerSegmentsResult"
+    
+  - name: "customer-transformer-summary"
+    type: "expression-enrichment"
+    description: "Generate customer transformer summary"
+    condition: "true"
+    expression: "'Customer transformer completed: ' + (#data.transformerType != null ? #data.transformerType : 'unknown') + ' using real APEX services'"
+    target-field: "customerTransformerSummary"
+
+# Transformer processing categories
+processing-categories:
+  - category: "transformer-rules-processing"
+    description: "Transformer rules creation and management"
+    processing-type: "real-apex-enrichment"
+    rule-types:
+      - "Membership-based rules"
+      - "Age-based rules"
+      - "Behavior-based rules"
+      - "Risk-based rules"
+    
+  - category: "field-actions-processing"
+    description: "Field transformer actions processing"
+    processing-type: "real-apex-enrichment"
+    action-types:
+      - "Category addition actions"
+      - "Category removal actions"
+      - "Field modification actions"
+      - "Conditional actions"
+    
+  - category: "customer-segments-processing"
+    description: "Customer segmentation processing"
+    processing-type: "real-apex-enrichment"
+    segment-aspects:
+      - "Membership tier segmentation"
+      - "Age-based segmentation"
+      - "Behavioral segmentation"
+      - "Value-based segmentation"
+
+# Customer transformation patterns
+transformation-patterns:
+  membership-based-pattern:
+    pattern-name: "Membership-Based Transformation"
+    description: "Pattern for transforming customers based on membership level"
+    membership-tiers: ["GOLD", "SILVER", "BRONZE", "BASIC"]
+    transformation-logic:
+      - "Gold members get premium product categories"
+      - "Silver members get standard product categories"
+      - "Bronze members get basic product categories"
+      - "Basic members get limited product categories"
+    
+  age-based-pattern:
+    pattern-name: "Age-Based Transformation"
+    description: "Pattern for transforming customers based on age demographics"
+    age-segments: ["YOUNG", "MIDDLE_AGED", "SENIOR"]
+    transformation-logic:
+      - "Young customers get growth-oriented categories"
+      - "Middle-aged customers get balanced categories"
+      - "Senior customers get conservative categories"
+    
+  behavior-based-pattern:
+    pattern-name: "Behavior-Based Transformation"
+    description: "Pattern for transforming customers based on behavior"
+    behavior-types: ["ACTIVE_TRADER", "PASSIVE_INVESTOR", "CONSERVATIVE", "AGGRESSIVE"]
+    transformation-logic:
+      - "Active traders get trading-focused categories"
+      - "Passive investors get long-term categories"
+      - "Conservative customers get low-risk categories"
+      - "Aggressive customers get high-growth categories"
+
+# Performance settings
+performance-settings:
+  transformer-rules-processing:
+    processing-timeout: 5000
+    parallel-processing: true
+    cache-results: true
+    
+  field-actions-processing:
+    processing-timeout: 3000
+    parallel-processing: true
+    action-optimization: true
+    
+  customer-segments-processing:
+    processing-timeout: 4000
+    parallel-processing: false
+    segment-intensive: true
+
+# Demonstration scenarios
+demonstration-scenarios:
+  comprehensive-customer-transformation:
+    scenario-name: "Comprehensive Customer Transformation"
+    description: "Demonstrate comprehensive customer transformation processing"
+    steps:
+      - "Load customer transformer configurations"
+      - "Process transformer rules"
+      - "Process field actions"
+      - "Process customer segments"
+      - "Generate transformation results"
+    expected-outcome: "Successful comprehensive customer transformation"
+    
+  membership-tier-transformation:
+    scenario-name: "Membership Tier Transformation"
+    description: "Demonstrate membership tier-based transformation"
+    steps:
+      - "Load membership tier configurations"
+      - "Process Gold member transformations"
+      - "Process Silver member transformations"
+      - "Process Basic member transformations"
+      - "Generate membership transformation results"
+    expected-outcome: "Successful membership tier transformation"
+    
+  age-demographic-transformation:
+    scenario-name: "Age Demographic Transformation"
+    description: "Demonstrate age demographic-based transformation"
+    steps:
+      - "Load age demographic configurations"
+      - "Process young customer transformations"
+      - "Process senior customer transformations"
+      - "Generate age-based transformation results"
+    expected-outcome: "Successful age demographic transformation"
+
+# Customer transformation configuration
+customer-transformation:
+  product-categories:
+    category-type: "Product Categories"
+    description: "Product categories for customer recommendations"
+    available-categories:
+      - "Equity"
+      - "FixedIncome"
+      - "ETF"
+      - "Mutual Funds"
+      - "Options"
+      - "Futures"
+      - "Commodities"
+      - "Real Estate"
+    category-characteristics:
+      - "Risk-based categorization"
+      - "Return-based categorization"
+      - "Liquidity-based categorization"
+      - "Time horizon-based categorization"
+
+# Quality assurance
+quality-assurance:
+  transformation-reliability:
+    - "Transformation rules must be deterministic"
+    - "Field actions must be accurate"
+    - "Customer segments must be well-defined"
+    - "Performance must meet SLA requirements"
+    
+  customer-accuracy:
+    - "Customer segmentation must be precise"
+    - "Product recommendations must be appropriate"
+    - "Risk assessments must be comprehensive"
+    - "Behavioral analysis must be accurate"
+    
+  processing-requirements:
+    - "Transformation time must be reasonable"
+    - "Memory usage must be controlled"
+    - "Rule execution must be efficient"
+    - "Parallel processing must be thread-safe"
+
+# Output configuration
+output:
+  include-input: true
+  include-metadata: true
+  format: "enhanced"
+  transformation-summary: true
+  performance-metrics: true
+  rule-details: true
+  action-details: true
+  segment-analysis: true

@@ -1,0 +1,356 @@
+# APEX Customer Samples Configuration
+# External data source configuration for customer samples processing
+# Replaces hardcoded customer sample creation from IntegratedCustomerValidatorDemo
+
+type: "external-data-config"
+name: "customer-samples-config"
+description: "Data-driven customer samples configuration for integrated customer validation processing"
+
+# Customer samples configuration by sample type
+data:
+  valid-customer-samples:
+    sample-type: "valid-customer-samples"
+    sample-name: "Valid Customer Samples"
+    description: "Customer samples that should pass validation"
+    sample-parameters:
+      validation-expectation: "PASS"
+      sample-category: "VALID"
+      test-purpose: "POSITIVE_TESTING"
+    customer-samples:
+      valid-senior-gold-customer:
+        customer-id: "VALID_SENIOR_GOLD_001"
+        customer-name: "John Doe"
+        customer-age: 65
+        membership-level: "Gold"
+        preferred-categories: ["Equity", "FixedIncome"]
+        customer-characteristics:
+          age-category: "SENIOR"
+          membership-tier: "PREMIUM"
+          risk-profile: "MODERATE"
+          investment-experience: "HIGH"
+        validation-expectations:
+          age-validation: "PASS"
+          membership-validation: "PASS"
+          category-validation: "PASS"
+          overall-validation: "PASS"
+        test-scenarios:
+          - "Senior age validation (60+)"
+          - "Gold membership validation"
+          - "Premium category preferences"
+        audit-requirements:
+          - "Log valid senior Gold customer test"
+          - "Track positive validation results"
+          
+      valid-young-silver-customer:
+        customer-id: "VALID_YOUNG_SILVER_001"
+        customer-name: "Young Silver"
+        customer-age: 25
+        membership-level: "Silver"
+        preferred-categories: ["ETF"]
+        customer-characteristics:
+          age-category: "YOUNG"
+          membership-tier: "STANDARD"
+          risk-profile: "MODERATE"
+          investment-experience: "MEDIUM"
+        validation-expectations:
+          age-validation: "PASS"
+          membership-validation: "PASS"
+          category-validation: "PASS"
+          overall-validation: "PASS"
+        test-scenarios:
+          - "Young age validation (18-35)"
+          - "Silver membership validation"
+          - "Standard category preferences"
+        audit-requirements:
+          - "Log valid young Silver customer test"
+          - "Track positive validation results"
+          
+      valid-platinum-customer:
+        customer-id: "VALID_PLATINUM_001"
+        customer-name: "Alice Brown"
+        customer-age: 75
+        membership-level: "Platinum"
+        preferred-categories: ["FixedIncome"]
+        customer-characteristics:
+          age-category: "SENIOR"
+          membership-tier: "VIP"
+          risk-profile: "CONSERVATIVE"
+          investment-experience: "VERY_HIGH"
+        validation-expectations:
+          age-validation: "PASS"
+          membership-validation: "PASS"
+          category-validation: "PASS"
+          overall-validation: "PASS"
+        test-scenarios:
+          - "Senior age validation (60+)"
+          - "Platinum membership validation"
+          - "VIP category preferences"
+        audit-requirements:
+          - "Log valid Platinum customer test"
+          - "Track VIP validation results"
+          
+      valid-middle-aged-gold-customer:
+        customer-id: "VALID_MIDDLE_AGED_GOLD_001"
+        customer-name: "Michael Johnson"
+        customer-age: 45
+        membership-level: "Gold"
+        preferred-categories: ["Equity", "ETF"]
+        customer-characteristics:
+          age-category: "MIDDLE_AGED"
+          membership-tier: "PREMIUM"
+          risk-profile: "MODERATE_TO_HIGH"
+          investment-experience: "HIGH"
+        validation-expectations:
+          age-validation: "PASS"
+          membership-validation: "PASS"
+          category-validation: "PASS"
+          overall-validation: "PASS"
+        test-scenarios:
+          - "Middle-aged validation (35-60)"
+          - "Gold membership validation"
+          - "Diversified category preferences"
+        audit-requirements:
+          - "Log valid middle-aged Gold customer test"
+          - "Track premium validation results"
+    sample-settings:
+      generation-method: "DATA_DRIVEN"
+      validation-testing: true
+      comprehensive-coverage: true
+    
+  invalid-customer-samples:
+    sample-type: "invalid-customer-samples"
+    sample-name: "Invalid Customer Samples"
+    description: "Customer samples that should fail validation"
+    sample-parameters:
+      validation-expectation: "FAIL"
+      sample-category: "INVALID"
+      test-purpose: "NEGATIVE_TESTING"
+    customer-samples:
+      invalid-age-customer:
+        customer-id: "INVALID_AGE_001"
+        customer-name: "Jane Smith"
+        customer-age: 45
+        membership-level: "Gold"
+        preferred-categories: ["ETF"]
+        customer-characteristics:
+          age-category: "MIDDLE_AGED"
+          membership-tier: "PREMIUM"
+          validation-issue: "AGE_OUT_OF_RANGE"
+        validation-expectations:
+          age-validation: "FAIL"
+          membership-validation: "PASS"
+          category-validation: "PASS"
+          overall-validation: "FAIL"
+        failure-reasons:
+          - "Age 45 does not meet senior criteria (60+)"
+          - "Age validation should fail for senior Gold validation"
+        test-scenarios:
+          - "Age validation failure (too young for senior)"
+          - "Gold membership validation (should pass)"
+          - "Category validation (should pass)"
+        audit-requirements:
+          - "Log invalid age customer test"
+          - "Track negative validation results"
+          
+      invalid-membership-customer:
+        customer-id: "INVALID_MEMBERSHIP_001"
+        customer-name: "Bob Johnson"
+        customer-age: 70
+        membership-level: "Silver"
+        preferred-categories: ["Commodity"]
+        customer-characteristics:
+          age-category: "SENIOR"
+          membership-tier: "STANDARD"
+          validation-issue: "MEMBERSHIP_MISMATCH"
+        validation-expectations:
+          age-validation: "PASS"
+          membership-validation: "FAIL"
+          category-validation: "PASS"
+          overall-validation: "FAIL"
+        failure-reasons:
+          - "Silver membership does not meet Gold criteria"
+          - "Membership validation should fail for Gold validation"
+        test-scenarios:
+          - "Age validation (should pass)"
+          - "Membership validation failure (Silver vs Gold)"
+          - "Category validation (should pass)"
+        audit-requirements:
+          - "Log invalid membership customer test"
+          - "Track membership validation failures"
+          
+      invalid-young-age-customer:
+        customer-id: "INVALID_YOUNG_AGE_001"
+        customer-name: "Too Young Customer"
+        customer-age: 16
+        membership-level: "Silver"
+        preferred-categories: ["ETF"]
+        customer-characteristics:
+          age-category: "UNDERAGE"
+          membership-tier: "STANDARD"
+          validation-issue: "UNDERAGE"
+        validation-expectations:
+          age-validation: "FAIL"
+          membership-validation: "PASS"
+          category-validation: "PASS"
+          overall-validation: "FAIL"
+        failure-reasons:
+          - "Age 16 is below minimum age requirement (18)"
+          - "Underage customers cannot be validated"
+        test-scenarios:
+          - "Underage validation failure (below 18)"
+          - "Silver membership validation (should pass)"
+          - "Category validation (should pass)"
+        audit-requirements:
+          - "Log underage customer test"
+          - "Track age validation failures"
+    sample-settings:
+      generation-method: "DATA_DRIVEN"
+      validation-testing: true
+      failure-analysis: true
+    
+  edge-case-customer-samples:
+    sample-type: "edge-case-customer-samples"
+    sample-name: "Edge Case Customer Samples"
+    description: "Customer samples for edge case testing"
+    sample-parameters:
+      validation-expectation: "CONDITIONAL"
+      sample-category: "EDGE_CASE"
+      test-purpose: "BOUNDARY_TESTING"
+    customer-samples:
+      boundary-age-customer:
+        customer-id: "BOUNDARY_AGE_001"
+        customer-name: "Boundary Age Customer"
+        customer-age: 60
+        membership-level: "Gold"
+        preferred-categories: ["FixedIncome"]
+        customer-characteristics:
+          age-category: "BOUNDARY_SENIOR"
+          membership-tier: "PREMIUM"
+          validation-issue: "BOUNDARY_CONDITION"
+        validation-expectations:
+          age-validation: "PASS"
+          membership-validation: "PASS"
+          category-validation: "PASS"
+          overall-validation: "PASS"
+        test-scenarios:
+          - "Boundary age validation (exactly 60)"
+          - "Gold membership validation"
+          - "Conservative category preferences"
+        audit-requirements:
+          - "Log boundary age customer test"
+          - "Track boundary condition results"
+          
+      maximum-age-customer:
+        customer-id: "MAXIMUM_AGE_001"
+        customer-name: "Maximum Age Customer"
+        customer-age: 100
+        membership-level: "Platinum"
+        preferred-categories: ["FixedIncome"]
+        customer-characteristics:
+          age-category: "MAXIMUM_AGE"
+          membership-tier: "VIP"
+          validation-issue: "MAXIMUM_BOUNDARY"
+        validation-expectations:
+          age-validation: "PASS"
+          membership-validation: "PASS"
+          category-validation: "PASS"
+          overall-validation: "PASS"
+        test-scenarios:
+          - "Maximum age validation (exactly 100)"
+          - "Platinum membership validation"
+          - "Conservative category preferences"
+        audit-requirements:
+          - "Log maximum age customer test"
+          - "Track maximum boundary results"
+    sample-settings:
+      generation-method: "DATA_DRIVEN"
+      validation-testing: true
+      boundary-analysis: true
+    
+  comprehensive-test-samples:
+    sample-type: "comprehensive-test-samples"
+    sample-name: "Comprehensive Test Samples"
+    description: "Comprehensive customer samples for full validation testing"
+    sample-parameters:
+      validation-expectation: "MIXED"
+      sample-category: "COMPREHENSIVE"
+      test-purpose: "FULL_COVERAGE_TESTING"
+    customer-samples:
+      comprehensive-valid-sample:
+        customer-id: "COMPREHENSIVE_VALID_001"
+        customer-name: "Comprehensive Valid Customer"
+        customer-age: 68
+        membership-level: "Gold"
+        preferred-categories: ["Equity", "FixedIncome", "ETF"]
+        customer-characteristics:
+          age-category: "SENIOR"
+          membership-tier: "PREMIUM"
+          risk-profile: "BALANCED"
+          investment-experience: "VERY_HIGH"
+        validation-expectations:
+          age-validation: "PASS"
+          membership-validation: "PASS"
+          category-validation: "PASS"
+          overall-validation: "PASS"
+        test-scenarios:
+          - "Comprehensive senior validation"
+          - "Premium membership validation"
+          - "Diversified category validation"
+        audit-requirements:
+          - "Log comprehensive valid customer test"
+          - "Track full validation coverage"
+    sample-settings:
+      generation-method: "DATA_DRIVEN"
+      validation-testing: true
+      comprehensive-coverage: true
+    
+  default:
+    sample-type: "default"
+    sample-name: "Default Customer Samples"
+    description: "Default customer sample processing"
+    customer-samples:
+      default-customer:
+        customer-id: "DEFAULT_001"
+        customer-name: "Default Customer"
+        customer-age: 30
+        membership-level: "Basic"
+        preferred-categories: ["ETF"]
+    sample-settings:
+      generation-method: "DEFAULT"
+
+# Sample generation patterns
+generation-patterns:
+  age-distribution-pattern:
+    pattern-name: "Age Distribution Pattern"
+    description: "Generate samples across age distributions"
+    age-ranges: ["18-35", "35-60", "60-100"]
+    
+  membership-coverage-pattern:
+    pattern-name: "Membership Coverage Pattern"
+    description: "Generate samples across membership levels"
+    membership-levels: ["Basic", "Silver", "Gold", "Platinum"]
+    
+  validation-scenario-pattern:
+    pattern-name: "Validation Scenario Pattern"
+    description: "Generate samples for validation scenarios"
+    scenario-types: ["Valid", "Invalid", "EdgeCase", "Comprehensive"]
+
+# Quality assurance
+quality-assurance:
+  sample-accuracy:
+    - "Customer samples must be realistic"
+    - "Sample data must be consistent"
+    - "Validation expectations must be accurate"
+    - "Test scenarios must be comprehensive"
+    
+  test-coverage:
+    - "Samples must cover all validation scenarios"
+    - "Edge cases must be included"
+    - "Boundary conditions must be tested"
+    - "Negative testing must be comprehensive"
+    
+  data-integrity:
+    - "Sample data must be valid"
+    - "Customer characteristics must be consistent"
+    - "Validation expectations must be correct"
+    - "Audit requirements must be complete"

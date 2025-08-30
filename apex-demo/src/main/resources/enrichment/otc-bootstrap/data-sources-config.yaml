@@ -1,0 +1,388 @@
+# APEX Data Sources Configuration
+# External data source configuration for data sources integration
+# Replaces hardcoded data source logic from OtcOptionsBootstrapDemo
+
+type: "external-data-config"
+name: "data-sources-config"
+description: "Data-driven data sources configuration for OTC options processing"
+
+# Data sources configuration by source type
+data:
+  file-system-data-sources:
+    source-type: "file-system-data-sources"
+    source-name: "File System Data Sources"
+    description: "File system based data sources for commodity and reference data"
+    data-source-parameters:
+      base-path: "data/reference"
+      file-format: "yaml"
+      caching-strategy: "file-based"
+      refresh-interval: 3600
+    data-sources:
+      commodity-reference-data:
+        source-id: "commodity-reference"
+        source-name: "Commodity Reference Data"
+        source-description: "Comprehensive commodity reference data"
+        file-path: "data/reference/commodity-reference-data.yaml"
+        data-format: "yaml"
+        update-frequency: "daily"
+        data-categories:
+          - "Energy Commodities"
+          - "Precious Metals"
+          - "Agricultural Products"
+          - "Industrial Metals"
+        data-attributes:
+          - "commodity-name"
+          - "exchange"
+          - "unit-of-measure"
+          - "category"
+          - "sector"
+          - "contract-specifications"
+        validation-rules:
+          - "Commodity names must be unique"
+          - "Exchanges must be recognized"
+          - "Units must be standard"
+          - "Categories must be valid"
+          
+      market-calendars:
+        source-id: "market-calendars"
+        source-name: "Market Calendars"
+        source-description: "Global market trading calendars"
+        file-path: "data/reference/market-calendars.yaml"
+        data-format: "yaml"
+        update-frequency: "weekly"
+        data-categories:
+          - "Exchange Holidays"
+          - "Settlement Dates"
+          - "Expiry Dates"
+        data-attributes:
+          - "exchange"
+          - "holiday-dates"
+          - "trading-hours"
+          - "settlement-cycles"
+        validation-rules:
+          - "Dates must be valid"
+          - "Exchanges must exist"
+          - "Trading hours must be reasonable"
+          
+      regulatory-data:
+        source-id: "regulatory-data"
+        source-name: "Regulatory Reference Data"
+        source-description: "Regulatory and compliance reference data"
+        file-path: "data/reference/regulatory-data.yaml"
+        data-format: "yaml"
+        update-frequency: "monthly"
+        data-categories:
+          - "Regulatory Requirements"
+          - "Compliance Rules"
+          - "Reporting Standards"
+        data-attributes:
+          - "regulation-name"
+          - "jurisdiction"
+          - "effective-date"
+          - "requirements"
+        validation-rules:
+          - "Regulations must be current"
+          - "Jurisdictions must be valid"
+          - "Effective dates must be accurate"
+    source-settings:
+      connection-timeout: 5000
+      read-timeout: 10000
+      retry-attempts: 3
+      cache-size: 1000
+    
+  database-data-sources:
+    source-type: "database-data-sources"
+    source-name: "Database Data Sources"
+    description: "Database based data sources for dynamic and transactional data"
+    data-source-parameters:
+      connection-pool: "apex-pool"
+      max-connections: 20
+      connection-timeout: 5000
+      query-timeout: 30000
+    data-sources:
+      currency-reference-database:
+        source-id: "currency-reference-db"
+        source-name: "Currency Reference Database"
+        source-description: "Currency and FX reference data database"
+        connection-string: "jdbc:postgresql://localhost:5432/apex_reference"
+        schema: "currency_data"
+        primary-tables:
+          - "currencies"
+          - "fx_rates"
+          - "currency_pairs"
+        data-categories:
+          - "Currency Codes"
+          - "FX Rates"
+          - "Currency Attributes"
+        data-attributes:
+          - "currency-code"
+          - "currency-name"
+          - "decimal-places"
+          - "major-currency"
+        validation-rules:
+          - "Currency codes must be ISO 4217"
+          - "FX rates must be positive"
+          - "Decimal places must be valid"
+          
+      counterparty-database:
+        source-id: "counterparty-db"
+        source-name: "Counterparty Database"
+        source-description: "Counterparty and credit reference data"
+        connection-string: "jdbc:postgresql://localhost:5432/apex_counterparty"
+        schema: "counterparty_data"
+        primary-tables:
+          - "counterparties"
+          - "credit_ratings"
+          - "exposure_limits"
+        data-categories:
+          - "Counterparty Details"
+          - "Credit Ratings"
+          - "Risk Limits"
+        data-attributes:
+          - "counterparty-id"
+          - "counterparty-name"
+          - "credit-rating"
+          - "region"
+          - "sector"
+        validation-rules:
+          - "Counterparty IDs must be unique"
+          - "Credit ratings must be valid"
+          - "Regions must be recognized"
+          
+      transaction-database:
+        source-id: "transaction-db"
+        source-name: "Transaction Database"
+        source-description: "Historical transaction and pricing data"
+        connection-string: "jdbc:postgresql://localhost:5432/apex_transactions"
+        schema: "transaction_data"
+        primary-tables:
+          - "trades"
+          - "prices"
+          - "settlements"
+        data-categories:
+          - "Trade History"
+          - "Price History"
+          - "Settlement History"
+        data-attributes:
+          - "trade-id"
+          - "trade-date"
+          - "price"
+          - "quantity"
+          - "settlement-date"
+        validation-rules:
+          - "Trade IDs must be unique"
+          - "Prices must be positive"
+          - "Dates must be valid"
+    source-settings:
+      connection-pool-size: 20
+      connection-timeout: 5000
+      query-timeout: 30000
+      retry-attempts: 3
+    
+  cache-data-sources:
+    source-type: "cache-data-sources"
+    source-name: "Cache Data Sources"
+    description: "In-memory cache data sources for high-performance data access"
+    data-source-parameters:
+      cache-provider: "redis"
+      cache-cluster: "apex-cache-cluster"
+      max-memory: "2GB"
+      eviction-policy: "LRU"
+    data-sources:
+      counterparty-cache:
+        source-id: "counterparty-cache"
+        source-name: "Counterparty Cache"
+        source-description: "High-performance counterparty data cache"
+        cache-key-pattern: "counterparty:{id}"
+        ttl-seconds: 3600
+        data-categories:
+          - "Counterparty Details"
+          - "Credit Ratings"
+          - "Risk Metrics"
+        data-attributes:
+          - "counterparty-id"
+          - "counterparty-name"
+          - "credit-rating"
+          - "risk-score"
+        cache-strategies:
+          - "write-through"
+          - "read-through"
+          - "refresh-ahead"
+        validation-rules:
+          - "Cache keys must be unique"
+          - "TTL must be positive"
+          - "Data must be serializable"
+          
+      market-data-cache:
+        source-id: "market-data-cache"
+        source-name: "Market Data Cache"
+        source-description: "Real-time market data cache"
+        cache-key-pattern: "market:{instrument}:{date}"
+        ttl-seconds: 300
+        data-categories:
+          - "Current Prices"
+          - "Volatility Data"
+          - "Volume Data"
+        data-attributes:
+          - "instrument-id"
+          - "price"
+          - "bid"
+          - "ask"
+          - "volume"
+          - "timestamp"
+        cache-strategies:
+          - "write-behind"
+          - "refresh-ahead"
+        validation-rules:
+          - "Prices must be positive"
+          - "Timestamps must be recent"
+          - "Volume must be non-negative"
+          
+      pricing-model-cache:
+        source-id: "pricing-model-cache"
+        source-name: "Pricing Model Cache"
+        source-description: "Pricing model parameters and results cache"
+        cache-key-pattern: "pricing:{model}:{parameters-hash}"
+        ttl-seconds: 1800
+        data-categories:
+          - "Model Parameters"
+          - "Pricing Results"
+          - "Risk Sensitivities"
+        data-attributes:
+          - "model-name"
+          - "parameters"
+          - "theoretical-price"
+          - "greeks"
+        cache-strategies:
+          - "write-through"
+          - "lazy-loading"
+        validation-rules:
+          - "Model names must be valid"
+          - "Parameters must be complete"
+          - "Prices must be reasonable"
+    source-settings:
+      connection-timeout: 1000
+      operation-timeout: 5000
+      retry-attempts: 2
+      cluster-failover: true
+    
+  external-data-sources:
+    source-type: "external-data-sources"
+    source-name: "External Data Sources"
+    description: "External market data and reference data providers"
+    data-source-parameters:
+      authentication-method: "api-key"
+      rate-limiting: "enabled"
+      circuit-breaker: "enabled"
+      timeout-ms: 10000
+    data-sources:
+      bloomberg-api:
+        source-id: "bloomberg-api"
+        source-name: "Bloomberg Market Data API"
+        source-description: "Bloomberg real-time and historical market data"
+        api-endpoint: "https://api.bloomberg.com/v1"
+        authentication-type: "oauth2"
+        data-categories:
+          - "Real-Time Prices"
+          - "Historical Data"
+          - "Reference Data"
+          - "Corporate Actions"
+        data-attributes:
+          - "security-id"
+          - "price"
+          - "volume"
+          - "market-cap"
+        rate-limits:
+          - "1000 requests per minute"
+          - "10000 requests per hour"
+        validation-rules:
+          - "Security IDs must be valid"
+          - "Prices must be current"
+          - "Data must be complete"
+          
+      refinitiv-eikon:
+        source-id: "refinitiv-eikon"
+        source-name: "Refinitiv Eikon Data API"
+        source-description: "Refinitiv market data and analytics"
+        api-endpoint: "https://api.refinitiv.com/data/v1"
+        authentication-type: "api-key"
+        data-categories:
+          - "Market Data"
+          - "Fundamental Data"
+          - "News and Analytics"
+        data-attributes:
+          - "ric-code"
+          - "price"
+          - "fundamentals"
+          - "news"
+        rate-limits:
+          - "500 requests per minute"
+          - "5000 requests per hour"
+        validation-rules:
+          - "RIC codes must be valid"
+          - "Data must be timely"
+          - "Quality scores must be acceptable"
+    source-settings:
+      connection-timeout: 10000
+      read-timeout: 30000
+      retry-attempts: 3
+      circuit-breaker-threshold: 5
+    
+  default:
+    source-type: "default"
+    source-name: "Default Data Source"
+    description: "Default data source configuration"
+    data-sources:
+      default-source:
+        source-id: "default"
+        source-name: "Default Source"
+        source-description: "Default data source"
+        data-categories:
+          - "Default Data"
+        data-attributes:
+          - "default-attribute"
+    source-settings:
+      timeout: 5000
+
+# Data source integration patterns
+integration-patterns:
+  hierarchical-fallback:
+    pattern-name: "Hierarchical Fallback Pattern"
+    description: "Try multiple data sources in priority order"
+    priority-order:
+      - "cache-data-sources"
+      - "database-data-sources"
+      - "file-system-data-sources"
+      - "external-data-sources"
+    
+  parallel-aggregation:
+    pattern-name: "Parallel Aggregation Pattern"
+    description: "Query multiple sources in parallel and aggregate"
+    aggregation-strategy: "best-quality"
+    timeout-strategy: "fail-fast"
+    
+  real-time-with-fallback:
+    pattern-name: "Real-Time with Fallback Pattern"
+    description: "Use real-time data with static fallback"
+    primary-source: "external-data-sources"
+    fallback-source: "file-system-data-sources"
+
+# Quality assurance
+quality-assurance:
+  data-source-reliability:
+    - "Data sources must be available and responsive"
+    - "Connection pooling must be efficient"
+    - "Failover mechanisms must work correctly"
+    - "Circuit breakers must prevent cascading failures"
+    
+  data-quality:
+    - "Data must be validated before use"
+    - "Stale data must be detected and handled"
+    - "Data lineage must be tracked"
+    - "Quality metrics must be monitored"
+    
+  performance-requirements:
+    - "Data access must be within SLA"
+    - "Caching must improve performance"
+    - "Parallel access must be thread-safe"
+    - "Resource usage must be controlled"

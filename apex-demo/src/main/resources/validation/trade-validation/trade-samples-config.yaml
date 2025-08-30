@@ -1,0 +1,311 @@
+# APEX Trade Samples Configuration
+# External data source configuration for trade samples
+# Replaces hardcoded trade sample creation from IntegratedTradeValidatorComplexDemo
+
+type: "external-data-config"
+name: "trade-samples-config"
+description: "Data-driven trade samples configuration for complex trade validation testing"
+
+# Trade samples configuration by sample type
+data:
+  valid-equity-trade:
+    sample-id: "SAMPLE001"
+    sample-type: "valid-equity-trade"
+    description: "Valid equity trade sample for testing"
+    trade-data:
+      tradeId: "EQ001"
+      instrumentType: "Equity"
+      instrumentId: "AAPL.US"
+      ticker: "AAPL"
+      exchange: "NASDAQ"
+      quantity: 1000
+      price: 150.00
+      amount: 150000.00
+      currency: "USD"
+      tradeDate: "2025-08-30"
+      settlementDate: "2025-09-01"
+      settlementMethod: "DVP"
+      settlementLocation: "DTCC"
+      counterparty: "Goldman Sachs"
+      country: "US"
+      customer:
+        customerId: "CUST001"
+        kycStatus: "APPROVED"
+        riskRating: "Low"
+      settlementInstructions: "Standard DVP settlement via DTCC"
+    expected-validation-result: "PASS"
+    validation-categories: ["settlement", "instrument", "risk"]
+    
+  valid-bond-trade:
+    sample-id: "SAMPLE002"
+    sample-type: "valid-bond-trade"
+    description: "Valid bond trade sample for testing"
+    trade-data:
+      tradeId: "BD001"
+      instrumentType: "Bond"
+      instrumentId: "US10Y.BOND"
+      maturityDate: "2035-08-30"
+      couponRate: 3.5
+      quantity: 100
+      price: 98.50
+      amount: 98500.00
+      currency: "USD"
+      tradeDate: "2025-08-30"
+      settlementDate: "2025-08-31"
+      settlementMethod: "DVP"
+      settlementLocation: "DTCC"
+      counterparty: "JPMorgan"
+      country: "US"
+      customer:
+        customerId: "CUST002"
+        kycStatus: "APPROVED"
+        riskRating: "Low"
+      settlementInstructions: "T+1 bond settlement via DTCC"
+    expected-validation-result: "PASS"
+    validation-categories: ["settlement", "instrument", "compliance"]
+    
+  valid-derivative-trade:
+    sample-id: "SAMPLE003"
+    sample-type: "valid-derivative-trade"
+    description: "Valid derivative trade sample for testing"
+    trade-data:
+      tradeId: "DV001"
+      instrumentType: "Option"
+      instrumentId: "AAPL.OPT.C.160.20250930"
+      underlyingAsset: "AAPL"
+      optionType: "CALL"
+      strikePrice: 160.00
+      expirationDate: "2025-09-30"
+      quantity: 10
+      price: 5.00
+      amount: 5000.00
+      currency: "USD"
+      tradeDate: "2025-08-30"
+      settlementDate: "2025-08-31"
+      settlementMethod: "DVP"
+      settlementLocation: "DTCC"
+      counterparty: "Morgan Stanley"
+      country: "US"
+      customer:
+        customerId: "CUST003"
+        kycStatus: "APPROVED"
+        riskRating: "Medium"
+      settlementInstructions: "Option settlement via DTCC"
+    expected-validation-result: "PASS"
+    validation-categories: ["settlement", "instrument", "risk"]
+    
+  invalid-sanctions-trade:
+    sample-id: "SAMPLE004"
+    sample-type: "invalid-sanctions-trade"
+    description: "Invalid trade with sanctioned counterparty"
+    trade-data:
+      tradeId: "SN001"
+      instrumentType: "Equity"
+      instrumentId: "MSFT.US"
+      ticker: "MSFT"
+      exchange: "NASDAQ"
+      quantity: 500
+      price: 300.00
+      amount: 150000.00
+      currency: "USD"
+      tradeDate: "2025-08-30"
+      settlementDate: "2025-09-01"
+      settlementMethod: "DVP"
+      settlementLocation: "DTCC"
+      counterparty: "EntityA"  # Sanctioned entity
+      country: "US"
+      customer:
+        customerId: "CUST004"
+        kycStatus: "APPROVED"
+        riskRating: "Low"
+      settlementInstructions: "Standard DVP settlement"
+    expected-validation-result: "FAIL"
+    expected-errors: ["Counterparty is on sanctions list"]
+    validation-categories: ["compliance"]
+    
+  invalid-high-risk-country-trade:
+    sample-id: "SAMPLE005"
+    sample-type: "invalid-high-risk-country-trade"
+    description: "Invalid trade involving high-risk country"
+    trade-data:
+      tradeId: "HR001"
+      instrumentType: "Bond"
+      instrumentId: "GOVT.BOND.XYZ"
+      quantity: 50
+      price: 1000.00
+      amount: 50000.00
+      currency: "USD"
+      tradeDate: "2025-08-30"
+      settlementDate: "2025-08-31"
+      settlementMethod: "DVP"
+      settlementLocation: "DTCC"
+      counterparty: "Local Bank XYZ"
+      country: "CountryX"  # High-risk country
+      customer:
+        customerId: "CUST005"
+        kycStatus: "APPROVED"
+        riskRating: "Medium"
+      settlementInstructions: "International settlement"
+    expected-validation-result: "FAIL"
+    expected-errors: ["Trade involves high-risk country"]
+    validation-categories: ["compliance"]
+    
+  invalid-settlement-method-trade:
+    sample-id: "SAMPLE006"
+    sample-type: "invalid-settlement-method-trade"
+    description: "Invalid trade with unsupported settlement method"
+    trade-data:
+      tradeId: "SM001"
+      instrumentType: "Equity"
+      instrumentId: "GOOGL.US"
+      ticker: "GOOGL"
+      exchange: "NASDAQ"
+      quantity: 100
+      price: 2500.00
+      amount: 250000.00
+      currency: "USD"
+      tradeDate: "2025-08-30"
+      settlementDate: "2025-09-01"
+      settlementMethod: "INVALID_METHOD"  # Invalid settlement method
+      settlementLocation: "DTCC"
+      counterparty: "Citigroup"
+      country: "US"
+      customer:
+        customerId: "CUST006"
+        kycStatus: "APPROVED"
+        riskRating: "Low"
+      settlementInstructions: "Invalid settlement method test"
+    expected-validation-result: "FAIL"
+    expected-errors: ["Invalid settlement method"]
+    validation-categories: ["settlement"]
+    
+  large-amount-aml-trade:
+    sample-id: "SAMPLE007"
+    sample-type: "large-amount-aml-trade"
+    description: "Large amount trade requiring AML approval"
+    trade-data:
+      tradeId: "AML001"
+      instrumentType: "Equity"
+      instrumentId: "TSLA.US"
+      ticker: "TSLA"
+      exchange: "NASDAQ"
+      quantity: 50000
+      price: 200.00
+      amount: 10000000.00  # Large amount requiring AML approval
+      currency: "USD"
+      tradeDate: "2025-08-30"
+      settlementDate: "2025-09-01"
+      settlementMethod: "DVP"
+      settlementLocation: "DTCC"
+      counterparty: "Bank of America"
+      country: "US"
+      customer:
+        customerId: "CUST007"
+        kycStatus: "APPROVED"
+        riskRating: "High"
+      amlApproval: false  # No AML approval
+      settlementInstructions: "Large trade settlement"
+    expected-validation-result: "FAIL"
+    expected-errors: ["AML approval required for large transactions"]
+    validation-categories: ["compliance"]
+    
+  incomplete-trade-data:
+    sample-id: "SAMPLE008"
+    sample-type: "incomplete-trade-data"
+    description: "Trade with missing required data"
+    trade-data:
+      tradeId: "INC001"
+      instrumentType: "Equity"
+      # Missing instrumentId, ticker, exchange
+      quantity: 1000
+      price: 100.00
+      amount: 100000.00
+      currency: "USD"
+      tradeDate: "2025-08-30"
+      # Missing settlementDate
+      settlementMethod: "DVP"
+      settlementLocation: "DTCC"
+      counterparty: "Wells Fargo"
+      country: "US"
+      customer:
+        customerId: "CUST008"
+        kycStatus: "PENDING"  # KYC not approved
+        riskRating: "Medium"
+      settlementInstructions: "Incomplete trade test"
+    expected-validation-result: "FAIL"
+    expected-errors: ["Invalid instrument identifier", "Customer KYC not approved"]
+    validation-categories: ["instrument", "compliance"]
+    
+  default:
+    sample-id: "SAMPLE000"
+    sample-type: "default"
+    description: "Default trade sample"
+    trade-data:
+      tradeId: "DEFAULT001"
+      instrumentType: "Equity"
+      instrumentId: "DEFAULT.STOCK"
+      quantity: 100
+      price: 50.00
+      amount: 5000.00
+      currency: "USD"
+      tradeDate: "2025-08-30"
+      settlementDate: "2025-09-01"
+      settlementMethod: "DVP"
+      settlementLocation: "DTCC"
+      counterparty: "Default Bank"
+      country: "US"
+      customer:
+        customerId: "DEFAULT_CUST"
+        kycStatus: "APPROVED"
+        riskRating: "Low"
+      settlementInstructions: "Default settlement"
+    expected-validation-result: "PASS"
+    validation-categories: ["basic"]
+
+# Sample test scenarios
+test-scenarios:
+  positive-validation-tests:
+    scenario-name: "Positive Validation Tests"
+    description: "Test cases that should pass validation"
+    samples:
+      - "valid-equity-trade"
+      - "valid-bond-trade"
+      - "valid-derivative-trade"
+    expected-results: "ALL_PASS"
+    
+  negative-validation-tests:
+    scenario-name: "Negative Validation Tests"
+    description: "Test cases that should fail validation"
+    samples:
+      - "invalid-sanctions-trade"
+      - "invalid-high-risk-country-trade"
+      - "invalid-settlement-method-trade"
+      - "large-amount-aml-trade"
+      - "incomplete-trade-data"
+    expected-results: "ALL_FAIL"
+    
+  mixed-validation-tests:
+    scenario-name: "Mixed Validation Tests"
+    description: "Mixed test cases with both pass and fail scenarios"
+    samples:
+      - "valid-equity-trade"
+      - "invalid-sanctions-trade"
+      - "valid-bond-trade"
+      - "invalid-settlement-method-trade"
+    expected-results: "MIXED"
+
+# Performance test data
+performance-test-data:
+  bulk-validation-test:
+    test-name: "Bulk Validation Performance Test"
+    description: "Performance test with multiple trade samples"
+    sample-count: 1000
+    base-sample: "valid-equity-trade"
+    variations:
+      - "instrument-type-variation"
+      - "amount-variation"
+      - "currency-variation"
+    performance-targets:
+      max-processing-time: "5000ms"
+      min-throughput: "200 trades/second"
+      max-memory-usage: "512MB"

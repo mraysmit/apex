@@ -1,0 +1,165 @@
+# APEX Integrated Trade Validator Demo Configuration
+# Real APEX YAML configuration for integrated trade validation processing
+# Replaces all hardcoded trade validation logic from IntegratedTradeValidatorDemo (@version 1.0)
+
+type: "apex-enrichment-config"
+name: "integrated-trade-validator-demo"
+description: "APEX-compliant integrated trade validation with real enrichment services"
+
+# External data source for integrated trade validation configurations
+external-data-sources:
+  - name: "trade-validation-parameters-config"
+    type: "external-data-config"
+    source: "validation/trade-validation-simple/trade-validation-parameters-config.yaml"
+    
+  - name: "trade-samples-simple-config"
+    type: "external-data-config"
+    source: "validation/trade-validation-simple/trade-samples-simple-config.yaml"
+    
+  - name: "validation-rules-simple-config"
+    type: "external-data-config"
+    source: "validation/trade-validation-simple/validation-rules-simple-config.yaml"
+
+# APEX enrichment processing for integrated trade validation
+enrichments:
+  - name: "trade-parameter-validation"
+    type: "lookup-enrichment"
+    description: "Validate trade parameters using data-driven configuration"
+    condition: "#data.validationType == 'trade-parameter-validation'"
+    lookup-source: "trade-validation-parameters-config"
+    lookup-key: "#data.parameterType != null ? #data.parameterType : 'default'"
+    target-field: "tradeParameterValidationResult"
+    
+  - name: "trade-sample-processing"
+    type: "lookup-enrichment"
+    description: "Process trade samples using data-driven configuration"
+    condition: "#data.validationType == 'trade-sample-processing'"
+    lookup-source: "trade-samples-simple-config"
+    lookup-key: "#data.sampleType != null ? #data.sampleType : 'default'"
+    target-field: "tradeSampleProcessingResult"
+    
+  - name: "validation-rules-simple-processing"
+    type: "lookup-enrichment"
+    description: "Process validation rules using data-driven configuration"
+    condition: "#data.validationType == 'validation-rules-simple'"
+    lookup-source: "validation-rules-simple-config"
+    lookup-key: "#data.ruleType != null ? #data.ruleType : 'default'"
+    target-field: "validationRulesSimpleResult"
+    
+  - name: "integrated-validation-summary"
+    type: "expression-enrichment"
+    description: "Generate integrated validation summary"
+    condition: "true"
+    expression: "'Integrated trade validation completed: ' + (#data.validationType != null ? #data.validationType : 'unknown') + ' using real APEX services'"
+    target-field: "integratedValidationSummary"
+
+# Integrated trade validation categories
+validation-categories:
+  - category: "trade-parameter-validation"
+    description: "Trade parameter validation and verification"
+    processing-type: "real-apex-enrichment"
+    validation-aspects:
+      - "Allowed values validation"
+      - "Category verification"
+      - "Parameter consistency checks"
+      - "Type validation"
+    
+  - category: "trade-sample-processing"
+    description: "Trade sample creation and processing"
+    processing-type: "real-apex-enrichment"
+    validation-aspects:
+      - "Sample trade generation"
+      - "Trade data validation"
+      - "Sample completeness checking"
+      - "Data integrity validation"
+    
+  - category: "validation-rules-simple"
+    description: "Simple validation rule processing"
+    processing-type: "real-apex-enrichment"
+    validation-aspects:
+      - "Rule group processing"
+      - "Basic rule validation"
+      - "Simple logic evaluation"
+      - "Rule execution"
+
+# Validation performance settings
+performance-settings:
+  trade-parameter-validation:
+    validation-timeout: 3000
+    parallel-validation: true
+    cache-results: true
+    
+  trade-sample-processing:
+    sample-processing-timeout: 2000
+    batch-processing: true
+    cache-results: true
+    
+  validation-rules-simple:
+    rule-evaluation-timeout: 5000
+    parallel-rule-execution: false
+    rule-cache-size: 500
+
+# Integration patterns
+integration-patterns:
+  equity-validation-pattern:
+    pattern-name: "Equity Trade Validation"
+    description: "Validation pattern for equity trades"
+    parameter-types: ["equity-parameters"]
+    sample-types: ["equity-trade-sample"]
+    rule-types: ["equity-validation-rules"]
+    
+  bond-validation-pattern:
+    pattern-name: "Bond Trade Validation"
+    description: "Validation pattern for bond trades"
+    parameter-types: ["bond-parameters"]
+    sample-types: ["bond-trade-sample"]
+    rule-types: ["bond-validation-rules"]
+    
+  generic-validation-pattern:
+    pattern-name: "Generic Trade Validation"
+    description: "Generic validation pattern for all trade types"
+    parameter-types: ["generic-parameters"]
+    sample-types: ["generic-trade-sample"]
+    rule-types: ["generic-validation-rules"]
+
+# Demonstration scenarios
+demonstration-scenarios:
+  basic-equity-validation:
+    scenario-name: "Basic Equity Validation"
+    description: "Demonstrate basic equity trade validation"
+    steps:
+      - "Load equity parameters"
+      - "Create equity trade samples"
+      - "Apply equity validation rules"
+      - "Generate validation results"
+    expected-outcome: "Successful equity validation"
+    
+  basic-bond-validation:
+    scenario-name: "Basic Bond Validation"
+    description: "Demonstrate basic bond trade validation"
+    steps:
+      - "Load bond parameters"
+      - "Create bond trade samples"
+      - "Apply bond validation rules"
+      - "Generate validation results"
+    expected-outcome: "Successful bond validation"
+    
+  comprehensive-validation:
+    scenario-name: "Comprehensive Trade Validation"
+    description: "Demonstrate comprehensive trade validation across multiple types"
+    steps:
+      - "Load all parameter types"
+      - "Create diverse trade samples"
+      - "Apply comprehensive validation rules"
+      - "Generate comprehensive results"
+    expected-outcome: "Successful comprehensive validation"
+
+# Output configuration
+output:
+  include-input: true
+  include-metadata: true
+  format: "enhanced"
+  validation-summary: true
+  performance-metrics: true
+  validation-details: true
+  demonstration-results: true

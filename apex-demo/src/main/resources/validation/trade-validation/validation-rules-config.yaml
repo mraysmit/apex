@@ -1,0 +1,254 @@
+# APEX Validation Rules Configuration
+# External data source configuration for validation rules
+# Replaces hardcoded validation rule logic from IntegratedTradeValidatorComplexDemo
+
+type: "external-data-config"
+name: "validation-rules-config"
+description: "Data-driven validation rules configuration for complex trade validation"
+
+# Validation rules configuration by rule type
+data:
+  settlement-validation-rules:
+    rule-id: "RULE001"
+    rule-type: "settlement-validation-rules"
+    description: "Settlement validation rule definitions"
+    rule-groups:
+      basic-settlement-group:
+        group-name: "Basic Settlement Validation"
+        group-type: "AND"
+        rules:
+          - rule-name: "settlement-method-validation"
+            expression: "#trade.settlementMethod != null && #allowedSettlementMethods.contains(#trade.settlementMethod)"
+            error-message: "Invalid settlement method"
+            severity: "ERROR"
+          - rule-name: "settlement-location-validation"
+            expression: "#trade.settlementLocation != null && #allowedSettlementLocations.contains(#trade.settlementLocation)"
+            error-message: "Invalid settlement location"
+            severity: "ERROR"
+          - rule-name: "settlement-currency-validation"
+            expression: "#trade.currency != null && #allowedCurrencies.contains(#trade.currency)"
+            error-message: "Invalid settlement currency"
+            severity: "ERROR"
+          - rule-name: "settlement-amount-validation"
+            expression: "#trade.amount != null && #trade.amount >= #minSettlementAmount && #trade.amount <= #maxSettlementAmount"
+            error-message: "Settlement amount out of range"
+            severity: "ERROR"
+      
+      enhanced-settlement-group:
+        group-name: "Enhanced Settlement Validation"
+        group-type: "AND"
+        rules:
+          - rule-name: "enhanced-settlement-method-validation"
+            expression: "#trade.settlementMethod != null && #enhancedAllowedSettlementMethods.contains(#trade.settlementMethod)"
+            error-message: "Invalid enhanced settlement method"
+            severity: "ERROR"
+          - rule-name: "settlement-date-validation"
+            expression: "#trade.settlementDate != null && #trade.settlementDate.isAfter(#trade.tradeDate)"
+            error-message: "Settlement date must be after trade date"
+            severity: "ERROR"
+          - rule-name: "settlement-instructions-validation"
+            expression: "#trade.settlementInstructions != null && #trade.settlementInstructions.length() > 0"
+            error-message: "Settlement instructions required"
+            severity: "WARNING"
+    
+  compliance-validation-rules:
+    rule-id: "RULE002"
+    rule-type: "compliance-validation-rules"
+    description: "Compliance validation rule definitions"
+    rule-groups:
+      sanctions-screening-group:
+        group-name: "Sanctions Screening"
+        group-type: "OR"
+        rules:
+          - rule-name: "counterparty-sanctions-check"
+            expression: "#trade.counterparty != null && !#restrictedEntities.contains(#trade.counterparty)"
+            error-message: "Counterparty is on sanctions list"
+            severity: "CRITICAL"
+          - rule-name: "country-sanctions-check"
+            expression: "#trade.country != null && !#highRiskCountries.contains(#trade.country)"
+            error-message: "Trade involves high-risk country"
+            severity: "CRITICAL"
+      
+      aml-compliance-group:
+        group-name: "AML Compliance"
+        group-type: "AND"
+        rules:
+          - rule-name: "transaction-amount-threshold"
+            expression: "#trade.amount == null || #trade.amount < #amlThreshold || #trade.amlApproval == true"
+            error-message: "AML approval required for large transactions"
+            severity: "ERROR"
+          - rule-name: "customer-due-diligence"
+            expression: "#trade.customer != null && #trade.customer.kycStatus == 'APPROVED'"
+            error-message: "Customer KYC not approved"
+            severity: "ERROR"
+    
+  instrument-validation-rules:
+    rule-id: "RULE003"
+    rule-type: "instrument-validation-rules"
+    description: "Instrument validation rule definitions"
+    rule-groups:
+      instrument-type-group:
+        group-name: "Instrument Type Validation"
+        group-type: "AND"
+        rules:
+          - rule-name: "instrument-type-validation"
+            expression: "#trade.instrumentType != null && #validInstrumentTypes.contains(#trade.instrumentType)"
+            error-message: "Invalid instrument type"
+            severity: "ERROR"
+          - rule-name: "instrument-identifier-validation"
+            expression: "#trade.instrumentId != null && #trade.instrumentId.length() >= 6"
+            error-message: "Invalid instrument identifier"
+            severity: "ERROR"
+      
+      instrument-specific-group:
+        group-name: "Instrument Specific Validation"
+        group-type: "OR"
+        rules:
+          - rule-name: "equity-validation"
+            expression: "#trade.instrumentType != 'Equity' || (#trade.exchange != null && #trade.ticker != null)"
+            error-message: "Equity trades require exchange and ticker"
+            severity: "ERROR"
+          - rule-name: "bond-validation"
+            expression: "#trade.instrumentType != 'Bond' || (#trade.maturityDate != null && #trade.couponRate != null)"
+            error-message: "Bond trades require maturity date and coupon rate"
+            severity: "ERROR"
+          - rule-name: "derivative-validation"
+            expression: "#trade.instrumentType == null || !#derivativeTypes.contains(#trade.instrumentType) || #trade.underlyingAsset != null"
+            error-message: "Derivative trades require underlying asset"
+            severity: "ERROR"
+    
+  risk-validation-rules:
+    rule-id: "RULE004"
+    rule-type: "risk-validation-rules"
+    description: "Risk validation rule definitions"
+    rule-groups:
+      position-risk-group:
+        group-name: "Position Risk Validation"
+        group-type: "AND"
+        rules:
+          - rule-name: "position-limit-validation"
+            expression: "#trade.quantity == null || #trade.quantity <= #maxPositionLimit"
+            error-message: "Trade exceeds position limit"
+            severity: "ERROR"
+          - rule-name: "concentration-risk-validation"
+            expression: "#trade.instrumentType == null || #portfolioConcentration.get(#trade.instrumentType) == null || #portfolioConcentration.get(#trade.instrumentType) < #maxConcentrationLimit"
+            error-message: "Trade would exceed concentration limit"
+            severity: "WARNING"
+      
+      market-risk-group:
+        group-name: "Market Risk Validation"
+        group-type: "AND"
+        rules:
+          - rule-name: "volatility-check"
+            expression: "#trade.instrumentType == null || #instrumentVolatility.get(#trade.instrumentType) == null || #instrumentVolatility.get(#trade.instrumentType) < #maxVolatilityThreshold"
+            error-message: "Instrument volatility exceeds threshold"
+            severity: "WARNING"
+          - rule-name: "liquidity-check"
+            expression: "#trade.instrumentType == null || #instrumentLiquidity.get(#trade.instrumentType) == null || #instrumentLiquidity.get(#trade.instrumentType) > #minLiquidityThreshold"
+            error-message: "Instrument liquidity below threshold"
+            severity: "WARNING"
+    
+  default:
+    rule-id: "RULE000"
+    rule-type: "default"
+    description: "Default validation rules"
+    rule-groups:
+      basic-validation-group:
+        group-name: "Basic Validation"
+        group-type: "AND"
+        rules:
+          - rule-name: "trade-not-null"
+            expression: "#trade != null"
+            error-message: "Trade object is required"
+            severity: "CRITICAL"
+
+# Rule execution patterns
+execution-patterns:
+  sequential-validation:
+    pattern-name: "Sequential Rule Execution"
+    description: "Execute rules in defined sequence"
+    execution-order:
+      - "settlement-validation-rules"
+      - "compliance-validation-rules"
+      - "instrument-validation-rules"
+      - "risk-validation-rules"
+    stop-on-error: true
+    
+  parallel-validation:
+    pattern-name: "Parallel Rule Execution"
+    description: "Execute independent rule groups in parallel"
+    parallel-groups:
+      - ["settlement-validation-rules", "instrument-validation-rules"]
+      - ["compliance-validation-rules", "risk-validation-rules"]
+    aggregation-strategy: "all-must-pass"
+    
+  conditional-validation:
+    pattern-name: "Conditional Rule Execution"
+    description: "Execute rules based on trade characteristics"
+    conditions:
+      - condition: "#trade.instrumentType == 'Equity'"
+        rule-groups: ["settlement-validation-rules", "instrument-validation-rules"]
+      - condition: "#trade.amount > 1000000"
+        rule-groups: ["compliance-validation-rules", "risk-validation-rules"]
+      - condition: "#trade.counterparty.riskRating == 'High'"
+        rule-groups: ["compliance-validation-rules"]
+
+# Rule parameters and thresholds
+rule-parameters:
+  settlement-parameters:
+    minSettlementAmount: 1000.0
+    maxSettlementAmount: 10000000.0
+    allowedSettlementMethods: ["DVP", "FOP", "DFP"]
+    allowedSettlementLocations: ["DTCC", "Euroclear", "Clearstream"]
+    allowedCurrencies: ["USD", "EUR", "GBP", "JPY"]
+    
+  compliance-parameters:
+    amlThreshold: 10000.0
+    highRiskCountries: ["CountryX", "CountryY", "CountryZ"]
+    restrictedEntities: ["EntityA", "EntityB", "EntityC"]
+    
+  instrument-parameters:
+    validInstrumentTypes: ["Equity", "Bond", "Option", "Future", "Swap", "ETF", "FixedIncome"]
+    derivativeTypes: ["Option", "Future", "Swap"]
+    
+  risk-parameters:
+    maxPositionLimit: 1000000
+    maxConcentrationLimit: 0.25
+    maxVolatilityThreshold: 0.30
+    minLiquidityThreshold: 0.10
+
+# Validation performance settings
+performance-settings:
+  rule-execution:
+    timeout-milliseconds: 5000
+    parallel-execution: true
+    cache-results: true
+    
+  error-handling:
+    continue-on-warning: true
+    stop-on-error: true
+    max-errors: 10
+    
+  monitoring:
+    track-execution-time: true
+    log-rule-results: true
+    generate-metrics: true
+
+# Integration specifications
+integration:
+  rule-engines:
+    - "APEX Rules Engine"
+    - "Drools Rule Engine"
+    - "Custom Validation Framework"
+    
+  data-sources:
+    - "Trade Management System"
+    - "Reference Data Service"
+    - "Risk Management System"
+    - "Compliance Database"
+    
+  notification-channels:
+    - "Email alerts"
+    - "System notifications"
+    - "Dashboard updates"
+    - "Audit logs"

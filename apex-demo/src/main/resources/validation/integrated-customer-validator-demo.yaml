@@ -1,0 +1,211 @@
+# APEX Integrated Customer Validator Demo Configuration
+# Real APEX YAML configuration for integrated customer validation processing
+# Replaces all hardcoded customer validation logic from IntegratedCustomerValidatorDemo (@version 1.0)
+
+type: "apex-enrichment-config"
+name: "integrated-customer-validator-demo"
+description: "APEX-compliant integrated customer validator with real enrichment services"
+
+# External data source for integrated customer validator configurations
+external-data-sources:
+  - name: "validation-rules-config"
+    type: "external-data-config"
+    source: "validation/integrated-customer/validation-rules-config.yaml"
+    
+  - name: "customer-samples-config"
+    type: "external-data-config"
+    source: "validation/integrated-customer/customer-samples-config.yaml"
+    
+  - name: "validation-parameters-config"
+    type: "external-data-config"
+    source: "validation/integrated-customer/validation-parameters-config.yaml"
+
+# APEX enrichment processing for integrated customer validator
+enrichments:
+  - name: "validation-rules-processing"
+    type: "lookup-enrichment"
+    description: "Process validation rules using data-driven configuration"
+    condition: "#data.validatorType == 'validation-rules-processing'"
+    lookup-source: "validation-rules-config"
+    lookup-key: "#data.ruleType != null ? #data.ruleType : 'default'"
+    target-field: "validationRulesResult"
+    
+  - name: "customer-samples-processing"
+    type: "lookup-enrichment"
+    description: "Process customer samples using data-driven configuration"
+    condition: "#data.validatorType == 'customer-samples-processing'"
+    lookup-source: "customer-samples-config"
+    lookup-key: "#data.sampleType != null ? #data.sampleType : 'default'"
+    target-field: "customerSamplesResult"
+    
+  - name: "validation-parameters-processing"
+    type: "lookup-enrichment"
+    description: "Process validation parameters using data-driven configuration"
+    condition: "#data.validatorType == 'validation-parameters-processing'"
+    lookup-source: "validation-parameters-config"
+    lookup-key: "#data.parameterType != null ? #data.parameterType : 'default'"
+    target-field: "validationParametersResult"
+    
+  - name: "integrated-customer-validator-summary"
+    type: "expression-enrichment"
+    description: "Generate integrated customer validator summary"
+    condition: "true"
+    expression: "'Integrated customer validator completed: ' + (#data.validatorType != null ? #data.validatorType : 'unknown') + ' using real APEX services'"
+    target-field: "integratedCustomerValidatorSummary"
+
+# Validator processing categories
+processing-categories:
+  - category: "validation-rules-processing"
+    description: "Validation rules creation and management"
+    processing-type: "real-apex-enrichment"
+    rule-types:
+      - "Age-based validation rules"
+      - "Membership-based validation rules"
+      - "Category-based validation rules"
+      - "Dynamic validation rules"
+    
+  - category: "customer-samples-processing"
+    description: "Customer samples processing and validation"
+    processing-type: "real-apex-enrichment"
+    sample-types:
+      - "Valid customer samples"
+      - "Invalid customer samples"
+      - "Edge case customer samples"
+      - "Comprehensive test samples"
+    
+  - category: "validation-parameters-processing"
+    description: "Validation parameters processing"
+    processing-type: "real-apex-enrichment"
+    parameter-aspects:
+      - "Age range parameters"
+      - "Membership level parameters"
+      - "Category validation parameters"
+      - "Dynamic validation parameters"
+
+# Customer validation patterns
+validation-patterns:
+  age-based-validation-pattern:
+    pattern-name: "Age-Based Validation"
+    description: "Pattern for validating customers based on age criteria"
+    age-ranges: ["YOUNG", "MIDDLE_AGED", "SENIOR"]
+    validation-logic:
+      - "Young customers: 18-35 years"
+      - "Middle-aged customers: 35-60 years"
+      - "Senior customers: 60+ years"
+    
+  membership-based-validation-pattern:
+    pattern-name: "Membership-Based Validation"
+    description: "Pattern for validating customers based on membership level"
+    membership-levels: ["BASIC", "SILVER", "GOLD", "PLATINUM"]
+    validation-logic:
+      - "Basic members: Standard validation"
+      - "Silver members: Enhanced validation"
+      - "Gold members: Premium validation"
+      - "Platinum members: VIP validation"
+    
+  category-based-validation-pattern:
+    pattern-name: "Category-Based Validation"
+    description: "Pattern for validating customers based on preferred categories"
+    category-types: ["EQUITY", "FIXED_INCOME", "ETF", "COMMODITY", "OPTIONS"]
+    validation-logic:
+      - "Equity categories: Growth-focused validation"
+      - "Fixed income categories: Conservative validation"
+      - "ETF categories: Diversified validation"
+      - "Commodity categories: Specialized validation"
+
+# Performance settings
+performance-settings:
+  validation-rules-processing:
+    processing-timeout: 4000
+    parallel-processing: true
+    cache-results: true
+    
+  customer-samples-processing:
+    processing-timeout: 3000
+    parallel-processing: true
+    sample-optimization: true
+    
+  validation-parameters-processing:
+    processing-timeout: 2000
+    parallel-processing: false
+    parameter-intensive: true
+
+# Demonstration scenarios
+demonstration-scenarios:
+  comprehensive-customer-validation:
+    scenario-name: "Comprehensive Customer Validation"
+    description: "Demonstrate comprehensive customer validation processing"
+    steps:
+      - "Load customer validation configurations"
+      - "Process validation rules"
+      - "Process customer samples"
+      - "Process validation parameters"
+      - "Generate validation results"
+    expected-outcome: "Successful comprehensive customer validation"
+    
+  age-based-validation:
+    scenario-name: "Age-Based Validation"
+    description: "Demonstrate age-based customer validation"
+    steps:
+      - "Load age-based validation configurations"
+      - "Process senior customer validations"
+      - "Process young customer validations"
+      - "Generate age-based validation results"
+    expected-outcome: "Successful age-based validation"
+    
+  membership-tier-validation:
+    scenario-name: "Membership Tier Validation"
+    description: "Demonstrate membership tier-based validation"
+    steps:
+      - "Load membership tier configurations"
+      - "Process Gold member validations"
+      - "Process Silver member validations"
+      - "Generate membership validation results"
+    expected-outcome: "Successful membership tier validation"
+
+# Customer validation configuration
+customer-validation:
+  validation-criteria:
+    criteria-type: "Customer Validation Criteria"
+    description: "Criteria for customer validation processing"
+    validation-aspects:
+      - "Age range validation"
+      - "Membership level validation"
+      - "Preferred category validation"
+      - "Risk profile validation"
+    criteria-characteristics:
+      - "Rule-based validation"
+      - "Parameter-driven validation"
+      - "Dynamic validation"
+      - "Comprehensive validation"
+
+# Quality assurance
+quality-assurance:
+  validation-reliability:
+    - "Validation rules must be deterministic"
+    - "Customer samples must be representative"
+    - "Validation parameters must be accurate"
+    - "Performance must meet SLA requirements"
+    
+  customer-accuracy:
+    - "Customer validation must be precise"
+    - "Age range validation must be correct"
+    - "Membership validation must be appropriate"
+    - "Category validation must be comprehensive"
+    
+  processing-requirements:
+    - "Validation time must be reasonable"
+    - "Memory usage must be controlled"
+    - "Rule execution must be efficient"
+    - "Parallel processing must be thread-safe"
+
+# Output configuration
+output:
+  include-input: true
+  include-metadata: true
+  format: "enhanced"
+  validation-summary: true
+  performance-metrics: true
+  rule-details: true
+  sample-details: true
+  parameter-analysis: true

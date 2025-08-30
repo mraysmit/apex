@@ -1,0 +1,352 @@
+# APEX Auto-Repair Rules Configuration
+# External data source configuration for auto-repair rules processing
+# Replaces hardcoded auto-repair rules from CustodyAutoRepairBootstrap
+
+type: "external-data-config"
+name: "auto-repair-rules-config"
+description: "Data-driven auto-repair rules configuration for custody settlement processing"
+
+# Auto-repair rules configuration by rule type
+data:
+  field-completion-rules:
+    rule-type: "field-completion-rules"
+    rule-name: "Field Completion Rules"
+    description: "Rules for completing missing fields in settlement instructions"
+    rule-parameters:
+      priority-level: "high"
+      auto-execution: true
+      validation-required: true
+    completion-rules:
+      counterparty-completion:
+        rule-id: "COMPLETE_COUNTERPARTY"
+        rule-name: "Complete Missing Counterparty"
+        rule-description: "Complete missing counterparty information using standing instructions"
+        trigger-conditions:
+          - "counterpartyId == null"
+          - "eligibleForAutoRepair == true"
+          - "highValueTransaction == false"
+        completion-logic:
+          priority-order:
+            - "client-level-standing-instruction"
+            - "market-level-standing-instruction"
+            - "instrument-level-standing-instruction"
+            - "default-standing-instruction"
+          field-mappings:
+            - source-field: "applicableClientSI.defaultCounterpartyId"
+              target-field: "counterpartyId"
+            - source-field: "applicableClientSI.defaultCounterpartyName"
+              target-field: "counterpartyName"
+        validation-rules:
+          - "counterpartyId != null && counterpartyId.length() > 0"
+          - "counterpartyName != null && counterpartyName.length() > 0"
+        audit-requirements:
+          - "Log original missing field"
+          - "Log standing instruction used"
+          - "Log completed field values"
+          
+      custodian-completion:
+        rule-id: "COMPLETE_CUSTODIAN"
+        rule-name: "Complete Missing Custodian"
+        rule-description: "Complete missing custodian information using standing instructions"
+        trigger-conditions:
+          - "custodianId == null"
+          - "eligibleForAutoRepair == true"
+          - "highValueTransaction == false"
+        completion-logic:
+          priority-order:
+            - "client-level-standing-instruction"
+            - "market-level-standing-instruction"
+            - "instrument-level-standing-instruction"
+            - "default-standing-instruction"
+          field-mappings:
+            - source-field: "applicableClientSI.defaultCustodianId"
+              target-field: "custodianId"
+            - source-field: "applicableClientSI.defaultCustodianName"
+              target-field: "custodianName"
+        validation-rules:
+          - "custodianId != null && custodianId.length() > 0"
+          - "custodianName != null && custodianName.length() > 0"
+        audit-requirements:
+          - "Log original missing field"
+          - "Log standing instruction used"
+          - "Log completed field values"
+          
+      settlement-method-completion:
+        rule-id: "COMPLETE_SETTLEMENT_METHOD"
+        rule-name: "Complete Missing Settlement Method"
+        rule-description: "Complete missing settlement method using standing instructions"
+        trigger-conditions:
+          - "settlementMethod == null"
+          - "eligibleForAutoRepair == true"
+        completion-logic:
+          priority-order:
+            - "client-level-standing-instruction"
+            - "market-level-standing-instruction"
+            - "instrument-level-standing-instruction"
+            - "default-settlement-method"
+          field-mappings:
+            - source-field: "applicableClientSI.defaultSettlementMethod"
+              target-field: "settlementMethod"
+          default-values:
+            - field: "settlementMethod"
+              value: "DVP"
+        validation-rules:
+          - "settlementMethod != null"
+          - "['DVP', 'FOP', 'RVP'].contains(settlementMethod)"
+        audit-requirements:
+          - "Log settlement method assignment"
+    rule-settings:
+      execution-timeout: 5000
+      parallel-execution: true
+      error-handling: "continue-on-warning"
+    
+  standing-instruction-matching:
+    rule-type: "standing-instruction-matching"
+    rule-name: "Standing Instruction Matching Rules"
+    description: "Rules for matching and applying standing instructions"
+    rule-parameters:
+      priority-level: "high"
+      auto-execution: true
+      validation-required: true
+    matching-rules:
+      client-level-matching:
+        rule-id: "MATCH_CLIENT_SI"
+        rule-name: "Match Client-Level Standing Instruction"
+        rule-description: "Match and apply client-level standing instructions"
+        matching-criteria:
+          - field: "clientId"
+            operator: "equals"
+            priority: 100
+        application-logic:
+          - "Create BootstrapStandingInstruction for client"
+          - "Set default counterparty from client SI"
+          - "Set default custodian from client SI"
+          - "Set default settlement method from client SI"
+        validation-rules:
+          - "clientId != null"
+          - "applicableClientSI != null"
+        
+      market-level-matching:
+        rule-id: "MATCH_MARKET_SI"
+        rule-name: "Match Market-Level Standing Instruction"
+        rule-description: "Match and apply market-level standing instructions"
+        matching-criteria:
+          - field: "market"
+            operator: "equals"
+            priority: 200
+        application-logic:
+          - "Create BootstrapStandingInstruction for market"
+          - "Set market-specific custodian"
+          - "Set market-specific counterparty"
+          - "Set market-specific settlement method"
+        validation-rules:
+          - "market != null"
+          - "applicableMarketSI != null"
+        
+      instrument-level-matching:
+        rule-id: "MATCH_INSTRUMENT_SI"
+        rule-name: "Match Instrument-Level Standing Instruction"
+        rule-description: "Match and apply instrument-level standing instructions"
+        matching-criteria:
+          - field: "instrumentType"
+            operator: "equals"
+            priority: 300
+        application-logic:
+          - "Create BootstrapStandingInstruction for instrument"
+          - "Set instrument-specific settlement method"
+          - "Set instrument-specific delivery instruction"
+        validation-rules:
+          - "instrumentType != null"
+          - "applicableInstrumentSI != null"
+    rule-settings:
+      execution-timeout: 3000
+      parallel-execution: false
+      error-handling: "fail-on-error"
+    
+  risk-assessment-rules:
+    rule-type: "risk-assessment-rules"
+    rule-name: "Risk Assessment Rules"
+    description: "Rules for assessing risk and determining processing approach"
+    rule-parameters:
+      priority-level: "critical"
+      auto-execution: true
+      validation-required: true
+    assessment-rules:
+      high-value-assessment:
+        rule-id: "ASSESS_HIGH_VALUE"
+        rule-name: "High-Value Transaction Assessment"
+        rule-description: "Assess if transaction is high-value and requires special handling"
+        assessment-criteria:
+          - condition: "settlementAmount >= 10000000"
+            risk-level: "HIGH"
+            action: "MANUAL_REVIEW"
+          - condition: "settlementAmount >= 50000000"
+            risk-level: "ULTRA_HIGH"
+            action: "ENHANCED_REVIEW"
+          - condition: "settlementAmount >= 100000000"
+            risk-level: "CRITICAL"
+            action: "SENIOR_MANAGEMENT_APPROVAL"
+        processing-logic:
+          - "Set highValueTransaction flag"
+          - "Set eligibleForAutoRepair to false if high value"
+          - "Escalate to appropriate review level"
+        validation-rules:
+          - "settlementAmount != null"
+          - "settlementAmount > 0"
+        
+      client-tier-assessment:
+        rule-id: "ASSESS_CLIENT_TIER"
+        rule-name: "Client Tier Assessment"
+        rule-description: "Assess client tier and apply appropriate service levels"
+        assessment-criteria:
+          - condition: "clientTier == 'PREMIUM'"
+            service-level: "PREMIUM"
+            sla-hours: 2
+          - condition: "clientTier == 'INSTITUTIONAL'"
+            service-level: "INSTITUTIONAL"
+            sla-hours: 2
+          - condition: "clientTier == 'STANDARD'"
+            service-level: "STANDARD"
+            sla-hours: 4
+        processing-logic:
+          - "Set service level based on client tier"
+          - "Apply appropriate SLA"
+          - "Assign dedicated support if applicable"
+        validation-rules:
+          - "clientTier != null"
+          - "serviceLevel != null"
+        
+      market-risk-assessment:
+        rule-id: "ASSESS_MARKET_RISK"
+        rule-name: "Market Risk Assessment"
+        rule-description: "Assess market-specific risks and requirements"
+        assessment-criteria:
+          - condition: "market == 'JAPAN'"
+            regulatory-regime: "JFSA"
+            settlement-cycle: "T+2"
+          - condition: "market == 'HONG_KONG'"
+            regulatory-regime: "SFC"
+            settlement-cycle: "T+2"
+          - condition: "market == 'SINGAPORE'"
+            regulatory-regime: "MAS"
+            settlement-cycle: "T+2"
+          - condition: "market == 'KOREA'"
+            regulatory-regime: "FSC"
+            settlement-cycle: "T+2"
+        processing-logic:
+          - "Apply market-specific regulatory requirements"
+          - "Set appropriate settlement cycle"
+          - "Apply market-specific validation rules"
+        validation-rules:
+          - "market != null"
+          - "regulatoryRegime != null"
+    rule-settings:
+      execution-timeout: 4000
+      parallel-execution: true
+      error-handling: "fail-on-critical-error"
+    
+  audit-trail-generation:
+    rule-type: "audit-trail-generation"
+    rule-name: "Audit Trail Generation Rules"
+    description: "Rules for generating comprehensive audit trails"
+    rule-parameters:
+      priority-level: "mandatory"
+      auto-execution: true
+      validation-required: false
+    audit-rules:
+      repair-action-logging:
+        rule-id: "LOG_REPAIR_ACTIONS"
+        rule-name: "Log Repair Actions"
+        rule-description: "Log all auto-repair actions performed"
+        logging-requirements:
+          - "Log original instruction state"
+          - "Log missing fields identified"
+          - "Log standing instructions applied"
+          - "Log field completion actions"
+          - "Log final instruction state"
+        audit-fields:
+          - "timestamp"
+          - "instruction-id"
+          - "repair-actions"
+          - "standing-instructions-used"
+          - "user-id"
+          - "system-id"
+        
+      risk-assessment-logging:
+        rule-id: "LOG_RISK_ASSESSMENT"
+        rule-name: "Log Risk Assessment"
+        rule-description: "Log risk assessment results and decisions"
+        logging-requirements:
+          - "Log risk assessment criteria"
+          - "Log risk level determination"
+          - "Log processing decisions"
+          - "Log escalation actions"
+        audit-fields:
+          - "timestamp"
+          - "instruction-id"
+          - "risk-level"
+          - "assessment-criteria"
+          - "processing-decision"
+    rule-settings:
+      execution-timeout: 1000
+      parallel-execution: true
+      error-handling: "continue-on-error"
+    
+  default:
+    rule-type: "default"
+    rule-name: "Default Auto-Repair Rules"
+    description: "Default auto-repair processing"
+    completion-rules:
+      basic-completion:
+        rule-id: "BASIC_COMPLETION"
+        rule-name: "Basic Field Completion"
+        completion-logic:
+          - "Apply default values where appropriate"
+    rule-settings:
+      execution-timeout: 1000
+
+# Auto-repair algorithms
+repair-algorithms:
+  field-completion-algorithm:
+    algorithm-name: "Field Completion Algorithm"
+    description: "Algorithm for completing missing fields"
+    characteristics:
+      - "Priority-based standing instruction matching"
+      - "Hierarchical field completion"
+      - "Validation and audit trail generation"
+    
+  risk-based-processing:
+    algorithm-name: "Risk-Based Processing Algorithm"
+    description: "Algorithm for risk-based processing decisions"
+    characteristics:
+      - "Multi-factor risk assessment"
+      - "Threshold-based decision making"
+      - "Escalation workflow management"
+    
+  audit-trail-generation:
+    algorithm-name: "Audit Trail Generation Algorithm"
+    description: "Algorithm for comprehensive audit trail generation"
+    characteristics:
+      - "Complete action logging"
+      - "Regulatory compliance tracking"
+      - "Performance metrics collection"
+
+# Quality assurance
+quality-assurance:
+  rule-accuracy:
+    - "Auto-repair rules must be accurate"
+    - "Field completion logic must be correct"
+    - "Risk assessment criteria must be appropriate"
+    - "Audit requirements must be comprehensive"
+    
+  operational-efficiency:
+    - "Rules must be operationally efficient"
+    - "Processing time must be within SLA"
+    - "Error handling must be robust"
+    - "Parallel processing must be thread-safe"
+    
+  regulatory-compliance:
+    - "Rules must meet regulatory requirements"
+    - "Audit trails must be complete"
+    - "Risk assessments must be documented"
+    - "Escalation procedures must be defined"
