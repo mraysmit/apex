@@ -1,18 +1,5 @@
 package dev.mars.apex.demo.evaluation;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.demo.model.Trade;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
-
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
  *
@@ -29,552 +16,446 @@ import java.util.logging.Logger;
  * limitations under the License.
  */
 
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+
 /**
- * Comprehensive demonstration of compliance service functionality with RulesEngine.
+ * APEX-Compliant Compliance Service Demo for Regulatory Compliance Processing.
  *
-* This class is part of the APEX A powerful expression processor for Java applications.
+ * This class demonstrates authentic APEX integration using real APEX core services
+ * instead of hardcoded simulation. Following the SimplePostgreSQLLookupDemo pattern:
+ *
+ * ============================================================================
+ * REAL APEX SERVICES USED:
+ * - EnrichmentService: Real APEX enrichment processor for compliance processing
+ * - YamlConfigurationLoader: Real YAML configuration loading and validation
+ * - ExpressionEvaluatorService: Real SpEL expression evaluation for compliance rules
+ * - LookupServiceRegistry: Real lookup service integration for regulatory data
+ * ============================================================================
+ *
+ * CRITICAL: This class eliminates ALL hardcoded compliance logic and uses:
+ * - YAML-driven compliance configuration from external files
+ * - Real APEX enrichment services for regulatory processing
+ * - Fail-fast error handling (no hardcoded fallbacks)
+ * - Authentic APEX service integration throughout
+ *
+ * REFACTORING NOTES:
+ * - Replaced hardcoded regulatory constants with YAML-driven configuration
+ * - Eliminated embedded compliance rules and business logic
+ * - Uses real APEX enrichment services for compliance evaluation
+ * - Follows fail-fast approach when YAML configurations are missing
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-27
- * @version 1.0
- */
-/**
- * Comprehensive demonstration of compliance service functionality with RulesEngine.
- * This class shows the step-by-step process of creating and using a compliance service
- * for regulatory reporting and compliance checks. It combines both the demonstration
- * logic and the configuration functionality in a single self-contained class.
- *
- * This is a demo class with a main method for running the demonstration and instance
- * methods for compliance operations.
+ * @version 2.0 - Real APEX services integration (Reference Template)
  */
 public class ComplianceServiceDemo {
-    private static final Logger LOGGER = Logger.getLogger(ComplianceServiceDemo.class.getName());
 
-    // Regulatory frameworks
-    public static final String REG_MIFID_II = "MiFID II";
-    public static final String REG_EMIR = "EMIR";
-    public static final String REG_DODD_FRANK = "Dodd-Frank";
-    public static final String REG_BASEL_III = "Basel III";
-    public static final String REG_SFTR = "SFTR";
+    private static final Logger logger = LoggerFactory.getLogger(ComplianceServiceDemo.class);
 
-    // Reporting statuses
-    public static final String STATUS_PENDING = "Pending";
-    public static final String STATUS_SUBMITTED = "Submitted";
-    public static final String STATUS_ACCEPTED = "Accepted";
-    public static final String STATUS_REJECTED = "Rejected";
-    public static final String STATUS_AMENDED = "Amended";
+    // Real APEX services for authentic integration
+    private final YamlConfigurationLoader yamlLoader;
+    private final EnrichmentService enrichmentService;
+    private final LookupServiceRegistry serviceRegistry;
+    private final ExpressionEvaluatorService expressionEvaluator;
 
-    // Trade types (from PostTradeProcessingServiceDemoConfig)
-    public static final String TYPE_EQUITY = "Equity";
-    public static final String TYPE_FIXED_INCOME = "FixedIncome";
-    public static final String TYPE_DERIVATIVE = "Derivative";
-    public static final String TYPE_FOREX = "Forex";
-    public static final String TYPE_COMMODITY = "Commodity";
-
-    // Instance fields for compliance configuration
-    private final Map<String, List<String>> regulatoryRequirements = new HashMap<>();
-    private final Map<String, Integer> reportingDeadlines = new HashMap<>();
-    private final RulesEngine rulesEngine;
-    private final Map<String, Rule> complianceRules = new HashMap<>();
+    // Configuration data (populated via real APEX processing)
+    private Map<String, Object> configurationData;
 
     /**
-     * Private constructor to prevent instantiation.
-     * This is a demo class that should only be run via the main method.
+     * Initialize the compliance service demo with real APEX services.
      */
-    private ComplianceServiceDemo() {
-        // Private constructor to prevent instantiation
-        this.rulesEngine = null;
+    public ComplianceServiceDemo() {
+        // Initialize real APEX services for authentic integration
+        this.yamlLoader = new YamlConfigurationLoader();
+        this.serviceRegistry = new LookupServiceRegistry();
+        this.expressionEvaluator = new ExpressionEvaluatorService();
+        this.enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
+
+        logger.info("ComplianceServiceDemo initialized with real APEX services");
+
+        try {
+            loadExternalConfiguration();
+        } catch (Exception e) {
+            logger.error("Failed to initialize ComplianceServiceDemo: {}", e.getMessage());
+            throw new RuntimeException("Compliance service demo initialization failed", e);
+        }
     }
 
     /**
-     * Create a new ComplianceServiceDemo with the specified rules engine.
-     *
-     * @param rulesEngine The rules engine to use for compliance checks
+     * Loads external YAML configuration.
      */
-    private ComplianceServiceDemo(RulesEngine rulesEngine) {
-        this.rulesEngine = rulesEngine;
-        initializeDefaultValues();
-        initializeRules();
+    private void loadExternalConfiguration() throws Exception {
+        logger.info("Loading external compliance configuration YAML...");
+
+        configurationData = new HashMap<>();
+        
+        try {
+            // Load main compliance configuration
+            YamlRuleConfiguration mainConfig = yamlLoader.loadFromClasspath("evaluation/compliance-service-demo.yaml");
+            configurationData.put("mainConfig", mainConfig);
+            
+            // Load regulatory requirements configuration
+            YamlRuleConfiguration regulatoryConfig = yamlLoader.loadFromClasspath("evaluation/compliance/regulatory-requirements.yaml");
+            configurationData.put("regulatoryConfig", regulatoryConfig);
+            
+            // Load reporting deadlines configuration
+            YamlRuleConfiguration deadlinesConfig = yamlLoader.loadFromClasspath("evaluation/compliance/reporting-deadlines.yaml");
+            configurationData.put("deadlinesConfig", deadlinesConfig);
+            
+            // Load compliance rules configuration
+            YamlRuleConfiguration rulesConfig = yamlLoader.loadFromClasspath("evaluation/compliance/compliance-rules.yaml");
+            configurationData.put("rulesConfig", rulesConfig);
+            
+            // Load test data configuration
+            YamlRuleConfiguration testDataConfig = yamlLoader.loadFromClasspath("evaluation/compliance/compliance-test-data.yaml");
+            configurationData.put("testDataConfig", testDataConfig);
+            
+            logger.info("External compliance configuration YAML loaded successfully");
+            
+        } catch (Exception e) {
+            logger.warn("External compliance YAML files not found, APEX enrichment will use fail-fast approach: {}", e.getMessage());
+            throw new RuntimeException("Required compliance configuration YAML files not found", e);
+        }
+    }
+
+    // ============================================================================
+    // APEX-COMPLIANT COMPLIANCE PROCESSING METHODS (Real APEX Service Integration)
+    // ============================================================================
+
+    /**
+     * Processes compliance requirements for a trade using real APEX enrichment.
+     */
+    public Map<String, Object> processTradeCompliance(Map<String, Object> tradeData) {
+        try {
+            logger.info("Processing trade compliance using real APEX enrichment...");
+
+            // Load main compliance configuration
+            YamlRuleConfiguration mainConfig = (YamlRuleConfiguration) configurationData.get("mainConfig");
+            if (mainConfig == null) {
+                throw new RuntimeException("Main compliance configuration not found");
+            }
+
+            // Use real APEX enrichment service for compliance processing
+            Object enrichedResult = enrichmentService.enrichObject(mainConfig, tradeData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichedResult;
+
+            logger.info("Trade compliance processed successfully using real APEX enrichment");
+            return result;
+
+        } catch (Exception e) {
+            logger.error("Failed to process trade compliance with APEX enrichment: {}", e.getMessage());
+            throw new RuntimeException("Trade compliance processing failed", e);
+        }
     }
 
     /**
-     * Main method to run the demonstration.
-     *
-     * @param args Command line arguments (not used)
+     * Checks MiFID II reporting requirements using real APEX enrichment.
+     */
+    public Map<String, Object> checkMiFIDReporting(Map<String, Object> tradeData) {
+        try {
+            logger.info("Checking MiFID II reporting requirements using real APEX enrichment...");
+
+            // Add regulation-specific context
+            Map<String, Object> enrichedTradeData = new HashMap<>(tradeData);
+            enrichedTradeData.put("regulationType", "MiFID_II");
+            enrichedTradeData.put("checkType", "reporting-requirement");
+
+            return processTradeCompliance(enrichedTradeData);
+
+        } catch (Exception e) {
+            logger.error("Failed to check MiFID II reporting requirements: {}", e.getMessage());
+            throw new RuntimeException("MiFID II reporting check failed", e);
+        }
+    }
+
+    /**
+     * Checks EMIR reporting requirements using real APEX enrichment.
+     */
+    public Map<String, Object> checkEMIRReporting(Map<String, Object> tradeData) {
+        try {
+            logger.info("Checking EMIR reporting requirements using real APEX enrichment...");
+
+            // Add regulation-specific context
+            Map<String, Object> enrichedTradeData = new HashMap<>(tradeData);
+            enrichedTradeData.put("regulationType", "EMIR");
+            enrichedTradeData.put("checkType", "reporting-requirement");
+
+            return processTradeCompliance(enrichedTradeData);
+
+        } catch (Exception e) {
+            logger.error("Failed to check EMIR reporting requirements: {}", e.getMessage());
+            throw new RuntimeException("EMIR reporting check failed", e);
+        }
+    }
+
+    /**
+     * Checks Dodd-Frank reporting requirements using real APEX enrichment.
+     */
+    public Map<String, Object> checkDoddFrankReporting(Map<String, Object> tradeData) {
+        try {
+            logger.info("Checking Dodd-Frank reporting requirements using real APEX enrichment...");
+
+            // Add regulation-specific context
+            Map<String, Object> enrichedTradeData = new HashMap<>(tradeData);
+            enrichedTradeData.put("regulationType", "DODD_FRANK");
+            enrichedTradeData.put("checkType", "reporting-requirement");
+
+            return processTradeCompliance(enrichedTradeData);
+
+        } catch (Exception e) {
+            logger.error("Failed to check Dodd-Frank reporting requirements: {}", e.getMessage());
+            throw new RuntimeException("Dodd-Frank reporting check failed", e);
+        }
+    }
+
+    /**
+     * Checks Basel III reporting requirements using real APEX enrichment.
+     */
+    public Map<String, Object> checkBaselReporting(Map<String, Object> tradeData) {
+        try {
+            logger.info("Checking Basel III reporting requirements using real APEX enrichment...");
+
+            // Add regulation-specific context
+            Map<String, Object> enrichedTradeData = new HashMap<>(tradeData);
+            enrichedTradeData.put("regulationType", "BASEL_III");
+            enrichedTradeData.put("checkType", "reporting-requirement");
+
+            return processTradeCompliance(enrichedTradeData);
+
+        } catch (Exception e) {
+            logger.error("Failed to check Basel III reporting requirements: {}", e.getMessage());
+            throw new RuntimeException("Basel III reporting check failed", e);
+        }
+    }
+
+    /**
+     * Checks SFTR reporting requirements using real APEX enrichment.
+     */
+    public Map<String, Object> checkSFTRReporting(Map<String, Object> tradeData) {
+        try {
+            logger.info("Checking SFTR reporting requirements using real APEX enrichment...");
+
+            // Add regulation-specific context
+            Map<String, Object> enrichedTradeData = new HashMap<>(tradeData);
+            enrichedTradeData.put("regulationType", "SFTR");
+            enrichedTradeData.put("checkType", "reporting-requirement");
+
+            return processTradeCompliance(enrichedTradeData);
+
+        } catch (Exception e) {
+            logger.error("Failed to check SFTR reporting requirements: {}", e.getMessage());
+            throw new RuntimeException("SFTR reporting check failed", e);
+        }
+    }
+
+    /**
+     * Checks for compliance issues using real APEX enrichment.
+     */
+    public Map<String, Object> checkComplianceIssues(Map<String, Object> tradeData) {
+        try {
+            logger.info("Checking for compliance issues using real APEX enrichment...");
+
+            // Add compliance check context
+            Map<String, Object> enrichedTradeData = new HashMap<>(tradeData);
+            enrichedTradeData.put("checkType", "compliance-issues");
+
+            return processTradeCompliance(enrichedTradeData);
+
+        } catch (Exception e) {
+            logger.error("Failed to check compliance issues: {}", e.getMessage());
+            throw new RuntimeException("Compliance issues check failed", e);
+        }
+    }
+
+    /**
+     * Generates compliance reports using real APEX enrichment.
+     */
+    public Map<String, Object> generateComplianceReport(Map<String, Object> tradeData, String reportType) {
+        try {
+            logger.info("Generating compliance report using real APEX enrichment...");
+
+            // Add report generation context
+            Map<String, Object> enrichedTradeData = new HashMap<>(tradeData);
+            enrichedTradeData.put("reportType", reportType);
+            enrichedTradeData.put("checkType", "report-generation");
+
+            return processTradeCompliance(enrichedTradeData);
+
+        } catch (Exception e) {
+            logger.error("Failed to generate compliance report: {}", e.getMessage());
+            throw new RuntimeException("Compliance report generation failed", e);
+        }
+    }
+
+    // ============================================================================
+    // DEMONSTRATION METHODS (APEX-Compliant)
+    // ============================================================================
+
+    /**
+     * Demonstrates equity trade compliance processing with sample data.
+     */
+    public void demonstrateEquityTradeCompliance() {
+        logger.info("Demonstrating equity trade compliance with real APEX processing...");
+
+        // Create sample equity trade data
+        Map<String, Object> equityTrade = new HashMap<>();
+        equityTrade.put("tradeId", "T1001");
+        equityTrade.put("tradeType", "Equity");
+        equityTrade.put("category", "Stock");
+        equityTrade.put("amount", 100000);
+        equityTrade.put("currency", "EUR");
+        equityTrade.put("counterparty", "BANK_A");
+
+        // Process using real APEX enrichment
+        Map<String, Object> result = processTradeCompliance(equityTrade);
+
+        logger.info("Equity trade compliance result: {}", result);
+        System.out.println("=== Equity Trade Compliance Demo Results ===");
+        System.out.println("Input: " + equityTrade);
+        System.out.println("Result: " + result);
+    }
+
+    /**
+     * Demonstrates derivative trade compliance processing with sample data.
+     */
+    public void demonstrateDerivativeTradeCompliance() {
+        logger.info("Demonstrating derivative trade compliance with real APEX processing...");
+
+        // Create sample derivative trade data
+        Map<String, Object> derivativeTrade = new HashMap<>();
+        derivativeTrade.put("tradeId", "T1003");
+        derivativeTrade.put("tradeType", "Derivative");
+        derivativeTrade.put("category", "Option");
+        derivativeTrade.put("amount", 250000);
+        derivativeTrade.put("currency", "GBP");
+        derivativeTrade.put("counterparty", "BANK_C");
+
+        // Process using real APEX enrichment
+        Map<String, Object> result = processTradeCompliance(derivativeTrade);
+
+        logger.info("Derivative trade compliance result: {}", result);
+        System.out.println("=== Derivative Trade Compliance Demo Results ===");
+        System.out.println("Input: " + derivativeTrade);
+        System.out.println("Result: " + result);
+    }
+
+    /**
+     * Demonstrates MiFID II reporting check with sample data.
+     */
+    public void demonstrateMiFIDReportingCheck() {
+        logger.info("Demonstrating MiFID II reporting check with real APEX processing...");
+
+        // Create sample trade data for MiFID II check
+        Map<String, Object> tradeData = new HashMap<>();
+        tradeData.put("tradeId", "T2001");
+        tradeData.put("tradeType", "FixedIncome");
+        tradeData.put("category", "Bond");
+        tradeData.put("amount", 500000);
+        tradeData.put("currency", "USD");
+
+        // Process using real APEX enrichment
+        Map<String, Object> result = checkMiFIDReporting(tradeData);
+
+        logger.info("MiFID II reporting check result: {}", result);
+        System.out.println("=== MiFID II Reporting Check Demo Results ===");
+        System.out.println("Input: " + tradeData);
+        System.out.println("Result: " + result);
+    }
+
+    /**
+     * Demonstrates compliance issues detection with sample data.
+     */
+    public void demonstrateComplianceIssuesCheck() {
+        logger.info("Demonstrating compliance issues check with real APEX processing...");
+
+        // Create sample trade data with potential issues
+        Map<String, Object> problematicTrade = new HashMap<>();
+        problematicTrade.put("tradeId", ""); // Missing trade ID
+        problematicTrade.put("tradeType", "Equity");
+        problematicTrade.put("category", "Stock");
+        problematicTrade.put("amount", 50000);
+        problematicTrade.put("riskLevel", "High");
+
+        // Process using real APEX enrichment
+        Map<String, Object> result = checkComplianceIssues(problematicTrade);
+
+        logger.info("Compliance issues check result: {}", result);
+        System.out.println("=== Compliance Issues Check Demo Results ===");
+        System.out.println("Input: " + problematicTrade);
+        System.out.println("Result: " + result);
+    }
+
+    /**
+     * Demonstrates comprehensive compliance processing with sample data.
+     */
+    public void demonstrateComprehensiveCompliance() {
+        logger.info("Demonstrating comprehensive compliance processing with real APEX processing...");
+
+        // Create sample comprehensive trade data
+        Map<String, Object> comprehensiveTrade = new HashMap<>();
+        comprehensiveTrade.put("tradeId", "C1001");
+        comprehensiveTrade.put("tradeType", "Derivative");
+        comprehensiveTrade.put("category", "Interest Rate Swap");
+        comprehensiveTrade.put("amount", 2000000);
+        comprehensiveTrade.put("currency", "EUR");
+        comprehensiveTrade.put("counterparty", "MAJOR_BANK");
+        comprehensiveTrade.put("riskLevel", "Medium");
+        comprehensiveTrade.put("jurisdiction", "EU");
+
+        // Process using real APEX enrichment
+        Map<String, Object> result = processTradeCompliance(comprehensiveTrade);
+
+        logger.info("Comprehensive compliance result: {}", result);
+        System.out.println("=== Comprehensive Compliance Demo Results ===");
+        System.out.println("Input: " + comprehensiveTrade);
+        System.out.println("Result: " + result);
+    }
+
+    // ============================================================================
+    // MAIN METHOD FOR DEMONSTRATION
+    // ============================================================================
+
+    /**
+     * Main method to demonstrate APEX-compliant compliance processing.
      */
     public static void main(String[] args) {
-        // Run the demonstration
-        runComplianceServiceDemo();
-    }
+        try {
+            logger.info("Starting APEX-compliant compliance service demonstration...");
 
-    /**
-     * Run the compliance service demonstration.
-     * This method shows the step-by-step process of creating and using a compliance service.
-     */
-    private static void runComplianceServiceDemo() {
-        LOGGER.info("Starting compliance service demonstration");
+            // Initialize with real APEX services
+            ComplianceServiceDemo demo = new ComplianceServiceDemo();
 
-        // Step 1: Create a RulesEngine
-        LOGGER.info("Step 1: Creating a RulesEngine");
-        RulesEngine rulesEngine = new RulesEngine(new RulesEngineConfiguration());
+            // Run all demonstrations
+            demo.demonstrateEquityTradeCompliance();
+            System.out.println();
 
-        // Step 2: Create a ComplianceServiceDemo instance
-        LOGGER.info("Step 2: Creating a ComplianceServiceDemo instance");
-        ComplianceServiceDemo demo = new ComplianceServiceDemo(rulesEngine);
+            demo.demonstrateDerivativeTradeCompliance();
+            System.out.println();
 
-        // Step 3: Create test trades
-        LOGGER.info("Step 3: Creating test trades");
-        List<Trade> trades = createTestTrades();
+            demo.demonstrateMiFIDReportingCheck();
+            System.out.println();
 
-        // Step 4: Process each trade for compliance
-        LOGGER.info("Step 4: Processing trades for compliance");
-        for (Trade trade : trades) {
-            LOGGER.info("Processing trade: " + trade);
+            demo.demonstrateComplianceIssuesCheck();
+            System.out.println();
 
-            // Step 4.1: Check applicable regulations
-            List<String> regulations = demo.getApplicableRegulations(trade);
-            LOGGER.info("Applicable regulations: " + regulations);
+            demo.demonstrateComprehensiveCompliance();
 
-            // Step 4.2: Check MiFID II reporting requirement
-            checkMiFIDReporting(trade, demo);
+            logger.info("APEX-compliant compliance service demonstration completed successfully");
 
-            // Step 4.3: Check EMIR reporting requirement
-            checkEMIRReporting(trade, demo);
-
-            // Step 4.4: Check Dodd-Frank reporting requirement
-            checkDoddFrankReporting(trade, demo);
-
-            // Step 4.5: Check Basel III reporting requirement
-            checkBaselReporting(trade, demo);
-
-            // Step 4.6: Check SFTR reporting requirement
-            checkSFTRReporting(trade, demo);
-
-            // Step 4.7: Check for compliance issues
-            checkComplianceIssues(trade, demo);
-
-            // Add a separator
-            LOGGER.info("----------------------------------------");
+        } catch (Exception e) {
+            logger.error("Compliance service demonstration failed: {}", e.getMessage());
+            System.err.println("Demo failed: " + e.getMessage());
+            e.printStackTrace();
         }
-
-        LOGGER.info("Compliance service demonstration completed");
-    }
-
-    /**
-     * Check if a trade requires MiFID II reporting.
-     *
-     * @param trade The trade to check
-     * @param demo The compliance service demo instance
-     */
-    private static void checkMiFIDReporting(Trade trade, ComplianceServiceDemo demo) {
-        RuleResult result = demo.requiresMiFIDReportingWithResult(trade);
-
-        if (result.isTriggered()) {
-            LOGGER.info("TradeB requires MiFID II reporting");
-            LOGGER.info("Report: " + demo.generateMiFIDReport(trade));
-        } else {
-            LOGGER.info("TradeB does not require MiFID II reporting");
-        }
-    }
-
-    /**
-     * Check if a trade requires EMIR reporting.
-     *
-     * @param trade The trade to check
-     * @param demo The compliance service demo instance
-     */
-    private static void checkEMIRReporting(Trade trade, ComplianceServiceDemo demo) {
-        RuleResult result = demo.requiresEMIRReportingWithResult(trade);
-
-        if (result.isTriggered()) {
-            LOGGER.info("TradeB requires EMIR reporting");
-            LOGGER.info("Report: " + demo.generateEMIRReport(trade));
-        } else {
-            LOGGER.info("TradeB does not require EMIR reporting");
-        }
-    }
-
-    /**
-     * Check if a trade requires Dodd-Frank reporting.
-     *
-     * @param trade The trade to check
-     * @param demo The compliance service demo instance
-     */
-    private static void checkDoddFrankReporting(Trade trade, ComplianceServiceDemo demo) {
-        RuleResult result = demo.requiresDoddFrankReportingWithResult(trade);
-
-        if (result.isTriggered()) {
-            LOGGER.info("TradeB requires Dodd-Frank reporting");
-            LOGGER.info("Report: " + demo.generateDoddFrankReport(trade));
-        } else {
-            LOGGER.info("TradeB does not require Dodd-Frank reporting");
-        }
-    }
-
-    /**
-     * Check if a trade requires Basel III reporting.
-     *
-     * @param trade The trade to check
-     * @param demo The compliance service demo instance
-     */
-    private static void checkBaselReporting(Trade trade, ComplianceServiceDemo demo) {
-        RuleResult result = demo.requiresBaselReportingWithResult(trade);
-
-        if (result.isTriggered()) {
-            LOGGER.info("TradeB requires Basel III reporting");
-            LOGGER.info("Report: " + demo.generateBaselReport(trade));
-        } else {
-            LOGGER.info("TradeB does not require Basel III reporting");
-        }
-    }
-
-    /**
-     * Check if a trade requires SFTR reporting.
-     *
-     * @param trade The trade to check
-     * @param demo The compliance service demo instance
-     */
-    private static void checkSFTRReporting(Trade trade, ComplianceServiceDemo demo) {
-        RuleResult result = demo.requiresSFTRReportingWithResult(trade);
-
-        if (result.isTriggered()) {
-            LOGGER.info("TradeB requires SFTR reporting");
-            LOGGER.info("Report: " + demo.generateSFTRReport(trade));
-        } else {
-            LOGGER.info("TradeB does not require SFTR reporting");
-        }
-    }
-
-    /**
-     * Check if a trade has compliance issues.
-     *
-     * @param trade The trade to check
-     * @param demo The compliance service demo instance
-     */
-    private static void checkComplianceIssues(Trade trade, ComplianceServiceDemo demo) {
-        RuleResult result = demo.hasComplianceIssuesWithResult(trade);
-
-        if (result.isTriggered()) {
-            LOGGER.info("TradeB has compliance issues");
-        } else {
-            LOGGER.info("TradeB has no compliance issues");
-        }
-    }
-
-    /**
-     * Create a list of test trades.
-     *
-     * @return A list of test trades
-     */
-    private static List<Trade> createTestTrades() {
-        return Arrays.asList(
-                new Trade("T1001", TYPE_EQUITY, "Stock"),
-                new Trade("T1002", TYPE_FIXED_INCOME, "Bond"),
-                new Trade("T1003", TYPE_DERIVATIVE, "Option"),
-                new Trade("T1004", TYPE_FOREX, "Spot"),
-                new Trade("T1005", TYPE_COMMODITY, "Future"),
-                new Trade("", TYPE_EQUITY, "Stock") // Invalid trade
-        );
-    }
-
-    // ========== Configuration Methods (from ComplianceServiceDemoConfig) ==========
-
-    /**
-     * Initialize default values for regulatory requirements and deadlines.
-     */
-    private void initializeDefaultValues() {
-        LOGGER.info("Initializing compliance service configuration with regulatory requirements");
-
-        // Initialize regulatory requirements by trade type
-        regulatoryRequirements.put(TYPE_EQUITY, Arrays.asList(REG_MIFID_II, REG_BASEL_III));
-        regulatoryRequirements.put(TYPE_FIXED_INCOME, Arrays.asList(REG_MIFID_II, REG_BASEL_III, REG_SFTR));
-        regulatoryRequirements.put(TYPE_DERIVATIVE, Arrays.asList(REG_MIFID_II, REG_EMIR, REG_DODD_FRANK));
-        regulatoryRequirements.put(TYPE_FOREX, Arrays.asList(REG_MIFID_II, REG_DODD_FRANK));
-        regulatoryRequirements.put(TYPE_COMMODITY, Arrays.asList(REG_MIFID_II, REG_EMIR));
-
-        LOGGER.info("Configured regulatory requirements for " + regulatoryRequirements.size() + " trade types");
-
-        // Initialize reporting deadlines (in hours) by regulatory framework
-        reportingDeadlines.put(REG_MIFID_II, 24);
-        reportingDeadlines.put(REG_EMIR, 48);
-        reportingDeadlines.put(REG_DODD_FRANK, 24);
-        reportingDeadlines.put(REG_BASEL_III, 72);
-        reportingDeadlines.put(REG_SFTR, 24);
-    }
-
-    /**
-     * Initialize rules for compliance checks.
-     */
-    private void initializeRules() {
-        // Rule for MiFID II reporting
-        complianceRules.put(REG_MIFID_II, new Rule(
-                "MiFIDReportingRule",
-                "#trade != null && #regulatoryRequirements.containsKey(#trade.value) && " +
-                        "#regulatoryRequirements.get(#trade.value).contains('" + REG_MIFID_II + "')",
-                "TradeB requires MiFID II reporting"
-        ));
-
-        // Rule for EMIR reporting
-        complianceRules.put(REG_EMIR, new Rule(
-                "EMIRReportingRule",
-                "#trade != null && #regulatoryRequirements.containsKey(#trade.value) && " +
-                        "#regulatoryRequirements.get(#trade.value).contains('" + REG_EMIR + "')",
-                "TradeB requires EMIR reporting"
-        ));
-
-        // Rule for Dodd-Frank reporting
-        complianceRules.put(REG_DODD_FRANK, new Rule(
-                "DoddFrankReportingRule",
-                "#trade != null && #regulatoryRequirements.containsKey(#trade.value) && " +
-                        "#regulatoryRequirements.get(#trade.value).contains('" + REG_DODD_FRANK + "')",
-                "TradeB requires Dodd-Frank reporting"
-        ));
-
-        // Rule for Basel III reporting
-        complianceRules.put(REG_BASEL_III, new Rule(
-                "BaselReportingRule",
-                "#trade != null && #regulatoryRequirements.containsKey(#trade.value) && " +
-                        "#regulatoryRequirements.get(#trade.value).contains('" + REG_BASEL_III + "')",
-                "TradeB requires Basel III reporting"
-        ));
-
-        // Rule for SFTR reporting
-        complianceRules.put(REG_SFTR, new Rule(
-                "SFTRReportingRule",
-                "#trade != null && #regulatoryRequirements.containsKey(#trade.value) && " +
-                        "#regulatoryRequirements.get(#trade.value).contains('" + REG_SFTR + "')",
-                "TradeB requires SFTR reporting"
-        ));
-
-        // Rule for compliance issues
-        complianceRules.put("ComplianceIssues", new Rule(
-                "ComplianceIssuesRule",
-                "#trade == null || #trade.id == null || #trade.id.isEmpty() || " +
-                        "#trade.value == null || #trade.value.isEmpty() || " +
-                        "#trade.category == null || #trade.category.isEmpty() || " +
-                        "(#riskService != null && (#riskLevel == 'High' || #riskLevel == 'Extreme'))",
-                "TradeB has compliance issues"
-        ));
-    }
-
-    /**
-     * Get applicable regulatory frameworks for a trade.
-     *
-     * @param trade The trade
-     * @return List of applicable regulatory frameworks
-     */
-    public List<String> getApplicableRegulations(Trade trade) {
-        if (trade == null) return Arrays.asList();
-
-        String type = trade.getValue();
-        return regulatoryRequirements.getOrDefault(type, Arrays.asList());
-    }
-
-    /**
-     * Get reporting deadline for a specific regulatory framework.
-     *
-     * @param regulation The regulatory framework
-     * @return Reporting deadline in hours
-     */
-    public int getReportingDeadline(String regulation) {
-        return reportingDeadlines.getOrDefault(regulation, 48);
-    }
-
-    /**
-     * Check if a trade requires MiFID II reporting with detailed result.
-     *
-     * @param trade The trade
-     * @return RuleResult containing the evaluation outcome
-     */
-    public RuleResult requiresMiFIDReportingWithResult(Trade trade) {
-        Map<String, Object> facts = new HashMap<>();
-        facts.put("trade", trade);
-        facts.put("regulatoryRequirements", regulatoryRequirements);
-
-        Rule rule = complianceRules.get(REG_MIFID_II);
-        return rulesEngine.executeRulesList(Collections.singletonList(rule), facts);
-    }
-
-    /**
-     * Check if a trade requires EMIR reporting with detailed result.
-     *
-     * @param trade The trade
-     * @return RuleResult containing the evaluation outcome
-     */
-    public RuleResult requiresEMIRReportingWithResult(Trade trade) {
-        Map<String, Object> facts = new HashMap<>();
-        facts.put("trade", trade);
-        facts.put("regulatoryRequirements", regulatoryRequirements);
-
-        Rule rule = complianceRules.get(REG_EMIR);
-        return rulesEngine.executeRulesList(Collections.singletonList(rule), facts);
-    }
-
-    /**
-     * Check if a trade requires Dodd-Frank reporting with detailed result.
-     *
-     * @param trade The trade
-     * @return RuleResult containing the evaluation outcome
-     */
-    public RuleResult requiresDoddFrankReportingWithResult(Trade trade) {
-        Map<String, Object> facts = new HashMap<>();
-        facts.put("trade", trade);
-        facts.put("regulatoryRequirements", regulatoryRequirements);
-
-        Rule rule = complianceRules.get(REG_DODD_FRANK);
-        return rulesEngine.executeRulesList(Collections.singletonList(rule), facts);
-    }
-
-    /**
-     * Check if a trade requires Basel III reporting with detailed result.
-     *
-     * @param trade The trade
-     * @return RuleResult containing the evaluation outcome
-     */
-    public RuleResult requiresBaselReportingWithResult(Trade trade) {
-        Map<String, Object> facts = new HashMap<>();
-        facts.put("trade", trade);
-        facts.put("regulatoryRequirements", regulatoryRequirements);
-
-        Rule rule = complianceRules.get(REG_BASEL_III);
-        return rulesEngine.executeRulesList(Collections.singletonList(rule), facts);
-    }
-
-    /**
-     * Check if a trade requires SFTR reporting with detailed result.
-     *
-     * @param trade The trade
-     * @return RuleResult containing the evaluation outcome
-     */
-    public RuleResult requiresSFTRReportingWithResult(Trade trade) {
-        Map<String, Object> facts = new HashMap<>();
-        facts.put("trade", trade);
-        facts.put("regulatoryRequirements", regulatoryRequirements);
-
-        Rule rule = complianceRules.get(REG_SFTR);
-        return rulesEngine.executeRulesList(Collections.singletonList(rule), facts);
-    }
-
-    /**
-     * Check if a trade has any compliance issues with detailed result.
-     *
-     * @param trade The trade
-     * @return RuleResult containing the evaluation outcome
-     */
-    public RuleResult hasComplianceIssuesWithResult(Trade trade) {
-        Map<String, Object> facts = new HashMap<>();
-        facts.put("trade", trade);
-
-        // Add risk service and risk level to facts
-        if (trade != null) {
-            RiskManagementService riskService = new RiskManagementService();
-            String riskLevel = riskService.determineRiskLevel(trade);
-            facts.put("riskService", riskService);
-            facts.put("riskLevel", riskLevel);
-        }
-
-        Rule rule = complianceRules.get("ComplianceIssues");
-        return rulesEngine.executeRulesList(Collections.singletonList(rule), facts);
-    }
-
-    // ========== Report Generation Methods ==========
-
-    /**
-     * Generate MiFID II transaction report for a trade.
-     *
-     * @param trade The trade
-     * @return Report content as a string
-     */
-    public String generateMiFIDReport(Trade trade) {
-        if (trade == null) return "Error: No trade provided";
-
-        RuleResult result = requiresMiFIDReportingWithResult(trade);
-        if (!result.isTriggered()) return "Error: MiFID II reporting not required";
-
-        return "MiFID II Transaction Report for TradeB ID: " + trade.getId() +
-                "\nInstrument: " + trade.getValue() +
-                "\nCategory: " + trade.getCategory() +
-                "\nReporting Deadline: " + getReportingDeadline(REG_MIFID_II) + " hours";
-    }
-
-    /**
-     * Generate EMIR transaction report for a trade.
-     *
-     * @param trade The trade
-     * @return Report content as a string
-     */
-    public String generateEMIRReport(Trade trade) {
-        if (trade == null) return "Error: No trade provided";
-
-        RuleResult result = requiresEMIRReportingWithResult(trade);
-        if (!result.isTriggered()) return "Error: EMIR reporting not required";
-
-        return "EMIR Transaction Report for TradeB ID: " + trade.getId() +
-                "\nInstrument: " + trade.getValue() +
-                "\nCategory: " + trade.getCategory() +
-                "\nReporting Deadline: " + getReportingDeadline(REG_EMIR) + " hours";
-    }
-
-    /**
-     * Generate Dodd-Frank transaction report for a trade.
-     *
-     * @param trade The trade
-     * @return Report content as a string
-     */
-    public String generateDoddFrankReport(Trade trade) {
-        if (trade == null) return "Error: No trade provided";
-
-        RuleResult result = requiresDoddFrankReportingWithResult(trade);
-        if (!result.isTriggered()) return "Error: Dodd-Frank reporting not required";
-
-        return "Dodd-Frank Transaction Report for TradeB ID: " + trade.getId() +
-                "\nInstrument: " + trade.getValue() +
-                "\nCategory: " + trade.getCategory() +
-                "\nReporting Deadline: " + getReportingDeadline(REG_DODD_FRANK) + " hours";
-    }
-
-    /**
-     * Generate Basel III transaction report for a trade.
-     *
-     * @param trade The trade
-     * @return Report content as a string
-     */
-    public String generateBaselReport(Trade trade) {
-        if (trade == null) return "Error: No trade provided";
-
-        RuleResult result = requiresBaselReportingWithResult(trade);
-        if (!result.isTriggered()) return "Error: Basel III reporting not required";
-
-        return "Basel III Transaction Report for TradeB ID: " + trade.getId() +
-                "\nInstrument: " + trade.getValue() +
-                "\nCategory: " + trade.getCategory() +
-                "\nReporting Deadline: " + getReportingDeadline(REG_BASEL_III) + " hours";
-    }
-
-    /**
-     * Generate SFTR transaction report for a trade.
-     *
-     * @param trade The trade
-     * @return Report content as a string
-     */
-    public String generateSFTRReport(Trade trade) {
-        if (trade == null) return "Error: No trade provided";
-
-        RuleResult result = requiresSFTRReportingWithResult(trade);
-        if (!result.isTriggered()) return "Error: SFTR reporting not required";
-
-        return "SFTR Transaction Report for TradeB ID: " + trade.getId() +
-                "\nInstrument: " + trade.getValue() +
-                "\nCategory: " + trade.getCategory() +
-                "\nReporting Deadline: " + getReportingDeadline(REG_SFTR) + " hours";
-    }
-
-    /**
-     * Get the rules engine used by this demo.
-     *
-     * @return The rules engine
-     */
-    public RulesEngine getRulesEngine() {
-        return rulesEngine;
     }
 }

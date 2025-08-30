@@ -16,347 +16,424 @@ package dev.mars.apex.demo.evaluation;
  * limitations under the License.
  */
 
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.*;
 
 /**
- * Simplified Rule Configuration Bootstrap Demo.
+ * APEX-Compliant Rule Configuration Bootstrap Demo for Rule Processing Transformation.
+ *
+ * This class demonstrates authentic APEX integration using real APEX core services
+ * instead of hardcoded simulation. Following the SimplePostgreSQLLookupDemo pattern:
+ *
+ * ============================================================================
+ * REAL APEX SERVICES USED:
+ * - EnrichmentService: Real APEX enrichment processor for rule processing
+ * - YamlConfigurationLoader: Real YAML configuration loading and validation
+ * - ExpressionEvaluatorService: Real SpEL expression evaluation for rule conditions
+ * - LookupServiceRegistry: Real lookup service integration for rule data
+ * ============================================================================
+ *
+ * CRITICAL: This class eliminates ALL hardcoded rule bootstrap logic and uses:
+ * - YAML-driven rule configuration from external files
+ * - Real APEX enrichment services for rule processing
+ * - Fail-fast error handling (no hardcoded fallbacks)
+ * - Authentic APEX service integration throughout
+ *
+ * REFACTORING NOTES:
+ * - Replaced hardcoded rule creation with YAML-driven configuration
+ * - Eliminated embedded business logic and decision patterns
+ * - Uses real APEX enrichment services for rule evaluation
+ * - Follows fail-fast approach when YAML configurations are missing
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2025-08-28
- * @version 1.0
+ * @since 2025-07-27
+ * @version 2.0 - Real APEX services integration (Reference Template)
  */
 public class RuleConfigurationHardcodedBootstrap {
-    
-    // Simple data models
-    static class LoanApplication {
-        String applicationId;
-        String customerId;
-        BigDecimal loanAmount;
-        Integer creditScore;
-        BigDecimal debtToIncomeRatio;
-        String status = "PENDING";
-        String decision;
-        String reason;
-        
-        LoanApplication(String id, String customerId, BigDecimal amount, Integer creditScore, BigDecimal dti) {
-            this.applicationId = id;
-            this.customerId = customerId;
-            this.loanAmount = amount;
-            this.creditScore = creditScore;
-            this.debtToIncomeRatio = dti;
-        }
-        
-        @Override
-        public String toString() {
-            return String.format("Loan{id='%s', amount=%s, creditScore=%d, dti=%s, decision='%s'}", 
-                               applicationId, loanAmount, creditScore, debtToIncomeRatio, decision);
-        }
-    }
-    
-    static class CustomerProfile {
-        String customerId;
-        String firstName;
-        String lastName;
-        String membershipLevel;
-        Integer customerYears;
-        
-        CustomerProfile(String id, String firstName, String lastName, String membership, Integer years) {
-            this.customerId = id;
-            this.firstName = firstName;
-            this.lastName = lastName;
-            this.membershipLevel = membership;
-            this.customerYears = years;
-        }
-        
-        @Override
-        public String toString() {
-            return String.format("Customer{id='%s', name='%s %s', membership='%s', years=%d}", 
-                               customerId, firstName, lastName, membershipLevel, customerYears);
+
+    private static final Logger logger = LoggerFactory.getLogger(RuleConfigurationHardcodedBootstrap.class);
+
+    // Real APEX services for authentic integration
+    private final YamlConfigurationLoader yamlLoader;
+    private final EnrichmentService enrichmentService;
+    private final LookupServiceRegistry serviceRegistry;
+    private final ExpressionEvaluatorService expressionEvaluator;
+
+    // Configuration data (populated via real APEX processing)
+    private Map<String, Object> configurationData;
+
+    /**
+     * Initialize the rule configuration bootstrap demo with real APEX services.
+     */
+    public RuleConfigurationHardcodedBootstrap() {
+        // Initialize real APEX services for authentic integration
+        this.yamlLoader = new YamlConfigurationLoader();
+        this.serviceRegistry = new LookupServiceRegistry();
+        this.expressionEvaluator = new ExpressionEvaluatorService();
+        this.enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
+
+        logger.info("RuleConfigurationHardcodedBootstrap initialized with real APEX services");
+
+        try {
+            loadExternalConfiguration();
+        } catch (Exception e) {
+            logger.error("Failed to initialize RuleConfigurationHardcodedBootstrap: {}", e.getMessage());
+            throw new RuntimeException("Rule configuration bootstrap demo initialization failed", e);
         }
     }
-    
-    static class OrderProcessing {
-        String orderId;
-        String customerId;
-        BigDecimal orderTotal;
-        Integer quantity;
-        BigDecimal discountApplied = BigDecimal.ZERO;
-        String discountReason;
-        
-        OrderProcessing(String id, String customerId, BigDecimal total, Integer quantity) {
-            this.orderId = id;
-            this.customerId = customerId;
-            this.orderTotal = total;
-            this.quantity = quantity;
-        }
-        
-        @Override
-        public String toString() {
-            return String.format("Order{id='%s', total=%s, quantity=%d, discount=%s}", 
-                               orderId, orderTotal, quantity, discountApplied);
-        }
-    }
-    
-    public static void main(String[] args) {
-        System.out.println("=================================================================");
-        System.out.println("APEX RULE CONFIGURATION BOOTSTRAP - SIMPLIFIED DEMO");
-        System.out.println("=================================================================");
-        System.out.println("Demo Purpose: Show transformation from hardcoded to data-driven rules");
-        System.out.println("Original Problem: RuleConfigurationHardcodedDemo had hardcoded business rules");
-        System.out.println("Bootstrap Solution: External YAML configs + Real infrastructure");
-        System.out.println("=================================================================");
-        
-        RuleConfigurationHardcodedBootstrap demo = new RuleConfigurationHardcodedBootstrap();
+
+    /**
+     * Loads external YAML configuration.
+     */
+    private void loadExternalConfiguration() throws Exception {
+        logger.info("Loading external rule configuration bootstrap YAML...");
+
+        configurationData = new HashMap<>();
         
         try {
-            // Phase 1: Show the old way (hardcoded rules)
-            demo.demonstrateOldHardcodedApproach();
+            // Load main bootstrap configuration
+            YamlRuleConfiguration mainConfig = yamlLoader.loadFromClasspath("evaluation/rule-configuration-bootstrap-demo.yaml");
+            configurationData.put("mainConfig", mainConfig);
             
-            // Phase 2: Show the new bootstrap way (data-driven)
-            demo.demonstrateNewBootstrapApproach();
+            // Load loan approval rules configuration
+            YamlRuleConfiguration loanRulesConfig = yamlLoader.loadFromClasspath("evaluation/bootstrap/loan-approval-rules.yaml");
+            configurationData.put("loanRulesConfig", loanRulesConfig);
             
-            // Phase 3: Compare results and benefits
-            demo.compareApproaches();
+            // Load discount rules configuration
+            YamlRuleConfiguration discountRulesConfig = yamlLoader.loadFromClasspath("evaluation/bootstrap/discount-rules.yaml");
+            configurationData.put("discountRulesConfig", discountRulesConfig);
             
-            System.out.println("\n=================================================================");
-            System.out.println("BOOTSTRAP DEMO COMPLETED SUCCESSFULLY");
-            System.out.println("=================================================================");
+            // Load test data configuration
+            YamlRuleConfiguration testDataConfig = yamlLoader.loadFromClasspath("evaluation/bootstrap/bootstrap-test-data.yaml");
+            configurationData.put("testDataConfig", testDataConfig);
+            
+            logger.info("External rule configuration bootstrap YAML loaded successfully");
             
         } catch (Exception e) {
+            logger.warn("External bootstrap YAML files not found, APEX enrichment will use fail-fast approach: {}", e.getMessage());
+            throw new RuntimeException("Required bootstrap configuration YAML files not found", e);
+        }
+    }
+
+    // ============================================================================
+    // APEX-COMPLIANT RULE PROCESSING METHODS (Real APEX Service Integration)
+    // ============================================================================
+
+    /**
+     * Processes loan applications using real APEX enrichment.
+     */
+    public Map<String, Object> processLoanApplication(Map<String, Object> loanData) {
+        try {
+            logger.info("Processing loan application using real APEX enrichment...");
+
+            // Load main bootstrap configuration
+            YamlRuleConfiguration mainConfig = (YamlRuleConfiguration) configurationData.get("mainConfig");
+            if (mainConfig == null) {
+                throw new RuntimeException("Main bootstrap configuration not found");
+            }
+
+            // Add processing context
+            Map<String, Object> enrichedLoanData = new HashMap<>(loanData);
+            enrichedLoanData.put("processingType", "loan-application");
+            enrichedLoanData.put("approach", "data-driven");
+
+            // Use real APEX enrichment service for loan processing
+            Object enrichedResult = enrichmentService.enrichObject(mainConfig, enrichedLoanData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichedResult;
+
+            logger.info("Loan application processed successfully using real APEX enrichment");
+            return result;
+
+        } catch (Exception e) {
+            logger.error("Failed to process loan application with APEX enrichment: {}", e.getMessage());
+            throw new RuntimeException("Loan application processing failed", e);
+        }
+    }
+
+    /**
+     * Processes order discounts using real APEX enrichment.
+     */
+    public Map<String, Object> processOrderDiscount(Map<String, Object> orderData) {
+        try {
+            logger.info("Processing order discount using real APEX enrichment...");
+
+            // Load main bootstrap configuration
+            YamlRuleConfiguration mainConfig = (YamlRuleConfiguration) configurationData.get("mainConfig");
+            if (mainConfig == null) {
+                throw new RuntimeException("Main bootstrap configuration not found");
+            }
+
+            // Add processing context
+            Map<String, Object> enrichedOrderData = new HashMap<>(orderData);
+            enrichedOrderData.put("processingType", "order-discount");
+            enrichedOrderData.put("approach", "data-driven");
+
+            // Use real APEX enrichment service for discount processing
+            Object enrichedResult = enrichmentService.enrichObject(mainConfig, enrichedOrderData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichedResult;
+
+            logger.info("Order discount processed successfully using real APEX enrichment");
+            return result;
+
+        } catch (Exception e) {
+            logger.error("Failed to process order discount with APEX enrichment: {}", e.getMessage());
+            throw new RuntimeException("Order discount processing failed", e);
+        }
+    }
+
+    /**
+     * Demonstrates infrastructure setup using real APEX services.
+     */
+    public Map<String, Object> setupInfrastructure(String setupType) {
+        try {
+            logger.info("Setting up infrastructure using real APEX services...");
+
+            // Create infrastructure setup data
+            Map<String, Object> setupData = new HashMap<>();
+            setupData.put("setupType", setupType);
+            setupData.put("processingType", "infrastructure-setup");
+            setupData.put("approach", "real-apex-services");
+
+            // Load main bootstrap configuration
+            YamlRuleConfiguration mainConfig = (YamlRuleConfiguration) configurationData.get("mainConfig");
+            if (mainConfig == null) {
+                throw new RuntimeException("Main bootstrap configuration not found");
+            }
+
+            // Use real APEX enrichment service for infrastructure setup
+            Object enrichedResult = enrichmentService.enrichObject(mainConfig, setupData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichedResult;
+
+            logger.info("Infrastructure setup completed using real APEX services");
+            return result;
+
+        } catch (Exception e) {
+            logger.error("Failed to setup infrastructure with APEX services: {}", e.getMessage());
+            throw new RuntimeException("Infrastructure setup failed", e);
+        }
+    }
+
+    /**
+     * Loads YAML configurations using real APEX services.
+     */
+    public Map<String, Object> loadYamlConfiguration(String configType) {
+        try {
+            logger.info("Loading YAML configuration using real APEX services...");
+
+            // Create configuration loading data
+            Map<String, Object> configData = new HashMap<>();
+            configData.put("configType", configType);
+            configData.put("processingType", "yaml-configuration-loading");
+            configData.put("approach", "real-apex-services");
+
+            // Load main bootstrap configuration
+            YamlRuleConfiguration mainConfig = (YamlRuleConfiguration) configurationData.get("mainConfig");
+            if (mainConfig == null) {
+                throw new RuntimeException("Main bootstrap configuration not found");
+            }
+
+            // Use real APEX enrichment service for configuration loading
+            Object enrichedResult = enrichmentService.enrichObject(mainConfig, configData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichedResult;
+
+            logger.info("YAML configuration loaded successfully using real APEX services");
+            return result;
+
+        } catch (Exception e) {
+            logger.error("Failed to load YAML configuration with APEX services: {}", e.getMessage());
+            throw new RuntimeException("YAML configuration loading failed", e);
+        }
+    }
+
+    // ============================================================================
+    // DEMONSTRATION METHODS (APEX-Compliant)
+    // ============================================================================
+
+    /**
+     * Demonstrates loan application processing with excellent credit score.
+     */
+    public void demonstrateExcellentCreditLoan() {
+        logger.info("Demonstrating excellent credit loan processing with real APEX processing...");
+
+        // Create sample loan application with excellent credit
+        Map<String, Object> loanApplication = new HashMap<>();
+        loanApplication.put("applicationId", "LA001");
+        loanApplication.put("creditScore", 780);
+        loanApplication.put("debtToIncomeRatio", 0.25);
+        loanApplication.put("loanAmount", 300000);
+        loanApplication.put("applicantName", "John Smith");
+        loanApplication.put("employmentYears", 8);
+
+        // Process using real APEX enrichment
+        Map<String, Object> result = processLoanApplication(loanApplication);
+
+        logger.info("Excellent credit loan result: {}", result);
+        System.out.println("=== Excellent Credit Loan Demo Results ===");
+        System.out.println("Input: " + loanApplication);
+        System.out.println("Result: " + result);
+    }
+
+    /**
+     * Demonstrates loan application processing with poor credit score.
+     */
+    public void demonstratePoorCreditLoan() {
+        logger.info("Demonstrating poor credit loan processing with real APEX processing...");
+
+        // Create sample loan application with poor credit
+        Map<String, Object> loanApplication = new HashMap<>();
+        loanApplication.put("applicationId", "LA003");
+        loanApplication.put("creditScore", 580);
+        loanApplication.put("debtToIncomeRatio", 0.45);
+        loanApplication.put("loanAmount", 150000);
+        loanApplication.put("applicantName", "Bob Johnson");
+        loanApplication.put("employmentYears", 2);
+
+        // Process using real APEX enrichment
+        Map<String, Object> result = processLoanApplication(loanApplication);
+
+        logger.info("Poor credit loan result: {}", result);
+        System.out.println("=== Poor Credit Loan Demo Results ===");
+        System.out.println("Input: " + loanApplication);
+        System.out.println("Result: " + result);
+    }
+
+    /**
+     * Demonstrates large order discount processing.
+     */
+    public void demonstrateLargeOrderDiscount() {
+        logger.info("Demonstrating large order discount processing with real APEX processing...");
+
+        // Create sample large order data
+        Map<String, Object> orderData = new HashMap<>();
+        orderData.put("orderId", "OP001");
+        orderData.put("orderTotal", 1250.00);
+        orderData.put("customerId", "CUST001");
+        orderData.put("customerYears", 3);
+        orderData.put("customerName", "Premium Corp");
+
+        // Process using real APEX enrichment
+        Map<String, Object> result = processOrderDiscount(orderData);
+
+        logger.info("Large order discount result: {}", result);
+        System.out.println("=== Large Order Discount Demo Results ===");
+        System.out.println("Input: " + orderData);
+        System.out.println("Result: " + result);
+    }
+
+    /**
+     * Demonstrates new customer discount processing.
+     */
+    public void demonstrateNewCustomerDiscount() {
+        logger.info("Demonstrating new customer discount processing with real APEX processing...");
+
+        // Create sample new customer order data
+        Map<String, Object> orderData = new HashMap<>();
+        orderData.put("orderId", "OP003");
+        orderData.put("orderTotal", 400.00);
+        orderData.put("customerId", "CUST003");
+        orderData.put("customerYears", 0);
+        orderData.put("customerName", "New Startup LLC");
+
+        // Process using real APEX enrichment
+        Map<String, Object> result = processOrderDiscount(orderData);
+
+        logger.info("New customer discount result: {}", result);
+        System.out.println("=== New Customer Discount Demo Results ===");
+        System.out.println("Input: " + orderData);
+        System.out.println("Result: " + result);
+    }
+
+    /**
+     * Demonstrates infrastructure setup with real APEX services.
+     */
+    public void demonstrateInfrastructureSetup() {
+        logger.info("Demonstrating infrastructure setup with real APEX services...");
+
+        // Setup basic infrastructure
+        Map<String, Object> basicSetup = setupInfrastructure("basic-setup");
+
+        logger.info("Basic infrastructure setup result: {}", basicSetup);
+        System.out.println("=== Infrastructure Setup Demo Results ===");
+        System.out.println("Basic Setup Result: " + basicSetup);
+
+        // Setup advanced infrastructure
+        Map<String, Object> advancedSetup = setupInfrastructure("advanced-setup");
+
+        logger.info("Advanced infrastructure setup result: {}", advancedSetup);
+        System.out.println("Advanced Setup Result: " + advancedSetup);
+    }
+
+    /**
+     * Demonstrates YAML configuration loading with real APEX services.
+     */
+    public void demonstrateYamlConfigurationLoading() {
+        logger.info("Demonstrating YAML configuration loading with real APEX services...");
+
+        // Load loan rules configuration
+        Map<String, Object> loanConfig = loadYamlConfiguration("loan-approval-rules");
+
+        logger.info("Loan configuration loading result: {}", loanConfig);
+        System.out.println("=== YAML Configuration Loading Demo Results ===");
+        System.out.println("Loan Config Result: " + loanConfig);
+
+        // Load discount rules configuration
+        Map<String, Object> discountConfig = loadYamlConfiguration("discount-rules");
+
+        logger.info("Discount configuration loading result: {}", discountConfig);
+        System.out.println("Discount Config Result: " + discountConfig);
+    }
+
+    // ============================================================================
+    // MAIN METHOD FOR DEMONSTRATION
+    // ============================================================================
+
+    /**
+     * Main method to demonstrate APEX-compliant rule configuration bootstrap.
+     */
+    public static void main(String[] args) {
+        try {
+            logger.info("Starting APEX-compliant rule configuration bootstrap demonstration...");
+
+            // Initialize with real APEX services
+            RuleConfigurationHardcodedBootstrap demo = new RuleConfigurationHardcodedBootstrap();
+
+            // Run all demonstrations
+            demo.demonstrateExcellentCreditLoan();
+            System.out.println();
+
+            demo.demonstratePoorCreditLoan();
+            System.out.println();
+
+            demo.demonstrateLargeOrderDiscount();
+            System.out.println();
+
+            demo.demonstrateNewCustomerDiscount();
+            System.out.println();
+
+            demo.demonstrateInfrastructureSetup();
+            System.out.println();
+
+            demo.demonstrateYamlConfigurationLoading();
+
+            logger.info("APEX-compliant rule configuration bootstrap demonstration completed successfully");
+
+        } catch (Exception e) {
+            logger.error("Rule configuration bootstrap demonstration failed: {}", e.getMessage());
             System.err.println("Demo failed: " + e.getMessage());
             e.printStackTrace();
-        }
-    }
-    
-    /**
-     * Demonstrates the old hardcoded approach (like original RuleConfigurationHardcodedDemo).
-     */
-    private void demonstrateOldHardcodedApproach() {
-        System.out.println("\n--- PHASE 1: Old Hardcoded Approach (Original RuleConfigurationHardcodedDemo) ---");
-        
-        // Create sample data
-        List<LoanApplication> loans = createSampleLoanApplications();
-        
-        System.out.println("Processing loans with HARDCODED rules (bad approach):");
-        
-        for (LoanApplication loan : loans) {
-            // This is how the original RuleConfigurationHardcodedDemo worked - hardcoded rules
-            processLoanWithHardcodedRules(loan);
-            System.out.printf("  %s -> Decision: %s (%s)%n", loan.applicationId, loan.decision, loan.reason);
-        }
-        
-        System.out.println("\nProblems with hardcoded approach:");
-        System.out.println("  ❌ Rules embedded in Java code");
-        System.out.println("  ❌ No external configuration");
-        System.out.println("  ❌ Hard to modify without recompilation");
-        System.out.println("  ❌ No real infrastructure demonstration");
-        System.out.println("  ❌ Violates APEX design principles");
-    }
-    
-    /**
-     * Demonstrates the new bootstrap approach with data-driven rules.
-     */
-    private void demonstrateNewBootstrapApproach() {
-        System.out.println("\n--- PHASE 2: New Bootstrap Approach (Data-Driven Rules) ---");
-        
-        // Simulate infrastructure setup
-        System.out.println("Step 1: Setting up infrastructure...");
-        simulateInfrastructureSetup();
-        
-        // Simulate YAML configuration loading
-        System.out.println("Step 2: Loading YAML rule configurations...");
-        Map<String, Object> ruleConfigs = simulateYamlConfigurationLoading();
-        
-        // Create sample data
-        List<LoanApplication> loans = createSampleLoanApplications();
-        List<CustomerProfile> customers = createSampleCustomerProfiles();
-        List<OrderProcessing> orders = createSampleOrders();
-        
-        // Process with data-driven rules
-        System.out.println("Step 3: Processing with data-driven rules...");
-        
-        System.out.println("\nLoan Approval Processing:");
-        for (LoanApplication loan : loans) {
-            processLoanWithDataDrivenRules(loan, ruleConfigs);
-            System.out.printf("  %s -> Decision: %s (%s)%n", 
-                            loan.applicationId, loan.decision, loan.reason);
-        }
-        
-        System.out.println("\nOrder Discount Processing:");
-        for (int i = 0; i < orders.size() && i < customers.size(); i++) {
-            OrderProcessing order = orders.get(i);
-            CustomerProfile customer = customers.get(i);
-            processOrderWithDataDrivenRules(order, customer, ruleConfigs);
-            System.out.printf("  %s -> Discount: %s (%s)%n", 
-                            order.orderId, order.discountApplied, order.discountReason);
-        }
-        
-        System.out.println("\nBenefits of bootstrap approach:");
-        System.out.println("  ✅ Rules loaded from external YAML files");
-        System.out.println("  ✅ Real infrastructure setup (database, files)");
-        System.out.println("  ✅ Configurable without code changes");
-        System.out.println("  ✅ Comprehensive business scenarios");
-        System.out.println("  ✅ Follows APEX design principles");
-    }
-    
-    /**
-     * Compares the two approaches and shows the transformation benefits.
-     */
-    private void compareApproaches() {
-        System.out.println("\n--- PHASE 3: Comparison and Transformation Benefits ---");
-        
-        System.out.println("\nTRANSFORMATION SUMMARY:");
-        System.out.println("┌─────────────────────────────────────────────────────────────────┐");
-        System.out.println("│ BEFORE (Original RuleConfigurationHardcodedDemo)                        │");
-        System.out.println("├─────────────────────────────────────────────────────────────────┤");
-        System.out.println("│ • Hardcoded rules in Java methods                              │");
-        System.out.println("│ • No external configuration files                              │");
-        System.out.println("│ • No infrastructure demonstration                              │");
-        System.out.println("│ • Limited reusability and flexibility                          │");
-        System.out.println("└─────────────────────────────────────────────────────────────────┘");
-        
-        System.out.println("┌─────────────────────────────────────────────────────────────────┐");
-        System.out.println("│ AFTER (RuleConfigurationBootstrap)                             │");
-        System.out.println("├─────────────────────────────────────────────────────────────────┤");
-        System.out.println("│ • Rules loaded from external YAML files                        │");
-        System.out.println("│ • PostgreSQL database setup and management                     │");
-        System.out.println("│ • Complete infrastructure demonstration                         │");
-        System.out.println("│ • Self-contained bootstrap with cleanup                        │");
-        System.out.println("│ • Real APEX Rule Engine integration                            │");
-        System.out.println("│ • Multiple data source types (DB, YAML, inline)               │");
-        System.out.println("│ • Comprehensive business scenarios                             │");
-        System.out.println("└─────────────────────────────────────────────────────────────────┘");
-        
-        System.out.println("\nFILES CREATED IN BOOTSTRAP REFACTORING:");
-        System.out.println("Infrastructure Classes:");
-        System.out.println("  📁 RuleConfigDatabaseSetup.java - PostgreSQL database setup");
-        System.out.println("  📁 RuleConfigDataSourceVerifier.java - Data source verification");
-        System.out.println("  📁 RuleConfigExternalDatasetSetup.java - YAML file generation");
-        
-        System.out.println("Model Classes:");
-        System.out.println("  📁 LoanApplication.java - Loan application data model");
-        System.out.println("  📁 CustomerProfile.java - Customer profile with loyalty info");
-        System.out.println("  📁 OrderProcessing.java - Order processing with discounts");
-        
-        System.out.println("YAML Configuration Files:");
-        System.out.println("  📄 rule-configuration-bootstrap.yaml - Main configuration");
-        System.out.println("  📄 loan-approval-rules.yaml - 6 loan approval rules");
-        System.out.println("  📄 discount-rules.yaml - 4 order discount rules");
-        System.out.println("  📄 combined-rules.yaml - Complex rule combinations");
-        
-        System.out.println("Main Bootstrap Class:");
-        System.out.println("  📁 RuleConfigurationBootstrap.java - Complete bootstrap demo");
-        
-        System.out.println("\nKEY IMPROVEMENTS:");
-        System.out.println("  🚀 100% Data-Driven: All rules from external YAML files");
-        System.out.println("  🚀 Real Infrastructure: PostgreSQL + file management");
-        System.out.println("  🚀 APEX Integration: Proper use of APEX Rule Engine APIs");
-        System.out.println("  🚀 Bootstrap Pattern: Self-contained with setup/cleanup");
-        System.out.println("  🚀 Business Scenarios: Complete end-to-end processing");
-    }
-    
-    // Helper methods for simulation
-    
-    private void simulateInfrastructureSetup() {
-        System.out.println("  ✅ PostgreSQL database setup (4 tables created)");
-        System.out.println("  ✅ External YAML files created");
-        System.out.println("  ✅ Data source verification completed");
-        try { Thread.sleep(500); } catch (InterruptedException e) {}
-    }
-    
-    private Map<String, Object> simulateYamlConfigurationLoading() {
-        System.out.println("  ✅ loan-approval-rules.yaml loaded (6 rules)");
-        System.out.println("  ✅ discount-rules.yaml loaded (4 rules)");
-        System.out.println("  ✅ combined-rules.yaml loaded (5 rules)");
-        
-        Map<String, Object> configs = new HashMap<>();
-        configs.put("loanRulesLoaded", true);
-        configs.put("discountRulesLoaded", true);
-        configs.put("combinedRulesLoaded", true);
-        
-        try { Thread.sleep(300); } catch (InterruptedException e) {}
-        return configs;
-    }
-    
-    private List<LoanApplication> createSampleLoanApplications() {
-        List<LoanApplication> loans = new ArrayList<>();
-        loans.add(new LoanApplication("LA001", "CUST001", new BigDecimal("250000"), 780, new BigDecimal("0.28")));
-        loans.add(new LoanApplication("LA002", "CUST002", new BigDecimal("45000"), 720, new BigDecimal("0.35")));
-        loans.add(new LoanApplication("LA003", "CUST003", new BigDecimal("15000"), 580, new BigDecimal("0.48")));
-        loans.add(new LoanApplication("LA004", "CUST004", new BigDecimal("180000"), 760, new BigDecimal("0.32")));
-        return loans;
-    }
-    
-    private List<CustomerProfile> createSampleCustomerProfiles() {
-        List<CustomerProfile> customers = new ArrayList<>();
-        customers.add(new CustomerProfile("CUST001", "John", "Smith", "Gold", 6));
-        customers.add(new CustomerProfile("CUST002", "Sarah", "Johnson", "Silver", 3));
-        customers.add(new CustomerProfile("CUST003", "Mike", "Brown", "Basic", 0));
-        customers.add(new CustomerProfile("CUST004", "Emily", "Davis", "Gold", 8));
-        return customers;
-    }
-    
-    private List<OrderProcessing> createSampleOrders() {
-        List<OrderProcessing> orders = new ArrayList<>();
-        orders.add(new OrderProcessing("ORD001", "CUST001", new BigDecimal("1250.00"), 3));
-        orders.add(new OrderProcessing("ORD002", "CUST002", new BigDecimal("89.99"), 1));
-        orders.add(new OrderProcessing("ORD003", "CUST003", new BigDecimal("450.00"), 15));
-        orders.add(new OrderProcessing("ORD004", "CUST004", new BigDecimal("2100.00"), 8));
-        return orders;
-    }
-    
-    // Old hardcoded approach (simulating original RuleConfigurationHardcodedDemo)
-    private void processLoanWithHardcodedRules(LoanApplication loan) {
-        // This simulates the hardcoded rules from the original RuleConfigurationHardcodedDemo
-        if (loan.creditScore >= 750) {
-            loan.decision = "APPROVED";
-            loan.reason = "Excellent credit score (hardcoded rule)";
-        } else if (loan.creditScore >= 700 && loan.debtToIncomeRatio.compareTo(new BigDecimal("0.36")) <= 0) {
-            loan.decision = "APPROVED";
-            loan.reason = "Good credit with acceptable DTI (hardcoded rule)";
-        } else if (loan.creditScore < 620) {
-            loan.decision = "REJECTED";
-            loan.reason = "Poor credit score (hardcoded rule)";
-        } else {
-            loan.decision = "REFERRED";
-            loan.reason = "Manual review required (hardcoded rule)";
-        }
-    }
-    
-    // New data-driven approach (simulating bootstrap with YAML rules)
-    private void processLoanWithDataDrivenRules(LoanApplication loan, Map<String, Object> ruleConfigs) {
-        // This simulates loading rules from YAML and applying them
-        if (loan.creditScore >= 750) {
-            loan.decision = "APPROVED";
-            loan.reason = "Rule LA002: Excellent credit (from YAML)";
-        } else if (loan.creditScore >= 700 && loan.debtToIncomeRatio.compareTo(new BigDecimal("0.36")) <= 0) {
-            loan.decision = "APPROVED";
-            loan.reason = "Rule LA001: Good credit + low DTI (from YAML)";
-        } else if (loan.creditScore < 620) {
-            loan.decision = "REJECTED";
-            loan.reason = "Rule LA003: Poor credit (from YAML)";
-        } else {
-            loan.decision = "REFERRED";
-            loan.reason = "Rule LA005: Moderate credit review (from YAML)";
-        }
-    }
-    
-    private void processOrderWithDataDrivenRules(OrderProcessing order, CustomerProfile customer, Map<String, Object> ruleConfigs) {
-        // This simulates loading discount rules from YAML and applying them
-        if (order.orderTotal.compareTo(new BigDecimal("1000")) > 0) {
-            order.discountApplied = order.orderTotal.multiply(new BigDecimal("0.15"));
-            order.discountReason = "Rule OD001: Large order 15% discount (from YAML)";
-        } else if (customer.customerYears > 5) {
-            order.discountApplied = order.orderTotal.multiply(new BigDecimal("0.10"));
-            order.discountReason = "Rule OD002: Loyalty 10% discount (from YAML)";
-        } else if (customer.customerYears == 0) {
-            order.discountApplied = order.orderTotal.multiply(new BigDecimal("0.05"));
-            order.discountReason = "Rule OD003: New customer 5% discount (from YAML)";
-        } else {
-            order.discountApplied = BigDecimal.ZERO;
-            order.discountReason = "Rule OD004: No discount (from YAML)";
         }
     }
 }

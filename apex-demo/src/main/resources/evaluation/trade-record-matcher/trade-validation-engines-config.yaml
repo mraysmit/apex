@@ -1,0 +1,464 @@
+# APEX Trade Validation Engines Configuration
+# External data source configuration for trade validation engines
+# Replaces hardcoded trade validation logic from TradeRecordMatcherDemo
+
+type: "external-data-config"
+name: "trade-validation-engines-config"
+description: "Data-driven trade validation engines configuration for trade record matcher"
+
+# Trade validation engines configuration by engine type
+data:
+  trade-type-validation-engines:
+    engine-type: "trade-type-validation-engines"
+    engine-name: "Trade Type Validation Engines"
+    description: "Engines for trade type validation and verification"
+    engine-characteristics:
+      validation-category: "TRADE_TYPE"
+      validation-method: "TYPE_SPECIFIC"
+      real-time-capability: true
+    validation-engines:
+      equity-type-validation-engine:
+        engine-id: "EQUITY_TYPE_VALIDATION_ENGINE"
+        engine-name: "Equity Type Validation Engine"
+        engine-description: "Engine for validating equity trade types and characteristics"
+        validation-parameters:
+          symbol-validation-weight: 0.3
+          market-validation-weight: 0.25
+          sector-validation-weight: 0.2
+          exchange-validation-weight: 0.25
+        validation-rules:
+          - rule-name: "equity-symbol-validation"
+            rule-condition: "#trade.type == 'Equity'"
+            rule-calculation: "#trade.symbol != null && #trade.symbol.matches('^[A-Z]{1,5}$') ? 1.0 : 0.0"
+            rule-description: "Validate equity symbol format (1-5 uppercase letters)"
+            rule-priority: 1
+            rule-action: "VALIDATE"
+          - rule-name: "equity-market-validation"
+            rule-condition: "#trade.type == 'Equity' && #trade.market != null"
+            rule-calculation: "T(java.util.Arrays).asList('NYSE', 'NASDAQ', 'AMEX', 'OTC').contains(#trade.market) ? 1.0 : 0.0"
+            rule-description: "Validate equity market is recognized"
+            rule-priority: 2
+            rule-action: "VALIDATE"
+          - rule-name: "equity-sector-validation"
+            rule-condition: "#trade.type == 'Equity' && #trade.sector != null"
+            rule-calculation: "T(java.util.Arrays).asList('Technology', 'Healthcare', 'Financial', 'Energy', 'Consumer', 'Industrial', 'Materials', 'Utilities', 'Real Estate', 'Communication').contains(#trade.sector) ? 1.0 : 0.0"
+            rule-description: "Validate equity sector classification"
+            rule-priority: 3
+            rule-action: "VALIDATE"
+          - rule-name: "equity-exchange-validation"
+            rule-condition: "#trade.type == 'Equity' && #trade.exchange != null"
+            rule-calculation: "#exchangeValidator.isValidEquityExchange(#trade.exchange) ? 1.0 : 0.0"
+            rule-description: "Validate equity exchange is operational"
+            rule-priority: 4
+            rule-action: "VALIDATE"
+        validation-outcomes:
+          success-outcome: "EQUITY_TYPE_VALIDATED"
+          failure-outcome: "EQUITY_TYPE_VALIDATION_FAILED"
+        audit-requirements:
+          - "Log equity type validation results"
+          - "Track symbol and market validation rates"
+          
+      fixed-income-type-validation-engine:
+        engine-id: "FIXED_INCOME_TYPE_VALIDATION_ENGINE"
+        engine-name: "Fixed Income Type Validation Engine"
+        engine-description: "Engine for validating fixed income trade types and characteristics"
+        validation-parameters:
+          cusip-validation-weight: 0.4
+          maturity-validation-weight: 0.3
+          rating-validation-weight: 0.2
+          issuer-validation-weight: 0.1
+        validation-rules:
+          - rule-name: "cusip-validation"
+            rule-condition: "#trade.type == 'FixedIncome'"
+            rule-calculation: "#trade.cusip != null && #trade.cusip.matches('^[0-9A-Z]{9}$') ? 1.0 : 0.0"
+            rule-description: "Validate CUSIP format (9 alphanumeric characters)"
+            rule-priority: 1
+            rule-action: "VALIDATE"
+          - rule-name: "maturity-date-validation"
+            rule-condition: "#trade.type == 'FixedIncome' && #trade.maturityDate != null"
+            rule-calculation: "#trade.maturityDate.isAfter(T(java.time.LocalDate).now()) ? 1.0 : 0.0"
+            rule-description: "Validate maturity date is in the future"
+            rule-priority: 2
+            rule-action: "VALIDATE"
+          - rule-name: "credit-rating-validation"
+            rule-condition: "#trade.type == 'FixedIncome' && #trade.creditRating != null"
+            rule-calculation: "T(java.util.Arrays).asList('AAA', 'AA+', 'AA', 'AA-', 'A+', 'A', 'A-', 'BBB+', 'BBB', 'BBB-', 'BB+', 'BB', 'BB-', 'B+', 'B', 'B-', 'CCC', 'CC', 'C', 'D').contains(#trade.creditRating) ? 1.0 : 0.0"
+            rule-description: "Validate credit rating is recognized"
+            rule-priority: 3
+            rule-action: "VALIDATE"
+          - rule-name: "issuer-validation"
+            rule-condition: "#trade.type == 'FixedIncome' && #trade.issuer != null"
+            rule-calculation: "#issuerValidator.isValidIssuer(#trade.issuer) ? 1.0 : 0.0"
+            rule-description: "Validate issuer is recognized entity"
+            rule-priority: 4
+            rule-action: "VALIDATE"
+        validation-outcomes:
+          success-outcome: "FIXED_INCOME_TYPE_VALIDATED"
+          failure-outcome: "FIXED_INCOME_TYPE_VALIDATION_FAILED"
+        audit-requirements:
+          - "Log fixed income type validation results"
+          - "Track CUSIP and rating validation rates"
+          
+      derivative-type-validation-engine:
+        engine-id: "DERIVATIVE_TYPE_VALIDATION_ENGINE"
+        engine-name: "Derivative Type Validation Engine"
+        engine-description: "Engine for validating derivative trade types and characteristics"
+        validation-parameters:
+          underlying-validation-weight: 0.3
+          expiration-validation-weight: 0.25
+          strike-validation-weight: 0.25
+          option-type-validation-weight: 0.2
+        validation-rules:
+          - rule-name: "underlying-asset-validation"
+            rule-condition: "#trade.type == 'Derivative'"
+            rule-calculation: "#trade.underlyingAsset != null && #trade.underlyingAsset.length() > 0 ? 1.0 : 0.0"
+            rule-description: "Validate underlying asset is specified"
+            rule-priority: 1
+            rule-action: "VALIDATE"
+          - rule-name: "expiration-date-validation"
+            rule-condition: "#trade.type == 'Derivative' && #trade.expirationDate != null"
+            rule-calculation: "#trade.expirationDate.isAfter(T(java.time.LocalDate).now()) ? 1.0 : 0.0"
+            rule-description: "Validate expiration date is in the future"
+            rule-priority: 2
+            rule-action: "VALIDATE"
+          - rule-name: "strike-price-validation"
+            rule-condition: "#trade.type == 'Derivative' && #trade.strikePrice != null"
+            rule-calculation: "#trade.strikePrice > 0 ? 1.0 : 0.0"
+            rule-description: "Validate strike price is positive"
+            rule-priority: 3
+            rule-action: "VALIDATE"
+          - rule-name: "option-type-validation"
+            rule-condition: "#trade.type == 'Derivative' && #trade.optionType != null"
+            rule-calculation: "T(java.util.Arrays).asList('CALL', 'PUT', 'FORWARD', 'FUTURE', 'SWAP').contains(#trade.optionType) ? 1.0 : 0.0"
+            rule-description: "Validate option type is recognized"
+            rule-priority: 4
+            rule-action: "VALIDATE"
+        validation-outcomes:
+          success-outcome: "DERIVATIVE_TYPE_VALIDATED"
+          failure-outcome: "DERIVATIVE_TYPE_VALIDATION_FAILED"
+        audit-requirements:
+          - "Log derivative type validation results"
+          - "Track underlying and expiration validation rates"
+    engine-settings:
+      type-specific-validation: true
+      real-time-validation: true
+      comprehensive-checking: true
+    
+  trade-data-validation-engines:
+    engine-type: "trade-data-validation-engines"
+    engine-name: "Trade Data Validation Engines"
+    description: "Engines for trade data validation and integrity checking"
+    engine-characteristics:
+      validation-category: "DATA_INTEGRITY"
+      validation-method: "FIELD_SPECIFIC"
+      comprehensive-checking: true
+    validation-engines:
+      numeric-data-validation-engine:
+        engine-id: "NUMERIC_DATA_VALIDATION_ENGINE"
+        engine-name: "Numeric Data Validation Engine"
+        engine-description: "Engine for validating numeric trade data fields"
+        validation-parameters:
+          price-validation-weight: 0.3
+          quantity-validation-weight: 0.25
+          amount-validation-weight: 0.25
+          percentage-validation-weight: 0.2
+        validation-rules:
+          - rule-name: "price-range-validation"
+            rule-condition: "#trade.price != null"
+            rule-calculation: "#trade.price > 0 && #trade.price < 1000000 ? 1.0 : 0.0"
+            rule-description: "Validate price is within reasonable range (0 to 1M)"
+            rule-priority: 1
+            rule-action: "VALIDATE"
+          - rule-name: "quantity-validation"
+            rule-condition: "#trade.quantity != null"
+            rule-calculation: "#trade.quantity > 0 && #trade.quantity < 1000000000 ? 1.0 : 0.0"
+            rule-description: "Validate quantity is positive and reasonable"
+            rule-priority: 2
+            rule-action: "VALIDATE"
+          - rule-name: "notional-amount-validation"
+            rule-condition: "#trade.notionalAmount != null"
+            rule-calculation: "#trade.notionalAmount > 0 && #trade.notionalAmount < 10000000000 ? 1.0 : 0.0"
+            rule-description: "Validate notional amount is positive and reasonable"
+            rule-priority: 3
+            rule-action: "VALIDATE"
+          - rule-name: "percentage-validation"
+            rule-condition: "#trade.percentage != null"
+            rule-calculation: "#trade.percentage >= 0 && #trade.percentage <= 100 ? 1.0 : 0.0"
+            rule-description: "Validate percentage is between 0 and 100"
+            rule-priority: 4
+            rule-action: "VALIDATE"
+        validation-outcomes:
+          success-outcome: "NUMERIC_DATA_VALIDATED"
+          failure-outcome: "NUMERIC_DATA_VALIDATION_FAILED"
+        audit-requirements:
+          - "Log numeric data validation results"
+          - "Track range validation effectiveness"
+          
+      date-data-validation-engine:
+        engine-id: "DATE_DATA_VALIDATION_ENGINE"
+        engine-name: "Date Data Validation Engine"
+        engine-description: "Engine for validating date-related trade data fields"
+        validation-parameters:
+          trade-date-validation-weight: 0.3
+          settlement-date-validation-weight: 0.25
+          maturity-date-validation-weight: 0.25
+          expiration-date-validation-weight: 0.2
+        validation-rules:
+          - rule-name: "trade-date-validation"
+            rule-condition: "#trade.tradeDate != null"
+            rule-calculation: "#trade.tradeDate.isBefore(T(java.time.LocalDate).now().plusDays(1)) && #trade.tradeDate.isAfter(T(java.time.LocalDate).now().minusYears(10)) ? 1.0 : 0.0"
+            rule-description: "Validate trade date is reasonable (within 10 years past to tomorrow)"
+            rule-priority: 1
+            rule-action: "VALIDATE"
+          - rule-name: "settlement-date-validation"
+            rule-condition: "#trade.settlementDate != null && #trade.tradeDate != null"
+            rule-calculation: "#trade.settlementDate.isAfter(#trade.tradeDate) || #trade.settlementDate.isEqual(#trade.tradeDate) ? 1.0 : 0.0"
+            rule-description: "Validate settlement date is on or after trade date"
+            rule-priority: 2
+            rule-action: "VALIDATE"
+          - rule-name: "maturity-date-validation"
+            rule-condition: "#trade.maturityDate != null && #trade.tradeDate != null"
+            rule-calculation: "#trade.maturityDate.isAfter(#trade.tradeDate) ? 1.0 : 0.0"
+            rule-description: "Validate maturity date is after trade date"
+            rule-priority: 3
+            rule-action: "VALIDATE"
+          - rule-name: "expiration-date-validation"
+            rule-condition: "#trade.expirationDate != null && #trade.tradeDate != null"
+            rule-calculation: "#trade.expirationDate.isAfter(#trade.tradeDate) ? 1.0 : 0.0"
+            rule-description: "Validate expiration date is after trade date"
+            rule-priority: 4
+            rule-action: "VALIDATE"
+        validation-outcomes:
+          success-outcome: "DATE_DATA_VALIDATED"
+          failure-outcome: "DATE_DATA_VALIDATION_FAILED"
+        audit-requirements:
+          - "Log date data validation results"
+          - "Track date relationship validation"
+          
+      string-data-validation-engine:
+        engine-id: "STRING_DATA_VALIDATION_ENGINE"
+        engine-name: "String Data Validation Engine"
+        engine-description: "Engine for validating string-based trade data fields"
+        validation-parameters:
+          symbol-validation-weight: 0.25
+          counterparty-validation-weight: 0.25
+          description-validation-weight: 0.25
+          reference-validation-weight: 0.25
+        validation-rules:
+          - rule-name: "symbol-format-validation"
+            rule-condition: "#trade.symbol != null"
+            rule-calculation: "#trade.symbol.matches('^[A-Z0-9]{1,12}$') ? 1.0 : 0.0"
+            rule-description: "Validate symbol format (1-12 alphanumeric uppercase)"
+            rule-priority: 1
+            rule-action: "VALIDATE"
+          - rule-name: "counterparty-name-validation"
+            rule-condition: "#trade.counterpartyName != null"
+            rule-calculation: "#trade.counterpartyName.length() >= 2 && #trade.counterpartyName.length() <= 100 ? 1.0 : 0.0"
+            rule-description: "Validate counterparty name length (2-100 characters)"
+            rule-priority: 2
+            rule-action: "VALIDATE"
+          - rule-name: "description-validation"
+            rule-condition: "#trade.description != null"
+            rule-calculation: "#trade.description.length() >= 5 && #trade.description.length() <= 500 ? 1.0 : 0.0"
+            rule-description: "Validate description length (5-500 characters)"
+            rule-priority: 3
+            rule-action: "VALIDATE"
+          - rule-name: "reference-format-validation"
+            rule-condition: "#trade.tradeReference != null"
+            rule-calculation: "#trade.tradeReference.matches('^[A-Z0-9-]{5,20}$') ? 1.0 : 0.0"
+            rule-description: "Validate trade reference format (5-20 alphanumeric with hyphens)"
+            rule-priority: 4
+            rule-action: "VALIDATE"
+        validation-outcomes:
+          success-outcome: "STRING_DATA_VALIDATED"
+          failure-outcome: "STRING_DATA_VALIDATION_FAILED"
+        audit-requirements:
+          - "Log string data validation results"
+          - "Track format validation compliance"
+    engine-settings:
+      field-specific-validation: true
+      format-checking: true
+      range-validation: true
+    
+  trade-business-rule-engines:
+    engine-type: "trade-business-rule-engines"
+    engine-name: "Trade Business Rule Engines"
+    description: "Engines for trade business rule validation and compliance"
+    engine-characteristics:
+      validation-category: "BUSINESS_RULES"
+      validation-method: "RULE_BASED"
+      business-logic-intensive: true
+    validation-engines:
+      market-hours-validation-engine:
+        engine-id: "MARKET_HOURS_VALIDATION_ENGINE"
+        engine-name: "Market Hours Validation Engine"
+        engine-description: "Engine for validating trades against market hours"
+        validation-parameters:
+          market-open-validation-weight: 0.4
+          market-close-validation-weight: 0.3
+          holiday-validation-weight: 0.2
+          weekend-validation-weight: 0.1
+        validation-rules:
+          - rule-name: "market-hours-validation"
+            rule-condition: "#trade.tradeTime != null && #trade.market != null"
+            rule-calculation: "#marketHoursValidator.isWithinMarketHours(#trade.market, #trade.tradeTime) ? 1.0 : 0.0"
+            rule-description: "Validate trade occurred within market hours"
+            rule-priority: 1
+            rule-action: "VALIDATE"
+          - rule-name: "holiday-validation"
+            rule-condition: "#trade.tradeDate != null && #trade.market != null"
+            rule-calculation: "!#holidayValidator.isMarketHoliday(#trade.market, #trade.tradeDate) ? 1.0 : 0.0"
+            rule-description: "Validate trade did not occur on market holiday"
+            rule-priority: 2
+            rule-action: "VALIDATE"
+          - rule-name: "weekend-validation"
+            rule-condition: "#trade.tradeDate != null"
+            rule-calculation: "#trade.tradeDate.getDayOfWeek().getValue() <= 5 ? 1.0 : 0.0"
+            rule-description: "Validate trade did not occur on weekend"
+            rule-priority: 3
+            rule-action: "VALIDATE"
+        validation-outcomes:
+          success-outcome: "MARKET_HOURS_VALIDATED"
+          failure-outcome: "MARKET_HOURS_VALIDATION_FAILED"
+        audit-requirements:
+          - "Log market hours validation results"
+          - "Track after-hours trading exceptions"
+          
+      position-limits-validation-engine:
+        engine-id: "POSITION_LIMITS_VALIDATION_ENGINE"
+        engine-name: "Position Limits Validation Engine"
+        engine-description: "Engine for validating trades against position limits"
+        validation-parameters:
+          individual-limit-validation-weight: 0.3
+          aggregate-limit-validation-weight: 0.3
+          concentration-limit-validation-weight: 0.2
+          exposure-limit-validation-weight: 0.2
+        validation-rules:
+          - rule-name: "individual-position-limit-validation"
+            rule-condition: "#trade.notionalAmount != null && #trade.symbol != null"
+            rule-calculation: "#positionLimitValidator.isWithinIndividualLimit(#trade.symbol, #trade.notionalAmount) ? 1.0 : 0.0"
+            rule-description: "Validate trade is within individual position limits"
+            rule-priority: 1
+            rule-action: "VALIDATE"
+          - rule-name: "aggregate-position-limit-validation"
+            rule-condition: "#trade.notionalAmount != null && #trade.sector != null"
+            rule-calculation: "#positionLimitValidator.isWithinAggregateLimit(#trade.sector, #trade.notionalAmount) ? 1.0 : 0.0"
+            rule-description: "Validate trade is within aggregate position limits"
+            rule-priority: 2
+            rule-action: "VALIDATE"
+          - rule-name: "concentration-limit-validation"
+            rule-condition: "#trade.notionalAmount != null && #trade.issuer != null"
+            rule-calculation: "#concentrationLimitValidator.isWithinConcentrationLimit(#trade.issuer, #trade.notionalAmount) ? 1.0 : 0.0"
+            rule-description: "Validate trade is within concentration limits"
+            rule-priority: 3
+            rule-action: "VALIDATE"
+        validation-outcomes:
+          success-outcome: "POSITION_LIMITS_VALIDATED"
+          failure-outcome: "POSITION_LIMITS_VALIDATION_FAILED"
+        audit-requirements:
+          - "Log position limits validation results"
+          - "Track limit breach incidents"
+    engine-settings:
+      business-rule-enforcement: true
+      limit-checking: true
+      compliance-monitoring: true
+    
+  trade-compliance-engines:
+    engine-type: "trade-compliance-engines"
+    engine-name: "Trade Compliance Engines"
+    description: "Engines for trade regulatory compliance validation"
+    engine-characteristics:
+      validation-category: "REGULATORY_COMPLIANCE"
+      validation-method: "COMPLIANCE_RULES"
+      regulatory-intensive: true
+    validation-engines:
+      regulatory-compliance-engine:
+        engine-id: "REGULATORY_COMPLIANCE_ENGINE"
+        engine-name: "Regulatory Compliance Engine"
+        engine-description: "Engine for validating trades against regulatory requirements"
+        validation-parameters:
+          mifid-compliance-weight: 0.25
+          dodd-frank-compliance-weight: 0.25
+          basel-compliance-weight: 0.25
+          local-regulation-compliance-weight: 0.25
+        validation-rules:
+          - rule-name: "mifid-compliance-validation"
+            rule-condition: "#trade.jurisdiction == 'EU'"
+            rule-calculation: "#mifidValidator.isCompliant(#trade) ? 1.0 : 0.0"
+            rule-description: "Validate trade complies with MiFID regulations"
+            rule-priority: 1
+            rule-action: "VALIDATE"
+          - rule-name: "dodd-frank-compliance-validation"
+            rule-condition: "#trade.jurisdiction == 'US'"
+            rule-calculation: "#doddFrankValidator.isCompliant(#trade) ? 1.0 : 0.0"
+            rule-description: "Validate trade complies with Dodd-Frank regulations"
+            rule-priority: 2
+            rule-action: "VALIDATE"
+          - rule-name: "basel-compliance-validation"
+            rule-condition: "#trade.type == 'Derivative'"
+            rule-calculation: "#baselValidator.isCompliant(#trade) ? 1.0 : 0.0"
+            rule-description: "Validate trade complies with Basel regulations"
+            rule-priority: 3
+            rule-action: "VALIDATE"
+        validation-outcomes:
+          success-outcome: "REGULATORY_COMPLIANCE_VALIDATED"
+          failure-outcome: "REGULATORY_COMPLIANCE_VALIDATION_FAILED"
+        audit-requirements:
+          - "Log regulatory compliance validation results"
+          - "Track compliance violations"
+    engine-settings:
+      regulatory-monitoring: true
+      compliance-checking: true
+      violation-tracking: true
+    
+  default:
+    engine-type: "default"
+    engine-name: "Default Trade Validation Engines"
+    description: "Default trade validation engine processing"
+    validation-engines:
+      default-engine:
+        engine-id: "DEFAULT_ENGINE"
+        engine-name: "Default Engine"
+        validation-rules:
+          - rule-name: "default-validation"
+            rule-calculation: "1.0"
+            rule-description: "Default validation (always pass)"
+    engine-settings:
+      default-processing: true
+
+# Engine execution patterns
+execution-patterns:
+  validation-category-pattern:
+    pattern-name: "Validation Category Pattern"
+    description: "Execute engines based on validation categories"
+    validation-categories: ["TRADE_TYPE", "DATA_INTEGRITY", "BUSINESS_RULES", "REGULATORY_COMPLIANCE"]
+    
+  validation-method-pattern:
+    pattern-name: "Validation Method Pattern"
+    description: "Execute engines based on validation methods"
+    validation-methods: ["TYPE_SPECIFIC", "FIELD_SPECIFIC", "RULE_BASED", "COMPLIANCE_RULES"]
+    
+  trade-type-pattern:
+    pattern-name: "Trade Type Pattern"
+    description: "Execute engines based on trade types"
+    trade-types: ["Equity", "FixedIncome", "Derivative", "Forex", "Commodity"]
+
+# Quality assurance
+quality-assurance:
+  engine-accuracy:
+    - "Trade validation engines must be accurate"
+    - "Validation rules must be correct"
+    - "Business rules must be current"
+    - "Compliance checks must be comprehensive"
+    
+  engine-reliability:
+    - "Engines must be consistent"
+    - "Validation must be repeatable"
+    - "Performance must be acceptable"
+    - "Error handling must be robust"
+    
+  regulatory-compliance:
+    - "Validation must comply with regulations"
+    - "Rules must meet regulatory standards"
+    - "Documentation must be complete"
+    - "Audit trails must be maintained"

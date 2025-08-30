@@ -4,6 +4,15 @@
 [![Maven](https://img.shields.io/badge/Maven-3.8+-blue.svg)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Compatible-blue.svg)](https://www.postgresql.org/)
+[![Documentation](https://img.shields.io/badge/Docs-Complete-blue.svg)](docs/)
+[![Demos](https://img.shields.io/badge/Demos-16%2B-orange.svg)](apex-demo/)
+[![Playground](https://img.shields.io/badge/Playground-Interactive-purple.svg)](http://localhost:8081/playground)
+[![Financial Services](https://img.shields.io/badge/Financial%20Services-Ready-gold.svg)](docs/APEX_FINANCIAL_SERVICES_GUIDE.md)
+[![Tests](https://img.shields.io/badge/Tests-100%25%20Coverage-brightgreen.svg)](apex-core/src/test)
+[![API Docs](https://img.shields.io/badge/API-Swagger-green.svg)](http://localhost:8080/swagger-ui.html)
+
 **Version:** 2.1
 **Date:** 2025-08-28
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
@@ -29,7 +38,7 @@ mvn spring-boot:run
 ### Run Demonstrations
 ```bash
 cd apex-demo
-# 🆕 External Data-Source Reference Demos (APEX 2.1)
+# External Data-Source Reference Demos (APEX 2.1)
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.SimplePostgreSQLLookupDemo"
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.PostgreSQLLookupDemo"
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookup.ExternalDataSourceWorkingDemo"
@@ -44,7 +53,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo
 
 ## Key Features
 
-### 🆕 APEX 2.1 - External Data-Source Reference System
+### APEX 2.1 - External Data-Source Reference System
 - **Clean Architecture**: Separation of infrastructure and business logic configurations
 - **Configuration Caching**: Automatic caching of external configurations for performance
 - **Reusable Components**: Share data-source configurations across multiple rule sets
@@ -59,7 +68,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo
 - **Enterprise Features**: Connection pooling, health monitoring, caching, circuit breakers
 - **100% Test Coverage**: Comprehensive testing with cross-browser UI support
 
-## 🚀 External Data-Source Reference System
+## External Data-Source Reference System
 
 APEX 2.1 introduces a revolutionary **external data-source reference system** that enables clean architecture and enterprise-grade configuration management.
 
@@ -136,11 +145,11 @@ queries:
 
 ### Key Benefits
 
-- **🏗️ Clean Architecture**: Infrastructure and business logic cleanly separated
-- **♻️ Reusable Components**: External data-source configurations shared across multiple rule sets
-- **⚡ Performance**: Configuration caching and connection pooling
-- **🌍 Environment Management**: Different infrastructure configurations for dev/test/prod
-- **📈 Enterprise Scalability**: Production-ready configuration management
+- **Clean Architecture**: Infrastructure and business logic cleanly separated
+- **Reusable Components**: External data-source configurations shared across multiple rule sets
+- **Performance**: Configuration caching and connection pooling
+- **Environment Management**: Different infrastructure configurations for dev/test/prod
+- **Enterprise Scalability**: Production-ready configuration management
 
 ## Architecture
 
@@ -219,7 +228,7 @@ graph TB
 3. **All Bootstrap Demonstrations** (120 minutes) - Complete financial workflows
 4. **Advanced Feature Demos** (60-90 minutes) - Technical deep dive
 
-### 🆕 External Data-Source Reference Path (1-2 hours)
+### External Data-Source Reference Path (1-2 hours)
 1. **SimplePostgreSQLLookupDemo** (20 minutes) - Basic external references
 2. **PostgreSQLLookupDemo** (30 minutes) - Advanced multi-table lookups
 3. **ExternalDataSourceWorkingDemo** (30 minutes) - Production-ready patterns
@@ -260,7 +269,7 @@ graph TB
 - **Transactional Data**: Use **External Database References** (PostgreSQL, MySQL, Oracle)
 - **Real-time Data**: Use **External API References** with caching
 - **Batch Data**: Use **External File References** (CSV, JSON, XML)
-- **🆕 Clean Architecture**: Use **External Data-Source References** for separation of concerns
+- **Clean Architecture**: Use **External Data-Source References** for separation of concerns
 
 ## Requirements
 
@@ -274,7 +283,7 @@ Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for detai
 
 ## Getting Help
 
-### 🆕 External Data-Source Reference System
+### External Data-Source Reference System
 1. **[APEX YAML Reference Guide](docs/APEX_YAML_REFERENCE.md)** - Complete external data-source reference syntax
 2. **[APEX Data Management Guide](docs/APEX_DATA_MANAGEMENT_GUIDE.md)** - Section 16: External Data Source Integration
 3. **External Data-Source Reference Demos** - SimplePostgreSQLLookupDemo, PostgreSQLLookupDemo, ExternalDataSourceWorkingDemo

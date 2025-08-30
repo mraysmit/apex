@@ -1,11 +1,5 @@
 package dev.mars.apex.demo.evaluation;
 
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleGroup;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
-
-import java.util.*;
-
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
  *
@@ -22,578 +16,356 @@ import java.util.*;
  * limitations under the License.
  */
 
+
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+
 /**
- * Service for defining and creating business rules configurations.
+ * APEX-Compliant Rule Configuration Demo for Rules Engine Demonstrations.
  *
-* This class is part of the APEX A powerful expression processor for Java applications.
+ * This class demonstrates authentic APEX integration using real APEX core services
+ * instead of hardcoded simulation. Following the SimplePostgreSQLLookupDemo pattern:
+ *
+ * ============================================================================
+ * REAL APEX SERVICES USED:
+ * - EnrichmentService: Real APEX enrichment processor for rule processing
+ * - YamlConfigurationLoader: Real YAML configuration loading and validation
+ * - ExpressionEvaluatorService: Real SpEL expression evaluation for rule conditions
+ * - LookupServiceRegistry: Real lookup service integration
+ * ============================================================================
+ *
+ * CRITICAL: This class eliminates ALL hardcoded rule creation and uses:
+ * - YAML-driven rule loading from external configuration files
+ * - Real APEX enrichment services for rule processing
+ * - Fail-fast error handling (no hardcoded fallbacks)
+ * - Authentic APEX service integration throughout
+ *
+ * REFACTORING NOTES:
+ * - Replaced hardcoded rule creation with YAML-driven configuration
+ * - Eliminated embedded business logic parameters
+ * - Uses real APEX enrichment services for rule evaluation
+ * - Follows fail-fast approach when YAML configurations are missing
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-27
- * @version 1.0
- */
-/**
- * Service for defining and creating business rules configurations.
- * This class centralizes business rule configuration, separating it from rule processing.
+ * @version 2.0 - Real APEX services integration (Reference Template)
  */
 public class RuleConfigurationHardcodedDemo {
 
+    private static final Logger logger = LoggerFactory.getLogger(RuleConfigurationHardcodedDemo.class);
+
+    // Real APEX services for authentic integration
+    private final YamlConfigurationLoader yamlLoader;
+    private final EnrichmentService enrichmentService;
+    private final LookupServiceRegistry serviceRegistry;
+    private final ExpressionEvaluatorService expressionEvaluator;
+
+    // Configuration data (populated via real APEX processing)
+    private Map<String, Object> configurationData;
+
     /**
-     * Register loan approval rules with the provided configuration.
-     *
-     * @param config The rules engine configuration to register rules with
+     * Initialize the rule configuration demo with real APEX services.
      */
-    public static void registerLoanApprovalRules(RulesEngineConfiguration config) {
+    public RuleConfigurationHardcodedDemo() {
+        // Initialize real APEX services for authentic integration
+        this.yamlLoader = new YamlConfigurationLoader();
+        this.serviceRegistry = new LookupServiceRegistry();
+        this.expressionEvaluator = new ExpressionEvaluatorService();
+        this.enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
+
+        logger.info("RuleConfigurationHardcodedDemo initialized with real APEX services");
+
         try {
-            // Rule 1: Approve loans with good credit and low debt-to-income ratio
-            config.rule("LA001")
-                .withCategory("loan-approval")
-                .withName("approve-good-credit")
-                .withCondition("#creditScore >= 700 and #debtToIncomeRatio <= 0.36")
-                .withMessage("Loan approved based on good credit")
-                .withDescription("Approves loans for applicants with credit score >= 700 and debt-to-income ratio <= 36%")
-                .withPriority(10)
-                .build();
-
-            // Rule 2: Approve loans with excellent credit regardless of debt-to-income ratio
-            config.rule("LA002")
-                .withCategory("loan-approval")
-                .withName("approve-excellent-credit")
-                .withCondition("#creditScore >= 750")
-                .withMessage("Loan approved based on excellent credit")
-                .withDescription("Approves loans for applicants with credit score >= 750")
-                .withPriority(5)
-                .build();
-
-            // Rule 3: Reject loans with poor credit
-            config.rule("LA003")
-                .withCategory("loan-approval")
-                .withName("reject-poor-credit")
-                .withCondition("#creditScore < 620")
-                .withMessage("Loan rejected due to poor credit")
-                .withDescription("Rejects loans for applicants with credit score < 620")
-                .withPriority(20)
-                .build();
-
-            // Rule 4: Reject loans with high debt-to-income ratio
-            config.rule("LA004")
-                .withCategory("loan-approval")
-                .withName("reject-high-dti")
-                .withCondition("#debtToIncomeRatio > 0.43")
-                .withMessage("Loan rejected due to high debt-to-income ratio")
-                .withDescription("Rejects loans for applicants with debt-to-income ratio > 43%")
-                .withPriority(30)
-                .build();
-
-            // Rule 5: Refer loans with moderate credit and acceptable debt-to-income ratio
-            config.rule("LA005")
-                .withCategory("loan-approval")
-                .withName("refer-moderate-credit")
-                .withCondition("#creditScore >= 620 and #creditScore < 700 and #debtToIncomeRatio <= 0.43")
-                .withMessage("Loan referred for manual review")
-                .withDescription("Refers loans for manual review for applicants with credit score between 620 and 700 and debt-to-income ratio <= 43%")
-                .withPriority(40)
-                .build();
-
-            // Rule 6: Default rule - reject all other loans
-            config.rule("LA006")
-                .withCategory("loan-approval")
-                .withName("reject-default")
-                .withCondition("true")
-                .withMessage("Loan rejected based on default criteria")
-                .withDescription("Default rule that rejects all loans that don't meet other criteria")
-                .withPriority(100)
-                .build();
+            loadExternalConfiguration();
         } catch (Exception e) {
-            System.err.println("Error registering loan approval rules: " + e.getMessage());
+            logger.error("Failed to initialize RuleConfigurationHardcodedDemo: {}", e.getMessage());
+            throw new RuntimeException("Rule configuration demo initialization failed", e);
         }
     }
 
     /**
-     * Register discount rules with the provided configuration.
-     *
-     * @param config The rules engine configuration to register rules with
+     * Loads external YAML configuration.
      */
-    public static void registerDiscountRules(RulesEngineConfiguration config) {
+    private void loadExternalConfiguration() throws Exception {
+        logger.info("Loading external rule configuration YAML...");
+
+        configurationData = new HashMap<>();
+        
         try {
-            // Define rule parameters
-            double largeOrderThreshold = 1000.0;
-            int loyalCustomerYears = 5;
-            int newCustomerYears = 0;
-
-            // Rule 1: 15% discount for orders over $1000
-            createRule(
-                    config,
-                    "OD001", // Rule ID
-                    "order-discount", // Rule category
-                    "large-order-discount", // Rule name
-                    "#orderTotal > " + largeOrderThreshold, // Parameterized condition
-                    "15% discount applied for large order", // Message
-                    "Provides a 15% discount for orders exceeding $1000", // Description
-                    10 // Priority
-            );
-
-            // Rule 2: 10% discount for loyal customers (over 5 years)
-            createRule(
-                    config,
-                    "OD002", // Rule ID
-                    "order-discount", // Rule category
-                    "loyalty-discount", // Rule name
-                    "#customerYears > " + loyalCustomerYears, // Parameterized condition
-                    "10% discount applied for customer loyalty", // Message
-                    "Rewards loyal customers who have been with us for more than 5 years", // Description
-                    20 // Priority
-            );
-
-            // Rule 3: 5% discount for first-time customers
-            createRule(
-                    config,
-                    "OD003", // Rule ID
-                    "order-discount", // Rule category
-                    "new-customer-discount", // Rule name
-                    "#customerYears == " + newCustomerYears, // Parameterized condition
-                    "5% discount applied for new customers", // Message
-                    "Welcomes new customers with a 5% discount on their first order", // Description
-                    30 // Priority
-            );
-
-            // Rule 4: No discount for standard orders
-            createRule(
-                    config,
-                    "OD004", // Rule ID
-                    "order-discount", // Rule category
-                    "no-discount", // Rule name
-                    "true", // Condition
-                    "No discount applied", // Message
-                    "Default rule when no other discount rules apply", // Description
-                    100 // Priority
-            );
+            // Load main rule configuration
+            YamlRuleConfiguration mainConfig = yamlLoader.loadFromClasspath("evaluation/rule-configuration-demo.yaml");
+            configurationData.put("mainConfig", mainConfig);
+            
+            // Load specific rule configurations
+            YamlRuleConfiguration loanApprovalConfig = yamlLoader.loadFromClasspath("evaluation/rules/loan-approval-rules.yaml");
+            configurationData.put("loanApprovalConfig", loanApprovalConfig);
+            
+            YamlRuleConfiguration discountConfig = yamlLoader.loadFromClasspath("evaluation/rules/discount-rules.yaml");
+            configurationData.put("discountConfig", discountConfig);
+            
+            YamlRuleConfiguration combinedConfig = yamlLoader.loadFromClasspath("evaluation/rules/combined-rules.yaml");
+            configurationData.put("combinedConfig", combinedConfig);
+            
+            logger.info("External rule configuration YAML loaded successfully");
+            
         } catch (Exception e) {
-            System.err.println("Error registering discount rules: " + e.getMessage());
+            logger.warn("External rule YAML files not found, APEX enrichment will use fail-fast approach: {}", e.getMessage());
+            throw new RuntimeException("Required rule configuration YAML files not found", e);
         }
     }
 
+    // ============================================================================
+    // APEX-COMPLIANT RULE PROCESSING METHODS (Real APEX Service Integration)
+    // ============================================================================
+
     /**
-     * Register combined rules demonstration rules with the provided configuration.
-     *
-     * @param config The rules engine configuration to register rules with
+     * Processes loan approval rules using real APEX enrichment.
      */
-    public static void registerCombinedRulesDemoRules(RulesEngineConfiguration config) {
+    public Map<String, Object> processLoanApprovalRules(Map<String, Object> inputData) {
         try {
-            // Create a new category for combined rules
-            String combinedCategory = "combined-rules";
+            logger.info("Processing loan approval rules using real APEX enrichment...");
 
-            // Register some simple rules for demonstration
-            createRule(
-                    config,
-                    "CR001", // Rule ID
-                    combinedCategory, // Rule category
-                    "high-value-order", // Rule name
-                    "#orderTotal > 500", // Condition
-                    "High-value order detected", // Message
-                    "Identifies orders with a total value exceeding $500", // Description
-                    10 // Priority
-            );
+            // Load loan approval rule configuration
+            YamlRuleConfiguration loanApprovalConfig = (YamlRuleConfiguration) configurationData.get("loanApprovalConfig");
+            if (loanApprovalConfig == null) {
+                throw new RuntimeException("Loan approval rule configuration not found");
+            }
 
-            createRule(
-                    config,
-                    "CR002", // Rule ID
-                    combinedCategory, // Rule category
-                    "loyal-customer", // Rule name
-                    "#customerYears > 3", // Condition
-                    "Loyal customer detected", // Message
-                    "Identifies customers who have been with us for more than 3 years", // Description
-                    20 // Priority
-            );
+            // Use real APEX enrichment service for rule processing
+            Object enrichedResult = enrichmentService.enrichObject(loanApprovalConfig, inputData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichedResult;
 
-            createRule(
-                    config,
-                    "CR003", // Rule ID
-                    combinedCategory, // Rule category
-                    "large-quantity", // Rule name
-                    "#quantity > 10", // Condition
-                    "Large quantity order detected", // Message
-                    "Identifies orders with more than 10 items", // Description
-                    30 // Priority
-            );
+            logger.info("Loan approval rules processed successfully using real APEX enrichment");
+            return result;
 
-            // Combine rules with AND - high value AND loyal customer
-            combineRulesWithAnd(
-                    config,
-                    "CR004", // Rule ID
-                    combinedCategory, // Rule category
-                    "premium-loyal-customer", // Rule name
-                    Arrays.asList("CR001", "CR002"), // Rules to combine
-                    "Premium loyal customer detected", // Message
-                    "Identifies high-value orders from loyal customers", // Description
-                    5 // Priority (higher priority than individual rules)
-            );
-
-            // Combine rules with OR - high value OR large quantity
-            combineRulesWithOr(
-                    config,
-                    "CR005", // Rule ID
-                    combinedCategory, // Rule category
-                    "special-handling-required", // Rule name
-                    Arrays.asList("CR001", "CR003"), // Rules to combine
-                    "Special handling required", // Message
-                    "Identifies orders that require special handling due to high value or large quantity", // Description
-                    15 // Priority
-            );
         } catch (Exception e) {
-            System.err.println("Error registering combined rules demo rules: " + e.getMessage());
+            logger.error("Failed to process loan approval rules with APEX enrichment: {}", e.getMessage());
+            throw new RuntimeException("Loan approval rule processing failed", e);
         }
     }
 
     /**
-     * Register rule group demonstration rules with the provided configuration.
-     *
-     * @param config The rules engine configuration to register rules with
+     * Processes discount rules using real APEX enrichment.
      */
-    public static void registerRuleGroupDemoRules(RulesEngineConfiguration config) {
+    public Map<String, Object> processDiscountRules(Map<String, Object> inputData) {
         try {
-            // Create categories for demonstration
-            String investmentCategory = "investment-rules";
-            String riskCategory = "risk-assessment";
-            String complianceCategory = "compliance";
+            logger.info("Processing discount rules using real APEX enrichment...");
 
-            // Register some basic rules in different categories and store them in variables
-            Rule ir001 = createRule(
-                    config,
-                    "IR001", // Rule ID
-                    investmentCategory, // Rule category
-                    "high-value-investment", // Rule name
-                    "#investmentAmount > 100000", // Condition
-                    "High-value investment detected", // Message
-                    "Identifies investments with a value exceeding $100,000", // Description
-                    10 // Priority
-            );
-
-            Rule ir002 = createRule(
-                    config,
-                    "IR002", // Rule ID
-                    investmentCategory, // Rule category
-                    "retirement-account", // Rule name
-                    "#accountType == 'retirement'", // Condition
-                    "Retirement account detected", // Message
-                    "Identifies retirement accounts", // Description
-                    20 // Priority
-            );
-
-            // Register a rule in multiple categories
-            Set<String> multiCategories = new HashSet<>(Arrays.asList(riskCategory, complianceCategory));
-            Rule ra001 = createRuleWithCategories(
-                    config,
-                    "RA001", // Rule ID
-                    multiCategories, // Multiple categories
-                    "high-risk-client", // Rule name
-                    "#clientRiskScore > 7", // Condition
-                    "High-risk client detected", // Message
-                    "Identifies clients with high risk scores", // Description
-                    5 // Priority
-            );
-
-            Rule ra002 = createRule(
-                    config,
-                    "RA002", // Rule ID
-                    riskCategory, // Rule category
-                    "volatile-market", // Rule name
-                    "#marketVolatility > 0.2", // Condition
-                    "Volatile market conditions detected", // Message
-                    "Identifies periods of high market volatility", // Description
-                    15 // Priority
-            );
-
-            Rule co001 = createRule(
-                    config,
-                    "CO001", // Rule ID
-                    complianceCategory, // Rule category
-                    "kyc-verified", // Rule name
-                    "!#kycVerified", // Condition
-                    "KYC verification required", // Message
-                    "Identifies clients who need KYC verification", // Description
-                    25 // Priority
-            );
-
-            // Create a rule group with AND operator
-            RuleGroup ruleGroup1 = createRuleGroupWithAnd(
-                    config,
-                    "RG001", // Group ID
-                    investmentCategory, // Group category
-                    "retirement-investment-checks", // Group name
-                    "Checks for retirement investment criteria", // Description
-                    50 // Priority
-            );
-
-            // Add rules to the group with sequence numbers, using the stored rule variables
-            if (ir001 != null) {
-                ruleGroup1.addRule(ir001, 1);
-            } else {
-                System.err.println("Cannot add rule IR001 to group 'retirement-investment-checks', rule not found");
+            // Load discount rule configuration
+            YamlRuleConfiguration discountConfig = (YamlRuleConfiguration) configurationData.get("discountConfig");
+            if (discountConfig == null) {
+                throw new RuntimeException("Discount rule configuration not found");
             }
 
-            if (ir002 != null) {
-                ruleGroup1.addRule(ir002, 2);
-            } else {
-                System.err.println("Cannot add rule IR002 to group 'retirement-investment-checks', rule not found");
-            }
+            // Use real APEX enrichment service for rule processing
+            Object enrichedResult = enrichmentService.enrichObject(discountConfig, inputData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichedResult;
 
-            // Create a rule group with OR operator
-            RuleGroup ruleGroup2 = createRuleGroupWithOr(
-                    config,
-                    "RG002", // Group ID
-                    riskCategory, // Group category
-                    "risk-assessment-checks", // Group name
-                    "Checks for various risk factors", // Description
-                    60 // Priority
-            );
+            logger.info("Discount rules processed successfully using real APEX enrichment");
+            return result;
 
-            // Add rules to the group with sequence numbers, using the stored rule variables
-            if (ra001 != null) {
-                ruleGroup2.addRule(ra001, 1);
-            } else {
-                System.err.println("Cannot add rule RA001 to group 'risk-assessment-checks', rule not found");
-            }
-
-            if (ra002 != null) {
-                ruleGroup2.addRule(ra002, 2);
-            } else {
-                System.err.println("Cannot add rule RA002 to group 'risk-assessment-checks', rule not found");
-            }
-
-            // Create a multi-category rule group
-            Set<String> groupCategories = new HashSet<>(Arrays.asList(riskCategory, complianceCategory));
-            RuleGroup ruleGroup3 = createRuleGroupWithAnd(
-                    config,
-                    "RG003", // Group ID
-                    groupCategories, // Multiple categories
-                    "compliance-checks", // Group name
-                    "Checks for compliance requirements", // Description
-                    70 // Priority
-            );
-
-            // Add rules to the group with sequence numbers, using the stored rule variables
-            if (co001 != null) {
-                ruleGroup3.addRule(co001, 1);
-            } else {
-                System.err.println("Cannot add rule CO001 to group 'compliance-checks', rule not found");
-            }
-
-            if (ra001 != null) {
-                ruleGroup3.addRule(ra001, 2);
-            } else {
-                System.err.println("Cannot add rule RA001 to group 'compliance-checks', rule not found");
-            }
         } catch (Exception e) {
-            System.err.println("Error registering rule group demo rules: " + e.getMessage());
+            logger.error("Failed to process discount rules with APEX enrichment: {}", e.getMessage());
+            throw new RuntimeException("Discount rule processing failed", e);
         }
     }
 
     /**
-     * Creates a rule for investment recommendations.
-     *
-     * @return A rule for investment recommendations
+     * Processes combined rules using real APEX enrichment.
      */
-    public static Rule createInvestmentRecommendationsRule() {
-        return new Rule(
-                "Investment Recommendations",
-                "#inventory.?[#customer.preferredCategories.contains(category)]",
-                "Recommended financial instruments based on investor preferences"
-        );
-    }
+    public Map<String, Object> processCombinedRules(Map<String, Object> inputData) {
+        try {
+            logger.info("Processing combined rules using real APEX enrichment...");
 
-    /**
-     * Creates a rule for gold tier investor offers.
-     *
-     * @return A rule for gold tier investor offers
-     */
-    public static Rule createGoldTierInvestorOffersRule() {
-        return new Rule(
-                "Gold Tier Investor Offers",
-                "#customer.membershipLevel == 'Gold' ? " +
-                        "#inventory.?[price > 500].![name + ' - ' + (price * 0.9) + ' (10% discount)'] : " +
-                        "#inventory.?[price > 500].![name]",
-                "Special investment opportunities for Gold tier investors"
-        );
-    }
-
-    /**
-     * Creates a rule for low-cost investment options.
-     *
-     * @return A rule for low-cost investment options
-     */
-    public static Rule createLowCostInvestmentOptionsRule() {
-        return new Rule(
-                "Low-Cost Investment Options",
-                "#inventory.?[price < 200].![name + ' - $' + price]",
-                "Low-cost investment options under $200"
-        );
-    }
-
-    /**
-     * Creates a set of rules for free shipping eligibility, premium discounts, and express processing.
-     *
-     * @return A list of rules for order processing
-     */
-    public static List<Rule> createOrderProcessingRules() {
-        return Arrays.asList(
-                new Rule(
-                        "Free shipping eligibility",
-                        "order.calculateTotal() > 100",
-                        "Customer is eligible for free shipping"
-                ),
-                new Rule(
-                        "Premium discount",
-                        "customer.membershipLevel == 'Gold' and customer.age > 25",
-                        "Customer is eligible for premium discount"
-                ),
-                new Rule(
-                        "Express processing",
-                        "order.status == 'PENDING' and order.quantity < 5 and customer.isEligibleForDiscount()",
-                        "Order is eligible for express processing"
-                )
-        );
-    }
-
-    /**
-     * Creates a map of discount rules with dynamic discount percentages based on customer membership level.
-     *
-     * @return A map of discount rules
-     */
-    public static Map<String, String> createDiscountRules() {
-        Map<String, String> discountRules = new HashMap<>();
-        discountRules.put("Basic", "#{ customer.age > 60 ? 10 : 5 }");
-        discountRules.put("Silver", "#{ customer.age > 60 ? 15 : (order.calculateTotal() > 200 ? 12 : 8) }");
-        discountRules.put("Gold", "#{ customer.age > 60 ? 20 : (order.calculateTotal() > 200 ? 18 : 15) }");
-        return discountRules;
-    }
-
-    /**
-     * Helper method to create and register a rule.
-     */
-    private static Rule createRule(RulesEngineConfiguration config, String id, String category, String name,
-                                  String condition, String message, String description, int priority) {
-        return config.rule(id)
-            .withCategory(category)
-            .withName(name)
-            .withCondition(condition)
-            .withMessage(message)
-            .withDescription(description)
-            .withPriority(priority)
-            .build();
-    }
-
-    /**
-     * Helper method to create and register a rule with multiple categories.
-     */
-    private static Rule createRuleWithCategories(RulesEngineConfiguration config, String id, Set<String> categoryNames, String name,
-                                               String condition, String message, String description, int priority) {
-        return config.rule(id)
-            .withCategoryNames(categoryNames)
-            .withName(name)
-            .withCondition(condition)
-            .withMessage(message)
-            .withDescription(description)
-            .withPriority(priority)
-            .build();
-    }
-
-    /**
-     * Helper method to create a rule group with AND operator.
-     */
-    private static RuleGroup createRuleGroupWithAnd(RulesEngineConfiguration config, String id, String category, String name,
-                                                  String description, int priority) {
-        return config.createRuleGroupWithAnd(id, category, name, description, priority);
-    }
-
-    /**
-     * Helper method to create a rule group with AND operator and multiple categories.
-     */
-    private static RuleGroup createRuleGroupWithAnd(RulesEngineConfiguration config, String id, Set<String> categoryNames, String name,
-                                                  String description, int priority) {
-        return config.createRuleGroupWithAnd(id, categoryNames, name, description, priority);
-    }
-
-    /**
-     * Helper method to create a rule group with OR operator.
-     */
-    private static RuleGroup createRuleGroupWithOr(RulesEngineConfiguration config, String id, String category, String name,
-                                                 String description, int priority) {
-        return config.createRuleGroupWithOr(id, category, name, description, priority);
-    }
-
-
-
-    /**
-     * Helper method to combine rules with an AND operator.
-     * 
-     * @param config The rules engine configuration
-     * @param id The ID of the new combined rule
-     * @param category The category of the new combined rule
-     * @param name The name of the new combined rule
-     * @param ruleIds The IDs of the rules to combine
-     * @param message The message for the new combined rule
-     * @param description The description of the new combined rule
-     * @param priority The priority of the new combined rule
-     * @return The ID of the new combined rule, or null if any of the rules don't exist
-     */
-    private static String combineRulesWithAnd(RulesEngineConfiguration config, String id, String category, String name,
-                                            List<String> ruleIds, String message, String description, int priority) {
-        // Check if any rule IDs are null or empty
-        if (ruleIds == null || ruleIds.isEmpty()) {
-            System.err.println("Cannot combine rules with AND: no rule IDs provided");
-            return null;
-        }
-
-        // Check if all rules exist before combining
-        for (String ruleId : ruleIds) {
-            Rule rule = config.getRuleById(ruleId);
-            if (rule == null) {
-                System.err.println("Cannot combine rules with AND: rule with ID '" + ruleId + "' not found");
-                return null;
+            // Load combined rule configuration
+            YamlRuleConfiguration combinedConfig = (YamlRuleConfiguration) configurationData.get("combinedConfig");
+            if (combinedConfig == null) {
+                throw new RuntimeException("Combined rule configuration not found");
             }
-        }
 
-        String combinedRuleId = config.combineRulesWithAnd(id, category, name, ruleIds, message, description, priority);
-        if (combinedRuleId == null) {
-            System.err.println("Failed to combine rules with AND: " + ruleIds);
+            // Use real APEX enrichment service for rule processing
+            Object enrichedResult = enrichmentService.enrichObject(combinedConfig, inputData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichedResult;
+
+            logger.info("Combined rules processed successfully using real APEX enrichment");
+            return result;
+
+        } catch (Exception e) {
+            logger.error("Failed to process combined rules with APEX enrichment: {}", e.getMessage());
+            throw new RuntimeException("Combined rule processing failed", e);
         }
-        return combinedRuleId;
     }
 
     /**
-     * Helper method to combine rules with an OR operator.
-     * 
-     * @param config The rules engine configuration
-     * @param id The ID of the new combined rule
-     * @param category The category of the new combined rule
-     * @param name The name of the new combined rule
-     * @param ruleIds The IDs of the rules to combine
-     * @param message The message for the new combined rule
-     * @param description The description of the new combined rule
-     * @param priority The priority of the new combined rule
-     * @return The ID of the new combined rule, or null if any of the rules don't exist
+     * Processes all rule types using real APEX enrichment.
      */
-    private static String combineRulesWithOr(RulesEngineConfiguration config, String id, String category, String name,
-                                           List<String> ruleIds, String message, String description, int priority) {
-        // Check if any rule IDs are null or empty
-        if (ruleIds == null || ruleIds.isEmpty()) {
-            System.err.println("Cannot combine rules with OR: no rule IDs provided");
-            return null;
-        }
+    public Map<String, Object> processAllRules(Map<String, Object> inputData) {
+        try {
+            logger.info("Processing all rules using real APEX enrichment...");
 
-        // Check if all rules exist before combining
-        for (String ruleId : ruleIds) {
-            Rule rule = config.getRuleById(ruleId);
-            if (rule == null) {
-                System.err.println("Cannot combine rules with OR: rule with ID '" + ruleId + "' not found");
-                return null;
+            // Load main rule configuration
+            YamlRuleConfiguration mainConfig = (YamlRuleConfiguration) configurationData.get("mainConfig");
+            if (mainConfig == null) {
+                throw new RuntimeException("Main rule configuration not found");
             }
-        }
 
-        String combinedRuleId = config.combineRulesWithOr(id, category, name, ruleIds, message, description, priority);
-        if (combinedRuleId == null) {
-            System.err.println("Failed to combine rules with OR: " + ruleIds);
+            // Use real APEX enrichment service for comprehensive rule processing
+            Object enrichedResult = enrichmentService.enrichObject(mainConfig, inputData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichedResult;
+
+            logger.info("All rules processed successfully using real APEX enrichment");
+            return result;
+
+        } catch (Exception e) {
+            logger.error("Failed to process all rules with APEX enrichment: {}", e.getMessage());
+            throw new RuntimeException("All rules processing failed", e);
         }
-        return combinedRuleId;
+    }
+
+    // ============================================================================
+    // DEMONSTRATION METHODS (APEX-Compliant)
+    // ============================================================================
+
+    /**
+     * Demonstrates loan approval rule processing with sample data.
+     */
+    public void demonstrateLoanApprovalRules() {
+        logger.info("Demonstrating loan approval rules with real APEX processing...");
+
+        // Create sample loan application data
+        Map<String, Object> loanApplication = new HashMap<>();
+        loanApplication.put("applicantId", "APP001");
+        loanApplication.put("creditScore", 720);
+        loanApplication.put("debtToIncomeRatio", 0.35);
+        loanApplication.put("loanAmount", 250000);
+        loanApplication.put("applicationType", "MORTGAGE");
+
+        // Process using real APEX enrichment
+        Map<String, Object> result = processLoanApprovalRules(loanApplication);
+
+        logger.info("Loan approval result: {}", result);
+        System.out.println("=== Loan Approval Demo Results ===");
+        System.out.println("Input: " + loanApplication);
+        System.out.println("Result: " + result);
+    }
+
+    /**
+     * Demonstrates discount rule processing with sample data.
+     */
+    public void demonstrateDiscountRules() {
+        logger.info("Demonstrating discount rules with real APEX processing...");
+
+        // Create sample order data
+        Map<String, Object> orderData = new HashMap<>();
+        orderData.put("orderId", "ORD001");
+        orderData.put("orderTotal", 1250.00);
+        orderData.put("customerYears", 6);
+        orderData.put("customerType", "LOYAL");
+        orderData.put("orderCategory", "ELECTRONICS");
+
+        // Process using real APEX enrichment
+        Map<String, Object> result = processDiscountRules(orderData);
+
+        logger.info("Discount rule result: {}", result);
+        System.out.println("=== Discount Rules Demo Results ===");
+        System.out.println("Input: " + orderData);
+        System.out.println("Result: " + result);
+    }
+
+    /**
+     * Demonstrates combined rule processing with sample data.
+     */
+    public void demonstrateCombinedRules() {
+        logger.info("Demonstrating combined rules with real APEX processing...");
+
+        // Create sample comprehensive data
+        Map<String, Object> comprehensiveData = new HashMap<>();
+        comprehensiveData.put("customerId", "CUST001");
+        comprehensiveData.put("creditScore", 680);
+        comprehensiveData.put("orderTotal", 800.00);
+        comprehensiveData.put("customerYears", 3);
+        comprehensiveData.put("riskProfile", "MEDIUM");
+        comprehensiveData.put("transactionType", "PURCHASE");
+
+        // Process using real APEX enrichment
+        Map<String, Object> result = processCombinedRules(comprehensiveData);
+
+        logger.info("Combined rules result: {}", result);
+        System.out.println("=== Combined Rules Demo Results ===");
+        System.out.println("Input: " + comprehensiveData);
+        System.out.println("Result: " + result);
+    }
+
+    /**
+     * Demonstrates comprehensive rule processing with sample data.
+     */
+    public void demonstrateAllRules() {
+        logger.info("Demonstrating all rules with real APEX processing...");
+
+        // Create sample comprehensive data
+        Map<String, Object> allRulesData = new HashMap<>();
+        allRulesData.put("sessionId", "SESSION001");
+        allRulesData.put("creditScore", 750);
+        allRulesData.put("debtToIncomeRatio", 0.28);
+        allRulesData.put("orderTotal", 1500.00);
+        allRulesData.put("customerYears", 8);
+        allRulesData.put("loanAmount", 300000);
+        allRulesData.put("riskProfile", "LOW");
+        allRulesData.put("customerType", "PREMIUM");
+
+        // Process using real APEX enrichment
+        Map<String, Object> result = processAllRules(allRulesData);
+
+        logger.info("All rules result: {}", result);
+        System.out.println("=== All Rules Demo Results ===");
+        System.out.println("Input: " + allRulesData);
+        System.out.println("Result: " + result);
+    }
+
+    // ============================================================================
+    // MAIN METHOD FOR DEMONSTRATION
+    // ============================================================================
+
+    /**
+     * Main method to demonstrate APEX-compliant rule processing.
+     */
+    public static void main(String[] args) {
+        try {
+            logger.info("Starting APEX-compliant rule configuration demonstration...");
+
+            // Initialize with real APEX services
+            RuleConfigurationHardcodedDemo demo = new RuleConfigurationHardcodedDemo();
+
+            // Run all demonstrations
+            demo.demonstrateLoanApprovalRules();
+            System.out.println();
+
+            demo.demonstrateDiscountRules();
+            System.out.println();
+
+            demo.demonstrateCombinedRules();
+            System.out.println();
+
+            demo.demonstrateAllRules();
+
+            logger.info("APEX-compliant rule configuration demonstration completed successfully");
+
+        } catch (Exception e) {
+            logger.error("Rule configuration demonstration failed: {}", e.getMessage());
+            System.err.println("Demo failed: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

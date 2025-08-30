@@ -1,0 +1,423 @@
+# APEX Risk Calculation Engines Configuration
+# External data source configuration for risk calculation engines
+# Replaces hardcoded risk calculation logic from RiskManagementService
+
+type: "external-data-config"
+name: "risk-calculation-engines-config"
+description: "Data-driven risk calculation engines configuration for risk management service"
+
+# Risk calculation engines configuration by engine type
+data:
+  market-risk-calculation-engines:
+    engine-type: "market-risk-calculation-engines"
+    engine-name: "Market Risk Calculation Engines"
+    description: "Engines for market risk calculation and computation"
+    engine-characteristics:
+      calculation-category: "MARKET_RISK"
+      computation-method: "FACTOR_WEIGHTED"
+      real-time-capability: true
+    calculation-engines:
+      equity-market-risk-engine:
+        engine-id: "EQUITY_MARKET_RISK_ENGINE"
+        engine-name: "Equity Market Risk Calculation Engine"
+        engine-description: "Engine for calculating equity market risk"
+        calculation-parameters:
+          volatility-weight: 0.4
+          beta-weight: 0.3
+          correlation-weight: 0.2
+          sector-weight: 0.1
+        calculation-rules:
+          - rule-name: "equity-base-risk-calculation"
+            rule-condition: "#trade.type == 'Equity'"
+            rule-calculation: "#trade.notionalAmount * #marketRiskFactors.getOrDefault('equity', 0.15)"
+            rule-description: "Calculate base equity market risk"
+            rule-priority: 1
+            rule-action: "CALCULATE"
+          - rule-name: "equity-volatility-adjustment"
+            rule-condition: "#trade.type == 'Equity' && #volatilityIndex != null"
+            rule-calculation: "#baseRisk * (1 + #volatilityIndex * 0.4)"
+            rule-description: "Adjust for market volatility"
+            rule-priority: 2
+            rule-action: "ADJUST"
+          - rule-name: "equity-beta-adjustment"
+            rule-condition: "#trade.type == 'Equity' && #trade.beta != null"
+            rule-calculation: "#baseRisk * #trade.beta"
+            rule-description: "Adjust for equity beta"
+            rule-priority: 3
+            rule-action: "ADJUST"
+          - rule-name: "equity-correlation-adjustment"
+            rule-condition: "#trade.type == 'Equity' && #portfolioCorrelation != null"
+            rule-calculation: "#baseRisk * (1 + #portfolioCorrelation * 0.2)"
+            rule-description: "Adjust for portfolio correlation"
+            rule-priority: 4
+            rule-action: "ADJUST"
+        engine-outcomes:
+          success-outcome: "EQUITY_MARKET_RISK_CALCULATED"
+          failure-outcome: "EQUITY_MARKET_RISK_CALCULATION_FAILED"
+        audit-requirements:
+          - "Log equity market risk calculations"
+          - "Track volatility and beta impacts"
+          
+      fixed-income-market-risk-engine:
+        engine-id: "FIXED_INCOME_MARKET_RISK_ENGINE"
+        engine-name: "Fixed Income Market Risk Calculation Engine"
+        engine-description: "Engine for calculating fixed income market risk"
+        calculation-parameters:
+          duration-weight: 0.5
+          convexity-weight: 0.2
+          credit-spread-weight: 0.2
+          yield-curve-weight: 0.1
+        calculation-rules:
+          - rule-name: "fixed-income-base-risk-calculation"
+            rule-condition: "#trade.type == 'FixedIncome'"
+            rule-calculation: "#trade.notionalAmount * #marketRiskFactors.getOrDefault('fixedIncome', 0.08)"
+            rule-description: "Calculate base fixed income market risk"
+            rule-priority: 1
+            rule-action: "CALCULATE"
+          - rule-name: "duration-risk-adjustment"
+            rule-condition: "#trade.type == 'FixedIncome' && #trade.duration != null"
+            rule-calculation: "#baseRisk * #trade.duration * 0.01"
+            rule-description: "Adjust for duration risk"
+            rule-priority: 2
+            rule-action: "ADJUST"
+          - rule-name: "credit-spread-adjustment"
+            rule-condition: "#trade.type == 'FixedIncome' && #creditSpreadChange != null"
+            rule-calculation: "#baseRisk * (1 + #creditSpreadChange * 0.2)"
+            rule-description: "Adjust for credit spread changes"
+            rule-priority: 3
+            rule-action: "ADJUST"
+        engine-outcomes:
+          success-outcome: "FIXED_INCOME_MARKET_RISK_CALCULATED"
+          failure-outcome: "FIXED_INCOME_MARKET_RISK_CALCULATION_FAILED"
+        audit-requirements:
+          - "Log fixed income market risk calculations"
+          - "Track duration and spread impacts"
+          
+      derivative-market-risk-engine:
+        engine-id: "DERIVATIVE_MARKET_RISK_ENGINE"
+        engine-name: "Derivative Market Risk Calculation Engine"
+        engine-description: "Engine for calculating derivative market risk"
+        calculation-parameters:
+          delta-weight: 0.3
+          gamma-weight: 0.25
+          vega-weight: 0.25
+          theta-weight: 0.2
+        calculation-rules:
+          - rule-name: "derivative-base-risk-calculation"
+            rule-condition: "#trade.type == 'Derivative'"
+            rule-calculation: "#trade.notionalAmount * #marketRiskFactors.getOrDefault('derivative', 0.20)"
+            rule-description: "Calculate base derivative market risk"
+            rule-priority: 1
+            rule-action: "CALCULATE"
+          - rule-name: "delta-risk-adjustment"
+            rule-condition: "#trade.type == 'Derivative' && #trade.delta != null"
+            rule-calculation: "#baseRisk * T(java.lang.Math).abs(#trade.delta) * 0.3"
+            rule-description: "Adjust for delta risk"
+            rule-priority: 2
+            rule-action: "ADJUST"
+          - rule-name: "gamma-risk-adjustment"
+            rule-condition: "#trade.type == 'Derivative' && #trade.gamma != null"
+            rule-calculation: "#baseRisk + (#trade.notionalAmount * #trade.gamma * 0.25)"
+            rule-description: "Add gamma risk component"
+            rule-priority: 3
+            rule-action: "ADD"
+          - rule-name: "vega-risk-adjustment"
+            rule-condition: "#trade.type == 'Derivative' && #trade.vega != null"
+            rule-calculation: "#baseRisk + (#trade.notionalAmount * #trade.vega * 0.25)"
+            rule-description: "Add vega risk component"
+            rule-priority: 4
+            rule-action: "ADD"
+        engine-outcomes:
+          success-outcome: "DERIVATIVE_MARKET_RISK_CALCULATED"
+          failure-outcome: "DERIVATIVE_MARKET_RISK_CALCULATION_FAILED"
+        audit-requirements:
+          - "Log derivative market risk calculations"
+          - "Track Greeks impact analysis"
+    engine-settings:
+      real-time-calculation: true
+      factor-weighting: true
+      volatility-adjustment: true
+    
+  credit-risk-calculation-engines:
+    engine-type: "credit-risk-calculation-engines"
+    engine-name: "Credit Risk Calculation Engines"
+    description: "Engines for credit risk calculation and computation"
+    engine-characteristics:
+      calculation-category: "CREDIT_RISK"
+      computation-method: "RATING_PROBABILITY"
+      default-modeling: true
+    calculation-engines:
+      counterparty-credit-risk-engine:
+        engine-id: "COUNTERPARTY_CREDIT_RISK_ENGINE"
+        engine-name: "Counterparty Credit Risk Calculation Engine"
+        engine-description: "Engine for calculating counterparty credit risk"
+        calculation-parameters:
+          probability-of-default-weight: 0.4
+          loss-given-default-weight: 0.3
+          exposure-at-default-weight: 0.2
+          maturity-adjustment-weight: 0.1
+        calculation-rules:
+          - rule-name: "aaa-credit-risk-calculation"
+            rule-condition: "#counterparty.rating == 'AAA'"
+            rule-calculation: "#trade.notionalAmount * 0.001"
+            rule-description: "Minimal credit risk for AAA counterparty"
+            rule-priority: 1
+            rule-action: "CALCULATE"
+          - rule-name: "aa-credit-risk-calculation"
+            rule-condition: "#counterparty.rating == 'AA'"
+            rule-calculation: "#trade.notionalAmount * 0.003"
+            rule-description: "Low credit risk for AA counterparty"
+            rule-priority: 1
+            rule-action: "CALCULATE"
+          - rule-name: "a-credit-risk-calculation"
+            rule-condition: "#counterparty.rating == 'A'"
+            rule-calculation: "#trade.notionalAmount * 0.008"
+            rule-description: "Moderate credit risk for A counterparty"
+            rule-priority: 1
+            rule-action: "CALCULATE"
+          - rule-name: "bbb-credit-risk-calculation"
+            rule-condition: "#counterparty.rating == 'BBB'"
+            rule-calculation: "#trade.notionalAmount * 0.015"
+            rule-description: "Higher credit risk for BBB counterparty"
+            rule-priority: 1
+            rule-action: "CALCULATE"
+          - rule-name: "below-investment-grade-calculation"
+            rule-condition: "#counterparty.rating != null && !T(java.util.Arrays).asList('AAA', 'AA', 'A', 'BBB').contains(#counterparty.rating)"
+            rule-calculation: "#trade.notionalAmount * 0.050"
+            rule-description: "High credit risk for below investment grade"
+            rule-priority: 1
+            rule-action: "CALCULATE"
+          - rule-name: "maturity-adjustment"
+            rule-condition: "#trade.maturityDays != null && #trade.maturityDays > 365"
+            rule-calculation: "#baseRisk * (1 + (#trade.maturityDays / 365.0 - 1) * 0.1)"
+            rule-description: "Adjust credit risk for maturity"
+            rule-priority: 2
+            rule-action: "ADJUST"
+        engine-outcomes:
+          success-outcome: "COUNTERPARTY_CREDIT_RISK_CALCULATED"
+          failure-outcome: "COUNTERPARTY_CREDIT_RISK_CALCULATION_FAILED"
+        audit-requirements:
+          - "Log counterparty credit risk calculations"
+          - "Track rating and maturity impacts"
+          
+      collateral-adjusted-credit-risk-engine:
+        engine-id: "COLLATERAL_ADJUSTED_CREDIT_RISK_ENGINE"
+        engine-name: "Collateral Adjusted Credit Risk Calculation Engine"
+        engine-description: "Engine for calculating credit risk adjusted for collateral"
+        calculation-parameters:
+          collateral-coverage-weight: 0.5
+          collateral-quality-weight: 0.3
+          haircut-weight: 0.2
+        calculation-rules:
+          - rule-name: "full-collateral-adjustment"
+            rule-condition: "#collateral.coverage >= 1.0"
+            rule-calculation: "#baseRisk * 0.1"
+            rule-description: "Significant risk reduction for full collateral"
+            rule-priority: 1
+            rule-action: "ADJUST"
+          - rule-name: "partial-collateral-adjustment"
+            rule-condition: "#collateral.coverage >= 0.5 && #collateral.coverage < 1.0"
+            rule-calculation: "#baseRisk * (1 - #collateral.coverage * 0.5)"
+            rule-description: "Proportional risk reduction for partial collateral"
+            rule-priority: 1
+            rule-action: "ADJUST"
+          - rule-name: "high-quality-collateral-bonus"
+            rule-condition: "#collateral.quality == 'HIGH'"
+            rule-calculation: "#baseRisk * 0.8"
+            rule-description: "Additional risk reduction for high-quality collateral"
+            rule-priority: 2
+            rule-action: "ADJUST"
+          - rule-name: "collateral-haircut-adjustment"
+            rule-condition: "#collateral.haircut != null"
+            rule-calculation: "#baseRisk * (1 + #collateral.haircut)"
+            rule-description: "Adjust for collateral haircut"
+            rule-priority: 3
+            rule-action: "ADJUST"
+        engine-outcomes:
+          success-outcome: "COLLATERAL_ADJUSTED_CREDIT_RISK_CALCULATED"
+          failure-outcome: "COLLATERAL_ADJUSTED_CREDIT_RISK_CALCULATION_FAILED"
+        audit-requirements:
+          - "Log collateral adjusted credit risk calculations"
+          - "Track collateral effectiveness"
+    engine-settings:
+      rating-monitoring: true
+      collateral-valuation: true
+      maturity-adjustment: true
+    
+  liquidity-risk-calculation-engines:
+    engine-type: "liquidity-risk-calculation-engines"
+    engine-name: "Liquidity Risk Calculation Engines"
+    description: "Engines for liquidity risk calculation and computation"
+    engine-characteristics:
+      calculation-category: "LIQUIDITY_RISK"
+      computation-method: "MARKET_IMPACT"
+      time-sensitivity: true
+    calculation-engines:
+      market-liquidity-risk-engine:
+        engine-id: "MARKET_LIQUIDITY_RISK_ENGINE"
+        engine-name: "Market Liquidity Risk Calculation Engine"
+        engine-description: "Engine for calculating market liquidity risk"
+        calculation-parameters:
+          bid-ask-spread-weight: 0.4
+          market-depth-weight: 0.3
+          trading-volume-weight: 0.2
+          volatility-weight: 0.1
+        calculation-rules:
+          - rule-name: "liquid-market-calculation"
+            rule-condition: "#market.bidAskSpread <= 0.01"
+            rule-calculation: "#trade.notionalAmount * 0.005"
+            rule-description: "Low liquidity risk for liquid markets"
+            rule-priority: 1
+            rule-action: "CALCULATE"
+          - rule-name: "moderate-liquidity-calculation"
+            rule-condition: "#market.bidAskSpread > 0.01 && #market.bidAskSpread <= 0.05"
+            rule-calculation: "#trade.notionalAmount * 0.02"
+            rule-description: "Moderate liquidity risk"
+            rule-priority: 1
+            rule-action: "CALCULATE"
+          - rule-name: "illiquid-market-calculation"
+            rule-condition: "#market.bidAskSpread > 0.05"
+            rule-calculation: "#trade.notionalAmount * 0.08"
+            rule-description: "High liquidity risk for illiquid markets"
+            rule-priority: 1
+            rule-action: "CALCULATE"
+          - rule-name: "market-depth-adjustment"
+            rule-condition: "#market.depth == 'SHALLOW'"
+            rule-calculation: "#baseRisk * 1.5"
+            rule-description: "Increase risk for shallow markets"
+            rule-priority: 2
+            rule-action: "ADJUST"
+          - rule-name: "high-volume-adjustment"
+            rule-condition: "#market.dailyVolume > #market.averageVolume * 2"
+            rule-calculation: "#baseRisk * 0.8"
+            rule-description: "Reduce risk for high volume periods"
+            rule-priority: 3
+            rule-action: "ADJUST"
+        engine-outcomes:
+          success-outcome: "MARKET_LIQUIDITY_RISK_CALCULATED"
+          failure-outcome: "MARKET_LIQUIDITY_RISK_CALCULATION_FAILED"
+        audit-requirements:
+          - "Log market liquidity risk calculations"
+          - "Track market condition impacts"
+    engine-settings:
+      market-monitoring: true
+      real-time-spreads: true
+      volume-tracking: true
+    
+  settlement-risk-calculation-engines:
+    engine-type: "settlement-risk-calculation-engines"
+    engine-name: "Settlement Risk Calculation Engines"
+    description: "Engines for settlement risk calculation and computation"
+    engine-characteristics:
+      calculation-category: "SETTLEMENT_RISK"
+      computation-method: "METHOD_DAYS"
+      counterparty-dependency: true
+    calculation-engines:
+      settlement-method-risk-engine:
+        engine-id: "SETTLEMENT_METHOD_RISK_ENGINE"
+        engine-name: "Settlement Method Risk Calculation Engine"
+        engine-description: "Engine for calculating settlement risk based on method"
+        calculation-parameters:
+          method-reliability-weight: 0.4
+          settlement-days-weight: 0.3
+          counterparty-risk-weight: 0.2
+          operational-complexity-weight: 0.1
+        calculation-rules:
+          - rule-name: "dtc-settlement-risk-calculation"
+            rule-condition: "#settlementMethod == 'DTC'"
+            rule-calculation: "#trade.notionalAmount * 0.001 * #settlementDays"
+            rule-description: "Low settlement risk for DTC"
+            rule-priority: 1
+            rule-action: "CALCULATE"
+          - rule-name: "fedwire-settlement-risk-calculation"
+            rule-condition: "#settlementMethod == 'Fedwire'"
+            rule-calculation: "#trade.notionalAmount * 0.002 * #settlementDays"
+            rule-description: "Low settlement risk for Fedwire"
+            rule-priority: 1
+            rule-action: "CALCULATE"
+          - rule-name: "euroclear-settlement-risk-calculation"
+            rule-condition: "#settlementMethod == 'Euroclear'"
+            rule-calculation: "#trade.notionalAmount * 0.003 * #settlementDays"
+            rule-description: "Moderate settlement risk for Euroclear"
+            rule-priority: 1
+            rule-action: "CALCULATE"
+          - rule-name: "clearstream-settlement-risk-calculation"
+            rule-condition: "#settlementMethod == 'Clearstream'"
+            rule-calculation: "#trade.notionalAmount * 0.003 * #settlementDays"
+            rule-description: "Moderate settlement risk for Clearstream"
+            rule-priority: 1
+            rule-action: "CALCULATE"
+          - rule-name: "manual-settlement-risk-calculation"
+            rule-condition: "#settlementMethod == 'Manual'"
+            rule-calculation: "#trade.notionalAmount * 0.010 * #settlementDays"
+            rule-description: "High settlement risk for manual settlement"
+            rule-priority: 1
+            rule-action: "CALCULATE"
+          - rule-name: "long-settlement-adjustment"
+            rule-condition: "#settlementDays > 5"
+            rule-calculation: "#baseRisk * (1 + (#settlementDays - 5) * 0.1)"
+            rule-description: "Increase risk for long settlement periods"
+            rule-priority: 2
+            rule-action: "ADJUST"
+        engine-outcomes:
+          success-outcome: "SETTLEMENT_METHOD_RISK_CALCULATED"
+          failure-outcome: "SETTLEMENT_METHOD_RISK_CALCULATION_FAILED"
+        audit-requirements:
+          - "Log settlement method risk calculations"
+          - "Track method and timing impacts"
+    engine-settings:
+      method-monitoring: true
+      timing-analysis: true
+      operational-tracking: true
+    
+  default:
+    engine-type: "default"
+    engine-name: "Default Risk Calculation Engines"
+    description: "Default risk calculation engine processing"
+    calculation-engines:
+      default-engine:
+        engine-id: "DEFAULT_ENGINE"
+        engine-name: "Default Engine"
+        calculation-rules:
+          - rule-name: "default-calculation"
+            rule-calculation: "#trade.notionalAmount * 0.05"
+            rule-description: "Default risk calculation"
+    engine-settings:
+      default-processing: true
+
+# Engine execution patterns
+execution-patterns:
+  risk-category-pattern:
+    pattern-name: "Risk Category Pattern"
+    description: "Execute engines based on risk categories"
+    risk-categories: ["MARKET_RISK", "CREDIT_RISK", "LIQUIDITY_RISK", "SETTLEMENT_RISK"]
+    
+  computation-method-pattern:
+    pattern-name: "Computation Method Pattern"
+    description: "Execute engines based on computation methods"
+    computation-methods: ["FACTOR_WEIGHTED", "RATING_PROBABILITY", "MARKET_IMPACT", "METHOD_DAYS"]
+    
+  trade-type-pattern:
+    pattern-name: "Trade Type Pattern"
+    description: "Execute engines based on trade types"
+    trade-types: ["Equity", "FixedIncome", "Derivative", "Forex", "Commodity"]
+
+# Quality assurance
+quality-assurance:
+  engine-accuracy:
+    - "Risk calculation engines must be accurate"
+    - "Mathematical computations must be precise"
+    - "Risk factors must be current"
+    - "Calculations must be auditable"
+    
+  engine-reliability:
+    - "Engines must be consistent"
+    - "Calculations must be repeatable"
+    - "Performance must be acceptable"
+    - "Error handling must be robust"
+    
+  regulatory-compliance:
+    - "Calculations must comply with risk regulations"
+    - "Methods must be approved"
+    - "Documentation must be complete"
+    - "Validation must be thorough"

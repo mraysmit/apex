@@ -1,14 +1,5 @@
 package dev.mars.apex.demo.evaluation;
 
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.demo.model.Trade;
-import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
-
-import java.util.*;
-import java.util.logging.Logger;
-
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
  *
@@ -25,867 +16,602 @@ import java.util.logging.Logger;
  * limitations under the License.
  */
 
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+
 /**
- * Comprehensive Dynamic Method Execution Demo.
+ * APEX-Compliant Dynamic Method Execution Demo.
  *
- * This merged class combines the functionality of:
- * - DynamicMethodExecutionDemo (main demo logic)
- * - DynamicMethodExecutionDemoConfig (configuration, rules, and services)
+ * This class demonstrates authentic APEX integration using real APEX core services
+ * instead of hardcoded simulation. Following the SimplePostgreSQLLookupDemo pattern:
  *
- * It demonstrates dynamic method execution using SpEL expressions,
- * focusing on financial trade processing, risk management, compliance,
- * and rule-based processing capabilities.
+ * ============================================================================
+ * REAL APEX SERVICES USED:
+ * - EnrichmentService: Real APEX enrichment processor for dynamic method execution
+ * - YamlConfigurationLoader: Real YAML configuration loading and validation
+ * - ExpressionEvaluatorService: Real SpEL expression evaluation for dynamic rules
+ * - LookupServiceRegistry: Real lookup service integration for dynamic data
+ * ============================================================================
  *
- * This class is part of the APEX A powerful expression processor for Java applications.
+ * CRITICAL: This class eliminates ALL hardcoded dynamic method execution logic and uses:
+ * - YAML-driven comprehensive dynamic method configuration from external files
+ * - Real APEX enrichment services for all dynamic processing categories
+ * - Fail-fast error handling (no hardcoded fallbacks)
+ * - Authentic APEX service integration for settlement, risk, pricing, and compliance
+ *
+ * REFACTORING NOTES:
+ * - Replaced hardcoded service classes with real APEX service integration
+ * - Eliminated embedded business logic and calculation patterns
+ * - Uses real APEX enrichment services for all dynamic method execution
+ * - Follows fail-fast approach when YAML configurations are missing
+ * - Comprehensive dynamic processing with 7 execution categories
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-27
- * @version 1.0
+ * @version 2.0 - Real APEX services integration (Reference Template)
  */
 public class DynamicMethodExecutionDemo {
-    private static final Logger LOGGER = Logger.getLogger(DynamicMethodExecutionDemo.class.getName());
 
-    // Core APEX services
-    private final ExpressionEvaluatorService evaluatorService;
-    private final Map<String, Rule> expressionRules = new HashMap<>();
+    private static final Logger logger = LoggerFactory.getLogger(DynamicMethodExecutionDemo.class);
 
-    // Trade types constants (from DynamicMethodExecutionDemoConfig)
-    private static final String TYPE_EQUITY = "Equity";
-    private static final String TYPE_FIXED_INCOME = "FixedIncome";
-    private static final String TYPE_DERIVATIVE = "Derivative";
-    private static final String TYPE_FOREX = "Forex";
-    private static final String TYPE_COMMODITY = "Commodity";
+    // Real APEX services for authentic integration
+    private final YamlConfigurationLoader yamlLoader;
+    private final EnrichmentService enrichmentService;
+    private final LookupServiceRegistry serviceRegistry;
+    private final ExpressionEvaluatorService expressionEvaluator;
 
-    // Settlement methods constants (from DynamicMethodExecutionDemoConfig)
-    private static final String METHOD_DTC = "DTC";
-    private static final String METHOD_FEDWIRE = "Fedwire";
-    private static final String METHOD_EUROCLEAR = "Euroclear";
-    private static final String METHOD_CLEARSTREAM = "Clearstream";
-    private static final String METHOD_MANUAL = "Manual";
+    // Configuration data (populated via real APEX processing)
+    private Map<String, Object> configurationData;
+    
+    // Processing results (populated via real APEX processing)
+    private Map<String, Object> processingResults;
 
     /**
-     * Constructor for creating a demo instance with services.
-     *
-     * @param evaluatorService The expression evaluator service to use
-     */
-    public DynamicMethodExecutionDemo(ExpressionEvaluatorService evaluatorService) {
-        this.evaluatorService = evaluatorService;
-        initializeRules();
-    }
-
-    /**
-     * Default constructor that creates all services.
+     * Initialize the dynamic method execution demo with real APEX services.
      */
     public DynamicMethodExecutionDemo() {
-        this.evaluatorService = new ExpressionEvaluatorService();
-        initializeRules();
-    }
+        // Initialize real APEX services for authentic integration
+        this.yamlLoader = new YamlConfigurationLoader();
+        this.serviceRegistry = new LookupServiceRegistry();
+        this.expressionEvaluator = new ExpressionEvaluatorService();
+        this.enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
+        
+        this.processingResults = new HashMap<>();
 
-    // ========================================
-    // CONFIGURATION FUNCTIONALITY (from DynamicMethodExecutionDemoConfig)
-    // ========================================
-
-    /**
-     * Initialize rules for dynamic method execution.
-     */
-    private void initializeRules() {
-        LOGGER.info("Initializing rules for dynamic method execution");
-
-        // Rule for settlement days calculation
-        expressionRules.put("SettlementDays", new Rule(
-                "SettlementDaysRule",
-                "#settlementService.calculateSettlementDays(#trade)",
-                "Calculate settlement days for trade"
-        ));
-
-        // Rule for settlement method determination
-        expressionRules.put("SettlementMethod", new Rule(
-                "SettlementMethodRule",
-                "#settlementService.determineSettlementMethod(#trade)",
-                "Determine settlement method for trade"
-        ));
-
-        // Rule for market risk calculation
-        expressionRules.put("MarketRisk", new Rule(
-                "MarketRiskRule",
-                "#riskService.calculateMarketRisk(#trade)",
-                "Calculate market risk for trade"
-        ));
-
-        // Rule for pricing calculation
-        expressionRules.put("StandardPrice", new Rule(
-                "StandardPriceRule",
-                "#pricingService.calculateStandardPrice(#basePrice)",
-                "Calculate standard price"
-        ));
-
-        // Additional rules for comprehensive demonstration
-        expressionRules.put("CreditRisk", new Rule(
-                "CreditRiskRule",
-                "#riskService.calculateCreditRisk(#trade)",
-                "Calculate credit risk for trade"
-        ));
-
-        expressionRules.put("ComplianceCheck", new Rule(
-                "ComplianceCheckRule",
-                "#complianceService.getApplicableRegulations(#trade)",
-                "Get applicable regulations for trade"
-        ));
-
-        expressionRules.put("PremiumPrice", new Rule(
-                "PremiumPriceRule",
-                "#pricingService.calculatePremiumPrice(#basePrice)",
-                "Calculate premium price"
-        ));
-
-        expressionRules.put("SalePrice", new Rule(
-                "SalePriceRule",
-                "#pricingService.calculateSalePrice(#basePrice)",
-                "Calculate sale price"
-        ));
-
-        expressionRules.put("ClearancePrice", new Rule(
-                "ClearancePriceRule",
-                "#pricingService.calculateClearancePrice(#basePrice)",
-                "Calculate clearance price"
-        ));
-    }
-
-    /**
-     * Create an evaluation context with self-contained services.
-     *
-     * @return The evaluation context
-     */
-    public StandardEvaluationContext createContext() {
-        LOGGER.info("Creating evaluation context");
-
-        StandardEvaluationContext context = new StandardEvaluationContext();
-
-        // Create and add sample trades
-        Map<String, Trade> sampleTrades = createSampleTrades();
-        context.setVariable("trades", sampleTrades);
-
-        // Create and add services
-        context.setVariable("settlementService", new SettlementService());
-        context.setVariable("riskService", new RiskService());
-        context.setVariable("pricingService", new PricingService());
-        context.setVariable("complianceService", new ComplianceService());
-        context.setVariable("notionalValue", 1000000.0);
-
-        return context;
-    }
-
-    /**
-     * Create sample trades for demonstration.
-     *
-     * @return A map of sample trades
-     */
-    private Map<String, Trade> createSampleTrades() {
-        Map<String, Trade> sampleTrades = new HashMap<>();
-
-        // Create sample trades of different types
-        sampleTrades.put("equity", new Trade("T001", TYPE_EQUITY, "InstrumentType"));
-        sampleTrades.put("fixedIncome", new Trade("T002", TYPE_FIXED_INCOME, "InstrumentType"));
-        sampleTrades.put("derivative", new Trade("T003", TYPE_DERIVATIVE, "InstrumentType"));
-        sampleTrades.put("forex", new Trade("T004", TYPE_FOREX, "InstrumentType"));
-        sampleTrades.put("commodity", new Trade("T005", TYPE_COMMODITY, "InstrumentType"));
-
-        // Create a trade with no ID for validation testing
-        Trade invalidTrade = new Trade();
-        invalidTrade.setValue(TYPE_EQUITY);
-        invalidTrade.setCategory("InstrumentType");
-        sampleTrades.put("invalid", invalidTrade);
-
-        return sampleTrades;
-    }
-
-    /**
-     * Main method to run the demonstration.
-     *
-     * @param args Command line arguments (not used)
-     */
-    public static void main(String[] args) {
-        // Create demo instance with default constructor
-        DynamicMethodExecutionDemo demo = new DynamicMethodExecutionDemo();
-        demo.runDynamicMethodExecutionDemo();
-    }
-
-    /**
-     * Run the dynamic method execution demonstration.
-     * This method shows the step-by-step process of creating and using dynamic method execution.
-     */
-    public void runDynamicMethodExecutionDemo() {
-        System.out.println("Starting dynamic method execution demonstration");
-
-        // Step 1: Create an evaluation context with self-contained services
-        System.out.println("Step 1: Creating an evaluation context");
-        StandardEvaluationContext context = createContext();
-
-        // Step 2: Demonstrate settlement processing
-        System.out.println("Step 2: Demonstrating settlement processing");
-        demonstrateSettlementProcessing(context);
-
-        // Step 3: Demonstrate risk management
-        System.out.println("Step 3: Demonstrating risk management");
-        demonstrateRiskManagement(context);
-
-        // Step 4: Demonstrate compliance and regulatory reporting
-        System.out.println("Step 4: Demonstrating compliance and regulatory reporting");
-        demonstrateComplianceAndReporting(context);
-
-        // Step 5: Demonstrate fee calculations
-        System.out.println("Step 5: Demonstrating fee calculations");
-        demonstrateFeeCalculations(context);
-
-        // Step 6: Demonstrate conditional processing
-        System.out.println("Step 6: Demonstrating conditional processing");
-        demonstrateConditionalProcessing(context);
-
-        // Step 7: Demonstrate rule-based processing
-        System.out.println("Step 7: Demonstrating rule-based processing");
-        demonstrateRuleBasedProcessing(context);
-
-        // Step 8: Demonstrate pricing variations
-        System.out.println("Step 8: Demonstrating pricing variations");
-        demonstratePricingVariations(context);
-
-        // Step 9: Demonstrate trade validation
-        System.out.println("Step 9: Demonstrating trade validation");
-        demonstrateTradeValidation(context);
-
-        System.out.println("Dynamic method execution demonstration completed");
-    }
-
-    // ========================================
-    // DEMO METHODS
-    // ========================================
-
-    /**
-     * Demonstrate settlement processing.
-     *
-     * @param context The evaluation context
-     */
-    private void demonstrateSettlementProcessing(StandardEvaluationContext context) {
-        System.out.println("\n----- CATEGORY 1: SETTLEMENT PROCESSING -----");
-
-        // Example 1: Calculate settlement days for different trade types
-        String[] tradeTypes = {"equity", "fixedIncome", "derivative", "forex", "commodity"};
-        for (String tradeType : tradeTypes) {
-            String expression = "#settlementService.calculateSettlementDays(#trades['" + tradeType + "'])";
-            Integer days = evaluateSettlementProcessing(expression, context, Integer.class);
-            System.out.println("Example 1." + (tradeType.charAt(0) - 'a' + 1) +
-                    ": Settlement days for " + tradeType + " trade: " + days);
-        }
-
-        // Example 2: Determine settlement method for different trade types
-        for (String tradeType : tradeTypes) {
-            String expression = "#settlementService.determineSettlementMethod(#trades['" + tradeType + "'])";
-            String method = evaluateSettlementProcessing(expression, context, String.class);
-            System.out.println("Example 2." + (tradeType.charAt(0) - 'a' + 1) +
-                    ": Settlement method for " + tradeType + " trade: " + method);
-        }
-    }
-
-    /**
-     * Demonstrate risk management.
-     *
-     * @param context The evaluation context
-     */
-    private void demonstrateRiskManagement(StandardEvaluationContext context) {
-        System.out.println("\n----- CATEGORY 2: RISK MANAGEMENT -----");
-
-        // Example 3: Calculate market risk for different trade types
-        String[] tradeTypes = {"equity", "fixedIncome", "derivative", "forex", "commodity"};
-        for (String tradeType : tradeTypes) {
-            String expression = "#riskService.calculateMarketRisk(#trades['" + tradeType + "'])";
-            Double risk = evaluateRiskManagement(expression, context, Double.class);
-            System.out.println("Example 3." + (tradeType.charAt(0) - 'a' + 1) +
-                    ": Market risk for " + tradeType + " trade: " + risk);
-        }
-
-        // Example 4: Calculate credit risk for different trade types
-        for (String tradeType : tradeTypes) {
-            String expression = "#riskService.calculateCreditRisk(#trades['" + tradeType + "'])";
-            Double risk = evaluateRiskManagement(expression, context, Double.class);
-            System.out.println("Example 4." + (tradeType.charAt(0) - 'a' + 1) +
-                    ": Credit risk for " + tradeType + " trade: " + risk);
-        }
-    }
-
-    /**
-     * Demonstrate compliance and regulatory reporting.
-     *
-     * @param context The evaluation context
-     */
-    private void demonstrateComplianceAndReporting(StandardEvaluationContext context) {
-        System.out.println("\n----- CATEGORY 3: COMPLIANCE AND REGULATORY REPORTING -----");
-
-        // Example 5: Get applicable regulations for different trade types
-        String[] tradeTypes = {"equity", "fixedIncome", "derivative", "forex", "commodity"};
-        for (String tradeType : tradeTypes) {
-            String expression = "#complianceService.getApplicableRegulations(#trades['" + tradeType + "'])";
-            @SuppressWarnings("unchecked")
-            List<String> regulations = (List<String>) evaluateComplianceAndReporting(expression, context, List.class);
-            System.out.println("Example 5." + (tradeType.charAt(0) - 'a' + 1) +
-                    ": Applicable regulations for " + tradeType + " trade: " + regulations);
-        }
-    }
-
-    /**
-     * Demonstrate fee calculations.
-     *
-     * @param context The evaluation context
-     */
-    private void demonstrateFeeCalculations(StandardEvaluationContext context) {
-        System.out.println("\n----- CATEGORY 4: FEE CALCULATIONS -----");
-
-        // Example 6: Calculate standard price for different base prices
-        double[] basePrices = {100.0, 500.0, 1000.0, 5000.0};
-        for (int i = 0; i < basePrices.length; i++) {
-            String expression = "#pricingService.calculateStandardPrice(" + basePrices[i] + ")";
-            Double price = evaluateFeeCalculation(expression, context, Double.class);
-            System.out.println("Example 6." + (i + 1) +
-                    ": Standard price for base price $" + basePrices[i] + ": $" + price);
-        }
-
-        // Example 7: Calculate premium price for different base prices
-        for (int i = 0; i < basePrices.length; i++) {
-            String expression = "#pricingService.calculatePremiumPrice(" + basePrices[i] + ")";
-            Double price = evaluateFeeCalculation(expression, context, Double.class);
-            System.out.println("Example 7." + (i + 1) +
-                    ": Premium price for base price $" + basePrices[i] + ": $" + price);
-        }
-    }
-
-    /**
-     * Demonstrate conditional processing.
-     *
-     * @param context The evaluation context
-     */
-    private void demonstrateConditionalProcessing(StandardEvaluationContext context) {
-        System.out.println("\n----- CATEGORY 5: CONDITIONAL PROCESSING -----");
-
-        // Example 8: Conditional processing based on trade type
-        String[] tradeTypes = {"equity", "fixedIncome", "derivative", "forex", "commodity"};
-        for (String tradeType : tradeTypes) {
-            String expression = "#trades['" + tradeType + "'].value == 'Equity' ? 'Apply equity rules' : " +
-                    "#trades['" + tradeType + "'].value == 'FixedIncome' ? 'Apply fixed income rules' : " +
-                    "#trades['" + tradeType + "'].value == 'Derivative' ? 'Apply derivative rules' : " +
-                    "#trades['" + tradeType + "'].value == 'Forex' ? 'Apply forex rules' : " +
-                    "#trades['" + tradeType + "'].value == 'Commodity' ? 'Apply commodity rules' : " +
-                    "'Apply default rules'";
-            String result = evaluateConditionalProcessing(expression, context, String.class);
-            System.out.println("Example 8." + (tradeType.charAt(0) - 'a' + 1) +
-                    ": Conditional processing for " + tradeType + " trade: " + result);
-        }
-    }
-
-    /**
-     * Demonstrate rule-based processing using the rules engine.
-     *
-     * @param context The evaluation context
-     */
-    private void demonstrateRuleBasedProcessing(StandardEvaluationContext context) {
-        System.out.println("\n----- CATEGORY 6: RULE-BASED PROCESSING -----");
-
-        // Example 9: Show available rules
-        Map<String, String> availableRules = getAvailableRules();
-        System.out.println("Example 9.1: Available rules:");
-        for (Map.Entry<String, String> entry : availableRules.entrySet()) {
-            System.out.println("  - " + entry.getKey() + ": " + entry.getValue());
-        }
-
-        // Example 10: Execute individual rules
-        System.out.println("\nExample 9.2: Executing individual rules for equity trade:");
-        context.setVariable("trade", context.lookupVariable("trades"));
-        @SuppressWarnings("unchecked")
-        Map<String, Object> trades = (Map<String, Object>) context.lookupVariable("trades");
-        context.setVariable("trade", trades.get("equity"));
-        context.setVariable("basePrice", 100.0);
+        logger.info("DynamicMethodExecutionDemo initialized with real APEX services");
 
         try {
-            Integer settlementDays = executeRule("SettlementDays", context, Integer.class);
-            System.out.println("  - Settlement Days: " + settlementDays);
-
-            String settlementMethod = executeRule("SettlementMethod", context, String.class);
-            System.out.println("  - Settlement Method: " + settlementMethod);
-
-            Double marketRisk = executeRule("MarketRisk", context, Double.class);
-            System.out.println("  - Market Risk: " + marketRisk);
-
-            Double standardPrice = executeRule("StandardPrice", context, Double.class);
-            System.out.println("  - Standard Price: " + standardPrice);
+            loadExternalConfiguration();
         } catch (Exception e) {
-            System.out.println("  - Error executing rules: " + e.getMessage());
-        }
-
-        // Example 11: Execute all rules at once
-        System.out.println("\nExample 9.3: Executing all rules for derivative trade:");
-        context.setVariable("trade", trades.get("derivative"));
-        context.setVariable("basePrice", 500.0);
-
-        Map<String, Object> allResults = executeAllRules(context);
-        for (Map.Entry<String, Object> entry : allResults.entrySet()) {
-            System.out.println("  - " + entry.getKey() + ": " + entry.getValue());
+            logger.error("Failed to initialize DynamicMethodExecutionDemo: {}", e.getMessage());
+            throw new RuntimeException("Dynamic method execution demo initialization failed", e);
         }
     }
 
     /**
-     * Demonstrate pricing variations using all pricing methods.
-     *
-     * @param context The evaluation context
+     * Constructor for creating a demo instance with external services (for testing).
      */
-    private void demonstratePricingVariations(StandardEvaluationContext context) {
-        System.out.println("\n----- CATEGORY 7: PRICING VARIATIONS -----");
+    public DynamicMethodExecutionDemo(ExpressionEvaluatorService evaluatorService) {
+        // Initialize with provided evaluator service and create other real APEX services
+        this.expressionEvaluator = evaluatorService;
+        this.yamlLoader = new YamlConfigurationLoader();
+        this.serviceRegistry = new LookupServiceRegistry();
+        this.enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
+        
+        this.processingResults = new HashMap<>();
 
-        // Example 12: Demonstrate all pricing methods for different base prices
-        double[] basePrices = {100.0, 500.0, 1000.0, 2500.0};
+        logger.info("DynamicMethodExecutionDemo initialized with external evaluator service");
 
-        for (int i = 0; i < basePrices.length; i++) {
-            double basePrice = basePrices[i];
-            System.out.println("\nExample 10." + (i + 1) + ": Pricing variations for base price $" + basePrice + ":");
-
-            Map<String, Double> pricingResults = demonstratePricingVariations(basePrice, context);
-
-            System.out.println("  - Standard Price: $" + pricingResults.get("standard"));
-            System.out.println("  - Premium Price (+20%): $" + pricingResults.get("premium"));
-            System.out.println("  - Sale Price (-20%): $" + pricingResults.get("sale"));
-            System.out.println("  - Clearance Price (-50%): $" + pricingResults.get("clearance"));
-
-            // Calculate price spread
-            double spread = pricingResults.get("premium") - pricingResults.get("clearance");
-            System.out.println("  - Price Spread (Premium to Clearance): $" + spread);
+        try {
+            loadExternalConfiguration();
+        } catch (Exception e) {
+            logger.error("Failed to initialize DynamicMethodExecutionDemo: {}", e.getMessage());
+            throw new RuntimeException("Dynamic method execution demo initialization failed", e);
         }
     }
 
     /**
-     * Demonstrate trade validation including invalid trades.
-     *
-     * @param context The evaluation context
+     * Loads external YAML configuration.
      */
-    private void demonstrateTradeValidation(StandardEvaluationContext context) {
-        System.out.println("\n----- CATEGORY 8: TRADE VALIDATION -----");
+    private void loadExternalConfiguration() throws Exception {
+        logger.info("Loading external dynamic method execution YAML...");
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> trades = (Map<String, Object>) context.lookupVariable("trades");
+        configurationData = new HashMap<>();
+        
+        try {
+            // Load main dynamic method execution configuration
+            YamlRuleConfiguration mainConfig = yamlLoader.loadFromClasspath("evaluation/dynamic-method-execution-demo.yaml");
+            configurationData.put("mainConfig", mainConfig);
+            
+            // Load settlement processing configuration
+            YamlRuleConfiguration settlementConfig = yamlLoader.loadFromClasspath("evaluation/dynamic-execution/settlement-processing-config.yaml");
+            configurationData.put("settlementConfig", settlementConfig);
+            
+            // Load risk management configuration
+            YamlRuleConfiguration riskConfig = yamlLoader.loadFromClasspath("evaluation/dynamic-execution/risk-management-config.yaml");
+            configurationData.put("riskConfig", riskConfig);
+            
+            // Load pricing service configuration
+            YamlRuleConfiguration pricingConfig = yamlLoader.loadFromClasspath("evaluation/dynamic-execution/pricing-service-config.yaml");
+            configurationData.put("pricingConfig", pricingConfig);
+            
+            // Load compliance service configuration
+            YamlRuleConfiguration complianceConfig = yamlLoader.loadFromClasspath("evaluation/dynamic-execution/compliance-service-config.yaml");
+            configurationData.put("complianceConfig", complianceConfig);
+            
+            // Load dynamic rules configuration
+            YamlRuleConfiguration rulesConfig = yamlLoader.loadFromClasspath("evaluation/dynamic-execution/dynamic-rules-config.yaml");
+            configurationData.put("rulesConfig", rulesConfig);
+            
+            // Load dynamic test data configuration
+            YamlRuleConfiguration testDataConfig = yamlLoader.loadFromClasspath("evaluation/dynamic-execution/dynamic-test-data.yaml");
+            configurationData.put("testDataConfig", testDataConfig);
+            
+            logger.info("External dynamic method execution YAML loaded successfully");
+            
+        } catch (Exception e) {
+            logger.warn("External dynamic execution YAML files not found, APEX enrichment will use fail-fast approach: {}", e.getMessage());
+            throw new RuntimeException("Required dynamic method execution configuration YAML files not found", e);
+        }
+    }
 
-        // Example 13: Validate valid trades
-        System.out.println("Example 11.1: Validating valid trades:");
-        String[] validTradeTypes = {"equity", "fixedIncome", "derivative", "forex", "commodity"};
+    // ============================================================================
+    // APEX-COMPLIANT DYNAMIC METHOD PROCESSING (Real APEX Service Integration)
+    // ============================================================================
 
-        for (String tradeType : validTradeTypes) {
-            Object tradeObj = trades.get(tradeType);
-            if (tradeObj instanceof Trade) {
-                Trade trade = (Trade) tradeObj;
-                Map<String, Object> validationResults = validateTrade(trade, context);
+    /**
+     * Processes settlement operations using real APEX enrichment.
+     */
+    public Map<String, Object> processSettlementOperation(String tradeType) {
+        try {
+            logger.info("Processing settlement operation for trade type '{}' using real APEX enrichment...", tradeType);
 
-                System.out.println("  - " + tradeType.toUpperCase() + " TradeB (" + trade.getId() + "):");
-                System.out.println("    * Has ID: " + validationResults.get("hasId"));
-                System.out.println("    * Has Value: " + validationResults.get("hasValue"));
-                System.out.println("    * Has Category: " + validationResults.get("hasCategory"));
-                System.out.println("    * Settlement Days: " + validationResults.get("settlementDays"));
-                System.out.println("    * Valid Settlement: " + validationResults.get("validSettlementDays"));
+            // Load main configuration
+            YamlRuleConfiguration mainConfig = (YamlRuleConfiguration) configurationData.get("mainConfig");
+            if (mainConfig == null) {
+                throw new RuntimeException("Main dynamic method execution configuration not found");
             }
+
+            // Create settlement processing data
+            Map<String, Object> settlementData = new HashMap<>();
+            settlementData.put("tradeType", tradeType);
+            settlementData.put("processingType", "settlement-processing");
+            settlementData.put("approach", "real-apex-services");
+
+            // Use real APEX enrichment service for settlement processing
+            Object enrichedResult = enrichmentService.enrichObject(mainConfig, settlementData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichedResult;
+
+            logger.info("Settlement operation for trade type '{}' processed successfully using real APEX enrichment", tradeType);
+            return result;
+
+        } catch (Exception e) {
+            logger.error("Failed to process settlement operation for trade type '{}' with APEX enrichment: {}", tradeType, e.getMessage());
+            throw new RuntimeException("Settlement operation processing failed: " + tradeType, e);
         }
-
-        // Example 14: Validate invalid trade
-        System.out.println("\nExample 11.2: Validating invalid trade:");
-        Object invalidTradeObj = trades.get("invalid");
-        if (invalidTradeObj instanceof Trade) {
-            Trade invalidTrade = (Trade) invalidTradeObj;
-            Map<String, Object> validationResults = validateTrade(invalidTrade, context);
-
-            System.out.println("  - INVALID TradeB:");
-            System.out.println("    * Has ID: " + validationResults.get("hasId"));
-            System.out.println("    * Has Value: " + validationResults.get("hasValue"));
-            System.out.println("    * Has Category: " + validationResults.get("hasCategory"));
-            System.out.println("    * Settlement Days: " + validationResults.get("settlementDays"));
-            System.out.println("    * Valid Settlement: " + validationResults.get("validSettlementDays"));
-        }
-
-        // Example 15: Validate null trade
-        System.out.println("\nExample 11.3: Validating null trade:");
-        Map<String, Object> nullValidationResults = validateTrade(null, context);
-        System.out.println("  - NULL TradeB:");
-        System.out.println("    * Has ID: " + nullValidationResults.get("hasId"));
-        System.out.println("    * Has Value: " + nullValidationResults.get("hasValue"));
-        System.out.println("    * Has Category: " + nullValidationResults.get("hasCategory"));
-        System.out.println("    * Settlement Days: " + nullValidationResults.get("settlementDays"));
-        System.out.println("    * Valid Settlement: " + nullValidationResults.get("validSettlementDays"));
-    }
-
-    // ========================================
-    // EVALUATION METHODS (from DynamicMethodExecutionDemoConfig)
-    // ========================================
-
-    /**
-     * Evaluate a settlement processing expression.
-     *
-     * @param expression The expression to evaluate
-     * @param context The evaluation context
-     * @param resultType The expected result type
-     * @param <T> The type of the result
-     * @return The result of the evaluation
-     */
-    public <T> T evaluateSettlementProcessing(String expression, EvaluationContext context, Class<T> resultType) {
-        LOGGER.info("Evaluating settlement processing expression: " + expression);
-        return evaluatorService.evaluate(expression, context, resultType);
     }
 
     /**
-     * Evaluate a risk management expression.
-     *
-     * @param expression The expression to evaluate
-     * @param context The evaluation context
-     * @param resultType The expected result type
-     * @param <T> The type of the result
-     * @return The result of the evaluation
+     * Processes risk management operations using real APEX enrichment.
      */
-    public <T> T evaluateRiskManagement(String expression, EvaluationContext context, Class<T> resultType) {
-        LOGGER.info("Evaluating risk management expression: " + expression);
-        return evaluatorService.evaluate(expression, context, resultType);
-    }
+    public Map<String, Object> processRiskManagement(String tradeType) {
+        try {
+            logger.info("Processing risk management for trade type '{}' using real APEX enrichment...", tradeType);
 
-    /**
-     * Evaluate a compliance and reporting expression.
-     *
-     * @param expression The expression to evaluate
-     * @param context The evaluation context
-     * @param resultType The expected result type
-     * @param <T> The type of the result
-     * @return The result of the evaluation
-     */
-    public <T> T evaluateComplianceAndReporting(String expression, EvaluationContext context, Class<T> resultType) {
-        LOGGER.info("Evaluating compliance and reporting expression: " + expression);
-        return evaluatorService.evaluate(expression, context, resultType);
-    }
-
-    /**
-     * Evaluate a fee calculation expression.
-     *
-     * @param expression The expression to evaluate
-     * @param context The evaluation context
-     * @param resultType The expected result type
-     * @param <T> The type of the result
-     * @return The result of the evaluation
-     */
-    public <T> T evaluateFeeCalculation(String expression, EvaluationContext context, Class<T> resultType) {
-        LOGGER.info("Evaluating fee calculation expression: " + expression);
-        return evaluatorService.evaluate(expression, context, resultType);
-    }
-
-    /**
-     * Evaluate a conditional processing expression.
-     *
-     * @param expression The expression to evaluate
-     * @param context The evaluation context
-     * @param resultType The expected result type
-     * @param <T> The type of the result
-     * @return The result of the evaluation
-     */
-    public <T> T evaluateConditionalProcessing(String expression, EvaluationContext context, Class<T> resultType) {
-        LOGGER.info("Evaluating conditional processing expression: " + expression);
-        return evaluatorService.evaluate(expression, context, resultType);
-    }
-
-    /**
-     * Execute a rule by name using the rules engine.
-     *
-     * @param ruleName The name of the rule to execute
-     * @param context The evaluation context
-     * @param resultType The expected result type
-     * @param <T> The type of the result
-     * @return The result of the rule execution
-     */
-    public <T> T executeRule(String ruleName, EvaluationContext context, Class<T> resultType) {
-        LOGGER.info("Executing rule: " + ruleName);
-        Rule rule = expressionRules.get(ruleName);
-        if (rule == null) {
-            throw new IllegalArgumentException("Rule not found: " + ruleName);
-        }
-        return evaluatorService.evaluate(rule.getCondition(), context, resultType);
-    }
-
-    /**
-     * Execute all rules and return their results.
-     *
-     * @param context The evaluation context
-     * @return A map of rule names to their execution results
-     */
-    public Map<String, Object> executeAllRules(EvaluationContext context) {
-        LOGGER.info("Executing all rules");
-        Map<String, Object> results = new HashMap<>();
-
-        for (Map.Entry<String, Rule> entry : expressionRules.entrySet()) {
-            String ruleName = entry.getKey();
-            Rule rule = entry.getValue();
-            try {
-                Object result = evaluatorService.evaluate(rule.getCondition(), context, Object.class);
-                results.put(ruleName, result);
-                LOGGER.info("Rule " + ruleName + " executed successfully: " + result);
-            } catch (Exception e) {
-                LOGGER.warning("Failed to execute rule " + ruleName + ": " + e.getMessage());
-                results.put(ruleName, "ERROR: " + e.getMessage());
+            // Load main configuration
+            YamlRuleConfiguration mainConfig = (YamlRuleConfiguration) configurationData.get("mainConfig");
+            if (mainConfig == null) {
+                throw new RuntimeException("Main dynamic method execution configuration not found");
             }
-        }
 
-        return results;
+            // Create risk management processing data
+            Map<String, Object> riskData = new HashMap<>();
+            riskData.put("tradeType", tradeType);
+            riskData.put("processingType", "risk-management");
+            riskData.put("approach", "real-apex-services");
+
+            // Use real APEX enrichment service for risk management processing
+            Object enrichedResult = enrichmentService.enrichObject(mainConfig, riskData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichedResult;
+
+            logger.info("Risk management for trade type '{}' processed successfully using real APEX enrichment", tradeType);
+            return result;
+
+        } catch (Exception e) {
+            logger.error("Failed to process risk management for trade type '{}' with APEX enrichment: {}", tradeType, e.getMessage());
+            throw new RuntimeException("Risk management processing failed: " + tradeType, e);
+        }
     }
 
     /**
-     * Validate a trade using rule-based processing.
-     *
-     * @param trade The trade to validate
-     * @param context The evaluation context
-     * @return Validation results
+     * Processes pricing operations using real APEX enrichment.
      */
-    public Map<String, Object> validateTrade(Trade trade, EvaluationContext context) {
-        LOGGER.info("Validating trade: " + (trade != null ? trade.getId() : "null"));
+    public Map<String, Object> processPricingOperation(double basePrice, String pricingType) {
+        try {
+            logger.info("Processing pricing operation for base price {} with type '{}' using real APEX enrichment...", basePrice, pricingType);
 
-        Map<String, Object> validationResults = new HashMap<>();
-        context.setVariable("trade", trade);
-
-        // Basic validation rules
-        validationResults.put("hasId", trade != null && trade.getId() != null && !trade.getId().trim().isEmpty());
-        validationResults.put("hasValue", trade != null && trade.getValue() != null && !trade.getValue().trim().isEmpty());
-        validationResults.put("hasCategory", trade != null && trade.getCategory() != null && !trade.getCategory().trim().isEmpty());
-
-        // Execute settlement days rule for validation
-        if (expressionRules.containsKey("SettlementDays")) {
-            try {
-                Integer settlementDays = executeRule("SettlementDays", context, Integer.class);
-                validationResults.put("settlementDays", settlementDays);
-                validationResults.put("validSettlementDays", settlementDays > 0);
-            } catch (Exception e) {
-                validationResults.put("settlementDays", "ERROR: " + e.getMessage());
-                validationResults.put("validSettlementDays", false);
+            // Load main configuration
+            YamlRuleConfiguration mainConfig = (YamlRuleConfiguration) configurationData.get("mainConfig");
+            if (mainConfig == null) {
+                throw new RuntimeException("Main dynamic method execution configuration not found");
             }
+
+            // Create pricing processing data
+            Map<String, Object> pricingData = new HashMap<>();
+            pricingData.put("basePrice", basePrice);
+            pricingData.put("pricingType", pricingType);
+            pricingData.put("processingType", "pricing-service");
+            pricingData.put("approach", "real-apex-services");
+
+            // Use real APEX enrichment service for pricing processing
+            Object enrichedResult = enrichmentService.enrichObject(mainConfig, pricingData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichedResult;
+
+            logger.info("Pricing operation for base price {} with type '{}' processed successfully using real APEX enrichment", basePrice, pricingType);
+            return result;
+
+        } catch (Exception e) {
+            logger.error("Failed to process pricing operation for base price {} with type '{}' with APEX enrichment: {}", basePrice, pricingType, e.getMessage());
+            throw new RuntimeException("Pricing operation processing failed: " + pricingType, e);
         }
-
-        return validationResults;
     }
 
     /**
-     * Demonstrate pricing variations using all pricing methods.
-     *
-     * @param basePrice The base price to calculate variations for
-     * @param context The evaluation context
-     * @return A map of pricing method names to calculated prices
+     * Processes compliance operations using real APEX enrichment.
      */
-    public Map<String, Double> demonstratePricingVariations(double basePrice, EvaluationContext context) {
-        LOGGER.info("Demonstrating pricing variations for base price: " + basePrice);
+    public Map<String, Object> processComplianceOperation(String tradeType) {
+        try {
+            logger.info("Processing compliance operation for trade type '{}' using real APEX enrichment...", tradeType);
 
-        Map<String, Double> pricingResults = new HashMap<>();
-
-        // Standard price
-        String standardExpression = "#pricingService.calculateStandardPrice(" + basePrice + ")";
-        Double standardPrice = evaluatorService.evaluate(standardExpression, context, Double.class);
-        pricingResults.put("standard", standardPrice);
-
-        // Premium price
-        String premiumExpression = "#pricingService.calculatePremiumPrice(" + basePrice + ")";
-        Double premiumPrice = evaluatorService.evaluate(premiumExpression, context, Double.class);
-        pricingResults.put("premium", premiumPrice);
-
-        // Sale price
-        String saleExpression = "#pricingService.calculateSalePrice(" + basePrice + ")";
-        Double salePrice = evaluatorService.evaluate(saleExpression, context, Double.class);
-        pricingResults.put("sale", salePrice);
-
-        // Clearance price
-        String clearanceExpression = "#pricingService.calculateClearancePrice(" + basePrice + ")";
-        Double clearancePrice = evaluatorService.evaluate(clearanceExpression, context, Double.class);
-        pricingResults.put("clearance", clearancePrice);
-
-        return pricingResults;
-    }
-
-    /**
-     * Get available rules.
-     *
-     * @return A map of rule names to their descriptions
-     */
-    public Map<String, String> getAvailableRules() {
-        Map<String, String> ruleDescriptions = new HashMap<>();
-        for (Map.Entry<String, Rule> entry : expressionRules.entrySet()) {
-            ruleDescriptions.put(entry.getKey(), entry.getValue().getDescription());
-        }
-        return ruleDescriptions;
-    }
-
-    /**
-     * Execute rules using the formal rules engine (alternative to direct evaluation).
-     * This demonstrates the difference between direct expression evaluation and
-     * formal rule engine execution with full rule lifecycle management.
-     *
-     * @param ruleNames The names of the rules to execute
-     * @param context The evaluation context
-     * @return A map of rule names to their execution results
-     */
-    public Map<String, Object> executeRulesWithEngine(List<String> ruleNames, EvaluationContext context) {
-        LOGGER.info("Executing rules using formal rules engine: " + ruleNames);
-        Map<String, Object> results = new HashMap<>();
-
-        List<Rule> rulesToExecute = new ArrayList<>();
-        for (String ruleName : ruleNames) {
-            Rule rule = expressionRules.get(ruleName);
-            if (rule != null) {
-                rulesToExecute.add(rule);
-            } else {
-                results.put(ruleName, "ERROR: Rule not found");
+            // Load main configuration
+            YamlRuleConfiguration mainConfig = (YamlRuleConfiguration) configurationData.get("mainConfig");
+            if (mainConfig == null) {
+                throw new RuntimeException("Main dynamic method execution configuration not found");
             }
-        }
 
-        if (!rulesToExecute.isEmpty()) {
-            try {
-                // Use the rules engine for formal rule execution
-                // Note: This would typically involve the RuleEngineService, but for this demo
-                // we'll show the pattern of how the RulesEngine would be used
-                for (Rule rule : rulesToExecute) {
-                    try {
-                        Object result = evaluatorService.evaluate(rule.getCondition(), context, Object.class);
-                        results.put(rule.getName(), result);
-                        LOGGER.info("Rule " + rule.getName() + " executed via engine: " + result);
-                    } catch (Exception e) {
-                        LOGGER.warning("Failed to execute rule " + rule.getName() + " via engine: " + e.getMessage());
-                        results.put(rule.getName(), "ERROR: " + e.getMessage());
-                    }
-                }
-            } catch (Exception e) {
-                LOGGER.warning("Rules engine execution failed: " + e.getMessage());
-                for (String ruleName : ruleNames) {
-                    results.put(ruleName, "ERROR: Engine execution failed - " + e.getMessage());
-                }
+            // Create compliance processing data
+            Map<String, Object> complianceData = new HashMap<>();
+            complianceData.put("tradeType", tradeType);
+            complianceData.put("processingType", "compliance-service");
+            complianceData.put("approach", "real-apex-services");
+
+            // Use real APEX enrichment service for compliance processing
+            Object enrichedResult = enrichmentService.enrichObject(mainConfig, complianceData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichedResult;
+
+            logger.info("Compliance operation for trade type '{}' processed successfully using real APEX enrichment", tradeType);
+            return result;
+
+        } catch (Exception e) {
+            logger.error("Failed to process compliance operation for trade type '{}' with APEX enrichment: {}", tradeType, e.getMessage());
+            throw new RuntimeException("Compliance operation processing failed: " + tradeType, e);
+        }
+    }
+
+    /**
+     * Processes dynamic rule execution using real APEX enrichment.
+     */
+    public Map<String, Object> processDynamicRule(String ruleName, Map<String, Object> inputData) {
+        try {
+            logger.info("Processing dynamic rule '{}' using real APEX enrichment...", ruleName);
+
+            // Load main configuration
+            YamlRuleConfiguration mainConfig = (YamlRuleConfiguration) configurationData.get("mainConfig");
+            if (mainConfig == null) {
+                throw new RuntimeException("Main dynamic method execution configuration not found");
             }
-        }
 
-        return results;
+            // Create dynamic rule processing data
+            Map<String, Object> ruleData = new HashMap<>(inputData);
+            ruleData.put("ruleName", ruleName);
+            ruleData.put("processingType", "dynamic-rules");
+            ruleData.put("approach", "real-apex-services");
+
+            // Use real APEX enrichment service for dynamic rule processing
+            Object enrichedResult = enrichmentService.enrichObject(mainConfig, ruleData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichedResult;
+
+            logger.info("Dynamic rule '{}' processed successfully using real APEX enrichment", ruleName);
+            return result;
+
+        } catch (Exception e) {
+            logger.error("Failed to process dynamic rule '{}' with APEX enrichment: {}", ruleName, e.getMessage());
+            throw new RuntimeException("Dynamic rule processing failed: " + ruleName, e);
+        }
     }
 
-    // ========================================
-    // SERVICE CLASSES (from DynamicMethodExecutionDemoConfig)
-    // ========================================
-
     /**
-     * Self-contained settlement service for demonstration.
-     * Methods in this class are called dynamically via SpEL expressions.
+     * Processes conditional operations using real APEX enrichment.
      */
-    @SuppressWarnings("unused") // Methods called dynamically via SpEL expressions
-    private class SettlementService {
-        private final Map<String, Integer> settlementDays = new HashMap<>();
+    public Map<String, Object> processConditionalOperation(boolean condition, String trueValue, String falseValue) {
+        try {
+            logger.info("Processing conditional operation using real APEX enrichment...");
 
-        public SettlementService() {
-            // Initialize settlement days by type
-            settlementDays.put(TYPE_EQUITY, 2);
-            settlementDays.put(TYPE_FIXED_INCOME, 1);
-            settlementDays.put(TYPE_DERIVATIVE, 1);
-            settlementDays.put(TYPE_FOREX, 2);
-            settlementDays.put(TYPE_COMMODITY, 3);
-        }
-
-        public int calculateSettlementDays(Trade trade) {
-            if (trade == null || trade.getValue() == null || trade.getValue().trim().isEmpty()) return 0;
-            return settlementDays.getOrDefault(trade.getValue(), 2);
-        }
-
-        public String determineSettlementMethod(Trade trade) {
-            if (trade == null) return METHOD_MANUAL;
-
-            switch (trade.getValue()) {
-                case TYPE_EQUITY:
-                    return METHOD_DTC;
-                case TYPE_FIXED_INCOME:
-                    return METHOD_FEDWIRE;
-                case TYPE_DERIVATIVE:
-                    return METHOD_CLEARSTREAM;
-                case TYPE_FOREX:
-                    return METHOD_EUROCLEAR;
-                case TYPE_COMMODITY:
-                    return METHOD_MANUAL;
-                default:
-                    return METHOD_MANUAL;
+            // Load main configuration
+            YamlRuleConfiguration mainConfig = (YamlRuleConfiguration) configurationData.get("mainConfig");
+            if (mainConfig == null) {
+                throw new RuntimeException("Main dynamic method execution configuration not found");
             }
+
+            // Create conditional processing data
+            Map<String, Object> conditionalData = new HashMap<>();
+            conditionalData.put("condition", condition);
+            conditionalData.put("trueValue", trueValue);
+            conditionalData.put("falseValue", falseValue);
+            conditionalData.put("processingType", "conditional-processing");
+            conditionalData.put("approach", "real-apex-services");
+
+            // Use real APEX enrichment service for conditional processing
+            Object enrichedResult = enrichmentService.enrichObject(mainConfig, conditionalData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichedResult;
+
+            logger.info("Conditional operation processed successfully using real APEX enrichment");
+            return result;
+
+        } catch (Exception e) {
+            logger.error("Failed to process conditional operation with APEX enrichment: {}", e.getMessage());
+            throw new RuntimeException("Conditional operation processing failed", e);
         }
     }
 
     /**
-     * Self-contained risk service for demonstration.
-     * Methods in this class are called dynamically via SpEL expressions.
+     * Processes fee calculation using real APEX enrichment.
      */
-    @SuppressWarnings("unused") // Methods called dynamically via SpEL expressions
-    private class RiskService {
-        private final Map<String, Double> marketRiskFactors = new HashMap<>();
-        private final Map<String, Double> creditRiskFactors = new HashMap<>();
+    public Map<String, Object> processFeeCalculation(double notionalValue, Double feeRate) {
+        try {
+            logger.info("Processing fee calculation for notional value {} using real APEX enrichment...", notionalValue);
 
-        public RiskService() {
-            // Initialize risk factors by type
-            marketRiskFactors.put(TYPE_EQUITY, 0.15);
-            marketRiskFactors.put(TYPE_FIXED_INCOME, 0.05);
-            marketRiskFactors.put(TYPE_DERIVATIVE, 0.25);
-            marketRiskFactors.put(TYPE_FOREX, 0.10);
-            marketRiskFactors.put(TYPE_COMMODITY, 0.20);
+            // Load main configuration
+            YamlRuleConfiguration mainConfig = (YamlRuleConfiguration) configurationData.get("mainConfig");
+            if (mainConfig == null) {
+                throw new RuntimeException("Main dynamic method execution configuration not found");
+            }
 
-            creditRiskFactors.put(TYPE_EQUITY, 0.10);
-            creditRiskFactors.put(TYPE_FIXED_INCOME, 0.15);
-            creditRiskFactors.put(TYPE_DERIVATIVE, 0.20);
-            creditRiskFactors.put(TYPE_FOREX, 0.05);
-            creditRiskFactors.put(TYPE_COMMODITY, 0.10);
+            // Create fee calculation processing data
+            Map<String, Object> feeData = new HashMap<>();
+            feeData.put("notionalValue", notionalValue);
+            if (feeRate != null) {
+                feeData.put("feeRate", feeRate);
+            }
+            feeData.put("processingType", "fee-calculation");
+            feeData.put("approach", "real-apex-services");
+
+            // Use real APEX enrichment service for fee calculation processing
+            Object enrichedResult = enrichmentService.enrichObject(mainConfig, feeData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichedResult;
+
+            logger.info("Fee calculation for notional value {} processed successfully using real APEX enrichment", notionalValue);
+            return result;
+
+        } catch (Exception e) {
+            logger.error("Failed to process fee calculation for notional value {} with APEX enrichment: {}", notionalValue, e.getMessage());
+            throw new RuntimeException("Fee calculation processing failed", e);
         }
+    }
 
-        public double calculateMarketRisk(Trade trade) {
-            if (trade == null) return 0.0;
-            return marketRiskFactors.getOrDefault(trade.getValue(), 0.10);
-        }
+    // ============================================================================
+    // APEX-COMPLIANT DEMONSTRATION METHODS
+    // ============================================================================
 
-        public double calculateCreditRisk(Trade trade) {
-            if (trade == null) return 0.0;
-            return creditRiskFactors.getOrDefault(trade.getValue(), 0.10);
+    /**
+     * Demonstrates settlement processing using real APEX enrichment.
+     */
+    public void demonstrateSettlementProcessing() {
+        System.out.println("\n----- CATEGORY 1: SETTLEMENT PROCESSING (Real APEX Enrichment) -----");
+
+        String[] tradeTypes = {"Equity", "FixedIncome", "Derivative", "Forex", "Commodity"};
+
+        for (String tradeType : tradeTypes) {
+            System.out.printf("Processing settlement for %s trade using real APEX enrichment...%n", tradeType);
+
+            Map<String, Object> result = processSettlementOperation(tradeType);
+
+            System.out.printf("  Settlement Days: %s%n", result.get("settlementDays"));
+            System.out.printf("  Settlement Method: %s%n", result.get("settlementMethod"));
+            System.out.printf("  Execution Summary: %s%n", result.get("executionSummary"));
         }
     }
 
     /**
-     * Self-contained pricing service for demonstration.
-     * Methods in this class are called dynamically via SpEL expressions.
+     * Demonstrates risk management using real APEX enrichment.
      */
-    @SuppressWarnings("unused") // Methods called dynamically via SpEL expressions
-    private class PricingService {
-        public double calculateStandardPrice(double basePrice) {
-            return basePrice;
-        }
+    public void demonstrateRiskManagement() {
+        System.out.println("\n----- CATEGORY 2: RISK MANAGEMENT (Real APEX Enrichment) -----");
 
-        public double calculatePremiumPrice(double basePrice) {
-            return basePrice * 1.20; // 20% premium
-        }
+        String[] tradeTypes = {"Equity", "FixedIncome", "Derivative", "Forex", "Commodity"};
 
-        public double calculateSalePrice(double basePrice) {
-            return basePrice * 0.80; // 20% discount
-        }
+        for (String tradeType : tradeTypes) {
+            System.out.printf("Processing risk management for %s trade using real APEX enrichment...%n", tradeType);
 
-        public double calculateClearancePrice(double basePrice) {
-            return basePrice * 0.50; // 50% discount
+            Map<String, Object> result = processRiskManagement(tradeType);
+
+            System.out.printf("  Market Risk: %s%n", result.get("marketRisk"));
+            System.out.printf("  Credit Risk: %s%n", result.get("creditRisk"));
+            System.out.printf("  Execution Summary: %s%n", result.get("executionSummary"));
         }
     }
 
     /**
-     * Self-contained compliance service for demonstration.
-     * Methods in this class are called dynamically via SpEL expressions.
+     * Demonstrates pricing service using real APEX enrichment.
      */
-    @SuppressWarnings("unused") // Methods called dynamically via SpEL expressions
-    private class ComplianceService {
-        private final Map<String, List<String>> applicableRegulations = new HashMap<>();
+    public void demonstratePricingService() {
+        System.out.println("\n----- CATEGORY 3: PRICING SERVICE (Real APEX Enrichment) -----");
 
-        public ComplianceService() {
-            // Initialize regulations by type
-            applicableRegulations.put(TYPE_EQUITY, Arrays.asList("SEC Rule 10b-5", "Regulation SHO", "Market Access Rule"));
-            applicableRegulations.put(TYPE_FIXED_INCOME, Arrays.asList("MSRB Rule G-15", "TRACE Reporting", "Best Execution"));
-            applicableRegulations.put(TYPE_DERIVATIVE, Arrays.asList("Dodd-Frank Act", "EMIR", "Basel III"));
-            applicableRegulations.put(TYPE_FOREX, Arrays.asList("CFTC Part 23", "MiFID II", "Basel III"));
-            applicableRegulations.put(TYPE_COMMODITY, Arrays.asList("CEA Section 4s", "REMIT", "Position Limits"));
+        String[] pricingTypes = {"standard", "premium", "sale", "clearance"};
+        double basePrice = 100.00;
+
+        for (String pricingType : pricingTypes) {
+            System.out.printf("Processing %s pricing for base price $%.2f using real APEX enrichment...%n", pricingType, basePrice);
+
+            Map<String, Object> result = processPricingOperation(basePrice, pricingType);
+
+            System.out.printf("  Calculated Price: %s%n", result.get("calculatedPrice"));
+            System.out.printf("  Execution Summary: %s%n", result.get("executionSummary"));
         }
+    }
 
-        public List<String> getApplicableRegulations(Trade trade) {
-            if (trade == null) return Collections.emptyList();
-            return applicableRegulations.getOrDefault(trade.getValue(), Collections.emptyList());
+    /**
+     * Demonstrates compliance service using real APEX enrichment.
+     */
+    public void demonstrateComplianceService() {
+        System.out.println("\n----- CATEGORY 4: COMPLIANCE SERVICE (Real APEX Enrichment) -----");
+
+        String[] tradeTypes = {"Equity", "FixedIncome", "Derivative", "Forex", "Commodity"};
+
+        for (String tradeType : tradeTypes) {
+            System.out.printf("Processing compliance for %s trade using real APEX enrichment...%n", tradeType);
+
+            Map<String, Object> result = processComplianceOperation(tradeType);
+
+            System.out.printf("  Applicable Regulations: %s%n", result.get("applicableRegulations"));
+            System.out.printf("  Execution Summary: %s%n", result.get("executionSummary"));
+        }
+    }
+
+    /**
+     * Demonstrates dynamic rule execution using real APEX enrichment.
+     */
+    public void demonstrateDynamicRules() {
+        System.out.println("\n----- CATEGORY 5: DYNAMIC RULES (Real APEX Enrichment) -----");
+
+        // Settlement days rule
+        Map<String, Object> settlementInput = new HashMap<>();
+        settlementInput.put("tradeType", "Equity");
+        Map<String, Object> settlementResult = processDynamicRule("SettlementDays", settlementInput);
+        System.out.printf("Settlement Days Rule Result: %s%n", settlementResult.get("ruleResult"));
+
+        // Market risk rule
+        Map<String, Object> riskInput = new HashMap<>();
+        riskInput.put("tradeType", "Derivative");
+        Map<String, Object> riskResult = processDynamicRule("MarketRisk", riskInput);
+        System.out.printf("Market Risk Rule Result: %s%n", riskResult.get("ruleResult"));
+
+        // Premium pricing rule
+        Map<String, Object> pricingInput = new HashMap<>();
+        pricingInput.put("basePrice", 100.00);
+        Map<String, Object> pricingResult = processDynamicRule("PremiumPrice", pricingInput);
+        System.out.printf("Premium Price Rule Result: %s%n", pricingResult.get("ruleResult"));
+    }
+
+    /**
+     * Demonstrates conditional processing using real APEX enrichment.
+     */
+    public void demonstrateConditionalProcessing() {
+        System.out.println("\n----- CATEGORY 6: CONDITIONAL PROCESSING (Real APEX Enrichment) -----");
+
+        // True condition
+        Map<String, Object> trueResult = processConditionalOperation(true, "Condition is true", "Condition is false");
+        System.out.printf("True Condition Result: %s%n", trueResult.get("conditionalResult"));
+
+        // False condition
+        Map<String, Object> falseResult = processConditionalOperation(false, "Condition is true", "Condition is false");
+        System.out.printf("False Condition Result: %s%n", falseResult.get("conditionalResult"));
+    }
+
+    /**
+     * Demonstrates fee calculation using real APEX enrichment.
+     */
+    public void demonstrateFeeCalculation() {
+        System.out.println("\n----- CATEGORY 7: FEE CALCULATION (Real APEX Enrichment) -----");
+
+        // Standard fee calculation
+        Map<String, Object> standardFeeResult = processFeeCalculation(1000000.00, null);
+        System.out.printf("Standard Fee (1M notional): %s%n", standardFeeResult.get("calculatedFee"));
+
+        // Premium fee calculation
+        Map<String, Object> premiumFeeResult = processFeeCalculation(5000000.00, 0.0015);
+        System.out.printf("Premium Fee (5M notional, 0.15%% rate): %s%n", premiumFeeResult.get("calculatedFee"));
+    }
+
+    /**
+     * Run the comprehensive dynamic method execution demonstration.
+     */
+    public void runDynamicMethodExecutionDemo() {
+        System.out.println("=================================================================");
+        System.out.println("APEX DYNAMIC METHOD EXECUTION DEMONSTRATION");
+        System.out.println("=================================================================");
+        System.out.println("Demo Purpose: Comprehensive dynamic method execution with real APEX services");
+        System.out.println("Processing Methods: Real APEX Enrichment + YAML Configurations");
+        System.out.println("Execution Categories: 7 comprehensive categories with real APEX integration");
+        System.out.println("Data Sources: Real APEX Services + External YAML Files");
+        System.out.println("=================================================================");
+
+        try {
+            // Category 1: Settlement Processing
+            demonstrateSettlementProcessing();
+
+            // Category 2: Risk Management
+            demonstrateRiskManagement();
+
+            // Category 3: Pricing Service
+            demonstratePricingService();
+
+            // Category 4: Compliance Service
+            demonstrateComplianceService();
+
+            // Category 5: Dynamic Rules
+            demonstrateDynamicRules();
+
+            // Category 6: Conditional Processing
+            demonstrateConditionalProcessing();
+
+            // Category 7: Fee Calculation
+            demonstrateFeeCalculation();
+
+            System.out.println("\n=================================================================");
+            System.out.println("DYNAMIC METHOD EXECUTION DEMONSTRATION COMPLETED SUCCESSFULLY");
+            System.out.println("=================================================================");
+            System.out.println("All 7 categories executed using real APEX services");
+            System.out.println("Total processing: 25+ dynamic method executions");
+            System.out.println("Configuration: 6 YAML files with comprehensive method definitions");
+            System.out.println("Integration: 100% real APEX enrichment services");
+            System.out.println("=================================================================");
+
+        } catch (Exception e) {
+            logger.error("Dynamic method execution demonstration failed: {}", e.getMessage());
+            System.err.println("Demonstration failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // ============================================================================
+    // MAIN METHOD FOR DYNAMIC METHOD EXECUTION DEMONSTRATION
+    // ============================================================================
+
+    /**
+     * Main method to demonstrate APEX-compliant dynamic method execution.
+     */
+    public static void main(String[] args) {
+        try {
+            logger.info("Starting APEX-compliant dynamic method execution demonstration...");
+
+            // Initialize with real APEX services
+            DynamicMethodExecutionDemo demo = new DynamicMethodExecutionDemo();
+
+            // Run comprehensive demonstration
+            demo.runDynamicMethodExecutionDemo();
+
+            logger.info("APEX-compliant dynamic method execution demonstration completed successfully");
+
+        } catch (Exception e) {
+            logger.error("Dynamic method execution demonstration failed: {}", e.getMessage());
+            System.err.println("Demonstration failed: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
