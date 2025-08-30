@@ -1606,15 +1606,15 @@ public class RuleSet {
     public static class ValidationBuilder {
         // Pre-built validation patterns
         public ValidationBuilder ageCheck(int minimumAge) {
-            return addRule("#data.age >= " + minimumAge);
+            return addRule("#age >= " + minimumAge);
         }
 
         public ValidationBuilder emailRequired() {
-            return addRule("#data.email != null && #data.email.contains('@')");
+            return addRule("#email != null && #email.contains('@')");
         }
 
         public ValidationBuilder balanceMinimum(BigDecimal minimum) {
-            return addRule("#data.balance >= " + minimum);
+            return addRule("#balance >= " + minimum);
         }
 
         public RulesEngine build() {
@@ -3296,7 +3296,7 @@ metadata:
 rules:
   - id: "age-validation"
     name: "Age Check"
-    condition: "#data.age >= 18"
+    condition: "#age >= 18"
     message: "Customer must be at least 18 years old"
     severity: "ERROR"
     metadata:
