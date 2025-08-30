@@ -85,7 +85,7 @@
                 <version>3.1.0</version>
                 <configuration>
                     <!-- Default main class - can be overridden with -Dexec.mainClass -->
-                    <mainClass>dev.mars.apex.demo.runners.DemoRunner</mainClass>
+                    <mainClass>dev.mars.apex.demo.runners.ValidationRunner</mainClass>
                 </configuration>
                 <executions>
                     <!-- Default execution for DemoRunner -->

@@ -18,6 +18,7 @@ package dev.mars.apex.demo.model;
 
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -235,8 +236,8 @@ public class LoanApplication {
         if (annualIncome != null && annualIncome.compareTo(BigDecimal.ZERO) > 0) {
             // Estimate monthly debt payment as a percentage of loan amount
             BigDecimal estimatedMonthlyDebt = loanAmount.multiply(new BigDecimal("0.01"));
-            BigDecimal monthlyIncome = annualIncome.divide(new BigDecimal("12"), 4, BigDecimal.ROUND_HALF_UP);
-            return estimatedMonthlyDebt.divide(monthlyIncome, 4, BigDecimal.ROUND_HALF_UP);
+            BigDecimal monthlyIncome = annualIncome.divide(new BigDecimal("12"), 4, RoundingMode.HALF_UP);
+            return estimatedMonthlyDebt.divide(monthlyIncome, 4, RoundingMode.HALF_UP);
         }
         
         return BigDecimal.ZERO;

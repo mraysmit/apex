@@ -11,84 +11,87 @@ metadata:
 
 # Basic Dataset Structure Enrichments
 enrichments:
-  - name: "basic-dataset-structure-processing"
-    type: "dataset-enrichment"
+  - id: "basic-dataset-structure-processing"
+    name: "basic-dataset-structure-processing"
+    type: "field-enrichment"
     description: "Basic dataset structure processing using real APEX services"
     conditions:
-      - condition: "#data.processingType == 'BASIC_DATASET'"
+      - condition: "#processingType == 'BASIC_DATASET'"
         actions:
           - type: "dataset-processing"
             dataset-operations:
               - operation: "currency-lookup"
-                condition: "#data.currency != null"
+                condition: "#currency != null"
                 action:
                   type: "set-field"
                   field: "currencyName"
-                  value: "#data.currency == 'USD' ? 'US Dollar' : (#data.currency == 'EUR' ? 'Euro' : (#data.currency == 'GBP' ? 'British Pound' : 'Unknown Currency'))"
+                  value: "#currency == 'USD' ? 'US Dollar' : (#currency == 'EUR' ? 'Euro' : (#currency == 'GBP' ? 'British Pound' : 'Unknown Currency'))"
                 message: "Currency lookup for dataset structure"
               - operation: "amount-validation"
-                condition: "#data.amount != null && #data.amount > 0"
+                condition: "#amount != null && #amount > 0"
                 action:
                   type: "set-field"
                   field: "amountValid"
                   value: true
                 message: "Amount validation for dataset structure"
               - operation: "customer-classification"
-                condition: "#data.customerId != null"
+                condition: "#customerId != null"
                 action:
                   type: "set-field"
                   field: "customerType"
-                  value: "#data.customerId.startsWith('CUST') ? 'STANDARD_CUSTOMER' : 'UNKNOWN_CUSTOMER'"
+                  value: "#customerId.startsWith('CUST') ? 'STANDARD_CUSTOMER' : 'UNKNOWN_CUSTOMER'"
                 message: "Customer classification for dataset structure"
             processing-metadata:
               processing-type: "BASIC_DATASET"
               complexity: "LOW"
               dataset-operations: 3
 
-  - name: "simple-data-enrichment-processing"
-    type: "enrichment-processing"
+  - id: "simple-data-enrichment-processing"
+    name: "simple-data-enrichment-processing"
+    type: "lookup-enrichment"
     description: "Simple data enrichment with lookup operations"
     conditions:
-      - condition: "#data.processingType == 'SIMPLE_ENRICHMENT'"
+      - condition: "#processingType == 'SIMPLE_ENRICHMENT'"
         actions:
           - type: "simple-enrichment-processing"
             enrichment-operations:
               - operation: "product-lookup"
-                condition: "#data.productId != null"
+                condition: "#productId != null"
                 action:
                   type: "set-field"
                   field: "productName"
-                  value: "#data.productId == 'LAPTOP001' ? 'Business Laptop' : (#data.productId == 'DESKTOP001' ? 'Business Desktop' : 'Unknown Product')"
+                  value: "#productId == 'LAPTOP001' ? 'Business Laptop' : (#productId == 'DESKTOP001' ? 'Business Desktop' : 'Unknown Product')"
                 message: "Product lookup for simple enrichment"
               - operation: "quantity-validation"
-                condition: "#data.quantity != null && #data.quantity > 0"
+                condition: "#quantity != null && #quantity > 0"
                 action:
                   type: "set-field"
                   field: "quantityValid"
                   value: true
                 message: "Quantity validation for simple enrichment"
               - operation: "customer-enrichment"
-                condition: "#data.customerId != null"
+                condition: "#customerId != null"
                 action:
                   type: "set-field"
                   field: "customerStatus"
-                  value: "#data.customerId == 'CUST001' ? 'ACTIVE' : 'INACTIVE'"
+                  value: "#customerId == 'CUST001' ? 'ACTIVE' : 'INACTIVE'"
                 message: "Customer enrichment for simple processing"
             processing-metadata:
               processing-type: "SIMPLE_ENRICHMENT"
               complexity: "MEDIUM"
               enrichment-operations: 3
 
-  - name: "complex-data-enrichment-processing"
-    type: "complex-enrichment"
+  - id: "complex-data-enrichment-processing"
+    name: "complex-data-enrichment-processing"
+    type: "calculation-enrichment"
     description: "Complex data enrichment with nested structures and mappings"
     conditions:
-      - condition: "#data.processingType == 'COMPLEX_ENRICHMENT'"
+      - condition: "#processingType == 'COMPLEX_ENRICHMENT'"
         actions:
           - type: "complex-enrichment-processing"
             complex-operations:
               - operation: "order-enrichment"
-                condition: "#data.orderId != null && #data.customerId != null && #data.productId != null"
+                condition: "#orderId != null && #customerId != null && #productId != null"
                 actions:
                   - type: "set-field"
                     field: "orderStatus"
@@ -98,23 +101,23 @@ enrichments:
                     value: "STANDARD_ORDER"
                   - type: "set-field"
                     field: "priorityLevel"
-                    value: "#data.amount > 2000 ? 'HIGH' : 'NORMAL'"
+                    value: "#amount > 2000 ? 'HIGH' : 'NORMAL'"
                 message: "Complex order enrichment with multiple fields"
               - operation: "pricing-calculation"
-                condition: "#data.quantity != null && #data.amount != null"
+                condition: "#quantity != null && #amount != null"
                 actions:
                   - type: "set-field"
                     field: "unitPrice"
-                    value: "#data.amount / #data.quantity"
+                    value: "#amount / #quantity"
                   - type: "set-field"
                     field: "totalValue"
-                    value: "#data.amount"
+                    value: "#amount"
                   - type: "set-field"
                     field: "discountEligible"
-                    value: "#data.amount > 2000"
+                    value: "#amount > 2000"
                 message: "Complex pricing calculation with derived fields"
               - operation: "fulfillment-planning"
-                condition: "#data.productId != null && #data.quantity != null"
+                condition: "#productId != null && #quantity != null"
                 actions:
                   - type: "set-field"
                     field: "estimatedDelivery"
@@ -124,18 +127,19 @@ enrichments:
                     value: "CENTRAL_WAREHOUSE"
                   - type: "set-field"
                     field: "shippingMethod"
-                    value: "#data.amount > 2000 ? 'EXPRESS' : 'STANDARD'"
+                    value: "#amount > 2000 ? 'EXPRESS' : 'STANDARD'"
                 message: "Complex fulfillment planning with logistics"
             processing-metadata:
               processing-type: "COMPLEX_ENRICHMENT"
               complexity: "HIGH"
               complex-operations: 3
 
-  - name: "multi-dataset-scenarios-processing"
-    type: "multi-dataset-enrichment"
+  - id: "multi-dataset-scenarios-processing"
+    name: "multi-dataset-scenarios-processing"
+    type: "lookup-enrichment"
     description: "Multi-dataset scenarios with relationships and cross-references"
     conditions:
-      - condition: "#data.processingType == 'MULTI_DATASET'"
+      - condition: "#processingType == 'MULTI_DATASET'"
         actions:
           - type: "multi-dataset-processing"
             dataset-relationships:
@@ -143,25 +147,25 @@ enrichments:
                 datasets: ["transaction", "currency", "product"]
                 operations:
                   - operation: "cross-reference-validation"
-                    condition: "#data.transactionId != null && #data.currency != null && #data.productId != null"
+                    condition: "#transactionId != null && #currency != null && #productId != null"
                     action:
                       type: "set-field"
                       field: "crossReferenceValid"
                       value: true
                     message: "Cross-reference validation across multiple datasets"
                   - operation: "currency-product-compatibility"
-                    condition: "#data.currency == 'USD' && #data.productId.startsWith('LAPTOP')"
+                    condition: "#currency == 'USD' && #productId.startsWith('LAPTOP')"
                     action:
                       type: "set-field"
                       field: "currencyProductCompatible"
                       value: true
                     message: "Currency and product compatibility check"
                   - operation: "customer-transaction-history"
-                    condition: "#data.customerId != null && #data.amount != null"
+                    condition: "#customerId != null && #amount != null"
                     action:
                       type: "set-field"
                       field: "customerTransactionProfile"
-                      value: "#data.amount > 1000 ? 'HIGH_VALUE_CUSTOMER' : 'STANDARD_CUSTOMER'"
+                      value: "#amount > 1000 ? 'HIGH_VALUE_CUSTOMER' : 'STANDARD_CUSTOMER'"
                     message: "Customer transaction history analysis"
             processing-metadata:
               processing-type: "MULTI_DATASET"
@@ -169,43 +173,44 @@ enrichments:
               dataset-relationships: 1
               cross-references: 3
 
-  - name: "validation-with-enriched-data-processing"
-    type: "validation-enrichment"
+  - id: "validation-with-enriched-data-processing"
+    name: "validation-with-enriched-data-processing"
+    type: "field-enrichment"
     description: "Validation with enriched data and quality assurance"
     conditions:
-      - condition: "#data.processingType == 'VALIDATION_ENRICHED'"
+      - condition: "#processingType == 'VALIDATION_ENRICHED'"
         actions:
           - type: "validation-enriched-processing"
             validation-rules:
               - rule: "currency-validation"
-                condition: "#data.currency != null"
+                condition: "#currency != null"
                 validations:
                   - validation: "currency-format"
-                    condition: "#data.currency.length() == 3"
+                    condition: "#currency.length() == 3"
                     action:
                       type: "set-field"
                       field: "currencyFormatValid"
                       value: true
                     message: "Currency format validation (3-letter code)"
                   - validation: "currency-supported"
-                    condition: "#data.currency == 'USD' || #data.currency == 'EUR' || #data.currency == 'GBP'"
+                    condition: "#currency == 'USD' || #currency == 'EUR' || #currency == 'GBP'"
                     action:
                       type: "set-field"
                       field: "currencySupported"
                       value: true
                     message: "Currency support validation"
               - rule: "amount-validation"
-                condition: "#data.amount != null"
+                condition: "#amount != null"
                 validations:
                   - validation: "amount-positive"
-                    condition: "#data.amount > 0"
+                    condition: "#amount > 0"
                     action:
                       type: "set-field"
                       field: "amountPositive"
                       value: true
                     message: "Amount must be positive"
                   - validation: "amount-reasonable"
-                    condition: "#data.amount <= 1000000"
+                    condition: "#amount <= 1000000"
                     action:
                       type: "set-field"
                       field: "amountReasonable"
@@ -217,16 +222,17 @@ enrichments:
               validation-rules: 2
               total-validations: 4
 
-  - name: "error-handling-and-defaults-processing"
-    type: "error-handling-enrichment"
+  - id: "error-handling-and-defaults-processing"
+    name: "error-handling-and-defaults-processing"
+    type: "field-enrichment"
     description: "Error handling and default value strategies"
     conditions:
-      - condition: "#data.processingType == 'ERROR_HANDLING'"
+      - condition: "#processingType == 'ERROR_HANDLING'"
         actions:
           - type: "error-handling-processing"
             error-handling-strategies:
               - strategy: "unknown-currency-handling"
-                condition: "#data.currency == 'UNKNOWN' || #data.currency == null"
+                condition: "#currency == 'UNKNOWN' || #currency == null"
                 actions:
                   - type: "set-field"
                     field: "currencyName"
@@ -242,7 +248,7 @@ enrichments:
                     value: true
                 message: "Handle unknown currency with default values"
               - strategy: "missing-amount-handling"
-                condition: "#data.amount == null"
+                condition: "#amount == null"
                 actions:
                   - type: "set-field"
                     field: "amount"
@@ -255,7 +261,7 @@ enrichments:
                     value: true
                 message: "Handle missing amount with default value"
               - strategy: "default-values-application"
-                condition: "#data.requireDefaults == true"
+                condition: "#requireDefaults == true"
                 actions:
                   - type: "set-field"
                     field: "defaultsApplied"

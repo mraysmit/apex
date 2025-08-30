@@ -1,21 +1,5 @@
 package dev.mars.apex.demo.runners;
 
-/*
- * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import dev.mars.apex.demo.enrichment.BatchProcessingDemo;
 import dev.mars.apex.demo.enrichment.ComprehensiveFinancialSettlementDemo;
 import dev.mars.apex.demo.enrichment.CustodyAutoRepairBootstrap;
@@ -33,18 +17,9 @@ import org.slf4j.LoggerFactory;
 import java.util.Scanner;
 
 /**
- * EnrichmentRunner - Comprehensive APEX Enrichment Demonstrations
+ * EnrichmentRunner - APEX Enrichment Demonstrations
  * 
- * This runner provides complete coverage of all enrichment-related demos in the APEX Rules Engine,
- * demonstrating data transformation, lookup operations, and data enhancement capabilities.
- * 
- * ENRICHMENT CATEGORIES COVERED:
- * • Data Management: Core data handling and transformation patterns
- * • YAML Datasets: Inline and external dataset enrichment techniques
- * • External Data Sources: Database, API, and file-based enrichment
- * • Financial Processing: Settlement, custody, and trading enrichment
- * • Batch Processing: High-volume data transformation workflows
- * • Bootstrap Scenarios: Complete end-to-end enrichment workflows
+ * This runner provides complete coverage of all enrichment-related demos in the APEX Rules Engine.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-08-29
@@ -54,11 +29,6 @@ public class EnrichmentRunner {
     
     private static final Logger logger = LoggerFactory.getLogger(EnrichmentRunner.class);
     
-    /**
-     * Main entry point for Enrichment demos.
-     * 
-     * @param args command line arguments: empty for interactive mode, demo name for direct execution
-     */
     public static void main(String[] args) {
         EnrichmentRunner runner = new EnrichmentRunner();
         
@@ -69,9 +39,6 @@ public class EnrichmentRunner {
         }
     }
     
-    /**
-     * Run in interactive mode with menu selection.
-     */
     private void runInteractiveMode() {
         displayBanner();
         
@@ -83,7 +50,7 @@ public class EnrichmentRunner {
             String choice = scanner.nextLine().trim().toLowerCase();
             
             if (choice.equals("q") || choice.equals("quit") || choice.equals("exit")) {
-                System.out.println("\n✅ Thank you for exploring APEX Enrichment capabilities!");
+                System.out.println("\nThank you for exploring APEX Enrichment capabilities!");
                 break;
             }
             
@@ -93,9 +60,6 @@ public class EnrichmentRunner {
         scanner.close();
     }
     
-    /**
-     * Run specific demo directly.
-     */
     private void runDirectMode(String demoName) {
         displayBanner();
         System.out.println("Running enrichment demo: " + demoName);
@@ -104,24 +68,15 @@ public class EnrichmentRunner {
         executeChoice(demoName.toLowerCase());
     }
     
-    /**
-     * Display the runner banner.
-     */
     private void displayBanner() {
-        logger.info("╔" + "═".repeat(78) + "╗");
-        logger.info("║" + " ".repeat(21) + "APEX RULES ENGINE - ENRICHMENT DEMOS" + " ".repeat(20) + "║");
-        logger.info("╚" + "═".repeat(78) + "╝");
-        logger.info("");
-        logger.info("Welcome to comprehensive APEX enrichment demonstrations! 🔧");
-        logger.info("");
-        logger.info("These demos showcase data transformation, lookup operations,");
-        logger.info("and data enhancement capabilities of the APEX Rules Engine.");
-        logger.info("");
+        System.out.println("================================================================================");
+        System.out.println("                    APEX RULES ENGINE - ENRICHMENT DEMOS                       ");
+        System.out.println("================================================================================");
+        System.out.println();
+        System.out.println("Welcome to comprehensive APEX enrichment demonstrations!");
+        System.out.println();
     }
     
-    /**
-     * Display the interactive menu.
-     */
     private void displayMenu() {
         System.out.println("Available Enrichment Demonstrations:");
         System.out.println("  1. Data Management Demo - Core data handling patterns");
@@ -138,136 +93,121 @@ public class EnrichmentRunner {
         System.out.println();
     }
     
-    /**
-     * Execute the selected choice.
-     */
     private void executeChoice(String choice) {
         try {
             switch (choice) {
                 case "1":
                 case "data":
                 case "management":
-                    runDemo("Data Management Demo", DataManagementDemo::main);
+                    runDemo("Data Management Demo", () -> DataManagementDemo.main(new String[]{}));
                     break;
                 case "2":
                 case "yaml":
                 case "dataset":
-                    runDemo("YAML Dataset Demo", YamlDatasetDemo::main);
+                    runDemo("YAML Dataset Demo", () -> YamlDatasetDemo.main(new String[]{}));
                     break;
                 case "3":
                 case "external":
                 case "datasource":
-                    runDemo("External Data Source Demo", ExternalDataSourceDemo::main);
+                    runDemo("External Data Source Demo", () -> ExternalDataSourceDemo.main(new String[]{}));
                     break;
                 case "4":
                 case "batch":
                 case "processing":
-                    runDemo("Batch Processing Demo", BatchProcessingDemo::main);
+                    runDemo("Batch Processing Demo", () -> BatchProcessingDemo.main(new String[]{}));
                     break;
                 case "5":
                 case "financial":
                 case "settlement":
-                    runDemo("Financial Settlement Demo", ComprehensiveFinancialSettlementDemo::main);
+                    runDemo("Financial Settlement Demo", () -> ComprehensiveFinancialSettlementDemo.main(new String[]{}));
                     break;
                 case "6":
                 case "custody":
                 case "repair":
-                    runDemo("Custody Auto-Repair Demo", CustodyAutoRepairDemo::main);
+                    runDemo("Custody Auto-Repair Demo", () -> CustodyAutoRepairDemo.main(new String[]{}));
                     break;
                 case "7":
                 case "custodybootstrap":
                 case "bootstrap":
-                    runDemo("Custody Auto-Repair Bootstrap", CustodyAutoRepairBootstrap::main);
+                    runDemo("Custody Auto-Repair Bootstrap", () -> CustodyAutoRepairBootstrap.main(new String[]{}));
                     break;
                 case "8":
                 case "otc":
                 case "options":
-                    runDemo("OTC Options Bootstrap", OtcOptionsBootstrapDemo::main);
+                    runDemo("OTC Options Bootstrap", () -> OtcOptionsBootstrapDemo.main(new String[]{}));
                     break;
                 case "9":
                 case "customer":
                 case "transformer":
-                    runDemo("Customer Transformer Demo", CustomerTransformerDemo::main);
+                    runDemo("Customer Transformer Demo", () -> CustomerTransformerDemo.main(new String[]{}));
                     break;
                 case "10":
                 case "trade":
                 case "tradetransformer":
-                    runDemo("Trade Transformer Demo", TradeTransformerDemo::main);
+                    runDemo("Trade Transformer Demo", () -> TradeTransformerDemo.main(new String[]{}));
                     break;
                 case "11":
                 case "all":
                     runAllEnrichmentDemos();
                     break;
                 default:
-                    System.out.println("❌ Invalid choice: " + choice);
+                    System.out.println("Invalid choice: " + choice);
                     System.out.println("Please try again or type 'q' to quit.");
                     break;
             }
         } catch (Exception e) {
-            logger.error("❌ Error executing enrichment demo: {}", e.getMessage(), e);
+            logger.error("Error executing enrichment demo: {}", e.getMessage(), e);
         }
         
         System.out.println();
     }
     
-    /**
-     * Run a single demo with error handling.
-     */
     private void runDemo(String demoName, DemoExecutor executor) {
-        logger.info("▶ Running: {}", demoName);
-        logger.info("─".repeat(50));
+        logger.info("Running: {}", demoName);
+        logger.info("--------------------------------------------------");
         
         try {
             long startTime = System.currentTimeMillis();
-            executor.execute(new String[]{});
+            executor.execute();
             long endTime = System.currentTimeMillis();
             
-            logger.info("✅ {} completed successfully", demoName);
+            logger.info("{} completed successfully", demoName);
             logger.info("Execution time: {} ms", (endTime - startTime));
             
         } catch (Exception e) {
-            logger.warn("⚠ {} encountered issues: {}", demoName, e.getMessage());
-            logger.info("📝 This may be expected if dependencies are not available");
-            logger.info("🎯 The enrichment concepts and patterns are still demonstrated!");
+            logger.warn("{} encountered issues: {}", demoName, e.getMessage());
+            logger.info("This may be expected if dependencies are not available");
         }
     }
     
-    /**
-     * Run all enrichment demos in sequence.
-     */
     private void runAllEnrichmentDemos() {
-        logger.info("🚀 Running All Enrichment Demonstrations");
-        logger.info("═".repeat(50));
+        logger.info("Running All Enrichment Demonstrations");
+        logger.info("==================================================");
         logger.info("");
         
         long totalStartTime = System.currentTimeMillis();
         
-        runDemo("Data Management Demo", DataManagementDemo::main);
-        runDemo("YAML Dataset Demo", YamlDatasetDemo::main);
-        runDemo("External Data Source Demo", ExternalDataSourceDemo::main);
-        runDemo("Batch Processing Demo", BatchProcessingDemo::main);
-        runDemo("Financial Settlement Demo", ComprehensiveFinancialSettlementDemo::main);
-        runDemo("Custody Auto-Repair Demo", CustodyAutoRepairDemo::main);
-        runDemo("Custody Auto-Repair Bootstrap", CustodyAutoRepairBootstrap::main);
-        runDemo("OTC Options Bootstrap", OtcOptionsBootstrapDemo::main);
-        runDemo("Customer Transformer Demo", CustomerTransformerDemo::main);
-        runDemo("Trade Transformer Demo", TradeTransformerDemo::main);
+        runDemo("Data Management Demo", () -> DataManagementDemo.main(new String[]{}));
+        runDemo("YAML Dataset Demo", () -> YamlDatasetDemo.main(new String[]{}));
+        runDemo("External Data Source Demo", () -> ExternalDataSourceDemo.main(new String[]{}));
+        runDemo("Batch Processing Demo", () -> BatchProcessingDemo.main(new String[]{}));
+        runDemo("Financial Settlement Demo", () -> ComprehensiveFinancialSettlementDemo.main(new String[]{}));
+        runDemo("Custody Auto-Repair Demo", () -> CustodyAutoRepairDemo.main(new String[]{}));
+        runDemo("Custody Auto-Repair Bootstrap", () -> CustodyAutoRepairBootstrap.main(new String[]{}));
+        runDemo("OTC Options Bootstrap", () -> OtcOptionsBootstrapDemo.main(new String[]{}));
+        runDemo("Customer Transformer Demo", () -> CustomerTransformerDemo.main(new String[]{}));
+        runDemo("Trade Transformer Demo", () -> TradeTransformerDemo.main(new String[]{}));
         
         long totalEndTime = System.currentTimeMillis();
         long totalTime = totalEndTime - totalStartTime;
         
         logger.info("");
-        logger.info("🎉 All enrichment demonstrations completed!");
+        logger.info("All enrichment demonstrations completed!");
         logger.info("Total execution time: {} ms ({} seconds)", totalTime, totalTime / 1000.0);
-        logger.info("");
-        logger.info("You've experienced the full range of APEX enrichment capabilities!");
     }
     
-    /**
-     * Functional interface for demo execution.
-     */
     @FunctionalInterface
     private interface DemoExecutor {
-        void execute(String[] args) throws Exception;
+        void execute() throws Exception;
     }
 }

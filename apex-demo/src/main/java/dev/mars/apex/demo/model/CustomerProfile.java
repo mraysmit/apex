@@ -18,6 +18,7 @@ package dev.mars.apex.demo.model;
 
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -258,7 +259,7 @@ public class CustomerProfile {
         if (totalOrders == null || totalOrders == 0 || totalSpent == null) {
             return BigDecimal.ZERO;
         }
-        return totalSpent.divide(new BigDecimal(totalOrders), 2, BigDecimal.ROUND_HALF_UP);
+        return totalSpent.divide(new BigDecimal(totalOrders), 2, RoundingMode.HALF_UP);
     }
     
     public String getFullName() {

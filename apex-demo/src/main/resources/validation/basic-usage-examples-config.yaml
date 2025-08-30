@@ -11,100 +11,66 @@ metadata:
 
 # Basic Validation Enrichments
 enrichments:
-  - name: "basic-field-validation"
-    type: "validation-enrichment"
+  - id: "basic-field-validation"
+    name: "basic-field-validation"
+    type: "field-enrichment"
     description: "Basic field validation using real APEX processing"
-    conditions:
-      - condition: "#data.name != null || #data.age != null || #data.email != null"
-        actions:
-          - type: "field-validation"
-            validations:
-              - field: "name"
-                rules:
-                  - condition: "#value != null && #value.length() > 0"
-                    message: "Name is required"
-                    severity: "ERROR"
-                  - condition: "#value != null && #value.length() >= 2"
-                    message: "Name must be at least 2 characters"
-                    severity: "WARNING"
-              - field: "age"
-                rules:
-                  - condition: "#value != null && #value >= 18 && #value <= 120"
-                    message: "Age must be between 18 and 120"
-                    severity: "ERROR"
-                  - condition: "#value != null && #value >= 21"
-                    message: "Age verification for premium services"
-                    severity: "INFO"
-              - field: "email"
-                rules:
-                  - condition: "#value != null && #value.contains('@')"
-                    message: "Email must contain @ symbol"
-                    severity: "ERROR"
-                  - condition: "#value != null && #value.matches('.*@.*\\..+')"
-                    message: "Email must be valid format"
-                    severity: "WARNING"
+    condition: "#name != null || #age != null || #email != null"
+    field-mappings:
+      - source-field: "name"
+        target-field: "validatedName"
+        required: true
+      - source-field: "age"
+        target-field: "validatedAge"
+        required: true
+      - source-field: "email"
+        target-field: "validatedEmail"
+        required: false
 
-  - name: "business-object-processing"
-    type: "business-enrichment"
+  - id: "business-object-processing"
+    name: "business-object-processing"
+    type: "field-enrichment"
     description: "Business object processing with real APEX services"
-    conditions:
-      - condition: "#data.customerType != null || #data.productCategory != null || #data.tradeValue != null"
-        actions:
-          - type: "business-processing"
-            rules:
-              - condition: "#data.customerType == 'PREMIUM'"
-                action:
-                  type: "set-field"
-                  field: "customerBenefits"
-                  value: "PREMIUM_BENEFITS"
-              - condition: "#data.productCategory == 'ELECTRONICS'"
-                action:
-                  type: "set-field"
-                  field: "productWarranty"
-                  value: "EXTENDED_WARRANTY"
-              - condition: "#data.tradeValue != null && #data.tradeValue > 5000"
-                action:
-                  type: "set-field"
-                  field: "tradeClassification"
-                  value: "HIGH_VALUE_TRADE"
-              - condition: "#data.membershipLevel == 'GOLD'"
-                action:
-                  type: "set-field"
-                  field: "membershipBenefits"
-                  value: "GOLD_MEMBER_PERKS"
+    condition: "#customerType != null || #productCategory != null || #tradeValue != null"
+    field-mappings:
+      - source-field: "customerType"
+        target-field: "processedCustomerType"
+        required: false
+      - source-field: "productCategory"
+        target-field: "processedProductCategory"
+        required: false
+      - source-field: "tradeValue"
+        target-field: "processedTradeValue"
+        required: false
 
-  - name: "expression-evaluation"
-    type: "expression-enrichment"
+  - id: "expression-evaluation"
+    name: "expression-evaluation"
+    type: "calculation-enrichment"
     description: "Expression evaluation using real APEX SpEL processing"
-    conditions:
-      - condition: "#data.amount != null || #data.rate != null || #data.quantity != null || #data.price != null"
-        actions:
-          - type: "expression-processing"
-            expressions:
-              - name: "calculateInterest"
-                condition: "#data.amount != null && #data.rate != null"
-                expression: "#data.amount * #data.rate"
-                target: "calculatedInterest"
-              - name: "calculateTotal"
-                condition: "#data.quantity != null && #data.price != null"
-                expression: "#data.quantity * #data.price"
-                target: "totalValue"
-              - name: "calculateDiscount"
-                condition: "#data.amount != null && #data.amount > 1000"
-                expression: "#data.amount * 0.1"
-                target: "discountAmount"
-              - name: "calculateTax"
-                condition: "#data.totalValue != null"
-                expression: "#data.totalValue * 0.08"
-                target: "taxAmount"
-              - name: "calculateFinalAmount"
-                condition: "#data.totalValue != null && #data.taxAmount != null"
-                expression: "#data.totalValue + #data.taxAmount"
-                target: "finalAmount"
+    condition: "#amount != null || #rate != null || #quantity != null || #price != null"
+    calculations:
+      - field: "calculatedInterest"
+        expression: "#amount * #rate"
+      - field: "totalValue"
+        expression: "#quantity * #price"
+      - field: "discountAmount"
+        expression: "#amount * 0.1"
+      - field: "taxAmount"
+        expression: "#totalValue * 0.08"
+      - field: "finalAmount"
+        expression: "#totalValue + #taxAmount"
+    field-mappings:
+      - source-field: "calculatedInterest"
+        target-field: "calculatedInterest"
+        required: false
+      - source-field: "totalValue"
+        target-field: "totalValue"
+        required: false
 
 # Validation Rules Configuration
 validation-rules:
-  - name: "required-field-validation"
+  - id: "required-field-validation"
+    name: "required-field-validation"
     description: "Required field validation patterns"
     rules:
       - field: "name"
@@ -119,7 +85,8 @@ validation-rules:
         required: false
         pattern: "^[A-Za-z0-9+_.-]+@(.+)$"
 
-  - name: "business-validation"
+  - id: "business-validation"
+    name: "business-validation"
     description: "Business object validation patterns"
     rules:
       - field: "customerType"
@@ -132,7 +99,8 @@ validation-rules:
       - field: "membershipLevel"
         allowed-values: ["BRONZE", "SILVER", "GOLD", "PLATINUM"]
 
-  - name: "expression-validation"
+  - id: "expression-validation"
+    name: "expression-validation"
     description: "Expression evaluation validation patterns"
     rules:
       - field: "amount"

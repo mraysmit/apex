@@ -18,6 +18,7 @@ package dev.mars.apex.demo.model;
 
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -242,7 +243,7 @@ public class OrderProcessing {
         if (quantity == null || quantity == 0 || orderTotal == null) {
             return BigDecimal.ZERO;
         }
-        return orderTotal.divide(new BigDecimal(quantity), 2, BigDecimal.ROUND_HALF_UP);
+        return orderTotal.divide(new BigDecimal(quantity), 2, RoundingMode.HALF_UP);
     }
     
     public void applyDiscount(BigDecimal discountPercentage) {
@@ -264,7 +265,7 @@ public class OrderProcessing {
             return BigDecimal.ZERO;
         }
         
-        return discountApplied.divide(orderTotal, 4, BigDecimal.ROUND_HALF_UP)
+        return discountApplied.divide(orderTotal, 4, RoundingMode.HALF_UP)
                              .multiply(new BigDecimal("100"));
     }
     
