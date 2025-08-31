@@ -1,3 +1,5 @@
+![APEX System Logo](docs/APEX%20System%20logo.png)
+
 # APEX Rules Engine
 
 [![Java](https://img.shields.io/badge/Java-23-orange.svg)](https://openjdk.java.net/projects/jdk/23/)
