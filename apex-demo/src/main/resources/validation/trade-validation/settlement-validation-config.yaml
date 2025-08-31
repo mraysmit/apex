@@ -1,0 +1,230 @@
+# APEX Settlement Validation Configuration
+# External data source configuration for settlement validation
+# Replaces hardcoded settlement logic from IntegratedTradeValidatorComplexDemo
+
+type: "external-data-config"
+name: "settlement-validation-config"
+description: "Data-driven settlement validation configuration for complex trade validation"
+
+# Settlement validation configuration by settlement type
+data:
+  standard-settlement:
+    validation-id: "SETTLE001"
+    settlement-type: "standard"
+    description: "Standard settlement validation parameters"
+    allowed-settlement-methods:
+      - "DVP"  # Delivery versus Payment
+      - "FOP"  # Free of Payment
+      - "DFP"  # Delivery Free of Payment
+    allowed-settlement-locations:
+      - "DTCC"       # Depository Trust & Clearing Corporation
+      - "Euroclear"  # Euroclear Bank
+      - "Clearstream" # Clearstream Banking
+    allowed-currencies:
+      - "USD"  # US Dollar
+      - "EUR"  # Euro
+      - "GBP"  # British Pound
+      - "JPY"  # Japanese Yen
+    min-settlement-amount: 1000.0
+    max-settlement-amount: 10000000.0
+    settlement-period-days: 3
+    validation-rules:
+      - "Settlement method must be in allowed list"
+      - "Settlement location must be recognized"
+      - "Currency must be supported"
+      - "Amount must be within limits"
+    
+  enhanced-settlement:
+    validation-id: "SETTLE002"
+    settlement-type: "enhanced"
+    description: "Enhanced settlement validation with additional methods"
+    allowed-settlement-methods:
+      - "DVP"  # Delivery versus Payment
+      - "FOP"  # Free of Payment
+      - "DFP"  # Delivery Free of Payment
+      - "RVP"  # Receive versus Payment
+      - "PVP"  # Payment versus Payment
+    allowed-settlement-locations:
+      - "DTCC"       # Depository Trust & Clearing Corporation
+      - "Euroclear"  # Euroclear Bank
+      - "Clearstream" # Clearstream Banking
+      - "CDS"        # Canadian Depository for Securities
+      - "JASDEC"     # Japan Securities Depository Center
+      - "HKSCC"      # Hong Kong Securities Clearing Company
+    allowed-currencies:
+      - "USD"  # US Dollar
+      - "EUR"  # Euro
+      - "GBP"  # British Pound
+      - "JPY"  # Japanese Yen
+      - "CHF"  # Swiss Franc
+      - "CAD"  # Canadian Dollar
+      - "AUD"  # Australian Dollar
+      - "CNY"  # Chinese Yuan
+    min-settlement-amount: 500.0
+    max-settlement-amount: 50000000.0
+    settlement-period-days: 5
+    validation-rules:
+      - "Settlement method must be in enhanced allowed list"
+      - "Settlement location must be globally recognized"
+      - "Currency must be in extended currency list"
+      - "Amount must be within enhanced limits"
+    
+  institutional-settlement:
+    validation-id: "SETTLE003"
+    settlement-type: "institutional"
+    description: "Institutional settlement validation for large trades"
+    allowed-settlement-methods:
+      - "DVP"  # Delivery versus Payment
+      - "RVP"  # Receive versus Payment
+      - "PVP"  # Payment versus Payment
+    allowed-settlement-locations:
+      - "DTCC"       # Depository Trust & Clearing Corporation
+      - "Euroclear"  # Euroclear Bank
+      - "Clearstream" # Clearstream Banking
+      - "CDS"        # Canadian Depository for Securities
+      - "JASDEC"     # Japan Securities Depository Center
+      - "HKSCC"      # Hong Kong Securities Clearing Company
+    allowed-currencies:
+      - "USD"  # US Dollar
+      - "EUR"  # Euro
+      - "GBP"  # British Pound
+      - "JPY"  # Japanese Yen
+      - "CHF"  # Swiss Franc
+    min-settlement-amount: 10000.0
+    max-settlement-amount: 100000000.0
+    settlement-period-days: 1
+    validation-rules:
+      - "Settlement method must support institutional requirements"
+      - "Settlement location must have institutional capabilities"
+      - "Currency must be major trading currency"
+      - "Amount must meet institutional minimums"
+    
+  default:
+    validation-id: "SETTLE000"
+    settlement-type: "default"
+    description: "Default settlement validation"
+    allowed-settlement-methods:
+      - "DVP"
+    allowed-settlement-locations:
+      - "DTCC"
+    allowed-currencies:
+      - "USD"
+    min-settlement-amount: 1000.0
+    max-settlement-amount: 1000000.0
+    settlement-period-days: 3
+    validation-rules:
+      - "Basic settlement validation"
+
+# Settlement validation patterns
+validation-patterns:
+  equity-settlement:
+    pattern-name: "Equity Settlement Validation"
+    description: "Validation patterns specific to equity trades"
+    applicable-instruments: ["Equity", "ETF"]
+    settlement-requirements:
+      - "T+2 settlement cycle"
+      - "DVP settlement method required"
+      - "Recognized exchange settlement location"
+    validation-checks:
+      - "Instrument type verification"
+      - "Settlement cycle compliance"
+      - "Exchange settlement capability"
+      
+  fixed-income-settlement:
+    pattern-name: "Fixed Income Settlement Validation"
+    description: "Validation patterns specific to fixed income trades"
+    applicable-instruments: ["Bond", "FixedIncome"]
+    settlement-requirements:
+      - "T+1 or T+3 settlement cycle"
+      - "DVP or FOP settlement methods"
+      - "Bond settlement infrastructure"
+    validation-checks:
+      - "Bond type verification"
+      - "Settlement infrastructure capability"
+      - "Coupon payment handling"
+      
+  derivatives-settlement:
+    pattern-name: "Derivatives Settlement Validation"
+    description: "Validation patterns specific to derivatives trades"
+    applicable-instruments: ["Option", "Future", "Swap"]
+    settlement-requirements:
+      - "Same-day or T+1 settlement"
+      - "Margin requirements"
+      - "Clearing house settlement"
+    validation-checks:
+      - "Derivatives clearing capability"
+      - "Margin calculation"
+      - "Risk management compliance"
+
+# Settlement risk assessment
+risk-assessment:
+  settlement-risk-factors:
+    counterparty-risk:
+      description: "Risk of counterparty default during settlement"
+      risk-levels:
+        low: "Institutional counterparties with high credit ratings"
+        medium: "Corporate counterparties with standard ratings"
+        high: "Individual or unrated counterparties"
+      mitigation-strategies:
+        - "Credit limit monitoring"
+        - "Collateral requirements"
+        - "Settlement guarantee schemes"
+        
+    operational-risk:
+      description: "Risk of operational failures during settlement"
+      risk-factors:
+        - "System availability"
+        - "Communication failures"
+        - "Processing errors"
+      mitigation-strategies:
+        - "Redundant systems"
+        - "Automated processing"
+        - "Error detection and correction"
+        
+    market-risk:
+      description: "Risk of market movements affecting settlement"
+      risk-factors:
+        - "Price volatility"
+        - "Currency fluctuations"
+        - "Interest rate changes"
+      mitigation-strategies:
+        - "Real-time pricing"
+        - "Currency hedging"
+        - "Settlement timing optimization"
+
+# Performance benchmarks
+performance-benchmarks:
+  validation-speed:
+    standard-settlement: "< 100ms"
+    enhanced-settlement: "< 200ms"
+    institutional-settlement: "< 50ms"
+    
+  accuracy-targets:
+    validation-accuracy: 99.9
+    false-positive-rate: "< 0.1%"
+    false-negative-rate: "< 0.05%"
+    
+  throughput-capacity:
+    daily-validations: 1000000
+    peak-hour-capacity: 50000
+    concurrent-validations: 1000
+
+# Integration specifications
+integration:
+  settlement-systems:
+    - "DTCC Settlement Systems"
+    - "Euroclear SettlementLink"
+    - "Clearstream CreationOnline"
+    - "SWIFT Settlement Instructions"
+    
+  validation-services:
+    - "Real-time settlement validation"
+    - "Batch settlement processing"
+    - "Settlement exception handling"
+    - "Settlement reporting"
+    
+  monitoring-capabilities:
+    - "Settlement status tracking"
+    - "Performance metrics"
+    - "Error rate monitoring"
+    - "SLA compliance tracking"

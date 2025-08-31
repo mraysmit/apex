@@ -1,0 +1,373 @@
+# APEX Customer Segments Configuration
+# External data source configuration for customer segments processing
+# Replaces hardcoded customer segmentation from CustomerTransformerDemo
+
+type: "external-data-config"
+name: "customer-segments-config"
+description: "Data-driven customer segments configuration for customer transformation processing"
+
+# Customer segments configuration by segment type
+data:
+  membership-tier-segments:
+    segment-type: "membership-tier-segments"
+    segment-name: "Membership Tier Segments"
+    description: "Customer segmentation based on membership tier levels"
+    segment-parameters:
+      segmentation-basis: "membership-level"
+      priority-weighting: "high"
+      dynamic-updates: true
+    customer-segments:
+      gold-tier-segment:
+        segment-id: "GOLD_TIER"
+        segment-name: "Gold Tier Customers"
+        segment-description: "Premium customers with Gold membership level"
+        segment-criteria:
+          membership-level: "Gold"
+          minimum-portfolio-value: 500000
+          minimum-relationship-duration: 24
+        segment-characteristics:
+          service-level: "PREMIUM"
+          dedicated-advisor: true
+          priority-support: true
+          exclusive-products: true
+        product-recommendations:
+          - "Equity"
+          - "FixedIncome"
+          - "ETF"
+          - "Options"
+          - "Alternative Investments"
+        discount-rate: 0.15
+        segment-benefits:
+          - "15% discount on trading fees"
+          - "Dedicated relationship manager"
+          - "Priority customer support"
+          - "Access to exclusive investment products"
+          - "Complimentary portfolio reviews"
+        
+      silver-tier-segment:
+        segment-id: "SILVER_TIER"
+        segment-name: "Silver Tier Customers"
+        segment-description: "Standard premium customers with Silver membership level"
+        segment-criteria:
+          membership-level: "Silver"
+          minimum-portfolio-value: 100000
+          minimum-relationship-duration: 12
+        segment-characteristics:
+          service-level: "ENHANCED"
+          dedicated-advisor: false
+          priority-support: true
+          exclusive-products: false
+        product-recommendations:
+          - "FixedIncome"
+          - "ETF"
+          - "Mutual Funds"
+        discount-rate: 0.10
+        segment-benefits:
+          - "10% discount on trading fees"
+          - "Enhanced customer support"
+          - "Quarterly portfolio reviews"
+          - "Access to research reports"
+        
+      bronze-tier-segment:
+        segment-id: "BRONZE_TIER"
+        segment-name: "Bronze Tier Customers"
+        segment-description: "Entry-level premium customers with Bronze membership level"
+        segment-criteria:
+          membership-level: "Bronze"
+          minimum-portfolio-value: 25000
+          minimum-relationship-duration: 6
+        segment-characteristics:
+          service-level: "STANDARD"
+          dedicated-advisor: false
+          priority-support: false
+          exclusive-products: false
+        product-recommendations:
+          - "ETF"
+          - "Mutual Funds"
+        discount-rate: 0.05
+        segment-benefits:
+          - "5% discount on trading fees"
+          - "Standard customer support"
+          - "Annual portfolio reviews"
+        
+      basic-tier-segment:
+        segment-id: "BASIC_TIER"
+        segment-name: "Basic Tier Customers"
+        segment-description: "Standard customers with Basic membership level"
+        segment-criteria:
+          membership-level: "Basic"
+          minimum-portfolio-value: 0
+          minimum-relationship-duration: 0
+        segment-characteristics:
+          service-level: "BASIC"
+          dedicated-advisor: false
+          priority-support: false
+          exclusive-products: false
+        product-recommendations:
+          - "ETF"
+        discount-rate: 0.00
+        segment-benefits:
+          - "Standard trading fees"
+          - "Basic customer support"
+          - "Self-service portfolio tools"
+    segment-settings:
+      evaluation-frequency: "monthly"
+      automatic-upgrades: true
+      downgrade-protection: 90
+    
+  age-demographic-segments:
+    segment-type: "age-demographic-segments"
+    segment-name: "Age Demographic Segments"
+    description: "Customer segmentation based on age demographics and life stages"
+    segment-parameters:
+      segmentation-basis: "age-demographics"
+      priority-weighting: "medium"
+      dynamic-updates: true
+    customer-segments:
+      young-professionals-segment:
+        segment-id: "YOUNG_PROFESSIONALS"
+        segment-name: "Young Professionals"
+        segment-description: "Young customers focused on wealth building"
+        segment-criteria:
+          age-range: "25-35"
+          employment-status: "EMPLOYED"
+          income-level: "MEDIUM_TO_HIGH"
+        segment-characteristics:
+          investment-horizon: "LONG_TERM"
+          risk-tolerance: "MODERATE_TO_HIGH"
+          growth-focused: true
+          technology-savvy: true
+        product-recommendations:
+          - "Equity"
+          - "ETF"
+          - "Options"
+          - "Growth Funds"
+        investment-strategy: "AGGRESSIVE_GROWTH"
+        segment-benefits:
+          - "Growth-oriented investment options"
+          - "Technology-enabled trading platforms"
+          - "Educational resources for wealth building"
+        
+      middle-aged-accumulators-segment:
+        segment-id: "MIDDLE_AGED_ACCUMULATORS"
+        segment-name: "Middle-Aged Accumulators"
+        segment-description: "Middle-aged customers in peak earning years"
+        segment-criteria:
+          age-range: "35-55"
+          employment-status: "EMPLOYED"
+          family-status: "FAMILY_RESPONSIBILITIES"
+        segment-characteristics:
+          investment-horizon: "MEDIUM_TO_LONG_TERM"
+          risk-tolerance: "MODERATE"
+          balance-focused: true
+          planning-oriented: true
+        product-recommendations:
+          - "Equity"
+          - "FixedIncome"
+          - "ETF"
+          - "Mutual Funds"
+          - "Balanced Funds"
+        investment-strategy: "BALANCED_GROWTH"
+        segment-benefits:
+          - "Balanced investment portfolios"
+          - "Retirement planning services"
+          - "Tax-efficient investment strategies"
+        
+      pre-retirees-segment:
+        segment-id: "PRE_RETIREES"
+        segment-name: "Pre-Retirees"
+        segment-description: "Customers approaching retirement age"
+        segment-criteria:
+          age-range: "55-65"
+          retirement-planning: "ACTIVE"
+          wealth-preservation-focus: true
+        segment-characteristics:
+          investment-horizon: "SHORT_TO_MEDIUM_TERM"
+          risk-tolerance: "MODERATE_TO_LOW"
+          preservation-focused: true
+          income-focused: true
+        product-recommendations:
+          - "FixedIncome"
+          - "Dividend Stocks"
+          - "Conservative Funds"
+          - "Annuities"
+        investment-strategy: "CAPITAL_PRESERVATION"
+        segment-benefits:
+          - "Retirement planning expertise"
+          - "Income-generating investments"
+          - "Risk management strategies"
+        
+      retirees-segment:
+        segment-id: "RETIREES"
+        segment-name: "Retirees"
+        segment-description: "Retired customers focused on income and preservation"
+        segment-criteria:
+          age-range: "65+"
+          employment-status: "RETIRED"
+          income-focus: true
+        segment-characteristics:
+          investment-horizon: "SHORT_TERM"
+          risk-tolerance: "LOW"
+          income-focused: true
+          preservation-focused: true
+        product-recommendations:
+          - "FixedIncome"
+          - "Dividend Stocks"
+          - "Conservative Funds"
+          - "CDs"
+        investment-strategy: "INCOME_GENERATION"
+        segment-benefits:
+          - "Income-focused investment options"
+          - "Capital preservation strategies"
+          - "Estate planning services"
+    segment-settings:
+      evaluation-frequency: "quarterly"
+      life-stage-transitions: true
+      automatic-adjustments: true
+    
+  behavioral-segments:
+    segment-type: "behavioral-segments"
+    segment-name: "Behavioral Segments"
+    description: "Customer segmentation based on trading behavior and investment patterns"
+    segment-parameters:
+      segmentation-basis: "behavior-patterns"
+      priority-weighting: "high"
+      dynamic-updates: true
+    customer-segments:
+      active-traders-segment:
+        segment-id: "ACTIVE_TRADERS"
+        segment-name: "Active Traders"
+        segment-description: "Customers with high trading frequency and activity"
+        segment-criteria:
+          trading-frequency: "HIGH"
+          monthly-trades: ">20"
+          portfolio-turnover: ">100%"
+        segment-characteristics:
+          risk-tolerance: "HIGH"
+          market-engagement: "VERY_HIGH"
+          technology-usage: "ADVANCED"
+          research-consumption: "HIGH"
+        product-recommendations:
+          - "Options"
+          - "Futures"
+          - "Equity"
+          - "ETF"
+          - "Margin Trading"
+        trading-strategy: "ACTIVE_TRADING"
+        segment-benefits:
+          - "Advanced trading platforms"
+          - "Real-time market data"
+          - "Professional research tools"
+          - "Reduced trading fees for volume"
+        
+      passive-investors-segment:
+        segment-id: "PASSIVE_INVESTORS"
+        segment-name: "Passive Investors"
+        segment-description: "Customers with buy-and-hold investment approach"
+        segment-criteria:
+          trading-frequency: "LOW"
+          monthly-trades: "<5"
+          portfolio-turnover: "<25%"
+        segment-characteristics:
+          risk-tolerance: "MODERATE"
+          market-engagement: "LOW"
+          long-term-focused: true
+          cost-conscious: true
+        product-recommendations:
+          - "ETF"
+          - "Index Funds"
+          - "Mutual Funds"
+          - "Target Date Funds"
+        investment-strategy: "BUY_AND_HOLD"
+        segment-benefits:
+          - "Low-cost investment options"
+          - "Automated investment services"
+          - "Long-term planning tools"
+        
+      conservative-investors-segment:
+        segment-id: "CONSERVATIVE_INVESTORS"
+        segment-name: "Conservative Investors"
+        segment-description: "Risk-averse customers focused on capital preservation"
+        segment-criteria:
+          risk-tolerance: "LOW"
+          volatility-preference: "LOW"
+          capital-preservation-focus: true
+        segment-characteristics:
+          investment-horizon: "SHORT_TO_MEDIUM_TERM"
+          income-focused: true
+          stability-seeking: true
+          loss-averse: true
+        product-recommendations:
+          - "FixedIncome"
+          - "Money Market Funds"
+          - "CDs"
+          - "Conservative Balanced Funds"
+        investment-strategy: "CAPITAL_PRESERVATION"
+        segment-benefits:
+          - "Low-risk investment options"
+          - "Guaranteed return products"
+          - "Capital protection strategies"
+    segment-settings:
+      evaluation-frequency: "monthly"
+      behavior-tracking: true
+      adaptive-recommendations: true
+    
+  default:
+    segment-type: "default"
+    segment-name: "Default Customer Segments"
+    description: "Default customer segmentation"
+    customer-segments:
+      default-segment:
+        segment-id: "DEFAULT"
+        segment-name: "Default Segment"
+        product-recommendations:
+          - "ETF"
+        discount-rate: 0.00
+    segment-settings:
+      evaluation-frequency: "quarterly"
+
+# Segmentation algorithms
+segmentation-algorithms:
+  membership-tier-algorithm:
+    algorithm-name: "Membership Tier Segmentation"
+    description: "Algorithm for membership tier-based segmentation"
+    characteristics:
+      - "Portfolio value assessment"
+      - "Relationship duration evaluation"
+      - "Service level determination"
+    
+  age-demographic-algorithm:
+    algorithm-name: "Age Demographic Segmentation"
+    description: "Algorithm for age demographic-based segmentation"
+    characteristics:
+      - "Life stage identification"
+      - "Investment horizon assessment"
+      - "Risk tolerance evaluation"
+    
+  behavioral-algorithm:
+    algorithm-name: "Behavioral Segmentation"
+    description: "Algorithm for behavior-based segmentation"
+    characteristics:
+      - "Trading pattern analysis"
+      - "Risk behavior assessment"
+      - "Engagement level evaluation"
+
+# Quality assurance
+quality-assurance:
+  segmentation-accuracy:
+    - "Customer segments must be well-defined"
+    - "Segment criteria must be measurable"
+    - "Product recommendations must be appropriate"
+    - "Segment benefits must be valuable"
+    
+  operational-efficiency:
+    - "Segmentation must be operationally efficient"
+    - "Segment evaluation must be timely"
+    - "Dynamic updates must be reliable"
+    - "Segment transitions must be smooth"
+    
+  business-alignment:
+    - "Segments must align with business strategy"
+    - "Segment benefits must be profitable"
+    - "Customer experience must be enhanced"
+    - "Segment differentiation must be clear"

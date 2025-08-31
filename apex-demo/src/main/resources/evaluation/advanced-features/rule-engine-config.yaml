@@ -1,0 +1,232 @@
+# APEX Rule Engine Configuration
+# External data source configuration for rule engine operations
+# Replaces hardcoded rule engine logic from ApexAdvancedFeaturesDemo
+
+type: "external-data-config"
+name: "rule-engine-config"
+description: "Data-driven rule engine configuration for advanced features"
+
+# Rule engine configuration by rule type
+data:
+  investment-rules:
+    rule-id: "RULE001"
+    rule-type: "investment-processing"
+    description: "Investment rule processing with complex conditions"
+    rule-definitions:
+      - rule-name: "high-value-equity-filter"
+        condition: "#product.price > 500 && #product.category == 'Equity'"
+        action: "include-in-portfolio"
+        priority: 1
+        description: "Include high-value equity products in portfolio"
+      - rule-name: "fixed-income-diversification"
+        condition: "#product.category == 'FixedIncome' && #product.price > 800"
+        action: "diversification-candidate"
+        priority: 2
+        description: "Consider fixed income products for diversification"
+      - rule-name: "risk-assessment"
+        condition: "#product.category == 'RealEstate' || #product.price > 1000"
+        action: "risk-evaluation-required"
+        priority: 3
+        description: "Require risk evaluation for real estate or high-value products"
+    execution-strategy: "sequential"
+    
+  conditional-rules:
+    rule-id: "RULE002"
+    rule-type: "conditional-processing"
+    description: "Conditional rule execution with follow-up actions"
+    rule-definitions:
+      - rule-name: "customer-tier-evaluation"
+        condition: "#customer.membershipLevel == 'Platinum'"
+        action: "premium-processing"
+        follow-up-condition: "#result == 'premium-processing'"
+        follow-up-action: "apply-platinum-benefits"
+        description: "Evaluate customer tier and apply appropriate benefits"
+      - rule-name: "age-based-recommendations"
+        condition: "#customer.age >= 50"
+        action: "conservative-portfolio"
+        follow-up-condition: "#result == 'conservative-portfolio'"
+        follow-up-action: "fixed-income-focus"
+        description: "Age-based investment recommendations"
+    execution-strategy: "conditional-chain"
+    
+  result-based-rules:
+    rule-id: "RULE003"
+    rule-type: "result-based-processing"
+    description: "Rules that execute based on previous rule results"
+    rule-definitions:
+      - rule-name: "high-value-customer-rule"
+        condition: "#customer.totalInvestment > 100000"
+        action: "high-value-classification"
+        result-handlers:
+          - result-type: "high-value-classification"
+            handler-action: "assign-relationship-manager"
+            description: "Assign dedicated relationship manager"
+          - result-type: "standard-classification"
+            handler-action: "standard-service"
+            description: "Provide standard service level"
+      - rule-name: "portfolio-rebalancing"
+        condition: "#portfolio.riskLevel > 0.7"
+        action: "rebalancing-required"
+        result-handlers:
+          - result-type: "rebalancing-required"
+            handler-action: "schedule-rebalancing"
+            description: "Schedule portfolio rebalancing"
+    execution-strategy: "result-driven"
+    
+  dynamic-selection-rules:
+    rule-id: "RULE004"
+    rule-type: "dynamic-selection"
+    description: "Dynamic rule selection based on runtime conditions"
+    rule-repository:
+      - rule-key: "equity-focused"
+        rule-name: "equity-investment-rule"
+        condition: "#customer.preferredCategories.contains('Equity')"
+        action: "equity-portfolio-construction"
+        description: "Focus on equity investments"
+      - rule-key: "balanced-approach"
+        rule-name: "balanced-investment-rule"
+        condition: "#customer.riskTolerance == 'Medium'"
+        action: "balanced-portfolio-construction"
+        description: "Balanced investment approach"
+      - rule-key: "conservative-approach"
+        rule-name: "conservative-investment-rule"
+        condition: "#customer.age > 60 || #customer.riskTolerance == 'Low'"
+        action: "conservative-portfolio-construction"
+        description: "Conservative investment approach"
+    selection-strategy: "first-match"
+    
+  default:
+    rule-id: "RULE000"
+    rule-type: "default"
+    description: "Default rule processing"
+    rule-definitions:
+      - rule-name: "default-processing"
+        condition: "true"
+        action: "standard-processing"
+        description: "Default processing rule"
+    execution-strategy: "simple"
+
+# Rule execution patterns
+execution-patterns:
+  sequential-execution:
+    description: "Execute rules in defined sequence"
+    characteristics:
+      - "Predictable execution order"
+      - "Each rule processes independently"
+      - "Results can influence subsequent rules"
+    use-cases:
+      - "Investment screening pipeline"
+      - "Risk assessment workflow"
+      - "Compliance checking sequence"
+      
+  conditional-chain:
+    description: "Execute rules based on conditions and chain results"
+    characteristics:
+      - "Conditional execution flow"
+      - "Follow-up actions based on results"
+      - "Dynamic execution path"
+    use-cases:
+      - "Customer onboarding workflow"
+      - "Product recommendation engine"
+      - "Risk mitigation procedures"
+      
+  result-driven:
+    description: "Execute subsequent actions based on rule results"
+    characteristics:
+      - "Result-type specific handling"
+      - "Multiple result handlers per rule"
+      - "Flexible response patterns"
+    use-cases:
+      - "Customer classification systems"
+      - "Portfolio management decisions"
+      - "Service level determination"
+      
+  parallel-execution:
+    description: "Execute independent rules in parallel"
+    characteristics:
+      - "Concurrent rule evaluation"
+      - "Improved performance for independent rules"
+      - "Result aggregation required"
+    use-cases:
+      - "Multi-criteria analysis"
+      - "Independent validation checks"
+      - "Parallel risk assessments"
+
+# Rule performance optimization
+performance-optimization:
+  rule-caching:
+    cache-strategy: "LRU"
+    cache-size: 500
+    cache-ttl: 3600
+    cache-key-strategy: "rule-condition-hash"
+    
+  evaluation-optimization:
+    short-circuit-evaluation: true
+    condition-ordering: "most-selective-first"
+    result-memoization: true
+    parallel-evaluation: true
+    
+  resource-management:
+    max-concurrent-evaluations: 10
+    evaluation-timeout: 5000
+    memory-limit: "256MB"
+    cpu-limit: "2 cores"
+
+# Rule validation and testing
+validation:
+  rule-syntax-validation:
+    - "SpEL expression syntax checking"
+    - "Variable reference validation"
+    - "Type compatibility checking"
+    
+  rule-logic-validation:
+    - "Condition coverage analysis"
+    - "Dead rule detection"
+    - "Conflicting rule identification"
+    
+  performance-validation:
+    - "Execution time benchmarking"
+    - "Memory usage profiling"
+    - "Scalability testing"
+
+# Monitoring and observability
+monitoring:
+  execution-metrics:
+    - "Rule execution count"
+    - "Average execution time"
+    - "Success/failure rates"
+    - "Resource utilization"
+    
+  business-metrics:
+    - "Rule effectiveness scores"
+    - "Business outcome correlation"
+    - "Decision accuracy rates"
+    - "Customer satisfaction impact"
+    
+  alerting:
+    - condition: "execution-time > 1000ms"
+      action: "performance-alert"
+    - condition: "failure-rate > 5%"
+      action: "reliability-alert"
+    - condition: "memory-usage > 80%"
+      action: "resource-alert"
+
+# Integration capabilities
+integration:
+  external-data-sources:
+    - "Customer databases"
+    - "Product catalogs"
+    - "Market data feeds"
+    - "Regulatory databases"
+    
+  rule-repositories:
+    - "Database-stored rules"
+    - "File-based rule definitions"
+    - "External rule management systems"
+    - "Version-controlled rule sets"
+    
+  execution-environments:
+    - "Synchronous processing"
+    - "Asynchronous processing"
+    - "Batch processing"
+    - "Stream processing"

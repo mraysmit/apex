@@ -1,0 +1,283 @@
+# APEX Dynamic Test Data Configuration
+# External data source configuration for dynamic method execution testing
+# Replaces hardcoded test data from DynamicMethodExecutionDemo
+
+type: "external-data-config"
+name: "dynamic-test-data"
+description: "Comprehensive test data for dynamic method execution demonstration"
+
+# Sample trades for dynamic method execution testing
+data:
+  sample-trades:
+    equity-trade:
+      trade-id: "EQ001"
+      trade-type: "Equity"
+      instrument-type: "Common Stock"
+      symbol: "AAPL"
+      quantity: 1000
+      price: 150.00
+      notional-value: 150000.00
+      currency: "USD"
+      counterparty: "Goldman Sachs"
+      trade-date: "2025-08-30"
+      expected-settlement-days: 2
+      expected-settlement-method: "DTC"
+      
+    fixed-income-trade:
+      trade-id: "FI001"
+      trade-type: "FixedIncome"
+      instrument-type: "Corporate Bond"
+      symbol: "MSFT 3.5% 2030"
+      quantity: 100
+      price: 102.50
+      notional-value: 102500.00
+      currency: "USD"
+      counterparty: "JP Morgan"
+      trade-date: "2025-08-30"
+      expected-settlement-days: 1
+      expected-settlement-method: "Fedwire"
+      
+    derivative-trade:
+      trade-id: "DV001"
+      trade-type: "Derivative"
+      instrument-type: "Call Option"
+      symbol: "SPY 450 Call Dec 2025"
+      quantity: 10
+      price: 5.25
+      notional-value: 5250.00
+      currency: "USD"
+      counterparty: "Morgan Stanley"
+      trade-date: "2025-08-30"
+      expected-settlement-days: 1
+      expected-settlement-method: "Clearstream"
+      
+    forex-trade:
+      trade-id: "FX001"
+      trade-type: "Forex"
+      instrument-type: "Currency Pair"
+      symbol: "EUR/USD"
+      quantity: 1000000
+      price: 1.0850
+      notional-value: 1085000.00
+      currency: "USD"
+      counterparty: "Deutsche Bank"
+      trade-date: "2025-08-30"
+      expected-settlement-days: 2
+      expected-settlement-method: "Euroclear"
+      
+    commodity-trade:
+      trade-id: "CM001"
+      trade-type: "Commodity"
+      instrument-type: "Crude Oil Future"
+      symbol: "WTI Mar 2026"
+      quantity: 100
+      price: 75.50
+      notional-value: 755000.00
+      currency: "USD"
+      counterparty: "Shell Trading"
+      trade-date: "2025-08-30"
+      expected-settlement-days: 3
+      expected-settlement-method: "Manual"
+
+# Test scenarios for different processing types
+test-scenarios:
+  settlement-processing-scenarios:
+    - scenario-id: "SETTLE_001"
+      description: "Standard equity settlement processing"
+      trade-type: "Equity"
+      processing-type: "settlement-processing"
+      expected-settlement-days: 2
+      expected-settlement-method: "DTC"
+      
+    - scenario-id: "SETTLE_002"
+      description: "Fixed income settlement processing"
+      trade-type: "FixedIncome"
+      processing-type: "settlement-processing"
+      expected-settlement-days: 1
+      expected-settlement-method: "Fedwire"
+      
+    - scenario-id: "SETTLE_003"
+      description: "Complex derivative settlement processing"
+      trade-type: "Derivative"
+      processing-type: "settlement-processing"
+      expected-settlement-days: 1
+      expected-settlement-method: "Clearstream"
+      
+  risk-management-scenarios:
+    - scenario-id: "RISK_001"
+      description: "Equity market risk calculation"
+      trade-type: "Equity"
+      processing-type: "risk-management"
+      expected-market-risk: 0.05
+      expected-credit-risk: 0.03
+      
+    - scenario-id: "RISK_002"
+      description: "Derivative risk calculation with high volatility"
+      trade-type: "Derivative"
+      processing-type: "risk-management"
+      expected-market-risk: 0.15
+      expected-credit-risk: 0.20
+      
+    - scenario-id: "RISK_003"
+      description: "Commodity risk calculation"
+      trade-type: "Commodity"
+      processing-type: "risk-management"
+      expected-market-risk: 0.12
+      expected-credit-risk: 0.10
+      
+  pricing-service-scenarios:
+    - scenario-id: "PRICE_001"
+      description: "Standard pricing calculation"
+      base-price: 100.00
+      pricing-type: "standard"
+      processing-type: "pricing-service"
+      expected-price: 100.00
+      
+    - scenario-id: "PRICE_002"
+      description: "Premium pricing calculation"
+      base-price: 100.00
+      pricing-type: "premium"
+      processing-type: "pricing-service"
+      expected-price: 120.00
+      
+    - scenario-id: "PRICE_003"
+      description: "Sale pricing calculation"
+      base-price: 100.00
+      pricing-type: "sale"
+      processing-type: "pricing-service"
+      expected-price: 80.00
+      
+    - scenario-id: "PRICE_004"
+      description: "Clearance pricing calculation"
+      base-price: 100.00
+      pricing-type: "clearance"
+      processing-type: "pricing-service"
+      expected-price: 50.00
+      
+  compliance-service-scenarios:
+    - scenario-id: "COMP_001"
+      description: "Equity compliance regulations lookup"
+      trade-type: "Equity"
+      processing-type: "compliance-service"
+      expected-regulations: ["SEC Rule 10b-5", "Regulation SHO", "Market Access Rule"]
+      
+    - scenario-id: "COMP_002"
+      description: "Derivative compliance regulations lookup"
+      trade-type: "Derivative"
+      processing-type: "compliance-service"
+      expected-regulations: ["Dodd-Frank Act", "EMIR", "Basel III"]
+      
+    - scenario-id: "COMP_003"
+      description: "Forex compliance regulations lookup"
+      trade-type: "Forex"
+      processing-type: "compliance-service"
+      expected-regulations: ["CFTC Part 23", "MiFID II", "Basel III"]
+
+# Dynamic rule execution test scenarios
+dynamic-rule-scenarios:
+  - scenario-id: "RULE_001"
+    description: "Settlement days rule execution"
+    rule-name: "SettlementDays"
+    processing-type: "dynamic-rules"
+    input-data:
+      trade-type: "Equity"
+    expected-result: 2
+    
+  - scenario-id: "RULE_002"
+    description: "Market risk rule execution"
+    rule-name: "MarketRisk"
+    processing-type: "dynamic-rules"
+    input-data:
+      trade-type: "Derivative"
+    expected-result: 0.15
+    
+  - scenario-id: "RULE_003"
+    description: "Premium pricing rule execution"
+    rule-name: "PremiumPrice"
+    processing-type: "dynamic-rules"
+    input-data:
+      base-price: 100.00
+    expected-result: 120.00
+
+# Conditional processing test scenarios
+conditional-processing-scenarios:
+  - scenario-id: "COND_001"
+    description: "Simple true condition"
+    processing-type: "conditional-processing"
+    condition: true
+    true-value: "Condition is true"
+    false-value: "Condition is false"
+    expected-result: "Condition is true"
+    
+  - scenario-id: "COND_002"
+    description: "Simple false condition"
+    processing-type: "conditional-processing"
+    condition: false
+    true-value: "Condition is true"
+    false-value: "Condition is false"
+    expected-result: "Condition is false"
+    
+  - scenario-id: "COND_003"
+    description: "Complex condition with trade type"
+    processing-type: "conditional-processing"
+    condition: "#data.tradeType == 'Equity'"
+    true-value: "Equity trade processing"
+    false-value: "Non-equity trade processing"
+    trade-type: "Equity"
+    expected-result: "Equity trade processing"
+
+# Fee calculation test scenarios
+fee-calculation-scenarios:
+  - scenario-id: "FEE_001"
+    description: "Standard fee calculation"
+    processing-type: "fee-calculation"
+    notional-value: 1000000.00
+    fee-rate: 0.001
+    expected-fee: 1000.00
+    
+  - scenario-id: "FEE_002"
+    description: "Premium fee calculation"
+    processing-type: "fee-calculation"
+    notional-value: 5000000.00
+    fee-rate: 0.0015
+    expected-fee: 7500.00
+    
+  - scenario-id: "FEE_003"
+    description: "Default fee rate calculation"
+    processing-type: "fee-calculation"
+    notional-value: 2000000.00
+    expected-fee: 2000.00
+
+# Performance test scenarios
+performance-scenarios:
+  - scenario-id: "PERF_001"
+    description: "High-volume settlement processing"
+    processing-type: "performance-testing"
+    scenario-type: "load-testing"
+    entity-count: 1000
+    expected-throughput: "1000 trades/second"
+    expected-response-time: "< 100ms per trade"
+    
+  - scenario-id: "PERF_002"
+    description: "Complex risk calculation performance"
+    processing-type: "performance-testing"
+    scenario-type: "stress-testing"
+    entity-count: 500
+    expected-throughput: "500 calculations/second"
+    expected-response-time: "< 200ms per calculation"
+
+# Error handling test scenarios
+error-scenarios:
+  - scenario-id: "ERROR_001"
+    description: "Missing trade type"
+    processing-type: "error-handling"
+    trade-type: null
+    expected-error: "missing-trade-type"
+    expected-handling: "fail-fast-with-clear-message"
+    
+  - scenario-id: "ERROR_002"
+    description: "Invalid pricing type"
+    processing-type: "error-handling"
+    pricing-type: "invalid-type"
+    expected-error: "invalid-pricing-type"
+    expected-handling: "fail-fast-with-clear-message"

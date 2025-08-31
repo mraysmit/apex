@@ -1,3 +1,5 @@
+![APEX System Logo](APEX%20System%20logo.png)
+
 # APEX - Advanced Processing Engine for eXpressions
 
 **Version:** 1.0
@@ -349,7 +351,7 @@ mvn spring-boot:run
 
 #### 1. **OTC Options Bootstrap Demo** - Multi-Source Data Integration
 ```bash
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo" -pl apex-demo
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.OtcOptionsBootstrapDemo" -pl apex-demo
 ```
 
 **What It Demonstrates:**
@@ -470,7 +472,7 @@ mvn spring-boot:run
 cd apex-demo
 
 # Bootstrap Demonstrations (Complete Scenarios)
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.OtcOptionsBootstrapDemo"
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CommoditySwapBootstrapDemo"
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.TradeSettlementBootstrapDemo"
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.RiskAssessmentBootstrapDemo"
@@ -482,9 +484,9 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.lookups.Concatenated
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.YamlDatasetDemo.ConditionalExpressionLookupDemo"
 
 # Advanced Feature Demonstrations (Technical Deep Dive)
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.DynamicMethodExecutionDemo"
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.PerformanceAndExceptionDemo"
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.DataServiceManagerDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.evaluation.DynamicMethodExecutionDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.evaluation.PerformanceAndExceptionDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.infrastructure.DataServiceManagerDemo"
 # ... and 5 more advanced demos
 ```
 

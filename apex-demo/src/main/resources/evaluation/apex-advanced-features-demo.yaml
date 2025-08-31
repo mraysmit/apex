@@ -1,0 +1,181 @@
+# APEX Advanced Features Demo Configuration
+# Real APEX YAML configuration for advanced features processing
+# Replaces all hardcoded advanced features logic from ApexAdvancedFeaturesDemo (@version 1.0)
+
+type: "apex-enrichment-config"
+name: "apex-advanced-features-demo"
+description: "APEX-compliant advanced features with real enrichment services"
+
+# External data source for advanced features configurations
+external-data-sources:
+  - name: "collection-operations-config"
+    type: "external-data-config"
+    source: "evaluation/advanced-features/collection-operations-config.yaml"
+    
+  - name: "rule-engine-config"
+    type: "external-data-config"
+    source: "evaluation/advanced-features/rule-engine-config.yaml"
+    
+  - name: "template-processing-config"
+    type: "external-data-config"
+    source: "evaluation/advanced-features/template-processing-config.yaml"
+    
+  - name: "dynamic-lookup-config"
+    type: "external-data-config"
+    source: "evaluation/advanced-features/dynamic-lookup-config.yaml"
+    
+  - name: "rule-result-features-config"
+    type: "external-data-config"
+    source: "evaluation/advanced-features/rule-result-features-config.yaml"
+    
+  - name: "advanced-features-test-data"
+    type: "external-data-config"
+    source: "evaluation/advanced-features/advanced-features-test-data.yaml"
+
+# APEX enrichment processing for advanced features
+enrichments:
+  - name: "collection-operations-processing"
+    type: "lookup-enrichment"
+    description: "Process collection operations using data-driven configuration"
+    condition: "#data.processingType == 'collection-operations'"
+    lookup-source: "collection-operations-config"
+    lookup-key: "#data.operationType != null ? #data.operationType : 'default'"
+    target-field: "collectionResult"
+    
+  - name: "rule-engine-processing"
+    type: "lookup-enrichment"
+    description: "Process rule engine operations using data-driven configuration"
+    condition: "#data.processingType == 'rule-engine'"
+    lookup-source: "rule-engine-config"
+    lookup-key: "#data.ruleType != null ? #data.ruleType : 'default'"
+    target-field: "ruleEngineResult"
+    
+  - name: "template-processing"
+    type: "lookup-enrichment"
+    description: "Process template operations using data-driven configuration"
+    condition: "#data.processingType == 'template-processing'"
+    lookup-source: "template-processing-config"
+    lookup-key: "#data.templateType != null ? #data.templateType : 'default'"
+    target-field: "templateResult"
+    
+  - name: "dynamic-lookup-processing"
+    type: "lookup-enrichment"
+    description: "Process dynamic lookup operations using data-driven configuration"
+    condition: "#data.processingType == 'dynamic-lookup'"
+    lookup-source: "dynamic-lookup-config"
+    lookup-key: "#data.lookupType != null ? #data.lookupType : 'default'"
+    target-field: "lookupResult"
+    
+  - name: "rule-result-processing"
+    type: "lookup-enrichment"
+    description: "Process rule result features using data-driven configuration"
+    condition: "#data.processingType == 'rule-result-features'"
+    lookup-source: "rule-result-features-config"
+    lookup-key: "#data.featureType != null ? #data.featureType : 'default'"
+    target-field: "ruleResultFeature"
+    
+  - name: "dynamic-method-execution"
+    type: "expression-enrichment"
+    description: "Execute dynamic methods using real APEX expressions"
+    condition: "#data.processingType == 'dynamic-method-execution'"
+    expression: "#data.methodName != null ? 'Dynamic method executed: ' + #data.methodName : 'No method specified'"
+    target-field: "dynamicMethodResult"
+    
+  - name: "advanced-features-summary"
+    type: "expression-enrichment"
+    description: "Generate advanced features processing summary"
+    condition: "true"
+    expression: "'Advanced features processing completed: ' + (#data.processingType != null ? #data.processingType : 'unknown') + ' using real APEX services'"
+    target-field: "advancedFeaturesSummary"
+
+# Advanced features processing categories
+processing-categories:
+  - category: "collection-operations"
+    description: "Collection manipulation and array operations"
+    processing-type: "real-apex-enrichment"
+    features:
+      - "List filtering and mapping"
+      - "Array operations and transformations"
+      - "Complex collection queries"
+      - "Aggregation and grouping"
+    
+  - category: "rule-engine"
+    description: "Advanced rule engine capabilities"
+    processing-type: "real-apex-enrichment"
+    features:
+      - "Investment rule processing"
+      - "Conditional rule execution"
+      - "Rule chaining and dependencies"
+      - "Dynamic rule selection"
+    
+  - category: "template-processing"
+    description: "Template expressions and processing"
+    processing-type: "real-apex-enrichment"
+    features:
+      - "XML template processing"
+      - "JSON template processing"
+      - "Dynamic template generation"
+      - "Template variable substitution"
+    
+  - category: "dynamic-lookup"
+    description: "Dynamic lookup service operations"
+    processing-type: "real-apex-enrichment"
+    features:
+      - "Runtime lookup service creation"
+      - "Dynamic data source integration"
+      - "Lookup service chaining"
+      - "Data source management"
+    
+  - category: "rule-result-features"
+    description: "Advanced rule result processing"
+    processing-type: "real-apex-enrichment"
+    features:
+      - "Rule result analysis"
+      - "Result-based routing"
+      - "Conditional follow-up processing"
+      - "Result type handling"
+    
+  - category: "dynamic-method-execution"
+    description: "Dynamic method execution capabilities"
+    processing-type: "real-apex-expressions"
+    features:
+      - "Runtime method invocation"
+      - "Dynamic parameter binding"
+      - "Method result processing"
+      - "Exception handling"
+
+# Performance and optimization settings
+performance-settings:
+  collection-operations:
+    batch-size: 1000
+    parallel-processing: true
+    memory-optimization: true
+    
+  rule-engine:
+    rule-cache-size: 500
+    evaluation-timeout: 5000
+    concurrent-evaluations: 10
+    
+  template-processing:
+    template-cache-size: 100
+    processing-timeout: 3000
+    variable-resolution-depth: 5
+    
+  dynamic-lookup:
+    lookup-cache-size: 200
+    lookup-timeout: 2000
+    connection-pool-size: 20
+    
+  rule-result-features:
+    result-cache-size: 300
+    analysis-timeout: 1000
+    feature-extraction-depth: 3
+
+# Output configuration
+output:
+  include-input: true
+  include-metadata: true
+  format: "enhanced"
+  advanced-features-summary: true
+  performance-metrics: true
+  processing-details: true

@@ -1,0 +1,315 @@
+# APEX Sample OTC Options Configuration
+# External data source configuration for sample OTC options creation
+# Replaces hardcoded OTC option creation from OtcOptionsBootstrapDemo
+
+type: "external-data-config"
+name: "sample-otc-options-config"
+description: "Data-driven sample OTC options configuration for bootstrap processing"
+
+# Sample OTC options configuration by option type
+data:
+  energy-commodities-options:
+    option-type: "energy-commodities-options"
+    description: "Energy commodities OTC options for bootstrap processing"
+    sample-options:
+      - option-id: "OTC001"
+        option-name: "Natural Gas Call Option"
+        trade-date: "2025-08-02"
+        counterparty-buyer: "GOLDMAN_SACHS"
+        counterparty-seller: "JP_MORGAN"
+        option-type: "Call"
+        underlying-asset:
+          name: "Natural Gas"
+          unit: "MMBtu"
+          exchange: "NYMEX"
+        strike-price: 3.50
+        strike-currency: "USD"
+        notional-quantity: 10000.00
+        expiry-date: "2025-12-28"
+        settlement-type: "Cash"
+        days-to-expiry: 148
+        commodity-category: "Energy"
+        
+      - option-id: "OTC002"
+        option-name: "Brent Crude Oil Put Option"
+        trade-date: "2025-08-02"
+        counterparty-buyer: "MORGAN_STANLEY"
+        counterparty-seller: "CITI"
+        option-type: "Put"
+        underlying-asset:
+          name: "Brent Crude Oil"
+          unit: "Barrel"
+          exchange: "ICE"
+        strike-price: 75.00
+        strike-currency: "USD"
+        notional-quantity: 1000.00
+        expiry-date: "2026-03-15"
+        settlement-type: "Physical"
+        days-to-expiry: 225
+        commodity-category: "Energy"
+        
+      - option-id: "OTC003"
+        option-name: "WTI Crude Oil Call Option"
+        trade-date: "2025-08-02"
+        counterparty-buyer: "BARCLAYS"
+        counterparty-seller: "HSBC"
+        option-type: "Call"
+        underlying-asset:
+          name: "WTI Crude Oil"
+          unit: "Barrel"
+          exchange: "NYMEX"
+        strike-price: 72.50
+        strike-currency: "USD"
+        notional-quantity: 2000.00
+        expiry-date: "2025-11-15"
+        settlement-type: "Cash"
+        days-to-expiry: 105
+        commodity-category: "Energy"
+    creation-rules:
+      - "Energy options must have valid commodity references"
+      - "Strike prices must be positive"
+      - "Expiry dates must be in the future"
+      - "Notional quantities must be positive"
+    
+  precious-metals-options:
+    option-type: "precious-metals-options"
+    description: "Precious metals OTC options for bootstrap processing"
+    sample-options:
+      - option-id: "OTC004"
+        option-name: "Gold Call Option"
+        trade-date: "2025-08-02"
+        counterparty-buyer: "BARCLAYS"
+        counterparty-seller: "DEUTSCHE_BANK"
+        option-type: "Call"
+        underlying-asset:
+          name: "Gold"
+          unit: "Troy Ounce"
+          exchange: "COMEX"
+        strike-price: 2100.00
+        strike-currency: "USD"
+        notional-quantity: 100.00
+        expiry-date: "2025-11-30"
+        settlement-type: "Cash"
+        days-to-expiry: 120
+        commodity-category: "Precious Metals"
+        
+      - option-id: "OTC005"
+        option-name: "Silver Put Option"
+        trade-date: "2025-08-02"
+        counterparty-buyer: "JPMORGAN"
+        counterparty-seller: "GOLDMAN_SACHS"
+        option-type: "Put"
+        underlying-asset:
+          name: "Silver"
+          unit: "Troy Ounce"
+          exchange: "COMEX"
+        strike-price: 28.50
+        strike-currency: "USD"
+        notional-quantity: 5000.00
+        expiry-date: "2026-01-15"
+        settlement-type: "Physical"
+        days-to-expiry: 166
+        commodity-category: "Precious Metals"
+        
+      - option-id: "OTC006"
+        option-name: "Platinum Call Option"
+        trade-date: "2025-08-02"
+        counterparty-buyer: "CITI"
+        counterparty-seller: "MORGAN_STANLEY"
+        option-type: "Call"
+        underlying-asset:
+          name: "Platinum"
+          unit: "Troy Ounce"
+          exchange: "NYMEX"
+        strike-price: 1050.00
+        strike-currency: "USD"
+        notional-quantity: 50.00
+        expiry-date: "2025-12-15"
+        settlement-type: "Cash"
+        days-to-expiry: 135
+        commodity-category: "Precious Metals"
+    creation-rules:
+      - "Precious metals options must have valid metal references"
+      - "Strike prices must be positive"
+      - "Expiry dates must be in the future"
+      - "Notional quantities must be positive"
+    
+  agricultural-commodities-options:
+    option-type: "agricultural-commodities-options"
+    description: "Agricultural commodities OTC options for bootstrap processing"
+    sample-options:
+      - option-id: "OTC007"
+        option-name: "Corn Call Option"
+        trade-date: "2025-08-02"
+        counterparty-buyer: "DEUTSCHE_BANK"
+        counterparty-seller: "BARCLAYS"
+        option-type: "Call"
+        underlying-asset:
+          name: "Corn"
+          unit: "Bushel"
+          exchange: "CBOT"
+        strike-price: 4.25
+        strike-currency: "USD"
+        notional-quantity: 50000.00
+        expiry-date: "2025-12-01"
+        settlement-type: "Physical"
+        days-to-expiry: 121
+        commodity-category: "Agricultural"
+        
+      - option-id: "OTC008"
+        option-name: "Wheat Put Option"
+        trade-date: "2025-08-02"
+        counterparty-buyer: "HSBC"
+        counterparty-seller: "CITI"
+        option-type: "Put"
+        underlying-asset:
+          name: "Wheat"
+          unit: "Bushel"
+          exchange: "CBOT"
+        strike-price: 5.75
+        strike-currency: "USD"
+        notional-quantity: 25000.00
+        expiry-date: "2025-10-30"
+        settlement-type: "Cash"
+        days-to-expiry: 89
+        commodity-category: "Agricultural"
+    creation-rules:
+      - "Agricultural options must have valid crop references"
+      - "Strike prices must be positive"
+      - "Expiry dates must align with harvest cycles"
+      - "Notional quantities must be realistic"
+    
+  default:
+    option-type: "default"
+    description: "Default OTC options"
+    sample-options:
+      - option-id: "OTC000"
+        option-name: "Default Option"
+        trade-date: "2025-08-02"
+        counterparty-buyer: "DEFAULT_BUYER"
+        counterparty-seller: "DEFAULT_SELLER"
+        option-type: "Call"
+        underlying-asset:
+          name: "Default Asset"
+          unit: "Unit"
+          exchange: "DEFAULT"
+        strike-price: 100.00
+        strike-currency: "USD"
+        notional-quantity: 1.00
+        expiry-date: "2025-12-31"
+        settlement-type: "Cash"
+        days-to-expiry: 151
+        commodity-category: "Default"
+    creation-rules:
+      - "Basic option validation"
+
+# Option creation patterns
+creation-patterns:
+  energy-pattern:
+    pattern-name: "Energy Commodities Creation Pattern"
+    description: "Pattern for creating energy commodity options"
+    required-fields:
+      - "trade-date"
+      - "counterparty-buyer"
+      - "counterparty-seller"
+      - "option-type"
+      - "underlying-asset"
+      - "strike-price"
+      - "notional-quantity"
+      - "expiry-date"
+      - "settlement-type"
+    validation-rules:
+      - "Strike price must be positive"
+      - "Notional quantity must be positive"
+      - "Expiry date must be in the future"
+      - "Underlying asset must be valid energy commodity"
+    
+  precious-metals-pattern:
+    pattern-name: "Precious Metals Creation Pattern"
+    description: "Pattern for creating precious metals options"
+    required-fields:
+      - "trade-date"
+      - "counterparty-buyer"
+      - "counterparty-seller"
+      - "option-type"
+      - "underlying-asset"
+      - "strike-price"
+      - "notional-quantity"
+      - "expiry-date"
+      - "settlement-type"
+    validation-rules:
+      - "Strike price must be positive"
+      - "Notional quantity must be positive"
+      - "Expiry date must be in the future"
+      - "Underlying asset must be valid precious metal"
+    
+  agricultural-pattern:
+    pattern-name: "Agricultural Commodities Creation Pattern"
+    description: "Pattern for creating agricultural commodity options"
+    required-fields:
+      - "trade-date"
+      - "counterparty-buyer"
+      - "counterparty-seller"
+      - "option-type"
+      - "underlying-asset"
+      - "strike-price"
+      - "notional-quantity"
+      - "expiry-date"
+      - "settlement-type"
+    validation-rules:
+      - "Strike price must be positive"
+      - "Notional quantity must be positive"
+      - "Expiry date must align with harvest cycles"
+      - "Underlying asset must be valid agricultural commodity"
+
+# Counterparty mappings
+counterparty-mappings:
+  investment-banks:
+    - name: "GOLDMAN_SACHS"
+      full-name: "Goldman Sachs Group Inc."
+      credit-rating: "AAA"
+      region: "North America"
+    - name: "JP_MORGAN"
+      full-name: "JPMorgan Chase & Co."
+      credit-rating: "AAA"
+      region: "North America"
+    - name: "MORGAN_STANLEY"
+      full-name: "Morgan Stanley"
+      credit-rating: "AA+"
+      region: "North America"
+    - name: "CITI"
+      full-name: "Citigroup Inc."
+      credit-rating: "AA-"
+      region: "North America"
+    - name: "BARCLAYS"
+      full-name: "Barclays PLC"
+      credit-rating: "A+"
+      region: "Europe"
+    - name: "DEUTSCHE_BANK"
+      full-name: "Deutsche Bank AG"
+      credit-rating: "BBB+"
+      region: "Europe"
+    - name: "HSBC"
+      full-name: "HSBC Holdings PLC"
+      credit-rating: "AA-"
+      region: "Europe"
+
+# Quality assurance
+quality-assurance:
+  option-validation:
+    - "All required fields must be present"
+    - "Financial values must be positive"
+    - "Dates must be valid and in the future"
+    - "Counterparties must be recognized institutions"
+    
+  market-validation:
+    - "Underlying assets must be valid commodities"
+    - "Exchanges must be recognized markets"
+    - "Strike prices must be reasonable"
+    - "Settlement types must be appropriate"
+    
+  risk-validation:
+    - "Notional amounts must be within risk limits"
+    - "Counterparty exposure must be acceptable"
+    - "Market risk must be assessed"
+    - "Operational risk must be considered"

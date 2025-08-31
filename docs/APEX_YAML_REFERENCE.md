@@ -1,8 +1,11 @@
+![APEX System Logo](APEX%20System%20logo.png)
 # APEX YAML Syntax Reference Guide
 
-**Version:** 2.0
-**Date:** 2025-08-28
+**Version:** 2.1
+**Date:** 2025-08-30
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
+
+> **🚨 CRITICAL SYNTAX UPDATE**: This document is currently being updated to reflect the correct APEX SpEL syntax. APEX processes HashMap data where fields are accessed using `#fieldName` syntax, NOT `#data.fieldName`. Many examples in this document still show the incorrect `#data.` prefix and are being corrected. Always use `#fieldName` for field access in APEX YAML configurations.
 
 ## Table of Contents
 
@@ -42,7 +45,7 @@ APEX YAML is a declarative configuration language for the APEX Rules Engine that
 
 APEX YAML follows these core principles:
 
-1. **Data-Driven**: All logic operates on a data context using `#data` prefix
+1. **Data-Driven**: All logic operates on HashMap data context using direct field references (`#fieldName`)
 2. **Expression-Based**: Conditions and calculations use SpEL expressions
 3. **Type-Safe**: Strong typing with automatic type conversion
 4. **Null-Safe**: Built-in null safety with optional navigation operators
@@ -244,20 +247,22 @@ dataSources:
 
 ### 3.1 Data Access Patterns
 
-#### The `#data` Prefix
+#### Direct Field Access
 
-All data access in APEX YAML uses the `#data` prefix to reference the input data context:
+All data access in APEX YAML uses direct field references to access HashMap data:
 
 ```yaml
 # Accessing top-level fields
-condition: "#data.fieldName != null"
+condition: "#fieldName != null"
 
-# Accessing nested fields
-condition: "#data.trade.security.instrumentId != null"
+# Accessing nested fields (when data contains nested objects)
+condition: "#trade.security.instrumentId != null"
 
 # Using in calculations
-expression: "#data.trade.quantity * #data.trade.price"
+expression: "#quantity * #price"
 ```
+
+> **⚠️ CRITICAL SYNTAX NOTE**: APEX processes HashMap data structures where field names are accessed directly using `#fieldName` syntax. Do **NOT** use `#data.fieldName` syntax as this will cause SpEL evaluation errors. The correct pattern is always `#fieldName` for HashMap keys.
 
 #### Nested Field Access with Dot Notation
 
@@ -265,13 +270,13 @@ Access nested objects using dot notation:
 
 ```yaml
 # Simple nesting
-condition: "#data.customer.address.country == 'US'"
+condition: "#customer.address.country == 'US'"
 
 # Deep nesting
-condition: "#data.trade.tradeHeader.partyTradeIdentifier.tradeId != null"
+condition: "#trade.tradeHeader.partyTradeIdentifier.tradeId != null"
 
 # Array/list access
-condition: "#data.positions[0].instrumentId != null"
+condition: "#positions[0].instrumentId != null"
 ```
 
 #### Null-Safe Navigation
@@ -280,10 +285,10 @@ Use the `?.` operator for null-safe navigation:
 
 ```yaml
 # Safe navigation - won't throw NullPointerException
-condition: "#data.trade?.security?.instrumentId != null"
+condition: "#trade?.security?.instrumentId != null"
 
 # Equivalent to checking each level for null
-condition: "#data.trade != null && #data.trade.security != null && #data.trade.security.instrumentId != null"
+condition: "#trade != null && #trade.security != null && #trade.security.instrumentId != null"
 ```
 
 #### Array and Collection Access
@@ -292,13 +297,13 @@ Access arrays and collections:
 
 ```yaml
 # Array index access
-condition: "#data.positions[0].quantity > 0"
+condition: "#positions[0].quantity > 0"
 
 # Collection size
-condition: "#data.positions.size() > 0"
+condition: "#positions.size() > 0"
 
 # Collection operations
-condition: "#data.positions.?[quantity > 1000].size() > 0"  # Filter collection
+condition: "#positions.?[quantity > 1000].size() > 0"  # Filter collection
 ```
 
 ### 3.2 Condition Syntax
@@ -309,13 +314,13 @@ Basic boolean logic:
 
 ```yaml
 # Simple boolean check
-condition: "#data.isActive"
+condition: "#isActive"
 
 # Negation
-condition: "!#data.isDeleted"
+condition: "!#isDeleted"
 
 # Complex boolean logic
-condition: "#data.isActive && !#data.isDeleted"
+condition: "#isActive && !#isDeleted"
 ```
 
 #### Comparison Operators
@@ -324,16 +329,16 @@ All standard comparison operators are supported:
 
 ```yaml
 # Equality
-condition: "#data.status == 'ACTIVE'"
+condition: "#status == 'ACTIVE'"
 
 # Inequality
-condition: "#data.quantity != 0"
+condition: "#quantity != 0"
 
 # Numeric comparisons
-condition: "#data.price > 100.0"
-condition: "#data.quantity >= 1000"
-condition: "#data.discount < 0.1"
-condition: "#data.rating <= 5"
+condition: "#price > 100.0"
+condition: "#quantity >= 1000"
+condition: "#discount < 0.1"
+condition: "#rating <= 5"
 ```
 
 #### Logical Operators
@@ -342,16 +347,16 @@ Combine conditions with logical operators:
 
 ```yaml
 # AND operator
-condition: "#data.isActive && #data.quantity > 0"
+condition: "#isActive && #quantity > 0"
 
 # OR operator
-condition: "#data.status == 'PENDING' || #data.status == 'PROCESSING'"
+condition: "#status == 'PENDING' || #status == 'PROCESSING'"
 
 # NOT operator
-condition: "!#data.isDeleted && #data.isVisible"
+condition: "!#isDeleted && #isVisible"
 
 # Complex combinations with parentheses
-condition: "(#data.type == 'EQUITY' || #data.type == 'BOND') && #data.quantity > 0"
+condition: "(#type == 'EQUITY' || #type == 'BOND') && #quantity > 0"
 ```
 
 #### String Operations
@@ -360,20 +365,20 @@ String manipulation and comparison:
 
 ```yaml
 # String equality (case-sensitive)
-condition: "#data.currency == 'USD'"
+condition: "#currency == 'USD'"
 
 # String contains
-condition: "#data.description.contains('SWAP')"
+condition: "#description.contains('SWAP')"
 
 # String starts with / ends with
-condition: "#data.instrumentId.startsWith('US')"
-condition: "#data.instrumentId.endsWith('005')"
+condition: "#instrumentId.startsWith('US')"
+condition: "#instrumentId.endsWith('005')"
 
 # String length
-condition: "#data.instrumentId.length() == 12"
+condition: "#instrumentId.length() == 12"
 
 # Case-insensitive comparison
-condition: "#data.currency.toUpperCase() == 'USD'"
+condition: "#currency.toUpperCase() == 'USD'"
 ```
 
 #### Regular Expression Support
@@ -382,13 +387,13 @@ Use regex for pattern matching:
 
 ```yaml
 # ISIN format validation
-condition: "#data.instrumentId.matches('^[A-Z]{2}[A-Z0-9]{9}[0-9]$')"
+condition: "#instrumentId.matches('^[A-Z]{2}[A-Z0-9]{9}[0-9]$')"
 
 # Email validation
-condition: "#data.email.matches('^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$')"
+condition: "#email.matches('^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$')"
 
 # Phone number validation
-condition: "#data.phone.matches('^\\+?[1-9]\\d{1,14}$')"
+condition: "#phone.matches('^\\+?[1-9]\\d{1,14}$')"
 ```
 
 #### Null Checks and Validation
@@ -397,16 +402,16 @@ Proper null handling:
 
 ```yaml
 # Null check
-condition: "#data.fieldName != null"
+condition: "#fieldName != null"
 
 # Not null and not empty for strings
-condition: "#data.fieldName != null && #data.fieldName.trim().length() > 0"
+condition: "#fieldName != null && #fieldName.trim().length() > 0"
 
 # Null-safe string operations
-condition: "#data.fieldName?.trim()?.length() > 0"
+condition: "#fieldName?.trim()?.length() > 0"
 
 # Default values for null fields
-expression: "#data.fieldName != null ? #data.fieldName : 'DEFAULT_VALUE'"
+expression: "#fieldName != null ? #fieldName : 'DEFAULT_VALUE'"
 ```
 
 ### 3.3 Expression Language
@@ -417,13 +422,13 @@ APEX YAML provides full access to Spring Expression Language features:
 
 ```yaml
 # Variable assignment and reuse
-expression: "#root.setVariable('tradeValue', #data.quantity * #data.price); #tradeValue"
+expression: "#root.setVariable('tradeValue', #quantity * #price); #tradeValue"
 
 # Method chaining
-expression: "#data.instrumentId.substring(0, 2).toUpperCase()"
+expression: "#instrumentId.substring(0, 2).toUpperCase()"
 
 # Collection operations
-expression: "#data.positions.![quantity * price].sum()"
+expression: "#positions.![quantity * price].sum()"
 ```
 
 #### Mathematical Operations
@@ -432,19 +437,19 @@ Standard mathematical operations:
 
 ```yaml
 # Basic arithmetic
-expression: "#data.quantity * #data.price"
-expression: "#data.total - #data.discount"
-expression: "#data.principal + #data.interest"
-expression: "#data.amount / #data.exchangeRate"
-expression: "#data.base % #data.divisor"
+expression: "#quantity * #price"
+expression: "#total - #discount"
+expression: "#principal + #interest"
+expression: "#amount / #exchangeRate"
+expression: "#base % #divisor"
 
 # Mathematical functions via Java Math class
-expression: "T(java.lang.Math).max(#data.value1, #data.value2)"
-expression: "T(java.lang.Math).min(#data.value1, #data.value2)"
-expression: "T(java.lang.Math).abs(#data.value)"
-expression: "T(java.lang.Math).sqrt(#data.value)"
-expression: "T(java.lang.Math).pow(#data.base, #data.exponent)"
-expression: "T(java.lang.Math).round(#data.value * 100) / 100.0"  # Round to 2 decimals
+expression: "T(java.lang.Math).max(#value1, #value2)"
+expression: "T(java.lang.Math).min(#value1, #value2)"
+expression: "T(java.lang.Math).abs(#value)"
+expression: "T(java.lang.Math).sqrt(#value)"
+expression: "T(java.lang.Math).pow(#base, #exponent)"
+expression: "T(java.lang.Math).round(#value * 100) / 100.0"  # Round to 2 decimals
 ```
 
 #### String Manipulation
@@ -453,17 +458,17 @@ String operations and formatting:
 
 ```yaml
 # String concatenation
-expression: "#data.firstName + ' ' + #data.lastName"
+expression: "#firstName + ' ' + #lastName"
 
 # String formatting
-expression: "T(java.lang.String).format('Trade %s: %,.2f %s', #data.tradeId, #data.amount, #data.currency)"
+expression: "T(java.lang.String).format('Trade %s: %,.2f %s', #tradeId, #amount, #currency)"
 
 # String manipulation
-expression: "#data.text.toUpperCase()"
-expression: "#data.text.toLowerCase()"
-expression: "#data.text.trim()"
-expression: "#data.text.substring(0, 10)"
-expression: "#data.text.replace('OLD', 'NEW')"
+expression: "#text.toUpperCase()"
+expression: "#text.toLowerCase()"
+expression: "#text.trim()"
+expression: "#text.substring(0, 10)"
+expression: "#text.replace('OLD', 'NEW')"
 ```
 
 #### Date and Time Functions
@@ -479,13 +484,13 @@ expression: "T(java.time.Instant).now().toString()"
 expression: "T(java.time.LocalDate).now().format(T(java.time.format.DateTimeFormatter).ofPattern('yyyyMMdd'))"
 
 # Date arithmetic
-expression: "#data.tradeDate.plusDays(2)"  # Add 2 days
-expression: "#data.startDate.plusMonths(1)"  # Add 1 month
-expression: "#data.endDate.minusYears(1)"  # Subtract 1 year
+expression: "#tradeDate.plusDays(2)"  # Add 2 days
+expression: "#startDate.plusMonths(1)"  # Add 1 month
+expression: "#endDate.minusYears(1)"  # Subtract 1 year
 
 # Date comparisons
-condition: "#data.settlementDate.isAfter(T(java.time.LocalDate).now())"
-condition: "#data.maturityDate.isBefore(#data.tradeDate.plusYears(10))"
+condition: "#settlementDate.isAfter(T(java.time.LocalDate).now())"
+condition: "#maturityDate.isBefore(#tradeDate.plusYears(10))"
 ```
 
 #### Java Class Access
@@ -497,14 +502,14 @@ Access Java classes and static methods using `T()` syntax:
 expression: "T(java.util.UUID).randomUUID().toString()"
 
 # BigDecimal operations
-expression: "T(java.math.BigDecimal).valueOf(#data.amount).multiply(T(java.math.BigDecimal).valueOf(#data.rate))"
+expression: "T(java.math.BigDecimal).valueOf(#amount).multiply(T(java.math.BigDecimal).valueOf(#rate))"
 
 # Collections utilities
-expression: "T(java.util.Collections).max(#data.values)"
-expression: "T(java.util.Collections).min(#data.values)"
+expression: "T(java.util.Collections).max(#values)"
+expression: "T(java.util.Collections).min(#values)"
 
 # Custom utility classes
-expression: "T(com.company.utils.FinancialUtils).calculateInterest(#data.principal, #data.rate, #data.days)"
+expression: "T(com.company.utils.FinancialUtils).calculateInterest(#principal, #rate, #days)"
 ```
 
 ---
@@ -519,21 +524,21 @@ Validation rules check data integrity and business constraints:
 rules:
   - id: "trade-id-required"
     name: "Trade ID Required"
-    condition: "#data.trade != null && #data.trade.tradeId != null && #data.trade.tradeId.trim().length() > 0"
+    condition: "#trade != null && #trade.tradeId != null && #trade.tradeId.trim().length() > 0"
     message: "Trade ID is required and cannot be empty"
     severity: "ERROR"
     priority: 1
 
   - id: "isin-format-validation"
     name: "ISIN Format Validation"
-    condition: "#data.security != null && #data.security.isin != null && #data.security.isin.matches('^[A-Z]{2}[A-Z0-9]{9}[0-9]$')"
+    condition: "#security != null && #security.isin != null && #security.isin.matches('^[A-Z]{2}[A-Z0-9]{9}[0-9]$')"
     message: "ISIN must follow format: 2 country letters + 9 alphanumeric + 1 check digit"
     severity: "ERROR"
     priority: 1
 
   - id: "trade-value-positive"
     name: "Trade Value Must Be Positive"
-    condition: "#data.quantity != null && #data.price != null && (#data.quantity * #data.price) > 0"
+    condition: "#quantity != null && #price != null && (#quantity * #price) > 0"
     message: "Trade value must be positive"
     severity: "ERROR"
     priority: 1
@@ -545,7 +550,7 @@ rules:
 |----------|----------|-------------|---------|
 | `id` | Yes | Unique rule identifier | "trade-id-required" |
 | `name` | Yes | Human-readable rule name | "Trade ID Required" |
-| `condition` | Yes | SpEL expression that must be true | "#data.field != null" |
+| `condition` | Yes | SpEL expression that must be true | "#field != null" |
 | `message` | Yes | Error/warning message | "Field is required" |
 | `severity` | Yes | ERROR, WARNING, INFO | "ERROR" |
 | `priority` | No | Execution priority (1 = highest) | 1 |
@@ -563,7 +568,7 @@ rules:
   # Multi-field validation
   - id: "settlement-date-validation"
     name: "Settlement Date Must Be After Trade Date"
-    condition: "#data.tradeDate != null && #data.settlementDate != null && #data.settlementDate.isAfter(#data.tradeDate)"
+    condition: "#tradeDate != null && #settlementDate != null && #settlementDate.isAfter(#tradeDate)"
     message: "Settlement date must be after trade date"
     severity: "ERROR"
     priority: 1
@@ -571,7 +576,7 @@ rules:
   # Conditional validation
   - id: "margin-required-for-derivatives"
     name: "Margin Required for Derivative Trades"
-    condition: "#data.instrumentType != 'DERIVATIVE' || (#data.instrumentType == 'DERIVATIVE' && #data.marginAmount != null && #data.marginAmount > 0)"
+    condition: "#instrumentType != 'DERIVATIVE' || (#instrumentType == 'DERIVATIVE' && #marginAmount != null && #marginAmount > 0)"
     message: "Margin amount is required for derivative trades"
     severity: "ERROR"
     priority: 2
@@ -579,7 +584,7 @@ rules:
   # Range validation
   - id: "credit-rating-range"
     name: "Credit Rating Must Be Valid"
-    condition: "#data.creditRating == null || (#data.creditRating >= 1 && #data.creditRating <= 10)"
+    condition: "#creditRating == null || (#creditRating >= 1 && #creditRating <= 10)"
     message: "Credit rating must be between 1 and 10"
     severity: "WARNING"
     priority: 3
@@ -594,7 +599,7 @@ rules:
   # Business logic rule
   - id: "high-value-trade-approval"
     name: "High Value Trade Requires Approval"
-    condition: "#data.tradeValue > 10000000"  # $10M threshold
+    condition: "#tradeValue > 10000000"  # $10M threshold
     message: "Trade exceeds $10M threshold and requires additional approval"
     severity: "WARNING"
     priority: 1
@@ -602,7 +607,7 @@ rules:
   # Regulatory compliance rule
   - id: "emir-reporting-required"
     name: "EMIR Reporting Required"
-    condition: "#data.counterparty.jurisdiction == 'EU' && #data.notionalAmount > 1000000"
+    condition: "#counterparty.jurisdiction == 'EU' && #notionalAmount > 1000000"
     message: "Trade requires EMIR reporting"
     severity: "INFO"
     priority: 2
@@ -610,7 +615,7 @@ rules:
   # Risk management rule
   - id: "concentration-limit-check"
     name: "Concentration Limit Check"
-    condition: "#data.portfolioConcentration <= 0.25"  # 25% limit
+    condition: "#portfolioConcentration <= 0.25"  # 25% limit
     message: "Position exceeds 25% concentration limit"
     severity: "ERROR"
     priority: 1
@@ -628,7 +633,7 @@ Lookup enrichments add data by matching keys against datasets:
 enrichments:
   - id: "lei-enrichment"
     type: "lookup-enrichment"
-    condition: "#data.counterparty != null && #data.counterparty.name != null"
+    condition: "#counterparty != null && #counterparty.name != null"
     lookup-config:
       lookup-key: "counterparty.name"  # Field path (no # prefix in lookup-key)
       lookup-dataset:
@@ -688,12 +693,12 @@ Calculation enrichments derive new fields using expressions:
 enrichments:
   - id: "trade-value-calculation"
     type: "calculation-enrichment"
-    condition: "#data.quantity != null && #data.price != null"
+    condition: "#quantity != null && #price != null"
     calculations:
       - field: "tradeValue"
-        expression: "#data.quantity * #data.price"
+        expression: "#quantity * #price"
       - field: "tradeValueUSD"
-        expression: "#data.currency == 'USD' ? #tradeValue : #tradeValue * #data.exchangeRate"
+        expression: "#currency == 'USD' ? #tradeValue : #tradeValue * #exchangeRate"
       - field: "commission"
         expression: "#tradeValue * 0.001"  # 0.1% commission
       - field: "netAmount"
@@ -701,10 +706,10 @@ enrichments:
 
   - id: "risk-calculations"
     type: "calculation-enrichment"
-    condition: "#data.tradeValue != null"
+    condition: "#tradeValue != null"
     calculations:
       - field: "var1Day"
-        expression: "#data.tradeValue * 0.025"  # 2.5% VaR
+        expression: "#tradeValue * 0.025"  # 2.5% VaR
       - field: "var10Day"
         expression: "#var1Day * T(java.lang.Math).sqrt(10)"
       - field: "riskLevel"
@@ -1146,10 +1151,10 @@ expression: "#condition ? 'value1' : 'value2'"
 expression: "#score >= 90 ? 'A' : (#score >= 80 ? 'B' : (#score >= 70 ? 'C' : 'F'))"
 
 # Complex conditions
-expression: "#data.type == 'EQUITY' && #data.quantity > 1000 ? 'LARGE_EQUITY' : 'OTHER'"
+expression: "#type == 'EQUITY' && #quantity > 1000 ? 'LARGE_EQUITY' : 'OTHER'"
 
 # Null-safe ternary
-expression: "#data.field != null ? #data.field : 'DEFAULT'"
+expression: "#field != null ? #field : 'DEFAULT'"
 ```
 
 #### Complex Branching
@@ -1160,11 +1165,11 @@ Handle multiple conditions efficiently:
 calculations:
   - field: "riskCategory"
     expression: |
-      #data.assetClass == 'EQUITY' ?
-        (#data.marketCap > 10000000000 ? 'LARGE_CAP_EQUITY' : 'SMALL_CAP_EQUITY') :
-      #data.assetClass == 'BOND' ?
-        (#data.creditRating.startsWith('AA') ? 'HIGH_GRADE_BOND' : 'INVESTMENT_GRADE_BOND') :
-      #data.assetClass == 'DERIVATIVE' ?
+      #assetClass == 'EQUITY' ?
+        (#marketCap > 10000000000 ? 'LARGE_CAP_EQUITY' : 'SMALL_CAP_EQUITY') :
+      #assetClass == 'BOND' ?
+        (#creditRating.startsWith('AA') ? 'HIGH_GRADE_BOND' : 'INVESTMENT_GRADE_BOND') :
+      #assetClass == 'DERIVATIVE' ?
         'DERIVATIVE' :
       'OTHER'
 ```
@@ -1175,17 +1180,17 @@ Optimize conditions for better performance:
 
 ```yaml
 # Good: Check simple conditions first
-condition: "#data.isActive && #data.complexCalculation() > threshold"
+condition: "#isActive && #complexCalculation() > threshold"
 
 # Better: Use short-circuit evaluation
-condition: "#data.isActive && (#data.value != null && #data.value > 0) && #data.complexCalculation() > threshold"
+condition: "#isActive && (#value != null && #value > 0) && #complexCalculation() > threshold"
 
 # Best: Cache expensive calculations
 calculations:
   - field: "expensiveResult"
-    expression: "#data.complexCalculation()"
+    expression: "#complexCalculation()"
   - field: "finalResult"
-    expression: "#data.isActive && #expensiveResult > threshold"
+    expression: "#isActive && #expensiveResult > threshold"
 ```
 
 ### 8.2 Function Usage
@@ -1196,22 +1201,22 @@ APEX provides access to standard Java functions:
 
 ```yaml
 # String functions
-expression: "#data.text.toUpperCase()"
-expression: "#data.text.substring(0, 10)"
-expression: "#data.text.matches('[A-Z]{2}[0-9]{10}')"
+expression: "#text.toUpperCase()"
+expression: "#text.substring(0, 10)"
+expression: "#text.matches('[A-Z]{2}[0-9]{10}')"
 
 # Math functions
-expression: "T(java.lang.Math).max(#data.value1, #data.value2)"
-expression: "T(java.lang.Math).round(#data.value * 100) / 100.0"
+expression: "T(java.lang.Math).max(#value1, #value2)"
+expression: "T(java.lang.Math).round(#value * 100) / 100.0"
 
 # Date functions
 expression: "T(java.time.LocalDate).now().plusDays(2)"
-expression: "#data.date.format(T(java.time.format.DateTimeFormatter).ofPattern('yyyy-MM-dd'))"
+expression: "#date.format(T(java.time.format.DateTimeFormatter).ofPattern('yyyy-MM-dd'))"
 
 # Collection functions
-expression: "#data.list.size()"
-expression: "#data.list.contains('value')"
-expression: "#data.list.?[field > 100].size()"  # Filter and count
+expression: "#list.size()"
+expression: "#list.contains('value')"
+expression: "#list.?[field > 100].size()"  # Filter and count
 ```
 
 #### Custom Function Integration
@@ -1220,13 +1225,13 @@ Access custom utility classes:
 
 ```yaml
 # Custom financial calculations
-expression: "T(com.company.utils.FinancialUtils).calculateYield(#data.price, #data.coupon, #data.maturity)"
+expression: "T(com.company.utils.FinancialUtils).calculateYield(#price, #coupon, #maturity)"
 
 # Custom validation functions
-condition: "T(com.company.validators.ISINValidator).isValid(#data.isin)"
+condition: "T(com.company.validators.ISINValidator).isValid(#isin)"
 
 # Custom formatting functions
-expression: "T(com.company.formatters.CurrencyFormatter).format(#data.amount, #data.currency)"
+expression: "T(com.company.formatters.CurrencyFormatter).format(#amount, #currency)"
 ```
 
 #### Error Handling in Functions
@@ -1235,13 +1240,13 @@ Handle potential errors gracefully:
 
 ```yaml
 # Safe division
-expression: "#data.denominator != 0 ? #data.numerator / #data.denominator : 0"
+expression: "#denominator != 0 ? #numerator / #denominator : 0"
 
 # Safe string operations
-expression: "#data.text != null && #data.text.length() > 10 ? #data.text.substring(0, 10) : #data.text"
+expression: "#text != null && #text.length() > 10 ? #text.substring(0, 10) : #text"
 
 # Try-catch equivalent using ternary
-expression: "#data.value != null && #data.value.matches('[0-9]+') ? T(java.lang.Integer).parseInt(#data.value) : 0"
+expression: "#value != null && #value.matches('[0-9]+') ? T(java.lang.Integer).parseInt(#value) : 0"
 ```
 
 ---
@@ -1256,17 +1261,17 @@ Write efficient conditions:
 
 ```yaml
 # Good: Simple conditions first
-condition: "#data.isActive && #data.expensiveCheck()"
+condition: "#isActive && #expensiveCheck()"
 
 # Better: Use null checks to avoid expensive operations
-condition: "#data.field != null && #data.field.expensiveOperation() > 0"
+condition: "#field != null && #field.expensiveOperation() > 0"
 
 # Best: Cache results of expensive operations
 calculations:
   - field: "cachedResult"
-    expression: "#data.expensiveOperation()"
+    expression: "#expensiveOperation()"
   - field: "finalCheck"
-    expression: "#data.isActive && #cachedResult > threshold"
+    expression: "#isActive && #cachedResult > threshold"
 ```
 
 #### Dataset Sizing
@@ -1296,12 +1301,12 @@ Write efficient expressions:
 
 ```yaml
 # Avoid: Repeated expensive calculations
-expression: "#data.complexCalc() + #data.complexCalc() * 0.1"
+expression: "#complexCalc() + #complexCalc() * 0.1"
 
 # Better: Calculate once and reuse
 calculations:
   - field: "baseValue"
-    expression: "#data.complexCalc()"
+    expression: "#complexCalc()"
   - field: "finalValue"
     expression: "#baseValue + #baseValue * 0.1"
 ```
@@ -1324,7 +1329,7 @@ enrichments:
 
 calculations:
   - field: "tradeValueUSD"            # camelCase for calculated fields
-    expression: "#data.quantity * #data.price"
+    expression: "#quantity * #price"
 ```
 
 #### Documentation Standards
@@ -1338,11 +1343,11 @@ enrichments:
     # Purpose: Calculate portfolio risk metrics according to Basel III requirements
     # Input: position data with market values and volatilities
     # Output: VaR, expected shortfall, and risk-weighted assets
-    condition: "#data.positions != null && #data.positions.size() > 0"
+    condition: "#positions != null && #positions.size() > 0"
     calculations:
       # Calculate 1-day VaR at 99% confidence level
       - field: "var1Day99"
-        expression: "#data.portfolioValue * 0.025"  # 2.5% VaR multiplier
+        expression: "#portfolioValue * 0.025"  # 2.5% VaR multiplier
 
       # Scale to 10-day VaR using square root of time rule
       - field: "var10Day99"
@@ -1359,10 +1364,10 @@ Handle missing or invalid data gracefully:
 # Provide defaults for missing data
 calculations:
   - field: "effectiveRate"
-    expression: "#data.customRate != null ? #data.customRate : #data.standardRate"
+    expression: "#customRate != null ? #customRate : #standardRate"
 
   - field: "safeCalculation"
-    expression: "#data.denominator != null && #data.denominator != 0 ? #data.numerator / #data.denominator : 0"
+    expression: "#denominator != null && #denominator != 0 ? #numerator / #denominator : 0"
 ```
 
 #### Null Safety
@@ -1371,13 +1376,13 @@ Always check for null values:
 
 ```yaml
 # Safe navigation
-condition: "#data.trade?.security?.instrumentId != null"
+condition: "#trade?.security?.instrumentId != null"
 
 # Explicit null checks
-condition: "#data.trade != null && #data.trade.security != null && #data.trade.security.instrumentId != null"
+condition: "#trade != null && #trade.security != null && #trade.security.instrumentId != null"
 
 # Safe string operations
-expression: "#data.text != null && #data.text.trim().length() > 0 ? #data.text.toUpperCase() : 'UNKNOWN'"
+expression: "#text != null && #text.trim().length() > 0 ? #text.toUpperCase() : 'UNKNOWN'"
 ```
 
 ---
@@ -1394,7 +1399,7 @@ Standard pattern for enriching with reference data:
 enrichments:
   - id: "security-master-enrichment"
     type: "lookup-enrichment"
-    condition: "#data.instrumentId != null"
+    condition: "#instrumentId != null"
     lookup-config:
       lookup-key: "instrumentId"
       lookup-dataset:
@@ -1418,13 +1423,13 @@ Standard risk metrics calculation:
 enrichments:
   - id: "risk-metrics"
     type: "calculation-enrichment"
-    condition: "#data.marketValue != null"
+    condition: "#marketValue != null"
     calculations:
       # Value at Risk calculations
       - field: "var1Day95"
-        expression: "#data.marketValue * 0.0164"  # 1.64 * volatility
+        expression: "#marketValue * 0.0164"  # 1.64 * volatility
       - field: "var1Day99"
-        expression: "#data.marketValue * 0.0233"  # 2.33 * volatility
+        expression: "#marketValue * 0.0233"  # 2.33 * volatility
       - field: "var10Day99"
         expression: "#var1Day99 * T(java.lang.Math).sqrt(10)"
 
@@ -1444,13 +1449,13 @@ enrichments:
     calculations:
       # UTI generation
       - field: "regulatory.uti"
-        expression: "#data.reportingEntity.lei + '-' + #data.tradeId + '-' + T(java.time.LocalDate).now().format(T(java.time.format.DateTimeFormatter).ofPattern('yyyyMMdd'))"
+        expression: "#reportingEntity.lei + '-' + #tradeId + '-' + T(java.time.LocalDate).now().format(T(java.time.format.DateTimeFormatter).ofPattern('yyyyMMdd'))"
 
       # Jurisdiction flags
       - field: "regulatory.emirApplicable"
-        expression: "#data.counterparty.jurisdiction == 'EU'"
+        expression: "#counterparty.jurisdiction == 'EU'"
       - field: "regulatory.mifidApplicable"
-        expression: "#data.venue.country == 'GB' || #data.venue.country == 'DE' || #data.venue.country == 'FR'"
+        expression: "#venue.country == 'GB' || #venue.country == 'DE' || #venue.country == 'FR'"
 ```
 
 ### 9.2 Data Validation Patterns
@@ -1463,13 +1468,13 @@ Standard format validation approach:
 rules:
   - id: "isin-format"
     name: "ISIN Format Validation"
-    condition: "#data.isin == null || #data.isin.matches('^[A-Z]{2}[A-Z0-9]{9}[0-9]$')"
+    condition: "#isin == null || #isin.matches('^[A-Z]{2}[A-Z0-9]{9}[0-9]$')"
     message: "ISIN must be 12 characters: 2 letters + 9 alphanumeric + 1 digit"
     severity: "ERROR"
 
   - id: "lei-format"
     name: "LEI Format Validation"
-    condition: "#data.lei == null || #data.lei.matches('^[A-Z0-9]{18}[0-9]{2}$')"
+    condition: "#lei == null || #lei.matches('^[A-Z0-9]{18}[0-9]{2}$')"
     message: "LEI must be 20 characters: 18 alphanumeric + 2 check digits"
     severity: "ERROR"
 ```
@@ -1482,13 +1487,13 @@ Standard business rule validation:
 rules:
   - id: "settlement-date-business-rule"
     name: "Settlement Date Must Be Business Day"
-    condition: "#data.settlementDate == null || T(com.company.utils.BusinessDayUtils).isBusinessDay(#data.settlementDate, #data.market.country)"
+    condition: "#settlementDate == null || T(com.company.utils.BusinessDayUtils).isBusinessDay(#settlementDate, #market.country)"
     message: "Settlement date must be a business day in the market country"
     severity: "ERROR"
 
   - id: "trade-limit-check"
     name: "Trade Limit Validation"
-    condition: "#data.tradeValue <= #data.counterparty.creditLimit"
+    condition: "#tradeValue <= #counterparty.creditLimit"
     message: "Trade value exceeds counterparty credit limit"
     severity: "ERROR"
 ```
@@ -1501,13 +1506,13 @@ Validate relationships between fields:
 rules:
   - id: "settlement-after-trade-date"
     name: "Settlement Date After Trade Date"
-    condition: "#data.tradeDate == null || #data.settlementDate == null || #data.settlementDate.isAfter(#data.tradeDate)"
+    condition: "#tradeDate == null || #settlementDate == null || #settlementDate.isAfter(#tradeDate)"
     message: "Settlement date must be after trade date"
     severity: "ERROR"
 
   - id: "currency-consistency"
     name: "Currency Consistency Check"
-    condition: "#data.security.currency == null || #data.trade.currency == null || #data.security.currency == #data.trade.currency"
+    condition: "#security.currency == null || #trade.currency == null || #security.currency == #trade.currency"
     message: "Security currency must match trade currency"
     severity: "WARNING"
 ```
@@ -1531,7 +1536,7 @@ metadata:
 enrichments:
   - id: "lei-lookup"
     type: "lookup-enrichment"
-    condition: "#data.counterpartyName != null"
+    condition: "#counterpartyName != null"
     lookup-config:
       lookup-key: "counterpartyName"
       lookup-dataset:
@@ -1560,10 +1565,10 @@ metadata:
 enrichments:
   - id: "trade-value"
     type: "calculation-enrichment"
-    condition: "#data.quantity != null && #data.price != null"
+    condition: "#quantity != null && #price != null"
     calculations:
       - field: "tradeValue"
-        expression: "#data.quantity * #data.price"
+        expression: "#quantity * #price"
       - field: "commission"
         expression: "#tradeValue * 0.001"  # 0.1% commission
       - field: "netAmount"
@@ -1583,7 +1588,7 @@ metadata:
 rules:
   - id: "required-fields"
     name: "Required Fields Validation"
-    condition: "#data.tradeId != null && #data.counterpartyName != null && #data.instrumentId != null"
+    condition: "#tradeId != null && #counterpartyName != null && #instrumentId != null"
     message: "Trade ID, counterparty name, and instrument ID are required"
     severity: "ERROR"
     priority: 1
@@ -1605,7 +1610,7 @@ enrichments:
   # Step 1: Enrich counterparty data
   - id: "counterparty-enrichment"
     type: "lookup-enrichment"
-    condition: "#data.counterpartyName != null"
+    condition: "#counterpartyName != null"
     lookup-config:
       lookup-key: "counterpartyName"
       lookup-dataset:
@@ -1627,17 +1632,17 @@ enrichments:
   # Step 2: Calculate trade metrics
   - id: "trade-calculations"
     type: "calculation-enrichment"
-    condition: "#data.quantity != null && #data.price != null"
+    condition: "#quantity != null && #price != null"
     calculations:
       - field: "tradeValue"
-        expression: "#data.quantity * #data.price"
+        expression: "#quantity * #price"
       - field: "tradeValueUSD"
-        expression: "#data.currency == 'USD' ? #tradeValue : #tradeValue * #data.fxRate"
+        expression: "#currency == 'USD' ? #tradeValue : #tradeValue * #fxRate"
 
   # Step 3: Determine settlement instructions based on enriched data
   - id: "settlement-instructions"
     type: "lookup-enrichment"
-    condition: "#data.counterparty.lei != null && #data.venue.country != null"
+    condition: "#counterparty.lei != null && #venue.country != null"
     lookup-config:
       lookup-key: "#counterparty.lei + '_' + #venue.country"
       lookup-dataset:
@@ -1659,7 +1664,7 @@ enrichments:
   # Step 4: Calculate fees based on trade value and counterparty rating
   - id: "fee-calculations"
     type: "calculation-enrichment"
-    condition: "#data.tradeValueUSD != null && #data.counterparty.creditRating != null"
+    condition: "#tradeValueUSD != null && #counterparty.creditRating != null"
     calculations:
       - field: "commissionRate"
         expression: "#counterparty.creditRating.startsWith('A') ? 0.0005 : 0.001"  # Premium rate for A-rated
@@ -1681,13 +1686,13 @@ enrichments:
 
 #### Syntax Errors
 
-**Missing `#data` prefix:**
+**Missing field reference prefix:**
 ```yaml
-# Wrong
-condition: "trade.quantity > 0"
+# Wrong - no # prefix
+condition: "quantity > 0"
 
-# Correct
-condition: "#data.trade.quantity > 0"
+# Correct - direct field reference
+condition: "#quantity > 0"
 ```
 
 **Incorrect field access:**
@@ -1702,10 +1707,10 @@ lookup-key: "counterparty.name"
 **Invalid SpEL syntax:**
 ```yaml
 # Wrong - invalid operator
-condition: "#data.value = 100"
+condition: "#value = 100"
 
 # Correct - use == for comparison
-condition: "#data.value == 100"
+condition: "#value == 100"
 ```
 
 #### Runtime Errors
@@ -1713,19 +1718,19 @@ condition: "#data.value == 100"
 **NullPointerException:**
 ```yaml
 # Problematic - can throw NPE
-expression: "#data.trade.security.instrumentId.substring(0, 2)"
+expression: "#trade.security.instrumentId.substring(0, 2)"
 
 # Safe - use null checks
-expression: "#data.trade?.security?.instrumentId != null ? #data.trade.security.instrumentId.substring(0, 2) : null"
+expression: "#trade?.security?.instrumentId != null ? #trade.security.instrumentId.substring(0, 2) : null"
 ```
 
 **Type conversion errors:**
 ```yaml
 # Problematic - string to number conversion
-expression: "#data.stringValue + 100"
+expression: "#stringValue + 100"
 
 # Safe - explicit conversion with validation
-expression: "#data.stringValue != null && #data.stringValue.matches('[0-9]+') ? T(java.lang.Integer).parseInt(#data.stringValue) + 100 : 100"
+expression: "#stringValue != null && #stringValue.matches('[0-9]+') ? T(java.lang.Integer).parseInt(#stringValue) + 100 : 100"
 ```
 
 #### Performance Issues
@@ -1733,12 +1738,12 @@ expression: "#data.stringValue != null && #data.stringValue.matches('[0-9]+') ? 
 **Expensive operations in conditions:**
 ```yaml
 # Problematic - expensive operation repeated
-condition: "#data.expensiveCalculation() > 0 && #data.expensiveCalculation() < 1000"
+condition: "#expensiveCalculation() > 0 && #expensiveCalculation() < 1000"
 
 # Better - calculate once
 calculations:
   - field: "calculationResult"
-    expression: "#data.expensiveCalculation()"
+    expression: "#expensiveCalculation()"
   - field: "isValid"
     expression: "#calculationResult > 0 && #calculationResult < 1000"
 ```
@@ -1753,11 +1758,11 @@ Test expressions in isolation:
 # Add debug calculations to test expressions
 calculations:
   - field: "debug.inputQuantity"
-    expression: "#data.quantity"
+    expression: "#quantity"
   - field: "debug.inputPrice"
-    expression: "#data.price"
+    expression: "#price"
   - field: "debug.multiplication"
-    expression: "#data.quantity * #data.price"
+    expression: "#quantity * #price"
   - field: "debug.finalResult"
     expression: "#debug.multiplication"
 ```
@@ -1771,9 +1776,9 @@ calculations:
   - field: "log.processingTimestamp"
     expression: "T(java.time.Instant).now().toString()"
   - field: "log.inputSummary"
-    expression: "'Processing trade: ' + #data.tradeId + ' for ' + #data.counterpartyName"
+    expression: "'Processing trade: ' + #tradeId + ' for ' + #counterpartyName"
   - field: "log.calculationDetails"
-    expression: "'Quantity: ' + #data.quantity + ', Price: ' + #data.price + ', Result: ' + (#data.quantity * #data.price)"
+    expression: "'Quantity: ' + #quantity + ', Price: ' + #price + ', Result: ' + (#quantity * #price)"
 ```
 
 ---
@@ -1786,35 +1791,35 @@ calculations:
 
 | Operator | Description | Example |
 |----------|-------------|---------|
-| `==` | Equality | `#data.status == 'ACTIVE'` |
-| `!=` | Inequality | `#data.quantity != 0` |
-| `>`, `>=` | Greater than | `#data.price > 100` |
-| `<`, `<=` | Less than | `#data.discount < 0.1` |
-| `&&` | Logical AND | `#data.isActive && #data.quantity > 0` |
-| `\|\|` | Logical OR | `#data.status == 'PENDING' \|\| #data.status == 'PROCESSING'` |
-| `!` | Logical NOT | `!#data.isDeleted` |
-| `?:` | Ternary | `#data.value > 0 ? 'POSITIVE' : 'NEGATIVE'` |
-| `?.` | Safe navigation | `#data.trade?.security?.instrumentId` |
-| `+` | Addition/Concatenation | `#data.quantity + #data.bonus` |
-| `-` | Subtraction | `#data.total - #data.discount` |
-| `*` | Multiplication | `#data.quantity * #data.price` |
-| `/` | Division | `#data.amount / #data.rate` |
-| `%` | Modulo | `#data.value % 10` |
+| `==` | Equality | `#status == 'ACTIVE'` |
+| `!=` | Inequality | `#quantity != 0` |
+| `>`, `>=` | Greater than | `#price > 100` |
+| `<`, `<=` | Less than | `#discount < 0.1` |
+| `&&` | Logical AND | `#isActive && #quantity > 0` |
+| `\|\|` | Logical OR | `#status == 'PENDING' \|\| #status == 'PROCESSING'` |
+| `!` | Logical NOT | `!#isDeleted` |
+| `?:` | Ternary | `#value > 0 ? 'POSITIVE' : 'NEGATIVE'` |
+| `?.` | Safe navigation | `#trade?.security?.instrumentId` |
+| `+` | Addition/Concatenation | `#quantity + #bonus` |
+| `-` | Subtraction | `#total - #discount` |
+| `*` | Multiplication | `#quantity * #price` |
+| `/` | Division | `#amount / #rate` |
+| `%` | Modulo | `#value % 10` |
 
 #### Function Reference
 
 **String Functions:**
 ```yaml
-#data.text.toUpperCase()           # Convert to uppercase
-#data.text.toLowerCase()           # Convert to lowercase
-#data.text.trim()                  # Remove whitespace
-#data.text.substring(0, 10)        # Extract substring
-#data.text.length()                # Get string length
-#data.text.contains('substring')   # Check if contains
-#data.text.startsWith('prefix')    # Check if starts with
-#data.text.endsWith('suffix')      # Check if ends with
-#data.text.matches('regex')        # Regex match
-#data.text.replace('old', 'new')   # Replace text
+#text.toUpperCase()           # Convert to uppercase
+#text.toLowerCase()           # Convert to lowercase
+#text.trim()                  # Remove whitespace
+#text.substring(0, 10)        # Extract substring
+#text.length()                # Get string length
+#text.contains('substring')   # Check if contains
+#text.startsWith('prefix')    # Check if starts with
+#text.endsWith('suffix')      # Check if ends with
+#text.matches('regex')        # Regex match
+#text.replace('old', 'new')   # Replace text
 ```
 
 **Math Functions:**
@@ -1833,10 +1838,10 @@ T(java.lang.Math).floor(value)     # Round down
 ```yaml
 T(java.time.LocalDate).now()                                    # Current date
 T(java.time.Instant).now().toString()                          # Current timestamp
-#data.date.plusDays(2)                                          # Add days
-#data.date.minusMonths(1)                                       # Subtract months
-#data.date.isAfter(otherDate)                                   # Date comparison
-#data.date.format(T(java.time.format.DateTimeFormatter).ofPattern('yyyy-MM-dd'))  # Format date
+#date.plusDays(2)                                          # Add days
+#date.minusMonths(1)                                       # Subtract months
+#date.isAfter(otherDate)                                   # Date comparison
+#date.format(T(java.time.format.DateTimeFormatter).ofPattern('yyyy-MM-dd'))  # Format date
 ```
 
 ### 12.2 SpEL Integration
@@ -1846,13 +1851,13 @@ T(java.time.Instant).now().toString()                          # Current timesta
 APEX YAML supports these SpEL features:
 
 - **Literal expressions**: `'Hello World'`, `123`, `true`
-- **Property access**: `#data.property`, `#data.nested.property`
-- **Method invocation**: `#data.text.toUpperCase()`
+- **Property access**: `#property`, `#nested.property`
+- **Method invocation**: `#text.toUpperCase()`
 - **Operators**: Arithmetic, comparison, logical, ternary
 - **Variables**: `#root`, `#this`, custom variables
-- **Collection operations**: `#data.list[0]`, `#data.list.size()`
+- **Collection operations**: `#list[0]`, `#list.size()`
 - **Type references**: `T(java.lang.Math).max(a, b)`
-- **Safe navigation**: `#data.optional?.property`
+- **Safe navigation**: `#optional?.property`
 
 #### APEX-Specific Extensions
 
@@ -1900,7 +1905,7 @@ No breaking changes, but new features available:
 rules:
   - id: "example-rule"
     name: "Example Rule"
-    condition: "#data.field != null"
+    condition: "#field != null"
     message: "Field is required"
     severity: "ERROR"
     # New in 1.1: Custom error codes

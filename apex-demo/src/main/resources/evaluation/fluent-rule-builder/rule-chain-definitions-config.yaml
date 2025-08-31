@@ -1,0 +1,498 @@
+# APEX Rule Chain Definitions Configuration
+# External data source configuration for rule chain definitions
+# Replaces hardcoded rule chain building logic from FluentRuleBuilderExample
+
+type: "external-data-config"
+name: "rule-chain-definitions-config"
+description: "Data-driven rule chain definitions configuration for fluent rule builder processing"
+
+# Rule chain definitions configuration by chain type
+data:
+  customer-type-rule-chains:
+    chain-type: "customer-type-rule-chains"
+    chain-name: "Customer Type Rule Chains"
+    description: "Rule chains based on customer type processing"
+    chain-characteristics:
+      chain-category: "CUSTOMER_TYPE"
+      execution-model: "SEQUENTIAL"
+      branching-support: true
+    rule-chain-definitions:
+      vip-customer-chain:
+        chain-id: "VIP_CUSTOMER_CHAIN"
+        chain-name: "VIP Customer Processing Chain"
+        chain-description: "Rule chain for VIP customer processing with premium paths"
+        chain-structure:
+          root-rule:
+            rule-name: "CustomerTypeCheck"
+            rule-condition: "#customerType == 'VIP' || #customerType == 'PREMIUM'"
+            rule-description: "High-tier customer detected"
+            rule-priority: 100
+          success-branch:
+            rule-name: "HighValueCheck"
+            rule-condition: "#transactionAmount > 100000"
+            rule-description: "High-value transaction detected"
+            rule-priority: 200
+            success-branch:
+              rule-name: "RegionalComplianceCheck"
+              rule-condition: "#region == 'US' ? #accountAge >= 5 : #accountAge >= 3"
+              rule-description: "Regional compliance check"
+              rule-priority: 300
+              success-outcome: "VIP_APPROVED"
+              failure-outcome: "COMPLIANCE_REVIEW"
+            failure-branch:
+              rule-name: "StandardProcessing"
+              rule-condition: "true"
+              rule-description: "Standard processing applied"
+              rule-priority: 400
+              success-outcome: "STANDARD_APPROVED"
+          failure-branch:
+            rule-name: "BasicValidation"
+            rule-condition: "#transactionAmount > 0"
+            rule-description: "Basic validation check"
+            rule-priority: 500
+            success-outcome: "BASIC_APPROVED"
+            failure-outcome: "REJECTED"
+        execution-paths:
+          - path-name: "VIP High-Value Path"
+            path-sequence: ["CustomerTypeCheck", "HighValueCheck", "RegionalComplianceCheck"]
+            expected-outcome: "VIP_APPROVED"
+          - path-name: "VIP Standard Path"
+            path-sequence: ["CustomerTypeCheck", "HighValueCheck", "StandardProcessing"]
+            expected-outcome: "STANDARD_APPROVED"
+          - path-name: "Basic Validation Path"
+            path-sequence: ["CustomerTypeCheck", "BasicValidation"]
+            expected-outcome: "BASIC_APPROVED"
+        audit-requirements:
+          - "Log VIP customer chain execution"
+          - "Track premium processing paths"
+          
+      premium-customer-chain:
+        chain-id: "PREMIUM_CUSTOMER_CHAIN"
+        chain-name: "Premium Customer Processing Chain"
+        chain-description: "Rule chain for premium customer processing with enhanced validation"
+        chain-structure:
+          root-rule:
+            rule-name: "PremiumCustomerCheck"
+            rule-condition: "#customerType == 'PREMIUM'"
+            rule-description: "Premium customer identified"
+            rule-priority: 100
+          success-branch:
+            rule-name: "RiskAssessmentCheck"
+            rule-condition: "#riskScore <= 90"
+            rule-description: "Risk assessment validation"
+            rule-priority: 200
+            success-branch:
+              rule-name: "EnhancedComplianceCheck"
+              rule-condition: "#region == 'ASIA' ? #accountAge >= 1 : #accountAge >= 2"
+              rule-description: "Enhanced compliance validation"
+              rule-priority: 300
+              success-outcome: "PREMIUM_APPROVED"
+              failure-outcome: "MANUAL_REVIEW"
+            failure-branch:
+              rule-name: "RiskMitigationCheck"
+              rule-condition: "#transactionAmount <= 200000"
+              rule-description: "Risk mitigation assessment"
+              rule-priority: 400
+              success-outcome: "CONDITIONAL_APPROVAL"
+              failure-outcome: "HIGH_RISK_REVIEW"
+          failure-branch:
+            rule-name: "StandardFallbackCheck"
+            rule-condition: "true"
+            rule-description: "Standard fallback processing"
+            rule-priority: 500
+            success-outcome: "FALLBACK_APPROVED"
+        execution-paths:
+          - path-name: "Premium Approved Path"
+            path-sequence: ["PremiumCustomerCheck", "RiskAssessmentCheck", "EnhancedComplianceCheck"]
+            expected-outcome: "PREMIUM_APPROVED"
+          - path-name: "Risk Mitigation Path"
+            path-sequence: ["PremiumCustomerCheck", "RiskAssessmentCheck", "RiskMitigationCheck"]
+            expected-outcome: "CONDITIONAL_APPROVAL"
+          - path-name: "Standard Fallback Path"
+            path-sequence: ["PremiumCustomerCheck", "StandardFallbackCheck"]
+            expected-outcome: "FALLBACK_APPROVED"
+        audit-requirements:
+          - "Log premium customer chain execution"
+          - "Track risk assessment processing"
+          
+      standard-customer-chain:
+        chain-id: "STANDARD_CUSTOMER_CHAIN"
+        chain-name: "Standard Customer Processing Chain"
+        chain-description: "Rule chain for standard customer processing with basic validation"
+        chain-structure:
+          root-rule:
+            rule-name: "StandardCustomerCheck"
+            rule-condition: "#customerType == 'STANDARD'"
+            rule-description: "Standard customer identified"
+            rule-priority: 100
+          success-branch:
+            rule-name: "BasicTransactionCheck"
+            rule-condition: "#transactionAmount > 0 && #transactionAmount <= 100000"
+            rule-description: "Basic transaction validation"
+            rule-priority: 200
+            success-branch:
+              rule-name: "StandardComplianceCheck"
+              rule-condition: "#accountAge >= 1"
+              rule-description: "Standard compliance validation"
+              rule-priority: 300
+              success-outcome: "STANDARD_APPROVED"
+              failure-outcome: "ACCOUNT_AGE_REVIEW"
+            failure-branch:
+              rule-name: "TransactionLimitCheck"
+              rule-condition: "#transactionAmount <= 150000"
+              rule-description: "Transaction limit validation"
+              rule-priority: 400
+              success-outcome: "LIMIT_APPROVED"
+              failure-outcome: "LIMIT_EXCEEDED"
+          failure-branch:
+            rule-name: "BasicFallbackCheck"
+            rule-condition: "true"
+            rule-description: "Basic fallback processing"
+            rule-priority: 500
+            success-outcome: "BASIC_APPROVED"
+        execution-paths:
+          - path-name: "Standard Approved Path"
+            path-sequence: ["StandardCustomerCheck", "BasicTransactionCheck", "StandardComplianceCheck"]
+            expected-outcome: "STANDARD_APPROVED"
+          - path-name: "Limit Check Path"
+            path-sequence: ["StandardCustomerCheck", "BasicTransactionCheck", "TransactionLimitCheck"]
+            expected-outcome: "LIMIT_APPROVED"
+          - path-name: "Basic Fallback Path"
+            path-sequence: ["StandardCustomerCheck", "BasicFallbackCheck"]
+            expected-outcome: "BASIC_APPROVED"
+        audit-requirements:
+          - "Log standard customer chain execution"
+          - "Track basic validation processing"
+    chain-settings:
+      execution-timeout: 5000
+      parallel-execution: false
+      chain-optimization: true
+    
+  transaction-value-rule-chains:
+    chain-type: "transaction-value-rule-chains"
+    chain-name: "Transaction Value Rule Chains"
+    description: "Rule chains based on transaction value processing"
+    chain-characteristics:
+      chain-category: "TRANSACTION_VALUE"
+      execution-model: "CONDITIONAL"
+      branching-support: true
+    rule-chain-definitions:
+      high-value-transaction-chain:
+        chain-id: "HIGH_VALUE_TRANSACTION_CHAIN"
+        chain-name: "High Value Transaction Chain"
+        chain-description: "Rule chain for high-value transaction processing"
+        chain-structure:
+          root-rule:
+            rule-name: "HighValueThresholdCheck"
+            rule-condition: "#transactionAmount >= 100000"
+            rule-description: "High-value threshold validation"
+            rule-priority: 100
+          success-branch:
+            rule-name: "EnhancedDueDiligenceCheck"
+            rule-condition: "#customerType == 'VIP' || #customerType == 'PREMIUM'"
+            rule-description: "Enhanced due diligence for high-value transactions"
+            rule-priority: 200
+            success-branch:
+              rule-name: "RegulatoryReportingCheck"
+              rule-condition: "#transactionAmount >= 250000"
+              rule-description: "Regulatory reporting requirements"
+              rule-priority: 300
+              success-outcome: "HIGH_VALUE_APPROVED_WITH_REPORTING"
+              failure-outcome: "HIGH_VALUE_APPROVED"
+            failure-branch:
+              rule-name: "AdditionalVerificationCheck"
+              rule-condition: "#accountAge >= 3"
+              rule-description: "Additional verification for non-premium customers"
+              rule-priority: 400
+              success-outcome: "HIGH_VALUE_VERIFIED"
+              failure-outcome: "MANUAL_VERIFICATION"
+          failure-branch:
+            rule-name: "StandardValueProcessing"
+            rule-condition: "true"
+            rule-description: "Standard value processing"
+            rule-priority: 500
+            success-outcome: "STANDARD_VALUE_APPROVED"
+        execution-paths:
+          - path-name: "High-Value Premium Path"
+            path-sequence: ["HighValueThresholdCheck", "EnhancedDueDiligenceCheck", "RegulatoryReportingCheck"]
+            expected-outcome: "HIGH_VALUE_APPROVED_WITH_REPORTING"
+          - path-name: "High-Value Standard Path"
+            path-sequence: ["HighValueThresholdCheck", "EnhancedDueDiligenceCheck"]
+            expected-outcome: "HIGH_VALUE_APPROVED"
+          - path-name: "Additional Verification Path"
+            path-sequence: ["HighValueThresholdCheck", "EnhancedDueDiligenceCheck", "AdditionalVerificationCheck"]
+            expected-outcome: "HIGH_VALUE_VERIFIED"
+        audit-requirements:
+          - "Log high-value transaction processing"
+          - "Track regulatory reporting requirements"
+          
+      medium-value-transaction-chain:
+        chain-id: "MEDIUM_VALUE_TRANSACTION_CHAIN"
+        chain-name: "Medium Value Transaction Chain"
+        chain-description: "Rule chain for medium-value transaction processing"
+        chain-structure:
+          root-rule:
+            rule-name: "MediumValueRangeCheck"
+            rule-condition: "#transactionAmount >= 25000 && #transactionAmount < 100000"
+            rule-description: "Medium-value range validation"
+            rule-priority: 100
+          success-branch:
+            rule-name: "StandardDueDiligenceCheck"
+            rule-condition: "#customerType != 'BASIC'"
+            rule-description: "Standard due diligence for medium-value transactions"
+            rule-priority: 200
+            success-branch:
+              rule-name: "ComplianceScreeningCheck"
+              rule-condition: "#region == 'EU' ? true : #accountAge >= 2"
+              rule-description: "Compliance screening requirements"
+              rule-priority: 300
+              success-outcome: "MEDIUM_VALUE_APPROVED"
+              failure-outcome: "COMPLIANCE_SCREENING_REQUIRED"
+            failure-branch:
+              rule-name: "BasicCustomerLimitCheck"
+              rule-condition: "#transactionAmount <= 50000"
+              rule-description: "Basic customer transaction limit"
+              rule-priority: 400
+              success-outcome: "BASIC_LIMIT_APPROVED"
+              failure-outcome: "BASIC_LIMIT_EXCEEDED"
+          failure-branch:
+            rule-name: "LowValueProcessing"
+            rule-condition: "true"
+            rule-description: "Low value processing"
+            rule-priority: 500
+            success-outcome: "LOW_VALUE_APPROVED"
+        execution-paths:
+          - path-name: "Medium-Value Approved Path"
+            path-sequence: ["MediumValueRangeCheck", "StandardDueDiligenceCheck", "ComplianceScreeningCheck"]
+            expected-outcome: "MEDIUM_VALUE_APPROVED"
+          - path-name: "Basic Customer Path"
+            path-sequence: ["MediumValueRangeCheck", "StandardDueDiligenceCheck", "BasicCustomerLimitCheck"]
+            expected-outcome: "BASIC_LIMIT_APPROVED"
+          - path-name: "Low Value Path"
+            path-sequence: ["MediumValueRangeCheck", "LowValueProcessing"]
+            expected-outcome: "LOW_VALUE_APPROVED"
+        audit-requirements:
+          - "Log medium-value transaction processing"
+          - "Track compliance screening results"
+    chain-settings:
+      execution-timeout: 3000
+      parallel-execution: true
+      value-optimization: true
+    
+  regional-compliance-rule-chains:
+    chain-type: "regional-compliance-rule-chains"
+    chain-name: "Regional Compliance Rule Chains"
+    description: "Rule chains based on regional compliance requirements"
+    chain-characteristics:
+      chain-category: "REGIONAL_COMPLIANCE"
+      execution-model: "REGION_SPECIFIC"
+      branching-support: true
+    rule-chain-definitions:
+      us-compliance-chain:
+        chain-id: "US_COMPLIANCE_CHAIN"
+        chain-name: "US Compliance Chain"
+        chain-description: "Rule chain for US regulatory compliance"
+        chain-structure:
+          root-rule:
+            rule-name: "USJurisdictionCheck"
+            rule-condition: "#region == 'US'"
+            rule-description: "US jurisdiction validation"
+            rule-priority: 100
+          success-branch:
+            rule-name: "PatriotActComplianceCheck"
+            rule-condition: "#transactionAmount >= 10000"
+            rule-description: "USA PATRIOT Act compliance requirements"
+            rule-priority: 200
+            success-branch:
+              rule-name: "BSAReportingCheck"
+              rule-condition: "#transactionAmount >= 10000"
+              rule-description: "Bank Secrecy Act reporting requirements"
+              rule-priority: 300
+              success-outcome: "US_COMPLIANT_WITH_REPORTING"
+              failure-outcome: "US_COMPLIANT"
+            failure-branch:
+              rule-name: "StandardUSComplianceCheck"
+              rule-condition: "true"
+              rule-description: "Standard US compliance validation"
+              rule-priority: 400
+              success-outcome: "US_STANDARD_COMPLIANT"
+          failure-branch:
+            rule-name: "NonUSProcessing"
+            rule-condition: "true"
+            rule-description: "Non-US processing"
+            rule-priority: 500
+            success-outcome: "NON_US_PROCESSED"
+        execution-paths:
+          - path-name: "US Compliant with Reporting Path"
+            path-sequence: ["USJurisdictionCheck", "PatriotActComplianceCheck", "BSAReportingCheck"]
+            expected-outcome: "US_COMPLIANT_WITH_REPORTING"
+          - path-name: "US Standard Compliant Path"
+            path-sequence: ["USJurisdictionCheck", "PatriotActComplianceCheck", "StandardUSComplianceCheck"]
+            expected-outcome: "US_STANDARD_COMPLIANT"
+        audit-requirements:
+          - "Log US compliance processing"
+          - "Track BSA reporting requirements"
+          
+      eu-compliance-chain:
+        chain-id: "EU_COMPLIANCE_CHAIN"
+        chain-name: "EU Compliance Chain"
+        chain-description: "Rule chain for EU regulatory compliance"
+        chain-structure:
+          root-rule:
+            rule-name: "EUJurisdictionCheck"
+            rule-condition: "#region == 'EU'"
+            rule-description: "EU jurisdiction validation"
+            rule-priority: 100
+          success-branch:
+            rule-name: "GDPRComplianceCheck"
+            rule-condition: "true"
+            rule-description: "GDPR compliance requirements"
+            rule-priority: 200
+            success-branch:
+              rule-name: "MiFIDComplianceCheck"
+              rule-condition: "#customerType == 'VIP' || #customerType == 'PREMIUM'"
+              rule-description: "MiFID II compliance for investment services"
+              rule-priority: 300
+              success-outcome: "EU_MIFID_COMPLIANT"
+              failure-outcome: "EU_GDPR_COMPLIANT"
+            failure-branch:
+              rule-name: "BasicEUComplianceCheck"
+              rule-condition: "true"
+              rule-description: "Basic EU compliance validation"
+              rule-priority: 400
+              success-outcome: "EU_BASIC_COMPLIANT"
+          failure-branch:
+            rule-name: "NonEUProcessing"
+            rule-condition: "true"
+            rule-description: "Non-EU processing"
+            rule-priority: 500
+            success-outcome: "NON_EU_PROCESSED"
+        execution-paths:
+          - path-name: "EU MiFID Compliant Path"
+            path-sequence: ["EUJurisdictionCheck", "GDPRComplianceCheck", "MiFIDComplianceCheck"]
+            expected-outcome: "EU_MIFID_COMPLIANT"
+          - path-name: "EU GDPR Compliant Path"
+            path-sequence: ["EUJurisdictionCheck", "GDPRComplianceCheck"]
+            expected-outcome: "EU_GDPR_COMPLIANT"
+        audit-requirements:
+          - "Log EU compliance processing"
+          - "Track GDPR and MiFID requirements"
+    chain-settings:
+      execution-timeout: 4000
+      parallel-execution: false
+      compliance-optimization: true
+    
+  multi-branch-rule-chains:
+    chain-type: "multi-branch-rule-chains"
+    chain-name: "Multi-Branch Rule Chains"
+    description: "Complex rule chains with multiple branching scenarios"
+    chain-characteristics:
+      chain-category: "MULTI_BRANCH"
+      execution-model: "COMPLEX_BRANCHING"
+      branching-support: true
+    rule-chain-definitions:
+      comprehensive-decision-chain:
+        chain-id: "COMPREHENSIVE_DECISION_CHAIN"
+        chain-name: "Comprehensive Decision Chain"
+        chain-description: "Complex multi-branch decision chain for comprehensive processing"
+        chain-structure:
+          root-rule:
+            rule-name: "InitialClassificationCheck"
+            rule-condition: "true"
+            rule-description: "Initial customer and transaction classification"
+            rule-priority: 100
+          success-branch:
+            rule-name: "MultiFactorAssessmentCheck"
+            rule-condition: "#customerType != null && #transactionAmount != null && #region != null"
+            rule-description: "Multi-factor assessment validation"
+            rule-priority: 200
+            success-branch:
+              rule-name: "ComplexDecisionMatrixCheck"
+              rule-condition: "(#customerType == 'VIP' && #transactionAmount > 100000) || (#customerType == 'PREMIUM' && #riskScore <= 80) || (#region == 'US' && #accountAge >= 5)"
+              rule-description: "Complex decision matrix evaluation"
+              rule-priority: 300
+              success-outcome: "COMPLEX_APPROVED"
+              failure-outcome: "COMPLEX_REVIEW_REQUIRED"
+            failure-branch:
+              rule-name: "FallbackDecisionCheck"
+              rule-condition: "#transactionAmount <= 50000"
+              rule-description: "Fallback decision processing"
+              rule-priority: 400
+              success-outcome: "FALLBACK_APPROVED"
+              failure-outcome: "MANUAL_DECISION_REQUIRED"
+          failure-branch:
+            rule-name: "ErrorHandlingCheck"
+            rule-condition: "true"
+            rule-description: "Error handling and recovery"
+            rule-priority: 500
+            success-outcome: "ERROR_HANDLED"
+        execution-paths:
+          - path-name: "Complex Approved Path"
+            path-sequence: ["InitialClassificationCheck", "MultiFactorAssessmentCheck", "ComplexDecisionMatrixCheck"]
+            expected-outcome: "COMPLEX_APPROVED"
+          - path-name: "Fallback Path"
+            path-sequence: ["InitialClassificationCheck", "MultiFactorAssessmentCheck", "FallbackDecisionCheck"]
+            expected-outcome: "FALLBACK_APPROVED"
+          - path-name: "Error Handling Path"
+            path-sequence: ["InitialClassificationCheck", "ErrorHandlingCheck"]
+            expected-outcome: "ERROR_HANDLED"
+        audit-requirements:
+          - "Log complex multi-branch processing"
+          - "Track decision matrix evaluations"
+    chain-settings:
+      execution-timeout: 6000
+      parallel-execution: false
+      complex-optimization: true
+    
+  default:
+    chain-type: "default"
+    chain-name: "Default Rule Chain Definitions"
+    description: "Default rule chain processing"
+    rule-chain-definitions:
+      default-chain:
+        chain-id: "DEFAULT_CHAIN"
+        chain-name: "Default Chain"
+        chain-structure:
+          root-rule:
+            rule-name: "DefaultCheck"
+            rule-condition: "true"
+            success-outcome: "DEFAULT_APPROVED"
+    chain-settings:
+      execution-timeout: 1000
+
+# Chain execution patterns
+execution-patterns:
+  sequential-execution-pattern:
+    pattern-name: "Sequential Execution Pattern"
+    description: "Execute rules in sequential order"
+    execution-characteristics: ["ORDERED", "DEPENDENT", "FAIL_FAST"]
+    
+  parallel-execution-pattern:
+    pattern-name: "Parallel Execution Pattern"
+    description: "Execute independent rules in parallel"
+    execution-characteristics: ["CONCURRENT", "INDEPENDENT", "AGGREGATE_RESULTS"]
+    
+  conditional-branching-pattern:
+    pattern-name: "Conditional Branching Pattern"
+    description: "Execute rules based on conditional branching"
+    execution-characteristics: ["CONDITIONAL", "BRANCHING", "PATH_DEPENDENT"]
+
+# Quality assurance
+quality-assurance:
+  chain-accuracy:
+    - "Rule chains must be logically correct"
+    - "Chain conditions must be syntactically valid"
+    - "Execution paths must be well-defined"
+    - "Outcomes must be appropriate"
+    
+  performance-requirements:
+    - "Chain execution must be within timeout limits"
+    - "Complex chains must be optimized"
+    - "Branching logic must be efficient"
+    - "Error handling must be comprehensive"
+    
+  business-alignment:
+    - "Chains must reflect business processes"
+    - "Decision logic must be accurate"
+    - "Compliance requirements must be met"
+    - "Customer processing must be appropriate"

@@ -1,394 +1,170 @@
 package dev.mars.apex.demo.runners;
 
-/*
- * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Scanner;
 
 /**
- * AllDemosRunnerAlt - Automatically discovers and runs all demo classes.
+ * AllDemosRunner - Master APEX Demonstrations Runner
  * 
- * This runner scans the demo package structure and automatically executes all demos
- * without requiring any interface implementation or ceremony. It works with demos that have:
- * - main(String[] args) methods
- * - run() methods (no parameters)
- * - Both (prioritizes run() for consistency)
- * 
- * Usage:
- * - java AllDemosRunnerAlt                # Run all demos
- * - java AllDemosRunnerAlt --list         # List all discovered demos
- * - java AllDemosRunnerAlt --package core # Run demos from specific package
+ * This runner provides access to all APEX demo categories through individual specialized runners.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2025-07-28
+ * @since 2025-08-29
  * @version 1.0
  */
 public class AllDemosRunner {
     
-    private static final String[] EXCLUDED_CLASSES = {
-        "AllDemosRunnerAlt", "DemoRunner", "DemoFramework", "Demo", "DemoCategory"
-    };
-    
-    final List<DemoInfo> discoveredDemos = new ArrayList<>();
-    private int successCount = 0;
-    private int failureCount = 0;
-    private int skippedCount = 0;
+    private static final Logger logger = LoggerFactory.getLogger(AllDemosRunner.class);
     
     public static void main(String[] args) {
-        System.out.println("=== APEX Rules Engine - All Demos Runner ===");
-        System.out.println("Automatically discovering and running all available demos...\n");
-        
         AllDemosRunner runner = new AllDemosRunner();
         
-        if (args.length > 0) {
-            if ("--list".equals(args[0])) {
-                runner.listAllDemos();
-                return;
-            } else if ("--package".equals(args[0]) && args.length > 1) {
-                runner.runDemosFromPackage(args[1]);
-                return;
-            }
-        }
-        
-        runner.runAllDemos();
-    }
-    
-    /**
-     * Discover all demo classes in the demo package structure.
-     */
-    public void discoverDemos() {
-        discoveredDemos.clear();
-
-        try {
-            // Manually register known demo classes to avoid reflection issues
-            registerKnownDemoClasses();
-
-            // Sort demos by package and class name for consistent execution order
-            discoveredDemos.sort(Comparator.comparing(DemoInfo::getPackageName)
-                    .thenComparing(DemoInfo::getClassName));
-
-        } catch (Exception e) {
-            System.err.println("Error discovering demos: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Register known demo classes manually to avoid reflection issues.
-     */
-    private void registerKnownDemoClasses() {
-        // Core demos
-        registerDemoClass("dev.mars.apex.demo.examples.QuickStartDemo");
-        registerDemoClass("dev.mars.apex.demo.examples.LayeredAPIDemo");
-
-        // Examples demos
-        registerDemoClass("dev.mars.apex.demo.examples.YamlDatasetDemo");
-        registerDemoClass("dev.mars.apex.demo.examples.FinancialServicesDemo");
-        registerDemoClass("dev.mars.apex.demo.examples.PerformanceDemo");
-        registerDemoClass("dev.mars.apex.demo.examples.SimplifiedAPIDemo");
-        registerDemoClass("dev.mars.apex.demo.examples.YamlConfigurationDemo");
-        registerDemoClass("dev.mars.apex.demo.examples.BatchProcessingDemo");
-        registerDemoClass("dev.mars.apex.demo.examples.FileProcessingDemo");
-
-        // Examples demos
-        registerDemoClass("dev.mars.apex.demo.examples.BasicUsageExamples");
-        registerDemoClass("dev.mars.apex.demo.examples.LayeredAPIDemo");
-        registerDemoClass("dev.mars.apex.demo.bootstrap.AdvancedFeaturesDemo");
-        registerDemoClass("dev.mars.apex.demo.bootstrap.CommoditySwapValidationQuickDemo");
-        registerDemoClass("dev.mars.apex.demo.examples.FinancialDemo");
-
-        registerDemoClass("dev.mars.apex.demo.examples.ApexRulesEngineDemo");
-        registerDemoClass("dev.mars.apex.demo.examples.CustodyAutoRepairDemo");
-        registerDemoClass("dev.mars.apex.demo.examples.FluentRuleBuilderExample");
-
-        // Advanced demos
-        registerDemoClass("dev.mars.apex.demo.bootstrap.DataServiceManagerDemo");
-        registerDemoClass("dev.mars.apex.demo.bootstrap.DynamicMethodExecutionDemo");
-        registerDemoClass("dev.mars.apex.demo.bootstrap.PerformanceAndExceptionDemo");
-        registerDemoClass("dev.mars.apex.demo.bootstrap.ApexAdvancedFeaturesDemo");
-
-        // Bootstrap demos
-        registerDemoClass("dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo");
-
-        // Ruleset demos
-        registerDemoClass("dev.mars.apex.demo.rulesets.ComplianceServiceDemo");
-        registerDemoClass("dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap");
-        registerDemoClass("dev.mars.apex.demo.rulesets.PricingServiceDemo");
-        registerDemoClass("dev.mars.apex.demo.rulesets.RuleDefinitionServiceDemo");
-        registerDemoClass("dev.mars.apex.demo.rulesets.CustomerTransformerDemo");
-        registerDemoClass("dev.mars.apex.demo.rulesets.PostTradeProcessingServiceDemo");
-    }
-
-    /**
-     * Register a single demo class by name.
-     */
-    private void registerDemoClass(String className) {
-        try {
-            Class<?> clazz = Class.forName(className);
-            if (!shouldSkipClass(clazz)) {
-                DemoInfo demoInfo = analyzeDemoClass(clazz);
-                if (demoInfo != null) {
-                    discoveredDemos.add(demoInfo);
-                }
-            }
-        } catch (ClassNotFoundException e) {
-            // Skip classes that don't exist (silently)
-        } catch (Exception e) {
-            System.err.println("Error registering demo class " + className + ": " + e.getMessage());
-        }
-    }
-    
-
-    /**
-     * Check if a class should be skipped.
-     */
-    private boolean shouldSkipClass(Class<?> clazz) {
-        String simpleName = clazz.getSimpleName();
-        
-        // Skip excluded classes
-        for (String excluded : EXCLUDED_CLASSES) {
-            if (simpleName.equals(excluded)) {
-                return true;
-            }
-        }
-        
-        // Skip abstract classes, interfaces, enums
-        if (clazz.isInterface() || clazz.isEnum() || 
-            java.lang.reflect.Modifier.isAbstract(clazz.getModifiers())) {
-            return true;
-        }
-        
-        // Skip inner classes and utility classes
-        if (clazz.isMemberClass() || simpleName.contains("$")) {
-            return true;
-        }
-        
-        return false;
-    }
-    
-    /**
-     * Analyze a demo class to determine how it can be executed.
-     */
-    private DemoInfo analyzeDemoClass(Class<?> clazz) {
-        Method mainMethod = null;
-        Method runMethod = null;
-        
-        try {
-            // Look for main method
-            mainMethod = clazz.getMethod("main", String[].class);
-        } catch (NoSuchMethodException e) {
-            // No main method
-        }
-        
-        try {
-            // Look for run method (no parameters)
-            runMethod = clazz.getMethod("run");
-        } catch (NoSuchMethodException e) {
-            // No run method
-        }
-        
-        if (mainMethod == null && runMethod == null) {
-            return null; // Not a runnable demo
-        }
-        
-        return new DemoInfo(clazz, mainMethod, runMethod);
-    }
-    
-    /**
-     * Run all discovered demos.
-     */
-    public void runAllDemos() {
-        discoverDemos();
-        
-        if (discoveredDemos.isEmpty()) {
-            System.out.println("No runnable demos found.");
-            return;
-        }
-        
-        System.out.println("Discovered " + discoveredDemos.size() + " runnable demos:");
-        for (DemoInfo demo : discoveredDemos) {
-            System.out.println("  - " + demo.getFullName() + " (" + demo.getExecutionType() + ")");
-        }
-        System.out.println();
-        
-        // Group demos by package for organized execution
-        Map<String, List<DemoInfo>> demosByPackage = discoveredDemos.stream()
-                .collect(Collectors.groupingBy(DemoInfo::getPackageName));
-        
-        for (Map.Entry<String, List<DemoInfo>> entry : demosByPackage.entrySet()) {
-            String packageName = entry.getKey();
-            List<DemoInfo> packageDemos = entry.getValue();
-            
-            System.out.println("═".repeat(80));
-            System.out.println("PACKAGE: " + packageName.toUpperCase());
-            System.out.println("═".repeat(80));
-            
-            for (DemoInfo demo : packageDemos) {
-                runSingleDemo(demo);
-                System.out.println();
-            }
-        }
-        
-        printSummary();
-    }
-    
-    /**
-     * Run demos from a specific package.
-     */
-    public void runDemosFromPackage(String packageSuffix) {
-        discoverDemos();
-        
-        List<DemoInfo> filteredDemos = discoveredDemos.stream()
-                .filter(demo -> demo.getPackageName().contains(packageSuffix))
-                .collect(Collectors.toList());
-        
-        if (filteredDemos.isEmpty()) {
-            System.out.println("No demos found in package containing: " + packageSuffix);
-            return;
-        }
-        
-        System.out.println("Running " + filteredDemos.size() + " demos from package: " + packageSuffix);
-        System.out.println();
-        
-        for (DemoInfo demo : filteredDemos) {
-            runSingleDemo(demo);
-            System.out.println();
-        }
-        
-        printSummary();
-    }
-    
-    /**
-     * List all discovered demos without running them.
-     */
-    public void listAllDemos() {
-        discoverDemos();
-        
-        if (discoveredDemos.isEmpty()) {
-            System.out.println("No runnable demos found.");
-            return;
-        }
-        
-        System.out.println("Discovered " + discoveredDemos.size() + " runnable demos:\n");
-        
-        Map<String, List<DemoInfo>> demosByPackage = discoveredDemos.stream()
-                .collect(Collectors.groupingBy(DemoInfo::getPackageName));
-        
-        for (Map.Entry<String, List<DemoInfo>> entry : demosByPackage.entrySet()) {
-            System.out.println(entry.getKey() + ":");
-            for (DemoInfo demo : entry.getValue()) {
-                System.out.println("  - " + demo.getClassName() + " (" + demo.getExecutionType() + ")");
-            }
-            System.out.println();
-        }
-    }
-    
-    /**
-     * Run a single demo with error handling.
-     */
-    void runSingleDemo(DemoInfo demo) {
-        System.out.println("▶ Running: " + demo.getFullName());
-        System.out.println("  Method: " + demo.getExecutionType());
-        System.out.println("  " + "-".repeat(60));
-        
-        long startTime = System.currentTimeMillis();
-        
-        try {
-            if (demo.hasRunMethod()) {
-                // Prefer run() method for consistency
-                Object instance = demo.getDemoClass().getDeclaredConstructor().newInstance();
-                demo.getRunMethod().invoke(instance);
-            } else if (demo.hasMainMethod()) {
-                // Fall back to main method
-                demo.getMainMethod().invoke(null, (Object) new String[0]);
-            }
-            
-            long duration = System.currentTimeMillis() - startTime;
-            System.out.println("  " + "-".repeat(60));
-            System.out.println("COMPLETED: " + demo.getClassName() + " (" + duration + "ms)");
-            successCount++;
-            
-        } catch (Exception e) {
-            long duration = System.currentTimeMillis() - startTime;
-            System.out.println("  " + "-".repeat(60));
-            System.out.println("FAILED: " + demo.getClassName() + " (" + duration + "ms)");
-            System.out.println("   Error: " + e.getMessage());
-            if (e.getCause() != null) {
-                System.out.println("   Cause: " + e.getCause().getMessage());
-            }
-            failureCount++;
-        }
-    }
-    
-    /**
-     * Print execution summary.
-     */
-    private void printSummary() {
-        System.out.println("═".repeat(80));
-        System.out.println("EXECUTION SUMMARY");
-        System.out.println("═".repeat(80));
-        System.out.println("Total Demos: " + discoveredDemos.size());
-        System.out.println("Successful: " + successCount);
-        System.out.println("Failed: " + failureCount);
-        System.out.println("Skipped: " + skippedCount);
-        System.out.println();
-        
-        if (failureCount == 0) {
-            System.out.println("All demos completed successfully!");
+        if (args.length == 0) {
+            runner.runInteractiveMode();
         } else {
-            System.out.println(" Some demos failed. Check the output above for details.");
+            runner.runDirectMode(args[0]);
         }
     }
     
-    /**
-     * Information about a discovered demo class.
-     */
-    static class DemoInfo {
-        private final Class<?> demoClass;
-        private final Method mainMethod;
-        private final Method runMethod;
+    private void runInteractiveMode() {
+        displayBanner();
         
-        public DemoInfo(Class<?> demoClass, Method mainMethod, Method runMethod) {
-            this.demoClass = demoClass;
-            this.mainMethod = mainMethod;
-            this.runMethod = runMethod;
+        Scanner scanner = new Scanner(System.in);
+        
+        while (true) {
+            displayMenu();
+            System.out.print("Enter your choice (1-6, or 'q' to quit): ");
+            String choice = scanner.nextLine().trim().toLowerCase();
+            
+            if (choice.equals("q") || choice.equals("quit") || choice.equals("exit")) {
+                System.out.println("\nThank you for exploring APEX Rules Engine capabilities!");
+                break;
+            }
+            
+            executeChoice(choice);
         }
         
-        public Class<?> getDemoClass() { return demoClass; }
-        public Method getMainMethod() { return mainMethod; }
-        public Method getRunMethod() { return runMethod; }
+        scanner.close();
+    }
+    
+    private void runDirectMode(String runnerName) {
+        displayBanner();
+        System.out.println("Launching runner: " + runnerName);
+        System.out.println();
         
-        public boolean hasMainMethod() { return mainMethod != null; }
-        public boolean hasRunMethod() { return runMethod != null; }
-        
-        public String getClassName() { return demoClass.getSimpleName(); }
-        public String getFullName() { return demoClass.getName(); }
-        
-        public String getPackageName() {
-            String packageName = demoClass.getPackage().getName();
-            return packageName.substring(packageName.lastIndexOf('.') + 1);
+        executeChoice(runnerName.toLowerCase());
+    }
+    
+    private void displayBanner() {
+        System.out.println("================================================================================");
+        System.out.println("                        APEX RULES ENGINE - ALL DEMOS                          ");
+        System.out.println("================================================================================");
+        System.out.println();
+        System.out.println("Welcome to the complete APEX Rules Engine demonstration suite!");
+        System.out.println("Choose a category to explore specific functionality areas.");
+        System.out.println();
+    }
+    
+    private void displayMenu() {
+        System.out.println("Available Demo Categories:");
+        System.out.println("  1. Validation Demos - Data quality and business rule validation (8 demos)");
+        System.out.println("  2. Enrichment Demos - Data transformation and enhancement (10 demos)");
+        System.out.println("  3. Lookup Demos - Data lookup and reference operations (4 demos)");
+        System.out.println("  4. Evaluation Demos - Expression and rule evaluation (5 demos)");
+        System.out.println("  5. Infrastructure Demos - Configuration and setup (4 demos)");
+        System.out.println("  6. Run All Categories - Execute all demo runners sequentially");
+        System.out.println();
+    }
+    
+    private void executeChoice(String choice) {
+        try {
+            switch (choice) {
+                case "1":
+                case "validation":
+                case "validate":
+                    runRunner("Validation Demos", () -> ValidationRunner.main(new String[]{}));
+                    break;
+                case "2":
+                case "enrichment":
+                case "enrich":
+                    runRunner("Enrichment Demos", () -> EnrichmentRunner.main(new String[]{}));
+                    break;
+                case "3":
+                case "lookup":
+                case "lookups":
+                    runRunner("Lookup Demos", () -> LookupRunner.main(new String[]{}));
+                    break;
+                case "4":
+                case "evaluation":
+                case "evaluate":
+                    runRunner("Evaluation Demos", () -> EvaluationRunner.main(new String[]{}));
+                    break;
+                case "5":
+                case "infrastructure":
+                case "infra":
+                    runRunner("Infrastructure Demos", () -> InfrastructureRunner.main(new String[]{}));
+                    break;
+                case "6":
+                case "all":
+                    runAllCategories();
+                    break;
+                default:
+                    System.out.println("Invalid choice: " + choice);
+                    System.out.println("Please try again or type 'q' to quit.");
+                    break;
+            }
+        } catch (Exception e) {
+            logger.error("Error executing demo runner: {}", e.getMessage(), e);
         }
         
-        public String getExecutionType() {
-            if (hasRunMethod()) return "run()";
-            if (hasMainMethod()) return "main()";
-            return "unknown";
+        System.out.println();
+    }
+    
+    private void runRunner(String runnerName, DemoExecutor executor) {
+        logger.info("Launching: {}", runnerName);
+        logger.info("--------------------------------------------------");
+        
+        try {
+            long startTime = System.currentTimeMillis();
+            executor.execute();
+            long endTime = System.currentTimeMillis();
+            
+            logger.info("{} completed successfully", runnerName);
+            logger.info("Execution time: {} ms", (endTime - startTime));
+            
+        } catch (Exception e) {
+            logger.warn("{} encountered issues: {}", runnerName, e.getMessage());
+            logger.info("This may be expected if dependencies are not available");
         }
+    }
+    
+    private void runAllCategories() {
+        logger.info("Running All Demo Categories");
+        logger.info("==================================================");
+        logger.info("");
+        
+        long totalStartTime = System.currentTimeMillis();
+        
+        runRunner("Validation Demos", () -> ValidationRunner.main(new String[]{"all"}));
+        runRunner("Enrichment Demos", () -> EnrichmentRunner.main(new String[]{"all"}));
+        runRunner("Lookup Demos", () -> LookupRunner.main(new String[]{"all"}));
+        runRunner("Evaluation Demos", () -> EvaluationRunner.main(new String[]{"all"}));
+        runRunner("Infrastructure Demos", () -> InfrastructureRunner.main(new String[]{"all"}));
+        
+        long totalEndTime = System.currentTimeMillis();
+        long totalTime = totalEndTime - totalStartTime;
+        
+        logger.info("");
+        logger.info("All demo categories completed!");
+        logger.info("Total execution time: {} ms ({} seconds)", totalTime, totalTime / 1000.0);
+        logger.info("");
+        logger.info("You've experienced the complete APEX Rules Engine demonstration suite!");
+    }
+    
+    @FunctionalInterface
+    private interface DemoExecutor {
+        void execute() throws Exception;
     }
 }

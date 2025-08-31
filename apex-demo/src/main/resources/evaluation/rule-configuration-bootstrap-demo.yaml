@@ -1,0 +1,81 @@
+# APEX Rule Configuration Bootstrap Demo Configuration
+# Real APEX YAML configuration for rule bootstrap processing
+# Replaces all hardcoded rule bootstrap logic from RuleConfigurationHardcodedBootstrap (@version 1.0)
+
+type: "apex-enrichment-config"
+name: "rule-configuration-bootstrap-demo"
+description: "APEX-compliant rule configuration bootstrap with real enrichment services"
+
+# External data source for rule configurations
+external-data-sources:
+  - name: "loan-approval-rules"
+    type: "external-data-config"
+    source: "evaluation/bootstrap/loan-approval-rules.yaml"
+    
+  - name: "discount-rules"
+    type: "external-data-config"
+    source: "evaluation/bootstrap/discount-rules.yaml"
+    
+  - name: "bootstrap-test-data"
+    type: "external-data-config"
+    source: "evaluation/bootstrap/bootstrap-test-data.yaml"
+
+# APEX enrichment processing for rule bootstrap
+enrichments:
+  - name: "loan-approval-processing"
+    type: "lookup-enrichment"
+    description: "Process loan applications using data-driven rules"
+    condition: "#data.applicationId != null && #data.creditScore != null"
+    lookup-source: "loan-approval-rules"
+    lookup-key: "#data.creditScore >= 750 ? 'excellent-credit' : (#data.creditScore >= 700 && #data.debtToIncomeRatio <= 0.36 ? 'good-credit-low-dti' : (#data.creditScore < 620 ? 'poor-credit' : 'moderate-credit'))"
+    target-field: "loanDecision"
+    
+  - name: "discount-processing"
+    type: "lookup-enrichment"
+    description: "Process order discounts using data-driven rules"
+    condition: "#data.orderId != null && #data.orderTotal != null"
+    lookup-source: "discount-rules"
+    lookup-key: "#data.orderTotal > 1000 ? 'large-order' : (#data.customerYears > 5 ? 'loyalty-customer' : (#data.customerYears == 0 ? 'new-customer' : 'standard-customer'))"
+    target-field: "discountDecision"
+    
+  - name: "bootstrap-comparison"
+    type: "expression-enrichment"
+    description: "Compare hardcoded vs data-driven approaches"
+    condition: "true"
+    expression: "'Bootstrap transformation: ' + (#data.approach != null ? #data.approach : 'unknown') + ' approach processed'"
+    target-field: "bootstrapSummary"
+    
+  - name: "infrastructure-setup"
+    type: "expression-enrichment"
+    description: "Simulate infrastructure setup with real APEX processing"
+    condition: "#data.setupType != null"
+    expression: "'Infrastructure setup completed: ' + #data.setupType + ' - using real APEX services'"
+    target-field: "infrastructureStatus"
+    
+  - name: "yaml-configuration-loading"
+    type: "expression-enrichment"
+    description: "Load YAML configurations using real APEX services"
+    condition: "#data.configType != null"
+    expression: "'YAML configuration loaded: ' + #data.configType + ' - processed by real APEX enrichment'"
+    target-field: "configurationStatus"
+
+# Bootstrap demonstration scenarios
+bootstrap-scenarios:
+  - scenario: "hardcoded-approach"
+    description: "Demonstrate problems with hardcoded rule approach"
+    processing-type: "simulation"
+    
+  - scenario: "data-driven-approach"
+    description: "Demonstrate benefits of data-driven rule approach"
+    processing-type: "real-apex-enrichment"
+    
+  - scenario: "comparison-analysis"
+    description: "Compare both approaches and show transformation benefits"
+    processing-type: "analytical"
+
+# Output configuration
+output:
+  include-input: true
+  include-metadata: true
+  format: "enhanced"
+  bootstrap-summary: true

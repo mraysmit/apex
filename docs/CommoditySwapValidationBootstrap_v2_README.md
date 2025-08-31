@@ -1,3 +1,4 @@
+![APEX System Logo](APEX%20System%20logo.png)
 # APEX Commodity Swap Validation Bootstrap - Version 2.0
 
 **Version:** 2.0  
@@ -71,7 +72,7 @@ Welcome to the **APEX Commodity Swap Validation Bootstrap Version 2.0**! This co
 ```bash
 # From the project root directory
 cd apex-demo
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.validation.CommoditySwapValidationBootstrap"
 ```
 
 ### **Option 2: Interactive Development with APEX Playground**
@@ -650,10 +651,10 @@ mvn spring-boot:run
 yamllint commodity-swap-validation-bootstrap-v2.yaml
 
 # Test configuration loading
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap" -Dapex.config.validate-only=true
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.validation.CommoditySwapValidationBootstrap" -Dapex.config.validate-only=true
 
 # Run full bootstrap test
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.validation.CommoditySwapValidationBootstrap"
 ```
 
 ## Business Value and ROI

@@ -1,0 +1,245 @@
+# APEX Performance and Exception Demo Configuration
+# Real APEX YAML configuration for performance and exception handling processing
+# Replaces all hardcoded performance and exception logic from PerformanceAndExceptionDemo (@version 1.0)
+
+type: "apex-enrichment-config"
+name: "performance-and-exception-demo"
+description: "APEX-compliant performance and exception handling with real enrichment services"
+
+# External data source for performance and exception configurations
+external-data-sources:
+  - name: "performance-test-contexts-config"
+    type: "external-data-config"
+    source: "evaluation/performance-and-exception/performance-test-contexts-config.yaml"
+    
+  - name: "exception-handling-scenarios-config"
+    type: "external-data-config"
+    source: "evaluation/performance-and-exception/exception-handling-scenarios-config.yaml"
+    
+  - name: "performance-monitoring-patterns-config"
+    type: "external-data-config"
+    source: "evaluation/performance-and-exception/performance-monitoring-patterns-config.yaml"
+
+# APEX enrichment processing for performance and exception handling
+enrichments:
+  - name: "performance-test-contexts-processing"
+    type: "lookup-enrichment"
+    description: "Process performance test contexts using data-driven configuration"
+    condition: "#data.performanceType == 'performance-test-contexts-processing'"
+    lookup-source: "performance-test-contexts-config"
+    lookup-key: "#data.contextType != null ? #data.contextType : 'default'"
+    target-field: "performanceTestContextsResult"
+    
+  - name: "exception-handling-scenarios-processing"
+    type: "lookup-enrichment"
+    description: "Process exception handling scenarios using data-driven configuration"
+    condition: "#data.performanceType == 'exception-handling-scenarios-processing'"
+    lookup-source: "exception-handling-scenarios-config"
+    lookup-key: "#data.scenarioType != null ? #data.scenarioType : 'default'"
+    target-field: "exceptionHandlingScenariosResult"
+    
+  - name: "performance-monitoring-patterns-processing"
+    type: "lookup-enrichment"
+    description: "Process performance monitoring patterns using data-driven configuration"
+    condition: "#data.performanceType == 'performance-monitoring-patterns-processing'"
+    lookup-source: "performance-monitoring-patterns-config"
+    lookup-key: "#data.patternType != null ? #data.patternType : 'default'"
+    target-field: "performanceMonitoringPatternsResult"
+    
+  - name: "performance-and-exception-summary"
+    type: "expression-enrichment"
+    description: "Generate performance and exception handling summary"
+    condition: "true"
+    expression: "'Performance and exception handling completed: ' + (#data.performanceType != null ? #data.performanceType : 'unknown') + ' using real APEX services'"
+    target-field: "performanceAndExceptionSummary"
+
+# Performance processing categories
+processing-categories:
+  - category: "performance-test-contexts-processing"
+    description: "Performance test contexts creation and management"
+    processing-type: "real-apex-enrichment"
+    context-types:
+      - "Caching performance contexts"
+      - "Expression complexity contexts"
+      - "Exception handling contexts"
+      - "Concurrent execution contexts"
+    
+  - category: "exception-handling-scenarios-processing"
+    description: "Exception handling scenarios processing"
+    processing-type: "real-apex-enrichment"
+    scenario-types:
+      - "Invalid expression scenarios"
+      - "Null pointer scenarios"
+      - "Type conversion scenarios"
+      - "Mixed rule scenarios"
+    
+  - category: "performance-monitoring-patterns-processing"
+    description: "Performance monitoring patterns processing"
+    processing-type: "real-apex-enrichment"
+    pattern-aspects:
+      - "Execution time monitoring"
+      - "Memory usage tracking"
+      - "Concurrent performance analysis"
+      - "Exception rate monitoring"
+
+# Performance testing patterns
+performance-testing-patterns:
+  caching-performance-pattern:
+    pattern-name: "Caching Performance Testing"
+    description: "Pattern for testing rule caching performance"
+    test-scenarios: ["CACHE_MISS", "CACHE_HIT", "CACHE_INVALIDATION", "CACHE_WARMING"]
+    performance-metrics:
+      - "First execution time (cache miss)"
+      - "Subsequent execution time (cache hit)"
+      - "Cache hit ratio"
+      - "Memory usage impact"
+    
+  expression-complexity-pattern:
+    pattern-name: "Expression Complexity Testing"
+    description: "Pattern for testing expression complexity impact"
+    complexity-levels: ["SIMPLE", "MODERATE", "COMPLEX", "VERY_COMPLEX"]
+    performance-metrics:
+      - "Simple expression execution time"
+      - "Complex expression execution time"
+      - "Complexity scaling factor"
+      - "Memory allocation patterns"
+    
+  concurrent-execution-pattern:
+    pattern-name: "Concurrent Execution Testing"
+    description: "Pattern for testing concurrent rule execution"
+    concurrency-levels: ["SINGLE_THREAD", "MULTI_THREAD", "HIGH_CONCURRENCY", "STRESS_TEST"]
+    performance-metrics:
+      - "Single-threaded baseline"
+      - "Multi-threaded throughput"
+      - "Contention analysis"
+      - "Scalability metrics"
+
+# Exception handling patterns
+exception-handling-patterns:
+  invalid-expression-pattern:
+    pattern-name: "Invalid Expression Handling"
+    description: "Pattern for handling invalid expression exceptions"
+    exception-types: ["SYNTAX_ERROR", "COMPILATION_ERROR", "EVALUATION_ERROR", "TYPE_ERROR"]
+    handling-strategies:
+      - "Graceful degradation"
+      - "Error logging and recovery"
+      - "Fallback rule execution"
+      - "Exception propagation control"
+    
+  null-pointer-pattern:
+    pattern-name: "Null Pointer Exception Handling"
+    description: "Pattern for handling null pointer exceptions"
+    null-scenarios: ["NULL_CONTEXT", "NULL_VALUES", "NULL_REFERENCES", "NULL_OPERATIONS"]
+    handling-strategies:
+      - "Null-safe operations"
+      - "Default value substitution"
+      - "Conditional execution"
+      - "Validation and early exit"
+    
+  type-conversion-pattern:
+    pattern-name: "Type Conversion Exception Handling"
+    description: "Pattern for handling type conversion exceptions"
+    conversion-scenarios: ["STRING_TO_NUMBER", "NUMBER_TO_STRING", "OBJECT_CASTING", "COLLECTION_OPERATIONS"]
+    handling-strategies:
+      - "Type validation before conversion"
+      - "Safe conversion with defaults"
+      - "Exception-based flow control"
+      - "Type-aware processing"
+
+# Performance settings
+performance-settings:
+  performance-test-contexts-processing:
+    processing-timeout: 5000
+    parallel-processing: true
+    cache-results: true
+    
+  exception-handling-scenarios-processing:
+    processing-timeout: 3000
+    parallel-processing: true
+    error-tolerance: "HIGH"
+    
+  performance-monitoring-patterns-processing:
+    processing-timeout: 4000
+    parallel-processing: false
+    monitoring-intensive: true
+
+# Demonstration scenarios
+demonstration-scenarios:
+  comprehensive-performance-testing:
+    scenario-name: "Comprehensive Performance Testing"
+    description: "Demonstrate comprehensive performance testing processing"
+    steps:
+      - "Load performance and exception configurations"
+      - "Process performance test contexts"
+      - "Process exception handling scenarios"
+      - "Process performance monitoring patterns"
+      - "Generate performance results"
+    expected-outcome: "Successful comprehensive performance testing"
+    
+  caching-performance-analysis:
+    scenario-name: "Caching Performance Analysis"
+    description: "Demonstrate caching performance analysis"
+    steps:
+      - "Load caching performance configurations"
+      - "Process cache miss scenarios"
+      - "Process cache hit scenarios"
+      - "Generate caching performance results"
+    expected-outcome: "Successful caching performance analysis"
+    
+  exception-handling-validation:
+    scenario-name: "Exception Handling Validation"
+    description: "Demonstrate exception handling validation"
+    steps:
+      - "Load exception handling configurations"
+      - "Process invalid expression scenarios"
+      - "Process null pointer scenarios"
+      - "Generate exception handling results"
+    expected-outcome: "Successful exception handling validation"
+
+# Performance and exception configuration
+performance-and-exception:
+  testing-categories:
+    category-type: "Performance and Exception Testing Categories"
+    description: "Categories for performance and exception testing processing"
+    available-categories:
+      - "Performance benchmarking"
+      - "Exception handling validation"
+      - "Concurrent execution testing"
+      - "Memory usage analysis"
+      - "Error recovery testing"
+    category-characteristics:
+      - "Quantitative performance measurement"
+      - "Qualitative exception handling assessment"
+      - "Scalability and concurrency analysis"
+      - "Resource utilization monitoring"
+
+# Quality assurance
+quality-assurance:
+  performance-reliability:
+    - "Performance tests must be repeatable"
+    - "Exception handling must be consistent"
+    - "Monitoring patterns must be accurate"
+    - "Performance must meet SLA requirements"
+    
+  testing-accuracy:
+    - "Performance measurements must be precise"
+    - "Exception scenarios must be comprehensive"
+    - "Monitoring data must be reliable"
+    - "Test results must be reproducible"
+    
+  processing-requirements:
+    - "Performance testing time must be reasonable"
+    - "Memory usage must be controlled"
+    - "Exception handling must be efficient"
+    - "Concurrent processing must be thread-safe"
+
+# Output configuration
+output:
+  include-input: true
+  include-metadata: true
+  format: "enhanced"
+  performance-summary: true
+  exception-metrics: true
+  monitoring-details: true
+  test-results: true
+  analysis-reports: true

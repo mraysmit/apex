@@ -1,0 +1,383 @@
+# APEX Product Validation Rules Configuration
+# External data source configuration for product validation rules processing
+# Replaces hardcoded product validation rule creation from IntegratedProductValidatorDemo
+
+type: "external-data-config"
+name: "product-validation-rules-config"
+description: "Data-driven product validation rules configuration for integrated product validation processing"
+
+# Product validation rules configuration by rule type
+data:
+  price-based-validation-rules:
+    rule-type: "price-based-validation-rules"
+    rule-name: "Price-Based Validation Rules"
+    description: "Validation rules based on product price criteria"
+    rule-parameters:
+      priority-level: "high"
+      execution-order: 100
+      cache-results: true
+    validation-rules:
+      fixed-income-price-validation:
+        rule-id: "FIXED_INCOME_PRICE_VALIDATION"
+        rule-name: "Fixed Income Price Validation"
+        rule-description: "Validate fixed income products within price range"
+        rule-condition: "#product.price >= #minPrice && #product.price <= #maxPrice && #product.category == 'FixedIncome'"
+        rule-priority: 100
+        validation-criteria:
+          min-price: 100.0
+          max-price: 2000.0
+          category: "FixedIncome"
+          validation-type: "PRICE_RANGE"
+        validation-logic:
+          - "Price must be between $100 and $2000"
+          - "Product must be FixedIncome category"
+          - "Price validation must pass"
+        validation-messages:
+          success: "Fixed income price validation passed"
+          failure: "Fixed income price validation failed"
+        audit-requirements:
+          - "Log fixed income price validation"
+          - "Track price validation results"
+          
+      equity-price-validation:
+        rule-id: "EQUITY_PRICE_VALIDATION"
+        rule-name: "Equity Price Validation"
+        rule-description: "Validate equity products within price range"
+        rule-condition: "#product.price >= #minPrice && #product.price <= #maxPrice && #product.category == 'Equity'"
+        rule-priority: 200
+        validation-criteria:
+          min-price: 50.0
+          max-price: 1000.0
+          category: "Equity"
+          validation-type: "PRICE_RANGE"
+        validation-logic:
+          - "Price must be between $50 and $1000"
+          - "Product must be Equity category"
+          - "Price validation must pass"
+        validation-messages:
+          success: "Equity price validation passed"
+          failure: "Equity price validation failed"
+        audit-requirements:
+          - "Log equity price validation"
+          - "Track price validation results"
+          
+      etf-price-validation:
+        rule-id: "ETF_PRICE_VALIDATION"
+        rule-name: "ETF Price Validation"
+        rule-description: "Validate ETF products within price range"
+        rule-condition: "#product.price >= #minPrice && #product.price <= #maxPrice && #product.category == 'ETF'"
+        rule-priority: 300
+        validation-criteria:
+          min-price: 25.0
+          max-price: 2500.0
+          category: "ETF"
+          validation-type: "PRICE_RANGE"
+        validation-logic:
+          - "Price must be between $25 and $2500"
+          - "Product must be ETF category"
+          - "Price validation must pass"
+        validation-messages:
+          success: "ETF price validation passed"
+          failure: "ETF price validation failed"
+        audit-requirements:
+          - "Log ETF price validation"
+          - "Track price validation results"
+          
+      commodity-price-validation:
+        rule-id: "COMMODITY_PRICE_VALIDATION"
+        rule-name: "Commodity Price Validation"
+        rule-description: "Validate commodity products within price range"
+        rule-condition: "#product.price >= #minPrice && #product.price <= #maxPrice && #product.category == 'Commodity'"
+        rule-priority: 400
+        validation-criteria:
+          min-price: 10.0
+          max-price: 5000.0
+          category: "Commodity"
+          validation-type: "PRICE_RANGE"
+        validation-logic:
+          - "Price must be between $10 and $5000"
+          - "Product must be Commodity category"
+          - "Price validation must pass"
+        validation-messages:
+          success: "Commodity price validation passed"
+          failure: "Commodity price validation failed"
+        audit-requirements:
+          - "Log commodity price validation"
+          - "Track price validation results"
+    rule-settings:
+      execution-timeout: 2000
+      parallel-execution: true
+      error-handling: "continue-on-warning"
+    
+  category-based-validation-rules:
+    rule-type: "category-based-validation-rules"
+    rule-name: "Category-Based Validation Rules"
+    description: "Validation rules based on product category"
+    rule-parameters:
+      priority-level: "high"
+      execution-order: 200
+      cache-results: true
+    validation-rules:
+      fixed-income-category-validation:
+        rule-id: "FIXED_INCOME_CATEGORY_VALIDATION"
+        rule-name: "Fixed Income Category Validation"
+        rule-description: "Validate FixedIncome category products"
+        rule-condition: "#product.category == 'FixedIncome'"
+        rule-priority: 500
+        validation-criteria:
+          category: "FixedIncome"
+          category-type: "CONSERVATIVE"
+          validation-type: "CATEGORY_MATCH"
+        validation-logic:
+          - "Product category must be FixedIncome"
+          - "Category validation must pass"
+        validation-messages:
+          success: "FixedIncome category validation passed"
+          failure: "FixedIncome category validation failed"
+        audit-requirements:
+          - "Log FixedIncome category validation"
+          - "Track category validation results"
+          
+      equity-category-validation:
+        rule-id: "EQUITY_CATEGORY_VALIDATION"
+        rule-name: "Equity Category Validation"
+        rule-description: "Validate Equity category products"
+        rule-condition: "#product.category == 'Equity'"
+        rule-priority: 600
+        validation-criteria:
+          category: "Equity"
+          category-type: "GROWTH"
+          validation-type: "CATEGORY_MATCH"
+        validation-logic:
+          - "Product category must be Equity"
+          - "Category validation must pass"
+        validation-messages:
+          success: "Equity category validation passed"
+          failure: "Equity category validation failed"
+        audit-requirements:
+          - "Log Equity category validation"
+          - "Track category validation results"
+          
+      etf-category-validation:
+        rule-id: "ETF_CATEGORY_VALIDATION"
+        rule-name: "ETF Category Validation"
+        rule-description: "Validate ETF category products"
+        rule-condition: "#product.category == 'ETF'"
+        rule-priority: 700
+        validation-criteria:
+          category: "ETF"
+          category-type: "DIVERSIFIED"
+          validation-type: "CATEGORY_MATCH"
+        validation-logic:
+          - "Product category must be ETF"
+          - "Category validation must pass"
+        validation-messages:
+          success: "ETF category validation passed"
+          failure: "ETF category validation failed"
+        audit-requirements:
+          - "Log ETF category validation"
+          - "Track category validation results"
+          
+      commodity-category-validation:
+        rule-id: "COMMODITY_CATEGORY_VALIDATION"
+        rule-name: "Commodity Category Validation"
+        rule-description: "Validate Commodity category products"
+        rule-condition: "#product.category == 'Commodity'"
+        rule-priority: 800
+        validation-criteria:
+          category: "Commodity"
+          category-type: "ALTERNATIVE"
+          validation-type: "CATEGORY_MATCH"
+        validation-logic:
+          - "Product category must be Commodity"
+          - "Category validation must pass"
+        validation-messages:
+          success: "Commodity category validation passed"
+          failure: "Commodity category validation failed"
+        audit-requirements:
+          - "Log Commodity category validation"
+          - "Track category validation results"
+    rule-settings:
+      execution-timeout: 1500
+      parallel-execution: true
+      error-handling: "continue-on-warning"
+    
+  quality-based-validation-rules:
+    rule-type: "quality-based-validation-rules"
+    rule-name: "Quality-Based Validation Rules"
+    description: "Validation rules based on product quality metrics"
+    rule-parameters:
+      priority-level: "medium"
+      execution-order: 300
+      cache-results: true
+    validation-rules:
+      premium-quality-validation:
+        rule-id: "PREMIUM_QUALITY_VALIDATION"
+        rule-name: "Premium Quality Validation"
+        rule-description: "Validate premium quality products"
+        rule-condition: "#product.price >= 1000.0 && (#product.category == 'FixedIncome' || #product.category == 'Equity')"
+        rule-priority: 900
+        validation-criteria:
+          quality-level: "PREMIUM"
+          min-price: 1000.0
+          validation-type: "QUALITY_ASSESSMENT"
+        validation-logic:
+          - "Price must be $1000 or higher for premium quality"
+          - "Category must be FixedIncome or Equity"
+          - "Quality validation must pass"
+        validation-messages:
+          success: "Premium quality validation passed"
+          failure: "Premium quality validation failed"
+        audit-requirements:
+          - "Log premium quality validation"
+          - "Track quality validation results"
+          
+      standard-quality-validation:
+        rule-id: "STANDARD_QUALITY_VALIDATION"
+        rule-name: "Standard Quality Validation"
+        rule-description: "Validate standard quality products"
+        rule-condition: "#product.price >= 100.0 && #product.price < 1000.0"
+        rule-priority: 1000
+        validation-criteria:
+          quality-level: "STANDARD"
+          min-price: 100.0
+          max-price: 999.99
+          validation-type: "QUALITY_ASSESSMENT"
+        validation-logic:
+          - "Price must be between $100 and $999.99 for standard quality"
+          - "Quality validation must pass"
+        validation-messages:
+          success: "Standard quality validation passed"
+          failure: "Standard quality validation failed"
+        audit-requirements:
+          - "Log standard quality validation"
+          - "Track quality validation results"
+          
+      basic-quality-validation:
+        rule-id: "BASIC_QUALITY_VALIDATION"
+        rule-name: "Basic Quality Validation"
+        rule-description: "Validate basic quality products"
+        rule-condition: "#product.price >= 10.0 && #product.price < 100.0"
+        rule-priority: 1100
+        validation-criteria:
+          quality-level: "BASIC"
+          min-price: 10.0
+          max-price: 99.99
+          validation-type: "QUALITY_ASSESSMENT"
+        validation-logic:
+          - "Price must be between $10 and $99.99 for basic quality"
+          - "Quality validation must pass"
+        validation-messages:
+          success: "Basic quality validation passed"
+          failure: "Basic quality validation failed"
+        audit-requirements:
+          - "Log basic quality validation"
+          - "Track quality validation results"
+    rule-settings:
+      execution-timeout: 1000
+      parallel-execution: true
+      error-handling: "continue-on-warning"
+    
+  dynamic-validation-rules:
+    rule-type: "dynamic-validation-rules"
+    rule-name: "Dynamic Validation Rules"
+    description: "Dynamic validation rules for flexible product validation"
+    rule-parameters:
+      priority-level: "medium"
+      execution-order: 400
+      cache-results: false
+    validation-rules:
+      combined-price-category-validation:
+        rule-id: "COMBINED_PRICE_CATEGORY_VALIDATION"
+        rule-name: "Combined Price and Category Validation"
+        rule-description: "Validate products based on combined price and category criteria"
+        rule-condition: "(#product.price >= #minPrice && #product.price <= #maxPrice) && #allowedCategories.contains(#product.category)"
+        rule-priority: 1200
+        validation-criteria:
+          validation-type: "COMBINED_CRITERIA"
+          criteria-combination: "PRICE_AND_CATEGORY"
+        validation-logic:
+          - "Price must be within specified range"
+          - "Category must be in allowed list"
+          - "Combined validation must pass"
+        validation-messages:
+          success: "Combined price and category validation passed"
+          failure: "Combined price and category validation failed"
+        audit-requirements:
+          - "Log combined validation"
+          - "Track complex validation results"
+          
+      risk-based-validation:
+        rule-id: "RISK_BASED_VALIDATION"
+        rule-name: "Risk-Based Validation"
+        rule-description: "Validate products based on risk assessment"
+        rule-condition: "#product.category == 'Equity' ? #product.price <= #equityMaxPrice : (#product.category == 'FixedIncome' ? #product.price <= #fixedIncomeMaxPrice : true)"
+        rule-priority: 1300
+        validation-criteria:
+          validation-type: "RISK_ASSESSMENT"
+          risk-factors: ["CATEGORY", "PRICE", "VOLATILITY"]
+        validation-logic:
+          - "Equity products have specific price limits"
+          - "FixedIncome products have different price limits"
+          - "Risk-based validation must pass"
+        validation-messages:
+          success: "Risk-based validation passed"
+          failure: "Risk-based validation failed"
+        audit-requirements:
+          - "Log risk-based validation"
+          - "Track risk assessment results"
+    rule-settings:
+      execution-timeout: 2500
+      parallel-execution: false
+      error-handling: "fail-on-error"
+    
+  default:
+    rule-type: "default"
+    rule-name: "Default Product Validation Rules"
+    description: "Default product validation processing"
+    validation-rules:
+      default-validation:
+        rule-id: "DEFAULT_VALIDATION"
+        rule-name: "Default Validation"
+        rule-condition: "true"
+        validation-messages:
+          success: "Default validation passed"
+    rule-settings:
+      execution-timeout: 500
+
+# Rule execution patterns
+execution-patterns:
+  price-priority-pattern:
+    pattern-name: "Price Priority Pattern"
+    description: "Execute price-based rules in priority order"
+    execution-order: ["FixedIncome", "Equity", "ETF", "Commodity"]
+    
+  category-validation-pattern:
+    pattern-name: "Category Validation Pattern"
+    description: "Execute category rules by type"
+    execution-order: ["FixedIncome", "Equity", "ETF", "Commodity"]
+    
+  quality-assessment-pattern:
+    pattern-name: "Quality Assessment Pattern"
+    description: "Execute quality-based rules by level"
+    execution-order: ["Premium", "Standard", "Basic"]
+
+# Quality assurance
+quality-assurance:
+  rule-accuracy:
+    - "Validation rules must be logically correct"
+    - "Rule conditions must be syntactically valid"
+    - "Validation criteria must be appropriate"
+    - "Validation messages must be clear"
+    
+  performance-requirements:
+    - "Rule execution must be within timeout limits"
+    - "Complex rules must be optimized"
+    - "Parallel execution must be thread-safe"
+    - "Error handling must be robust"
+    
+  business-alignment:
+    - "Rules must reflect business requirements"
+    - "Product validation must be accurate"
+    - "Price and category criteria must be appropriate"
+    - "Quality validation must be comprehensive"

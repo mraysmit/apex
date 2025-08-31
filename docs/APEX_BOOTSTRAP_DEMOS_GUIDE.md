@@ -1,3 +1,5 @@
+![APEX System Logo](APEX%20System%20logo.png)
+
 # APEX Bootstrap Demos Guide - External Data-Source Reference System
 
 **Version:** 2.1

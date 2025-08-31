@@ -1,3 +1,5 @@
+![APEX System Logo](APEX%20System%20logo.png)
+
 # APEX Custody and Safekeeping Auto-Repair: Business Requirements and Implementation Guide
 
 **Version:** 1.0
@@ -2143,7 +2145,7 @@ scenario-registry:
     config-file: "scenarios/settlement-auto-repair-scenario.yaml"
     data-types:
       - "SettlementInstruction"
-      - "dev.mars.apex.demo.bootstrap.model.BootstrapSettlementInstruction"
+      - "dev.mars.apex.demo.model.BootstrapSettlementInstruction"
     description: "Intelligent auto-repair for failed settlement instructions in Asian markets"
     business-domain: "Post-Trade Settlement"
     regulatory-scope: "Asian Markets (Japan, Hong Kong, Singapore, Korea)"
@@ -2180,7 +2182,7 @@ scenario:
 
   # Data types this scenario applies to
   data-types:
-    - "dev.mars.apex.demo.bootstrap.model.BootstrapSettlementInstruction"
+    - "dev.mars.apex.demo.model.BootstrapSettlementInstruction"
     - "SettlementInstruction"
 
   # References to the complete auto-repair configuration

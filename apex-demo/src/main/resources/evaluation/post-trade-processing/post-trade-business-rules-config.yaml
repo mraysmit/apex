@@ -1,0 +1,476 @@
+# APEX Post-Trade Business Rules Configuration
+# External data source configuration for post-trade business rules
+# Replaces hardcoded business rules logic from PostTradeProcessingServiceDemo
+
+type: "external-data-config"
+name: "post-trade-business-rules-config"
+description: "Data-driven post-trade business rules configuration for post-trade processing service"
+
+# Post-trade business rules configuration by rule type
+data:
+  trade-type-validation-rules:
+    rule-type: "trade-type-validation-rules"
+    rule-name: "Trade Type Validation Rules"
+    description: "Business rules for validating different trade types"
+    rule-characteristics:
+      rule-category: "VALIDATION"
+      enforcement-level: "MANDATORY"
+      error-handling: "FAIL_FAST"
+    business-rules:
+      equity-trade-validation-rules:
+        rule-id: "EQUITY_TRADE_VALIDATION_RULES"
+        rule-name: "Equity Trade Validation Rules"
+        rule-description: "Comprehensive validation rules for equity trades"
+        trade-type: "Equity"
+        validation-rules:
+          - rule-name: "equity-symbol-format"
+            rule-condition: "#trade.symbol != null && #trade.symbol.matches('[A-Z]{1,5}')"
+            rule-description: "Equity symbol must be 1-5 uppercase letters"
+            rule-severity: "ERROR"
+            rule-action: "REJECT_TRADE"
+          - rule-name: "equity-quantity-positive"
+            rule-condition: "#trade.quantity > 0"
+            rule-description: "Equity quantity must be positive"
+            rule-severity: "ERROR"
+            rule-action: "REJECT_TRADE"
+          - rule-name: "equity-price-reasonable"
+            rule-condition: "#trade.price > 0 && #trade.price <= 10000"
+            rule-description: "Equity price must be reasonable (0-$10,000)"
+            rule-severity: "WARNING"
+            rule-action: "FLAG_FOR_REVIEW"
+          - rule-name: "equity-market-hours"
+            rule-condition: "T(java.time.LocalTime).now().isAfter(T(java.time.LocalTime).of(9, 30)) && T(java.time.LocalTime).now().isBefore(T(java.time.LocalTime).of(16, 0))"
+            rule-description: "Equity trades must be within market hours (9:30 AM - 4:00 PM)"
+            rule-severity: "WARNING"
+            rule-action: "REQUIRE_APPROVAL"
+          - rule-name: "equity-position-limit"
+            rule-condition: "#trade.quantity <= 100000"
+            rule-description: "Single equity trade quantity must not exceed 100,000 shares"
+            rule-severity: "ERROR"
+            rule-action: "REJECT_TRADE"
+        compliance-requirements:
+          - "SEC Rule 15c3-3 compliance"
+          - "FINRA position limit compliance"
+          - "Market maker exemption handling"
+        audit-requirements:
+          - "Log equity validation rule execution"
+          - "Track rule violation patterns"
+          
+      fixed-income-trade-validation-rules:
+        rule-id: "FIXED_INCOME_TRADE_VALIDATION_RULES"
+        rule-name: "Fixed Income Trade Validation Rules"
+        rule-description: "Comprehensive validation rules for fixed income trades"
+        trade-type: "FixedIncome"
+        validation-rules:
+          - rule-name: "bond-cusip-format"
+            rule-condition: "#trade.cusip != null && #trade.cusip.matches('[0-9A-Z]{9}')"
+            rule-description: "Bond CUSIP must be 9 alphanumeric characters"
+            rule-severity: "ERROR"
+            rule-action: "REJECT_TRADE"
+          - rule-name: "bond-maturity-future"
+            rule-condition: "#trade.maturityDate != null && #trade.maturityDate.isAfter(T(java.time.LocalDate).now())"
+            rule-description: "Bond maturity date must be in the future"
+            rule-severity: "ERROR"
+            rule-action: "REJECT_TRADE"
+          - rule-name: "bond-yield-reasonable"
+            rule-condition: "#trade.yield >= 0 && #trade.yield <= 0.20"
+            rule-description: "Bond yield must be reasonable (0-20%)"
+            rule-severity: "WARNING"
+            rule-action: "FLAG_FOR_REVIEW"
+          - rule-name: "bond-credit-rating"
+            rule-condition: "#trade.creditRating != null && (#trade.creditRating == 'AAA' || #trade.creditRating == 'AA' || #trade.creditRating == 'A' || #trade.creditRating == 'BBB')"
+            rule-description: "Bond must have investment grade credit rating"
+            rule-severity: "WARNING"
+            rule-action: "REQUIRE_APPROVAL"
+          - rule-name: "bond-face-value-limit"
+            rule-condition: "#trade.faceValue <= 50000000"
+            rule-description: "Single bond trade face value must not exceed $50M"
+            rule-severity: "ERROR"
+            rule-action: "REJECT_TRADE"
+        compliance-requirements:
+          - "MSRB Rule G-15 compliance"
+          - "Credit risk assessment"
+          - "Interest rate risk evaluation"
+        audit-requirements:
+          - "Log fixed income validation rule execution"
+          - "Track credit rating distribution"
+          
+      derivative-trade-validation-rules:
+        rule-id: "DERIVATIVE_TRADE_VALIDATION_RULES"
+        rule-name: "Derivative Trade Validation Rules"
+        rule-description: "Comprehensive validation rules for derivative trades"
+        trade-type: "Derivative"
+        validation-rules:
+          - rule-name: "derivative-underlying-valid"
+            rule-condition: "#trade.underlyingAsset != null && !#trade.underlyingAsset.isEmpty()"
+            rule-description: "Derivative must have valid underlying asset"
+            rule-severity: "ERROR"
+            rule-action: "REJECT_TRADE"
+          - rule-name: "derivative-expiration-future"
+            rule-condition: "#trade.expirationDate != null && #trade.expirationDate.isAfter(T(java.time.LocalDate).now())"
+            rule-description: "Derivative expiration date must be in the future"
+            rule-severity: "ERROR"
+            rule-action: "REJECT_TRADE"
+          - rule-name: "derivative-notional-limit"
+            rule-condition: "#trade.notionalAmount <= 100000000"
+            rule-description: "Derivative notional amount must not exceed $100M"
+            rule-severity: "ERROR"
+            rule-action: "REJECT_TRADE"
+          - rule-name: "derivative-margin-sufficient"
+            rule-condition: "#trade.initialMargin >= (#trade.notionalAmount * 0.05)"
+            rule-description: "Initial margin must be at least 5% of notional amount"
+            rule-severity: "ERROR"
+            rule-action: "REJECT_TRADE"
+          - rule-name: "derivative-counterparty-rating"
+            rule-condition: "#trade.counterpartyRating != null && (#trade.counterpartyRating == 'A' || #trade.counterpartyRating == 'AA' || #trade.counterpartyRating == 'AAA')"
+            rule-description: "Counterparty must have high credit rating for derivatives"
+            rule-severity: "WARNING"
+            rule-action: "REQUIRE_APPROVAL"
+        compliance-requirements:
+          - "Dodd-Frank Act compliance"
+          - "CFTC reporting requirements"
+          - "Margin requirements (BCBS-IOSCO)"
+        audit-requirements:
+          - "Log derivative validation rule execution"
+          - "Track margin requirement compliance"
+    rule-settings:
+      validation-optimization: true
+      compliance-checking: true
+      audit-comprehensive: true
+    
+  settlement-method-rules:
+    rule-type: "settlement-method-rules"
+    rule-name: "Settlement Method Rules"
+    description: "Business rules for settlement method selection"
+    rule-characteristics:
+      rule-category: "SELECTION"
+      enforcement-level: "ADVISORY"
+      error-handling: "CONTINUE_WITH_WARNING"
+    business-rules:
+      dtc-settlement-rules:
+        rule-id: "DTC_SETTLEMENT_RULES"
+        rule-name: "DTC Settlement Rules"
+        rule-description: "Rules for DTC settlement method selection"
+        settlement-method: "DTC"
+        selection-rules:
+          - rule-name: "dtc-trade-type-eligible"
+            rule-condition: "#trade.type == 'Equity' || #trade.type == 'Derivative'"
+            rule-description: "DTC supports equity and derivative trades"
+            rule-priority: 1
+            rule-weight: 0.8
+          - rule-name: "dtc-currency-eligible"
+            rule-condition: "#trade.currency == 'USD'"
+            rule-description: "DTC only supports USD currency"
+            rule-priority: 1
+            rule-weight: 1.0
+          - rule-name: "dtc-jurisdiction-eligible"
+            rule-condition: "#trade.jurisdiction == 'US'"
+            rule-description: "DTC only supports US jurisdiction"
+            rule-priority: 1
+            rule-weight: 1.0
+          - rule-name: "dtc-cost-effective"
+            rule-condition: "#trade.amount >= 1000 && #trade.amount <= 10000000"
+            rule-description: "DTC is cost-effective for trades $1K-$10M"
+            rule-priority: 2
+            rule-weight: 0.6
+        method-characteristics:
+          cost-score: 0.9
+          speed-score: 1.0
+          reliability-score: 0.95
+          coverage-score: 0.7
+        audit-requirements:
+          - "Log DTC settlement rule evaluation"
+          - "Track DTC selection frequency"
+          
+      fedwire-settlement-rules:
+        rule-id: "FEDWIRE_SETTLEMENT_RULES"
+        rule-name: "Fedwire Settlement Rules"
+        rule-description: "Rules for Fedwire settlement method selection"
+        settlement-method: "Fedwire"
+        selection-rules:
+          - rule-name: "fedwire-trade-type-eligible"
+            rule-condition: "#trade.type == 'FixedIncome' || #trade.type == 'Forex'"
+            rule-description: "Fedwire supports fixed income and forex trades"
+            rule-priority: 1
+            rule-weight: 0.8
+          - rule-name: "fedwire-currency-eligible"
+            rule-condition: "#trade.currency == 'USD'"
+            rule-description: "Fedwire only supports USD currency"
+            rule-priority: 1
+            rule-weight: 1.0
+          - rule-name: "fedwire-urgency-preferred"
+            rule-condition: "#trade.urgency == 'HIGH' || #trade.settlementDate.equals(T(java.time.LocalDate).now())"
+            rule-description: "Fedwire preferred for urgent or same-day settlement"
+            rule-priority: 1
+            rule-weight: 0.9
+          - rule-name: "fedwire-amount-threshold"
+            rule-condition: "#trade.amount >= 10000"
+            rule-description: "Fedwire preferred for trades >= $10K"
+            rule-priority: 2
+            rule-weight: 0.7
+        method-characteristics:
+          cost-score: 0.8
+          speed-score: 1.0
+          reliability-score: 1.0
+          coverage-score: 0.6
+        audit-requirements:
+          - "Log Fedwire settlement rule evaluation"
+          - "Track urgent settlement patterns"
+          
+      euroclear-settlement-rules:
+        rule-id: "EUROCLEAR_SETTLEMENT_RULES"
+        rule-name: "Euroclear Settlement Rules"
+        rule-description: "Rules for Euroclear settlement method selection"
+        settlement-method: "Euroclear"
+        selection-rules:
+          - rule-name: "euroclear-trade-type-eligible"
+            rule-condition: "#trade.type == 'FixedIncome' || #trade.type == 'Equity'"
+            rule-description: "Euroclear supports fixed income and equity trades"
+            rule-priority: 1
+            rule-weight: 0.8
+          - rule-name: "euroclear-currency-eligible"
+            rule-condition: "#trade.currency == 'EUR' || #trade.currency == 'GBP' || #trade.currency == 'USD'"
+            rule-description: "Euroclear supports EUR, GBP, and USD currencies"
+            rule-priority: 1
+            rule-weight: 0.9
+          - rule-name: "euroclear-jurisdiction-eligible"
+            rule-condition: "#trade.jurisdiction == 'EU' || #trade.jurisdiction == 'UK'"
+            rule-description: "Euroclear supports EU and UK jurisdictions"
+            rule-priority: 1
+            rule-weight: 1.0
+          - rule-name: "euroclear-cross-border-preferred"
+            rule-condition: "#trade.crossBorder == true"
+            rule-description: "Euroclear preferred for cross-border European trades"
+            rule-priority: 2
+            rule-weight: 0.8
+        method-characteristics:
+          cost-score: 0.7
+          speed-score: 0.8
+          reliability-score: 0.9
+          coverage-score: 0.9
+        audit-requirements:
+          - "Log Euroclear settlement rule evaluation"
+          - "Track cross-border settlement patterns"
+    rule-settings:
+      method-optimization: true
+      cost-analysis: true
+      geographic-preference: true
+    
+  fee-calculation-rules:
+    rule-type: "fee-calculation-rules"
+    rule-name: "Fee Calculation Rules"
+    description: "Business rules for fee calculation"
+    rule-characteristics:
+      rule-category: "CALCULATION"
+      enforcement-level: "MANDATORY"
+      error-handling: "USE_DEFAULT"
+    business-rules:
+      base-fee-calculation-rules:
+        rule-id: "BASE_FEE_CALCULATION_RULES"
+        rule-name: "Base Fee Calculation Rules"
+        rule-description: "Rules for calculating base settlement fees"
+        calculation-rules:
+          - rule-name: "equity-base-fee"
+            rule-condition: "#trade.type == 'Equity'"
+            rule-calculation: "15.0"
+            rule-description: "Base fee for equity trades is $15"
+            rule-priority: 1
+          - rule-name: "fixed-income-base-fee"
+            rule-condition: "#trade.type == 'FixedIncome'"
+            rule-calculation: "25.0"
+            rule-description: "Base fee for fixed income trades is $25"
+            rule-priority: 1
+          - rule-name: "derivative-base-fee"
+            rule-condition: "#trade.type == 'Derivative'"
+            rule-calculation: "50.0"
+            rule-description: "Base fee for derivative trades is $50"
+            rule-priority: 1
+          - rule-name: "forex-base-fee"
+            rule-condition: "#trade.type == 'Forex'"
+            rule-calculation: "10.0"
+            rule-description: "Base fee for forex trades is $10"
+            rule-priority: 1
+          - rule-name: "commodity-base-fee"
+            rule-condition: "#trade.type == 'Commodity'"
+            rule-calculation: "30.0"
+            rule-description: "Base fee for commodity trades is $30"
+            rule-priority: 1
+          - rule-name: "default-base-fee"
+            rule-condition: "true"
+            rule-calculation: "20.0"
+            rule-description: "Default base fee is $20"
+            rule-priority: 999
+        audit-requirements:
+          - "Log base fee calculation rule execution"
+          - "Track fee distribution by trade type"
+          
+      volume-fee-calculation-rules:
+        rule-id: "VOLUME_FEE_CALCULATION_RULES"
+        rule-name: "Volume Fee Calculation Rules"
+        rule-description: "Rules for calculating volume-based fees"
+        calculation-rules:
+          - rule-name: "volume-tier-1"
+            rule-condition: "#trade.amount <= 100000"
+            rule-calculation: "#trade.amount * 0.001"
+            rule-description: "0.1% fee for trades up to $100K"
+            rule-priority: 1
+          - rule-name: "volume-tier-2"
+            rule-condition: "#trade.amount > 100000 && #trade.amount <= 1000000"
+            rule-calculation: "#trade.amount * 0.0008"
+            rule-description: "0.08% fee for trades $100K-$1M"
+            rule-priority: 1
+          - rule-name: "volume-tier-3"
+            rule-condition: "#trade.amount > 1000000 && #trade.amount <= 10000000"
+            rule-calculation: "#trade.amount * 0.0005"
+            rule-description: "0.05% fee for trades $1M-$10M"
+            rule-priority: 1
+          - rule-name: "volume-tier-4"
+            rule-condition: "#trade.amount > 10000000"
+            rule-calculation: "#trade.amount * 0.0003"
+            rule-description: "0.03% fee for trades over $10M"
+            rule-priority: 1
+        audit-requirements:
+          - "Log volume fee calculation rule execution"
+          - "Track fee tier usage patterns"
+          
+      method-fee-calculation-rules:
+        rule-id: "METHOD_FEE_CALCULATION_RULES"
+        rule-name: "Settlement Method Fee Calculation Rules"
+        rule-description: "Rules for calculating settlement method fees"
+        calculation-rules:
+          - rule-name: "dtc-method-fee"
+            rule-condition: "#trade.settlementMethod == 'DTC'"
+            rule-calculation: "5.0"
+            rule-description: "DTC settlement method fee is $5"
+            rule-priority: 1
+          - rule-name: "fedwire-method-fee"
+            rule-condition: "#trade.settlementMethod == 'Fedwire'"
+            rule-calculation: "10.0"
+            rule-description: "Fedwire settlement method fee is $10"
+            rule-priority: 1
+          - rule-name: "euroclear-method-fee"
+            rule-condition: "#trade.settlementMethod == 'Euroclear'"
+            rule-calculation: "15.0"
+            rule-description: "Euroclear settlement method fee is $15"
+            rule-priority: 1
+          - rule-name: "clearstream-method-fee"
+            rule-condition: "#trade.settlementMethod == 'Clearstream'"
+            rule-calculation: "12.0"
+            rule-description: "Clearstream settlement method fee is $12"
+            rule-priority: 1
+          - rule-name: "manual-method-fee"
+            rule-condition: "#trade.settlementMethod == 'Manual'"
+            rule-calculation: "50.0"
+            rule-description: "Manual settlement method fee is $50"
+            rule-priority: 1
+          - rule-name: "default-method-fee"
+            rule-condition: "true"
+            rule-calculation: "25.0"
+            rule-description: "Default settlement method fee is $25"
+            rule-priority: 999
+        audit-requirements:
+          - "Log method fee calculation rule execution"
+          - "Track fee distribution by settlement method"
+    rule-settings:
+      fee-optimization: true
+      tiered-calculation: true
+      method-differentiation: true
+    
+  compliance-validation-rules:
+    rule-type: "compliance-validation-rules"
+    rule-name: "Compliance Validation Rules"
+    description: "Business rules for regulatory compliance validation"
+    rule-characteristics:
+      rule-category: "COMPLIANCE"
+      enforcement-level: "MANDATORY"
+      error-handling: "FAIL_FAST"
+    business-rules:
+      regulatory-compliance-rules:
+        rule-id: "REGULATORY_COMPLIANCE_RULES"
+        rule-name: "Regulatory Compliance Rules"
+        rule-description: "Rules for ensuring regulatory compliance"
+        compliance-rules:
+          - rule-name: "kyc-compliance"
+            rule-condition: "#trade.kycCompleted == true"
+            rule-description: "Know Your Customer (KYC) compliance must be completed"
+            rule-severity: "ERROR"
+            rule-action: "REJECT_TRADE"
+          - rule-name: "aml-compliance"
+            rule-condition: "#trade.amlCleared == true"
+            rule-description: "Anti-Money Laundering (AML) clearance required"
+            rule-severity: "ERROR"
+            rule-action: "REJECT_TRADE"
+          - rule-name: "sanctions-screening"
+            rule-condition: "#trade.sanctionsScreened == true && #trade.sanctionsCleared == true"
+            rule-description: "Sanctions screening must be completed and cleared"
+            rule-severity: "ERROR"
+            rule-action: "REJECT_TRADE"
+          - rule-name: "position-limit-compliance"
+            rule-condition: "#trade.positionLimitCompliant == true"
+            rule-description: "Trade must comply with position limits"
+            rule-severity: "ERROR"
+            rule-action: "REJECT_TRADE"
+          - rule-name: "best-execution-compliance"
+            rule-condition: "#trade.bestExecutionCompliant == true"
+            rule-description: "Trade must comply with best execution requirements"
+            rule-severity: "WARNING"
+            rule-action: "FLAG_FOR_REVIEW"
+        audit-requirements:
+          - "Log regulatory compliance rule execution"
+          - "Track compliance violation patterns"
+    rule-settings:
+      compliance-strict: true
+      regulatory-updates: true
+      audit-comprehensive: true
+    
+  default:
+    rule-type: "default"
+    rule-name: "Default Post-Trade Business Rules"
+    description: "Default post-trade business rule processing"
+    business-rules:
+      default-rule:
+        rule-id: "DEFAULT_RULE"
+        rule-name: "Default Rule"
+        validation-rules:
+          - rule-name: "basic-validation"
+            rule-condition: "#trade != null"
+            rule-description: "Trade must not be null"
+    rule-settings:
+      default-processing: true
+
+# Rule execution patterns
+execution-patterns:
+  trade-type-pattern:
+    pattern-name: "Trade Type Pattern"
+    description: "Execute rules based on trade types"
+    trade-types: ["Equity", "FixedIncome", "Derivative", "Forex", "Commodity"]
+    
+  rule-category-pattern:
+    pattern-name: "Rule Category Pattern"
+    description: "Execute rules based on rule categories"
+    rule-categories: ["VALIDATION", "SELECTION", "CALCULATION", "COMPLIANCE"]
+    
+  enforcement-level-pattern:
+    pattern-name: "Enforcement Level Pattern"
+    description: "Execute rules based on enforcement levels"
+    enforcement-levels: ["MANDATORY", "ADVISORY", "INFORMATIONAL"]
+
+# Quality assurance
+quality-assurance:
+  rule-accuracy:
+    - "Business rules must be accurate"
+    - "Validation logic must be comprehensive"
+    - "Calculation rules must be precise"
+    - "Compliance rules must be current"
+    
+  rule-reliability:
+    - "Rules must be consistently applied"
+    - "Rule execution must be deterministic"
+    - "Performance must be acceptable"
+    - "Error handling must be robust"
+    
+  regulatory-alignment:
+    - "Rules must reflect current regulations"
+    - "Compliance requirements must be met"
+    - "Audit trails must be complete"
+    - "Rule changes must be tracked"

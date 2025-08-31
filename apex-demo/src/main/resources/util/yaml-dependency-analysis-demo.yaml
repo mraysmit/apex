@@ -1,0 +1,272 @@
+# APEX YAML Dependency Analysis Demo Configuration
+# Real APEX YAML configuration for YAML dependency analysis processing
+# Replaces all hardcoded dependency analysis logic from YamlDependencyAnalysisDemo (@since 1.0.0)
+
+type: "apex-enrichment-config"
+name: "yaml-dependency-analysis-demo"
+description: "APEX-compliant YAML dependency analysis with real enrichment services"
+
+# External data source for YAML dependency analysis configurations
+external-data-sources:
+  - name: "scenario-files-config"
+    type: "external-data-config"
+    source: "util/dependency-analysis/scenario-files-config.yaml"
+    
+  - name: "analysis-algorithms-config"
+    type: "external-data-config"
+    source: "util/dependency-analysis/analysis-algorithms-config.yaml"
+    
+  - name: "reporting-features-config"
+    type: "external-data-config"
+    source: "util/dependency-analysis/reporting-features-config.yaml"
+
+# APEX enrichment processing for YAML dependency analysis
+enrichments:
+  - name: "scenario-file-analysis"
+    type: "lookup-enrichment"
+    description: "Analyze scenario files using data-driven configuration"
+    condition: "#data.analysisType == 'scenario-file-analysis'"
+    lookup-source: "scenario-files-config"
+    lookup-key: "#data.fileType != null ? #data.fileType : 'default'"
+    target-field: "scenarioFileAnalysisResult"
+    
+  - name: "dependency-analysis-processing"
+    type: "lookup-enrichment"
+    description: "Process dependency analysis using data-driven configuration"
+    condition: "#data.analysisType == 'dependency-analysis-processing'"
+    lookup-source: "analysis-algorithms-config"
+    lookup-key: "#data.algorithmType != null ? #data.algorithmType : 'default'"
+    target-field: "dependencyAnalysisResult"
+    
+  - name: "advanced-features-processing"
+    type: "lookup-enrichment"
+    description: "Process advanced features using data-driven configuration"
+    condition: "#data.analysisType == 'advanced-features-processing'"
+    lookup-source: "reporting-features-config"
+    lookup-key: "#data.featureType != null ? #data.featureType : 'default'"
+    target-field: "advancedFeaturesResult"
+    
+  - name: "dependency-analysis-summary"
+    type: "expression-enrichment"
+    description: "Generate dependency analysis summary"
+    condition: "true"
+    expression: "'YAML dependency analysis completed: ' + (#data.analysisType != null ? #data.analysisType : 'unknown') + ' using real APEX services'"
+    target-field: "dependencyAnalysisSummary"
+
+# Dependency analysis processing categories
+processing-categories:
+  - category: "scenario-file-analysis"
+    description: "Scenario file analysis and validation"
+    processing-type: "real-apex-enrichment"
+    analysis-aspects:
+      - "YAML file validation"
+      - "Dependency chain tracing"
+      - "Missing file detection"
+      - "Circular dependency detection"
+    
+  - category: "dependency-analysis-processing"
+    description: "Advanced dependency analysis algorithms"
+    processing-type: "real-apex-enrichment"
+    analysis-aspects:
+      - "Dependency graph construction"
+      - "Statistical analysis"
+      - "Health status assessment"
+      - "Performance monitoring"
+    
+  - category: "advanced-features-processing"
+    description: "Advanced reporting and visualization features"
+    processing-type: "real-apex-enrichment"
+    analysis-aspects:
+      - "Dependency tree visualization"
+      - "Reverse dependency lookup"
+      - "File type distribution"
+      - "Comprehensive reporting"
+
+# Analysis algorithms
+analysis-algorithms:
+  dependency-graph-construction:
+    algorithm-name: "Dependency Graph Construction"
+    description: "Build comprehensive dependency graphs from YAML files"
+    characteristics:
+      - "Recursive dependency traversal"
+      - "Circular dependency detection"
+      - "Missing file identification"
+      - "Performance optimization"
+    
+  statistical-analysis:
+    algorithm-name: "Statistical Analysis"
+    description: "Generate statistical insights from dependency data"
+    characteristics:
+      - "File count analysis"
+      - "Depth analysis"
+      - "Health metrics calculation"
+      - "Performance metrics"
+    
+  health-assessment:
+    algorithm-name: "Health Assessment"
+    description: "Assess overall health of YAML dependency chains"
+    characteristics:
+      - "Missing file detection"
+      - "Invalid YAML detection"
+      - "Circular dependency detection"
+      - "Overall health scoring"
+
+# Performance settings
+performance-settings:
+  scenario-file-analysis:
+    analysis-timeout: 5000
+    parallel-analysis: true
+    cache-results: true
+    
+  dependency-analysis-processing:
+    processing-timeout: 10000
+    parallel-processing: true
+    memory-optimization: true
+    
+  advanced-features-processing:
+    feature-timeout: 3000
+    parallel-features: false
+    result-caching: true
+
+# Demonstration scenarios
+demonstration-scenarios:
+  basic-dependency-analysis:
+    scenario-name: "Basic Dependency Analysis"
+    description: "Demonstrate basic YAML dependency analysis"
+    steps:
+      - "Load scenario file configurations"
+      - "Analyze individual scenario files"
+      - "Generate dependency graphs"
+      - "Report analysis results"
+      - "Generate analysis summary"
+    expected-outcome: "Successful dependency analysis"
+    
+  advanced-analysis-features:
+    scenario-name: "Advanced Analysis Features"
+    description: "Demonstrate advanced dependency analysis features"
+    steps:
+      - "Load advanced feature configurations"
+      - "Perform detailed dependency analysis"
+      - "Generate comprehensive reports"
+      - "Demonstrate reverse dependency lookup"
+      - "Generate advanced analysis results"
+    expected-outcome: "Successful advanced analysis"
+    
+  comprehensive-reporting:
+    scenario-name: "Comprehensive Reporting"
+    description: "Demonstrate comprehensive dependency reporting"
+    steps:
+      - "Load reporting configurations"
+      - "Generate dependency trees"
+      - "Create file type distributions"
+      - "Generate health reports"
+      - "Generate comprehensive reports"
+    expected-outcome: "Successful comprehensive reporting"
+
+# Analysis patterns
+analysis-patterns:
+  scenario-analysis-pattern:
+    pattern-name: "Scenario Analysis Pattern"
+    description: "Pattern for analyzing scenario files"
+    analysis-steps:
+      - "Load scenario file"
+      - "Parse YAML structure"
+      - "Extract dependencies"
+      - "Validate references"
+      - "Generate analysis report"
+    validation-rules:
+      - "YAML must be valid"
+      - "Dependencies must be traceable"
+      - "Missing files must be identified"
+      - "Circular dependencies must be detected"
+    
+  dependency-graph-pattern:
+    pattern-name: "Dependency Graph Pattern"
+    description: "Pattern for constructing dependency graphs"
+    construction-steps:
+      - "Initialize graph structure"
+      - "Add nodes for each file"
+      - "Create edges for dependencies"
+      - "Detect circular references"
+      - "Calculate graph statistics"
+    optimization-rules:
+      - "Graph construction must be efficient"
+      - "Memory usage must be controlled"
+      - "Circular detection must be accurate"
+      - "Statistics must be comprehensive"
+    
+  reporting-pattern:
+    pattern-name: "Reporting Pattern"
+    description: "Pattern for generating dependency reports"
+    reporting-steps:
+      - "Collect analysis data"
+      - "Format dependency trees"
+      - "Generate statistics"
+      - "Create visualizations"
+      - "Produce final reports"
+    quality-rules:
+      - "Reports must be accurate"
+      - "Visualizations must be clear"
+      - "Statistics must be correct"
+      - "Format must be consistent"
+
+# Quality assurance
+quality-assurance:
+  analysis-accuracy:
+    - "Dependency detection must be complete"
+    - "Missing files must be identified correctly"
+    - "Circular dependencies must be detected accurately"
+    - "Statistics must be calculated correctly"
+    
+  performance-requirements:
+    - "Analysis time must be reasonable"
+    - "Memory usage must be controlled"
+    - "Large dependency chains must be handled efficiently"
+    - "Parallel processing must be thread-safe"
+    
+  reporting-quality:
+    - "Reports must be comprehensive"
+    - "Visualizations must be accurate"
+    - "Statistics must be meaningful"
+    - "Output must be well-formatted"
+
+# File type mappings
+file-type-mappings:
+  scenario-files:
+    file-patterns:
+      - "**/*-scenario.yaml"
+      - "scenarios/*.yaml"
+    analysis-priority: "high"
+    validation-level: "comprehensive"
+    
+  bootstrap-files:
+    file-patterns:
+      - "bootstrap/*.yaml"
+      - "**/*-bootstrap.yaml"
+    analysis-priority: "medium"
+    validation-level: "standard"
+    
+  configuration-files:
+    file-patterns:
+      - "config/*.yaml"
+      - "**/*-config.yaml"
+    analysis-priority: "medium"
+    validation-level: "standard"
+    
+  validation-files:
+    file-patterns:
+      - "validation/*.yaml"
+      - "**/*-validation.yaml"
+    analysis-priority: "low"
+    validation-level: "basic"
+
+# Output configuration
+output:
+  include-input: true
+  include-metadata: true
+  format: "enhanced"
+  analysis-summary: true
+  performance-metrics: true
+  dependency-details: true
+  visualization-data: true
+  health-assessment: true

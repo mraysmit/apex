@@ -1,0 +1,149 @@
+# Basic Usage Examples Configuration
+# Real APEX YAML configuration for BasicUsageExamples.java
+# NO HARDCODED SIMULATION - Uses authentic APEX services
+
+metadata:
+  name: "Basic Usage Examples Configuration"
+  version: "2.0"
+  description: "Real APEX basic usage demonstration with field validations, business object processing, and expression evaluation"
+  author: "APEX Demo Team"
+  created: "2025-01-29"
+
+# Basic Validation Enrichments
+enrichments:
+  - id: "basic-field-validation"
+    name: "basic-field-validation"
+    type: "field-enrichment"
+    description: "Basic field validation using real APEX processing"
+    condition: "#name != null || #age != null || #email != null"
+    field-mappings:
+      - source-field: "name"
+        target-field: "validatedName"
+        required: true
+      - source-field: "age"
+        target-field: "validatedAge"
+        required: true
+      - source-field: "email"
+        target-field: "validatedEmail"
+        required: false
+
+  - id: "business-object-processing"
+    name: "business-object-processing"
+    type: "field-enrichment"
+    description: "Business object processing with real APEX services"
+    condition: "#customerType != null || #productCategory != null || #tradeValue != null"
+    field-mappings:
+      - source-field: "customerType"
+        target-field: "processedCustomerType"
+        required: false
+      - source-field: "productCategory"
+        target-field: "processedProductCategory"
+        required: false
+      - source-field: "tradeValue"
+        target-field: "processedTradeValue"
+        required: false
+
+  - id: "expression-evaluation"
+    name: "expression-evaluation"
+    type: "calculation-enrichment"
+    description: "Expression evaluation using real APEX SpEL processing"
+    condition: "#amount != null || #rate != null || #quantity != null || #price != null"
+    calculations:
+      - field: "calculatedInterest"
+        expression: "#amount * #rate"
+      - field: "totalValue"
+        expression: "#quantity * #price"
+      - field: "discountAmount"
+        expression: "#amount * 0.1"
+      - field: "taxAmount"
+        expression: "#totalValue * 0.08"
+      - field: "finalAmount"
+        expression: "#totalValue + #taxAmount"
+    field-mappings:
+      - source-field: "calculatedInterest"
+        target-field: "calculatedInterest"
+        required: false
+      - source-field: "totalValue"
+        target-field: "totalValue"
+        required: false
+
+# Validation Rules Configuration
+validation-rules:
+  - id: "required-field-validation"
+    name: "required-field-validation"
+    description: "Required field validation patterns"
+    rules:
+      - field: "name"
+        required: true
+        min-length: 2
+        max-length: 100
+      - field: "age"
+        required: false
+        min-value: 18
+        max-value: 120
+      - field: "email"
+        required: false
+        pattern: "^[A-Za-z0-9+_.-]+@(.+)$"
+
+  - id: "business-validation"
+    name: "business-validation"
+    description: "Business object validation patterns"
+    rules:
+      - field: "customerType"
+        allowed-values: ["STANDARD", "PREMIUM", "VIP"]
+      - field: "productCategory"
+        allowed-values: ["ELECTRONICS", "CLOTHING", "BOOKS", "HOME"]
+      - field: "tradeValue"
+        min-value: 0
+        max-value: 1000000
+      - field: "membershipLevel"
+        allowed-values: ["BRONZE", "SILVER", "GOLD", "PLATINUM"]
+
+  - id: "expression-validation"
+    name: "expression-validation"
+    description: "Expression evaluation validation patterns"
+    rules:
+      - field: "amount"
+        type: "numeric"
+        min-value: 0
+      - field: "rate"
+        type: "numeric"
+        min-value: 0
+        max-value: 1
+      - field: "quantity"
+        type: "integer"
+        min-value: 1
+      - field: "price"
+        type: "numeric"
+        min-value: 0
+
+# Processing Configuration
+processing:
+  fail-fast: true
+  enable-logging: true
+  max-processing-time: 30000
+  validation-enabled: true
+  expression-cache-enabled: true
+  
+# Output Configuration
+output:
+  format: "json"
+  include-metadata: true
+  include-processing-time: true
+  include-validation-results: true
+  include-expression-results: true
+
+# Performance Configuration
+performance:
+  enable-timing: true
+  log-slow-operations: true
+  slow-operation-threshold: 100
+  cache-validation-results: true
+  cache-expression-results: true
+
+# Error Handling Configuration
+error-handling:
+  validation-errors: "collect"
+  expression-errors: "fail-fast"
+  missing-field-errors: "warn"
+  type-conversion-errors: "fail"

@@ -1,0 +1,162 @@
+# APEX Compliance Test Data Configuration
+# External data source configuration for compliance testing scenarios
+# Replaces hardcoded test data from ComplianceServiceDemo
+
+type: "external-data-config"
+name: "compliance-test-data"
+description: "Test data scenarios for compliance service demonstration"
+
+# Test trade scenarios
+test-scenarios:
+  - scenario-id: "equity-trade"
+    description: "Standard equity trade requiring MiFID II and Basel III reporting"
+    data:
+      tradeId: "T1001"
+      tradeType: "Equity"
+      category: "Stock"
+      amount: 100000
+      currency: "EUR"
+      counterparty: "BANK_A"
+    expected-regulations:
+      - "MiFID II"
+      - "Basel III"
+    expected-deadlines:
+      MiFID_II: 24
+      BASEL_III: 168
+      
+  - scenario-id: "fixed-income-trade"
+    description: "Fixed income trade requiring MiFID II, Basel III, and SFTR reporting"
+    data:
+      tradeId: "T1002"
+      tradeType: "FixedIncome"
+      category: "Bond"
+      amount: 500000
+      currency: "USD"
+      counterparty: "BANK_B"
+    expected-regulations:
+      - "MiFID II"
+      - "Basel III"
+      - "SFTR"
+    expected-deadlines:
+      MiFID_II: 24
+      BASEL_III: 168
+      SFTR: 24
+      
+  - scenario-id: "derivative-trade"
+    description: "Derivative trade requiring MiFID II, EMIR, and Dodd-Frank reporting"
+    data:
+      tradeId: "T1003"
+      tradeType: "Derivative"
+      category: "Option"
+      amount: 250000
+      currency: "GBP"
+      counterparty: "BANK_C"
+    expected-regulations:
+      - "MiFID II"
+      - "EMIR"
+      - "Dodd-Frank"
+    expected-deadlines:
+      MiFID_II: 24
+      EMIR: 48
+      DODD_FRANK: 72
+      
+  - scenario-id: "forex-trade"
+    description: "Forex trade requiring MiFID II and Dodd-Frank reporting"
+    data:
+      tradeId: "T1004"
+      tradeType: "Forex"
+      category: "Spot"
+      amount: 1000000
+      currency: "USD"
+      counterparty: "BANK_D"
+    expected-regulations:
+      - "MiFID II"
+      - "Dodd-Frank"
+    expected-deadlines:
+      MiFID_II: 24
+      DODD_FRANK: 72
+      
+  - scenario-id: "commodity-trade"
+    description: "Commodity trade requiring MiFID II and EMIR reporting"
+    data:
+      tradeId: "T1005"
+      tradeType: "Commodity"
+      category: "Future"
+      amount: 750000
+      currency: "EUR"
+      counterparty: "BANK_E"
+    expected-regulations:
+      - "MiFID II"
+      - "EMIR"
+    expected-deadlines:
+      MiFID_II: 24
+      EMIR: 48
+      
+  - scenario-id: "invalid-trade"
+    description: "Invalid trade with missing data to test compliance issues detection"
+    data:
+      tradeId: ""
+      tradeType: "Equity"
+      category: "Stock"
+      amount: 50000
+      currency: "EUR"
+      counterparty: "BANK_F"
+    expected-compliance-issues: true
+    expected-error: "Trade data is incomplete - missing required fields"
+
+# Risk assessment test scenarios
+risk-scenarios:
+  - scenario-id: "low-risk-trade"
+    description: "Low risk trade that should pass compliance checks"
+    data:
+      tradeId: "R1001"
+      tradeType: "Equity"
+      category: "Stock"
+      riskLevel: "Low"
+      amount: 10000
+    expected-risk-pass: true
+    
+  - scenario-id: "high-risk-trade"
+    description: "High risk trade requiring additional compliance checks"
+    data:
+      tradeId: "R1002"
+      tradeType: "Derivative"
+      category: "Option"
+      riskLevel: "High"
+      amount: 5000000
+    expected-risk-pass: false
+    expected-warning: "Trade has high or extreme risk level requiring additional compliance checks"
+    
+  - scenario-id: "extreme-risk-trade"
+    description: "Extreme risk trade requiring additional compliance checks"
+    data:
+      tradeId: "R1003"
+      tradeType: "Derivative"
+      category: "Swap"
+      riskLevel: "Extreme"
+      amount: 10000000
+    expected-risk-pass: false
+    expected-warning: "Trade has high or extreme risk level requiring additional compliance checks"
+
+# Comprehensive test scenarios
+comprehensive-scenarios:
+  - scenario-id: "multi-regulation-compliance"
+    description: "Complex trade requiring multiple regulatory compliance checks"
+    data:
+      tradeId: "C1001"
+      tradeType: "Derivative"
+      category: "Interest Rate Swap"
+      amount: 2000000
+      currency: "EUR"
+      counterparty: "MAJOR_BANK"
+      riskLevel: "Medium"
+      jurisdiction: "EU"
+    expected-regulations:
+      - "MiFID II"
+      - "EMIR"
+      - "Dodd-Frank"
+    expected-reports:
+      - "MiFID_II_Report"
+      - "EMIR_Report"
+      - "DoddFrank_Report"
+    expected-compliance-pass: true

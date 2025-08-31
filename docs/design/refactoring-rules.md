@@ -127,7 +127,7 @@ String defaultLevel = extractFromYaml(defaults, "customer.defaultMembershipLevel
 **Run this test immediately to identify hardcoded simulation violations:**
 ```bash
 # Detect hardcoded simulations across all data providers
-java -cp [classpath] dev.mars.apex.demo.data.DataProviderComplianceTest
+java -cp [classpath] dev.mars.apex.demo.infrastructure.DataProviderComplianceTest
 ```
 
 **Look for these critical violation indicators:**
@@ -320,7 +320,7 @@ The following classes have been successfully refactored and now serve as perfect
 ```bash
 # Run the APEX-compliant validation tool
 java -cp "apex-demo/target/classes;apex-core/target/classes;[dependencies...]" \
-     dev.mars.apex.demo.data.DataProviderComplianceTest
+     dev.mars.apex.demo.infrastructure.DataProviderComplianceTest
 ```
 
 ### **What the Compliance Test Validates:**
@@ -371,7 +371,7 @@ SCORE SUMMARY:
 mvn compile -pl apex-demo
 
 # 3. Run compliance validation
-java -cp [classpath] dev.mars.apex.demo.data.DataProviderComplianceTest
+java -cp [classpath] dev.mars.apex.demo.infrastructure.DataProviderComplianceTest
 
 # 4. Address any violations identified
 # 5. Re-run test to confirm compliance improvements
@@ -616,7 +616,7 @@ If you want, I can codify this as a CONTRIBUTING.md “Refactoring Guide” in a
 ### **Step 1: IMMEDIATE - Detect Hardcoded Simulations**
 ```bash
 # Run compliance test to identify violations
-java -cp [classpath] dev.mars.apex.demo.data.DataProviderComplianceTest
+java -cp [classpath] dev.mars.apex.demo.infrastructure.DataProviderComplianceTest
 
 # Look for critical violations:
 # ❌ "Contains hardcoded data patterns"
@@ -667,7 +667,7 @@ Object result = enrichmentService.enrichObject(config, inputData);
 ### **Step 5: VERIFICATION - Confirm Elimination**
 ```bash
 # Re-run compliance test to verify improvement
-java -cp [classpath] dev.mars.apex.demo.data.DataProviderComplianceTest
+java -cp [classpath] dev.mars.apex.demo.infrastructure.DataProviderComplianceTest
 
 # Target scores:
 # ✅ 4/4: Fully compliant - no hardcoded simulations

@@ -1,0 +1,205 @@
+# APEX Risk Management Configuration
+# External data source configuration for risk management
+# Replaces hardcoded risk logic from DynamicMethodExecutionDemo
+
+type: "external-data-config"
+name: "risk-management-config"
+description: "Data-driven risk management configuration for dynamic method execution"
+
+# Market risk configuration by trade type
+data:
+  Equity_market_risk:
+    risk-factor: 0.05
+    description: "Market risk factor for equity trades (5%)"
+    risk-category: "market-risk"
+    calculation-method: "value-at-risk"
+    confidence-level: 95
+    time-horizon: "1-day"
+    volatility-adjustment: 1.2
+    
+  FixedIncome_market_risk:
+    risk-factor: 0.02
+    description: "Market risk factor for fixed income trades (2%)"
+    risk-category: "market-risk"
+    calculation-method: "duration-based"
+    confidence-level: 95
+    time-horizon: "1-day"
+    volatility-adjustment: 0.8
+    
+  Derivative_market_risk:
+    risk-factor: 0.15
+    description: "Market risk factor for derivative trades (15%)"
+    risk-category: "market-risk"
+    calculation-method: "monte-carlo"
+    confidence-level: 99
+    time-horizon: "1-day"
+    volatility-adjustment: 2.5
+    
+  Forex_market_risk:
+    risk-factor: 0.08
+    description: "Market risk factor for forex trades (8%)"
+    risk-category: "market-risk"
+    calculation-method: "currency-var"
+    confidence-level: 95
+    time-horizon: "1-day"
+    volatility-adjustment: 1.5
+    
+  Commodity_market_risk:
+    risk-factor: 0.12
+    description: "Market risk factor for commodity trades (12%)"
+    risk-category: "market-risk"
+    calculation-method: "commodity-var"
+    confidence-level: 95
+    time-horizon: "1-day"
+    volatility-adjustment: 2.0
+
+# Credit risk configuration by trade type
+  Equity_credit_risk:
+    risk-factor: 0.03
+    description: "Credit risk factor for equity trades (3%)"
+    risk-category: "credit-risk"
+    calculation-method: "probability-of-default"
+    rating-dependency: true
+    collateral-adjustment: 0.5
+    
+  FixedIncome_credit_risk:
+    risk-factor: 0.08
+    description: "Credit risk factor for fixed income trades (8%)"
+    risk-category: "credit-risk"
+    calculation-method: "credit-spread"
+    rating-dependency: true
+    collateral-adjustment: 0.3
+    
+  Derivative_credit_risk:
+    risk-factor: 0.20
+    description: "Credit risk factor for derivative trades (20%)"
+    risk-category: "credit-risk"
+    calculation-method: "potential-future-exposure"
+    rating-dependency: true
+    collateral-adjustment: 0.8
+    
+  Forex_credit_risk:
+    risk-factor: 0.05
+    description: "Credit risk factor for forex trades (5%)"
+    risk-category: "credit-risk"
+    calculation-method: "settlement-risk"
+    rating-dependency: false
+    collateral-adjustment: 0.2
+    
+  Commodity_credit_risk:
+    risk-factor: 0.10
+    description: "Credit risk factor for commodity trades (10%)"
+    risk-category: "credit-risk"
+    calculation-method: "counterparty-exposure"
+    rating-dependency: true
+    collateral-adjustment: 0.6
+
+# Risk limits and thresholds
+risk-limits:
+  market-risk-limits:
+    daily-var-limit: 10000000  # $10M daily VaR limit
+    stress-test-limit: 50000000  # $50M stress test limit
+    concentration-limit: 0.25  # 25% maximum concentration
+    
+  credit-risk-limits:
+    counterparty-limit: 25000000  # $25M per counterparty
+    sector-limit: 100000000  # $100M per sector
+    country-limit: 200000000  # $200M per country
+    
+  operational-risk-limits:
+    daily-loss-limit: 1000000  # $1M daily operational loss limit
+    monthly-loss-limit: 5000000  # $5M monthly operational loss limit
+    annual-loss-limit: 25000000  # $25M annual operational loss limit
+
+# Risk measurement methodologies
+methodologies:
+  value-at-risk:
+    description: "Statistical measure of potential loss"
+    confidence-levels: [95, 99, 99.9]
+    time-horizons: ["1-day", "10-day", "1-month"]
+    calculation-methods: ["historical-simulation", "parametric", "monte-carlo"]
+    
+  expected-shortfall:
+    description: "Expected loss beyond VaR threshold"
+    confidence-levels: [95, 99]
+    calculation-methods: ["historical-simulation", "monte-carlo"]
+    
+  stress-testing:
+    description: "Impact assessment under adverse scenarios"
+    scenario-types: ["historical", "hypothetical", "regulatory"]
+    frequency: "monthly"
+    
+  back-testing:
+    description: "Validation of risk model accuracy"
+    frequency: "daily"
+    exception-threshold: 5
+    confidence-level: 99
+
+# Risk factors and correlations
+risk-factors:
+  equity-factors:
+    - "Market index movements"
+    - "Sector rotation"
+    - "Individual stock volatility"
+    - "Dividend yield changes"
+    
+  fixed-income-factors:
+    - "Interest rate changes"
+    - "Credit spread movements"
+    - "Yield curve shifts"
+    - "Inflation expectations"
+    
+  derivative-factors:
+    - "Underlying asset volatility"
+    - "Time decay"
+    - "Interest rate sensitivity"
+    - "Implied volatility changes"
+    
+  forex-factors:
+    - "Exchange rate volatility"
+    - "Interest rate differentials"
+    - "Political stability"
+    - "Economic indicators"
+    
+  commodity-factors:
+    - "Supply and demand dynamics"
+    - "Weather conditions"
+    - "Geopolitical events"
+    - "Storage costs"
+
+# Risk reporting and monitoring
+reporting:
+  daily-reports:
+    - "VaR by asset class"
+    - "Credit exposure by counterparty"
+    - "Limit utilization"
+    - "P&L attribution"
+    
+  weekly-reports:
+    - "Stress test results"
+    - "Back-testing performance"
+    - "Risk concentration analysis"
+    - "Model validation results"
+    
+  monthly-reports:
+    - "Risk appetite assessment"
+    - "Capital adequacy analysis"
+    - "Regulatory capital requirements"
+    - "Risk-adjusted returns"
+
+# Performance benchmarks
+performance-benchmarks:
+  calculation-time:
+    market-risk: "< 30 seconds"
+    credit-risk: "< 60 seconds"
+    operational-risk: "< 15 seconds"
+    
+  accuracy-targets:
+    var-accuracy: 95.0
+    back-test-exceptions: "< 5 per year"
+    model-validation: "quarterly"
+    
+  system-capacity:
+    daily-calculations: 100000
+    concurrent-users: 50
+    data-retention: "5 years"

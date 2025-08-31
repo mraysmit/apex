@@ -1,0 +1,217 @@
+# APEX Dynamic Rules Configuration
+# External data source configuration for dynamic rules
+# Replaces hardcoded rule logic from DynamicMethodExecutionDemo
+
+type: "external-data-config"
+name: "dynamic-rules-config"
+description: "Data-driven dynamic rules configuration for method execution"
+
+# Dynamic rules configuration
+data:
+  SettlementDays:
+    rule-id: "SettlementDaysRule"
+    rule-type: "calculation"
+    description: "Calculate settlement days for trade"
+    expression: "#settlementService.calculateSettlementDays(#trade)"
+    return-type: "Integer"
+    dependencies: ["settlement-processing-config"]
+    execution-priority: 1
+    
+  SettlementMethod:
+    rule-id: "SettlementMethodRule"
+    rule-type: "determination"
+    description: "Determine settlement method for trade"
+    expression: "#settlementService.determineSettlementMethod(#trade)"
+    return-type: "String"
+    dependencies: ["settlement-processing-config"]
+    execution-priority: 2
+    
+  MarketRisk:
+    rule-id: "MarketRiskRule"
+    rule-type: "calculation"
+    description: "Calculate market risk for trade"
+    expression: "#riskService.calculateMarketRisk(#trade)"
+    return-type: "Double"
+    dependencies: ["risk-management-config"]
+    execution-priority: 3
+    
+  CreditRisk:
+    rule-id: "CreditRiskRule"
+    rule-type: "calculation"
+    description: "Calculate credit risk for trade"
+    expression: "#riskService.calculateCreditRisk(#trade)"
+    return-type: "Double"
+    dependencies: ["risk-management-config"]
+    execution-priority: 4
+    
+  StandardPrice:
+    rule-id: "StandardPriceRule"
+    rule-type: "calculation"
+    description: "Calculate standard price"
+    expression: "#pricingService.calculateStandardPrice(#basePrice)"
+    return-type: "Double"
+    dependencies: ["pricing-service-config"]
+    execution-priority: 5
+    
+  PremiumPrice:
+    rule-id: "PremiumPriceRule"
+    rule-type: "calculation"
+    description: "Calculate premium price"
+    expression: "#pricingService.calculatePremiumPrice(#basePrice)"
+    return-type: "Double"
+    dependencies: ["pricing-service-config"]
+    execution-priority: 6
+    
+  ComplianceCheck:
+    rule-id: "ComplianceCheckRule"
+    rule-type: "lookup"
+    description: "Get applicable regulations for trade"
+    expression: "#complianceService.getApplicableRegulations(#trade)"
+    return-type: "List<String>"
+    dependencies: ["compliance-service-config"]
+    execution-priority: 7
+
+# Advanced dynamic rules
+advanced-rules:
+  ConditionalSettlement:
+    rule-id: "ConditionalSettlementRule"
+    rule-type: "conditional"
+    description: "Conditional settlement processing based on trade characteristics"
+    conditions:
+      - condition: "#trade.value == 'Equity' && #trade.notionalValue > 1000000"
+        expression: "#settlementService.calculateSettlementDays(#trade) + 1"
+        description: "Large equity trades require additional settlement day"
+      - condition: "#trade.value == 'Derivative'"
+        expression: "#settlementService.calculateSettlementDays(#trade)"
+        description: "Standard derivative settlement"
+      - condition: "true"
+        expression: "#settlementService.calculateSettlementDays(#trade)"
+        description: "Default settlement calculation"
+    return-type: "Integer"
+    
+  RiskAdjustedPricing:
+    rule-id: "RiskAdjustedPricingRule"
+    rule-type: "complex-calculation"
+    description: "Risk-adjusted pricing calculation"
+    expression: "#basePrice * (1 + #riskService.calculateMarketRisk(#trade) + #riskService.calculateCreditRisk(#trade))"
+    return-type: "Double"
+    dependencies: ["pricing-service-config", "risk-management-config"]
+    
+  ComplianceValidation:
+    rule-id: "ComplianceValidationRule"
+    rule-type: "validation"
+    description: "Comprehensive compliance validation"
+    validations:
+      - validation: "#trade.notionalValue <= 10000000"
+        message: "Trade exceeds maximum notional limit"
+        severity: "ERROR"
+      - validation: "#complianceService.getApplicableRegulations(#trade).size() > 0"
+        message: "No applicable regulations found"
+        severity: "WARNING"
+      - validation: "#trade.value != null && !#trade.value.isEmpty()"
+        message: "Trade type is required"
+        severity: "ERROR"
+    return-type: "ValidationResult"
+
+# Rule execution patterns
+execution-patterns:
+  sequential-execution:
+    description: "Execute rules in sequential order"
+    pattern-type: "sequential"
+    rules: ["SettlementDays", "SettlementMethod", "MarketRisk", "CreditRisk"]
+    stop-on-error: true
+    
+  parallel-execution:
+    description: "Execute independent rules in parallel"
+    pattern-type: "parallel"
+    rule-groups:
+      - group: "risk-calculations"
+        rules: ["MarketRisk", "CreditRisk"]
+      - group: "pricing-calculations"
+        rules: ["StandardPrice", "PremiumPrice"]
+    max-parallel-threads: 4
+    
+  conditional-execution:
+    description: "Execute rules based on conditions"
+    pattern-type: "conditional"
+    execution-tree:
+      - condition: "#trade.value == 'Equity'"
+        rules: ["SettlementDays", "MarketRisk", "ComplianceCheck"]
+      - condition: "#trade.value == 'Derivative'"
+        rules: ["SettlementDays", "MarketRisk", "CreditRisk", "ComplianceCheck"]
+      - condition: "true"
+        rules: ["SettlementDays", "ComplianceCheck"]
+
+# Rule performance and monitoring
+performance-monitoring:
+  execution-metrics:
+    average-execution-time: "< 100ms"
+    maximum-execution-time: "< 500ms"
+    success-rate: "> 99.9%"
+    
+  rule-specific-metrics:
+    SettlementDays:
+      average-time: "< 10ms"
+      cache-hit-rate: "> 80%"
+    MarketRisk:
+      average-time: "< 50ms"
+      calculation-accuracy: "> 99.5%"
+    ComplianceCheck:
+      average-time: "< 30ms"
+      regulation-coverage: "100%"
+      
+  error-handling:
+    retry-policy:
+      max-retries: 3
+      retry-delay: "100ms"
+      exponential-backoff: true
+    fallback-strategies:
+      - "Use cached results"
+      - "Apply default values"
+      - "Escalate to manual processing"
+
+# Rule versioning and deployment
+versioning:
+  version-control:
+    current-version: "2.0"
+    previous-versions: ["1.0", "1.1", "1.2"]
+    rollback-capability: true
+    
+  deployment-strategy:
+    deployment-type: "blue-green"
+    validation-required: true
+    approval-process: "two-stage"
+    
+  change-management:
+    change-approval: "required"
+    impact-assessment: "mandatory"
+    testing-requirements: "comprehensive"
+    documentation-updates: "automatic"
+
+# Integration and dependencies
+integration:
+  external-services:
+    - service: "settlement-service"
+      endpoint: "/api/settlement"
+      timeout: "5000ms"
+    - service: "risk-service"
+      endpoint: "/api/risk"
+      timeout: "10000ms"
+    - service: "pricing-service"
+      endpoint: "/api/pricing"
+      timeout: "3000ms"
+    - service: "compliance-service"
+      endpoint: "/api/compliance"
+      timeout: "7000ms"
+      
+  data-dependencies:
+    - "Market data feeds"
+    - "Reference data"
+    - "Regulatory updates"
+    - "Configuration parameters"
+    
+  system-dependencies:
+    - "Database connectivity"
+    - "Message queue availability"
+    - "Cache services"
+    - "Logging infrastructure"

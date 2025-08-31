@@ -1,0 +1,447 @@
+# APEX Settlement Operations Configuration
+# External data source configuration for settlement operations
+# Replaces hardcoded settlement operations logic from PostTradeProcessingServiceDemo
+
+type: "external-data-config"
+name: "settlement-operations-config"
+description: "Data-driven settlement operations configuration for post-trade processing service"
+
+# Settlement operations configuration by operation type
+data:
+  settlement-method-determination-operations:
+    operation-type: "settlement-method-determination-operations"
+    operation-name: "Settlement Method Determination Operations"
+    description: "Operations for determining optimal settlement methods"
+    operation-characteristics:
+      operation-category: "METHOD_DETERMINATION"
+      decision-model: "RULE_BASED"
+      optimization-strategy: "COST_AND_SPEED"
+    settlement-operations:
+      dtc-settlement-operation:
+        operation-id: "DTC_SETTLEMENT_OPERATION"
+        operation-name: "DTC Settlement Operation"
+        operation-description: "Settlement operation using Depository Trust Company (DTC)"
+        settlement-method: "DTC"
+        method-characteristics:
+          processing-fee: 5.0
+          processing-days: 0
+          supported-currencies: ["USD"]
+          geographic-scope: "US"
+          supported-trade-types: ["Equity", "Derivative"]
+        selection-criteria:
+          - criterion-name: "trade-type-compatibility"
+            criterion-condition: "#trade.type == 'Equity' || #trade.type == 'Derivative'"
+            criterion-description: "Trade type must be compatible with DTC"
+          - criterion-name: "currency-compatibility"
+            criterion-condition: "#trade.currency == 'USD'"
+            criterion-description: "Currency must be USD for DTC settlement"
+          - criterion-name: "geographic-eligibility"
+            criterion-condition: "#trade.jurisdiction == 'US'"
+            criterion-description: "Trade must be in US jurisdiction"
+          - criterion-name: "amount-threshold"
+            criterion-condition: "#trade.amount >= 1000 && #trade.amount <= 10000000"
+            criterion-description: "Trade amount must be within DTC limits"
+        processing-requirements:
+          pre-settlement-checks:
+            - "Verify DTC participant status"
+            - "Confirm security eligibility"
+            - "Validate settlement instructions"
+          settlement-execution:
+            - "Submit settlement instruction to DTC"
+            - "Monitor settlement status"
+            - "Handle settlement exceptions"
+          post-settlement-actions:
+            - "Confirm settlement completion"
+            - "Update trade status"
+            - "Generate settlement reports"
+        audit-requirements:
+          - "Log DTC settlement operation steps"
+          - "Track settlement performance metrics"
+          
+      fedwire-settlement-operation:
+        operation-id: "FEDWIRE_SETTLEMENT_OPERATION"
+        operation-name: "Fedwire Settlement Operation"
+        operation-description: "Settlement operation using Federal Reserve Wire Network (Fedwire)"
+        settlement-method: "Fedwire"
+        method-characteristics:
+          processing-fee: 10.0
+          processing-days: 0
+          supported-currencies: ["USD"]
+          geographic-scope: "US"
+          supported-trade-types: ["FixedIncome", "Forex"]
+        selection-criteria:
+          - criterion-name: "trade-type-compatibility"
+            criterion-condition: "#trade.type == 'FixedIncome' || #trade.type == 'Forex'"
+            criterion-description: "Trade type must be compatible with Fedwire"
+          - criterion-name: "currency-compatibility"
+            criterion-condition: "#trade.currency == 'USD'"
+            criterion-description: "Currency must be USD for Fedwire settlement"
+          - criterion-name: "amount-threshold"
+            criterion-condition: "#trade.amount >= 10000"
+            criterion-description: "Trade amount must meet Fedwire minimum"
+          - criterion-name: "urgency-requirement"
+            criterion-condition: "#trade.urgency == 'HIGH' || #trade.settlementDate.equals(T(java.time.LocalDate).now())"
+            criterion-description: "High urgency or same-day settlement required"
+        processing-requirements:
+          pre-settlement-checks:
+            - "Verify Federal Reserve membership"
+            - "Confirm funds availability"
+            - "Validate wire instructions"
+          settlement-execution:
+            - "Submit wire transfer instruction"
+            - "Monitor wire transfer status"
+            - "Handle wire transfer exceptions"
+          post-settlement-actions:
+            - "Confirm wire transfer completion"
+            - "Update trade status"
+            - "Generate wire transfer reports"
+        audit-requirements:
+          - "Log Fedwire settlement operation steps"
+          - "Track wire transfer performance"
+          
+      euroclear-settlement-operation:
+        operation-id: "EUROCLEAR_SETTLEMENT_OPERATION"
+        operation-name: "Euroclear Settlement Operation"
+        operation-description: "Settlement operation using Euroclear settlement system"
+        settlement-method: "Euroclear"
+        method-characteristics:
+          processing-fee: 15.0
+          processing-days: 1
+          supported-currencies: ["EUR", "GBP", "USD"]
+          geographic-scope: "EUROPE"
+          supported-trade-types: ["FixedIncome", "Equity"]
+        selection-criteria:
+          - criterion-name: "trade-type-compatibility"
+            criterion-condition: "#trade.type == 'FixedIncome' || #trade.type == 'Equity'"
+            criterion-description: "Trade type must be compatible with Euroclear"
+          - criterion-name: "currency-compatibility"
+            criterion-condition: "#trade.currency == 'EUR' || #trade.currency == 'GBP' || #trade.currency == 'USD'"
+            criterion-description: "Currency must be supported by Euroclear"
+          - criterion-name: "geographic-eligibility"
+            criterion-condition: "#trade.jurisdiction == 'EU' || #trade.jurisdiction == 'UK'"
+            criterion-description: "Trade must be in European jurisdiction"
+          - criterion-name: "security-eligibility"
+            criterion-condition: "#trade.securityType == 'GOVERNMENT_BOND' || #trade.securityType == 'CORPORATE_BOND' || #trade.securityType == 'EQUITY'"
+            criterion-description: "Security must be eligible for Euroclear settlement"
+        processing-requirements:
+          pre-settlement-checks:
+            - "Verify Euroclear participant status"
+            - "Confirm security eligibility"
+            - "Validate settlement instructions"
+          settlement-execution:
+            - "Submit settlement instruction to Euroclear"
+            - "Monitor settlement status"
+            - "Handle settlement exceptions"
+          post-settlement-actions:
+            - "Confirm settlement completion"
+            - "Update trade status"
+            - "Generate settlement reports"
+        audit-requirements:
+          - "Log Euroclear settlement operation steps"
+          - "Track cross-border settlement metrics"
+          
+      clearstream-settlement-operation:
+        operation-id: "CLEARSTREAM_SETTLEMENT_OPERATION"
+        operation-name: "Clearstream Settlement Operation"
+        operation-description: "Settlement operation using Clearstream settlement system"
+        settlement-method: "Clearstream"
+        method-characteristics:
+          processing-fee: 12.0
+          processing-days: 1
+          supported-currencies: ["EUR", "USD"]
+          geographic-scope: "EUROPE"
+          supported-trade-types: ["FixedIncome", "Derivative", "Commodity"]
+        selection-criteria:
+          - criterion-name: "trade-type-compatibility"
+            criterion-condition: "#trade.type == 'FixedIncome' || #trade.type == 'Derivative' || #trade.type == 'Commodity'"
+            criterion-description: "Trade type must be compatible with Clearstream"
+          - criterion-name: "currency-compatibility"
+            criterion-condition: "#trade.currency == 'EUR' || #trade.currency == 'USD'"
+            criterion-description: "Currency must be supported by Clearstream"
+          - criterion-name: "geographic-eligibility"
+            criterion-condition: "#trade.jurisdiction == 'DE' || #trade.jurisdiction == 'EU'"
+            criterion-description: "Trade must be in German or EU jurisdiction"
+          - criterion-name: "collateral-management"
+            criterion-condition: "#trade.collateralRequired == true"
+            criterion-description: "Clearstream preferred for collateral management"
+        processing-requirements:
+          pre-settlement-checks:
+            - "Verify Clearstream participant status"
+            - "Confirm collateral availability"
+            - "Validate settlement instructions"
+          settlement-execution:
+            - "Submit settlement instruction to Clearstream"
+            - "Monitor settlement status"
+            - "Handle settlement exceptions"
+          post-settlement-actions:
+            - "Confirm settlement completion"
+            - "Update collateral positions"
+            - "Generate settlement reports"
+        audit-requirements:
+          - "Log Clearstream settlement operation steps"
+          - "Track collateral management metrics"
+          
+      manual-settlement-operation:
+        operation-id: "MANUAL_SETTLEMENT_OPERATION"
+        operation-name: "Manual Settlement Operation"
+        operation-description: "Manual settlement operation for complex or exceptional trades"
+        settlement-method: "Manual"
+        method-characteristics:
+          processing-fee: 50.0
+          processing-days: 5
+          supported-currencies: ["ALL"]
+          geographic-scope: "GLOBAL"
+          supported-trade-types: ["ALL"]
+        selection-criteria:
+          - criterion-name: "fallback-option"
+            criterion-condition: "true"
+            criterion-description: "Manual settlement is always available as fallback"
+          - criterion-name: "complex-trade"
+            criterion-condition: "#trade.complexity == 'HIGH' || #trade.customSettlement == true"
+            criterion-description: "Complex trades may require manual settlement"
+          - criterion-name: "exception-handling"
+            criterion-condition: "#trade.settlementExceptions != null && !#trade.settlementExceptions.isEmpty()"
+            criterion-description: "Trades with settlement exceptions require manual handling"
+          - criterion-name: "regulatory-requirement"
+            criterion-condition: "#trade.manualSettlementRequired == true"
+            criterion-description: "Some trades require manual settlement by regulation"
+        processing-requirements:
+          pre-settlement-checks:
+            - "Review trade details manually"
+            - "Verify counterparty information"
+            - "Confirm settlement instructions"
+          settlement-execution:
+            - "Coordinate manual settlement process"
+            - "Monitor settlement progress"
+            - "Handle settlement issues"
+          post-settlement-actions:
+            - "Confirm manual settlement completion"
+            - "Document settlement process"
+            - "Generate detailed settlement reports"
+        audit-requirements:
+          - "Log all manual settlement steps"
+          - "Maintain detailed audit trail"
+    operation-settings:
+      method-optimization: true
+      cost-analysis: true
+      performance-tracking: true
+    
+  settlement-fee-calculation-operations:
+    operation-type: "settlement-fee-calculation-operations"
+    operation-name: "Settlement Fee Calculation Operations"
+    description: "Operations for calculating settlement fees"
+    operation-characteristics:
+      operation-category: "FEE_CALCULATION"
+      calculation-model: "MULTI_COMPONENT"
+      fee-structure: "TIERED"
+    fee-calculation-operations:
+      base-fee-calculation:
+        calculation-id: "BASE_FEE_CALCULATION"
+        calculation-name: "Base Fee Calculation"
+        calculation-description: "Calculate base settlement fee by trade type"
+        fee-components:
+          equity-base-fee:
+            trade-type: "Equity"
+            base-fee: 15.0
+            fee-description: "Base fee for equity trades"
+          fixed-income-base-fee:
+            trade-type: "FixedIncome"
+            base-fee: 25.0
+            fee-description: "Base fee for fixed income trades"
+          derivative-base-fee:
+            trade-type: "Derivative"
+            base-fee: 50.0
+            fee-description: "Base fee for derivative trades"
+          forex-base-fee:
+            trade-type: "Forex"
+            base-fee: 10.0
+            fee-description: "Base fee for forex trades"
+          commodity-base-fee:
+            trade-type: "Commodity"
+            base-fee: 30.0
+            fee-description: "Base fee for commodity trades"
+        calculation-rules:
+          - rule-name: "base-fee-lookup"
+            rule-condition: "true"
+            rule-calculation: "#baseFeeMap[#trade.type] ?: 20.0"
+            rule-description: "Look up base fee by trade type"
+        audit-requirements:
+          - "Log base fee calculation"
+          - "Track fee by trade type"
+          
+      volume-fee-calculation:
+        calculation-id: "VOLUME_FEE_CALCULATION"
+        calculation-name: "Volume Fee Calculation"
+        calculation-description: "Calculate volume-based fee scaling"
+        fee-tiers:
+          tier-1:
+            volume-threshold: 0
+            volume-limit: 100000
+            fee-rate: 0.001
+            fee-description: "0.1% for trades up to $100K"
+          tier-2:
+            volume-threshold: 100000
+            volume-limit: 1000000
+            fee-rate: 0.0008
+            fee-description: "0.08% for trades $100K-$1M"
+          tier-3:
+            volume-threshold: 1000000
+            volume-limit: 10000000
+            fee-rate: 0.0005
+            fee-description: "0.05% for trades $1M-$10M"
+          tier-4:
+            volume-threshold: 10000000
+            volume-limit: 999999999
+            fee-rate: 0.0003
+            fee-description: "0.03% for trades over $10M"
+        calculation-rules:
+          - rule-name: "volume-tier-determination"
+            rule-condition: "true"
+            rule-calculation: "#trade.amount <= 100000 ? 0.001 : (#trade.amount <= 1000000 ? 0.0008 : (#trade.amount <= 10000000 ? 0.0005 : 0.0003))"
+            rule-description: "Determine volume fee rate by trade amount"
+          - rule-name: "volume-fee-calculation"
+            rule-condition: "true"
+            rule-calculation: "#trade.amount * #volumeFeeRate"
+            rule-description: "Calculate volume-based fee"
+        audit-requirements:
+          - "Log volume fee calculation"
+          - "Track fee tier usage"
+          
+      method-fee-calculation:
+        calculation-id: "METHOD_FEE_CALCULATION"
+        calculation-name: "Settlement Method Fee Calculation"
+        calculation-description: "Calculate settlement method-specific fees"
+        method-fees:
+          dtc-method-fee:
+            settlement-method: "DTC"
+            method-fee: 5.0
+            fee-description: "DTC settlement method fee"
+          fedwire-method-fee:
+            settlement-method: "Fedwire"
+            method-fee: 10.0
+            fee-description: "Fedwire settlement method fee"
+          euroclear-method-fee:
+            settlement-method: "Euroclear"
+            method-fee: 15.0
+            fee-description: "Euroclear settlement method fee"
+          clearstream-method-fee:
+            settlement-method: "Clearstream"
+            method-fee: 12.0
+            fee-description: "Clearstream settlement method fee"
+          manual-method-fee:
+            settlement-method: "Manual"
+            method-fee: 50.0
+            fee-description: "Manual settlement method fee"
+        calculation-rules:
+          - rule-name: "method-fee-lookup"
+            rule-condition: "true"
+            rule-calculation: "#methodFeeMap[#trade.settlementMethod] ?: 25.0"
+            rule-description: "Look up method fee by settlement method"
+        audit-requirements:
+          - "Log method fee calculation"
+          - "Track fee by settlement method"
+    operation-settings:
+      fee-optimization: true
+      tiered-calculation: true
+      method-analysis: true
+    
+  settlement-day-calculation-operations:
+    operation-type: "settlement-day-calculation-operations"
+    operation-name: "Settlement Day Calculation Operations"
+    description: "Operations for calculating settlement days"
+    operation-characteristics:
+      operation-category: "DAY_CALCULATION"
+      calculation-model: "BUSINESS_DAY_AWARE"
+      holiday-handling: "SKIP_HOLIDAYS"
+    day-calculation-operations:
+      trade-type-settlement-days:
+        calculation-id: "TRADE_TYPE_SETTLEMENT_DAYS"
+        calculation-name: "Trade Type Settlement Days"
+        calculation-description: "Calculate settlement days by trade type"
+        settlement-days:
+          equity-settlement-days:
+            trade-type: "Equity"
+            settlement-days: 2
+            day-description: "T+2 settlement for equity trades"
+          fixed-income-settlement-days:
+            trade-type: "FixedIncome"
+            settlement-days: 1
+            day-description: "T+1 settlement for fixed income trades"
+          derivative-settlement-days:
+            trade-type: "Derivative"
+            settlement-days: 1
+            day-description: "T+1 settlement for derivative trades"
+          forex-settlement-days:
+            trade-type: "Forex"
+            settlement-days: 2
+            day-description: "T+2 settlement for forex trades"
+          commodity-settlement-days:
+            trade-type: "Commodity"
+            settlement-days: 3
+            day-description: "T+3 settlement for commodity trades"
+        calculation-rules:
+          - rule-name: "settlement-days-lookup"
+            rule-condition: "true"
+            rule-calculation: "#settlementDaysMap[#trade.type] ?: 2"
+            rule-description: "Look up settlement days by trade type"
+          - rule-name: "business-day-adjustment"
+            rule-condition: "true"
+            rule-calculation: "#tradeDate.plusDays(#settlementDays).with(T(java.time.temporal.TemporalAdjusters).nextOrSame(T(java.time.DayOfWeek).MONDAY))"
+            rule-description: "Adjust for business days"
+        audit-requirements:
+          - "Log settlement day calculation"
+          - "Track business day adjustments"
+    operation-settings:
+      business-day-calculation: true
+      holiday-calendar: true
+      adjustment-tracking: true
+    
+  default:
+    operation-type: "default"
+    operation-name: "Default Settlement Operations"
+    description: "Default settlement operation processing"
+    settlement-operations:
+      default-operation:
+        operation-id: "DEFAULT_OPERATION"
+        operation-name: "Default Operation"
+        method-characteristics:
+          processing-fee: 25.0
+    operation-settings:
+      default-processing: true
+
+# Operation execution patterns
+execution-patterns:
+  settlement-method-pattern:
+    pattern-name: "Settlement Method Pattern"
+    description: "Execute operations based on settlement methods"
+    settlement-methods: ["DTC", "Fedwire", "Euroclear", "Clearstream", "Manual"]
+    
+  trade-type-pattern:
+    pattern-name: "Trade Type Pattern"
+    description: "Execute operations based on trade types"
+    trade-types: ["Equity", "FixedIncome", "Derivative", "Forex", "Commodity"]
+    
+  fee-calculation-pattern:
+    pattern-name: "Fee Calculation Pattern"
+    description: "Execute operations based on fee calculation types"
+    calculation-types: ["BASE_FEE", "VOLUME_FEE", "METHOD_FEE", "REGULATORY_FEE"]
+
+# Quality assurance
+quality-assurance:
+  operation-accuracy:
+    - "Settlement operations must be accurate"
+    - "Fee calculations must be precise"
+    - "Settlement day calculations must be correct"
+    - "Method selection must be optimal"
+    
+  operation-reliability:
+    - "Operations must be repeatable"
+    - "Calculations must be consistent"
+    - "Method selection must be reliable"
+    - "Performance must be predictable"
+    
+  business-compliance:
+    - "Operations must comply with regulations"
+    - "Fee structures must be transparent"
+    - "Settlement methods must be approved"
+    - "Audit trails must be comprehensive"

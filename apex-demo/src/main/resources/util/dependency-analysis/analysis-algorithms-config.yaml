@@ -1,0 +1,350 @@
+# APEX Analysis Algorithms Configuration
+# External data source configuration for dependency analysis algorithms
+# Replaces hardcoded analysis logic from YamlDependencyAnalysisDemo
+
+type: "external-data-config"
+name: "analysis-algorithms-config"
+description: "Data-driven analysis algorithms configuration for dependency processing"
+
+# Analysis algorithms configuration by algorithm type
+data:
+  dependency-graph-construction:
+    algorithm-type: "dependency-graph-construction"
+    algorithm-name: "Dependency Graph Construction Algorithm"
+    description: "Advanced algorithm for constructing comprehensive dependency graphs"
+    algorithm-parameters:
+      traversal-strategy: "depth-first"
+      cycle-detection: "enabled"
+      missing-file-handling: "track-and-continue"
+      performance-optimization: "enabled"
+    processing-stages:
+      initialization:
+        stage-name: "Graph Initialization"
+        stage-description: "Initialize dependency graph structure"
+        processing-steps:
+          - step: "create-root-node"
+            description: "Create root node for target file"
+            timeout: 100
+          - step: "initialize-graph-structure"
+            description: "Initialize graph data structures"
+            timeout: 100
+          - step: "setup-tracking-collections"
+            description: "Setup collections for tracking analysis state"
+            timeout: 50
+        stage-timeout: 250
+        
+      dependency-traversal:
+        stage-name: "Dependency Traversal"
+        stage-description: "Traverse and map all dependencies"
+        processing-steps:
+          - step: "parse-yaml-file"
+            description: "Parse YAML file and extract structure"
+            timeout: 500
+          - step: "extract-dependencies"
+            description: "Extract dependency references from YAML"
+            timeout: 300
+          - step: "resolve-dependency-paths"
+            description: "Resolve relative and absolute dependency paths"
+            timeout: 200
+          - step: "create-dependency-nodes"
+            description: "Create nodes for each dependency"
+            timeout: 400
+        stage-timeout: 1400
+        
+      cycle-detection:
+        stage-name: "Cycle Detection"
+        stage-description: "Detect circular dependencies in the graph"
+        processing-steps:
+          - step: "mark-visited-nodes"
+            description: "Mark nodes as visited during traversal"
+            timeout: 200
+          - step: "detect-back-edges"
+            description: "Detect back edges indicating cycles"
+            timeout: 300
+          - step: "trace-cycle-paths"
+            description: "Trace complete cycle paths"
+            timeout: 200
+        stage-timeout: 700
+        
+      validation:
+        stage-name: "Dependency Validation"
+        stage-description: "Validate all dependencies and file existence"
+        processing-steps:
+          - step: "check-file-existence"
+            description: "Check if dependency files exist"
+            timeout: 800
+          - step: "validate-yaml-syntax"
+            description: "Validate YAML syntax of dependency files"
+            timeout: 1000
+          - step: "check-file-accessibility"
+            description: "Check if files are accessible and readable"
+            timeout: 400
+        stage-timeout: 2200
+    algorithm-settings:
+      max-depth: 10
+      max-nodes: 1000
+      timeout-ms: 10000
+      parallel-processing: false
+    
+  statistical-analysis:
+    algorithm-type: "statistical-analysis"
+    algorithm-name: "Statistical Analysis Algorithm"
+    description: "Algorithm for generating comprehensive statistics from dependency data"
+    algorithm-parameters:
+      metrics-calculation: "comprehensive"
+      performance-tracking: "enabled"
+      health-assessment: "enabled"
+      trend-analysis: "basic"
+    processing-stages:
+      data-collection:
+        stage-name: "Data Collection"
+        stage-description: "Collect raw data from dependency graph"
+        processing-steps:
+          - step: "count-total-files"
+            description: "Count total files in dependency graph"
+            timeout: 100
+          - step: "calculate-depth-metrics"
+            description: "Calculate maximum and average depth"
+            timeout: 200
+          - step: "identify-file-types"
+            description: "Identify and categorize file types"
+            timeout: 300
+        stage-timeout: 600
+        
+      metrics-calculation:
+        stage-name: "Metrics Calculation"
+        stage-description: "Calculate comprehensive dependency metrics"
+        processing-steps:
+          - step: "calculate-node-metrics"
+            description: "Calculate per-node metrics"
+            timeout: 400
+          - step: "calculate-graph-metrics"
+            description: "Calculate overall graph metrics"
+            timeout: 300
+          - step: "calculate-health-metrics"
+            description: "Calculate health and quality metrics"
+            timeout: 200
+        stage-timeout: 900
+        
+      health-assessment:
+        stage-name: "Health Assessment"
+        stage-description: "Assess overall health of dependency structure"
+        processing-steps:
+          - step: "assess-missing-files"
+            description: "Assess impact of missing files"
+            timeout: 200
+          - step: "assess-circular-dependencies"
+            description: "Assess impact of circular dependencies"
+            timeout: 300
+          - step: "calculate-health-score"
+            description: "Calculate overall health score"
+            timeout: 100
+        stage-timeout: 600
+    algorithm-settings:
+      precision: "high"
+      timeout-ms: 5000
+      caching-enabled: true
+    
+  health-assessment:
+    algorithm-type: "health-assessment"
+    algorithm-name: "Health Assessment Algorithm"
+    description: "Algorithm for comprehensive health assessment of dependency chains"
+    algorithm-parameters:
+      assessment-depth: "comprehensive"
+      scoring-method: "weighted"
+      threshold-based: "enabled"
+      remediation-suggestions: "enabled"
+    processing-stages:
+      issue-identification:
+        stage-name: "Issue Identification"
+        stage-description: "Identify all potential issues in dependency chain"
+        processing-steps:
+          - step: "identify-missing-files"
+            description: "Identify missing dependency files"
+            timeout: 300
+          - step: "identify-invalid-yaml"
+            description: "Identify files with invalid YAML syntax"
+            timeout: 500
+          - step: "identify-circular-dependencies"
+            description: "Identify circular dependency chains"
+            timeout: 400
+          - step: "identify-orphaned-files"
+            description: "Identify unreferenced files"
+            timeout: 200
+        stage-timeout: 1400
+        
+      severity-assessment:
+        stage-name: "Severity Assessment"
+        stage-description: "Assess severity of identified issues"
+        processing-steps:
+          - step: "assess-missing-file-impact"
+            description: "Assess impact of missing files"
+            timeout: 300
+          - step: "assess-circular-dependency-impact"
+            description: "Assess impact of circular dependencies"
+            timeout: 400
+          - step: "assess-invalid-yaml-impact"
+            description: "Assess impact of invalid YAML files"
+            timeout: 200
+        stage-timeout: 900
+        
+      health-scoring:
+        stage-name: "Health Scoring"
+        stage-description: "Calculate comprehensive health scores"
+        processing-steps:
+          - step: "calculate-component-scores"
+            description: "Calculate scores for individual components"
+            timeout: 200
+          - step: "calculate-weighted-score"
+            description: "Calculate weighted overall score"
+            timeout: 100
+          - step: "generate-health-grade"
+            description: "Generate letter grade for health"
+            timeout: 50
+        stage-timeout: 350
+        
+      remediation-planning:
+        stage-name: "Remediation Planning"
+        stage-description: "Generate remediation suggestions"
+        processing-steps:
+          - step: "prioritize-issues"
+            description: "Prioritize issues by severity and impact"
+            timeout: 200
+          - step: "generate-remediation-steps"
+            description: "Generate specific remediation steps"
+            timeout: 300
+          - step: "estimate-remediation-effort"
+            description: "Estimate effort required for remediation"
+            timeout: 100
+        stage-timeout: 600
+    algorithm-settings:
+      scoring-precision: "high"
+      remediation-detail: "comprehensive"
+      timeout-ms: 8000
+    
+  performance-analysis:
+    algorithm-type: "performance-analysis"
+    algorithm-name: "Performance Analysis Algorithm"
+    description: "Algorithm for analyzing performance characteristics of dependency processing"
+    algorithm-parameters:
+      timing-precision: "milliseconds"
+      memory-tracking: "enabled"
+      throughput-calculation: "enabled"
+      bottleneck-identification: "enabled"
+    processing-stages:
+      timing-analysis:
+        stage-name: "Timing Analysis"
+        stage-description: "Analyze timing characteristics of dependency processing"
+        processing-steps:
+          - step: "measure-parse-times"
+            description: "Measure YAML parsing times"
+            timeout: 100
+          - step: "measure-traversal-times"
+            description: "Measure dependency traversal times"
+            timeout: 200
+          - step: "measure-validation-times"
+            description: "Measure validation times"
+            timeout: 150
+        stage-timeout: 450
+        
+      memory-analysis:
+        stage-name: "Memory Analysis"
+        stage-description: "Analyze memory usage patterns"
+        processing-steps:
+          - step: "measure-graph-memory"
+            description: "Measure memory used by dependency graph"
+            timeout: 100
+          - step: "measure-node-memory"
+            description: "Measure memory per node"
+            timeout: 100
+          - step: "identify-memory-hotspots"
+            description: "Identify memory usage hotspots"
+            timeout: 100
+        stage-timeout: 300
+        
+      throughput-analysis:
+        stage-name: "Throughput Analysis"
+        stage-description: "Analyze processing throughput"
+        processing-steps:
+          - step: "calculate-files-per-second"
+            description: "Calculate files processed per second"
+            timeout: 50
+          - step: "calculate-nodes-per-second"
+            description: "Calculate nodes processed per second"
+            timeout: 50
+          - step: "calculate-dependencies-per-second"
+            description: "Calculate dependencies processed per second"
+            timeout: 50
+        stage-timeout: 150
+    algorithm-settings:
+      precision: "high"
+      sampling-rate: 1000
+      timeout-ms: 3000
+    
+  default:
+    algorithm-type: "default"
+    algorithm-name: "Default Analysis Algorithm"
+    description: "Default algorithm for basic dependency analysis"
+    algorithm-parameters:
+      analysis-depth: "basic"
+      validation-level: "standard"
+    processing-stages:
+      basic-analysis:
+        stage-name: "Basic Analysis"
+        stage-description: "Perform basic dependency analysis"
+        processing-steps:
+          - step: "basic-parsing"
+            description: "Basic YAML parsing"
+            timeout: 500
+          - step: "basic-validation"
+            description: "Basic validation"
+            timeout: 500
+        stage-timeout: 1000
+    algorithm-settings:
+      timeout-ms: 2000
+
+# Algorithm optimization settings
+optimization-settings:
+  dependency-graph-construction:
+    caching-strategy: "aggressive"
+    parallel-processing: false
+    memory-optimization: "enabled"
+    early-termination: "on-error"
+    
+  statistical-analysis:
+    caching-strategy: "moderate"
+    parallel-processing: true
+    memory-optimization: "standard"
+    early-termination: "disabled"
+    
+  health-assessment:
+    caching-strategy: "conservative"
+    parallel-processing: false
+    memory-optimization: "enabled"
+    early-termination: "on-critical-error"
+    
+  performance-analysis:
+    caching-strategy: "disabled"
+    parallel-processing: false
+    memory-optimization: "disabled"
+    early-termination: "disabled"
+
+# Quality assurance
+quality-assurance:
+  algorithm-reliability:
+    - "Algorithms must handle edge cases gracefully"
+    - "Error handling must be comprehensive"
+    - "Performance must be predictable"
+    - "Memory usage must be controlled"
+    
+  result-accuracy:
+    - "Analysis results must be accurate"
+    - "Statistics must be calculated correctly"
+    - "Health assessments must be reliable"
+    - "Performance metrics must be precise"
+    
+  algorithm-efficiency:
+    - "Processing time must be reasonable"
+    - "Memory usage must be optimized"
+    - "Parallel processing must be thread-safe"
+    - "Caching must improve performance"

@@ -1,3 +1,5 @@
+![APEX System Logo](APEX%20System%20logo.png)
+
 # APEX - Complete User Guide
 
 **Version:** 1.0
@@ -1440,7 +1442,7 @@ Bootstrap demos provide:
 
 ```bash
 cd apex-demo
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.CustodyAutoRepairBootstrap"
 ```
 
 **What You'll Learn:**
@@ -1460,7 +1462,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CustodyAutoRepairBo
 
 ```bash
 cd apex-demo
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.validation.CommoditySwapValidationBootstrap"
 ```
 
 **What You'll Learn:**
@@ -1480,7 +1482,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CommoditySwapValida
 
 ```bash
 cd apex-demo
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.OtcOptionsBootstrapDemo"
 ```
 
 **What You'll Learn:**
@@ -1500,7 +1502,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.OtcOptionsBootstrap
 
 ```bash
 cd apex-demo
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.ScenarioBasedProcessingDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.evaluation.ScenarioBasedProcessingDemo"
 ```
 
 **What You'll Learn:**
@@ -1551,10 +1553,10 @@ cd apex-demo
 ./scripts/run-demos.bat    # Windows
 
 # Or run individual demos
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo"
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap"
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap"
-mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.ScenarioBasedProcessingDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.OtcOptionsBootstrapDemo"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.validation.CommoditySwapValidationBootstrap"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.CustodyAutoRepairBootstrap"
+mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.evaluation.ScenarioBasedProcessingDemo"
 ```
 
 ### What to Expect
@@ -3454,7 +3456,7 @@ Here's how to set up a scenario for processing OTC Options:
 scenario-registry:
   - scenario-id: "otc-options-standard"
     config-file: "scenarios/otc-options-scenario.yaml"
-    data-types: ["OtcOption", "dev.mars.apex.demo.bootstrap.model.OtcOption"]
+    data-types: ["OtcOption", "dev.mars.apex.demo.model.OtcOption"]
     description: "Standard validation and enrichment pipeline for OTC Options"
     business-domain: "Derivatives Trading"
     owner: "derivatives.team@company.com"
@@ -3477,7 +3479,7 @@ scenario:
 
   # Data types this scenario applies to
   data-types:
-    - "dev.mars.apex.demo.bootstrap.model.OtcOption"
+    - "dev.mars.apex.demo.model.OtcOption"
     - "OtcOption"  # Short name alias
 
   # References to existing rule configuration files
@@ -6054,17 +6056,177 @@ For long-term configuration quality:
 
 ### Common Issues
 
-**Configuration Issues:**
-- **Configuration not loading**: Check YAML syntax and file paths
-- **Missing metadata errors**: Ensure all required metadata fields are present (see [YAML Validation Tips and Troubleshooting](#yaml-validation-tips-and-troubleshooting))
-- **Validation failures**: Use the validation utilities and implementation checklists to verify file structure
-- **Type errors**: Verify correct `type` value for your file purpose (see [Quick Reference](#quick-reference))
+This section covers the most frequently encountered issues when working with APEX, based on real-world usage patterns and support cases. Each issue includes the error symptoms, root cause, and step-by-step resolution.
 
-**Runtime Issues:**
-- **Enrichment not working**: Verify condition expressions and field mappings
-- **Performance issues**: Enable caching and monitor metrics
-- **Data not found**: Check key field matching and default values
-- **Scenario not found**: Verify scenario registry and data type mappings
+#### SpEL Expression Evaluation Errors
+
+**Most Common Issue**: Field reference syntax errors in YAML configurations.
+
+**Error Symptoms:**
+```
+WARNING: Error evaluating enrichment condition '#data.amount != null' for enrichment expression-evaluation:
+EL1007E: Property or field 'amount' cannot be found on null
+org.springframework.expression.spel.SpelEvaluationException: EL1007E: Property or field 'amount' cannot be found on null
+```
+
+**Root Cause**: Using `#data.fieldName` syntax when data is passed as a HashMap where fields should be accessed directly as `#fieldName`.
+
+**Resolution:**
+1. **Identify the data structure**: APEX typically processes HashMap objects where keys are accessed directly
+2. **Fix field references**: Change `#data.fieldName` to `#fieldName` in all SpEL expressions
+3. **Common patterns to fix**:
+   - **Conditions**: `#data.amount != null` → `#amount != null`
+   - **Calculations**: `#data.amount * #data.rate` → `#amount * #rate`
+   - **Method calls**: `#data.currency.length()` → `#currency.length()`
+   - **Ternary operators**: `#data.amount > 1000 ? 'HIGH' : 'LOW'` → `#amount > 1000 ? 'HIGH' : 'LOW'`
+
+**Prevention**: Always verify field names match your actual data structure before writing SpEL expressions.
+
+#### YAML Configuration Loading Errors
+
+**Error Symptoms:**
+```
+YamlConfigurationException: Enrichment ID is required
+Configuration loading failed
+```
+
+**Root Cause**: Missing required fields in YAML enrichment definitions.
+
+**Resolution:**
+1. **Add required ID field**: Every enrichment must have an `id` field
+   ```yaml
+   enrichments:
+     - id: "my-enrichment"        # Required
+       name: "my-enrichment"      # Required
+       type: "field-enrichment"   # Required
+   ```
+2. **Verify enrichment types**: Use only supported types:
+   - `field-enrichment`
+   - `lookup-enrichment`
+   - `calculation-enrichment`
+3. **Check field mappings**: Ensure `field-mappings` are present for field enrichments
+
+#### BigDecimal Deprecation Warnings
+
+**Error Symptoms:**
+```
+ROUND_HALF_UP in java.math.BigDecimal has been deprecated
+divide(java.math.BigDecimal,int,int) in java.math.BigDecimal has been deprecated
+```
+
+**Root Cause**: Using deprecated BigDecimal constants and methods.
+
+**Resolution:**
+1. **Import RoundingMode**: Add `import java.math.RoundingMode;`
+2. **Replace deprecated constants**:
+   - `BigDecimal.ROUND_HALF_UP` → `RoundingMode.HALF_UP`
+   - `BigDecimal.ROUND_DOWN` → `RoundingMode.DOWN`
+3. **Update divide methods**:
+   - `amount.divide(divisor, 2, BigDecimal.ROUND_HALF_UP)` → `amount.divide(divisor, 2, RoundingMode.HALF_UP)`
+
+#### Configuration Issues
+
+**Configuration not loading**:
+- Check YAML syntax using online validators
+- Verify file paths are correct and files exist
+- Ensure proper indentation (use spaces, not tabs)
+
+**Missing metadata errors**:
+- Ensure all required metadata fields are present (see [YAML Validation Tips and Troubleshooting](#yaml-validation-tips-and-troubleshooting))
+- Verify `name`, `version`, `description` fields exist
+
+**Validation failures**:
+- Use validation utilities: `mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.util.YamlValidationDemo`
+- Check implementation checklists to verify file structure
+
+**Type errors**:
+- Verify correct `type` value for your file purpose (see [Quick Reference](#quick-reference))
+- Ensure type matches the intended enrichment functionality
+
+#### Runtime Issues
+
+**Enrichment not working**:
+- Verify condition expressions use correct field syntax (`#fieldName` not `#data.fieldName`)
+- Check field mappings match your data structure
+- Ensure enrichment conditions evaluate to true for your test data
+
+**Performance issues**:
+- Enable caching for frequently accessed data
+- Monitor metrics and identify bottlenecks
+- Consider connection pooling for external data sources
+
+**Data not found**:
+- Check key field matching between lookup keys and data
+- Verify default values are configured for missing data
+- Test lookup conditions with actual data samples
+
+**Scenario not found**:
+- Verify scenario registry configuration
+- Check data type mappings in scenario files
+- Ensure scenario files are in the correct directory structure
+
+#### Debugging SpEL Expressions
+
+**Quick Debugging Steps:**
+1. **Log your data structure**: Add logging to see the actual HashMap keys
+   ```java
+   logger.info("Data keys: {}", data.keySet());
+   logger.info("Data values: {}", data);
+   ```
+
+2. **Test simple expressions first**: Start with basic field access before complex logic
+   ```yaml
+   # Test this first
+   condition: "#amount != null"
+   # Before testing this
+   condition: "#amount != null && #amount > 1000 && #currency == 'USD'"
+   ```
+
+3. **Use safe navigation**: Prevent null pointer exceptions
+   ```yaml
+   # Unsafe
+   expression: "#customer.address.country"
+   # Safe
+   expression: "#customer?.address?.country"
+   ```
+
+4. **Validate field names**: Ensure YAML field names exactly match HashMap keys
+   ```yaml
+   # Wrong - case mismatch
+   condition: "#CustomerID != null"
+   # Correct - exact match
+   condition: "#customerId != null"
+   ```
+
+**Common SpEL Patterns:**
+- **Null checks**: `#field != null`
+- **String operations**: `#field.length() > 0`, `#field.startsWith('PREFIX')`
+- **Numeric comparisons**: `#amount > 1000`, `#quantity >= 1`
+- **Conditional logic**: `#amount > 1000 ? 'HIGH' : 'LOW'`
+- **Method calls**: `#currency.toUpperCase()`, `#date.isAfter(#otherDate)`
+
+#### Error Prevention Best Practices
+
+**Before Writing YAML Configurations:**
+1. **Understand your data structure**: Print or log the actual data being processed
+2. **Start simple**: Begin with basic field access before adding complex logic
+3. **Use consistent naming**: Match field names exactly between data and YAML
+4. **Test incrementally**: Add one condition at a time and test each step
+
+**YAML Configuration Checklist:**
+- ✅ All enrichments have required `id`, `name`, and `type` fields
+- ✅ SpEL expressions use `#fieldName` syntax (not `#data.fieldName`)
+- ✅ Field names match actual data structure exactly
+- ✅ Enrichment types are valid (`field-enrichment`, `lookup-enrichment`, `calculation-enrichment`)
+- ✅ Required field mappings are present for field enrichments
+- ✅ Null safety is considered in complex expressions
+
+**Testing Strategy:**
+1. **Unit test your data**: Verify data structure before writing rules
+2. **Test with real data**: Use actual data samples, not mock data
+3. **Validate incrementally**: Test each enrichment individually
+4. **Check logs**: Monitor for warnings and errors during testing
+5. **Use validation tools**: Run `mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.util.YamlValidationDemo`
 
 ### Documentation Resources
 
@@ -6199,9 +6361,9 @@ public class ScenarioAuditLogger {
 ### Bootstrap Demo Resources
 
 **Getting Started with Bootstrap Demos:**
-- **OTC Options Bootstrap**: `mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.bootstrap.OtcOptionsBootstrapDemo -pl apex-demo`
-- **Commodity Swap Bootstrap**: `mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.bootstrap.CommoditySwapValidationBootstrap -pl apex-demo`
-- **Custody Auto-Repair Bootstrap**: `mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.bootstrap.CustodyAutoRepairBootstrap -pl apex-demo`
+- **OTC Options Bootstrap**: `mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.enrichment.OtcOptionsBootstrapDemo -pl apex-demo`
+- **Commodity Swap Bootstrap**: `mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.validation.CommoditySwapValidationBootstrap -pl apex-demo`
+- **Custody Auto-Repair Bootstrap**: `mvn exec:java -Dexec.mainClass=dev.mars.apex.demo.enrichment.CustodyAutoRepairBootstrap -pl apex-demo`
 
 **Bootstrap Documentation:**
 - **Complete Implementation Guides**: Each bootstrap includes detailed README with business requirements and technical implementation

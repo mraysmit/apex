@@ -1,0 +1,209 @@
+# APEX Collection Operations Configuration
+# External data source configuration for collection operations
+# Replaces hardcoded collection logic from ApexAdvancedFeaturesDemo
+
+type: "external-data-config"
+name: "collection-operations-config"
+description: "Data-driven collection operations configuration for advanced features"
+
+# Collection operations configuration by operation type
+data:
+  list-filtering:
+    operation-id: "COLL001"
+    operation-type: "filtering"
+    description: "List filtering operations with complex predicates"
+    supported-operations:
+      - "filter-by-price"
+      - "filter-by-category"
+      - "filter-by-membership"
+      - "filter-by-age-range"
+    performance-characteristics:
+      time-complexity: "O(n)"
+      space-complexity: "O(k)"
+      parallel-capable: true
+    
+  array-operations:
+    operation-id: "COLL002"
+    operation-type: "array-manipulation"
+    description: "Array operations and transformations"
+    supported-operations:
+      - "array-mapping"
+      - "array-reduction"
+      - "array-sorting"
+      - "array-grouping"
+    performance-characteristics:
+      time-complexity: "O(n log n)"
+      space-complexity: "O(n)"
+      parallel-capable: true
+    
+  complex-queries:
+    operation-id: "COLL003"
+    operation-type: "complex-querying"
+    description: "Complex collection queries with multiple conditions"
+    supported-operations:
+      - "multi-condition-filtering"
+      - "nested-property-access"
+      - "cross-collection-joins"
+      - "conditional-aggregation"
+    performance-characteristics:
+      time-complexity: "O(n²)"
+      space-complexity: "O(n)"
+      parallel-capable: false
+    
+  aggregation-operations:
+    operation-id: "COLL004"
+    operation-type: "aggregation"
+    description: "Aggregation and grouping operations"
+    supported-operations:
+      - "sum-aggregation"
+      - "average-calculation"
+      - "count-operations"
+      - "group-by-operations"
+    performance-characteristics:
+      time-complexity: "O(n)"
+      space-complexity: "O(g)"
+      parallel-capable: true
+    
+  default:
+    operation-id: "COLL000"
+    operation-type: "default"
+    description: "Default collection operation"
+    supported-operations:
+      - "basic-iteration"
+    performance-characteristics:
+      time-complexity: "O(n)"
+      space-complexity: "O(1)"
+      parallel-capable: true
+
+# Collection operation patterns
+operation-patterns:
+  financial-product-filtering:
+    pattern-name: "Financial Product Filtering"
+    description: "Filter financial products based on various criteria"
+    operations:
+      - operation: "filter-by-price"
+        expression: "#products.?[price > 500]"
+        description: "Filter products with price greater than 500"
+      - operation: "filter-by-category"
+        expression: "#products.?[category == 'Equity']"
+        description: "Filter equity products"
+      - operation: "filter-high-value"
+        expression: "#products.?[price > 1000 && category in {'Equity', 'FixedIncome'}]"
+        description: "Filter high-value equity and fixed income products"
+        
+  customer-analysis:
+    pattern-name: "Customer Analysis Operations"
+    description: "Analyze customer data using collection operations"
+    operations:
+      - operation: "filter-premium-customers"
+        expression: "#customers.?[membershipLevel in {'Gold', 'Platinum'}]"
+        description: "Filter premium customers"
+      - operation: "filter-by-age-group"
+        expression: "#customers.?[age >= 25 && age <= 65]"
+        description: "Filter customers in target age group"
+      - operation: "filter-by-preferences"
+        expression: "#customers.?[preferredCategories.contains('Equity')]"
+        description: "Filter customers interested in equity products"
+        
+  inventory-management:
+    pattern-name: "Inventory Management Operations"
+    description: "Manage inventory using collection operations"
+    operations:
+      - operation: "low-stock-items"
+        expression: "#inventory.?[quantity < 10]"
+        description: "Find low stock items"
+      - operation: "high-value-inventory"
+        expression: "#inventory.?[price * quantity > 50000]"
+        description: "Find high-value inventory items"
+      - operation: "category-grouping"
+        expression: "#inventory.groupBy(category)"
+        description: "Group inventory by category"
+
+# Advanced collection features
+advanced-features:
+  projection-operations:
+    description: "Project specific fields from collections"
+    examples:
+      - operation: "name-price-projection"
+        expression: "#products.![name + ': $' + price]"
+        description: "Project product names and prices"
+      - operation: "customer-summary"
+        expression: "#customers.![name + ' (' + membershipLevel + ')']"
+        description: "Project customer summaries"
+        
+  selection-operations:
+    description: "Select first/last elements with conditions"
+    examples:
+      - operation: "first-high-value"
+        expression: "#products.^[price > 1000]"
+        description: "Select first high-value product"
+      - operation: "last-equity-product"
+        expression: "#products.$[category == 'Equity']"
+        description: "Select last equity product"
+        
+  nested-operations:
+    description: "Complex nested collection operations"
+    examples:
+      - operation: "nested-filtering"
+        expression: "#customers.?[preferredCategories.?[#this == 'Equity'].size() > 0]"
+        description: "Customers with equity preferences using nested filtering"
+      - operation: "complex-aggregation"
+        expression: "#products.?[category == 'Equity'].![price].sum()"
+        description: "Sum of all equity product prices"
+
+# Performance optimization guidelines
+performance-optimization:
+  filtering-best-practices:
+    - "Use indexed fields for filtering when possible"
+    - "Apply most selective filters first"
+    - "Consider parallel processing for large collections"
+    - "Cache frequently used filter results"
+    
+  memory-management:
+    - "Use streaming operations for large datasets"
+    - "Avoid creating intermediate collections unnecessarily"
+    - "Consider lazy evaluation for complex operations"
+    - "Monitor memory usage during collection processing"
+    
+  scalability-considerations:
+    - "Implement pagination for large result sets"
+    - "Use database-level filtering when possible"
+    - "Consider distributed processing for very large collections"
+    - "Monitor performance metrics and optimize bottlenecks"
+
+# Error handling and validation
+error-handling:
+  null-safety:
+    - "Handle null collections gracefully"
+    - "Validate collection elements before processing"
+    - "Provide meaningful error messages for invalid operations"
+    
+  type-safety:
+    - "Validate element types before casting"
+    - "Handle type conversion errors appropriately"
+    - "Use generic types for type safety"
+    
+  boundary-conditions:
+    - "Handle empty collections appropriately"
+    - "Validate index bounds for array operations"
+    - "Handle division by zero in aggregation operations"
+
+# Integration specifications
+integration:
+  data-sources:
+    - "In-memory collections"
+    - "Database result sets"
+    - "External API responses"
+    - "File-based data sources"
+    
+  output-formats:
+    - "Filtered collections"
+    - "Aggregated results"
+    - "Transformed data structures"
+    - "Summary statistics"
+    
+  monitoring:
+    - "Operation execution time"
+    - "Memory usage patterns"
+    - "Error rates and types"
+    - "Throughput metrics"

@@ -1,0 +1,339 @@
+# APEX Commodity Data Configuration
+# External data source configuration for commodity data processing
+# Replaces embedded commodity data from CommoditySwapValidationBootstrap
+
+type: "external-data-config"
+name: "commodity-data-config"
+description: "Data-driven commodity data configuration for commodity swap processing"
+
+# Commodity data configuration by commodity type
+data:
+  energy-commodities:
+    commodity-type: "energy-commodities"
+    commodity-category: "Energy"
+    description: "Energy commodities data and specifications"
+    commodity-specifications:
+      crude-oil:
+        commodity-name: "Crude Oil"
+        commodity-code: "CL"
+        supported-indices:
+          - index-name: "WTI"
+            full-name: "West Texas Intermediate"
+            exchange: "NYMEX"
+            contract-size: "1000 barrels"
+            price-unit: "USD per barrel"
+            delivery-location: "Cushing, Oklahoma"
+            quality-specifications:
+              - "API gravity: 39.6 degrees"
+              - "Sulfur content: 0.24%"
+              - "Sweet crude classification"
+              
+          - index-name: "BRENT"
+            full-name: "Brent Crude Oil"
+            exchange: "ICE"
+            contract-size: "1000 barrels"
+            price-unit: "USD per barrel"
+            delivery-location: "North Sea"
+            quality-specifications:
+              - "API gravity: 38.3 degrees"
+              - "Sulfur content: 0.37%"
+              - "Sweet crude classification"
+              
+      natural-gas:
+        commodity-name: "Natural Gas"
+        commodity-code: "NG"
+        supported-indices:
+          - index-name: "HENRY_HUB"
+            full-name: "Henry Hub Natural Gas"
+            exchange: "NYMEX"
+            contract-size: "10000 MMBtu"
+            price-unit: "USD per MMBtu"
+            delivery-location: "Henry Hub, Louisiana"
+            quality-specifications:
+              - "Pipeline quality natural gas"
+              - "Heating value: 1.036 MMBtu per Mcf"
+              - "Sulfur content: <4 ppm"
+              
+      heating-oil:
+        commodity-name: "Heating Oil"
+        commodity-code: "HO"
+        supported-indices:
+          - index-name: "NYMEX_HEATING_OIL"
+            full-name: "NYMEX Heating Oil"
+            exchange: "NYMEX"
+            contract-size: "42000 gallons"
+            price-unit: "USD per gallon"
+            delivery-location: "New York Harbor"
+            quality-specifications:
+              - "No. 2 heating oil"
+              - "Sulfur content: 15 ppm max"
+              - "ASTM specifications"
+    processing-characteristics:
+      price-volatility: "high"
+      storage-requirements: "specialized-facilities"
+      seasonal-factors: "weather-dependent"
+      regulatory-oversight: "CFTC"
+    risk-factors:
+      - "Geopolitical risk"
+      - "Weather risk"
+      - "Storage capacity constraints"
+      - "Refinery capacity utilization"
+      - "Transportation bottlenecks"
+    
+  metals-commodities:
+    commodity-type: "metals-commodities"
+    commodity-category: "Metals"
+    description: "Metals commodities data and specifications"
+    commodity-specifications:
+      precious-metals:
+        gold:
+          commodity-name: "Gold"
+          commodity-code: "GC"
+          supported-indices:
+            - index-name: "COMEX_GOLD"
+              full-name: "COMEX Gold"
+              exchange: "COMEX"
+              contract-size: "100 troy ounces"
+              price-unit: "USD per troy ounce"
+              delivery-location: "COMEX-approved depositories"
+              quality-specifications:
+                - "Fineness: 995 minimum"
+                - "Good delivery bars"
+                - "LBMA approved refiners"
+                
+        silver:
+          commodity-name: "Silver"
+          commodity-code: "SI"
+          supported-indices:
+            - index-name: "COMEX_SILVER"
+              full-name: "COMEX Silver"
+              exchange: "COMEX"
+              contract-size: "5000 troy ounces"
+              price-unit: "USD per troy ounce"
+              delivery-location: "COMEX-approved depositories"
+              quality-specifications:
+                - "Fineness: 999 minimum"
+                - "Good delivery bars"
+                - "LBMA approved refiners"
+                
+      industrial-metals:
+        copper:
+          commodity-name: "Copper"
+          commodity-code: "HG"
+          supported-indices:
+            - index-name: "LME_COPPER"
+              full-name: "LME Copper"
+              exchange: "LME"
+              contract-size: "25 tonnes"
+              price-unit: "USD per tonne"
+              delivery-location: "LME-approved warehouses"
+              quality-specifications:
+                - "Grade A copper cathodes"
+                - "99.99% purity minimum"
+                - "LME brand approval"
+                
+        aluminum:
+          commodity-name: "Aluminum"
+          commodity-code: "AL"
+          supported-indices:
+            - index-name: "LME_ALUMINUM"
+              full-name: "LME Aluminum"
+              exchange: "LME"
+              contract-size: "25 tonnes"
+              price-unit: "USD per tonne"
+              delivery-location: "LME-approved warehouses"
+              quality-specifications:
+                - "Primary aluminum ingots"
+                - "99.7% purity minimum"
+                - "LME brand approval"
+    processing-characteristics:
+      price-volatility: "medium"
+      storage-requirements: "secure-vaults"
+      seasonal-factors: "limited"
+      regulatory-oversight: "CFTC-LME"
+    risk-factors:
+      - "Industrial demand fluctuations"
+      - "Currency risk (USD strength)"
+      - "Central bank policy"
+      - "Mining supply disruptions"
+      - "Warehouse financing costs"
+    
+  agricultural-commodities:
+    commodity-type: "agricultural-commodities"
+    commodity-category: "Agricultural"
+    description: "Agricultural commodities data and specifications"
+    commodity-specifications:
+      grains:
+        corn:
+          commodity-name: "Corn"
+          commodity-code: "C"
+          supported-indices:
+            - index-name: "CBOT_CORN"
+              full-name: "CBOT Corn"
+              exchange: "CBOT"
+              contract-size: "5000 bushels"
+              price-unit: "USD per bushel"
+              delivery-location: "Chicago and approved locations"
+              quality-specifications:
+                - "No. 2 Yellow Corn"
+                - "Moisture: 15% maximum"
+                - "Test weight: 56 lbs/bushel minimum"
+                
+        wheat:
+          commodity-name: "Wheat"
+          commodity-code: "W"
+          supported-indices:
+            - index-name: "CBOT_WHEAT"
+              full-name: "CBOT Wheat"
+              exchange: "CBOT"
+              contract-size: "5000 bushels"
+              price-unit: "USD per bushel"
+              delivery-location: "Chicago and approved locations"
+              quality-specifications:
+                - "No. 2 Soft Red Winter Wheat"
+                - "Protein: 10.5% minimum"
+                - "Test weight: 58 lbs/bushel minimum"
+                
+        soybeans:
+          commodity-name: "Soybeans"
+          commodity-code: "S"
+          supported-indices:
+            - index-name: "CBOT_SOYBEANS"
+              full-name: "CBOT Soybeans"
+              exchange: "CBOT"
+              contract-size: "5000 bushels"
+              price-unit: "USD per bushel"
+              delivery-location: "Chicago and approved locations"
+              quality-specifications:
+                - "No. 2 Yellow Soybeans"
+                - "Moisture: 13% maximum"
+                - "Test weight: 56 lbs/bushel minimum"
+                
+      soft-commodities:
+        sugar:
+          commodity-name: "Sugar"
+          commodity-code: "SB"
+          supported-indices:
+            - index-name: "ICE_SUGAR_11"
+              full-name: "ICE Sugar No. 11"
+              exchange: "ICE"
+              contract-size: "112000 pounds"
+              price-unit: "USD per pound"
+              delivery-location: "Various international ports"
+              quality-specifications:
+                - "Raw cane sugar"
+                - "Polarization: 96 degrees minimum"
+                - "ICE quality standards"
+    processing-characteristics:
+      price-volatility: "high"
+      storage-requirements: "climate-controlled"
+      seasonal-factors: "harvest-dependent"
+      regulatory-oversight: "CFTC"
+    risk-factors:
+      - "Weather risk"
+      - "Crop disease and pests"
+      - "Government policy changes"
+      - "Global supply/demand imbalances"
+      - "Currency fluctuations"
+      - "Storage and transportation costs"
+    
+  default:
+    commodity-type: "default"
+    commodity-category: "Default"
+    description: "Default commodity data"
+    commodity-specifications:
+      default-commodity:
+        commodity-name: "Default Commodity"
+        commodity-code: "DEFAULT"
+        supported-indices:
+          - index-name: "DEFAULT_INDEX"
+            full-name: "Default Index"
+            exchange: "DEFAULT"
+            contract-size: "1 unit"
+            price-unit: "USD per unit"
+    processing-characteristics:
+      price-volatility: "medium"
+      storage-requirements: "standard"
+      seasonal-factors: "none"
+    risk-factors:
+      - "General market risk"
+
+# Commodity processing algorithms
+processing-algorithms:
+  energy-processing:
+    algorithm-name: "Energy Commodities Processing"
+    description: "Specialized processing for energy commodities"
+    characteristics:
+      - "Weather impact analysis"
+      - "Storage cost calculations"
+      - "Refinery margin analysis"
+      - "Transportation cost modeling"
+    
+  metals-processing:
+    algorithm-name: "Metals Commodities Processing"
+    description: "Specialized processing for metals commodities"
+    characteristics:
+      - "Industrial demand analysis"
+      - "Currency impact assessment"
+      - "Storage and financing costs"
+      - "Supply chain risk analysis"
+    
+  agricultural-processing:
+    algorithm-name: "Agricultural Commodities Processing"
+    description: "Specialized processing for agricultural commodities"
+    characteristics:
+      - "Seasonal pattern analysis"
+      - "Weather risk assessment"
+      - "Crop cycle modeling"
+      - "Government policy impact"
+
+# Market conventions
+market-conventions:
+  pricing-conventions:
+    energy:
+      - "Spot pricing vs futures curves"
+      - "Crack spread calculations"
+      - "Basis differentials"
+      - "Calendar spread pricing"
+    metals:
+      - "Spot vs forward pricing"
+      - "Contango/backwardation analysis"
+      - "Storage cost adjustments"
+      - "Currency hedging considerations"
+    agricultural:
+      - "Harvest vs non-harvest pricing"
+      - "Basis patterns"
+      - "Carry market dynamics"
+      - "Weather premium calculations"
+      
+  settlement-conventions:
+    physical-delivery:
+      - "Delivery location specifications"
+      - "Quality tolerance ranges"
+      - "Inspection procedures"
+      - "Title transfer requirements"
+    cash-settlement:
+      - "Reference price determination"
+      - "Settlement calculation methods"
+      - "Timing of settlement"
+      - "Currency conversion procedures"
+
+# Quality assurance
+quality-assurance:
+  data-accuracy:
+    - "Commodity specifications must be current"
+    - "Index definitions must be accurate"
+    - "Quality standards must be up-to-date"
+    - "Exchange information must be correct"
+    
+  market-alignment:
+    - "Specifications must match exchange standards"
+    - "Pricing conventions must be market-standard"
+    - "Settlement procedures must be accurate"
+    - "Risk factors must be comprehensive"
+    
+  regulatory-compliance:
+    - "Regulatory oversight must be identified"
+    - "Position limits must be current"
+    - "Reporting requirements must be accurate"
+    - "Compliance procedures must be defined"

@@ -1,0 +1,188 @@
+# APEX Test Utilities Demo Configuration
+# Real APEX YAML configuration for test utilities processing
+# Replaces all hardcoded test data creation logic from TestUtilities (@version 1.0)
+
+type: "apex-enrichment-config"
+name: "test-utilities-demo"
+description: "APEX-compliant test utilities with real enrichment services"
+
+# External data source for test utilities configurations
+external-data-sources:
+  - name: "sample-data-config"
+    type: "external-data-config"
+    source: "util/test-data/sample-data-config.yaml"
+    
+  - name: "test-data-generation-config"
+    type: "external-data-config"
+    source: "util/test-data/test-data-generation-config.yaml"
+    
+  - name: "validation-helpers-config"
+    type: "external-data-config"
+    source: "util/test-data/validation-helpers-config.yaml"
+
+# APEX enrichment processing for test utilities
+enrichments:
+  - name: "sample-data-creation"
+    type: "lookup-enrichment"
+    description: "Create sample data using data-driven configuration"
+    condition: "#data.utilityType == 'sample-data-creation'"
+    lookup-source: "sample-data-config"
+    lookup-key: "#data.dataType != null ? #data.dataType : 'default'"
+    target-field: "sampleDataCreationResult"
+    
+  - name: "test-data-generation"
+    type: "lookup-enrichment"
+    description: "Generate test data using data-driven configuration"
+    condition: "#data.utilityType == 'test-data-generation'"
+    lookup-source: "test-data-generation-config"
+    lookup-key: "#data.generationType != null ? #data.generationType : 'default'"
+    target-field: "testDataGenerationResult"
+    
+  - name: "validation-helpers-processing"
+    type: "lookup-enrichment"
+    description: "Process validation helpers using data-driven configuration"
+    condition: "#data.utilityType == 'validation-helpers'"
+    lookup-source: "validation-helpers-config"
+    lookup-key: "#data.helperType != null ? #data.helperType : 'default'"
+    target-field: "validationHelpersResult"
+    
+  - name: "test-utilities-summary"
+    type: "expression-enrichment"
+    description: "Generate test utilities summary"
+    condition: "true"
+    expression: "'Test utilities processing completed: ' + (#data.utilityType != null ? #data.utilityType : 'unknown') + ' using real APEX services'"
+    target-field: "testUtilitiesSummary"
+
+# Test utilities processing categories
+processing-categories:
+  - category: "sample-data-creation"
+    description: "Sample data creation and management"
+    processing-type: "real-apex-enrichment"
+    utility-aspects:
+      - "Customer data creation"
+      - "Product data creation"
+      - "Trade data creation"
+      - "Financial trade data creation"
+      - "Commodity swap data creation"
+    
+  - category: "test-data-generation"
+    description: "Test data generation and randomization"
+    processing-type: "real-apex-enrichment"
+    utility-aspects:
+      - "Random test data generation"
+      - "Bulk data creation"
+      - "Data variation patterns"
+      - "Performance test data"
+    
+  - category: "validation-helpers"
+    description: "Validation helpers and utility methods"
+    processing-type: "real-apex-enrichment"
+    utility-aspects:
+      - "Object to map conversion"
+      - "Data validation utilities"
+      - "Test result collection"
+      - "Assertion helpers"
+
+# Utility performance settings
+performance-settings:
+  sample-data-creation:
+    creation-timeout: 2000
+    parallel-creation: true
+    cache-results: true
+    
+  test-data-generation:
+    generation-timeout: 5000
+    batch-generation: true
+    cache-results: false
+    
+  validation-helpers:
+    validation-timeout: 1000
+    parallel-validation: true
+    helper-cache-size: 200
+
+# Test data patterns
+test-data-patterns:
+  customer-data-pattern:
+    pattern-name: "Customer Data Generation"
+    description: "Pattern for generating customer test data"
+    data-types: ["sample-customers"]
+    generation-rules:
+      - "Customer names must be realistic"
+      - "Ages must be within valid ranges"
+      - "Email addresses must be valid format"
+      - "Membership levels must be recognized"
+    
+  product-data-pattern:
+    pattern-name: "Product Data Generation"
+    description: "Pattern for generating product test data"
+    data-types: ["sample-products"]
+    generation-rules:
+      - "Product names must be descriptive"
+      - "Prices must be positive values"
+      - "Categories must be valid"
+      - "Product IDs must be unique"
+    
+  trade-data-pattern:
+    pattern-name: "Trade Data Generation"
+    description: "Pattern for generating trade test data"
+    data-types: ["sample-trades", "sample-financial-trades"]
+    generation-rules:
+      - "Trade IDs must be unique"
+      - "Amounts must be positive"
+      - "Currencies must be valid"
+      - "Counterparties must be recognized"
+    
+  commodity-data-pattern:
+    pattern-name: "Commodity Data Generation"
+    description: "Pattern for generating commodity test data"
+    data-types: ["sample-commodity-swaps"]
+    generation-rules:
+      - "Swap IDs must be unique"
+      - "Counterparties must be valid"
+      - "Underlying assets must be recognized"
+      - "Notional amounts must be positive"
+
+# Demonstration scenarios
+demonstration-scenarios:
+  basic-sample-data:
+    scenario-name: "Basic Sample Data Creation"
+    description: "Demonstrate basic sample data creation"
+    steps:
+      - "Load sample data configurations"
+      - "Create customer sample data"
+      - "Create product sample data"
+      - "Create trade sample data"
+      - "Generate utility results"
+    expected-outcome: "Successful sample data creation"
+    
+  advanced-test-generation:
+    scenario-name: "Advanced Test Data Generation"
+    description: "Demonstrate advanced test data generation"
+    steps:
+      - "Load generation configurations"
+      - "Generate random test data"
+      - "Apply data variation patterns"
+      - "Create bulk test datasets"
+      - "Generate utility results"
+    expected-outcome: "Successful test data generation"
+    
+  validation-helpers:
+    scenario-name: "Validation Helpers Processing"
+    description: "Demonstrate validation helpers functionality"
+    steps:
+      - "Load validation helper configurations"
+      - "Process object to map conversions"
+      - "Apply validation utilities"
+      - "Collect test results"
+      - "Generate utility results"
+    expected-outcome: "Successful validation helpers processing"
+
+# Output configuration
+output:
+  include-input: true
+  include-metadata: true
+  format: "enhanced"
+  utility-summary: true
+  performance-metrics: true
+  utility-details: true
+  demonstration-results: true

@@ -1,0 +1,161 @@
+# APEX Integrated Trade Validator Complex Demo Configuration
+# Real APEX YAML configuration for complex trade validation processing
+# Replaces all hardcoded trade validation logic from IntegratedTradeValidatorComplexDemo (@version 1.0)
+
+type: "apex-enrichment-config"
+name: "integrated-trade-validator-complex-demo"
+description: "APEX-compliant complex trade validation with real enrichment services"
+
+# External data source for complex trade validation configurations
+external-data-sources:
+  - name: "settlement-validation-config"
+    type: "external-data-config"
+    source: "validation/trade-validation/settlement-validation-config.yaml"
+    
+  - name: "compliance-validation-config"
+    type: "external-data-config"
+    source: "validation/trade-validation/compliance-validation-config.yaml"
+    
+  - name: "lookup-services-config"
+    type: "external-data-config"
+    source: "validation/trade-validation/lookup-services-config.yaml"
+    
+  - name: "validation-rules-config"
+    type: "external-data-config"
+    source: "validation/trade-validation/validation-rules-config.yaml"
+    
+  - name: "trade-samples-config"
+    type: "external-data-config"
+    source: "validation/trade-validation/trade-samples-config.yaml"
+
+# APEX enrichment processing for complex trade validation
+enrichments:
+  - name: "settlement-validation"
+    type: "lookup-enrichment"
+    description: "Validate settlement parameters using data-driven configuration"
+    condition: "#data.validationType == 'settlement-validation'"
+    lookup-source: "settlement-validation-config"
+    lookup-key: "#data.settlementType != null ? #data.settlementType : 'default'"
+    target-field: "settlementValidationResult"
+    
+  - name: "compliance-validation"
+    type: "lookup-enrichment"
+    description: "Validate compliance parameters using data-driven configuration"
+    condition: "#data.validationType == 'compliance-validation'"
+    lookup-source: "compliance-validation-config"
+    lookup-key: "#data.complianceType != null ? #data.complianceType : 'default'"
+    target-field: "complianceValidationResult"
+    
+  - name: "lookup-service-validation"
+    type: "lookup-enrichment"
+    description: "Validate using lookup services with data-driven configuration"
+    condition: "#data.validationType == 'lookup-service-validation'"
+    lookup-source: "lookup-services-config"
+    lookup-key: "#data.lookupServiceType != null ? #data.lookupServiceType : 'default'"
+    target-field: "lookupServiceValidationResult"
+    
+  - name: "validation-rules-processing"
+    type: "lookup-enrichment"
+    description: "Process validation rules using data-driven configuration"
+    condition: "#data.validationType == 'validation-rules'"
+    lookup-source: "validation-rules-config"
+    lookup-key: "#data.ruleType != null ? #data.ruleType : 'default'"
+    target-field: "validationRulesResult"
+    
+  - name: "trade-sample-validation"
+    type: "lookup-enrichment"
+    description: "Validate trade samples using data-driven configuration"
+    condition: "#data.validationType == 'trade-sample-validation'"
+    lookup-source: "trade-samples-config"
+    lookup-key: "#data.sampleType != null ? #data.sampleType : 'default'"
+    target-field: "tradeSampleValidationResult"
+    
+  - name: "validation-summary"
+    type: "expression-enrichment"
+    description: "Generate comprehensive validation summary"
+    condition: "true"
+    expression: "'Complex trade validation completed: ' + (#data.validationType != null ? #data.validationType : 'unknown') + ' using real APEX services'"
+    target-field: "validationSummary"
+
+# Complex trade validation categories
+validation-categories:
+  - category: "settlement-validation"
+    description: "Settlement parameter validation and verification"
+    processing-type: "real-apex-enrichment"
+    validation-aspects:
+      - "Settlement method validation"
+      - "Settlement location verification"
+      - "Currency code validation"
+      - "Settlement amount checks"
+    
+  - category: "compliance-validation"
+    description: "Compliance and regulatory validation"
+    processing-type: "real-apex-enrichment"
+    validation-aspects:
+      - "High-risk country screening"
+      - "Restricted entity checking"
+      - "Regulatory compliance verification"
+      - "AML/KYC validation"
+    
+  - category: "lookup-service-validation"
+    description: "Reference data validation using lookup services"
+    processing-type: "real-apex-enrichment"
+    validation-aspects:
+      - "Instrument type validation"
+      - "Custodian verification"
+      - "Account type validation"
+      - "Risk rating assessment"
+    
+  - category: "validation-rules"
+    description: "Complex validation rule processing"
+    processing-type: "real-apex-enrichment"
+    validation-aspects:
+      - "Rule group processing"
+      - "Nested rule validation"
+      - "AND/OR logic evaluation"
+      - "Conditional rule execution"
+    
+  - category: "trade-sample-validation"
+    description: "Sample trade validation and testing"
+    processing-type: "real-apex-enrichment"
+    validation-aspects:
+      - "Enhanced trade validation"
+      - "Trade completeness checking"
+      - "Data integrity validation"
+      - "Business rule compliance"
+
+# Validation performance settings
+performance-settings:
+  settlement-validation:
+    validation-timeout: 5000
+    parallel-validation: true
+    cache-results: true
+    
+  compliance-validation:
+    validation-timeout: 10000
+    parallel-validation: false
+    cache-results: true
+    
+  lookup-service-validation:
+    validation-timeout: 3000
+    parallel-validation: true
+    cache-results: true
+    
+  validation-rules:
+    rule-evaluation-timeout: 7000
+    parallel-rule-execution: true
+    rule-cache-size: 1000
+    
+  trade-sample-validation:
+    sample-validation-timeout: 2000
+    batch-validation: true
+    validation-cache-size: 500
+
+# Output configuration
+output:
+  include-input: true
+  include-metadata: true
+  format: "enhanced"
+  validation-summary: true
+  performance-metrics: true
+  validation-details: true

@@ -1,0 +1,415 @@
+# APEX Product Samples Configuration
+# External data source configuration for product samples processing
+# Replaces hardcoded product sample creation from IntegratedProductValidatorDemo
+
+type: "external-data-config"
+name: "product-samples-config"
+description: "Data-driven product samples configuration for integrated product validation processing"
+
+# Product samples configuration by sample type
+data:
+  valid-product-samples:
+    sample-type: "valid-product-samples"
+    sample-name: "Valid Product Samples"
+    description: "Product samples that should pass validation"
+    sample-parameters:
+      validation-expectation: "PASS"
+      sample-category: "VALID"
+      test-purpose: "POSITIVE_TESTING"
+    product-samples:
+      valid-fixed-income-product:
+        product-id: "VALID_FIXED_INCOME_001"
+        product-name: "US Treasury Bond"
+        product-price: 1200.0
+        product-category: "FixedIncome"
+        product-characteristics:
+          price-category: "MEDIUM"
+          quality-level: "PREMIUM"
+          risk-profile: "LOW"
+          maturity: "10_YEARS"
+        validation-expectations:
+          price-validation: "PASS"
+          category-validation: "PASS"
+          quality-validation: "PASS"
+          overall-validation: "PASS"
+        test-scenarios:
+          - "Fixed income price validation ($100-$2000)"
+          - "FixedIncome category validation"
+          - "Premium quality validation"
+        audit-requirements:
+          - "Log valid fixed income product test"
+          - "Track positive validation results"
+          
+      valid-equity-product:
+        product-id: "VALID_EQUITY_001"
+        product-name: "Apple Stock"
+        product-price: 180.0
+        product-category: "Equity"
+        product-characteristics:
+          price-category: "MEDIUM"
+          quality-level: "STANDARD"
+          risk-profile: "MODERATE"
+          sector: "TECHNOLOGY"
+        validation-expectations:
+          price-validation: "PASS"
+          category-validation: "PASS"
+          quality-validation: "PASS"
+          overall-validation: "PASS"
+        test-scenarios:
+          - "Equity price validation ($50-$1000)"
+          - "Equity category validation"
+          - "Standard quality validation"
+        audit-requirements:
+          - "Log valid equity product test"
+          - "Track positive validation results"
+          
+      valid-etf-product:
+        product-id: "VALID_ETF_001"
+        product-name: "Gold ETF"
+        product-price: 1500.0
+        product-category: "ETF"
+        product-characteristics:
+          price-category: "HIGH"
+          quality-level: "PREMIUM"
+          risk-profile: "MODERATE"
+          underlying-asset: "GOLD"
+        validation-expectations:
+          price-validation: "PASS"
+          category-validation: "PASS"
+          quality-validation: "PASS"
+          overall-validation: "PASS"
+        test-scenarios:
+          - "ETF price validation ($25-$2500)"
+          - "ETF category validation"
+          - "Premium quality validation"
+        audit-requirements:
+          - "Log valid ETF product test"
+          - "Track positive validation results"
+          
+      valid-commodity-product:
+        product-id: "VALID_COMMODITY_001"
+        product-name: "Silver Futures"
+        product-price: 2500.0
+        product-category: "Commodity"
+        product-characteristics:
+          price-category: "HIGH"
+          quality-level: "PREMIUM"
+          risk-profile: "HIGH"
+          underlying-asset: "SILVER"
+        validation-expectations:
+          price-validation: "PASS"
+          category-validation: "PASS"
+          quality-validation: "PASS"
+          overall-validation: "PASS"
+        test-scenarios:
+          - "Commodity price validation ($10-$5000)"
+          - "Commodity category validation"
+          - "Premium quality validation"
+        audit-requirements:
+          - "Log valid commodity product test"
+          - "Track positive validation results"
+    sample-settings:
+      generation-method: "DATA_DRIVEN"
+      validation-testing: true
+      comprehensive-coverage: true
+    
+  invalid-product-samples:
+    sample-type: "invalid-product-samples"
+    sample-name: "Invalid Product Samples"
+    description: "Product samples that should fail validation"
+    sample-parameters:
+      validation-expectation: "FAIL"
+      sample-category: "INVALID"
+      test-purpose: "NEGATIVE_TESTING"
+    product-samples:
+      invalid-price-fixed-income:
+        product-id: "INVALID_PRICE_FIXED_INCOME_001"
+        product-name: "Expensive Bond"
+        product-price: 2500.0
+        product-category: "FixedIncome"
+        product-characteristics:
+          price-category: "OVERPRICED"
+          quality-level: "PREMIUM"
+          validation-issue: "PRICE_OUT_OF_RANGE"
+        validation-expectations:
+          price-validation: "FAIL"
+          category-validation: "PASS"
+          quality-validation: "PASS"
+          overall-validation: "FAIL"
+        failure-reasons:
+          - "Price $2500 exceeds FixedIncome maximum ($2000)"
+          - "Price validation should fail for FixedIncome products"
+        test-scenarios:
+          - "Price validation failure (too expensive)"
+          - "FixedIncome category validation (should pass)"
+          - "Quality validation (should pass)"
+        audit-requirements:
+          - "Log invalid price product test"
+          - "Track negative validation results"
+          
+      invalid-category-product:
+        product-id: "INVALID_CATEGORY_001"
+        product-name: "Wrong Category Product"
+        product-price: 150.0
+        product-category: "Options"
+        product-characteristics:
+          price-category: "MEDIUM"
+          quality-level: "STANDARD"
+          validation-issue: "UNSUPPORTED_CATEGORY"
+        validation-expectations:
+          price-validation: "CONDITIONAL"
+          category-validation: "FAIL"
+          quality-validation: "PASS"
+          overall-validation: "FAIL"
+        failure-reasons:
+          - "Options category is not supported in current validation"
+          - "Category validation should fail for unsupported categories"
+        test-scenarios:
+          - "Price validation (conditional)"
+          - "Category validation failure (unsupported category)"
+          - "Quality validation (should pass)"
+        audit-requirements:
+          - "Log invalid category product test"
+          - "Track category validation failures"
+          
+      invalid-low-price-product:
+        product-id: "INVALID_LOW_PRICE_001"
+        product-name: "Too Cheap Product"
+        product-price: 5.0
+        product-category: "Equity"
+        product-characteristics:
+          price-category: "UNDERPRICED"
+          quality-level: "BASIC"
+          validation-issue: "PRICE_TOO_LOW"
+        validation-expectations:
+          price-validation: "FAIL"
+          category-validation: "PASS"
+          quality-validation: "FAIL"
+          overall-validation: "FAIL"
+        failure-reasons:
+          - "Price $5 is below Equity minimum ($50)"
+          - "Price too low for any quality level"
+        test-scenarios:
+          - "Price validation failure (too low)"
+          - "Equity category validation (should pass)"
+          - "Quality validation failure (below basic threshold)"
+        audit-requirements:
+          - "Log invalid low price product test"
+          - "Track price validation failures"
+          
+      invalid-high-price-equity:
+        product-id: "INVALID_HIGH_PRICE_EQUITY_001"
+        product-name: "Overpriced Stock"
+        product-price: 1500.0
+        product-category: "Equity"
+        product-characteristics:
+          price-category: "OVERPRICED"
+          quality-level: "PREMIUM"
+          validation-issue: "EQUITY_PRICE_TOO_HIGH"
+        validation-expectations:
+          price-validation: "FAIL"
+          category-validation: "PASS"
+          quality-validation: "PASS"
+          overall-validation: "FAIL"
+        failure-reasons:
+          - "Price $1500 exceeds Equity maximum ($1000)"
+          - "Equity price validation should fail"
+        test-scenarios:
+          - "Price validation failure (too high for equity)"
+          - "Equity category validation (should pass)"
+          - "Quality validation (should pass)"
+        audit-requirements:
+          - "Log invalid high price equity test"
+          - "Track equity price validation failures"
+    sample-settings:
+      generation-method: "DATA_DRIVEN"
+      validation-testing: true
+      failure-analysis: true
+    
+  edge-case-product-samples:
+    sample-type: "edge-case-product-samples"
+    sample-name: "Edge Case Product Samples"
+    description: "Product samples for edge case testing"
+    sample-parameters:
+      validation-expectation: "CONDITIONAL"
+      sample-category: "EDGE_CASE"
+      test-purpose: "BOUNDARY_TESTING"
+    product-samples:
+      boundary-price-fixed-income:
+        product-id: "BOUNDARY_PRICE_FIXED_INCOME_001"
+        product-name: "Boundary Fixed Income"
+        product-price: 100.0
+        product-category: "FixedIncome"
+        product-characteristics:
+          price-category: "BOUNDARY_MINIMUM"
+          quality-level: "STANDARD"
+          validation-issue: "BOUNDARY_CONDITION"
+        validation-expectations:
+          price-validation: "PASS"
+          category-validation: "PASS"
+          quality-validation: "PASS"
+          overall-validation: "PASS"
+        test-scenarios:
+          - "Boundary price validation (exactly $100)"
+          - "FixedIncome category validation"
+          - "Standard quality validation"
+        audit-requirements:
+          - "Log boundary price product test"
+          - "Track boundary condition results"
+          
+      maximum-price-fixed-income:
+        product-id: "MAXIMUM_PRICE_FIXED_INCOME_001"
+        product-name: "Maximum Price Fixed Income"
+        product-price: 2000.0
+        product-category: "FixedIncome"
+        product-characteristics:
+          price-category: "BOUNDARY_MAXIMUM"
+          quality-level: "PREMIUM"
+          validation-issue: "MAXIMUM_BOUNDARY"
+        validation-expectations:
+          price-validation: "PASS"
+          category-validation: "PASS"
+          quality-validation: "PASS"
+          overall-validation: "PASS"
+        test-scenarios:
+          - "Maximum price validation (exactly $2000)"
+          - "FixedIncome category validation"
+          - "Premium quality validation"
+        audit-requirements:
+          - "Log maximum price product test"
+          - "Track maximum boundary results"
+          
+      minimum-equity-price:
+        product-id: "MINIMUM_EQUITY_PRICE_001"
+        product-name: "Minimum Equity Price"
+        product-price: 50.0
+        product-category: "Equity"
+        product-characteristics:
+          price-category: "BOUNDARY_MINIMUM"
+          quality-level: "BASIC"
+          validation-issue: "MINIMUM_BOUNDARY"
+        validation-expectations:
+          price-validation: "PASS"
+          category-validation: "PASS"
+          quality-validation: "CONDITIONAL"
+          overall-validation: "PASS"
+        test-scenarios:
+          - "Minimum price validation (exactly $50)"
+          - "Equity category validation"
+          - "Basic quality validation"
+        audit-requirements:
+          - "Log minimum equity price test"
+          - "Track minimum boundary results"
+    sample-settings:
+      generation-method: "DATA_DRIVEN"
+      validation-testing: true
+      boundary-analysis: true
+    
+  comprehensive-test-samples:
+    sample-type: "comprehensive-test-samples"
+    sample-name: "Comprehensive Test Samples"
+    description: "Comprehensive product samples for full validation testing"
+    sample-parameters:
+      validation-expectation: "MIXED"
+      sample-category: "COMPREHENSIVE"
+      test-purpose: "FULL_COVERAGE_TESTING"
+    product-samples:
+      comprehensive-valid-sample:
+        product-id: "COMPREHENSIVE_VALID_001"
+        product-name: "Comprehensive Valid Product"
+        product-price: 750.0
+        product-category: "FixedIncome"
+        product-characteristics:
+          price-category: "MEDIUM"
+          quality-level: "STANDARD"
+          risk-profile: "LOW"
+          comprehensive-test: true
+        validation-expectations:
+          price-validation: "PASS"
+          category-validation: "PASS"
+          quality-validation: "PASS"
+          overall-validation: "PASS"
+        test-scenarios:
+          - "Comprehensive price validation"
+          - "Category validation"
+          - "Quality validation"
+        audit-requirements:
+          - "Log comprehensive valid product test"
+          - "Track full validation coverage"
+          
+      comprehensive-mixed-sample:
+        product-id: "COMPREHENSIVE_MIXED_001"
+        product-name: "Comprehensive Mixed Product"
+        product-price: 1250.0
+        product-category: "ETF"
+        product-characteristics:
+          price-category: "MEDIUM_HIGH"
+          quality-level: "PREMIUM"
+          risk-profile: "MODERATE"
+          comprehensive-test: true
+        validation-expectations:
+          price-validation: "PASS"
+          category-validation: "PASS"
+          quality-validation: "PASS"
+          overall-validation: "PASS"
+        test-scenarios:
+          - "Comprehensive ETF validation"
+          - "Premium quality validation"
+          - "Mixed scenario validation"
+        audit-requirements:
+          - "Log comprehensive mixed product test"
+          - "Track mixed validation scenarios"
+    sample-settings:
+      generation-method: "DATA_DRIVEN"
+      validation-testing: true
+      comprehensive-coverage: true
+    
+  default:
+    sample-type: "default"
+    sample-name: "Default Product Samples"
+    description: "Default product sample processing"
+    product-samples:
+      default-product:
+        product-id: "DEFAULT_001"
+        product-name: "Default Product"
+        product-price: 100.0
+        product-category: "FixedIncome"
+    sample-settings:
+      generation-method: "DEFAULT"
+
+# Sample generation patterns
+generation-patterns:
+  price-distribution-pattern:
+    pattern-name: "Price Distribution Pattern"
+    description: "Generate samples across price distributions"
+    price-ranges: ["$0-$100", "$100-$500", "$500-$2000", "$2000+"]
+    
+  category-coverage-pattern:
+    pattern-name: "Category Coverage Pattern"
+    description: "Generate samples across product categories"
+    product-categories: ["FixedIncome", "Equity", "ETF", "Commodity"]
+    
+  validation-scenario-pattern:
+    pattern-name: "Validation Scenario Pattern"
+    description: "Generate samples for validation scenarios"
+    scenario-types: ["Valid", "Invalid", "EdgeCase", "Comprehensive"]
+
+# Quality assurance
+quality-assurance:
+  sample-accuracy:
+    - "Product samples must be realistic"
+    - "Sample data must be consistent"
+    - "Validation expectations must be accurate"
+    - "Test scenarios must be comprehensive"
+    
+  test-coverage:
+    - "Samples must cover all validation scenarios"
+    - "Edge cases must be included"
+    - "Boundary conditions must be tested"
+    - "Negative testing must be comprehensive"
+    
+  data-integrity:
+    - "Sample data must be valid"
+    - "Product characteristics must be consistent"
+    - "Validation expectations must be correct"
+    - "Audit requirements must be complete"

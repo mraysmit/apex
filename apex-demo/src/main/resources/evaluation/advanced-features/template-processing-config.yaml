@@ -1,0 +1,248 @@
+# APEX Template Processing Configuration
+# External data source configuration for template processing
+# Replaces hardcoded template logic from ApexAdvancedFeaturesDemo
+
+type: "external-data-config"
+name: "template-processing-config"
+description: "Data-driven template processing configuration for advanced features"
+
+# Template processing configuration by template type
+data:
+  xml-template:
+    template-id: "TMPL001"
+    template-type: "xml-processing"
+    description: "XML template processing with dynamic content generation"
+    template-features:
+      - "Dynamic element generation"
+      - "Attribute value substitution"
+      - "Conditional element inclusion"
+      - "Nested structure support"
+    processing-characteristics:
+      format: "XML"
+      validation: "XSD-based"
+      transformation: "XSLT-compatible"
+      encoding: "UTF-8"
+    
+  json-template:
+    template-id: "TMPL002"
+    template-type: "json-processing"
+    description: "JSON template processing with object manipulation"
+    template-features:
+      - "Dynamic object construction"
+      - "Array manipulation"
+      - "Property value substitution"
+      - "Conditional property inclusion"
+    processing-characteristics:
+      format: "JSON"
+      validation: "JSON-Schema"
+      transformation: "JSONPath-based"
+      encoding: "UTF-8"
+    
+  text-template:
+    template-id: "TMPL003"
+    template-type: "text-processing"
+    description: "Text template processing with variable substitution"
+    template-features:
+      - "Variable placeholder replacement"
+      - "Conditional text blocks"
+      - "Loop constructs"
+      - "Expression evaluation"
+    processing-characteristics:
+      format: "Plain Text"
+      validation: "Syntax-based"
+      transformation: "String-based"
+      encoding: "UTF-8"
+    
+  html-template:
+    template-id: "TMPL004"
+    template-type: "html-processing"
+    description: "HTML template processing with dynamic content"
+    template-features:
+      - "Dynamic HTML generation"
+      - "CSS class manipulation"
+      - "JavaScript integration"
+      - "Form element generation"
+    processing-characteristics:
+      format: "HTML"
+      validation: "HTML5-compliant"
+      transformation: "DOM-based"
+      encoding: "UTF-8"
+    
+  default:
+    template-id: "TMPL000"
+    template-type: "default"
+    description: "Default template processing"
+    template-features:
+      - "Basic variable substitution"
+    processing-characteristics:
+      format: "Text"
+      validation: "None"
+      transformation: "Simple"
+      encoding: "UTF-8"
+
+# Template processing patterns
+processing-patterns:
+  financial-report-generation:
+    pattern-name: "Financial Report Generation"
+    description: "Generate financial reports using templates"
+    templates:
+      - template-type: "xml-template"
+        template-name: "portfolio-summary"
+        variables: ["customer", "portfolio", "performance"]
+        output-format: "XML"
+      - template-type: "json-template"
+        template-name: "investment-analysis"
+        variables: ["investments", "risk-metrics", "recommendations"]
+        output-format: "JSON"
+      - template-type: "html-template"
+        template-name: "client-dashboard"
+        variables: ["client-data", "market-data", "alerts"]
+        output-format: "HTML"
+        
+  customer-communication:
+    pattern-name: "Customer Communication Templates"
+    description: "Generate customer communications using templates"
+    templates:
+      - template-type: "text-template"
+        template-name: "welcome-email"
+        variables: ["customer-name", "account-details", "next-steps"]
+        output-format: "Text"
+      - template-type: "html-template"
+        template-name: "newsletter"
+        variables: ["market-updates", "product-highlights", "customer-preferences"]
+        output-format: "HTML"
+        
+  regulatory-reporting:
+    pattern-name: "Regulatory Reporting Templates"
+    description: "Generate regulatory reports using templates"
+    templates:
+      - template-type: "xml-template"
+        template-name: "compliance-report"
+        variables: ["transactions", "compliance-status", "exceptions"]
+        output-format: "XML"
+      - template-type: "json-template"
+        template-name: "risk-report"
+        variables: ["risk-exposures", "limits", "breaches"]
+        output-format: "JSON"
+
+# Template variable management
+variable-management:
+  variable-types:
+    simple-variables:
+      description: "Simple scalar values"
+      examples: ["customer-name", "account-number", "balance"]
+      processing: "Direct substitution"
+      
+    object-variables:
+      description: "Complex object structures"
+      examples: ["customer", "portfolio", "transaction"]
+      processing: "Property access and navigation"
+      
+    collection-variables:
+      description: "Arrays and lists"
+      examples: ["transactions", "holdings", "alerts"]
+      processing: "Iteration and aggregation"
+      
+    calculated-variables:
+      description: "Computed values"
+      examples: ["total-value", "percentage-change", "risk-score"]
+      processing: "Expression evaluation"
+      
+  variable-resolution:
+    resolution-order:
+      - "Direct variable lookup"
+      - "Object property navigation"
+      - "Collection element access"
+      - "Expression evaluation"
+      - "Default value assignment"
+    
+    error-handling:
+      - "Missing variable warnings"
+      - "Type conversion errors"
+      - "Null value handling"
+      - "Circular reference detection"
+
+# Template caching and optimization
+caching-optimization:
+  template-caching:
+    cache-strategy: "LRU"
+    cache-size: 100
+    cache-ttl: 1800
+    cache-key-strategy: "template-path-hash"
+    
+  compilation-optimization:
+    pre-compilation: true
+    syntax-validation: true
+    dependency-analysis: true
+    optimization-level: "high"
+    
+  rendering-optimization:
+    variable-pre-resolution: true
+    expression-caching: true
+    output-buffering: true
+    streaming-support: true
+
+# Template security and validation
+security:
+  input-validation:
+    - "Variable value sanitization"
+    - "Expression injection prevention"
+    - "File path traversal protection"
+    - "Resource access control"
+    
+  output-validation:
+    - "Generated content validation"
+    - "Format compliance checking"
+    - "Size limit enforcement"
+    - "Encoding verification"
+    
+  access-control:
+    - "Template access permissions"
+    - "Variable access restrictions"
+    - "Execution environment isolation"
+    - "Audit trail maintenance"
+
+# Performance monitoring
+performance-monitoring:
+  processing-metrics:
+    - "Template compilation time"
+    - "Variable resolution time"
+    - "Rendering execution time"
+    - "Memory usage patterns"
+    
+  quality-metrics:
+    - "Template syntax errors"
+    - "Variable resolution failures"
+    - "Output validation errors"
+    - "Performance degradation alerts"
+    
+  capacity-metrics:
+    - "Concurrent template processing"
+    - "Template cache hit rates"
+    - "Resource utilization"
+    - "Throughput measurements"
+
+# Integration specifications
+integration:
+  template-sources:
+    - "File system templates"
+    - "Database-stored templates"
+    - "External template repositories"
+    - "Inline template definitions"
+    
+  variable-sources:
+    - "Database queries"
+    - "External API calls"
+    - "Configuration files"
+    - "Runtime calculations"
+    
+  output-destinations:
+    - "File system output"
+    - "Database storage"
+    - "HTTP responses"
+    - "Message queues"
+    
+  supported-formats:
+    input-formats: ["XML", "JSON", "Text", "HTML", "Markdown"]
+    output-formats: ["XML", "JSON", "Text", "HTML", "PDF", "CSV"]
+    transformation-formats: ["XSLT", "JSONPath", "Regex", "Custom"]

@@ -1,0 +1,425 @@
+# APEX Trade Matching Algorithms Configuration
+# External data source configuration for trade matching algorithms
+# Replaces hardcoded trade matching logic from TradeRecordMatcherDemo
+
+type: "external-data-config"
+name: "trade-matching-algorithms-config"
+description: "Data-driven trade matching algorithms configuration for trade record matcher"
+
+# Trade matching algorithms configuration by algorithm type
+data:
+  exact-match-algorithms:
+    algorithm-type: "exact-match-algorithms"
+    algorithm-name: "Exact Match Algorithms"
+    description: "Algorithms for exact trade matching and identification"
+    algorithm-characteristics:
+      matching-category: "EXACT"
+      precision-level: "HIGH"
+      performance-profile: "FAST"
+    matching-algorithms:
+      primary-key-exact-match:
+        algorithm-id: "PRIMARY_KEY_EXACT_MATCH"
+        algorithm-name: "Primary Key Exact Match Algorithm"
+        algorithm-description: "Exact matching based on primary trade identifiers"
+        matching-fields:
+          - field-name: "tradeId"
+            field-weight: 1.0
+            field-required: true
+            field-type: "STRING"
+          - field-name: "tradeReference"
+            field-weight: 0.9
+            field-required: false
+            field-type: "STRING"
+          - field-name: "externalId"
+            field-weight: 0.8
+            field-required: false
+            field-type: "STRING"
+        matching-rules:
+          - rule-name: "trade-id-exact-match"
+            rule-condition: "#trade1.tradeId != null && #trade2.tradeId != null"
+            rule-calculation: "#trade1.tradeId.equals(#trade2.tradeId) ? 1.0 : 0.0"
+            rule-description: "Exact match on trade ID"
+            rule-priority: 1
+            rule-weight: 1.0
+          - rule-name: "trade-reference-exact-match"
+            rule-condition: "#trade1.tradeReference != null && #trade2.tradeReference != null"
+            rule-calculation: "#trade1.tradeReference.equals(#trade2.tradeReference) ? 0.9 : 0.0"
+            rule-description: "Exact match on trade reference"
+            rule-priority: 2
+            rule-weight: 0.9
+          - rule-name: "external-id-exact-match"
+            rule-condition: "#trade1.externalId != null && #trade2.externalId != null"
+            rule-calculation: "#trade1.externalId.equals(#trade2.externalId) ? 0.8 : 0.0"
+            rule-description: "Exact match on external ID"
+            rule-priority: 3
+            rule-weight: 0.8
+        matching-thresholds:
+          perfect-match-threshold: 1.0
+          high-confidence-threshold: 0.9
+          medium-confidence-threshold: 0.8
+          low-confidence-threshold: 0.7
+        audit-requirements:
+          - "Log exact match algorithm execution"
+          - "Track primary key matching success rates"
+          
+      trade-details-exact-match:
+        algorithm-id: "TRADE_DETAILS_EXACT_MATCH"
+        algorithm-name: "Trade Details Exact Match Algorithm"
+        algorithm-description: "Exact matching based on core trade details"
+        matching-fields:
+          - field-name: "symbol"
+            field-weight: 0.9
+            field-required: true
+            field-type: "STRING"
+          - field-name: "quantity"
+            field-weight: 0.8
+            field-required: true
+            field-type: "NUMERIC"
+          - field-name: "price"
+            field-weight: 0.8
+            field-required: true
+            field-type: "NUMERIC"
+          - field-name: "tradeDate"
+            field-weight: 0.7
+            field-required: true
+            field-type: "DATE"
+        matching-rules:
+          - rule-name: "symbol-exact-match"
+            rule-condition: "#trade1.symbol != null && #trade2.symbol != null"
+            rule-calculation: "#trade1.symbol.equals(#trade2.symbol) ? 0.9 : 0.0"
+            rule-description: "Exact match on trade symbol"
+            rule-priority: 1
+            rule-weight: 0.9
+          - rule-name: "quantity-exact-match"
+            rule-condition: "#trade1.quantity != null && #trade2.quantity != null"
+            rule-calculation: "#trade1.quantity.equals(#trade2.quantity) ? 0.8 : 0.0"
+            rule-description: "Exact match on trade quantity"
+            rule-priority: 2
+            rule-weight: 0.8
+          - rule-name: "price-exact-match"
+            rule-condition: "#trade1.price != null && #trade2.price != null"
+            rule-calculation: "T(java.lang.Math).abs(#trade1.price - #trade2.price) < 0.01 ? 0.8 : 0.0"
+            rule-description: "Exact match on trade price (within 1 cent)"
+            rule-priority: 3
+            rule-weight: 0.8
+          - rule-name: "trade-date-exact-match"
+            rule-condition: "#trade1.tradeDate != null && #trade2.tradeDate != null"
+            rule-calculation: "#trade1.tradeDate.equals(#trade2.tradeDate) ? 0.7 : 0.0"
+            rule-description: "Exact match on trade date"
+            rule-priority: 4
+            rule-weight: 0.7
+        matching-thresholds:
+          perfect-match-threshold: 3.2
+          high-confidence-threshold: 2.4
+          medium-confidence-threshold: 1.6
+          low-confidence-threshold: 0.8
+        audit-requirements:
+          - "Log trade details matching execution"
+          - "Track field-level matching statistics"
+    algorithm-settings:
+      exact-matching: true
+      case-sensitive: true
+      null-handling: "SKIP"
+    
+  fuzzy-match-algorithms:
+    algorithm-type: "fuzzy-match-algorithms"
+    algorithm-name: "Fuzzy Match Algorithms"
+    description: "Algorithms for fuzzy trade matching and similarity scoring"
+    algorithm-characteristics:
+      matching-category: "FUZZY"
+      precision-level: "MODERATE"
+      performance-profile: "MODERATE"
+    matching-algorithms:
+      string-similarity-match:
+        algorithm-id: "STRING_SIMILARITY_MATCH"
+        algorithm-name: "String Similarity Match Algorithm"
+        algorithm-description: "Fuzzy matching based on string similarity"
+        similarity-methods:
+          - method-name: "levenshtein-distance"
+            method-weight: 0.4
+            method-description: "Levenshtein distance similarity"
+          - method-name: "jaro-winkler"
+            method-weight: 0.3
+            method-description: "Jaro-Winkler similarity"
+          - method-name: "soundex"
+            method-weight: 0.2
+            method-description: "Soundex phonetic similarity"
+          - method-name: "metaphone"
+            method-weight: 0.1
+            method-description: "Metaphone phonetic similarity"
+        matching-rules:
+          - rule-name: "counterparty-name-similarity"
+            rule-condition: "#trade1.counterpartyName != null && #trade2.counterpartyName != null"
+            rule-calculation: "#stringUtils.levenshteinSimilarity(#trade1.counterpartyName, #trade2.counterpartyName)"
+            rule-description: "Fuzzy match on counterparty name"
+            rule-priority: 1
+            rule-weight: 0.8
+          - rule-name: "description-similarity"
+            rule-condition: "#trade1.description != null && #trade2.description != null"
+            rule-calculation: "#stringUtils.jaroWinklerSimilarity(#trade1.description, #trade2.description)"
+            rule-description: "Fuzzy match on trade description"
+            rule-priority: 2
+            rule-weight: 0.6
+          - rule-name: "comment-similarity"
+            rule-condition: "#trade1.comment != null && #trade2.comment != null"
+            rule-calculation: "#stringUtils.soundexSimilarity(#trade1.comment, #trade2.comment)"
+            rule-description: "Fuzzy match on trade comment"
+            rule-priority: 3
+            rule-weight: 0.4
+        similarity-thresholds:
+          high-similarity-threshold: 0.9
+          medium-similarity-threshold: 0.7
+          low-similarity-threshold: 0.5
+          minimum-similarity-threshold: 0.3
+        audit-requirements:
+          - "Log string similarity calculations"
+          - "Track similarity method effectiveness"
+          
+      numeric-tolerance-match:
+        algorithm-id: "NUMERIC_TOLERANCE_MATCH"
+        algorithm-name: "Numeric Tolerance Match Algorithm"
+        algorithm-description: "Fuzzy matching based on numeric tolerance"
+        tolerance-settings:
+          price-tolerance: 0.05
+          quantity-tolerance: 0.02
+          amount-tolerance: 0.01
+          percentage-tolerance: 0.001
+        matching-rules:
+          - rule-name: "price-tolerance-match"
+            rule-condition: "#trade1.price != null && #trade2.price != null"
+            rule-calculation: "T(java.lang.Math).abs(#trade1.price - #trade2.price) / T(java.lang.Math).max(#trade1.price, #trade2.price) <= 0.05 ? (1.0 - T(java.lang.Math).abs(#trade1.price - #trade2.price) / T(java.lang.Math).max(#trade1.price, #trade2.price) / 0.05) : 0.0"
+            rule-description: "Fuzzy match on price within 5% tolerance"
+            rule-priority: 1
+            rule-weight: 0.8
+          - rule-name: "quantity-tolerance-match"
+            rule-condition: "#trade1.quantity != null && #trade2.quantity != null"
+            rule-calculation: "T(java.lang.Math).abs(#trade1.quantity - #trade2.quantity) / T(java.lang.Math).max(#trade1.quantity, #trade2.quantity) <= 0.02 ? (1.0 - T(java.lang.Math).abs(#trade1.quantity - #trade2.quantity) / T(java.lang.Math).max(#trade1.quantity, #trade2.quantity) / 0.02) : 0.0"
+            rule-description: "Fuzzy match on quantity within 2% tolerance"
+            rule-priority: 2
+            rule-weight: 0.7
+          - rule-name: "amount-tolerance-match"
+            rule-condition: "#trade1.notionalAmount != null && #trade2.notionalAmount != null"
+            rule-calculation: "T(java.lang.Math).abs(#trade1.notionalAmount - #trade2.notionalAmount) / T(java.lang.Math).max(#trade1.notionalAmount, #trade2.notionalAmount) <= 0.01 ? (1.0 - T(java.lang.Math).abs(#trade1.notionalAmount - #trade2.notionalAmount) / T(java.lang.Math).max(#trade1.notionalAmount, #trade2.notionalAmount) / 0.01) : 0.0"
+            rule-description: "Fuzzy match on notional amount within 1% tolerance"
+            rule-priority: 3
+            rule-weight: 0.9
+        tolerance-thresholds:
+          perfect-tolerance-threshold: 1.0
+          high-tolerance-threshold: 0.8
+          medium-tolerance-threshold: 0.6
+          low-tolerance-threshold: 0.4
+        audit-requirements:
+          - "Log numeric tolerance calculations"
+          - "Track tolerance matching accuracy"
+          
+      date-range-match:
+        algorithm-id: "DATE_RANGE_MATCH"
+        algorithm-name: "Date Range Match Algorithm"
+        algorithm-description: "Fuzzy matching based on date ranges and proximity"
+        date-tolerances:
+          trade-date-tolerance-days: 1
+          settlement-date-tolerance-days: 2
+          maturity-date-tolerance-days: 7
+          expiration-date-tolerance-days: 1
+        matching-rules:
+          - rule-name: "trade-date-range-match"
+            rule-condition: "#trade1.tradeDate != null && #trade2.tradeDate != null"
+            rule-calculation: "T(java.lang.Math).abs(T(java.time.temporal.ChronoUnit).DAYS.between(#trade1.tradeDate, #trade2.tradeDate)) <= 1 ? (1.0 - T(java.lang.Math).abs(T(java.time.temporal.ChronoUnit).DAYS.between(#trade1.tradeDate, #trade2.tradeDate)) / 1.0) : 0.0"
+            rule-description: "Fuzzy match on trade date within 1 day"
+            rule-priority: 1
+            rule-weight: 0.8
+          - rule-name: "settlement-date-range-match"
+            rule-condition: "#trade1.settlementDate != null && #trade2.settlementDate != null"
+            rule-calculation: "T(java.lang.Math).abs(T(java.time.temporal.ChronoUnit).DAYS.between(#trade1.settlementDate, #trade2.settlementDate)) <= 2 ? (1.0 - T(java.lang.Math).abs(T(java.time.temporal.ChronoUnit).DAYS.between(#trade1.settlementDate, #trade2.settlementDate)) / 2.0) : 0.0"
+            rule-description: "Fuzzy match on settlement date within 2 days"
+            rule-priority: 2
+            rule-weight: 0.7
+          - rule-name: "maturity-date-range-match"
+            rule-condition: "#trade1.maturityDate != null && #trade2.maturityDate != null"
+            rule-calculation: "T(java.lang.Math).abs(T(java.time.temporal.ChronoUnit).DAYS.between(#trade1.maturityDate, #trade2.maturityDate)) <= 7 ? (1.0 - T(java.lang.Math).abs(T(java.time.temporal.ChronoUnit).DAYS.between(#trade1.maturityDate, #trade2.maturityDate)) / 7.0) : 0.0"
+            rule-description: "Fuzzy match on maturity date within 7 days"
+            rule-priority: 3
+            rule-weight: 0.6
+        date-thresholds:
+          perfect-date-threshold: 1.0
+          high-date-threshold: 0.8
+          medium-date-threshold: 0.6
+          low-date-threshold: 0.4
+        audit-requirements:
+          - "Log date range calculations"
+          - "Track date proximity matching"
+    algorithm-settings:
+      fuzzy-matching: true
+      similarity-optimization: true
+      tolerance-adjustment: true
+    
+  pattern-match-algorithms:
+    algorithm-type: "pattern-match-algorithms"
+    algorithm-name: "Pattern Match Algorithms"
+    description: "Algorithms for pattern-based trade matching and recognition"
+    algorithm-characteristics:
+      matching-category: "PATTERN"
+      precision-level: "MODERATE"
+      performance-profile: "MODERATE"
+    matching-algorithms:
+      trade-structure-pattern-match:
+        algorithm-id: "TRADE_STRUCTURE_PATTERN_MATCH"
+        algorithm-name: "Trade Structure Pattern Match Algorithm"
+        algorithm-description: "Pattern matching based on trade structure and format"
+        structure-patterns:
+          - pattern-name: "equity-trade-pattern"
+            pattern-regex: "^[A-Z]{1,5}\\s+\\d+\\s+\\d+\\.\\d{2}$"
+            pattern-description: "Equity trade pattern: SYMBOL QUANTITY PRICE"
+            pattern-weight: 0.9
+          - pattern-name: "bond-trade-pattern"
+            pattern-regex: "^[0-9A-Z]{9}\\s+\\d+\\s+\\d+\\.\\d{3}$"
+            pattern-description: "Bond trade pattern: CUSIP FACEVALUE YIELD"
+            pattern-weight: 0.8
+          - pattern-name: "forex-trade-pattern"
+            pattern-regex: "^[A-Z]{3}/[A-Z]{3}\\s+\\d+\\s+\\d+\\.\\d{4}$"
+            pattern-description: "Forex trade pattern: PAIR AMOUNT RATE"
+            pattern-weight: 0.7
+        matching-rules:
+          - rule-name: "equity-pattern-match"
+            rule-condition: "#trade1.type == 'Equity' && #trade2.type == 'Equity'"
+            rule-calculation: "#patternUtils.matchesPattern(#trade1.toString(), '^[A-Z]{1,5}\\\\s+\\\\d+\\\\s+\\\\d+\\\\.\\\\d{2}$') && #patternUtils.matchesPattern(#trade2.toString(), '^[A-Z]{1,5}\\\\s+\\\\d+\\\\s+\\\\d+\\\\.\\\\d{2}$') ? 0.9 : 0.0"
+            rule-description: "Pattern match for equity trades"
+            rule-priority: 1
+            rule-weight: 0.9
+          - rule-name: "bond-pattern-match"
+            rule-condition: "#trade1.type == 'FixedIncome' && #trade2.type == 'FixedIncome'"
+            rule-calculation: "#patternUtils.matchesPattern(#trade1.toString(), '^[0-9A-Z]{9}\\\\s+\\\\d+\\\\s+\\\\d+\\\\.\\\\d{3}$') && #patternUtils.matchesPattern(#trade2.toString(), '^[0-9A-Z]{9}\\\\s+\\\\d+\\\\s+\\\\d+\\\\.\\\\d{3}$') ? 0.8 : 0.0"
+            rule-description: "Pattern match for bond trades"
+            rule-priority: 2
+            rule-weight: 0.8
+          - rule-name: "forex-pattern-match"
+            rule-condition: "#trade1.type == 'Forex' && #trade2.type == 'Forex'"
+            rule-calculation: "#patternUtils.matchesPattern(#trade1.toString(), '^[A-Z]{3}/[A-Z]{3}\\\\s+\\\\d+\\\\s+\\\\d+\\\\.\\\\d{4}$') && #patternUtils.matchesPattern(#trade2.toString(), '^[A-Z]{3}/[A-Z]{3}\\\\s+\\\\d+\\\\s+\\\\d+\\\\.\\\\d{4}$') ? 0.7 : 0.0"
+            rule-description: "Pattern match for forex trades"
+            rule-priority: 3
+            rule-weight: 0.7
+        pattern-thresholds:
+          perfect-pattern-threshold: 0.9
+          high-pattern-threshold: 0.8
+          medium-pattern-threshold: 0.7
+          low-pattern-threshold: 0.6
+        audit-requirements:
+          - "Log pattern matching execution"
+          - "Track pattern recognition accuracy"
+    algorithm-settings:
+      pattern-recognition: true
+      regex-optimization: true
+      structure-analysis: true
+    
+  semantic-match-algorithms:
+    algorithm-type: "semantic-match-algorithms"
+    algorithm-name: "Semantic Match Algorithms"
+    description: "Algorithms for semantic trade matching and meaning-based recognition"
+    algorithm-characteristics:
+      matching-category: "SEMANTIC"
+      precision-level: "VARIABLE"
+      performance-profile: "SLOW"
+    matching-algorithms:
+      trade-context-semantic-match:
+        algorithm-id: "TRADE_CONTEXT_SEMANTIC_MATCH"
+        algorithm-name: "Trade Context Semantic Match Algorithm"
+        algorithm-description: "Semantic matching based on trade context and meaning"
+        semantic-features:
+          - feature-name: "trade-purpose"
+            feature-weight: 0.3
+            feature-description: "Purpose and intent of the trade"
+          - feature-name: "market-context"
+            feature-weight: 0.25
+            feature-description: "Market conditions and context"
+          - feature-name: "business-rationale"
+            feature-weight: 0.2
+            feature-description: "Business rationale and strategy"
+          - feature-name: "risk-profile"
+            feature-weight: 0.15
+            feature-description: "Risk characteristics and profile"
+          - feature-name: "regulatory-context"
+            feature-weight: 0.1
+            feature-description: "Regulatory and compliance context"
+        matching-rules:
+          - rule-name: "trade-purpose-semantic-match"
+            rule-condition: "#trade1.purpose != null && #trade2.purpose != null"
+            rule-calculation: "#semanticUtils.semanticSimilarity(#trade1.purpose, #trade2.purpose)"
+            rule-description: "Semantic match on trade purpose"
+            rule-priority: 1
+            rule-weight: 0.3
+          - rule-name: "market-context-semantic-match"
+            rule-condition: "#trade1.marketContext != null && #trade2.marketContext != null"
+            rule-calculation: "#semanticUtils.contextSimilarity(#trade1.marketContext, #trade2.marketContext)"
+            rule-description: "Semantic match on market context"
+            rule-priority: 2
+            rule-weight: 0.25
+          - rule-name: "business-rationale-semantic-match"
+            rule-condition: "#trade1.businessRationale != null && #trade2.businessRationale != null"
+            rule-calculation: "#semanticUtils.rationaleSimilarity(#trade1.businessRationale, #trade2.businessRationale)"
+            rule-description: "Semantic match on business rationale"
+            rule-priority: 3
+            rule-weight: 0.2
+        semantic-thresholds:
+          high-semantic-threshold: 0.8
+          medium-semantic-threshold: 0.6
+          low-semantic-threshold: 0.4
+          minimum-semantic-threshold: 0.2
+        audit-requirements:
+          - "Log semantic matching execution"
+          - "Track semantic similarity scores"
+    algorithm-settings:
+      semantic-analysis: true
+      context-awareness: true
+      meaning-extraction: true
+    
+  default:
+    algorithm-type: "default"
+    algorithm-name: "Default Trade Matching Algorithms"
+    description: "Default trade matching algorithm processing"
+    matching-algorithms:
+      default-algorithm:
+        algorithm-id: "DEFAULT_ALGORITHM"
+        algorithm-name: "Default Algorithm"
+        matching-rules:
+          - rule-name: "default-match"
+            rule-calculation: "0.5"
+            rule-description: "Default matching score"
+    algorithm-settings:
+      default-processing: true
+
+# Algorithm execution patterns
+execution-patterns:
+  matching-category-pattern:
+    pattern-name: "Matching Category Pattern"
+    description: "Execute algorithms based on matching categories"
+    matching-categories: ["EXACT", "FUZZY", "PATTERN", "SEMANTIC"]
+    
+  precision-level-pattern:
+    pattern-name: "Precision Level Pattern"
+    description: "Execute algorithms based on precision levels"
+    precision-levels: ["HIGH", "MODERATE", "VARIABLE"]
+    
+  performance-profile-pattern:
+    pattern-name: "Performance Profile Pattern"
+    description: "Execute algorithms based on performance profiles"
+    performance-profiles: ["FAST", "MODERATE", "SLOW"]
+
+# Quality assurance
+quality-assurance:
+  algorithm-accuracy:
+    - "Trade matching algorithms must be accurate"
+    - "Matching scores must be reliable"
+    - "Algorithm selection must be appropriate"
+    - "Results must be consistent"
+    
+  algorithm-reliability:
+    - "Algorithms must be repeatable"
+    - "Performance must be predictable"
+    - "Error handling must be robust"
+    - "Scalability must be maintained"
+    
+  business-alignment:
+    - "Algorithms must reflect business requirements"
+    - "Matching criteria must be relevant"
+    - "Thresholds must be appropriate"
+    - "Results must be actionable"

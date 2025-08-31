@@ -1,0 +1,242 @@
+# APEX Rule Result Features Configuration
+# External data source configuration for rule result features
+# Replaces hardcoded rule result logic from ApexAdvancedFeaturesDemo
+
+type: "external-data-config"
+name: "rule-result-features-config"
+description: "Data-driven rule result features configuration for advanced features"
+
+# Rule result features configuration by feature type
+data:
+  result-analysis:
+    feature-id: "FEAT001"
+    feature-type: "result-analysis"
+    description: "Analyze rule execution results for patterns and insights"
+    analysis-capabilities:
+      - "Result pattern detection"
+      - "Success/failure rate analysis"
+      - "Performance trend analysis"
+      - "Business impact assessment"
+    processing-characteristics:
+      analysis-depth: "comprehensive"
+      real-time-analysis: true
+      historical-comparison: true
+      predictive-insights: false
+    
+  result-routing:
+    feature-id: "FEAT002"
+    feature-type: "result-routing"
+    description: "Route rule results to appropriate downstream systems"
+    routing-capabilities:
+      - "Conditional result routing"
+      - "Multi-destination routing"
+      - "Result transformation"
+      - "Error handling and retry"
+    processing-characteristics:
+      routing-strategy: "rule-based"
+      parallel-routing: true
+      guaranteed-delivery: true
+      dead-letter-handling: true
+    
+  conditional-followup:
+    feature-id: "FEAT003"
+    feature-type: "conditional-followup"
+    description: "Execute follow-up actions based on rule results"
+    followup-capabilities:
+      - "Result-based action triggering"
+      - "Conditional workflow execution"
+      - "Multi-step process orchestration"
+      - "Exception handling"
+    processing-characteristics:
+      execution-mode: "asynchronous"
+      retry-mechanism: true
+      timeout-handling: true
+      rollback-support: true
+    
+  result-aggregation:
+    feature-id: "FEAT004"
+    feature-type: "result-aggregation"
+    description: "Aggregate results from multiple rule executions"
+    aggregation-capabilities:
+      - "Cross-rule result correlation"
+      - "Statistical aggregation"
+      - "Trend analysis"
+      - "Summary reporting"
+    processing-characteristics:
+      aggregation-window: "sliding"
+      real-time-updates: true
+      historical-retention: "90-days"
+      export-formats: ["JSON", "CSV", "XML"]
+    
+  default:
+    feature-id: "FEAT000"
+    feature-type: "default"
+    description: "Default rule result feature"
+    capabilities: ["Basic result logging"]
+    processing-characteristics:
+      mode: "simple"
+      retention: "30-days"
+
+# Result processing patterns
+processing-patterns:
+  investment-decision-workflow:
+    pattern-name: "Investment Decision Workflow"
+    description: "Process investment rule results through decision workflow"
+    workflow-steps:
+      - step: "result-validation"
+        action: "Validate rule execution results"
+        conditions: ["result-completeness", "data-quality"]
+      - step: "risk-assessment"
+        action: "Assess investment risk based on results"
+        conditions: ["risk-thresholds", "regulatory-compliance"]
+      - step: "approval-routing"
+        action: "Route to appropriate approval authority"
+        conditions: ["investment-amount", "customer-tier"]
+      - step: "execution-preparation"
+        action: "Prepare for trade execution"
+        conditions: ["market-conditions", "liquidity-check"]
+    
+  customer-onboarding-process:
+    pattern-name: "Customer Onboarding Process"
+    description: "Process customer onboarding rule results"
+    workflow-steps:
+      - step: "eligibility-verification"
+        action: "Verify customer eligibility"
+        conditions: ["kyc-completion", "credit-check"]
+      - step: "service-level-assignment"
+        action: "Assign appropriate service level"
+        conditions: ["investment-capacity", "relationship-value"]
+      - step: "account-setup"
+        action: "Setup customer accounts and services"
+        conditions: ["documentation-complete", "regulatory-approval"]
+      - step: "welcome-communication"
+        action: "Send welcome communications"
+        conditions: ["account-activation", "service-readiness"]
+
+# Advanced result features
+advanced-features:
+  machine-learning-insights:
+    description: "Apply ML algorithms to rule results"
+    capabilities:
+      - "Pattern recognition in results"
+      - "Anomaly detection"
+      - "Predictive result modeling"
+      - "Automated insight generation"
+    algorithms:
+      - "Classification algorithms"
+      - "Clustering algorithms"
+      - "Time series analysis"
+      - "Neural networks"
+    
+  real-time-dashboards:
+    description: "Real-time visualization of rule results"
+    capabilities:
+      - "Live result streaming"
+      - "Interactive dashboards"
+      - "Custom visualization widgets"
+      - "Alert and notification system"
+    visualization-types:
+      - "Time series charts"
+      - "Heat maps"
+      - "Scatter plots"
+      - "Geographic maps"
+    
+  result-correlation-analysis:
+    description: "Analyze correlations between different rule results"
+    capabilities:
+      - "Cross-rule correlation detection"
+      - "Causal relationship analysis"
+      - "Impact assessment"
+      - "Dependency mapping"
+    analysis-methods:
+      - "Statistical correlation"
+      - "Mutual information"
+      - "Granger causality"
+      - "Network analysis"
+
+# Performance optimization
+performance-optimization:
+  result-processing:
+    batch-processing: true
+    batch-size: 1000
+    processing-interval: 60
+    parallel-workers: 4
+    
+  storage-optimization:
+    compression: true
+    indexing-strategy: "composite-indexes"
+    partitioning: "time-based"
+    archival-policy: "90-day-retention"
+    
+  query-optimization:
+    result-caching: true
+    cache-size: 5000
+    cache-ttl: 300
+    query-optimization: true
+
+# Quality assurance
+quality-assurance:
+  result-validation:
+    - "Data type validation"
+    - "Range checking"
+    - "Consistency verification"
+    - "Completeness assessment"
+    
+  accuracy-monitoring:
+    - "Result accuracy tracking"
+    - "False positive/negative rates"
+    - "Precision and recall metrics"
+    - "Business outcome correlation"
+    
+  performance-monitoring:
+    - "Processing latency"
+    - "Throughput metrics"
+    - "Resource utilization"
+    - "Error rates"
+
+# Integration specifications
+integration:
+  result-sources:
+    - "Rule execution engines"
+    - "Decision management systems"
+    - "Workflow engines"
+    - "Business process systems"
+    
+  result-destinations:
+    - "Data warehouses"
+    - "Analytics platforms"
+    - "Reporting systems"
+    - "Notification services"
+    
+  communication-protocols:
+    - "HTTP/REST APIs"
+    - "Message queues"
+    - "Database triggers"
+    - "File-based exchange"
+    
+  data-formats:
+    - "JSON"
+    - "XML"
+    - "Avro"
+    - "Parquet"
+    - "CSV"
+
+# Compliance and governance
+compliance:
+  data-governance:
+    - "Data lineage tracking"
+    - "Access control and permissions"
+    - "Data retention policies"
+    - "Privacy protection measures"
+    
+  audit-requirements:
+    - "Complete audit trail"
+    - "Change tracking"
+    - "User activity logging"
+    - "Compliance reporting"
+    
+  regulatory-compliance:
+    - "Financial services regulations"
+    - "Data protection laws"
+    - "Industry standards"
+    - "Internal policies"

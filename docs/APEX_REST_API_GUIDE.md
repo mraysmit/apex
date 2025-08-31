@@ -1,3 +1,4 @@
+![APEX System Logo](APEX%20System%20logo.png)
 # APEX Rules Engine REST API - Complete Guide
 
 **Version:** 1.0

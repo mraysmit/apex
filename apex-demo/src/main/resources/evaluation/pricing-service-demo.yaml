@@ -1,0 +1,298 @@
+# APEX Pricing Service Demo Configuration
+# Real APEX YAML configuration for pricing service
+# Replaces all hardcoded pricing service logic from PricingServiceDemo (@version 1.0)
+
+type: "apex-enrichment-config"
+name: "pricing-service-demo"
+description: "APEX-compliant pricing service with real enrichment services"
+
+# External data source for pricing service configurations
+external-data-sources:
+  - name: "pricing-calculation-models-config"
+    type: "external-data-config"
+    source: "evaluation/pricing-service/pricing-calculation-models-config.yaml"
+    
+  - name: "pricing-rule-engines-config"
+    type: "external-data-config"
+    source: "evaluation/pricing-service/pricing-rule-engines-config.yaml"
+    
+  - name: "pricing-strategy-frameworks-config"
+    type: "external-data-config"
+    source: "evaluation/pricing-service/pricing-strategy-frameworks-config.yaml"
+
+# APEX enrichment processing for pricing service
+enrichments:
+  - name: "pricing-calculation-models-processing"
+    type: "lookup-enrichment"
+    description: "Process pricing calculation models using data-driven configuration"
+    condition: "#data.serviceType == 'pricing-calculation-models-processing'"
+    lookup-source: "pricing-calculation-models-config"
+    lookup-key: "#data.modelType != null ? #data.modelType : 'default'"
+    target-field: "pricingCalculationModelsResult"
+    
+  - name: "pricing-rule-engines-processing"
+    type: "lookup-enrichment"
+    description: "Process pricing rule engines using data-driven configuration"
+    condition: "#data.serviceType == 'pricing-rule-engines-processing'"
+    lookup-source: "pricing-rule-engines-config"
+    lookup-key: "#data.engineType != null ? #data.engineType : 'default'"
+    target-field: "pricingRuleEnginesResult"
+    
+  - name: "pricing-strategy-frameworks-processing"
+    type: "lookup-enrichment"
+    description: "Process pricing strategy frameworks using data-driven configuration"
+    condition: "#data.serviceType == 'pricing-strategy-frameworks-processing'"
+    lookup-source: "pricing-strategy-frameworks-config"
+    lookup-key: "#data.frameworkType != null ? #data.frameworkType : 'default'"
+    target-field: "pricingStrategyFrameworksResult"
+    
+  - name: "pricing-service-summary"
+    type: "expression-enrichment"
+    description: "Generate pricing service summary"
+    condition: "true"
+    expression: "'Pricing service completed: ' + (#data.serviceType != null ? #data.serviceType : 'unknown') + ' using real APEX services'"
+    target-field: "pricingServiceSummary"
+
+# Service processing categories
+processing-categories:
+  - category: "pricing-calculation-models-processing"
+    description: "Pricing calculation models creation and management"
+    processing-type: "real-apex-enrichment"
+    model-types:
+      - "Standard pricing models"
+      - "Premium pricing models"
+      - "Sale pricing models"
+      - "Clearance pricing models"
+    
+  - category: "pricing-rule-engines-processing"
+    description: "Pricing rule engines processing"
+    processing-type: "real-apex-enrichment"
+    engine-types:
+      - "Base price rule engines"
+      - "Discount rule engines"
+      - "Premium rule engines"
+      - "Dynamic pricing engines"
+    
+  - category: "pricing-strategy-frameworks-processing"
+    description: "Pricing strategy frameworks processing"
+    processing-type: "real-apex-enrichment"
+    framework-aspects:
+      - "Competitive pricing strategies"
+      - "Value-based pricing strategies"
+      - "Cost-plus pricing strategies"
+      - "Dynamic pricing strategies"
+
+# Pricing service patterns
+pricing-service-patterns:
+  pricing-calculation-pattern:
+    pattern-name: "Pricing Calculation Processing"
+    description: "Pattern for processing pricing calculations"
+    calculation-types: ["STANDARD", "PREMIUM", "SALE", "CLEARANCE"]
+    calculation-flow:
+      - "Base price validation and normalization"
+      - "Pricing rule evaluation and application"
+      - "Price adjustment and optimization"
+      - "Final price calculation and validation"
+    
+  pricing-rule-pattern:
+    pattern-name: "Pricing Rule Processing"
+    description: "Pattern for processing pricing rules"
+    rule-types: ["BASE_PRICE", "DISCOUNT", "PREMIUM", "DYNAMIC"]
+    rule-evaluation:
+      - "Rule condition evaluation"
+      - "Rule action execution"
+      - "Rule result validation"
+      - "Rule performance monitoring"
+    
+  pricing-strategy-pattern:
+    pattern-name: "Pricing Strategy Processing"
+    description: "Pattern for processing pricing strategies"
+    strategy-types: ["COMPETITIVE", "VALUE_BASED", "COST_PLUS", "DYNAMIC"]
+    strategy-implementation:
+      - "Market analysis and competitive positioning"
+      - "Value proposition assessment"
+      - "Cost structure analysis"
+      - "Dynamic pricing optimization"
+
+# Pricing model configurations
+pricing-model-configurations:
+  standard-pricing-model:
+    model-type: "Standard"
+    pricing-characteristics:
+      base-multiplier: 1.0
+      adjustment-factor: 0.0
+      minimum-price: 0.01
+      maximum-price: 999999.99
+      pricing-rules: ["BASE_PRICE_VALIDATION", "MINIMUM_PRICE_CHECK"]
+    
+  premium-pricing-model:
+    model-type: "Premium"
+    pricing-characteristics:
+      base-multiplier: 1.2
+      adjustment-factor: 0.2
+      minimum-price: 0.01
+      maximum-price: 999999.99
+      pricing-rules: ["PREMIUM_PRICE_CALCULATION", "PREMIUM_ELIGIBILITY_CHECK"]
+    
+  sale-pricing-model:
+    model-type: "Sale"
+    pricing-characteristics:
+      base-multiplier: 0.8
+      adjustment-factor: -0.2
+      minimum-price: 0.01
+      maximum-price: 999999.99
+      pricing-rules: ["SALE_PRICE_CALCULATION", "SALE_ELIGIBILITY_CHECK"]
+    
+  clearance-pricing-model:
+    model-type: "Clearance"
+    pricing-characteristics:
+      base-multiplier: 0.5
+      adjustment-factor: -0.5
+      minimum-price: 0.01
+      maximum-price: 999999.99
+      pricing-rules: ["CLEARANCE_PRICE_CALCULATION", "CLEARANCE_ELIGIBILITY_CHECK"]
+
+# Pricing rule configurations
+pricing-rule-configurations:
+  base-price-rules:
+    rule-category: "BASE_PRICE"
+    rule-characteristics:
+      validation-required: true
+      normalization-required: true
+      range-checking: true
+    rules:
+      - rule-name: "base-price-positive"
+        rule-condition: "#basePrice > 0"
+        rule-description: "Base price must be positive"
+      - rule-name: "base-price-reasonable"
+        rule-condition: "#basePrice <= 100000"
+        rule-description: "Base price must be reasonable"
+    
+  discount-rules:
+    rule-category: "DISCOUNT"
+    rule-characteristics:
+      percentage-based: true
+      minimum-discount: 0.05
+      maximum-discount: 0.75
+    rules:
+      - rule-name: "sale-discount-20-percent"
+        rule-condition: "#pricingType == 'Sale'"
+        rule-calculation: "#basePrice * 0.8"
+        rule-description: "Apply 20% discount for sale pricing"
+      - rule-name: "clearance-discount-50-percent"
+        rule-condition: "#pricingType == 'Clearance'"
+        rule-calculation: "#basePrice * 0.5"
+        rule-description: "Apply 50% discount for clearance pricing"
+    
+  premium-rules:
+    rule-category: "PREMIUM"
+    rule-characteristics:
+      percentage-based: true
+      minimum-premium: 0.1
+      maximum-premium: 0.5
+    rules:
+      - rule-name: "premium-markup-20-percent"
+        rule-condition: "#pricingType == 'Premium'"
+        rule-calculation: "#basePrice * 1.2"
+        rule-description: "Apply 20% premium for premium pricing"
+      - rule-name: "premium-eligibility-check"
+        rule-condition: "#basePrice >= 100"
+        rule-description: "Premium pricing available for items >= $100"
+
+# Performance settings
+performance-settings:
+  pricing-calculation-models-processing:
+    processing-timeout: 3000
+    parallel-processing: true
+    cache-results: true
+    
+  pricing-rule-engines-processing:
+    processing-timeout: 2000
+    parallel-processing: true
+    rule-optimization: true
+    
+  pricing-strategy-frameworks-processing:
+    processing-timeout: 5000
+    parallel-processing: false
+    strategy-intensive: true
+
+# Demonstration scenarios
+demonstration-scenarios:
+  comprehensive-pricing-service:
+    scenario-name: "Comprehensive Pricing Service"
+    description: "Demonstrate comprehensive pricing service processing"
+    steps:
+      - "Load pricing service configurations"
+      - "Process pricing calculation models"
+      - "Process pricing rule engines"
+      - "Process pricing strategy frameworks"
+      - "Generate pricing results"
+    expected-outcome: "Successful comprehensive pricing service"
+    
+  pricing-calculation-analysis:
+    scenario-name: "Pricing Calculation Analysis"
+    description: "Demonstrate pricing calculation analysis"
+    steps:
+      - "Load pricing calculation configurations"
+      - "Process standard pricing models"
+      - "Process premium pricing models"
+      - "Generate calculation results"
+    expected-outcome: "Successful pricing calculation analysis"
+    
+  pricing-strategy-optimization:
+    scenario-name: "Pricing Strategy Optimization"
+    description: "Demonstrate pricing strategy optimization"
+    steps:
+      - "Load pricing strategy configurations"
+      - "Process competitive pricing strategies"
+      - "Process value-based pricing strategies"
+      - "Generate optimization results"
+    expected-outcome: "Successful pricing strategy optimization"
+
+# Pricing service configuration
+pricing-service:
+  service-categories:
+    category-type: "Pricing Service Categories"
+    description: "Categories for pricing service operations"
+    available-categories:
+      - "Standard pricing calculations"
+      - "Premium pricing strategies"
+      - "Discount and sale pricing"
+      - "Dynamic pricing optimization"
+      - "Competitive pricing analysis"
+    category-characteristics:
+      - "Multi-model pricing support"
+      - "Rule-based pricing logic"
+      - "Strategy-driven pricing decisions"
+      - "Real-time pricing optimization"
+
+# Quality assurance
+quality-assurance:
+  service-reliability:
+    - "Pricing calculations must be accurate"
+    - "Pricing rules must be consistent"
+    - "Pricing strategies must be effective"
+    - "Performance must meet SLA requirements"
+    
+  calculation-accuracy:
+    - "Price calculations must be precise"
+    - "Rule evaluations must be correct"
+    - "Strategy implementations must be accurate"
+    - "Results must be reproducible"
+    
+  business-requirements:
+    - "Pricing must reflect business strategy"
+    - "Calculations must be transparent"
+    - "Rules must be maintainable"
+    - "Strategies must be adaptable"
+
+# Output configuration
+output:
+  include-input: true
+  include-metadata: true
+  format: "enhanced"
+  service-summary: true
+  calculation-details: true
+  rule-analysis: true
+  strategy-insights: true
+  performance-metrics: true
