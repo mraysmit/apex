@@ -1,4 +1,5 @@
-# APEX Custody Auto-Repair Bootstrap (@version 2.0)
+![APEX System Logo](APEX%20System%20logo.png)
+# APEX Custody Auto-Repair Bootstrap
 
 ## Overview
 
@@ -8,20 +9,20 @@ This APEX bootstrap demonstrates a complete end-to-end custody auto-repair scena
 
 ## What's New in Version 2.0
 
-### 🚀 **Real APEX Services Integration**
+### **Real APEX Services Integration**
 - **Eliminated ALL hardcoded simulation logic** - No more embedded business rules or static data
 - **Authentic APEX EnrichmentService** - Uses `enrichmentService.enrichObject()` for all processing
 - **Real YAML Configuration Loading** - External YAML files drive all business logic
 - **Fail-Fast Architecture** - No hardcoded fallbacks, proper error handling
 - **100% APEX-Compliant** - Follows all APEX integration best practices
 
-### 🏗️ **Comprehensive YAML Architecture**
+### **Comprehensive YAML Architecture**
 - **4 External YAML Configuration Files** - Complete separation of business logic from code
 - **3 Processing Categories** - Standing Instructions, Settlement Scenarios, Auto-Repair Rules
 - **Real APEX Enrichment Pipeline** - All data processing through authentic APEX services
 - **External Data Sources** - Business rules and data maintained in YAML, not Java code
 
-### 📁 **New Configuration Structure**
+### **New Configuration Structure**
 ```
 apex-demo/src/main/resources/enrichment/
 ├── custody-auto-repair-bootstrap-demo.yaml          # Main APEX enrichment configuration
@@ -83,7 +84,7 @@ cd apex-demo
 java -cp "target/classes:target/dependency/*" dev.mars.apex.demo.enrichment.CustodyAutoRepairBootstrap
 ```
 
-### 3. Expected Output (@version 2.0)
+### 3. Expected Output 
 ```
 =================================================================
 APEX CUSTODY AUTO-REPAIR BOOTSTRAP DEMONSTRATION
@@ -125,7 +126,7 @@ Architecture: Real APEX services with comprehensive YAML configurations
 Demo Status: SUCCESS
 ```
 
-## Architecture Overview (@version 2.0)
+## Architecture Overview 
 
 ### Real APEX Services Integration
 ```java
@@ -154,27 +155,10 @@ YamlRuleConfiguration autoRepairRulesConfig = yamlLoader.loadFromClasspath("enri
 2. **Settlement Scenarios Processing** - Settlement failure scenarios, repair scenarios, exception scenarios  
 3. **Auto-Repair Rules Processing** - Repair decision rules, approval workflows, exception handling
 
-## Key Improvements in Version 2.0
-
-### ✅ **Eliminated Hardcoded Simulation**
-- **Before**: Embedded business logic, static data, hardcoded rules
-- **After**: 100% YAML-driven configuration with real APEX services
-
-### ✅ **Real APEX Service Integration**  
-- **Before**: Simulated processing with hardcoded outcomes
-- **After**: Authentic APEX enrichment services for all operations
-
-### ✅ **Fail-Fast Architecture**
-- **Before**: Hardcoded fallbacks and default behaviors
-- **After**: Proper error handling with RuntimeExceptions when YAML missing
-
-### ✅ **External Configuration Management**
-- **Before**: Business rules embedded in Java code
-- **After**: Comprehensive YAML configurations maintainable by business users
-
-### ✅ **Authentic Demonstration**
-- **Before**: Simulated custody operations
-- **After**: Real APEX processing with genuine service integration
+### Data Sources
+1. **External YAML Files** - Business rules, data, and logic maintained in YAML files
+2. **Real APEX Services** - All data processing through authentic APEX services
+3. **Database Service** - Real database service for custody settlement data
 
 ## Configuration Customization
 

@@ -1,3 +1,4 @@
+![APEX System Logo](APEX%20System%20logo.png)
 # APEX Commodity Swap Validation Bootstrap - Version 2.0
 
 **Version:** 2.0  
