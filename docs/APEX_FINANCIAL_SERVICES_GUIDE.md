@@ -1,3 +1,5 @@
+![APEX System Logo](APEX%20System%20logo.png)
+
 # APEX - Financial Services Guide
 
 **Version:** 1.0

@@ -1,3 +1,5 @@
+![APEX System Logo](APEX%20System%20logo.png)
+
 # APEX - Technical Reference Guide
 
 **Version:** 2.1

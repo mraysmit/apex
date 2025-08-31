@@ -1,3 +1,5 @@
+![APEX System Logo](APEX%20System%20logo.png)
+
 # APEX - Complete User Guide
 
 **Version:** 1.0

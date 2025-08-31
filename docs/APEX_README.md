@@ -1,3 +1,5 @@
+![APEX System Logo](APEX%20System%20logo.png)
+
 # APEX - Advanced Processing Engine for eXpressions
 
 **Version:** 1.0

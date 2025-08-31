@@ -1,3 +1,5 @@
+![APEX System Logo](APEX%20System%20logo.png)
+
 # APEX Custody and Safekeeping Auto-Repair: Business Requirements and Implementation Guide
 
 **Version:** 1.0
