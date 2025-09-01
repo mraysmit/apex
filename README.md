@@ -12,7 +12,6 @@
 [![Demos](https://img.shields.io/badge/Demos-16%2B-orange.svg)](apex-demo/)
 [![Playground](https://img.shields.io/badge/Playground-Interactive-purple.svg)](http://localhost:8081/playground)
 [![Financial Services](https://img.shields.io/badge/Financial%20Services-Ready-gold.svg)](docs/APEX_FINANCIAL_SERVICES_GUIDE.md)
-[![Tests](https://img.shields.io/badge/Tests-100%25%20Coverage-brightgreen.svg)](apex-core/src/test)
 [![API Docs](https://img.shields.io/badge/API-Swagger-green.svg)](http://localhost:8080/swagger-ui.html)
 
 **Version:** 2.1
