@@ -2,8 +2,8 @@
 # Real APEX YAML configuration for SimplifiedAPIDemo.java
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
-metadata:
-  name: "Simplified API Demo Configuration"
+type: "apex-enrichment-config"
+name: "Simplified API Demo Configuration"
   version: "2.0"
   description: "Real APEX simplified API demonstration with ultra-simple processing, one-liner rule evaluations, and template-based validation"
   author: "APEX Demo Team"
@@ -247,3 +247,4 @@ error-handling:
   template-errors: "comprehensive"
   validation-errors: "collect"
   business-rule-errors: "fail-fast"
+

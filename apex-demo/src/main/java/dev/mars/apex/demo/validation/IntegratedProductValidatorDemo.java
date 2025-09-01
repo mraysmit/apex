@@ -21,7 +21,7 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.database.DatabaseService;
+
 import dev.mars.apex.demo.model.Product;
 
 import org.slf4j.Logger;
@@ -70,9 +70,7 @@ public class IntegratedProductValidatorDemo {
     private final EnrichmentService enrichmentService;
     private final LookupServiceRegistry serviceRegistry;
     private final ExpressionEvaluatorService expressionEvaluator;
-    private final DatabaseService databaseService;
-
-    // Configuration data (populated via real APEX processing)
+        // Configuration data (populated via real APEX processing)
     private Map<String, Object> configurationData;
     
     // Validation results (populated via real APEX processing)
@@ -87,9 +85,7 @@ public class IntegratedProductValidatorDemo {
         this.serviceRegistry = new LookupServiceRegistry();
         this.expressionEvaluator = new ExpressionEvaluatorService();
         this.enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
-        this.databaseService = new DatabaseService();
-        
-        this.validationResults = new HashMap<>();
+                this.validationResults = new HashMap<>();
 
         logger.info("IntegratedProductValidatorDemo initialized with real APEX services");
 
@@ -401,3 +397,4 @@ public class IntegratedProductValidatorDemo {
         }
     }
 }
+

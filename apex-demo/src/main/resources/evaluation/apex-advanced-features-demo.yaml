@@ -3,8 +3,14 @@
 # Replaces all hardcoded advanced features logic from ApexAdvancedFeaturesDemo (@version 1.0)
 
 type: "apex-enrichment-config"
-name: "apex-advanced-features-demo"
-description: "APEX-compliant advanced features with real enrichment services"
+name: "APEX Advanced Features Demo"
+  version: "2.0.0"
+  description: "APEX-compliant advanced features with real enrichment services"
+  type: "apex-enrichment-config"
+  author: "Mark Andrew Ray-Smith Cityline Ltd"
+  created-date: "2025-09-01"
+  domain: "Rule Evaluation"
+  tags: ["advanced-features", "demo", "enrichment", "evaluation"]
 
 # External data source for advanced features configurations
 external-data-sources:
@@ -179,3 +185,4 @@ output:
   advanced-features-summary: true
   performance-metrics: true
   processing-details: true
+

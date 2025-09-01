@@ -12,8 +12,8 @@
 #
 # ============================================================================
 
-metadata:
-  name: "OTC Options Processing Scenario"
+type: "apex-enrichment-config"
+name: "OTC Options Processing Scenario"
   version: "1.0.0"
   description: "Associates OTC Options with existing rule configurations"
   type: "scenario"
@@ -38,3 +38,4 @@ scenario:
   rule-configurations:
     - "bootstrap/otc-options-bootstrap.yaml"
     - "config/derivatives-validation-rules.yaml"
+

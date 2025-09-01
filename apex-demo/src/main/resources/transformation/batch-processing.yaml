@@ -2,8 +2,8 @@
 # APEX Rules Engine - Batch Processing Configuration
 # ============================================================================
 
-metadata:
-  name: "Batch Processing Rules Configuration"
+type: "apex-enrichment-config"
+name: "Batch Processing Rules Configuration"
   version: "1.0.0"
   description: "High-performance batch processing rules optimized for throughput and scalability"
   type: "rule-config"
@@ -341,3 +341,4 @@ batch_processing:
   enable_rule_compilation: true
   enable_expression_caching: true
   enable_result_pooling: true
+

@@ -14,8 +14,8 @@
 #
 # ============================================================================
 
-metadata:
-  name: "Production Demo Configuration"
+type: "apex-enrichment-config"
+name: "Production Demo Configuration"
   type: "rule-config"
   version: "2.0.0"
   description: "Configuration for production-ready demo data sources"
@@ -386,3 +386,4 @@ demo-scenarios:
   performance-demo:
     description: "High-performance processing with caching"
     data-sources: ["demo-csv-files", "demo-products-cache", "demo-customer-cache", "demo-lookup-cache"]
+

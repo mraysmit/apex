@@ -23,6 +23,7 @@ module dev.mars.apex.playground {
     requires java.base;
     requires java.logging;
     requires java.sql;
+    requires java.net.http;
 
     // APEX dependencies
     requires transitive dev.mars.apex.core;

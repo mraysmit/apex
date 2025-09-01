@@ -2,11 +2,11 @@
 # Demonstrates basic lookup-key usage with currency code enrichment
 # Use Case: Enrich currency transactions with detailed currency information
 
-metadata:
-  name: "Simple Field Lookup Demo"
+type: "apex-enrichment-config"
+name: "Simple Field Lookup Demo"
   description: "Demonstrates basic field lookup using currency codes"
   version: "1.0.0"
-  type: "enrichment"
+  type: "apex-enrichment-config"
   author: "APEX Demo Team"
 
 # Define the enrichment rules
@@ -167,3 +167,4 @@ processing:
   continue-on-error: true
   max-errors: 10
   error-handling: "log-and-continue"
+

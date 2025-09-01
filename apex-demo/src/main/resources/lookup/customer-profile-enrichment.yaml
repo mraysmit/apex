@@ -2,8 +2,8 @@
 # Demonstrates database lookup enrichment using APEX YAML processing with real H2 database
 # Use Case: Enrich transactions with customer profile data from database
 
-metadata:
-  name: "Customer Profile Enrichment Demo - Database Version"
+type: "apex-enrichment-config"
+name: "Customer Profile Enrichment Demo - Database Version"
   description: "Demonstrates database lookup enrichment using APEX YAML processing with real H2 database"
   version: "2.0.0"
   type: "rule-config"
@@ -50,3 +50,4 @@ enrichments:
           target-field: "customerStatus"
         - source-field: "created_date"
           target-field: "customerCreatedDate"
+

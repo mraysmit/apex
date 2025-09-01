@@ -272,7 +272,8 @@ public class CommoditySwapValidationQuickDemo {
         System.out.println("=== STATIC DATA VALIDATION & ENRICHMENT ===");
         
         System.out.println("1. Client Validation:");
-        Client client = FinancialStaticDataProvider.getClient(swap.getClientId());
+        FinancialStaticDataProvider provider = new FinancialStaticDataProvider();
+        Client client = provider.getClient(swap.getClientId());
         if (client != null) {
             System.out.println("   ✓ Client found: " + client.getClientName());
             System.out.println("   ✓ Client active: " + client.getActive());
@@ -287,7 +288,7 @@ public class CommoditySwapValidationQuickDemo {
         }
         
         System.out.println("\n2. Client Account Validation:");
-        ClientAccount account = FinancialStaticDataProvider.getClientAccount(swap.getClientAccountId());
+        ClientAccount account = provider.getClientAccount(swap.getClientAccountId());
         if (account != null) {
             System.out.println("   ✓ Account found: " + account.getAccountName());
             System.out.println("   ✓ Account active: " + account.getActive());
@@ -304,7 +305,7 @@ public class CommoditySwapValidationQuickDemo {
         }
         
         System.out.println("\n3. Counterparty Validation:");
-        Counterparty counterparty = FinancialStaticDataProvider.getCounterparty(swap.getCounterpartyId());
+        Counterparty counterparty = provider.getCounterparty(swap.getCounterpartyId());
         if (counterparty != null) {
             System.out.println("   ✓ Counterparty found: " + counterparty.getCounterpartyName());
             System.out.println("   ✓ Counterparty active: " + counterparty.getActive());
@@ -319,7 +320,7 @@ public class CommoditySwapValidationQuickDemo {
         }
         
         System.out.println("\n4. Currency Validation:");
-        CurrencyData currency = FinancialStaticDataProvider.getCurrency(swap.getNotionalCurrency());
+        CurrencyData currency = provider.getCurrency(swap.getNotionalCurrency());
         if (currency != null) {
             System.out.println("   ✓ Currency found: " + currency.getCurrencyName());
             System.out.println("   ✓ Currency active: " + currency.getActive());
@@ -330,7 +331,7 @@ public class CommoditySwapValidationQuickDemo {
         }
         
         System.out.println("\n5. Commodity Reference Validation:");
-        CommodityReference commodity = FinancialStaticDataProvider.getCommodity(swap.getReferenceIndex());
+        CommodityReference commodity = provider.getCommodity(swap.getReferenceIndex());
         if (commodity != null) {
             System.out.println("   ✓ Commodity found: " + commodity.getCommodityName());
             System.out.println("   ✓ Commodity active: " + commodity.getActive());

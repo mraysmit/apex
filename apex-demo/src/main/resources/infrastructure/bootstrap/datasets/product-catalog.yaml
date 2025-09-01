@@ -5,8 +5,8 @@
 # Purpose: Realistic financial product catalog for APEX demonstrations
 # ============================================================================
 
-metadata:
-  name: "Bootstrap Demo - Financial Product Catalog Dataset"
+type: "apex-enrichment-config"
+name: "Bootstrap Demo - Financial Product Catalog Dataset"
   version: "1.0.0"
   description: "Comprehensive financial products and services catalog (used by DemoDataBootstrap.java for product lookups)"
   type: "dataset"
@@ -360,3 +360,4 @@ pricing_models:
   subscription:
     description: "Fixed monthly or annual subscription fee"
     typical_range: "$9.99 - $99.99 per month"
+

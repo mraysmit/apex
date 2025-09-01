@@ -3,55 +3,71 @@
 # Replaces all hardcoded customer transformer logic from CustomerTransformerDemo (@version 1.0)
 
 type: "apex-enrichment-config"
+id: "customer-transformer-demo"
 name: "customer-transformer-demo"
 description: "APEX-compliant customer transformer with real enrichment services"
 
-# External data source for customer transformer configurations
-external-data-sources:
+# Data sources for customer transformer configurations
+data-sources:
   - name: "transformer-rules-config"
-    type: "external-data-config"
-    source: "enrichment/customer-transformer/transformer-rules-config.yaml"
-    
+    type: "inline"
+    description: "Transformer rules configuration data source"
+
   - name: "field-actions-config"
-    type: "external-data-config"
-    source: "enrichment/customer-transformer/field-actions-config.yaml"
-    
+    type: "inline"
+    description: "Field actions configuration data source"
+
   - name: "customer-segments-config"
-    type: "external-data-config"
-    source: "enrichment/customer-transformer/customer-segments-config.yaml"
+    type: "inline"
+    description: "Customer segments configuration data source"
 
 # APEX enrichment processing for customer transformer
 enrichments:
-  - name: "transformer-rules-processing"
+  - id: "transformer-rules-processing"
+    name: "transformer-rules-processing"
     type: "lookup-enrichment"
     description: "Process transformer rules using data-driven configuration"
     condition: "#data.transformerType == 'transformer-rules-processing'"
-    lookup-source: "transformer-rules-config"
-    lookup-key: "#data.ruleType != null ? #data.ruleType : 'default'"
-    target-field: "transformerRulesResult"
-    
-  - name: "field-actions-processing"
+    lookup-config:
+      lookup-service: "transformer-rules-config"
+      lookup-key: "#data.ruleType != null ? #data.ruleType : 'default'"
+    field-mappings:
+      - source-field: "result"
+        target-field: "transformerRulesResult"
+
+  - id: "field-actions-processing"
+    name: "field-actions-processing"
     type: "lookup-enrichment"
     description: "Process field actions using data-driven configuration"
     condition: "#data.transformerType == 'field-actions-processing'"
-    lookup-source: "field-actions-config"
-    lookup-key: "#data.actionType != null ? #data.actionType : 'default'"
-    target-field: "fieldActionsResult"
-    
-  - name: "customer-segments-processing"
+    lookup-config:
+      lookup-service: "field-actions-config"
+      lookup-key: "#data.actionType != null ? #data.actionType : 'default'"
+    field-mappings:
+      - source-field: "result"
+        target-field: "fieldActionsResult"
+
+  - id: "customer-segments-processing"
+    name: "customer-segments-processing"
     type: "lookup-enrichment"
     description: "Process customer segments using data-driven configuration"
     condition: "#data.transformerType == 'customer-segments-processing'"
-    lookup-source: "customer-segments-config"
-    lookup-key: "#data.segmentType != null ? #data.segmentType : 'default'"
-    target-field: "customerSegmentsResult"
-    
-  - name: "customer-transformer-summary"
-    type: "expression-enrichment"
+    lookup-config:
+      lookup-service: "customer-segments-config"
+      lookup-key: "#data.segmentType != null ? #data.segmentType : 'default'"
+    field-mappings:
+      - source-field: "result"
+        target-field: "customerSegmentsResult"
+
+  - id: "customer-transformer-summary"
+    name: "customer-transformer-summary"
+    type: "calculation-enrichment"
     description: "Generate customer transformer summary"
     condition: "true"
     expression: "'Customer transformer completed: ' + (#data.transformerType != null ? #data.transformerType : 'unknown') + ' using real APEX services'"
-    target-field: "customerTransformerSummary"
+    field-mappings:
+      - source-field: "expression"
+        target-field: "customerTransformerSummary"
 
 # Transformer processing categories
 processing-categories:

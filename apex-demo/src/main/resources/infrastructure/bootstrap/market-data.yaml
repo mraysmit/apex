@@ -11,8 +11,8 @@
 #
 # ============================================================================
 
-metadata:
-  name: "Market Data Reference Dataset"
+type: "apex-enrichment-config"
+name: "Market Data Reference Dataset"
   type: "dataset"
   version: "1.0.0"
   description: "Currency and market reference data for OTC Options processing"
@@ -129,3 +129,4 @@ markets:
       - "Corn"
       - "Soybeans"
     currency: "USD"
+

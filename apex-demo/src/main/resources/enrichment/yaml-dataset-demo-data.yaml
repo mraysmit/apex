@@ -2,8 +2,8 @@
 # Test data scenarios for YamlDatasetDemo.java
 # NO HARDCODED SIMULATION - Real APEX data processing
 
-metadata:
-  name: "YAML Dataset Demo Data"
+type: "apex-enrichment-config"
+name: "YAML Dataset Demo Data"
   version: "2.0"
   description: "Test data scenarios for real APEX YAML dataset demonstration"
   author: "APEX Demo Team"
@@ -241,3 +241,4 @@ reference-datasets:
       category: "ALTERNATIVE"
       riskLevel: "HIGH"
       minInvestment: 10000
+

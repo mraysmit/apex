@@ -1,4 +1,4 @@
-![APEX System Logo](APEX%20System%20logo.png)
+
 # APEX Custody Auto-Repair Bootstrap
 
 ## Overview

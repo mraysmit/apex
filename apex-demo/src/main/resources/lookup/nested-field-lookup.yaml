@@ -2,11 +2,11 @@
 # Demonstrates nested field navigation in lookup-key expressions
 # Use Case: Country-specific settlement information lookup using nested counterparty data
 
-metadata:
-  name: "Nested Field Reference Lookup Demo"
+type: "apex-enrichment-config"
+name: "Nested Field Reference Lookup Demo"
   description: "Demonstrates nested field navigation '#trade.counterparty.countryCode' for settlement enrichment"
   version: "1.0.0"
-  type: "enrichment"
+  type: "apex-enrichment-config"
   author: "APEX Demo Team"
 
 # Define the enrichment rules
@@ -243,3 +243,4 @@ processing:
   continue-on-error: true
   max-errors: 10
   error-handling: "log-and-continue"
+

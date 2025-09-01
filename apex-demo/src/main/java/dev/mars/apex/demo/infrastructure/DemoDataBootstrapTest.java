@@ -145,12 +145,11 @@ public class DemoDataBootstrapTest {
         
         try {
             // Try to use the old DemoDataProvider if it exists
-            DemoDataProvider oldProvider = new DemoDataProvider();
-
             System.out.println("\nOld Hardcoded Approach Results:");
-            List<Customer> oldCustomers = DemoDataProvider.createDemoCustomers();
-            List<Product> oldProducts = DemoDataProvider.createDemoProducts();
-            List<Trade> oldTrades = DemoDataProvider.createDemoTrades();
+            DemoDataProvider oldProviderInstance = new DemoDataProvider();
+            List<Customer> oldCustomers = oldProviderInstance.createDemoCustomers();
+            List<Product> oldProducts = oldProviderInstance.createDemoProducts();
+            List<Trade> oldTrades = oldProviderInstance.createDemoTrades();
             
             System.out.printf("  Old Customers: %d (hardcoded in Java)%n", oldCustomers.size());
             System.out.printf("  Old Products: %d (hardcoded in Java)%n", oldProducts.size());

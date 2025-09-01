@@ -2,9 +2,15 @@
 # External data source configuration for regulatory requirements by trade type
 # Replaces hardcoded regulatory requirements mapping from ComplianceServiceDemo
 
-type: "external-data-config"
-name: "regulatory-requirements"
-description: "Regulatory requirements mapping by trade type"
+type: "apex-enrichment-config"
+name: "Regulatory Requirements Configuration"
+  version: "2.0.0"
+  description: "Regulatory requirements mapping by trade type"
+  type: "external-data-config"
+  author: "Mark Andrew Ray-Smith Cityline Ltd"
+  created-date: "2025-09-01"
+  domain: "Financial Compliance"
+  tags: ["regulatory-requirements", "compliance", "external-data"]
 
 # Regulatory requirements by trade type
 data:
@@ -83,3 +89,4 @@ trade-types:
   Commodity:
     description: "Commodity instruments"
     examples: ["Commodity futures", "Commodity swaps", "Physical commodities"]
+

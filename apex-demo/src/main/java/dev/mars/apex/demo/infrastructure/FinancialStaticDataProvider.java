@@ -237,6 +237,46 @@ public class FinancialStaticDataProvider {
     }
 
     /**
+     * Populates client data using APEX enrichment.
+     */
+    private void populateClients() throws SQLException {
+        logger.info("Populating clients using APEX enrichment...");
+        // Implementation would use APEX services to populate client data
+    }
+
+    /**
+     * Populates client account data using APEX enrichment.
+     */
+    private void populateClientAccounts() throws SQLException {
+        logger.info("Populating client accounts using APEX enrichment...");
+        // Implementation would use APEX services to populate client account data
+    }
+
+    /**
+     * Populates counterparty data using APEX enrichment.
+     */
+    private void populateCounterparties() throws SQLException {
+        logger.info("Populating counterparties using APEX enrichment...");
+        // Implementation would use APEX services to populate counterparty data
+    }
+
+    /**
+     * Populates currency data using APEX enrichment.
+     */
+    private void populateCurrencies() throws SQLException {
+        logger.info("Populating currencies using APEX enrichment...");
+        // Implementation would use APEX services to populate currency data
+    }
+
+    /**
+     * Populates commodity data using APEX enrichment.
+     */
+    private void populateCommodities() throws SQLException {
+        logger.info("Populating commodities using APEX enrichment...");
+        // Implementation would use APEX services to populate commodity data
+    }
+
+    /**
      * Simulates in-memory setup when database is not available.
      */
     private void simulateInMemorySetup() {

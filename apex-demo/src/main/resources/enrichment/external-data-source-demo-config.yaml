@@ -2,8 +2,8 @@
 # Real APEX YAML configuration for ExternalDataSourceDemo.java
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
-metadata:
-  name: "External Data Source Demo Configuration"
+type: "apex-enrichment-config"
+name: "External Data Source Demo Configuration"
   version: "2.0"
   description: "Real APEX external data source demonstration with REST API, file system, cache, health monitoring, and performance metrics"
   author: "APEX Demo Team"
@@ -373,3 +373,4 @@ error-handling:
   cache-errors: "fallback-to-source"
   health-monitoring-errors: "collect"
   performance-errors: "collect-and-continue"
+

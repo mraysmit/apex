@@ -5,8 +5,8 @@
 # Purpose: Main configuration for data-driven demo data management
 # ============================================================================
 
-metadata:
-  name: "APEX Demo Data Bootstrap - Main Configuration"
+type: "apex-enrichment-config"
+name: "APEX Demo Data Bootstrap - Main Configuration"
   version: "1.0.0"
   description: "Main bootstrap configuration for comprehensive demo data management (used by DemoDataBootstrap.java)"
   type: "bootstrap"
@@ -262,3 +262,4 @@ audit:
     - "financial_regulations"
     - "audit_trail_integrity"
     - "performance_monitoring"
+

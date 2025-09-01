@@ -2,8 +2,8 @@
 # Real APEX YAML configuration for ApexRulesEngineDemo.java
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
-metadata:
-  name: "APEX Rules Engine Demo Configuration"
+type: "apex-enrichment-config"
+name: "APEX Rules Engine Demo Configuration"
   version: "2.0"
   description: "Real APEX rules engine demonstration with investment validation, risk assessment, and compliance checking"
   author: "APEX Demo Team"
@@ -111,3 +111,4 @@ output:
   format: "json"
   include-metadata: true
   include-processing-time: true
+

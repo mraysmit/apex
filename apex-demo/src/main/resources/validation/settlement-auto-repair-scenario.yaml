@@ -12,8 +12,8 @@
 #
 # ============================================================================
 
-metadata:
-  name: "Settlement Auto-Repair Processing Scenario"
+type: "apex-enrichment-config"
+name: "Settlement Auto-Repair Processing Scenario"
   version: "1.0.0"
   description: "Associates settlement instructions with existing rule configurations"
   type: "scenario"
@@ -38,3 +38,4 @@ scenario:
   rule-configurations:
     - "bootstrap/custody-auto-repair-bootstrap.yaml"
     - "config/settlement-validation-rules.yaml"
+

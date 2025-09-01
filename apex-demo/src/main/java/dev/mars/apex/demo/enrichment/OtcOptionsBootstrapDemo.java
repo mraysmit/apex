@@ -21,7 +21,7 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.datasource.DataSourceConfigService;
+
 import dev.mars.apex.demo.model.OtcOption;
 import dev.mars.apex.demo.model.UnderlyingAsset;
 
@@ -73,11 +73,9 @@ public class OtcOptionsBootstrapDemo {
     private final EnrichmentService enrichmentService;
     private final LookupServiceRegistry serviceRegistry;
     private final ExpressionEvaluatorService expressionEvaluator;
-    private final DataSourceConfigService dataSourceConfigService;
-
     // Configuration data (populated via real APEX processing)
     private Map<String, Object> configurationData;
-    
+
     // Bootstrap results (populated via real APEX processing)
     private Map<String, Object> bootstrapResults;
 
@@ -90,7 +88,6 @@ public class OtcOptionsBootstrapDemo {
         this.serviceRegistry = new LookupServiceRegistry();
         this.expressionEvaluator = new ExpressionEvaluatorService();
         this.enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
-        this.dataSourceConfigService = new DataSourceConfigService();
         
         this.bootstrapResults = new HashMap<>();
 

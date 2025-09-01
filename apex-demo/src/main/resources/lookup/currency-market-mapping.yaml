@@ -2,8 +2,8 @@
 # Demonstrates YAML-based business logic instead of hardcoded switch statements
 # Use Case: Map trading currencies to their primary stock exchanges/markets
 
-metadata:
-  name: "Currency to Market Mapping"
+type: "apex-enrichment-config"
+name: "Currency to Market Mapping"
   description: "Maps trading currencies to their primary stock exchanges using APEX YAML processing"
   version: "1.0.0"
   type: "rule-config"
@@ -186,3 +186,4 @@ monitoring:
     slow-lookup-threshold-ms: 100
     cache-miss-rate-threshold: 0.2
     error-rate-threshold: 0.05
+

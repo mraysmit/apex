@@ -1,5 +1,5 @@
-metadata:
-  name: "Simple PostgreSQL Database Enrichment Demo"
+type: "apex-enrichment-config"
+name: "Simple PostgreSQL Database Enrichment Demo"
   version: "1.0.0"
   type: "rule-config"
   description: "Simple customer profile enrichment using H2 database (PostgreSQL mode) with real SQL queries"
@@ -92,3 +92,4 @@ enrichments:
       - source-field: "created_date"
         target-field: "customerCreatedDate"
         required: false
+

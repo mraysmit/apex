@@ -5,6 +5,11 @@
 type: "apex-enrichment-config"
 name: "custody-auto-repair-bootstrap-demo"
 description: "APEX-compliant custody auto-repair bootstrap with real enrichment services"
+version: "2.0.0"
+author: "Mark Andrew Ray-Smith Cityline Ltd"
+created-date: "2025-09-01"
+domain: "Custody and Safekeeping"
+tags: ["custody", "auto-repair", "bootstrap", "enrichment", "demo"]
 
 # External data source for custody auto-repair bootstrap configurations
 external-data-sources:

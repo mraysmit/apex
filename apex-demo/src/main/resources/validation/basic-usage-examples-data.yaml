@@ -2,8 +2,8 @@
 # Test data scenarios for BasicUsageExamples.java
 # NO HARDCODED SIMULATION - Real APEX data processing
 
-metadata:
-  name: "Basic Usage Examples Data"
+type: "apex-enrichment-config"
+name: "Basic Usage Examples Data"
   version: "2.0"
   description: "Test data scenarios for real APEX basic usage demonstration"
   author: "APEX Demo Team"
@@ -241,3 +241,4 @@ reference-data:
       min-value: 0
       max-value: 1000000
       required: false
+

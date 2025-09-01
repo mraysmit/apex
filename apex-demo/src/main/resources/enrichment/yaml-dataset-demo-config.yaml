@@ -2,8 +2,8 @@
 # Real APEX YAML configuration for YamlDatasetDemo.java
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
-metadata:
-  name: "YAML Dataset Demo Configuration"
+type: "apex-enrichment-config"
+name: "YAML Dataset Demo Configuration"
   version: "2.0"
   description: "Real APEX YAML dataset demonstration with inline datasets, field mappings, and conditional processing"
   author: "APEX Demo Team"
@@ -208,3 +208,4 @@ output:
   include-metadata: true
   include-processing-time: true
   include-dataset-info: true
+

@@ -21,7 +21,7 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.RulesService;
+
 import dev.mars.apex.demo.model.CommodityTotalReturnSwap;
 
 import org.slf4j.Logger;
@@ -72,11 +72,9 @@ public class CommoditySwapValidationBootstrap {
     private final EnrichmentService enrichmentService;
     private final LookupServiceRegistry serviceRegistry;
     private final ExpressionEvaluatorService expressionEvaluator;
-    private final RulesService rulesService;
-
     // Configuration data (populated via real APEX processing)
     private Map<String, Object> configurationData;
-    
+
     // Validation results (populated via real APEX processing)
     private Map<String, Object> validationResults;
 
@@ -89,7 +87,6 @@ public class CommoditySwapValidationBootstrap {
         this.serviceRegistry = new LookupServiceRegistry();
         this.expressionEvaluator = new ExpressionEvaluatorService();
         this.enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
-        this.rulesService = new RulesService();
         
         this.validationResults = new HashMap<>();
 
@@ -261,9 +258,11 @@ public class CommoditySwapValidationBootstrap {
                 return Boolean.TRUE.equals(validationResult);
             }
 
-            // Use APEX rules service for validation
+            // Use APEX enrichment service for validation
             Map<String, Object> context = convertSwapToMap(swap);
-            return rulesService.check("#tradeId != null && #notionalAmount > 0", context);
+            YamlRuleConfiguration config = (YamlRuleConfiguration) configurationData.get("mainConfig");
+            Object enrichmentResult = enrichmentService.enrichObject(config, context);
+            return enrichmentResult != null;
 
         } catch (Exception e) {
             logger.error("Failed to validate commodity swap with APEX enrichment: {}", e.getMessage());

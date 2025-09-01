@@ -15,8 +15,8 @@
 #
 # ============================================================================
 
-metadata:
-  name: "APEX Demo Data Sources Configuration"
+type: "apex-enrichment-config"
+name: "APEX Demo Data Sources Configuration"
   type: "rule-config"
   version: "2.0.0"
   description: "Production data source configurations for APEX demonstrations"
@@ -323,3 +323,4 @@ environments:
         enabled: false  # Use real database configuration
       demo-rest-api:
         enabled: false  # Use real API configuration
+

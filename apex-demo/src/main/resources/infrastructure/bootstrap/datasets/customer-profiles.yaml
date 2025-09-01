@@ -5,8 +5,8 @@
 # Purpose: Realistic customer profile data for APEX demonstrations
 # ============================================================================
 
-metadata:
-  name: "Bootstrap Demo - Customer Profiles Dataset"
+type: "apex-enrichment-config"
+name: "Bootstrap Demo - Customer Profiles Dataset"
   version: "1.0.0"
   description: "Realistic customer profiles for financial services demonstrations (used by DemoDataBootstrap.java and multiple bootstrap demos)"
   type: "dataset"
@@ -333,3 +333,4 @@ lifecycle_stages:
   churned:
     description: "Former customer who has closed accounts"
     status: "INACTIVE"
+

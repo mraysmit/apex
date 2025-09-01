@@ -2,8 +2,8 @@
 # Test data scenarios for YamlConfigurationDemo.java
 # NO HARDCODED SIMULATION - Real APEX data processing
 
-metadata:
-  name: "YAML Configuration Demo Data"
+type: "apex-enrichment-config"
+name: "YAML Configuration Demo Data"
   version: "2.0"
   description: "Test data scenarios for real APEX YAML configuration demonstration"
   author: "APEX Demo Team"
@@ -309,3 +309,4 @@ reference-data:
     - "BUSINESS_EDITABLE"
     - "DYNAMIC_LOADING"
     - "ALL_TYPES"
+

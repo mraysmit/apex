@@ -362,6 +362,22 @@ public class IntegratedTradeValidatorDemo implements Validator<Trade> {
     // ============================================================================
 
     /**
+     * Get the name of this validator service.
+     */
+    @Override
+    public String getName() {
+        return "IntegratedTradeValidatorDemo";
+    }
+
+    /**
+     * Get the type of objects this validator can validate.
+     */
+    @Override
+    public Class<Trade> getType() {
+        return Trade.class;
+    }
+
+    /**
      * Validates a trade using real APEX enrichment services.
      * Implementation of the Validator<Trade> interface.
      */

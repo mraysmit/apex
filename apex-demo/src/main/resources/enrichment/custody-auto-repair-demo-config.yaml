@@ -2,8 +2,8 @@
 # Real APEX YAML configuration for CustodyAutoRepairDemo.java
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
-metadata:
-  name: "Custody Auto-Repair Demo Configuration"
+type: "apex-enrichment-config"
+name: "Custody Auto-Repair Demo Configuration"
   version: "2.0"
   description: "Real APEX custody auto-repair demonstration with settlement instruction processing, standing instruction management, and weighted rule-based decision making"
   author: "APEX Demo Team"
@@ -262,3 +262,4 @@ output:
   include-processing-time: true
   include-confidence-score: true
   include-repair-audit-trail: true
+

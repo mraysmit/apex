@@ -2,12 +2,12 @@
 # Test data scenarios for DataManagementDemo.java
 # NO HARDCODED SIMULATION - Real APEX data processing
 
-metadata:
-  name: "Data Management Demo Data"
-  version: "2.0"
-  description: "Test data scenarios for real APEX data management demonstration"
-  author: "APEX Demo Team"
-  created: "2025-08-29"
+type: "external-data-config"
+name: "data-management-demo-data"
+description: "Test data scenarios for real APEX data management demonstration"
+version: "2.0"
+author: "APEX Demo Team"
+created: "2025-08-29"
 
 # Basic Dataset Structure Test Scenarios
 basic-dataset-scenarios:
@@ -337,3 +337,4 @@ reference-data:
     - "MULTI_DATASET"
     - "VALIDATION_ENRICHED"
     - "ERROR_HANDLING"
+

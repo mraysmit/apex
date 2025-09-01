@@ -22,6 +22,9 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.core.engine.model.RuleGroup;
+import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +91,26 @@ public class RuleConfigurationDemo {
         } catch (Exception e) {
             logger.error("Failed to initialize RuleConfigurationDemo: {}", e.getMessage());
             throw new RuntimeException("Rule configuration demo initialization failed", e);
+        }
+    }
+
+    /**
+     * Loads external YAML configuration.
+     */
+    private void loadExternalConfiguration() throws Exception {
+        logger.info("Loading external rule configuration YAML...");
+        configurationData = new HashMap<>();
+
+        try {
+            // Load main rule configuration
+            YamlRuleConfiguration mainConfig = yamlLoader.loadFromClasspath("evaluation/rule-configuration-demo.yaml");
+            configurationData.put("mainConfig", mainConfig);
+
+            logger.info("External rule configuration YAML loaded successfully");
+
+        } catch (Exception e) {
+            logger.warn("External rule configuration YAML files not found, using static rule registration: {}", e.getMessage());
+            // This is acceptable for this demo - it can work with static rules
         }
     }
 

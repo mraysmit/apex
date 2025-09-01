@@ -5,8 +5,8 @@
 # Purpose: Realistic trading scenarios for APEX demonstrations
 # ============================================================================
 
-metadata:
-  name: "Bootstrap Demo - Trading Scenarios Dataset"
+type: "apex-enrichment-config"
+name: "Bootstrap Demo - Trading Scenarios Dataset"
   version: "1.0.0"
   description: "Comprehensive trading scenarios across multiple asset classes (used by DemoDataBootstrap.java and trading demos)"
   type: "dataset"
@@ -404,3 +404,4 @@ risk_rules:
       name: "counterparty-exposure-limit"
       condition: "#counterpartyExposure <= 5000000"
       message: "Counterparty exposure cannot exceed $5M"
+

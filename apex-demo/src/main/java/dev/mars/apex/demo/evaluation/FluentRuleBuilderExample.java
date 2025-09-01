@@ -21,8 +21,6 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.database.DatabaseService;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,11 +67,10 @@ public class FluentRuleBuilderExample {
     private final EnrichmentService enrichmentService;
     private final LookupServiceRegistry serviceRegistry;
     private final ExpressionEvaluatorService expressionEvaluator;
-    private final DatabaseService databaseService;
 
     // Configuration data (populated via real APEX processing)
     private Map<String, Object> configurationData;
-    
+
     // Builder results (populated via real APEX processing)
     private Map<String, Object> builderResults;
 
@@ -86,7 +83,6 @@ public class FluentRuleBuilderExample {
         this.serviceRegistry = new LookupServiceRegistry();
         this.expressionEvaluator = new ExpressionEvaluatorService();
         this.enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
-        this.databaseService = new DatabaseService();
         
         this.builderResults = new HashMap<>();
 

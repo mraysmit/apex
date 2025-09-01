@@ -5,6 +5,11 @@
 type: "external-data-config"
 name: "auto-repair-rules-config"
 description: "Data-driven auto-repair rules configuration for custody settlement processing"
+version: "2.0.0"
+author: "Mark Andrew Ray-Smith Cityline Ltd"
+created-date: "2025-09-01"
+domain: "Custody and Safekeeping"
+tags: ["auto-repair-rules", "custody", "bootstrap", "external-data"]
 
 # Auto-repair rules configuration by rule type
 data:

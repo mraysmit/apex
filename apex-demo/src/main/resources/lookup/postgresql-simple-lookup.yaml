@@ -2,8 +2,8 @@
 # Demonstrates external database data source using embedded H2 database (PostgreSQL compatible mode)
 # Use Case: Customer profile data source for enrichment lookups
 
-metadata:
-  name: "Self-Contained Database Data Source Demo"
+type: "apex-enrichment-config"
+name: "Self-Contained Database Data Source Demo"
   description: "Data source configuration for embedded H2 database with connection pooling and caching"
   version: "1.0.0"
   type: "external-data-config"
@@ -79,5 +79,6 @@ dataSources:
     # Parameter definitions
     parameterNames:
       - "customerId"
+
 
 

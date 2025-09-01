@@ -2,8 +2,8 @@
 # Real APEX YAML configuration for DataManagementDemo.java
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
-metadata:
-  name: "Data Management Demo Configuration"
+type: "apex-enrichment-config"
+name: "Data Management Demo Configuration"
   version: "2.0"
   description: "Real APEX data management demonstration with dataset structure, enrichment, validation, and error handling"
   author: "APEX Demo Team"
@@ -379,3 +379,4 @@ error-handling:
   validation-errors: "collect"
   multi-dataset-errors: "collect-with-fallback"
   default-value-errors: "apply-defaults"
+

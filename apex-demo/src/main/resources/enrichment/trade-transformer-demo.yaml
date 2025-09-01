@@ -6,52 +6,67 @@ type: "apex-enrichment-config"
 name: "trade-transformer-demo"
 description: "APEX-compliant trade transformer with real enrichment services"
 
-# External data source for trade transformer configurations
-external-data-sources:
+# Data sources for trade transformer configurations
+data-sources:
   - name: "trade-transformer-rules-config"
-    type: "external-data-config"
-    source: "enrichment/trade-transformer/trade-transformer-rules-config.yaml"
-    
+    type: "inline"
+    description: "Trade transformer rules configuration data source"
+
   - name: "trade-field-actions-config"
-    type: "external-data-config"
-    source: "enrichment/trade-transformer/trade-field-actions-config.yaml"
-    
+    type: "inline"
+    description: "Trade field actions configuration data source"
+
   - name: "trade-risk-ratings-config"
-    type: "external-data-config"
-    source: "enrichment/trade-transformer/trade-risk-ratings-config.yaml"
+    type: "inline"
+    description: "Trade risk ratings configuration data source"
 
 # APEX enrichment processing for trade transformer
 enrichments:
-  - name: "trade-transformer-rules-processing"
+  - id: "trade-transformer-rules-processing"
+    name: "trade-transformer-rules-processing"
     type: "lookup-enrichment"
     description: "Process trade transformer rules using data-driven configuration"
     condition: "#data.transformerType == 'trade-transformer-rules-processing'"
-    lookup-source: "trade-transformer-rules-config"
-    lookup-key: "#data.ruleType != null ? #data.ruleType : 'default'"
-    target-field: "tradeTransformerRulesResult"
-    
-  - name: "trade-field-actions-processing"
+    lookup-config:
+      lookup-service: "trade-transformer-rules-config"
+      lookup-key: "#data.ruleType != null ? #data.ruleType : 'default'"
+    field-mappings:
+      - source-field: "result"
+        target-field: "tradeTransformerRulesResult"
+
+  - id: "trade-field-actions-processing"
+    name: "trade-field-actions-processing"
     type: "lookup-enrichment"
     description: "Process trade field actions using data-driven configuration"
     condition: "#data.transformerType == 'trade-field-actions-processing'"
-    lookup-source: "trade-field-actions-config"
-    lookup-key: "#data.actionType != null ? #data.actionType : 'default'"
-    target-field: "tradeFieldActionsResult"
-    
-  - name: "trade-risk-ratings-processing"
+    lookup-config:
+      lookup-service: "trade-field-actions-config"
+      lookup-key: "#data.actionType != null ? #data.actionType : 'default'"
+    field-mappings:
+      - source-field: "result"
+        target-field: "tradeFieldActionsResult"
+
+  - id: "trade-risk-ratings-processing"
+    name: "trade-risk-ratings-processing"
     type: "lookup-enrichment"
     description: "Process trade risk ratings using data-driven configuration"
     condition: "#data.transformerType == 'trade-risk-ratings-processing'"
-    lookup-source: "trade-risk-ratings-config"
-    lookup-key: "#data.ratingType != null ? #data.ratingType : 'default'"
-    target-field: "tradeRiskRatingsResult"
+    lookup-config:
+      lookup-service: "trade-risk-ratings-config"
+      lookup-key: "#data.ratingType != null ? #data.ratingType : 'default'"
+    field-mappings:
+      - source-field: "result"
+        target-field: "tradeRiskRatingsResult"
     
-  - name: "trade-transformer-summary"
-    type: "expression-enrichment"
+  - id: "trade-transformer-summary"
+    name: "trade-transformer-summary"
+    type: "calculation-enrichment"
     description: "Generate trade transformer summary"
     condition: "true"
     expression: "'Trade transformer completed: ' + (#data.transformerType != null ? #data.transformerType : 'unknown') + ' using real APEX services'"
-    target-field: "tradeTransformerSummary"
+    field-mappings:
+      - source-field: "expression"
+        target-field: "tradeTransformerSummary"
 
 # Transformer processing categories
 processing-categories:

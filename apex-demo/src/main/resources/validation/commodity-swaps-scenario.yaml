@@ -12,8 +12,8 @@
 #
 # ============================================================================
 
-metadata:
-  name: "Commodity Swaps Processing Scenario"
+type: "apex-enrichment-config"
+name: "Commodity Swaps Processing Scenario"
   version: "1.0.0"
   description: "Associates commodity swaps with existing rule configurations"
   type: "scenario"
@@ -39,3 +39,4 @@ scenario:
   rule-configurations:
     - "bootstrap/commodity-swap-validation-bootstrap.yaml"
     - "config/financial-enrichment-rules.yaml"
+

@@ -2,8 +2,8 @@
 # Test data scenarios for ExternalDataSourceDemo.java
 # NO HARDCODED SIMULATION - Real APEX data processing
 
-metadata:
-  name: "External Data Source Demo Data"
+type: "apex-enrichment-config"
+name: "External Data Source Demo Data"
   version: "2.0"
   description: "Test data scenarios for real APEX external data source demonstration"
   author: "APEX Demo Team"
@@ -356,3 +356,4 @@ reference-data:
     - "HEALTH_MONITORING"
     - "ERROR_HANDLING"
     - "PERFORMANCE_METRICS"
+
