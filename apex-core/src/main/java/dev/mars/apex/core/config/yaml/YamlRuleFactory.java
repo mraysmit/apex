@@ -467,7 +467,7 @@ public class YamlRuleFactory {
     
     /**
      * Create a RuleGroup from YAML rule group configuration.
-     * 
+     *
      * @param yamlGroup The YAML rule group configuration
      * @param config The rules engine configuration (to lookup existing rules)
      * @return A RuleGroup object
@@ -478,18 +478,36 @@ public class YamlRuleFactory {
         String description = yamlGroup.getDescription() != null ? yamlGroup.getDescription() : "";
         int priority = yamlGroup.getPriority() != null ? yamlGroup.getPriority() : 100;
         boolean stopOnFirstFailure = yamlGroup.getStopOnFirstFailure() != null ? yamlGroup.getStopOnFirstFailure() : false;
-        
-        LOGGER.fine("Creating rule group: " + id + " (" + name + ")");
-        
+        boolean parallelExecution = yamlGroup.getParallelExecution() != null ? yamlGroup.getParallelExecution() : false;
+
+        // Debug mode can be enabled via YAML configuration or system property for troubleshooting
+        boolean debugMode = yamlGroup.getDebugMode() != null ? yamlGroup.getDebugMode() :
+                           Boolean.parseBoolean(System.getProperty("apex.rulegroup.debug", "false"));
+
+        LOGGER.fine("Creating rule group: " + id + " (" + name + ") with stopOnFirstFailure=" + stopOnFirstFailure +
+                   ", parallelExecution=" + parallelExecution + ", debugMode=" + debugMode);
+
         // Determine category
         String categoryName = yamlGroup.getCategory() != null ? yamlGroup.getCategory() : "default";
         getOrCreateCategory(categoryName, priority); // Ensure category exists in cache
 
-        RuleGroup group = new RuleGroup(id, categoryName, name, description, priority, stopOnFirstFailure);
-        
+        // Determine operator from YAML configuration
+        boolean isAndOperator = true; // Default to AND logic for rule groups
+        if (yamlGroup.getOperator() != null) {
+            String operator = yamlGroup.getOperator().toUpperCase();
+            if ("OR".equals(operator)) {
+                isAndOperator = false;
+            } else if (!"AND".equals(operator)) {
+                LOGGER.warning("Invalid operator '" + yamlGroup.getOperator() + "' for rule group '" + id + "'. Using AND as default.");
+            }
+        }
+
+        RuleGroup group = new RuleGroup(id, categoryName, name, description, priority,
+                                       isAndOperator, stopOnFirstFailure, parallelExecution, debugMode);
+
         // Add rules to the group
         addRulesToGroup(yamlGroup, group, config);
-        
+
         return group;
     }
     

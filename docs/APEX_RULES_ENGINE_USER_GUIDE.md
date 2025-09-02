@@ -4296,8 +4296,10 @@ rule-groups:
     categories: ["validation", "compliance"]  # Multiple categories
     priority: 10
     enabled: true
-    stop-on-first-failure: true  # Stop on first failure for efficiency
+    operator: "AND"              # NEW: "AND" or "OR" - how to combine rule results
+    stop-on-first-failure: true  # Stop on first failure for efficiency (short-circuit)
     parallel-execution: false    # Sequential execution
+    debug-mode: false           # NEW: Enable debug logging and disable short-circuiting
     rule-ids:
       - "age-validation"
       - "email-validation"
@@ -4319,8 +4321,10 @@ rule-groups:
     category: "eligibility"
     priority: 20
     enabled: true
-    stop-on-first-failure: false # Continue even if one rule fails
+    operator: "OR"              # NEW: OR logic - any rule can pass
+    stop-on-first-failure: true # NEW: Stop on first success for OR groups (short-circuit)
     parallel-execution: true     # Parallel execution for performance
+    debug-mode: false           # NEW: Disable debug mode for production
     rule-references:
       - rule-id: "premium-customer"
         sequence: 1
@@ -4428,39 +4432,122 @@ rule-groups:
 
 ### Rule Group Execution Behavior
 
-#### AND Groups (All Rules Must Pass)
+APEX Rule Groups support multiple execution strategies to optimize performance and provide debugging capabilities.
+
+#### Short-Circuit Evaluation (Default Behavior)
+
+**AND Groups (All Rules Must Pass)**
+- **Default**: `operator: "AND"`, `stop-on-first-failure: true`
+- **Behavior**: Stops on **first failure** (short-circuit)
+- **Logic**: All rules must evaluate to true for group to succeed
+- **Performance**: Optimal - avoids unnecessary rule evaluations
 
 ```java
-// AND group behavior
+// AND group with short-circuit behavior
 RuleGroup andGroup = config.createRuleGroupWithAnd("and-group", category, "AND Group", "All must pass", 10);
 
-// Execution logic:
-// - All rules must evaluate to true
-// - If any rule fails, the entire group fails
-// - Execution can stop on first failure (configurable)
-// - Result is true only if ALL rules pass
+// Execution flow:
+// Rule 1: PASS → Continue to Rule 2
+// Rule 2: PASS → Continue to Rule 3
+// Rule 3: FAIL → STOP (return false) - Rules 4 and 5 NOT evaluated
 
-Map<String, Object> data = Map.of("age", 25, "email", "test@example.com", "income", 30000);
+Map<String, Object> data = Map.of("age", 25, "email", "test@example.com", "income", 15000);
 RuleResult result = engine.executeRuleGroup(andGroup, data);
-// Returns true only if age >= 18 AND email is valid AND income >= 25000
+// Returns false as soon as income check fails (short-circuit)
 ```
 
-#### OR Groups (Any Rule Can Pass)
+**OR Groups (Any Rule Can Pass)**
+- **Default**: `operator: "OR"`, `stop-on-first-failure: true`
+- **Behavior**: Stops on **first success** (short-circuit)
+- **Logic**: Any rule can evaluate to true for group to succeed
+- **Performance**: Optimal - stops as soon as one rule passes
 
 ```java
-// OR group behavior
+// OR group with short-circuit behavior
 RuleGroup orGroup = config.createRuleGroupWithOr("or-group", category, "OR Group", "Any can pass", 20);
 
-// Execution logic:
-// - Any rule can evaluate to true for group to pass
-// - If one rule passes, the entire group passes
-// - Execution can stop on first success (configurable)
-// - Result is true if ANY rule passes
+// Execution flow:
+// Rule 1: FAIL → Continue to Rule 2
+// Rule 2: FAIL → Continue to Rule 3
+// Rule 3: PASS → STOP (return true) - Rules 4 and 5 NOT evaluated
 
 Map<String, Object> data = Map.of("age", 16, "email", null, "income", 30000);
 RuleResult result = engine.executeRuleGroup(orGroup, data);
-// Returns true if income >= 25000 (even though age and email fail)
+// Returns true as soon as income check passes (short-circuit)
 ```
+
+#### Complete Evaluation (Non-Short-Circuit)
+
+**When to Use**
+- **Debugging**: Need to see all rule results
+- **Logging**: Want comprehensive evaluation logs
+- **Reporting**: Need complete validation reports
+- **Testing**: Verify all rules work correctly
+
+**Configuration Options**
+```yaml
+rule-groups:
+  - id: "debug-validation"
+    operator: "AND"
+    stop-on-first-failure: false  # Disable short-circuiting
+    debug-mode: true             # Enable debug logging
+    # OR use system property: -Dapex.rulegroup.debug=true
+```
+
+**Behavior**
+- **All rules evaluated** regardless of intermediate results
+- **Debug logging** shows each rule's result
+- **Performance impact** - slower but more comprehensive
+
+#### Parallel Execution
+
+**When to Use**
+- **CPU-intensive rules** that can benefit from concurrency
+- **Independent rules** with no dependencies
+- **Multi-core systems** with available processing capacity
+
+**Configuration**
+```yaml
+rule-groups:
+  - id: "parallel-validation"
+    parallel-execution: true     # Enable parallel processing
+    stop-on-first-failure: false # Parallel execution disables short-circuiting
+```
+
+**Behavior**
+- **Rules execute concurrently** using thread pool
+- **Thread pool size**: `min(rule_count, available_processors)`
+- **Short-circuiting disabled** to ensure all rules complete
+- **Results collected** and combined using AND/OR logic
+
+#### Debug Mode
+
+**Enable Debug Mode**
+```yaml
+rule-groups:
+  - id: "debug-group"
+    debug-mode: true            # YAML configuration
+    # OR use system property: -Dapex.rulegroup.debug=true
+```
+
+**Debug Output**
+```
+DEBUG: Rule 'age-validation' in group 'customer-validation' evaluated to: true
+DEBUG: Rule 'email-validation' in group 'customer-validation' evaluated to: false
+DEBUG: AND group 'customer-validation' short-circuited after 2 rules
+DEBUG: Group 'customer-validation' evaluation complete. Evaluated: 2, Passed: 1, Failed: 1, Final result: false
+```
+
+#### Performance Comparison
+
+| Execution Mode | Speed | Memory | Use Case |
+|----------------|-------|---------|----------|
+| **Short-Circuit** | Fastest | Lowest | Production, performance-critical |
+| **Complete Evaluation** | Slower | Medium | Debugging, comprehensive reporting |
+| **Parallel Execution** | Variable* | Higher | CPU-intensive, independent rules |
+| **Debug Mode** | Slowest | Highest | Development, troubleshooting |
+
+*Parallel execution speed depends on rule complexity and system resources
 
 ### Integration with Rules Engine
 

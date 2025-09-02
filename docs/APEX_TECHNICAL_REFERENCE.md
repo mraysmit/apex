@@ -1960,59 +1960,221 @@ rule-groups:
 
 ### Execution Patterns
 
-#### AND Group Execution
+APEX RuleGroup implementation supports multiple execution strategies with configurable behavior.
+
+#### Core RuleGroup.evaluate() Method
 
 ```java
-// AND group: ALL rules must pass
-public RuleResult evaluateAndGroup(RuleGroup group, Map<String, Object> facts) {
-    boolean allPassed = true;
-    List<RuleResult> individualResults = new ArrayList<>();
-
-    // Execute rules in sequence order
-    for (Map.Entry<Integer, Rule> entry : group.getRulesBySequence().entrySet()) {
-        Rule rule = entry.getValue();
-        RuleResult result = rule.evaluate(facts);
-        individualResults.add(result);
-
-        if (!result.isTriggered()) {
-            allPassed = false;
-            if (group.isStopOnFirstFailure()) {
-                break; // Early termination for performance
-            }
-        }
+/**
+ * Main evaluation method with strategy selection
+ */
+public boolean evaluate(StandardEvaluationContext context) {
+    if (rulesBySequence.isEmpty()) {
+        return false;
     }
 
-    return new RuleResult(group.getName(),
-                         allPassed ? "All rules passed" : "One or more rules failed",
-                         allPassed, individualResults);
+    // Choose evaluation strategy based on configuration
+    boolean result;
+    if (parallelExecution && rulesBySequence.size() > 1) {
+        result = evaluateParallel(context);
+    } else {
+        result = evaluateSequential(context);
+    }
+
+    // Update message if group succeeded
+    if (result) {
+        updateMessage();
+    }
+
+    return result;
 }
 ```
 
-#### OR Group Execution
+#### Sequential Execution with Configurable Short-Circuiting
 
 ```java
-// OR group: ANY rule can pass
-public RuleResult evaluateOrGroup(RuleGroup group, Map<String, Object> facts) {
-    boolean anyPassed = false;
-    List<RuleResult> individualResults = new ArrayList<>();
+/**
+ * Sequential evaluation with configurable short-circuit behavior
+ */
+private boolean evaluateSequential(StandardEvaluationContext context) {
+    List<Integer> sequenceNumbers = new ArrayList<>(rulesBySequence.keySet());
+    sequenceNumbers.sort(Integer::compareTo);
 
-    // Execute rules in sequence order
-    for (Map.Entry<Integer, Rule> entry : group.getRulesBySequence().entrySet()) {
-        Rule rule = entry.getValue();
-        RuleResult result = rule.evaluate(facts);
-        individualResults.add(result);
+    // Determine if short-circuiting should be used
+    boolean useShortCircuit = stopOnFirstFailure && !debugMode;
 
-        if (result.isTriggered()) {
-            anyPassed = true;
-            if (group.isStopOnFirstSuccess()) {
-                break; // Early termination for performance
+    boolean result = isAndOperator; // Start with true for AND, false for OR
+    int evaluatedCount = 0;
+    int passedCount = 0;
+    int failedCount = 0;
+
+    for (Integer seq : sequenceNumbers) {
+        Rule rule = rulesBySequence.get(seq);
+        if (rule == null) continue;
+
+        try {
+            Expression exp = parser.parseExpression(rule.getCondition());
+            Boolean ruleResult = exp.getValue(context, Boolean.class);
+
+            if (ruleResult == null) ruleResult = false;
+
+            evaluatedCount++;
+            if (ruleResult) passedCount++; else failedCount++;
+
+            if (debugMode) {
+                System.out.println("DEBUG: Rule '" + rule.getName() +
+                                 "' in group '" + name + "' evaluated to: " + ruleResult);
+            }
+
+            if (isAndOperator) {
+                // AND logic: if any rule is false, the result is false
+                result = result && ruleResult;
+                if (!result && useShortCircuit) {
+                    if (debugMode) {
+                        System.out.println("DEBUG: AND group '" + name +
+                                         "' short-circuited after " + evaluatedCount + " rules");
+                    }
+                    break; // Short-circuit for AND
+                }
+            } else {
+                // OR logic: if any rule is true, the result is true
+                result = result || ruleResult;
+                if (result && useShortCircuit) {
+                    if (debugMode) {
+                        System.out.println("DEBUG: OR group '" + name +
+                                         "' short-circuited after " + evaluatedCount + " rules");
+                    }
+                    break; // Short-circuit for OR
+                }
+            }
+        } catch (Exception e) {
+            evaluatedCount++;
+            failedCount++;
+            System.err.println("Error evaluating rule '" + rule.getName() +
+                             "' in group '" + name + "': " + e.getMessage());
+
+            if (isAndOperator) {
+                if (useShortCircuit) return false;
+                result = false;
             }
         }
     }
 
-    return new RuleResult(group.getName(),
-                         anyPassed ? "At least one rule passed" : "No rules passed",
-                         anyPassed, individualResults);
+    if (debugMode) {
+        System.out.println("DEBUG: Group '" + name + "' evaluation complete. " +
+                         "Evaluated: " + evaluatedCount + ", Passed: " + passedCount +
+                         ", Failed: " + failedCount + ", Final result: " + result);
+    }
+
+    return result;
+}
+```
+
+#### Parallel Execution
+
+```java
+/**
+ * Parallel evaluation using thread pool
+ * Note: Disables short-circuiting to ensure all rules complete
+ */
+private boolean evaluateParallel(StandardEvaluationContext context) {
+    List<Integer> sequenceNumbers = new ArrayList<>(rulesBySequence.keySet());
+    sequenceNumbers.sort(Integer::compareTo);
+
+    // Create evaluation tasks
+    List<Callable<Boolean>> tasks = new ArrayList<>();
+    List<String> ruleNames = new ArrayList<>();
+
+    for (Integer seq : sequenceNumbers) {
+        Rule rule = rulesBySequence.get(seq);
+        if (rule == null) continue;
+
+        ruleNames.add(rule.getName());
+        tasks.add(() -> {
+            try {
+                Expression exp = parser.parseExpression(rule.getCondition());
+                Boolean ruleResult = exp.getValue(context, Boolean.class);
+
+                if (ruleResult == null) ruleResult = false;
+
+                if (debugMode) {
+                    System.out.println("DEBUG: Rule '" + rule.getName() +
+                                     "' in group '" + name + "' (parallel) evaluated to: " + ruleResult);
+                }
+
+                return ruleResult;
+            } catch (Exception e) {
+                System.err.println("Error evaluating rule '" + rule.getName() +
+                                 "' in group '" + name + "' (parallel): " + e.getMessage());
+                return false;
+            }
+        });
+    }
+
+    if (tasks.isEmpty()) return false;
+
+    // Execute in parallel
+    ExecutorService executor = Executors.newFixedThreadPool(
+        Math.min(tasks.size(), Runtime.getRuntime().availableProcessors())
+    );
+
+    try {
+        List<Future<Boolean>> futures = executor.invokeAll(tasks);
+
+        // Collect and combine results
+        boolean finalResult = isAndOperator;
+        int passedCount = 0, failedCount = 0;
+
+        for (int i = 0; i < futures.size(); i++) {
+            try {
+                Boolean result = futures.get(i).get();
+                if (result) passedCount++; else failedCount++;
+
+                if (isAndOperator) {
+                    finalResult = finalResult && result;
+                } else {
+                    finalResult = finalResult || result;
+                }
+            } catch (Exception e) {
+                System.err.println("Error getting result for rule '" + ruleNames.get(i) +
+                                 "' in group '" + name + "': " + e.getMessage());
+                failedCount++;
+                if (isAndOperator) finalResult = false;
+            }
+        }
+
+        if (debugMode) {
+            System.out.println("DEBUG: Group '" + name + "' parallel evaluation complete. " +
+                             "Total: " + futures.size() + ", Passed: " + passedCount +
+                             ", Failed: " + failedCount + ", Final result: " + finalResult);
+        }
+
+        return finalResult;
+
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        System.err.println("Parallel evaluation interrupted for group '" + name + "': " + e.getMessage());
+        return false;
+    } finally {
+        executor.shutdown();
+    }
+}
+```
+
+#### Configuration Properties
+
+```java
+public class RuleGroup implements RuleBase {
+    private final boolean isAndOperator;        // AND (true) or OR (false) logic
+    private final boolean stopOnFirstFailure;  // Enable/disable short-circuiting
+    private final boolean parallelExecution;   // Enable parallel rule execution
+    private final boolean debugMode;           // Enable debug logging, disable short-circuiting
+
+    // Getters
+    public boolean isAndOperator() { return isAndOperator; }
+    public boolean isStopOnFirstFailure() { return stopOnFirstFailure; }
+    public boolean isParallelExecution() { return parallelExecution; }
+    public boolean isDebugMode() { return debugMode; }
 }
 ```
 

@@ -59,10 +59,16 @@ public class YamlRuleGroup {
     
     @JsonProperty("stop-on-first-failure")
     private Boolean stopOnFirstFailure;
-    
+
     @JsonProperty("parallel-execution")
     private Boolean parallelExecution;
-    
+
+    @JsonProperty("operator")
+    private String operator; // "AND" or "OR"
+
+    @JsonProperty("debug-mode")
+    private Boolean debugMode;
+
     @JsonProperty("rule-ids")
     private List<String> ruleIds;
     
@@ -154,9 +160,25 @@ public class YamlRuleGroup {
     public Boolean getParallelExecution() {
         return parallelExecution;
     }
-    
+
     public void setParallelExecution(Boolean parallelExecution) {
         this.parallelExecution = parallelExecution;
+    }
+
+    public String getOperator() {
+        return operator;
+    }
+
+    public void setOperator(String operator) {
+        this.operator = operator;
+    }
+
+    public Boolean getDebugMode() {
+        return debugMode;
+    }
+
+    public void setDebugMode(Boolean debugMode) {
+        this.debugMode = debugMode;
     }
     
     public List<String> getRuleIds() {

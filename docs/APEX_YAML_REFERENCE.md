@@ -13,16 +13,17 @@
 2. [Document Structure & Metadata](#2-document-structure--metadata)
 3. [Core Syntax Elements](#3-core-syntax-elements)
 4. [Rules Section](#4-rules-section)
-5. [Enrichments Section](#5-enrichments-section)
-6. [Dataset Definitions](#6-dataset-definitions)
-7. [External Data-Source References](#7-external-data-source-references) **🆕 NEW**
-8. [Advanced Features](#8-advanced-features)
-9. [Best Practices](#9-best-practices)
-10. [Common Patterns](#10-common-patterns)
-11. [Examples & Use Cases](#11-examples--use-cases)
-12. [Troubleshooting](#12-troubleshooting)
-13. [Reference](#13-reference)
-14. [Migration & Compatibility](#14-migration--compatibility)
+5. [Rule Groups Section](#5-rule-groups-section) **🆕 NEW**
+6. [Enrichments Section](#6-enrichments-section)
+7. [Dataset Definitions](#7-dataset-definitions)
+8. [External Data-Source References](#8-external-data-source-references) **🆕 NEW**
+9. [Advanced Features](#9-advanced-features)
+10. [Best Practices](#10-best-practices)
+11. [Common Patterns](#11-common-patterns)
+12. [Examples & Use Cases](#12-examples--use-cases)
+13. [Troubleshooting](#13-troubleshooting)
+14. [Reference](#14-reference)
+15. [Migration & Compatibility](#15-migration--compatibility)
 
 ---
 
@@ -623,9 +624,274 @@ rules:
 
 ---
 
-## 5. Enrichments Section
+## 5. Rule Groups Section
 
-### 5.1 Lookup Enrichments
+### 5.1 Overview
+
+Rule Groups allow you to organize related rules and apply logical operators (AND/OR) to combine their results. Rule Groups support advanced execution features including parallel processing, configurable short-circuiting, and debug mode for comprehensive testing and troubleshooting.
+
+### 5.2 Basic Rule Group Configuration
+
+```yaml
+rule-groups:
+  - id: "validation-group"
+    name: "Input Validation"
+    description: "Validates all input parameters"
+    category: "validation"
+    priority: 10
+    enabled: true
+    operator: "AND"                    # "AND" or "OR" - how to combine rule results
+    stop-on-first-failure: true       # Enable/disable short-circuit evaluation
+    parallel-execution: false         # Execute rules in parallel when possible
+    debug-mode: false                 # Enable debug logging and disable short-circuiting
+    rule-ids:
+      - "trade-id-required"
+      - "isin-format-validation"
+      - "trade-value-positive"
+```
+
+#### Rule Group Properties
+
+| Property | Required | Default | Description | Example |
+|----------|----------|---------|-------------|---------|
+| `id` | Yes | - | Unique rule group identifier | "validation-group" |
+| `name` | Yes | - | Human-readable group name | "Input Validation" |
+| `description` | No | "" | Group description | "Validates all input parameters" |
+| `category` | No | "default" | Group category | "validation" |
+| `priority` | No | 100 | Execution priority (lower = higher priority) | 10 |
+| `enabled` | No | true | Whether group is active | true |
+| `operator` | No | "AND" | Logic operator: "AND" or "OR" | "AND" |
+| `stop-on-first-failure` | No | false | Enable short-circuit evaluation | true |
+| `parallel-execution` | No | false | Execute rules in parallel | false |
+| `debug-mode` | No | false | Enable debug logging | false |
+| `rule-ids` | Yes | - | List of rule IDs to include | ["rule1", "rule2"] |
+
+### 5.3 Execution Behavior
+
+#### AND Groups (All Rules Must Pass)
+
+```yaml
+rule-groups:
+  - id: "strict-validation"
+    name: "Strict Validation Group"
+    description: "All validation rules must pass"
+    operator: "AND"
+    stop-on-first-failure: true  # Stop on first failure for efficiency
+    rule-ids:
+      - "trade-id-required"      # Must pass
+      - "isin-format-validation" # Must pass
+      - "trade-value-positive"   # Must pass
+```
+
+**Execution Flow (Short-Circuit Enabled)**:
+```
+Rule 1: PASS → Continue to Rule 2
+Rule 2: PASS → Continue to Rule 3
+Rule 3: FAIL → STOP (return false) - Remaining rules NOT evaluated
+```
+
+#### OR Groups (Any Rule Can Pass)
+
+```yaml
+rule-groups:
+  - id: "eligibility-check"
+    name: "Customer Eligibility Check"
+    description: "Customer meets at least one eligibility criteria"
+    operator: "OR"
+    stop-on-first-failure: true  # Stop on first success for OR groups
+    rule-ids:
+      - "high-value-customer"    # Any can pass
+      - "premium-member"         # Any can pass
+      - "long-term-client"       # Any can pass
+```
+
+**Execution Flow (Short-Circuit Enabled)**:
+```
+Rule 1: FAIL → Continue to Rule 2
+Rule 2: FAIL → Continue to Rule 3
+Rule 3: PASS → STOP (return true) - Remaining rules NOT evaluated
+```
+
+### 5.4 Advanced Execution Features
+
+#### Short-Circuit Control
+
+```yaml
+rule-groups:
+  # Production-optimized (short-circuit enabled)
+  - id: "production-validation"
+    operator: "AND"
+    stop-on-first-failure: true   # Stop on first failure for performance
+    debug-mode: false            # Disable debug for performance
+    rule-ids: ["rule1", "rule2", "rule3"]
+
+  # Complete evaluation (short-circuit disabled)
+  - id: "comprehensive-validation"
+    operator: "AND"
+    stop-on-first-failure: false # Evaluate all rules regardless of failures
+    debug-mode: false           # No debug logging
+    rule-ids: ["rule1", "rule2", "rule3"]
+```
+
+#### Parallel Execution
+
+```yaml
+rule-groups:
+  - id: "parallel-validation"
+    name: "Parallel Rule Execution"
+    description: "Execute CPU-intensive rules in parallel"
+    operator: "AND"
+    parallel-execution: true     # Enable parallel processing
+    stop-on-first-failure: false # Parallel execution disables short-circuiting
+    rule-ids:
+      - "complex-calculation-rule"
+      - "external-api-validation"
+      - "database-lookup-rule"
+```
+
+**Parallel Execution Characteristics**:
+- **Thread Pool**: `min(rule_count, available_processors)`
+- **Short-Circuiting**: Automatically disabled to ensure all rules complete
+- **Error Handling**: Individual rule failures don't crash the group
+- **Use Cases**: CPU-intensive rules, independent validations
+
+#### Debug Mode
+
+```yaml
+rule-groups:
+  - id: "debug-validation"
+    name: "Debug Mode Validation"
+    description: "Complete evaluation with debug logging"
+    operator: "AND"
+    debug-mode: true            # Enable debug logging
+    stop-on-first-failure: false # Debug mode disables short-circuiting
+    rule-ids:
+      - "rule1"
+      - "rule2"
+      - "rule3"
+```
+
+**Debug Output Example**:
+```
+DEBUG: Rule 'trade-id-required' in group 'debug-validation' evaluated to: true
+DEBUG: Rule 'isin-format-validation' in group 'debug-validation' evaluated to: false
+DEBUG: Rule 'trade-value-positive' in group 'debug-validation' evaluated to: true
+DEBUG: Group 'debug-validation' evaluation complete. Evaluated: 3, Passed: 2, Failed: 1, Final result: false
+```
+
+**Debug Mode Configuration Options**:
+```yaml
+# Option 1: YAML configuration
+debug-mode: true
+
+# Option 2: System property (overrides YAML if not specified)
+# -Dapex.rulegroup.debug=true
+```
+
+### 5.5 Configuration Scenarios
+
+#### Production-Optimized Configuration
+
+```yaml
+rule-groups:
+  - id: "production-group"
+    name: "Production Validation"
+    operator: "AND"
+    stop-on-first-failure: true  # Enable short-circuiting for performance
+    parallel-execution: false    # Disable parallel for simplicity
+    debug-mode: false           # Disable debug for performance
+    rule-ids: ["critical-rule1", "critical-rule2"]
+```
+
+#### Debug-Optimized Configuration
+
+```yaml
+rule-groups:
+  - id: "debug-group"
+    name: "Debug Validation"
+    operator: "AND"
+    stop-on-first-failure: false # Disable short-circuiting for complete evaluation
+    parallel-execution: false    # Disable parallel for deterministic debugging
+    debug-mode: true            # Enable debug logging
+    rule-ids: ["test-rule1", "test-rule2", "test-rule3"]
+```
+
+#### Performance-Optimized Configuration
+
+```yaml
+rule-groups:
+  - id: "performance-group"
+    name: "High-Performance Validation"
+    operator: "OR"
+    stop-on-first-failure: true  # Stop on first success
+    parallel-execution: true     # Use parallel processing
+    debug-mode: false           # Disable debug for performance
+    rule-ids: ["fast-rule1", "fast-rule2", "fast-rule3"]
+```
+
+### 5.6 Performance Comparison
+
+| Configuration | Speed | Memory | CPU | Use Case |
+|---------------|-------|--------|-----|----------|
+| **Short-Circuit + Sequential** | Fastest | Lowest | Lowest | Production systems |
+| **Complete + Sequential** | Slower | Medium | Medium | Debugging, reporting |
+| **Complete + Parallel** | Variable* | Higher | Higher | CPU-intensive rules |
+| **Debug Mode** | Slowest | Highest | Medium | Development, troubleshooting |
+
+*Parallel execution speed depends on rule complexity and available CPU cores.
+
+### 5.7 Best Practices
+
+#### Performance Best Practices
+
+```yaml
+rule-groups:
+  # Order rules by likelihood of failure (most likely to fail first)
+  - id: "optimized-validation"
+    operator: "AND"
+    stop-on-first-failure: true
+    rule-ids:
+      - "quick-null-check"      # Fast, likely to fail
+      - "format-validation"     # Medium speed
+      - "complex-business-rule" # Slow, unlikely to fail
+```
+
+#### Error Handling Best Practices
+
+```yaml
+rule-groups:
+  # Separate critical and non-critical validations
+  - id: "critical-validation"
+    name: "Critical Business Rules"
+    operator: "AND"
+    stop-on-first-failure: true
+    rule-ids: ["mandatory-field-check", "regulatory-compliance"]
+
+  - id: "warning-validation"
+    name: "Warning-Level Checks"
+    operator: "OR"
+    stop-on-first-failure: false # Check all warnings
+    rule-ids: ["data-quality-warning", "business-recommendation"]
+```
+
+#### Testing Best Practices
+
+```yaml
+rule-groups:
+  # Use debug mode for comprehensive testing
+  - id: "test-validation"
+    name: "Test Environment Validation"
+    operator: "AND"
+    debug-mode: true           # Enable for testing
+    stop-on-first-failure: false # See all test results
+    rule-ids: ["test-rule1", "test-rule2", "test-rule3"]
+```
+
+---
+
+## 6. Enrichments Section
+
+### 6.1 Lookup Enrichments
 
 Lookup enrichments add data by matching keys against datasets:
 
@@ -750,9 +1016,9 @@ calculations:
 
 ---
 
-## 6. Dataset Definitions
+## 7. Dataset Definitions
 
-### 6.1 Inline Datasets
+### 7.1 Inline Datasets
 
 Inline datasets embed data directly in the configuration:
 
@@ -827,9 +1093,9 @@ lookup-dataset:
 
 ---
 
-## 7. External Data-Source References
+## 8. External Data-Source References
 
-### 7.1 Overview
+### 8.1 Overview
 
 **External Data-Source References** are APEX 2.0's enterprise-grade solution for clean architecture and configuration management. This system enables **separation of concerns** by splitting configurations into:
 
@@ -1135,9 +1401,9 @@ enrichments:
 
 ---
 
-## 8. Advanced Features
+## 9. Advanced Features
 
-### 8.1 Conditional Logic
+### 9.1 Conditional Logic
 
 #### Ternary Operators
 
@@ -1251,9 +1517,9 @@ expression: "#value != null && #value.matches('[0-9]+') ? T(java.lang.Integer).p
 
 ---
 
-## 9. Best Practices
+## 10. Best Practices
 
-### 9.1 Performance Guidelines
+### 10.1 Performance Guidelines
 
 #### Condition Optimization
 
@@ -1387,9 +1653,9 @@ expression: "#text != null && #text.trim().length() > 0 ? #text.toUpperCase() : 
 
 ---
 
-## 10. Common Patterns
+## 11. Common Patterns
 
-### 10.1 Financial Services Patterns
+### 11.1 Financial Services Patterns
 
 #### Reference Data Enrichment Pattern
 
@@ -1519,9 +1785,9 @@ rules:
 
 ---
 
-## 11. Examples & Use Cases
+## 12. Examples & Use Cases
 
-### 11.1 Simple Examples
+### 12.1 Simple Examples
 
 #### Basic Lookup Example
 
@@ -1680,9 +1946,9 @@ enrichments:
 
 ---
 
-## 12. Troubleshooting
+## 13. Troubleshooting
 
-### 12.1 Common Errors
+### 13.1 Common Errors
 
 #### Syntax Errors
 
@@ -1783,9 +2049,9 @@ calculations:
 
 ---
 
-## 13. Reference
+## 14. Reference
 
-### 13.1 Syntax Quick Reference
+### 14.1 Syntax Quick Reference
 
 #### Operators Table
 
@@ -1884,7 +2150,7 @@ APEX adds these extensions to standard SpEL:
 
 ---
 
-## 14. Migration & Compatibility
+## 15. Migration & Compatibility
 
 ### Version Compatibility
 
