@@ -2,12 +2,14 @@
 # Demonstrates database lookup enrichment using APEX YAML processing with real H2 database
 # Use Case: Enrich transactions with customer profile data from database
 
-type: "apex-enrichment-config"
-name: "Customer Profile Enrichment Demo - Database Version"
-  description: "Demonstrates database lookup enrichment using APEX YAML processing with real H2 database"
+metadata:
+  name: "Customer Profile Enrichment Demo - Database Version"
   version: "2.0.0"
-  type: "rule-config"
-  author: "APEX Demo Team"
+  description: "Demonstrates database lookup enrichment using APEX YAML processing with real H2 database"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "lookup", "database", "customer"]
 
 # Database configuration for customer data
 data-sources:
@@ -15,7 +17,9 @@ data-sources:
     type: "database"
     source-type: "h2"
     connection:
-      database: "apex_demo_shared"
+      host: "localhost"
+      port: 9092
+      database: "apex_demo_shared;MODE=PostgreSQL"
       username: "sa"
       password: ""
 
@@ -36,18 +40,18 @@ enrichments:
           - field: "customerId"
             type: "string"
 
-      # Field mappings from database columns to enriched object fields
-      field-mappings:
-        - source-field: "customer_name"
-          target-field: "customerName"
-        - source-field: "customer_type"
-          target-field: "customerType"
-        - source-field: "tier"
-          target-field: "customerTier"
-        - source-field: "region"
-          target-field: "customerRegion"
-        - source-field: "status"
-          target-field: "customerStatus"
-        - source-field: "created_date"
-          target-field: "customerCreatedDate"
+    # Field mappings from database columns to enriched object fields
+    field-mappings:
+      - source-field: "customer_name"
+        target-field: "customerName"
+      - source-field: "customer_type"
+        target-field: "customerType"
+      - source-field: "tier"
+        target-field: "customerTier"
+      - source-field: "region"
+        target-field: "customerRegion"
+      - source-field: "status"
+        target-field: "customerStatus"
+      - source-field: "created_date"
+        target-field: "customerCreatedDate"
 

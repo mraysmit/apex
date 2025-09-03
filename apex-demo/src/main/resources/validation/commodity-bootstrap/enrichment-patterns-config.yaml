@@ -2,9 +2,14 @@
 # External data source configuration for enrichment patterns processing
 # Replaces embedded enrichment patterns from CommoditySwapValidationBootstrap
 
-type: "external-data-config"
-name: "enrichment-patterns-config"
-description: "Data-driven enrichment patterns configuration for commodity swap processing"
+metadata:
+  name: "Enrichment Patterns Configuration"
+  version: "1.0.0"
+  description: "Data-driven enrichment patterns configuration for commodity swap processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "commodity-bootstrap", "enrichment-patterns"]
 
 # Enrichment patterns configuration by pattern type
 data:

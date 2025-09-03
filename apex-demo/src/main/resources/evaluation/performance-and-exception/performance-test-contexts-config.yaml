@@ -2,9 +2,14 @@
 # External data source configuration for performance test contexts
 # Replaces hardcoded Map.of context creation from PerformanceAndExceptionDemo
 
-type: "external-data-config"
-name: "performance-test-contexts-config"
-description: "Data-driven performance test contexts configuration for performance and exception handling processing"
+metadata:
+  name: "Performance Test Contexts Configuration"
+  version: "1.0.0"
+  description: "Data-driven performance test contexts configuration for performance and exception handling processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "performance-and-exception", "performance-test-contexts"]
 
 # Performance test contexts configuration by context type
 data:

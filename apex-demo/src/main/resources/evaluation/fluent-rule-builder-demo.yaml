@@ -2,9 +2,14 @@
 # Real APEX YAML configuration for fluent rule builder processing
 # Replaces all hardcoded fluent rule builder logic from FluentRuleBuilderExample (@version 1.0)
 
-type: "apex-enrichment-config"
-name: "fluent-rule-builder-demo"
-description: "APEX-compliant fluent rule builder with real enrichment services"
+metadata:
+  name: "Fluent Rule Builder Demo"
+  version: "1.0.0"
+  description: "APEX-compliant fluent rule builder with real enrichment services"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "fluent-rule-builder"]
 
 # External data source for fluent rule builder configurations
 external-data-sources:

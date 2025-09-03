@@ -71,10 +71,11 @@ public class AllDemosRunner {
         System.out.println("Available Demo Categories:");
         System.out.println("  1. Validation Demos - Data quality and business rule validation (8 demos)");
         System.out.println("  2. Enrichment Demos - Data transformation and enhancement (10 demos)");
-        System.out.println("  3. Lookup Demos - Data lookup and reference operations (4 demos)");
-        System.out.println("  4. Evaluation Demos - Expression and rule evaluation (5 demos)");
+        System.out.println("  3. Lookup Demos - Data lookup and reference operations (14 demos)");
+        System.out.println("  4. Evaluation Demos - Expression and rule evaluation (20 demos)");
         System.out.println("  5. Infrastructure Demos - Configuration and setup (4 demos)");
-        System.out.println("  6. Run All Categories - Execute all demo runners sequentially");
+        System.out.println("  6. Utility Demos - Testing and validation utilities (3 demos)");
+        System.out.println("  7. Run All Categories - Execute all demo runners sequentially");
         System.out.println();
     }
     
@@ -107,6 +108,11 @@ public class AllDemosRunner {
                     runRunner("Infrastructure Demos", () -> InfrastructureRunner.main(new String[]{}));
                     break;
                 case "6":
+                case "utility":
+                case "util":
+                    runRunner("Utility Demos", () -> UtilRunner.main(new String[]{}));
+                    break;
+                case "7":
                 case "all":
                     runAllCategories();
                     break;
@@ -152,6 +158,7 @@ public class AllDemosRunner {
         runRunner("Lookup Demos", () -> LookupRunner.main(new String[]{"all"}));
         runRunner("Evaluation Demos", () -> EvaluationRunner.main(new String[]{"all"}));
         runRunner("Infrastructure Demos", () -> InfrastructureRunner.main(new String[]{"all"}));
+        runRunner("Utility Demos", () -> UtilRunner.main(new String[]{"all"}));
         
         long totalEndTime = System.currentTimeMillis();
         long totalTime = totalEndTime - totalStartTime;

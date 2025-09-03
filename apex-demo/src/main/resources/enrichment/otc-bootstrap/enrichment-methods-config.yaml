@@ -2,9 +2,14 @@
 # External data source configuration for enrichment methods processing
 # Replaces hardcoded enrichment logic from OtcOptionsBootstrapDemo
 
-type: "external-data-config"
-name: "enrichment-methods-config"
-description: "Data-driven enrichment methods configuration for OTC options processing"
+metadata:
+  name: "Enrichment Methods Configuration"
+  version: "1.0.0"
+  description: "Data-driven enrichment methods configuration for OTC options processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "enrichment", "enrichment-methods", "external-data"]
 
 # Enrichment methods configuration by method type
 data:

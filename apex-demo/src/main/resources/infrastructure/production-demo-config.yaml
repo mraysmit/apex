@@ -1,3 +1,12 @@
+metadata:
+  name: "Production Demo Configuration"
+  version: "1.0.0"
+  description: "Configuration for ProductionDemoDataServiceManager that demonstrates proper usage of production ExternalDataSource implementations"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "infrastructure", "production-demo"]
+
 # ============================================================================
 # PRODUCTION DEMO CONFIGURATION
 # ============================================================================

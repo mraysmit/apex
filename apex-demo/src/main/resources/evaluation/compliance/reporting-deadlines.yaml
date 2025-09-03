@@ -2,9 +2,14 @@
 # External data source configuration for regulatory reporting deadlines
 # Replaces hardcoded reporting deadlines from ComplianceServiceDemo
 
-type: "external-data-config"
-name: "reporting-deadlines"
-description: "Regulatory reporting deadlines by regulation"
+metadata:
+  name: "Reporting Deadlines"
+  version: "1.0.0"
+  description: "Regulatory reporting deadlines by regulation"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "compliance", "reporting-deadlines"]
 
 # Reporting deadlines by regulation (in hours)
 data:

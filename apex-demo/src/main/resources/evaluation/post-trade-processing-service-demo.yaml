@@ -2,9 +2,14 @@
 # Real APEX YAML configuration for post-trade processing service
 # Replaces all hardcoded post-trade processing logic from PostTradeProcessingServiceDemo (@version 1.0)
 
-type: "apex-enrichment-config"
-name: "post-trade-processing-service-demo"
-description: "APEX-compliant post-trade processing service with real enrichment services"
+metadata:
+  name: "Post-Trade Processing Service Demo"
+  version: "1.0.0"
+  description: "APEX-compliant post-trade processing service with real enrichment services"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "post-trade-processing"]
 
 # External data source for post-trade processing configurations
 external-data-sources:

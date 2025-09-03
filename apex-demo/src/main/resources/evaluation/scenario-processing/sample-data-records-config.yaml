@@ -2,9 +2,14 @@
 # External data source configuration for sample data records creation
 # Replaces hardcoded sample data creation from ScenarioBasedProcessingDemo
 
-type: "external-data-config"
-name: "sample-data-records-config"
-description: "Data-driven sample data records configuration for scenario processing"
+metadata:
+  name: "Sample Data Records Configuration"
+  version: "1.0.0"
+  description: "Data-driven sample data records configuration for scenario processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "scenario-processing", "sample-data-records"]
 
 # Sample data records configuration by data type
 data:

@@ -2,9 +2,14 @@
 # External data source configuration for sample OTC options creation
 # Replaces hardcoded OTC option creation from OtcOptionsBootstrapDemo
 
-type: "external-data-config"
-name: "sample-otc-options-config"
-description: "Data-driven sample OTC options configuration for bootstrap processing"
+metadata:
+  name: "Sample OTC Options Configuration"
+  version: "1.0.0"
+  description: "Data-driven sample OTC options configuration for bootstrap processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "enrichment", "otc-options", "external-data"]
 
 # Sample OTC options configuration by option type
 data:

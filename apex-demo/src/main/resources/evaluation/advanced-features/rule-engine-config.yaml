@@ -2,9 +2,14 @@
 # External data source configuration for rule engine operations
 # Replaces hardcoded rule engine logic from ApexAdvancedFeaturesDemo
 
-type: "external-data-config"
-name: "rule-engine-config"
-description: "Data-driven rule engine configuration for advanced features"
+metadata:
+  name: "Rule Engine Configuration"
+  version: "1.0.0"
+  description: "Data-driven rule engine configuration for advanced features"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "advanced-features", "rule-engine"]
 
 # Rule engine configuration by rule type
 data:

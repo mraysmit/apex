@@ -2,12 +2,14 @@
 # Demonstrates compound lookup-key using string concatenation
 # Use Case: Customer-region specific pricing and tier information lookup
 
-type: "apex-enrichment-config"
-name: "Compound Key Lookup Demo"
-  description: "Demonstrates compound key lookup using customer ID and region concatenation"
+metadata:
+  name: "Compound Key Lookup Demo"
   version: "1.0.0"
-  type: "apex-enrichment-config"
-  author: "APEX Demo Team"
+  description: "Demonstrates compound key lookup using customer ID and region concatenation"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "lookup", "compound-key"]
 
 # Define the enrichment rules
 enrichments:

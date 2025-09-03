@@ -2,9 +2,14 @@
 # External data source configuration for trade matching algorithms
 # Replaces hardcoded trade matching logic from TradeRecordMatcherDemo
 
-type: "external-data-config"
-name: "trade-matching-algorithms-config"
-description: "Data-driven trade matching algorithms configuration for trade record matcher"
+metadata:
+  name: "Trade Matching Algorithms Configuration"
+  version: "1.0.0"
+  description: "Data-driven trade matching algorithms configuration for trade record matcher"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "trade-record-matcher", "trade-matching-algorithms"]
 
 # Trade matching algorithms configuration by algorithm type
 data:

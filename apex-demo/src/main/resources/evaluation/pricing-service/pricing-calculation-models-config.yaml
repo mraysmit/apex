@@ -2,9 +2,14 @@
 # External data source configuration for pricing calculation models
 # Replaces hardcoded pricing calculation logic from PricingServiceDemo
 
-type: "external-data-config"
-name: "pricing-calculation-models-config"
-description: "Data-driven pricing calculation models configuration for pricing service"
+metadata:
+  name: "Pricing Calculation Models Configuration"
+  version: "1.0.0"
+  description: "Data-driven pricing calculation models configuration for pricing service"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "pricing-service", "pricing-calculation-models"]
 
 # Pricing calculation models configuration by model type
 data:

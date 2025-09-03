@@ -2,12 +2,14 @@
 # Demonstrates conditional expression evaluation in lookup-key
 # Use Case: Risk-based loan assessment with conditional credit score categorization
 
-type: "apex-enrichment-config"
-name: "Conditional Expression Lookup Demo"
-  description: "Demonstrates conditional expression lookup using credit score-based risk categorization"
+metadata:
+  name: "Conditional Expression Lookup Demo"
   version: "1.0.0"
-  type: "apex-enrichment-config"
-  author: "APEX Demo Team"
+  description: "Demonstrates conditional expression lookup using credit score-based risk categorization"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "lookup", "conditional"]
 
 # Define the enrichment rules
 enrichments:

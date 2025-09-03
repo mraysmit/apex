@@ -2,9 +2,14 @@
 # External data source configuration for compliance testing scenarios
 # Replaces hardcoded test data from ComplianceServiceDemo
 
-type: "external-data-config"
-name: "compliance-test-data"
-description: "Test data scenarios for compliance service demonstration"
+metadata:
+  name: "Compliance Test Data"
+  version: "1.0.0"
+  description: "Test data scenarios for compliance service demonstration"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "compliance", "test-data"]
 
 # Test trade scenarios
 test-scenarios:

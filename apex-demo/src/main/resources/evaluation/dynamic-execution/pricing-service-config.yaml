@@ -2,9 +2,14 @@
 # External data source configuration for pricing service
 # Replaces hardcoded pricing logic from DynamicMethodExecutionDemo
 
-type: "external-data-config"
-name: "pricing-service-config"
-description: "Data-driven pricing service configuration for dynamic method execution"
+metadata:
+  name: "Pricing Service Configuration"
+  version: "1.0.0"
+  description: "Data-driven pricing service configuration for dynamic method execution"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "dynamic-execution", "pricing-service"]
 
 # Pricing configuration by pricing type
 data:

@@ -2,9 +2,14 @@
 # External data source configuration for dynamic rules
 # Replaces hardcoded rule logic from DynamicMethodExecutionDemo
 
-type: "external-data-config"
-name: "dynamic-rules-config"
-description: "Data-driven dynamic rules configuration for method execution"
+metadata:
+  name: "Dynamic Rules Configuration"
+  version: "1.0.0"
+  description: "Data-driven dynamic rules configuration for method execution"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "dynamic-execution", "dynamic-rules"]
 
 # Dynamic rules configuration
 data:

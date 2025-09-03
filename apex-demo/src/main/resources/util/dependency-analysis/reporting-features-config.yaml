@@ -2,9 +2,14 @@
 # External data source configuration for advanced reporting features
 # Replaces hardcoded reporting logic from YamlDependencyAnalysisDemo
 
-type: "external-data-config"
-name: "reporting-features-config"
-description: "Data-driven reporting features configuration for dependency analysis"
+metadata:
+  name: "Reporting Features Configuration"
+  version: "1.0.0"
+  description: "Data-driven reporting features configuration for dependency analysis"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "util", "dependency-analysis", "reporting-features"]
 
 # Reporting features configuration by feature type
 data:

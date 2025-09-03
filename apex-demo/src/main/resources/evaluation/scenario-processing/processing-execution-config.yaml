@@ -2,9 +2,14 @@
 # External data source configuration for processing execution
 # Replaces hardcoded processing execution logic from ScenarioBasedProcessingDemo
 
-type: "external-data-config"
-name: "processing-execution-config"
-description: "Data-driven processing execution configuration for scenarios"
+metadata:
+  name: "Processing Execution Configuration"
+  version: "1.0.0"
+  description: "Data-driven processing execution configuration for scenarios"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "scenario-processing", "processing-execution"]
 
 # Processing execution configuration by execution type
 data:

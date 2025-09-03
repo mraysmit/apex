@@ -2,12 +2,15 @@
 # Test data scenarios for DataManagementDemo.java
 # NO HARDCODED SIMULATION - Real APEX data processing
 
-type: "external-data-config"
-name: "data-management-demo-data"
-description: "Test data scenarios for real APEX data management demonstration"
-version: "2.0"
-author: "APEX Demo Team"
-created: "2025-08-29"
+metadata:
+  name: "Data Management Demo Data"
+  version: "2.0.0"
+  description: "Test data scenarios for real APEX data management demonstration"
+  type: "dataset"
+  author: "apex.demo.team@company.com"
+  source: "APEX Demo Data Generator"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "enrichment", "data-management", "test-data"]
 
 # Basic Dataset Structure Test Scenarios
 basic-dataset-scenarios:

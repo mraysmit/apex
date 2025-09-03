@@ -1,0 +1,37 @@
+# APEX Commodity Swap Validation Bootstrap Demo Configuration - Simplified
+# Real APEX YAML configuration for commodity swap validation bootstrap processing
+
+metadata:
+  name: "Commodity Swap Validation Bootstrap Demo"
+  version: "1.0.0"
+  description: "APEX-compliant commodity swap validation bootstrap with real enrichment services"
+  type: "bootstrap"
+  author: "apex.demo.team@company.com"
+  business-domain: "Commodity Swap Validation"
+  created-by: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "commodity-swap", "bootstrap"]
+
+# APEX enrichment processing for commodity swap validation bootstrap
+enrichments:
+  - id: "commodity-swap-validation-summary"
+    name: "commodity-swap-validation-summary"
+    type: "field-enrichment"
+    description: "Generate commodity swap validation bootstrap summary"
+    enabled: true
+    condition: "true"
+    field-mappings:
+      - source-field: "bootstrapType"
+        target-field: "commoditySwapValidationSummary"
+        default-value: "Commodity swap validation bootstrap completed using real APEX services"
+
+# Output configuration
+output:
+  include-input: true
+  include-metadata: true
+  format: "enhanced"
+  bootstrap-summary: true
+  performance-metrics: true
+  validation-details: true
+  enrichment-details: true
+  commodity-analysis: true

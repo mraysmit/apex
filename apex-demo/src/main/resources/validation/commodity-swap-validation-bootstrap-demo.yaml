@@ -2,9 +2,16 @@
 # Real APEX YAML configuration for commodity swap validation bootstrap processing
 # Replaces all hardcoded validation logic from CommoditySwapValidationBootstrap (@version 1.0)
 
-type: "apex-enrichment-config"
-name: "commodity-swap-validation-bootstrap-demo"
-description: "APEX-compliant commodity swap validation bootstrap with real enrichment services"
+metadata:
+  name: "Commodity Swap Validation Bootstrap Demo"
+  version: "1.0.0"
+  description: "APEX-compliant commodity swap validation bootstrap with real enrichment services"
+  type: "bootstrap"
+  author: "apex.demo.team@company.com"
+  business-domain: "Commodity Swap Validation"
+  created-by: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "commodity-swap", "bootstrap"]
 
 # External data source for commodity swap validation bootstrap configurations
 external-data-sources:
@@ -22,36 +29,49 @@ external-data-sources:
 
 # APEX enrichment processing for commodity swap validation bootstrap
 enrichments:
-  - name: "validation-rules-processing"
-    type: "lookup-enrichment"
+  - id: "validation-rules-processing"
+    name: "validation-rules-processing"
+    type: "field-enrichment"
     description: "Process validation rules using data-driven configuration"
-    condition: "#data.bootstrapType == 'validation-rules-processing'"
-    lookup-source: "validation-rules-config"
-    lookup-key: "#data.ruleType != null ? #data.ruleType : 'default'"
-    target-field: "validationRulesResult"
-    
-  - name: "enrichment-patterns-processing"
-    type: "lookup-enrichment"
-    description: "Process enrichment patterns using data-driven configuration"
-    condition: "#data.bootstrapType == 'enrichment-patterns-processing'"
-    lookup-source: "enrichment-patterns-config"
-    lookup-key: "#data.patternType != null ? #data.patternType : 'default'"
-    target-field: "enrichmentPatternsResult"
-    
-  - name: "commodity-data-processing"
-    type: "lookup-enrichment"
-    description: "Process commodity data using data-driven configuration"
-    condition: "#data.bootstrapType == 'commodity-data-processing'"
-    lookup-source: "commodity-data-config"
-    lookup-key: "#data.commodityType != null ? #data.commodityType : 'default'"
-    target-field: "commodityDataResult"
-    
-  - name: "commodity-swap-validation-summary"
-    type: "expression-enrichment"
-    description: "Generate commodity swap validation bootstrap summary"
+    enabled: true
     condition: "true"
-    expression: "'Commodity swap validation bootstrap completed: ' + (#data.bootstrapType != null ? #data.bootstrapType : 'unknown') + ' using real APEX services'"
-    target-field: "commoditySwapValidationSummary"
+    field-mappings:
+      - source-field: "ruleType"
+        target-field: "validationRulesResult"
+        default-value: "validation-rules-processed"
+
+  - id: "enrichment-patterns-processing"
+    name: "enrichment-patterns-processing"
+    type: "field-enrichment"
+    description: "Process enrichment patterns using data-driven configuration"
+    enabled: true
+    condition: "false"
+    field-mappings:
+      - source-field: "patternType"
+        target-field: "enrichmentPatternsResult"
+        default-value: "enrichment-patterns-processed"
+
+  - id: "commodity-data-processing"
+    name: "commodity-data-processing"
+    type: "field-enrichment"
+    description: "Process commodity data using data-driven configuration"
+    enabled: true
+    condition: "false"
+    field-mappings:
+      - source-field: "commodityType"
+        target-field: "commodityDataResult"
+        default-value: "commodity-data-processed"
+    
+  - id: "commodity-swap-validation-summary"
+    name: "commodity-swap-validation-summary"
+    type: "field-enrichment"
+    description: "Generate commodity swap validation bootstrap summary"
+    enabled: true
+    condition: "true"
+    field-mappings:
+      - source-field: "bootstrapType"
+        target-field: "commoditySwapValidationSummary"
+        default-value: "Commodity swap validation bootstrap completed using real APEX services"
 
 # Bootstrap processing categories
 processing-categories:

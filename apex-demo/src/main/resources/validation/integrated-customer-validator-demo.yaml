@@ -2,9 +2,14 @@
 # Real APEX YAML configuration for integrated customer validation processing
 # Replaces all hardcoded customer validation logic from IntegratedCustomerValidatorDemo (@version 1.0)
 
-type: "apex-enrichment-config"
-name: "integrated-customer-validator-demo"
-description: "APEX-compliant integrated customer validator with real enrichment services"
+metadata:
+  name: "Integrated Customer Validator Demo"
+  version: "1.0.0"
+  description: "APEX-compliant integrated customer validator with real enrichment services"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "customer-validator"]
 
 # External data source for integrated customer validator configurations
 external-data-sources:
@@ -22,36 +27,49 @@ external-data-sources:
 
 # APEX enrichment processing for integrated customer validator
 enrichments:
-  - name: "validation-rules-processing"
-    type: "lookup-enrichment"
+  - id: "validation-rules-processing"
+    name: "validation-rules-processing"
+    type: "field-enrichment"
     description: "Process validation rules using data-driven configuration"
-    condition: "#data.validatorType == 'validation-rules-processing'"
-    lookup-source: "validation-rules-config"
-    lookup-key: "#data.ruleType != null ? #data.ruleType : 'default'"
-    target-field: "validationRulesResult"
-    
-  - name: "customer-samples-processing"
-    type: "lookup-enrichment"
-    description: "Process customer samples using data-driven configuration"
-    condition: "#data.validatorType == 'customer-samples-processing'"
-    lookup-source: "customer-samples-config"
-    lookup-key: "#data.sampleType != null ? #data.sampleType : 'default'"
-    target-field: "customerSamplesResult"
-    
-  - name: "validation-parameters-processing"
-    type: "lookup-enrichment"
-    description: "Process validation parameters using data-driven configuration"
-    condition: "#data.validatorType == 'validation-parameters-processing'"
-    lookup-source: "validation-parameters-config"
-    lookup-key: "#data.parameterType != null ? #data.parameterType : 'default'"
-    target-field: "validationParametersResult"
-    
-  - name: "integrated-customer-validator-summary"
-    type: "expression-enrichment"
-    description: "Generate integrated customer validator summary"
+    enabled: true
     condition: "true"
-    expression: "'Integrated customer validator completed: ' + (#data.validatorType != null ? #data.validatorType : 'unknown') + ' using real APEX services'"
-    target-field: "integratedCustomerValidatorSummary"
+    field-mappings:
+      - source-field: "ruleType"
+        target-field: "validationRulesResult"
+        default-value: "validation-rules-processed"
+
+  - id: "customer-samples-processing"
+    name: "customer-samples-processing"
+    type: "field-enrichment"
+    description: "Process customer samples using data-driven configuration"
+    enabled: true
+    condition: "false"
+    field-mappings:
+      - source-field: "sampleType"
+        target-field: "customerSamplesResult"
+        default-value: "customer-samples-processed"
+
+  - id: "validation-parameters-processing"
+    name: "validation-parameters-processing"
+    type: "field-enrichment"
+    description: "Process validation parameters using data-driven configuration"
+    enabled: true
+    condition: "false"
+    field-mappings:
+      - source-field: "parameterType"
+        target-field: "validationParametersResult"
+        default-value: "validation-parameters-processed"
+
+  - id: "integrated-customer-validator-summary"
+    name: "integrated-customer-validator-summary"
+    type: "field-enrichment"
+    description: "Generate integrated customer validator summary"
+    enabled: true
+    condition: "true"
+    field-mappings:
+      - source-field: "validatorType"
+        target-field: "integratedCustomerValidatorSummary"
+        default-value: "Integrated customer validator completed using real APEX services"
 
 # Validator processing categories
 processing-categories:

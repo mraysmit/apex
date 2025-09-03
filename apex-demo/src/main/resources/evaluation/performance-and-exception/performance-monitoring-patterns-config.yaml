@@ -2,9 +2,14 @@
 # External data source configuration for performance monitoring patterns
 # Replaces hardcoded performance monitoring logic from PerformanceAndExceptionDemo
 
-type: "external-data-config"
-name: "performance-monitoring-patterns-config"
-description: "Data-driven performance monitoring patterns configuration for performance and exception handling processing"
+metadata:
+  name: "Performance Monitoring Patterns Configuration"
+  version: "1.0.0"
+  description: "Data-driven performance monitoring patterns configuration for performance and exception handling processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "performance-and-exception", "performance-monitoring-patterns"]
 
 # Performance monitoring patterns configuration by pattern type
 data:

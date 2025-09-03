@@ -2,9 +2,14 @@
 # Real APEX YAML configuration for performance and exception handling processing
 # Replaces all hardcoded performance and exception logic from PerformanceAndExceptionDemo (@version 1.0)
 
-type: "apex-enrichment-config"
-name: "performance-and-exception-demo"
-description: "APEX-compliant performance and exception handling with real enrichment services"
+metadata:
+  name: "Performance and Exception Demo"
+  version: "1.0.0"
+  description: "APEX-compliant performance and exception handling with real enrichment services"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "performance", "exception-handling"]
 
 # External data source for performance and exception configurations
 external-data-sources:

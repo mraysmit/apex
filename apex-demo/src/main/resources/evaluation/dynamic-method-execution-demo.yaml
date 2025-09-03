@@ -2,9 +2,14 @@
 # Real APEX YAML configuration for dynamic method execution processing
 # Replaces all hardcoded dynamic method execution logic from DynamicMethodExecutionDemo (@version 1.0)
 
-type: "apex-enrichment-config"
-name: "dynamic-method-execution-demo"
-description: "APEX-compliant dynamic method execution with real enrichment services"
+metadata:
+  name: "Dynamic Method Execution Demo"
+  version: "1.0.0"
+  description: "APEX-compliant dynamic method execution with real enrichment services"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "dynamic-execution"]
 
 # External data source for dynamic method execution configurations
 external-data-sources:

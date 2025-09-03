@@ -5,17 +5,18 @@
 # Purpose: Main configuration for data-driven demo data management
 # ============================================================================
 
-type: "apex-enrichment-config"
-name: "APEX Demo Data Bootstrap - Main Configuration"
+metadata:
+  name: "APEX Demo Data Bootstrap - Main Configuration"
   version: "1.0.0"
   description: "Main bootstrap configuration for comprehensive demo data management (used by DemoDataBootstrap.java)"
   type: "bootstrap"
+  author: "apex.demo.team@company.com"
   business-domain: "demo-data"
-  created-by: "APEX Bootstrap Demo Generator"
+  created-by: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
   associated-demo: "DemoDataBootstrap"
+  tags: ["apex-demo", "infrastructure", "bootstrap", "demo-data"]
   file-purpose: "Orchestrates loading of customer, product, and trading data for all bootstrap demos"
-  created-date: "2025-08-27"
-  author: "APEX Bootstrap Demo Generator"
 
 # Data source configurations
 data_sources:

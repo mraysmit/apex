@@ -2,9 +2,14 @@
 # External data source configuration for dynamic lookup operations
 # Replaces hardcoded lookup logic from ApexAdvancedFeaturesDemo
 
-type: "external-data-config"
-name: "dynamic-lookup-config"
-description: "Data-driven dynamic lookup configuration for advanced features"
+metadata:
+  name: "Dynamic Lookup Configuration"
+  version: "1.0.0"
+  description: "Data-driven dynamic lookup configuration for advanced features"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "advanced-features", "dynamic-lookup"]
 
 # Dynamic lookup configuration by lookup type
 data:

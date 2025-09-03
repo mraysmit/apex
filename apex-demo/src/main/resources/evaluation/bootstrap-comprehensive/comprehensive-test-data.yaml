@@ -2,9 +2,14 @@
 # External data source configuration for comprehensive testing scenarios
 # Replaces hardcoded test data from RuleConfigurationBootstrap
 
-type: "external-data-config"
-name: "comprehensive-test-data"
-description: "Comprehensive test data scenarios for bootstrap demonstration"
+metadata:
+  name: "Comprehensive Test Data"
+  version: "1.0.0"
+  description: "Comprehensive test data scenarios for bootstrap demonstration"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "bootstrap-comprehensive", "test-data"]
 
 # Comprehensive loan application test scenarios
 loan-applications:

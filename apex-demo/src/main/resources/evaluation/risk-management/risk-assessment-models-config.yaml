@@ -2,9 +2,14 @@
 # External data source configuration for risk assessment models
 # Replaces hardcoded risk assessment logic from RiskManagementService
 
-type: "external-data-config"
-name: "risk-assessment-models-config"
-description: "Data-driven risk assessment models configuration for risk management service"
+metadata:
+  name: "Risk Assessment Models Configuration"
+  version: "1.0.0"
+  description: "Data-driven risk assessment models configuration for risk management service"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "risk-management", "risk-assessment-models"]
 
 # Risk assessment models configuration by model type
 data:

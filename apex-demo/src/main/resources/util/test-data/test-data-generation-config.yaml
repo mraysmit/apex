@@ -2,9 +2,14 @@
 # External data source configuration for test data generation
 # Replaces hardcoded test data generation from TestUtilities
 
-type: "external-data-config"
-name: "test-data-generation-config"
-description: "Data-driven test data generation configuration for test utilities"
+metadata:
+  name: "Test Data Generation Configuration"
+  version: "1.0.0"
+  description: "Data-driven test data generation configuration for test utilities"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "util", "test-data", "generation"]
 
 # Test data generation configuration by generation type
 data:

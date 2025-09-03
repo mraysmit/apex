@@ -2,9 +2,14 @@
 # External data source configuration for pricing strategy frameworks
 # Replaces hardcoded pricing strategy logic from PricingServiceDemo
 
-type: "external-data-config"
-name: "pricing-strategy-frameworks-config"
-description: "Data-driven pricing strategy frameworks configuration for pricing service"
+metadata:
+  name: "Pricing Strategy Frameworks Configuration"
+  version: "1.0.0"
+  description: "Data-driven pricing strategy frameworks configuration for pricing service"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "pricing-service", "pricing-strategy-frameworks"]
 
 # Pricing strategy frameworks configuration by framework type
 data:

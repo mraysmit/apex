@@ -2,9 +2,14 @@
 # External data source configuration for comprehensive loan approval rules
 # Replaces hardcoded loan approval logic from RuleConfigurationBootstrap
 
-type: "external-data-config"
-name: "comprehensive-loan-rules"
-description: "Comprehensive data-driven loan approval rules for bootstrap demonstration"
+metadata:
+  name: "Comprehensive Loan Rules"
+  version: "1.0.0"
+  description: "Comprehensive data-driven loan approval rules for bootstrap demonstration"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "bootstrap-comprehensive", "loan-rules"]
 
 # Comprehensive loan approval rules by credit profile
 data:

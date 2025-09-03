@@ -2,9 +2,14 @@
 # External data source configuration for trade transformer rules processing
 # Replaces hardcoded trade transformer rule creation from TradeTransformerDemo
 
-type: "external-data-config"
-name: "trade-transformer-rules-config"
-description: "Data-driven trade transformer rules configuration for trade transformation processing"
+metadata:
+  name: "Trade Transformer Rules Configuration"
+  version: "1.0.0"
+  description: "Data-driven trade transformer rules configuration for trade transformation processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "enrichment", "trade-transformer-rules", "external-data"]
 
 # Trade transformer rules configuration by rule type
 data:

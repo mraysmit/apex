@@ -2,12 +2,15 @@
 # Test data scenarios for ExternalDataSourceDemo.java
 # NO HARDCODED SIMULATION - Real APEX data processing
 
-type: "apex-enrichment-config"
-name: "External Data Source Demo Data"
-  version: "2.0"
+metadata:
+  name: "External Data Source Demo Data"
+  version: "2.0.0"
   description: "Test data scenarios for real APEX external data source demonstration"
-  author: "APEX Demo Team"
-  created: "2025-08-29"
+  type: "dataset"
+  author: "apex.demo.team@company.com"
+  source: "APEX Demo Data Generator"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "enrichment", "external-data-source", "test-data"]
 
 # REST API Integration Test Scenarios
 rest-api-scenarios:

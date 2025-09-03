@@ -2,9 +2,14 @@
 # External data source configuration for pricing rule engines
 # Replaces hardcoded pricing rule logic from PricingServiceDemo
 
-type: "external-data-config"
-name: "pricing-rule-engines-config"
-description: "Data-driven pricing rule engines configuration for pricing service"
+metadata:
+  name: "Pricing Rule Engines Configuration"
+  version: "1.0.0"
+  description: "Data-driven pricing rule engines configuration for pricing service"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "pricing-service", "pricing-rule-engines"]
 
 # Pricing rule engines configuration by engine type
 data:

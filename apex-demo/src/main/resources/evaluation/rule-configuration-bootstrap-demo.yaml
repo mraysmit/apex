@@ -2,9 +2,16 @@
 # Real APEX YAML configuration for rule bootstrap processing
 # Replaces all hardcoded rule bootstrap logic from RuleConfigurationHardcodedBootstrap (@version 1.0)
 
-type: "apex-enrichment-config"
-name: "rule-configuration-bootstrap-demo"
-description: "APEX-compliant rule configuration bootstrap with real enrichment services"
+metadata:
+  name: "Rule Configuration Bootstrap Demo"
+  version: "1.0.0"
+  description: "APEX-compliant rule configuration bootstrap with real enrichment services"
+  type: "bootstrap"
+  author: "apex.demo.team@company.com"
+  business-domain: "Rule Configuration Management"
+  created-by: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "rule-configuration", "bootstrap"]
 
 # External data source for rule configurations
 external-data-sources:

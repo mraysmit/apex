@@ -1,3 +1,14 @@
+metadata:
+  name: "Settlement Auto-Repair Processing Scenario"
+  version: "1.0.0"
+  description: "Scenario configuration that associates Settlement Instruction data types with existing rule configuration files for processing"
+  type: "scenario"
+  author: "apex.demo.team@company.com"
+  business-domain: "Settlement Auto-Repair Processing"
+  owner: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "settlement", "auto-repair", "scenario"]
+
 # ============================================================================
 # SETTLEMENT AUTO-REPAIR PROCESSING SCENARIO
 # ============================================================================
@@ -11,14 +22,6 @@
 # - Lightweight routing configuration
 #
 # ============================================================================
-
-type: "apex-enrichment-config"
-name: "Settlement Auto-Repair Processing Scenario"
-  version: "1.0.0"
-  description: "Associates settlement instructions with existing rule configurations"
-  type: "scenario"
-  business-domain: "Post-TradeB Settlement"
-  owner: "settlement.operations@company.com"
 
 # ============================================================================
 # SCENARIO CONFIGURATION

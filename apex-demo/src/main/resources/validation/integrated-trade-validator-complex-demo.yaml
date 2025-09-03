@@ -2,9 +2,14 @@
 # Real APEX YAML configuration for complex trade validation processing
 # Replaces all hardcoded trade validation logic from IntegratedTradeValidatorComplexDemo (@version 1.0)
 
-type: "apex-enrichment-config"
-name: "integrated-trade-validator-complex-demo"
-description: "APEX-compliant complex trade validation with real enrichment services"
+metadata:
+  name: "Integrated Trade Validator Complex Demo"
+  version: "1.0.0"
+  description: "APEX-compliant complex trade validation with real enrichment services"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "trade-validator", "complex"]
 
 # External data source for complex trade validation configurations
 external-data-sources:

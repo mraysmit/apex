@@ -5,16 +5,17 @@
 # Purpose: Realistic customer profile data for APEX demonstrations
 # ============================================================================
 
-type: "apex-enrichment-config"
-name: "Bootstrap Demo - Customer Profiles Dataset"
+metadata:
+  name: "Bootstrap Demo - Customer Profiles Dataset"
   version: "1.0.0"
   description: "Realistic customer profiles for financial services demonstrations (used by DemoDataBootstrap.java and multiple bootstrap demos)"
   type: "dataset"
-  source: "generated"
+  author: "apex.demo.team@company.com"
+  source: "APEX Demo Data Generator"
+  created-date: "2024-12-24"
   associated-demos: ["DemoDataBootstrap", "OtcOptionsBootstrapDemo", "CustodyAutoRepairBootstrap"]
-  file-purpose: "Provides customer profile data with demographics, financial info, and risk profiles"
+  tags: ["apex-demo", "infrastructure", "bootstrap", "customer-profiles"]
   category: "customer-data"
-  created-date: "2025-08-27"
 
 # Customer profile definitions
 customer_profiles:

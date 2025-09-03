@@ -2,9 +2,14 @@
 # External data source configuration for trade validation parameters
 # Replaces hardcoded parameter logic from IntegratedTradeValidatorDemo
 
-type: "external-data-config"
-name: "trade-validation-parameters-config"
-description: "Data-driven trade validation parameters configuration for integrated trade validation"
+metadata:
+  name: "Trade Validation Parameters Configuration"
+  version: "1.0.0"
+  description: "Data-driven trade validation parameters configuration for integrated trade validation"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "trade-validation-simple", "trade-validation-parameters"]
 
 # Trade validation parameters configuration by parameter type
 data:

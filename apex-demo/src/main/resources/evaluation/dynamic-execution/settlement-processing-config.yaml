@@ -2,9 +2,14 @@
 # External data source configuration for settlement processing
 # Replaces hardcoded settlement logic from DynamicMethodExecutionDemo
 
-type: "external-data-config"
-name: "settlement-processing-config"
-description: "Data-driven settlement processing configuration for dynamic method execution"
+metadata:
+  name: "Settlement Processing Configuration"
+  version: "1.0.0"
+  description: "Data-driven settlement processing configuration for dynamic method execution"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "dynamic-execution", "settlement-processing"]
 
 # Settlement days configuration by trade type
 data:

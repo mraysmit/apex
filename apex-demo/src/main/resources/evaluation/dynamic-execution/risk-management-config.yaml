@@ -2,9 +2,14 @@
 # External data source configuration for risk management
 # Replaces hardcoded risk logic from DynamicMethodExecutionDemo
 
-type: "external-data-config"
-name: "risk-management-config"
-description: "Data-driven risk management configuration for dynamic method execution"
+metadata:
+  name: "Risk Management Configuration"
+  version: "1.0.0"
+  description: "Data-driven risk management configuration for dynamic method execution"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "dynamic-execution", "risk-management"]
 
 # Market risk configuration by trade type
 data:

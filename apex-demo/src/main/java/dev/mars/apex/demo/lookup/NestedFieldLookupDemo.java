@@ -312,14 +312,14 @@ public class NestedFieldLookupDemo extends AbstractLookupDemo {
             original.getCurrency()
         );
 
-        // Convert settlement to Map for APEX processing
-        Map<String, Object> settlementData = convertSettlementToMap(enriched);
+        // Use the actual settlement object for APEX processing to preserve nested structure
+        // This allows expressions like #trade.counterparty.countryCode to work correctly
 
         // Apply enrichments using the APEX rules engine
         if (ruleConfiguration != null && ruleConfiguration.getEnrichments() != null) {
             for (YamlEnrichment enrichment : ruleConfiguration.getEnrichments()) {
                 if (enrichment.getEnabled() != null && enrichment.getEnabled()) {
-                    applyEnrichmentToSettlement(enrichment, settlementData);
+                    applyEnrichmentToSettlement(enrichment, enriched);
                 }
             }
         }
@@ -328,14 +328,12 @@ public class NestedFieldLookupDemo extends AbstractLookupDemo {
         if (ruleConfiguration != null && ruleConfiguration.getRules() != null) {
             for (YamlRule rule : ruleConfiguration.getRules()) {
                 if (rule.getEnabled() != null && rule.getEnabled()) {
-                    applyValidationRuleToSettlement(rule, settlementData);
+                    applyValidationRuleToSettlement(rule, enriched);
                 }
             }
         }
 
-        // Convert enriched data back to TradeSettlement object
-        updateSettlementFromMap(enriched, settlementData);
-
+        // No need to convert back since we're working with the actual object
         return enriched;
     }
 
@@ -530,20 +528,26 @@ public class NestedFieldLookupDemo extends AbstractLookupDemo {
     /**
      * Apply enrichment to settlement data using APEX engine.
      */
-    private void applyEnrichmentToSettlement(YamlEnrichment enrichment, Map<String, Object> settlementData) throws Exception {
+    private void applyEnrichmentToSettlement(YamlEnrichment enrichment, TradeSettlement settlement) throws Exception {
         // Apply lookup enrichment directly using the YAML configuration
         if (enrichment.getLookupConfig() != null) {
-            applyLookupEnrichmentToSettlement(enrichment, settlementData);
+            applyLookupEnrichmentToSettlement(enrichment, settlement);
         }
     }
 
     /**
      * Apply lookup enrichment using the APEX engine.
      */
-    private void applyLookupEnrichmentToSettlement(YamlEnrichment enrichment, Map<String, Object> settlementData) throws Exception {
-        // Create evaluation context
-        StandardEvaluationContext context = new StandardEvaluationContext();
-        settlementData.forEach(context::setVariable);
+    private void applyLookupEnrichmentToSettlement(YamlEnrichment enrichment, TradeSettlement settlement) throws Exception {
+        // Create evaluation context with the actual settlement object as root and also as variables
+        StandardEvaluationContext context = new StandardEvaluationContext(settlement);
+
+        // Also set key objects as variables for expressions that use # prefix
+        context.setVariable("trade", settlement.getTrade());
+        if (settlement.getTrade() != null) {
+            context.setVariable("counterparty", settlement.getTrade().getCounterparty());
+        }
+        context.setVariable("settlementAmount", settlement.getSettlementAmount());
 
         // Evaluate condition
         if (enrichment.getCondition() != null) {
@@ -567,12 +571,13 @@ public class NestedFieldLookupDemo extends AbstractLookupDemo {
                     String keyField = dataset.getKeyField();
                     for (Map<String, Object> dataRow : dataset.getData()) {
                         if (keyValue != null && keyValue.equals(dataRow.get(keyField))) {
-                            // Apply field mappings
+                            // Apply field mappings directly to settlement object
                             if (enrichment.getFieldMappings() != null) {
                                 for (var mapping : enrichment.getFieldMappings()) {
                                     Object sourceValue = dataRow.get(mapping.getSourceField());
                                     if (sourceValue != null) {
-                                        settlementData.put(mapping.getTargetField(), sourceValue);
+                                        // Set the field directly on the settlement object
+                                        setSettlementField(settlement, mapping.getTargetField(), sourceValue);
                                     }
                                 }
                             }
@@ -585,12 +590,55 @@ public class NestedFieldLookupDemo extends AbstractLookupDemo {
     }
 
     /**
+     * Set field value on settlement object.
+     */
+    private void setSettlementField(TradeSettlement settlement, String fieldName, Object value) {
+        switch (fieldName) {
+            case "countryName":
+                settlement.setCountryName((String) value);
+                break;
+            case "regulatoryZone":
+                settlement.setRegulatoryZone((String) value);
+                break;
+            case "timeZone":
+                settlement.setTimeZone((String) value);
+                break;
+            case "settlementSystem":
+                settlement.setSettlementSystem((String) value);
+                break;
+            case "standardSettlementDays":
+                if (value instanceof Number) {
+                    settlement.setStandardSettlementDays(((Number) value).intValue());
+                } else {
+                    settlement.setStandardSettlementDays((Integer) value);
+                }
+                break;
+            case "holidayCalendar":
+                settlement.setHolidayCalendar((String) value);
+                break;
+            case "settlementFee":
+                if (value instanceof Number) {
+                    settlement.setSettlementFee(new BigDecimal(value.toString()));
+                } else {
+                    settlement.setSettlementFee((BigDecimal) value);
+                }
+                break;
+            case "custodianBank":
+                settlement.setCustodianBank((String) value);
+                break;
+            default:
+                // Log unknown field
+                System.out.println("Warning: Unknown field for settlement enrichment: " + fieldName);
+                break;
+        }
+    }
+
+    /**
      * Apply validation rule to settlement data.
      */
-    private void applyValidationRuleToSettlement(YamlRule rule, Map<String, Object> settlementData) throws Exception {
+    private void applyValidationRuleToSettlement(YamlRule rule, TradeSettlement settlement) throws Exception {
         if (rule.getCondition() != null) {
-            StandardEvaluationContext context = new StandardEvaluationContext();
-            settlementData.forEach(context::setVariable);
+            StandardEvaluationContext context = new StandardEvaluationContext(settlement);
 
             ExpressionEvaluatorService evaluator = new ExpressionEvaluatorService();
             Boolean result = evaluator.evaluate(rule.getCondition(), context, Boolean.class);
@@ -601,40 +649,5 @@ public class NestedFieldLookupDemo extends AbstractLookupDemo {
         }
     }
 
-    /**
-     * Update TradeSettlement from enriched Map data.
-     */
-    private void updateSettlementFromMap(TradeSettlement settlement, Map<String, Object> settlementData) {
-        // Update enriched fields
-        if (settlementData.containsKey("countryName")) {
-            settlement.setCountryName((String) settlementData.get("countryName"));
-        }
-        if (settlementData.containsKey("regulatoryZone")) {
-            settlement.setRegulatoryZone((String) settlementData.get("regulatoryZone"));
-        }
-        if (settlementData.containsKey("timeZone")) {
-            settlement.setTimeZone((String) settlementData.get("timeZone"));
-        }
-        if (settlementData.containsKey("settlementSystem")) {
-            settlement.setSettlementSystem((String) settlementData.get("settlementSystem"));
-        }
-        if (settlementData.containsKey("standardSettlementDays")) {
-            Object standardSettlementDays = settlementData.get("standardSettlementDays");
-            if (standardSettlementDays instanceof Number) {
-                settlement.setStandardSettlementDays(((Number) standardSettlementDays).intValue());
-            }
-        }
-        if (settlementData.containsKey("holidayCalendar")) {
-            settlement.setHolidayCalendar((String) settlementData.get("holidayCalendar"));
-        }
-        if (settlementData.containsKey("settlementFee")) {
-            Object settlementFee = settlementData.get("settlementFee");
-            if (settlementFee instanceof Number) {
-                settlement.setSettlementFee(new BigDecimal(settlementFee.toString()));
-            }
-        }
-        if (settlementData.containsKey("custodianBank")) {
-            settlement.setCustodianBank((String) settlementData.get("custodianBank"));
-        }
-    }
+
 }

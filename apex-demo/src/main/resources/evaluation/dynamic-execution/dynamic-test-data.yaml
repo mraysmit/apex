@@ -2,9 +2,14 @@
 # External data source configuration for dynamic method execution testing
 # Replaces hardcoded test data from DynamicMethodExecutionDemo
 
-type: "external-data-config"
-name: "dynamic-test-data"
-description: "Comprehensive test data for dynamic method execution demonstration"
+metadata:
+  name: "Dynamic Test Data"
+  version: "1.0.0"
+  description: "Comprehensive test data for dynamic method execution demonstration"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "dynamic-execution", "test-data"]
 
 # Sample trades for dynamic method execution testing
 data:

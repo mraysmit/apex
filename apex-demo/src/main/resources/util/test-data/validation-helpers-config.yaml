@@ -2,9 +2,14 @@
 # External data source configuration for validation helpers
 # Replaces hardcoded validation helper logic from TestUtilities
 
-type: "external-data-config"
-name: "validation-helpers-config"
-description: "Data-driven validation helpers configuration for test utilities"
+metadata:
+  name: "Validation Helpers Configuration"
+  version: "1.0.0"
+  description: "Data-driven validation helpers configuration for test utilities"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "util", "test-data", "validation-helpers"]
 
 # Validation helpers configuration by helper type
 data:

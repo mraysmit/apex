@@ -2,9 +2,14 @@
 # Real APEX YAML configuration for YAML dependency analysis processing
 # Replaces all hardcoded dependency analysis logic from YamlDependencyAnalysisDemo (@since 1.0.0)
 
-type: "apex-enrichment-config"
-name: "yaml-dependency-analysis-demo"
-description: "APEX-compliant YAML dependency analysis with real enrichment services"
+metadata:
+  name: "YAML Dependency Analysis Demo"
+  version: "1.0.0"
+  description: "APEX-compliant YAML dependency analysis with real enrichment services"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "util", "yaml-dependency-analysis", "enrichment"]
 
 # External data source for YAML dependency analysis configurations
 external-data-sources:

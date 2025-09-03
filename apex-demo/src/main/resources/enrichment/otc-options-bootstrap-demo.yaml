@@ -2,9 +2,16 @@
 # Real APEX YAML configuration for OTC options bootstrap processing
 # Replaces all hardcoded OTC options logic from OtcOptionsBootstrapDemo (@version 1.0)
 
-type: "apex-enrichment-config"
-name: "otc-options-bootstrap-demo"
-description: "APEX-compliant OTC options bootstrap with real enrichment services"
+metadata:
+  name: "OTC Options Bootstrap Demo"
+  version: "1.0.0"
+  description: "APEX-compliant OTC options bootstrap with real enrichment services"
+  type: "bootstrap"
+  author: "apex.demo.team@company.com"
+  business-domain: "OTC Options Trading"
+  created-by: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "enrichment", "otc-options", "bootstrap"]
 
 # External data source for OTC options bootstrap configurations
 external-data-sources:

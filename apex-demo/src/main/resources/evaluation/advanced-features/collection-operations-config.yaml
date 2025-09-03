@@ -2,9 +2,14 @@
 # External data source configuration for collection operations
 # Replaces hardcoded collection logic from ApexAdvancedFeaturesDemo
 
-type: "external-data-config"
-name: "collection-operations-config"
-description: "Data-driven collection operations configuration for advanced features"
+metadata:
+  name: "Collection Operations Configuration"
+  version: "1.0.0"
+  description: "Data-driven collection operations configuration for advanced features"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "advanced-features", "collection-operations"]
 
 # Collection operations configuration by operation type
 data:

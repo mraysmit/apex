@@ -2,12 +2,15 @@
 # Test data scenarios for BasicUsageExamples.java
 # NO HARDCODED SIMULATION - Real APEX data processing
 
-type: "apex-enrichment-config"
-name: "Basic Usage Examples Data"
-  version: "2.0"
+metadata:
+  name: "Basic Usage Examples Data"
+  version: "2.0.0"
   description: "Test data scenarios for real APEX basic usage demonstration"
-  author: "APEX Demo Team"
-  created: "2025-01-29"
+  type: "dataset"
+  author: "apex.demo.team@company.com"
+  source: "APEX Demo Data Generator"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "test-data"]
 
 # Basic Validation Test Scenarios
 basic-validation-scenarios:

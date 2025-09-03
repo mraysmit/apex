@@ -2,9 +2,14 @@
 # Real APEX YAML configuration for trade record matcher
 # Replaces all hardcoded trade record matcher logic from TradeRecordMatcherDemo (@version 1.0)
 
-type: "apex-enrichment-config"
-name: "trade-record-matcher-demo"
-description: "APEX-compliant trade record matcher with real enrichment services"
+metadata:
+  name: "Trade Record Matcher Demo"
+  version: "1.0.0"
+  description: "APEX-compliant trade record matcher with real enrichment services"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "trade-record-matcher"]
 
 # External data source for trade record matcher configurations
 external-data-sources:

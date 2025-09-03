@@ -2,9 +2,14 @@
 # External data source configuration for compliance validation
 # Replaces hardcoded compliance logic from IntegratedTradeValidatorComplexDemo
 
-type: "external-data-config"
-name: "compliance-validation-config"
-description: "Data-driven compliance validation configuration for complex trade validation"
+metadata:
+  name: "Compliance Validation Configuration"
+  version: "1.0.0"
+  description: "Data-driven compliance validation configuration for complex trade validation"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "trade-validation", "compliance-validation"]
 
 # Compliance validation configuration by compliance type
 data:

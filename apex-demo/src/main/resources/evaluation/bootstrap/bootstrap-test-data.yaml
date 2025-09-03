@@ -2,9 +2,14 @@
 # External data source configuration for bootstrap testing scenarios
 # Replaces hardcoded test data from RuleConfigurationHardcodedBootstrap
 
-type: "external-data-config"
-name: "bootstrap-test-data"
-description: "Test data scenarios for rule configuration bootstrap demonstration"
+metadata:
+  name: "Bootstrap Test Data"
+  version: "1.0.0"
+  description: "Test data scenarios for rule configuration bootstrap demonstration"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "bootstrap", "test-data"]
 
 # Loan application test scenarios
 loan-applications:

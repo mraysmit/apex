@@ -2,9 +2,14 @@
 # External data source configuration for rule management frameworks
 # Replaces hardcoded rule management logic from RuleDefinitionServiceDemo
 
-type: "external-data-config"
-name: "rule-management-frameworks-config"
-description: "Data-driven rule management frameworks configuration for rule definition service"
+metadata:
+  name: "Rule Management Frameworks Configuration"
+  version: "1.0.0"
+  description: "Data-driven rule management frameworks configuration for rule definition service"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "rule-definition-service", "rule-management-frameworks"]
 
 # Rule management frameworks configuration by framework type
 data:

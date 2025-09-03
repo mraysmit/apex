@@ -5,14 +5,16 @@
 # Purpose: Realistic trading scenarios for APEX demonstrations
 # ============================================================================
 
-type: "apex-enrichment-config"
-name: "Bootstrap Demo - Trading Scenarios Dataset"
+metadata:
+  name: "Bootstrap Demo - Trading Scenarios Dataset"
   version: "1.0.0"
   description: "Comprehensive trading scenarios across multiple asset classes (used by DemoDataBootstrap.java and trading demos)"
   type: "dataset"
-  source: "generated"
+  author: "apex.demo.team@company.com"
+  source: "APEX Demo Data Generator"
+  created-date: "2024-12-24"
   associated-demos: ["DemoDataBootstrap", "OtcOptionsBootstrapDemo", "FinancialDemo"]
-  file-purpose: "Provides realistic trading scenarios for OTC options, swaps, and other derivatives"
+  tags: ["apex-demo", "infrastructure", "bootstrap", "trading-scenarios"]
   category: "trading-data"
   created-date: "2025-08-27"
 

@@ -2,12 +2,15 @@
 # Test data scenarios for ComprehensiveFinancialSettlementDemo.java
 # NO HARDCODED SIMULATION - Real APEX data processing
 
-type: "external-data-config"
-name: "comprehensive-financial-settlement-demo-data"
-description: "Test data scenarios for real APEX comprehensive financial settlement demonstration"
-version: "2.0"
-author: "APEX Demo Team"
-created: "2025-01-29"
+metadata:
+  name: "Comprehensive Financial Settlement Demo Data"
+  version: "2.0.0"
+  description: "Test data scenarios for real APEX comprehensive financial settlement demonstration"
+  type: "dataset"
+  author: "apex.demo.team@company.com"
+  source: "APEX Demo Data Generator"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "enrichment", "financial", "settlement", "test-data"]
 
 # Multi-Asset Settlement Processing Test Scenarios
 multi-asset-scenarios:

@@ -63,7 +63,15 @@ public class DatabaseConnectivityTest {
         logger.info("\n============================================================");
         logger.info("TEST 1: Basic H2 Database Connection");
         logger.info("============================================================");
-        
+
+        // Load H2 driver explicitly
+        try {
+            Class.forName("org.h2.Driver");
+        } catch (ClassNotFoundException e) {
+            logger.error("H2 driver not found: " + e.getMessage());
+            throw new RuntimeException("H2 driver not available", e);
+        }
+
         String jdbcUrl = "jdbc:h2:mem:apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
         try (Connection connection = DriverManager.getConnection(jdbcUrl, "sa", "")) {
             logger.info("✅ Successfully connected to H2 database");

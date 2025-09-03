@@ -2,9 +2,14 @@
 # External data source configuration for customer segments processing
 # Replaces hardcoded customer segmentation from CustomerTransformerDemo
 
-type: "external-data-config"
-name: "customer-segments-config"
-description: "Data-driven customer segments configuration for customer transformation processing"
+metadata:
+  name: "Customer Segments Configuration"
+  version: "1.0.0"
+  description: "Data-driven customer segments configuration for customer transformation processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "enrichment", "customer-segments", "external-data"]
 
 # Customer segments configuration by segment type
 data:

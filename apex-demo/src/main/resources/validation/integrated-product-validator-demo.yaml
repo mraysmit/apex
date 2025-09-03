@@ -2,9 +2,14 @@
 # Real APEX YAML configuration for integrated product validation processing
 # Replaces all hardcoded product validation logic from IntegratedProductValidatorDemo (@version 1.0)
 
-type: "apex-enrichment-config"
-name: "integrated-product-validator-demo"
-description: "APEX-compliant integrated product validator with real enrichment services"
+metadata:
+  name: "Integrated Product Validator Demo"
+  version: "1.0.0"
+  description: "APEX-compliant integrated product validator with real enrichment services"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "product-validator"]
 
 # External data source for integrated product validator configurations
 external-data-sources:

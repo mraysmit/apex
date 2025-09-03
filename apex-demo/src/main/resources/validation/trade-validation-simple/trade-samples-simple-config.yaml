@@ -2,9 +2,14 @@
 # External data source configuration for simple trade samples
 # Replaces hardcoded trade sample creation from IntegratedTradeValidatorDemo
 
-type: "external-data-config"
-name: "trade-samples-simple-config"
-description: "Data-driven simple trade samples configuration for integrated trade validation"
+metadata:
+  name: "Trade Samples Simple Configuration"
+  version: "1.0.0"
+  description: "Data-driven simple trade samples configuration for integrated trade validation"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "trade-validation-simple", "trade-samples-simple"]
 
 # Trade samples configuration by sample type
 data:

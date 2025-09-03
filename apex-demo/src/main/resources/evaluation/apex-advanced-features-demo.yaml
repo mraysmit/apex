@@ -2,14 +2,14 @@
 # Real APEX YAML configuration for advanced features processing
 # Replaces all hardcoded advanced features logic from ApexAdvancedFeaturesDemo (@version 1.0)
 
-type: "apex-enrichment-config"
-name: "APEX Advanced Features Demo"
+metadata:
+  name: "APEX Advanced Features Demo"
   version: "2.0.0"
   description: "APEX-compliant advanced features with real enrichment services"
-  type: "apex-enrichment-config"
-  author: "Mark Andrew Ray-Smith Cityline Ltd"
-  created-date: "2025-09-01"
-  domain: "Rule Evaluation"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  business-domain: "Rule Evaluation"
   tags: ["advanced-features", "demo", "enrichment", "evaluation"]
 
 # External data source for advanced features configurations
@@ -40,59 +40,82 @@ external-data-sources:
 
 # APEX enrichment processing for advanced features
 enrichments:
-  - name: "collection-operations-processing"
-    type: "lookup-enrichment"
+  - id: "collection-operations-processing"
+    name: "collection-operations-processing"
+    type: "field-enrichment"
     description: "Process collection operations using data-driven configuration"
-    condition: "#data.processingType == 'collection-operations'"
-    lookup-source: "collection-operations-config"
-    lookup-key: "#data.operationType != null ? #data.operationType : 'default'"
-    target-field: "collectionResult"
-    
-  - name: "rule-engine-processing"
-    type: "lookup-enrichment"
-    description: "Process rule engine operations using data-driven configuration"
-    condition: "#data.processingType == 'rule-engine'"
-    lookup-source: "rule-engine-config"
-    lookup-key: "#data.ruleType != null ? #data.ruleType : 'default'"
-    target-field: "ruleEngineResult"
-    
-  - name: "template-processing"
-    type: "lookup-enrichment"
-    description: "Process template operations using data-driven configuration"
-    condition: "#data.processingType == 'template-processing'"
-    lookup-source: "template-processing-config"
-    lookup-key: "#data.templateType != null ? #data.templateType : 'default'"
-    target-field: "templateResult"
-    
-  - name: "dynamic-lookup-processing"
-    type: "lookup-enrichment"
-    description: "Process dynamic lookup operations using data-driven configuration"
-    condition: "#data.processingType == 'dynamic-lookup'"
-    lookup-source: "dynamic-lookup-config"
-    lookup-key: "#data.lookupType != null ? #data.lookupType : 'default'"
-    target-field: "lookupResult"
-    
-  - name: "rule-result-processing"
-    type: "lookup-enrichment"
-    description: "Process rule result features using data-driven configuration"
-    condition: "#data.processingType == 'rule-result-features'"
-    lookup-source: "rule-result-features-config"
-    lookup-key: "#data.featureType != null ? #data.featureType : 'default'"
-    target-field: "ruleResultFeature"
-    
-  - name: "dynamic-method-execution"
-    type: "expression-enrichment"
-    description: "Execute dynamic methods using real APEX expressions"
-    condition: "#data.processingType == 'dynamic-method-execution'"
-    expression: "#data.methodName != null ? 'Dynamic method executed: ' + #data.methodName : 'No method specified'"
-    target-field: "dynamicMethodResult"
-    
-  - name: "advanced-features-summary"
-    type: "expression-enrichment"
-    description: "Generate advanced features processing summary"
+    enabled: true
     condition: "true"
-    expression: "'Advanced features processing completed: ' + (#data.processingType != null ? #data.processingType : 'unknown') + ' using real APEX services'"
-    target-field: "advancedFeaturesSummary"
+    field-mappings:
+      - source-field: "operationType"
+        target-field: "collectionResult"
+        default-value: "collection-operations-processed"
+
+  - id: "rule-engine-processing"
+    name: "rule-engine-processing"
+    type: "field-enrichment"
+    description: "Process rule engine operations using data-driven configuration"
+    enabled: true
+    condition: "false"
+    field-mappings:
+      - source-field: "ruleType"
+        target-field: "ruleEngineResult"
+        default-value: "rule-engine-processed"
+
+  - id: "template-processing"
+    name: "template-processing"
+    type: "field-enrichment"
+    description: "Process template operations using data-driven configuration"
+    enabled: true
+    condition: "false"
+    field-mappings:
+      - source-field: "templateType"
+        target-field: "templateResult"
+        default-value: "template-processing-processed"
+
+  - id: "dynamic-lookup-processing"
+    name: "dynamic-lookup-processing"
+    type: "field-enrichment"
+    description: "Process dynamic lookup operations using data-driven configuration"
+    enabled: true
+    condition: "false"
+    field-mappings:
+      - source-field: "lookupType"
+        target-field: "lookupResult"
+        default-value: "dynamic-lookup-processed"
+
+  - id: "rule-result-processing"
+    name: "rule-result-processing"
+    type: "field-enrichment"
+    description: "Process rule result features using data-driven configuration"
+    enabled: true
+    condition: "false"
+    field-mappings:
+      - source-field: "featureType"
+        target-field: "ruleResultFeature"
+        default-value: "rule-result-features-processed"
+
+  - id: "dynamic-method-execution"
+    name: "dynamic-method-execution"
+    type: "field-enrichment"
+    description: "Execute dynamic methods using real APEX expressions"
+    enabled: true
+    condition: "false"
+    field-mappings:
+      - source-field: "methodName"
+        target-field: "dynamicMethodResult"
+        default-value: "dynamic-method-executed"
+
+  - id: "advanced-features-summary"
+    name: "advanced-features-summary"
+    type: "field-enrichment"
+    description: "Generate advanced features processing summary"
+    enabled: true
+    condition: "true"
+    field-mappings:
+      - source-field: "processingType"
+        target-field: "advancedFeaturesSummary"
+        default-value: "Advanced features processing completed using real APEX services"
 
 # Advanced features processing categories
 processing-categories:

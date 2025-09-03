@@ -2,9 +2,14 @@
 # External data source configuration for exception handling scenarios
 # Replaces hardcoded exception handling logic from PerformanceAndExceptionDemo
 
-type: "external-data-config"
-name: "exception-handling-scenarios-config"
-description: "Data-driven exception handling scenarios configuration for performance and exception handling processing"
+metadata:
+  name: "Exception Handling Scenarios Configuration"
+  version: "1.0.0"
+  description: "Data-driven exception handling scenarios configuration for performance and exception handling processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "performance-and-exception", "exception-handling-scenarios"]
 
 # Exception handling scenarios configuration by scenario type
 data:

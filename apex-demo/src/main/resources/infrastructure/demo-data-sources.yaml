@@ -1,3 +1,12 @@
+metadata:
+  name: "Demo Data Sources Configuration"
+  version: "1.0.0"
+  description: "Production data sources for APEX demo scenarios with proper ExternalDataSource implementations"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "infrastructure", "data-sources"]
+
 # ============================================================================
 # DEMO DATA SOURCES CONFIGURATION
 # ============================================================================

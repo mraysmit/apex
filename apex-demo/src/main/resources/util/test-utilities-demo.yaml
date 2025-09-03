@@ -2,9 +2,14 @@
 # Real APEX YAML configuration for test utilities processing
 # Replaces all hardcoded test data creation logic from TestUtilities (@version 1.0)
 
-type: "apex-enrichment-config"
-name: "test-utilities-demo"
-description: "APEX-compliant test utilities with real enrichment services"
+metadata:
+  name: "Test Utilities Demo"
+  version: "1.0.0"
+  description: "APEX-compliant test utilities with real enrichment services"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "util", "test-utilities"]
 
 # External data source for test utilities configurations
 external-data-sources:

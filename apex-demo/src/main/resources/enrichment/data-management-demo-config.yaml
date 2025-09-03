@@ -2,12 +2,14 @@
 # Real APEX YAML configuration for DataManagementDemo.java
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
-type: "apex-enrichment-config"
-name: "Data Management Demo Configuration"
-  version: "2.0"
+metadata:
+  name: "Data Management Demo Configuration"
+  version: "2.0.0"
   description: "Real APEX data management demonstration with dataset structure, enrichment, validation, and error handling"
-  author: "APEX Demo Team"
-  created: "2025-08-29"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "enrichment", "data-management"]
 
 # Basic Dataset Structure Enrichments
 enrichments:

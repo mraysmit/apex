@@ -5,16 +5,17 @@
 # Purpose: Realistic financial product catalog for APEX demonstrations
 # ============================================================================
 
-type: "apex-enrichment-config"
-name: "Bootstrap Demo - Financial Product Catalog Dataset"
+metadata:
+  name: "Bootstrap Demo - Financial Product Catalog Dataset"
   version: "1.0.0"
   description: "Comprehensive financial products and services catalog (used by DemoDataBootstrap.java for product lookups)"
   type: "dataset"
-  source: "generated"
+  author: "apex.demo.team@company.com"
+  source: "APEX Demo Data Generator"
+  created-date: "2024-12-24"
   associated-demos: ["DemoDataBootstrap", "FinancialDemo"]
-  file-purpose: "Provides financial product definitions, pricing, and risk characteristics"
+  tags: ["apex-demo", "infrastructure", "bootstrap", "product-catalog"]
   category: "product-data"
-  created-date: "2025-08-27"
 
 # Financial products catalog
 products:

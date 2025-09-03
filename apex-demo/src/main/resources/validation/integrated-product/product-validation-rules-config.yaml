@@ -2,9 +2,14 @@
 # External data source configuration for product validation rules processing
 # Replaces hardcoded product validation rule creation from IntegratedProductValidatorDemo
 
-type: "external-data-config"
-name: "product-validation-rules-config"
-description: "Data-driven product validation rules configuration for integrated product validation processing"
+metadata:
+  name: "Product Validation Rules Configuration"
+  version: "1.0.0"
+  description: "Data-driven product validation rules configuration for integrated product validation processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "integrated-product", "product-validation-rules"]
 
 # Product validation rules configuration by rule type
 data:

@@ -2,9 +2,14 @@
 # External data source configuration for settlement operations
 # Replaces hardcoded settlement operations logic from PostTradeProcessingServiceDemo
 
-type: "external-data-config"
-name: "settlement-operations-config"
-description: "Data-driven settlement operations configuration for post-trade processing service"
+metadata:
+  name: "Settlement Operations Configuration"
+  version: "1.0.0"
+  description: "Data-driven settlement operations configuration for post-trade processing service"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "post-trade-processing", "settlement-operations"]
 
 # Settlement operations configuration by operation type
 data:

@@ -2,9 +2,14 @@
 # External data source configuration for trade risk ratings processing
 # Replaces hardcoded trade risk rating logic from TradeTransformerDemo
 
-type: "external-data-config"
-name: "trade-risk-ratings-config"
-description: "Data-driven trade risk ratings configuration for trade transformation processing"
+metadata:
+  name: "Trade Risk Ratings Configuration"
+  version: "1.0.0"
+  description: "Data-driven trade risk ratings configuration for trade transformation processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "enrichment", "trade-risk-ratings", "external-data"]
 
 # Trade risk ratings configuration by rating type
 data:

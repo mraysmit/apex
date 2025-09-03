@@ -2,9 +2,14 @@
 # External data source configuration for product validation parameters processing
 # Replaces hardcoded product validation parameters from IntegratedProductValidatorDemo
 
-type: "external-data-config"
-name: "product-validation-parameters-config"
-description: "Data-driven product validation parameters configuration for integrated product validation processing"
+metadata:
+  name: "Product Validation Parameters Configuration"
+  version: "1.0.0"
+  description: "Data-driven product validation parameters configuration for integrated product validation processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "integrated-product", "product-validation-parameters"]
 
 # Product validation parameters configuration by parameter type
 data:

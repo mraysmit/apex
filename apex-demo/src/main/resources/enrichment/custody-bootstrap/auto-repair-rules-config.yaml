@@ -2,14 +2,15 @@
 # External data source configuration for auto-repair rules processing
 # Replaces hardcoded auto-repair rules from CustodyAutoRepairBootstrap
 
-type: "external-data-config"
-name: "auto-repair-rules-config"
-description: "Data-driven auto-repair rules configuration for custody settlement processing"
-version: "2.0.0"
-author: "Mark Andrew Ray-Smith Cityline Ltd"
-created-date: "2025-09-01"
-domain: "Custody and Safekeeping"
-tags: ["auto-repair-rules", "custody", "bootstrap", "external-data"]
+metadata:
+  name: "Auto-Repair Rules Configuration"
+  version: "2.0.0"
+  description: "Data-driven auto-repair rules configuration for custody settlement processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  business-domain: "Custody and Safekeeping"
+  tags: ["auto-repair-rules", "custody", "bootstrap", "external-data"]
 
 # Auto-repair rules configuration by rule type
 data:

@@ -2,9 +2,14 @@
 # External data source configuration for rule result features
 # Replaces hardcoded rule result logic from ApexAdvancedFeaturesDemo
 
-type: "external-data-config"
-name: "rule-result-features-config"
-description: "Data-driven rule result features configuration for advanced features"
+metadata:
+  name: "Rule Result Features Configuration"
+  version: "1.0.0"
+  description: "Data-driven rule result features configuration for advanced features"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "advanced-features", "rule-result-features"]
 
 # Rule result features configuration by feature type
 data:

@@ -2,9 +2,14 @@
 # External data source configuration for field actions processing
 # Replaces hardcoded field transformer actions from CustomerTransformerDemo
 
-type: "external-data-config"
-name: "field-actions-config"
-description: "Data-driven field actions configuration for customer transformation processing"
+metadata:
+  name: "Field Actions Configuration"
+  version: "1.0.0"
+  description: "Data-driven field actions configuration for customer transformation processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "enrichment", "field-actions", "external-data"]
 
 # Field actions configuration by action type
 data:

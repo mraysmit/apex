@@ -2,9 +2,14 @@
 # External data source configuration for rule analysis processors
 # Replaces hardcoded rule analysis logic from RuleDefinitionServiceDemo
 
-type: "external-data-config"
-name: "rule-analysis-processors-config"
-description: "Data-driven rule analysis processors configuration for rule definition service"
+metadata:
+  name: "Rule Analysis Processors Configuration"
+  version: "1.0.0"
+  description: "Data-driven rule analysis processors configuration for rule definition service"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "rule-definition-service", "rule-analysis-processors"]
 
 # Rule analysis processors configuration by processor type
 data:

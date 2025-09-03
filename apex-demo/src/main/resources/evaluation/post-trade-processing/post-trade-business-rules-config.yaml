@@ -2,9 +2,14 @@
 # External data source configuration for post-trade business rules
 # Replaces hardcoded business rules logic from PostTradeProcessingServiceDemo
 
-type: "external-data-config"
-name: "post-trade-business-rules-config"
-description: "Data-driven post-trade business rules configuration for post-trade processing service"
+metadata:
+  name: "Post-Trade Business Rules Configuration"
+  version: "1.0.0"
+  description: "Data-driven post-trade business rules configuration for post-trade processing service"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "post-trade-processing", "business-rules"]
 
 # Post-trade business rules configuration by rule type
 data:

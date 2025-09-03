@@ -2,9 +2,14 @@
 # External data source configuration for customer samples processing
 # Replaces hardcoded customer sample creation from IntegratedCustomerValidatorDemo
 
-type: "external-data-config"
-name: "customer-samples-config"
-description: "Data-driven customer samples configuration for integrated customer validation processing"
+metadata:
+  name: "Customer Samples Configuration"
+  version: "1.0.0"
+  description: "Data-driven customer samples configuration for integrated customer validation processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "integrated-customer", "customer-samples"]
 
 # Customer samples configuration by sample type
 data:

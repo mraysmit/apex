@@ -2,9 +2,14 @@
 # External data source configuration for lookup services
 # Replaces hardcoded lookup service logic from IntegratedTradeValidatorComplexDemo
 
-type: "external-data-config"
-name: "lookup-services-config"
-description: "Data-driven lookup services configuration for complex trade validation"
+metadata:
+  name: "Lookup Services Configuration"
+  version: "1.0.0"
+  description: "Data-driven lookup services configuration for complex trade validation"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "trade-validation", "lookup-services"]
 
 # Lookup services configuration by service type
 data:

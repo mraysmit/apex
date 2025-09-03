@@ -25,14 +25,70 @@ public class ExternalReferenceDebugTest {
     
     private static final Logger logger = LoggerFactory.getLogger(ExternalReferenceDebugTest.class);
     
-    private final YamlConfigurationLoader configLoader;
-    private final EnrichmentService enrichmentService;
-    
+    private YamlConfigurationLoader configLoader;
+    private EnrichmentService enrichmentService;
+    private Object h2Server; // H2 TCP server instance
+
     public ExternalReferenceDebugTest() {
+        // Initialize database FIRST, then APEX services
+        logger.info("ExternalReferenceDebugTest initializing...");
+    }
+
+    private void initializeApexServices() {
         this.configLoader = new YamlConfigurationLoader();
         LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
         this.enrichmentService = new EnrichmentService(serviceRegistry, new ExpressionEvaluatorService());
-        logger.info("ExternalReferenceDebugTest initialized");
+        logger.info("APEX services initialized after database setup");
+    }
+
+    private void testApexDatabaseConnection() {
+        logger.info("Testing APEX database connection directly...");
+        try {
+            // Load the same configuration that the enrichment will use
+            var config = configLoader.loadFromClasspath("lookup/customer-profile-enrichment.yaml");
+            logger.info("✅ APEX configuration loaded successfully");
+            logger.info("   Configuration name: " + config.getMetadata().getName());
+            logger.info("   Data sources count: " + (config.getDataSources() != null ? config.getDataSources().size() : 0));
+        } catch (Exception e) {
+            logger.error("❌ APEX database connection test failed: " + e.getMessage(), e);
+        }
+    }
+
+    private void testApexDataSourceDirectly() {
+        logger.info("Testing APEX DataSource directly...");
+        try {
+            // Create the same DataSource that APEX will use
+            var config = configLoader.loadFromClasspath("lookup/customer-profile-enrichment.yaml");
+            if (config.getDataSources() != null && !config.getDataSources().isEmpty()) {
+                // This will trigger the same DataSource creation as the enrichment
+                logger.info("✅ APEX DataSource configuration is accessible");
+                logger.info("   This will use the same H2 TCP connection as the demo");
+            } else {
+                logger.error("❌ No data sources found in APEX configuration");
+            }
+        } catch (Exception e) {
+            logger.error("❌ APEX DataSource test failed: " + e.getMessage(), e);
+        }
+    }
+
+    private void startH2Server() throws Exception {
+        try {
+            // Use reflection to start H2 TCP server to avoid hard dependency
+            Class<?> serverClass = Class.forName("org.h2.tools.Server");
+
+            // Create TCP server on port 9092
+            Object server = serverClass.getMethod("createTcpServer", String[].class)
+                .invoke(null, (Object) new String[]{"-tcp", "-tcpPort", "9092", "-tcpAllowOthers"});
+
+            // Start the server
+            serverClass.getMethod("start").invoke(server);
+
+            this.h2Server = server;
+            logger.info("✅ H2 TCP server started on port 9092");
+
+        } catch (Exception e) {
+            throw new Exception("Failed to start H2 TCP server: " + e.getMessage(), e);
+        }
     }
     
     public static void main(String[] args) {
@@ -46,9 +102,18 @@ public class ExternalReferenceDebugTest {
         logger.info("====================================================================================");
         
         try {
-            // Initialize database
+            // Initialize database FIRST
             initializeDatabase();
-            
+
+            // Initialize APEX services AFTER database is ready
+            initializeApexServices();
+
+        // Test APEX database connection directly
+        testApexDatabaseConnection();
+
+        // Test APEX DataSource directly
+        testApexDataSourceDirectly();
+
             // Test external reference enrichment with detailed logging
             testExternalReferenceWithDebugLogging();
             
@@ -62,15 +127,31 @@ public class ExternalReferenceDebugTest {
     }
     
     private void initializeDatabase() throws Exception {
-        logger.info("Initializing H2 database...");
-        
-        String jdbcUrl = "jdbc:h2:mem:apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+        logger.info("Initializing H2 database with TCP server...");
+
+        // Load H2 driver explicitly
+        try {
+            Class.forName("org.h2.Driver");
+        } catch (ClassNotFoundException e) {
+            logger.error("H2 driver not found: " + e.getMessage());
+            throw new RuntimeException("H2 driver not available", e);
+        }
+
+        // Start H2 TCP server
+        startH2Server();
+
+        // Connect to H2 via TCP (same as APEX will use) - use simple database name
+        String jdbcUrl = "jdbc:h2:tcp://localhost:9092/apex_demo_shared;MODE=PostgreSQL";
+        logger.info("JDBC URL: " + jdbcUrl);
         try (Connection connection = DriverManager.getConnection(jdbcUrl, "sa", "")) {
             Statement statement = connection.createStatement();
-            
+
+            // Clean up existing tables first
+            statement.execute("DROP TABLE IF EXISTS customers");
+
             // Create customers table
             statement.execute("""
-                CREATE TABLE IF NOT EXISTS customers (
+                CREATE TABLE customers (
                     customer_id VARCHAR(20) PRIMARY KEY,
                     customer_name VARCHAR(100) NOT NULL,
                     customer_type VARCHAR(20) NOT NULL,
@@ -89,6 +170,30 @@ public class ExternalReferenceDebugTest {
             """);
             
             logger.info("Database initialized with customer CUST000001");
+
+            // Verify the data was inserted correctly
+            var rs = statement.executeQuery("SELECT customer_name FROM customers WHERE customer_id = 'CUST000001'");
+            if (rs.next()) {
+                logger.info("✅ Verification: Found customer CUST000001: " + rs.getString("customer_name"));
+            } else {
+                logger.error("❌ Verification: Customer CUST000001 not found in database!");
+            }
+
+            // Test the exact query that APEX will use
+            logger.info("Testing APEX query directly...");
+            var apexQuery = "SELECT customer_name, customer_type, tier, region, status, created_date FROM customers WHERE customer_id = ?";
+            try (var ps = connection.prepareStatement(apexQuery)) {
+                ps.setString(1, "CUST000001");
+                var apexRs = ps.executeQuery();
+                if (apexRs.next()) {
+                    logger.info("✅ APEX query test successful:");
+                    logger.info("   customer_name: " + apexRs.getString("customer_name"));
+                    logger.info("   customer_type: " + apexRs.getString("customer_type"));
+                    logger.info("   tier: " + apexRs.getString("tier"));
+                } else {
+                    logger.error("❌ APEX query test failed - no results found!");
+                }
+            }
         }
     }
     

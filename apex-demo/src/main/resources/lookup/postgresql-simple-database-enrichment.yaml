@@ -1,10 +1,11 @@
-type: "apex-enrichment-config"
-name: "Simple PostgreSQL Database Enrichment Demo"
+metadata:
+  name: "Simple PostgreSQL Database Enrichment Demo"
   version: "1.0.0"
-  type: "rule-config"
   description: "Simple customer profile enrichment using H2 database (PostgreSQL mode) with real SQL queries"
-  author: "APEX Demo Team"
-  created: "2025-08-28"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "lookup", "database", "postgresql"]
 
 # External data source configuration for H2 database
 data-sources:

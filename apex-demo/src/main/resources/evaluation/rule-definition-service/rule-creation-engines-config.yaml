@@ -2,9 +2,14 @@
 # External data source configuration for rule creation engines
 # Replaces hardcoded rule creation logic from RuleDefinitionServiceDemo
 
-type: "external-data-config"
-name: "rule-creation-engines-config"
-description: "Data-driven rule creation engines configuration for rule definition service"
+metadata:
+  name: "Rule Creation Engines Configuration"
+  version: "1.0.0"
+  description: "Data-driven rule creation engines configuration for rule definition service"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "rule-definition-service", "rule-creation-engines"]
 
 # Rule creation engines configuration by engine type
 data:

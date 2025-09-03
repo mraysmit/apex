@@ -2,9 +2,14 @@
 # External data source configuration for scenario files analysis
 # Replaces hardcoded scenario file arrays from YamlDependencyAnalysisDemo
 
-type: "external-data-config"
-name: "scenario-files-config"
-description: "Data-driven scenario files configuration for dependency analysis"
+metadata:
+  name: "Scenario Files Configuration"
+  version: "1.0.0"
+  description: "Data-driven scenario files configuration for dependency analysis"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "util", "dependency-analysis", "scenario-files"]
 
 # Scenario files configuration by file type
 data:

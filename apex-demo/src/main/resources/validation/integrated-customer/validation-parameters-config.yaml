@@ -2,9 +2,14 @@
 # External data source configuration for validation parameters processing
 # Replaces hardcoded validation parameters from IntegratedCustomerValidatorDemo
 
-type: "external-data-config"
-name: "validation-parameters-config"
-description: "Data-driven validation parameters configuration for integrated customer validation processing"
+metadata:
+  name: "Validation Parameters Configuration"
+  version: "1.0.0"
+  description: "Data-driven validation parameters configuration for integrated customer validation processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "integrated-customer", "validation-parameters"]
 
 # Validation parameters configuration by parameter type
 data:

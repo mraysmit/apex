@@ -2,12 +2,15 @@
 # Test data scenarios for SimplifiedAPIDemo.java
 # NO HARDCODED SIMULATION - Real APEX data processing
 
-type: "apex-enrichment-config"
-name: "Simplified API Demo Data"
-  version: "2.0"
+metadata:
+  name: "Simplified API Demo Data"
+  version: "2.0.0"
   description: "Test data scenarios for real APEX simplified API demonstration"
-  author: "APEX Demo Team"
-  created: "2025-01-29"
+  type: "dataset"
+  author: "apex.demo.team@company.com"
+  source: "APEX Demo Data Generator"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "simplified-api", "test-data"]
 
 # Ultra-Simple API Test Scenarios
 ultra-simple-scenarios:

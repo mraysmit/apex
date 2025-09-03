@@ -2,9 +2,14 @@
 # External data source configuration for scenario routing
 # Replaces hardcoded scenario routing logic from ScenarioBasedProcessingDemo
 
-type: "external-data-config"
-name: "scenario-routing-config"
-description: "Data-driven scenario routing configuration for processing"
+metadata:
+  name: "Scenario Routing Configuration"
+  version: "1.0.0"
+  description: "Data-driven scenario routing configuration for processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "scenario-processing", "scenario-routing"]
 
 # Scenario routing configuration by routing type
 data:

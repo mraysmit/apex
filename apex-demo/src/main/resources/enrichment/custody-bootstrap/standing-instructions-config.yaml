@@ -2,14 +2,14 @@
 # External data source configuration for standing instructions processing
 # Replaces hardcoded standing instruction creation from CustodyAutoRepairBootstrap
 
-type: "apex-enrichment-config"
-name: "Standing Instructions Configuration"
+metadata:
+  name: "Standing Instructions Configuration"
   version: "2.0.0"
   description: "Data-driven standing instructions configuration for custody auto-repair processing"
   type: "external-data-config"
-  author: "Mark Andrew Ray-Smith Cityline Ltd"
-  created-date: "2025-09-01"
-  domain: "Custody and Safekeeping"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  business-domain: "Custody and Safekeeping"
   tags: ["standing-instructions", "custody", "auto-repair", "external-data"]
 
 # Standing instructions configuration by instruction type

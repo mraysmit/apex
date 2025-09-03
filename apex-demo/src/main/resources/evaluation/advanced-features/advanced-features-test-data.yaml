@@ -2,9 +2,14 @@
 # External data source configuration for advanced features testing
 # Replaces hardcoded test data from ApexAdvancedFeaturesDemo
 
-type: "external-data-config"
-name: "advanced-features-test-data"
-description: "Comprehensive test data for advanced features demonstration"
+metadata:
+  name: "Advanced Features Test Data"
+  version: "1.0.0"
+  description: "Comprehensive test data for advanced features demonstration"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "advanced-features", "test-data"]
 
 # Sample data for advanced features testing
 data:

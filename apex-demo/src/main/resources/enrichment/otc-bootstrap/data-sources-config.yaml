@@ -2,9 +2,14 @@
 # External data source configuration for data sources integration
 # Replaces hardcoded data source logic from OtcOptionsBootstrapDemo
 
-type: "external-data-config"
-name: "data-sources-config"
-description: "Data-driven data sources configuration for OTC options processing"
+metadata:
+  name: "Data Sources Configuration"
+  version: "1.0.0"
+  description: "Data-driven data sources configuration for OTC options processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "enrichment", "data-sources", "external-data"]
 
 # Data sources configuration by source type
 data:

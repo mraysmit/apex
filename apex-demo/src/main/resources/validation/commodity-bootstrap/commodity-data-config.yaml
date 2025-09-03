@@ -2,9 +2,14 @@
 # External data source configuration for commodity data processing
 # Replaces embedded commodity data from CommoditySwapValidationBootstrap
 
-type: "external-data-config"
-name: "commodity-data-config"
-description: "Data-driven commodity data configuration for commodity swap processing"
+metadata:
+  name: "Commodity Data Configuration"
+  version: "1.0.0"
+  description: "Data-driven commodity data configuration for commodity swap processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "commodity-bootstrap", "commodity-data"]
 
 # Commodity data configuration by commodity type
 data:

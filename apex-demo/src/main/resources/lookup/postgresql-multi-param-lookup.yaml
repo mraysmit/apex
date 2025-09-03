@@ -2,12 +2,14 @@
 # Demonstrates complex database data source with multiple parameters and advanced SQL queries
 # Use Case: Trade settlement instruction data source for multi-parameter lookups
 
-type: "apex-enrichment-config"
-name: "Self-Contained Database Multi-Parameter Data Source Demo"
-  description: "Data source configuration for complex database lookups with multiple parameters using embedded H2 database"
+metadata:
+  name: "Self-Contained Database Multi-Parameter Data Source Demo"
   version: "1.0.0"
+  description: "Data source configuration for complex database lookups with multiple parameters using embedded H2 database"
   type: "external-data-config"
-  author: "APEX Demo Team"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "lookup", "database", "multi-parameter"]
 
 # External data source configuration
 dataSources:

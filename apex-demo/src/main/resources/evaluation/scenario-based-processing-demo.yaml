@@ -2,9 +2,16 @@
 # Real APEX YAML configuration for scenario-based processing
 # Replaces all hardcoded scenario processing logic from ScenarioBasedProcessingDemo (@since 1.0.0)
 
-type: "apex-enrichment-config"
-name: "scenario-based-processing-demo"
-description: "APEX-compliant scenario-based processing with real enrichment services"
+metadata:
+  name: "Scenario-Based Processing Demo"
+  version: "1.0.0"
+  description: "APEX-compliant scenario-based processing with real enrichment services"
+  type: "scenario"
+  author: "apex.demo.team@company.com"
+  business-domain: "Scenario Processing"
+  owner: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "scenario-processing"]
 
 # External data source for scenario processing configurations
 external-data-sources:

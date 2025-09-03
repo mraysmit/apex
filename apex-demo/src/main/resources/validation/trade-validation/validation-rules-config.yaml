@@ -2,9 +2,14 @@
 # External data source configuration for validation rules
 # Replaces hardcoded validation rule logic from IntegratedTradeValidatorComplexDemo
 
-type: "external-data-config"
-name: "validation-rules-config"
-description: "Data-driven validation rules configuration for complex trade validation"
+metadata:
+  name: "Validation Rules Configuration"
+  version: "1.0.0"
+  description: "Data-driven validation rules configuration for complex trade validation"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "trade-validation", "validation-rules"]
 
 # Validation rules configuration by rule type
 data:

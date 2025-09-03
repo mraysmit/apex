@@ -2,9 +2,14 @@
 # External data source configuration for risk calculation engines
 # Replaces hardcoded risk calculation logic from RiskManagementService
 
-type: "external-data-config"
-name: "risk-calculation-engines-config"
-description: "Data-driven risk calculation engines configuration for risk management service"
+metadata:
+  name: "Risk Calculation Engines Configuration"
+  version: "1.0.0"
+  description: "Data-driven risk calculation engines configuration for risk management service"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "risk-management", "risk-calculation-engines"]
 
 # Risk calculation engines configuration by engine type
 data:

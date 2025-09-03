@@ -2,9 +2,14 @@
 # External data source configuration for compliance service
 # Replaces hardcoded compliance logic from DynamicMethodExecutionDemo
 
-type: "external-data-config"
-name: "compliance-service-config"
-description: "Data-driven compliance service configuration for dynamic method execution"
+metadata:
+  name: "Compliance Service Configuration"
+  version: "1.0.0"
+  description: "Data-driven compliance service configuration for dynamic method execution"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "dynamic-execution", "compliance-service"]
 
 # Applicable regulations by trade type
 data:

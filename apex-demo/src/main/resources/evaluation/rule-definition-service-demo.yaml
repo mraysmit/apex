@@ -2,9 +2,14 @@
 # Real APEX YAML configuration for rule definition service
 # Replaces all hardcoded rule definition service logic from RuleDefinitionServiceDemo (@version 1.0)
 
-type: "apex-enrichment-config"
-name: "rule-definition-service-demo"
-description: "APEX-compliant rule definition service with real enrichment services"
+metadata:
+  name: "Rule Definition Service Demo"
+  version: "1.0.0"
+  description: "APEX-compliant rule definition service with real enrichment services"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "rule-definition-service"]
 
 # External data source for rule definition service configurations
 external-data-sources:

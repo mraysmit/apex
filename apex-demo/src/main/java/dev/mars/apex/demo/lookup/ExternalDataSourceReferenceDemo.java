@@ -8,6 +8,7 @@ import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
@@ -35,15 +36,20 @@ public class ExternalDataSourceReferenceDemo {
     
     private static final Logger logger = LoggerFactory.getLogger(ExternalDataSourceReferenceDemo.class);
     
-    private final YamlConfigurationLoader configLoader;
-    private final EnrichmentService enrichmentService;
-    private final LookupServiceRegistry serviceRegistry;
+    private YamlConfigurationLoader configLoader;
+    private EnrichmentService enrichmentService;
+    private LookupServiceRegistry serviceRegistry;
 
     public ExternalDataSourceReferenceDemo() {
+        // Initialize database FIRST, then APEX services
+        logger.info("ExternalDataSourceReferenceDemo initializing...");
+    }
+
+    private void initializeApexServices() {
         this.configLoader = new YamlConfigurationLoader();
         this.serviceRegistry = new LookupServiceRegistry();
         this.enrichmentService = new EnrichmentService(serviceRegistry, new ExpressionEvaluatorService());
-        logger.info("ExternalDataSourceReferenceDemo initialized with APEX services");
+        logger.info("APEX services initialized after database setup");
     }
     
     public static void main(String[] args) {
@@ -57,9 +63,12 @@ public class ExternalDataSourceReferenceDemo {
         logger.info("====================================================================================");
         
         try {
-            // Initialize database
+            // Initialize database FIRST
             initializeDatabase();
-            
+
+            // Initialize APEX services AFTER database is ready
+            initializeApexServices();
+
             // Demo 1: Customer Profile Enrichment with External Reference
             demonstrateCustomerProfileEnrichment();
             
@@ -78,14 +87,29 @@ public class ExternalDataSourceReferenceDemo {
     private void initializeDatabase() throws Exception {
         logger.info("Initializing H2 database with shared access...");
         
-        // Create H2 database connection
+        // Load H2 driver explicitly
+        try {
+            Class.forName("org.h2.Driver");
+        } catch (ClassNotFoundException e) {
+            logger.error("H2 driver not found: " + e.getMessage());
+            throw new RuntimeException("H2 driver not available", e);
+        }
+
+        // Use the exact same JDBC URL as the working demo and YAML configuration
         String jdbcUrl = "jdbc:h2:mem:apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+        logger.info("JDBC URL: " + jdbcUrl);
         try (Connection connection = DriverManager.getConnection(jdbcUrl, "sa", "")) {
             Statement statement = connection.createStatement();
-            
+
+            // Clean up existing tables first
+            statement.execute("DROP TABLE IF EXISTS risk_assessments");
+            statement.execute("DROP TABLE IF EXISTS settlement_instructions");
+            statement.execute("DROP TABLE IF EXISTS counterparties");
+            statement.execute("DROP TABLE IF EXISTS customers");
+
             // Create customers table
             statement.execute("""
-                CREATE TABLE IF NOT EXISTS customers (
+                CREATE TABLE customers (
                     customer_id VARCHAR(20) PRIMARY KEY,
                     customer_name VARCHAR(100) NOT NULL,
                     customer_type VARCHAR(20) NOT NULL,
@@ -109,7 +133,7 @@ public class ExternalDataSourceReferenceDemo {
             
             // Create counterparties table
             statement.execute("""
-                CREATE TABLE IF NOT EXISTS counterparties (
+                CREATE TABLE counterparties (
                     counterparty_id VARCHAR(20) PRIMARY KEY,
                     counterparty_name VARCHAR(100) NOT NULL,
                     counterparty_type VARCHAR(20) NOT NULL,
@@ -128,8 +152,59 @@ public class ExternalDataSourceReferenceDemo {
                 ('CP_CITI', 'Citigroup', 'COMMERCIAL_BANK', 'A-', 'ACTIVE', '2023-01-01'),
                 ('CP_BOA', 'Bank of America', 'COMMERCIAL_BANK', 'A', 'ACTIVE', '2023-01-01')
             """);
-            
-            logger.info("Database initialized successfully with customer and counterparty data");
+
+            // Create settlement_instructions table
+            statement.execute("""
+                CREATE TABLE settlement_instructions (
+                    instruction_id VARCHAR(20) PRIMARY KEY,
+                    counterparty_id VARCHAR(20) NOT NULL,
+                    custodian_name VARCHAR(100),
+                    custodian_bic VARCHAR(20),
+                    settlement_method VARCHAR(20),
+                    delivery_instruction VARCHAR(100),
+                    market_name VARCHAR(50),
+                    settlement_cycle INTEGER,
+                    created_date DATE NOT NULL,
+                    FOREIGN KEY (counterparty_id) REFERENCES counterparties(counterparty_id)
+                )
+            """);
+
+            // Insert settlement instruction data
+            statement.execute("""
+                INSERT INTO settlement_instructions (instruction_id, counterparty_id, custodian_name, custodian_bic, settlement_method, delivery_instruction, market_name, settlement_cycle, created_date) VALUES
+                ('SI_GS_001', 'CP_GS', 'Goldman Sachs Custody', 'GSCCUS33', 'DVP', 'Free of Payment', 'NYSE', 3, '2023-01-01'),
+                ('SI_MS_001', 'CP_MS', 'Morgan Stanley Custody', 'MSINUS33', 'DVP', 'Against Payment', 'NASDAQ', 2, '2023-01-01'),
+                ('SI_JPM_001', 'CP_JPM', 'JPMorgan Custody', 'CHASUS33', 'RVP', 'Free of Payment', 'NYSE', 3, '2023-01-01'),
+                ('SI_CITI_001', 'CP_CITI', 'Citibank Custody', 'CITIUS33', 'DVP', 'Against Payment', 'NYSE', 2, '2023-01-01'),
+                ('SI_BOA_001', 'CP_BOA', 'Bank of America Custody', 'BOFAUS3N', 'DVP', 'Free of Payment', 'NASDAQ', 3, '2023-01-01')
+            """);
+
+            // Create risk_assessments table
+            statement.execute("""
+                CREATE TABLE risk_assessments (
+                    assessment_id VARCHAR(20) PRIMARY KEY,
+                    counterparty_id VARCHAR(20) NOT NULL,
+                    risk_category VARCHAR(20),
+                    risk_score DECIMAL(5,2),
+                    max_exposure DECIMAL(15,2),
+                    approval_required BOOLEAN,
+                    monitoring_level VARCHAR(20),
+                    assessment_date DATE NOT NULL,
+                    FOREIGN KEY (counterparty_id) REFERENCES counterparties(counterparty_id)
+                )
+            """);
+
+            // Insert risk assessment data
+            statement.execute("""
+                INSERT INTO risk_assessments (assessment_id, counterparty_id, risk_category, risk_score, max_exposure, approval_required, monitoring_level, assessment_date) VALUES
+                ('RA_GS_001', 'CP_GS', 'LOW', 2.5, 1000000000.00, false, 'STANDARD', '2023-01-01'),
+                ('RA_MS_001', 'CP_MS', 'LOW', 3.0, 800000000.00, false, 'STANDARD', '2023-01-01'),
+                ('RA_JPM_001', 'CP_JPM', 'LOW', 2.0, 1200000000.00, false, 'STANDARD', '2023-01-01'),
+                ('RA_CITI_001', 'CP_CITI', 'MEDIUM', 4.5, 600000000.00, true, 'ENHANCED', '2023-01-01'),
+                ('RA_BOA_001', 'CP_BOA', 'LOW', 3.5, 900000000.00, false, 'STANDARD', '2023-01-01')
+            """);
+
+            logger.info("Database initialized successfully with customer, counterparty, settlement instruction, and risk assessment data");
         }
     }
     

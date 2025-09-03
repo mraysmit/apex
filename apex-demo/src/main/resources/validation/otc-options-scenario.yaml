@@ -1,3 +1,14 @@
+metadata:
+  name: "OTC Options Processing Scenario"
+  version: "1.0.0"
+  description: "Scenario configuration that associates OTC Options data types with existing rule configuration files for processing"
+  type: "scenario"
+  author: "apex.demo.team@company.com"
+  business-domain: "OTC Options Processing"
+  owner: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "otc-options", "scenario"]
+
 # ============================================================================
 # OTC OPTIONS PROCESSING SCENARIO
 # ============================================================================
@@ -11,14 +22,6 @@
 # - Lightweight routing configuration
 #
 # ============================================================================
-
-type: "apex-enrichment-config"
-name: "OTC Options Processing Scenario"
-  version: "1.0.0"
-  description: "Associates OTC Options with existing rule configurations"
-  type: "scenario"
-  business-domain: "Derivatives Trading"
-  owner: "derivatives.team@company.com"
 
 # ============================================================================
 # SCENARIO CONFIGURATION

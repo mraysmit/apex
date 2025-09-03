@@ -2,14 +2,14 @@
 # Real APEX YAML configuration for compliance processing
 # Replaces all hardcoded compliance logic from ComplianceServiceDemo (@version 1.0)
 
-type: "apex-enrichment-config"
-name: "Compliance Service Demo"
+metadata:
+  name: "Compliance Service Demo"
   version: "2.0.0"
   description: "APEX-compliant compliance service processing with real enrichment services"
-  type: "apex-enrichment-config"
-  author: "Mark Andrew Ray-Smith Cityline Ltd"
-  created-date: "2025-09-01"
-  domain: "Financial Compliance"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  business-domain: "Financial Compliance"
   tags: ["compliance", "demo", "enrichment", "financial-services"]
 
 # External data source for regulatory requirements

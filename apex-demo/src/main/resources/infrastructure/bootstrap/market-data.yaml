@@ -11,13 +11,15 @@
 #
 # ============================================================================
 
-type: "apex-enrichment-config"
-name: "Market Data Reference Dataset"
-  type: "dataset"
+metadata:
+  name: "Market Data Reference Dataset"
   version: "1.0.0"
-  description: "Currency and market reference data for OTC Options processing"
-  created-date: "2025-08-02"
-  source: "OTC Options Bootstrap Demo Generator"
+  description: "External YAML dataset containing currency and market reference data for OTC Options Bootstrap Demo enrichment processing"
+  type: "dataset"
+  author: "apex.demo.team@company.com"
+  source: "APEX Demo Data Generator"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "infrastructure", "bootstrap", "market-data"]
   coverage: "Major trading currencies and market data"
 
 # Currency reference data with trading and market information

@@ -2,12 +2,14 @@
 # Real APEX YAML configuration for LayeredAPIDemo.java
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
-type: "apex-enrichment-config"
-name: "Layered API Demo Configuration"
-  version: "2.0"
+metadata:
+  name: "Layered API Demo Configuration"
+  version: "2.0.0"
   description: "Real APEX layered API demonstration with Layer 1 simple validation, Layer 2 business rule management, and Layer 3 advanced features"
-  author: "APEX Demo Team"
-  created: "2025-01-29"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "layered-api"]
 
 # Layer 1: Simple Validation Enrichments
 enrichments:

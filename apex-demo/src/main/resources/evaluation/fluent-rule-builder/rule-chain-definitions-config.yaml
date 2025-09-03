@@ -2,9 +2,14 @@
 # External data source configuration for rule chain definitions
 # Replaces hardcoded rule chain building logic from FluentRuleBuilderExample
 
-type: "external-data-config"
-name: "rule-chain-definitions-config"
-description: "Data-driven rule chain definitions configuration for fluent rule builder processing"
+metadata:
+  name: "Rule Chain Definitions Configuration"
+  version: "1.0.0"
+  description: "Data-driven rule chain definitions configuration for fluent rule builder processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "fluent-rule-builder", "rule-chain-definitions"]
 
 # Rule chain definitions configuration by chain type
 data:

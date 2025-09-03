@@ -2,9 +2,14 @@
 # External data source configuration for transformer rules processing
 # Replaces hardcoded transformer rule creation from CustomerTransformerDemo
 
-type: "external-data-config"
-name: "transformer-rules-config"
-description: "Data-driven transformer rules configuration for customer transformation processing"
+metadata:
+  name: "Transformer Rules Configuration"
+  version: "1.0.0"
+  description: "Data-driven transformer rules configuration for customer transformation processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "enrichment", "transformer-rules", "external-data"]
 
 # Transformer rules configuration by rule type
 data:

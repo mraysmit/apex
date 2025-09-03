@@ -2,9 +2,14 @@
 # External data source configuration for combined business rules processing
 # Replaces hardcoded combined processing logic from RuleConfigurationBootstrap
 
-type: "external-data-config"
-name: "combined-business-rules"
-description: "Combined business rules for comprehensive bootstrap demonstration"
+metadata:
+  name: "Combined Business Rules"
+  version: "1.0.0"
+  description: "Combined business rules for comprehensive bootstrap demonstration"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "bootstrap-comprehensive", "business-rules"]
 
 # Combined business rules by entity type
 data:

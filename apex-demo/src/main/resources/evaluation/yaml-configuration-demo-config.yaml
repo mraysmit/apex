@@ -2,12 +2,14 @@
 # Real APEX YAML configuration for YamlConfigurationDemo.java
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
-type: "apex-enrichment-config"
-name: "YAML Configuration Demo Configuration"
-  version: "2.0"
+metadata:
+  name: "YAML Configuration Demo Configuration"
+  version: "2.0.0"
   description: "Real APEX YAML configuration demonstration with external configuration, business user-editable rules, and dynamic configuration loading"
-  author: "APEX Demo Team"
-  created: "2025-01-29"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "yaml-configuration"]
 
 # External YAML Configuration Enrichments
 enrichments:

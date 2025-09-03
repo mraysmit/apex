@@ -1,3 +1,12 @@
+metadata:
+  name: "File Processing Rules Configuration"
+  version: "1.0.0"
+  description: "Comprehensive file processing pipeline using APEX Rules Engine for customer data validation and enrichment"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "transformation", "file-processing"]
+
 # ============================================================================
 # APEX Rules Engine - File Processing Configuration
 # ============================================================================
@@ -60,13 +69,6 @@
 # - Batch processing with configurable sizes and limits
 #
 # ============================================================================
-
-metadata:
-  name: "File Processing Rules"
-  version: "1.0.0"
-  description: "Validation and enrichment rules for JSON/XML customer data"
-  type: "rule-config"
-  author: "APEX Demo Team"
 
 # ============================================================================
 # VALIDATION RULES SECTION

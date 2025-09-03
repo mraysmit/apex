@@ -2,9 +2,14 @@
 # Real APEX YAML configuration for pricing service
 # Replaces all hardcoded pricing service logic from PricingServiceDemo (@version 1.0)
 
-type: "apex-enrichment-config"
-name: "pricing-service-demo"
-description: "APEX-compliant pricing service with real enrichment services"
+metadata:
+  name: "Pricing Service Demo"
+  version: "1.0.0"
+  description: "APEX-compliant pricing service with real enrichment services"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "pricing-service"]
 
 # External data source for pricing service configurations
 external-data-sources:

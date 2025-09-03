@@ -1,3 +1,14 @@
+metadata:
+  name: "Commodity Swaps Processing Scenario"
+  version: "1.0.0"
+  description: "Scenario configuration that associates Commodity Swap data types with existing rule configuration files for processing"
+  type: "scenario"
+  author: "apex.demo.team@company.com"
+  business-domain: "Commodity Swaps Processing"
+  owner: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "commodity-swaps", "scenario"]
+
 # ============================================================================
 # COMMODITY SWAPS PROCESSING SCENARIO
 # ============================================================================
@@ -11,14 +22,6 @@
 # - Lightweight routing configuration
 #
 # ============================================================================
-
-type: "apex-enrichment-config"
-name: "Commodity Swaps Processing Scenario"
-  version: "1.0.0"
-  description: "Associates commodity swaps with existing rule configurations"
-  type: "scenario"
-  business-domain: "Commodity Derivatives"
-  owner: "commodity.trading@company.com"
 
 # ============================================================================
 # SCENARIO CONFIGURATION

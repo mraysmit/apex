@@ -2,9 +2,14 @@
 # External data source configuration for product samples processing
 # Replaces hardcoded product sample creation from IntegratedProductValidatorDemo
 
-type: "external-data-config"
-name: "product-samples-config"
-description: "Data-driven product samples configuration for integrated product validation processing"
+metadata:
+  name: "Product Samples Configuration"
+  version: "1.0.0"
+  description: "Data-driven product samples configuration for integrated product validation processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "integrated-product", "product-samples"]
 
 # Product samples configuration by sample type
 data:

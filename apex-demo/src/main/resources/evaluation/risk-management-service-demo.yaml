@@ -2,9 +2,14 @@
 # Real APEX YAML configuration for risk management service
 # Replaces all hardcoded risk management service logic from RiskManagementService (@version 1.0)
 
-type: "apex-enrichment-config"
-name: "risk-management-service-demo"
-description: "APEX-compliant risk management service with real enrichment services"
+metadata:
+  name: "Risk Management Service Demo"
+  version: "1.0.0"
+  description: "APEX-compliant risk management service with real enrichment services"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "risk-management"]
 
 # External data source for risk management service configurations
 external-data-sources:

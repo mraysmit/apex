@@ -2,9 +2,14 @@
 # External data source configuration for infrastructure setup
 # Replaces hardcoded infrastructure setup from RuleConfigurationBootstrap
 
-type: "external-data-config"
-name: "infrastructure-config"
-description: "Infrastructure configuration for comprehensive bootstrap demonstration"
+metadata:
+  name: "Infrastructure Configuration"
+  version: "1.0.0"
+  description: "Infrastructure configuration for comprehensive bootstrap demonstration"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "bootstrap-comprehensive", "infrastructure"]
 
 # Infrastructure components
 infrastructure-components:

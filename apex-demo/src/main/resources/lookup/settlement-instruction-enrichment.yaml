@@ -2,12 +2,14 @@
 # Demonstrates complex multi-parameter database lookup enrichment using APEX YAML processing
 # Use Case: Enrich trades with settlement instructions and risk assessment data from database
 
-type: "apex-enrichment-config"
-name: "Settlement Instruction Multi-Parameter Enrichment Demo - Database Version"
-  description: "Demonstrates complex multi-parameter database lookup enrichment using APEX YAML processing"
+metadata:
+  name: "Settlement Instruction Multi-Parameter Enrichment Demo - Database Version"
   version: "2.0.0"
-  type: "rule-config"
-  author: "APEX Demo Team"
+  description: "Demonstrates complex multi-parameter database lookup enrichment using APEX YAML processing"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "lookup", "settlement", "multi-parameter"]
 
 # Database configuration for settlement and risk data
 data-sources:
@@ -15,7 +17,7 @@ data-sources:
     type: "database"
     source-type: "h2"
     connection:
-      database: "apex_demo_shared"
+      url: "jdbc:h2:mem:apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
       username: "sa"
       password: ""
 
@@ -57,9 +59,9 @@ enrichments:
         parameters:
           - field: "counterpartyId"
             type: "string"
-      
-      # Field mappings from database columns to enriched object fields
-      field-mappings:
+
+    # Field mappings from database columns to enriched object fields
+    field-mappings:
         - source-field: "instruction_id"
           target-field: "settlementInstructionId"
         - source-field: "counterparty_name"

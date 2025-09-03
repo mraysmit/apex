@@ -2,9 +2,14 @@
 # External data source configuration for compliance rules
 # Replaces hardcoded rule creation from ComplianceServiceDemo
 
-type: "external-data-config"
-name: "compliance-rules"
-description: "Compliance rules for regulatory reporting requirements"
+metadata:
+  name: "Compliance Rules"
+  version: "1.0.0"
+  description: "Compliance rules for regulatory reporting requirements"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "compliance", "rules"]
 
 # Compliance rules by regulation
 data:

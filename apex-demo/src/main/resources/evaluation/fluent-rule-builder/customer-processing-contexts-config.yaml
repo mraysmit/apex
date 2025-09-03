@@ -2,9 +2,14 @@
 # External data source configuration for customer processing contexts
 # Replaces hardcoded Map.of context creation from FluentRuleBuilderExample
 
-type: "external-data-config"
-name: "customer-processing-contexts-config"
-description: "Data-driven customer processing contexts configuration for fluent rule builder processing"
+metadata:
+  name: "Customer Processing Contexts Configuration"
+  version: "1.0.0"
+  description: "Data-driven customer processing contexts configuration for fluent rule builder processing"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "fluent-rule-builder", "customer-processing-contexts"]
 
 # Customer processing contexts configuration by context type
 data:

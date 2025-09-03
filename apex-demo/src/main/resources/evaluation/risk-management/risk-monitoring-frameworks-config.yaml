@@ -2,9 +2,14 @@
 # External data source configuration for risk monitoring frameworks
 # Replaces hardcoded risk monitoring logic from RiskManagementService
 
-type: "external-data-config"
-name: "risk-monitoring-frameworks-config"
-description: "Data-driven risk monitoring frameworks configuration for risk management service"
+metadata:
+  name: "Risk Monitoring Frameworks Configuration"
+  version: "1.0.0"
+  description: "Data-driven risk monitoring frameworks configuration for risk management service"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "risk-management", "risk-monitoring-frameworks"]
 
 # Risk monitoring frameworks configuration by framework type
 data:

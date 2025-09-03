@@ -2,9 +2,14 @@
 # External data source configuration for trade processing workflows
 # Replaces hardcoded post-trade processing workflow logic from PostTradeProcessingServiceDemo
 
-type: "external-data-config"
-name: "trade-processing-workflows-config"
-description: "Data-driven trade processing workflows configuration for post-trade processing service"
+metadata:
+  name: "Trade Processing Workflows Configuration"
+  version: "1.0.0"
+  description: "Data-driven trade processing workflows configuration for post-trade processing service"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "post-trade-processing", "trade-processing-workflows"]
 
 # Trade processing workflows configuration by workflow type
 data:

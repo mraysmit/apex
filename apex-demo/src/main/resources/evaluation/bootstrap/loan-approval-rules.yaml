@@ -2,9 +2,14 @@
 # External data source configuration for loan approval rules
 # Replaces hardcoded loan approval logic from RuleConfigurationHardcodedBootstrap
 
-type: "external-data-config"
-name: "loan-approval-rules"
-description: "Data-driven loan approval rules for bootstrap demonstration"
+metadata:
+  name: "Loan Approval Rules"
+  version: "1.0.0"
+  description: "Data-driven loan approval rules for bootstrap demonstration"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "bootstrap", "loan-approval-rules"]
 
 # Loan approval rules by credit profile
 data:

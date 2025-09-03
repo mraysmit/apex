@@ -2,9 +2,14 @@
 # External data source configuration for trade record processors
 # Replaces hardcoded trade record processing logic from TradeRecordMatcherDemo
 
-type: "external-data-config"
-name: "trade-record-processors-config"
-description: "Data-driven trade record processors configuration for trade record matcher"
+metadata:
+  name: "Trade Record Processors Configuration"
+  version: "1.0.0"
+  description: "Data-driven trade record processors configuration for trade record matcher"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "evaluation", "trade-record-matcher", "trade-record-processors"]
 
 # Trade record processors configuration by processor type
 data:

@@ -2,9 +2,14 @@
 # External data source configuration for simple validation rules
 # Replaces hardcoded validation rule logic from IntegratedTradeValidatorDemo
 
-type: "external-data-config"
-name: "validation-rules-simple-config"
-description: "Data-driven simple validation rules configuration for integrated trade validation"
+metadata:
+  name: "Validation Rules Simple Configuration"
+  version: "1.0.0"
+  description: "Data-driven simple validation rules configuration for integrated trade validation"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "validation", "trade-validation-simple", "validation-rules-simple"]
 
 # Validation rules configuration by rule type
 data:
@@ -217,20 +222,20 @@ execution-patterns:
 
 # Rule groups
 rule-groups:
-  critical-rules:
-    group-name: "Critical Validation Rules"
+  - id: "critical-rules"
+    name: "Critical Validation Rules"
     description: "Rules that must pass for trade to be valid"
     severity-levels: ["CRITICAL", "ERROR"]
     stop-on-failure: true
-    
-  warning-rules:
-    group-name: "Warning Validation Rules"
+
+  - id: "warning-rules"
+    name: "Warning Validation Rules"
     description: "Rules that generate warnings but don't fail validation"
     severity-levels: ["WARNING"]
     stop-on-failure: false
-    
-  comprehensive-rules:
-    group-name: "Comprehensive Validation Rules"
+
+  - id: "comprehensive-rules"
+    name: "Comprehensive Validation Rules"
     description: "All validation rules for complete trade validation"
     severity-levels: ["CRITICAL", "ERROR", "WARNING", "INFO"]
     stop-on-failure: false
