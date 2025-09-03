@@ -3,6 +3,7 @@
 # Replaces hardcoded business rules logic from PostTradeProcessingServiceDemo
 
 metadata:
+  id: "Post-Trade Business Rules Configuration"
   name: "Post-Trade Business Rules Configuration"
   version: "1.0.0"
   description: "Data-driven post-trade business rules configuration for post-trade processing service"

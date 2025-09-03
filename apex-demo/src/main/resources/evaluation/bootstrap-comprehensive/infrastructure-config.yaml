@@ -3,6 +3,7 @@
 # Replaces hardcoded infrastructure setup from RuleConfigurationBootstrap
 
 metadata:
+  id: "Infrastructure Configuration"
   name: "Infrastructure Configuration"
   version: "1.0.0"
   description: "Infrastructure configuration for comprehensive bootstrap demonstration"

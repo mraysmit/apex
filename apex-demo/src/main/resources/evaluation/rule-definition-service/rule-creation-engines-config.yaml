@@ -3,6 +3,7 @@
 # Replaces hardcoded rule creation logic from RuleDefinitionServiceDemo
 
 metadata:
+  id: "Rule Creation Engines Configuration"
   name: "Rule Creation Engines Configuration"
   version: "1.0.0"
   description: "Data-driven rule creation engines configuration for rule definition service"

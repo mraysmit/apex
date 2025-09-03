@@ -3,6 +3,7 @@
 # Use Case: Risk-based loan assessment with conditional credit score categorization
 
 metadata:
+  id: "Conditional Expression Lookup Demo"
   name: "Conditional Expression Lookup Demo"
   version: "1.0.0"
   description: "Demonstrates conditional expression lookup using credit score-based risk categorization"

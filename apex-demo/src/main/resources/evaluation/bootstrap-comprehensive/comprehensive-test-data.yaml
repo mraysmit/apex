@@ -3,6 +3,7 @@
 # Replaces hardcoded test data from RuleConfigurationBootstrap
 
 metadata:
+  id: "Comprehensive Test Data"
   name: "Comprehensive Test Data"
   version: "1.0.0"
   description: "Comprehensive test data scenarios for bootstrap demonstration"

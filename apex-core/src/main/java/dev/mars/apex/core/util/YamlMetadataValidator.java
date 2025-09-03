@@ -56,8 +56,9 @@ public class YamlMetadataValidator {
     
     // Required metadata fields for all YAML files
     private static final Set<String> REQUIRED_METADATA_FIELDS = Set.of(
+        "id",
         "name",
-        "version", 
+        "version",
         "description",
         "type"
     );

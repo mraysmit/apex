@@ -3,6 +3,7 @@
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
 metadata:
+  id: "YAML Dataset Demo Configuration"
   name: "YAML Dataset Demo Configuration"
   version: "2.0.0"
   description: "Real APEX YAML dataset demonstration with inline datasets, field mappings, and conditional processing"

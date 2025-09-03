@@ -3,6 +3,7 @@
 # Replaces hardcoded settlement operations logic from PostTradeProcessingServiceDemo
 
 metadata:
+  id: "Settlement Operations Configuration"
   name: "Settlement Operations Configuration"
   version: "1.0.0"
   description: "Data-driven settlement operations configuration for post-trade processing service"

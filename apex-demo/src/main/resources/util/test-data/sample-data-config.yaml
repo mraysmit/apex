@@ -3,6 +3,7 @@
 # Replaces hardcoded sample data creation from TestUtilities
 
 metadata:
+  id: "Sample Data Configuration"
   name: "Sample Data Configuration"
   version: "1.0.0"
   description: "Data-driven sample data configuration for test utilities"

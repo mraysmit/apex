@@ -6,6 +6,7 @@
 # ============================================================================
 
 metadata:
+  id: "Bootstrap Demo - Customer Profiles Dataset"
   name: "Bootstrap Demo - Customer Profiles Dataset"
   version: "1.0.0"
   description: "Realistic customer profiles for financial services demonstrations (used by DemoDataBootstrap.java and multiple bootstrap demos)"

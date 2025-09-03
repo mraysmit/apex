@@ -136,14 +136,75 @@ class JdbcTemplateFactoryTest {
     void testH2InMemoryJdbcUrl() throws DataSourceException, SQLException {
         DataSourceConfiguration config = createH2Configuration();
         config.getConnection().setHost(null); // Null host indicates in-memory
-        
+
         DataSource dataSource = JdbcTemplateFactory.createDataSource(config);
         assertNotNull(dataSource);
-        
+
         // Verify it's actually an in-memory database
         try (Connection connection = dataSource.getConnection()) {
             String url = connection.getMetaData().getURL();
             assertTrue(url.contains("jdbc:h2:mem:"));
+        }
+    }
+
+    @Test
+    @DisplayName("Should build H2 file-based JDBC URL correctly")
+    void testH2FileBasedJdbcUrl() throws DataSourceException, SQLException {
+        DataSourceConfiguration config = createH2Configuration();
+        config.getConnection().setHost(null);
+        config.getConnection().setDatabase("./target/test-h2/testdb");
+
+        DataSource dataSource = JdbcTemplateFactory.createDataSource(config);
+        assertNotNull(dataSource);
+
+        // Verify connection works and database path is correct
+        try (Connection connection = dataSource.getConnection()) {
+            String url = connection.getMetaData().getURL();
+            // H2 connection metadata URL doesn't include parameters, but should contain the database path
+            assertTrue(url.contains("jdbc:h2:./target/test-h2/testdb"), "URL should contain database path");
+
+            // Verify the connection is working by executing a simple query
+            assertNotNull(connection.createStatement().executeQuery("SELECT 1"));
+        }
+    }
+
+    @Test
+    @DisplayName("Should support custom H2 parameters in database field")
+    void testH2CustomParameters() throws DataSourceException, SQLException {
+        DataSourceConfiguration config = createH2Configuration();
+        config.getConnection().setHost(null);
+        config.getConnection().setDatabase("./target/test-h2/custom;MODE=MySQL;TRACE_LEVEL_FILE=4");
+
+        DataSource dataSource = JdbcTemplateFactory.createDataSource(config);
+        assertNotNull(dataSource);
+
+        // Verify connection works with custom parameters
+        try (Connection connection = dataSource.getConnection()) {
+            String url = connection.getMetaData().getURL();
+            assertTrue(url.contains("jdbc:h2:./target/test-h2/custom"), "URL should contain custom database path");
+
+            // Verify the connection is working by executing a simple query
+            assertNotNull(connection.createStatement().executeQuery("SELECT 1"));
+        }
+    }
+
+    @Test
+    @DisplayName("Should support H2 in-memory with custom parameters")
+    void testH2InMemoryCustomParameters() throws DataSourceException, SQLException {
+        DataSourceConfiguration config = createH2Configuration();
+        config.getConnection().setHost(null);
+        config.getConnection().setDatabase("mem:customtest;TRACE_LEVEL_SYSTEM_OUT=2;MODE=Oracle");
+
+        DataSource dataSource = JdbcTemplateFactory.createDataSource(config);
+        assertNotNull(dataSource);
+
+        // Verify connection works with custom in-memory parameters
+        try (Connection connection = dataSource.getConnection()) {
+            String url = connection.getMetaData().getURL();
+            assertTrue(url.contains("jdbc:h2:mem:customtest"), "URL should contain custom in-memory database name");
+
+            // Verify the connection is working by executing a simple query
+            assertNotNull(connection.createStatement().executeQuery("SELECT 1"));
         }
     }
 

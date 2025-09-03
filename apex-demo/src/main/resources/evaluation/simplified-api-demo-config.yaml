@@ -3,6 +3,7 @@
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
 metadata:
+  id: "Simplified API Demo Configuration"
   name: "Simplified API Demo Configuration"
   version: "2.0.0"
   description: "Real APEX simplified API demonstration with ultra-simple processing, one-liner rule evaluations, and template-based validation"

@@ -3,6 +3,7 @@
 # Replaces embedded commodity data from CommoditySwapValidationBootstrap
 
 metadata:
+  id: "Commodity Data Configuration"
   name: "Commodity Data Configuration"
   version: "1.0.0"
   description: "Data-driven commodity data configuration for commodity swap processing"

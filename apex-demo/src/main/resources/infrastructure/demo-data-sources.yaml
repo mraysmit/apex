@@ -1,4 +1,5 @@
 metadata:
+  id: "Demo Data Sources Configuration"
   name: "Demo Data Sources Configuration"
   version: "1.0.0"
   description: "Production data sources for APEX demo scenarios with proper ExternalDataSource implementations"
@@ -24,9 +25,10 @@ metadata:
 #
 # ============================================================================
 
-type: "apex-enrichment-config"
-name: "APEX Demo Data Sources Configuration"
-  type: "rule-config"
+# Configuration details
+configuration:
+  type: "apex-enrichment-config"
+  name: "APEX Demo Data Sources Configuration"
   version: "2.0.0"
   description: "Production data source configurations for APEX demonstrations"
   author: "apex-demo-team@company.com"
@@ -162,8 +164,8 @@ data-sources:
     description: "Demo database for advanced data source scenarios"
     
     connection:
-      url: "jdbc:h2:mem:apex-demo;DB_CLOSE_DELAY=-1"
-      driver-class: "org.h2.Driver"
+      # H2 file-based database for true sharing between demo and APEX
+      database: "./target/h2-demo/apex_demo_shared"
       username: "sa"
       password: ""
       
@@ -314,14 +316,14 @@ environments:
       demo-database:
         enabled: true
         connection:
-          url: "jdbc:h2:mem:apex-demo-dev;DB_CLOSE_DELAY=-1"
-          
+          database: "./target/h2-demo/apex_demo_shared"
+
   testing:
     data-sources:
       demo-database:
         enabled: true
         connection:
-          url: "jdbc:h2:mem:apex-demo-test;DB_CLOSE_DELAY=-1"
+          database: "./target/h2-demo/apex_demo_shared"
         connection-pool:
           max-size: 5
           

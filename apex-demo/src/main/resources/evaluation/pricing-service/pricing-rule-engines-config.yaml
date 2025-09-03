@@ -3,6 +3,7 @@
 # Replaces hardcoded pricing rule logic from PricingServiceDemo
 
 metadata:
+  id: "Pricing Rule Engines Configuration"
   name: "Pricing Rule Engines Configuration"
   version: "1.0.0"
   description: "Data-driven pricing rule engines configuration for pricing service"

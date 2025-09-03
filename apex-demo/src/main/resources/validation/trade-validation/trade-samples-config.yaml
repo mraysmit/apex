@@ -3,6 +3,7 @@
 # Replaces hardcoded trade sample creation from IntegratedTradeValidatorComplexDemo
 
 metadata:
+  id: "Trade Samples Configuration"
   name: "Trade Samples Configuration"
   version: "1.0.0"
   description: "Data-driven trade samples configuration for complex trade validation testing"

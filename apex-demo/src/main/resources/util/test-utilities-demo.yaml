@@ -3,6 +3,7 @@
 # Replaces all hardcoded test data creation logic from TestUtilities (@version 1.0)
 
 metadata:
+  id: "Test Utilities Demo"
   name: "Test Utilities Demo"
   version: "1.0.0"
   description: "APEX-compliant test utilities with real enrichment services"
@@ -27,31 +28,35 @@ external-data-sources:
 
 # APEX enrichment processing for test utilities
 enrichments:
-  - name: "sample-data-creation"
+  - id: "sample-data-creation"
+    name: "sample-data-creation"
     type: "lookup-enrichment"
     description: "Create sample data using data-driven configuration"
     condition: "#data.utilityType == 'sample-data-creation'"
     lookup-source: "sample-data-config"
     lookup-key: "#data.dataType != null ? #data.dataType : 'default'"
     target-field: "sampleDataCreationResult"
-    
-  - name: "test-data-generation"
+
+  - id: "test-data-generation"
+    name: "test-data-generation"
     type: "lookup-enrichment"
     description: "Generate test data using data-driven configuration"
     condition: "#data.utilityType == 'test-data-generation'"
     lookup-source: "test-data-generation-config"
     lookup-key: "#data.generationType != null ? #data.generationType : 'default'"
     target-field: "testDataGenerationResult"
-    
-  - name: "validation-helpers-processing"
+
+  - id: "validation-helpers"
+    name: "validation-helpers-processing"
     type: "lookup-enrichment"
     description: "Process validation helpers using data-driven configuration"
     condition: "#data.utilityType == 'validation-helpers'"
     lookup-source: "validation-helpers-config"
     lookup-key: "#data.helperType != null ? #data.helperType : 'default'"
     target-field: "validationHelpersResult"
-    
-  - name: "test-utilities-summary"
+
+  - id: "test-utilities-summary"
+    name: "test-utilities-summary"
     type: "expression-enrichment"
     description: "Generate test utilities summary"
     condition: "true"

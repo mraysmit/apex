@@ -3,6 +3,7 @@
 # Replaces all hardcoded customer validation logic from IntegratedCustomerValidatorDemo (@version 1.0)
 
 metadata:
+  id: "Integrated Customer Validator Demo"
   name: "Integrated Customer Validator Demo"
   version: "1.0.0"
   description: "APEX-compliant integrated customer validator with real enrichment services"

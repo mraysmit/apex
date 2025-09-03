@@ -3,6 +3,7 @@
 # Replaces hardcoded test data generation from TestUtilities
 
 metadata:
+  id: "Test Data Generation Configuration"
   name: "Test Data Generation Configuration"
   version: "1.0.0"
   description: "Data-driven test data generation configuration for test utilities"

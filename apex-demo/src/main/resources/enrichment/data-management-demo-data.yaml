@@ -3,6 +3,7 @@
 # NO HARDCODED SIMULATION - Real APEX data processing
 
 metadata:
+  id: "Data Management Demo Data"
   name: "Data Management Demo Data"
   version: "2.0.0"
   description: "Test data scenarios for real APEX data management demonstration"

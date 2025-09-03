@@ -3,6 +3,7 @@
 # Replaces all hardcoded performance and exception logic from PerformanceAndExceptionDemo (@version 1.0)
 
 metadata:
+  id: "Performance and Exception Demo"
   name: "Performance and Exception Demo"
   version: "1.0.0"
   description: "APEX-compliant performance and exception handling with real enrichment services"

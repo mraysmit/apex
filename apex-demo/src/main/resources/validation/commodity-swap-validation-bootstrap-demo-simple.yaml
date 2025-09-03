@@ -2,6 +2,7 @@
 # Real APEX YAML configuration for commodity swap validation bootstrap processing
 
 metadata:
+  id: "Commodity Swap Validation Bootstrap Demo"
   name: "Commodity Swap Validation Bootstrap Demo"
   version: "1.0.0"
   description: "APEX-compliant commodity swap validation bootstrap with real enrichment services"

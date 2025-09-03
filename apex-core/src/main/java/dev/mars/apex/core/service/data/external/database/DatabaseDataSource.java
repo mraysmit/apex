@@ -84,6 +84,27 @@ public class DatabaseDataSource implements ExternalDataSource {
             if (testConnection()) {
                 this.connectionStatus = ConnectionStatus.connected("Database connection established");
                 LOGGER.info("Database data source '{}' initialized successfully", config.getName());
+
+                // Test database connectivity and log table existence
+                try (Connection testConn = dataSource.getConnection()) {
+                    LOGGER.info("Testing database connectivity for '{}'", config.getName());
+                    LOGGER.info("Database URL: {}", testConn.getMetaData().getURL());
+
+                    // Check if customers table exists and has data
+                    try (Statement stmt = testConn.createStatement();
+                         ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM customers")) {
+                        if (rs.next()) {
+                            int count = rs.getInt(1);
+                            LOGGER.info("Found {} records in customers table", count);
+                        } else {
+                            LOGGER.warn("No records found in customers table");
+                        }
+                    } catch (SQLException e) {
+                        LOGGER.warn("Customers table does not exist or query failed: {}", e.getMessage());
+                    }
+                } catch (SQLException e) {
+                    LOGGER.error("Failed to test database connectivity: {}", e.getMessage());
+                }
             } else {
                 throw new DataSourceException(DataSourceException.ErrorType.CONNECTION_ERROR,
                     "Failed to establish database connection", null, config.getName(), "initialize", true);
@@ -222,7 +243,6 @@ public class DatabaseDataSource implements ExternalDataSource {
                     T result = (T) mapResultSetToObject(resultSet);
                     results.add(result);
                 }
-
                 metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
                 metrics.recordRecordsProcessed(results.size());
 

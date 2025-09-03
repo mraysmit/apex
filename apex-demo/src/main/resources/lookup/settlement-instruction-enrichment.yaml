@@ -3,6 +3,7 @@
 # Use Case: Enrich trades with settlement instructions and risk assessment data from database
 
 metadata:
+  id: "Settlement Instruction Multi-Parameter Enrichment Demo - Database Version"
   name: "Settlement Instruction Multi-Parameter Enrichment Demo - Database Version"
   version: "2.0.0"
   description: "Demonstrates complex multi-parameter database lookup enrichment using APEX YAML processing"
@@ -17,7 +18,8 @@ data-sources:
     type: "database"
     source-type: "h2"
     connection:
-      url: "jdbc:h2:mem:apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      # H2 file-based database for true sharing between demo and APEX
+      database: "./target/h2-demo/apex_demo_shared"
       username: "sa"
       password: ""
 

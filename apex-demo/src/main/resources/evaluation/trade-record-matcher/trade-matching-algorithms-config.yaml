@@ -3,6 +3,7 @@
 # Replaces hardcoded trade matching logic from TradeRecordMatcherDemo
 
 metadata:
+  id: "Trade Matching Algorithms Configuration"
   name: "Trade Matching Algorithms Configuration"
   version: "1.0.0"
   description: "Data-driven trade matching algorithms configuration for trade record matcher"

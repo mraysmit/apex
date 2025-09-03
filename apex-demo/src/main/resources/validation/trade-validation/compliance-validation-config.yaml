@@ -3,6 +3,7 @@
 # Replaces hardcoded compliance logic from IntegratedTradeValidatorComplexDemo
 
 metadata:
+  id: "Compliance Validation Configuration"
   name: "Compliance Validation Configuration"
   version: "1.0.0"
   description: "Data-driven compliance validation configuration for complex trade validation"

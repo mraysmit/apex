@@ -3,6 +3,7 @@
 # Replaces hardcoded validation parameters from IntegratedCustomerValidatorDemo
 
 metadata:
+  id: "Validation Parameters Configuration"
   name: "Validation Parameters Configuration"
   version: "1.0.0"
   description: "Data-driven validation parameters configuration for integrated customer validation processing"

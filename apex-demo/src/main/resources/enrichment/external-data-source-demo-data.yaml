@@ -3,6 +3,7 @@
 # NO HARDCODED SIMULATION - Real APEX data processing
 
 metadata:
+  id: "External Data Source Demo Data"
   name: "External Data Source Demo Data"
   version: "2.0.0"
   description: "Test data scenarios for real APEX external data source demonstration"

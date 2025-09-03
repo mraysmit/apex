@@ -3,6 +3,7 @@
 # Replaces all hardcoded dynamic method execution logic from DynamicMethodExecutionDemo (@version 1.0)
 
 metadata:
+  id: "Dynamic Method Execution Demo"
   name: "Dynamic Method Execution Demo"
   version: "1.0.0"
   description: "APEX-compliant dynamic method execution with real enrichment services"

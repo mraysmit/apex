@@ -3,6 +3,7 @@
 # Replaces hardcoded lookup service logic from IntegratedTradeValidatorComplexDemo
 
 metadata:
+  id: "Lookup Services Configuration"
   name: "Lookup Services Configuration"
   version: "1.0.0"
   description: "Data-driven lookup services configuration for complex trade validation"

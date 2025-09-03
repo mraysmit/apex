@@ -3,6 +3,7 @@
 # Use Case: Trade settlement instruction data source for multi-parameter lookups
 
 metadata:
+  id: "Self-Contained Database Multi-Parameter Data Source Demo"
   name: "Self-Contained Database Multi-Parameter Data Source Demo"
   version: "1.0.0"
   description: "Data source configuration for complex database lookups with multiple parameters using embedded H2 database"
@@ -12,17 +13,18 @@ metadata:
   tags: ["apex-demo", "lookup", "database", "multi-parameter"]
 
 # External data source configuration
-dataSources:
+data-sources:
   - name: "trading-database"
     type: "database"
-    sourceType: "h2"
+    source-type: "h2"
     enabled: true
     description: "Trading and settlement data from self-contained H2 database"
 
     connection:
-      url: "jdbc:h2:mem:apex_demo;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
-      username: "apex_user"
-      password: "apex_password"
+      # H2 file-based database for true sharing between demo and APEX
+      database: "./target/h2-demo/apex_demo_shared"
+      username: "sa"
+      password: ""
 
       # Advanced connection pool configuration (verified against YamlDataSource.java)
       connection-pool:

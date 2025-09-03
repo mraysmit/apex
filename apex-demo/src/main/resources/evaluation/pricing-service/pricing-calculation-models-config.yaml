@@ -3,6 +3,7 @@
 # Replaces hardcoded pricing calculation logic from PricingServiceDemo
 
 metadata:
+  id: "Pricing Calculation Models Configuration"
   name: "Pricing Calculation Models Configuration"
   version: "1.0.0"
   description: "Data-driven pricing calculation models configuration for pricing service"

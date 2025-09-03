@@ -3,6 +3,7 @@
 # Replaces hardcoded Map.of context creation from PerformanceAndExceptionDemo
 
 metadata:
+  id: "Performance Test Contexts Configuration"
   name: "Performance Test Contexts Configuration"
   version: "1.0.0"
   description: "Data-driven performance test contexts configuration for performance and exception handling processing"

@@ -3,6 +3,7 @@
 # Replaces hardcoded processing execution logic from ScenarioBasedProcessingDemo
 
 metadata:
+  id: "Processing Execution Configuration"
   name: "Processing Execution Configuration"
   version: "1.0.0"
   description: "Data-driven processing execution configuration for scenarios"

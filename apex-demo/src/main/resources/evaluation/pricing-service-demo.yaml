@@ -3,6 +3,7 @@
 # Replaces all hardcoded pricing service logic from PricingServiceDemo (@version 1.0)
 
 metadata:
+  id: "Pricing Service Demo"
   name: "Pricing Service Demo"
   version: "1.0.0"
   description: "APEX-compliant pricing service with real enrichment services"
@@ -27,31 +28,35 @@ external-data-sources:
 
 # APEX enrichment processing for pricing service
 enrichments:
-  - name: "pricing-calculation-models-processing"
+  - id: "pricing-calculation-models-processing"
+    name: "pricing-calculation-models-processing"
     type: "lookup-enrichment"
     description: "Process pricing calculation models using data-driven configuration"
     condition: "#data.serviceType == 'pricing-calculation-models-processing'"
     lookup-source: "pricing-calculation-models-config"
     lookup-key: "#data.modelType != null ? #data.modelType : 'default'"
     target-field: "pricingCalculationModelsResult"
-    
-  - name: "pricing-rule-engines-processing"
+
+  - id: "pricing-rule-engines-processing"
+    name: "pricing-rule-engines-processing"
     type: "lookup-enrichment"
     description: "Process pricing rule engines using data-driven configuration"
     condition: "#data.serviceType == 'pricing-rule-engines-processing'"
     lookup-source: "pricing-rule-engines-config"
     lookup-key: "#data.engineType != null ? #data.engineType : 'default'"
     target-field: "pricingRuleEnginesResult"
-    
-  - name: "pricing-strategy-frameworks-processing"
+
+  - id: "pricing-strategy-frameworks-processing"
+    name: "pricing-strategy-frameworks-processing"
     type: "lookup-enrichment"
     description: "Process pricing strategy frameworks using data-driven configuration"
     condition: "#data.serviceType == 'pricing-strategy-frameworks-processing'"
     lookup-source: "pricing-strategy-frameworks-config"
     lookup-key: "#data.frameworkType != null ? #data.frameworkType : 'default'"
     target-field: "pricingStrategyFrameworksResult"
-    
-  - name: "pricing-service-summary"
+
+  - id: "pricing-service-summary"
+    name: "pricing-service-summary"
     type: "expression-enrichment"
     description: "Generate pricing service summary"
     condition: "true"

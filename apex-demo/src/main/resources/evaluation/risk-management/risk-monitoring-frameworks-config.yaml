@@ -3,6 +3,7 @@
 # Replaces hardcoded risk monitoring logic from RiskManagementService
 
 metadata:
+  id: "Risk Monitoring Frameworks Configuration"
   name: "Risk Monitoring Frameworks Configuration"
   version: "1.0.0"
   description: "Data-driven risk monitoring frameworks configuration for risk management service"

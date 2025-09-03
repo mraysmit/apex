@@ -6,6 +6,7 @@
 # ============================================================================
 
 metadata:
+  id: "APEX Demo Data Bootstrap - Main Configuration"
   name: "APEX Demo Data Bootstrap - Main Configuration"
   version: "1.0.0"
   description: "Main bootstrap configuration for comprehensive demo data management (used by DemoDataBootstrap.java)"

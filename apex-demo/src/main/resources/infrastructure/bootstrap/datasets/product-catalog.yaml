@@ -6,6 +6,7 @@
 # ============================================================================
 
 metadata:
+  id: "Bootstrap Demo - Financial Product Catalog Dataset"
   name: "Bootstrap Demo - Financial Product Catalog Dataset"
   version: "1.0.0"
   description: "Comprehensive financial products and services catalog (used by DemoDataBootstrap.java for product lookups)"

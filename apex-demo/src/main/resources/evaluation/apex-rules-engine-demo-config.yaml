@@ -3,6 +3,7 @@
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
 metadata:
+  id: "APEX Rules Engine Demo Configuration"
   name: "APEX Rules Engine Demo Configuration"
   version: "2.0.0"
   description: "Real APEX rules engine demonstration with investment validation, risk assessment, and compliance checking"

@@ -151,26 +151,87 @@ dataSources:
       timeoutSeconds: 10
       failureThreshold: 2
 
-  # H2 in-memory database for testing
-  - name: "test-database"
+  # H2 file-based database for testing (RECOMMENDED)
+  - name: "test-database-file"
     type: "database"
     sourceType: "h2"
     enabled: false  # Only enabled in test environments
-    description: "In-memory database for testing"
+    description: "File-based H2 database for testing with true data sharing"
     tags:
       - "test"
-      - "in-memory"
-    
+      - "file-based"
+
     connection:
-      url: "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE"
+      # File-based H2 enables true database sharing between processes
+      database: "./target/h2-test/testdb"
       username: "sa"
-      #"${DB_PASSWORD}"
       password: ""
 
-      
       # H2 specific settings
       mode: "PostgreSQL"  # Compatibility mode
       initScript: "classpath:test-data.sql"
+
+  # H2 in-memory database (DEPRECATED - creates isolated instances)
+  - name: "test-database-memory"
+    type: "database"
+    sourceType: "h2"
+    enabled: false  # Only enabled in test environments
+    description: "In-memory database for testing (WARNING: creates isolated instances)"
+    tags:
+      - "test"
+      - "in-memory"
+      - "deprecated"
+
+    connection:
+      # WARNING: Each connection creates a separate in-memory instance
+      database: "testdb"  # Becomes jdbc:h2:mem:testdb
+      username: "sa"
+      password: ""
+
+      # H2 specific settings
+      mode: "PostgreSQL"  # Compatibility mode
+      initScript: "classpath:test-data.sql"
+
+  # H2 with custom parameters (ENHANCED - NEW!)
+  - name: "test-database-custom"
+    type: "database"
+    sourceType: "h2"
+    enabled: false  # Only enabled in test environments
+    description: "H2 database with custom parameters for performance and debugging"
+    tags:
+      - "test"
+      - "custom-parameters"
+      - "enhanced"
+
+    connection:
+      # Enhanced H2 configuration with custom parameters
+      # Format: "path/to/database;PARAM1=value1;PARAM2=value2"
+      database: "./target/h2-test/custom;MODE=MySQL;CACHE_SIZE=32768;TRACE_LEVEL_FILE=1"
+      username: "sa"
+      password: ""
+
+      # Custom parameters override APEX defaults:
+      # - MODE=MySQL (overrides default PostgreSQL)
+      # - CACHE_SIZE=32768 (sets 32MB cache)
+      # - TRACE_LEVEL_FILE=1 (enables error logging)
+      # - DB_CLOSE_DELAY=-1 (automatically added by APEX)
+
+  # H2 in-memory with custom parameters
+  - name: "test-database-memory-custom"
+    type: "database"
+    sourceType: "h2"
+    enabled: false
+    description: "In-memory H2 with custom parameters for testing"
+    tags:
+      - "test"
+      - "in-memory"
+      - "custom-parameters"
+
+    connection:
+      # In-memory H2 with performance tuning
+      database: "mem:testdb;CACHE_SIZE=16384;MODE=Oracle;TRACE_LEVEL_SYSTEM_OUT=1"
+      username: "sa"
+      password: ""
     
     queries:
       createUser: |

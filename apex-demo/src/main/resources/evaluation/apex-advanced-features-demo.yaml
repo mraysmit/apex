@@ -3,6 +3,7 @@
 # Replaces all hardcoded advanced features logic from ApexAdvancedFeaturesDemo (@version 1.0)
 
 metadata:
+  id: "APEX Advanced Features Demo"
   name: "APEX Advanced Features Demo"
   version: "2.0.0"
   description: "APEX-compliant advanced features with real enrichment services"

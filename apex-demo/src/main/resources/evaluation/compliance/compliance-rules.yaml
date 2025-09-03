@@ -3,6 +3,7 @@
 # Replaces hardcoded rule creation from ComplianceServiceDemo
 
 metadata:
+  id: "Compliance Rules"
   name: "Compliance Rules"
   version: "1.0.0"
   description: "Compliance rules for regulatory reporting requirements"

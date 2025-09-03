@@ -3,6 +3,7 @@
 # Replaces all hardcoded rule definition service logic from RuleDefinitionServiceDemo (@version 1.0)
 
 metadata:
+  id: "Rule Definition Service Demo"
   name: "Rule Definition Service Demo"
   version: "1.0.0"
   description: "APEX-compliant rule definition service with real enrichment services"
@@ -27,31 +28,35 @@ external-data-sources:
 
 # APEX enrichment processing for rule definition service
 enrichments:
-  - name: "rule-creation-engines-processing"
+  - id: "rule-creation-engines-processing"
+    name: "rule-creation-engines-processing"
     type: "lookup-enrichment"
     description: "Process rule creation engines using data-driven configuration"
     condition: "#data.serviceType == 'rule-creation-engines-processing'"
     lookup-source: "rule-creation-engines-config"
     lookup-key: "#data.engineType != null ? #data.engineType : 'default'"
     target-field: "ruleCreationEnginesResult"
-    
-  - name: "rule-management-frameworks-processing"
+
+  - id: "rule-management-frameworks-processing"
+    name: "rule-management-frameworks-processing"
     type: "lookup-enrichment"
     description: "Process rule management frameworks using data-driven configuration"
     condition: "#data.serviceType == 'rule-management-frameworks-processing'"
     lookup-source: "rule-management-frameworks-config"
     lookup-key: "#data.frameworkType != null ? #data.frameworkType : 'default'"
     target-field: "ruleManagementFrameworksResult"
-    
-  - name: "rule-analysis-processors-processing"
+
+  - id: "rule-analysis-processors-processing"
+    name: "rule-analysis-processors-processing"
     type: "lookup-enrichment"
     description: "Process rule analysis processors using data-driven configuration"
     condition: "#data.serviceType == 'rule-analysis-processors-processing'"
     lookup-source: "rule-analysis-processors-config"
     lookup-key: "#data.processorType != null ? #data.processorType : 'default'"
     target-field: "ruleAnalysisProcessorsResult"
-    
-  - name: "rule-definition-service-summary"
+
+  - id: "rule-definition-service-summary"
+    name: "rule-definition-service-summary"
     type: "expression-enrichment"
     description: "Generate rule definition service summary"
     condition: "true"

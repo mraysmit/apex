@@ -3,6 +3,7 @@
 # Replaces all hardcoded trade transformer logic from TradeTransformerDemo (@version 1.0)
 
 metadata:
+  id: "Trade Transformer Demo"
   name: "Trade Transformer Demo"
   version: "1.0.0"
   description: "APEX-compliant trade transformer with real enrichment services"

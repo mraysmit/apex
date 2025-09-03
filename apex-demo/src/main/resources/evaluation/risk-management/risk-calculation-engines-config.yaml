@@ -3,6 +3,7 @@
 # Replaces hardcoded risk calculation logic from RiskManagementService
 
 metadata:
+  id: "Risk Calculation Engines Configuration"
   name: "Risk Calculation Engines Configuration"
   version: "1.0.0"
   description: "Data-driven risk calculation engines configuration for risk management service"

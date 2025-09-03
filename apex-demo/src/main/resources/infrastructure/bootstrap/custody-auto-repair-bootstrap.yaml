@@ -74,6 +74,7 @@
 # ============================================================================
 
 metadata:
+  id: "Custody Auto-Repair Bootstrap Rules"
   name: "Custody Auto-Repair Bootstrap Rules"
   version: "1.0"
   description: "Complete bootstrap demonstration of Standing Instruction auto-repair for custody settlement in Asian markets"

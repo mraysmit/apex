@@ -3,6 +3,7 @@
 # Replaces hardcoded fluent API design patterns from FluentRuleBuilderExample
 
 metadata:
+  id: "Fluent API Patterns Configuration"
   name: "Fluent API Patterns Configuration"
   version: "1.0.0"
   description: "Data-driven fluent API patterns configuration for fluent rule builder processing"

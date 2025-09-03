@@ -3,6 +3,7 @@
 # Replaces hardcoded analysis logic from YamlDependencyAnalysisDemo
 
 metadata:
+  id: "Analysis Algorithms Configuration"
   name: "Analysis Algorithms Configuration"
   version: "1.0.0"
   description: "Data-driven analysis algorithms configuration for dependency processing"

@@ -3,6 +3,7 @@
 # Replaces all hardcoded OTC options logic from OtcOptionsBootstrapDemo (@version 1.0)
 
 metadata:
+  id: "OTC Options Bootstrap Demo"
   name: "OTC Options Bootstrap Demo"
   version: "1.0.0"
   description: "APEX-compliant OTC options bootstrap with real enrichment services"

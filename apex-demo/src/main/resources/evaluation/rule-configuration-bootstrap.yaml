@@ -3,6 +3,7 @@
 # Replaces all hardcoded rule bootstrap logic from RuleConfigurationBootstrap (@version 1.0)
 
 metadata:
+  id: "Rule Configuration Bootstrap"
   name: "Rule Configuration Bootstrap"
   version: "1.0.0"
   description: "APEX-compliant comprehensive rule configuration bootstrap with real enrichment services"
@@ -37,59 +38,67 @@ external-data-sources:
 
 # APEX enrichment processing for comprehensive rule bootstrap
 enrichments:
-  - name: "infrastructure-setup"
+  - id: "infrastructure-setup"
+    name: "infrastructure-setup"
     type: "expression-enrichment"
     description: "Setup infrastructure using real APEX services"
     condition: "#data.phase == 'infrastructure-setup'"
     expression: "'Infrastructure setup completed with real APEX services: ' + (#data.setupType != null ? #data.setupType : 'comprehensive')"
     target-field: "infrastructureStatus"
-    
-  - name: "data-source-verification"
+
+  - id: "data-source-verification"
+    name: "data-source-verification"
     type: "expression-enrichment"
     description: "Verify data sources using real APEX services"
     condition: "#data.phase == 'data-source-verification'"
     expression: "'Data sources verified using real APEX services: ' + (#data.sourceCount != null ? #data.sourceCount : '0') + ' sources'"
     target-field: "dataSourceStatus"
-    
-  - name: "rule-engine-initialization"
+
+  - id: "rule-engine-initialization"
+    name: "rule-engine-initialization"
     type: "expression-enrichment"
     description: "Initialize rule engine using real APEX services"
     condition: "#data.phase == 'rule-engine-initialization'"
     expression: "'Rule engine initialized with real APEX services: ' + (#data.engineType != null ? #data.engineType : 'comprehensive')"
     target-field: "ruleEngineStatus"
-    
-  - name: "comprehensive-loan-processing"
+
+  - id: "comprehensive-loan-processing"
+    name: "comprehensive-loan-processing"
     type: "lookup-enrichment"
     description: "Process loan applications using comprehensive data-driven rules"
     condition: "#data.applicationId != null && #data.creditScore != null && #data.debtToIncomeRatio != null"
     lookup-source: "comprehensive-loan-rules"
     lookup-key: "#data.creditScore >= 750 ? 'excellent-credit' : (#data.creditScore >= 700 && #data.debtToIncomeRatio <= 0.36 ? 'good-credit-low-dti' : (#data.creditScore < 620 ? 'poor-credit' : (#data.debtToIncomeRatio > 0.43 ? 'high-dti' : 'moderate-credit')))"
     target-field: "loanDecision"
-    
-  - name: "comprehensive-discount-processing"
+
+  - id: "comprehensive-discount-processing"
+    name: "comprehensive-discount-processing"
     type: "lookup-enrichment"
     description: "Process order discounts using comprehensive data-driven rules"
     condition: "#data.orderId != null && #data.orderTotal != null"
     lookup-source: "comprehensive-discount-rules"
     lookup-key: "#data.orderTotal > 1000 ? 'large-order' : (#data.customerYears > 5 ? 'loyalty-customer' : (#data.customerYears == 0 ? 'new-customer' : 'standard-customer'))"
     target-field: "discountDecision"
-    
-  - name: "combined-rules-processing"
+
+  - id: "combined-rules-processing"
+    name: "combined-rules-processing"
     type: "lookup-enrichment"
     description: "Process combined business rules using comprehensive data-driven approach"
     condition: "#data.processingType == 'combined-rules'"
     lookup-source: "combined-business-rules"
     lookup-key: "#data.entityType != null ? #data.entityType : 'default'"
     target-field: "combinedDecision"
-    
-  - name: "performance-metrics"
+
+  - id: "performance-metrics"
+    name: "performance-metrics"
     type: "expression-enrichment"
     description: "Calculate performance metrics using real APEX processing"
     condition: "#data.phase == 'performance-metrics'"
     expression: "'Performance metrics calculated: ' + (#data.entitiesProcessed != null ? #data.entitiesProcessed : '0') + ' entities processed'"
     target-field: "performanceMetrics"
-    
-  - name: "bootstrap-summary"
+
+  - id: "bootstrap-summary"
+    name: "bootstrap-summary"
     type: "expression-enrichment"
     description: "Generate comprehensive bootstrap processing summary"
     condition: "true"

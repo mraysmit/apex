@@ -3,6 +3,7 @@
 # Use Case: Customer-region specific pricing and tier information lookup
 
 metadata:
+  id: "Compound Key Lookup Demo"
   name: "Compound Key Lookup Demo"
   version: "1.0.0"
   description: "Demonstrates compound key lookup using customer ID and region concatenation"

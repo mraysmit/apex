@@ -89,10 +89,10 @@ public class YamlValidationDemo {
     private void runDemo() {
         logger.info("Starting YAML metadata validation demonstration...");
 
-        YamlValidationService validationService = new YamlValidationService("src/main/resources");
+        YamlValidationService validationService = new YamlValidationService("apex-demo/src/main/resources");
 
         // Discover all YAML files in the project
-        List<String> yamlFiles = validationService.discoverYamlFiles("src/main/resources");
+        List<String> yamlFiles = validationService.discoverYamlFiles("apex-demo/src/main/resources");
 
         System.out.println("\nDiscovered YAML Files:");
         System.out.println("======================");

@@ -20,6 +20,7 @@
 # ============================================================================
 
 metadata:
+  id: "Derivatives Validation Rules"
   name: "Derivatives Validation Rules"
   version: "1.0.0"
   description: "Comprehensive validation rules for derivatives trading and risk management"

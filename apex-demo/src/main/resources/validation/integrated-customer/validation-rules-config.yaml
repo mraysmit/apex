@@ -3,6 +3,7 @@
 # Replaces hardcoded validation rule creation from IntegratedCustomerValidatorDemo
 
 metadata:
+  id: "Validation Rules Configuration"
   name: "Validation Rules Configuration"
   version: "1.0.0"
   description: "Data-driven validation rules configuration for integrated customer validation processing"

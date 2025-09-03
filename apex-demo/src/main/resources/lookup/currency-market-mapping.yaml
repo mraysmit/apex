@@ -3,6 +3,7 @@
 # Use Case: Map trading currencies to their primary stock exchanges/markets
 
 metadata:
+  id: "Currency to Market Mapping"
   name: "Currency to Market Mapping"
   version: "1.0.0"
   description: "Maps trading currencies to their primary stock exchanges using APEX YAML processing"

@@ -3,6 +3,7 @@
 # Replaces hardcoded customer sample creation from IntegratedCustomerValidatorDemo
 
 metadata:
+  id: "Customer Samples Configuration"
   name: "Customer Samples Configuration"
   version: "1.0.0"
   description: "Data-driven customer samples configuration for integrated customer validation processing"

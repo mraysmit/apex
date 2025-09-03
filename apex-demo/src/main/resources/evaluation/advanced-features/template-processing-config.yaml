@@ -3,6 +3,7 @@
 # Replaces hardcoded template logic from ApexAdvancedFeaturesDemo
 
 metadata:
+  id: "Template Processing Configuration"
   name: "Template Processing Configuration"
   version: "1.0.0"
   description: "Data-driven template processing configuration for advanced features"

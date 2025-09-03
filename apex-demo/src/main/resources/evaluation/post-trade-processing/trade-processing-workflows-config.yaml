@@ -3,6 +3,7 @@
 # Replaces hardcoded post-trade processing workflow logic from PostTradeProcessingServiceDemo
 
 metadata:
+  id: "Trade Processing Workflows Configuration"
   name: "Trade Processing Workflows Configuration"
   version: "1.0.0"
   description: "Data-driven trade processing workflows configuration for post-trade processing service"

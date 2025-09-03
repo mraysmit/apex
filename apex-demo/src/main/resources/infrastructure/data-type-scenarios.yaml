@@ -21,6 +21,7 @@
 # ============================================================================
 
 metadata:
+  id: "Scenario Registry Configuration"
   name: "Scenario Registry Configuration"
   version: "1.0.0"
   description: "Registry of available scenario configurations and their file locations"

@@ -3,6 +3,7 @@
 # Replaces hardcoded trade transformer rule creation from TradeTransformerDemo
 
 metadata:
+  id: "Trade Transformer Rules Configuration"
   name: "Trade Transformer Rules Configuration"
   version: "1.0.0"
   description: "Data-driven trade transformer rules configuration for trade transformation processing"

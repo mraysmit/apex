@@ -3,6 +3,7 @@
 # Replaces hardcoded reporting logic from YamlDependencyAnalysisDemo
 
 metadata:
+  id: "Reporting Features Configuration"
   name: "Reporting Features Configuration"
   version: "1.0.0"
   description: "Data-driven reporting features configuration for dependency analysis"

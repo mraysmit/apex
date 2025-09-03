@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -222,18 +224,133 @@ public class JdbcTemplateFactory {
                     conn.getHost(), conn.getPort(), conn.getDatabase());
                     
             case "h2":
-                // H2 can be file-based or in-memory
+                // H2 can be file-based, in-memory, or TCP server mode
                 if (conn.getHost() != null) {
-                    return String.format("jdbc:h2:tcp://%s:%d/%s", 
-                        conn.getHost(), conn.getPort(), conn.getDatabase());
+                    // Check if host contains H2 parameters (no port specified) or is a real hostname
+                    if (conn.getPort() != null) {
+                        // H2 TCP Server mode - host is a real hostname
+                        return String.format("jdbc:h2:tcp://%s:%d/%s",
+                            conn.getHost(), conn.getPort(), conn.getDatabase());
+                    } else {
+                        // H2 in-memory mode with custom parameters via host field
+                        return String.format("jdbc:h2:mem:%s;%s",
+                            conn.getDatabase(), conn.getHost());
+                    }
                 } else {
-                    return String.format("jdbc:h2:mem:%s", conn.getDatabase());
+                    // H2 file-based or in-memory with default parameters
+                    String database = conn.getDatabase();
+                    String jdbcUrl;
+
+                    if (database != null && database.startsWith("mem:")) {
+                        // Explicit in-memory database: "mem:testdb" or "mem:testdb;PARAM=value"
+                        jdbcUrl = buildH2JdbcUrl(database);
+                    } else if (database != null && database.equals("mem")) {
+                        // Private in-memory database: "mem"
+                        jdbcUrl = "jdbc:h2:mem:;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+                    } else if (database != null) {
+                        // File-based database (default for demos): "./path/to/db" or "./path/to/db;PARAM=value"
+                        jdbcUrl = buildH2JdbcUrl(database);
+                    } else {
+                        // Fallback for null database
+                        jdbcUrl = "jdbc:h2:mem:default;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+                    }
+
+                    LOGGER.info("Built H2 JDBC URL: {}", jdbcUrl);
+                    return jdbcUrl;
                 }
                 
             default:
                 throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
                     "Unsupported database type: " + sourceType);
         }
+    }
+
+    /**
+     * Build H2 JDBC URL with support for optional parameters in the database field.
+     *
+     * Supports formats like:
+     * - "./target/h2-demo/testdb" → "jdbc:h2:./target/h2-demo/testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+     * - "./target/h2-demo/testdb;MODE=MySQL" → "jdbc:h2:./target/h2-demo/testdb;MODE=MySQL;DB_CLOSE_DELAY=-1"
+     * - "mem:testdb;TRACE_LEVEL_FILE=4" → "jdbc:h2:mem:testdb;TRACE_LEVEL_FILE=4;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+     *
+     * @param database The database field from configuration (may contain parameters)
+     * @return Complete H2 JDBC URL with default and custom parameters
+     */
+    private static String buildH2JdbcUrl(String database) {
+        if (database == null || database.trim().isEmpty()) {
+            return "jdbc:h2:mem:default;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+        }
+
+        // Check if database field contains parameters (semicolon-separated)
+        String[] parts = database.split(";", 2);
+        String databasePath = parts[0].trim();
+        String customParams = parts.length > 1 ? parts[1].trim() : "";
+
+        // Build base JDBC URL
+        String baseUrl = "jdbc:h2:" + databasePath;
+
+        // Prepare default parameters
+        String defaultParams = "DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+
+        if (customParams.isEmpty()) {
+            // No custom parameters - use defaults
+            return baseUrl + ";" + defaultParams;
+        } else {
+            // Custom parameters provided - merge with defaults
+            return mergeH2Parameters(baseUrl, customParams, defaultParams);
+        }
+    }
+
+    /**
+     * Merge custom H2 parameters with default parameters, avoiding duplicates.
+     * Custom parameters take precedence over defaults.
+     *
+     * @param baseUrl The base JDBC URL (e.g., "jdbc:h2:./path/to/db")
+     * @param customParams Custom parameters from user configuration
+     * @param defaultParams Default parameters to apply if not overridden
+     * @return Complete JDBC URL with merged parameters
+     */
+    private static String mergeH2Parameters(String baseUrl, String customParams, String defaultParams) {
+        // Parse custom parameters into a map
+        Map<String, String> paramMap = new HashMap<>();
+
+        // Add default parameters first
+        for (String param : defaultParams.split(";")) {
+            if (!param.trim().isEmpty()) {
+                String[] keyValue = param.split("=", 2);
+                if (keyValue.length == 2) {
+                    paramMap.put(keyValue[0].trim(), keyValue[1].trim());
+                } else {
+                    paramMap.put(keyValue[0].trim(), "");
+                }
+            }
+        }
+
+        // Override with custom parameters
+        for (String param : customParams.split(";")) {
+            if (!param.trim().isEmpty()) {
+                String[] keyValue = param.split("=", 2);
+                if (keyValue.length == 2) {
+                    paramMap.put(keyValue[0].trim(), keyValue[1].trim());
+                } else {
+                    paramMap.put(keyValue[0].trim(), "");
+                }
+            }
+        }
+
+        // Build final parameter string
+        StringBuilder finalParams = new StringBuilder();
+        for (Map.Entry<String, String> entry : paramMap.entrySet()) {
+            if (finalParams.length() > 0) {
+                finalParams.append(";");
+            }
+            finalParams.append(entry.getKey());
+            if (!entry.getValue().isEmpty()) {
+                finalParams.append("=").append(entry.getValue());
+            }
+        }
+
+        return baseUrl + ";" + finalParams.toString();
     }
     
     /**

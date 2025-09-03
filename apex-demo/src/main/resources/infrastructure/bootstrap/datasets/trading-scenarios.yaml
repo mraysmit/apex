@@ -6,6 +6,7 @@
 # ============================================================================
 
 metadata:
+  id: "Bootstrap Demo - Trading Scenarios Dataset"
   name: "Bootstrap Demo - Trading Scenarios Dataset"
   version: "1.0.0"
   description: "Comprehensive trading scenarios across multiple asset classes (used by DemoDataBootstrap.java and trading demos)"

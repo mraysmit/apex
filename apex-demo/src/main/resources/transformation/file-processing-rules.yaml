@@ -1,4 +1,5 @@
 metadata:
+  id: "File Processing Rules Configuration"
   name: "File Processing Rules Configuration"
   version: "1.0.0"
   description: "Comprehensive file processing pipeline using APEX Rules Engine for customer data validation and enrichment"

@@ -3,6 +3,7 @@
 # Replaces all hardcoded post-trade processing logic from PostTradeProcessingServiceDemo (@version 1.0)
 
 metadata:
+  id: "Post-Trade Processing Service Demo"
   name: "Post-Trade Processing Service Demo"
   version: "1.0.0"
   description: "APEX-compliant post-trade processing service with real enrichment services"
@@ -27,31 +28,35 @@ external-data-sources:
 
 # APEX enrichment processing for post-trade processing service
 enrichments:
-  - name: "trade-processing-workflows-processing"
+  - id: "trade-processing-workflows-processing"
+    name: "trade-processing-workflows-processing"
     type: "lookup-enrichment"
     description: "Process trade processing workflows using data-driven configuration"
     condition: "#data.serviceType == 'trade-processing-workflows-processing'"
     lookup-source: "trade-processing-workflows-config"
     lookup-key: "#data.workflowType != null ? #data.workflowType : 'default'"
     target-field: "tradeProcessingWorkflowsResult"
-    
-  - name: "settlement-operations-processing"
+
+  - id: "settlement-operations-processing"
+    name: "settlement-operations-processing"
     type: "lookup-enrichment"
     description: "Process settlement operations using data-driven configuration"
     condition: "#data.serviceType == 'settlement-operations-processing'"
     lookup-source: "settlement-operations-config"
     lookup-key: "#data.operationType != null ? #data.operationType : 'default'"
     target-field: "settlementOperationsResult"
-    
-  - name: "post-trade-business-rules-processing"
+
+  - id: "post-trade-business-rules-processing"
+    name: "post-trade-business-rules-processing"
     type: "lookup-enrichment"
     description: "Process post-trade business rules using data-driven configuration"
     condition: "#data.serviceType == 'post-trade-business-rules-processing'"
     lookup-source: "post-trade-business-rules-config"
     lookup-key: "#data.ruleType != null ? #data.ruleType : 'default'"
     target-field: "postTradeBusinessRulesResult"
-    
-  - name: "post-trade-processing-service-summary"
+
+  - id: "post-trade-processing-service-summary"
+    name: "post-trade-processing-service-summary"
     type: "expression-enrichment"
     description: "Generate post-trade processing service summary"
     condition: "true"

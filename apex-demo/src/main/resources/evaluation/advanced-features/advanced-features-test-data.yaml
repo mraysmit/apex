@@ -3,6 +3,7 @@
 # Replaces hardcoded test data from ApexAdvancedFeaturesDemo
 
 metadata:
+  id: "Advanced Features Test Data"
   name: "Advanced Features Test Data"
   version: "1.0.0"
   description: "Comprehensive test data for advanced features demonstration"

@@ -3,6 +3,7 @@
 # ============================================================================
 
 metadata:
+  id: "Batch Processing Rules Configuration"
   name: "Batch Processing Rules Configuration"
   version: "1.0.0"
   description: "High-performance batch processing rules optimized for throughput and scalability"

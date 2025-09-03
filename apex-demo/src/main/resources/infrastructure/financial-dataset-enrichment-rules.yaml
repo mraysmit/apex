@@ -75,6 +75,7 @@
 # ============================================================================
 
 metadata:
+  id: "Financial Services Dataset Enrichment Rules"
   name: "Financial Services Dataset Enrichment Rules"
   version: "1.0.0"
   description: "Post-trade settlement enrichment using inline YAML datasets"

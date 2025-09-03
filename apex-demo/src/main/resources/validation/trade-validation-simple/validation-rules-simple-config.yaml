@@ -3,6 +3,7 @@
 # Replaces hardcoded validation rule logic from IntegratedTradeValidatorDemo
 
 metadata:
+  id: "Validation Rules Simple Configuration"
   name: "Validation Rules Simple Configuration"
   version: "1.0.0"
   description: "Data-driven simple validation rules configuration for integrated trade validation"

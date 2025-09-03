@@ -3,6 +3,7 @@
 # Replaces hardcoded pricing strategy logic from PricingServiceDemo
 
 metadata:
+  id: "Pricing Strategy Frameworks Configuration"
   name: "Pricing Strategy Frameworks Configuration"
   version: "1.0.0"
   description: "Data-driven pricing strategy frameworks configuration for pricing service"

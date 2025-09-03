@@ -3,6 +3,7 @@
 # Replaces hardcoded loan approval logic from RuleConfigurationBootstrap
 
 metadata:
+  id: "Comprehensive Loan Rules"
   name: "Comprehensive Loan Rules"
   version: "1.0.0"
   description: "Comprehensive data-driven loan approval rules for bootstrap demonstration"

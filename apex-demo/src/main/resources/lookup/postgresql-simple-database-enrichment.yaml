@@ -1,4 +1,5 @@
 metadata:
+  id: "Simple PostgreSQL Database Enrichment Demo"
   name: "Simple PostgreSQL Database Enrichment Demo"
   version: "1.0.0"
   description: "Simple customer profile enrichment using H2 database (PostgreSQL mode) with real SQL queries"
@@ -16,8 +17,8 @@ data-sources:
     description: "Customer database using H2 in PostgreSQL compatibility mode"
 
     connection:
-      # H2 in-memory database configuration with shared access
-      database: "apex_demo_shared"
+      # H2 file-based database for true sharing between demo and APEX
+      database: "./target/h2-demo/apex_demo_shared"
       username: "sa"
       password: ""
 
@@ -73,24 +74,24 @@ enrichments:
           - field: "customerId"
             type: "string"
 
-    # Field mappings from lookup result to enriched object
+    # Field mappings from lookup result to enriched object (H2 returns uppercase column names)
     field-mappings:
-      - source-field: "customer_name"
+      - source-field: "CUSTOMER_NAME"
         target-field: "customerName"
         required: true
-      - source-field: "customer_type"
+      - source-field: "CUSTOMER_TYPE"
         target-field: "customerType"
         required: true
-      - source-field: "tier"
+      - source-field: "TIER"
         target-field: "customerTier"
         required: true
-      - source-field: "region"
+      - source-field: "REGION"
         target-field: "customerRegion"
         required: true
-      - source-field: "status"
+      - source-field: "STATUS"
         target-field: "customerStatus"
         required: true
-      - source-field: "created_date"
+      - source-field: "CREATED_DATE"
         target-field: "customerCreatedDate"
         required: false
 

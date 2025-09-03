@@ -3,6 +3,7 @@
 # Replaces hardcoded enrichment logic from OtcOptionsBootstrapDemo
 
 metadata:
+  id: "Enrichment Methods Configuration"
   name: "Enrichment Methods Configuration"
   version: "1.0.0"
   description: "Data-driven enrichment methods configuration for OTC options processing"

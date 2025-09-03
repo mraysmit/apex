@@ -3,6 +3,7 @@
 # Replaces hardcoded scenario file arrays from YamlDependencyAnalysisDemo
 
 metadata:
+  id: "Scenario Files Configuration"
   name: "Scenario Files Configuration"
   version: "1.0.0"
   description: "Data-driven scenario files configuration for dependency analysis"

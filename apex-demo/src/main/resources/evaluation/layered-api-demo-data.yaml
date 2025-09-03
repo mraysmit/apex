@@ -3,6 +3,7 @@
 # NO HARDCODED SIMULATION - Real APEX data processing
 
 metadata:
+  id: "Layered API Demo Data"
   name: "Layered API Demo Data"
   version: "2.0.0"
   description: "Test data scenarios for real APEX layered API demonstration"

@@ -3,6 +3,7 @@
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
 metadata:
+  id: "External Data Source Demo Configuration"
   name: "External Data Source Demo Configuration"
   version: "2.0.0"
   description: "Real APEX external data source demonstration with REST API, file system, cache, health monitoring, and performance metrics"

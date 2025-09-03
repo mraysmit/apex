@@ -78,6 +78,7 @@
 # ============================================================================
 
 metadata:
+  id: "Financial Validation Rules"
   name: "Financial Validation Rules"
   version: "1.0.0"
   description: "Comprehensive validation rules for financial instruments, particularly OTC Commodity Total Return Swaps"

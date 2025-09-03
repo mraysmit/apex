@@ -3,6 +3,7 @@
 # Replaces hardcoded parameter logic from IntegratedTradeValidatorDemo
 
 metadata:
+  id: "Trade Validation Parameters Configuration"
   name: "Trade Validation Parameters Configuration"
   version: "1.0.0"
   description: "Data-driven trade validation parameters configuration for integrated trade validation"

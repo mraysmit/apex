@@ -3,6 +3,7 @@
 # Replaces all hardcoded risk management service logic from RiskManagementService (@version 1.0)
 
 metadata:
+  id: "Risk Management Service Demo"
   name: "Risk Management Service Demo"
   version: "1.0.0"
   description: "APEX-compliant risk management service with real enrichment services"
@@ -27,31 +28,35 @@ external-data-sources:
 
 # APEX enrichment processing for risk management service
 enrichments:
-  - name: "risk-assessment-models-processing"
+  - id: "risk-assessment-models-processing"
+    name: "risk-assessment-models-processing"
     type: "lookup-enrichment"
     description: "Process risk assessment models using data-driven configuration"
     condition: "#data.serviceType == 'risk-assessment-models-processing'"
     lookup-source: "risk-assessment-models-config"
     lookup-key: "#data.modelType != null ? #data.modelType : 'default'"
     target-field: "riskAssessmentModelsResult"
-    
-  - name: "risk-calculation-engines-processing"
+
+  - id: "risk-calculation-engines-processing"
+    name: "risk-calculation-engines-processing"
     type: "lookup-enrichment"
     description: "Process risk calculation engines using data-driven configuration"
     condition: "#data.serviceType == 'risk-calculation-engines-processing'"
     lookup-source: "risk-calculation-engines-config"
     lookup-key: "#data.engineType != null ? #data.engineType : 'default'"
     target-field: "riskCalculationEnginesResult"
-    
-  - name: "risk-monitoring-frameworks-processing"
+
+  - id: "risk-monitoring-frameworks-processing"
+    name: "risk-monitoring-frameworks-processing"
     type: "lookup-enrichment"
     description: "Process risk monitoring frameworks using data-driven configuration"
     condition: "#data.serviceType == 'risk-monitoring-frameworks-processing'"
     lookup-source: "risk-monitoring-frameworks-config"
     lookup-key: "#data.frameworkType != null ? #data.frameworkType : 'default'"
     target-field: "riskMonitoringFrameworksResult"
-    
-  - name: "risk-management-service-summary"
+
+  - id: "risk-management-service-summary"
+    name: "risk-management-service-summary"
     type: "expression-enrichment"
     description: "Generate risk management service summary"
     condition: "true"

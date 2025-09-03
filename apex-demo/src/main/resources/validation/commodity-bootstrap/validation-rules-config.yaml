@@ -3,6 +3,7 @@
 # Replaces embedded YAML validation rules from CommoditySwapValidationBootstrap
 
 metadata:
+  id: "Validation Rules Configuration"
   name: "Validation Rules Configuration"
   version: "1.0.0"
   description: "Data-driven validation rules configuration for commodity swap processing"

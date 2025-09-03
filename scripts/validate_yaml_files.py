@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional
 
 # APEX YAML format requirements (based on APEX_YAML_REFERENCE.md)
-REQUIRED_METADATA_FIELDS = {"name", "version", "description", "type"}
+REQUIRED_METADATA_FIELDS = {"id", "name", "version", "description", "type"}
 VALID_FILE_TYPES = {
     "scenario", "scenario-registry", "bootstrap", "rule-config",
     "dataset", "enrichment", "rule-chain", "external-data-config"

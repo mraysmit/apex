@@ -3,6 +3,7 @@
 # Replaces hardcoded scenario routing logic from ScenarioBasedProcessingDemo
 
 metadata:
+  id: "Scenario Routing Configuration"
   name: "Scenario Routing Configuration"
   version: "1.0.0"
   description: "Data-driven scenario routing configuration for processing"

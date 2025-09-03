@@ -3,6 +3,7 @@
 # Replaces hardcoded trade validation logic from TradeRecordMatcherDemo
 
 metadata:
+  id: "Trade Validation Engines Configuration"
   name: "Trade Validation Engines Configuration"
   version: "1.0.0"
   description: "Data-driven trade validation engines configuration for trade record matcher"

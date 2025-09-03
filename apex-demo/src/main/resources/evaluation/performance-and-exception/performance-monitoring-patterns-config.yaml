@@ -3,6 +3,7 @@
 # Replaces hardcoded performance monitoring logic from PerformanceAndExceptionDemo
 
 metadata:
+  id: "Performance Monitoring Patterns Configuration"
   name: "Performance Monitoring Patterns Configuration"
   version: "1.0.0"
   description: "Data-driven performance monitoring patterns configuration for performance and exception handling processing"

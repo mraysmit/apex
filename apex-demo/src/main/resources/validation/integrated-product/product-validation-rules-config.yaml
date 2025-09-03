@@ -3,6 +3,7 @@
 # Replaces hardcoded product validation rule creation from IntegratedProductValidatorDemo
 
 metadata:
+  id: "Product Validation Rules Configuration"
   name: "Product Validation Rules Configuration"
   version: "1.0.0"
   description: "Data-driven product validation rules configuration for integrated product validation processing"

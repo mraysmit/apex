@@ -3,6 +3,7 @@
 # Replaces hardcoded rule management logic from RuleDefinitionServiceDemo
 
 metadata:
+  id: "Rule Management Frameworks Configuration"
   name: "Rule Management Frameworks Configuration"
   version: "1.0.0"
   description: "Data-driven rule management frameworks configuration for rule definition service"

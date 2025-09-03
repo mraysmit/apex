@@ -3,6 +3,7 @@
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
 metadata:
+  id: "Comprehensive Financial Settlement Demo Configuration"
   name: "Comprehensive Financial Settlement Demo Configuration"
   version: "2.0.0"
   description: "Real APEX comprehensive financial settlement demonstration with multi-asset processing, cross-border settlement, and high-value transaction handling"

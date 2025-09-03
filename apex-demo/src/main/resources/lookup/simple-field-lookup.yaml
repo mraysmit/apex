@@ -3,6 +3,7 @@
 # Use Case: Enrich currency transactions with detailed currency information
 
 metadata:
+  id: "Simple Field Lookup Demo"
   name: "Simple Field Lookup Demo"
   version: "1.0.0"
   description: "Demonstrates basic field lookup using currency codes"

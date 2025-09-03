@@ -3,6 +3,7 @@
 # Replaces hardcoded standing instruction creation from CustodyAutoRepairBootstrap
 
 metadata:
+  id: "Standing Instructions Configuration"
   name: "Standing Instructions Configuration"
   version: "2.0.0"
   description: "Data-driven standing instructions configuration for custody auto-repair processing"

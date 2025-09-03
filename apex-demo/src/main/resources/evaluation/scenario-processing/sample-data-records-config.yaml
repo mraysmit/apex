@@ -3,6 +3,7 @@
 # Replaces hardcoded sample data creation from ScenarioBasedProcessingDemo
 
 metadata:
+  id: "Sample Data Records Configuration"
   name: "Sample Data Records Configuration"
   version: "1.0.0"
   description: "Data-driven sample data records configuration for scenario processing"

@@ -3,6 +3,7 @@
 # Replaces hardcoded customer segmentation from CustomerTransformerDemo
 
 metadata:
+  id: "Customer Segments Configuration"
   name: "Customer Segments Configuration"
   version: "1.0.0"
   description: "Data-driven customer segments configuration for customer transformation processing"

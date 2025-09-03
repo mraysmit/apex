@@ -83,6 +83,7 @@
 # ============================================================================
 
 metadata:
+  id: "Financial Services Post-TradeB Settlement Rules"
   name: "Financial Services Post-TradeB Settlement Rules"
   version: "2.0.0"
   description: "Comprehensive post-trade settlement enrichment rules with full audit support"

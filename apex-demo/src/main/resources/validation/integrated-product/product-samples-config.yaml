@@ -3,6 +3,7 @@
 # Replaces hardcoded product sample creation from IntegratedProductValidatorDemo
 
 metadata:
+  id: "Product Samples Configuration"
   name: "Product Samples Configuration"
   version: "1.0.0"
   description: "Data-driven product samples configuration for integrated product validation processing"

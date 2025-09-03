@@ -3,6 +3,7 @@
 # Replaces hardcoded rule analysis logic from RuleDefinitionServiceDemo
 
 metadata:
+  id: "Rule Analysis Processors Configuration"
   name: "Rule Analysis Processors Configuration"
   version: "1.0.0"
   description: "Data-driven rule analysis processors configuration for rule definition service"

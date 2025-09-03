@@ -3,6 +3,7 @@
 # Replaces all hardcoded compliance logic from ComplianceServiceDemo (@version 1.0)
 
 metadata:
+  id: "Compliance Service Demo"
   name: "Compliance Service Demo"
   version: "2.0.0"
   description: "APEX-compliant compliance service processing with real enrichment services"

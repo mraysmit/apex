@@ -55,7 +55,7 @@ public class DatabaseConnectionTest {
         logger.info("============================================================");
         
         // Create database using demo approach
-        String jdbcUrl = "jdbc:h2:mem:apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+        String jdbcUrl = "jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
         logger.info("Demo JDBC URL: " + jdbcUrl);
 
         // Load H2 driver explicitly
@@ -68,6 +68,9 @@ public class DatabaseConnectionTest {
 
         try (Connection connection = DriverManager.getConnection(jdbcUrl, "sa", "")) {
             Statement statement = connection.createStatement();
+
+            // Clean up existing data to prevent primary key violations
+            statement.execute("DROP TABLE IF EXISTS customers");
             
             // Create customers table
             statement.execute("""
@@ -122,8 +125,8 @@ public class DatabaseConnectionTest {
         config.setConnection(connectionConfig);
         
         // Create direct JDBC connection (JdbcTemplateFactory not exported from apex-core)
-        // Build JDBC URL from ConnectionConfig properties
-        String jdbcUrl = "jdbc:h2:mem:" + connectionConfig.getDatabase() + ";DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+        // Use the exact same JDBC URL as the working demos
+        String jdbcUrl = "jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
         String username = connectionConfig.getUsername();
         String password = connectionConfig.getPassword();
         logger.info("Creating direct JDBC connection to: " + jdbcUrl);

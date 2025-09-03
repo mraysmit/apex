@@ -3,6 +3,7 @@
 # Use Case: Enrich transactions with customer profile data from database
 
 metadata:
+  id: "Customer Profile Enrichment Demo - Database Version"
   name: "Customer Profile Enrichment Demo - Database Version"
   version: "2.0.0"
   description: "Demonstrates database lookup enrichment using APEX YAML processing with real H2 database"
@@ -17,9 +18,8 @@ data-sources:
     type: "database"
     source-type: "h2"
     connection:
-      host: "localhost"
-      port: 9092
-      database: "apex_demo_shared;MODE=PostgreSQL"
+      # H2 file-based database for true sharing between demo and APEX
+      database: "./target/h2-demo/apex_demo_shared"
       username: "sa"
       password: ""
 
@@ -40,18 +40,18 @@ enrichments:
           - field: "customerId"
             type: "string"
 
-    # Field mappings from database columns to enriched object fields
+    # Field mappings from database columns to enriched object fields (H2 returns uppercase column names)
     field-mappings:
-      - source-field: "customer_name"
+      - source-field: "CUSTOMER_NAME"
         target-field: "customerName"
-      - source-field: "customer_type"
+      - source-field: "CUSTOMER_TYPE"
         target-field: "customerType"
-      - source-field: "tier"
+      - source-field: "TIER"
         target-field: "customerTier"
-      - source-field: "region"
+      - source-field: "REGION"
         target-field: "customerRegion"
-      - source-field: "status"
+      - source-field: "STATUS"
         target-field: "customerStatus"
-      - source-field: "created_date"
+      - source-field: "CREATED_DATE"
         target-field: "customerCreatedDate"
 

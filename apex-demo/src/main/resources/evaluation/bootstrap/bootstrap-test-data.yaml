@@ -3,6 +3,7 @@
 # Replaces hardcoded test data from RuleConfigurationHardcodedBootstrap
 
 metadata:
+  id: "Bootstrap Test Data"
   name: "Bootstrap Test Data"
   version: "1.0.0"
   description: "Test data scenarios for rule configuration bootstrap demonstration"

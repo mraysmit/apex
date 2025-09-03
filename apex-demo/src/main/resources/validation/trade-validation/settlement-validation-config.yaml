@@ -3,6 +3,7 @@
 # Replaces hardcoded settlement logic from IntegratedTradeValidatorComplexDemo
 
 metadata:
+  id: "Settlement Validation Configuration"
   name: "Settlement Validation Configuration"
   version: "1.0.0"
   description: "Data-driven settlement validation configuration for complex trade validation"

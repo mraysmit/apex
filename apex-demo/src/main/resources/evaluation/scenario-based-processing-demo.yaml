@@ -3,6 +3,7 @@
 # Replaces all hardcoded scenario processing logic from ScenarioBasedProcessingDemo (@since 1.0.0)
 
 metadata:
+  id: "Scenario-Based Processing Demo"
   name: "Scenario-Based Processing Demo"
   version: "1.0.0"
   description: "APEX-compliant scenario-based processing with real enrichment services"
@@ -12,6 +13,22 @@ metadata:
   owner: "apex.demo.team@company.com"
   created-date: "2024-12-24"
   tags: ["apex-demo", "evaluation", "scenario-processing"]
+
+# Scenario definition for scenario-based processing
+scenario:
+  scenario-id: "scenario-based-processing-demo"
+  name: "Scenario-Based Processing"
+  description: "Comprehensive scenario-based processing with data routing and execution"
+  business-domain: "Scenario Processing"
+  processing-type: "scenario-routing"
+  data-types:
+    - "OtcOptions"
+    - "CommoditySwap"
+    - "SettlementInstruction"
+  rule-configurations:
+    - "sample-data-creation"
+    - "scenario-routing"
+    - "processing-execution"
 
 # External data source for scenario processing configurations
 external-data-sources:
@@ -29,31 +46,35 @@ external-data-sources:
 
 # APEX enrichment processing for scenario-based processing
 enrichments:
-  - name: "sample-data-creation"
+  - id: "sample-data-creation"
+    name: "sample-data-creation"
     type: "lookup-enrichment"
     description: "Create sample data records using data-driven configuration"
     condition: "#data.processingType == 'sample-data-creation'"
     lookup-source: "sample-data-records-config"
     lookup-key: "#data.dataType != null ? #data.dataType : 'default'"
     target-field: "sampleDataCreationResult"
-    
-  - name: "scenario-routing"
+
+  - id: "scenario-routing"
+    name: "scenario-routing"
     type: "lookup-enrichment"
     description: "Route data to appropriate scenarios using data-driven configuration"
     condition: "#data.processingType == 'scenario-routing'"
     lookup-source: "scenario-routing-config"
     lookup-key: "#data.routingType != null ? #data.routingType : 'default'"
     target-field: "scenarioRoutingResult"
-    
-  - name: "processing-execution"
+
+  - id: "processing-execution"
+    name: "processing-execution"
     type: "lookup-enrichment"
     description: "Execute scenario processing using data-driven configuration"
     condition: "#data.processingType == 'processing-execution'"
     lookup-source: "processing-execution-config"
     lookup-key: "#data.executionType != null ? #data.executionType : 'default'"
     target-field: "processingExecutionResult"
-    
-  - name: "scenario-processing-summary"
+
+  - id: "scenario-based-processing-summary"
+    name: "scenario-processing-summary"
     type: "expression-enrichment"
     description: "Generate scenario processing summary"
     condition: "true"

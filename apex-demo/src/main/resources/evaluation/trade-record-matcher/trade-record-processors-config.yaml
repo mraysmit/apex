@@ -3,6 +3,7 @@
 # Replaces hardcoded trade record processing logic from TradeRecordMatcherDemo
 
 metadata:
+  id: "Trade Record Processors Configuration"
   name: "Trade Record Processors Configuration"
   version: "1.0.0"
   description: "Data-driven trade record processors configuration for trade record matcher"

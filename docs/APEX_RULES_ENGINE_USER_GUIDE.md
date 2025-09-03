@@ -2418,14 +2418,15 @@ Every APEX configuration file follows this basic structure:
 ```yaml
 # Metadata section: Information about this configuration file
 metadata:
-  name: "Configuration Name"              # What this configuration does
-  version: "1.0.0"                       # Version for tracking changes
-  description: "Configuration description" # Detailed explanation
+  id: "configuration-unique-id"          # Required: Unique identifier for this configuration
+  name: "Configuration Name"              # Required: What this configuration does
+  version: "1.0.0"                       # Required: Version for tracking changes
+  description: "Configuration description" # Required: Detailed explanation
   type: "rule-config"                     # Required: File type (rule-config, scenario, dataset, etc.)
-  author: "Team Name"                     # Who created/maintains this
-  created: "2025-08-02"                  # When it was created
-  last-modified: "2025-08-02"           # Last update date
-  tags: ["tag1", "tag2"]                # Categories for organization
+  author: "Team Name"                     # Required for rule-config: Who created/maintains this
+  created: "2025-08-02"                  # Optional: When it was created
+  last-modified: "2025-08-02"           # Optional: Last update date
+  tags: ["tag1", "tag2"]                # Optional: Categories for organization
 
 # Rules section: Your business logic
 rules:
@@ -3299,6 +3300,143 @@ lookup-config:
         service-key: "${PAGERDUTY_SERVICE_KEY}"
 ```
 
+### H2 Database Integration for Demos and Testing
+
+#### Overview
+
+H2 is an embedded Java database perfect for demos, testing, and development scenarios. APEX supports H2 in both file-based and in-memory modes, with file-based being recommended for scenarios requiring database sharing.
+
+#### ✅ RECOMMENDED: File-based H2 Configuration
+
+File-based H2 creates persistent database files that enable true database sharing between multiple processes:
+
+```yaml
+# File: customer-database.yaml
+data-sources:
+  - name: "customer-database"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "Customer master data from self-contained H2 database"
+
+    connection:
+      # H2 file-based database for true sharing between demo and APEX
+      database: "./target/h2-demo/apex_demo_shared"
+      username: "sa"
+      password: ""
+
+# Enhanced H2 Configuration with Custom Parameters
+data-sources:
+  - name: "h2-performance-database"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "H2 database with performance tuning and custom parameters"
+
+    connection:
+      # NEW: Custom H2 parameters can be specified after the database path
+      # Format: "path/to/database;PARAM1=value1;PARAM2=value2"
+      database: "./target/h2-demo/performance;MODE=MySQL;CACHE_SIZE=65536;TRACE_LEVEL_FILE=1"
+      username: "sa"
+      password: ""
+
+enrichments:
+  - name: "customer-profile-enrichment"
+    lookup-dataset:
+      type: "database"
+      data-source-ref: "customer-database"
+      query: "SELECT customer_name, customer_type, tier FROM customers WHERE customer_id = :customerId"
+
+    # IMPORTANT: H2 returns uppercase column names
+    field-mappings:
+      - source-field: "CUSTOMER_NAME"  # Must be uppercase
+        target-field: "customerName"
+      - source-field: "CUSTOMER_TYPE"
+        target-field: "customerType"
+```
+
+#### ❌ AVOID: In-memory H2 for Multi-Process Scenarios
+
+In-memory H2 creates isolated database instances that cannot be shared:
+
+```yaml
+# DON'T USE for demos requiring database sharing
+connection:
+  database: "shared_demo"  # Creates isolated in-memory instances
+```
+
+#### Java Code Integration
+
+```java
+public class H2DemoSetup {
+    // Use consistent JDBC URL with YAML configuration
+    private static final String JDBC_URL =
+        "jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+
+    public void initializeDatabase() throws SQLException {
+        try (Connection conn = DriverManager.getConnection(JDBC_URL, "sa", "")) {
+            Statement stmt = conn.createStatement();
+
+            // Clean up existing data
+            stmt.execute("DROP TABLE IF EXISTS customers");
+
+            // Create and populate table
+            stmt.execute("""
+                CREATE TABLE customers (
+                    customer_id VARCHAR(20) PRIMARY KEY,
+                    customer_name VARCHAR(100),
+                    customer_type VARCHAR(20),
+                    tier VARCHAR(20)
+                )
+            """);
+
+            stmt.execute("""
+                INSERT INTO customers VALUES
+                ('CUST001', 'Acme Corp', 'CORPORATE', 'PLATINUM')
+            """);
+        }
+    }
+}
+```
+
+#### Enhanced H2 Parameter Support
+
+APEX now supports custom H2 parameters directly in the database field:
+
+```yaml
+# Basic configuration (uses APEX defaults)
+database: "./target/h2-demo/basic"
+# → jdbc:h2:./target/h2-demo/basic;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+
+# Custom parameters (override defaults and add new ones)
+database: "./target/h2-demo/custom;MODE=MySQL;CACHE_SIZE=32768;TRACE_LEVEL_FILE=2"
+# → jdbc:h2:./target/h2-demo/custom;MODE=MySQL;CACHE_SIZE=32768;TRACE_LEVEL_FILE=2;DB_CLOSE_DELAY=-1
+```
+
+**Common H2 Parameters:**
+
+| Parameter | Description | Example Values |
+|-----------|-------------|----------------|
+| `MODE` | Database compatibility mode | `PostgreSQL`, `MySQL`, `Oracle`, `DB2` |
+| `CACHE_SIZE` | Database cache size in KB | `32768` (32MB), `65536` (64MB) |
+| `TRACE_LEVEL_FILE` | SQL logging level to file | `0` (off), `1` (error), `2` (info), `4` (debug) |
+| `TRACE_LEVEL_SYSTEM_OUT` | SQL logging to console | `0` (off), `1` (error), `2` (info) |
+| `INIT` | SQL script to run on startup | `RUNSCRIPT FROM 'classpath:init.sql'` |
+
+**Parameter Merging Rules:**
+1. Custom parameters override APEX defaults
+2. APEX automatically adds `DB_CLOSE_DELAY=-1` if not specified
+3. Additional custom parameters are preserved
+4. No duplicate parameters - custom takes precedence
+
+#### Key Considerations
+
+1. **Case Sensitivity:** H2 returns uppercase column names - use uppercase in field mappings
+2. **Database Cleanup:** Add `DROP TABLE IF EXISTS` to prevent primary key violations
+3. **Consistent Paths:** Use the same database path in Java code and YAML configuration
+4. **Directory Creation:** Ensure target directories exist before running demos
+5. **Custom Parameters:** Use semicolon-separated format for H2 parameters in database field
+
 ### Enterprise Integration Patterns
 
 #### 1. Multi-Tenant Lookup Configuration
@@ -3523,6 +3661,7 @@ All YAML files in APEX must include a `metadata` section with the following requ
 
 ```yaml
 metadata:
+  id: "unique-identifier"            # Required: Unique identifier for this configuration
   name: "Descriptive Name"           # Required: Human-readable name
   version: "1.0.0"                   # Required: Semantic version number
   description: "Clear description"   # Required: What this file does
@@ -3555,6 +3694,7 @@ metadata:
 ```yaml
 # Example for a scenario file
 metadata:
+  id: "OTC Options Processing Scenario"
   name: "OTC Options Processing Scenario"
   version: "1.0.0"
   description: "Associates OTC Options with existing rule configurations"
@@ -3567,6 +3707,7 @@ metadata:
 
 # Example for a rule-config file
 metadata:
+  id: "Financial Validation Rules"
   name: "Financial Validation Rules"
   version: "1.0.0"
   description: "Comprehensive validation rules for financial instruments"

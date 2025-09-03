@@ -96,7 +96,7 @@ public class ExternalDataSourceReferenceDemo {
         }
 
         // Use the exact same JDBC URL as the working demo and YAML configuration
-        String jdbcUrl = "jdbc:h2:mem:apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+        String jdbcUrl = "jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
         logger.info("JDBC URL: " + jdbcUrl);
         try (Connection connection = DriverManager.getConnection(jdbcUrl, "sa", "")) {
             Statement statement = connection.createStatement();

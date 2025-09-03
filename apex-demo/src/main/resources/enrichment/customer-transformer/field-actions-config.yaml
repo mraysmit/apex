@@ -3,6 +3,7 @@
 # Replaces hardcoded field transformer actions from CustomerTransformerDemo
 
 metadata:
+  id: "Field Actions Configuration"
   name: "Field Actions Configuration"
   version: "1.0.0"
   description: "Data-driven field actions configuration for customer transformation processing"

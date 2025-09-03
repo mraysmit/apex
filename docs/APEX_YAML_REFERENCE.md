@@ -1176,13 +1176,108 @@ metadata:
 connection:
   type: "database"
   driver: "postgresql"
-  url: "jdbc:h2:mem:apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
-  username: "sa"
-  password: ""
+  # For PostgreSQL
+  host: "localhost"
+  port: 5432
+  database: "customer_data"
+  username: "postgres"
+  password: "password"
   pool:
     initial-size: 5
     max-size: 20
     timeout: 30000
+
+# H2 Database Configuration Examples
+# ===================================
+
+# File-based H2 (RECOMMENDED for demos)
+h2-file-connection:
+  type: "database"
+  driver: "h2"
+  # File-based H2 enables true database sharing between processes
+  database: "./target/h2-demo/apex_demo_shared"
+  username: "sa"
+  password: ""
+
+# In-memory H2 (NOT RECOMMENDED - creates isolated instances)
+h2-memory-connection:
+  type: "database"
+  driver: "h2"
+  # WARNING: Each connection creates a separate in-memory instance
+  database: "shared_demo"  # Becomes jdbc:h2:mem:shared_demo
+  username: "sa"
+  password: ""
+
+# H2 TCP Server (for multi-process access)
+h2-tcp-connection:
+  type: "database"
+  driver: "h2"
+  host: "localhost"
+  port: 9092
+  database: "shared_demo"
+  username: "sa"
+  password: ""
+
+# Enhanced H2 with Custom Parameters (NEW!)
+h2-custom-connection:
+  type: "database"
+  driver: "h2"
+  # Custom parameters can be specified after the database path
+  # Format: "path/to/database;PARAM1=value1;PARAM2=value2"
+  database: "./target/h2-demo/custom;MODE=MySQL;CACHE_SIZE=32768;TRACE_LEVEL_FILE=2"
+  username: "sa"
+  password: ""
+  # This generates: jdbc:h2:./target/h2-demo/custom;MODE=MySQL;CACHE_SIZE=32768;TRACE_LEVEL_FILE=2;DB_CLOSE_DELAY=-1
+
+# H2 In-memory with Custom Parameters
+h2-memory-custom-connection:
+  type: "database"
+  driver: "h2"
+  # In-memory database with custom parameters
+  database: "mem:testdb;CACHE_SIZE=16384;MODE=Oracle;TRACE_LEVEL_SYSTEM_OUT=1"
+  username: "sa"
+  password: ""
+  # This generates: jdbc:h2:mem:testdb;CACHE_SIZE=16384;MODE=Oracle;TRACE_LEVEL_SYSTEM_OUT=1;DB_CLOSE_DELAY=-1
+
+# H2 Parameter Reference
+# ======================
+
+# Common H2 Parameters for Performance Tuning:
+# - MODE: Database compatibility mode (PostgreSQL, MySQL, Oracle, DB2, HSQLDB)
+# - CACHE_SIZE: Database cache size in KB (default: 16384 = 16MB)
+# - MAX_MEMORY_ROWS: Maximum rows kept in memory (default: 40000)
+# - MAX_MEMORY_UNDO: Maximum undo log entries in memory (default: 50000)
+
+# Common H2 Parameters for Debugging:
+# - TRACE_LEVEL_FILE: SQL logging level to file (0=off, 1=error, 2=info, 4=debug)
+# - TRACE_LEVEL_SYSTEM_OUT: SQL logging to console (0=off, 1=error, 2=info)
+# - TRACE_MAX_FILE_SIZE: Maximum trace file size in MB (default: 16)
+
+# Common H2 Parameters for Connection Management:
+# - DB_CLOSE_DELAY: Keep database open after last connection (-1=forever, 0=immediate, >0=seconds)
+# - DB_CLOSE_ON_EXIT: Close database when JVM exits (TRUE/FALSE)
+# - AUTO_SERVER: Enable automatic mixed mode (TRUE/FALSE)
+
+# Common H2 Parameters for Initialization:
+# - INIT: SQL script to run on database startup
+# - IFEXISTS: Only connect if database exists (TRUE/FALSE)
+# - ACCESS_MODE_DATA: Database access mode (r=read-only, rw=read-write)
+
+# Example Configurations:
+performance-tuned-h2:
+  database: "./target/h2-demo/performance;MODE=PostgreSQL;CACHE_SIZE=65536;MAX_MEMORY_ROWS=100000"
+
+debug-enabled-h2:
+  database: "./target/h2-demo/debug;TRACE_LEVEL_FILE=2;TRACE_LEVEL_SYSTEM_OUT=1;TRACE_MAX_FILE_SIZE=32"
+
+mysql-compatible-h2:
+  database: "./target/h2-demo/mysql;MODE=MySQL;CACHE_SIZE=32768"
+
+read-only-h2:
+  database: "./target/h2-demo/readonly;ACCESS_MODE_DATA=r;IFEXISTS=TRUE"
+
+auto-init-h2:
+  database: "./target/h2-demo/autoinit;INIT=RUNSCRIPT FROM 'classpath:schema.sql'"
 
 # Named queries for reuse
 queries:

@@ -1,4 +1,5 @@
 metadata:
+  id: "OTC Options Processing Scenario"
   name: "OTC Options Processing Scenario"
   version: "1.0.0"
   description: "Scenario configuration that associates OTC Options data types with existing rule configuration files for processing"

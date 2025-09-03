@@ -3,6 +3,7 @@
 # Replaces all hardcoded product validation logic from IntegratedProductValidatorDemo (@version 1.0)
 
 metadata:
+  id: "Integrated Product Validator Demo"
   name: "Integrated Product Validator Demo"
   version: "1.0.0"
   description: "APEX-compliant integrated product validator with real enrichment services"

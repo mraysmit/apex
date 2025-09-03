@@ -3,6 +3,7 @@
 # Use Case: Customer profile data source for enrichment lookups
 
 metadata:
+  id: "Self-Contained Database Data Source Demo"
   name: "Self-Contained Database Data Source Demo"
   version: "1.0.0"
   description: "Data source configuration for embedded H2 database with connection pooling and caching"
@@ -12,17 +13,18 @@ metadata:
   tags: ["apex-demo", "lookup", "database", "data-source"]
 
 # External data source configuration
-dataSources:
+data-sources:
   - name: "customer-database"
     type: "database"
-    sourceType: "h2"
+    source-type: "h2"
     enabled: true
     description: "Customer master data from self-contained H2 database"
 
     connection:
-      url: "jdbc:h2:mem:apex_demo;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
-      username: "apex_user"
-      password: "apex_password"
+      # H2 file-based database for true sharing between demo and APEX
+      database: "./target/h2-demo/apex_demo_shared"
+      username: "sa"
+      password: ""
 
       # Connection pool configuration (verified against YamlDataSource.java)
       connection-pool:
@@ -71,16 +73,54 @@ dataSources:
           ('CUST000002', 'Beta Industries', 'CORPORATE', 'GOLD', 'EU', 'ACTIVE', '2023-02-20'),
           ('CUST000003', 'Gamma Holdings', 'INSTITUTIONAL', 'PLATINUM', 'APAC', 'ACTIVE', '2023-03-10'),
           ('CUST000004', 'Delta Partners', 'CORPORATE', 'SILVER', 'NA', 'ACTIVE', '2023-04-05'),
-          ('CUST000005', 'Epsilon Fund', 'INSTITUTIONAL', 'GOLD', 'EU', 'ACTIVE', '2023-05-12')
-          ON DUPLICATE KEY UPDATE customer_name = VALUES(customer_name);
+          ('CUST000005', 'Epsilon Fund', 'INSTITUTIONAL', 'GOLD', 'EU', 'ACTIVE', '2023-05-12');
 
     # Query definitions for this data source
     queries:
-      customerProfile: "SELECT customer_id, customer_name, customer_type, tier, region, status, created_date, last_updated FROM customers WHERE customer_id = ?"
+      customerProfile: "SELECT customer_id, customer_name, customer_type, tier, region, status, created_date, last_updated FROM customers WHERE customer_id = :customerId"
 
     # Parameter definitions
     parameterNames:
       - "customerId"
 
+# Enrichment rules using database lookups
+enrichments:
+  - id: "customer-profile-simple-lookup"
+    name: "customer-profile-simple-lookup"
+    description: "Simple customer profile lookup using H2 database"
+    type: "lookup-enrichment"
 
+    # Condition: Only process if customerId is present
+    condition: "#customerId != null && #customerId != ''"
 
+    # Database lookup configuration
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        connection-name: "customer-database"
+        query: "SELECT customer_name, customer_type, tier, region, status, created_date FROM customers WHERE customer_id = :customerId"
+        parameters:
+          - field: "customerId"
+            type: "string"
+
+    # Field mappings for enrichment results (H2 returns uppercase column names)
+    field-mappings:
+      - source-field: "CUSTOMER_NAME"
+        target-field: "customerName"
+        required: true
+      - source-field: "CUSTOMER_TYPE"
+        target-field: "customerType"
+        required: true
+      - source-field: "TIER"
+        target-field: "customerTier"
+        required: true
+      - source-field: "REGION"
+        target-field: "customerRegion"
+        required: true
+      - source-field: "STATUS"
+        target-field: "customerStatus"
+        required: true
+      - source-field: "CREATED_DATE"
+        target-field: "customerCreatedDate"
+        required: false

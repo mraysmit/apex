@@ -67,6 +67,7 @@
 # ============================================================================
 
 metadata:
+  id: "Commodity Swap Validation Bootstrap"
   name: "Commodity Swap Validation Bootstrap"
   version: "1.0"
   description: "Complete commodity derivatives validation and enrichment demonstration"

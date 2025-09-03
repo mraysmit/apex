@@ -41,6 +41,7 @@
 # ============================================================================
 
 metadata:
+  id: "OTC Options Bootstrap Configuration"
   name: "OTC Options Bootstrap Configuration"
   version: "1.0.0"
   description: "Complete OTC Options validation and enrichment with three data lookup methods"

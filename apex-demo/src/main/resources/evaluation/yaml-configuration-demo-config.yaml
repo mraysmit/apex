@@ -3,6 +3,7 @@
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
 metadata:
+  id: "YAML Configuration Demo Configuration"
   name: "YAML Configuration Demo Configuration"
   version: "2.0.0"
   description: "Real APEX YAML configuration demonstration with external configuration, business user-editable rules, and dynamic configuration loading"

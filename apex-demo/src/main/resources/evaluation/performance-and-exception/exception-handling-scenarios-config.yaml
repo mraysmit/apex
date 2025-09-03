@@ -3,6 +3,7 @@
 # Replaces hardcoded exception handling logic from PerformanceAndExceptionDemo
 
 metadata:
+  id: "Exception Handling Scenarios Configuration"
   name: "Exception Handling Scenarios Configuration"
   version: "1.0.0"
   description: "Data-driven exception handling scenarios configuration for performance and exception handling processing"

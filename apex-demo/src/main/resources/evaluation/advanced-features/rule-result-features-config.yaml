@@ -3,6 +3,7 @@
 # Replaces hardcoded rule result logic from ApexAdvancedFeaturesDemo
 
 metadata:
+  id: "Rule Result Features Configuration"
   name: "Rule Result Features Configuration"
   version: "1.0.0"
   description: "Data-driven rule result features configuration for advanced features"

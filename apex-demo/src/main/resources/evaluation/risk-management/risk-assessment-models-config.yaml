@@ -3,6 +3,7 @@
 # Replaces hardcoded risk assessment logic from RiskManagementService
 
 metadata:
+  id: "Risk Assessment Models Configuration"
   name: "Risk Assessment Models Configuration"
   version: "1.0.0"
   description: "Data-driven risk assessment models configuration for risk management service"

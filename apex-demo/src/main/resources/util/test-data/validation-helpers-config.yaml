@@ -3,6 +3,7 @@
 # Replaces hardcoded validation helper logic from TestUtilities
 
 metadata:
+  id: "Validation Helpers Configuration"
   name: "Validation Helpers Configuration"
   version: "1.0.0"
   description: "Data-driven validation helpers configuration for test utilities"

@@ -3,6 +3,7 @@
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
 metadata:
+  id: "Data Management Demo Configuration"
   name: "Data Management Demo Configuration"
   version: "2.0.0"
   description: "Real APEX data management demonstration with dataset structure, enrichment, validation, and error handling"

@@ -3,6 +3,7 @@
 # Replaces all hardcoded trade validation logic from IntegratedTradeValidatorDemo (@version 1.0)
 
 metadata:
+  id: "Integrated Trade Validator Demo"
   name: "Integrated Trade Validator Demo"
   version: "1.0.0"
   description: "APEX-compliant integrated trade validation with real enrichment services"

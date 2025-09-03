@@ -3,6 +3,7 @@
 # Replaces hardcoded collection logic from ApexAdvancedFeaturesDemo
 
 metadata:
+  id: "Collection Operations Configuration"
   name: "Collection Operations Configuration"
   version: "1.0.0"
   description: "Data-driven collection operations configuration for advanced features"

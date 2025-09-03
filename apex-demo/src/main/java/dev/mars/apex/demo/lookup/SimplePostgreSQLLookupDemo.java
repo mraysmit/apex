@@ -235,10 +235,12 @@ public class SimplePostgreSQLLookupDemo {
             Class.forName("org.h2.Driver");
             logger.info("✅ H2 driver loaded successfully for external data-source reference");
 
-            // Create H2 database connection with shared in-memory database (PostgreSQL compatibility mode)
-            String jdbcUrl = "jdbc:h2:mem:apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+            // Create H2 database connection with shared file-based database (PostgreSQL compatibility mode)
+            String jdbcUrl = "jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
 
             try (var connection = java.sql.DriverManager.getConnection(jdbcUrl, "sa", "")) {
+                logger.info("✓ H2 driver loaded successfully for external data-source reference");
+
                 // Create customers table
                 String createTable = """
                     CREATE TABLE IF NOT EXISTS customers (

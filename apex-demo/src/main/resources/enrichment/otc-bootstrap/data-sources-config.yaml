@@ -3,6 +3,7 @@
 # Replaces hardcoded data source logic from OtcOptionsBootstrapDemo
 
 metadata:
+  id: "Data Sources Configuration"
   name: "Data Sources Configuration"
   version: "1.0.0"
   description: "Data-driven data sources configuration for OTC options processing"

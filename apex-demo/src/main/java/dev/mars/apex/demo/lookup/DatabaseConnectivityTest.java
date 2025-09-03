@@ -72,7 +72,7 @@ public class DatabaseConnectivityTest {
             throw new RuntimeException("H2 driver not available", e);
         }
 
-        String jdbcUrl = "jdbc:h2:mem:apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+        String jdbcUrl = "jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
         try (Connection connection = DriverManager.getConnection(jdbcUrl, "sa", "")) {
             logger.info("✅ Successfully connected to H2 database");
             logger.info("  Database URL: " + jdbcUrl);
@@ -89,10 +89,13 @@ public class DatabaseConnectivityTest {
         logger.info("TEST 2: Table Creation and Data Insertion");
         logger.info("============================================================");
         
-        String jdbcUrl = "jdbc:h2:mem:apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+        String jdbcUrl = "jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
         try (Connection connection = DriverManager.getConnection(jdbcUrl, "sa", "")) {
             Statement statement = connection.createStatement();
-            
+
+            // Clean up existing data to prevent primary key violations
+            statement.execute("DROP TABLE IF EXISTS customers");
+
             // Create customers table
             statement.execute("""
                 CREATE TABLE IF NOT EXISTS customers (
@@ -136,7 +139,7 @@ public class DatabaseConnectivityTest {
         logger.info("TEST 3: Named Parameter Query (APEX Style)");
         logger.info("============================================================");
         
-        String jdbcUrl = "jdbc:h2:mem:apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+        String jdbcUrl = "jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
         try (Connection connection = DriverManager.getConnection(jdbcUrl, "sa", "")) {
             
             // Test the exact query used in APEX configuration
@@ -197,10 +200,16 @@ public class DatabaseConnectivityTest {
         logger.info("TEST 4: Multi-Table JOIN Query");
         logger.info("============================================================");
         
-        String jdbcUrl = "jdbc:h2:mem:apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+        String jdbcUrl = "jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
         try (Connection connection = DriverManager.getConnection(jdbcUrl, "sa", "")) {
             Statement statement = connection.createStatement();
-            
+
+            // Clean up existing data to prevent primary key violations
+            // Drop dependent tables first to avoid constraint violations
+            statement.execute("DROP TABLE IF EXISTS settlement_instructions");
+            statement.execute("DROP TABLE IF EXISTS risk_assessments");
+            statement.execute("DROP TABLE IF EXISTS counterparties");
+
             // Create additional tables for JOIN test
             statement.execute("""
                 CREATE TABLE IF NOT EXISTS counterparties (

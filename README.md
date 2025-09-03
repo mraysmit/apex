@@ -59,11 +59,13 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo
 - **Configuration Caching**: Automatic caching of external configurations for performance
 - **Reusable Components**: Share data-source configurations across multiple rule sets
 - **Enterprise Scalability**: Environment-specific infrastructure with shared business logic
+- **Enhanced H2 Support**: Custom H2 parameters directly in YAML configuration for performance tuning and debugging
 
 ### Core Features
 - **Interactive Playground**: 4-panel web interface for real-time rule development and testing
 - **Scenario-Based Configuration**: Centralized management and routing of data processing pipelines
 - **External Data Integration**: Connect to databases, REST APIs, file systems, and caches
+- **Advanced H2 Database Support**: Custom parameters for performance tuning, debugging, and compatibility modes
 - **YAML Dataset Enrichment**: Embed reference data directly in configuration files
 - **Financial Services Ready**: OTC derivatives validation, regulatory compliance, risk assessment
 - **Enterprise Features**: Connection pooling, health monitoring, caching, circuit breakers

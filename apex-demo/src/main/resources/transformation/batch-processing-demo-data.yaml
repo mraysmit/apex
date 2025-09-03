@@ -3,6 +3,7 @@
 # NO HARDCODED SIMULATION - Real APEX data processing
 
 metadata:
+  id: "Batch Processing Demo Data"
   name: "Batch Processing Demo Data"
   version: "2.0.0"
   description: "Test data scenarios for real APEX batch processing demonstration"

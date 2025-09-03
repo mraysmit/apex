@@ -21,6 +21,7 @@
 # ============================================================================
 
 metadata:
+  id: "Settlement Validation Rules"
   name: "Settlement Validation Rules"
   version: "1.0.0"
   description: "Comprehensive validation rules for settlement processing and custody operations"

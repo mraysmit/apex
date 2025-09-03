@@ -3,6 +3,7 @@
 # Use Case: Country-specific settlement information lookup using nested counterparty data
 
 metadata:
+  id: "Nested Field Reference Lookup Demo"
   name: "Nested Field Reference Lookup Demo"
   version: "1.0.0"
   description: "Demonstrates nested field navigation '#trade.counterparty.countryCode' for settlement enrichment"

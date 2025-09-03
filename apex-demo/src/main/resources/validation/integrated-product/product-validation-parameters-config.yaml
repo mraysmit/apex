@@ -3,6 +3,7 @@
 # Replaces hardcoded product validation parameters from IntegratedProductValidatorDemo
 
 metadata:
+  id: "Product Validation Parameters Configuration"
   name: "Product Validation Parameters Configuration"
   version: "1.0.0"
   description: "Data-driven product validation parameters configuration for integrated product validation processing"
