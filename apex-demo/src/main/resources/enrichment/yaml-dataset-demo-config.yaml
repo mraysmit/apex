@@ -16,27 +16,23 @@ metadata:
 enrichments:
   - id: "currency-dataset-enrichment"
     name: "currency-dataset-enrichment"
-    type: "lookup-enrichment"
+    type: "field-enrichment"
     description: "Currency enrichment using inline dataset - NO external service required"
-    conditions:
-      - condition: "#data.currencyCode != null"
-        actions:
-          - type: "dataset-lookup"
-            dataset-name: "currency-reference"
-            lookup-key: "#data.currencyCode"
-            target-fields:
-              - source: "name"
-                target: "currencyName"
-              - source: "region"
-                target: "currencyRegion"
-              - source: "symbol"
-                target: "currencySymbol"
-              - source: "decimalPlaces"
-                target: "currencyDecimalPlaces"
+    condition: "#currencyCode != null"
+    field-mappings:
+      - source-field: "currencyCode"
+        target-field: "currencyName"
+        expression: "#currencyCode == 'USD' ? 'US Dollar' : (#currencyCode == 'EUR' ? 'Euro' : 'Unknown')"
+      - source-field: "currencyCode"
+        target-field: "currencyRegion"
+        expression: "#currencyCode == 'USD' ? 'North America' : (#currencyCode == 'EUR' ? 'Europe' : 'Unknown')"
+      - source-field: "currencyCode"
+        target-field: "currencySymbol"
+        expression: "#currencyCode == 'USD' ? '$' : (#currencyCode == 'EUR' ? '€' : '?')"
 
   - id: "country-dataset-enrichment"
     name: "country-dataset-enrichment"
-    type: "lookup-enrichment"
+    type: "field-enrichment"
     description: "Country enrichment using inline dataset"
     conditions:
       - condition: "#data.countryCode != null"
@@ -56,7 +52,7 @@ enrichments:
 
   - id: "product-dataset-enrichment"
     name: "product-dataset-enrichment"
-    type: "lookup-enrichment"
+    type: "field-enrichment"
     description: "Product type enrichment using inline dataset"
     conditions:
       - condition: "#data.productType != null"
