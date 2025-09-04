@@ -44,6 +44,9 @@ public class YamlRuleConfiguration {
     @JsonProperty("data-source-refs")
     private List<YamlDataSourceRef> dataSourceRefs;
 
+    @JsonProperty("data-sinks")
+    private List<YamlDataSink> dataSinks;
+
     @JsonProperty("categories")
     private List<YamlCategory> categories;
     
@@ -88,6 +91,14 @@ public class YamlRuleConfiguration {
 
     public void setDataSourceRefs(List<YamlDataSourceRef> dataSourceRefs) {
         this.dataSourceRefs = dataSourceRefs;
+    }
+
+    public List<YamlDataSink> getDataSinks() {
+        return dataSinks;
+    }
+
+    public void setDataSinks(List<YamlDataSink> dataSinks) {
+        this.dataSinks = dataSinks;
     }
 
     public List<YamlCategory> getCategories() {

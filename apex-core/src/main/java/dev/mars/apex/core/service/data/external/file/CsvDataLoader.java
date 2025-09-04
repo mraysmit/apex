@@ -74,6 +74,9 @@ public class CsvDataLoader implements DataLoader {
                 String headerLine = reader.readLine();
                 if (headerLine != null) {
                     headers = parseCsvLine(headerLine, formatConfig);
+                    LOGGER.debug("CSV headers parsed: {}", java.util.Arrays.toString(headers));
+                } else {
+                    LOGGER.warn("Expected header row but got null from file: {}", filePath);
                 }
             }
             
@@ -100,7 +103,12 @@ public class CsvDataLoader implements DataLoader {
                 }
             }
             
-            LOGGER.debug("Loaded {} rows from CSV file: {}", results.size(), filePath);
+            LOGGER.info("Loaded {} rows from CSV file: {}", results.size(), filePath);
+            if (results.isEmpty()) {
+                LOGGER.warn("CSV file loaded but contains no data rows: {}", filePath);
+            } else {
+                LOGGER.debug("Sample CSV row: {}", results.get(0));
+            }
             
         } catch (IOException e) {
             LOGGER.error("Failed to load CSV file: {}", filePath, e);

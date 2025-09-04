@@ -150,6 +150,13 @@
                             <mainClass>dev.mars.apex.demo.evaluation.ScenarioBasedProcessingDemo</mainClass>
                         </configuration>
                     </execution>
+                    <!-- ETL Demo -->
+                    <execution>
+                        <id>csv-to-h2-etl</id>
+                        <configuration>
+                            <mainClass>dev.mars.apex.demo.etl.CsvToH2PipelineDemo</mainClass>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>

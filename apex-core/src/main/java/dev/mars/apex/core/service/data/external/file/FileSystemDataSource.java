@@ -207,16 +207,21 @@ public class FileSystemDataSource implements ExternalDataSource {
     @Override
     public <T> List<T> query(String query, Map<String, Object> parameters) throws DataSourceException {
         try {
+            LOGGER.info("Executing query '{}' on file system data source '{}'", query, getName());
+
             // First, check if this is a named query from configuration
             String actualQuery = resolveNamedQuery(query);
+            LOGGER.info("Resolved query '{}' to '{}'", query, actualQuery);
 
             // If it's a JSONPath query, execute it against loaded data
             if (actualQuery.startsWith("$.") || actualQuery.startsWith("$[")) {
+                LOGGER.debug("Executing as JSONPath query: {}", actualQuery);
                 return executeJsonPathQuery(actualQuery, parameters);
             }
 
             // If it's a SQL-like query for CSV, execute it against loaded data
             if (actualQuery.toUpperCase().startsWith("SELECT")) {
+                LOGGER.info("Executing as CSV SQL query: {}", actualQuery);
                 return executeCsvQuery(actualQuery, parameters);
             }
             // Otherwise, treat it as a file pattern
@@ -488,8 +493,12 @@ public class FileSystemDataSource implements ExternalDataSource {
      */
     private String resolveNamedQuery(String query) {
         if (configuration.getQueries() != null && configuration.getQueries().containsKey(query)) {
-            return configuration.getQueries().get(query);
+            String resolvedQuery = configuration.getQueries().get(query);
+            LOGGER.info("Resolved named query '{}' to '{}'", query, resolvedQuery);
+            return resolvedQuery;
         }
+
+        LOGGER.info("No named query found for '{}', using as literal query", query);
         return query; // Return as-is if not found in named queries
     }
 
@@ -632,7 +641,9 @@ public class FileSystemDataSource implements ExternalDataSource {
             }
 
             // Load and parse the file
+            LOGGER.debug("Loading data from file for CSV query: {}", mostRecentFile);
             List<Object> fileData = loadDataFromFile(mostRecentFile);
+            LOGGER.debug("Loaded {} records from file for CSV query", fileData.size());
 
             // Apply SQL-like filtering (simplified implementation)
             List<T> results = new ArrayList<>();

@@ -30,36 +30,72 @@ external-data-sources:
 
 # APEX enrichment processing for custody auto-repair bootstrap
 enrichments:
-  - name: "standing-instructions-processing"
+  - id: "standing-instructions-processing"
+    name: "standing-instructions-processing"
     type: "lookup-enrichment"
     description: "Process standing instructions using data-driven configuration"
-    condition: "#data.bootstrapType == 'standing-instructions-processing'"
-    lookup-source: "standing-instructions-config"
-    lookup-key: "#data.instructionType != null ? #data.instructionType : 'default'"
-    target-field: "standingInstructionsResult"
-    
-  - name: "settlement-scenarios-processing"
+    condition: "#bootstrapType == 'standing-instructions-processing'"
+    lookup-config:
+      lookup-key: "#instructionType"
+      lookup-dataset:
+        type: "inline"
+        key-field: "type"
+        data:
+          - type: "client-level-instructions"
+            result: "Client-level standing instructions processed"
+          - type: "default"
+            result: "Default standing instructions processed"
+    field-mappings:
+      - source-field: "result"
+        target-field: "standingInstructionsResult"
+
+  - id: "settlement-scenarios-processing"
+    name: "settlement-scenarios-processing"
     type: "lookup-enrichment"
     description: "Process settlement scenarios using data-driven configuration"
-    condition: "#data.bootstrapType == 'settlement-scenarios-processing'"
-    lookup-source: "settlement-scenarios-config"
-    lookup-key: "#data.scenarioType != null ? #data.scenarioType : 'default'"
-    target-field: "settlementScenariosResult"
-    
-  - name: "auto-repair-rules-processing"
+    condition: "#bootstrapType == 'settlement-scenarios-processing'"
+    lookup-config:
+      lookup-key: "#scenarioType"
+      lookup-dataset:
+        type: "inline"
+        key-field: "type"
+        data:
+          - type: "standard-settlement-scenarios"
+            result: "Standard settlement scenarios processed"
+          - type: "default"
+            result: "Default settlement scenarios processed"
+    field-mappings:
+      - source-field: "result"
+        target-field: "settlementScenariosResult"
+
+  - id: "auto-repair-rules-processing"
+    name: "auto-repair-rules-processing"
     type: "lookup-enrichment"
     description: "Process auto-repair rules using data-driven configuration"
-    condition: "#data.bootstrapType == 'auto-repair-rules-processing'"
-    lookup-source: "auto-repair-rules-config"
-    lookup-key: "#data.ruleType != null ? #data.ruleType : 'default'"
-    target-field: "autoRepairRulesResult"
+    condition: "#bootstrapType == 'auto-repair-rules-processing'"
+    lookup-config:
+      lookup-key: "#ruleType"
+      lookup-dataset:
+        type: "inline"
+        key-field: "type"
+        data:
+          - type: "field-completion-rules"
+            result: "Field completion rules processed"
+          - type: "default"
+            result: "Default auto-repair rules processed"
+    field-mappings:
+      - source-field: "result"
+        target-field: "autoRepairRulesResult"
     
-  - name: "custody-auto-repair-summary"
-    type: "expression-enrichment"
+  - id: "custody-auto-repair-summary"
+    name: "custody-auto-repair-summary"
+    type: "field-enrichment"
     description: "Generate custody auto-repair bootstrap summary"
     condition: "true"
-    expression: "'Custody auto-repair bootstrap completed: ' + (#data.bootstrapType != null ? #data.bootstrapType : 'unknown') + ' using real APEX services'"
-    target-field: "custodyAutoRepairSummary"
+    field-mappings:
+      - source-field: "bootstrapType"
+        target-field: "custodyAutoRepairSummary"
+        expression: "'Custody auto-repair bootstrap completed: ' + (#bootstrapType != null ? #bootstrapType : 'unknown') + ' using real APEX services'"
 
 # Bootstrap processing categories
 processing-categories:

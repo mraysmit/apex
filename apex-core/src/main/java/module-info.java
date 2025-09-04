@@ -78,4 +78,11 @@ module dev.mars.apex.core {
     exports dev.mars.apex.core.service.data.external.cache;
     exports dev.mars.apex.core.service.data.external.file;
 
+    // Data sink exports
+    exports dev.mars.apex.core.config.datasink;
+    exports dev.mars.apex.core.service.data.external.database;
+
+    // Pipeline engine exports
+    exports dev.mars.apex.core.engine.pipeline;
+
 }

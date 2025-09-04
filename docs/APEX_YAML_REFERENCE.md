@@ -1494,6 +1494,177 @@ enrichments:
       log-errors: true               # Log errors for monitoring
 ```
 
+### 8.5 Data Sinks (Output Destinations)
+
+**Data Sinks** provide output capabilities for APEX, enabling processed data to be written to various destinations including databases, files, message queues, and REST APIs. This complements the existing data-sources functionality by providing a complete data pipeline solution.
+
+#### Overview
+
+Data sinks follow the same architectural patterns as data sources, supporting:
+- **Multiple Output Types**: Database, file system, message queue, REST API, cache
+- **Batch Processing**: Efficient bulk operations with configurable batch sizes
+- **Error Handling**: Comprehensive retry mechanisms and dead letter queues
+- **Schema Management**: Auto-creation and validation of database schemas
+- **Format Support**: JSON, CSV, XML, SQL, and custom formats
+
+#### Basic Data Sink Configuration
+
+```yaml
+metadata:
+  name: "Data Pipeline with Output"
+  version: "1.0.0"
+  description: "Complete data pipeline with input and output"
+
+data-sinks:
+  - name: "customer-database-sink"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "H2 database for processed customer data"
+
+    connection:
+      database: "./target/output/customer_data"
+      username: "sa"
+      password: ""
+      mode: "PostgreSQL"
+
+    operations:
+      insertCustomer: "INSERT INTO customers (id, name, email, processed_at) VALUES (:id, :name, :email, :processedAt)"
+      updateCustomer: "UPDATE customers SET name = :name, email = :email WHERE id = :id"
+      upsertCustomer: "MERGE INTO customers (id, name, email, processed_at) KEY (id) VALUES (:id, :name, :email, :processedAt)"
+
+    schema:
+      auto-create: true
+      table-name: "customers"
+      init-script: |
+        CREATE TABLE IF NOT EXISTS customers (
+          id INTEGER PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          email VARCHAR(255),
+          processed_at TIMESTAMP
+        );
+
+    error-handling:
+      strategy: "log-and-continue"
+      max-retries: 3
+      retry-delay: 1000
+      dead-letter-table: "failed_records"
+
+    batch:
+      enabled: true
+      batch-size: 50
+      timeout-ms: 10000
+      transaction-mode: "per-batch"
+```
+
+#### File System Data Sink
+
+```yaml
+data-sinks:
+  - name: "audit-file-sink"
+    type: "file-system"
+    source-type: "json"
+    enabled: true
+    description: "Audit trail file output"
+
+    connection:
+      base-path: "./target/output/audit"
+      file-pattern: "audit_{timestamp}.json"
+      encoding: "UTF-8"
+
+    operations:
+      writeAuditRecord: "WRITE_JSON"
+      appendAuditRecord: "APPEND_JSON"
+
+    output-format:
+      format: "json"
+      pretty-print: true
+      encoding: "UTF-8"
+      include-timestamp: true
+
+    batch:
+      enabled: true
+      batch-size: 100
+      flush-interval-ms: 5000
+```
+
+#### Data Sink Properties
+
+| Property | Required | Description | Example |
+|----------|----------|-------------|---------|
+| `name` | Yes | Unique identifier for the data sink | "customer-database-sink" |
+| `type` | Yes | Type of data sink | "database", "file-system", "message-queue" |
+| `source-type` | No | Specific implementation type | "h2", "postgresql", "csv", "json" |
+| `enabled` | No | Whether this sink is active (default: true) | true |
+| `description` | No | Human-readable description | "Customer data output sink" |
+| `connection` | Yes | Connection configuration | See connection examples |
+| `operations` | Yes | Named operations (SQL, templates, etc.) | See operations examples |
+| `schema` | No | Schema management configuration | See schema examples |
+| `error-handling` | No | Error handling strategy | See error handling examples |
+| `batch` | No | Batch processing configuration | See batch examples |
+| `output-format` | No | Output format settings | See format examples |
+
+#### Error Handling Strategies
+
+| Strategy | Description | Use Case |
+|----------|-------------|----------|
+| `fail-fast` | Stop processing on first error | Critical data integrity requirements |
+| `log-and-continue` | Log error and continue processing | Best effort processing |
+| `dead-letter` | Send failed records to dead letter queue | Error recovery and analysis |
+| `retry-and-fail` | Retry failed operations, then fail | Transient error handling |
+| `retry-and-continue` | Retry failed operations, then continue | Resilient processing |
+
+#### Complete Pipeline Example
+
+```yaml
+metadata:
+  name: "CSV to Database Pipeline"
+  version: "1.0.0"
+  description: "Complete pipeline from CSV input to database output"
+
+# Input data source
+data-source-refs:
+  - name: "customer-csv-input"
+    source: "data-sources/customer-csv.yaml"
+    enabled: true
+
+# Data transformation
+enrichments:
+  - id: "customer-data-enrichment"
+    type: "field-transformation"
+    description: "Enrich and validate customer data"
+    condition: "true"
+
+    calculations:
+      - field: "processedAt"
+        expression: "new java.util.Date()"
+      - field: "status"
+        expression: "'PROCESSED'"
+
+# Output data sink
+data-sinks:
+  - name: "customer-h2-output"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+
+    connection:
+      database: "./target/output/processed_customers"
+      username: "sa"
+      password: ""
+
+    operations:
+      insertCustomer: "INSERT INTO customers (id, name, email, processed_at, status) VALUES (:id, :name, :email, :processedAt, :status)"
+
+    schema:
+      auto-create: true
+      table-name: "customers"
+
+    batch:
+      enabled: true
+      batch-size: 100
+```
+
 ---
 
 ## 9. Advanced Features

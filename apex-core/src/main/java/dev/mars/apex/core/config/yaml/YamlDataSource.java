@@ -70,7 +70,10 @@ public class YamlDataSource {
     // Type-specific configurations
     @JsonProperty("queries")
     private Map<String, String> queries;
-    
+
+    @JsonProperty("operations")
+    private Map<String, String> operations;
+
     @JsonProperty("endpoints")
     private Map<String, String> endpoints;
     
@@ -201,11 +204,19 @@ public class YamlDataSource {
     public Map<String, String> getQueries() {
         return queries;
     }
-    
+
     public void setQueries(Map<String, String> queries) {
         this.queries = queries != null ? queries : new HashMap<>();
     }
-    
+
+    public Map<String, String> getOperations() {
+        return operations;
+    }
+
+    public void setOperations(Map<String, String> operations) {
+        this.operations = operations != null ? operations : new HashMap<>();
+    }
+
     public Map<String, String> getEndpoints() {
         return endpoints;
     }
@@ -326,7 +337,16 @@ public class YamlDataSource {
         }
         
         // Set type-specific configurations
-        config.setQueries(queries);
+        // Merge queries and operations into the queries map
+        Map<String, String> allQueries = new HashMap<>();
+        if (queries != null) {
+            allQueries.putAll(queries);
+        }
+        if (operations != null) {
+            allQueries.putAll(operations); // Operations take precedence over queries if there are conflicts
+        }
+        config.setQueries(allQueries);
+
         config.setEndpoints(endpoints);
         config.setTopics(topics);
         config.setKeyPatterns(keyPatterns);
