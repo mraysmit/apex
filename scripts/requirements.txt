@@ -1,0 +1,29 @@
+# Python dependencies for APEX analysis scripts
+# Install with: pip install -r requirements.txt
+
+# YAML processing
+PyYAML>=6.0
+
+# Data processing (optional, for advanced analysis)
+pandas>=1.5.0
+
+# JSON processing (built-in, but listed for completeness)
+# json - built-in module
+
+# Path handling (built-in, but listed for completeness)  
+# pathlib - built-in module
+
+# Regular expressions (built-in)
+# re - built-in module
+
+# Date/time handling (built-in)
+# datetime - built-in module
+
+# Command line argument parsing (built-in)
+# argparse - built-in module
+
+# Data classes (built-in in Python 3.7+)
+# dataclasses - built-in module
+
+# Type hints (built-in in Python 3.5+)
+# typing - built-in module

@@ -14,7 +14,8 @@ metadata:
 
 # Dataset-Based Enrichments with Inline Data
 enrichments:
-  - name: "currency-dataset-enrichment"
+  - id: "currency-dataset-enrichment"
+    name: "currency-dataset-enrichment"
     type: "lookup-enrichment"
     description: "Currency enrichment using inline dataset - NO external service required"
     conditions:
@@ -33,7 +34,8 @@ enrichments:
               - source: "decimalPlaces"
                 target: "currencyDecimalPlaces"
 
-  - name: "country-dataset-enrichment"
+  - id: "country-dataset-enrichment"
+    name: "country-dataset-enrichment"
     type: "lookup-enrichment"
     description: "Country enrichment using inline dataset"
     conditions:
@@ -52,7 +54,8 @@ enrichments:
               - source: "language"
                 target: "primaryLanguage"
 
-  - name: "product-dataset-enrichment"
+  - id: "product-dataset-enrichment"
+    name: "product-dataset-enrichment"
     type: "lookup-enrichment"
     description: "Product type enrichment using inline dataset"
     conditions:
@@ -69,7 +72,8 @@ enrichments:
               - source: "minInvestment"
                 target: "minimumInvestment"
 
-  - name: "field-mapping-enrichment"
+  - id: "field-mapping-enrichment"
+    name: "field-mapping-enrichment"
     type: "field-mapping-enrichment"
     description: "Field mapping and transformation processing"
     conditions:
@@ -87,7 +91,8 @@ enrichments:
                 target: "transformedField"
                 transform: "#value == 'TRANSFORM_ME' ? 'TRANSFORMED' : #value"
 
-  - name: "conditional-dataset-enrichment"
+  - id: "conditional-dataset-enrichment"
+    name: "conditional-dataset-enrichment"
     type: "conditional-enrichment"
     description: "Conditional processing based on data content"
     conditions:

@@ -1,0 +1,191 @@
+{
+  "timestamp": "2025-09-04T12:51:17.260303",
+  "total_demo_classes": 101,
+  "total_yaml_files": 164,
+  "consistency_score": 63.366336633663366,
+  "patterns": {
+    "standard_apex_loader": 45,
+    "custom_loader": 3,
+    "unknown": 53,
+    "error_handling": 68,
+    "multiple_yaml_files": 29,
+    "single_yaml_file": 13,
+    "no_yaml_files": 59
+  },
+  "demo_classes": [
+    {
+      "class_name": "BatchProcessingDemo",
+      "package": "dev.mars.apex.demo.enrichment",
+      "file_path": "mars\\apex\\demo\\enrichment\\BatchProcessingDemo.java",
+      "yaml_files": [
+        "transformation/batch-processing-demo-config.yaml"
+      ],
+      "loading_pattern": "standard_apex_loader",
+      "error_handling": true
+    },
+    {
+      "class_name": "ComprehensiveFinancialSettlementDemo",
+      "package": "dev.mars.apex.demo.enrichment",
+      "file_path": "mars\\apex\\demo\\enrichment\\ComprehensiveFinancialSettlementDemo.java",
+      "yaml_files": [
+        "comprehensive-financial-settlement-demo-config.yaml"
+      ],
+      "loading_pattern": "standard_apex_loader",
+      "error_handling": true
+    },
+    {
+      "class_name": "CustodyAutoRepairBootstrap",
+      "package": "dev.mars.apex.demo.enrichment",
+      "file_path": "mars\\apex\\demo\\enrichment\\CustodyAutoRepairBootstrap.java",
+      "yaml_files": [
+        "enrichment/custody-auto-repair-bootstrap-demo.yaml",
+        "enrichment/custody-bootstrap/standing-instructions-config.yaml",
+        "enrichment/custody-bootstrap/settlement-scenarios-config.yaml",
+        "enrichment/custody-bootstrap/auto-repair-rules-config.yaml"
+      ],
+      "loading_pattern": "standard_apex_loader",
+      "error_handling": true
+    },
+    {
+      "class_name": "CustodyAutoRepairDemo",
+      "package": "dev.mars.apex.demo.enrichment",
+      "file_path": "mars\\apex\\demo\\enrichment\\CustodyAutoRepairDemo.java",
+      "yaml_files": [
+        "custody-auto-repair-demo-config.yaml"
+      ],
+      "loading_pattern": "standard_apex_loader",
+      "error_handling": true
+    },
+    {
+      "class_name": "CustomerTransformerDemo",
+      "package": "dev.mars.apex.demo.enrichment",
+      "file_path": "mars\\apex\\demo\\enrichment\\CustomerTransformerDemo.java",
+      "yaml_files": [
+        "enrichment/customer-transformer-demo.yaml",
+        "enrichment/customer-transformer/transformer-rules-config.yaml",
+        "enrichment/customer-transformer/field-actions-config.yaml",
+        "enrichment/customer-transformer/customer-segments-config.yaml"
+      ],
+      "loading_pattern": "standard_apex_loader",
+      "error_handling": true
+    },
+    {
+      "class_name": "DataManagementDemo",
+      "package": "dev.mars.apex.demo.enrichment",
+      "file_path": "mars\\apex\\demo\\enrichment\\DataManagementDemo.java",
+      "yaml_files": [
+        "enrichment/data-management-demo-config.yaml"
+      ],
+      "loading_pattern": "standard_apex_loader",
+      "error_handling": true
+    },
+    {
+      "class_name": "ExternalDataSourceDemo",
+      "package": "dev.mars.apex.demo.enrichment",
+      "file_path": "mars\\apex\\demo\\enrichment\\ExternalDataSourceDemo.java",
+      "yaml_files": [
+        "enrichment/external-data-source-demo-config.yaml"
+      ],
+      "loading_pattern": "standard_apex_loader",
+      "error_handling": true
+    },
+    {
+      "class_name": "OtcOptionsBootstrapDemo",
+      "package": "dev.mars.apex.demo.enrichment",
+      "file_path": "mars\\apex\\demo\\enrichment\\OtcOptionsBootstrapDemo.java",
+      "yaml_files": [
+        "enrichment/otc-options-bootstrap-demo.yaml",
+        "enrichment/otc-bootstrap/sample-otc-options-config.yaml",
+        "enrichment/otc-bootstrap/enrichment-methods-config.yaml",
+        "enrichment/otc-bootstrap/data-sources-config.yaml"
+      ],
+      "loading_pattern": "standard_apex_loader",
+      "error_handling": true
+    },
+    {
+      "class_name": "TradeTransformerDemo",
+      "package": "dev.mars.apex.demo.enrichment",
+      "file_path": "mars\\apex\\demo\\enrichment\\TradeTransformerDemo.java",
+      "yaml_files": [
+        "enrichment/trade-transformer-demo.yaml",
+        "enrichment/trade-transformer/trade-transformer-rules-config.yaml",
+        "enrichment/trade-transformer/trade-field-actions-config.yaml",
+        "enrichment/trade-transformer/trade-risk-ratings-config.yaml"
+      ],
+      "loading_pattern": "standard_apex_loader",
+      "error_handling": true
+    },
+    {
+      "class_name": "YamlDatasetDemo",
+      "package": "dev.mars.apex.demo.enrichment",
+      "file_path": "mars\\apex\\demo\\enrichment\\YamlDatasetDemo.java",
+      "yaml_files": [
+        "yaml-dataset-demo-config.yaml"
+      ],
+      "loading_pattern": "standard_apex_loader",
+      "error_handling": true
+    }
+  ],
+  "yaml_files": [
+    {
+      "path": "enrichment\\comprehensive-financial-settlement-demo-config.yaml",
+      "size": 1391,
+      "documentation_quality": "excellent",
+      "exists": true
+    },
+    {
+      "path": "enrichment\\comprehensive-financial-settlement-demo-data.yaml",
+      "size": 8779,
+      "documentation_quality": "excellent",
+      "exists": true
+    },
+    {
+      "path": "enrichment\\custody-auto-repair-bootstrap-demo.yaml",
+      "size": 8845,
+      "documentation_quality": "excellent",
+      "exists": true
+    },
+    {
+      "path": "enrichment\\custody-auto-repair-demo-config.yaml",
+      "size": 10372,
+      "documentation_quality": "excellent",
+      "exists": true
+    },
+    {
+      "path": "enrichment\\custody-auto-repair-demo-data.yaml",
+      "size": 8813,
+      "documentation_quality": "excellent",
+      "exists": true
+    },
+    {
+      "path": "enrichment\\customer-transformer-demo.yaml",
+      "size": 8677,
+      "documentation_quality": "excellent",
+      "exists": true
+    },
+    {
+      "path": "enrichment\\data-management-demo-config.yaml",
+      "size": 15618,
+      "documentation_quality": "excellent",
+      "exists": true
+    },
+    {
+      "path": "enrichment\\data-management-demo-data.yaml",
+      "size": 10431,
+      "documentation_quality": "excellent",
+      "exists": true
+    },
+    {
+      "path": "enrichment\\external-data-source-demo-config.yaml",
+      "size": 14975,
+      "documentation_quality": "excellent",
+      "exists": true
+    },
+    {
+      "path": "enrichment\\external-data-source-demo-data.yaml",
+      "size": 11225,
+      "documentation_quality": "excellent",
+      "exists": true
+    }
+  ]
+}

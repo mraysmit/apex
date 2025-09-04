@@ -14,7 +14,8 @@ metadata:
 
 # Ultra-Simple API Enrichments
 enrichments:
-  - name: "ultra-simple-api-processing"
+  - id: "ultra-simple-api-processing"
+    name: "ultra-simple-api-processing"
     type: "simple-enrichment"
     description: "Ultra-simple API for 90% of use cases using real APEX processing"
     conditions:
@@ -39,7 +40,8 @@ enrichments:
               complexity: "LOW"
               use-case-coverage: "90%"
 
-  - name: "one-liner-rule-evaluations"
+  - id: "one-liner-rule-evaluations"
+    name: "one-liner-rule-evaluations"
     type: "one-liner-enrichment"
     description: "One-liner rule evaluations with simplified syntax"
     conditions:
@@ -64,7 +66,8 @@ enrichments:
               complexity: "MEDIUM"
               syntax: "SIMPLIFIED"
 
-  - name: "template-based-validation"
+  - id: "template-based-validation"
+    name: "template-based-validation"
     type: "template-enrichment"
     description: "Template-based validation patterns for common scenarios"
     conditions:

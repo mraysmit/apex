@@ -121,7 +121,7 @@ public class YamlConfigurationDemo {
             logger.info("Loading YAML configuration from yaml-configuration-demo-config.yaml");
             
             // Load configuration using real APEX YamlConfigurationLoader
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("yaml-configuration-demo-config.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("evaluation/yaml-configuration-demo-config.yaml");
             
             if (config == null) {
                 throw new IllegalStateException("Failed to load YAML configuration - file not found or invalid");

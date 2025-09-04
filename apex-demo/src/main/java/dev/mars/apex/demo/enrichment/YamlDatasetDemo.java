@@ -127,7 +127,7 @@ public class YamlDatasetDemo {
             logger.info("Loading YAML configuration from yaml-dataset-demo-config.yaml");
             
             // Load configuration using real APEX YamlConfigurationLoader
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("yaml-dataset-demo-config.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("enrichment/yaml-dataset-demo-config.yaml");
             
             if (config == null) {
                 throw new IllegalStateException("Failed to load YAML configuration - file not found or invalid");

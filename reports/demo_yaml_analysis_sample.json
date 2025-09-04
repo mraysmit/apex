@@ -1,0 +1,169 @@
+{
+  "timestamp": "2025-01-04T12:00:00",
+  "total_demo_classes": 42,
+  "total_yaml_files": 65,
+  "missing_yaml_files": 0,
+  "consistency_score": 95.2,
+  "demo_classes": [
+    {
+      "class_name": "YamlDatasetDemo",
+      "package": "dev.mars.apex.demo.enrichment",
+      "file_path": "apex-demo/src/main/java/dev/mars/apex/demo/enrichment/YamlDatasetDemo.java",
+      "yaml_files": ["enrichment/yaml-dataset-demo-config.yaml"],
+      "loading_pattern": "standard_apex_loader",
+      "error_handling": true,
+      "documentation": "YAML Dataset Demo Configuration Real APEX YAML configuration for YamlDatasetDemo.java NO HARDCODED SIMULATION - Uses authentic APEX services"
+    },
+    {
+      "class_name": "SimplifiedAPIDemo",
+      "package": "dev.mars.apex.demo.evaluation",
+      "file_path": "apex-demo/src/main/java/dev/mars/apex/demo/evaluation/SimplifiedAPIDemo.java",
+      "yaml_files": ["evaluation/simplified-api-demo-config.yaml"],
+      "loading_pattern": "standard_apex_loader",
+      "error_handling": true,
+      "documentation": "Simplified API Demo Configuration Real APEX YAML configuration for SimplifiedAPIDemo.java"
+    },
+    {
+      "class_name": "DynamicMethodExecutionDemo",
+      "package": "dev.mars.apex.demo.evaluation",
+      "file_path": "apex-demo/src/main/java/dev/mars/apex/demo/evaluation/DynamicMethodExecutionDemo.java",
+      "yaml_files": [
+        "evaluation/dynamic-method-execution-demo.yaml",
+        "evaluation/dynamic-execution/settlement-processing-config.yaml",
+        "evaluation/dynamic-execution/risk-management-config.yaml",
+        "evaluation/dynamic-execution/dynamic-test-data.yaml"
+      ],
+      "loading_pattern": "standard_apex_loader",
+      "error_handling": true,
+      "documentation": "Dynamic Method Execution Demo with real APEX services"
+    },
+    {
+      "class_name": "H2CustomParametersDemo",
+      "package": "dev.mars.apex.demo.lookup",
+      "file_path": "apex-demo/src/main/java/dev/mars/apex/demo/lookup/H2CustomParametersDemo.java",
+      "yaml_files": ["lookup/h2-custom-parameters-demo.yaml"],
+      "loading_pattern": "standard_apex_loader",
+      "error_handling": true,
+      "documentation": "Demonstrates the enhanced H2 parameter support in APEX"
+    },
+    {
+      "class_name": "CustodyAutoRepairDemo",
+      "package": "dev.mars.apex.demo.enrichment",
+      "file_path": "apex-demo/src/main/java/dev/mars/apex/demo/enrichment/CustodyAutoRepairDemo.java",
+      "yaml_files": ["enrichment/custody-auto-repair-demo-config.yaml"],
+      "loading_pattern": "standard_apex_loader",
+      "error_handling": true,
+      "documentation": "Custody Auto Repair Demo with real APEX processing"
+    }
+  ],
+  "yaml_files": [
+    {
+      "path": "enrichment/yaml-dataset-demo-config.yaml",
+      "exists": true,
+      "size": 8542,
+      "metadata": {
+        "id": "YAML Dataset Demo Configuration",
+        "name": "YAML Dataset Demo Configuration",
+        "version": "2.0.0",
+        "description": "Real APEX YAML dataset demonstration with inline datasets, field mappings, and conditional processing",
+        "type": "rule-config",
+        "author": "apex.demo.team@company.com",
+        "tags": ["apex-demo", "enrichment", "yaml-dataset"]
+      },
+      "documentation_quality": "excellent",
+      "tags": ["apex-demo", "enrichment", "yaml-dataset"]
+    },
+    {
+      "path": "evaluation/simplified-api-demo-config.yaml",
+      "exists": true,
+      "size": 12750,
+      "metadata": {
+        "id": "Simplified API Demo Configuration",
+        "name": "Simplified API Demo Configuration",
+        "version": "2.0.0",
+        "description": "Real APEX simplified API demonstration with ultra-simple processing",
+        "type": "rule-config",
+        "author": "apex.demo.team@company.com",
+        "tags": ["apex-demo", "evaluation", "simplified-api"]
+      },
+      "documentation_quality": "excellent",
+      "tags": ["apex-demo", "evaluation", "simplified-api"]
+    },
+    {
+      "path": "lookup/h2-custom-parameters-demo.yaml",
+      "exists": true,
+      "size": 4256,
+      "metadata": {
+        "name": "H2 Custom Parameters Demo",
+        "version": "1.0.0",
+        "description": "Demonstrates H2 database with custom parameters support",
+        "type": "external-data-config"
+      },
+      "documentation_quality": "excellent",
+      "tags": ["h2", "custom-parameters", "demo"]
+    }
+  ],
+  "patterns": {
+    "standard_apex_loader": 40,
+    "custom_loader": 1,
+    "configuration_method": 1,
+    "error_handling": 41,
+    "multiple_yaml_files": 8,
+    "single_yaml_file": 34,
+    "no_yaml_files": 0
+  },
+  "recommendations": [
+    "Standardize loading patterns in: CustomLoaderDemo",
+    "Add metadata tags to: legacy-config.yaml"
+  ],
+  "analysis_details": {
+    "loading_pattern_distribution": {
+      "standard_apex_loader": {
+        "count": 40,
+        "percentage": 95.2,
+        "description": "Uses YamlConfigurationLoader.loadFromClasspath()"
+      },
+      "custom_loader": {
+        "count": 1,
+        "percentage": 2.4,
+        "description": "Uses custom loading mechanism"
+      },
+      "configuration_method": {
+        "count": 1,
+        "percentage": 2.4,
+        "description": "Uses configuration method pattern"
+      }
+    },
+    "error_handling_coverage": {
+      "with_error_handling": 41,
+      "without_error_handling": 1,
+      "coverage_percentage": 97.6
+    },
+    "documentation_quality_distribution": {
+      "excellent": 65,
+      "good": 0,
+      "fair": 0,
+      "poor": 0
+    },
+    "file_organization": {
+      "by_category": {
+        "enrichment": 12,
+        "evaluation": 18,
+        "lookup": 15,
+        "validation": 8,
+        "util": 2,
+        "infrastructure": 10
+      },
+      "average_file_size": 6234,
+      "largest_file_size": 12750,
+      "smallest_file_size": 2345
+    },
+    "advanced_features": {
+      "external_data_source_references": 15,
+      "multi_parameter_lookups": 8,
+      "custom_h2_parameters": 1,
+      "bootstrap_configurations": 5,
+      "hierarchical_configs": 8
+    }
+  }
+}

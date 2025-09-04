@@ -14,7 +14,8 @@ metadata:
 
 # Investment Validation Enrichments
 enrichments:
-  - name: "investment-validation"
+  - id: "investment-validation"
+    name: "investment-validation"
     type: "lookup-enrichment"
     description: "Validates investment scenarios using real APEX processing"
     conditions:
@@ -30,7 +31,8 @@ enrichments:
             field: "processingPath"
             value: "#data.customerRiskProfile == 'CONSERVATIVE' ? 'LOW_RISK' : (#data.customerRiskProfile == 'MODERATE' ? 'MEDIUM_RISK' : 'HIGH_RISK')"
 
-  - name: "risk-assessment"
+  - id: "risk-assessment"
+    name: "risk-assessment"
     type: "lookup-enrichment"
     description: "Processes risk assessment using real APEX services"
     conditions:
@@ -49,7 +51,8 @@ enrichments:
             field: "portfolioRecommendation"
             value: "#data.portfolioValue > 1000000 ? 'PREMIUM_PORTFOLIO' : 'STANDARD_PORTFOLIO'"
 
-  - name: "compliance-checking"
+  - id: "compliance-checking"
+    name: "compliance-checking"
     type: "lookup-enrichment"
     description: "Performs compliance checking using real APEX services"
     conditions:
@@ -73,7 +76,8 @@ enrichments:
 
 # Rule Groups for Sequential Processing
 rule-groups:
-  - name: "investment-processing-workflow"
+  - id: "investment-processing-workflow"
+    name: "investment-processing-workflow"
     description: "Sequential investment processing workflow"
     rules:
       - name: "investment-validation"

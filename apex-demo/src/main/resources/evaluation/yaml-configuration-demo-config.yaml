@@ -14,7 +14,8 @@ metadata:
 
 # External YAML Configuration Enrichments
 enrichments:
-  - name: "external-yaml-configuration-processing"
+  - id: "external-yaml-configuration-processing"
+    name: "external-yaml-configuration-processing"
     type: "yaml-config-enrichment"
     description: "External YAML configuration processing using real APEX services"
     conditions:
@@ -55,7 +56,8 @@ enrichments:
               editable-by: "TECHNICAL_USERS"
               reload-required: false
 
-  - name: "business-user-editable-rules"
+  - id: "business-user-editable-rules"
+    name: "business-user-editable-rules"
     type: "business-rule-enrichment"
     description: "Business user-editable rules without code changes"
     conditions:
@@ -100,7 +102,8 @@ enrichments:
               editable-by: "BUSINESS_USERS"
               hot-reload: true
 
-  - name: "dynamic-configuration-loading"
+  - id: "dynamic-configuration-loading"
+    name: "dynamic-configuration-loading"
     type: "dynamic-config-enrichment"
     description: "Dynamic configuration loading and hot-reloading"
     conditions:

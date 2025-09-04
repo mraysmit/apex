@@ -120,7 +120,7 @@ public class ApexRulesEngineDemo {
             logger.info("Loading YAML configuration from apex-rules-engine-demo-config.yaml");
 
             // Load configuration using real APEX YamlConfigurationLoader
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("apex-rules-engine-demo-config.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("evaluation/apex-rules-engine-demo-config.yaml");
 
             if (config == null) {
                 throw new IllegalStateException("Failed to load YAML configuration - file not found or invalid");

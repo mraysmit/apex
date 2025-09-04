@@ -121,7 +121,7 @@ public class SimplifiedAPIDemo {
             logger.info("Loading YAML configuration from simplified-api-demo-config.yaml");
             
             // Load configuration using real APEX YamlConfigurationLoader
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("simplified-api-demo-config.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("evaluation/simplified-api-demo-config.yaml");
             
             if (config == null) {
                 throw new IllegalStateException("Failed to load YAML configuration - file not found or invalid");

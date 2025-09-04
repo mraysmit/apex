@@ -14,7 +14,8 @@ metadata:
 
 # Layer 1: Simple Validation Enrichments
 enrichments:
-  - name: "layer1-simple-validation"
+  - id: "layer1-simple-validation"
+    name: "layer1-simple-validation"
     type: "validation-enrichment"
     description: "Layer 1 simple validation using real APEX processing"
     conditions:
@@ -45,7 +46,8 @@ enrichments:
               api-type: "SIMPLE_VALIDATION"
               performance-tier: "BASIC"
 
-  - name: "layer2-business-rule-management"
+  - id: "layer2-business-rule-management"
+    name: "layer2-business-rule-management"
     type: "business-rule-enrichment"
     description: "Layer 2 business rule management with real APEX services"
     conditions:
@@ -79,7 +81,8 @@ enrichments:
               api-type: "BUSINESS_RULE_MANAGEMENT"
               performance-tier: "INTERMEDIATE"
 
-  - name: "layer3-advanced-features"
+  - id: "layer3-advanced-features"
+    name: "layer3-advanced-features"
     type: "advanced-enrichment"
     description: "Layer 3 advanced rule engine features with complex processing"
     conditions:
