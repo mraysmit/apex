@@ -65,6 +65,14 @@ public class QuickStartDemo {
     private static final Logger logger = LoggerFactory.getLogger(QuickStartDemo.class);
     private final RulesService rulesService;
 
+    /**
+     * Main method for standalone execution.
+     */
+    public static void main(String[] args) {
+        QuickStartDemo demo = new QuickStartDemo();
+        demo.run();
+    }
+
     public QuickStartDemo() {
         logger.info("Initializing QuickStart Demo");
         this.rulesService = new RulesService();
