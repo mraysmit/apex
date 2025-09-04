@@ -1,0 +1,38 @@
+# Financial Counterparties Dataset
+# Infrastructure dataset for financial counterparty data
+
+# Dataset Metadata
+dataset-info:
+  name: "financial-counterparties"
+  version: "1.0"
+  description: "Financial counterparties dataset for demo purposes"
+  category: "infrastructure"
+  record-count: 200
+
+# Counterparties Data
+data-sources:
+  counterparties:
+    type: "inline"
+    description: "Counterparty reference data"
+    data:
+      - counterpartyId: "CP001"
+        name: "JPMorgan Chase"
+        counterpartyType: "BANK"
+        jurisdiction: "US"
+        creditRating: "AA+"
+      - counterpartyId: "CP002"
+        name: "HSBC"
+        counterpartyType: "BANK"
+        jurisdiction: "UK"
+        creditRating: "AA"
+      - counterpartyId: "CP003"
+        name: "UBS"
+        counterpartyType: "BANK"
+        jurisdiction: "CH"
+        creditRating: "AA-"
+
+# Processing Configuration
+processing-config:
+  batch-size: 20
+  timeout-seconds: 40
+  audit-logging: true

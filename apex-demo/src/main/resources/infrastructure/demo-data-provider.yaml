@@ -1,0 +1,44 @@
+# Demo Data Provider Configuration
+# Infrastructure configuration for demo data provisioning
+
+# Demo Metadata
+demo-info:
+  name: "demo-data-provider"
+  version: "1.0"
+  description: "Demo data provider infrastructure configuration"
+  category: "infrastructure"
+  complexity: "basic"
+  author: "APEX Demo Team"
+
+# Data Provider Enrichments
+enrichments:
+  - id: "data-provider-setup"
+    name: "data-provider-setup"
+    type: "field-enrichment"
+    description: "Demo data provider setup"
+    condition: "#dataType != null"
+    field-mappings:
+      - source-field: "dataType"
+        target-field: "providerType"
+        expression: "#dataType == 'CUSTOMER' ? 'CUSTOMER_PROVIDER' : 'GENERIC_PROVIDER'"
+      - source-field: "recordCount"
+        target-field: "batchSize"
+        expression: "#recordCount > 1000 ? 100 : 50"
+
+# Rule Groups
+rule-groups:
+  - id: "data-provider-workflow"
+    name: "data-provider-workflow"
+    description: "Data provider workflow"
+    enrichment-sequence:
+      - "data-provider-setup"
+    execution-mode: "sequential"
+    error-handling: "stop-on-error"
+
+# Processing Configuration
+processing-config:
+  batch-size: 100
+  timeout-seconds: 60
+  retry-attempts: 2
+  parallel-processing: false
+  audit-logging: true

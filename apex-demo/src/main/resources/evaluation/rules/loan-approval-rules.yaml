@@ -1,0 +1,47 @@
+# Loan Approval Rules Configuration
+# Specific rules for loan approval processing
+
+# Demo Metadata
+demo-info:
+  name: "loan-approval-rules"
+  version: "1.0"
+  description: "Loan approval rules for demonstration"
+  category: "evaluation"
+  complexity: "intermediate"
+  author: "APEX Demo Team"
+
+# Loan Approval Enrichments
+enrichments:
+  - id: "loan-approval-validation"
+    name: "loan-approval-validation"
+    type: "field-enrichment"
+    description: "Loan approval validation processing"
+    condition: "#loanAmount != null"
+    field-mappings:
+      - source-field: "loanAmount"
+        target-field: "approvalLevel"
+        expression: "#loanAmount > 100000 ? 'SENIOR_APPROVAL' : 'STANDARD_APPROVAL'"
+      - source-field: "creditScore"
+        target-field: "riskCategory"
+        expression: "#creditScore > 750 ? 'LOW_RISK' : (#creditScore > 650 ? 'MEDIUM_RISK' : 'HIGH_RISK')"
+      - source-field: "income"
+        target-field: "incomeCategory"
+        expression: "#income > 100000 ? 'HIGH_INCOME' : 'STANDARD_INCOME'"
+
+# Rule Groups
+rule-groups:
+  - id: "loan-approval-workflow"
+    name: "loan-approval-workflow"
+    description: "Loan approval processing workflow"
+    enrichment-sequence:
+      - "loan-approval-validation"
+    execution-mode: "sequential"
+    error-handling: "stop-on-error"
+
+# Processing Configuration
+processing-config:
+  batch-size: 25
+  timeout-seconds: 45
+  retry-attempts: 2
+  parallel-processing: false
+  audit-logging: true

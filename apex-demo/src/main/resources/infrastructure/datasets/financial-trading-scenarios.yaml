@@ -1,0 +1,35 @@
+# Financial Trading Scenarios Dataset
+# Infrastructure dataset for financial trading scenario data
+
+# Dataset Metadata
+dataset-info:
+  name: "financial-trading-scenarios"
+  version: "1.0"
+  description: "Financial trading scenarios dataset for demo purposes"
+  category: "infrastructure"
+  record-count: 500
+
+# Trading Scenarios Data
+data-sources:
+  trading-scenarios:
+    type: "inline"
+    description: "Trading scenario reference data"
+    data:
+      - scenarioId: "TRADE001"
+        tradeType: "EQUITY"
+        amount: 100000
+        currency: "USD"
+      - scenarioId: "TRADE002"
+        tradeType: "BOND"
+        amount: 500000
+        currency: "EUR"
+      - scenarioId: "TRADE003"
+        tradeType: "DERIVATIVE"
+        amount: 1000000
+        currency: "GBP"
+
+# Processing Configuration
+processing-config:
+  batch-size: 25
+  timeout-seconds: 45
+  audit-logging: true

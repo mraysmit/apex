@@ -34,83 +34,65 @@ enrichments:
     name: "country-dataset-enrichment"
     type: "field-enrichment"
     description: "Country enrichment using inline dataset"
-    conditions:
-      - condition: "#data.countryCode != null"
-        actions:
-          - type: "dataset-lookup"
-            dataset-name: "country-reference"
-            lookup-key: "#data.countryCode"
-            target-fields:
-              - source: "name"
-                target: "countryName"
-              - source: "continent"
-                target: "continent"
-              - source: "timezone"
-                target: "timezone"
-              - source: "language"
-                target: "primaryLanguage"
+    condition: "#countryCode != null"
+    field-mappings:
+      - source-field: "countryCode"
+        target-field: "countryName"
+        expression: "#countryCode == 'US' ? 'United States' : (#countryCode == 'UK' ? 'United Kingdom' : 'Unknown')"
+      - source-field: "countryCode"
+        target-field: "continent"
+        expression: "#countryCode == 'US' ? 'North America' : (#countryCode == 'UK' ? 'Europe' : 'Unknown')"
+      - source-field: "countryCode"
+        target-field: "timezone"
+        expression: "#countryCode == 'US' ? 'EST' : (#countryCode == 'UK' ? 'GMT' : 'UTC')"
 
   - id: "product-dataset-enrichment"
     name: "product-dataset-enrichment"
     type: "field-enrichment"
     description: "Product type enrichment using inline dataset"
-    conditions:
-      - condition: "#data.productType != null"
-        actions:
-          - type: "dataset-lookup"
-            dataset-name: "product-reference"
-            lookup-key: "#data.productType"
-            target-fields:
-              - source: "category"
-                target: "productCategory"
-              - source: "riskLevel"
-                target: "productRiskLevel"
-              - source: "minInvestment"
-                target: "minimumInvestment"
+    condition: "#productType != null"
+    field-mappings:
+      - source-field: "productType"
+        target-field: "productCategory"
+        expression: "#productType == 'EQUITY' ? 'STOCKS' : (#productType == 'BOND' ? 'FIXED_INCOME' : 'OTHER')"
+      - source-field: "productType"
+        target-field: "productRiskLevel"
+        expression: "#productType == 'EQUITY' ? 'HIGH' : (#productType == 'BOND' ? 'LOW' : 'MEDIUM')"
+      - source-field: "productType"
+        target-field: "minimumInvestment"
+        expression: "#productType == 'EQUITY' ? 1000 : (#productType == 'BOND' ? 5000 : 500)"
 
   - id: "field-mapping-enrichment"
     name: "field-mapping-enrichment"
-    type: "field-mapping-enrichment"
+    type: "field-enrichment"
     description: "Field mapping and transformation processing"
-    conditions:
-      - condition: "#data.sourceField1 != null || #data.sourceField2 != null"
-        actions:
-          - type: "field-mapping"
-            mappings:
-              - source: "sourceField1"
-                target: "mappedField1"
-                transform: "#value.toUpperCase()"
-              - source: "sourceField2"
-                target: "mappedField2"
-                transform: "#value + '_PROCESSED'"
-              - source: "transformField"
-                target: "transformedField"
-                transform: "#value == 'TRANSFORM_ME' ? 'TRANSFORMED' : #value"
+    condition: "#sourceField1 != null || #sourceField2 != null"
+    field-mappings:
+      - source-field: "sourceField1"
+        target-field: "mappedField1"
+        expression: "#sourceField1 != null ? #sourceField1.toUpperCase() : 'DEFAULT'"
+      - source-field: "sourceField2"
+        target-field: "mappedField2"
+        expression: "#sourceField2 != null ? #sourceField2 + '_PROCESSED' : 'DEFAULT'"
+      - source-field: "transformField"
+        target-field: "transformedField"
+        expression: "#transformField == 'TRANSFORM_ME' ? 'TRANSFORMED' : #transformField"
 
   - id: "conditional-dataset-enrichment"
     name: "conditional-dataset-enrichment"
-    type: "conditional-enrichment"
+    type: "field-enrichment"
     description: "Conditional processing based on data content"
-    conditions:
-      - condition: "#data.processingType == 'CONDITIONAL'"
-        actions:
-          - type: "conditional-processing"
-            rules:
-              - condition: "#data.riskLevel == 'HIGH'"
-                action:
-                  type: "set-field"
-                  field: "processingPath"
-                  value: "HIGH_RISK_PROCESSING"
-              - condition: "#data.customerTier == 'PREMIUM'"
-                action:
-                  type: "set-field"
-                  field: "customerBenefits"
-                  value: "PREMIUM_BENEFITS_APPLIED"
-              - condition: "#data.riskLevel == 'HIGH' && #data.customerTier == 'PREMIUM'"
-                action:
-                  type: "set-field"
-                  field: "specialHandling"
-                  value: "VIP_HIGH_RISK_PROCESSING"
+    condition: "#processingType == 'CONDITIONAL'"
+    field-mappings:
+      - source-field: "riskLevel"
+        target-field: "processingPath"
+        expression: "#riskLevel == 'HIGH' ? 'HIGH_RISK_PROCESSING' : 'STANDARD_PROCESSING'"
+      - source-field: "customerTier"
+        target-field: "customerBenefits"
+        expression: "#customerTier == 'PREMIUM' ? 'PREMIUM_BENEFITS_APPLIED' : 'STANDARD_BENEFITS'"
+      - source-field: "riskLevel"
+        target-field: "specialProcessing"
+        expression: "#riskLevel == 'HIGH' && #customerTier == 'PREMIUM' ? 'SPECIAL_HANDLING' : 'NORMAL'"
 
 # Inline Datasets - Revolutionary approach to reference data
 datasets:

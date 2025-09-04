@@ -1,0 +1,35 @@
+# Customer Profiles Dataset
+# Infrastructure dataset for customer profile data
+
+# Dataset Metadata
+dataset-info:
+  name: "customer-profiles"
+  version: "1.0"
+  description: "Customer profile dataset for demo purposes"
+  category: "infrastructure"
+  record-count: 1000
+
+# Customer Profile Data
+data-sources:
+  customer-profiles:
+    type: "inline"
+    description: "Customer profile reference data"
+    data:
+      - customerId: "CUST001"
+        name: "John Smith"
+        riskProfile: "CONSERVATIVE"
+        accountType: "INDIVIDUAL"
+      - customerId: "CUST002"
+        name: "Jane Doe"
+        riskProfile: "MODERATE"
+        accountType: "JOINT"
+      - customerId: "CUST003"
+        name: "ABC Corp"
+        riskProfile: "AGGRESSIVE"
+        accountType: "CORPORATE"
+
+# Processing Configuration
+processing-config:
+  batch-size: 50
+  timeout-seconds: 30
+  audit-logging: true

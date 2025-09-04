@@ -1,0 +1,44 @@
+# Rule Configuration Demo
+# Main configuration for rule configuration demonstration
+
+# Demo Metadata
+demo-info:
+  name: "rule-configuration-demo"
+  version: "1.0"
+  description: "Rule configuration demonstration using real APEX services"
+  category: "evaluation"
+  complexity: "intermediate"
+  author: "APEX Demo Team"
+
+# Rule Configuration Enrichments
+enrichments:
+  - id: "rule-configuration-processing"
+    name: "rule-configuration-processing"
+    type: "field-enrichment"
+    description: "Rule configuration processing using real APEX services"
+    condition: "#ruleType != null"
+    field-mappings:
+      - source-field: "ruleType"
+        target-field: "configurationLevel"
+        expression: "#ruleType == 'COMPLEX' ? 'ADVANCED' : 'BASIC'"
+      - source-field: "priority"
+        target-field: "executionOrder"
+        expression: "#priority == 'HIGH' ? 1 : 2"
+
+# Rule Groups
+rule-groups:
+  - id: "rule-configuration-workflow"
+    name: "rule-configuration-workflow"
+    description: "Rule configuration processing workflow"
+    enrichment-sequence:
+      - "rule-configuration-processing"
+    execution-mode: "sequential"
+    error-handling: "continue-on-error"
+
+# Processing Configuration
+processing-config:
+  batch-size: 50
+  timeout-seconds: 60
+  retry-attempts: 2
+  parallel-processing: true
+  audit-logging: true

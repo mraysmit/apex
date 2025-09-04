@@ -1,0 +1,47 @@
+# Discount Rules Configuration
+# Specific rules for discount calculation processing
+
+# Demo Metadata
+demo-info:
+  name: "discount-rules"
+  version: "1.0"
+  description: "Discount calculation rules for demonstration"
+  category: "evaluation"
+  complexity: "basic"
+  author: "APEX Demo Team"
+
+# Discount Calculation Enrichments
+enrichments:
+  - id: "discount-calculation"
+    name: "discount-calculation"
+    type: "field-enrichment"
+    description: "Discount calculation processing"
+    condition: "#orderAmount != null"
+    field-mappings:
+      - source-field: "orderAmount"
+        target-field: "discountPercentage"
+        expression: "#orderAmount > 1000 ? 10 : (#orderAmount > 500 ? 5 : 0)"
+      - source-field: "customerType"
+        target-field: "customerDiscount"
+        expression: "#customerType == 'PREMIUM' ? 15 : (#customerType == 'GOLD' ? 10 : 0)"
+      - source-field: "orderAmount"
+        target-field: "finalDiscount"
+        expression: "#orderAmount > 1000 && #customerType == 'PREMIUM' ? 20 : 5"
+
+# Rule Groups
+rule-groups:
+  - id: "discount-calculation-workflow"
+    name: "discount-calculation-workflow"
+    description: "Discount calculation processing workflow"
+    enrichment-sequence:
+      - "discount-calculation"
+    execution-mode: "sequential"
+    error-handling: "continue-on-error"
+
+# Processing Configuration
+processing-config:
+  batch-size: 100
+  timeout-seconds: 30
+  retry-attempts: 1
+  parallel-processing: true
+  audit-logging: false

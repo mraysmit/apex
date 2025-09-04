@@ -1,0 +1,35 @@
+# Validation Customer Profiles Dataset
+# Infrastructure dataset for validation customer data
+
+# Dataset Metadata
+dataset-info:
+  name: "validation-customer-profiles"
+  version: "1.0"
+  description: "Validation customer profiles dataset for demo purposes"
+  category: "infrastructure"
+  record-count: 100
+
+# Validation Customer Data
+data-sources:
+  validation-customers:
+    type: "inline"
+    description: "Validation customer reference data"
+    data:
+      - customerId: "VAL001"
+        name: "Validation Customer 1"
+        status: "ACTIVE"
+        validationLevel: "ENHANCED"
+      - customerId: "VAL002"
+        name: "Validation Customer 2"
+        status: "PENDING"
+        validationLevel: "STANDARD"
+      - customerId: "VAL003"
+        name: "Validation Customer 3"
+        status: "SUSPENDED"
+        validationLevel: "BASIC"
+
+# Processing Configuration
+processing-config:
+  batch-size: 10
+  timeout-seconds: 20
+  audit-logging: true

@@ -1,0 +1,35 @@
+# Performance Customer Profiles Dataset
+# Infrastructure dataset for performance testing customer data
+
+# Dataset Metadata
+dataset-info:
+  name: "performance-customer-profiles"
+  version: "1.0"
+  description: "Performance customer profiles dataset for demo purposes"
+  category: "infrastructure"
+  record-count: 10000
+
+# Performance Customer Data
+data-sources:
+  performance-customers:
+    type: "inline"
+    description: "Performance customer reference data"
+    data:
+      - customerId: "PERF001"
+        name: "Performance Customer 1"
+        riskProfile: "HIGH"
+        portfolioValue: 10000000
+      - customerId: "PERF002"
+        name: "Performance Customer 2"
+        riskProfile: "MEDIUM"
+        portfolioValue: 5000000
+      - customerId: "PERF003"
+        name: "Performance Customer 3"
+        riskProfile: "LOW"
+        portfolioValue: 1000000
+
+# Processing Configuration
+processing-config:
+  batch-size: 100
+  timeout-seconds: 60
+  audit-logging: false

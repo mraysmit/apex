@@ -16,106 +16,51 @@ metadata:
 enrichments:
   - id: "ultra-simple-api-processing"
     name: "ultra-simple-api-processing"
-    type: "simple-enrichment"
+    type: "field-enrichment"
     description: "Ultra-simple API for 90% of use cases using real APEX processing"
-    conditions:
-      - condition: "#data.apiType == 'ULTRA_SIMPLE'"
-        actions:
-          - type: "simple-validation"
-            validations:
-              - field: "name"
-                rule: "#value != null && #value.length() > 0"
-                message: "Name must be present and non-empty"
-                result-field: "nameValid"
-              - field: "age"
-                rule: "#value != null && #value >= 18 && #value <= 120"
-                message: "Age must be between 18 and 120"
-                result-field: "ageValid"
-              - field: "email"
-                rule: "#value != null && #value.contains('@')"
-                message: "Email must contain @ symbol"
-                result-field: "emailValid"
-            processing-metadata:
-              api-type: "ULTRA_SIMPLE"
-              complexity: "LOW"
-              use-case-coverage: "90%"
+    condition: "#apiType == 'ULTRA_SIMPLE'"
+    field-mappings:
+      - source-field: "name"
+        target-field: "nameValid"
+        expression: "#name != null && #name.length() > 0 ? 'true' : 'false'"
+      - source-field: "email"
+        target-field: "emailValid"
+        expression: "#email != null && #email.contains('@') ? 'true' : 'false'"
+      - source-field: "age"
+        target-field: "ageValid"
+        expression: "#age != null && #age >= 18 ? 'true' : 'false'"
 
   - id: "one-liner-rule-evaluations"
     name: "one-liner-rule-evaluations"
-    type: "one-liner-enrichment"
+    type: "field-enrichment"
     description: "One-liner rule evaluations with simplified syntax"
-    conditions:
-      - condition: "#data.apiType == 'ONE_LINER'"
-        actions:
-          - type: "one-liner-processing"
-            rules:
-              - name: "order-approval"
-                expression: "#data.orderAmount <= #data.creditLimit && (#data.customerType == 'PREMIUM' || #data.orderAmount <= 10000)"
-                result-field: "orderApproved"
-                message: "Order approval based on credit limit and customer type"
-              - name: "discount-eligibility"
-                expression: "#data.customerType == 'PREMIUM' && #data.orderAmount > 10000"
-                result-field: "discountEligible"
-                message: "Premium customers with orders over $10,000 qualify for discounts"
-              - name: "amount-validation"
-                expression: "#data.orderAmount > 0 && #data.orderAmount <= 1000000"
-                result-field: "amountValid"
-                message: "Order amount must be positive and within limits"
-            processing-metadata:
-              api-type: "ONE_LINER"
-              complexity: "MEDIUM"
-              syntax: "SIMPLIFIED"
+    condition: "#apiType == 'ONE_LINER'"
+    field-mappings:
+      - source-field: "orderAmount"
+        target-field: "orderApproved"
+        expression: "#orderAmount <= #creditLimit && (#customerType == 'PREMIUM' || #orderAmount <= 10000) ? 'true' : 'false'"
+      - source-field: "customerType"
+        target-field: "discountEligible"
+        expression: "#customerType == 'PREMIUM' && #orderAmount > 10000 ? 'true' : 'false'"
+      - source-field: "orderAmount"
+        target-field: "amountValid"
+        expression: "#orderAmount > 0 && #orderAmount <= 1000000 ? 'true' : 'false'"
 
   - id: "template-based-validation"
     name: "template-based-validation"
-    type: "template-enrichment"
+    type: "field-enrichment"
     description: "Template-based validation patterns for common scenarios"
-    conditions:
-      - condition: "#data.apiType == 'TEMPLATE_BASED'"
-        actions:
-          - type: "template-processing"
-            templates:
-              - template: "customer-validation"
-                validations:
-                  - field: "customerName"
-                    rule: "#value != null && #value.length() >= 2"
-                    message: "Customer name must be at least 2 characters"
-                    result-field: "customerNameValid"
-                  - field: "customerEmail"
-                    rule: "#value != null && #value.matches('.*@.*\\..+')"
-                    message: "Customer email must be valid format"
-                    result-field: "customerEmailValid"
-              - template: "transaction-validation"
-                validations:
-                  - field: "transactionAmount"
-                    rule: "#value != null && #value > 0"
-                    message: "Transaction amount must be positive"
-                    result-field: "transactionAmountValid"
-                  - field: "transactionType"
-                    rule: "#value != null && (#value == 'WIRE_TRANSFER' || #value == 'ACH' || #value == 'CHECK')"
-                    message: "Transaction type must be valid"
-                    result-field: "transactionTypeValid"
-              - template: "risk-assessment"
-                rules:
-                  - condition: "#data.customerRiskRating == 'LOW' && #data.transactionAmount <= 100000"
-                    action:
-                      type: "set-field"
-                      field: "riskAssessment"
-                      value: "LOW_RISK"
-                  - condition: "#data.customerRiskRating == 'MEDIUM' || (#data.transactionAmount > 100000 && #data.transactionAmount <= 500000)"
-                    action:
-                      type: "set-field"
-                      field: "riskAssessment"
-                      value: "MEDIUM_RISK"
-                  - condition: "#data.customerRiskRating == 'HIGH' || #data.transactionAmount > 500000"
-                    action:
-                      type: "set-field"
-                      field: "riskAssessment"
-                      value: "HIGH_RISK"
-            processing-metadata:
-              api-type: "TEMPLATE_BASED"
-              complexity: "HIGH"
-              reusability: "HIGH"
+    condition: "#apiType == 'TEMPLATE_BASED'"
+    field-mappings:
+      - source-field: "customerName"
+        target-field: "customerNameValid"
+        expression: "#customerName != null && #customerName.length() >= 2 ? 'true' : 'false'"
+      - source-field: "customerEmail"
+        target-field: "customerEmailValid"
+        expression: "#customerEmail != null && #customerEmail.contains('@') ? 'true' : 'false'"
+      - source-field: "transactionAmount"
+        target-field: "transactionAmountValid"
+        expression: "#transactionAmount != null && #transactionAmount > 0 ? 'true' : 'false'"
 
 # Simplified API Configuration
 simplified-api-config:

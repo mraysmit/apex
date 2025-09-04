@@ -1,0 +1,38 @@
+# Financial Commodities Dataset
+# Infrastructure dataset for financial commodity data
+
+# Dataset Metadata
+dataset-info:
+  name: "financial-commodities"
+  version: "1.0"
+  description: "Financial commodities dataset for demo purposes"
+  category: "infrastructure"
+  record-count: 100
+
+# Commodities Data
+data-sources:
+  commodities:
+    type: "inline"
+    description: "Commodity reference data"
+    data:
+      - commodityId: "GOLD"
+        name: "Gold"
+        category: "PRECIOUS_METALS"
+        unit: "TROY_OUNCE"
+        price: 2000
+      - commodityId: "SILVER"
+        name: "Silver"
+        category: "PRECIOUS_METALS"
+        unit: "TROY_OUNCE"
+        price: 25
+      - commodityId: "OIL"
+        name: "Crude Oil"
+        category: "ENERGY"
+        unit: "BARREL"
+        price: 80
+
+# Processing Configuration
+processing-config:
+  batch-size: 10
+  timeout-seconds: 30
+  audit-logging: true

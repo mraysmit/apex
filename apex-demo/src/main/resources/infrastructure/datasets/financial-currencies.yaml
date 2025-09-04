@@ -1,0 +1,38 @@
+# Financial Currencies Dataset
+# Infrastructure dataset for financial currency data
+
+# Dataset Metadata
+dataset-info:
+  name: "financial-currencies"
+  version: "1.0"
+  description: "Financial currencies dataset for demo purposes"
+  category: "infrastructure"
+  record-count: 50
+
+# Currencies Data
+data-sources:
+  currencies:
+    type: "inline"
+    description: "Currency reference data"
+    data:
+      - currencyCode: "USD"
+        name: "US Dollar"
+        region: "North America"
+        symbol: "$"
+        decimalPlaces: 2
+      - currencyCode: "EUR"
+        name: "Euro"
+        region: "Europe"
+        symbol: "€"
+        decimalPlaces: 2
+      - currencyCode: "GBP"
+        name: "British Pound"
+        region: "United Kingdom"
+        symbol: "£"
+        decimalPlaces: 2
+
+# Processing Configuration
+processing-config:
+  batch-size: 5
+  timeout-seconds: 20
+  audit-logging: true

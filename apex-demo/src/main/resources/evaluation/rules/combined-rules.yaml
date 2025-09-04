@@ -1,0 +1,58 @@
+# Combined Rules Configuration
+# Combined rules for complex processing scenarios
+
+# Demo Metadata
+demo-info:
+  name: "combined-rules"
+  version: "1.0"
+  description: "Combined rules for complex demonstration scenarios"
+  category: "evaluation"
+  complexity: "advanced"
+  author: "APEX Demo Team"
+
+# Combined Processing Enrichments
+enrichments:
+  - id: "combined-validation"
+    name: "combined-validation"
+    type: "field-enrichment"
+    description: "Combined validation processing"
+    condition: "#entityType != null"
+    field-mappings:
+      - source-field: "entityType"
+        target-field: "processingType"
+        expression: "#entityType == 'LOAN' ? 'LOAN_PROCESSING' : 'ORDER_PROCESSING'"
+      - source-field: "amount"
+        target-field: "complexityLevel"
+        expression: "#amount > 50000 ? 'COMPLEX' : 'SIMPLE'"
+
+  - id: "combined-calculation"
+    name: "combined-calculation"
+    type: "field-enrichment"
+    description: "Combined calculation processing"
+    condition: "#processingType != null"
+    field-mappings:
+      - source-field: "processingType"
+        target-field: "calculationMethod"
+        expression: "#processingType == 'LOAN_PROCESSING' ? 'INTEREST_CALCULATION' : 'DISCOUNT_CALCULATION'"
+      - source-field: "complexityLevel"
+        target-field: "approvalRequired"
+        expression: "#complexityLevel == 'COMPLEX' ? 'true' : 'false'"
+
+# Rule Groups
+rule-groups:
+  - id: "combined-processing-workflow"
+    name: "combined-processing-workflow"
+    description: "Combined processing workflow"
+    enrichment-sequence:
+      - "combined-validation"
+      - "combined-calculation"
+    execution-mode: "sequential"
+    error-handling: "continue-on-error"
+
+# Processing Configuration
+processing-config:
+  batch-size: 75
+  timeout-seconds: 90
+  retry-attempts: 3
+  parallel-processing: true
+  audit-logging: true

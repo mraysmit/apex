@@ -1,0 +1,38 @@
+# Financial Clients Dataset
+# Infrastructure dataset for financial client data
+
+# Dataset Metadata
+dataset-info:
+  name: "financial-clients"
+  version: "1.0"
+  description: "Financial clients dataset for demo purposes"
+  category: "infrastructure"
+  record-count: 500
+
+# Financial Clients Data
+data-sources:
+  financial-clients:
+    type: "inline"
+    description: "Financial client reference data"
+    data:
+      - clientId: "CLIENT001"
+        name: "Goldman Sachs"
+        clientType: "INSTITUTIONAL"
+        jurisdiction: "US"
+        riskRating: "AAA"
+      - clientId: "CLIENT002"
+        name: "Deutsche Bank"
+        clientType: "INSTITUTIONAL"
+        jurisdiction: "EU"
+        riskRating: "AA"
+      - clientId: "CLIENT003"
+        name: "Barclays"
+        clientType: "INSTITUTIONAL"
+        jurisdiction: "UK"
+        riskRating: "AA+"
+
+# Processing Configuration
+processing-config:
+  batch-size: 50
+  timeout-seconds: 45
+  audit-logging: true
