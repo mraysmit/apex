@@ -1,0 +1,146 @@
+metadata:
+  name: "Test Configuration with Property Resolution"
+  version: "1.0.0"
+  description: "Demonstrates property resolution in APEX YAML configurations"
+  author: "test@example.com"
+  created: "2025-09-05"
+  tags: ["test", "property-resolution", "database"]
+
+# Data source configurations with property placeholders
+data-sources:
+  # PostgreSQL database with resolved properties
+  - name: "user-database"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    description: "User database with resolved connection properties"
+    tags:
+      - "production"
+      - "users"
+    
+    connection:
+      host: "${DB_HOST:localhost}"
+      port: ${DB_PORT:5432}
+      database: "${DB_NAME}"
+      username: "${DB_USER}"
+      password: "${DB_PASSWORD}"
+      schema: "public"
+      
+      # Connection pool settings
+      max-pool-size: 20
+      min-pool-size: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      
+      # SSL configuration
+      ssl-enabled: true
+      ssl-mode: "require"
+    
+    queries:
+      getUserById: "SELECT * FROM users WHERE id = :id"
+      getUserByEmail: "SELECT * FROM users WHERE email = :email"
+      createUser: "INSERT INTO users (name, email, created_at) VALUES (:name, :email, :createdAt)"
+      updateUser: "UPDATE users SET name = :name, email = :email WHERE id = :id"
+      deleteUser: "DELETE FROM users WHERE id = :id"
+    
+    parameter-names:
+      - "id"
+      - "email"
+      - "name"
+      - "createdAt"
+    
+    cache:
+      enabled: true
+      ttl-seconds: 300
+      max-size: 1000
+      key-prefix: "user"
+    
+    health-check:
+      enabled: true
+      interval-seconds: 30
+      timeout-seconds: 5
+      failure-threshold: 3
+
+  # H2 test database with mixed property resolution
+  - name: "test-database"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "H2 test database with property placeholders and defaults"
+    tags:
+      - "test"
+      - "h2"
+    
+    connection:
+      database: "${TEST_DB_PATH:./target/test/testdb}"
+      username: "${TEST_DB_USER:sa}"
+      password: "${TEST_DB_PASSWORD:}"
+      mode: "PostgreSQL"
+      init-script: "classpath:test-data.sql"
+    
+    queries:
+      createTestTable: |
+        CREATE TABLE IF NOT EXISTS test_table (
+          id INTEGER PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          value VARCHAR(255),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      
+      insertTestRecord: "INSERT INTO test_table (name, value) VALUES (:name, :value)"
+      getTestRecord: "SELECT * FROM test_table WHERE id = :id"
+      getAllTestRecords: "SELECT * FROM test_table ORDER BY id"
+      deleteTestRecord: "DELETE FROM test_table WHERE id = :id"
+      truncateTestTable: "TRUNCATE TABLE test_table"
+    
+    parameter-names:
+      - "id"
+      - "name"
+      - "value"
+    
+    cache:
+      enabled: false  # No caching for test database
+
+# Simple enrichment to demonstrate property resolution in other sections
+enrichments:
+  - id: "user-lookup"
+    name: "User Lookup Enrichment"
+    type: "lookup-enrichment"
+    description: "Lookup user data from database with resolved connection"
+    condition: "#userId != null"
+    
+    lookup-config:
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "user-database"
+        query-ref: "getUserById"
+      lookup-key: "#userId"
+      cache-enabled: true
+      cache-ttl-seconds: 300
+    
+    field-mappings:
+      - source-field: "name"
+        target-field: "userName"
+      - source-field: "email"
+        target-field: "userEmail"
+      - source-field: "created_at"
+        target-field: "userCreatedAt"
+
+# Simple rule to demonstrate complete configuration
+rules:
+  - id: "user-validation"
+    name: "User Validation Rule"
+    description: "Validate user data before processing"
+    condition: "#data != null"
+    priority: 100
+    
+    actions:
+      - type: "validation"
+        validations:
+          - field: "userId"
+            required: true
+            message: "User ID is required"
+          - field: "email"
+            pattern: "^[A-Za-z0-9+_.-]+@(.+)$"
+            message: "Valid email address is required"
