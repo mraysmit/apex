@@ -54,6 +54,7 @@ class YamlMetadataValidatorTest {
     void testValidScenarioFile() throws IOException {
         String validScenario = """
             metadata:
+              id: "test-scenario-001"
               name: "Test Scenario"
               version: "1.0.0"
               description: "A test scenario"
@@ -147,6 +148,7 @@ class YamlMetadataValidatorTest {
     void testValidBootstrapFile() throws IOException {
         String validBootstrap = """
             metadata:
+              id: "test-bootstrap-001"
               name: "Test Bootstrap"
               version: "1.0.0"
               description: "A test bootstrap configuration"
@@ -171,6 +173,7 @@ class YamlMetadataValidatorTest {
     void testValidDatasetFile() throws IOException {
         String validDataset = """
             metadata:
+              id: "test-dataset-001"
               name: "Test Dataset"
               version: "1.0.0"
               description: "A test dataset"
@@ -196,6 +199,7 @@ class YamlMetadataValidatorTest {
     void testScenarioRegistryValidation() throws IOException {
         String validRegistry = """
             metadata:
+              id: "test-registry-001"
               name: "Test Registry"
               version: "1.0.0"
               description: "A test scenario registry"
@@ -222,6 +226,7 @@ class YamlMetadataValidatorTest {
         // Create multiple files
         String validFile = """
             metadata:
+              id: "valid-file-001"
               name: "Valid File"
               version: "1.0.0"
               description: "A valid file"
@@ -261,6 +266,7 @@ class YamlMetadataValidatorTest {
     void testVersionFormatWarning() throws IOException {
         String invalidVersion = """
             metadata:
+              id: "test-version-001"
               name: "Test File"
               version: "invalid-version"
               description: "A test file"
@@ -307,7 +313,27 @@ class YamlMetadataValidatorTest {
         assertFalse(result.isValid(), "Invalid YAML syntax should fail validation");
         assertTrue(result.getErrors().stream().anyMatch(error -> error.contains("Failed to parse YAML file")));
     }
-    
+
+    @Test
+    void testValidPipelineType() throws IOException {
+        String validPipeline = """
+            metadata:
+              id: "test-pipeline-001"
+              name: "Test Pipeline"
+              version: "1.0.0"
+              description: "A test pipeline configuration"
+              type: "pipeline"
+              author: "pipeline.team@company.com"
+            """;
+
+        writeFile("config/pipeline-test.yaml", validPipeline);
+
+        YamlValidationResult result = validator.validateFile("config/pipeline-test.yaml");
+        assertTrue(result.isValid(), "Pipeline type should be valid. Errors: " + result.getErrors());
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals("VALID", result.getStatus());
+    }
+
     /**
      * Helper method to write content to a file in the temp directory.
      */

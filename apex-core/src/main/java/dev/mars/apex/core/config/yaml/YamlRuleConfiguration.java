@@ -1,6 +1,7 @@
 package dev.mars.apex.core.config.yaml;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.mars.apex.core.config.pipeline.PipelineConfiguration;
 
 import java.util.List;
 
@@ -64,6 +65,9 @@ public class YamlRuleConfiguration {
 
     @JsonProperty("rule-chains")
     private List<YamlRuleChain> ruleChains;
+
+    @JsonProperty("pipeline")
+    private PipelineConfiguration pipeline;
 
     // Default constructor
     public YamlRuleConfiguration() {}
@@ -148,20 +152,34 @@ public class YamlRuleConfiguration {
     public void setRuleChains(List<YamlRuleChain> ruleChains) {
         this.ruleChains = ruleChains;
     }
+
+    public PipelineConfiguration getPipeline() {
+        return pipeline;
+    }
+
+    public void setPipeline(PipelineConfiguration pipeline) {
+        this.pipeline = pipeline;
+    }
     
     /**
      * Metadata about the configuration file.
      */
     public static class ConfigurationMetadata {
+        @JsonProperty("id")
+        private String id;
+
         @JsonProperty("name")
         private String name;
-        
+
         @JsonProperty("version")
         private String version;
         
         @JsonProperty("description")
         private String description;
-        
+
+        @JsonProperty("type")
+        private String type;
+
         @JsonProperty("author")
         private String author;
         
@@ -176,8 +194,16 @@ public class YamlRuleConfiguration {
         
         // Default constructor
         public ConfigurationMetadata() {}
-        
+
         // Getters and setters
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
         public String getName() {
             return name;
         }
@@ -201,7 +227,15 @@ public class YamlRuleConfiguration {
         public void setDescription(String description) {
             this.description = description;
         }
-        
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
         public String getAuthor() {
             return author;
         }

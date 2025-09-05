@@ -209,19 +209,57 @@ public class DatabaseDataSink implements DataSink {
             
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement statement = prepareStatement(connection, sql, allParameters)) {
-                
+
                 int rowsAffected = statement.executeUpdate();
-                
+
                 metrics.recordSuccessfulWrite(System.currentTimeMillis() - startTime, rowsAffected);
-                
+
                 LOGGER.debug("Successfully wrote data using operation '{}', rows affected: {}", operation, rowsAffected);
                 
             }
             
         } catch (SQLException e) {
             metrics.recordFailedWrite(System.currentTimeMillis() - startTime);
-            throw DataSinkException.writeError("Failed to write data using operation: " + operation, e, 
-                "Data: " + (data != null ? data.getClass().getSimpleName() : "null"));
+
+            // Classify the SQL error to determine appropriate handling
+            SqlErrorClassifier.SqlErrorType errorType = SqlErrorClassifier.classifyError(e);
+            String errorDescription = SqlErrorClassifier.getErrorDescription(errorType);
+
+            switch (errorType) {
+                case DATA_INTEGRITY_VIOLATION:
+                    // Log the constraint violation but don't crash the pipeline
+                    LOGGER.warn("Data integrity violation in operation '{}': {} - Record will be skipped",
+                               operation, e.getMessage());
+
+                    // Create a non-fatal exception that can be handled gracefully
+                    throw DataSinkException.dataIntegrityError(
+                        "Data integrity violation: " + errorDescription, e,
+                        "Operation: " + operation + ", Data: " + (data != null ? data.getClass().getSimpleName() : "null"));
+
+                case TRANSIENT_ERROR:
+                    // These errors should be retried
+                    LOGGER.warn("Transient database error in operation '{}': {} - Operation can be retried",
+                               operation, e.getMessage());
+
+                    throw new DataSinkException(DataSinkException.ErrorType.CONNECTION_ERROR,
+                                               "Transient database error: " + errorDescription, e,
+                                               "Operation: " + operation,
+                                               true); // Retryable
+
+                case CONFIGURATION_ERROR:
+                    // These are serious configuration issues that should fail fast
+                    LOGGER.error("Database configuration error in operation '{}': {}", operation, e.getMessage());
+
+                    throw DataSinkException.configurationError("Database configuration error: " + errorDescription, e);
+
+                case FATAL_ERROR:
+                default:
+                    // Unknown errors should be escalated
+                    LOGGER.error("Fatal database error in operation '{}': {}", operation, e.getMessage());
+
+                    throw DataSinkException.writeError("Fatal database error: " + errorDescription, e,
+                        "Operation: " + operation + ", Data: " + (data != null ? data.getClass().getSimpleName() : "null"));
+            }
         }
     }
     
@@ -256,52 +294,60 @@ public class DatabaseDataSink implements DataSink {
         
         try {
             String sql = resolveOperation(operation);
-            
+
             try (Connection connection = dataSource.getConnection()) {
                 connection.setAutoCommit(false);
-                
-                try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                    
-                    for (Object item : data) {
-                        try {
-                            Map<String, Object> allParameters = mergeParameters(item, parameters);
-                            setStatementParameters(statement, allParameters);
-                            statement.addBatch();
+
+                // For batch operations, we need to prepare each statement individually
+                // because named parameter processing needs to happen for each item
+                for (Object item : data) {
+                    try {
+                        Map<String, Object> allParameters = mergeParameters(item, parameters);
+                        try (PreparedStatement statement = prepareStatement(connection, sql, allParameters)) {
+                            statement.executeUpdate();
                             successCount++;
-                        } catch (SQLException e) {
-                            failureCount++;
-                            LOGGER.warn("Failed to add item to batch: {}", e.getMessage());
+                        }
+                    } catch (SQLException e) {
+                        failureCount++;
+
+                        // Classify the SQL error to provide better logging
+                        SqlErrorClassifier.SqlErrorType errorType = SqlErrorClassifier.classifyError(e);
+                        String errorDescription = SqlErrorClassifier.getErrorDescription(errorType);
+
+                        if (errorType == SqlErrorClassifier.SqlErrorType.DATA_INTEGRITY_VIOLATION) {
+                            LOGGER.warn("Skipping batch item due to data integrity violation: {} - Item: {}",
+                                       e.getMessage(), item);
+                        } else {
+                            LOGGER.warn("Failed to execute batch item due to {}: {} - Item: {}",
+                                       errorDescription, e.getMessage(), item);
                         }
                     }
-                    
-                    if (successCount > 0) {
-                        int[] results = statement.executeBatch();
-                        connection.commit();
-                        
-                        int totalRowsAffected = Arrays.stream(results).sum();
-                        metrics.recordSuccessfulBatch(System.currentTimeMillis() - startTime, totalRowsAffected);
-                        
-                        LOGGER.debug("Successfully wrote batch using operation '{}', items: {}, rows affected: {}", 
-                                   operation, successCount, totalRowsAffected);
-                    } else {
-                        connection.rollback();
-                        throw DataSinkException.batchError("No items could be added to batch", 0, data.size());
-                    }
-                    
-                } catch (SQLException e) {
-                    connection.rollback();
-                    throw e;
                 }
-                
+
+                if (successCount > 0) {
+                    connection.commit();
+                    metrics.recordSuccessfulBatch(System.currentTimeMillis() - startTime, successCount);
+
+                    LOGGER.debug("Successfully wrote batch using operation '{}', items: {}",
+                               operation, successCount);
+                } else {
+                    connection.rollback();
+                    throw DataSinkException.batchError("No items could be processed in batch", 0, data.size());
+                }
+
+            } catch (SQLException e) {
+                metrics.recordFailedBatch(System.currentTimeMillis() - startTime);
+                throw DataSinkException.batchError("Failed to write batch using operation: " + operation,
+                                                 successCount, data.size());
             }
-            
+
             if (failureCount > 0) {
                 metrics.recordPartialBatch(System.currentTimeMillis() - startTime, successCount, failureCount);
             }
-            
-        } catch (SQLException e) {
+
+        } catch (Exception e) {
             metrics.recordFailedBatch(System.currentTimeMillis() - startTime);
-            throw DataSinkException.batchError("Failed to write batch using operation: " + operation, 
+            throw DataSinkException.batchError("Failed to write batch using operation: " + operation,
                                              successCount, data.size());
         }
     }
@@ -330,8 +376,34 @@ public class DatabaseDataSink implements DataSink {
             }
             
         } catch (SQLException e) {
-            throw DataSinkException.writeError("Failed to execute operation: " + operation, e, 
-                "Parameters: " + parameters);
+            // Classify the SQL error to determine appropriate handling
+            SqlErrorClassifier.SqlErrorType errorType = SqlErrorClassifier.classifyError(e);
+            String errorDescription = SqlErrorClassifier.getErrorDescription(errorType);
+
+            switch (errorType) {
+                case DATA_INTEGRITY_VIOLATION:
+                    LOGGER.warn("Data integrity violation in execute operation '{}': {}", operation, e.getMessage());
+                    throw DataSinkException.dataIntegrityError(
+                        "Data integrity violation: " + errorDescription, e,
+                        "Operation: " + operation + ", Parameters: " + parameters);
+
+                case TRANSIENT_ERROR:
+                    LOGGER.warn("Transient database error in execute operation '{}': {}", operation, e.getMessage());
+                    throw new DataSinkException(DataSinkException.ErrorType.CONNECTION_ERROR,
+                                               "Transient database error: " + errorDescription, e,
+                                               "Operation: " + operation,
+                                               true); // Retryable
+
+                case CONFIGURATION_ERROR:
+                    LOGGER.error("Database configuration error in execute operation '{}': {}", operation, e.getMessage());
+                    throw DataSinkException.configurationError("Database configuration error: " + errorDescription, e);
+
+                case FATAL_ERROR:
+                default:
+                    LOGGER.error("Fatal database error in execute operation '{}': {}", operation, e.getMessage());
+                    throw DataSinkException.writeError("Fatal database error: " + errorDescription, e,
+                        "Operation: " + operation + ", Parameters: " + parameters);
+            }
         }
     }
     
@@ -511,10 +583,14 @@ public class DatabaseDataSink implements DataSink {
 
             try {
                 // Execute initialization script if provided
-                if (configuration.getSchema().getInitScript() != null &&
-                    !configuration.getSchema().getInitScript().trim().isEmpty()) {
+                String initScript = configuration.getSchema().getInitScript();
+                LOGGER.info("Checking for init-script: {}", initScript != null ? "present (" + initScript.length() + " chars)" : "null");
 
-                    executeSchemaInitScript(configuration.getSchema().getInitScript());
+                if (initScript != null && !initScript.trim().isEmpty()) {
+                    LOGGER.info("Executing schema initialization script for database sink: {}", getName());
+                    executeSchemaInitScript(initScript);
+                } else {
+                    LOGGER.warn("No init-script found for schema auto-creation in database sink: {}", getName());
                 }
 
                 // Execute additional initialization scripts if provided
@@ -527,6 +603,9 @@ public class DatabaseDataSink implements DataSink {
                         }
                     }
                 }
+
+                // Verify schema creation with failsafe checks
+                verifySchemaCreation();
 
                 LOGGER.info("Schema initialization completed successfully for database sink: {}", getName());
 
@@ -545,22 +624,45 @@ public class DatabaseDataSink implements DataSink {
         }
 
         try {
-            LOGGER.debug("Executing schema initialization script for database sink: {}", getName());
+            LOGGER.info("Executing schema initialization script for database sink: {}", getName());
+            LOGGER.info("Script content preview: {}", script.substring(0, Math.min(100, script.length())) + "...");
 
             // Split script into individual statements (simple approach)
             String[] statements = script.split(";");
+            LOGGER.info("Split script into {} statements", statements.length);
+
+
 
             try (Connection connection = dataSource.getConnection()) {
                 connection.setAutoCommit(true); // Auto-commit for DDL statements
 
-                for (String statement : statements) {
-                    String trimmedStatement = statement.trim();
-                    if (!trimmedStatement.isEmpty() && !trimmedStatement.startsWith("--")) {
-                        LOGGER.debug("Executing SQL statement: {}", trimmedStatement.substring(0, Math.min(50, trimmedStatement.length())) + "...");
+                for (int i = 0; i < statements.length; i++) {
+                    String trimmedStatement = statements[i].trim();
 
-                        try (PreparedStatement preparedStatement = connection.prepareStatement(trimmedStatement)) {
-                            preparedStatement.execute();
+                    // Remove comment lines and extract actual SQL
+                    String[] lines = trimmedStatement.split("\n");
+                    StringBuilder sqlBuilder = new StringBuilder();
+                    for (String line : lines) {
+                        String trimmedLine = line.trim();
+                        if (!trimmedLine.isEmpty() && !trimmedLine.startsWith("--")) {
+                            sqlBuilder.append(trimmedLine).append(" ");
                         }
+                    }
+                    String actualSql = sqlBuilder.toString().trim();
+
+                    if (!actualSql.isEmpty()) {
+                        LOGGER.info("Executing SQL statement {}/{}: {}", i + 1, statements.length,
+                            actualSql.substring(0, Math.min(50, actualSql.length())) + "...");
+
+                        try (PreparedStatement preparedStatement = connection.prepareStatement(actualSql)) {
+                            preparedStatement.execute();
+                            LOGGER.info("✓ Statement {}/{} executed successfully", i + 1, statements.length);
+                        } catch (Exception e) {
+                            LOGGER.error("❌ Statement {}/{} failed: {}", i + 1, statements.length, e.getMessage());
+                            throw e;
+                        }
+                    } else {
+                        LOGGER.info("Skipping empty or comment-only statement {}/{}", i + 1, statements.length);
                     }
                 }
             }
@@ -572,7 +674,75 @@ public class DatabaseDataSink implements DataSink {
             throw DataSinkException.configurationError("Schema initialization script execution failed", e);
         }
     }
-    
+
+    /**
+     * Verify that the schema was created successfully by performing failsafe checks.
+     */
+    private void verifySchemaCreation() throws DataSinkException {
+        if (dataSource == null) {
+            throw DataSinkException.configurationError("Data source not available for schema verification");
+        }
+
+        try {
+            LOGGER.info("Performing schema verification checks for database sink: {}", getName());
+
+            try (Connection connection = dataSource.getConnection()) {
+                // Check if the main table exists (if specified in schema config)
+                if (configuration.getSchema().getTableName() != null) {
+                    verifyTableExists(connection, configuration.getSchema().getTableName());
+                }
+
+                // Perform a basic connectivity test by querying system tables
+                verifyDatabaseConnectivity(connection);
+
+                LOGGER.info("✓ Schema verification completed successfully for database sink: {}", getName());
+            }
+
+        } catch (Exception e) {
+            LOGGER.error("❌ Schema verification failed for database sink: {}", getName(), e);
+            throw DataSinkException.configurationError("Schema verification failed", e);
+        }
+    }
+
+    /**
+     * Verify that a specific table exists and is accessible.
+     */
+    private void verifyTableExists(Connection connection, String tableName) throws Exception {
+        String testQuery = "SELECT COUNT(*) FROM " + tableName + " WHERE 1=0";
+
+        try (PreparedStatement statement = connection.prepareStatement(testQuery)) {
+            statement.executeQuery();
+            LOGGER.info("✓ Table '{}' exists and is accessible", tableName);
+        } catch (Exception e) {
+            LOGGER.error("❌ Table '{}' verification failed: {}", tableName, e.getMessage());
+            throw new Exception("Table '" + tableName + "' does not exist or is not accessible", e);
+        }
+    }
+
+    /**
+     * Verify basic database connectivity by querying system information.
+     */
+    private void verifyDatabaseConnectivity(Connection connection) throws Exception {
+        try {
+            // Get database metadata to verify connection
+            var metadata = connection.getMetaData();
+            String databaseName = metadata.getDatabaseProductName();
+            String databaseVersion = metadata.getDatabaseProductVersion();
+
+            LOGGER.info("✓ Database connectivity verified: {} {}", databaseName, databaseVersion);
+
+            // Test a simple query that should work on all databases
+            try (PreparedStatement statement = connection.prepareStatement("SELECT 1")) {
+                statement.executeQuery();
+                LOGGER.info("✓ Basic query execution verified");
+            }
+
+        } catch (Exception e) {
+            LOGGER.error("❌ Database connectivity verification failed: {}", e.getMessage());
+            throw new Exception("Database connectivity verification failed", e);
+        }
+    }
+
     private String resolveOperation(String operation) throws DataSinkException {
         String sql = operationCache.get(operation);
         if (sql == null) {
@@ -603,25 +773,9 @@ public class DatabaseDataSink implements DataSink {
         return merged;
     }
     
-    private PreparedStatement prepareStatement(Connection connection, String sql, Map<String, Object> parameters) 
+    private PreparedStatement prepareStatement(Connection connection, String sql, Map<String, Object> parameters)
             throws SQLException {
-        PreparedStatement statement = connection.prepareStatement(sql);
-        setStatementParameters(statement, parameters);
-        return statement;
-    }
-    
-    private void setStatementParameters(PreparedStatement statement, Map<String, Object> parameters)
-            throws SQLException {
-        if (parameters == null || parameters.isEmpty()) {
-            return;
-        }
-
-        // This is a simplified parameter setting implementation
-        // In a full implementation, you would need proper parameter mapping based on SQL parameter names
-        int paramIndex = 1;
-        for (Object value : parameters.values()) {
-            statement.setObject(paramIndex++, value);
-        }
+        return JdbcParameterUtils.prepareStatement(connection, sql, parameters);
     }
     
     private List<Map<String, Object>> extractResultSet(ResultSet resultSet) throws SQLException {

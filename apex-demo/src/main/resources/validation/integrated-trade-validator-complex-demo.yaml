@@ -36,52 +36,126 @@ external-data-sources:
 
 # APEX enrichment processing for complex trade validation
 enrichments:
-  - name: "settlement-validation"
+  - id: "settlement-validation"
+    name: "settlement-validation"
     type: "lookup-enrichment"
     description: "Validate settlement parameters using data-driven configuration"
-    condition: "#data.validationType == 'settlement-validation'"
-    lookup-source: "settlement-validation-config"
-    lookup-key: "#data.settlementType != null ? #data.settlementType : 'default'"
-    target-field: "settlementValidationResult"
-    
-  - name: "compliance-validation"
+    enabled: true
+    condition: "#validationType == 'settlement-validation'"
+    lookup-config:
+      lookup-key: "#settlementType != null ? #settlementType : 'default'"
+      lookup-dataset:
+        type: "inline"
+        key-field: "type"
+        data:
+          - type: "default"
+            result: "Settlement validation completed: Method validated, Location validated, Currency validated, Amount validated"
+          - type: "dvp"
+            result: "DVP Settlement validation completed: Delivery vs Payment validated, Settlement date confirmed"
+          - type: "free"
+            result: "Free Settlement validation completed: Free delivery validated, No payment required"
+    field-mappings:
+      - source-field: "result"
+        target-field: "settlementValidationResult"
+
+  - id: "compliance-validation"
+    name: "compliance-validation"
     type: "lookup-enrichment"
     description: "Validate compliance parameters using data-driven configuration"
-    condition: "#data.validationType == 'compliance-validation'"
-    lookup-source: "compliance-validation-config"
-    lookup-key: "#data.complianceType != null ? #data.complianceType : 'default'"
-    target-field: "complianceValidationResult"
-    
-  - name: "lookup-service-validation"
+    enabled: true
+    condition: "#validationType == 'compliance-validation'"
+    lookup-config:
+      lookup-key: "#complianceType != null ? #complianceType : 'default'"
+      lookup-dataset:
+        type: "inline"
+        key-field: "type"
+        data:
+          - type: "default"
+            result: "Compliance validation completed: Regulatory requirements validated, Risk limits checked"
+          - type: "mifid"
+            result: "MiFID II Compliance validation completed: Best execution validated, Client categorization confirmed"
+          - type: "dodd-frank"
+            result: "Dodd-Frank Compliance validation completed: Swap reporting validated, Clearing requirements checked"
+    field-mappings:
+      - source-field: "result"
+        target-field: "complianceValidationResult"
+
+  - id: "lookup-service-validation"
+    name: "lookup-service-validation"
     type: "lookup-enrichment"
     description: "Validate using lookup services with data-driven configuration"
-    condition: "#data.validationType == 'lookup-service-validation'"
-    lookup-source: "lookup-services-config"
-    lookup-key: "#data.lookupServiceType != null ? #data.lookupServiceType : 'default'"
-    target-field: "lookupServiceValidationResult"
-    
-  - name: "validation-rules-processing"
+    enabled: true
+    condition: "#validationType == 'lookup-service-validation'"
+    lookup-config:
+      lookup-key: "#lookupServiceType != null ? #lookupServiceType : 'default'"
+      lookup-dataset:
+        type: "inline"
+        key-field: "type"
+        data:
+          - type: "default"
+            result: "Lookup service validation completed: Service connectivity validated, Data integrity checked"
+          - type: "counterparty"
+            result: "Counterparty lookup service validation completed: LEI validated, Credit rating checked"
+          - type: "instrument"
+            result: "Instrument lookup service validation completed: ISIN validated, Market data confirmed"
+    field-mappings:
+      - source-field: "result"
+        target-field: "lookupServiceValidationResult"
+
+  - id: "validation-rules-processing"
+    name: "validation-rules-processing"
     type: "lookup-enrichment"
     description: "Process validation rules using data-driven configuration"
-    condition: "#data.validationType == 'validation-rules'"
-    lookup-source: "validation-rules-config"
-    lookup-key: "#data.ruleType != null ? #data.ruleType : 'default'"
-    target-field: "validationRulesResult"
-    
-  - name: "trade-sample-validation"
+    enabled: true
+    condition: "#validationType == 'validation-rules'"
+    lookup-config:
+      lookup-key: "#ruleType != null ? #ruleType : 'default'"
+      lookup-dataset:
+        type: "inline"
+        key-field: "type"
+        data:
+          - type: "default"
+            result: "Validation rules processing completed: Business rules validated, Data quality checked"
+          - type: "trade-limits"
+            result: "Trade limits validation completed: Position limits checked, Risk thresholds validated"
+          - type: "market-data"
+            result: "Market data validation completed: Price validation, Volatility checks performed"
+    field-mappings:
+      - source-field: "result"
+        target-field: "validationRulesResult"
+
+  - id: "trade-sample-validation"
+    name: "trade-sample-validation"
     type: "lookup-enrichment"
     description: "Validate trade samples using data-driven configuration"
-    condition: "#data.validationType == 'trade-sample-validation'"
-    lookup-source: "trade-samples-config"
-    lookup-key: "#data.sampleType != null ? #data.sampleType : 'default'"
-    target-field: "tradeSampleValidationResult"
-    
-  - name: "validation-summary"
-    type: "expression-enrichment"
+    enabled: true
+    condition: "#validationType == 'trade-sample-validation'"
+    lookup-config:
+      lookup-key: "#sampleType != null ? #sampleType : 'default'"
+      lookup-dataset:
+        type: "inline"
+        key-field: "type"
+        data:
+          - type: "default"
+            result: "Trade sample validation completed: Sample data validated, Test scenarios executed"
+          - type: "equity"
+            result: "Equity trade sample validation completed: Stock trades validated, Dividend processing checked"
+          - type: "fixed-income"
+            result: "Fixed income trade sample validation completed: Bond trades validated, Coupon calculations checked"
+    field-mappings:
+      - source-field: "result"
+        target-field: "tradeSampleValidationResult"
+
+  - id: "validation-summary"
+    name: "validation-summary"
+    type: "calculation-enrichment"
     description: "Generate comprehensive validation summary"
+    enabled: true
     condition: "true"
-    expression: "'Complex trade validation completed: ' + (#data.validationType != null ? #data.validationType : 'unknown') + ' using real APEX services'"
-    target-field: "validationSummary"
+    field-mappings:
+      - source-field: "validationType"
+        target-field: "validationSummary"
+        expression: "'Complex trade validation completed: ' + (#validationType != null ? #validationType : 'unknown') + ' using real APEX services'"
 
 # Complex trade validation categories
 validation-categories:

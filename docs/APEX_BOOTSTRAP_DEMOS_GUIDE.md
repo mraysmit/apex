@@ -14,6 +14,7 @@ This guide documents the **APEX Bootstrap Demos** featuring the revolutionary **
 - **Validated YAML Configurations**: 100% validated external data-source reference examples
 - **Enterprise Architecture Patterns**: Production-ready configuration management
 - **Real APEX Engine Integration**: Actual APEX rules engine processing with external references
+- **Pipeline Orchestration**: YAML-driven ETL workflows with data sink integration **🆕 NEW**
 
 The APEX Playground provides a **comprehensive interactive web-based development environment** with a professional 4-panel interface for developing, testing, and demonstrating these advanced APEX capabilities.
 ### What's New in APEX 2.1 Bootstrap Demos
@@ -40,9 +41,10 @@ The APEX Playground provides a **comprehensive interactive web-based development
 1. **Simple External Reference Demo** - Start with basic external data-source reference patterns
 2. **Clean Architecture Understanding** - Learn infrastructure vs. business logic separation
 3. **PostgreSQL Integration Demo** - Explore real database integration with external references
-4. **Performance Optimization** - Understand configuration caching and connection pooling
-5. **Enterprise Patterns** - Master production-ready multi-environment configurations
-6. **Validation & Testing** - Verify configurations with comprehensive YAML validation
+4. **Pipeline Orchestration Demo** - Learn YAML-driven ETL workflows with CsvToH2PipelineDemo **🆕 NEW**
+5. **Performance Optimization** - Understand configuration caching and connection pooling
+6. **Enterprise Patterns** - Master production-ready multi-environment configurations
+7. **Validation & Testing** - Verify configurations with comprehensive YAML validation
 
 ### Interactive Development Learning Path
 1. **Load External Reference Examples** - Upload external data-source reference configurations
@@ -76,7 +78,79 @@ The **external data-source reference system** is APEX 2.1's revolutionary approa
 
 ## Available External Data-Source Reference Demos
 
-### 1. Simple PostgreSQL Customer Profile Demo (External Reference)
+### 1. CSV to H2 Pipeline Orchestration Demo **🆕 NEW**
+
+**File:** `etl/csv-to-h2-pipeline.yaml`
+**Java Demo:** `dev.mars.apex.demo.etl.CsvToH2PipelineDemo`
+
+**Purpose:** Demonstrates complete YAML-driven ETL pipeline orchestration with data sinks.
+
+**Key Features:**
+- **YAML-Driven Orchestration**: Complete pipeline workflow defined in YAML
+- **Step Dependencies**: Automatic dependency resolution and validation
+- **Data Sinks**: Database and file system output capabilities
+- **Error Handling**: Configurable error handling with optional steps
+- **Monitoring**: Built-in step timing and execution tracking
+
+**Architecture:**
+```yaml
+# Complete ETL Pipeline Configuration
+metadata:
+  name: "CSV to H2 ETL Pipeline Demo"
+  type: "data-pipeline-config"
+
+# Pipeline orchestration - defines the complete ETL workflow
+pipeline:
+  name: "customer-etl-pipeline"
+  steps:
+    - name: "extract-customers"
+      type: "extract"
+      source: "customer-csv-input"
+      operation: "getAllCustomers"
+
+    - name: "load-to-database"
+      type: "load"
+      sink: "customer-h2-database"
+      operation: "insertCustomer"
+      depends-on: ["extract-customers"]
+
+    - name: "audit-logging"
+      type: "audit"
+      sink: "audit-log-file"
+      operation: "writeAuditRecord"
+      depends-on: ["load-to-database"]
+      optional: true
+
+# Data sources and sinks
+data-sources:
+  - name: "customer-csv-input"
+    type: "file-system"
+    # ... CSV configuration
+
+data-sinks:
+  - name: "customer-h2-database"
+    type: "database"
+    # ... H2 database configuration
+```
+
+**Execution Results:**
+```
+✓ Pipeline success: true
+✓ Total duration: 23ms
+✓ Steps completed: 3/3
+✓ Extract step: 4ms (10 records)
+✓ Load step: 17ms (10 records inserted)
+✓ Audit step: 1ms (optional, failed gracefully)
+✓ Database verification: 10 customers successfully processed
+```
+
+**Run the Demo:**
+```bash
+java -cp apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar \
+     dev.mars.apex.demo.etl.CsvToH2PipelineDemo
+```
+
+### 2. Simple PostgreSQL Customer Profile Demo (External Reference)
 
 **File:** `enrichments/simple-postgresql-customer-profile-external-ref.yaml`
 

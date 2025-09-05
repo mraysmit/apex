@@ -13,6 +13,8 @@ Welcome to the APEX Technical Reference Guide! This document provides detailed t
 - **DataSource Resolver Component**: Advanced external configuration resolution
 - **Configuration Caching System**: Performance optimization through intelligent caching
 - **Enterprise Architecture Patterns**: Production-ready scalable configuration management
+- **Pipeline Orchestration Engine**: YAML-driven data processing workflows
+- **Data Sink Architecture**: Comprehensive output capabilities with database and file sinks
 
 ## Scenario-Based Configuration Architecture
 
@@ -46,6 +48,12 @@ graph TD
         ConfigCache["Configuration Cache<br/>• Cached external configs<br/>• Performance optimization<br/>• Lazy loading"]
     end
 
+    subgraph "🆕 Pipeline Orchestration Layer"
+        PipelineExecutor["Pipeline Executor<br/>• YAML-driven orchestration<br/>• Step dependency resolution<br/>• Error handling & monitoring"]
+        PipelineConfig["Pipeline Configuration<br/>• Step definitions<br/>• Dependency management<br/>• Execution settings"]
+        DataSinks["Data Sinks<br/>• Database sinks<br/>• File system sinks<br/>• Audit logging"]
+    end
+
     subgraph "Data Layer"
         InlineData["Inline Datasets<br/>• Embedded data<br/>• Static references"]
         ExternalYAML["External YAML<br/>• Shared reference data"]
@@ -58,13 +66,18 @@ graph TD
     ScenarioFiles -->|"references"| BootstrapFiles
     ConfigFiles -.->|"may reference"| EnrichmentFiles
     ConfigFiles -->|"🆕 data-source-refs"| DataSourceResolver
+    ConfigFiles -->|"🆕 pipeline"| PipelineExecutor
     EnrichmentFiles -->|"🆕 data-source-refs"| DataSourceResolver
+    PipelineExecutor -->|"uses"| PipelineConfig
+    PipelineExecutor -->|"writes to"| DataSinks
+    PipelineConfig -->|"references"| DataSourceResolver
     DataSourceResolver -->|"resolves"| ExternalConfigs
     DataSourceResolver -->|"caches"| ConfigCache
     BootstrapFiles -->|"contains"| InlineData
     ConfigFiles -->|"references"| ExternalYAML
     ExternalConfigs -->|"connects to"| DatabaseSources
     ExternalConfigs -->|"connects to"| APISources
+    DataSinks -->|"connects to"| DatabaseSources
 ```
 
 ### Core Components
@@ -1166,6 +1179,360 @@ RuleResult result = engine.evaluate(facts);
 - **Line 23**: Add inventory data to the facts map using the key "inventory"
 - **Line 26**: Create a rules engine instance with the provided configuration
 - **Line 27**: Evaluate all rules against the facts map and return the combined result
+
+## Pipeline Orchestration Architecture
+
+### Overview
+
+**Pipeline Orchestration** represents APEX's revolutionary approach to YAML-driven data processing workflows. This system embodies the core APEX principle that **all processing logic should be contained in the YAML configuration file**, eliminating hardcoded orchestration in Java code.
+
+### Technical Architecture
+
+```mermaid
+graph TB
+    subgraph "YAML Configuration Layer"
+        PC[Pipeline Configuration]
+        SC[Step Configuration]
+        DC[Dependency Configuration]
+        EC[Execution Configuration]
+    end
+
+    subgraph "Pipeline Execution Engine"
+        PE[Pipeline Executor]
+        SV[Step Validator]
+        DG[Dependency Graph]
+        ER[Execution Runtime]
+    end
+
+    subgraph "Step Execution Layer"
+        ES[Extract Steps]
+        TS[Transform Steps]
+        LS[Load Steps]
+        AS[Audit Steps]
+    end
+
+    subgraph "Data Flow Management"
+        CTX[Pipeline Context]
+        DF[Data Flow Manager]
+        SR[Step Results]
+        EM[Error Manager]
+    end
+
+    subgraph "External Integration"
+        DS[Data Sources]
+        DSK[Data Sinks]
+        EDS[External Data Sources]
+        AUD[Audit Systems]
+    end
+
+    PC --> PE
+    SC --> SV
+    DC --> DG
+    EC --> ER
+
+    PE --> ES
+    PE --> TS
+    PE --> LS
+    PE --> AS
+
+    ES --> CTX
+    TS --> DF
+    LS --> SR
+    AS --> EM
+
+    ES --> DS
+    LS --> DSK
+    TS --> EDS
+    AS --> AUD
+```
+
+### Core Components
+
+#### 1. PipelineExecutor
+
+The central orchestration engine that executes YAML-defined pipelines:
+
+```java
+public class PipelineExecutor {
+    private final ExternalDataSourceManager dataSourceManager;
+    private final Map<String, DataSink> dataSinks;
+    private final Map<String, Object> pipelineContext;
+    private final Map<String, PipelineStepResult> stepResults;
+
+    public YamlPipelineExecutionResult execute(PipelineConfiguration pipeline)
+            throws DataPipelineException;
+
+    private void validatePipeline(PipelineConfiguration pipeline)
+            throws DataPipelineException;
+
+    private void executeStep(PipelineStep step, YamlPipelineExecutionResult result)
+            throws DataPipelineException;
+
+    private List<PipelineStep> topologicalSort(List<PipelineStep> steps);
+}
+```
+
+#### 2. PipelineConfiguration
+
+Represents the complete pipeline definition from YAML:
+
+```java
+public class PipelineConfiguration {
+    private String name;
+    private String description;
+    private List<PipelineStep> steps;
+    private ExecutionConfiguration execution;
+    private List<TransformationConfiguration> transformations;
+    private MonitoringConfiguration monitoring;
+
+    public static class ExecutionConfiguration {
+        private String mode = "sequential"; // sequential or parallel
+        private String errorHandling = "stop-on-error";
+        private int maxRetries = 3;
+        private long retryDelayMs = 1000;
+    }
+}
+```
+
+#### 3. PipelineStep
+
+Individual step configuration with dependency management:
+
+```java
+public class PipelineStep {
+    private String name;
+    private String type; // extract, load, transform, audit
+    private String description;
+    private String source; // data source name (for extract steps)
+    private String sink; // data sink name (for load steps)
+    private String operation; // operation name to execute
+    private List<String> dependsOn; // step dependencies
+    private boolean optional = false; // if true, failure doesn't stop pipeline
+    private Map<String, Object> parameters;
+    private RetryConfiguration retry;
+
+    public boolean isExtractStep() { return "extract".equalsIgnoreCase(type); }
+    public boolean isLoadStep() { return "load".equalsIgnoreCase(type); }
+    public boolean isTransformStep() { return "transform".equalsIgnoreCase(type); }
+    public boolean isAuditStep() { return "audit".equalsIgnoreCase(type); }
+}
+```
+
+### Pipeline Execution Flow
+
+#### 1. Configuration Loading and Validation
+
+```java
+// Load pipeline from YAML
+YamlRuleConfiguration config = YamlConfigurationLoader.loadFromClasspath("pipeline.yaml");
+PipelineConfiguration pipeline = config.getPipeline();
+
+// Validate pipeline structure
+PipelineExecutor executor = new PipelineExecutor(dataSourceManager);
+executor.validatePipeline(pipeline); // Throws exception if invalid
+```
+
+#### 2. Dependency Resolution
+
+The executor automatically resolves step dependencies using topological sorting:
+
+```java
+private List<PipelineStep> topologicalSort(List<PipelineStep> steps) {
+    // Build dependency graph
+    Map<String, Set<String>> dependencies = buildDependencyGraph(steps);
+
+    // Detect circular dependencies
+    validateNoCycles(dependencies);
+
+    // Sort steps in execution order
+    return sortTopologically(steps, dependencies);
+}
+```
+
+#### 3. Step Execution
+
+Each step type has specialized execution logic:
+
+```java
+private void executeStep(PipelineStep step, YamlPipelineExecutionResult result) {
+    switch (step.getType().toLowerCase()) {
+        case "extract":
+            Object data = executeExtractStep(step);
+            pipelineContext.put("extractedData", data);
+            break;
+
+        case "load":
+            Object dataToLoad = pipelineContext.get("extractedData");
+            executeLoadStep(step, dataToLoad);
+            break;
+
+        case "transform":
+            Object dataToTransform = pipelineContext.get("extractedData");
+            Object transformedData = executeTransformStep(step, dataToTransform);
+            pipelineContext.put("transformedData", transformedData);
+            break;
+
+        case "audit":
+            Object dataToAudit = pipelineContext.get("extractedData");
+            executeAuditStep(step, dataToAudit);
+            break;
+    }
+}
+```
+
+### Data Flow Architecture
+
+#### Automatic Data Passing
+
+Data flows automatically between pipeline steps through the pipeline context:
+
+1. **Extract Step** → Stores data in `pipelineContext.put("extractedData", data)`
+2. **Transform Step** → Reads from context, transforms, stores result
+3. **Load Step** → Reads transformed data, writes to sink
+4. **Audit Step** → Reads original/transformed data for auditing
+
+#### Context Management
+
+```java
+private final Map<String, Object> pipelineContext = new ConcurrentHashMap<>();
+
+// Data automatically available in pipeline context:
+// - "extractedData": Raw data from extract steps
+// - "transformedData": Processed data from transform steps
+// - "stepResults": Results from each completed step
+// - Custom data from transform steps
+```
+
+### Error Handling and Recovery
+
+#### Pipeline-Level Error Handling
+
+```yaml
+pipeline:
+  execution:
+    error-handling: "stop-on-error"  # Stop pipeline on any error
+    # OR
+    error-handling: "continue-on-error"  # Continue with remaining steps
+    max-retries: 3
+    retry-delay-ms: 1000
+```
+
+#### Step-Level Error Handling
+
+```yaml
+steps:
+  - name: "optional-audit"
+    type: "audit"
+    optional: true  # Pipeline continues if this step fails
+    retry:
+      max-attempts: 3
+      delay-ms: 1000
+      backoff-multiplier: 2.0
+```
+
+### Performance and Monitoring
+
+#### Built-in Metrics Collection
+
+```java
+public class YamlPipelineExecutionResult {
+    private boolean success;
+    private long durationMs;
+    private List<PipelineStepResult> stepResults;
+    private int totalSteps;
+    private int successfulSteps;
+    private int failedSteps;
+
+    public double getSuccessRate() {
+        return (double) successfulSteps / totalSteps * 100.0;
+    }
+}
+
+public class PipelineStepResult {
+    private String stepName;
+    private boolean success;
+    private long durationMs;
+    private int recordsProcessed;
+    private int recordsFailed;
+
+    public double getSuccessRate() {
+        int total = recordsProcessed + recordsFailed;
+        return total == 0 ? (success ? 100.0 : 0.0) :
+               (double) recordsProcessed / total * 100.0;
+    }
+}
+```
+
+#### Execution Monitoring
+
+```yaml
+pipeline:
+  monitoring:
+    enabled: true
+    log-progress: true      # Log step start/completion
+    collect-metrics: true   # Collect timing metrics
+    alert-on-failure: true  # Alert on pipeline failures
+```
+
+### Integration with DataPipelineEngine
+
+The pipeline orchestration integrates seamlessly with the existing DataPipelineEngine:
+
+```java
+public class DataPipelineEngine {
+    private YamlRuleConfiguration configuration;
+
+    public YamlPipelineExecutionResult executePipeline(String pipelineName)
+            throws DataPipelineException {
+
+        if (configuration.getPipeline() == null) {
+            throw new DataPipelineException("No pipeline configuration found");
+        }
+
+        PipelineExecutor executor = new PipelineExecutor(dataSourceManager);
+        return executor.execute(configuration.getPipeline());
+    }
+}
+```
+
+### Usage Example
+
+**Java Code (Simplified):**
+```java
+// Load YAML configuration
+YamlRuleConfiguration config = YamlConfigurationLoader.loadFromClasspath("pipeline.yaml");
+
+// Initialize pipeline engine
+DataPipelineEngine pipelineEngine = new DataPipelineEngine();
+pipelineEngine.initialize(config);
+
+// Execute YAML-defined pipeline
+YamlPipelineExecutionResult result = pipelineEngine.executePipeline("customer-etl-pipeline");
+
+// Check results
+System.out.println("Pipeline success: " + result.isSuccess());
+System.out.println("Duration: " + result.getDurationMs() + "ms");
+System.out.println("Steps completed: " + result.getSuccessfulSteps() + "/" + result.getTotalSteps());
+```
+
+**YAML Configuration (Complete Orchestration):**
+```yaml
+pipeline:
+  name: "customer-etl-pipeline"
+  steps:
+    - name: "extract-customers"
+      type: "extract"
+      source: "customer-csv-input"
+      operation: "getAllCustomers"
+
+    - name: "load-to-database"
+      type: "load"
+      sink: "customer-h2-database"
+      operation: "insertCustomer"
+      depends-on: ["extract-customers"]
+```
+
+This architecture demonstrates APEX's commitment to **YAML-driven processing** where all orchestration logic is declaratively defined in configuration rather than hardcoded in Java.
 
 ## Bootstrap Demo Architecture
 

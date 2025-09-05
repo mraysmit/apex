@@ -87,13 +87,8 @@ public class ExternalDataSourceReferenceDemo {
     private void initializeDatabase() throws Exception {
         logger.info("Initializing H2 database with shared access...");
         
-        // Load H2 driver explicitly
-        try {
-            Class.forName("org.h2.Driver");
-        } catch (ClassNotFoundException e) {
-            logger.error("H2 driver not found: " + e.getMessage());
-            throw new RuntimeException("H2 driver not available", e);
-        }
+        // JDBC drivers are automatically loaded by apex-core JdbcTemplateFactory
+        logger.info("✅ JDBC drivers handled by apex-core");
 
         // Use the exact same JDBC URL as the working demo and YAML configuration
         String jdbcUrl = "jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";

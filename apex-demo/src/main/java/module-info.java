@@ -32,6 +32,7 @@ module dev.mars.apex.demo {
 
     // Database dependencies
     requires org.postgresql.jdbc;
+    requires com.h2database;
     requires java.sql.rowset;
 
     // Jackson dependencies for JSON and YAML processing
@@ -45,6 +46,9 @@ module dev.mars.apex.demo {
     requires org.slf4j.simple;
     requires jul.to.slf4j;
     requires jdk.compiler;
+
+    // Enable automatic JDBC driver loading
+    uses java.sql.Driver;
 
     // Export packages for Spring Expression Language access and general use
 

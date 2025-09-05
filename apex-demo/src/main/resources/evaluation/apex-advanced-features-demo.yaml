@@ -57,7 +57,7 @@ enrichments:
     type: "field-enrichment"
     description: "Process rule engine operations using data-driven configuration"
     enabled: true
-    condition: "false"
+    condition: "true"
     field-mappings:
       - source-field: "ruleType"
         target-field: "ruleEngineResult"
@@ -68,7 +68,7 @@ enrichments:
     type: "field-enrichment"
     description: "Process template operations using data-driven configuration"
     enabled: true
-    condition: "false"
+    condition: "true"
     field-mappings:
       - source-field: "templateType"
         target-field: "templateResult"
@@ -79,7 +79,7 @@ enrichments:
     type: "field-enrichment"
     description: "Process dynamic lookup operations using data-driven configuration"
     enabled: true
-    condition: "false"
+    condition: "true"
     field-mappings:
       - source-field: "lookupType"
         target-field: "lookupResult"
@@ -90,7 +90,7 @@ enrichments:
     type: "field-enrichment"
     description: "Process rule result features using data-driven configuration"
     enabled: true
-    condition: "false"
+    condition: "true"
     field-mappings:
       - source-field: "featureType"
         target-field: "ruleResultFeature"
@@ -101,7 +101,7 @@ enrichments:
     type: "field-enrichment"
     description: "Execute dynamic methods using real APEX expressions"
     enabled: true
-    condition: "false"
+    condition: "true"
     field-mappings:
       - source-field: "methodName"
         target-field: "dynamicMethodResult"

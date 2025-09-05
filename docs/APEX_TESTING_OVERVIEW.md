@@ -13,7 +13,7 @@ APEX includes a comprehensive testing framework that covers all aspects of the r
 
 ### Multi-Layer Testing Strategy
 
-APEX employs a multi-layer testing strategy that ensures comprehensive coverage across all system components:
+APEX employs a multi-layer testing strategy that ensures comprehensive coverage across all system components, including the new pipeline orchestration capabilities:
 
 ```mermaid
 graph TB
@@ -31,6 +31,7 @@ graph TB
         H[API Tests]
         I[Configuration Tests]
         J[Bootstrap Tests]
+        K[Pipeline Tests]
     end
 
     subgraph "Test Tools"
@@ -448,6 +449,7 @@ public class TestDataConfiguration {
 - **Test Reliability**: 99.9%+ success rate in CI/CD pipeline
 - **Test Maintainability**: Clear, readable, and well-documented tests
 - **Test Coverage**: Comprehensive coverage of business logic and edge cases
+- **Pipeline Testing**: Complete ETL workflow validation and performance testing **🆕 NEW**
 
 ### Reporting and Analysis
 ```xml

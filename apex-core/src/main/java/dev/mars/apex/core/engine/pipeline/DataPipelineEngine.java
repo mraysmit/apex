@@ -50,9 +50,11 @@ public class DataPipelineEngine {
     
     private final DataSourceFactory dataSourceFactory;
     private final DataSinkFactory dataSinkFactory;
-    
+
     private final Map<String, ExternalDataSource> dataSources = new HashMap<>();
     private final Map<String, DataSink> dataSinks = new HashMap<>();
+
+    private YamlRuleConfiguration configuration;
     
     /**
      * Constructor.
@@ -70,17 +72,20 @@ public class DataPipelineEngine {
      */
     public void initialize(YamlRuleConfiguration yamlConfig) throws DataPipelineException {
         LOGGER.info("Initializing Data Pipeline Engine from YAML configuration");
-        
+
+        // Store configuration for pipeline execution
+        this.configuration = yamlConfig;
+
         try {
             // Initialize data sources
             initializeDataSources(yamlConfig);
-            
+
             // Initialize data sinks
             initializeDataSinks(yamlConfig);
-            
-            LOGGER.info("Data Pipeline Engine initialized successfully with {} sources and {} sinks", 
+
+            LOGGER.info("Data Pipeline Engine initialized successfully with {} sources and {} sinks",
                        dataSources.size(), dataSinks.size());
-            
+
         } catch (Exception e) {
             LOGGER.error("Failed to initialize Data Pipeline Engine", e);
             shutdown(); // Cleanup on failure
@@ -248,7 +253,67 @@ public class DataPipelineEngine {
                 .build();
         }
     }
-    
+
+    /**
+     * Execute a pipeline by name from YAML configuration.
+     * This method implements the core APEX principle of YAML-driven processing.
+     *
+     * @param pipelineName The name of the pipeline to execute
+     * @return Pipeline execution result
+     * @throws DataPipelineException if execution fails
+     */
+    public YamlPipelineExecutionResult executePipeline(String pipelineName) throws DataPipelineException {
+        if (configuration == null) {
+            throw new DataPipelineException("Pipeline engine not initialized");
+        }
+
+        if (configuration.getPipeline() == null) {
+            throw new DataPipelineException("No pipeline configuration found in YAML");
+        }
+
+        if (!pipelineName.equals(configuration.getPipeline().getName())) {
+            throw new DataPipelineException("Pipeline not found: " + pipelineName);
+        }
+
+        LOGGER.info("Executing YAML-defined pipeline: {}", pipelineName);
+
+        // Create pipeline executor with access to data sources
+        PipelineExecutor executor = new PipelineExecutor(new ExternalDataSourceManagerAdapter());
+
+        // Add data sinks to executor
+        for (Map.Entry<String, DataSink> entry : dataSinks.entrySet()) {
+            executor.addDataSink(entry.getKey(), entry.getValue());
+        }
+
+        // Execute the pipeline
+        return executor.execute(configuration.getPipeline());
+    }
+
+    /**
+     * Adapter to provide ExternalDataSourceManager interface to PipelineExecutor.
+     */
+    private class ExternalDataSourceManagerAdapter implements dev.mars.apex.core.service.data.external.manager.ExternalDataSourceManager {
+        @Override
+        public ExternalDataSource getDataSource(String name) {
+            return dataSources.get(name);
+        }
+
+        @Override
+        public void addDataSource(String name, ExternalDataSource dataSource) {
+            dataSources.put(name, dataSource);
+        }
+
+        @Override
+        public void removeDataSource(String name) {
+            dataSources.remove(name);
+        }
+
+        @Override
+        public boolean hasDataSource(String name) {
+            return dataSources.containsKey(name);
+        }
+    }
+
     /**
      * Get a data source by name.
      */

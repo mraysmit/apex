@@ -37,6 +37,9 @@ module dev.mars.apex.core {
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.dataformat.yaml;
 
+    // Enable automatic JDBC driver loading
+    uses java.sql.Driver;
+
     // Existing exports
     exports dev.mars.apex.core.service.validation;
     exports dev.mars.apex.core.service.common;
@@ -84,5 +87,8 @@ module dev.mars.apex.core {
 
     // Pipeline engine exports
     exports dev.mars.apex.core.engine.pipeline;
+
+    // Pipeline configuration exports
+    exports dev.mars.apex.core.config.pipeline;
 
 }

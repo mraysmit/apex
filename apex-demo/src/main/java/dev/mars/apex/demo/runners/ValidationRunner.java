@@ -4,10 +4,8 @@ import dev.mars.apex.demo.validation.QuickStartDemo;
 import dev.mars.apex.demo.validation.BasicUsageExamples;
 import dev.mars.apex.demo.validation.CommoditySwapValidationBootstrap;
 import dev.mars.apex.demo.validation.CommoditySwapValidationQuickDemo;
-import dev.mars.apex.demo.validation.IntegratedCustomerValidatorDemo;
-import dev.mars.apex.demo.validation.IntegratedTradeValidatorDemo;
+import dev.mars.apex.demo.validation.IntegratedValidatorDemo;
 import dev.mars.apex.demo.validation.IntegratedTradeValidatorComplexDemo;
-import dev.mars.apex.demo.validation.IntegratedProductValidatorDemo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,11 +112,11 @@ public class ValidationRunner {
                     break;
                 case "5":
                 case "customer":
-                    runDemo("Integrated Customer Validator", () -> IntegratedCustomerValidatorDemo.main(new String[]{}));
+                    runDemo("Integrated Customer Validator", () -> IntegratedValidatorDemo.main(new String[]{"Customer"}));
                     break;
                 case "6":
                 case "trade":
-                    runDemo("Integrated Trade Validator", () -> IntegratedTradeValidatorDemo.main(new String[]{}));
+                    runDemo("Integrated Trade Validator", () -> IntegratedValidatorDemo.main(new String[]{"Trade"}));
                     break;
                 case "7":
                 case "tradecomplex":
@@ -127,7 +125,7 @@ public class ValidationRunner {
                     break;
                 case "8":
                 case "product":
-                    runDemo("Integrated Product Validator", () -> IntegratedProductValidatorDemo.main(new String[]{}));
+                    runDemo("Integrated Product Validator", () -> IntegratedValidatorDemo.main(new String[]{"Product"}));
                     break;
                 case "9":
                 case "all":
@@ -174,10 +172,10 @@ public class ValidationRunner {
         runDemo("Basic Usage Examples", () -> BasicUsageExamples.main(new String[]{}));
         runDemo("Commodity Swap Validation (Bootstrap)", () -> CommoditySwapValidationBootstrap.main(new String[]{}));
         runDemo("Commodity Swap Validation (Quick)", () -> CommoditySwapValidationQuickDemo.main(new String[]{}));
-        runDemo("Integrated Customer Validator", () -> IntegratedCustomerValidatorDemo.main(new String[]{}));
-        runDemo("Integrated Trade Validator", () -> IntegratedTradeValidatorDemo.main(new String[]{}));
+        runDemo("Integrated Customer Validator", () -> IntegratedValidatorDemo.main(new String[]{"Customer"}));
+        runDemo("Integrated Trade Validator", () -> IntegratedValidatorDemo.main(new String[]{"Trade"}));
         runDemo("Integrated Trade Validator (Complex)", () -> IntegratedTradeValidatorComplexDemo.main(new String[]{}));
-        runDemo("Integrated Product Validator", () -> IntegratedProductValidatorDemo.main(new String[]{}));
+        runDemo("Integrated Product Validator", () -> IntegratedValidatorDemo.main(new String[]{"Product"}));
 
         long totalEndTime = System.currentTimeMillis();
         long totalTime = totalEndTime - totalStartTime;

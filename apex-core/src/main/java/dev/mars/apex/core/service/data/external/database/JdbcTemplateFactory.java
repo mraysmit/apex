@@ -68,16 +68,24 @@ public class JdbcTemplateFactory {
     public static DataSource createDataSource(DataSourceConfiguration config) throws DataSourceException {
         String cacheKey = generateCacheKey(config);
         
+        // Validate configuration before proceeding
+        if (config.getSourceType() == null || config.getSourceType().trim().isEmpty()) {
+            throw DataSourceException.configurationError("Source type is required for database configuration");
+        }
+
         // Return cached DataSource if available
         DataSource cachedDataSource = DATA_SOURCE_CACHE.get(cacheKey);
         if (cachedDataSource != null) {
             LOGGER.debug("Returning cached DataSource for '{}'", config.getName());
             return cachedDataSource;
         }
-        
+
         try {
+            // Ensure appropriate JDBC driver is loaded
+            ensureDriverLoaded(config);
+
             DataSource dataSource = createNewDataSource(config);
-            
+
             // Test the connection before caching
             testDataSource(dataSource, config);
             
@@ -204,6 +212,11 @@ public class JdbcTemplateFactory {
      */
     private static String buildJdbcUrl(DataSourceConfiguration config) throws DataSourceException {
         ConnectionConfig conn = config.getConnection();
+
+        if (config.getSourceType() == null || config.getSourceType().trim().isEmpty()) {
+            throw DataSourceException.configurationError("Source type is required for database configuration");
+        }
+
         String sourceType = config.getSourceType().toLowerCase();
         
         switch (sourceType) {
@@ -352,7 +365,57 @@ public class JdbcTemplateFactory {
 
         return baseUrl + ";" + finalParams.toString();
     }
-    
+
+    /**
+     * Ensure the appropriate JDBC driver is loaded for the given database type.
+     * This handles both modular (automatic via SPI) and classpath (manual loading) scenarios.
+     */
+    private static void ensureDriverLoaded(DataSourceConfiguration config) throws DataSourceException {
+        if (config.getSourceType() == null || config.getSourceType().trim().isEmpty()) {
+            throw DataSourceException.configurationError("Source type is required for database configuration");
+        }
+
+        String sourceType = config.getSourceType().toLowerCase();
+        LOGGER.debug("Ensuring JDBC driver is loaded for database type: {}", sourceType);
+        String driverClassName = getDriverClassName(sourceType);
+
+        if (driverClassName != null) {
+            try {
+                // Try to load the driver class explicitly
+                // This works in both modular and classpath scenarios
+                Class.forName(driverClassName);
+                LOGGER.debug("Successfully loaded JDBC driver: {} for database type: {}",
+                    driverClassName, sourceType);
+            } catch (ClassNotFoundException e) {
+                LOGGER.warn("JDBC driver not found: {} for database type: {}. " +
+                    "Relying on automatic driver loading.", driverClassName, sourceType);
+                // Don't throw exception - let automatic driver loading handle it
+                // If the driver is truly missing, the connection attempt will fail with a clear error
+            }
+        }
+    }
+
+    /**
+     * Get the JDBC driver class name for a given database type.
+     */
+    private static String getDriverClassName(String sourceType) {
+        switch (sourceType) {
+            case "postgresql":
+                return "org.postgresql.Driver";
+            case "mysql":
+                return "com.mysql.cj.jdbc.Driver";
+            case "oracle":
+                return "oracle.jdbc.OracleDriver";
+            case "sqlserver":
+                return "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+            case "h2":
+                return "org.h2.Driver";
+            default:
+                LOGGER.debug("Unknown database type: {}. No explicit driver loading.", sourceType);
+                return null;
+        }
+    }
+
     /**
      * Test the DataSource by attempting to get a connection.
      */

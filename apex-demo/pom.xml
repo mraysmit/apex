@@ -89,8 +89,8 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <!-- Default main class - can be overridden with -Dexec.mainClass -->
-                    <mainClass>dev.mars.apex.demo.runners.ValidationRunner</mainClass>
+                    <!-- Default main class - APEX-compliant demo (no user input required) -->
+                    <mainClass>dev.mars.apex.demo.evaluation.ApexAdvancedFeaturesDemo</mainClass>
                 </configuration>
                 <executions>
                     <!-- Default execution for DemoRunner -->
@@ -155,6 +155,55 @@
                         <id>csv-to-h2-etl</id>
                         <configuration>
                             <mainClass>dev.mars.apex.demo.etl.CsvToH2PipelineDemo</mainClass>
+                        </configuration>
+                    </execution>
+                    <!-- Consolidated Validator Demo -->
+                    <execution>
+                        <id>integrated-validator</id>
+                        <configuration>
+                            <mainClass>dev.mars.apex.demo.validation.IntegratedValidatorDemo</mainClass>
+                        </configuration>
+                    </execution>
+                    <!-- Simple Field Lookup Demo (Refactored) -->
+                    <execution>
+                        <id>simple-field-lookup-refactored</id>
+                        <configuration>
+                            <mainClass>dev.mars.apex.demo.lookup.SimpleFieldLookupDemo</mainClass>
+                        </configuration>
+                    </execution>
+                    <!-- Compound Key Lookup Demo (Refactored) -->
+                    <execution>
+                        <id>compound-key-lookup-refactored</id>
+                        <configuration>
+                            <mainClass>dev.mars.apex.demo.lookup.CompoundKeyLookupDemo</mainClass>
+                        </configuration>
+                    </execution>
+                    <!-- Performance Demo (Refactored) -->
+                    <execution>
+                        <id>performance-demo-refactored</id>
+                        <configuration>
+                            <mainClass>dev.mars.apex.demo.evaluation.PerformanceDemo</mainClass>
+                        </configuration>
+                    </execution>
+                    <!-- Financial Demo (Evaluation) -->
+                    <execution>
+                        <id>financial-demo-evaluation</id>
+                        <configuration>
+                            <mainClass>dev.mars.apex.demo.evaluation.FinancialDemo</mainClass>
+                        </configuration>
+                    </execution>
+                    <!-- APEX Advanced Features Demo (Evaluation) -->
+                    <execution>
+                        <id>apex-advanced-features-demo</id>
+                        <configuration>
+                            <mainClass>dev.mars.apex.demo.evaluation.ApexAdvancedFeaturesDemo</mainClass>
+                        </configuration>
+                    </execution>
+                    <!-- YAML Configuration Demo (Evaluation) -->
+                    <execution>
+                        <id>yaml-configuration-demo</id>
+                        <configuration>
+                            <mainClass>dev.mars.apex.demo.evaluation.YamlConfigurationDemo</mainClass>
                         </configuration>
                     </execution>
                 </executions>

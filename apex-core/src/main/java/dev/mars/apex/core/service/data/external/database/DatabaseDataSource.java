@@ -251,7 +251,30 @@ public class DatabaseDataSource implements ExternalDataSource {
 
         } catch (SQLException e) {
             metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
-            throw DataSourceException.executionError("Database query failed", e, "query");
+
+            // Classify the SQL error to provide better error handling
+            SqlErrorClassifier.SqlErrorType errorType = SqlErrorClassifier.classifyError(e);
+            String errorDescription = SqlErrorClassifier.getErrorDescription(errorType);
+
+            switch (errorType) {
+                case CONFIGURATION_ERROR:
+                    LOGGER.error("Database configuration error in query: {}", e.getMessage());
+                    throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
+                                                 "Database configuration error: " + errorDescription, e,
+                                                 configuration.getName(), "query", false);
+
+                case TRANSIENT_ERROR:
+                    LOGGER.warn("Transient database error in query: {}", e.getMessage());
+                    throw new DataSourceException(DataSourceException.ErrorType.CONNECTION_ERROR,
+                                                 "Transient database error: " + errorDescription, e,
+                                                 configuration.getName(), "query", true); // Retryable
+
+                case DATA_INTEGRITY_VIOLATION:
+                case FATAL_ERROR:
+                default:
+                    LOGGER.error("Database query failed: {}", e.getMessage());
+                    throw DataSourceException.executionError("Database query failed: " + errorDescription, e, "query");
+            }
         }
     }
     
@@ -298,7 +321,33 @@ public class DatabaseDataSource implements ExternalDataSource {
             
         } catch (SQLException e) {
             metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
-            throw DataSourceException.executionError("Batch update failed", e, "batchUpdate");
+
+            // Classify the SQL error to provide better error handling
+            SqlErrorClassifier.SqlErrorType errorType = SqlErrorClassifier.classifyError(e);
+            String errorDescription = SqlErrorClassifier.getErrorDescription(errorType);
+
+            switch (errorType) {
+                case CONFIGURATION_ERROR:
+                    LOGGER.error("Database configuration error in batch update: {}", e.getMessage());
+                    throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
+                                                 "Database configuration error: " + errorDescription, e,
+                                                 configuration.getName(), "batchUpdate", false);
+
+                case TRANSIENT_ERROR:
+                    LOGGER.warn("Transient database error in batch update: {}", e.getMessage());
+                    throw new DataSourceException(DataSourceException.ErrorType.CONNECTION_ERROR,
+                                                 "Transient database error: " + errorDescription, e,
+                                                 configuration.getName(), "batchUpdate", true); // Retryable
+
+                case DATA_INTEGRITY_VIOLATION:
+                    LOGGER.warn("Data integrity violation in batch update: {}", e.getMessage());
+                    throw DataSourceException.executionError("Data integrity violation: " + errorDescription, e, "batchUpdate");
+
+                case FATAL_ERROR:
+                default:
+                    LOGGER.error("Batch update failed: {}", e.getMessage());
+                    throw DataSourceException.executionError("Batch update failed: " + errorDescription, e, "batchUpdate");
+            }
         }
     }
     
@@ -370,21 +419,7 @@ public class DatabaseDataSource implements ExternalDataSource {
      * Build parameter map from array of parameters.
      */
     private Map<String, Object> buildParameterMap(Object... parameters) {
-        Map<String, Object> paramMap = new HashMap<>();
-        String[] paramNames = configuration.getParameterNames();
-        
-        if (paramNames != null) {
-            for (int i = 0; i < parameters.length && i < paramNames.length; i++) {
-                paramMap.put(paramNames[i], parameters[i]);
-            }
-        } else {
-            // Use generic parameter names
-            for (int i = 0; i < parameters.length; i++) {
-                paramMap.put("param" + (i + 1), parameters[i]);
-            }
-        }
-        
-        return paramMap;
+        return JdbcParameterUtils.buildParameterMap(configuration.getParameterNames(), parameters);
     }
     
     /**
@@ -392,66 +427,7 @@ public class DatabaseDataSource implements ExternalDataSource {
      */
     private PreparedStatement prepareStatement(Connection connection, String query,
                                              Map<String, Object> parameters) throws SQLException {
-        // Validate inputs
-        if (query == null) {
-            throw new SQLException("Query cannot be null");
-        }
-        if (parameters == null) {
-            throw new SQLException("Parameters cannot be null");
-        }
-
-        // Better implementation - process parameters in order they appear in SQL
-        String processedQuery = query;
-        List<Object> paramValues = new ArrayList<>();
-
-        LOGGER.debug("Preparing statement with query: {}", query);
-        LOGGER.debug("Parameters: {}", parameters);
-
-        // Find all parameter placeholders in order
-        int searchIndex = 0;
-        while (searchIndex < processedQuery.length()) {
-            int colonIndex = processedQuery.indexOf(':', searchIndex);
-            if (colonIndex == -1) break;
-
-            // Find the end of the parameter name
-            int endIndex = colonIndex + 1;
-            while (endIndex < processedQuery.length() &&
-                   (Character.isLetterOrDigit(processedQuery.charAt(endIndex)) ||
-                    processedQuery.charAt(endIndex) == '_')) {
-                endIndex++;
-            }
-
-            String paramName = processedQuery.substring(colonIndex + 1, endIndex);
-            LOGGER.debug("Found parameter: {} at position {}-{}", paramName, colonIndex, endIndex);
-
-            if (parameters.containsKey(paramName)) {
-                Object paramValue = parameters.get(paramName);
-                LOGGER.debug("Replacing parameter {} with value: {}", paramName, paramValue);
-
-                // Replace this occurrence with ?
-                processedQuery = processedQuery.substring(0, colonIndex) + "?" +
-                               processedQuery.substring(endIndex);
-                paramValues.add(paramValue);
-                searchIndex = colonIndex + 1;
-            } else {
-                LOGGER.warn("Parameter {} not found in parameters map: {}", paramName, parameters.keySet());
-                searchIndex = endIndex;
-            }
-        }
-
-        LOGGER.debug("Processed query: {}", processedQuery);
-        LOGGER.debug("Parameter values: {}", paramValues);
-
-        PreparedStatement statement = connection.prepareStatement(processedQuery);
-
-        // Set parameter values
-        for (int i = 0; i < paramValues.size(); i++) {
-            Object value = paramValues.get(i);
-            LOGGER.debug("Setting parameter {} to value: {}", i + 1, value);
-            statement.setObject(i + 1, value);
-        }
-
-        return statement;
+        return JdbcParameterUtils.prepareStatement(connection, query, parameters);
     }
     
     /**

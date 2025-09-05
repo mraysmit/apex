@@ -72,7 +72,8 @@ public class YamlMetadataValidator {
         "dataset",
         "enrichment",
         "rule-chain",
-        "external-data-config"
+        "external-data-config",
+        "pipeline"
     );
     
     // Type-specific required fields
@@ -84,7 +85,8 @@ public class YamlMetadataValidator {
         "dataset", Set.of("source"),
         "enrichment", Set.of("author"),
         "rule-chain", Set.of("author"),
-        "external-data-config", Set.of("author")
+        "external-data-config", Set.of("author"),
+        "pipeline", Set.of("author")
     );
     
     private final YamlConfigurationLoader configLoader;

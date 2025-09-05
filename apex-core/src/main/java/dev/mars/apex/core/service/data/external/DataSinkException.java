@@ -48,6 +48,12 @@ public class DataSinkException extends Exception {
          * Write operation errors (data validation failures, constraint violations, etc.).
          */
         WRITE_ERROR("Write Error", "Failed to write data to sink"),
+
+        /**
+         * Data integrity violations (primary key conflicts, constraint violations, etc.).
+         * These are typically data quality issues that should be handled gracefully.
+         */
+        DATA_INTEGRITY_ERROR("Data Integrity Error", "Data violates database constraints"),
         
         /**
          * Batch operation errors (partial failures, transaction rollbacks, etc.).
@@ -189,6 +195,7 @@ public class DataSinkException extends Exception {
             case SCHEMA_ERROR:
             case SECURITY_ERROR:
             case DATA_ERROR:
+            case DATA_INTEGRITY_ERROR:
                 return false;
             case BATCH_ERROR:
             case UNKNOWN_ERROR:
@@ -270,6 +277,20 @@ public class DataSinkException extends Exception {
     public static DataSinkException timeoutError(String message, long timeoutMs) {
         String context = String.format("Timeout: %d ms", timeoutMs);
         return new DataSinkException(ErrorType.TIMEOUT_ERROR, message, null, context, true);
+    }
+
+    /**
+     * Create a data integrity error.
+     */
+    public static DataSinkException dataIntegrityError(String message) {
+        return new DataSinkException(ErrorType.DATA_INTEGRITY_ERROR, message);
+    }
+
+    /**
+     * Create a data integrity error with cause and context.
+     */
+    public static DataSinkException dataIntegrityError(String message, Throwable cause, String context) {
+        return new DataSinkException(ErrorType.DATA_INTEGRITY_ERROR, message, cause, context, false);
     }
     
     @Override

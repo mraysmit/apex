@@ -358,9 +358,8 @@ public class PostgreSQLLookupDemo {
         logger.info("Initializing H2 database with comprehensive multi-table schema...");
 
         try {
-            // CRITICAL: Load H2 driver explicitly to ensure it's available for DataSourceFactory
-            Class.forName("org.h2.Driver");
-            logger.info("✅ H2 driver loaded successfully for external data-source reference");
+            // JDBC drivers are automatically loaded by apex-core JdbcTemplateFactory
+            logger.info("✅ JDBC drivers handled by apex-core");
 
             // Create H2 database connection with shared in-memory database (PostgreSQL compatibility mode)
             String jdbcUrl = "jdbc:h2:mem:apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
