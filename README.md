@@ -44,12 +44,18 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.SimplePostgreSQLLook
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.PostgreSQLLookupDemo"
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookup.ExternalDataSourceWorkingDemo"
 
+# Pipeline Orchestration Demo (NEW - ETL workflows)
+mvn exec:java@csv-to-h2-etl
+
 # Bootstrap demos (complete end-to-end scenarios)
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.enrichment.OtcOptionsBootstrapDemo"
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.bootstrap.CommoditySwapBootstrapDemo"
 
 # Lookup pattern examples
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo"
+
+# File System Lookup Demo (NEW - file-system dataset type)
+mvn exec:java@file-system-lookup
 ```
 
 ## Key Features
@@ -63,6 +69,8 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo
 
 ### Core Features
 - **Interactive Playground**: 4-panel web interface for real-time rule development and testing
+- **Pipeline Orchestration**: YAML-driven ETL workflows with dependency management and error handling
+- **Data Sink Architecture**: Comprehensive output capabilities to databases, files, and audit systems
 - **Scenario-Based Configuration**: Centralized management and routing of data processing pipelines
 - **External Data Integration**: Connect to databases, REST APIs, file systems, and caches
 - **Advanced H2 Database Support**: Custom parameters for performance tuning, debugging, and compatibility modes
@@ -154,6 +162,68 @@ queries:
 - **Environment Management**: Different infrastructure configurations for dev/test/prod
 - **Enterprise Scalability**: Production-ready configuration management
 
+## Pipeline Orchestration
+
+APEX 2.1 introduces powerful **Pipeline Orchestration** capabilities that enable complete ETL (Extract, Transform, Load) workflows defined entirely in YAML configuration.
+
+### YAML-Driven ETL Workflows
+
+**Traditional Approach (Hardcoded Java):**
+```java
+// Complex orchestration code
+dataSource.extract("getAllCustomers", "customer-csv-input");
+database.insert("customer-h2-database", "insertCustomer", customerData);
+auditLog.write("audit-log-file", "writeAuditRecord", auditData);
+```
+
+**Modern Approach (YAML-Driven Pipeline):**
+```java
+// Simple APEX pipeline execution
+pipelineEngine.executePipeline("customer-etl-pipeline");
+```
+
+```yaml
+# Complete ETL workflow in YAML
+pipeline:
+  name: "customer-etl-pipeline"
+  steps:
+    - name: "extract-customers"
+      type: "extract"
+      source: "customer-csv-input"
+      operation: "getAllCustomers"
+
+    - name: "load-to-database"
+      type: "load"
+      sink: "customer-h2-database"
+      operation: "insertCustomer"
+      depends-on: ["extract-customers"]
+
+    - name: "audit-logging"
+      type: "audit"
+      sink: "audit-log-file"
+      operation: "writeAuditRecord"
+      depends-on: ["load-to-database"]
+      optional: true
+```
+
+### Key Pipeline Features
+
+- **Dependency Management**: Automatic step dependency resolution and validation
+- **Error Handling**: Configurable error handling strategies with optional steps
+- **Data Flow**: Automatic data passing between pipeline steps
+- **Monitoring**: Built-in step timing and execution tracking
+- **Data Sinks**: Database, file system, and audit logging outputs
+- **Batch Processing**: Efficient bulk operations with configurable batch sizes
+
+### Pipeline Demo
+
+```bash
+# Run the complete ETL pipeline demonstration
+mvn exec:java@csv-to-h2-etl -pl apex-demo
+```
+
+This demo processes customer data from CSV to H2 database with full audit logging in approximately 23ms, demonstrating production-ready performance.
+
 ## Architecture
 
 ```mermaid
@@ -212,24 +282,31 @@ graph TB
 
 ## Project Structure
 
-- **apex-core**: Core rules engine and **external data-source reference system**
-- **apex-demo**: 16+ comprehensive demonstrations including **external data-source reference examples**
+- **apex-core**: Core rules engine with **external data-source reference system** and **pipeline orchestration engine**
+- **apex-demo**: 16+ comprehensive demonstrations including **pipeline orchestration** and **external data-source reference examples**
 - **apex-playground**: Interactive web-based development environment
 - **apex-rest-api**: Complete REST API with OpenAPI/Swagger documentation
-- **docs**: Comprehensive documentation and guides including **external data-source reference guide**
+- **docs**: Comprehensive documentation and guides including **pipeline orchestration guide** and **external data-source reference guide**
 
 ## Learning Paths
 
 ### Quick Start (30 minutes)
 1. **APEX Playground** (15 minutes) - Interactive experimentation
-2. **Simple PostgreSQL Lookup Demo** (5 minutes) - External data-source references
-3. **OTC Options Bootstrap Demo** (10 minutes) - Complete workflow
+2. **Pipeline Orchestration Demo** (5 minutes) - ETL workflow demonstration
+3. **Simple PostgreSQL Lookup Demo** (5 minutes) - External data-source references
+4. **OTC Options Bootstrap Demo** (5 minutes) - Complete workflow
 
 ### Developer Path (3-4 hours)
-1. **External Data-Source Reference Demos** (45 minutes) - Modern clean architecture
-2. **All Lookup Pattern Examples** (60 minutes) - Master data enrichment
-3. **All Bootstrap Demonstrations** (120 minutes) - Complete financial workflows
-4. **Advanced Feature Demos** (60-90 minutes) - Technical deep dive
+1. **Pipeline Orchestration Demo** (30 minutes) - YAML-driven ETL workflows
+2. **External Data-Source Reference Demos** (45 minutes) - Modern clean architecture
+3. **All Lookup Pattern Examples** (60 minutes) - Master data enrichment
+4. **All Bootstrap Demonstrations** (120 minutes) - Complete financial workflows
+5. **Advanced Feature Demos** (60-90 minutes) - Technical deep dive
+
+### Pipeline Orchestration Path (1 hour)
+1. **CSV to H2 ETL Demo** (20 minutes) - Complete ETL pipeline demonstration
+2. **Pipeline Configuration Review** (20 minutes) - YAML pipeline syntax and features
+3. **Data Sink Architecture** (20 minutes) - Database and file output capabilities
 
 ### External Data-Source Reference Path (1-2 hours)
 1. **SimplePostgreSQLLookupDemo** (20 minutes) - Basic external references
@@ -239,19 +316,19 @@ graph TB
 
 ### Production Implementation (4-6 hours)
 1. **Complete Demo Ecosystem** (180 minutes) - All 16 demonstrations
-2. **Documentation Deep Dive** (120-180 minutes) - All 6 guides
+2. **Documentation Deep Dive** (120-180 minutes) - All 7 guides
 3. **Custom Implementation** (varies) - Build your own configurations
 
 ## Documentation
 
 ### Essential Guides
 - **[APEX Playground](http://localhost:8081/playground)** - Interactive development environment
-- **[Rules Engine User Guide](docs/APEX_RULES_ENGINE_USER_GUIDE.md)** - Complete user documentation
+- **[Rules Engine User Guide](docs/APEX_RULES_ENGINE_USER_GUIDE.md)** - Complete user documentation with data management
+- **[Pipeline Orchestration Guide](docs/APEX_DATA_PIPELINE_ORCHESTRATION_GUIDE.md)** - YAML-driven ETL workflows
 - **[Technical Reference](docs/APEX_TECHNICAL_REFERENCE.md)** - Architecture and implementation
 - **[Financial Services Guide](docs/APEX_FINANCIAL_SERVICES_GUIDE.md)** - Domain-specific patterns
 - **[Bootstrap Demos Guide](docs/APEX_BOOTSTRAP_DEMOS_GUIDE.md)** - 16 comprehensive demonstrations
 - **[REST API Guide](docs/APEX_REST_API_GUIDE.md)** - Complete HTTP API reference
-- **[Data Management Guide](docs/APEX_DATA_MANAGEMENT_GUIDE.md)** - Data integration and management
 
 ### Quick Reference
 - **Configuration Questions**: [Rules Engine User Guide](docs/APEX_RULES_ENGINE_USER_GUIDE.md)
@@ -261,6 +338,8 @@ graph TB
 ## Use Cases
 
 ### Perfect For
+- **ETL Workflows**: Complete data pipeline orchestration with dependency management
+- **Data Processing**: Multi-step data transformation and validation workflows
 - **Currency Reference Data**: ISO currency codes with metadata
 - **Regulatory Compliance**: MiFID II, EMIR, Dodd-Frank reporting
 - **OTC Derivatives Validation**: Multi-tier validation framework
@@ -268,6 +347,8 @@ graph TB
 - **Risk Assessment**: Credit, market, and operational risk scoring
 
 ### Data Integration
+- **ETL Pipelines**: Use **Pipeline Orchestration** for complete data processing workflows
+- **Data Sinks**: Output to databases, files, and audit systems with **Data Sink Architecture**
 - **Static Reference Data** (< 100 records): Use YAML Datasets
 - **Transactional Data**: Use **External Database References** (PostgreSQL, MySQL, Oracle)
 - **Real-time Data**: Use **External API References** with caching
@@ -286,9 +367,14 @@ Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for detai
 
 ## Getting Help
 
+### Pipeline Orchestration
+1. **[APEX Data Pipeline Orchestration Guide](docs/APEX_DATA_PIPELINE_ORCHESTRATION_GUIDE.md)** - Complete pipeline orchestration documentation
+2. **CSV to H2 ETL Demo** - `mvn exec:java@csv-to-h2-etl -pl apex-demo`
+3. **[APEX YAML Reference Guide](docs/APEX_YAML_REFERENCE.md)** - Pipeline configuration syntax
+
 ### External Data-Source Reference System
 1. **[APEX YAML Reference Guide](docs/APEX_YAML_REFERENCE.md)** - Complete external data-source reference syntax
-2. **[APEX Data Management Guide](docs/APEX_DATA_MANAGEMENT_GUIDE.md)** - Section 16: External Data Source Integration
+2. **[Rules Engine User Guide](docs/APEX_RULES_ENGINE_USER_GUIDE.md)** - Section: External Data Source Integration
 3. **External Data-Source Reference Demos** - SimplePostgreSQLLookupDemo, PostgreSQLLookupDemo, ExternalDataSourceWorkingDemo
 
 ### General Documentation

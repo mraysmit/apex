@@ -1142,7 +1142,7 @@ public class YamlConfigurationLoader {
         }
 
         String type = dataset.getType().toLowerCase();
-        Set<String> validTypes = Set.of("inline", "yaml-file", "csv-file", "database", "rest-api");
+        Set<String> validTypes = Set.of("inline", "yaml-file", "csv-file", "file-system", "database", "rest-api");
 
         if (!validTypes.contains(type)) {
             throw new YamlConfigurationException("Invalid dataset type '" + type + "' for enrichment: " + enrichmentId + ". Valid types: " + validTypes);
@@ -1155,6 +1155,7 @@ public class YamlConfigurationLoader {
                 break;
             case "yaml-file":
             case "csv-file":
+            case "file-system":
                 validateFileDataset(dataset, enrichmentId, type);
                 break;
             case "database":

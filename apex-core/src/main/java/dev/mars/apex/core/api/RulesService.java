@@ -8,6 +8,8 @@ import dev.mars.apex.core.engine.model.RuleResult;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -59,7 +61,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * </pre>
  */
 public class RulesService {
-    
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RulesService.class);
+
     private final RulesEngine engine;
     private final Map<String, Rule> namedRules = new ConcurrentHashMap<>();
     
@@ -88,12 +92,18 @@ public class RulesService {
      * @return true if the condition evaluates to true
      */
     public boolean check(String condition, Map<String, Object> facts) {
+        LOGGER.debug("TRACE: RulesService.check() called - condition: '{}', facts: {}", condition, facts);
         try {
             String ruleId = "check-" + Math.abs(condition.hashCode());
             Rule rule = createSimpleRule(ruleId, "Check", condition, "Condition met");
+            LOGGER.debug("Created rule for condition check: id='{}', condition='{}'", ruleId, condition);
+
             RuleResult result = engine.executeRule(rule, facts);
-            return result.isTriggered();
+            boolean triggered = result.isTriggered();
+            LOGGER.debug("RulesService.check() result: {} for condition '{}'", triggered, condition);
+            return triggered;
         } catch (Exception e) {
+            LOGGER.debug("RulesService.check() failed with exception for condition '{}': {}", condition, e.getMessage());
             return false; // Fail safely for simple API
         }
     }

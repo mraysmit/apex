@@ -1,0 +1,10 @@
+I want to create new tests in the lookup package that load data from xml and json files and performa enrichment. Keep these test simple and focused on the requirement. Remember all the lookup and enrichment processing for these tests must be confugred only in yaml files. Look for existing examples - there are many - for how this works currently. Do not reinvent the wheel - all the processing exists in apex-core so make sure you fully understand the codebase before making code changes. Do not reinvent the wheel as you are to do. Work incrementally and test after each small incremental change. When testing make sure you scan the test logs properly for test errors, do not rely on the exit code as that is largely meaningless. 
+
+Do not hallucinate new APEX yaml keywrords. 
+
+----------
+
+I want to create a new lookup demo that loads data from a file on the file system. The file can be json, csv, or xml. The demo should be in the lookup package and named FileSystemLookupDemo. The yaml file should be named file-system-lookup.yaml and be placed in the lookup folder. The demo should load the file using the file-system dataset type and perform a simple enrichment. The demo should be well documented and include a README.md file. The yaml
+
+-----
+

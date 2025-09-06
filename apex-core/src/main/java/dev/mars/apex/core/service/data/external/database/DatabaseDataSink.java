@@ -202,20 +202,27 @@ public class DatabaseDataSink implements DataSink {
         }
         
         long startTime = System.currentTimeMillis();
-        
+        LOGGER.debug("Starting write operation '{}' on database sink '{}'", operation, getName());
+
         try {
             String sql = resolveOperation(operation);
+            LOGGER.debug("Resolved operation '{}' to SQL: {}", operation, sql);
+
             Map<String, Object> allParameters = mergeParameters(data, parameters);
-            
+            LOGGER.debug("Merged parameters for write operation: {}", allParameters);
+
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement statement = prepareStatement(connection, sql, allParameters)) {
 
+                LOGGER.debug("Executing write statement for operation '{}'", operation);
                 int rowsAffected = statement.executeUpdate();
 
-                metrics.recordSuccessfulWrite(System.currentTimeMillis() - startTime, rowsAffected);
+                long executionTime = System.currentTimeMillis() - startTime;
+                metrics.recordSuccessfulWrite(executionTime, rowsAffected);
 
-                LOGGER.debug("Successfully wrote data using operation '{}', rows affected: {}", operation, rowsAffected);
-                
+                LOGGER.debug("Successfully wrote data using operation '{}', rows affected: {} in {}ms",
+                    operation, rowsAffected, executionTime);
+
             }
             
         } catch (SQLException e) {
@@ -291,12 +298,17 @@ public class DatabaseDataSink implements DataSink {
         long startTime = System.currentTimeMillis();
         int successCount = 0;
         int failureCount = 0;
-        
+
+        LOGGER.debug("Starting batch write operation '{}' on database sink '{}' with {} items",
+            operation, getName(), data.size());
+
         try {
             String sql = resolveOperation(operation);
+            LOGGER.debug("Resolved batch operation '{}' to SQL: {}", operation, sql);
 
             try (Connection connection = dataSource.getConnection()) {
                 connection.setAutoCommit(false);
+                LOGGER.debug("Started transaction for batch write operation");
 
                 // For batch operations, we need to prepare each statement individually
                 // because named parameter processing needs to happen for each item
@@ -326,11 +338,13 @@ public class DatabaseDataSink implements DataSink {
 
                 if (successCount > 0) {
                     connection.commit();
-                    metrics.recordSuccessfulBatch(System.currentTimeMillis() - startTime, successCount);
+                    long executionTime = System.currentTimeMillis() - startTime;
+                    metrics.recordSuccessfulBatch(executionTime, successCount);
 
-                    LOGGER.debug("Successfully wrote batch using operation '{}', items: {}",
-                               operation, successCount);
+                    LOGGER.debug("Successfully wrote batch using operation '{}', items: {} in {}ms",
+                               operation, successCount, executionTime);
                 } else {
+                    LOGGER.debug("No items could be processed in batch, rolling back transaction");
                     connection.rollback();
                     throw DataSinkException.batchError("No items could be processed in batch", 0, data.size());
                 }
@@ -357,21 +371,32 @@ public class DatabaseDataSink implements DataSink {
         if (!initialized) {
             throw DataSinkException.configurationError("Database sink not initialized");
         }
-        
+
+        LOGGER.debug("Executing operation '{}' on database sink '{}' with parameters: {}",
+            operation, getName(), parameters);
+
         try {
             String sql = resolveOperation(operation);
-            
+            LOGGER.debug("Resolved operation '{}' to SQL: {}", operation, sql);
+
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement statement = prepareStatement(connection, sql, parameters)) {
-                
+
+                LOGGER.debug("Executing statement for operation '{}'", operation);
                 boolean hasResultSet = statement.execute();
-                
+
                 if (hasResultSet) {
+                    LOGGER.debug("Operation '{}' returned result set", operation);
                     try (ResultSet resultSet = statement.getResultSet()) {
-                        return extractResultSet(resultSet);
+                        Object result = extractResultSet(resultSet);
+                        LOGGER.debug("Operation '{}' completed with result: {}", operation,
+                            result != null ? result.getClass().getSimpleName() : "null");
+                        return result;
                     }
                 } else {
-                    return statement.getUpdateCount();
+                    int updateCount = statement.getUpdateCount();
+                    LOGGER.debug("Operation '{}' completed with update count: {}", operation, updateCount);
+                    return updateCount;
                 }
             }
             

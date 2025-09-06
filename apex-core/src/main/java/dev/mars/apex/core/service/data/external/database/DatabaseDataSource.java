@@ -67,6 +67,7 @@ public class DatabaseDataSource implements ExternalDataSource {
      * @param configuration The data source configuration
      */
     public DatabaseDataSource(DataSource dataSource, DataSourceConfiguration configuration) {
+        LOGGER.info("APEX-CORE: Creating DatabaseDataSource instance for '{}'", configuration.getName());
         this.dataSource = dataSource;
         this.configuration = configuration;
         this.connectionStatus = ConnectionStatus.notInitialized();
@@ -165,43 +166,54 @@ public class DatabaseDataSource implements ExternalDataSource {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getData(String dataType, Object... parameters) {
+        LOGGER.info("TRACE: DatabaseDataSource.getData called - dataType: {}, parameters: {}", dataType, java.util.Arrays.toString(parameters));
         long startTime = System.currentTimeMillis();
         
         try {
             // Check cache first if enabled
             if (isCacheEnabled()) {
                 String cacheKey = generateCacheKey(dataType, parameters);
+                LOGGER.debug("Checking cache for key: {}", cacheKey);
                 CachedResult cached = resultCache.get(cacheKey);
                 if (cached != null && !cached.isExpired()) {
+                    LOGGER.debug("Cache hit for key: {}", cacheKey);
                     metrics.recordCacheHit();
                     metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
                     return (T) cached.getData();
                 }
+                LOGGER.debug("Cache miss for key: {}", cacheKey);
                 metrics.recordCacheMiss();
             }
-            
+
             // Execute database query
+            LOGGER.debug("Executing database query for data type: {}", dataType);
             Object result = executeQuery(dataType, parameters);
-            
+
             // Cache the result if caching is enabled
             if (isCacheEnabled() && result != null) {
                 String cacheKey = generateCacheKey(dataType, parameters);
                 long ttl = configuration.getCache().getTtlSeconds() * 1000L;
                 resultCache.put(cacheKey, new CachedResult(result, System.currentTimeMillis() + ttl));
+                LOGGER.debug("Cached result for key: {} with TTL: {}ms", cacheKey, ttl);
             }
-            
-            metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
+
+            long executionTime = System.currentTimeMillis() - startTime;
+            metrics.recordSuccessfulRequest(executionTime);
+            LOGGER.debug("Database operation completed in {}ms", executionTime);
             return (T) result;
-            
+
         } catch (Exception e) {
-            metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
-            LOGGER.error("Failed to get data from database", e);
+            long executionTime = System.currentTimeMillis() - startTime;
+            metrics.recordFailedRequest(executionTime);
+            LOGGER.error("Failed to get data from database after {}ms: {}", executionTime, e.getMessage());
+            LOGGER.debug("Database operation failed", e);
             return null;
         }
     }
     
     @Override
     public <T> List<T> query(String query, Map<String, Object> parameters) throws DataSourceException {
+        LOGGER.info("TRACE: DatabaseDataSource.query called - query: {}, parameters: {}", query, parameters);
         // Validate inputs
         if (query == null) {
             throw DataSourceException.configurationError("Query cannot be null");
@@ -211,6 +223,9 @@ public class DatabaseDataSource implements ExternalDataSource {
         }
 
         long startTime = System.currentTimeMillis();
+        LOGGER.debug("Executing database query on '{}' with {} parameters", getName(), parameters.size());
+        LOGGER.debug("Query: {}", query);
+        LOGGER.debug("Parameters: {}", parameters);
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = prepareStatement(connection, query, parameters)) {
@@ -226,15 +241,20 @@ public class DatabaseDataSource implements ExternalDataSource {
             if (isModifyingStatement && !hasReturningClause) {
 
                 // Use executeUpdate for DML/DDL statements
+                LOGGER.debug("Executing DML/DDL statement (executeUpdate)");
                 int updateCount = statement.executeUpdate();
-                metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
+                long executionTime = System.currentTimeMillis() - startTime;
+
+                metrics.recordSuccessfulRequest(executionTime);
                 metrics.recordRecordsProcessed(updateCount);
 
+                LOGGER.debug("DML/DDL statement completed: {} rows affected in {}ms", updateCount, executionTime);
                 // Return empty list for update operations
                 return new ArrayList<>();
 
             } else {
                 // Use executeQuery for SELECT statements
+                LOGGER.debug("Executing SELECT statement (executeQuery)");
                 ResultSet resultSet = statement.executeQuery();
                 List<T> results = new ArrayList<>();
 
@@ -243,9 +263,12 @@ public class DatabaseDataSource implements ExternalDataSource {
                     T result = (T) mapResultSetToObject(resultSet);
                     results.add(result);
                 }
-                metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
+                long executionTime = System.currentTimeMillis() - startTime;
+
+                metrics.recordSuccessfulRequest(executionTime);
                 metrics.recordRecordsProcessed(results.size());
 
+                LOGGER.debug("SELECT statement completed: {} rows returned in {}ms", results.size(), executionTime);
                 return results;
             }
 
@@ -280,41 +303,64 @@ public class DatabaseDataSource implements ExternalDataSource {
     
     @Override
     public <T> T queryForObject(String query, Map<String, Object> parameters) throws DataSourceException {
+        LOGGER.info("TRACE: DatabaseDataSource.queryForObject called - query: {}, parameters: {}", query, parameters);
+        LOGGER.debug("Executing queryForObject on '{}' - expecting single result", getName());
+        LOGGER.debug("QueryForObject query: {}", query);
+        LOGGER.debug("QueryForObject parameters: {}", parameters);
         List<T> results = query(query, parameters);
-        return results.isEmpty() ? null : results.get(0);
+        T result = results.isEmpty() ? null : results.get(0);
+        LOGGER.debug("queryForObject completed: {} result", result != null ? "found" : "no");
+        return result;
     }
     
     @Override
     public <T> List<List<T>> batchQuery(List<String> queries) throws DataSourceException {
+        LOGGER.debug("Executing batch query on '{}' with {} queries", getName(), queries.size());
         List<List<T>> results = new ArrayList<>();
-        
-        for (String query : queries) {
+
+        for (int i = 0; i < queries.size(); i++) {
+            String query = queries.get(i);
+            LOGGER.debug("Executing batch query {}/{}: {}", i + 1, queries.size(), query);
             List<T> queryResult = query(query, Collections.emptyMap());
             results.add(queryResult);
+            LOGGER.debug("Batch query {}/{} completed: {} results", i + 1, queries.size(), queryResult.size());
         }
-        
+
+        LOGGER.debug("Batch query completed: {} queries executed", queries.size());
         return results;
     }
     
     @Override
     public void batchUpdate(List<String> updates) throws DataSourceException {
+        LOGGER.debug("Executing batch update on '{}' with {} statements", getName(), updates.size());
         long startTime = System.currentTimeMillis();
-        
+
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);
-            
+            LOGGER.debug("Started transaction for batch update");
+
             try (Statement statement = connection.createStatement()) {
-                for (String update : updates) {
+                for (int i = 0; i < updates.size(); i++) {
+                    String update = updates.get(i);
+                    LOGGER.debug("Adding batch statement {}/{}: {}", i + 1, updates.size(), update);
                     statement.addBatch(update);
                 }
-                
+
+                LOGGER.debug("Executing batch of {} statements", updates.size());
                 int[] updateCounts = statement.executeBatch();
                 connection.commit();
-                
-                metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
-                metrics.recordRecordsProcessed(Arrays.stream(updateCounts).sum());
-                
+
+                long executionTime = System.currentTimeMillis() - startTime;
+                int totalRows = Arrays.stream(updateCounts).sum();
+
+                metrics.recordSuccessfulRequest(executionTime);
+                metrics.recordRecordsProcessed(totalRows);
+
+                LOGGER.debug("Batch update completed: {} statements executed, {} total rows affected in {}ms",
+                    updates.size(), totalRows, executionTime);
+
             } catch (SQLException e) {
+                LOGGER.debug("Batch update failed, rolling back transaction: {}", e.getMessage());
                 connection.rollback();
                 throw e;
             }
@@ -381,11 +427,14 @@ public class DatabaseDataSource implements ExternalDataSource {
      * Execute a query based on data type and parameters.
      */
     private Object executeQuery(String dataType, Object... parameters) throws SQLException {
+        LOGGER.info("TRACE: DatabaseDataSource.executeQuery called - dataType: {}, parameters: {}", dataType, java.util.Arrays.toString(parameters));
         String query = getQueryForDataType(dataType);
         if (query == null) {
             throw new SQLException("No query defined for data type: " + dataType);
         }
-        
+        LOGGER.debug("Resolved query for data type '{}': {}", dataType, query);
+        LOGGER.debug("Parameters: {}", java.util.Arrays.toString(parameters));
+
         try (Connection connection = dataSource.getConnection()) {
             if (parameters.length == 0) {
                 // Simple query without parameters
@@ -427,6 +476,8 @@ public class DatabaseDataSource implements ExternalDataSource {
      */
     private PreparedStatement prepareStatement(Connection connection, String query,
                                              Map<String, Object> parameters) throws SQLException {
+        LOGGER.info("TRACE: DatabaseDataSource.prepareStatement called - query: {}, parameters: {}", query, parameters);
+        LOGGER.debug("DatabaseDataSource.prepareStatement parameters: {}", parameters);
         return JdbcParameterUtils.prepareStatement(connection, query, parameters);
     }
     

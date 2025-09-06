@@ -13,11 +13,11 @@
 2. [Document Structure & Metadata](#2-document-structure--metadata)
 3. [Core Syntax Elements](#3-core-syntax-elements)
 4. [Rules Section](#4-rules-section)
-5. [Rule Groups Section](#5-rule-groups-section) **🆕 NEW**
+5. [Rule Groups Section](#5-rule-groups-section) 
 6. [Enrichments Section](#6-enrichments-section)
 7. [Dataset Definitions](#7-dataset-definitions)
-8. [External Data-Source References](#8-external-data-source-references) **🆕 NEW**
-9. [Pipeline Orchestration](#9-pipeline-orchestration) **🆕 NEW**
+8. [External Data-Source References](#8-external-data-source-references)
+9. [Pipeline Orchestration](#9-pipeline-orchestration) 
 10. [Advanced Features](#10-advanced-features)
 11. [Best Practices](#11-best-practices)
 12. [Common Patterns](#12-common-patterns)
@@ -106,6 +106,7 @@ Every APEX YAML document must begin with a metadata section:
 
 ```yaml
 metadata:
+  id: "unique-document-identifier"
   name: "Document Name"
   version: "1.0.0"
   description: "Document description"
@@ -113,7 +114,8 @@ metadata:
   author: "author@company.com"
   created-by: "author@company.com"
   created-date: "2024-12-24"
-  domain: "Business Domain"
+  business-domain: "Business Domain"
+  source: "Data Source System"
   tags: ["tag1", "tag2", "tag3"]
 ```
 
@@ -121,6 +123,7 @@ metadata:
 
 | Property | Required | Description | Example |
 |----------|----------|-------------|---------|
+| `id` | Yes | Unique document identifier | "financial-settlement-rules-v1" |
 | `name` | Yes | Human-readable document name | "Financial Settlement Rules" |
 | `version` | Yes | Semantic version number | "1.2.3" |
 | `description` | Yes | Brief description of purpose | "Post-trade settlement enrichment" |
@@ -128,8 +131,29 @@ metadata:
 | `author` | No | Document author | "john.doe@bank.com" |
 | `created-by` | No | Creator identifier | "settlement-team@bank.com" |
 | `created-date` | No | Creation date (ISO format) | "2024-12-24" |
-| `domain` | No | Business domain | "Financial Services" |
+| `business-domain` | No | Business domain for scenarios/bootstrap | "Financial Services" |
+| `source` | No | Data source system (for dataset types) | "Reference Data Service" |
 | `tags` | No | Categorization tags | ["finance", "settlement"] |
+
+### Metadata Validation and Best Practices
+
+#### Required vs Optional Fields
+- **Always Required**: `id`, `name`, `version`, `description`, `type`
+- **Type-Specific Requirements**: See document types table below
+- **Recommended**: `author`, `created-date`, `tags` for better maintainability
+
+#### Consistency Guidelines
+- **Version Format**: Use semantic versioning (e.g., "2.1.0") for all documents
+- **Date Format**: Use ISO format "YYYY-MM-DD" for `created-date`
+- **Email Format**: Use consistent email format for `author` and `created-by`
+- **Tag Format**: Use lowercase, hyphenated tags: `["apex-demo", "trade-validation"]`
+
+#### Validation Notes
+APEX validates metadata at configuration load time and will reject documents with:
+- Missing required fields for the document type
+- Invalid `type` values not in the supported list
+- Malformed version numbers or dates
+- Duplicate `id` values within the same deployment
 
 ### Document-Level Configuration
 
@@ -137,26 +161,45 @@ Additional configuration options:
 
 ```yaml
 metadata:
+  id: "example-configuration"
   name: "Example Configuration"
   version: "1.0.0"
   type: "rule-config"
-  
+
   # Processing configuration
   processing:
     parallel: true
     timeout: 30000  # milliseconds
     retry-count: 3
-    
+
   # Logging configuration
   logging:
     level: "INFO"
     include-context: true
-    
+
   # Performance configuration
   performance:
     cache-enabled: true
     cache-ttl: 3600  # seconds
 ```
+
+### Important Notes on Metadata
+
+#### The `id` Attribute
+The `id` attribute is **critical** for APEX document identification and is used throughout the system for:
+- **Configuration Loading**: APEX services use the `id` to identify and cache configurations
+- **Error Reporting**: Error messages reference the document `id` for troubleshooting
+- **Dependency Resolution**: Other configurations reference documents by their `id`
+- **Audit Trails**: All processing logs include the document `id` for traceability
+
+**Best Practices for `id` Values**:
+- Use descriptive, kebab-case identifiers: `"customer-profile-enrichment-v2"`
+- Include version information when appropriate: `"trade-validation-rules-2024"`
+- Keep them unique across your APEX deployment
+- Avoid spaces and special characters except hyphens and underscores
+
+#### Date Field Standardization
+Use `created-date` with ISO format (`YYYY-MM-DD`) for consistency across all APEX configurations.
 
 ### Document Types
 
@@ -164,15 +207,15 @@ APEX supports several document types, each with specific purposes and validation
 
 | Type | Purpose | Required Fields | Top-level Sections |
 |------|---------|----------------|-------------------|
-| `rule-config` | Business rules and validation logic | `author` | `rules`, `enrichments` |
-| `enrichment` | Data enrichment configurations | `author` | `enrichments` |
-| `dataset` | Reference data and lookup tables | `source` | `data` |
-| `scenario` | End-to-end processing scenarios | `business-domain`, `owner` | `scenario`, `data-types`, `rule-configurations` |
-| `scenario-registry` | Scenario collection management | `created-by` | `scenarios` |
-| `bootstrap` | Demo and initialization configurations | `business-domain`, `created-by` | `bootstrap`, `data-sources` |
-| `rule-chain` | Sequential rule execution definitions | `author` | `rule-chains` |
-| `external-data-config` | External data source configurations | `author` | `dataSources`, `configuration` |
-| `pipeline` | ETL and data processing pipeline orchestration | `author` | `pipeline`, `data-sources`, `data-sinks` |
+| `rule-config` | Business rules and validation logic | `id`, `author` | `rules`, `enrichments` |
+| `enrichment` | Data enrichment configurations | `id`, `author` | `enrichments` |
+| `dataset` | Reference data and lookup tables | `id`, `source` | `data` |
+| `scenario` | End-to-end processing scenarios | `id`, `business-domain`, `owner` | `scenario`, `data-types`, `rule-configurations` |
+| `scenario-registry` | Scenario collection management | `id`, `created-by` | `scenarios` |
+| `bootstrap` | Demo and initialization configurations | `id`, `business-domain`, `created-by` | `bootstrap`, `data-sources` |
+| `rule-chain` | Sequential rule execution definitions | `id`, `author` | `rule-chains` |
+| `external-data-config` | External data source configurations | `id`, `author` | `dataSources`, `configuration` |
+| `pipeline` | ETL and data processing pipeline orchestration | `id`, `author` | `pipeline`, `data-sources`, `data-sinks` |
 
 #### External Data Configuration
 
@@ -1774,7 +1817,7 @@ data-sinks:
 
 ### 9.1 Overview
 
-**Pipeline Orchestration** is APEX's revolutionary approach to YAML-driven data processing workflows. This system embodies the core APEX principle that **all processing logic should be contained in the YAML configuration file**, eliminating hardcoded orchestration in Java code.
+**Pipeline Orchestration** is APEX's approach to YAML-driven data processing workflows. This system embodies the core APEX principle that **all processing logic should be contained in the YAML configuration file**, eliminating hardcoded orchestration in Java code.
 
 #### Key Benefits
 

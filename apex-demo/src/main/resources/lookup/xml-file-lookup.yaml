@@ -1,0 +1,74 @@
+# XML File Lookup Example Configuration
+# Demonstrates file-system data source lookup using XML files
+# Use Case: Enrich product data using XML file lookup
+
+metadata:
+  id: "XML File Lookup Demo"
+  name: "XML File Lookup Demo"
+  version: "1.0.0"
+  description: "Demonstrates file-system lookup using XML files from demo-data/xml"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-09-05"
+  tags: ["apex-demo", "lookup", "xml", "file-system"]
+
+# Note: Using file-system data source for XML file loading
+# This demonstrates the new file-system dataset type capability
+
+# Define the enrichment rules
+enrichments:
+  - id: "product-details-xml-enrichment"
+    name: "Product Details XML Lookup"
+    description: "Enrich transactions with product details using XML file lookup"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#productId != null && #productId != ''"
+    
+    lookup-config:
+      # Simple field reference - extract product ID from input
+      lookup-key: "#productId"
+      
+      lookup-dataset:
+        type: "file-system"
+        key-field: "id"
+        file-path: "demo-data/xml/products.xml"
+    
+    # Map the lookup results to target fields
+    field-mappings:
+      - source-field: "name"
+        target-field: "productName"
+        required: true
+        
+      - source-field: "price"
+        target-field: "productPrice"
+        required: true
+        
+      - source-field: "category"
+        target-field: "productCategory"
+        required: true
+        
+      - source-field: "available"
+        target-field: "productAvailable"
+        required: false
+
+# Optional validation rules
+validations:
+  - id: "product-id-xml-format"
+    name: "Product ID Format Validation"
+    description: "Ensure product ID is not empty"
+    type: "field-validation"
+    enabled: true
+    condition: "#productId != null"
+    
+    validation-config:
+      field: "productId"
+      rules:
+        - type: "regex"
+          pattern: "^PROD\\d{3}$"
+          message: "Product ID must be in format PROD### (e.g., PROD001)"
+
+# Processing configuration
+processing:
+  continue-on-error: true
+  max-errors: 10
+  error-handling: "log-and-continue"

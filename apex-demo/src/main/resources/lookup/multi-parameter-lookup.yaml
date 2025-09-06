@@ -1,0 +1,102 @@
+# Multi-Parameter Database Lookup Demo
+# Demonstrates database lookup with multiple parameters using settlement instructions
+# Use Case: Simple settlement instruction lookup with multiple query parameters
+
+metadata:
+  id: "Multi-Parameter Database Lookup Demo"
+  name: "Multi-Parameter Database Lookup Demo"
+  version: "1.0.0"
+  description: "Simple demo showing database lookup with multiple parameters"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-09-05"
+  tags: ["apex-demo", "lookup", "database", "multi-parameter"]
+
+# External data source configuration
+data-sources:
+  - name: "settlement-database"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "Settlement instruction database for multi-parameter lookup demo"
+
+    connection:
+      # H2 file-based database for demo
+      database: "./target/h2-demo/settlement_demo"
+      username: "sa"
+      password: ""
+
+    # Query definitions (not used - enrichment defines inline query)
+    queries:
+      healthCheck: "SELECT COUNT(*) FROM settlement_instructions"
+
+    # Health check
+    healthCheck:
+      enabled: true
+      query: "SELECT COUNT(*) FROM settlement_instructions"
+      timeout: 5000
+
+# Enrichment rules using multi-parameter database lookup
+enrichments:
+  - id: "settlement-instruction-lookup"
+    name: "Settlement Instruction Lookup"
+    description: "Enrich trade data with settlement instructions using multiple parameters"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#counterpartyId != null && #instrumentType != null && #currency != null && #market != null"
+    
+    lookup-config:
+      # Create a Map with multiple parameters for the database lookup
+      lookup-key: "{'counterpartyId': #counterpartyId, 'instrumentType': #instrumentType, 'currency': #currency, 'market': #market, 'minAmount': #minAmount, 'maxAmount': #maxAmount}"
+      
+      lookup-dataset:
+        type: "database"
+        connection-name: "settlement-database"
+        query: |
+          SELECT 
+            si.instruction_id, 
+            si.counterparty_id, 
+            cp.counterparty_name
+          FROM settlement_instructions si
+          LEFT JOIN counterparties cp ON si.counterparty_id = cp.counterparty_id
+          WHERE si.counterparty_id = :counterpartyId
+            AND si.instrument_type = :instrumentType
+            AND si.currency = :currency
+            AND si.market = :market
+            AND (:minAmount IS NULL OR si.min_amount <= :minAmount)
+            AND (:maxAmount IS NULL OR si.max_amount >= :maxAmount)
+          ORDER BY si.priority ASC
+          LIMIT 1
+        parameters:
+          - field: "counterpartyId"
+            type: "string"
+          - field: "instrumentType"
+            type: "string"
+          - field: "currency"
+            type: "string"
+          - field: "market"
+            type: "string"
+          - field: "minAmount"
+            type: "decimal"
+          - field: "maxAmount"
+            type: "decimal"
+    
+    # Map the lookup results to target fields (H2 returns uppercase column names)
+    field-mappings:
+      - source-field: "INSTRUCTION_ID"
+        target-field: "settlementInstructionId"
+        required: true
+
+      - source-field: "COUNTERPARTY_ID"
+        target-field: "settlementCounterpartyId"
+        required: true
+
+      - source-field: "COUNTERPARTY_NAME"
+        target-field: "settlementCounterpartyName"
+        required: false
+
+# Processing configuration
+processing:
+  continue-on-error: true
+  max-errors: 10
+  error-handling: "log-and-continue"

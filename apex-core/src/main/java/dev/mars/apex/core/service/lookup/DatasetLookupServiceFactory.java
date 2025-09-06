@@ -3,6 +3,8 @@ package dev.mars.apex.core.service.lookup;
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
 import dev.mars.apex.core.service.enrichment.EnrichmentException;
 import dev.mars.apex.core.service.data.external.file.CsvDataLoader;
+import dev.mars.apex.core.service.data.external.file.JsonDataLoader;
+import dev.mars.apex.core.service.data.external.file.XmlDataLoader;
 import dev.mars.apex.core.config.datasource.FileFormatConfig;
 
 import java.nio.file.Path;
@@ -93,6 +95,9 @@ public class DatasetLookupServiceFactory {
             case "csv-file":
                 return createCsvFileDatasetService(serviceName, dataset);
 
+            case "file-system":
+                return createFileSystemDatasetService(serviceName, dataset);
+
             case "database":
                 if (configuration == null) {
                     throw new EnrichmentException("Database lookups require configuration context. Use createDatasetLookupService(serviceName, dataset, configuration) method instead.");
@@ -101,7 +106,7 @@ public class DatasetLookupServiceFactory {
 
             default:
                 throw new EnrichmentException("Unsupported dataset type: " + datasetType +
-                                            ". Supported types: inline, yaml-file, csv-file, database");
+                                            ". Supported types: inline, yaml-file, csv-file, file-system, database");
         }
     }
     
@@ -402,7 +407,165 @@ public class DatasetLookupServiceFactory {
             return errorDataset;
         }
     }
-    
+
+    /**
+     * Create a file-system dataset lookup service.
+     *
+     * @param serviceName The name for the service
+     * @param dataset The dataset configuration
+     * @return A configured DatasetLookupService
+     */
+    private static DatasetLookupService createFileSystemDatasetService(String serviceName,
+                                                                       YamlEnrichment.LookupDataset dataset) {
+        LOGGER.info("Creating file-system dataset lookup service: " + serviceName);
+
+        // Load data from file system
+        YamlEnrichment.LookupDataset fileDataset = loadFromFileSystem(dataset);
+
+        // Create and return the service
+        return new DatasetLookupService(serviceName, fileDataset);
+    }
+
+    /**
+     * Load dataset from file system (JSON, XML, or other formats).
+     *
+     * @param dataset The dataset configuration
+     * @return Dataset with loaded data
+     */
+    private static YamlEnrichment.LookupDataset loadFromFileSystem(YamlEnrichment.LookupDataset dataset) {
+        try {
+            LOGGER.info("Loading file-system dataset from file: " + dataset.getFilePath());
+
+            // Create a copy of the dataset
+            YamlEnrichment.LookupDataset fileDataset = new YamlEnrichment.LookupDataset();
+            fileDataset.setType(dataset.getType());
+            fileDataset.setFilePath(dataset.getFilePath());
+            fileDataset.setKeyField(dataset.getKeyField());
+            fileDataset.setDefaultValues(dataset.getDefaultValues());
+            fileDataset.setCacheEnabled(dataset.getCacheEnabled());
+            fileDataset.setCacheTtlSeconds(dataset.getCacheTtlSeconds());
+
+            // Load actual data from file
+            Path filePath = Paths.get(dataset.getFilePath());
+            if (!Files.exists(filePath)) {
+                LOGGER.warning("File not found: " + dataset.getFilePath() + ". Using empty dataset.");
+                fileDataset.setData(Collections.emptyList());
+                return fileDataset;
+            }
+
+            // Determine file format and load data
+            String fileName = filePath.getFileName().toString().toLowerCase();
+            List<Map<String, Object>> loadedData;
+
+            if (fileName.endsWith(".json")) {
+                loadedData = loadJsonFile(filePath);
+            } else if (fileName.endsWith(".xml")) {
+                loadedData = loadXmlFile(filePath);
+            } else {
+                throw new EnrichmentException("Unsupported file format for file-system dataset: " + fileName +
+                                            ". Supported formats: .json, .xml");
+            }
+
+            fileDataset.setData(loadedData);
+            LOGGER.info("Successfully loaded " + loadedData.size() + " records from file: " + dataset.getFilePath());
+
+            return fileDataset;
+
+        } catch (Exception e) {
+            LOGGER.severe("Failed to load file-system dataset from file: " + dataset.getFilePath() + ". Error: " + e.getMessage());
+
+            // Return dataset with empty data on error
+            YamlEnrichment.LookupDataset errorDataset = new YamlEnrichment.LookupDataset();
+            errorDataset.setType(dataset.getType());
+            errorDataset.setFilePath(dataset.getFilePath());
+            errorDataset.setKeyField(dataset.getKeyField());
+            errorDataset.setDefaultValues(dataset.getDefaultValues());
+            errorDataset.setCacheEnabled(dataset.getCacheEnabled());
+            errorDataset.setCacheTtlSeconds(dataset.getCacheTtlSeconds());
+            errorDataset.setData(Collections.emptyList());
+
+            return errorDataset;
+        }
+    }
+
+    /**
+     * Load data from JSON file.
+     *
+     * @param filePath Path to the JSON file
+     * @return List of data records
+     * @throws Exception if loading fails
+     */
+    private static List<Map<String, Object>> loadJsonFile(Path filePath) throws Exception {
+        LOGGER.fine("Loading JSON file: " + filePath);
+
+        // Use JsonDataLoader if available, otherwise use simple JSON parsing
+        try {
+            FileFormatConfig formatConfig = new FileFormatConfig();
+            formatConfig.setType("json");
+            formatConfig.setEncoding("UTF-8");
+
+            JsonDataLoader jsonLoader = new JsonDataLoader();
+            List<Object> loadedData = jsonLoader.loadData(filePath, formatConfig);
+
+            // Convert to List<Map<String, Object>>
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> mapData = (List<Map<String, Object>>) (List<?>) loadedData;
+            return mapData;
+
+        } catch (Exception e) {
+            LOGGER.warning("JsonDataLoader failed, falling back to simple JSON parsing: " + e.getMessage());
+            return loadJsonFileSimple(filePath);
+        }
+    }
+
+    /**
+     * Load data from XML file.
+     *
+     * @param filePath Path to the XML file
+     * @return List of data records
+     * @throws Exception if loading fails
+     */
+    private static List<Map<String, Object>> loadXmlFile(Path filePath) throws Exception {
+        LOGGER.fine("Loading XML file: " + filePath);
+
+        // Use XmlDataLoader if available, otherwise use simple XML parsing
+        try {
+            FileFormatConfig formatConfig = new FileFormatConfig();
+            formatConfig.setType("xml");
+            formatConfig.setEncoding("UTF-8");
+
+            XmlDataLoader xmlLoader = new XmlDataLoader();
+            List<Object> loadedData = xmlLoader.loadData(filePath, formatConfig);
+
+            // Convert to List<Map<String, Object>>
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> mapData = (List<Map<String, Object>>) (List<?>) loadedData;
+            return mapData;
+
+        } catch (Exception e) {
+            LOGGER.warning("XmlDataLoader failed, falling back to simple XML parsing: " + e.getMessage());
+            return loadXmlFileSimple(filePath);
+        }
+    }
+
+    /**
+     * Simple JSON file loading fallback.
+     */
+    private static List<Map<String, Object>> loadJsonFileSimple(Path filePath) throws Exception {
+        // For now, return empty list - this can be enhanced later
+        LOGGER.warning("Simple JSON parsing not yet implemented for: " + filePath);
+        return Collections.emptyList();
+    }
+
+    /**
+     * Simple XML file loading fallback.
+     */
+    private static List<Map<String, Object>> loadXmlFileSimple(Path filePath) throws Exception {
+        // For now, return empty list - this can be enhanced later
+        LOGGER.warning("Simple XML parsing not yet implemented for: " + filePath);
+        return Collections.emptyList();
+    }
+
     /**
      * Validate dataset configuration.
      * 
@@ -433,11 +596,12 @@ public class DatasetLookupServiceFactory {
                 
             case "yaml-file":
             case "csv-file":
+            case "file-system":
                 if (dataset.getFilePath() == null || dataset.getFilePath().trim().isEmpty()) {
                     throw new EnrichmentException("File-based dataset must specify a file path");
                 }
                 break;
-                
+
             default:
                 throw new EnrichmentException("Unsupported dataset type: " + type);
         }

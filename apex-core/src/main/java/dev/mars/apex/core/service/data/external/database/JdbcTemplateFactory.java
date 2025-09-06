@@ -82,19 +82,23 @@ public class JdbcTemplateFactory {
 
         try {
             // Ensure appropriate JDBC driver is loaded
+            LOGGER.debug("Ensuring JDBC driver is loaded for '{}'", config.getName());
             ensureDriverLoaded(config);
 
+            LOGGER.debug("Creating new DataSource for '{}'", config.getName());
             DataSource dataSource = createNewDataSource(config);
 
             // Test the connection before caching
+            LOGGER.debug("Testing DataSource connection for '{}'", config.getName());
             testDataSource(dataSource, config);
-            
+
             // Cache the DataSource
             DATA_SOURCE_CACHE.put(cacheKey, dataSource);
-            
-            LOGGER.info("Created and cached DataSource for '{}' ({})", 
+
+            LOGGER.info("Created and cached DataSource for '{}' ({})",
                 config.getName(), config.getSourceType());
-            
+            LOGGER.debug("DataSource cache now contains {} entries", DATA_SOURCE_CACHE.size());
+
             return dataSource;
             
         } catch (Exception e) {
@@ -122,9 +126,11 @@ public class JdbcTemplateFactory {
         
         // Try to use HikariCP if available, otherwise use simple DataSource
         try {
+            LOGGER.debug("Attempting to create HikariCP DataSource for '{}'", config.getName());
             return createHikariDataSource(config);
         } catch (ClassNotFoundException e) {
             LOGGER.warn("HikariCP not available, using simple DataSource for '{}'", config.getName());
+            LOGGER.debug("Falling back to simple DataSource for '{}'", config.getName());
             return createSimpleDataSource(config);
         }
     }
