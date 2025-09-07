@@ -121,21 +121,16 @@ public class PropertyResolutionTest {
     }
 
     @Test
-    @DisplayName("Should throw exception for missing required property")
+    @DisplayName("Should return original placeholder for missing property")
     void testMissingRequiredProperty() throws Exception {
         LOGGER.info("TEST: Missing required property");
-        
+
         String input = "${DEFINITELY_NONEXISTENT_PROPERTY}";
-        
-        Exception exception = assertThrows(Exception.class, () -> {
-            resolvePropertiesMethod.invoke(loader, input);
-        });
-        
-        // The actual exception will be wrapped in InvocationTargetException
-        assertTrue(exception.getCause() instanceof YamlConfigurationException);
-        assertTrue(exception.getCause().getMessage().contains("Property not found: DEFINITELY_NONEXISTENT_PROPERTY"));
-        
-        LOGGER.info("✓ Missing property throws correct exception: " + exception.getCause().getMessage());
+        String result = (String) resolvePropertiesMethod.invoke(loader, input);
+
+        // Should return the original placeholder when property is not found
+        assertEquals("${DEFINITELY_NONEXISTENT_PROPERTY}", result);
+        LOGGER.info("✓ Missing required property returns original placeholder: " + result);
     }
 
     @Test
@@ -193,11 +188,59 @@ public class PropertyResolutionTest {
     @DisplayName("Should handle complex placeholder patterns")
     void testComplexPlaceholders() throws Exception {
         LOGGER.info("TEST: Complex placeholder patterns");
-        
+
         String input = "host=${TEST_PROP},port=5432,password=${TEST_PASSWORD:fallback},timeout=${TIMEOUT:30}";
         String result = (String) resolvePropertiesMethod.invoke(loader, input);
-        
+
         assertEquals("host=test_value,port=5432,password=secret123,timeout=30", result);
         LOGGER.info("✓ Complex placeholders work: " + input + " -> [RESULT_MASKED_FOR_SECURITY]");
+    }
+
+    @Test
+    @DisplayName("Should resolve simple property placeholder with parentheses syntax")
+    void testSimpleParenthesesPropertyResolution() throws Exception {
+        LOGGER.info("TEST: Simple parentheses property resolution");
+
+        String input = "$(TEST_PROP)";
+        String result = (String) resolvePropertiesMethod.invoke(loader, input);
+
+        assertEquals("test_value", result);
+        LOGGER.info("✓ Simple parentheses property resolution works: " + input + " -> " + result);
+    }
+
+    @Test
+    @DisplayName("Should resolve password property with parentheses syntax")
+    void testParenthesesPasswordResolution() throws Exception {
+        LOGGER.info("TEST: Parentheses password property resolution");
+
+        String input = "$(TEST_PASSWORD)";
+        String result = (String) resolvePropertiesMethod.invoke(loader, input);
+
+        assertEquals("secret123", result);
+        LOGGER.info("✓ Parentheses password property resolution works: " + input + " -> [MASKED]");
+    }
+
+    @Test
+    @DisplayName("Should resolve property with default value using parentheses syntax")
+    void testParenthesesPropertyWithDefault() throws Exception {
+        LOGGER.info("TEST: Parentheses property with default value");
+
+        String input = "$(NONEXISTENT_PROP:default_value)";
+        String result = (String) resolvePropertiesMethod.invoke(loader, input);
+
+        assertEquals("default_value", result);
+        LOGGER.info("✓ Parentheses property with default works: " + input + " -> " + result);
+    }
+
+    @Test
+    @DisplayName("Should resolve mixed curly and parentheses placeholders")
+    void testMixedPlaceholderSyntax() throws Exception {
+        LOGGER.info("TEST: Mixed placeholder syntax");
+
+        String input = "host=${TEST_PROP},password=$(TEST_PASSWORD),timeout=$(TIMEOUT:30)";
+        String result = (String) resolvePropertiesMethod.invoke(loader, input);
+
+        assertEquals("host=test_value,password=secret123,timeout=30", result);
+        LOGGER.info("✓ Mixed placeholder syntax works: " + input + " -> [RESULT_MASKED_FOR_SECURITY]");
     }
 }

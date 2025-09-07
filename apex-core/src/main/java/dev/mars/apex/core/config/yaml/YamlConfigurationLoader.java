@@ -1817,7 +1817,7 @@ public class YamlConfigurationLoader {
 
     /**
      * Resolve environment variables and system properties in configuration values.
-     * Supports: ${VAR}, ${VAR:default}
+     * Supports: ${VAR}, ${VAR:default}, $(VAR), $(VAR:default)
      *
      * NOTE: This method is added in Phase 1 but not used yet to ensure zero impact.
      *
@@ -1826,28 +1826,45 @@ public class YamlConfigurationLoader {
      * @throws YamlConfigurationException if a required property is not found
      */
     private String resolveProperties(String value) throws YamlConfigurationException {
-        if (value == null || !value.contains("${")) {
+        if (value == null || (!value.contains("${") && !value.contains("$("))) {
             return value;
         }
 
         LOGGER.fine("Resolving properties in value: " + maskSensitiveValue(value));
 
-        // Simple regex-based replacement for ${VAR} and ${VAR:default} patterns
-        Pattern pattern = Pattern.compile("\\$\\{([^}]+)\\}");
-        Matcher matcher = pattern.matcher(value);
+        String result = value;
 
-        StringBuffer result = new StringBuffer();
-        while (matcher.find()) {
-            String placeholder = matcher.group(1);
-            String resolved = resolveSingleProperty(placeholder);
-            matcher.appendReplacement(result, Matcher.quoteReplacement(resolved));
+        // First resolve ${VAR} and ${VAR:default} patterns
+        if (result.contains("${")) {
+            Pattern curlyPattern = Pattern.compile("\\$\\{([^}]+)\\}");
+            Matcher curlyMatcher = curlyPattern.matcher(result);
+            StringBuffer curlyResult = new StringBuffer();
+            while (curlyMatcher.find()) {
+                String placeholder = curlyMatcher.group(1);
+                String resolved = resolveSingleProperty(placeholder);
+                curlyMatcher.appendReplacement(curlyResult, Matcher.quoteReplacement(resolved));
+            }
+            curlyMatcher.appendTail(curlyResult);
+            result = curlyResult.toString();
         }
-        matcher.appendTail(result);
 
-        String finalResult = result.toString();
-        LOGGER.fine("Property resolution completed: " + maskSensitiveValue(finalResult));
+        // Then resolve $(VAR) and $(VAR:default) patterns
+        if (result.contains("$(")) {
+            Pattern parenPattern = Pattern.compile("\\$\\(([^)]+)\\)");
+            Matcher parenMatcher = parenPattern.matcher(result);
+            StringBuffer parenResult = new StringBuffer();
+            while (parenMatcher.find()) {
+                String placeholder = parenMatcher.group(1);
+                String resolved = resolveSingleProperty(placeholder);
+                parenMatcher.appendReplacement(parenResult, Matcher.quoteReplacement(resolved));
+            }
+            parenMatcher.appendTail(parenResult);
+            result = parenResult.toString();
+        }
 
-        return finalResult;
+        LOGGER.fine("Property resolution completed: " + maskSensitiveValue(result));
+
+        return result;
     }
 
     /**
@@ -1872,8 +1889,8 @@ public class YamlConfigurationLoader {
             value = defaultValue;
         }
         if (value == null) {
-            throw new YamlConfigurationException("Property not found: " + key +
-                " (checked system properties and environment variables)");
+            // Return the original placeholder if property not found
+            return "${" + placeholder + "}";
         }
 
         // Log resolution (mask sensitive values)
