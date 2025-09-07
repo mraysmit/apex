@@ -3,7 +3,7 @@
 # Replaces hardcoded loan approval logic from RuleConfigurationBootstrap
 
 metadata:
-  id: "Comprehensive Loan Rules"
+  id: "comprehensive-loan-rules"
   name: "Comprehensive Loan Rules"
   version: "1.0.0"
   description: "Comprehensive data-driven loan approval rules for bootstrap demonstration"
@@ -15,7 +15,7 @@ metadata:
 # Comprehensive loan approval rules by credit profile
 data:
   excellent-credit:
-    rule-id: "LA001"
+    rule-id: "comprehensive-loan-rules"
     decision: "APPROVED"
     reason: "Excellent credit score - automatic approval"
     description: "Credit score >= 750 qualifies for automatic approval"
@@ -27,7 +27,7 @@ data:
     processing-priority: "high"
     
   good-credit-low-dti:
-    rule-id: "LA002"
+    rule-id: "comprehensive-loan-rules"
     decision: "APPROVED"
     reason: "Good credit with acceptable debt-to-income ratio"
     description: "Credit score >= 700 with DTI <= 0.36"
@@ -39,7 +39,7 @@ data:
     processing-priority: "high"
     
   poor-credit:
-    rule-id: "LA003"
+    rule-id: "comprehensive-loan-rules"
     decision: "REJECTED"
     reason: "Credit score below minimum threshold"
     description: "Credit score < 620 results in automatic rejection"
@@ -51,7 +51,7 @@ data:
     processing-priority: "low"
     
   high-dti:
-    rule-id: "LA004"
+    rule-id: "comprehensive-loan-rules"
     decision: "REJECTED"
     reason: "High debt-to-income ratio exceeds acceptable limits"
     description: "DTI ratio > 0.43 results in automatic rejection"
@@ -63,7 +63,7 @@ data:
     processing-priority: "low"
     
   moderate-credit:
-    rule-id: "LA005"
+    rule-id: "comprehensive-loan-rules"
     decision: "REFERRED"
     reason: "Moderate credit requires manual underwriter review"
     description: "Credit score 620-699 with acceptable DTI requires review"

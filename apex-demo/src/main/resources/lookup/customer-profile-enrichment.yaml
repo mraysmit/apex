@@ -3,7 +3,7 @@
 # Use Case: Enrich transactions with customer profile data from database
 
 metadata:
-  id: "Customer Profile Enrichment Demo - Database Version"
+  id: "customer-profile-enrichment-demo---database-version"
   name: "Customer Profile Enrichment Demo - Database Version"
   version: "2.0.0"
   description: "Demonstrates database lookup enrichment using APEX YAML processing with real H2 database"
@@ -25,7 +25,7 @@ data-sources:
 
 # Enrichment rules using verified APEX syntax with database lookups
 enrichments:
-  - id: "customer-profile-database-lookup"
+  - id: "customer-profile-enrichment-demo---database-version"
     type: "lookup-enrichment"
     description: "Enrich transactions with customer profile data from H2 database"
     condition: "#customerId != null && #customerId != ''"

@@ -3,7 +3,7 @@
 # Replaces all hardcoded post-trade processing logic from PostTradeProcessingServiceDemo (@version 1.0)
 
 metadata:
-  id: "Post-Trade Processing Service Demo"
+  id: "post-trade-processing-service-demo"
   name: "Post-Trade Processing Service Demo"
   version: "1.0.0"
   description: "APEX-compliant post-trade processing service with real enrichment services"
@@ -28,7 +28,7 @@ external-data-sources:
 
 # APEX enrichment processing for post-trade processing service
 enrichments:
-  - id: "trade-processing-workflows-processing"
+  - id: "post-trade-processing-service-demo"
     name: "trade-processing-workflows-processing"
     type: "lookup-enrichment"
     description: "Process trade processing workflows using data-driven configuration"
@@ -37,7 +37,7 @@ enrichments:
     lookup-key: "#data.workflowType != null ? #data.workflowType : 'default'"
     target-field: "tradeProcessingWorkflowsResult"
 
-  - id: "settlement-operations-processing"
+  - id: "post-trade-processing-service-demo"
     name: "settlement-operations-processing"
     type: "lookup-enrichment"
     description: "Process settlement operations using data-driven configuration"
@@ -46,7 +46,7 @@ enrichments:
     lookup-key: "#data.operationType != null ? #data.operationType : 'default'"
     target-field: "settlementOperationsResult"
 
-  - id: "post-trade-business-rules-processing"
+  - id: "post-trade-processing-service-demo"
     name: "post-trade-business-rules-processing"
     type: "lookup-enrichment"
     description: "Process post-trade business rules using data-driven configuration"
@@ -55,7 +55,7 @@ enrichments:
     lookup-key: "#data.ruleType != null ? #data.ruleType : 'default'"
     target-field: "postTradeBusinessRulesResult"
 
-  - id: "post-trade-processing-service-summary"
+  - id: "post-trade-processing-service-demo"
     name: "post-trade-processing-service-summary"
     type: "expression-enrichment"
     description: "Generate post-trade processing service summary"

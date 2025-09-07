@@ -2,6 +2,7 @@
 # This demonstrates various file format configurations including CSV, JSON, XML, and fixed-width
 
 metadata:
+  id: "file-system-data-sources-example"
   name: "File System Data Sources Example"
   version: "1.0.0"
   description: "Example configuration showing different file system data source setups"

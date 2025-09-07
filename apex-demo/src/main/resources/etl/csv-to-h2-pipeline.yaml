@@ -9,7 +9,7 @@ metadata:
   name: "CSV to H2 ETL Pipeline Demo"
   version: "1.0.0"
   description: "Demonstration of CSV data processing with H2 database output using APEX data sinks"
-  type: "pipeline"
+  type: "pipeline-config"
   author: "APEX Demo Team"
   tags: ["demo", "etl", "csv", "h2", "pipeline"]
 
@@ -117,7 +117,7 @@ data-sources:
     operations:
       getAllCustomers: "SELECT * FROM csv"
       getActiveCustomers: "SELECT * FROM csv WHERE status = 'ACTIVE'"
-      getCustomerById: "SELECT * FROM csv WHERE id = :id"
+      getCustomerByid: "csv-to-h2-pipeline-demo"
 
     # Parameter names for operations
     parameter-names: ["id", "status"]

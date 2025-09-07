@@ -3,7 +3,7 @@
 # NO HARDCODED SIMULATION - Real APEX data processing
 
 metadata:
-  id: "YAML Configuration Demo Data"
+  id: "yaml-configuration-demo-data"
   name: "YAML Configuration Demo Data"
   version: "2.0.0"
   description: "Test data scenarios for real APEX YAML configuration demonstration"
@@ -18,9 +18,9 @@ external-yaml-scenarios:
   - scenario: "valid-commodity-trade"
     description: "Valid commodity trade for external YAML configuration processing"
     data:
-      tradeId: "COM123456"
-      externalTradeId: "EXT-COM-001"
-      counterpartyId: "COUNTERPARTY001"
+      tradeid: "yaml-configuration-demo-data"
+      externalTradeid: "yaml-configuration-demo-data"
+      counterpartyid: "yaml-configuration-demo-data"
       notionalAmount: 50000000
       notionalCurrency: "USD"
       referenceIndex: "WTI"
@@ -37,9 +37,9 @@ external-yaml-scenarios:
   - scenario: "invalid-commodity-trade"
     description: "Invalid commodity trade for external YAML configuration validation"
     data:
-      tradeId: ""
-      externalTradeId: "EXT-COM-002"
-      counterpartyId: "COUNTERPARTY002"
+      tradeid: "yaml-configuration-demo-data"
+      externalTradeid: "yaml-configuration-demo-data"
+      counterpartyid: "yaml-configuration-demo-data"
       notionalAmount: -1000000
       notionalCurrency: "INVALID_CURRENCY"
       referenceIndex: "BRENT"
@@ -56,9 +56,9 @@ external-yaml-scenarios:
   - scenario: "eur-commodity-trade"
     description: "EUR-denominated commodity trade for external YAML configuration"
     data:
-      tradeId: "COM789012"
-      externalTradeId: "EXT-COM-003"
-      counterpartyId: "COUNTERPARTY003"
+      tradeid: "yaml-configuration-demo-data"
+      externalTradeid: "yaml-configuration-demo-data"
+      counterpartyid: "yaml-configuration-demo-data"
       notionalAmount: 25000000
       notionalCurrency: "EUR"
       referenceIndex: "BRENT"
@@ -76,8 +76,8 @@ business-editable-scenarios:
   - scenario: "approved-client-low-risk"
     description: "Approved client with low risk for business user-editable rules"
     data:
-      clientId: "CLIENT001"
-      clientAccountId: "ACC001"
+      clientid: "yaml-configuration-demo-data"
+      clientAccountid: "yaml-configuration-demo-data"
       counterpartyRating: "A+"
       riskLevel: "LOW"
       businessApproval: "APPROVED"
@@ -94,8 +94,8 @@ business-editable-scenarios:
   - scenario: "pending-approval-medium-risk"
     description: "Pending approval with medium risk for business rules"
     data:
-      clientId: "CLIENT002"
-      clientAccountId: "ACC002"
+      clientid: "yaml-configuration-demo-data"
+      clientAccountid: "yaml-configuration-demo-data"
       counterpartyRating: "BBB"
       riskLevel: "MEDIUM"
       businessApproval: "PENDING"
@@ -110,8 +110,8 @@ business-editable-scenarios:
   - scenario: "high-rated-counterparty"
     description: "High-rated counterparty for business rules processing"
     data:
-      clientId: "CLIENT003"
-      clientAccountId: "ACC003"
+      clientid: "yaml-configuration-demo-data"
+      clientAccountid: "yaml-configuration-demo-data"
       counterpartyRating: "A"
       riskLevel: "HIGH"
       businessApproval: "APPROVED"
@@ -178,13 +178,13 @@ integrated-scenarios:
     description: "Complete workflow demonstrating all YAML configuration types"
     data:
       # External YAML data
-      tradeId: "COM456789"
+      tradeid: "yaml-configuration-demo-data"
       notionalAmount: 75000000
       notionalCurrency: "USD"
       commodityType: "CRUDE_OIL"
       # Business editable data
-      clientId: "CLIENT004"
-      clientAccountId: "ACC004"
+      clientid: "yaml-configuration-demo-data"
+      clientAccountid: "yaml-configuration-demo-data"
       counterpartyRating: "A+"
       riskLevel: "LOW"
       businessApproval: "APPROVED"
@@ -235,7 +235,7 @@ performance-scenarios:
   - scenario: "external-yaml-performance"
     description: "Performance testing for external YAML configuration"
     data:
-      tradeId: "PERF_COM_001"
+      tradeid: "yaml-configuration-demo-data"
       notionalAmount: 10000000
       notionalCurrency: "USD"
       commodityType: "CRUDE_OIL"
@@ -248,7 +248,7 @@ performance-scenarios:
   - scenario: "business-editable-performance"
     description: "Performance testing for business editable rules"
     data:
-      clientId: "PERF_CLIENT_001"
+      clientid: "yaml-configuration-demo-data"
       counterpartyRating: "A+"
       riskLevel: "LOW"
       configType: "BUSINESS_EDITABLE"

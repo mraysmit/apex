@@ -3,7 +3,7 @@
 # Replaces hardcoded regulatory requirements mapping from ComplianceServiceDemo
 
 metadata:
-  id: "Regulatory Requirements Configuration"
+  id: "regulatory-requirements-configuration"
   name: "Regulatory Requirements Configuration"
   version: "2.0.0"
   description: "Regulatory requirements mapping by trade type"

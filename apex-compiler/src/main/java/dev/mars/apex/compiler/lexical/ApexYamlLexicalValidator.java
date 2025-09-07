@@ -36,8 +36,9 @@ public class ApexYamlLexicalValidator {
     );
     
     private static final Set<String> VALID_DOCUMENT_TYPES = Set.of(
-        "rule-config", "enrichment", "dataset", "scenario", 
-        "scenario-registry", "bootstrap", "rule-chain", "external-data-config"
+        "rule-config", "enrichment", "dataset", "scenario",
+        "scenario-registry", "bootstrap", "rule-chain", "external-data-config",
+        "pipeline-config"
     );
     
     private static final Map<String, Set<String>> TYPE_SPECIFIC_REQUIRED_FIELDS = Map.of(
@@ -48,7 +49,8 @@ public class ApexYamlLexicalValidator {
         "scenario-registry", Set.of("created-by"),
         "bootstrap", Set.of("business-domain", "created-by"),
         "rule-chain", Set.of("author"),
-        "external-data-config", Set.of("author")
+        "external-data-config", Set.of("author"),
+        "pipeline-config", Set.of("author")
     );
     
     private static final Map<String, Set<String>> TYPE_REQUIRED_SECTIONS = Map.of(
@@ -59,7 +61,8 @@ public class ApexYamlLexicalValidator {
         "scenario-registry", Set.of("scenarios"),
         "bootstrap", Set.of("bootstrap", "data-sources"),
         "rule-chain", Set.of("rule-chains"),
-        "external-data-config", Set.of("dataSources", "configuration")
+        "external-data-config", Set.of("dataSources", "configuration"),
+        "pipeline-config", Set.of("pipeline", "data-sources", "data-sinks") // At least one required
     );
     
     // SpEL Expression Pattern (basic validation)

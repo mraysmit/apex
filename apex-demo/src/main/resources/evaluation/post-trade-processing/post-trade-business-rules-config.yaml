@@ -3,7 +3,7 @@
 # Replaces hardcoded business rules logic from PostTradeProcessingServiceDemo
 
 metadata:
-  id: "Post-Trade Business Rules Configuration"
+  id: "post-trade-business-rules-configuration"
   name: "Post-Trade Business Rules Configuration"
   version: "1.0.0"
   description: "Data-driven post-trade business rules configuration for post-trade processing service"
@@ -24,7 +24,7 @@ data:
       error-handling: "FAIL_FAST"
     business-rules:
       equity-trade-validation-rules:
-        rule-id: "EQUITY_TRADE_VALIDATION_RULES"
+        rule-id: "post-trade-business-rules-configuration"
         rule-name: "Equity Trade Validation Rules"
         rule-description: "Comprehensive validation rules for equity trades"
         trade-type: "Equity"
@@ -63,7 +63,7 @@ data:
           - "Track rule violation patterns"
           
       fixed-income-trade-validation-rules:
-        rule-id: "FIXED_INCOME_TRADE_VALIDATION_RULES"
+        rule-id: "post-trade-business-rules-configuration"
         rule-name: "Fixed Income Trade Validation Rules"
         rule-description: "Comprehensive validation rules for fixed income trades"
         trade-type: "FixedIncome"
@@ -102,7 +102,7 @@ data:
           - "Track credit rating distribution"
           
       derivative-trade-validation-rules:
-        rule-id: "DERIVATIVE_TRADE_VALIDATION_RULES"
+        rule-id: "post-trade-business-rules-configuration"
         rule-name: "Derivative Trade Validation Rules"
         rule-description: "Comprehensive validation rules for derivative trades"
         trade-type: "Derivative"
@@ -154,7 +154,7 @@ data:
       error-handling: "CONTINUE_WITH_WARNING"
     business-rules:
       dtc-settlement-rules:
-        rule-id: "DTC_SETTLEMENT_RULES"
+        rule-id: "post-trade-business-rules-configuration"
         rule-name: "DTC Settlement Rules"
         rule-description: "Rules for DTC settlement method selection"
         settlement-method: "DTC"
@@ -189,7 +189,7 @@ data:
           - "Track DTC selection frequency"
           
       fedwire-settlement-rules:
-        rule-id: "FEDWIRE_SETTLEMENT_RULES"
+        rule-id: "post-trade-business-rules-configuration"
         rule-name: "Fedwire Settlement Rules"
         rule-description: "Rules for Fedwire settlement method selection"
         settlement-method: "Fedwire"
@@ -224,7 +224,7 @@ data:
           - "Track urgent settlement patterns"
           
       euroclear-settlement-rules:
-        rule-id: "EUROCLEAR_SETTLEMENT_RULES"
+        rule-id: "post-trade-business-rules-configuration"
         rule-name: "Euroclear Settlement Rules"
         rule-description: "Rules for Euroclear settlement method selection"
         settlement-method: "Euroclear"
@@ -272,7 +272,7 @@ data:
       error-handling: "USE_DEFAULT"
     business-rules:
       base-fee-calculation-rules:
-        rule-id: "BASE_FEE_CALCULATION_RULES"
+        rule-id: "post-trade-business-rules-configuration"
         rule-name: "Base Fee Calculation Rules"
         rule-description: "Rules for calculating base settlement fees"
         calculation-rules:
@@ -311,7 +311,7 @@ data:
           - "Track fee distribution by trade type"
           
       volume-fee-calculation-rules:
-        rule-id: "VOLUME_FEE_CALCULATION_RULES"
+        rule-id: "post-trade-business-rules-configuration"
         rule-name: "Volume Fee Calculation Rules"
         rule-description: "Rules for calculating volume-based fees"
         calculation-rules:
@@ -340,7 +340,7 @@ data:
           - "Track fee tier usage patterns"
           
       method-fee-calculation-rules:
-        rule-id: "METHOD_FEE_CALCULATION_RULES"
+        rule-id: "post-trade-business-rules-configuration"
         rule-name: "Settlement Method Fee Calculation Rules"
         rule-description: "Rules for calculating settlement method fees"
         calculation-rules:
@@ -392,7 +392,7 @@ data:
       error-handling: "FAIL_FAST"
     business-rules:
       regulatory-compliance-rules:
-        rule-id: "REGULATORY_COMPLIANCE_RULES"
+        rule-id: "post-trade-business-rules-configuration"
         rule-name: "Regulatory Compliance Rules"
         rule-description: "Rules for ensuring regulatory compliance"
         compliance-rules:
@@ -435,7 +435,7 @@ data:
     description: "Default post-trade business rule processing"
     business-rules:
       default-rule:
-        rule-id: "DEFAULT_RULE"
+        rule-id: "post-trade-business-rules-configuration"
         rule-name: "Default Rule"
         validation-rules:
           - rule-name: "basic-validation"

@@ -3,7 +3,7 @@
 # Replaces hardcoded rule engine logic from ApexAdvancedFeaturesDemo
 
 metadata:
-  id: "Rule Engine Configuration"
+  id: "rule-engine-configuration"
   name: "Rule Engine Configuration"
   version: "1.0.0"
   description: "Data-driven rule engine configuration for advanced features"

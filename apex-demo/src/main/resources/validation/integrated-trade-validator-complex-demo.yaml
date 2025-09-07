@@ -3,7 +3,7 @@
 # Replaces all hardcoded trade validation logic from IntegratedTradeValidatorComplexDemo (@version 1.0)
 
 metadata:
-  id: "Integrated Trade Validator Complex Demo"
+  id: "integrated-trade-validator-complex-demo"
   name: "Integrated Trade Validator Complex Demo"
   version: "1.0.0"
   description: "APEX-compliant complex trade validation with real enrichment services"
@@ -36,7 +36,7 @@ external-data-sources:
 
 # APEX enrichment processing for complex trade validation
 enrichments:
-  - id: "settlement-validation"
+  - id: "integrated-trade-validator-complex-demo"
     name: "settlement-validation"
     type: "lookup-enrichment"
     description: "Validate settlement parameters using data-driven configuration"
@@ -58,7 +58,7 @@ enrichments:
       - source-field: "result"
         target-field: "settlementValidationResult"
 
-  - id: "compliance-validation"
+  - id: "integrated-trade-validator-complex-demo"
     name: "compliance-validation"
     type: "lookup-enrichment"
     description: "Validate compliance parameters using data-driven configuration"
@@ -80,7 +80,7 @@ enrichments:
       - source-field: "result"
         target-field: "complianceValidationResult"
 
-  - id: "lookup-service-validation"
+  - id: "integrated-trade-validator-complex-demo"
     name: "lookup-service-validation"
     type: "lookup-enrichment"
     description: "Validate using lookup services with data-driven configuration"
@@ -102,7 +102,7 @@ enrichments:
       - source-field: "result"
         target-field: "lookupServiceValidationResult"
 
-  - id: "validation-rules-processing"
+  - id: "integrated-trade-validator-complex-demo"
     name: "validation-rules-processing"
     type: "lookup-enrichment"
     description: "Process validation rules using data-driven configuration"
@@ -124,7 +124,7 @@ enrichments:
       - source-field: "result"
         target-field: "validationRulesResult"
 
-  - id: "trade-sample-validation"
+  - id: "integrated-trade-validator-complex-demo"
     name: "trade-sample-validation"
     type: "lookup-enrichment"
     description: "Validate trade samples using data-driven configuration"
@@ -146,7 +146,7 @@ enrichments:
       - source-field: "result"
         target-field: "tradeSampleValidationResult"
 
-  - id: "validation-summary"
+  - id: "integrated-trade-validator-complex-demo"
     name: "validation-summary"
     type: "calculation-enrichment"
     description: "Generate comprehensive validation summary"

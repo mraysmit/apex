@@ -3,7 +3,7 @@
 # Replaces hardcoded settlement operations logic from PostTradeProcessingServiceDemo
 
 metadata:
-  id: "Settlement Operations Configuration"
+  id: "settlement-operations-configuration"
   name: "Settlement Operations Configuration"
   version: "1.0.0"
   description: "Data-driven settlement operations configuration for post-trade processing service"
@@ -24,7 +24,7 @@ data:
       optimization-strategy: "COST_AND_SPEED"
     settlement-operations:
       dtc-settlement-operation:
-        operation-id: "DTC_SETTLEMENT_OPERATION"
+        operation-id: "settlement-operations-configuration"
         operation-name: "DTC Settlement Operation"
         operation-description: "Settlement operation using Depository Trust Company (DTC)"
         settlement-method: "DTC"
@@ -65,7 +65,7 @@ data:
           - "Track settlement performance metrics"
           
       fedwire-settlement-operation:
-        operation-id: "FEDWIRE_SETTLEMENT_OPERATION"
+        operation-id: "settlement-operations-configuration"
         operation-name: "Fedwire Settlement Operation"
         operation-description: "Settlement operation using Federal Reserve Wire Network (Fedwire)"
         settlement-method: "Fedwire"
@@ -106,7 +106,7 @@ data:
           - "Track wire transfer performance"
           
       euroclear-settlement-operation:
-        operation-id: "EUROCLEAR_SETTLEMENT_OPERATION"
+        operation-id: "settlement-operations-configuration"
         operation-name: "Euroclear Settlement Operation"
         operation-description: "Settlement operation using Euroclear settlement system"
         settlement-method: "Euroclear"
@@ -147,7 +147,7 @@ data:
           - "Track cross-border settlement metrics"
           
       clearstream-settlement-operation:
-        operation-id: "CLEARSTREAM_SETTLEMENT_OPERATION"
+        operation-id: "settlement-operations-configuration"
         operation-name: "Clearstream Settlement Operation"
         operation-description: "Settlement operation using Clearstream settlement system"
         settlement-method: "Clearstream"
@@ -188,7 +188,7 @@ data:
           - "Track collateral management metrics"
           
       manual-settlement-operation:
-        operation-id: "MANUAL_SETTLEMENT_OPERATION"
+        operation-id: "settlement-operations-configuration"
         operation-name: "Manual Settlement Operation"
         operation-description: "Manual settlement operation for complex or exceptional trades"
         settlement-method: "Manual"
@@ -242,7 +242,7 @@ data:
       fee-structure: "TIERED"
     fee-calculation-operations:
       base-fee-calculation:
-        calculation-id: "BASE_FEE_CALCULATION"
+        calculation-id: "settlement-operations-configuration"
         calculation-name: "Base Fee Calculation"
         calculation-description: "Calculate base settlement fee by trade type"
         fee-components:
@@ -276,7 +276,7 @@ data:
           - "Track fee by trade type"
           
       volume-fee-calculation:
-        calculation-id: "VOLUME_FEE_CALCULATION"
+        calculation-id: "settlement-operations-configuration"
         calculation-name: "Volume Fee Calculation"
         calculation-description: "Calculate volume-based fee scaling"
         fee-tiers:
@@ -314,7 +314,7 @@ data:
           - "Track fee tier usage"
           
       method-fee-calculation:
-        calculation-id: "METHOD_FEE_CALCULATION"
+        calculation-id: "settlement-operations-configuration"
         calculation-name: "Settlement Method Fee Calculation"
         calculation-description: "Calculate settlement method-specific fees"
         method-fees:
@@ -361,7 +361,7 @@ data:
       holiday-handling: "SKIP_HOLIDAYS"
     day-calculation-operations:
       trade-type-settlement-days:
-        calculation-id: "TRADE_TYPE_SETTLEMENT_DAYS"
+        calculation-id: "settlement-operations-configuration"
         calculation-name: "Trade Type Settlement Days"
         calculation-description: "Calculate settlement days by trade type"
         settlement-days:
@@ -408,7 +408,7 @@ data:
     description: "Default settlement operation processing"
     settlement-operations:
       default-operation:
-        operation-id: "DEFAULT_OPERATION"
+        operation-id: "settlement-operations-configuration"
         operation-name: "Default Operation"
         method-characteristics:
           processing-fee: 25.0

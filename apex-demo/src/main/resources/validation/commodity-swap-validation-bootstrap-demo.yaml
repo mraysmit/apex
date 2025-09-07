@@ -3,7 +3,7 @@
 # Replaces all hardcoded validation logic from CommoditySwapValidationBootstrap (@version 1.0)
 
 metadata:
-  id: "Commodity Swap Validation Bootstrap Demo"
+  id: "commodity-swap-validation-bootstrap-demo"
   name: "Commodity Swap Validation Bootstrap Demo"
   version: "1.0.0"
   description: "APEX-compliant commodity swap validation bootstrap with real enrichment services"
@@ -30,7 +30,7 @@ external-data-sources:
 
 # APEX enrichment processing for commodity swap validation bootstrap
 enrichments:
-  - id: "validation-rules-processing"
+  - id: "commodity-swap-validation-bootstrap-demo"
     name: "validation-rules-processing"
     type: "field-enrichment"
     description: "Process validation rules using data-driven configuration"
@@ -41,7 +41,7 @@ enrichments:
         target-field: "validationRulesResult"
         default-value: "validation-rules-processed"
 
-  - id: "enrichment-patterns-processing"
+  - id: "commodity-swap-validation-bootstrap-demo"
     name: "enrichment-patterns-processing"
     type: "field-enrichment"
     description: "Process enrichment patterns using data-driven configuration"
@@ -52,7 +52,7 @@ enrichments:
         target-field: "enrichmentPatternsResult"
         default-value: "enrichment-patterns-processed"
 
-  - id: "commodity-data-processing"
+  - id: "commodity-swap-validation-bootstrap-demo"
     name: "commodity-data-processing"
     type: "field-enrichment"
     description: "Process commodity data using data-driven configuration"
@@ -63,7 +63,7 @@ enrichments:
         target-field: "commodityDataResult"
         default-value: "commodity-data-processed"
     
-  - id: "commodity-swap-validation-summary"
+  - id: "commodity-swap-validation-bootstrap-demo"
     name: "commodity-swap-validation-summary"
     type: "field-enrichment"
     description: "Generate commodity swap validation bootstrap summary"

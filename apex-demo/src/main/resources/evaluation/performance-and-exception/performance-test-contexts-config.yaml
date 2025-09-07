@@ -3,7 +3,7 @@
 # Replaces hardcoded Map.of context creation from PerformanceAndExceptionDemo
 
 metadata:
-  id: "Performance Test Contexts Configuration"
+  id: "performance-test-contexts-configuration"
   name: "Performance Test Contexts Configuration"
   version: "1.0.0"
   description: "Data-driven performance test contexts configuration for performance and exception handling processing"
@@ -24,7 +24,7 @@ data:
       execution-pattern: "REPEATED"
     test-contexts:
       cache-miss-context:
-        context-id: "CACHE_MISS_CONTEXT"
+        context-id: "performance-test-contexts-configuration"
         context-name: "Cache Miss Test Context"
         context-description: "Context for testing cache miss performance"
         test-data:
@@ -50,7 +50,7 @@ data:
           - "Track compilation overhead"
           
       cache-hit-context:
-        context-id: "CACHE_HIT_CONTEXT"
+        context-id: "performance-test-contexts-configuration"
         context-name: "Cache Hit Test Context"
         context-description: "Context for testing cache hit performance"
         test-data:
@@ -76,7 +76,7 @@ data:
           - "Track optimization gains"
           
       cache-warming-context:
-        context-id: "CACHE_WARMING_CONTEXT"
+        context-id: "performance-test-contexts-configuration"
         context-name: "Cache Warming Test Context"
         context-description: "Context for testing cache warming strategies"
         test-data:
@@ -115,7 +115,7 @@ data:
       execution-pattern: "COMPARATIVE"
     test-contexts:
       simple-expression-context:
-        context-id: "SIMPLE_EXPRESSION_CONTEXT"
+        context-id: "performance-test-contexts-configuration"
         context-name: "Simple Expression Test Context"
         context-description: "Context for testing simple expression performance"
         test-data:
@@ -141,7 +141,7 @@ data:
           - "Establish baseline metrics"
           
       complex-expression-context:
-        context-id: "COMPLEX_EXPRESSION_CONTEXT"
+        context-id: "performance-test-contexts-configuration"
         context-name: "Complex Expression Test Context"
         context-description: "Context for testing complex expression performance"
         test-data:
@@ -167,7 +167,7 @@ data:
           - "Compare against baseline"
           
       very-complex-expression-context:
-        context-id: "VERY_COMPLEX_EXPRESSION_CONTEXT"
+        context-id: "performance-test-contexts-configuration"
         context-name: "Very Complex Expression Test Context"
         context-description: "Context for testing very complex expression performance"
         test-data:
@@ -206,7 +206,7 @@ data:
       execution-pattern: "ERROR_PRONE"
     test-contexts:
       invalid-expression-context:
-        context-id: "INVALID_EXPRESSION_CONTEXT"
+        context-id: "performance-test-contexts-configuration"
         context-name: "Invalid Expression Test Context"
         context-description: "Context for testing invalid expression handling"
         test-data:
@@ -233,7 +233,7 @@ data:
           - "Track error recovery patterns"
           
       null-pointer-context:
-        context-id: "NULL_POINTER_CONTEXT"
+        context-id: "performance-test-contexts-configuration"
         context-name: "Null Pointer Test Context"
         context-description: "Context for testing null pointer exception handling"
         test-data:
@@ -273,7 +273,7 @@ data:
       execution-pattern: "PARALLEL"
     test-contexts:
       single-thread-baseline-context:
-        context-id: "SINGLE_THREAD_BASELINE_CONTEXT"
+        context-id: "performance-test-contexts-configuration"
         context-name: "Single Thread Baseline Context"
         context-description: "Baseline context for single-threaded execution"
         test-data:
@@ -299,7 +299,7 @@ data:
           - "Establish throughput baseline"
           
       multi-thread-context:
-        context-id: "MULTI_THREAD_CONTEXT"
+        context-id: "performance-test-contexts-configuration"
         context-name: "Multi-Thread Test Context"
         context-description: "Context for multi-threaded execution testing"
         test-data:
@@ -325,7 +325,7 @@ data:
           - "Compare against baseline"
           
       high-concurrency-context:
-        context-id: "HIGH_CONCURRENCY_CONTEXT"
+        context-id: "performance-test-contexts-configuration"
         context-name: "High Concurrency Test Context"
         context-description: "Context for high concurrency stress testing"
         test-data:
@@ -360,7 +360,7 @@ data:
     description: "Default performance test context processing"
     test-contexts:
       default-context:
-        context-id: "DEFAULT_CONTEXT"
+        context-id: "performance-test-contexts-configuration"
         context-name: "Default Context"
         test-data:
           amount: 1000000.0

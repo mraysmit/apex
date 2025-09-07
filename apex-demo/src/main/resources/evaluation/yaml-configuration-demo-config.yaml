@@ -3,7 +3,7 @@
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
 metadata:
-  id: "YAML Configuration Demo Configuration"
+  id: "yaml-configuration-demo-configuration"
   name: "YAML Configuration Demo Configuration"
   version: "2.0.0"
   description: "Real APEX YAML configuration demonstration with external configuration, business user-editable rules, and dynamic configuration loading"
@@ -14,7 +14,7 @@ metadata:
 
 # External YAML Configuration Enrichments
 enrichments:
-  - id: "external-yaml-configuration-processing"
+  - id: "yaml-configuration-demo-configuration"
     name: "external-yaml-configuration-processing"
     type: "yaml-config-enrichment"
     description: "External YAML configuration processing using real APEX services"
@@ -56,7 +56,7 @@ enrichments:
               editable-by: "TECHNICAL_USERS"
               reload-required: false
 
-  - id: "business-user-editable-rules"
+  - id: "yaml-configuration-demo-configuration"
     name: "business-user-editable-rules"
     type: "business-rule-enrichment"
     description: "Business user-editable rules without code changes"
@@ -102,7 +102,7 @@ enrichments:
               editable-by: "BUSINESS_USERS"
               hot-reload: true
 
-  - id: "dynamic-configuration-loading"
+  - id: "yaml-configuration-demo-configuration"
     name: "dynamic-configuration-loading"
     type: "dynamic-config-enrichment"
     description: "Dynamic configuration loading and hot-reloading"

@@ -3,7 +3,7 @@
 # Replaces hardcoded pricing rule logic from PricingServiceDemo
 
 metadata:
-  id: "Pricing Rule Engines Configuration"
+  id: "pricing-rule-engines-configuration"
   name: "Pricing Rule Engines Configuration"
   version: "1.0.0"
   description: "Data-driven pricing rule engines configuration for pricing service"
@@ -24,7 +24,7 @@ data:
       validation-focus: "INPUT_VALIDATION"
     rule-engines:
       base-price-validation-engine:
-        engine-id: "BASE_PRICE_VALIDATION_ENGINE"
+        engine-id: "pricing-rule-engines-configuration"
         engine-name: "Base Price Validation Engine"
         engine-description: "Engine for validating base price inputs"
         validation-rules:
@@ -60,7 +60,7 @@ data:
           - "Track validation failure patterns"
           
       base-price-normalization-engine:
-        engine-id: "BASE_PRICE_NORMALIZATION_ENGINE"
+        engine-id: "pricing-rule-engines-configuration"
         engine-name: "Base Price Normalization Engine"
         engine-description: "Engine for normalizing base price values"
         normalization-rules:
@@ -103,7 +103,7 @@ data:
       calculation-focus: "DISCOUNT_APPLICATION"
     rule-engines:
       sale-discount-engine:
-        engine-id: "SALE_DISCOUNT_ENGINE"
+        engine-id: "pricing-rule-engines-configuration"
         engine-name: "Sale Discount Engine"
         engine-description: "Engine for calculating sale discounts"
         discount-rules:
@@ -137,7 +137,7 @@ data:
           - "Track minimum price protections"
           
       clearance-discount-engine:
-        engine-id: "CLEARANCE_DISCOUNT_ENGINE"
+        engine-id: "pricing-rule-engines-configuration"
         engine-name: "Clearance Discount Engine"
         engine-description: "Engine for calculating clearance discounts"
         discount-rules:
@@ -172,7 +172,7 @@ data:
           - "Track liquidation pricing decisions"
           
       tiered-discount-engine:
-        engine-id: "TIERED_DISCOUNT_ENGINE"
+        engine-id: "pricing-rule-engines-configuration"
         engine-name: "Tiered Discount Engine"
         engine-description: "Engine for calculating tiered discounts based on price ranges"
         discount-rules:
@@ -220,7 +220,7 @@ data:
       calculation-focus: "PREMIUM_APPLICATION"
     rule-engines:
       premium-markup-engine:
-        engine-id: "PREMIUM_MARKUP_ENGINE"
+        engine-id: "pricing-rule-engines-configuration"
         engine-name: "Premium Markup Engine"
         engine-description: "Engine for calculating premium markups"
         premium-rules:
@@ -255,7 +255,7 @@ data:
           - "Track premium markup applications"
           
       premium-tiered-engine:
-        engine-id: "PREMIUM_TIERED_ENGINE"
+        engine-id: "pricing-rule-engines-configuration"
         engine-name: "Premium Tiered Engine"
         engine-description: "Engine for calculating tiered premium markups"
         premium-rules:
@@ -303,7 +303,7 @@ data:
       calculation-focus: "OPTIMIZATION"
     rule-engines:
       market-based-pricing-engine:
-        engine-id: "MARKET_BASED_PRICING_ENGINE"
+        engine-id: "pricing-rule-engines-configuration"
         engine-name: "Market-Based Pricing Engine"
         engine-description: "Engine for market-based dynamic pricing"
         dynamic-rules:
@@ -339,7 +339,7 @@ data:
           - "Track dynamic pricing adjustments"
           
       time-based-pricing-engine:
-        engine-id: "TIME_BASED_PRICING_ENGINE"
+        engine-id: "pricing-rule-engines-configuration"
         engine-name: "Time-Based Pricing Engine"
         engine-description: "Engine for time-based dynamic pricing"
         dynamic-rules:
@@ -384,7 +384,7 @@ data:
     description: "Default pricing rule engine processing"
     rule-engines:
       default-engine:
-        engine-id: "DEFAULT_ENGINE"
+        engine-id: "pricing-rule-engines-configuration"
         engine-name: "Default Engine"
         validation-rules:
           - rule-name: "default-validation"

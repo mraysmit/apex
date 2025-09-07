@@ -3,7 +3,7 @@
 # Replaces hardcoded customer segmentation from CustomerTransformerDemo
 
 metadata:
-  id: "Customer Segments Configuration"
+  id: "customer-segments-configuration"
   name: "Customer Segments Configuration"
   version: "1.0.0"
   description: "Data-driven customer segments configuration for customer transformation processing"
@@ -24,7 +24,7 @@ data:
       dynamic-updates: true
     customer-segments:
       gold-tier-segment:
-        segment-id: "GOLD_TIER"
+        segment-id: "customer-segments-configuration"
         segment-name: "Gold Tier Customers"
         segment-description: "Premium customers with Gold membership level"
         segment-criteria:
@@ -51,7 +51,7 @@ data:
           - "Complimentary portfolio reviews"
         
       silver-tier-segment:
-        segment-id: "SILVER_TIER"
+        segment-id: "customer-segments-configuration"
         segment-name: "Silver Tier Customers"
         segment-description: "Standard premium customers with Silver membership level"
         segment-criteria:
@@ -75,7 +75,7 @@ data:
           - "Access to research reports"
         
       bronze-tier-segment:
-        segment-id: "BRONZE_TIER"
+        segment-id: "customer-segments-configuration"
         segment-name: "Bronze Tier Customers"
         segment-description: "Entry-level premium customers with Bronze membership level"
         segment-criteria:
@@ -97,7 +97,7 @@ data:
           - "Annual portfolio reviews"
         
       basic-tier-segment:
-        segment-id: "BASIC_TIER"
+        segment-id: "customer-segments-configuration"
         segment-name: "Basic Tier Customers"
         segment-description: "Standard customers with Basic membership level"
         segment-criteria:
@@ -131,7 +131,7 @@ data:
       dynamic-updates: true
     customer-segments:
       young-professionals-segment:
-        segment-id: "YOUNG_PROFESSIONALS"
+        segment-id: "customer-segments-configuration"
         segment-name: "Young Professionals"
         segment-description: "Young customers focused on wealth building"
         segment-criteria:
@@ -155,7 +155,7 @@ data:
           - "Educational resources for wealth building"
         
       middle-aged-accumulators-segment:
-        segment-id: "MIDDLE_AGED_ACCUMULATORS"
+        segment-id: "customer-segments-configuration"
         segment-name: "Middle-Aged Accumulators"
         segment-description: "Middle-aged customers in peak earning years"
         segment-criteria:
@@ -180,7 +180,7 @@ data:
           - "Tax-efficient investment strategies"
         
       pre-retirees-segment:
-        segment-id: "PRE_RETIREES"
+        segment-id: "customer-segments-configuration"
         segment-name: "Pre-Retirees"
         segment-description: "Customers approaching retirement age"
         segment-criteria:
@@ -204,7 +204,7 @@ data:
           - "Risk management strategies"
         
       retirees-segment:
-        segment-id: "RETIREES"
+        segment-id: "customer-segments-configuration"
         segment-name: "Retirees"
         segment-description: "Retired customers focused on income and preservation"
         segment-criteria:
@@ -241,7 +241,7 @@ data:
       dynamic-updates: true
     customer-segments:
       active-traders-segment:
-        segment-id: "ACTIVE_TRADERS"
+        segment-id: "customer-segments-configuration"
         segment-name: "Active Traders"
         segment-description: "Customers with high trading frequency and activity"
         segment-criteria:
@@ -267,7 +267,7 @@ data:
           - "Reduced trading fees for volume"
         
       passive-investors-segment:
-        segment-id: "PASSIVE_INVESTORS"
+        segment-id: "customer-segments-configuration"
         segment-name: "Passive Investors"
         segment-description: "Customers with buy-and-hold investment approach"
         segment-criteria:
@@ -291,7 +291,7 @@ data:
           - "Long-term planning tools"
         
       conservative-investors-segment:
-        segment-id: "CONSERVATIVE_INVESTORS"
+        segment-id: "customer-segments-configuration"
         segment-name: "Conservative Investors"
         segment-description: "Risk-averse customers focused on capital preservation"
         segment-criteria:
@@ -324,7 +324,7 @@ data:
     description: "Default customer segmentation"
     customer-segments:
       default-segment:
-        segment-id: "DEFAULT"
+        segment-id: "customer-segments-configuration"
         segment-name: "Default Segment"
         product-recommendations:
           - "ETF"

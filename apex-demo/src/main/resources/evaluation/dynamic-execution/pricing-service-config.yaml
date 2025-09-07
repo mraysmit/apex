@@ -3,7 +3,7 @@
 # Replaces hardcoded pricing logic from DynamicMethodExecutionDemo
 
 metadata:
-  id: "Pricing Service Configuration"
+  id: "pricing-service-configuration"
   name: "Pricing Service Configuration"
   version: "1.0.0"
   description: "Data-driven pricing service configuration for dynamic method execution"

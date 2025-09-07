@@ -3,7 +3,7 @@
 # Replaces hardcoded lookup logic from ApexAdvancedFeaturesDemo
 
 metadata:
-  id: "Dynamic Lookup Configuration"
+  id: "dynamic-lookup-configuration"
   name: "Dynamic Lookup Configuration"
   version: "1.0.0"
   description: "Data-driven dynamic lookup configuration for advanced features"

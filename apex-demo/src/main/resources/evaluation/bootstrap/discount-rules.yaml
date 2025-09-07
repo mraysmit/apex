@@ -3,7 +3,7 @@
 # Replaces hardcoded discount logic from RuleConfigurationHardcodedBootstrap
 
 metadata:
-  id: "Discount Rules"
+  id: "discount-rules"
   name: "Discount Rules"
   version: "1.0.0"
   description: "Data-driven discount rules for bootstrap demonstration"

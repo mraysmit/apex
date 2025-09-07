@@ -3,7 +3,7 @@
 # Replaces hardcoded risk calculation logic from RiskManagementService
 
 metadata:
-  id: "Risk Calculation Engines Configuration"
+  id: "risk-calculation-engines-configuration"
   name: "Risk Calculation Engines Configuration"
   version: "1.0.0"
   description: "Data-driven risk calculation engines configuration for risk management service"
@@ -24,7 +24,7 @@ data:
       real-time-capability: true
     calculation-engines:
       equity-market-risk-engine:
-        engine-id: "EQUITY_MARKET_RISK_ENGINE"
+        engine-id: "risk-calculation-engines-configuration"
         engine-name: "Equity Market Risk Calculation Engine"
         engine-description: "Engine for calculating equity market risk"
         calculation-parameters:
@@ -65,7 +65,7 @@ data:
           - "Track volatility and beta impacts"
           
       fixed-income-market-risk-engine:
-        engine-id: "FIXED_INCOME_MARKET_RISK_ENGINE"
+        engine-id: "risk-calculation-engines-configuration"
         engine-name: "Fixed Income Market Risk Calculation Engine"
         engine-description: "Engine for calculating fixed income market risk"
         calculation-parameters:
@@ -100,7 +100,7 @@ data:
           - "Track duration and spread impacts"
           
       derivative-market-risk-engine:
-        engine-id: "DERIVATIVE_MARKET_RISK_ENGINE"
+        engine-id: "risk-calculation-engines-configuration"
         engine-name: "Derivative Market Risk Calculation Engine"
         engine-description: "Engine for calculating derivative market risk"
         calculation-parameters:
@@ -154,7 +154,7 @@ data:
       default-modeling: true
     calculation-engines:
       counterparty-credit-risk-engine:
-        engine-id: "COUNTERPARTY_CREDIT_RISK_ENGINE"
+        engine-id: "risk-calculation-engines-configuration"
         engine-name: "Counterparty Credit Risk Calculation Engine"
         engine-description: "Engine for calculating counterparty credit risk"
         calculation-parameters:
@@ -207,7 +207,7 @@ data:
           - "Track rating and maturity impacts"
           
       collateral-adjusted-credit-risk-engine:
-        engine-id: "COLLATERAL_ADJUSTED_CREDIT_RISK_ENGINE"
+        engine-id: "risk-calculation-engines-configuration"
         engine-name: "Collateral Adjusted Credit Risk Calculation Engine"
         engine-description: "Engine for calculating credit risk adjusted for collateral"
         calculation-parameters:
@@ -260,7 +260,7 @@ data:
       time-sensitivity: true
     calculation-engines:
       market-liquidity-risk-engine:
-        engine-id: "MARKET_LIQUIDITY_RISK_ENGINE"
+        engine-id: "risk-calculation-engines-configuration"
         engine-name: "Market Liquidity Risk Calculation Engine"
         engine-description: "Engine for calculating market liquidity risk"
         calculation-parameters:
@@ -320,7 +320,7 @@ data:
       counterparty-dependency: true
     calculation-engines:
       settlement-method-risk-engine:
-        engine-id: "SETTLEMENT_METHOD_RISK_ENGINE"
+        engine-id: "risk-calculation-engines-configuration"
         engine-name: "Settlement Method Risk Calculation Engine"
         engine-description: "Engine for calculating settlement risk based on method"
         calculation-parameters:
@@ -382,7 +382,7 @@ data:
     description: "Default risk calculation engine processing"
     calculation-engines:
       default-engine:
-        engine-id: "DEFAULT_ENGINE"
+        engine-id: "risk-calculation-engines-configuration"
         engine-name: "Default Engine"
         calculation-rules:
           - rule-name: "default-calculation"

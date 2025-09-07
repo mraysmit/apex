@@ -3,7 +3,7 @@
 # Replaces hardcoded auto-repair rules from CustodyAutoRepairBootstrap
 
 metadata:
-  id: "Auto-Repair Rules Configuration"
+  id: "auto-repair-rules-configuration"
   name: "Auto-Repair Rules Configuration"
   version: "2.0.0"
   description: "Data-driven auto-repair rules configuration for custody settlement processing"

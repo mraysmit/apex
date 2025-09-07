@@ -1,7 +1,9 @@
 metadata:
+  id: "test-config-with-property-resolution"
   name: "Test Configuration with Property Resolution"
   version: "1.0.0"
   description: "Demonstrates property resolution in APEX YAML configurations"
+  type: "rule-config"
   author: "test@example.com"
   created: "2025-09-05"
   tags: ["test", "property-resolution", "database"]

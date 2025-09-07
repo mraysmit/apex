@@ -3,7 +3,7 @@
 # Replaces all hardcoded rule bootstrap logic from RuleConfigurationHardcodedBootstrap (@version 1.0)
 
 metadata:
-  id: "Rule Configuration Bootstrap Demo"
+  id: "rule-configuration-bootstrap-demo"
   name: "Rule Configuration Bootstrap Demo"
   version: "1.0.0"
   description: "APEX-compliant rule configuration bootstrap with real enrichment services"
@@ -30,7 +30,7 @@ external-data-sources:
 
 # APEX enrichment processing for rule bootstrap
 enrichments:
-  - id: "loan-approval-processing"
+  - id: "rule-configuration-bootstrap-demo"
     name: "loan-approval-processing"
     type: "lookup-enrichment"
     description: "Process loan applications using data-driven rules"
@@ -39,7 +39,7 @@ enrichments:
     lookup-key: "#data.creditScore >= 750 ? 'excellent-credit' : (#data.creditScore >= 700 && #data.debtToIncomeRatio <= 0.36 ? 'good-credit-low-dti' : (#data.creditScore < 620 ? 'poor-credit' : 'moderate-credit'))"
     target-field: "loanDecision"
 
-  - id: "discount-processing"
+  - id: "rule-configuration-bootstrap-demo"
     name: "discount-processing"
     type: "lookup-enrichment"
     description: "Process order discounts using data-driven rules"
@@ -48,7 +48,7 @@ enrichments:
     lookup-key: "#data.orderTotal > 1000 ? 'large-order' : (#data.customerYears > 5 ? 'loyalty-customer' : (#data.customerYears == 0 ? 'new-customer' : 'standard-customer'))"
     target-field: "discountDecision"
 
-  - id: "bootstrap-comparison"
+  - id: "rule-configuration-bootstrap-demo"
     name: "bootstrap-comparison"
     type: "expression-enrichment"
     description: "Compare hardcoded vs data-driven approaches"
@@ -56,7 +56,7 @@ enrichments:
     expression: "'Bootstrap transformation: ' + (#data.approach != null ? #data.approach : 'unknown') + ' approach processed'"
     target-field: "bootstrapSummary"
 
-  - id: "infrastructure-setup"
+  - id: "rule-configuration-bootstrap-demo"
     name: "infrastructure-setup"
     type: "expression-enrichment"
     description: "Simulate infrastructure setup with real APEX processing"
@@ -64,7 +64,7 @@ enrichments:
     expression: "'Infrastructure setup completed: ' + #data.setupType + ' - using real APEX services'"
     target-field: "infrastructureStatus"
 
-  - id: "yaml-configuration-loading"
+  - id: "rule-configuration-bootstrap-demo"
     name: "yaml-configuration-loading"
     type: "expression-enrichment"
     description: "Load YAML configurations using real APEX services"

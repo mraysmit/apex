@@ -3,7 +3,7 @@
 # Replaces hardcoded compliance logic from DynamicMethodExecutionDemo
 
 metadata:
-  id: "Compliance Service Configuration"
+  id: "compliance-service-configuration"
   name: "Compliance Service Configuration"
   version: "1.0.0"
   description: "Data-driven compliance service configuration for dynamic method execution"

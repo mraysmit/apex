@@ -3,7 +3,7 @@
 # Replaces hardcoded test data from RuleConfigurationBootstrap
 
 metadata:
-  id: "Comprehensive Test Data"
+  id: "comprehensive-test-data"
   name: "Comprehensive Test Data"
   version: "1.0.0"
   description: "Comprehensive test data scenarios for bootstrap demonstration"
@@ -14,11 +14,11 @@ metadata:
 
 # Comprehensive loan application test scenarios
 loan-applications:
-  - application-id: "LA_COMP_001"
+  - application-id: "comprehensive-test-data"
     description: "Excellent credit score with low DTI"
     data:
-      applicationId: "LA_COMP_001"
-      customerId: "CUST_001"
+      applicationid: "comprehensive-test-data"
+      customerid: "comprehensive-test-data"
       creditScore: 780
       debtToIncomeRatio: 0.25
       loanAmount: 350000
@@ -30,11 +30,11 @@ loan-applications:
     expected-rule: "LA001"
     expected-processing-time: "< 1 second"
     
-  - application-id: "LA_COMP_002"
+  - application-id: "comprehensive-test-data"
     description: "Good credit with acceptable DTI"
     data:
-      applicationId: "LA_COMP_002"
-      customerId: "CUST_002"
+      applicationid: "comprehensive-test-data"
+      customerid: "comprehensive-test-data"
       creditScore: 720
       debtToIncomeRatio: 0.32
       loanAmount: 275000
@@ -46,11 +46,11 @@ loan-applications:
     expected-rule: "LA002"
     expected-processing-time: "< 1 second"
     
-  - application-id: "LA_COMP_003"
+  - application-id: "comprehensive-test-data"
     description: "Poor credit score application"
     data:
-      applicationId: "LA_COMP_003"
-      customerId: "CUST_003"
+      applicationid: "comprehensive-test-data"
+      customerid: "comprehensive-test-data"
       creditScore: 580
       debtToIncomeRatio: 0.45
       loanAmount: 180000
@@ -62,11 +62,11 @@ loan-applications:
     expected-rule: "LA003"
     expected-processing-time: "< 1 second"
     
-  - application-id: "LA_COMP_004"
+  - application-id: "comprehensive-test-data"
     description: "High DTI ratio application"
     data:
-      applicationId: "LA_COMP_004"
-      customerId: "CUST_004"
+      applicationid: "comprehensive-test-data"
+      customerid: "comprehensive-test-data"
       creditScore: 680
       debtToIncomeRatio: 0.48
       loanAmount: 220000
@@ -78,11 +78,11 @@ loan-applications:
     expected-rule: "LA004"
     expected-processing-time: "< 1 second"
     
-  - application-id: "LA_COMP_005"
+  - application-id: "comprehensive-test-data"
     description: "Moderate credit requiring manual review"
     data:
-      applicationId: "LA_COMP_005"
-      customerId: "CUST_005"
+      applicationid: "comprehensive-test-data"
+      customerid: "comprehensive-test-data"
       creditScore: 650
       debtToIncomeRatio: 0.38
       loanAmount: 200000
@@ -96,11 +96,11 @@ loan-applications:
 
 # Comprehensive order processing test scenarios
 order-processing:
-  - order-id: "OP_COMP_001"
+  - order-id: "comprehensive-test-data"
     description: "Premium large order qualifying for maximum discount"
     data:
-      orderId: "OP_COMP_001"
-      customerId: "CUST_001"
+      orderid: "comprehensive-test-data"
+      customerid: "comprehensive-test-data"
       orderTotal: 12500.00
       quantity: 50
       customerYears: 8
@@ -110,11 +110,11 @@ order-processing:
     expected-rule: "OD007"
     expected-processing-time: "< 50ms"
     
-  - order-id: "OP_COMP_002"
+  - order-id: "comprehensive-test-data"
     description: "Large order with volume discount"
     data:
-      orderId: "OP_COMP_002"
-      customerId: "CUST_002"
+      orderid: "comprehensive-test-data"
+      customerid: "comprehensive-test-data"
       orderTotal: 6750.00
       quantity: 25
       customerYears: 4
@@ -124,11 +124,11 @@ order-processing:
     expected-rule: "OD005"
     expected-processing-time: "< 50ms"
     
-  - order-id: "OP_COMP_003"
+  - order-id: "comprehensive-test-data"
     description: "Platinum loyalty customer"
     data:
-      orderId: "OP_COMP_003"
-      customerId: "CUST_003"
+      orderid: "comprehensive-test-data"
+      customerid: "comprehensive-test-data"
       orderTotal: 850.00
       quantity: 8
       customerYears: 12
@@ -138,11 +138,11 @@ order-processing:
     expected-rule: "OD006"
     expected-processing-time: "< 50ms"
     
-  - order-id: "OP_COMP_004"
+  - order-id: "comprehensive-test-data"
     description: "Standard large order"
     data:
-      orderId: "OP_COMP_004"
-      customerId: "CUST_004"
+      orderid: "comprehensive-test-data"
+      customerid: "comprehensive-test-data"
       orderTotal: 1450.00
       quantity: 12
       customerYears: 3
@@ -152,11 +152,11 @@ order-processing:
     expected-rule: "OD001"
     expected-processing-time: "< 50ms"
     
-  - order-id: "OP_COMP_005"
+  - order-id: "comprehensive-test-data"
     description: "New customer welcome offer"
     data:
-      orderId: "OP_COMP_005"
-      customerId: "CUST_005"
+      orderid: "comprehensive-test-data"
+      customerid: "comprehensive-test-data"
       orderTotal: 450.00
       quantity: 5
       customerYears: 0
@@ -168,33 +168,33 @@ order-processing:
 
 # Combined processing test scenarios
 combined-processing:
-  - scenario-id: "COMB_001"
+  - scenario-id: "comprehensive-test-data"
     description: "Premium customer with loan and large order"
     data:
       entityType: "combined-analysis"
-      customerId: "CUST_001"
+      customerid: "comprehensive-test-data"
       customerType: "premium"
       loanApplication:
-        applicationId: "LA_COMP_001"
+        applicationid: "comprehensive-test-data"
         creditScore: 780
         debtToIncomeRatio: 0.25
         loanAmount: 350000
       orderProcessing:
-        orderId: "OP_COMP_001"
+        orderid: "comprehensive-test-data"
         orderTotal: 12500.00
         customerYears: 8
     expected-processing-type: "holistic-assessment"
     expected-rule: "CB004"
     expected-enhancements: ["expedited-processing", "preferential-rates"]
     
-  - scenario-id: "COMB_002"
+  - scenario-id: "comprehensive-test-data"
     description: "Enterprise customer bulk processing"
     data:
       entityType: "combined-analysis"
-      customerId: "CUST_002"
+      customerid: "comprehensive-test-data"
       customerType: "enterprise"
       orderProcessing:
-        orderId: "OP_COMP_002"
+        orderid: "comprehensive-test-data"
         orderTotal: 15000.00
         customerYears: 5
     expected-processing-type: "holistic-assessment"
@@ -203,7 +203,7 @@ combined-processing:
 
 # Performance test scenarios
 performance-scenarios:
-  - scenario-id: "PERF_001"
+  - scenario-id: "comprehensive-test-data"
     description: "High-volume loan processing"
     data:
       scenario-type: "load-testing"
@@ -213,7 +213,7 @@ performance-scenarios:
     expected-throughput: "1000 applications/second"
     expected-response-time: "< 5 seconds total"
     
-  - scenario-id: "PERF_002"
+  - scenario-id: "comprehensive-test-data"
     description: "High-volume order processing"
     data:
       scenario-type: "load-testing"
@@ -223,7 +223,7 @@ performance-scenarios:
     expected-throughput: "2000 orders/second"
     expected-response-time: "< 50ms per order"
     
-  - scenario-id: "PERF_003"
+  - scenario-id: "comprehensive-test-data"
     description: "Combined rules stress testing"
     data:
       scenario-type: "stress-testing"
@@ -235,7 +235,7 @@ performance-scenarios:
 
 # Infrastructure test scenarios
 infrastructure-scenarios:
-  - scenario-id: "INFRA_001"
+  - scenario-id: "comprehensive-test-data"
     description: "Complete infrastructure setup"
     data:
       setup-type: "comprehensive"
@@ -243,7 +243,7 @@ infrastructure-scenarios:
     expected-setup-time: "10-15 seconds"
     expected-status: "all-components-ready"
     
-  - scenario-id: "INFRA_002"
+  - scenario-id: "comprehensive-test-data"
     description: "Data source verification"
     data:
       verification-type: "comprehensive"
@@ -253,16 +253,16 @@ infrastructure-scenarios:
 
 # Error handling test scenarios
 error-scenarios:
-  - scenario-id: "ERROR_001"
+  - scenario-id: "comprehensive-test-data"
     description: "Missing required data fields"
     data:
-      applicationId: "LA_ERROR_001"
+      applicationid: "comprehensive-test-data"
       creditScore: null
       debtToIncomeRatio: 0.35
     expected-error: "missing-required-fields"
     expected-handling: "fail-fast-with-clear-message"
     
-  - scenario-id: "ERROR_002"
+  - scenario-id: "comprehensive-test-data"
     description: "Invalid YAML configuration"
     data:
       config-file: "invalid-syntax.yaml"

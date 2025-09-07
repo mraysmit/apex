@@ -3,7 +3,7 @@
 # Replaces all hardcoded scenario processing logic from ScenarioBasedProcessingDemo (@since 1.0.0)
 
 metadata:
-  id: "Scenario-Based Processing Demo"
+  id: "scenario-based-processing-demo"
   name: "Scenario-Based Processing Demo"
   version: "1.0.0"
   description: "APEX-compliant scenario-based processing with real enrichment services"
@@ -46,7 +46,7 @@ external-data-sources:
 
 # APEX enrichment processing for scenario-based processing
 enrichments:
-  - id: "sample-data-creation"
+  - id: "scenario-based-processing-demo"
     name: "sample-data-creation"
     type: "lookup-enrichment"
     description: "Create sample data records using data-driven configuration"
@@ -55,7 +55,7 @@ enrichments:
     lookup-key: "#data.dataType != null ? #data.dataType : 'default'"
     target-field: "sampleDataCreationResult"
 
-  - id: "scenario-routing"
+  - id: "scenario-based-processing-demo"
     name: "scenario-routing"
     type: "lookup-enrichment"
     description: "Route data to appropriate scenarios using data-driven configuration"
@@ -64,7 +64,7 @@ enrichments:
     lookup-key: "#data.routingType != null ? #data.routingType : 'default'"
     target-field: "scenarioRoutingResult"
 
-  - id: "processing-execution"
+  - id: "scenario-based-processing-demo"
     name: "processing-execution"
     type: "lookup-enrichment"
     description: "Execute scenario processing using data-driven configuration"
@@ -73,7 +73,7 @@ enrichments:
     lookup-key: "#data.executionType != null ? #data.executionType : 'default'"
     target-field: "processingExecutionResult"
 
-  - id: "scenario-based-processing-summary"
+  - id: "scenario-based-processing-demo"
     name: "scenario-processing-summary"
     type: "expression-enrichment"
     description: "Generate scenario processing summary"

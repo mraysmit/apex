@@ -3,7 +3,7 @@
 # Replaces hardcoded rule chain building logic from FluentRuleBuilderExample
 
 metadata:
-  id: "Rule Chain Definitions Configuration"
+  id: "rule-chain-definitions-configuration"
   name: "Rule Chain Definitions Configuration"
   version: "1.0.0"
   description: "Data-driven rule chain definitions configuration for fluent rule builder processing"

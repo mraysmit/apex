@@ -3,7 +3,7 @@
 # Pure YAML-driven configuration replacing redundant individual validators
 
 metadata:
-  id: "Integrated Validator Demo"
+  id: "integrated-validator-demo"
   name: "Integrated Validator Demo"
   version: "1.0.0"
   description: "APEX consolidated validator for Customer, Product, and Trade entities using pure YAML-driven configuration"
@@ -14,7 +14,7 @@ metadata:
 
 # APEX enrichment processing for consolidated validation
 enrichments:
-  - id: "validation-rules-processing"
+  - id: "integrated-validator-demo"
     name: "validation-rules-processing"
     type: "lookup-enrichment"
     description: "Process validation rules for any entity type using data-driven configuration"
@@ -50,7 +50,7 @@ enrichments:
       - source-field: "result"
         target-field: "validationRulesResult"
 
-  - id: "entity-samples-processing"
+  - id: "integrated-validator-demo"
     name: "entity-samples-processing"
     type: "lookup-enrichment"
     description: "Process entity samples for any entity type using data-driven configuration"
@@ -86,7 +86,7 @@ enrichments:
       - source-field: "result"
         target-field: "entitySamplesResult"
 
-  - id: "validation-parameters-processing"
+  - id: "integrated-validator-demo"
     name: "validation-parameters-processing"
     type: "lookup-enrichment"
     description: "Process validation parameters for any entity type using data-driven configuration"
@@ -122,7 +122,7 @@ enrichments:
       - source-field: "result"
         target-field: "validationParametersResult"
 
-  - id: "validation-summary"
+  - id: "integrated-validator-demo"
     name: "validation-summary"
     type: "calculation-enrichment"
     description: "Generate comprehensive validation summary for any entity type"

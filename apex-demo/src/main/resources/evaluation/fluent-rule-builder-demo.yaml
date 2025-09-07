@@ -3,7 +3,7 @@
 # Replaces all hardcoded fluent rule builder logic from FluentRuleBuilderExample (@version 1.0)
 
 metadata:
-  id: "Fluent Rule Builder Demo"
+  id: "fluent-rule-builder-demo"
   name: "Fluent Rule Builder Demo"
   version: "1.0.0"
   description: "APEX-compliant fluent rule builder with real enrichment services"

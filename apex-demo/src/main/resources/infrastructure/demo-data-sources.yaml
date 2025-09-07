@@ -1,5 +1,5 @@
 metadata:
-  id: "Demo Data Sources Configuration"
+  id: "demo-data-sources-configuration"
   name: "Demo Data Sources Configuration"
   version: "1.0.0"
   description: "Production data sources for APEX demo scenarios with proper ExternalDataSource implementations"

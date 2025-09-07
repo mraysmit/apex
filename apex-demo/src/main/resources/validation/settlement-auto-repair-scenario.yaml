@@ -1,5 +1,5 @@
 metadata:
-  id: "Settlement Auto-Repair Processing Scenario"
+  id: "settlement-auto-repair-processing-scenario"
   name: "Settlement Auto-Repair Processing Scenario"
   version: "1.0.0"
   description: "Scenario configuration that associates Settlement Instruction data types with existing rule configuration files for processing"
@@ -29,7 +29,7 @@ metadata:
 # ============================================================================
 
 scenario:
-  scenario-id: "settlement-auto-repair"
+  scenario-id: "settlement-auto-repair-processing-scenario"
   name: "Settlement Instructions Auto-Repair"
   description: "Associates settlement instructions with existing rule configurations"
 

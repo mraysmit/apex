@@ -12,7 +12,7 @@
 # ============================================================================
 
 metadata:
-  id: "Market Data Reference Dataset"
+  id: "market-data-reference-dataset"
   name: "Market Data Reference Dataset"
   version: "1.0.0"
   description: "External YAML dataset containing currency and market reference data for OTC Options Bootstrap Demo enrichment processing"

@@ -3,7 +3,7 @@
 # Replaces all hardcoded rule bootstrap logic from RuleConfigurationBootstrap (@version 1.0)
 
 metadata:
-  id: "Rule Configuration Bootstrap"
+  id: "rule-configuration-bootstrap"
   name: "Rule Configuration Bootstrap"
   version: "1.0.0"
   description: "APEX-compliant comprehensive rule configuration bootstrap with real enrichment services"
@@ -38,7 +38,7 @@ external-data-sources:
 
 # APEX enrichment processing for comprehensive rule bootstrap
 enrichments:
-  - id: "infrastructure-setup"
+  - id: "rule-configuration-bootstrap"
     name: "infrastructure-setup"
     type: "expression-enrichment"
     description: "Setup infrastructure using real APEX services"
@@ -46,7 +46,7 @@ enrichments:
     expression: "'Infrastructure setup completed with real APEX services: ' + (#data.setupType != null ? #data.setupType : 'comprehensive')"
     target-field: "infrastructureStatus"
 
-  - id: "data-source-verification"
+  - id: "rule-configuration-bootstrap"
     name: "data-source-verification"
     type: "expression-enrichment"
     description: "Verify data sources using real APEX services"
@@ -54,7 +54,7 @@ enrichments:
     expression: "'Data sources verified using real APEX services: ' + (#data.sourceCount != null ? #data.sourceCount : '0') + ' sources'"
     target-field: "dataSourceStatus"
 
-  - id: "rule-engine-initialization"
+  - id: "rule-configuration-bootstrap"
     name: "rule-engine-initialization"
     type: "expression-enrichment"
     description: "Initialize rule engine using real APEX services"
@@ -62,7 +62,7 @@ enrichments:
     expression: "'Rule engine initialized with real APEX services: ' + (#data.engineType != null ? #data.engineType : 'comprehensive')"
     target-field: "ruleEngineStatus"
 
-  - id: "comprehensive-loan-processing"
+  - id: "rule-configuration-bootstrap"
     name: "comprehensive-loan-processing"
     type: "lookup-enrichment"
     description: "Process loan applications using comprehensive data-driven rules"
@@ -71,7 +71,7 @@ enrichments:
     lookup-key: "#data.creditScore >= 750 ? 'excellent-credit' : (#data.creditScore >= 700 && #data.debtToIncomeRatio <= 0.36 ? 'good-credit-low-dti' : (#data.creditScore < 620 ? 'poor-credit' : (#data.debtToIncomeRatio > 0.43 ? 'high-dti' : 'moderate-credit')))"
     target-field: "loanDecision"
 
-  - id: "comprehensive-discount-processing"
+  - id: "rule-configuration-bootstrap"
     name: "comprehensive-discount-processing"
     type: "lookup-enrichment"
     description: "Process order discounts using comprehensive data-driven rules"
@@ -80,7 +80,7 @@ enrichments:
     lookup-key: "#data.orderTotal > 1000 ? 'large-order' : (#data.customerYears > 5 ? 'loyalty-customer' : (#data.customerYears == 0 ? 'new-customer' : 'standard-customer'))"
     target-field: "discountDecision"
 
-  - id: "combined-rules-processing"
+  - id: "rule-configuration-bootstrap"
     name: "combined-rules-processing"
     type: "lookup-enrichment"
     description: "Process combined business rules using comprehensive data-driven approach"
@@ -89,7 +89,7 @@ enrichments:
     lookup-key: "#data.entityType != null ? #data.entityType : 'default'"
     target-field: "combinedDecision"
 
-  - id: "performance-metrics"
+  - id: "rule-configuration-bootstrap"
     name: "performance-metrics"
     type: "expression-enrichment"
     description: "Calculate performance metrics using real APEX processing"
@@ -97,7 +97,7 @@ enrichments:
     expression: "'Performance metrics calculated: ' + (#data.entitiesProcessed != null ? #data.entitiesProcessed : '0') + ' entities processed'"
     target-field: "performanceMetrics"
 
-  - id: "bootstrap-summary"
+  - id: "rule-configuration-bootstrap"
     name: "bootstrap-summary"
     type: "expression-enrichment"
     description: "Generate comprehensive bootstrap processing summary"

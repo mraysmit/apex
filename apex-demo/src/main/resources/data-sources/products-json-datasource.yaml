@@ -2,11 +2,11 @@
 # Defines connection to JSON files in demo-data/json directory
 
 metadata:
-  id: "Products JSON Data Source"
+  id: "products-json-data-source"
   name: "Products JSON Data Source"
   version: "1.0.0"
   description: "File system data source for products JSON files"
-  type: "data-source"
+  type: "external-data-config"
   author: "apex.demo.team@company.com"
   created-date: "2025-09-05"
   tags: ["apex-demo", "data-source", "json", "products"]

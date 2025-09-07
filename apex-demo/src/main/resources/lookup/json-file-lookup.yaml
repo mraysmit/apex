@@ -3,7 +3,7 @@
 # Use Case: Enrich product data using JSON file lookup
 
 metadata:
-  id: "JSON File Lookup Demo"
+  id: "json-file-lookup-demo"
   name: "JSON File Lookup Demo"
   version: "1.0.0"
   description: "Demonstrates file-system lookup using JSON files from demo-data/json"
@@ -17,7 +17,7 @@ metadata:
 
 # Define the enrichment rules
 enrichments:
-  - id: "product-details-enrichment"
+  - id: "json-file-lookup-demo"
     name: "Product Details Lookup"
     description: "Enrich transactions with product details using JSON file lookup"
     type: "lookup-enrichment"
@@ -53,7 +53,7 @@ enrichments:
 
 # Optional validation rules
 validations:
-  - id: "product-id-format"
+  - id: "json-file-lookup-demo"
     name: "Product ID Format Validation"
     description: "Ensure product ID is not empty"
     type: "field-validation"

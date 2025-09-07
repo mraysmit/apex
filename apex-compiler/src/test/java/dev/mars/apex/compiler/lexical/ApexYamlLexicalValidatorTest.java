@@ -195,10 +195,10 @@ class ApexYamlLexicalValidatorTest {
               author: "test@example.com"
             # Missing both 'rules' and 'enrichments' sections
             """;
-        
+
         Path yamlFile = tempDir.resolve("missing-sections.yaml");
         Files.writeString(yamlFile, yamlMissingSections);
-        
+
         ApexYamlLexicalValidator.ValidationResult result = validator.validateFile(yamlFile);
 
         assertThat(result.isValid()).isFalse();
@@ -206,5 +206,197 @@ class ApexYamlLexicalValidatorTest {
             error.contains("Document type 'rule-config' requires at least one of") &&
             error.contains("rules") && error.contains("enrichments"));
         System.out.println("✅ Missing required sections test passed");
+    }
+
+    @Test
+    void shouldValidateValidPipelineConfigDocument(@TempDir Path tempDir) throws Exception {
+        // Create a valid pipeline-config YAML file
+        String validPipelineYaml = """
+            metadata:
+              id: "test-pipeline"
+              name: "Test Pipeline"
+              version: "1.0.0"
+              description: "Test pipeline configuration"
+              type: "pipeline-config"
+              author: "test@example.com"
+
+            pipeline:
+              name: "test-pipeline"
+              steps:
+                - name: "extract-data"
+                  type: "extract"
+                  source: "test-source"
+
+            data-sources:
+              - name: "test-source"
+                type: "file-system"
+
+            data-sinks:
+              - name: "test-sink"
+                type: "database"
+            """;
+
+        Path yamlFile = tempDir.resolve("test-pipeline.yaml");
+        Files.writeString(yamlFile, validPipelineYaml);
+
+        // Validate
+        ApexYamlLexicalValidator.ValidationResult result = validator.validateFile(yamlFile);
+
+        // Verify
+        assertThat(result.isValid()).isTrue();
+        assertThat(result.getErrors()).isEmpty();
+        System.out.println("✅ Valid pipeline-config document test passed");
+    }
+
+    @Test
+    void shouldDetectMissingAuthorForPipelineConfig(@TempDir Path tempDir) throws Exception {
+        String yamlMissingAuthor = """
+            metadata:
+              id: "test-pipeline"
+              name: "Test Pipeline"
+              version: "1.0.0"
+              description: "Test pipeline configuration"
+              type: "pipeline-config"
+              # Missing required 'author' field for pipeline-config type
+
+            pipeline:
+              name: "test-pipeline"
+              steps: []
+            """;
+
+        Path yamlFile = tempDir.resolve("missing-author-pipeline.yaml");
+        Files.writeString(yamlFile, yamlMissingAuthor);
+
+        ApexYamlLexicalValidator.ValidationResult result = validator.validateFile(yamlFile);
+
+        assertThat(result.isValid()).isFalse();
+        assertThat(result.getErrors()).anyMatch(error ->
+            error.contains("Missing required field for type 'pipeline-config': author"));
+        System.out.println("✅ Missing author for pipeline-config test passed");
+    }
+
+    @Test
+    void shouldValidateCompletePipelineConfigDocument(@TempDir Path tempDir) throws Exception {
+        // Test a complete pipeline configuration similar to the orchestration guide examples
+        String completePipelineYaml = """
+            metadata:
+              id: "csv-to-h2-pipeline"
+              name: "CSV to H2 ETL Pipeline Demo"
+              version: "1.0.0"
+              description: "Demonstration of CSV data processing with H2 database output"
+              type: "pipeline-config"
+              author: "APEX Demo Team"
+
+            pipeline:
+              name: "customer-etl-pipeline"
+              description: "Extract customer data from CSV, transform, and load into H2 database"
+              steps:
+                - name: "extract-customers"
+                  type: "extract"
+                  source: "customer-csv-input"
+                  operation: "getAllCustomers"
+
+                - name: "load-to-database"
+                  type: "load"
+                  sink: "customer-h2-database"
+                  operation: "insertCustomer"
+                  depends-on: ["extract-customers"]
+
+            data-sources:
+              - name: "customer-csv-input"
+                type: "file-system"
+                connection:
+                  basePath: "./data"
+                  filePattern: "customers.csv"
+
+            data-sinks:
+              - name: "customer-h2-database"
+                type: "database"
+                sourceType: "h2"
+                connection:
+                  database: "./output/customer_database"
+                  username: "sa"
+                  password: ""
+            """;
+
+        Path yamlFile = tempDir.resolve("complete-pipeline.yaml");
+        Files.writeString(yamlFile, completePipelineYaml);
+
+        // Validate
+        ApexYamlLexicalValidator.ValidationResult result = validator.validateFile(yamlFile);
+
+        // Verify
+        assertThat(result.isValid()).isTrue();
+        assertThat(result.getErrors()).isEmpty();
+        System.out.println("✅ Complete pipeline-config document validation test passed");
+        System.out.println("   Pipeline configuration matches orchestration guide format");
+    }
+
+    @Test
+    void shouldValidateFixedOrchestrationGuideExample(@TempDir Path tempDir) throws Exception {
+        // Test the exact fixed example from the orchestration guide
+        String fixedGuideExample = """
+            metadata:
+              id: "my-first-pipeline"
+              name: "My First Pipeline"
+              version: "1.0.0"
+              description: "Simple CSV to database pipeline"
+              type: "pipeline-config"
+              author: "APEX Demo Team"
+
+            pipeline:
+              name: "csv-to-db-pipeline"
+              description: "Read CSV data and write to database"
+
+              steps:
+                - name: "extract-data"
+                  type: "extract"
+                  source: "csv-input"
+                  operation: "getAllRecords"
+
+                - name: "load-data"
+                  type: "load"
+                  sink: "database-output"
+                  operation: "insertRecord"
+                  depends-on: ["extract-data"]
+
+            data-sources:
+              - name: "csv-input"
+                type: "file-system"
+                connection:
+                  basePath: "./data"
+                  filePattern: "input.csv"
+                fileFormat:
+                  type: "csv"
+                  hasHeaderRow: true
+                queries:
+                  getAllRecords: "SELECT * FROM csv"
+
+            data-sinks:
+              - name: "database-output"
+                type: "database"
+                sourceType: "h2"
+                connection:
+                  database: "./output/data"
+                  username: "sa"
+                  password: ""
+                operations:
+                  insertRecord: |
+                    INSERT INTO records (id, name, value)
+                    VALUES (:id, :name, :value)
+            """;
+
+        Path yamlFile = tempDir.resolve("fixed-guide-example.yaml");
+        Files.writeString(yamlFile, fixedGuideExample);
+
+        // Validate
+        ApexYamlLexicalValidator.ValidationResult result = validator.validateFile(yamlFile);
+
+        // Verify
+        assertThat(result.isValid()).isTrue();
+        assertThat(result.getErrors()).isEmpty();
+        System.out.println("✅ Fixed orchestration guide example validation test passed");
+        System.out.println("   All required metadata fields present and valid");
+        System.out.println("   Document type 'pipeline-config' is now supported");
     }
 }

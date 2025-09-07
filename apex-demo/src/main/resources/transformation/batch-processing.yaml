@@ -3,7 +3,7 @@
 # ============================================================================
 
 metadata:
-  id: "Batch Processing Rules Configuration"
+  id: "batch-processing-rules-configuration"
   name: "Batch Processing Rules Configuration"
   version: "1.0.0"
   description: "High-performance batch processing rules optimized for throughput and scalability"
@@ -106,7 +106,7 @@ metadata:
 #
 rules:
   # Customer validation rule optimized for batch processing
-  - id: "batch-customer-validation"
+  - id: "batch-processing-rules-configuration"
     name: "batch-customer-validation"
     description: "Fast customer validation for batch processing"
     condition: "#data.age >= 18 && #data.email != null && #data.name != null"
@@ -118,7 +118,7 @@ rules:
       batch_friendly: true
 
   # TradeB validation rule for financial batch processing
-  - id: "batch-trade-validation"
+  - id: "batch-processing-rules-configuration"
     name: "batch-trade-validation"
     description: "High-speed trade validation for settlement processing"
     condition: "#data.amount > 0 && #data.currency != null && #data.counterparty != null"
@@ -130,7 +130,7 @@ rules:
       batch_friendly: true
 
   # Risk threshold rule for batch risk calculations
-  - id: "batch-risk-threshold"
+  - id: "batch-processing-rules-configuration"
     name: "batch-risk-threshold"
     description: "Risk threshold check for batch risk calculations"
     condition: "#data.amount <= 1000000"
@@ -142,7 +142,7 @@ rules:
       batch_friendly: true
 
   # Data quality rule for batch data processing
-  - id: "batch-data-quality"
+  - id: "batch-processing-rules-configuration"
     name: "batch-data-quality"
     description: "Data quality validation for batch processing"
     condition: "#data.id != null && #data.timestamp != null"

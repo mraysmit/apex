@@ -3,7 +3,7 @@
 # Replaces hardcoded test data from DynamicMethodExecutionDemo
 
 metadata:
-  id: "Dynamic Test Data"
+  id: "dynamic-test-data"
   name: "Dynamic Test Data"
   version: "1.0.0"
   description: "Comprehensive test data for dynamic method execution demonstration"

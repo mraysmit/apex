@@ -3,7 +3,7 @@
 # Replaces hardcoded risk assessment logic from RiskManagementService
 
 metadata:
-  id: "Risk Assessment Models Configuration"
+  id: "risk-assessment-models-configuration"
   name: "Risk Assessment Models Configuration"
   version: "1.0.0"
   description: "Data-driven risk assessment models configuration for risk management service"
@@ -24,7 +24,7 @@ data:
       volatility-sensitivity: "HIGH"
     assessment-models:
       equity-market-risk-model:
-        model-id: "EQUITY_MARKET_RISK_MODEL"
+        model-id: "risk-assessment-models-configuration"
         model-name: "Equity Market Risk Assessment Model"
         model-description: "Market risk assessment model for equity trades"
         risk-factors:
@@ -58,7 +58,7 @@ data:
           - "Track volatility impact analysis"
           
       fixed-income-market-risk-model:
-        model-id: "FIXED_INCOME_MARKET_RISK_MODEL"
+        model-id: "risk-assessment-models-configuration"
         model-name: "Fixed Income Market Risk Assessment Model"
         model-description: "Market risk assessment model for fixed income trades"
         risk-factors:
@@ -92,7 +92,7 @@ data:
           - "Track duration and credit spread impact"
           
       derivative-market-risk-model:
-        model-id: "DERIVATIVE_MARKET_RISK_MODEL"
+        model-id: "risk-assessment-models-configuration"
         model-name: "Derivative Market Risk Assessment Model"
         model-description: "Market risk assessment model for derivative trades"
         risk-factors:
@@ -139,7 +139,7 @@ data:
       default-probability: "VARIABLE"
     assessment-models:
       counterparty-credit-risk-model:
-        model-id: "COUNTERPARTY_CREDIT_RISK_MODEL"
+        model-id: "risk-assessment-models-configuration"
         model-name: "Counterparty Credit Risk Assessment Model"
         model-description: "Credit risk assessment model based on counterparty ratings"
         risk-factors:
@@ -183,7 +183,7 @@ data:
           - "Track rating impact analysis"
           
       collateral-credit-risk-model:
-        model-id: "COLLATERAL_CREDIT_RISK_MODEL"
+        model-id: "risk-assessment-models-configuration"
         model-name: "Collateral Credit Risk Assessment Model"
         model-description: "Credit risk assessment model considering collateral"
         risk-factors:
@@ -235,7 +235,7 @@ data:
       time-sensitivity: "HIGH"
     assessment-models:
       market-liquidity-risk-model:
-        model-id: "MARKET_LIQUIDITY_RISK_MODEL"
+        model-id: "risk-assessment-models-configuration"
         model-name: "Market Liquidity Risk Assessment Model"
         model-description: "Liquidity risk assessment based on market conditions"
         risk-factors:
@@ -274,7 +274,7 @@ data:
           - "Track market depth analysis"
           
       funding-liquidity-risk-model:
-        model-id: "FUNDING_LIQUIDITY_RISK_MODEL"
+        model-id: "risk-assessment-models-configuration"
         model-name: "Funding Liquidity Risk Assessment Model"
         model-description: "Liquidity risk assessment for funding requirements"
         risk-factors:
@@ -321,7 +321,7 @@ data:
       human-factor: "SIGNIFICANT"
     assessment-models:
       process-operational-risk-model:
-        model-id: "PROCESS_OPERATIONAL_RISK_MODEL"
+        model-id: "risk-assessment-models-configuration"
         model-name: "Process Operational Risk Assessment Model"
         model-description: "Operational risk assessment based on process complexity"
         risk-factors:
@@ -369,7 +369,7 @@ data:
     description: "Default risk assessment model processing"
     assessment-models:
       default-model:
-        model-id: "DEFAULT_MODEL"
+        model-id: "risk-assessment-models-configuration"
         model-name: "Default Model"
         assessment-rules:
           - rule-name: "default-assessment"

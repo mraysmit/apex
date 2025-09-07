@@ -3,7 +3,7 @@
 # Replaces hardcoded trade field transformer actions from TradeTransformerDemo
 
 metadata:
-  id: "Trade Field Actions Configuration"
+  id: "trade-field-actions-configuration"
   name: "Trade Field Actions Configuration"
   version: "1.0.0"
   description: "Data-driven trade field actions configuration for trade transformation processing"

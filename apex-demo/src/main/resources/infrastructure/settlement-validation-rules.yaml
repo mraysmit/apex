@@ -21,7 +21,7 @@
 # ============================================================================
 
 metadata:
-  id: "Settlement Validation Rules"
+  id: "settlement-validation-rules"
   name: "Settlement Validation Rules"
   version: "1.0.0"
   description: "Comprehensive validation rules for settlement processing and custody operations"
@@ -42,7 +42,7 @@ metadata:
 #
 rules:
   # Basic Instruction Validation
-  - id: "settlement-instruction-id"
+  - id: "settlement-validation-rules"
     name: "Settlement Instruction ID Required"
     condition: "#settlementInstructionId != null && #settlementInstructionId.length() >= 8"
     message: "Settlement instruction ID must be at least 8 characters"
@@ -50,7 +50,7 @@ rules:
     priority: 1
     categories: ["structural", "identification"]
 
-  - id: "settlement-date-required"
+  - id: "settlement-validation-rules"
     name: "Settlement Date Required"
     condition: "#settlementDate != null"
     message: "Settlement date is required for all settlement instructions"
@@ -58,7 +58,7 @@ rules:
     priority: 1
     categories: ["structural", "temporal"]
 
-  - id: "settlement-amount-positive"
+  - id: "settlement-validation-rules"
     name: "Settlement Amount Must Be Positive"
     condition: "#settlementAmount != null && #settlementAmount > 0"
     message: "Settlement amount must be positive"
@@ -67,7 +67,7 @@ rules:
     categories: ["structural", "financial"]
 
   # Currency and Account Validation
-  - id: "settlement-currency-valid"
+  - id: "settlement-validation-rules"
     name: "Valid Settlement Currency"
     condition: "#settlementCurrency != null && #settlementCurrency in {'USD', 'EUR', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD'}"
     message: "Settlement currency must be a supported currency"
@@ -75,7 +75,7 @@ rules:
     priority: 2
     categories: ["business-logic", "currency"]
 
-  - id: "account-number-format"
+  - id: "settlement-validation-rules"
     name: "Account Number Format Validation"
     condition: "#accountNumber != null && #accountNumber.matches('^[A-Z0-9]{8,20}$')"
     message: "Account number must be 8-20 alphanumeric characters"
@@ -91,7 +91,7 @@ rules:
 # safekeeping arrangements for securities and assets.
 #
   # Custodian Validation
-  - id: "custodian-required"
+  - id: "settlement-validation-rules"
     name: "Custodian Required for Securities"
     condition: "#assetType == 'SECURITY' ? #custodian != null : true"
     message: "Custodian is required for security settlements"
@@ -99,7 +99,7 @@ rules:
     priority: 1
     categories: ["business-logic", "custody"]
 
-  - id: "custodian-authorization"
+  - id: "settlement-validation-rules"
     name: "Custodian Authorization Check"
     condition: "#custodian != null ? #custodian in {'DTCC', 'EUROCLEAR', 'CLEARSTREAM', 'CREST', 'SIX'} : true"
     message: "Custodian must be an authorized central securities depository"
@@ -108,7 +108,7 @@ rules:
     categories: ["business-logic", "custody", "authorization"]
 
   # Asset and Security Validation
-  - id: "security-identifier-required"
+  - id: "settlement-validation-rules"
     name: "Security Identifier Required"
     condition: "#assetType == 'SECURITY' ? (#isin != null || #cusip != null || #sedol != null) : true"
     message: "Security identifier (ISIN, CUSIP, or SEDOL) required for securities"
@@ -116,7 +116,7 @@ rules:
     priority: 1
     categories: ["structural", "identification", "securities"]
 
-  - id: "isin-format-validation"
+  - id: "settlement-validation-rules"
     name: "ISIN Format Validation"
     condition: "#isin == null || #isin.matches('^[A-Z]{2}[A-Z0-9]{9}[0-9]$')"
     message: "ISIN must follow ISO 6166 format (12 characters)"
@@ -132,7 +132,7 @@ rules:
 # cut-off times, and settlement cycles.
 #
   # Settlement Date Validation
-  - id: "settlement-date-future"
+  - id: "settlement-validation-rules"
     name: "Settlement Date Must Be Future"
     condition: "#settlementDate != null && #settlementDate.isAfter(T(java.time.LocalDate).now())"
     message: "Settlement date must be in the future"
@@ -140,7 +140,7 @@ rules:
     priority: 1
     categories: ["business-logic", "temporal"]
 
-  - id: "settlement-cycle-compliance"
+  - id: "settlement-validation-rules"
     name: "Settlement Cycle Compliance"
     condition: "#tradeDate != null && #settlementDate != null && T(java.time.temporal.ChronoUnit).DAYS.between(#tradeDate, #settlementDate) <= 3"
     message: "Settlement must occur within T+3 cycle"
@@ -148,7 +148,7 @@ rules:
     priority: 3
     categories: ["business-logic", "temporal", "regulatory"]
 
-  - id: "cut-off-time-check"
+  - id: "settlement-validation-rules"
     name: "Cut-off Time Validation"
     condition: "#instructionTime != null && #instructionTime.isBefore(T(java.time.LocalTime).of(15, 0))"
     message: "Settlement instructions must be submitted before 3:00 PM cut-off"
@@ -164,7 +164,7 @@ rules:
 # for settlement processing.
 #
   # Payment Method Validation
-  - id: "payment-method-required"
+  - id: "settlement-validation-rules"
     name: "Payment Method Required"
     condition: "#paymentMethod != null && #paymentMethod in {'WIRE', 'ACH', 'SWIFT', 'FEDWIRE', 'CHAPS'}"
     message: "Valid payment method is required"
@@ -172,7 +172,7 @@ rules:
     priority: 2
     categories: ["business-logic", "payment"]
 
-  - id: "bank-details-required"
+  - id: "settlement-validation-rules"
     name: "Bank Details Required for Wire Transfers"
     condition: "#paymentMethod == 'WIRE' ? (#bankSwiftCode != null && #bankAccountNumber != null) : true"
     message: "SWIFT code and bank account number required for wire transfers"
@@ -181,7 +181,7 @@ rules:
     categories: ["structural", "payment", "banking"]
 
   # Delivery Instructions
-  - id: "delivery-method-securities"
+  - id: "settlement-validation-rules"
     name: "Delivery Method for Securities"
     condition: "#assetType == 'SECURITY' ? #deliveryMethod in {'DTC', 'BOOK_ENTRY', 'PHYSICAL'} : true"
     message: "Valid delivery method required for securities"
@@ -197,7 +197,7 @@ rules:
 # requirements for settlement operations.
 #
   # Settlement Risk Controls
-  - id: "settlement-limit-check"
+  - id: "settlement-validation-rules"
     name: "Settlement Amount Limit Check"
     condition: "#settlementAmount <= 10000000"
     message: "Settlement amount exceeds daily limit of 10 million"
@@ -205,7 +205,7 @@ rules:
     priority: 3
     categories: ["risk-management", "limits"]
 
-  - id: "counterparty-settlement-limit"
+  - id: "settlement-validation-rules"
     name: "Counterparty Settlement Limit"
     condition: "#counterpartyId != null && #settlementAmount <= 5000000"
     message: "Settlement amount exceeds counterparty limit"
@@ -214,7 +214,7 @@ rules:
     categories: ["risk-management", "counterparty", "limits"]
 
   # Regulatory Compliance
-  - id: "aml-screening-required"
+  - id: "settlement-validation-rules"
     name: "AML Screening Required"
     condition: "#settlementAmount >= 10000"
     message: "AML screening required for settlements over 10,000"
@@ -222,7 +222,7 @@ rules:
     priority: 5
     categories: ["regulatory", "aml", "compliance"]
 
-  - id: "sanctions-check-required"
+  - id: "settlement-validation-rules"
     name: "Sanctions Check Required"
     condition: "#counterpartyJurisdiction != null && #counterpartyJurisdiction not in {'US', 'EU', 'UK', 'CA', 'AU', 'JP'}"
     message: "Sanctions screening required for non-allied jurisdictions"
@@ -238,7 +238,7 @@ rules:
 # settlement processing.
 #
   # System and Infrastructure
-  - id: "settlement-system-available"
+  - id: "settlement-validation-rules"
     name: "Settlement System Availability"
     condition: "#settlementSystem != null && #settlementSystem in {'SWIFT', 'FEDWIRE', 'TARGET2', 'CHAPS'}"
     message: "Settlement system must be available and supported"
@@ -246,7 +246,7 @@ rules:
     priority: 1
     categories: ["operational", "infrastructure"]
 
-  - id: "backup-settlement-method"
+  - id: "settlement-validation-rules"
     name: "Backup Settlement Method"
     condition: "#backupSettlementMethod != null"
     message: "Backup settlement method should be specified for contingency"

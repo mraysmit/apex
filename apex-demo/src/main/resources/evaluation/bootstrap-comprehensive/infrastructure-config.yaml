@@ -3,7 +3,7 @@
 # Replaces hardcoded infrastructure setup from RuleConfigurationBootstrap
 
 metadata:
-  id: "Infrastructure Configuration"
+  id: "infrastructure-configuration"
   name: "Infrastructure Configuration"
   version: "1.0.0"
   description: "Infrastructure configuration for comprehensive bootstrap demonstration"
@@ -15,7 +15,7 @@ metadata:
 # Infrastructure components
 infrastructure-components:
   database-setup:
-    component-id: "DB001"
+    component-id: "infrastructure-configuration"
     name: "PostgreSQL Database Setup"
     description: "Setup PostgreSQL database with comprehensive schema"
     configuration:
@@ -33,7 +33,7 @@ infrastructure-components:
     status: "real-apex-integration"
     
   data-source-verifier:
-    component-id: "DSV001"
+    component-id: "infrastructure-configuration"
     name: "Data Source Verification Service"
     description: "Verify all data sources using real APEX validation"
     configuration:
@@ -48,7 +48,7 @@ infrastructure-components:
     status: "real-apex-integration"
     
   yaml-configuration-loader:
-    component-id: "YCL001"
+    component-id: "infrastructure-configuration"
     name: "YAML Configuration Loader"
     description: "Load YAML configurations using real APEX services"
     configuration:
@@ -60,7 +60,7 @@ infrastructure-components:
     status: "real-apex-integration"
     
   enrichment-service:
-    component-id: "ES001"
+    component-id: "infrastructure-configuration"
     name: "APEX Enrichment Service"
     description: "Real APEX enrichment service for rule processing"
     configuration:
@@ -72,7 +72,7 @@ infrastructure-components:
     status: "real-apex-integration"
     
   rule-engine:
-    component-id: "RE001"
+    component-id: "infrastructure-configuration"
     name: "APEX Rule Engine"
     description: "Comprehensive rule engine with real APEX services"
     configuration:
@@ -86,7 +86,7 @@ infrastructure-components:
 # Setup phases
 setup-phases:
   phase-1-infrastructure:
-    phase-id: "P001"
+    phase-id: "infrastructure-configuration"
     name: "Infrastructure Setup"
     description: "Setup core infrastructure components"
     components:
@@ -96,7 +96,7 @@ setup-phases:
     dependencies: []
     
   phase-2-configuration:
-    phase-id: "P002"
+    phase-id: "infrastructure-configuration"
     name: "Configuration Loading"
     description: "Load YAML configurations and validate"
     components:
@@ -105,7 +105,7 @@ setup-phases:
     dependencies: ["P001"]
     
   phase-3-services:
-    phase-id: "P003"
+    phase-id: "infrastructure-configuration"
     name: "Service Initialization"
     description: "Initialize APEX services"
     components:
@@ -115,7 +115,7 @@ setup-phases:
     dependencies: ["P001", "P002"]
     
   phase-4-verification:
-    phase-id: "P004"
+    phase-id: "infrastructure-configuration"
     name: "System Verification"
     description: "Verify complete system integration"
     components:
@@ -127,7 +127,7 @@ setup-phases:
 # Data sources
 data-sources:
   postgresql-database:
-    source-id: "DS001"
+    source-id: "infrastructure-configuration"
     type: "database"
     connection-string: "postgresql://localhost:5432/apex_comprehensive_demo"
     schema: "rule_config"
@@ -135,14 +135,14 @@ data-sources:
     estimated-records: 1000
     
   yaml-configurations:
-    source-id: "DS002"
+    source-id: "infrastructure-configuration"
     type: "yaml-files"
     base-path: "evaluation/bootstrap-comprehensive"
     file-count: 5
     total-rules: 50
     
   external-apis:
-    source-id: "DS003"
+    source-id: "infrastructure-configuration"
     type: "rest-api"
     endpoints: ["credit-bureau", "payment-processor", "compliance-service"]
     availability: "simulated"

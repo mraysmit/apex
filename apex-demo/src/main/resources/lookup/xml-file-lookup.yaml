@@ -3,7 +3,7 @@
 # Use Case: Enrich product data using XML file lookup
 
 metadata:
-  id: "XML File Lookup Demo"
+  id: "xml-file-lookup-demo"
   name: "XML File Lookup Demo"
   version: "1.0.0"
   description: "Demonstrates file-system lookup using XML files from demo-data/xml"
@@ -17,7 +17,7 @@ metadata:
 
 # Define the enrichment rules
 enrichments:
-  - id: "product-details-xml-enrichment"
+  - id: "xml-file-lookup-demo"
     name: "Product Details XML Lookup"
     description: "Enrich transactions with product details using XML file lookup"
     type: "lookup-enrichment"
@@ -53,7 +53,7 @@ enrichments:
 
 # Optional validation rules
 validations:
-  - id: "product-id-xml-format"
+  - id: "xml-file-lookup-demo"
     name: "Product ID Format Validation"
     description: "Ensure product ID is not empty"
     type: "field-validation"

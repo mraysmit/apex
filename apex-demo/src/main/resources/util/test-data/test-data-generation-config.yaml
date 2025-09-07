@@ -3,7 +3,7 @@
 # Replaces hardcoded test data generation from TestUtilities
 
 metadata:
-  id: "Test Data Generation Configuration"
+  id: "test-data-generation-configuration"
   name: "Test Data Generation Configuration"
   version: "1.0.0"
   description: "Data-driven test data generation configuration for test utilities"
@@ -15,7 +15,7 @@ metadata:
 # Test data generation configuration by generation type
 data:
   random-test-data:
-    generation-id: "GEN001"
+    generation-id: "test-data-generation-configuration"
     generation-type: "random-test-data"
     description: "Random test data generation with configurable patterns"
     generation-parameters:
@@ -73,7 +73,7 @@ data:
       - "Enum values must respect weight distributions"
     
   bulk-test-data:
-    generation-id: "GEN002"
+    generation-id: "test-data-generation-configuration"
     generation-type: "bulk-test-data"
     description: "Bulk test data generation for performance testing"
     generation-parameters:
@@ -123,7 +123,7 @@ data:
       - "Data must be suitable for performance testing"
     
   performance-test-data:
-    generation-id: "GEN003"
+    generation-id: "test-data-generation-configuration"
     generation-type: "performance-test-data"
     description: "Specialized test data for performance benchmarking"
     generation-parameters:
@@ -174,7 +174,7 @@ data:
       - "Generation must be memory efficient"
     
   variation-test-data:
-    generation-id: "GEN004"
+    generation-id: "test-data-generation-configuration"
     generation-type: "variation-test-data"
     description: "Test data with controlled variations for testing edge cases"
     generation-parameters:
@@ -217,7 +217,7 @@ data:
       - "Variations must support comprehensive testing"
     
   default:
-    generation-id: "GEN000"
+    generation-id: "test-data-generation-configuration"
     generation-type: "default"
     description: "Default test data generation"
     generation-parameters:

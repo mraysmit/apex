@@ -1,0 +1,28 @@
+APEX ENHANCED COMPILER ANALYSIS REPORT
+=====================================
+
+OVERALL STATISTICS:
+  Total files analyzed: 178
+  Valid files: 38
+  Invalid files: 140
+  Success rate: 21.3%
+
+DEPENDENCY STATISTICS:
+  Files with dependencies: 178
+  Files with circular dependencies: 0
+
+ERROR PATTERN ANALYSIS:
+  Other Issues: 136 occurrences
+  Missing Files: 67 occurrences
+
+TOP ROOT CAUSES:
+  1x: Missing dependency file: evaluation/bootstrap-comprehensive/infrastructure-config.yaml
+  1x: Missing dependency file: validation/trade-validation/compliance-validation-config.yaml
+  1x: Missing dependency file: evaluation/scenario-processing/scenario-routing-config.yaml
+  1x: Missing dependency file: evaluation/fluent-rule-builder/fluent-api-patterns-config.yaml
+  1x: Missing dependency file: enrichment/custody-bootstrap/settlement-scenarios-config.yaml
+  1x: Missing dependency file: evaluation/trade-record-matcher/trade-validation-engines-config.yaml
+  1x: Missing dependency file: evaluation/compliance/reporting-deadlines.yaml
+  1x: Missing dependency file: evaluation/trade-record-matcher/trade-matching-algorithms-config.yaml
+  1x: Missing dependency file: evaluation/fluent-rule-builder/customer-processing-contexts-config.yaml
+  1x: Missing dependency file: evaluation/rule-definition-service/rule-management-frameworks-config.yaml

@@ -3,7 +3,7 @@
 # Replaces all hardcoded dependency analysis logic from YamlDependencyAnalysisDemo (@since 1.0.0)
 
 metadata:
-  id: "YAML Dependency Analysis Demo"
+  id: "yaml-dependency-analysis-demo"
   name: "YAML Dependency Analysis Demo"
   version: "1.0.0"
   description: "APEX-compliant YAML dependency analysis with real enrichment services"

@@ -3,7 +3,7 @@
 # Replaces hardcoded trade validation logic from TradeRecordMatcherDemo
 
 metadata:
-  id: "Trade Validation Engines Configuration"
+  id: "trade-validation-engines-configuration"
   name: "Trade Validation Engines Configuration"
   version: "1.0.0"
   description: "Data-driven trade validation engines configuration for trade record matcher"
@@ -24,7 +24,7 @@ data:
       real-time-capability: true
     validation-engines:
       equity-type-validation-engine:
-        engine-id: "EQUITY_TYPE_VALIDATION_ENGINE"
+        engine-id: "trade-validation-engines-configuration"
         engine-name: "Equity Type Validation Engine"
         engine-description: "Engine for validating equity trade types and characteristics"
         validation-parameters:
@@ -65,7 +65,7 @@ data:
           - "Track symbol and market validation rates"
           
       fixed-income-type-validation-engine:
-        engine-id: "FIXED_INCOME_TYPE_VALIDATION_ENGINE"
+        engine-id: "trade-validation-engines-configuration"
         engine-name: "Fixed Income Type Validation Engine"
         engine-description: "Engine for validating fixed income trade types and characteristics"
         validation-parameters:
@@ -106,7 +106,7 @@ data:
           - "Track CUSIP and rating validation rates"
           
       derivative-type-validation-engine:
-        engine-id: "DERIVATIVE_TYPE_VALIDATION_ENGINE"
+        engine-id: "trade-validation-engines-configuration"
         engine-name: "Derivative Type Validation Engine"
         engine-description: "Engine for validating derivative trade types and characteristics"
         validation-parameters:
@@ -160,7 +160,7 @@ data:
       comprehensive-checking: true
     validation-engines:
       numeric-data-validation-engine:
-        engine-id: "NUMERIC_DATA_VALIDATION_ENGINE"
+        engine-id: "trade-validation-engines-configuration"
         engine-name: "Numeric Data Validation Engine"
         engine-description: "Engine for validating numeric trade data fields"
         validation-parameters:
@@ -201,7 +201,7 @@ data:
           - "Track range validation effectiveness"
           
       date-data-validation-engine:
-        engine-id: "DATE_DATA_VALIDATION_ENGINE"
+        engine-id: "trade-validation-engines-configuration"
         engine-name: "Date Data Validation Engine"
         engine-description: "Engine for validating date-related trade data fields"
         validation-parameters:
@@ -242,7 +242,7 @@ data:
           - "Track date relationship validation"
           
       string-data-validation-engine:
-        engine-id: "STRING_DATA_VALIDATION_ENGINE"
+        engine-id: "trade-validation-engines-configuration"
         engine-name: "String Data Validation Engine"
         engine-description: "Engine for validating string-based trade data fields"
         validation-parameters:
@@ -296,7 +296,7 @@ data:
       business-logic-intensive: true
     validation-engines:
       market-hours-validation-engine:
-        engine-id: "MARKET_HOURS_VALIDATION_ENGINE"
+        engine-id: "trade-validation-engines-configuration"
         engine-name: "Market Hours Validation Engine"
         engine-description: "Engine for validating trades against market hours"
         validation-parameters:
@@ -331,7 +331,7 @@ data:
           - "Track after-hours trading exceptions"
           
       position-limits-validation-engine:
-        engine-id: "POSITION_LIMITS_VALIDATION_ENGINE"
+        engine-id: "trade-validation-engines-configuration"
         engine-name: "Position Limits Validation Engine"
         engine-description: "Engine for validating trades against position limits"
         validation-parameters:
@@ -379,7 +379,7 @@ data:
       regulatory-intensive: true
     validation-engines:
       regulatory-compliance-engine:
-        engine-id: "REGULATORY_COMPLIANCE_ENGINE"
+        engine-id: "trade-validation-engines-configuration"
         engine-name: "Regulatory Compliance Engine"
         engine-description: "Engine for validating trades against regulatory requirements"
         validation-parameters:
@@ -423,7 +423,7 @@ data:
     description: "Default trade validation engine processing"
     validation-engines:
       default-engine:
-        engine-id: "DEFAULT_ENGINE"
+        engine-id: "trade-validation-engines-configuration"
         engine-name: "Default Engine"
         validation-rules:
           - rule-name: "default-validation"

@@ -3,7 +3,7 @@
 # Use Case: Simple settlement instruction lookup with multiple query parameters
 
 metadata:
-  id: "Multi-Parameter Database Lookup Demo"
+  id: "multi-parameter-database-lookup-demo"
   name: "Multi-Parameter Database Lookup Demo"
   version: "1.0.0"
   description: "Simple demo showing database lookup with multiple parameters"
@@ -38,7 +38,7 @@ data-sources:
 
 # Enrichment rules using multi-parameter database lookup
 enrichments:
-  - id: "settlement-instruction-lookup"
+  - id: "multi-parameter-database-lookup-demo"
     name: "Settlement Instruction Lookup"
     description: "Enrich trade data with settlement instructions using multiple parameters"
     type: "lookup-enrichment"

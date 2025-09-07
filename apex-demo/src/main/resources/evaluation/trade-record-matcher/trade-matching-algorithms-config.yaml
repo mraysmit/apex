@@ -3,7 +3,7 @@
 # Replaces hardcoded trade matching logic from TradeRecordMatcherDemo
 
 metadata:
-  id: "Trade Matching Algorithms Configuration"
+  id: "trade-matching-algorithms-configuration"
   name: "Trade Matching Algorithms Configuration"
   version: "1.0.0"
   description: "Data-driven trade matching algorithms configuration for trade record matcher"
@@ -24,7 +24,7 @@ data:
       performance-profile: "FAST"
     matching-algorithms:
       primary-key-exact-match:
-        algorithm-id: "PRIMARY_KEY_EXACT_MATCH"
+        algorithm-id: "trade-matching-algorithms-configuration"
         algorithm-name: "Primary Key Exact Match Algorithm"
         algorithm-description: "Exact matching based on primary trade identifiers"
         matching-fields:
@@ -69,7 +69,7 @@ data:
           - "Track primary key matching success rates"
           
       trade-details-exact-match:
-        algorithm-id: "TRADE_DETAILS_EXACT_MATCH"
+        algorithm-id: "trade-matching-algorithms-configuration"
         algorithm-name: "Trade Details Exact Match Algorithm"
         algorithm-description: "Exact matching based on core trade details"
         matching-fields:
@@ -137,7 +137,7 @@ data:
       performance-profile: "MODERATE"
     matching-algorithms:
       string-similarity-match:
-        algorithm-id: "STRING_SIMILARITY_MATCH"
+        algorithm-id: "trade-matching-algorithms-configuration"
         algorithm-name: "String Similarity Match Algorithm"
         algorithm-description: "Fuzzy matching based on string similarity"
         similarity-methods:
@@ -182,7 +182,7 @@ data:
           - "Track similarity method effectiveness"
           
       numeric-tolerance-match:
-        algorithm-id: "NUMERIC_TOLERANCE_MATCH"
+        algorithm-id: "trade-matching-algorithms-configuration"
         algorithm-name: "Numeric Tolerance Match Algorithm"
         algorithm-description: "Fuzzy matching based on numeric tolerance"
         tolerance-settings:
@@ -219,7 +219,7 @@ data:
           - "Track tolerance matching accuracy"
           
       date-range-match:
-        algorithm-id: "DATE_RANGE_MATCH"
+        algorithm-id: "trade-matching-algorithms-configuration"
         algorithm-name: "Date Range Match Algorithm"
         algorithm-description: "Fuzzy matching based on date ranges and proximity"
         date-tolerances:
@@ -269,7 +269,7 @@ data:
       performance-profile: "MODERATE"
     matching-algorithms:
       trade-structure-pattern-match:
-        algorithm-id: "TRADE_STRUCTURE_PATTERN_MATCH"
+        algorithm-id: "trade-matching-algorithms-configuration"
         algorithm-name: "Trade Structure Pattern Match Algorithm"
         algorithm-description: "Pattern matching based on trade structure and format"
         structure-patterns:
@@ -327,7 +327,7 @@ data:
       performance-profile: "SLOW"
     matching-algorithms:
       trade-context-semantic-match:
-        algorithm-id: "TRADE_CONTEXT_SEMANTIC_MATCH"
+        algorithm-id: "trade-matching-algorithms-configuration"
         algorithm-name: "Trade Context Semantic Match Algorithm"
         algorithm-description: "Semantic matching based on trade context and meaning"
         semantic-features:
@@ -384,7 +384,7 @@ data:
     description: "Default trade matching algorithm processing"
     matching-algorithms:
       default-algorithm:
-        algorithm-id: "DEFAULT_ALGORITHM"
+        algorithm-id: "trade-matching-algorithms-configuration"
         algorithm-name: "Default Algorithm"
         matching-rules:
           - rule-name: "default-match"

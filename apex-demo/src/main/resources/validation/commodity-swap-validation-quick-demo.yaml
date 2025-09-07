@@ -3,7 +3,7 @@
 # Unique features: Ultra-Simple API, Template-Based Rules, Advanced Configuration, Performance Monitoring
 
 metadata:
-  id: "Commodity Swap Validation Quick Demo"
+  id: "commodity-swap-validation-quick-demo"
   name: "Commodity Swap Validation Quick Demo"
   version: "1.0.0"
   description: "APEX layered API demonstration with performance monitoring for commodity swap validation"
@@ -14,7 +14,7 @@ metadata:
 
 # APEX enrichment processing for layered API demonstration
 enrichments:
-  - id: "ultra-simple-api-layer"
+  - id: "commodity-swap-validation-quick-demo"
     name: "ultra-simple-api-layer"
     type: "calculation-enrichment"
     description: "Layer 1: Ultra-Simple API validation processing"
@@ -25,7 +25,7 @@ enrichments:
         target-field: "layerResult"
         expression: "'Layer 1 (Ultra-Simple API): Basic field validations completed for ' + #data.tradeId + ' - Trade ID: ' + (#data.tradeId != null ? 'VALID' : 'INVALID') + ', Notional: ' + (#data.notionalAmount != null ? 'VALID' : 'INVALID') + ', Currency: ' + (#data.notionalCurrency != null ? 'VALID' : 'INVALID')"
 
-  - id: "template-based-rules-layer"
+  - id: "commodity-swap-validation-quick-demo"
     name: "template-based-rules-layer"
     type: "calculation-enrichment"
     description: "Layer 2: Template-Based Rules validation processing"
@@ -36,7 +36,7 @@ enrichments:
         target-field: "layerResult"
         expression: "'Layer 2 (Template-Based Rules): Structured validation completed for ' + #data.tradeId + ' - Validation Engine: PASSED, Business Engine: PASSED, Rules Applied: 8 total (5 validation + 3 business)'"
 
-  - id: "advanced-configuration-layer"
+  - id: "commodity-swap-validation-quick-demo"
     name: "advanced-configuration-layer"
     type: "calculation-enrichment"
     description: "Layer 3: Advanced Configuration with performance monitoring"
@@ -47,7 +47,7 @@ enrichments:
         target-field: "layerResult"
         expression: "'Layer 3 (Advanced Configuration): Performance monitoring enabled for ' + #data.tradeId + ' - Rules Executed: 3, Average Time: 1.2ms, Success Rate: 100%'"
 
-  - id: "static-data-validation-layer"
+  - id: "commodity-swap-validation-quick-demo"
     name: "static-data-validation-layer"
     type: "calculation-enrichment"
     description: "Static Data Validation and Enrichment"
@@ -58,7 +58,7 @@ enrichments:
         target-field: "layerResult"
         expression: "'Static Data Validation: Client ' + #data.clientId + ' validated, Counterparty ' + #data.counterpartyId + ' validated, Currency ' + #data.notionalCurrency + ' validated, Commodity ' + #data.referenceIndex + ' validated'"
 
-  - id: "validation-summary"
+  - id: "commodity-swap-validation-quick-demo"
     name: "validation-summary"
     type: "calculation-enrichment"
     description: "Generate comprehensive validation summary"
@@ -210,9 +210,9 @@ commodity-swap-validation:
 # Sample data templates
 sample-data-templates:
   commodity-swap-sample:
-    tradeId: "TRS001"
-    counterpartyId: "CP001"
-    clientId: "CLI001"
+    tradeid: "commodity-swap-validation-quick-demo"
+    counterpartyid: "commodity-swap-validation-quick-demo"
+    clientid: "commodity-swap-validation-quick-demo"
     commodityType: "ENERGY"
     referenceIndex: "WTI"
     notionalAmount: "10000000"

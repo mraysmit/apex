@@ -3,7 +3,7 @@
 # Replaces hardcoded test data from ComplianceServiceDemo
 
 metadata:
-  id: "Compliance Test Data"
+  id: "compliance-test-data"
   name: "Compliance Test Data"
   version: "1.0.0"
   description: "Test data scenarios for compliance service demonstration"

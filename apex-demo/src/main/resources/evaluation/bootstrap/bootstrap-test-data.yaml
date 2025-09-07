@@ -3,7 +3,7 @@
 # Replaces hardcoded test data from RuleConfigurationHardcodedBootstrap
 
 metadata:
-  id: "Bootstrap Test Data"
+  id: "bootstrap-test-data"
   name: "Bootstrap Test Data"
   version: "1.0.0"
   description: "Test data scenarios for rule configuration bootstrap demonstration"
@@ -14,10 +14,10 @@ metadata:
 
 # Loan application test scenarios
 loan-applications:
-  - application-id: "LA001"
+  - application-id: "bootstrap-test-data"
     description: "Excellent credit score application"
     data:
-      applicationId: "LA001"
+      applicationid: "bootstrap-test-data"
       creditScore: 780
       debtToIncomeRatio: 0.25
       loanAmount: 300000
@@ -26,10 +26,10 @@ loan-applications:
     expected-decision: "APPROVED"
     expected-rule: "LA002"
     
-  - application-id: "LA002"
+  - application-id: "bootstrap-test-data"
     description: "Good credit with acceptable DTI"
     data:
-      applicationId: "LA002"
+      applicationid: "bootstrap-test-data"
       creditScore: 720
       debtToIncomeRatio: 0.32
       loanAmount: 250000
@@ -38,10 +38,10 @@ loan-applications:
     expected-decision: "APPROVED"
     expected-rule: "LA001"
     
-  - application-id: "LA003"
+  - application-id: "bootstrap-test-data"
     description: "Poor credit score application"
     data:
-      applicationId: "LA003"
+      applicationid: "bootstrap-test-data"
       creditScore: 580
       debtToIncomeRatio: 0.45
       loanAmount: 150000
@@ -50,10 +50,10 @@ loan-applications:
     expected-decision: "REJECTED"
     expected-rule: "LA003"
     
-  - application-id: "LA004"
+  - application-id: "bootstrap-test-data"
     description: "Moderate credit requiring manual review"
     data:
-      applicationId: "LA004"
+      applicationid: "bootstrap-test-data"
       creditScore: 650
       debtToIncomeRatio: 0.38
       loanAmount: 200000
@@ -64,45 +64,45 @@ loan-applications:
 
 # Order processing test scenarios
 order-processing:
-  - order-id: "OP001"
+  - order-id: "bootstrap-test-data"
     description: "Large order qualifying for volume discount"
     data:
-      orderId: "OP001"
+      orderid: "bootstrap-test-data"
       orderTotal: 1250.00
-      customerId: "CUST001"
+      customerid: "bootstrap-test-data"
       customerYears: 3
       customerName: "Premium Corp"
     expected-discount-percentage: 15
     expected-rule: "OD001"
     
-  - order-id: "OP002"
+  - order-id: "bootstrap-test-data"
     description: "Loyalty customer with 6 years"
     data:
-      orderId: "OP002"
+      orderid: "bootstrap-test-data"
       orderTotal: 750.00
-      customerId: "CUST002"
+      customerid: "bootstrap-test-data"
       customerYears: 6
       customerName: "Loyal Industries"
     expected-discount-percentage: 10
     expected-rule: "OD002"
     
-  - order-id: "OP003"
+  - order-id: "bootstrap-test-data"
     description: "New customer welcome offer"
     data:
-      orderId: "OP003"
+      orderid: "bootstrap-test-data"
       orderTotal: 400.00
-      customerId: "CUST003"
+      customerid: "bootstrap-test-data"
       customerYears: 0
       customerName: "New Startup LLC"
     expected-discount-percentage: 5
     expected-rule: "OD003"
     
-  - order-id: "OP004"
+  - order-id: "bootstrap-test-data"
     description: "Standard customer with no special discount"
     data:
-      orderId: "OP004"
+      orderid: "bootstrap-test-data"
       orderTotal: 300.00
-      customerId: "CUST004"
+      customerid: "bootstrap-test-data"
       customerYears: 2
       customerName: "Regular Business Inc"
     expected-discount-percentage: 0
@@ -110,7 +110,7 @@ order-processing:
 
 # Bootstrap comparison scenarios
 bootstrap-comparisons:
-  - scenario-id: "hardcoded-vs-data-driven"
+  - scenario-id: "bootstrap-test-data"
     description: "Compare hardcoded approach vs data-driven approach"
     test-cases:
       - case: "loan-processing"
@@ -137,7 +137,7 @@ bootstrap-comparisons:
 
 # Infrastructure setup scenarios
 infrastructure-scenarios:
-  - setup-id: "basic-setup"
+  - setup-id: "bootstrap-test-data"
     description: "Basic infrastructure setup for rule processing"
     components:
       - "yaml-configuration-loader"
@@ -146,7 +146,7 @@ infrastructure-scenarios:
       - "lookup-service-registry"
     setup-time: "immediate"
     
-  - setup-id: "advanced-setup"
+  - setup-id: "bootstrap-test-data"
     description: "Advanced infrastructure with monitoring and analytics"
     components:
       - "yaml-configuration-loader"

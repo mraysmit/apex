@@ -21,7 +21,7 @@
 # ============================================================================
 
 metadata:
-  id: "Scenario Registry Configuration"
+  id: "scenario-registry-configuration"
   name: "Scenario Registry Configuration"
   version: "1.0.0"
   description: "Registry of available scenario configurations and their file locations"
@@ -35,7 +35,7 @@ metadata:
 
 scenario-registry:
   # OTC Options Processing Scenario
-  - scenario-id: "otc-options-standard"
+  - scenario-id: "scenario-registry-configuration"
     config-file: "scenarios/otc-options-scenario.yaml"
     data-types:
       - "dev.mars.apex.demo.model.OtcOption"
@@ -45,7 +45,7 @@ scenario-registry:
     owner: "derivatives.team@company.com"
 
   # Commodity Swaps Processing Scenario
-  - scenario-id: "commodity-swaps-standard"
+  - scenario-id: "scenario-registry-configuration"
     config-file: "scenarios/commodity-swaps-scenario.yaml"
     data-types:
       - "dev.mars.apex.demo.validation.CommoditySwapValidationBootstrap.CommodityTotalReturnSwap"
@@ -56,7 +56,7 @@ scenario-registry:
     owner: "commodity.trading@company.com"
 
   # Settlement Instructions Auto-Repair Scenario
-  - scenario-id: "settlement-auto-repair"
+  - scenario-id: "scenario-registry-configuration"
     config-file: "scenarios/settlement-auto-repair-scenario.yaml"
     data-types:
       - "dev.mars.apex.demo.model.BootstrapSettlementInstruction"

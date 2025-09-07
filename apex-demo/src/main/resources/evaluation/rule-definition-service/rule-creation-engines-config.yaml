@@ -3,7 +3,7 @@
 # Replaces hardcoded rule creation logic from RuleDefinitionServiceDemo
 
 metadata:
-  id: "Rule Creation Engines Configuration"
+  id: "rule-creation-engines-configuration"
   name: "Rule Creation Engines Configuration"
   version: "1.0.0"
   description: "Data-driven rule creation engines configuration for rule definition service"
@@ -24,7 +24,7 @@ data:
       business-criticality: "CRITICAL"
     creation-engines:
       investment-recommendation-engine:
-        engine-id: "INVESTMENT_RECOMMENDATION_ENGINE"
+        engine-id: "rule-creation-engines-configuration"
         engine-name: "Investment Recommendation Rule Creation Engine"
         engine-description: "Engine for creating investment recommendation rules"
         rule-templates:
@@ -70,7 +70,7 @@ data:
           - "Track rule template usage"
           
       transaction-validation-engine:
-        engine-id: "TRANSACTION_VALIDATION_ENGINE"
+        engine-id: "rule-creation-engines-configuration"
         engine-name: "Transaction Validation Rule Creation Engine"
         engine-description: "Engine for creating transaction validation rules"
         rule-templates:
@@ -110,7 +110,7 @@ data:
           - "Track fraud pattern effectiveness"
           
       compliance-monitoring-engine:
-        engine-id: "COMPLIANCE_MONITORING_ENGINE"
+        engine-id: "rule-creation-engines-configuration"
         engine-name: "Compliance Monitoring Rule Creation Engine"
         engine-description: "Engine for creating compliance monitoring rules"
         rule-templates:
@@ -163,7 +163,7 @@ data:
       business-criticality: "HIGH"
     creation-engines:
       customer-eligibility-engine:
-        engine-id: "CUSTOMER_ELIGIBILITY_ENGINE"
+        engine-id: "rule-creation-engines-configuration"
         engine-name: "Customer Eligibility Rule Creation Engine"
         engine-description: "Engine for creating customer eligibility rules"
         rule-templates:
@@ -203,7 +203,7 @@ data:
           - "Track eligibility criteria effectiveness"
           
       customer-service-engine:
-        engine-id: "CUSTOMER_SERVICE_ENGINE"
+        engine-id: "rule-creation-engines-configuration"
         engine-name: "Customer Service Rule Creation Engine"
         engine-description: "Engine for creating customer service rules"
         rule-templates:
@@ -256,7 +256,7 @@ data:
       business-criticality: "HIGH"
     creation-engines:
       product-availability-engine:
-        engine-id: "PRODUCT_AVAILABILITY_ENGINE"
+        engine-id: "rule-creation-engines-configuration"
         engine-name: "Product Availability Rule Creation Engine"
         engine-description: "Engine for creating product availability rules"
         rule-templates:
@@ -296,7 +296,7 @@ data:
           - "Track availability accuracy"
           
       product-pricing-engine:
-        engine-id: "PRODUCT_PRICING_ENGINE"
+        engine-id: "rule-creation-engines-configuration"
         engine-name: "Product Pricing Rule Creation Engine"
         engine-description: "Engine for creating product pricing rules"
         rule-templates:
@@ -349,7 +349,7 @@ data:
       business-criticality: "CRITICAL"
     creation-engines:
       regulatory-compliance-engine:
-        engine-id: "REGULATORY_COMPLIANCE_ENGINE"
+        engine-id: "rule-creation-engines-configuration"
         engine-name: "Regulatory Compliance Rule Creation Engine"
         engine-description: "Engine for creating regulatory compliance rules"
         rule-templates:
@@ -398,7 +398,7 @@ data:
     description: "Default rule creation engine processing"
     creation-engines:
       default-engine:
-        engine-id: "DEFAULT_ENGINE"
+        engine-id: "rule-creation-engines-configuration"
         engine-name: "Default Engine"
         creation-rules:
           - rule-name: "default-rule-creation"

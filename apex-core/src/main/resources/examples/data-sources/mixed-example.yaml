@@ -2,6 +2,7 @@
 # This demonstrates cache data sources and a complete multi-source setup
 
 metadata:
+  id: "mixed-data-sources-example"
   name: "Mixed Data Sources Example"
   version: "1.0.0"
   description: "Complete example with cache, database, API, and file sources working together"

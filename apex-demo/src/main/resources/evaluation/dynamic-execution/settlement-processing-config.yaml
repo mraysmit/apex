@@ -3,7 +3,7 @@
 # Replaces hardcoded settlement logic from DynamicMethodExecutionDemo
 
 metadata:
-  id: "Settlement Processing Configuration"
+  id: "settlement-processing-configuration"
   name: "Settlement Processing Configuration"
   version: "1.0.0"
   description: "Data-driven settlement processing configuration for dynamic method execution"

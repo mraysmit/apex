@@ -3,7 +3,7 @@
 # NO HARDCODED SIMULATION - Real APEX data processing
 
 metadata:
-  id: "Comprehensive Financial Settlement Demo Data"
+  id: "comprehensive-financial-settlement-demo-data"
   name: "Comprehensive Financial Settlement Demo Data"
   version: "2.0.0"
   description: "Test data scenarios for real APEX comprehensive financial settlement demonstration"
@@ -18,10 +18,10 @@ multi-asset-scenarios:
   - scenario: "uk-equity-settlement"
     description: "UK equity settlement processing"
     data:
-      tradeId: "TRADE_001"
+      tradeid: "comprehensive-financial-settlement-demo-data"
       assetClass: "EQUITY"
       market: "UK"
-      instrumentId: "VOD.L"
+      instrumentid: "comprehensive-financial-settlement-demo-data"
       instrumentType: "EQUITY"
       quantity: 10000
       price: 2750.50
@@ -37,10 +37,10 @@ multi-asset-scenarios:
   - scenario: "us-bond-settlement"
     description: "US fixed income settlement processing"
     data:
-      tradeId: "TRADE_002"
+      tradeid: "comprehensive-financial-settlement-demo-data"
       assetClass: "FIXED_INCOME"
       market: "US"
-      instrumentId: "US_TREASURY_10Y"
+      instrumentid: "comprehensive-financial-settlement-demo-data"
       instrumentType: "GOVERNMENT_BOND"
       notional: 1000000
       price: 98.75
@@ -56,10 +56,10 @@ multi-asset-scenarios:
   - scenario: "german-equity-settlement"
     description: "German equity settlement processing"
     data:
-      tradeId: "TRADE_003"
+      tradeid: "comprehensive-financial-settlement-demo-data"
       assetClass: "EQUITY"
       market: "GERMANY"
-      instrumentId: "SAP.DE"
+      instrumentid: "comprehensive-financial-settlement-demo-data"
       instrumentType: "EQUITY"
       quantity: 5000
       price: 120.75
@@ -77,11 +77,11 @@ cross-border-scenarios:
   - scenario: "us-to-germany-bond-settlement"
     description: "Cross-border US to Germany fixed income settlement"
     data:
-      tradeId: "TRADE_004"
+      tradeid: "comprehensive-financial-settlement-demo-data"
       assetClass: "FIXED_INCOME"
       sourceMarket: "US"
       targetMarket: "GERMANY"
-      instrumentId: "US_TREASURY_10Y"
+      instrumentid: "comprehensive-financial-settlement-demo-data"
       notional: 1000000
       price: 98.75
       sourceCurrency: "USD"
@@ -97,11 +97,11 @@ cross-border-scenarios:
   - scenario: "uk-to-japan-equity-settlement"
     description: "Cross-border UK to Japan equity settlement"
     data:
-      tradeId: "TRADE_005"
+      tradeid: "comprehensive-financial-settlement-demo-data"
       assetClass: "EQUITY"
       sourceMarket: "UK"
       targetMarket: "JAPAN"
-      instrumentId: "VOD.L"
+      instrumentid: "comprehensive-financial-settlement-demo-data"
       quantity: 10000
       price: 2750.50
       sourceCurrency: "GBP"
@@ -117,11 +117,11 @@ cross-border-scenarios:
   - scenario: "germany-to-us-derivatives-settlement"
     description: "Cross-border Germany to US derivatives settlement"
     data:
-      tradeId: "TRADE_006"
+      tradeid: "comprehensive-financial-settlement-demo-data"
       assetClass: "DERIVATIVES"
       sourceMarket: "GERMANY"
       targetMarket: "US"
-      instrumentId: "EUR_USD_SWAP"
+      instrumentid: "comprehensive-financial-settlement-demo-data"
       notional: 5000000
       sourceCurrency: "EUR"
       targetCurrency: "USD"
@@ -138,10 +138,10 @@ high-value-scenarios:
   - scenario: "critical-value-us-equity"
     description: "Critical value US equity transaction requiring senior management approval"
     data:
-      tradeId: "TRADE_007"
+      tradeid: "comprehensive-financial-settlement-demo-data"
       assetClass: "EQUITY"
       market: "US"
-      instrumentId: "AAPL"
+      instrumentid: "comprehensive-financial-settlement-demo-data"
       quantity: 500000
       price: 190.00
       totalValue: 95000000.0
@@ -159,10 +159,10 @@ high-value-scenarios:
   - scenario: "high-value-uk-bond"
     description: "High value UK bond transaction requiring operations manager approval"
     data:
-      tradeId: "TRADE_008"
+      tradeid: "comprehensive-financial-settlement-demo-data"
       assetClass: "FIXED_INCOME"
       market: "UK"
-      instrumentId: "UK_GILT_10Y"
+      instrumentid: "comprehensive-financial-settlement-demo-data"
       notional: 25000000
       price: 102.50
       totalValue: 25625000.0
@@ -180,10 +180,10 @@ high-value-scenarios:
   - scenario: "standard-value-transaction"
     description: "Standard value transaction not requiring special approval"
     data:
-      tradeId: "TRADE_009"
+      tradeid: "comprehensive-financial-settlement-demo-data"
       assetClass: "EQUITY"
       market: "GERMANY"
-      instrumentId: "BMW.DE"
+      instrumentid: "comprehensive-financial-settlement-demo-data"
       quantity: 1000
       price: 85.50
       totalValue: 85500.0
@@ -203,10 +203,10 @@ integrated-scenarios:
     description: "Complete settlement workflow from trade to settlement"
     data:
       # Multi-asset processing
-      tradeId: "TRADE_WORKFLOW_001"
+      tradeid: "comprehensive-financial-settlement-demo-data"
       assetClass: "EQUITY"
       market: "UK"
-      instrumentId: "LLOY.L"
+      instrumentid: "comprehensive-financial-settlement-demo-data"
       quantity: 100000
       price: 55.75
       currency: "GBP"
@@ -231,23 +231,23 @@ performance-scenarios:
     description: "Bulk settlement processing for performance testing"
     data:
       settlements:
-        - tradeId: "BULK_001"
+        - tradeid: "comprehensive-financial-settlement-demo-data"
           assetClass: "EQUITY"
           market: "UK"
           totalValue: 1000000
-        - tradeId: "BULK_002"
+        - tradeid: "comprehensive-financial-settlement-demo-data"
           assetClass: "FIXED_INCOME"
           market: "US"
           totalValue: 2000000
-        - tradeId: "BULK_003"
+        - tradeid: "comprehensive-financial-settlement-demo-data"
           assetClass: "DERIVATIVES"
           market: "GERMANY"
           totalValue: 15000000
-        - tradeId: "BULK_004"
+        - tradeid: "comprehensive-financial-settlement-demo-data"
           assetClass: "EQUITY"
           market: "JAPAN"
           totalValue: 500000
-        - tradeId: "BULK_005"
+        - tradeid: "comprehensive-financial-settlement-demo-data"
           assetClass: "FIXED_INCOME"
           market: "HONG_KONG"
           totalValue: 3000000

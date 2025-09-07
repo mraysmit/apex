@@ -3,7 +3,7 @@
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
 metadata:
-  id: "APEX Rules Engine Demo Configuration"
+  id: "apex-rules-engine-demo-configuration"
   name: "APEX Rules Engine Demo Configuration"
   version: "2.0.0"
   description: "Real APEX rules engine demonstration with investment validation, risk assessment, and compliance checking"
@@ -14,7 +14,7 @@ metadata:
 
 # Investment Validation Enrichments
 enrichments:
-  - id: "investment-validation"
+  - id: "apex-rules-engine-demo-configuration"
     name: "investment-validation"
     type: "field-enrichment"
     description: "Validates investment scenarios using real APEX processing"
@@ -30,7 +30,7 @@ enrichments:
         target-field: "processingPath"
         expression: "#customerRiskProfile == 'CONSERVATIVE' ? 'LOW_RISK' : (#customerRiskProfile == 'MODERATE' ? 'MEDIUM_RISK' : 'HIGH_RISK')"
 
-  - id: "risk-assessment"
+  - id: "apex-rules-engine-demo-configuration"
     name: "risk-assessment"
     type: "field-enrichment"
     description: "Processes risk assessment using real APEX services"
@@ -49,7 +49,7 @@ enrichments:
         target-field: "portfolioRecommendation"
         expression: "#portfolioValue > 1000000 ? 'PREMIUM_PORTFOLIO' : 'STANDARD_PORTFOLIO'"
 
-  - id: "compliance-checking"
+  - id: "apex-rules-engine-demo-configuration"
     name: "compliance-checking"
     type: "field-enrichment"
     description: "Performs compliance checking using real APEX services"
@@ -70,7 +70,7 @@ enrichments:
 
 # Rule Groups for Sequential Processing
 rule-groups:
-  - id: "investment-processing-workflow"
+  - id: "apex-rules-engine-demo-configuration"
     name: "investment-processing-workflow"
     description: "Sequential investment processing workflow"
     rules:

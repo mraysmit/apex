@@ -1,5 +1,5 @@
 metadata:
-  id: "Simple PostgreSQL Database Enrichment Demo"
+  id: "simple-postgresql-database-enrichment-demo"
   name: "Simple PostgreSQL Database Enrichment Demo"
   version: "1.0.0"
   description: "Simple customer profile enrichment using H2 database (PostgreSQL mode) with real SQL queries"
@@ -55,7 +55,7 @@ data-sources:
 
 # Enrichment rules using real database lookups
 enrichments:
-  - id: "customer-profile-database-lookup"
+  - id: "simple-postgresql-database-enrichment-demo"
     name: "customer-profile-database-lookup"
     description: "Enrich customer data using H2 database lookup with real SQL queries"
     type: "lookup-enrichment"

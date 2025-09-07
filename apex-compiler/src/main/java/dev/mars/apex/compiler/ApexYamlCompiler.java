@@ -2,7 +2,7 @@ package dev.mars.apex.compiler;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.compiler.lexical.ApexYamlLexicalValidator;
+import dev.mars.apex.compiler.dependency.ApexDependencyAnalyzer;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -84,23 +84,64 @@ public class ApexYamlCompiler {
             return;
         }
 
-        // Validate the YAML file
-        ApexYamlLexicalValidator validator = new ApexYamlLexicalValidator();
+        // Validate the YAML file with dependency analysis
+        ApexDependencyAnalyzer dependencyAnalyzer = new ApexDependencyAnalyzer();
         Path yamlFile = Paths.get(args[0]);
 
-        System.out.println("\n🔍 Validating: " + yamlFile);
-        System.out.println("-".repeat(50));
+        System.out.println("\n🔍 Validating with Dependency Analysis: " + yamlFile);
+        System.out.println("-".repeat(60));
 
-        ApexYamlLexicalValidator.ValidationResult result = validator.validateFile(yamlFile);
+        // Perform dependency-aware validation
+        ApexDependencyAnalyzer.DependencyValidationResult result = dependencyAnalyzer.validateWithDependencies(yamlFile);
 
-        // Display results
-        System.out.println(result);
+        // Display dependency graph
+        if (!result.getDependencies().isEmpty()) {
+            System.out.println("\n📊 DEPENDENCY GRAPH:");
+            result.getDependencies().forEach((file, deps) -> {
+                System.out.println("  " + file);
+                deps.forEach(dep -> System.out.println("    └─ " + dep));
+            });
+        }
+
+        // Display circular dependencies
+        if (!result.getCircularDependencies().isEmpty()) {
+            System.out.println("\n🔄 CIRCULAR DEPENDENCIES DETECTED:");
+            result.getCircularDependencies().forEach(cycle ->
+                System.out.println("  ⚠️  " + cycle));
+        }
+
+        // Display root causes
+        if (!result.getRootCauses().isEmpty()) {
+            System.out.println("\n🎯 ROOT CAUSES:");
+            result.getRootCauses().forEach(cause ->
+                System.out.println("  🔍 " + cause));
+        }
+
+        // Display validation errors
+        if (!result.getErrors().isEmpty()) {
+            System.out.println("\n❌ VALIDATION ERRORS:");
+            result.getErrors().forEach(error ->
+                System.out.println("  • " + error));
+        }
+
+        // Display file-specific results
+        System.out.println("\n📋 FILE VALIDATION RESULTS:");
+        result.getFileResults().forEach((file, fileResult) -> {
+            String status = fileResult.isValid() ? "✅" : "❌";
+            System.out.println("  " + status + " " + file);
+            if (!fileResult.isValid()) {
+                fileResult.getErrors().forEach(error ->
+                    System.out.println("      • " + error));
+            }
+        });
 
         if (result.isValid()) {
-            System.out.println("✅ VALIDATION PASSED - APEX YAML file is valid!");
+            System.out.println("\n✅ DEPENDENCY-AWARE VALIDATION PASSED!");
+            System.out.println("   All files in dependency chain are valid.");
             System.exit(0);
         } else {
-            System.out.println("❌ VALIDATION FAILED - Please fix the errors above");
+            System.out.println("\n❌ DEPENDENCY-AWARE VALIDATION FAILED!");
+            System.out.println("   Please fix the errors above, starting with root causes.");
             System.exit(1);
         }
     }

@@ -3,7 +3,7 @@
 # Replaces hardcoded sample data creation from ScenarioBasedProcessingDemo
 
 metadata:
-  id: "Sample Data Records Configuration"
+  id: "sample-data-records-configuration"
   name: "Sample Data Records Configuration"
   version: "1.0.0"
   description: "Data-driven sample data records configuration for scenario processing"
@@ -15,11 +15,11 @@ metadata:
 # Sample data records configuration by data type
 data:
   otc-option-records:
-    data-id: "SAMPLE001"
+    data-id: "sample-data-records-configuration"
     data-type: "otc-option-records"
     description: "OTC Option sample data records for scenario routing"
     sample-records:
-      - record-id: "OTC001"
+      - record-id: "sample-data-records-configuration"
         record-type: "OtcOption"
         trade-date: "2025-08-02"
         counterparty: "GOLDMAN_SACHS"
@@ -35,7 +35,7 @@ data:
         settlement-type: "Cash"
         scenario-routing: "otc-options-standard"
         
-      - record-id: "OTC002"
+      - record-id: "sample-data-records-configuration"
         record-type: "OtcOption"
         trade-date: "2025-08-02"
         counterparty: "JPMORGAN"
@@ -51,7 +51,7 @@ data:
         settlement-type: "Physical"
         scenario-routing: "otc-options-complex"
         
-      - record-id: "OTC003"
+      - record-id: "sample-data-records-configuration"
         record-type: "OtcOption"
         trade-date: "2025-08-02"
         counterparty: "MORGAN_STANLEY"
@@ -73,16 +73,16 @@ data:
       - "Notional amounts must be positive"
     
   commodity-swap-records:
-    data-id: "SAMPLE002"
+    data-id: "sample-data-records-configuration"
     data-type: "commodity-swap-records"
     description: "Commodity Swap sample data records for scenario routing"
     sample-records:
-      - record-id: "CS001"
+      - record-id: "sample-data-records-configuration"
         record-type: "CommoditySwap"
         data-type: "CommoditySwap"
-        trade-id: "CS_20250802_001"
-        counterparty-id: "CP001"
-        client-id: "CLI001"
+        trade-id: "sample-data-records-configuration"
+        counterparty-id: "sample-data-records-configuration"
+        client-id: "sample-data-records-configuration"
         commodity-type: "ENERGY"
         reference-index: "WTI"
         notional-amount: 5000000.00
@@ -91,12 +91,12 @@ data:
         maturity-date: "2027-08-02"
         scenario-routing: "commodity-swaps-standard"
         
-      - record-id: "CS002"
+      - record-id: "sample-data-records-configuration"
         record-type: "CommoditySwap"
         data-type: "CommoditySwap"
-        trade-id: "CS_20250802_002"
-        counterparty-id: "CP002"
-        client-id: "CLI002"
+        trade-id: "sample-data-records-configuration"
+        counterparty-id: "sample-data-records-configuration"
+        client-id: "sample-data-records-configuration"
         commodity-type: "METALS"
         reference-index: "GOLD_SPOT"
         notional-amount: 15000000.00
@@ -105,12 +105,12 @@ data:
         maturity-date: "2028-08-02"
         scenario-routing: "commodity-swaps-complex"
         
-      - record-id: "CS003"
+      - record-id: "sample-data-records-configuration"
         record-type: "CommoditySwap"
         data-type: "CommoditySwap"
-        trade-id: "CS_20250802_003"
-        counterparty-id: "CP003"
-        client-id: "CLI003"
+        trade-id: "sample-data-records-configuration"
+        counterparty-id: "sample-data-records-configuration"
+        client-id: "sample-data-records-configuration"
         commodity-type: "AGRICULTURE"
         reference-index: "CORN_FUTURES"
         notional-amount: 2500000.00
@@ -125,15 +125,15 @@ data:
       - "Commodity types must be recognized"
     
   settlement-instruction-records:
-    data-id: "SAMPLE003"
+    data-id: "sample-data-records-configuration"
     data-type: "settlement-instruction-records"
     description: "Settlement Instruction sample data records for scenario routing"
     sample-records:
-      - record-id: "SI001"
+      - record-id: "sample-data-records-configuration"
         record-type: "SettlementInstruction"
         data-type: "SettlementInstruction"
-        instruction-id: "SI_20250802_001"
-        client-id: "CLIENT_PREMIUM_ASIA_001"
+        instruction-id: "sample-data-records-configuration"
+        client-id: "sample-data-records-configuration"
         market: "JAPAN"
         instrument-type: "EQUITY"
         settlement-amount: 2000000.00
@@ -142,11 +142,11 @@ data:
         requires-repair: true
         scenario-routing: "settlement-auto-repair"
         
-      - record-id: "SI002"
+      - record-id: "sample-data-records-configuration"
         record-type: "SettlementInstruction"
         data-type: "SettlementInstruction"
-        instruction-id: "SI_20250802_002"
-        client-id: "CLIENT_STANDARD_EUROPE_001"
+        instruction-id: "sample-data-records-configuration"
+        client-id: "sample-data-records-configuration"
         market: "LONDON"
         instrument-type: "BOND"
         settlement-amount: 5000000.00
@@ -155,11 +155,11 @@ data:
         requires-repair: false
         scenario-routing: "settlement-manual-review"
         
-      - record-id: "SI003"
+      - record-id: "sample-data-records-configuration"
         record-type: "SettlementInstruction"
         data-type: "SettlementInstruction"
-        instruction-id: "SI_20250802_003"
-        client-id: "CLIENT_PREMIUM_ASIA_002"
+        instruction-id: "sample-data-records-configuration"
+        client-id: "sample-data-records-configuration"
         market: "SINGAPORE"
         instrument-type: "EQUITY"
         settlement-amount: 3500000.00
@@ -174,11 +174,11 @@ data:
       - "Currencies must match market conventions"
     
   default:
-    data-id: "SAMPLE000"
+    data-id: "sample-data-records-configuration"
     data-type: "default"
     description: "Default sample data records"
     sample-records:
-      - record-id: "DEFAULT001"
+      - record-id: "sample-data-records-configuration"
         record-type: "DefaultRecord"
         name: "Default Record"
         value: "Default Value"

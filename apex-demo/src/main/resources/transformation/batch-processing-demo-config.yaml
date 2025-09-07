@@ -3,7 +3,7 @@
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
 metadata:
-  id: "Batch Processing Demo Configuration"
+  id: "batch-processing-demo-configuration"
   name: "Batch Processing Demo Configuration"
   version: "2.0.0"
   description: "Real APEX batch processing demonstration with sequential, parallel, memory-efficient, error handling, financial scenarios, and performance monitoring"

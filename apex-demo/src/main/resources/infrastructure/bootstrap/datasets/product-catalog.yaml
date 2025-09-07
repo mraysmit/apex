@@ -6,7 +6,7 @@
 # ============================================================================
 
 metadata:
-  id: "Bootstrap Demo - Financial Product Catalog Dataset"
+  id: "bootstrap-demo---financial-product-catalog-dataset"
   name: "Bootstrap Demo - Financial Product Catalog Dataset"
   version: "1.0.0"
   description: "Comprehensive financial products and services catalog (used by DemoDataBootstrap.java for product lookups)"
@@ -20,7 +20,7 @@ metadata:
 
 # Financial products catalog
 products:
-  - product_id: "PROD001"
+  - product_id: "bootstrap-demo---financial-product-catalog-dataset"
     product_info:
       name: "Private Wealth Management"
       category: "Investment"
@@ -52,7 +52,7 @@ products:
     risk_profile: "LOW_TO_MEDIUM"
     active: true
 
-  - product_id: "PROD002"
+  - product_id: "bootstrap-demo---financial-product-catalog-dataset"
     product_info:
       name: "Premium Trading Account"
       category: "Trading"
@@ -85,7 +85,7 @@ products:
     risk_profile: "MEDIUM_TO_HIGH"
     active: true
 
-  - product_id: "PROD003"
+  - product_id: "bootstrap-demo---financial-product-catalog-dataset"
     product_info:
       name: "High-Yield Savings Plus"
       category: "Savings"
@@ -118,7 +118,7 @@ products:
     risk_profile: "LOW"
     active: true
 
-  - product_id: "PROD004"
+  - product_id: "bootstrap-demo---financial-product-catalog-dataset"
     product_info:
       name: "Corporate Treasury Services"
       category: "Corporate"
@@ -151,7 +151,7 @@ products:
     risk_profile: "LOW_TO_MEDIUM"
     active: true
 
-  - product_id: "PROD005"
+  - product_id: "bootstrap-demo---financial-product-catalog-dataset"
     product_info:
       name: "Structured Products Portfolio"
       category: "Investment"
@@ -184,7 +184,7 @@ products:
     risk_profile: "MEDIUM"
     active: true
 
-  - product_id: "PROD006"
+  - product_id: "bootstrap-demo---financial-product-catalog-dataset"
     product_info:
       name: "FX Trading Platform"
       category: "Trading"
@@ -217,7 +217,7 @@ products:
     risk_profile: "HIGH"
     active: true
 
-  - product_id: "PROD007"
+  - product_id: "bootstrap-demo---financial-product-catalog-dataset"
     product_info:
       name: "Commodity Investment Fund"
       category: "Investment"
@@ -250,7 +250,7 @@ products:
     risk_profile: "MEDIUM_TO_HIGH"
     active: true
 
-  - product_id: "PROD008"
+  - product_id: "bootstrap-demo---financial-product-catalog-dataset"
     product_info:
       name: "Digital Banking Suite"
       category: "Digital"
@@ -286,25 +286,25 @@ products:
 # Product eligibility rules
 eligibility_rules:
   balance_requirements:
-    - rule_id: "ER001"
+    - rule_id: "bootstrap-demo---financial-product-catalog-dataset"
       name: "minimum-balance-check"
       condition: "#customerBalance >= #productMinBalance"
       message: "Customer balance must meet minimum product requirement"
       
   income_requirements:
-    - rule_id: "ER002"
+    - rule_id: "bootstrap-demo---financial-product-catalog-dataset"
       name: "minimum-income-check"
       condition: "#customerIncome >= #productMinIncome"
       message: "Customer income must meet minimum product requirement"
       
   experience_requirements:
-    - rule_id: "ER003"
+    - rule_id: "bootstrap-demo---financial-product-catalog-dataset"
       name: "investment-experience-check"
       condition: "#productRequiredExperience.contains(#customerExperience)"
       message: "Customer must have required investment experience level"
       
   segment_requirements:
-    - rule_id: "ER004"
+    - rule_id: "bootstrap-demo---financial-product-catalog-dataset"
       name: "membership-segment-check"
       condition: "#productTargetSegments.contains(#customerMembershipLevel)"
       message: "Product is only available to specific membership segments"

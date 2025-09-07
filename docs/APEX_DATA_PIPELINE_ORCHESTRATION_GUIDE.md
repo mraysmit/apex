@@ -4,7 +4,7 @@
 
 **Version:** 1.0
 **Date:** 2025-09-06
-**Author:** APEX Development Team
+**Author:** MArk A Ray-Smith Cityline Ltd.
 
 ## Overview
 
@@ -73,7 +73,7 @@ Pipeline orchestration in APEX allows you to define complete data processing wor
 
 ### The APEX Principle
 
-**Before (Hardcoded Java Orchestration):**
+**Typical (Hardcoded Java Orchestration):**
 ```java
 // Traditional approach - hardcoded orchestration
 List<Customer> customers = csvReader.readCustomers("input.csv");
@@ -85,7 +85,7 @@ for (Customer customer : customers) {
 }
 ```
 
-**After (YAML-Driven Orchestration):**
+**Dynamic (YAML-Driven Orchestration):**
 ```java
 // APEX approach - YAML-driven orchestration
 pipelineEngine.executePipeline("customer-etl-pipeline");
@@ -259,9 +259,12 @@ Let's create a simple pipeline that reads data from a CSV file and writes it to 
 ```yaml
 # my-first-pipeline.yaml
 metadata:
+  id: "my-first-pipeline"
   name: "My First Pipeline"
   version: "1.0.0"
   description: "Simple CSV to database pipeline"
+  type: "pipeline-config"
+  author: "APEX Demo Team"
 
 pipeline:
   name: "csv-to-db-pipeline"
@@ -348,9 +351,12 @@ Every pipeline configuration follows this structure:
 
 ```yaml
 metadata:
+  id: "pipeline-identifier"
   name: "Pipeline Name"
   description: "What this pipeline does"
   version: "1.0.0"
+  type: "pipeline-config"
+  author: "Pipeline Team"
 
 pipeline:
   name: "pipeline-identifier"
@@ -376,9 +382,11 @@ data-sinks:
 
 ```yaml
 metadata:
+  id: "customer-processing-pipeline"
   name: "Customer Processing Pipeline"
   version: "1.0.0"
   description: "Complete customer data processing workflow"
+  type: "pipeline-config"
   author: "Data Team"
   tags: ["etl", "customers", "production"]
 ```
@@ -910,9 +918,11 @@ This **working example** demonstrates the full pipeline orchestration capabiliti
 
 ```yaml
 metadata:
+  id: "csv-to-h2-pipeline-demo"
   name: "CSV to H2 ETL Pipeline Demo"
   version: "1.0.0"
   description: "Demonstration of CSV data processing with H2 database output using APEX data sinks"
+  type: "pipeline-config"
   author: "APEX Demo Team"
   tags: ["demo", "etl", "csv", "h2", "pipeline"]
 
@@ -1531,6 +1541,14 @@ if (!validation.isValid()) {
 Extract data from CSV, transform it, and load into database:
 
 ```yaml
+metadata:
+  id: "customer-etl-pipeline"
+  name: "Customer ETL Pipeline"
+  version: "1.0.0"
+  description: "Extract data from CSV, transform it, and load into database"
+  type: "pipeline-config"
+  author: "ETL Team"
+
 pipeline:
   name: "customer-etl-pipeline"
   steps:
@@ -1546,12 +1564,28 @@ pipeline:
       type: "load"
       sink: "customer-db"
       depends-on: ["validate-data"]
+
+data-sources:
+  - name: "customer-csv"
+    type: "file-system"
+
+data-sinks:
+  - name: "customer-db"
+    type: "database"
 ```
 
 ### Use Case 2: Data Synchronization
 Sync data between multiple systems:
 
 ```yaml
+metadata:
+  id: "data-sync-pipeline"
+  name: "Data Synchronization Pipeline"
+  version: "1.0.0"
+  description: "Sync data between multiple systems"
+  type: "pipeline-config"
+  author: "Data Integration Team"
+
 pipeline:
   name: "data-sync-pipeline"
   steps:
@@ -1568,12 +1602,30 @@ pipeline:
       type: "load"
       sink: "target-database-2"
       depends-on: ["extract-source-system"]
+
+data-sources:
+  - name: "source-database"
+    type: "database"
+
+data-sinks:
+  - name: "target-database-1"
+    type: "database"
+  - name: "target-database-2"
+    type: "database"
 ```
 
 ### Use Case 3: Audit Trail Creation
 Process data and create comprehensive audit trails:
 
 ```yaml
+metadata:
+  id: "audit-trail-pipeline"
+  name: "Audit Trail Creation Pipeline"
+  version: "1.0.0"
+  description: "Process data and create comprehensive audit trails"
+  type: "pipeline-config"
+  author: "Compliance Team"
+
 pipeline:
   name: "audit-pipeline"
   steps:
@@ -1595,6 +1647,16 @@ pipeline:
       sink: "audit-log"
       depends-on: ["load-processed-data"]
       optional: true
+
+data-sources:
+  - name: "transaction-log"
+    type: "database"
+
+data-sinks:
+  - name: "processed-database"
+    type: "database"
+  - name: "audit-log"
+    type: "file-system"
 ```
 
 ---

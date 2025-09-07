@@ -3,7 +3,7 @@
 # Replaces hardcoded OTC option creation from OtcOptionsBootstrapDemo
 
 metadata:
-  id: "Sample OTC Options Configuration"
+  id: "sample-otc-options-configuration"
   name: "Sample OTC Options Configuration"
   version: "1.0.0"
   description: "Data-driven sample OTC options configuration for bootstrap processing"
