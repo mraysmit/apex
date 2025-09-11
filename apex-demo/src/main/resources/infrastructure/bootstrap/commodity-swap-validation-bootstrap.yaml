@@ -67,7 +67,7 @@
 # ============================================================================
 
 metadata:
-  id: "Commodity Swap Validation Bootstrap"
+  id: "commodity-swap-validation-bootstrap"
   name: "Commodity Swap Validation Bootstrap"
   version: "1.0"
   description: "Complete commodity derivatives validation and enrichment demonstration"
@@ -112,7 +112,7 @@ metadata:
 #
 rule-chains:
   # Ultra-Simple API validation chain
-  - id: "ultra-simple-validation"
+  - id: "commodity-swap-validation-bootstrap"
     name: "Ultra-Simple Validation Rules"
     description: "Basic field validation using ultra-simple API"
     pattern: "conditional-chaining"
@@ -120,28 +120,28 @@ rule-chains:
     priority: 100
     configuration:
       trigger-rule:
-        id: "basic-fields-check"
+        id: "commodity-swap-validation-bootstrap"
         condition: "tradeId != null && counterpartyId != null && clientId != null"
         message: "Basic required fields validation"
         description: "Ensures all essential trade identifiers are present"
       conditional-rules:
         on-trigger:
-          - id: "notional-positive"
+          - id: "commodity-swap-validation-bootstrap"
             condition: "notionalAmount != null && notionalAmount > 0"
             message: "Notional amount must be positive"
             description: "Validates notional amount is greater than zero"
-          - id: "commodity-type-required"
+          - id: "commodity-swap-validation-bootstrap"
             condition: "commodityType != null && commodityType.trim().length() > 0"
             message: "Commodity type is required"
             description: "Ensures commodity type is specified"
         on-no-trigger:
-          - id: "basic-validation-failure"
+          - id: "commodity-swap-validation-bootstrap"
             condition: "true"
             message: "Basic field validation failed"
             description: "One or more required fields are missing"
 
   # Template-based business rules chain
-  - id: "template-business-rules"
+  - id: "commodity-swap-validation-bootstrap"
     name: "Template-Based Business Rules"
     description: "Business logic validation using template-based rules"
     pattern: "accumulative-chaining"
@@ -150,32 +150,32 @@ rule-chains:
     configuration:
       accumulator-variable: "businessRuleScore"
       accumulation-rules:
-        - id: "maturity-eligibility"
+        - id: "commodity-swap-validation-bootstrap"
           condition: "maturityDate != null && maturityDate.isBefore(tradeDate.plusYears(5))"
           weight: 25
           message: "TradeB maturity within 5 years"
           description: "Validates trade maturity is within acceptable range"
-        - id: "currency-consistency"
+        - id: "commodity-swap-validation-bootstrap"
           condition: "notionalCurrency == paymentCurrency && paymentCurrency == settlementCurrency"
           weight: 20
           message: "All currencies must match"
           description: "Ensures currency consistency across trade legs"
-        - id: "settlement-terms"
+        - id: "commodity-swap-validation-bootstrap"
           condition: "settlementDays != null && settlementDays >= 0 && settlementDays <= 5"
           weight: 15
           message: "Settlement within 5 days"
           description: "Validates settlement period is within acceptable range"
-        - id: "energy-commodity-validation"
+        - id: "commodity-swap-validation-bootstrap"
           condition: "commodityType == 'ENERGY' && (referenceIndex == 'WTI' || referenceIndex == 'BRENT' || referenceIndex == 'HENRY_HUB')"
           weight: 30
           message: "Valid energy commodity and index"
           description: "Ensures energy commodities use valid reference indices"
-        - id: "metals-commodity-validation"
+        - id: "commodity-swap-validation-bootstrap"
           condition: "commodityType == 'METALS' && (referenceIndex == 'GOLD' || referenceIndex == 'SILVER' || referenceIndex == 'COPPER')"
           weight: 30
           message: "Valid metals commodity and index"
           description: "Ensures metals commodities use valid reference indices"
-        - id: "agricultural-commodity-validation"
+        - id: "commodity-swap-validation-bootstrap"
           condition: "commodityType == 'AGRICULTURAL' && (referenceIndex == 'CORN' || referenceIndex == 'WHEAT' || referenceIndex == 'SOYBEANS')"
           weight: 30
           message: "Valid agricultural commodity and index"
@@ -185,7 +185,7 @@ rule-chains:
         warning-score: 50
 
   # Advanced configuration chain
-  - id: "advanced-validation"
+  - id: "commodity-swap-validation-bootstrap"
     name: "Advanced Configuration Rules"
     description: "Complex validation using advanced configuration"
     pattern: "conditional-chaining"
@@ -193,32 +193,32 @@ rule-chains:
     priority: 300
     configuration:
       trigger-rule:
-        id: "advanced-eligibility"
+        id: "commodity-swap-validation-bootstrap"
         condition: "tradeId != null && tradeId.matches('^TRS[0-9]{3}$')"
         message: "TradeB ID format validation"
         description: "Validates trade ID follows TRS### format"
       conditional-rules:
         on-trigger:
-          - id: "notional-range-check"
+          - id: "commodity-swap-validation-bootstrap"
             condition: "notionalAmount >= 1000000 && notionalAmount <= 100000000"
             message: "Notional must be between $1M and $100M"
             description: "Validates notional amount is within acceptable range"
-          - id: "regulatory-compliance"
+          - id: "commodity-swap-validation-bootstrap"
             condition: "jurisdiction != null && regulatoryRegime != null"
             message: "Regulatory information required"
             description: "Ensures regulatory compliance fields are populated"
-          - id: "funding-spread-validation"
+          - id: "commodity-swap-validation-bootstrap"
             condition: "fundingSpread != null && fundingSpread >= 0 && fundingSpread <= 1000"
             message: "Funding spread within acceptable range"
             description: "Validates funding spread is between 0 and 1000 basis points"
         on-no-trigger:
-          - id: "format-validation-failure"
+          - id: "commodity-swap-validation-bootstrap"
             condition: "true"
             message: "TradeB ID format validation failed"
             description: "TradeB ID does not follow required format"
 
   # Risk management chain
-  - id: "risk-management-rules"
+  - id: "commodity-swap-validation-bootstrap"
     name: "Risk Management Rules"
     description: "Risk-based validation and limits"
     pattern: "accumulative-chaining"
@@ -227,17 +227,17 @@ rule-chains:
     configuration:
       accumulator-variable: "riskManagementScore"
       accumulation-rules:
-        - id: "client-credit-limit"
+        - id: "commodity-swap-validation-bootstrap"
           condition: "notionalAmount <= 250000000"
           weight: 40
           message: "Within client credit limit"
           description: "TradeB notional is within client credit limit"
-        - id: "counterparty-exposure"
+        - id: "commodity-swap-validation-bootstrap"
           condition: "notionalAmount <= 1000000000"
           weight: 35
           message: "Within counterparty exposure limit"
           description: "TradeB notional is within counterparty exposure limit"
-        - id: "commodity-concentration"
+        - id: "commodity-swap-validation-bootstrap"
           condition: "true"
           weight: 25
           message: "Commodity concentration acceptable"
@@ -248,7 +248,7 @@ rule-chains:
 
 enrichments:
   # Client data enrichment
-  - id: "client-enrichment"
+  - id: "commodity-swap-validation-bootstrap"
     name: "Client Data Enrichment"
     description: "Enrich trade with client information"
     type: "lookup-enrichment"
@@ -260,7 +260,7 @@ enrichments:
         type: "inline"
         key-field: "clientId"
         data:
-          - clientId: "CLIENT001"
+          - clientid: "commodity-swap-validation-bootstrap"
             client_name: "ABC Corporation"
             client_rating: "A+"
             client_tier: "PREMIUM"
@@ -276,7 +276,7 @@ enrichments:
         description: "Client risk rating"
 
   # Counterparty data enrichment
-  - id: "counterparty-enrichment"
+  - id: "commodity-swap-validation-bootstrap"
     name: "Counterparty Data Enrichment"
     description: "Enrich trade with counterparty information"
     type: "lookup-enrichment"
@@ -288,7 +288,7 @@ enrichments:
         type: "inline"
         key-field: "counterpartyId"
         data:
-          - counterpartyId: "CP001"
+          - counterpartyid: "commodity-swap-validation-bootstrap"
             counterparty_name: "Goldman Sachs"
             counterparty_rating: "A+"
             counterparty_tier: "TIER1"
@@ -304,7 +304,7 @@ enrichments:
         description: "Counterparty regulatory status"
 
   # Commodity reference data enrichment
-  - id: "commodity-enrichment"
+  - id: "commodity-swap-validation-bootstrap"
     name: "Commodity Reference Data Enrichment"
     description: "Enrich trade with commodity reference data"
     type: "lookup-enrichment"

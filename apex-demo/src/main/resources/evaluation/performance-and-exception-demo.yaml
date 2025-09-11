@@ -3,7 +3,7 @@
 # Replaces all hardcoded performance and exception logic from PerformanceAndExceptionDemo (@version 1.0)
 
 metadata:
-  id: "Performance and Exception Demo"
+  id: "performance-and-exception-demo"
   name: "Performance and Exception Demo"
   version: "1.0.0"
   description: "APEX-compliant performance and exception handling with real enrichment services"
@@ -53,7 +53,7 @@ enrichments:
     target-field: "performanceMonitoringPatternsResult"
     
   - name: "performance-and-exception-summary"
-    type: "expression-enrichment"
+    type: "calculation-enrichment"
     description: "Generate performance and exception handling summary"
     condition: "true"
     expression: "'Performance and exception handling completed: ' + (#data.performanceType != null ? #data.performanceType : 'unknown') + ' using real APEX services'"

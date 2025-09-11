@@ -3,7 +3,7 @@
 # Replaces hardcoded rule logic from DynamicMethodExecutionDemo
 
 metadata:
-  id: "Dynamic Rules Configuration"
+  id: "dynamic-rules-configuration"
   name: "Dynamic Rules Configuration"
   version: "1.0.0"
   description: "Data-driven dynamic rules configuration for method execution"

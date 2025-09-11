@@ -3,7 +3,7 @@
 # Replaces hardcoded risk logic from DynamicMethodExecutionDemo
 
 metadata:
-  id: "Risk Management Configuration"
+  id: "risk-management-configuration"
   name: "Risk Management Configuration"
   version: "1.0.0"
   description: "Data-driven risk management configuration for dynamic method execution"

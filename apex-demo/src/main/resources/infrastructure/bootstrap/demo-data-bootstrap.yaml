@@ -6,7 +6,7 @@
 # ============================================================================
 
 metadata:
-  id: "APEX Demo Data Bootstrap - Main Configuration"
+  id: "apex-demo-data-bootstrap---main-configuration"
   name: "APEX Demo Data Bootstrap - Main Configuration"
   version: "1.0.0"
   description: "Main bootstrap configuration for comprehensive demo data management (used by DemoDataBootstrap.java)"
@@ -151,54 +151,54 @@ trading_scenarios:
 # Data validation rules
 validation_rules:
   customer_validation:
-    - rule_id: "CV001"
+    - rule_id: "apex-demo-data-bootstrap---main-configuration"
       name: "valid-email-format"
       condition: "#email != null && #email.matches('^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$')"
       message: "Customer email must be in valid format"
       
-    - rule_id: "CV002"
+    - rule_id: "apex-demo-data-bootstrap---main-configuration"
       name: "valid-age-range"
       condition: "#age >= 18 && #age <= 100"
       message: "Customer age must be between 18 and 100"
       
-    - rule_id: "CV003"
+    - rule_id: "apex-demo-data-bootstrap---main-configuration"
       name: "valid-balance"
       condition: "#balance >= 0"
       message: "Customer balance cannot be negative"
       
-    - rule_id: "CV004"
+    - rule_id: "apex-demo-data-bootstrap---main-configuration"
       name: "membership-balance-consistency"
       condition: "(#membershipLevel == 'Platinum' && #balance >= 500000) || (#membershipLevel == 'Gold' && #balance >= 100000) || (#membershipLevel == 'Silver' && #balance >= 25000) || (#membershipLevel == 'Basic' && #balance >= 1000)"
       message: "Customer balance must meet minimum requirements for membership level"
   
   product_validation:
-    - rule_id: "PV001"
+    - rule_id: "apex-demo-data-bootstrap---main-configuration"
       name: "valid-product-price"
       condition: "#price > 0"
       message: "Product price must be positive"
       
-    - rule_id: "PV002"
+    - rule_id: "apex-demo-data-bootstrap---main-configuration"
       name: "valid-category"
       condition: "#category != null && #category.length() > 0"
       message: "Product must have a valid category"
       
-    - rule_id: "PV003"
+    - rule_id: "apex-demo-data-bootstrap---main-configuration"
       name: "min-balance-consistency"
       condition: "#minBalance >= 0 && #minBalance <= #price"
       message: "Minimum balance must be non-negative and not exceed product price"
   
   trade_validation:
-    - rule_id: "TV001"
+    - rule_id: "apex-demo-data-bootstrap---main-configuration"
       name: "valid-trade-amount"
       condition: "#amount > 0"
       message: "Trade amount must be positive"
       
-    - rule_id: "TV002"
+    - rule_id: "apex-demo-data-bootstrap---main-configuration"
       name: "valid-currency"
       condition: "#currency != null && #currency.matches('^[A-Z]{3}$')"
       message: "Currency must be a valid 3-letter ISO code"
       
-    - rule_id: "TV003"
+    - rule_id: "apex-demo-data-bootstrap---main-configuration"
       name: "valid-asset-class"
       condition: "#assetClass != null && #assetClass.length() > 0"
       message: "Trade must have a valid asset class"

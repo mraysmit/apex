@@ -3,7 +3,7 @@
 # Replaces hardcoded rule result logic from ApexAdvancedFeaturesDemo
 
 metadata:
-  id: "Rule Result Features Configuration"
+  id: "rule-result-features-configuration"
   name: "Rule Result Features Configuration"
   version: "1.0.0"
   description: "Data-driven rule result features configuration for advanced features"
@@ -15,7 +15,7 @@ metadata:
 # Rule result features configuration by feature type
 data:
   result-analysis:
-    feature-id: "FEAT001"
+    feature-id: "rule-result-features-configuration"
     feature-type: "result-analysis"
     description: "Analyze rule execution results for patterns and insights"
     analysis-capabilities:
@@ -30,7 +30,7 @@ data:
       predictive-insights: false
     
   result-routing:
-    feature-id: "FEAT002"
+    feature-id: "rule-result-features-configuration"
     feature-type: "result-routing"
     description: "Route rule results to appropriate downstream systems"
     routing-capabilities:
@@ -45,7 +45,7 @@ data:
       dead-letter-handling: true
     
   conditional-followup:
-    feature-id: "FEAT003"
+    feature-id: "rule-result-features-configuration"
     feature-type: "conditional-followup"
     description: "Execute follow-up actions based on rule results"
     followup-capabilities:
@@ -60,7 +60,7 @@ data:
       rollback-support: true
     
   result-aggregation:
-    feature-id: "FEAT004"
+    feature-id: "rule-result-features-configuration"
     feature-type: "result-aggregation"
     description: "Aggregate results from multiple rule executions"
     aggregation-capabilities:
@@ -75,7 +75,7 @@ data:
       export-formats: ["JSON", "CSV", "XML"]
     
   default:
-    feature-id: "FEAT000"
+    feature-id: "rule-result-features-configuration"
     feature-type: "default"
     description: "Default rule result feature"
     capabilities: ["Basic result logging"]

@@ -3,7 +3,7 @@
 # Use Case: Risk-based loan assessment with conditional credit score categorization
 
 metadata:
-  id: "Conditional Expression Lookup Demo"
+  id: "conditional-expression-lookup-demo"
   name: "Conditional Expression Lookup Demo"
   version: "1.0.0"
   description: "Demonstrates conditional expression lookup using credit score-based risk categorization"
@@ -14,7 +14,7 @@ metadata:
 
 # Define the enrichment rules
 enrichments:
-  - id: "risk-based-assessment-enrichment"
+  - id: "conditional-expression-lookup-demo"
     name: "Risk-Based Assessment Lookup"
     description: "Enrich risk assessments with conditional credit score-based risk parameters"
     type: "lookup-enrichment"
@@ -121,7 +121,7 @@ enrichments:
 
 # Optional validation rules
 validations:
-  - id: "credit-score-range"
+  - id: "conditional-expression-lookup-demo"
     name: "Credit Score Range Validation"
     description: "Ensure credit score is within valid range"
     type: "field-validation"
@@ -136,7 +136,7 @@ validations:
           max: 850
           message: "Credit score must be between 300 and 850"
           
-  - id: "annual-income-positive"
+  - id: "conditional-expression-lookup-demo"
     name: "Annual Income Validation"
     description: "Ensure annual income is positive"
     type: "field-validation"
@@ -150,7 +150,7 @@ validations:
           min: 0.01
           message: "Annual income must be positive"
           
-  - id: "requested-amount-positive"
+  - id: "conditional-expression-lookup-demo"
     name: "Requested Amount Validation"
     description: "Ensure requested loan amount is positive"
     type: "field-validation"
@@ -165,7 +165,7 @@ validations:
           max: 10000000.00
           message: "Requested amount must be between $1,000 and $10,000,000"
           
-  - id: "employment-status-valid"
+  - id: "conditional-expression-lookup-demo"
     name: "Employment Status Validation"
     description: "Ensure employment status is valid"
     type: "field-validation"
@@ -179,7 +179,7 @@ validations:
           allowedValues: ["FULL_TIME", "PART_TIME", "CONTRACT", "SELF_EMPLOYED", "UNEMPLOYED", "RETIRED"]
           message: "Employment status must be one of: FULL_TIME, PART_TIME, CONTRACT, SELF_EMPLOYED, UNEMPLOYED, RETIRED"
           
-  - id: "years-employed-reasonable"
+  - id: "conditional-expression-lookup-demo"
     name: "Years Employed Validation"
     description: "Ensure years employed is reasonable"
     type: "field-validation"

@@ -3,7 +3,7 @@
 # Replaces hardcoded settlement scenarios from CustodyAutoRepairBootstrap
 
 metadata:
-  id: "Settlement Scenarios Configuration"
+  id: "settlement-scenarios-configuration"
   name: "Settlement Scenarios Configuration"
   version: "2.0.0"
   description: "Data-driven settlement scenarios configuration for custody auto-repair processing"

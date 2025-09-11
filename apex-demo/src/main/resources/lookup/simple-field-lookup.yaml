@@ -3,7 +3,7 @@
 # Use Case: Enrich currency transactions with detailed currency information
 
 metadata:
-  id: "Simple Field Lookup Demo"
+  id: "simple-field-lookup-demo"
   name: "Simple Field Lookup Demo"
   version: "1.0.0"
   description: "Demonstrates basic field lookup using currency codes"
@@ -14,7 +14,7 @@ metadata:
 
 # Define the enrichment rules
 enrichments:
-  - id: "currency-details-enrichment"
+  - id: "simple-field-lookup-demo"
     name: "Currency Details Lookup"
     description: "Enrich transactions with currency details using simple field lookup"
     type: "lookup-enrichment"
@@ -137,7 +137,7 @@ enrichments:
 
 # Optional validation rules to ensure data quality
 validations:
-  - id: "currency-code-format"
+  - id: "simple-field-lookup-demo"
     name: "Currency Code Format Validation"
     description: "Ensure currency code is 3 characters uppercase"
     type: "field-validation"
@@ -151,7 +151,7 @@ validations:
           pattern: "^[A-Z]{3}$"
           message: "Currency code must be 3 uppercase letters"
           
-  - id: "amount-positive"
+  - id: "simple-field-lookup-demo"
     name: "Positive Amount Validation"
     description: "Ensure transaction amount is positive"
     type: "field-validation"

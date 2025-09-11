@@ -3,7 +3,7 @@
 # Replaces hardcoded trade risk rating logic from TradeTransformerDemo
 
 metadata:
-  id: "Trade Risk Ratings Configuration"
+  id: "trade-risk-ratings-configuration"
   name: "Trade Risk Ratings Configuration"
   version: "1.0.0"
   description: "Data-driven trade risk ratings configuration for trade transformation processing"

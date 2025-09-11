@@ -63,9 +63,8 @@ public class H2CustomParametersDemo {
         logger.info("============================================================");
         
         try {
-            // Load H2 driver
-            Class.forName("org.h2.Driver");
-            logger.info("✅ H2 driver loaded successfully");
+            // JDBC drivers are automatically loaded by apex-core JdbcTemplateFactory
+            logger.info("✅ JDBC drivers handled by apex-core");
             
             // Create H2 database with custom parameters matching YAML config
             // This matches: database: "./target/h2-demo/custom_params;MODE=MySQL;TRACE_LEVEL_FILE=2;CACHE_SIZE=32768"

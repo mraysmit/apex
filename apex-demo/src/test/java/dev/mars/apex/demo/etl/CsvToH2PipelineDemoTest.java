@@ -299,7 +299,7 @@ public class CsvToH2PipelineDemoTest {
 
         try {
             Class.forName("org.h2.Driver");
-            LOGGER.info("  ✓ H2 database driver available");
+            LOGGER.info("  ✓ H2 database driver available (automatically loaded via module system)");
         } catch (ClassNotFoundException e) {
             LOGGER.error("  ✗ H2 database driver not found", e);
             throw e;

@@ -3,7 +3,7 @@
 # Replaces hardcoded reporting deadlines from ComplianceServiceDemo
 
 metadata:
-  id: "Reporting Deadlines"
+  id: "reporting-deadlines"
   name: "Reporting Deadlines"
   version: "1.0.0"
   description: "Regulatory reporting deadlines by regulation"

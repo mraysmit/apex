@@ -3,7 +3,7 @@
 # Use Case: Customer-region specific pricing and tier information lookup
 
 metadata:
-  id: "Compound Key Lookup Demo"
+  id: "compound-key-lookup-demo"
   name: "Compound Key Lookup Demo"
   version: "1.0.0"
   description: "Demonstrates compound key lookup using customer ID and region concatenation"
@@ -14,7 +14,7 @@ metadata:
 
 # Define the enrichment rules
 enrichments:
-  - id: "customer-region-pricing-enrichment"
+  - id: "compound-key-lookup-demo"
     name: "Customer-Region Pricing Lookup"
     description: "Enrich orders with customer-region specific pricing and tier information"
     type: "lookup-enrichment"
@@ -157,7 +157,7 @@ enrichments:
 
 # Optional validation rules
 validations:
-  - id: "customer-id-format"
+  - id: "compound-key-lookup-demo"
     name: "Customer ID Format Validation"
     description: "Ensure customer ID follows expected format"
     type: "field-validation"
@@ -171,7 +171,7 @@ validations:
           pattern: "^CUST\\d{3}$"
           message: "Customer ID must be in format CUST### (e.g., CUST001)"
           
-  - id: "region-code-validation"
+  - id: "compound-key-lookup-demo"
     name: "Region Code Validation"
     description: "Ensure region code is valid"
     type: "field-validation"
@@ -185,7 +185,7 @@ validations:
           allowedValues: ["NA", "EU", "APAC", "LATAM", "ME", "AFRICA"]
           message: "Region must be one of: NA, EU, APAC, LATAM, ME, AFRICA"
           
-  - id: "quantity-positive"
+  - id: "compound-key-lookup-demo"
     name: "Positive Quantity Validation"
     description: "Ensure order quantity is positive"
     type: "field-validation"

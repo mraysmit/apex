@@ -3,7 +3,7 @@
 # Replaces hardcoded validation rule logic from IntegratedTradeValidatorComplexDemo
 
 metadata:
-  id: "Validation Rules Configuration"
+  id: "validation-rules-configuration"
   name: "Validation Rules Configuration"
   version: "1.0.0"
   description: "Data-driven validation rules configuration for complex trade validation"
@@ -15,7 +15,7 @@ metadata:
 # Validation rules configuration by rule type
 data:
   settlement-validation-rules:
-    rule-id: "RULE001"
+    rule-id: "validation-rules-configuration"
     rule-type: "settlement-validation-rules"
     description: "Settlement validation rule definitions"
     rule-groups:
@@ -58,7 +58,7 @@ data:
             severity: "WARNING"
     
   compliance-validation-rules:
-    rule-id: "RULE002"
+    rule-id: "validation-rules-configuration"
     rule-type: "compliance-validation-rules"
     description: "Compliance validation rule definitions"
     rule-groups:
@@ -89,7 +89,7 @@ data:
             severity: "ERROR"
     
   instrument-validation-rules:
-    rule-id: "RULE003"
+    rule-id: "validation-rules-configuration"
     rule-type: "instrument-validation-rules"
     description: "Instrument validation rule definitions"
     rule-groups:
@@ -124,7 +124,7 @@ data:
             severity: "ERROR"
     
   risk-validation-rules:
-    rule-id: "RULE004"
+    rule-id: "validation-rules-configuration"
     rule-type: "risk-validation-rules"
     description: "Risk validation rule definitions"
     rule-groups:
@@ -155,7 +155,7 @@ data:
             severity: "WARNING"
     
   default:
-    rule-id: "RULE000"
+    rule-id: "validation-rules-configuration"
     rule-type: "default"
     description: "Default validation rules"
     rule-groups:

@@ -3,7 +3,7 @@
 # Replaces hardcoded rule analysis logic from RuleDefinitionServiceDemo
 
 metadata:
-  id: "Rule Analysis Processors Configuration"
+  id: "rule-analysis-processors-configuration"
   name: "Rule Analysis Processors Configuration"
   version: "1.0.0"
   description: "Data-driven rule analysis processors configuration for rule definition service"
@@ -24,7 +24,7 @@ data:
       scoring-approach: "WEIGHTED"
     analysis-processors:
       cyclomatic-complexity-processor:
-        processor-id: "CYCLOMATIC_COMPLEXITY_PROCESSOR"
+        processor-id: "rule-analysis-processors-configuration"
         processor-name: "Cyclomatic Complexity Analysis Processor"
         processor-description: "Processor for analyzing cyclomatic complexity of rules"
         complexity-metrics:
@@ -74,7 +74,7 @@ data:
           - "Track complexity trends over time"
           
       cognitive-complexity-processor:
-        processor-id: "COGNITIVE_COMPLEXITY_PROCESSOR"
+        processor-id: "rule-analysis-processors-configuration"
         processor-name: "Cognitive Complexity Analysis Processor"
         processor-description: "Processor for analyzing cognitive complexity of rules"
         complexity-factors:
@@ -141,7 +141,7 @@ data:
           - "Track cognitive load patterns"
           
       maintainability-complexity-processor:
-        processor-id: "MAINTAINABILITY_COMPLEXITY_PROCESSOR"
+        processor-id: "rule-analysis-processors-configuration"
         processor-name: "Maintainability Complexity Analysis Processor"
         processor-description: "Processor for analyzing rule maintainability complexity"
         maintainability-dimensions:
@@ -203,7 +203,7 @@ data:
       optimization-focus: "EXECUTION_EFFICIENCY"
     analysis-processors:
       execution-time-processor:
-        processor-id: "EXECUTION_TIME_PROCESSOR"
+        processor-id: "rule-analysis-processors-configuration"
         processor-name: "Rule Execution Time Analysis Processor"
         processor-description: "Processor for analyzing rule execution time performance"
         performance-metrics:
@@ -253,7 +253,7 @@ data:
           - "Track performance trends and degradations"
           
       memory-usage-processor:
-        processor-id: "MEMORY_USAGE_PROCESSOR"
+        processor-id: "rule-analysis-processors-configuration"
         processor-name: "Rule Memory Usage Analysis Processor"
         processor-description: "Processor for analyzing rule memory usage patterns"
         memory-metrics:
@@ -293,7 +293,7 @@ data:
           - "Track memory optimization opportunities"
           
       throughput-processor:
-        processor-id: "THROUGHPUT_PROCESSOR"
+        processor-id: "rule-analysis-processors-configuration"
         processor-name: "Rule Throughput Analysis Processor"
         processor-description: "Processor for analyzing rule throughput and scalability"
         throughput-metrics:
@@ -346,7 +346,7 @@ data:
       impact-assessment: "COMPREHENSIVE"
     analysis-processors:
       dependency-graph-processor:
-        processor-id: "DEPENDENCY_GRAPH_PROCESSOR"
+        processor-id: "rule-analysis-processors-configuration"
         processor-name: "Rule Dependency Graph Analysis Processor"
         processor-description: "Processor for analyzing rule dependency graphs"
         dependency-types:
@@ -386,7 +386,7 @@ data:
           - "Track dependency evolution over time"
           
       impact-analysis-processor:
-        processor-id: "IMPACT_ANALYSIS_PROCESSOR"
+        processor-id: "rule-analysis-processors-configuration"
         processor-name: "Rule Impact Analysis Processor"
         processor-description: "Processor for analyzing rule change impact"
         impact-dimensions:
@@ -444,7 +444,7 @@ data:
       scoring-approach: "COMPREHENSIVE"
     analysis-processors:
       rule-quality-metrics-processor:
-        processor-id: "RULE_QUALITY_METRICS_PROCESSOR"
+        processor-id: "rule-analysis-processors-configuration"
         processor-name: "Rule Quality Metrics Analysis Processor"
         processor-description: "Processor for analyzing rule quality metrics"
         quality-dimensions:
@@ -516,7 +516,7 @@ data:
     description: "Default rule analysis processor processing"
     analysis-processors:
       default-processor:
-        processor-id: "DEFAULT_PROCESSOR"
+        processor-id: "rule-analysis-processors-configuration"
         processor-name: "Default Processor"
         analysis-rules:
           - rule-name: "default-analysis"

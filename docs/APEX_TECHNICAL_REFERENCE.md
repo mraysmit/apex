@@ -3,16 +3,66 @@
 # APEX - Technical Reference Guide
 
 **Version:** 2.1
-**Date:** 2025-08-28
+**Date:** 2025-09-06
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
-Welcome to the APEX Technical Reference Guide! This document provides detailed technical information for developers, architects, and system integrators working with APEX. While the User Guide focuses on getting started and common use cases, this reference dives deep into the technical architecture, advanced patterns, implementation details, scenario-based configuration management, **external data-source reference system**, and enterprise YAML validation systems.
+Welcome to the APEX Technical Reference Guide! This comprehensive document provides detailed technical information for developers, architects, and system integrators working with APEX. This reference covers everything from basic concepts to advanced enterprise patterns, including scenario-based configuration management, **external data-source reference system**, enterprise YAML validation systems, **REST API integration**, **comprehensive testing frameworks**, and **H2 database optimization**.
+
+## Document Structure
+
+This guide follows a logical progression from simple to advanced topics:
+
+1. **Foundation Concepts** - Core architecture and configuration patterns
+2. **Data Integration** - External data sources and H2 database usage
+3. **Pipeline Orchestration** - YAML-driven data processing workflows
+4. **REST API Integration** - Complete API reference and usage patterns
+5. **Testing Framework** - Comprehensive testing strategies and tools
+6. **Advanced Patterns** - Enterprise architecture and optimization techniques
+
+## Table of Contents
+
+1. [Scenario-Based Configuration Architecture](#scenario-based-configuration-architecture)
+2. [External Data-Source Reference System](#external-data-source-reference-system)
+3. [Pipeline Orchestration Architecture](#pipeline-orchestration-architecture)
+4. [Bootstrap Demo Architecture](#bootstrap-demo-architecture)
+5. [APEX System Architecture](#apex-system-architecture)
+6. [Rule Configuration Methods](#rule-configuration-methods)
+7. [Advanced Configuration Patterns](#advanced-configuration-patterns)
+8. [Enterprise YAML Validation System](#enterprise-yaml-validation-system)
+9. [H2 Database Integration Guide](#h2-database-integration-guide)
+   - [YAML Configuration Patterns](#yaml-configuration-patterns)
+   - [H2 Parameter Reference](#h2-parameter-reference)
+   - [Field Mapping Considerations](#field-mapping-considerations)
+   - [Demo Best Practices](#demo-best-practices)
+   - [Troubleshooting](#troubleshooting)
+10. [APEX REST API Integration Guide](#apex-rest-api-integration-guide)
+    - [REST API Configuration](#rest-api-configuration)
+    - [Java REST API Integration](#java-rest-api-integration)
+    - [Authentication Patterns](#authentication-patterns)
+    - [Response Mapping and Transformation](#response-mapping-and-transformation)
+    - [Error Handling Strategies](#error-handling-strategies)
+    - [REST API Monitoring and Metrics](#rest-api-monitoring-and-metrics)
+    - [REST API Testing Framework](#rest-api-testing-framework)
+    - [Enterprise REST API Patterns](#enterprise-rest-api-patterns)
+    - [REST API Best Practices](#rest-api-best-practices)
+11. [APEX Testing Framework Guide](#apex-testing-framework-guide)
+    - [Testing Framework Architecture](#testing-framework-architecture)
+    - [Core Testing Components](#core-testing-components)
+    - [Unit Testing Framework](#unit-testing-framework)
+    - [Integration Testing Framework](#integration-testing-framework)
+    - [Performance Testing Framework](#performance-testing-framework)
+    - [Compliance Testing Framework](#compliance-testing-framework)
+    - [Test Automation and CI/CD Integration](#test-automation-and-cicd-integration)
+    - [Test Data Management](#test-data-management)
+12. [Advanced Dataset Patterns](#advanced-dataset-patterns)
 
 **🆕 APEX 2.1 Technical Features:**
 - **External Data-Source Reference Architecture**: Clean separation of infrastructure and business logic
 - **DataSource Resolver Component**: Advanced external configuration resolution
 - **Configuration Caching System**: Performance optimization through intelligent caching
 - **Enterprise Architecture Patterns**: Production-ready scalable configuration management
+- **Pipeline Orchestration Engine**: YAML-driven data processing workflows
+- **Data Sink Architecture**: Comprehensive output capabilities with database and file sinks
 
 ## Scenario-Based Configuration Architecture
 
@@ -46,6 +96,12 @@ graph TD
         ConfigCache["Configuration Cache<br/>• Cached external configs<br/>• Performance optimization<br/>• Lazy loading"]
     end
 
+    subgraph "🆕 Pipeline Orchestration Layer"
+        PipelineExecutor["Pipeline Executor<br/>• YAML-driven orchestration<br/>• Step dependency resolution<br/>• Error handling & monitoring"]
+        PipelineConfig["Pipeline Configuration<br/>• Step definitions<br/>• Dependency management<br/>• Execution settings"]
+        DataSinks["Data Sinks<br/>• Database sinks<br/>• File system sinks<br/>• Audit logging"]
+    end
+
     subgraph "Data Layer"
         InlineData["Inline Datasets<br/>• Embedded data<br/>• Static references"]
         ExternalYAML["External YAML<br/>• Shared reference data"]
@@ -58,13 +114,18 @@ graph TD
     ScenarioFiles -->|"references"| BootstrapFiles
     ConfigFiles -.->|"may reference"| EnrichmentFiles
     ConfigFiles -->|"🆕 data-source-refs"| DataSourceResolver
+    ConfigFiles -->|"🆕 pipeline"| PipelineExecutor
     EnrichmentFiles -->|"🆕 data-source-refs"| DataSourceResolver
+    PipelineExecutor -->|"uses"| PipelineConfig
+    PipelineExecutor -->|"writes to"| DataSinks
+    PipelineConfig -->|"references"| DataSourceResolver
     DataSourceResolver -->|"resolves"| ExternalConfigs
     DataSourceResolver -->|"caches"| ConfigCache
     BootstrapFiles -->|"contains"| InlineData
     ConfigFiles -->|"references"| ExternalYAML
     ExternalConfigs -->|"connects to"| DatabaseSources
     ExternalConfigs -->|"connects to"| APISources
+    DataSinks -->|"connects to"| DatabaseSources
 ```
 
 ### Core Components
@@ -1166,6 +1227,746 @@ RuleResult result = engine.evaluate(facts);
 - **Line 23**: Add inventory data to the facts map using the key "inventory"
 - **Line 26**: Create a rules engine instance with the provided configuration
 - **Line 27**: Evaluate all rules against the facts map and return the combined result
+
+---
+
+## H2 Database Integration Guide
+
+### Overview
+
+H2 is APEX's preferred embedded database for demos, testing, and development scenarios. This section provides comprehensive guidance for optimal H2 database usage with APEX, including configuration patterns, performance tuning, and troubleshooting.
+
+### Key Concepts
+
+#### Database Sharing Modes
+
+**File-based H2 (RECOMMENDED):**
+- Creates persistent database files on disk
+- Enables true database sharing between multiple processes
+- Data survives application restarts
+- Perfect for demos where APEX and demo code need to share data
+
+**In-memory H2 (NOT RECOMMENDED for demos):**
+- Creates temporary database instances in memory
+- Each connection may create a separate isolated instance
+- Data is lost when application terminates
+- Can cause "Table not found" errors in multi-process scenarios
+
+### YAML Configuration Patterns
+
+#### ✅ RECOMMENDED: File-based H2 Configuration
+
+```yaml
+# File: customer-database.yaml
+metadata:
+  name: "Customer Database"
+  version: "1.0.0"
+  type: "external-data-config"
+  description: "H2 file-based customer database for demos"
+
+data-sources:
+  - name: "customer-database"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "Customer master data from self-contained H2 database"
+
+    connection:
+      # H2 file-based database for true sharing between demo and APEX
+      database: "./target/h2-demo/apex_demo_shared"
+      username: "sa"
+      password: ""
+
+# Enhanced H2 Configuration with Custom Parameters
+data-sources:
+  - name: "h2-custom-database"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "H2 database with custom parameters"
+
+    connection:
+      # Custom H2 parameters can be specified after the database path
+      # Format: "path/to/database;PARAM1=value1;PARAM2=value2"
+      database: "./target/h2-demo/custom;MODE=MySQL;TRACE_LEVEL_FILE=2;CACHE_SIZE=32768"
+      username: "sa"
+      password: ""
+
+    queries:
+      customerLookup: "SELECT customer_name, customer_type, tier, region, status FROM customers WHERE customer_id = :customerId"
+
+    parameterNames:
+      - "customerId"
+
+enrichments:
+  - name: "customer-profile-enrichment"
+    description: "Enrich with customer profile data"
+
+    lookup-dataset:
+      type: "database"
+      data-source-ref: "customer-database"
+      query-ref: "customerLookup"
+
+      parameters:
+        - name: "customerId"
+          source-field: "customerId"
+          required: true
+
+    # IMPORTANT: H2 returns uppercase column names
+    field-mappings:
+      - source-field: "CUSTOMER_NAME"
+        target-field: "customerName"
+      - source-field: "CUSTOMER_TYPE"
+        target-field: "customerType"
+      - source-field: "TIER"
+        target-field: "customerTier"
+      - source-field: "REGION"
+        target-field: "customerRegion"
+      - source-field: "STATUS"
+        target-field: "customerStatus"
+```
+
+#### ❌ DEPRECATED: In-memory H2 Configuration
+
+```yaml
+# DON'T USE: Creates isolated database instances
+data-sources:
+  - name: "customer-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      # PROBLEM: Each connection creates separate in-memory instance
+      database: "shared_demo"  # Becomes jdbc:h2:mem:shared_demo
+      username: "sa"
+      password: ""
+```
+
+### H2 Parameter Support
+
+#### Supported Parameter Formats
+
+APEX supports custom H2 parameters directly in the `database` field:
+
+```yaml
+# Basic file-based (uses APEX defaults)
+database: "./target/h2-demo/apex_demo_shared"
+# → jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+
+# Custom parameters (override defaults)
+database: "./target/h2-demo/custom;MODE=MySQL;TRACE_LEVEL_FILE=2"
+# → jdbc:h2:./target/h2-demo/custom;MODE=MySQL;TRACE_LEVEL_FILE=2;DB_CLOSE_DELAY=-1
+
+# In-memory with custom parameters
+database: "mem:testdb;CACHE_SIZE=16384;MODE=Oracle"
+# → jdbc:h2:mem:testdb;CACHE_SIZE=16384;MODE=Oracle;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+```
+
+#### Parameter Merging Rules
+
+1. **Custom parameters override APEX defaults**
+2. **APEX automatically adds `DB_CLOSE_DELAY=-1` if not specified**
+3. **Additional custom parameters are preserved**
+4. **Parameter order: custom parameters first, then APEX defaults**
+
+### Java Code Patterns
+
+#### ✅ RECOMMENDED: File-based H2 in Java
+
+```java
+public class CustomerDatabaseDemo {
+    // Use the EXACT same JDBC URL as YAML configuration
+    private static final String JDBC_URL =
+        "jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+
+    public void initializeDatabase() throws SQLException {
+        try (Connection connection = DriverManager.getConnection(JDBC_URL, "sa", "")) {
+            Statement statement = connection.createStatement();
+
+            // Clean up existing data to prevent primary key violations
+            statement.execute("DROP TABLE IF EXISTS customers");
+
+            // Create table
+            statement.execute("""
+                CREATE TABLE IF NOT EXISTS customers (
+                    customer_id VARCHAR(20) PRIMARY KEY,
+                    customer_name VARCHAR(100) NOT NULL,
+                    customer_type VARCHAR(20) NOT NULL,
+                    tier VARCHAR(20) NOT NULL,
+                    region VARCHAR(10) NOT NULL,
+                    status VARCHAR(20) NOT NULL,
+                    created_date DATE NOT NULL
+                )
+            """);
+
+            // Insert test data
+            statement.execute("""
+                INSERT INTO customers VALUES
+                ('CUST000001', 'Acme Corporation', 'CORPORATE', 'PLATINUM', 'NA', 'ACTIVE', '2023-01-15'),
+                ('CUST000002', 'Global Industries', 'CORPORATE', 'GOLD', 'EU', 'ACTIVE', '2023-02-20'),
+                ('CUST000003', 'Tech Startup Inc', 'STARTUP', 'SILVER', 'NA', 'ACTIVE', '2023-03-10')
+            """);
+        }
+    }
+}
+```
+
+### H2 Parameter Reference
+
+#### Performance Tuning Parameters
+
+| Parameter | Description | Default | Example Values |
+|-----------|-------------|---------|----------------|
+| `CACHE_SIZE` | Database cache size in KB | 16384 (16MB) | `32768` (32MB), `65536` (64MB) |
+| `MAX_MEMORY_ROWS` | Maximum rows kept in memory | 40000 | `100000`, `200000` |
+| `MAX_MEMORY_UNDO` | Maximum undo log entries in memory | 50000 | `100000`, `200000` |
+| `MAX_OPERATION_MEMORY` | Maximum memory for operations in KB | 100000 | `200000`, `500000` |
+| `CACHE_TYPE` | Cache algorithm | TQ | `LRU`, `SOFT_LRU` |
+
+#### Compatibility Mode Parameters
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| `MODE` | Database compatibility mode | `PostgreSQL`, `MySQL`, `Oracle`, `DB2`, `HSQLDB` |
+
+**Mode Details:**
+- `PostgreSQL` - PostgreSQL compatibility (APEX default)
+- `MySQL` - MySQL compatibility mode
+- `Oracle` - Oracle compatibility mode
+- `DB2` - IBM DB2 compatibility mode
+- `HSQLDB` - HSQLDB compatibility mode
+
+#### Debugging and Logging Parameters
+
+| Parameter | Description | Values | Example |
+|-----------|-------------|--------|---------|
+| `TRACE_LEVEL_FILE` | SQL logging level to file | 0-4 | `0` (off), `1` (error), `2` (info), `4` (debug) |
+| `TRACE_LEVEL_SYSTEM_OUT` | SQL logging to console | 0-4 | `0` (off), `1` (error), `2` (info) |
+| `TRACE_MAX_FILE_SIZE` | Maximum trace file size in MB | Number | `16`, `32`, `64` |
+
+#### Connection Management Parameters
+
+| Parameter | Description | Values | Example |
+|-----------|-------------|--------|---------|
+| `DB_CLOSE_DELAY` | Keep database open after last connection | -1, 0, >0 | `-1` (forever), `0` (immediate), `30` (30 seconds) |
+| `DB_CLOSE_ON_EXIT` | Close database when JVM exits | TRUE/FALSE | `TRUE`, `FALSE` |
+| `AUTO_SERVER` | Enable automatic mixed mode | TRUE/FALSE | `TRUE`, `FALSE` |
+| `AUTO_SERVER_PORT` | Port for automatic server mode | Number | `9090`, `9091` |
+
+#### Security and Access Parameters
+
+| Parameter | Description | Values | Example |
+|-----------|-------------|--------|---------|
+| `ACCESS_MODE_DATA` | Database access mode | r, rw | `r` (read-only), `rw` (read-write) |
+| `IFEXISTS` | Only connect if database exists | TRUE/FALSE | `TRUE`, `FALSE` |
+| `CIPHER` | Encryption cipher | AES, XTEA | `AES`, `XTEA` |
+
+#### Initialization Parameters
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| `INIT` | SQL script to run on startup | `RUNSCRIPT FROM 'classpath:init.sql'` |
+| `SCHEMA` | Default schema name | `PUBLIC`, `DEMO` |
+
+### Field Mapping Considerations
+
+#### H2 Column Name Case Sensitivity
+
+H2 database returns **uppercase column names** by default. Your field mappings must account for this:
+
+```yaml
+# ✅ CORRECT: Use uppercase source fields
+field-mappings:
+  - source-field: "CUSTOMER_NAME"    # H2 returns uppercase
+    target-field: "customerName"     # Target can be any case
+  - source-field: "CUSTOMER_TYPE"
+    target-field: "customerType"
+
+# ❌ INCORRECT: Lowercase source fields won't match
+field-mappings:
+  - source-field: "customer_name"    # Won't match H2 uppercase columns
+    target-field: "customerName"
+```
+
+### Demo Best Practices
+
+#### 1. Database Cleanup
+Always clean up existing data to prevent primary key violations:
+
+```java
+// Clean up before creating tables
+statement.execute("DROP TABLE IF EXISTS customers");
+statement.execute("DROP TABLE IF EXISTS orders");  // Drop dependent tables first
+```
+
+#### 2. Consistent JDBC URLs
+Use the exact same JDBC URL pattern in both Java code and YAML:
+
+**Java:** `jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL`
+**YAML:** `database: "./target/h2-demo/apex_demo_shared"`
+
+#### 3. Directory Structure
+Ensure the target directory exists:
+```bash
+mkdir -p target/h2-demo
+```
+
+#### 4. Connection Parameters
+- `DB_CLOSE_DELAY=-1`: Keeps database open between connections
+- `MODE=PostgreSQL`: Enables PostgreSQL compatibility mode
+
+### Troubleshooting
+
+#### "Table not found" Errors
+**Cause:** Database instance isolation between demo and APEX
+**Solution:** Use file-based H2 with consistent paths
+
+#### Primary Key Violations
+**Cause:** Multiple demo runs without cleanup
+**Solution:** Add `DROP TABLE IF EXISTS` statements
+
+#### Field Mapping Failures
+**Cause:** Case sensitivity mismatch
+**Solution:** Use uppercase source field names
+
+#### Connection Refused
+**Cause:** Database files locked or corrupted
+**Solution:** Delete `target/h2-demo/` directory and restart
+
+### Example Configurations
+
+#### Performance-Optimized Configuration
+
+```yaml
+connection:
+  database: "./target/h2-demo/performance;MODE=PostgreSQL;CACHE_SIZE=65536;MAX_MEMORY_ROWS=100000;MAX_MEMORY_UNDO=100000"
+  username: "sa"
+  password: ""
+```
+
+#### Debug-Enabled Configuration
+
+```yaml
+connection:
+  database: "./target/h2-demo/debug;TRACE_LEVEL_FILE=2;TRACE_LEVEL_SYSTEM_OUT=1;TRACE_MAX_FILE_SIZE=32"
+  username: "sa"
+  password: ""
+```
+
+#### MySQL-Compatible Configuration
+
+```yaml
+connection:
+  database: "./target/h2-demo/mysql;MODE=MySQL;CACHE_SIZE=32768"
+  username: "sa"
+  password: ""
+```
+
+#### Read-Only Configuration
+
+```yaml
+connection:
+  database: "./target/h2-demo/readonly;ACCESS_MODE_DATA=r;IFEXISTS=TRUE"
+  username: "sa"
+  password: ""
+```
+
+#### Auto-Initialization Configuration
+
+```yaml
+connection:
+  database: "./target/h2-demo/autoinit;INIT=RUNSCRIPT FROM 'classpath:schema.sql';SCHEMA=DEMO"
+  username: "sa"
+  password: ""
+```
+
+### Migration from In-memory to File-based
+
+To migrate existing demos from in-memory to file-based H2:
+
+1. **Update YAML configuration:**
+   ```yaml
+   # Change from:
+   database: "shared_demo"
+   # To:
+   database: "./target/h2-demo/apex_demo_shared"
+   ```
+
+2. **Update Java JDBC URLs:**
+   ```java
+   // Change from:
+   String jdbcUrl = "jdbc:h2:mem:shared_demo;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+   // To:
+   String jdbcUrl = "jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+   ```
+
+3. **Update field mappings to uppercase:**
+   ```yaml
+   # Change from:
+   source-field: "customer_name"
+   # To:
+   source-field: "CUSTOMER_NAME"
+   ```
+
+4. **Add cleanup code:**
+   ```java
+   statement.execute("DROP TABLE IF EXISTS customers");
+   ```
+
+This migration ensures reliable database sharing between demo code and APEX configurations.
+
+## Pipeline Orchestration Architecture
+
+### Overview
+
+**Pipeline Orchestration** represents APEX's revolutionary approach to YAML-driven data processing workflows. This system embodies the core APEX principle that **all processing logic should be contained in the YAML configuration file**, eliminating hardcoded orchestration in Java code.
+
+### Technical Architecture
+
+```mermaid
+graph TB
+    subgraph "YAML Configuration Layer"
+        PC[Pipeline Configuration]
+        SC[Step Configuration]
+        DC[Dependency Configuration]
+        EC[Execution Configuration]
+    end
+
+    subgraph "Pipeline Execution Engine"
+        PE[Pipeline Executor]
+        SV[Step Validator]
+        DG[Dependency Graph]
+        ER[Execution Runtime]
+    end
+
+    subgraph "Step Execution Layer"
+        ES[Extract Steps]
+        TS[Transform Steps]
+        LS[Load Steps]
+        AS[Audit Steps]
+    end
+
+    subgraph "Data Flow Management"
+        CTX[Pipeline Context]
+        DF[Data Flow Manager]
+        SR[Step Results]
+        EM[Error Manager]
+    end
+
+    subgraph "External Integration"
+        DS[Data Sources]
+        DSK[Data Sinks]
+        EDS[External Data Sources]
+        AUD[Audit Systems]
+    end
+
+    PC --> PE
+    SC --> SV
+    DC --> DG
+    EC --> ER
+
+    PE --> ES
+    PE --> TS
+    PE --> LS
+    PE --> AS
+
+    ES --> CTX
+    TS --> DF
+    LS --> SR
+    AS --> EM
+
+    ES --> DS
+    LS --> DSK
+    TS --> EDS
+    AS --> AUD
+```
+
+### Core Components
+
+#### 1. PipelineExecutor
+
+The central orchestration engine that executes YAML-defined pipelines:
+
+```java
+public class PipelineExecutor {
+    private final ExternalDataSourceManager dataSourceManager;
+    private final Map<String, DataSink> dataSinks;
+    private final Map<String, Object> pipelineContext;
+    private final Map<String, PipelineStepResult> stepResults;
+
+    public YamlPipelineExecutionResult execute(PipelineConfiguration pipeline)
+            throws DataPipelineException;
+
+    private void validatePipeline(PipelineConfiguration pipeline)
+            throws DataPipelineException;
+
+    private void executeStep(PipelineStep step, YamlPipelineExecutionResult result)
+            throws DataPipelineException;
+
+    private List<PipelineStep> topologicalSort(List<PipelineStep> steps);
+}
+```
+
+#### 2. PipelineConfiguration
+
+Represents the complete pipeline definition from YAML:
+
+```java
+public class PipelineConfiguration {
+    private String name;
+    private String description;
+    private List<PipelineStep> steps;
+    private ExecutionConfiguration execution;
+    private List<TransformationConfiguration> transformations;
+    private MonitoringConfiguration monitoring;
+
+    public static class ExecutionConfiguration {
+        private String mode = "sequential"; // sequential or parallel
+        private String errorHandling = "stop-on-error";
+        private int maxRetries = 3;
+        private long retryDelayMs = 1000;
+    }
+}
+```
+
+#### 3. PipelineStep
+
+Individual step configuration with dependency management:
+
+```java
+public class PipelineStep {
+    private String name;
+    private String type; // extract, load, transform, audit
+    private String description;
+    private String source; // data source name (for extract steps)
+    private String sink; // data sink name (for load steps)
+    private String operation; // operation name to execute
+    private List<String> dependsOn; // step dependencies
+    private boolean optional = false; // if true, failure doesn't stop pipeline
+    private Map<String, Object> parameters;
+    private RetryConfiguration retry;
+
+    public boolean isExtractStep() { return "extract".equalsIgnoreCase(type); }
+    public boolean isLoadStep() { return "load".equalsIgnoreCase(type); }
+    public boolean isTransformStep() { return "transform".equalsIgnoreCase(type); }
+    public boolean isAuditStep() { return "audit".equalsIgnoreCase(type); }
+}
+```
+
+### Pipeline Execution Flow
+
+#### 1. Configuration Loading and Validation
+
+```java
+// Load pipeline from YAML
+YamlRuleConfiguration config = YamlConfigurationLoader.loadFromClasspath("pipeline.yaml");
+PipelineConfiguration pipeline = config.getPipeline();
+
+// Validate pipeline structure
+PipelineExecutor executor = new PipelineExecutor(dataSourceManager);
+executor.validatePipeline(pipeline); // Throws exception if invalid
+```
+
+#### 2. Dependency Resolution
+
+The executor automatically resolves step dependencies using topological sorting:
+
+```java
+private List<PipelineStep> topologicalSort(List<PipelineStep> steps) {
+    // Build dependency graph
+    Map<String, Set<String>> dependencies = buildDependencyGraph(steps);
+
+    // Detect circular dependencies
+    validateNoCycles(dependencies);
+
+    // Sort steps in execution order
+    return sortTopologically(steps, dependencies);
+}
+```
+
+#### 3. Step Execution
+
+Each step type has specialized execution logic:
+
+```java
+private void executeStep(PipelineStep step, YamlPipelineExecutionResult result) {
+    switch (step.getType().toLowerCase()) {
+        case "extract":
+            Object data = executeExtractStep(step);
+            pipelineContext.put("extractedData", data);
+            break;
+
+        case "load":
+            Object dataToLoad = pipelineContext.get("extractedData");
+            executeLoadStep(step, dataToLoad);
+            break;
+
+        case "transform":
+            Object dataToTransform = pipelineContext.get("extractedData");
+            Object transformedData = executeTransformStep(step, dataToTransform);
+            pipelineContext.put("transformedData", transformedData);
+            break;
+
+        case "audit":
+            Object dataToAudit = pipelineContext.get("extractedData");
+            executeAuditStep(step, dataToAudit);
+            break;
+    }
+}
+```
+
+### Data Flow Architecture
+
+#### Automatic Data Passing
+
+Data flows automatically between pipeline steps through the pipeline context:
+
+1. **Extract Step** → Stores data in `pipelineContext.put("extractedData", data)`
+2. **Transform Step** → Reads from context, transforms, stores result
+3. **Load Step** → Reads transformed data, writes to sink
+4. **Audit Step** → Reads original/transformed data for auditing
+
+#### Context Management
+
+```java
+private final Map<String, Object> pipelineContext = new ConcurrentHashMap<>();
+
+// Data automatically available in pipeline context:
+// - "extractedData": Raw data from extract steps
+// - "transformedData": Processed data from transform steps
+// - "stepResults": Results from each completed step
+// - Custom data from transform steps
+```
+
+### Error Handling and Recovery
+
+#### Pipeline-Level Error Handling
+
+```yaml
+pipeline:
+  execution:
+    error-handling: "stop-on-error"  # Stop pipeline on any error
+    # OR
+    error-handling: "continue-on-error"  # Continue with remaining steps
+    max-retries: 3
+    retry-delay-ms: 1000
+```
+
+#### Step-Level Error Handling
+
+```yaml
+steps:
+  - name: "optional-audit"
+    type: "audit"
+    optional: true  # Pipeline continues if this step fails
+    retry:
+      max-attempts: 3
+      delay-ms: 1000
+      backoff-multiplier: 2.0
+```
+
+### Performance and Monitoring
+
+#### Built-in Metrics Collection
+
+```java
+public class YamlPipelineExecutionResult {
+    private boolean success;
+    private long durationMs;
+    private List<PipelineStepResult> stepResults;
+    private int totalSteps;
+    private int successfulSteps;
+    private int failedSteps;
+
+    public double getSuccessRate() {
+        return (double) successfulSteps / totalSteps * 100.0;
+    }
+}
+
+public class PipelineStepResult {
+    private String stepName;
+    private boolean success;
+    private long durationMs;
+    private int recordsProcessed;
+    private int recordsFailed;
+
+    public double getSuccessRate() {
+        int total = recordsProcessed + recordsFailed;
+        return total == 0 ? (success ? 100.0 : 0.0) :
+               (double) recordsProcessed / total * 100.0;
+    }
+}
+```
+
+#### Execution Monitoring
+
+```yaml
+pipeline:
+  monitoring:
+    enabled: true
+    log-progress: true      # Log step start/completion
+    collect-metrics: true   # Collect timing metrics
+    alert-on-failure: true  # Alert on pipeline failures
+```
+
+### Integration with DataPipelineEngine
+
+The pipeline orchestration integrates seamlessly with the existing DataPipelineEngine:
+
+```java
+public class DataPipelineEngine {
+    private YamlRuleConfiguration configuration;
+
+    public YamlPipelineExecutionResult executePipeline(String pipelineName)
+            throws DataPipelineException {
+
+        if (configuration.getPipeline() == null) {
+            throw new DataPipelineException("No pipeline configuration found");
+        }
+
+        PipelineExecutor executor = new PipelineExecutor(dataSourceManager);
+        return executor.execute(configuration.getPipeline());
+    }
+}
+```
+
+### Usage Example
+
+**Java Code (Simplified):**
+```java
+// Load YAML configuration
+YamlRuleConfiguration config = YamlConfigurationLoader.loadFromClasspath("pipeline.yaml");
+
+// Initialize pipeline engine
+DataPipelineEngine pipelineEngine = new DataPipelineEngine();
+pipelineEngine.initialize(config);
+
+// Execute YAML-defined pipeline
+YamlPipelineExecutionResult result = pipelineEngine.executePipeline("customer-etl-pipeline");
+
+// Check results
+System.out.println("Pipeline success: " + result.isSuccess());
+System.out.println("Duration: " + result.getDurationMs() + "ms");
+System.out.println("Steps completed: " + result.getSuccessfulSteps() + "/" + result.getTotalSteps());
+```
+
+**YAML Configuration (Complete Orchestration):**
+```yaml
+pipeline:
+  name: "customer-etl-pipeline"
+  steps:
+    - name: "extract-customers"
+      type: "extract"
+      source: "customer-csv-input"
+      operation: "getAllCustomers"
+
+    - name: "load-to-database"
+      type: "load"
+      sink: "customer-h2-database"
+      operation: "insertCustomer"
+      depends-on: ["extract-customers"]
+```
+
+This architecture demonstrates APEX's commitment to **YAML-driven processing** where all orchestration logic is declaratively defined in configuration rather than hardcoded in Java.
 
 ## Bootstrap Demo Architecture
 
@@ -4206,3 +5007,2310 @@ enrichments:
         file-path: "datasets/eu-equity-data.yaml"
         key-field: "isin"
 ```
+
+---
+
+## APEX REST API Integration Guide
+
+### Overview
+
+APEX provides comprehensive REST API integration capabilities that enable seamless integration with external systems, microservices architectures, and web applications. This section covers all aspects of REST API integration, from basic HTTP client usage to advanced enterprise patterns.
+
+### Core REST API Features
+
+#### HTTP Client Integration
+- Built-in HTTP client with connection pooling
+- Support for all HTTP methods (GET, POST, PUT, DELETE, PATCH)
+- Automatic JSON serialization/deserialization
+- Configurable timeouts and retry policies
+- SSL/TLS support with certificate validation
+
+#### Authentication Support
+- Basic Authentication
+- Bearer Token Authentication
+- API Key Authentication
+- OAuth 2.0 integration
+- Custom authentication headers
+
+#### Error Handling and Resilience
+- Automatic retry with exponential backoff
+- Circuit breaker pattern implementation
+- Fallback mechanisms for service unavailability
+- Comprehensive error logging and monitoring
+
+### REST API Configuration
+
+#### Basic HTTP Client Configuration
+
+```yaml
+# File: rest-api-config.yaml
+metadata:
+  name: "REST API Configuration"
+  version: "1.0.0"
+  type: "external-data-config"
+  description: "Configuration for external REST API integration"
+
+# HTTP Client Configuration
+http-client:
+  connection-timeout: 5000      # 5 seconds
+  read-timeout: 30000          # 30 seconds
+  max-connections: 100         # Connection pool size
+  max-connections-per-route: 20
+  retry-attempts: 3
+  retry-delay: 1000           # 1 second between retries
+
+  # SSL Configuration
+  ssl:
+    verify-certificates: true
+    trust-store-path: "classpath:truststore.jks"
+    trust-store-password: "changeit"
+
+# API Endpoints Configuration
+api-endpoints:
+  - name: "customer-service"
+    base-url: "https://api.example.com/v1"
+    authentication:
+      type: "bearer-token"
+      token: "${CUSTOMER_API_TOKEN}"
+
+    endpoints:
+      get-customer: "/customers/{customerId}"
+      create-customer: "/customers"
+      update-customer: "/customers/{customerId}"
+
+  - name: "pricing-service"
+    base-url: "https://pricing.example.com/api"
+    authentication:
+      type: "api-key"
+      header-name: "X-API-Key"
+      api-key: "${PRICING_API_KEY}"
+
+    endpoints:
+      get-price: "/prices/{symbol}"
+      get-historical: "/prices/{symbol}/history"
+```
+
+#### Data Source Integration with REST APIs
+
+```yaml
+# REST API as Data Source
+data-sources:
+  - name: "customer-api"
+    type: "rest-api"
+    enabled: true
+    description: "Customer data from REST API"
+
+    connection:
+      base-url: "https://api.example.com/v1"
+      authentication:
+        type: "bearer-token"
+        token: "${API_TOKEN}"
+
+      # Connection settings
+      connection-timeout: 5000
+      read-timeout: 15000
+      max-retries: 3
+
+    # API Operations
+    operations:
+      getCustomer:
+        method: "GET"
+        path: "/customers/{customerId}"
+        parameters:
+          - name: "customerId"
+            type: "path"
+            required: true
+        response-mapping:
+          customer-id: "id"
+          customer-name: "name"
+          customer-email: "email"
+          customer-status: "status"
+
+      searchCustomers:
+        method: "GET"
+        path: "/customers"
+        parameters:
+          - name: "query"
+            type: "query"
+            required: false
+          - name: "limit"
+            type: "query"
+            default: 10
+        response-mapping:
+          customers: "data"
+          total-count: "total"
+
+# Using REST API in Enrichments
+enrichments:
+  - id: "customer-api-enrichment"
+    type: "lookup-enrichment"
+    description: "Enrich with customer data from REST API"
+
+    lookup-dataset:
+      type: "rest-api"
+      data-source-ref: "customer-api"
+      operation-ref: "getCustomer"
+
+      parameters:
+        - name: "customerId"
+          source-field: "customerId"
+          required: true
+
+    field-mappings:
+      - source-field: "customer-name"
+        target-field: "customerName"
+      - source-field: "customer-email"
+        target-field: "customerEmail"
+      - source-field: "customer-status"
+        target-field: "customerStatus"
+```
+
+### Java REST API Integration
+
+#### Basic REST Client Usage
+
+```java
+import dev.mars.apex.rest.RestApiClient;
+import dev.mars.apex.rest.RestApiConfiguration;
+import dev.mars.apex.rest.RestApiResponse;
+
+public class CustomerApiClient {
+    private final RestApiClient restClient;
+
+    public CustomerApiClient() {
+        RestApiConfiguration config = RestApiConfiguration.builder()
+            .baseUrl("https://api.example.com/v1")
+            .connectionTimeout(5000)
+            .readTimeout(15000)
+            .maxRetries(3)
+            .authentication(BearerTokenAuth.of("your-api-token"))
+            .build();
+
+        this.restClient = new RestApiClient(config);
+    }
+
+    public Customer getCustomer(String customerId) {
+        RestApiResponse<Customer> response = restClient
+            .get("/customers/{customerId}")
+            .pathParam("customerId", customerId)
+            .execute(Customer.class);
+
+        if (response.isSuccess()) {
+            return response.getData();
+        } else {
+            throw new CustomerNotFoundException("Customer not found: " + customerId);
+        }
+    }
+
+    public List<Customer> searchCustomers(String query, int limit) {
+        RestApiResponse<CustomerSearchResult> response = restClient
+            .get("/customers")
+            .queryParam("query", query)
+            .queryParam("limit", limit)
+            .execute(CustomerSearchResult.class);
+
+        return response.isSuccess() ?
+            response.getData().getCustomers() :
+            Collections.emptyList();
+    }
+
+    public Customer createCustomer(Customer customer) {
+        RestApiResponse<Customer> response = restClient
+            .post("/customers")
+            .body(customer)
+            .execute(Customer.class);
+
+        if (response.isSuccess()) {
+            return response.getData();
+        } else {
+            throw new CustomerCreationException("Failed to create customer: " +
+                response.getErrorMessage());
+        }
+    }
+}
+```
+
+#### Advanced REST Client with Error Handling
+
+```java
+import dev.mars.apex.rest.*;
+import dev.mars.apex.rest.retry.RetryPolicy;
+import dev.mars.apex.rest.circuit.CircuitBreakerConfig;
+
+public class ResilientApiClient {
+    private final RestApiClient restClient;
+
+    public ResilientApiClient() {
+        // Configure retry policy
+        RetryPolicy retryPolicy = RetryPolicy.builder()
+            .maxAttempts(3)
+            .initialDelay(Duration.ofSeconds(1))
+            .maxDelay(Duration.ofSeconds(10))
+            .exponentialBackoff(2.0)
+            .retryOn(IOException.class, TimeoutException.class)
+            .build();
+
+        // Configure circuit breaker
+        CircuitBreakerConfig circuitBreaker = CircuitBreakerConfig.builder()
+            .failureThreshold(5)
+            .recoveryTimeout(Duration.ofMinutes(1))
+            .build();
+
+        RestApiConfiguration config = RestApiConfiguration.builder()
+            .baseUrl("https://api.example.com/v1")
+            .connectionTimeout(5000)
+            .readTimeout(15000)
+            .retryPolicy(retryPolicy)
+            .circuitBreaker(circuitBreaker)
+            .authentication(BearerTokenAuth.of("your-api-token"))
+            .build();
+
+        this.restClient = new RestApiClient(config);
+    }
+
+    public Optional<Customer> getCustomerSafely(String customerId) {
+        try {
+            RestApiResponse<Customer> response = restClient
+                .get("/customers/{customerId}")
+                .pathParam("customerId", customerId)
+                .executeWithFallback(Customer.class, this::getCustomerFromCache);
+
+            return response.isSuccess() ?
+                Optional.of(response.getData()) :
+                Optional.empty();
+
+        } catch (CircuitBreakerOpenException e) {
+            log.warn("Circuit breaker open for customer API, using cache");
+            return getCustomerFromCache(customerId);
+        }
+    }
+
+    private Optional<Customer> getCustomerFromCache(String customerId) {
+        // Fallback to cache or default data
+        return customerCache.get(customerId);
+    }
+}
+```
+
+### Authentication Patterns
+
+#### Bearer Token Authentication
+
+```yaml
+authentication:
+  type: "bearer-token"
+  token: "${API_TOKEN}"
+  # Token will be sent as: Authorization: Bearer ${API_TOKEN}
+```
+
+```java
+RestApiConfiguration config = RestApiConfiguration.builder()
+    .authentication(BearerTokenAuth.of("your-jwt-token"))
+    .build();
+```
+
+#### API Key Authentication
+
+```yaml
+authentication:
+  type: "api-key"
+  header-name: "X-API-Key"
+  api-key: "${API_KEY}"
+```
+
+```java
+RestApiConfiguration config = RestApiConfiguration.builder()
+    .authentication(ApiKeyAuth.of("X-API-Key", "your-api-key"))
+    .build();
+```
+
+#### Basic Authentication
+
+```yaml
+authentication:
+  type: "basic"
+  username: "${API_USERNAME}"
+  password: "${API_PASSWORD}"
+```
+
+```java
+RestApiConfiguration config = RestApiConfiguration.builder()
+    .authentication(BasicAuth.of("username", "password"))
+    .build();
+```
+
+#### OAuth 2.0 Authentication
+
+```yaml
+authentication:
+  type: "oauth2"
+  client-id: "${OAUTH_CLIENT_ID}"
+  client-secret: "${OAUTH_CLIENT_SECRET}"
+  token-url: "https://auth.example.com/oauth/token"
+  scope: "read write"
+```
+
+```java
+OAuth2Config oauth2 = OAuth2Config.builder()
+    .clientId("your-client-id")
+    .clientSecret("your-client-secret")
+    .tokenUrl("https://auth.example.com/oauth/token")
+    .scope("read write")
+    .build();
+
+RestApiConfiguration config = RestApiConfiguration.builder()
+    .authentication(OAuth2Auth.of(oauth2))
+    .build();
+```
+
+### Response Mapping and Transformation
+
+#### Automatic JSON Mapping
+
+```java
+// Automatic mapping to POJO
+public class Customer {
+    private String id;
+    private String name;
+    private String email;
+    private String status;
+
+    // getters and setters
+}
+
+RestApiResponse<Customer> response = restClient
+    .get("/customers/{id}")
+    .pathParam("id", customerId)
+    .execute(Customer.class);
+```
+
+#### Custom Response Mapping
+
+```yaml
+operations:
+  getCustomer:
+    method: "GET"
+    path: "/customers/{customerId}"
+    response-mapping:
+      # Map API response fields to internal fields
+      customer-id: "id"
+      customer-name: "fullName"
+      customer-email: "emailAddress"
+      customer-status: "accountStatus"
+
+    # Transform response data
+    response-transformations:
+      - field: "customer-status"
+        transformation: "toUpperCase()"
+      - field: "customer-email"
+        transformation: "toLowerCase()"
+```
+
+#### Complex Response Processing
+
+```java
+public class ApiResponseProcessor {
+
+    public ProcessedData processApiResponse(RestApiResponse<RawApiData> response) {
+        if (!response.isSuccess()) {
+            throw new ApiProcessingException("API call failed: " + response.getErrorMessage());
+        }
+
+        RawApiData rawData = response.getData();
+
+        return ProcessedData.builder()
+            .id(rawData.getId())
+            .name(normalizeString(rawData.getName()))
+            .email(validateEmail(rawData.getEmail()))
+            .status(mapStatus(rawData.getStatus()))
+            .lastUpdated(Instant.now())
+            .build();
+    }
+
+    private String normalizeString(String input) {
+        return input != null ? input.trim().toUpperCase() : null;
+    }
+
+    private String validateEmail(String email) {
+        if (email != null && email.contains("@")) {
+            return email.toLowerCase();
+        }
+        throw new InvalidEmailException("Invalid email format: " + email);
+    }
+
+    private CustomerStatus mapStatus(String status) {
+        return switch (status.toUpperCase()) {
+            case "ACTIVE" -> CustomerStatus.ACTIVE;
+            case "INACTIVE" -> CustomerStatus.INACTIVE;
+            case "PENDING" -> CustomerStatus.PENDING;
+            default -> CustomerStatus.UNKNOWN;
+        };
+    }
+}
+```
+
+### Error Handling Strategies
+
+#### Comprehensive Error Handling
+
+```java
+public class ApiErrorHandler {
+
+    public <T> T handleApiCall(Supplier<RestApiResponse<T>> apiCall, String operation) {
+        try {
+            RestApiResponse<T> response = apiCall.get();
+
+            if (response.isSuccess()) {
+                return response.getData();
+            } else {
+                handleApiError(response, operation);
+                return null; // Never reached due to exception
+            }
+
+        } catch (ConnectTimeoutException e) {
+            log.error("Connection timeout for operation: {}", operation, e);
+            throw new ApiTimeoutException("API connection timeout", e);
+
+        } catch (ReadTimeoutException e) {
+            log.error("Read timeout for operation: {}", operation, e);
+            throw new ApiTimeoutException("API read timeout", e);
+
+        } catch (IOException e) {
+            log.error("Network error for operation: {}", operation, e);
+            throw new ApiNetworkException("Network error", e);
+
+        } catch (Exception e) {
+            log.error("Unexpected error for operation: {}", operation, e);
+            throw new ApiException("Unexpected API error", e);
+        }
+    }
+
+    private void handleApiError(RestApiResponse<?> response, String operation) {
+        int statusCode = response.getStatusCode();
+        String errorMessage = response.getErrorMessage();
+
+        switch (statusCode) {
+            case 400:
+                throw new ApiBadRequestException("Bad request: " + errorMessage);
+            case 401:
+                throw new ApiUnauthorizedException("Unauthorized: " + errorMessage);
+            case 403:
+                throw new ApiForbiddenException("Forbidden: " + errorMessage);
+            case 404:
+                throw new ApiNotFoundException("Not found: " + errorMessage);
+            case 429:
+                throw new ApiRateLimitException("Rate limit exceeded: " + errorMessage);
+            case 500:
+                throw new ApiServerException("Server error: " + errorMessage);
+            case 503:
+                throw new ApiUnavailableException("Service unavailable: " + errorMessage);
+            default:
+                throw new ApiException("API error " + statusCode + ": " + errorMessage);
+        }
+    }
+}
+```
+
+#### Fallback Mechanisms
+
+```java
+public class ApiWithFallback {
+    private final RestApiClient primaryClient;
+    private final RestApiClient fallbackClient;
+    private final CacheService cacheService;
+
+    public Customer getCustomer(String customerId) {
+        // Try primary API
+        try {
+            Customer customer = callPrimaryApi(customerId);
+            cacheService.put(customerId, customer); // Cache successful result
+            return customer;
+
+        } catch (ApiException e) {
+            log.warn("Primary API failed, trying fallback", e);
+
+            // Try fallback API
+            try {
+                return callFallbackApi(customerId);
+
+            } catch (ApiException fallbackError) {
+                log.warn("Fallback API also failed, using cache", fallbackError);
+
+                // Use cached data as last resort
+                Customer cachedCustomer = cacheService.get(customerId);
+                if (cachedCustomer != null) {
+                    return cachedCustomer;
+                }
+
+                // All options exhausted
+                throw new CustomerUnavailableException(
+                    "Customer data unavailable from all sources", e);
+            }
+        }
+    }
+
+    private Customer callPrimaryApi(String customerId) {
+        return primaryClient
+            .get("/customers/{id}")
+            .pathParam("id", customerId)
+            .execute(Customer.class)
+            .getData();
+    }
+
+    private Customer callFallbackApi(String customerId) {
+        return fallbackClient
+            .get("/customer-data/{id}")
+            .pathParam("id", customerId)
+            .execute(Customer.class)
+            .getData();
+    }
+}
+```
+
+### REST API Monitoring and Metrics
+
+#### Performance Monitoring
+
+```java
+import dev.mars.apex.monitoring.ApiMetrics;
+import dev.mars.apex.monitoring.MetricsCollector;
+
+public class MonitoredApiClient {
+    private final RestApiClient restClient;
+    private final MetricsCollector metricsCollector;
+
+    public MonitoredApiClient() {
+        this.restClient = new RestApiClient(config);
+        this.metricsCollector = new MetricsCollector();
+    }
+
+    public Customer getCustomer(String customerId) {
+        long startTime = System.currentTimeMillis();
+        String operation = "getCustomer";
+
+        try {
+            RestApiResponse<Customer> response = restClient
+                .get("/customers/{customerId}")
+                .pathParam("customerId", customerId)
+                .execute(Customer.class);
+
+            long duration = System.currentTimeMillis() - startTime;
+
+            if (response.isSuccess()) {
+                metricsCollector.recordSuccess(operation, duration);
+                return response.getData();
+            } else {
+                metricsCollector.recordError(operation, duration, response.getStatusCode());
+                throw new CustomerNotFoundException("Customer not found: " + customerId);
+            }
+
+        } catch (Exception e) {
+            long duration = System.currentTimeMillis() - startTime;
+            metricsCollector.recordException(operation, duration, e);
+            throw e;
+        }
+    }
+
+    public ApiMetrics getMetrics() {
+        return metricsCollector.getMetrics();
+    }
+}
+```
+
+#### Health Checks
+
+```java
+import dev.mars.apex.health.HealthCheck;
+import dev.mars.apex.health.HealthStatus;
+
+public class ApiHealthCheck implements HealthCheck {
+    private final RestApiClient restClient;
+
+    @Override
+    public HealthStatus checkHealth() {
+        try {
+            RestApiResponse<String> response = restClient
+                .get("/health")
+                .execute(String.class);
+
+            if (response.isSuccess()) {
+                return HealthStatus.healthy("API is responding");
+            } else {
+                return HealthStatus.unhealthy("API returned status: " + response.getStatusCode());
+            }
+
+        } catch (Exception e) {
+            return HealthStatus.unhealthy("API health check failed", e);
+        }
+    }
+}
+```
+
+### REST API Testing Framework
+
+#### Unit Testing with Mock APIs
+
+```java
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import static org.mockito.Mockito.*;
+
+public class CustomerApiClientTest {
+
+    @Mock
+    private RestApiClient mockRestClient;
+
+    private CustomerApiClient customerApiClient;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        customerApiClient = new CustomerApiClient(mockRestClient);
+    }
+
+    @Test
+    void testGetCustomer_Success() {
+        // Arrange
+        String customerId = "CUST001";
+        Customer expectedCustomer = new Customer(customerId, "John Doe", "john@example.com");
+
+        RestApiResponse<Customer> mockResponse = RestApiResponse.success(expectedCustomer);
+
+        when(mockRestClient.get("/customers/{customerId}"))
+            .thenReturn(mockRequestBuilder());
+        when(mockRequestBuilder().pathParam("customerId", customerId))
+            .thenReturn(mockRequestBuilder());
+        when(mockRequestBuilder().execute(Customer.class))
+            .thenReturn(mockResponse);
+
+        // Act
+        Customer result = customerApiClient.getCustomer(customerId);
+
+        // Assert
+        assertThat(result).isEqualTo(expectedCustomer);
+        verify(mockRestClient).get("/customers/{customerId}");
+    }
+
+    @Test
+    void testGetCustomer_NotFound() {
+        // Arrange
+        String customerId = "NONEXISTENT";
+        RestApiResponse<Customer> mockResponse = RestApiResponse.error(404, "Not Found");
+
+        when(mockRestClient.get("/customers/{customerId}"))
+            .thenReturn(mockRequestBuilder());
+        when(mockRequestBuilder().pathParam("customerId", customerId))
+            .thenReturn(mockRequestBuilder());
+        when(mockRequestBuilder().execute(Customer.class))
+            .thenReturn(mockResponse);
+
+        // Act & Assert
+        assertThatThrownBy(() -> customerApiClient.getCustomer(customerId))
+            .isInstanceOf(CustomerNotFoundException.class)
+            .hasMessageContaining("Customer not found: " + customerId);
+    }
+
+    @Mock
+    private RequestBuilder mockRequestBuilder() {
+        return mock(RequestBuilder.class);
+    }
+}
+```
+
+#### Integration Testing with WireMock
+
+```java
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+public class CustomerApiIntegrationTest {
+
+    private WireMockServer wireMockServer;
+    private CustomerApiClient customerApiClient;
+
+    @BeforeEach
+    void setUp() {
+        wireMockServer = new WireMockServer(8089);
+        wireMockServer.start();
+
+        RestApiConfiguration config = RestApiConfiguration.builder()
+            .baseUrl("http://localhost:8089")
+            .build();
+
+        customerApiClient = new CustomerApiClient(new RestApiClient(config));
+    }
+
+    @AfterEach
+    void tearDown() {
+        wireMockServer.stop();
+    }
+
+    @Test
+    void testGetCustomer_IntegrationSuccess() {
+        // Arrange
+        String customerId = "CUST001";
+        String responseBody = """
+            {
+                "id": "CUST001",
+                "name": "John Doe",
+                "email": "john@example.com",
+                "status": "ACTIVE"
+            }
+            """;
+
+        wireMockServer.stubFor(
+            WireMock.get(WireMock.urlEqualTo("/customers/" + customerId))
+                .willReturn(WireMock.aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(responseBody))
+        );
+
+        // Act
+        Customer result = customerApiClient.getCustomer(customerId);
+
+        // Assert
+        assertThat(result.getId()).isEqualTo(customerId);
+        assertThat(result.getName()).isEqualTo("John Doe");
+        assertThat(result.getEmail()).isEqualTo("john@example.com");
+        assertThat(result.getStatus()).isEqualTo("ACTIVE");
+
+        // Verify the request was made
+        wireMockServer.verify(
+            WireMock.getRequestedFor(WireMock.urlEqualTo("/customers/" + customerId))
+        );
+    }
+
+    @Test
+    void testGetCustomer_IntegrationTimeout() {
+        // Arrange
+        String customerId = "SLOW001";
+
+        wireMockServer.stubFor(
+            WireMock.get(WireMock.urlEqualTo("/customers/" + customerId))
+                .willReturn(WireMock.aResponse()
+                    .withStatus(200)
+                    .withFixedDelay(10000)) // 10 second delay
+        );
+
+        // Act & Assert
+        assertThatThrownBy(() -> customerApiClient.getCustomer(customerId))
+            .isInstanceOf(ApiTimeoutException.class);
+    }
+}
+```
+
+### Enterprise REST API Patterns
+
+#### API Gateway Integration
+
+```yaml
+# API Gateway Configuration
+api-gateway:
+  base-url: "https://gateway.example.com"
+  authentication:
+    type: "oauth2"
+    client-id: "${GATEWAY_CLIENT_ID}"
+    client-secret: "${GATEWAY_CLIENT_SECRET}"
+    token-url: "https://auth.example.com/oauth/token"
+
+  # Service routing
+  services:
+    - name: "customer-service"
+      path: "/api/customers"
+      upstream: "https://customers.internal.com"
+
+    - name: "pricing-service"
+      path: "/api/pricing"
+      upstream: "https://pricing.internal.com"
+
+    - name: "orders-service"
+      path: "/api/orders"
+      upstream: "https://orders.internal.com"
+
+# Rate limiting
+rate-limiting:
+  enabled: true
+  requests-per-minute: 1000
+  burst-size: 100
+
+# Circuit breaker
+circuit-breaker:
+  failure-threshold: 5
+  recovery-timeout: 60000
+  half-open-max-calls: 3
+```
+
+#### Microservices Communication
+
+```java
+public class MicroserviceOrchestrator {
+    private final CustomerServiceClient customerService;
+    private final PricingServiceClient pricingService;
+    private final OrderServiceClient orderService;
+
+    public OrderProcessingResult processOrder(OrderRequest request) {
+        // Step 1: Validate customer
+        Customer customer = customerService.getCustomer(request.getCustomerId());
+        if (!customer.isActive()) {
+            throw new InactiveCustomerException("Customer is not active");
+        }
+
+        // Step 2: Get pricing
+        List<PriceQuote> quotes = pricingService.getPricing(request.getItems());
+
+        // Step 3: Create order
+        Order order = orderService.createOrder(
+            OrderCreationRequest.builder()
+                .customerId(customer.getId())
+                .items(request.getItems())
+                .quotes(quotes)
+                .build()
+        );
+
+        return OrderProcessingResult.builder()
+            .orderId(order.getId())
+            .customer(customer)
+            .totalAmount(order.getTotalAmount())
+            .status(order.getStatus())
+            .build();
+    }
+}
+```
+
+#### Async REST API Patterns
+
+```java
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class AsyncApiClient {
+    private final RestApiClient restClient;
+    private final ExecutorService executorService;
+
+    public AsyncApiClient() {
+        this.restClient = new RestApiClient(config);
+        this.executorService = Executors.newFixedThreadPool(10);
+    }
+
+    public CompletableFuture<Customer> getCustomerAsync(String customerId) {
+        return CompletableFuture.supplyAsync(() -> {
+            return restClient
+                .get("/customers/{customerId}")
+                .pathParam("customerId", customerId)
+                .execute(Customer.class)
+                .getData();
+        }, executorService);
+    }
+
+    public CompletableFuture<List<Order>> getCustomerOrdersAsync(String customerId) {
+        return CompletableFuture.supplyAsync(() -> {
+            return restClient
+                .get("/customers/{customerId}/orders")
+                .pathParam("customerId", customerId)
+                .execute(OrderList.class)
+                .getData()
+                .getOrders();
+        }, executorService);
+    }
+
+    public CompletableFuture<CustomerProfile> getCompleteCustomerProfile(String customerId) {
+        CompletableFuture<Customer> customerFuture = getCustomerAsync(customerId);
+        CompletableFuture<List<Order>> ordersFuture = getCustomerOrdersAsync(customerId);
+
+        return customerFuture.thenCombine(ordersFuture, (customer, orders) -> {
+            return CustomerProfile.builder()
+                .customer(customer)
+                .orders(orders)
+                .totalOrderValue(calculateTotalValue(orders))
+                .build();
+        });
+    }
+
+    private BigDecimal calculateTotalValue(List<Order> orders) {
+        return orders.stream()
+            .map(Order::getTotalAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+}
+```
+
+### REST API Best Practices
+
+#### Configuration Management
+
+```yaml
+# Environment-specific configurations
+environments:
+  development:
+    api-endpoints:
+      customer-service:
+        base-url: "http://localhost:8080/api"
+        authentication:
+          type: "none"
+
+  staging:
+    api-endpoints:
+      customer-service:
+        base-url: "https://staging-api.example.com"
+        authentication:
+          type: "api-key"
+          api-key: "${STAGING_API_KEY}"
+
+  production:
+    api-endpoints:
+      customer-service:
+        base-url: "https://api.example.com"
+        authentication:
+          type: "oauth2"
+          client-id: "${PROD_CLIENT_ID}"
+          client-secret: "${PROD_CLIENT_SECRET}"
+```
+
+#### Security Best Practices
+
+```java
+public class SecureApiClient {
+
+    // 1. Use HTTPS only
+    private static final String HTTPS_ONLY_BASE_URL = "https://api.example.com";
+
+    // 2. Validate SSL certificates
+    private RestApiConfiguration createSecureConfig() {
+        return RestApiConfiguration.builder()
+            .baseUrl(HTTPS_ONLY_BASE_URL)
+            .sslVerification(true)
+            .trustStore("classpath:truststore.jks")
+            .authentication(createSecureAuth())
+            .build();
+    }
+
+    // 3. Use secure authentication
+    private Authentication createSecureAuth() {
+        return OAuth2Auth.builder()
+            .clientId(getFromSecureStore("CLIENT_ID"))
+            .clientSecret(getFromSecureStore("CLIENT_SECRET"))
+            .tokenUrl("https://auth.example.com/oauth/token")
+            .build();
+    }
+
+    // 4. Sanitize inputs
+    public Customer getCustomer(String customerId) {
+        String sanitizedId = sanitizeInput(customerId);
+        validateCustomerId(sanitizedId);
+
+        return restClient
+            .get("/customers/{customerId}")
+            .pathParam("customerId", sanitizedId)
+            .execute(Customer.class)
+            .getData();
+    }
+
+    private String sanitizeInput(String input) {
+        if (input == null) return null;
+        return input.trim().replaceAll("[^a-zA-Z0-9-_]", "");
+    }
+
+    private void validateCustomerId(String customerId) {
+        if (customerId == null || customerId.length() < 3 || customerId.length() > 20) {
+            throw new IllegalArgumentException("Invalid customer ID format");
+        }
+    }
+
+    private String getFromSecureStore(String key) {
+        // Retrieve from secure configuration store (e.g., HashiCorp Vault)
+        return secureConfigurationStore.getValue(key);
+    }
+}
+```
+
+This comprehensive REST API integration guide provides everything needed to integrate APEX with external REST APIs, from basic configuration to advanced enterprise patterns with security, monitoring, and testing.
+
+---
+
+## APEX Testing Framework Guide
+
+### Overview
+
+APEX provides a comprehensive testing framework designed to ensure reliability, performance, and correctness of rule-based systems. This framework supports multiple testing approaches from unit tests to end-to-end integration testing, with specialized tools for rule validation, performance testing, and compliance verification.
+
+### Testing Framework Architecture
+
+```mermaid
+graph TD
+    A[APEX Testing Framework] --> B[Unit Testing]
+    A --> C[Integration Testing]
+    A --> D[Performance Testing]
+    A --> E[Compliance Testing]
+
+    B --> B1[Rule Unit Tests]
+    B --> B2[Configuration Tests]
+    B --> B3[Data Source Tests]
+    B --> B4[Mock Framework]
+
+    C --> C1[End-to-End Tests]
+    C --> C2[API Integration Tests]
+    C --> C3[Database Integration]
+    C --> C4[External Service Tests]
+
+    D --> D1[Load Testing]
+    D --> D2[Stress Testing]
+    D --> D3[Performance Benchmarks]
+    D --> D4[Memory Profiling]
+
+    E --> E1[Rule Coverage Analysis]
+    E --> E2[Audit Trail Validation]
+    E --> E3[Regulatory Compliance]
+    E --> E4[Data Quality Checks]
+
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5
+    style C fill:#e8f5e8
+    style D fill:#fff3e0
+    style E fill:#ffebee
+```
+
+### Core Testing Components
+
+#### Test Framework Classes
+
+**Core Testing Classes:**
+- `ApexTestFramework` - Main testing framework coordinator
+- `RuleTestBuilder` - Fluent API for building rule tests
+- `TestDataBuilder` - Helper for creating test data sets
+- `MockDataSourceManager` - Mock data sources for testing
+- `PerformanceTestRunner` - Performance and load testing
+- `ComplianceTestValidator` - Regulatory compliance testing
+
+**Assertion and Validation:**
+- `RuleAssertions` - Specialized assertions for rule results
+- `DataAssertions` - Assertions for data validation
+- `PerformanceAssertions` - Performance-specific assertions
+- `ConfigurationValidator` - YAML configuration validation
+
+### Unit Testing Framework
+
+#### Basic Rule Unit Testing
+
+```java
+import dev.mars.apex.testing.ApexTestFramework;
+import dev.mars.apex.testing.RuleTestBuilder;
+import dev.mars.apex.testing.TestDataBuilder;
+import org.junit.jupiter.api.Test;
+import static dev.mars.apex.testing.RuleAssertions.*;
+
+public class CustomerValidationRulesTest {
+
+    private final ApexTestFramework testFramework = new ApexTestFramework();
+
+    @Test
+    void testCustomerAgeValidation() {
+        // Arrange
+        Map<String, Object> testData = TestDataBuilder.create()
+            .withField("customerAge", 25)
+            .withField("customerType", "INDIVIDUAL")
+            .build();
+
+        // Act
+        RuleResult result = testFramework
+            .loadConfiguration("customer-validation-rules.yaml")
+            .withTestData(testData)
+            .executeRules();
+
+        // Assert
+        assertThat(result)
+            .isSuccessful()
+            .hasNoErrors()
+            .hasPassedRuleCount(1)
+            .containsRule("age-validation-rule");
+    }
+
+    @Test
+    void testCustomerAgeValidation_UnderAge() {
+        // Arrange
+        Map<String, Object> testData = TestDataBuilder.create()
+            .withField("customerAge", 16)
+            .withField("customerType", "INDIVIDUAL")
+            .build();
+
+        // Act
+        RuleResult result = testFramework
+            .loadConfiguration("customer-validation-rules.yaml")
+            .withTestData(testData)
+            .executeRules();
+
+        // Assert
+        assertThat(result)
+            .isNotSuccessful()
+            .hasErrors()
+            .hasFailedRuleCount(1)
+            .containsFailedRule("age-validation-rule")
+            .hasErrorMessage("Customer must be at least 18 years old");
+    }
+
+    @Test
+    void testMultipleValidationRules() {
+        // Arrange
+        Map<String, Object> testData = TestDataBuilder.create()
+            .withField("customerAge", 25)
+            .withField("customerEmail", "john.doe@example.com")
+            .withField("customerPhone", "+1-555-123-4567")
+            .withField("customerType", "INDIVIDUAL")
+            .build();
+
+        // Act
+        RuleResult result = testFramework
+            .loadConfiguration("customer-validation-rules.yaml")
+            .withTestData(testData)
+            .executeRules();
+
+        // Assert
+        assertThat(result)
+            .isSuccessful()
+            .hasPassedRuleCount(3)
+            .containsRules("age-validation-rule", "email-validation-rule", "phone-validation-rule")
+            .hasNoFailedRules();
+    }
+}
+```
+
+#### Advanced Rule Testing with Parameterized Tests
+
+```java
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
+
+public class ParameterizedRuleTest {
+
+    private final ApexTestFramework testFramework = new ApexTestFramework();
+
+    @ParameterizedTest
+    @CsvSource({
+        "18, true, 'Valid adult customer'",
+        "25, true, 'Valid adult customer'",
+        "65, true, 'Valid senior customer'",
+        "17, false, 'Customer must be at least 18 years old'",
+        "16, false, 'Customer must be at least 18 years old'",
+        "0, false, 'Customer must be at least 18 years old'"
+    })
+    void testAgeValidationWithMultipleValues(int age, boolean expectedSuccess, String expectedMessage) {
+        // Arrange
+        Map<String, Object> testData = TestDataBuilder.create()
+            .withField("customerAge", age)
+            .withField("customerType", "INDIVIDUAL")
+            .build();
+
+        // Act
+        RuleResult result = testFramework
+            .loadConfiguration("customer-validation-rules.yaml")
+            .withTestData(testData)
+            .executeRules();
+
+        // Assert
+        if (expectedSuccess) {
+            assertThat(result).isSuccessful();
+        } else {
+            assertThat(result)
+                .isNotSuccessful()
+                .hasErrorMessage(expectedMessage);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "john.doe@example.com",
+        "jane.smith@company.org",
+        "user123@domain.co.uk",
+        "test.email+tag@example.com"
+    })
+    void testValidEmailAddresses(String email) {
+        // Arrange
+        Map<String, Object> testData = TestDataBuilder.create()
+            .withField("customerEmail", email)
+            .build();
+
+        // Act
+        RuleResult result = testFramework
+            .loadConfiguration("email-validation-rules.yaml")
+            .withTestData(testData)
+            .executeRules();
+
+        // Assert
+        assertThat(result)
+            .isSuccessful()
+            .containsRule("email-format-validation");
+    }
+}
+```
+
+#### Mock Data Source Testing
+
+```java
+import dev.mars.apex.testing.MockDataSourceManager;
+import dev.mars.apex.testing.MockDataSource;
+
+public class DataSourceIntegrationTest {
+
+    private MockDataSourceManager mockDataManager;
+    private ApexTestFramework testFramework;
+
+    @BeforeEach
+    void setUp() {
+        mockDataManager = new MockDataSourceManager();
+        testFramework = new ApexTestFramework()
+            .withMockDataManager(mockDataManager);
+    }
+
+    @Test
+    void testCustomerLookupWithMockData() {
+        // Arrange - Set up mock data source
+        MockDataSource customerDataSource = mockDataManager
+            .createMockDataSource("customer-database")
+            .withQuery("getCustomerById")
+            .withMockData(Map.of(
+                "CUST001", Map.of(
+                    "customerId", "CUST001",
+                    "customerName", "John Doe",
+                    "customerType", "PREMIUM",
+                    "status", "ACTIVE"
+                ),
+                "CUST002", Map.of(
+                    "customerId", "CUST002",
+                    "customerName", "Jane Smith",
+                    "customerType", "STANDARD",
+                    "status", "ACTIVE"
+                )
+            ));
+
+        Map<String, Object> testData = TestDataBuilder.create()
+            .withField("customerId", "CUST001")
+            .build();
+
+        // Act
+        RuleResult result = testFramework
+            .loadConfiguration("customer-enrichment-rules.yaml")
+            .withTestData(testData)
+            .executeRules();
+
+        // Assert
+        assertThat(result)
+            .isSuccessful()
+            .hasEnrichedField("customerName", "John Doe")
+            .hasEnrichedField("customerType", "PREMIUM")
+            .hasEnrichedField("status", "ACTIVE");
+
+        // Verify mock interactions
+        assertThat(customerDataSource)
+            .wasCalledOnce()
+            .wasCalledWithParameter("customerId", "CUST001");
+    }
+
+    @Test
+    void testCustomerLookupNotFound() {
+        // Arrange - Mock data source with no matching data
+        mockDataManager
+            .createMockDataSource("customer-database")
+            .withQuery("getCustomerById")
+            .withEmptyResult();
+
+        Map<String, Object> testData = TestDataBuilder.create()
+            .withField("customerId", "NONEXISTENT")
+            .build();
+
+        // Act
+        RuleResult result = testFramework
+            .loadConfiguration("customer-enrichment-rules.yaml")
+            .withTestData(testData)
+            .executeRules();
+
+        // Assert
+        assertThat(result)
+            .isNotSuccessful()
+            .hasErrorMessage("Customer not found: NONEXISTENT")
+            .hasNoEnrichedFields();
+    }
+}
+```
+
+### Integration Testing Framework
+
+#### End-to-End Integration Tests
+
+```java
+import dev.mars.apex.testing.IntegrationTestFramework;
+import dev.mars.apex.testing.TestEnvironment;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
+
+@SpringBootTest
+@TestPropertySource(locations = "classpath:test.properties")
+public class CustomerProcessingIntegrationTest {
+
+    private final IntegrationTestFramework integrationFramework =
+        new IntegrationTestFramework();
+
+    @Test
+    void testCompleteCustomerProcessingWorkflow() {
+        // Arrange - Set up test environment
+        TestEnvironment testEnv = integrationFramework
+            .createTestEnvironment()
+            .withDatabase("h2-test-database")
+            .withExternalService("customer-api", "http://localhost:8089")
+            .withConfiguration("customer-processing-rules.yaml");
+
+        // Seed test data
+        testEnv.seedDatabase("customers", List.of(
+            Map.of("id", "CUST001", "name", "John Doe", "type", "PREMIUM"),
+            Map.of("id", "CUST002", "name", "Jane Smith", "type", "STANDARD")
+        ));
+
+        // Mock external API
+        testEnv.mockExternalService("customer-api")
+            .whenGet("/customers/CUST001")
+            .thenReturn(200, """
+                {
+                    "id": "CUST001",
+                    "creditScore": 750,
+                    "riskRating": "LOW"
+                }
+                """);
+
+        Map<String, Object> inputData = Map.of(
+            "customerId", "CUST001",
+            "transactionAmount", 10000.00,
+            "transactionType", "WIRE_TRANSFER"
+        );
+
+        // Act - Execute complete workflow
+        WorkflowResult result = integrationFramework
+            .executeWorkflow("customer-transaction-processing", inputData);
+
+        // Assert - Verify complete workflow
+        assertThat(result)
+            .isSuccessful()
+            .hasProcessedSteps(5)
+            .completedWithinTimeout(Duration.ofSeconds(5));
+
+        // Verify database changes
+        assertThat(testEnv.getDatabase("customers"))
+            .hasRecord("CUST001")
+            .withField("lastTransactionAmount", 10000.00)
+            .withField("lastTransactionDate", isToday());
+
+        // Verify external API calls
+        assertThat(testEnv.getExternalService("customer-api"))
+            .wasCalledOnce()
+            .withPath("/customers/CUST001");
+    }
+
+    @Test
+    void testErrorHandlingInIntegration() {
+        // Arrange - Set up failure scenario
+        TestEnvironment testEnv = integrationFramework
+            .createTestEnvironment()
+            .withDatabase("h2-test-database")
+            .withExternalService("customer-api", "http://localhost:8089");
+
+        // Mock API failure
+        testEnv.mockExternalService("customer-api")
+            .whenGet("/customers/CUST999")
+            .thenReturn(404, "Customer not found");
+
+        Map<String, Object> inputData = Map.of(
+            "customerId", "CUST999",
+            "transactionAmount", 5000.00
+        );
+
+        // Act
+        WorkflowResult result = integrationFramework
+            .executeWorkflow("customer-transaction-processing", inputData);
+
+        // Assert - Verify error handling
+        assertThat(result)
+            .isNotSuccessful()
+            .hasError("Customer not found")
+            .hasFailedStep("customer-lookup")
+            .hasNoSideEffects(); // No database changes should occur
+    }
+}
+```
+
+### Performance Testing Framework
+
+#### Load Testing
+
+```java
+import dev.mars.apex.testing.PerformanceTestRunner;
+import dev.mars.apex.testing.LoadTestConfiguration;
+import dev.mars.apex.testing.PerformanceMetrics;
+
+public class RulePerformanceTest {
+
+    private final PerformanceTestRunner performanceRunner = new PerformanceTestRunner();
+
+    @Test
+    void testRulePerformanceUnderLoad() {
+        // Arrange
+        LoadTestConfiguration loadConfig = LoadTestConfiguration.builder()
+            .concurrentUsers(50)
+            .testDuration(Duration.ofMinutes(2))
+            .rampUpTime(Duration.ofSeconds(30))
+            .targetThroughput(1000) // requests per second
+            .build();
+
+        TestDataGenerator dataGenerator = TestDataGenerator.builder()
+            .withRandomCustomerIds(1000)
+            .withRandomTransactionAmounts(100, 100000)
+            .withRandomTransactionTypes("WIRE", "ACH", "CHECK")
+            .build();
+
+        // Act
+        PerformanceMetrics metrics = performanceRunner
+            .loadConfiguration("customer-validation-rules.yaml")
+            .withLoadConfiguration(loadConfig)
+            .withDataGenerator(dataGenerator)
+            .executeLoadTest();
+
+        // Assert
+        assertThat(metrics)
+            .hasAverageResponseTime(lessThan(Duration.ofMillis(100)))
+            .has95thPercentileResponseTime(lessThan(Duration.ofMillis(200)))
+            .hasMaxResponseTime(lessThan(Duration.ofMillis(500)))
+            .hasThroughput(greaterThan(800)) // requests per second
+            .hasErrorRate(lessThan(0.01)) // Less than 1% errors
+            .hasNoMemoryLeaks()
+            .hasStablePerformance();
+    }
+
+    @Test
+    void testMemoryUsageUnderLoad() {
+        // Arrange
+        LoadTestConfiguration memoryTestConfig = LoadTestConfiguration.builder()
+            .concurrentUsers(100)
+            .testDuration(Duration.ofMinutes(5))
+            .memoryProfiling(true)
+            .build();
+
+        // Act
+        PerformanceMetrics metrics = performanceRunner
+            .loadConfiguration("complex-rules.yaml")
+            .withLoadConfiguration(memoryTestConfig)
+            .executeMemoryTest();
+
+        // Assert
+        assertThat(metrics.getMemoryMetrics())
+            .hasMaxHeapUsage(lessThan(512 * 1024 * 1024)) // Less than 512MB
+            .hasNoMemoryLeaks()
+            .hasStableGarbageCollection()
+            .hasAcceptableGCOverhead(lessThan(5.0)); // Less than 5% GC overhead
+    }
+
+    @Test
+    void testStressTestingLimits() {
+        // Arrange - Stress test to find breaking point
+        StressTestConfiguration stressConfig = StressTestConfiguration.builder()
+            .startingUsers(10)
+            .maxUsers(500)
+            .userIncrement(10)
+            .incrementInterval(Duration.ofSeconds(30))
+            .failureThreshold(0.05) // 5% error rate
+            .responseTimeThreshold(Duration.ofSeconds(1))
+            .build();
+
+        // Act
+        StressTestResult result = performanceRunner
+            .loadConfiguration("customer-validation-rules.yaml")
+            .withStressConfiguration(stressConfig)
+            .executeStressTest();
+
+        // Assert
+        assertThat(result)
+            .foundBreakingPoint()
+            .hasMaxSupportedUsers(greaterThan(200))
+            .hasGracefulDegradation()
+            .recoveredAfterStress();
+
+        System.out.println("Maximum supported concurrent users: " +
+            result.getMaxSupportedUsers());
+    }
+}
+```
+
+#### Benchmark Testing
+
+```java
+import dev.mars.apex.testing.BenchmarkRunner;
+import dev.mars.apex.testing.BenchmarkResult;
+
+public class RuleBenchmarkTest {
+
+    private final BenchmarkRunner benchmarkRunner = new BenchmarkRunner();
+
+    @Test
+    void benchmarkRuleExecutionPerformance() {
+        // Arrange
+        List<String> ruleConfigurations = List.of(
+            "simple-validation-rules.yaml",
+            "complex-business-rules.yaml",
+            "enrichment-rules.yaml",
+            "transformation-rules.yaml"
+        );
+
+        // Act & Assert
+        for (String config : ruleConfigurations) {
+            BenchmarkResult result = benchmarkRunner
+                .loadConfiguration(config)
+                .withWarmupIterations(1000)
+                .withBenchmarkIterations(10000)
+                .withTestData(createStandardTestData())
+                .executeBenchmark();
+
+            System.out.printf("Configuration: %s%n", config);
+            System.out.printf("  Average execution time: %.2f ms%n",
+                result.getAverageExecutionTime().toMillis());
+            System.out.printf("  95th percentile: %.2f ms%n",
+                result.get95thPercentile().toMillis());
+            System.out.printf("  Throughput: %.0f ops/sec%n",
+                result.getThroughput());
+
+            // Performance assertions
+            assertThat(result)
+                .hasAverageExecutionTime(lessThan(Duration.ofMillis(50)))
+                .hasThroughput(greaterThan(1000.0))
+                .hasConsistentPerformance();
+        }
+    }
+
+    private Map<String, Object> createStandardTestData() {
+        return TestDataBuilder.create()
+            .withField("customerId", "CUST001")
+            .withField("customerType", "PREMIUM")
+            .withField("transactionAmount", 10000.00)
+            .withField("transactionType", "WIRE_TRANSFER")
+            .withField("region", "US")
+            .build();
+    }
+}
+```
+
+### Compliance Testing Framework
+
+#### Regulatory Compliance Testing
+
+```java
+import dev.mars.apex.testing.ComplianceTestValidator;
+import dev.mars.apex.testing.RegulatoryFramework;
+import dev.mars.apex.testing.AuditTrailValidator;
+
+public class RegulatoryComplianceTest {
+
+    private final ComplianceTestValidator complianceValidator = new ComplianceTestValidator();
+
+    @Test
+    void testSOXComplianceRequirements() {
+        // Arrange - SOX compliance requirements
+        ComplianceRequirements soxRequirements = ComplianceRequirements.builder()
+            .framework(RegulatoryFramework.SOX)
+            .requireAuditTrail(true)
+            .requireDataIntegrity(true)
+            .requireAccessControl(true)
+            .requireChangeTracking(true)
+            .build();
+
+        Map<String, Object> testData = TestDataBuilder.create()
+            .withField("transactionAmount", 1000000.00) // Large transaction
+            .withField("customerId", "CUST001")
+            .withField("userId", "USER123")
+            .withField("timestamp", Instant.now())
+            .build();
+
+        // Act
+        ComplianceTestResult result = complianceValidator
+            .loadConfiguration("financial-transaction-rules.yaml")
+            .withComplianceRequirements(soxRequirements)
+            .withTestData(testData)
+            .executeComplianceTest();
+
+        // Assert
+        assertThat(result)
+            .isCompliant()
+            .hasAuditTrail()
+            .hasDataIntegrityChecks()
+            .hasAccessControlValidation()
+            .hasChangeTrackingEnabled()
+            .meetsAllRequirements(soxRequirements);
+    }
+
+    @Test
+    void testGDPRDataPrivacyCompliance() {
+        // Arrange - GDPR compliance requirements
+        ComplianceRequirements gdprRequirements = ComplianceRequirements.builder()
+            .framework(RegulatoryFramework.GDPR)
+            .requireDataMinimization(true)
+            .requireConsentTracking(true)
+            .requireDataRetentionLimits(true)
+            .requireRightToErasure(true)
+            .build();
+
+        Map<String, Object> testData = TestDataBuilder.create()
+            .withField("customerId", "EU_CUST001")
+            .withField("personalData", Map.of(
+                "name", "John Doe",
+                "email", "john@example.com",
+                "phone", "+49-123-456-7890"
+            ))
+            .withField("consentGiven", true)
+            .withField("consentDate", LocalDate.now().minusDays(30))
+            .build();
+
+        // Act
+        ComplianceTestResult result = complianceValidator
+            .loadConfiguration("customer-data-processing-rules.yaml")
+            .withComplianceRequirements(gdprRequirements)
+            .withTestData(testData)
+            .executeComplianceTest();
+
+        // Assert
+        assertThat(result)
+            .isCompliant()
+            .hasDataMinimization()
+            .hasConsentTracking()
+            .hasDataRetentionControls()
+            .supportsRightToErasure()
+            .meetsAllRequirements(gdprRequirements);
+    }
+
+    @Test
+    void testAuditTrailCompleteness() {
+        // Arrange
+        AuditTrailValidator auditValidator = new AuditTrailValidator();
+
+        Map<String, Object> testData = TestDataBuilder.create()
+            .withField("transactionId", "TXN123456")
+            .withField("amount", 50000.00)
+            .withField("userId", "TRADER001")
+            .build();
+
+        // Act
+        RuleResult result = testFramework
+            .loadConfiguration("trading-rules.yaml")
+            .withAuditTrailEnabled(true)
+            .withTestData(testData)
+            .executeRules();
+
+        // Assert
+        AuditTrail auditTrail = result.getAuditTrail();
+
+        assertThat(auditTrail)
+            .isNotEmpty()
+            .hasEntry("transactionId", "TXN123456")
+            .hasEntry("userId", "TRADER001")
+            .hasEntry("timestamp", isRecent())
+            .hasEntry("ruleExecutions", hasSize(greaterThan(0)))
+            .hasEntry("dataAccess", hasSize(greaterThan(0)))
+            .hasCompleteChainOfCustody();
+    }
+}
+```
+
+#### Data Quality Testing
+
+```java
+import dev.mars.apex.testing.DataQualityValidator;
+import dev.mars.apex.testing.DataQualityMetrics;
+
+public class DataQualityTest {
+
+    private final DataQualityValidator dataQualityValidator = new DataQualityValidator();
+
+    @Test
+    void testDataCompletenessValidation() {
+        // Arrange
+        List<Map<String, Object>> testDataset = List.of(
+            Map.of("customerId", "CUST001", "name", "John Doe", "email", "john@example.com"),
+            Map.of("customerId", "CUST002", "name", "Jane Smith", "email", "jane@example.com"),
+            Map.of("customerId", "CUST003", "name", "", "email", "incomplete@example.com"), // Missing name
+            Map.of("customerId", "CUST004", "name", "Bob Wilson") // Missing email
+        );
+
+        DataQualityRules qualityRules = DataQualityRules.builder()
+            .requireField("customerId")
+            .requireField("name")
+            .requireField("email")
+            .minimumCompleteness(0.95) // 95% completeness required
+            .build();
+
+        // Act
+        DataQualityMetrics metrics = dataQualityValidator
+            .withDataset(testDataset)
+            .withQualityRules(qualityRules)
+            .validateDataQuality();
+
+        // Assert
+        assertThat(metrics)
+            .hasCompleteness(0.75) // 75% complete (3 out of 4 records complete)
+            .isBelow(qualityRules.getMinimumCompleteness())
+            .hasIncompleteRecords(2)
+            .hasQualityIssues();
+    }
+
+    @Test
+    void testDataAccuracyValidation() {
+        // Arrange
+        List<Map<String, Object>> testDataset = List.of(
+            Map.of("email", "valid@example.com", "age", 25, "phone", "+1-555-123-4567"),
+            Map.of("email", "invalid-email", "age", 30, "phone", "+1-555-987-6543"),
+            Map.of("email", "another@example.com", "age", -5, "phone", "invalid-phone"),
+            Map.of("email", "good@example.com", "age", 150, "phone", "+1-555-111-2222")
+        );
+
+        DataQualityRules qualityRules = DataQualityRules.builder()
+            .validateEmailFormat("email")
+            .validateRange("age", 0, 120)
+            .validatePhoneFormat("phone")
+            .minimumAccuracy(0.90) // 90% accuracy required
+            .build();
+
+        // Act
+        DataQualityMetrics metrics = dataQualityValidator
+            .withDataset(testDataset)
+            .withQualityRules(qualityRules)
+            .validateDataQuality();
+
+        // Assert
+        assertThat(metrics)
+            .hasAccuracy(0.25) // Only 1 out of 4 records fully accurate
+            .isBelow(qualityRules.getMinimumAccuracy())
+            .hasInaccurateRecords(3)
+            .hasValidationErrors(List.of(
+                "Invalid email format: invalid-email",
+                "Age out of range: -5",
+                "Invalid phone format: invalid-phone",
+                "Age out of range: 150"
+            ));
+    }
+}
+```
+
+### Test Automation and CI/CD Integration
+
+#### Automated Test Suites
+
+```java
+import dev.mars.apex.testing.TestSuite;
+import dev.mars.apex.testing.TestSuiteRunner;
+import dev.mars.apex.testing.TestReport;
+
+public class AutomatedTestSuite {
+
+    @Test
+    void executeCompleteTestSuite() {
+        // Arrange - Define comprehensive test suite
+        TestSuite testSuite = TestSuite.builder()
+            .name("APEX Complete Validation Suite")
+            .addUnitTests("unit-tests/**/*Test.java")
+            .addIntegrationTests("integration-tests/**/*Test.java")
+            .addPerformanceTests("performance-tests/**/*Test.java")
+            .addComplianceTests("compliance-tests/**/*Test.java")
+            .withParallelExecution(true)
+            .withMaxConcurrency(4)
+            .withTimeout(Duration.ofMinutes(30))
+            .build();
+
+        // Act
+        TestReport report = TestSuiteRunner.execute(testSuite);
+
+        // Assert
+        assertThat(report)
+            .hasOverallSuccess(true)
+            .hasTestCount(greaterThan(100))
+            .hasPassRate(greaterThan(0.95)) // 95% pass rate
+            .hasExecutionTime(lessThan(Duration.ofMinutes(30)))
+            .hasNoBlockingIssues();
+
+        // Generate reports
+        report.generateJUnitXmlReport("target/test-results/junit.xml");
+        report.generateHtmlReport("target/test-results/report.html");
+        report.generateCoverageReport("target/test-results/coverage.html");
+    }
+}
+```
+
+#### CI/CD Pipeline Integration
+
+```yaml
+# .github/workflows/apex-testing.yml
+name: APEX Testing Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+
+      - name: Run Unit Tests
+        run: |
+          mvn test -Dtest="**/*UnitTest" \
+            -Dmaven.test.failure.ignore=false \
+            -Dapex.test.mode=unit
+
+      - name: Publish Unit Test Results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Unit Test Results
+          path: target/surefire-reports/*.xml
+          reporter: java-junit
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Run Integration Tests
+        run: |
+          mvn test -Dtest="**/*IntegrationTest" \
+            -Dapex.test.mode=integration \
+            -Dspring.datasource.url=jdbc:postgresql://localhost:5432/postgres \
+            -Dspring.datasource.username=postgres \
+            -Dspring.datasource.password=postgres
+
+  performance-tests:
+    runs-on: ubuntu-latest
+    needs: integration-tests
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Run Performance Tests
+        run: |
+          mvn test -Dtest="**/*PerformanceTest" \
+            -Dapex.test.mode=performance \
+            -Dapex.performance.duration=2m \
+            -Dapex.performance.users=50
+
+      - name: Upload Performance Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-results
+          path: target/performance-reports/
+
+  compliance-tests:
+    runs-on: ubuntu-latest
+    needs: integration-tests
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Run Compliance Tests
+        run: |
+          mvn test -Dtest="**/*ComplianceTest" \
+            -Dapex.test.mode=compliance \
+            -Dapex.compliance.frameworks=SOX,GDPR,PCI
+
+      - name: Generate Compliance Report
+        run: |
+          mvn exec:java -Dexec.mainClass="dev.mars.apex.testing.ComplianceReportGenerator" \
+            -Dexec.args="target/compliance-reports/"
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run Security Scan
+        uses: securecodewarrior/github-action-add-sarif@v1
+        with:
+          sarif-file: 'security-scan-results.sarif'
+
+      - name: OWASP Dependency Check
+        run: |
+          mvn org.owasp:dependency-check-maven:check \
+            -DfailBuildOnCVSS=7 \
+            -DsuppressionsLocation=owasp-suppressions.xml
+```
+
+### Test Data Management
+
+#### Test Data Builders and Factories
+
+```java
+import dev.mars.apex.testing.TestDataFactory;
+import dev.mars.apex.testing.DataSetBuilder;
+
+public class TestDataManagement {
+
+    public static class CustomerTestDataFactory extends TestDataFactory<Customer> {
+
+        @Override
+        public Customer createDefault() {
+            return Customer.builder()
+                .customerId("CUST" + generateSequentialId())
+                .customerName("Test Customer " + generateSequentialId())
+                .customerType("STANDARD")
+                .email(generateEmail())
+                .phone(generatePhoneNumber())
+                .status("ACTIVE")
+                .createdDate(LocalDate.now())
+                .build();
+        }
+
+        public Customer createPremiumCustomer() {
+            return createDefault().toBuilder()
+                .customerType("PREMIUM")
+                .creditLimit(100000.00)
+                .build();
+        }
+
+        public Customer createInactiveCustomer() {
+            return createDefault().toBuilder()
+                .status("INACTIVE")
+                .lastActivityDate(LocalDate.now().minusMonths(6))
+                .build();
+        }
+
+        public List<Customer> createBatch(int count) {
+            return IntStream.range(0, count)
+                .mapToObj(i -> createDefault())
+                .collect(Collectors.toList());
+        }
+    }
+
+    public static class TransactionTestDataFactory extends TestDataFactory<Transaction> {
+
+        @Override
+        public Transaction createDefault() {
+            return Transaction.builder()
+                .transactionId("TXN" + generateSequentialId())
+                .customerId("CUST001") // Default customer
+                .amount(generateRandomAmount(100, 10000))
+                .transactionType("WIRE_TRANSFER")
+                .currency("USD")
+                .timestamp(Instant.now())
+                .status("PENDING")
+                .build();
+        }
+
+        public Transaction createLargeTransaction() {
+            return createDefault().toBuilder()
+                .amount(generateRandomAmount(100000, 1000000))
+                .transactionType("WIRE_TRANSFER")
+                .requiresApproval(true)
+                .build();
+        }
+
+        public Transaction createInternationalTransaction() {
+            return createDefault().toBuilder()
+                .currency("EUR")
+                .destinationCountry("DE")
+                .exchangeRate(1.18)
+                .swiftCode("DEUTDEFF")
+                .build();
+        }
+    }
+
+    @Test
+    void demonstrateTestDataUsage() {
+        // Create test data using factories
+        CustomerTestDataFactory customerFactory = new CustomerTestDataFactory();
+        TransactionTestDataFactory transactionFactory = new TransactionTestDataFactory();
+
+        Customer customer = customerFactory.createPremiumCustomer();
+        Transaction transaction = transactionFactory.createLargeTransaction()
+            .toBuilder()
+            .customerId(customer.getCustomerId())
+            .build();
+
+        // Create comprehensive test dataset
+        Map<String, Object> testData = DataSetBuilder.create()
+            .withCustomer(customer)
+            .withTransaction(transaction)
+            .withMarketData(createMarketData())
+            .withRegulatoryData(createRegulatoryData())
+            .build();
+
+        // Execute test
+        RuleResult result = testFramework
+            .loadConfiguration("large-transaction-rules.yaml")
+            .withTestData(testData)
+            .executeRules();
+
+        assertThat(result).isSuccessful();
+    }
+}
+```
+
+This comprehensive testing framework guide provides everything needed to implement robust testing strategies for APEX-based systems, from basic unit tests to advanced compliance and performance testing.
+
+---
+
+## Appendix A: Database Error Handling Improvements
+
+### Overview
+
+This appendix describes the comprehensive improvements made to database error handling in the APEX rules engine to prevent system crashes due to data configuration errors like primary key violations. These improvements are critical for robust system operation in production environments.
+
+### Problem Statement
+
+Previously, database errors such as primary key violations, unique constraint violations, and other data integrity issues would cause the entire pipeline to crash with unhandled exceptions. This was problematic because:
+
+1. **Data integrity violations are configuration issues**, not system failures
+2. **Pipelines should be resilient** to individual record failures
+3. **Different error types require different handling strategies**
+4. **Users need meaningful error messages** to understand what went wrong
+
+### Solution Architecture
+
+#### 1. SQL Error Classification System
+
+Created a new `SqlErrorClassifier` utility class that categorizes SQL errors into four types:
+
+**Error Types:**
+- **DATA_INTEGRITY_VIOLATION**: Primary key conflicts, unique constraints, foreign key violations, not null violations
+- **TRANSIENT_ERROR**: Connection timeouts, deadlocks, temporary resource unavailability
+- **CONFIGURATION_ERROR**: Table not found, column not found, syntax errors
+- **FATAL_ERROR**: Unknown/unexpected database errors
+
+**Classification Logic:**
+- **SQL State codes**: Uses standard SQL State codes (23505, 23502, etc.)
+- **Database-specific error codes**: H2, PostgreSQL specific codes
+- **Message pattern matching**: Fallback for cases where SQL State is missing
+
+#### 2. Enhanced Exception Handling
+
+**New DataSinkException Type:**
+- Added `DATA_INTEGRITY_ERROR` to the `DataSinkException.ErrorType` enum
+- Created factory methods for creating data integrity exceptions
+- Made data integrity errors non-retryable by default
+
+**Graceful Pipeline Execution:**
+- Updated `PipelineExecutor` to handle data integrity violations gracefully
+- Records with integrity violations are logged and skipped
+- Pipeline continues processing remaining records
+- Provides summary statistics (success count, skipped count)
+
+#### 3. Comprehensive Error Handling Updates
+
+Updated error handling in multiple components:
+
+**DatabaseDataSink:**
+- **write() method**: Classifies SQL errors and handles appropriately
+- **writeBatch() method**: Enhanced batch processing with per-item error classification
+- **execute() method**: Improved error classification for operations
+
+**DatabaseDataSource:**
+- **query() method**: Better error classification for read operations
+- **batchUpdate() method**: Enhanced batch update error handling
+
+**PipelineExecutor:**
+- **executeLoadStep()**: Graceful handling of data integrity violations
+- **Batch processing**: Continues processing even when individual records fail
+- **Detailed logging**: Provides clear information about skipped records
+
+### Implementation Details
+
+#### SqlErrorClassifier Class
+
+<augment_code_snippet path="apex-core/src/main/java/com/apexrules/core/util/SqlErrorClassifier.java" mode="EXCERPT">
+````java
+public class SqlErrorClassifier {
+    public enum SqlErrorType {
+        DATA_INTEGRITY_VIOLATION,
+        TRANSIENT_ERROR,
+        CONFIGURATION_ERROR,
+        FATAL_ERROR
+    }
+
+    public static SqlErrorType classifyError(SQLException e);
+    public static String getErrorDescription(SqlErrorType errorType);
+    public static boolean shouldFailPipeline(SqlErrorType errorType);
+}
+````
+</augment_code_snippet>
+
+#### Enhanced Pipeline Execution
+
+<augment_code_snippet path="apex-core/src/main/java/com/apexrules/core/pipeline/PipelineExecutor.java" mode="EXCERPT">
+````java
+// Before: Pipeline would crash on first primary key violation
+// After: Pipeline logs violation and continues processing
+
+for (Object record : dataList) {
+    try {
+        dataSink.write(step.getOperation(), record);
+        successCount++;
+    } catch (DataSinkException e) {
+        if (e.getErrorType() == DataSinkException.ErrorType.DATA_INTEGRITY_ERROR) {
+            LOGGER.warn("Skipping record due to data integrity violation: {}", e.getMessage());
+            skippedCount++;
+        } else {
+            throw e; // Re-throw other types of errors
+        }
+    }
+}
+````
+</augment_code_snippet>
+
+### Error Handling Strategies
+
+#### Data Integrity Violations
+- **Action**: Log warning and skip record
+- **Pipeline**: Continues processing
+- **User Impact**: Record is skipped, pipeline completes successfully
+- **Example**: Primary key violation, unique constraint violation
+
+#### Transient Errors
+- **Action**: Mark as retryable
+- **Pipeline**: Can be retried with backoff
+- **User Impact**: Operation may succeed on retry
+- **Example**: Connection timeout, deadlock
+
+#### Configuration Errors
+- **Action**: Fail fast
+- **Pipeline**: Stops immediately
+- **User Impact**: Requires intervention to fix configuration
+- **Example**: Table not found, column not found
+
+#### Fatal Errors
+- **Action**: Escalate and fail
+- **Pipeline**: Stops immediately
+- **User Impact**: Requires investigation
+- **Example**: Unknown database errors
+
+### Testing and Verification
+
+#### Comprehensive Test Coverage (31 Tests Total)
+
+**SqlErrorClassifierTest (17 tests)**
+- ✅ Primary key violation classification
+- ✅ Unique constraint violation classification
+- ✅ Foreign key violation classification
+- ✅ NOT NULL violation classification
+- ✅ Connection error classification
+- ✅ Deadlock error classification
+- ✅ Table not found classification
+- ✅ Column not found classification
+- ✅ Syntax error classification
+- ✅ Unknown error classification
+- ✅ Null exception handling
+- ✅ Error description verification
+- ✅ Message pattern classification
+
+**DatabaseErrorHandlingIntegrationTest (7 tests)**
+- ✅ Real table not found error classification
+- ✅ Real column not found error classification
+- ✅ Real SQL syntax error classification
+- ✅ Real primary key violation classification
+- ✅ Real unique constraint violation classification
+- ✅ Real NOT NULL violation classification
+
+**DatabaseErrorHandlingProofTest (7 tests)**
+- ✅ **PROOF**: Table not found → CONFIGURATION_ERROR → FAIL FAST
+- ✅ **PROOF**: Column not found → CONFIGURATION_ERROR → FAIL FAST
+- ✅ **PROOF**: SQL syntax error → CONFIGURATION_ERROR → FAIL FAST
+- ✅ **PROOF**: Primary key violation → DATA_INTEGRITY_VIOLATION → GRACEFUL HANDLING
+- ✅ **PROOF**: Unique constraint violation → DATA_INTEGRITY_VIOLATION → GRACEFUL HANDLING
+- ✅ **PROOF**: NOT NULL violation → DATA_INTEGRITY_VIOLATION → GRACEFUL HANDLING
+
+### Benefits
+
+#### 1. System Resilience
+- Pipelines no longer crash due to data quality issues
+- Individual record failures don't stop entire batch processing
+- Better separation of data issues vs system issues
+
+#### 2. Improved Observability
+- Clear categorization of error types
+- Detailed logging with context information
+- Summary statistics for batch operations
+
+#### 3. Better User Experience
+- Meaningful error messages
+- Clear indication of what went wrong
+- Guidance on whether errors are retryable
+
+#### 4. Operational Excellence
+- Reduced false alarms from data quality issues
+- Better error recovery strategies
+- Improved system monitoring capabilities
+
+### Usage Examples
+
+#### Before (System Crash):
+```
+ERROR: Pipeline execution failed: Required step failed: load-to-database
+Caused by: Unique index or primary key violation: "PRIMARY KEY ON PUBLIC.CUSTOMERS(CUSTOMER_ID)"
+```
+
+#### After (Graceful Handling):
+```
+WARN: Skipping record due to data integrity violation: Primary key violation - customer_id already exists
+INFO: Load step 'load-to-database' completed: 4 records loaded successfully, 1 record skipped due to data integrity issues
+```
+
+### Future Enhancements
+
+1. **Configurable Error Strategies**: Allow users to configure how different error types are handled
+2. **Dead Letter Queue**: Option to send failed records to a separate table/queue for later analysis
+3. **Retry Logic**: Implement automatic retry with exponential backoff for transient errors
+4. **Error Metrics**: Collect and expose metrics about error rates and types
+5. **Error Recovery**: Implement recovery strategies for different error scenarios
+
+### Key Achievement
+
+The primary key violation that previously crashed the entire pipeline is now handled gracefully, allowing the pipeline to continue processing and complete successfully while logging the problematic records. This significantly enhances the robustness and reliability of APEX systems by providing intelligent error handling that distinguishes between different types of database errors and responds appropriately.
+
+This comprehensive database error handling system ensures that APEX applications can operate reliably in production environments while providing clear feedback about data quality issues and system problems.

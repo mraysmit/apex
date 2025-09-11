@@ -3,7 +3,7 @@
 # Replaces all hardcoded risk management service logic from RiskManagementService (@version 1.0)
 
 metadata:
-  id: "Risk Management Service Demo"
+  id: "risk-management-service-demo"
   name: "Risk Management Service Demo"
   version: "1.0.0"
   description: "APEX-compliant risk management service with real enrichment services"
@@ -28,7 +28,7 @@ external-data-sources:
 
 # APEX enrichment processing for risk management service
 enrichments:
-  - id: "risk-assessment-models-processing"
+  - id: "risk-management-service-demo"
     name: "risk-assessment-models-processing"
     type: "lookup-enrichment"
     description: "Process risk assessment models using data-driven configuration"
@@ -37,7 +37,7 @@ enrichments:
     lookup-key: "#data.modelType != null ? #data.modelType : 'default'"
     target-field: "riskAssessmentModelsResult"
 
-  - id: "risk-calculation-engines-processing"
+  - id: "risk-management-service-demo"
     name: "risk-calculation-engines-processing"
     type: "lookup-enrichment"
     description: "Process risk calculation engines using data-driven configuration"
@@ -46,7 +46,7 @@ enrichments:
     lookup-key: "#data.engineType != null ? #data.engineType : 'default'"
     target-field: "riskCalculationEnginesResult"
 
-  - id: "risk-monitoring-frameworks-processing"
+  - id: "risk-management-service-demo"
     name: "risk-monitoring-frameworks-processing"
     type: "lookup-enrichment"
     description: "Process risk monitoring frameworks using data-driven configuration"
@@ -55,7 +55,7 @@ enrichments:
     lookup-key: "#data.frameworkType != null ? #data.frameworkType : 'default'"
     target-field: "riskMonitoringFrameworksResult"
 
-  - id: "risk-management-service-summary"
+  - id: "risk-management-service-demo"
     name: "risk-management-service-summary"
     type: "expression-enrichment"
     description: "Generate risk management service summary"

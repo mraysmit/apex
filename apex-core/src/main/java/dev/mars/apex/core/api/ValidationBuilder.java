@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -31,6 +33,8 @@ import java.util.stream.Collectors;
  * @version 1.0
  */
 public class ValidationBuilder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ValidationBuilder.class);
 
     private final Object data;
     private final Map<String, Object> facts;
@@ -198,7 +202,10 @@ public class ValidationBuilder {
      * </pre>
      */
     public boolean passes() {
-        return rules.stream().allMatch(rule -> rule.test(getTestData(), rulesService));
+        LOGGER.debug("TRACE: ValidationBuilder.passes() called with {} rules", rules.size());
+        boolean result = rules.stream().allMatch(rule -> rule.test(getTestData(), rulesService));
+        LOGGER.debug("ValidationBuilder.passes() result: {} (all {} rules passed: {})", result, rules.size(), result);
+        return result;
     }
     
     /**
@@ -229,15 +236,27 @@ public class ValidationBuilder {
      * </pre>
      */
     public ValidationResult validate() {
+        LOGGER.debug("TRACE: ValidationBuilder.validate() called with {} rules", rules.size());
         List<String> errors = new ArrayList<>();
-        
-        for (ValidationRule rule : rules) {
-            if (!rule.test(getTestData(), rulesService)) {
+
+        for (int i = 0; i < rules.size(); i++) {
+            ValidationRule rule = rules.get(i);
+            LOGGER.debug("Validating rule {}/{}: condition='{}', message='{}'",
+                i + 1, rules.size(), rule.condition, rule.errorMessage);
+
+            boolean ruleResult = rule.test(getTestData(), rulesService);
+            LOGGER.debug("Rule {}/{} result: {}", i + 1, rules.size(), ruleResult ? "PASS" : "FAIL");
+
+            if (!ruleResult) {
                 errors.add(rule.getErrorMessage());
+                LOGGER.debug("Added error message: '{}'", rule.getErrorMessage());
             }
         }
-        
-        return new ValidationResult(errors.isEmpty(), errors);
+
+        ValidationResult result = new ValidationResult(errors.isEmpty(), errors);
+        LOGGER.debug("ValidationBuilder.validate() completed: {} errors, valid: {}",
+            errors.size(), result.isValid());
+        return result;
     }
     
     /**
@@ -293,15 +312,24 @@ public class ValidationBuilder {
         }
         
         public boolean test(Object data, RulesService rulesService) {
+            LOGGER.debug("TRACE: ValidationRule.test() called - condition: '{}', data type: {}",
+                condition, data != null ? data.getClass().getSimpleName() : "null");
             try {
+                boolean result;
                 if (data instanceof Map) {
                     @SuppressWarnings("unchecked")
                     Map<String, Object> facts = (Map<String, Object>) data;
-                    return rulesService.check(condition, facts);
+                    LOGGER.debug("Testing rule condition '{}' against Map facts: {}", condition, facts);
+                    result = rulesService.check(condition, facts);
                 } else {
-                    return rulesService.check(condition, data);
+                    LOGGER.debug("Testing rule condition '{}' against object: {}", condition, data);
+                    result = rulesService.check(condition, data);
                 }
+                LOGGER.debug("ValidationRule.test() result: {} for condition '{}'", result, condition);
+                return result;
             } catch (Exception e) {
+                LOGGER.debug("ValidationRule.test() failed with exception for condition '{}': {}",
+                    condition, e.getMessage());
                 return false; // Fail safely
             }
         }

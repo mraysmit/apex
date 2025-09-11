@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  * YAML configuration class for external data sources.
@@ -444,10 +446,15 @@ public class YamlDataSource {
     }
     
     // Helper methods for type conversion
-    
+
     private String getStringValue(Map<String, Object> map, String key) {
         Object value = map.get(key);
-        return value != null ? value.toString() : null;
+        if (value == null) {
+            return null;
+        }
+        String stringValue = value.toString();
+        // Apply property resolution to string values
+        return resolveProperties(stringValue);
     }
     
     private Integer getIntegerValue(Map<String, Object> map, String key) {
@@ -772,5 +779,82 @@ public class YamlDataSource {
                ", sourceType='" + sourceType + '\'' +
                ", enabled=" + enabled +
                '}';
+    }
+
+    // ========================================================================
+    // PROPERTY RESOLUTION METHODS
+    // ========================================================================
+
+    /**
+     * Resolve environment variables and system properties in configuration values.
+     * Supports: ${VAR}, ${VAR:default}, $(VAR), $(VAR:default)
+     *
+     * @param value The configuration value that may contain property placeholders
+     * @return The value with resolved properties
+     */
+    private String resolveProperties(String value) {
+        if (value == null || (!value.contains("${") && !value.contains("$("))) {
+            return value;
+        }
+
+        String result = value;
+
+        // First resolve ${VAR} and ${VAR:default} patterns
+        if (result.contains("${")) {
+            Pattern curlyPattern = Pattern.compile("\\$\\{([^}]+)\\}");
+            Matcher curlyMatcher = curlyPattern.matcher(result);
+            StringBuffer curlyResult = new StringBuffer();
+            while (curlyMatcher.find()) {
+                String placeholder = curlyMatcher.group(1);
+                String resolved = resolveSingleProperty(placeholder);
+                curlyMatcher.appendReplacement(curlyResult, Matcher.quoteReplacement(resolved));
+            }
+            curlyMatcher.appendTail(curlyResult);
+            result = curlyResult.toString();
+        }
+
+        // Then resolve $(VAR) and $(VAR:default) patterns
+        if (result.contains("$(")) {
+            Pattern parenPattern = Pattern.compile("\\$\\(([^)]+)\\)");
+            Matcher parenMatcher = parenPattern.matcher(result);
+            StringBuffer parenResult = new StringBuffer();
+            while (parenMatcher.find()) {
+                String placeholder = parenMatcher.group(1);
+                String resolved = resolveSingleProperty(placeholder);
+                parenMatcher.appendReplacement(parenResult, Matcher.quoteReplacement(resolved));
+            }
+            parenMatcher.appendTail(parenResult);
+            result = parenResult.toString();
+        }
+
+        return result;
+    }
+
+    /**
+     * Resolve a single property placeholder.
+     *
+     * @param placeholder The placeholder (e.g., "VAR" or "VAR:default")
+     * @return The resolved value
+     */
+    private String resolveSingleProperty(String placeholder) {
+        // Handle default values: VAR:default
+        String[] parts = placeholder.split(":", 2);
+        String key = parts[0].trim();
+        String defaultValue = parts.length > 1 ? parts[1].trim() : null;
+
+        // Resolution order: System Properties -> Environment Variables -> Default
+        String value = System.getProperty(key);
+        if (value == null) {
+            value = System.getenv(key);
+        }
+        if (value == null && defaultValue != null) {
+            value = defaultValue;
+        }
+        if (value == null) {
+            // Return the original placeholder if property not found
+            return "${" + placeholder + "}";
+        }
+
+        return value;
     }
 }

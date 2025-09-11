@@ -74,7 +74,7 @@
 # ============================================================================
 
 metadata:
-  id: "Custody Auto-Repair Bootstrap Rules"
+  id: "custody-auto-repair-bootstrap-rules"
   name: "Custody Auto-Repair Bootstrap Rules"
   version: "1.0"
   description: "Complete bootstrap demonstration of Standing Instruction auto-repair for custody settlement in Asian markets"
@@ -123,7 +123,7 @@ metadata:
 #
 rule-chains:
   # Primary auto-repair decision chain
-  - id: "si-auto-repair-chain"
+  - id: "custody-auto-repair-bootstrap-rules"
     name: "Standing Instruction Auto-Repair Chain"
     description: "Weighted evaluation of client, market, and instrument level standing instructions"
     pattern: "accumulative-chaining"
@@ -134,31 +134,31 @@ rule-chains:
       initial-value: 0
       accumulation-rules:
         # Client-level rules (highest weight: 0.6)
-        - id: "client-level-si-rule"
+        - id: "custody-auto-repair-bootstrap-rules"
           condition: "clientId != null && applicableClientSI != null ? 60 : 0"
           message: "Client-level SI evaluation - Premium clients get highest priority"
           weight: 0.6
           description: "Evaluates client-specific standing instructions with highest priority"
         # Market-level rules (medium weight: 0.3)
-        - id: "market-level-si-rule"
+        - id: "custody-auto-repair-bootstrap-rules"
           condition: "market != null && applicableMarketSI != null ? 30 : 0"
           message: "Market-level SI evaluation - Asian market conventions applied"
           weight: 0.3
           description: "Applies market-specific settlement conventions for Asian markets"
         # Instrument-level rules (lowest weight: 0.1)
-        - id: "instrument-level-si-rule"
+        - id: "custody-auto-repair-bootstrap-rules"
           condition: "instrumentType != null && applicableInstrumentSI != null ? 10 : 0"
           message: "Instrument-level SI evaluation - Asset class defaults applied"
           weight: 0.1
           description: "Applies instrument-type specific settlement defaults"
       final-decision-rule:
-        id: "repair-decision"
+        id: "custody-auto-repair-bootstrap-rules"
         condition: "repairScore >= 50 ? 'REPAIR_APPROVED' : (repairScore >= 20 ? 'PARTIAL_REPAIR' : 'MANUAL_REVIEW_REQUIRED')"
         message: "Final auto-repair decision based on weighted scoring"
         description: "Determines repair action based on accumulated confidence score"
 
   # Eligibility pre-check chain
-  - id: "eligibility-check-chain"
+  - id: "custody-auto-repair-bootstrap-rules"
     name: "Auto-Repair Eligibility Check"
     description: "Pre-flight checks for auto-repair eligibility including high-value and opt-out exceptions"
     pattern: "conditional-chaining"
@@ -166,18 +166,18 @@ rule-chains:
     priority: 200
     configuration:
       trigger-rule:
-        id: "basic-eligibility"
+        id: "custody-auto-repair-bootstrap-rules"
         condition: "requiresRepair && !highValueTransaction && !clientOptOut"
         message: "Basic eligibility criteria met for auto-repair"
         description: "Checks if instruction requires repair and is not excluded by business rules"
       conditional-rules:
         on-trigger:
-          - id: "confidence-threshold-check"
+          - id: "custody-auto-repair-bootstrap-rules"
             condition: "true"
             message: "Proceeding with auto-repair evaluation"
             description: "Instruction passed eligibility checks"
         on-no-trigger:
-          - id: "eligibility-failure"
+          - id: "custody-auto-repair-bootstrap-rules"
             condition: "false"
             message: "Instruction not eligible for auto-repair - manual intervention required"
             description: "Instruction failed eligibility checks"
@@ -185,7 +185,7 @@ rule-chains:
 # Comprehensive enrichments for standing instruction lookup and field population
 enrichments:
   # Client Standing Instructions Enrichment
-  - id: "client-si-enrichment"
+  - id: "custody-auto-repair-bootstrap-rules"
     name: "Client Standing Instructions Lookup"
     type: "lookup-enrichment"
     target-type: "BootstrapSettlementInstruction"
@@ -200,17 +200,17 @@ enrichments:
         key-field: "clientId"
         data:
           # Premium institutional client - Asia Pacific
-          - clientId: "CLIENT_PREMIUM_ASIA_001"
-            siId: "SI_PREMIUM_ASIA_001"
+          - clientid: "custody-auto-repair-bootstrap-rules"
+            siid: "custody-auto-repair-bootstrap-rules"
             siName: "Premium Asset Management Asia - Default SI"
             scopeType: "CLIENT"
             weight: 0.6
             confidenceLevel: 0.98
-            defaultCounterpartyId: "CP_PREMIUM_GLOBAL_CUSTODY"
+            defaultCounterpartyid: "custody-auto-repair-bootstrap-rules"
             defaultCounterpartyName: "Premium Global Custody Services"
             defaultCounterpartyBic: "PREMGBCUST01"
             defaultCounterpartyAccount: "PREM_ASIA_001_MAIN"
-            defaultCustodianId: "CUST_PREMIUM_GLOBAL"
+            defaultCustodianid: "custody-auto-repair-bootstrap-rules"
             defaultCustodianName: "Premium Global Custodian Ltd"
             defaultCustodianBic: "PREMGBCUST01"
             defaultCustodialAccount: "CUST_PREM_ASIA_001"
@@ -224,17 +224,17 @@ enrichments:
             clientTier: "PREMIUM"
 
           # Standard institutional client
-          - clientId: "CLIENT_STANDARD_ASIA_002"
-            siId: "SI_STANDARD_ASIA_002"
+          - clientid: "custody-auto-repair-bootstrap-rules"
+            siid: "custody-auto-repair-bootstrap-rules"
             siName: "Standard Asset Management - Default SI"
             scopeType: "CLIENT"
             weight: 0.6
             confidenceLevel: 0.90
-            defaultCounterpartyId: "CP_STANDARD_REGIONAL"
+            defaultCounterpartyid: "custody-auto-repair-bootstrap-rules"
             defaultCounterpartyName: "Standard Regional Custody"
             defaultCounterpartyBic: "STDRGNLCUST"
             defaultCounterpartyAccount: "STD_ASIA_002_MAIN"
-            defaultCustodianId: "CUST_STANDARD_ASIA"
+            defaultCustodianid: "custody-auto-repair-bootstrap-rules"
             defaultCustodianName: "Standard Asia Custodian"
             defaultCustodianBic: "STDASIACUST"
             defaultCustodialAccount: "CUST_STD_ASIA_002"
@@ -247,17 +247,17 @@ enrichments:
             clientTier: "STANDARD"
 
           # Hedge fund client
-          - clientId: "CLIENT_HEDGE_FUND_003"
-            siId: "SI_HEDGE_FUND_003"
+          - clientid: "custody-auto-repair-bootstrap-rules"
+            siid: "custody-auto-repair-bootstrap-rules"
             siName: "Asia Hedge Fund Partners - Default SI"
             scopeType: "CLIENT"
             weight: 0.6
             confidenceLevel: 0.85
-            defaultCounterpartyId: "CP_PRIME_BROKERAGE"
+            defaultCounterpartyid: "custody-auto-repair-bootstrap-rules"
             defaultCounterpartyName: "Prime Brokerage Services"
             defaultCounterpartyBic: "PRIMEBRKBIC"
             defaultCounterpartyAccount: "PRIME_HF_003_MARGIN"
-            defaultCustodianId: "CUST_PRIME_BROKER"
+            defaultCustodianid: "custody-auto-repair-bootstrap-rules"
             defaultCustodianName: "Prime Broker Custodian"
             defaultCustodianBic: "PRIMEBRKBIC"
             defaultCustodialAccount: "CUST_PRIME_HF_003"
@@ -271,8 +271,8 @@ enrichments:
             clientTier: "HEDGE_FUND"
 
           # Client with opt-out (for exception testing)
-          - clientId: "CLIENT_OPT_OUT"
-            siId: "SI_OPT_OUT"
+          - clientid: "custody-auto-repair-bootstrap-rules"
+            siid: "custody-auto-repair-bootstrap-rules"
             siName: "Opt-Out Client - Manual Only"
             scopeType: "CLIENT"
             weight: 0.6
@@ -324,7 +324,7 @@ enrichments:
         target-field: "applicableClientSI.enabled"
 
   # Market Standing Instructions Enrichment
-  - id: "market-si-enrichment"
+  - id: "custody-auto-repair-bootstrap-rules"
     name: "Market Standing Instructions Lookup"
     type: "lookup-enrichment"
     target-type: "BootstrapSettlementInstruction"
@@ -340,15 +340,15 @@ enrichments:
         data:
           # Japan Market Configuration
           - market: "JAPAN"
-            siId: "SI_JAPAN_MARKET"
+            siid: "custody-auto-repair-bootstrap-rules"
             siName: "Japan Market Default SI"
             scopeType: "MARKET"
             weight: 0.3
             confidenceLevel: 0.88
-            defaultCustodianId: "CUST_JAPAN_STANDARD"
+            defaultCustodianid: "custody-auto-repair-bootstrap-rules"
             defaultCustodianName: "Japan Standard Custodian KK"
             defaultCustodianBic: "JPSTDCUST01"
-            defaultCounterpartyId: "CP_JAPAN_STANDARD"
+            defaultCounterpartyid: "custody-auto-repair-bootstrap-rules"
             defaultCounterpartyName: "Japan Standard Counterparty"
             defaultCounterpartyBic: "JPSTDCP001"
             defaultSettlementMethod: "DVP"
@@ -365,15 +365,15 @@ enrichments:
 
           # Hong Kong Market Configuration
           - market: "HONG_KONG"
-            siId: "SI_HONG_KONG_MARKET"
+            siid: "custody-auto-repair-bootstrap-rules"
             siName: "Hong Kong Market Default SI"
             scopeType: "MARKET"
             weight: 0.3
             confidenceLevel: 0.90
-            defaultCustodianId: "CUST_HK_STANDARD"
+            defaultCustodianid: "custody-auto-repair-bootstrap-rules"
             defaultCustodianName: "Hong Kong Standard Custodian Ltd"
             defaultCustodianBic: "HKSTDCUST01"
-            defaultCounterpartyId: "CP_HK_STANDARD"
+            defaultCounterpartyid: "custody-auto-repair-bootstrap-rules"
             defaultCounterpartyName: "Hong Kong Standard Counterparty"
             defaultCounterpartyBic: "HKSTDCP001"
             defaultSettlementMethod: "DVP"
@@ -390,15 +390,15 @@ enrichments:
 
           # Singapore Market Configuration
           - market: "SINGAPORE"
-            siId: "SI_SINGAPORE_MARKET"
+            siid: "custody-auto-repair-bootstrap-rules"
             siName: "Singapore Market Default SI"
             scopeType: "MARKET"
             weight: 0.3
             confidenceLevel: 0.87
-            defaultCustodianId: "CUST_SG_STANDARD"
+            defaultCustodianid: "custody-auto-repair-bootstrap-rules"
             defaultCustodianName: "Singapore Standard Custodian Pte Ltd"
             defaultCustodianBic: "SGSTDCUST01"
-            defaultCounterpartyId: "CP_SG_STANDARD"
+            defaultCounterpartyid: "custody-auto-repair-bootstrap-rules"
             defaultCounterpartyName: "Singapore Standard Counterparty"
             defaultCounterpartyBic: "SGSTDCP001"
             defaultSettlementMethod: "DVP"
@@ -415,15 +415,15 @@ enrichments:
 
           # Korea Market Configuration
           - market: "KOREA"
-            siId: "SI_KOREA_MARKET"
+            siid: "custody-auto-repair-bootstrap-rules"
             siName: "Korea Market Default SI"
             scopeType: "MARKET"
             weight: 0.3
             confidenceLevel: 0.85
-            defaultCustodianId: "CUST_KR_STANDARD"
+            defaultCustodianid: "custody-auto-repair-bootstrap-rules"
             defaultCustodianName: "Korea Standard Custodian Co Ltd"
             defaultCustodianBic: "KRSTDCUST01"
-            defaultCounterpartyId: "CP_KR_STANDARD"
+            defaultCounterpartyid: "custody-auto-repair-bootstrap-rules"
             defaultCounterpartyName: "Korea Standard Counterparty"
             defaultCounterpartyBic: "KRSTDCP001"
             defaultSettlementMethod: "DVP"
@@ -483,7 +483,7 @@ enrichments:
         target-field: "applicableMarketSI.enabled"
 
   # Instrument Standing Instructions Enrichment
-  - id: "instrument-si-enrichment"
+  - id: "custody-auto-repair-bootstrap-rules"
     name: "Instrument Standing Instructions Lookup"
     type: "lookup-enrichment"
     target-type: "BootstrapSettlementInstruction"
@@ -499,7 +499,7 @@ enrichments:
         data:
           # Equity Instruments
           - instrumentType: "EQUITY"
-            siId: "SI_EQUITY_GLOBAL"
+            siid: "custody-auto-repair-bootstrap-rules"
             siName: "Global Equity Instrument SI"
             scopeType: "INSTRUMENT"
             weight: 0.1
@@ -513,7 +513,7 @@ enrichments:
 
           # Fixed Income Instruments
           - instrumentType: "FIXED_INCOME"
-            siId: "SI_FIXED_INCOME_GLOBAL"
+            siid: "custody-auto-repair-bootstrap-rules"
             siName: "Global Fixed Income SI"
             scopeType: "INSTRUMENT"
             weight: 0.1
@@ -527,7 +527,7 @@ enrichments:
 
           # Derivatives
           - instrumentType: "DERIVATIVES"
-            siId: "SI_DERIVATIVES_GLOBAL"
+            siid: "custody-auto-repair-bootstrap-rules"
             siName: "Global Derivatives SI"
             scopeType: "INSTRUMENT"
             weight: 0.1
@@ -542,7 +542,7 @@ enrichments:
 
           # Foreign Exchange
           - instrumentType: "FX"
-            siId: "SI_FX_GLOBAL"
+            siid: "custody-auto-repair-bootstrap-rules"
             siName: "Global FX SI"
             scopeType: "INSTRUMENT"
             weight: 0.1

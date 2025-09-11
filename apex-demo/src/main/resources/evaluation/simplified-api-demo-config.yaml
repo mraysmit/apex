@@ -3,7 +3,7 @@
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
 metadata:
-  id: "Simplified API Demo Configuration"
+  id: "simplified-api-demo-configuration"
   name: "Simplified API Demo Configuration"
   version: "2.0.0"
   description: "Real APEX simplified API demonstration with ultra-simple processing, one-liner rule evaluations, and template-based validation"
@@ -14,7 +14,7 @@ metadata:
 
 # Ultra-Simple API Enrichments
 enrichments:
-  - id: "ultra-simple-api-processing"
+  - id: "simplified-api-demo-configuration"
     name: "ultra-simple-api-processing"
     type: "field-enrichment"
     description: "Ultra-simple API for 90% of use cases using real APEX processing"
@@ -30,7 +30,7 @@ enrichments:
         target-field: "ageValid"
         expression: "#age != null && #age >= 18 ? 'true' : 'false'"
 
-  - id: "one-liner-rule-evaluations"
+  - id: "simplified-api-demo-configuration"
     name: "one-liner-rule-evaluations"
     type: "field-enrichment"
     description: "One-liner rule evaluations with simplified syntax"
@@ -46,7 +46,7 @@ enrichments:
         target-field: "amountValid"
         expression: "#orderAmount > 0 && #orderAmount <= 1000000 ? 'true' : 'false'"
 
-  - id: "template-based-validation"
+  - id: "simplified-api-demo-configuration"
     name: "template-based-validation"
     type: "field-enrichment"
     description: "Template-based validation patterns for common scenarios"

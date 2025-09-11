@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -39,6 +40,7 @@ import java.util.logging.Logger;
  */
 public class ValidationService {
     private static final Logger LOGGER = Logger.getLogger(ValidationService.class.getName());
+    private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(ValidationService.class);
     private final LookupServiceRegistry registry;
     private final RulesEngine rulesEngine;
 
@@ -91,17 +93,23 @@ public class ValidationService {
      */
     @SuppressWarnings("unchecked")
     public <T> RuleResult validateWithResult(String validatorName, T value) {
+        SLF4J_LOGGER.debug("TRACE: ValidationService.validateWithResult() called - validator: '{}', value type: {}",
+            validatorName, value != null ? value.getClass().getSimpleName() : "null");
         LOGGER.fine("Validating value using validation: " + validatorName);
 
         // First, check if the validation exists
         Validator<?> validator = registry.getService(validatorName, Validator.class);
         if (validator == null) {
+            SLF4J_LOGGER.debug("Validator not found: '{}'", validatorName);
             LOGGER.warning("Validator not found: " + validatorName);
             return RuleResult.error("Validation", "Validator not found: " + validatorName);
         }
+        SLF4J_LOGGER.debug("Found validator '{}' of type: {}", validatorName, validator.getClass().getSimpleName());
 
         // Check if the validation can handle this type
         if (value != null && !validator.getType().isInstance(value)) {
+            SLF4J_LOGGER.debug("Type mismatch - validator '{}' expects: {}, got: {}",
+                validatorName, validator.getType().getSimpleName(), value.getClass().getSimpleName());
             LOGGER.warning("Validator " + validatorName + " cannot handle type: " + value.getClass().getName());
             return RuleResult.error("Validation", "Validator " + validatorName + " cannot handle type: " + value.getClass().getName());
         }
@@ -110,6 +118,7 @@ public class ValidationService {
         Validator<T> typedValidator = (Validator<T>) validator;
 
         // Call the validation's validate method directly to set lastValidatedValue for testing
+        SLF4J_LOGGER.debug("Calling validator.validate() for '{}'", validatorName);
         typedValidator.validate(value);
 
         // Create a rule for the validation
@@ -118,6 +127,8 @@ public class ValidationService {
             "#validation.validate(#value)",
             "Validation using " + validatorName
         );
+        SLF4J_LOGGER.debug("Created validation rule: '{}' with condition: '{}'",
+            validationRule.getName(), validationRule.getCondition());
 
         // Create a list of rules
         List<Rule> rules = new ArrayList<>();
@@ -127,8 +138,14 @@ public class ValidationService {
         Map<String, Object> facts = new HashMap<>();
         facts.put("validation", validator);
         facts.put("value", value);
+        SLF4J_LOGGER.debug("Created facts for rule execution: validation={}, value={}",
+            validator.getClass().getSimpleName(), value);
 
         // Execute the rule
-        return rulesEngine.executeRulesList(rules, facts);
+        SLF4J_LOGGER.debug("Executing validation rule via RulesEngine");
+        RuleResult result = rulesEngine.executeRulesList(rules, facts);
+        SLF4J_LOGGER.debug("ValidationService.validateWithResult() completed - result: {}",
+            result != null ? (result.isTriggered() ? "VALID" : "INVALID") : "NULL");
+        return result;
     }
 }

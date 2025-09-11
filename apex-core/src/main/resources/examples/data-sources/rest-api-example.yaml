@@ -2,6 +2,7 @@
 # This demonstrates various REST API configurations with different authentication methods
 
 metadata:
+  id: "rest-api-data-sources-example"
   name: "REST API Data Sources Example"
   version: "1.0.0"
   description: "Example configuration showing different REST API data source setups"

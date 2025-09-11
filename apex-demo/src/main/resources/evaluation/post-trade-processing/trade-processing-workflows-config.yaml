@@ -3,7 +3,7 @@
 # Replaces hardcoded post-trade processing workflow logic from PostTradeProcessingServiceDemo
 
 metadata:
-  id: "Trade Processing Workflows Configuration"
+  id: "trade-processing-workflows-configuration"
   name: "Trade Processing Workflows Configuration"
   version: "1.0.0"
   description: "Data-driven trade processing workflows configuration for post-trade processing service"
@@ -24,7 +24,7 @@ data:
       error-handling: "FAIL_FAST"
     processing-workflows:
       equity-trade-validation-workflow:
-        workflow-id: "EQUITY_TRADE_VALIDATION_WORKFLOW"
+        workflow-id: "trade-processing-workflows-configuration"
         workflow-name: "Equity Trade Validation Workflow"
         workflow-description: "Comprehensive validation workflow for equity trades"
         trade-type: "Equity"
@@ -67,7 +67,7 @@ data:
           - "Track compliance check results"
           
       fixed-income-trade-validation-workflow:
-        workflow-id: "FIXED_INCOME_TRADE_VALIDATION_WORKFLOW"
+        workflow-id: "trade-processing-workflows-configuration"
         workflow-name: "Fixed Income Trade Validation Workflow"
         workflow-description: "Comprehensive validation workflow for fixed income trades"
         trade-type: "FixedIncome"
@@ -110,7 +110,7 @@ data:
           - "Track credit risk assessment results"
           
       derivative-trade-validation-workflow:
-        workflow-id: "DERIVATIVE_TRADE_VALIDATION_WORKFLOW"
+        workflow-id: "trade-processing-workflows-configuration"
         workflow-name: "Derivative Trade Validation Workflow"
         workflow-description: "Comprehensive validation workflow for derivative trades"
         trade-type: "Derivative"
@@ -166,7 +166,7 @@ data:
       error-handling: "CONTINUE_ON_ERROR"
     processing-workflows:
       counterparty-matching-workflow:
-        workflow-id: "COUNTERPARTY_MATCHING_WORKFLOW"
+        workflow-id: "trade-processing-workflows-configuration"
         workflow-name: "Counterparty Matching Workflow"
         workflow-description: "Workflow for matching trades with counterparties"
         matching-steps:
@@ -205,7 +205,7 @@ data:
           - "Track risk assessment results"
           
       trade-confirmation-matching-workflow:
-        workflow-id: "TRADE_CONFIRMATION_MATCHING_WORKFLOW"
+        workflow-id: "trade-processing-workflows-configuration"
         workflow-name: "Trade Confirmation Matching Workflow"
         workflow-description: "Workflow for confirming matched trades"
         confirmation-steps:
@@ -248,7 +248,7 @@ data:
       error-handling: "RETRY_ON_ERROR"
     processing-workflows:
       trade-affirmation-workflow:
-        workflow-id: "TRADE_AFFIRMATION_WORKFLOW"
+        workflow-id: "trade-processing-workflows-configuration"
         workflow-name: "Trade Affirmation Workflow"
         workflow-description: "Workflow for affirming trades with all parties"
         affirmation-steps:
@@ -303,7 +303,7 @@ data:
       error-handling: "COMPENSATE_ON_ERROR"
     processing-workflows:
       trade-settlement-workflow:
-        workflow-id: "TRADE_SETTLEMENT_WORKFLOW"
+        workflow-id: "trade-processing-workflows-configuration"
         workflow-name: "Trade Settlement Workflow"
         workflow-description: "Workflow for settling trades and completing transactions"
         settlement-steps:
@@ -351,7 +351,7 @@ data:
     description: "Default trade processing workflow"
     processing-workflows:
       default-workflow:
-        workflow-id: "DEFAULT_WORKFLOW"
+        workflow-id: "trade-processing-workflows-configuration"
         workflow-name: "Default Workflow"
         workflow-outcomes:
           success-outcome: "DEFAULT_SUCCESS"

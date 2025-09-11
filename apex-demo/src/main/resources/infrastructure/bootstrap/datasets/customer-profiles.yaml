@@ -6,7 +6,7 @@
 # ============================================================================
 
 metadata:
-  id: "Bootstrap Demo - Customer Profiles Dataset"
+  id: "bootstrap-demo---customer-profiles-dataset"
   name: "Bootstrap Demo - Customer Profiles Dataset"
   version: "1.0.0"
   description: "Realistic customer profiles for financial services demonstrations (used by DemoDataBootstrap.java and multiple bootstrap demos)"
@@ -20,7 +20,7 @@ metadata:
 
 # Customer profile definitions
 customer_profiles:
-  - customer_id: "CUST001"
+  - customer_id: "bootstrap-demo---customer-profiles-dataset"
     personal_info:
       name: "Emily Chen"
       age: 34
@@ -53,7 +53,7 @@ customer_profiles:
       account_status: "ACTIVE"
       relationship_manager: "Sarah Johnson"
 
-  - customer_id: "CUST002"
+  - customer_id: "bootstrap-demo---customer-profiles-dataset"
     personal_info:
       name: "Marcus Johnson"
       age: 42
@@ -86,7 +86,7 @@ customer_profiles:
       account_status: "ACTIVE"
       relationship_manager: "David Kim"
 
-  - customer_id: "CUST003"
+  - customer_id: "bootstrap-demo---customer-profiles-dataset"
     personal_info:
       name: "Sarah Williams"
       age: 29
@@ -119,7 +119,7 @@ customer_profiles:
       account_status: "ACTIVE"
       relationship_manager: "Lisa Chen"
 
-  - customer_id: "CUST004"
+  - customer_id: "bootstrap-demo---customer-profiles-dataset"
     personal_info:
       name: "David Rodriguez"
       age: 38
@@ -152,7 +152,7 @@ customer_profiles:
       account_status: "ACTIVE"
       relationship_manager: "Michael Brown"
 
-  - customer_id: "CUST005"
+  - customer_id: "bootstrap-demo---customer-profiles-dataset"
     personal_info:
       name: "Lisa Thompson"
       age: 26
@@ -185,7 +185,7 @@ customer_profiles:
       account_status: "ACTIVE"
       relationship_manager: "Jennifer Wilson"
 
-  - customer_id: "CUST006"
+  - customer_id: "bootstrap-demo---customer-profiles-dataset"
     personal_info:
       name: "James Park"
       age: 45
@@ -218,7 +218,7 @@ customer_profiles:
       account_status: "ACTIVE"
       relationship_manager: "Robert Davis"
 
-  - customer_id: "CUST007"
+  - customer_id: "bootstrap-demo---customer-profiles-dataset"
     personal_info:
       name: "Anna Kowalski"
       age: 31
@@ -251,7 +251,7 @@ customer_profiles:
       account_status: "ACTIVE"
       relationship_manager: "Thomas Anderson"
 
-  - customer_id: "CUST008"
+  - customer_id: "bootstrap-demo---customer-profiles-dataset"
     personal_info:
       name: "Robert Kim"
       age: 28

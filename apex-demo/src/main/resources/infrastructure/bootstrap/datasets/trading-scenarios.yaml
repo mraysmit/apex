@@ -6,7 +6,7 @@
 # ============================================================================
 
 metadata:
-  id: "Bootstrap Demo - Trading Scenarios Dataset"
+  id: "bootstrap-demo---trading-scenarios-dataset"
   name: "Bootstrap Demo - Trading Scenarios Dataset"
   version: "1.0.0"
   description: "Comprehensive trading scenarios across multiple asset classes (used by DemoDataBootstrap.java and trading demos)"
@@ -21,7 +21,7 @@ metadata:
 
 # Trading scenarios
 trading_scenarios:
-  - trade_id: "TRD001"
+  - trade_id: "bootstrap-demo---trading-scenarios-dataset"
     trade_info:
       asset_class: "Equity"
       instrument: "AAPL"
@@ -51,7 +51,7 @@ trading_scenarios:
       exchange_fees: 17.55
       regulatory_fees: 8.78
 
-  - trade_id: "TRD002"
+  - trade_id: "bootstrap-demo---trading-scenarios-dataset"
     trade_info:
       asset_class: "Fixed Income"
       instrument: "US10Y"
@@ -81,7 +81,7 @@ trading_scenarios:
       custody_fees: 123.44
       settlement_fees: 50.00
 
-  - trade_id: "TRD003"
+  - trade_id: "bootstrap-demo---trading-scenarios-dataset"
     trade_info:
       asset_class: "FX"
       instrument: "EURUSD"
@@ -110,7 +110,7 @@ trading_scenarios:
       spread_cost: 1359.38
       settlement_fees: 25.00
 
-  - trade_id: "TRD004"
+  - trade_id: "bootstrap-demo---trading-scenarios-dataset"
     trade_info:
       asset_class: "Commodity"
       instrument: "WTI"
@@ -140,7 +140,7 @@ trading_scenarios:
       exchange_fees: 82.50
       storage_fees: 165.00
 
-  - trade_id: "TRD005"
+  - trade_id: "bootstrap-demo---trading-scenarios-dataset"
     trade_info:
       asset_class: "Derivative"
       instrument: "SPX_CALL_4500_DEC2025"
@@ -171,7 +171,7 @@ trading_scenarios:
       exchange_fees: 62.75
       regulatory_fees: 12.55
 
-  - trade_id: "TRD006"
+  - trade_id: "bootstrap-demo---trading-scenarios-dataset"
     trade_info:
       asset_class: "Equity"
       instrument: "TSLA"
@@ -201,7 +201,7 @@ trading_scenarios:
       exchange_fees: 24.58
       regulatory_fees: 12.29
 
-  - trade_id: "TRD007"
+  - trade_id: "bootstrap-demo---trading-scenarios-dataset"
     trade_info:
       asset_class: "Fixed Income"
       instrument: "CORP_BOND_AAPL_2030"
@@ -232,7 +232,7 @@ trading_scenarios:
       custody_fees: 51.13
       settlement_fees: 40.00
 
-  - trade_id: "TRD008"
+  - trade_id: "bootstrap-demo---trading-scenarios-dataset"
     trade_info:
       asset_class: "FX"
       instrument: "GBPJPY"
@@ -381,29 +381,29 @@ counterparties:
 # Risk management rules
 risk_rules:
   position_limits:
-    - rule_id: "RL001"
+    - rule_id: "bootstrap-demo---trading-scenarios-dataset"
       name: "single-position-limit"
       condition: "#positionValue <= 10000000"
       message: "Single position cannot exceed $10M"
       
-    - rule_id: "RL002"
+    - rule_id: "bootstrap-demo---trading-scenarios-dataset"
       name: "sector-concentration-limit"
       condition: "#sectorExposure <= 0.25"
       message: "Sector exposure cannot exceed 25% of portfolio"
       
   var_limits:
-    - rule_id: "RL003"
+    - rule_id: "bootstrap-demo---trading-scenarios-dataset"
       name: "daily-var-limit"
       condition: "#dailyVaR <= 500000"
       message: "Daily VaR cannot exceed $500K"
       
-    - rule_id: "RL004"
+    - rule_id: "bootstrap-demo---trading-scenarios-dataset"
       name: "portfolio-var-limit"
       condition: "#portfolioVaR <= 2000000"
       message: "Portfolio VaR cannot exceed $2M"
       
   counterparty_limits:
-    - rule_id: "RL005"
+    - rule_id: "bootstrap-demo---trading-scenarios-dataset"
       name: "counterparty-exposure-limit"
       condition: "#counterpartyExposure <= 5000000"
       message: "Counterparty exposure cannot exceed $5M"

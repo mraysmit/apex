@@ -3,7 +3,7 @@
 # Replaces hardcoded lookup service logic from IntegratedTradeValidatorComplexDemo
 
 metadata:
-  id: "Lookup Services Configuration"
+  id: "lookup-services-configuration"
   name: "Lookup Services Configuration"
   version: "1.0.0"
   description: "Data-driven lookup services configuration for complex trade validation"
@@ -15,7 +15,7 @@ metadata:
 # Lookup services configuration by service type
 data:
   instrument-types:
-    service-id: "LOOKUP001"
+    service-id: "lookup-services-configuration"
     service-type: "instrument-types"
     description: "Financial instrument types lookup service"
     lookup-data:
@@ -67,7 +67,7 @@ data:
       refresh-strategy: "lazy"
     
   settlement-methods:
-    service-id: "LOOKUP002"
+    service-id: "lookup-services-configuration"
     service-type: "settlement-methods"
     description: "Settlement methods lookup service"
     lookup-data:
@@ -107,7 +107,7 @@ data:
       refresh-strategy: "eager"
     
   settlement-locations:
-    service-id: "LOOKUP003"
+    service-id: "lookup-services-configuration"
     service-type: "settlement-locations"
     description: "Settlement locations lookup service"
     lookup-data:
@@ -153,7 +153,7 @@ data:
       refresh-strategy: "scheduled"
     
   custodians:
-    service-id: "LOOKUP004"
+    service-id: "lookup-services-configuration"
     service-type: "custodians"
     description: "Custodian banks lookup service"
     lookup-data:
@@ -199,7 +199,7 @@ data:
       refresh-strategy: "lazy"
     
   account-types:
-    service-id: "LOOKUP005"
+    service-id: "lookup-services-configuration"
     service-type: "account-types"
     description: "Account types lookup service"
     lookup-data:
@@ -239,7 +239,7 @@ data:
       refresh-strategy: "eager"
     
   currency-codes:
-    service-id: "LOOKUP006"
+    service-id: "lookup-services-configuration"
     service-type: "currency-codes"
     description: "Currency codes lookup service"
     lookup-data:
@@ -297,7 +297,7 @@ data:
       refresh-strategy: "lazy"
     
   risk-ratings:
-    service-id: "LOOKUP007"
+    service-id: "lookup-services-configuration"
     service-type: "risk-ratings"
     description: "Risk ratings lookup service"
     lookup-data:
@@ -325,7 +325,7 @@ data:
       refresh-strategy: "scheduled"
     
   default:
-    service-id: "LOOKUP000"
+    service-id: "lookup-services-configuration"
     service-type: "default"
     description: "Default lookup service"
     lookup-data:

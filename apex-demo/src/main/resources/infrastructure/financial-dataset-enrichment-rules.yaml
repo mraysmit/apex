@@ -75,7 +75,7 @@
 # ============================================================================
 
 metadata:
-  id: "Financial Services Dataset Enrichment Rules"
+  id: "financial-services-dataset-enrichment-rules"
   name: "Financial Services Dataset Enrichment Rules"
   version: "1.0.0"
   description: "Post-trade settlement enrichment using inline YAML datasets"
@@ -130,7 +130,7 @@ metadata:
 #
 enrichments:
   # Currency enrichment using inline dataset
-  - id: "currency-dataset-enrichment"
+  - id: "financial-services-dataset-enrichment-rules"
     name: "Currency Data Enrichment (Inline Dataset)"
     description: "Enrich trades with currency information from inline YAML dataset"
     type: "lookup-enrichment"
@@ -215,7 +215,7 @@ enrichments:
         default-value: false
 
   # Market Identifier Code (MIC) enrichment
-  - id: "mic-dataset-enrichment"
+  - id: "financial-services-dataset-enrichment-rules"
     name: "Market Identifier Code Enrichment (Inline Dataset)"
     description: "Enrich trades with trading venue information"
     type: "lookup-enrichment"
@@ -293,7 +293,7 @@ enrichments:
         default-value: false
 
   # Country/Jurisdiction enrichment
-  - id: "jurisdiction-dataset-enrichment"
+  - id: "financial-services-dataset-enrichment-rules"
     name: "Jurisdiction Enrichment (Inline Dataset)"
     description: "Enrich counterparty data with jurisdiction information"
     type: "lookup-enrichment"
@@ -377,7 +377,7 @@ enrichments:
         default-value: false
 
   # Settlement instruction codes
-  - id: "settlement-instruction-enrichment"
+  - id: "financial-services-dataset-enrichment-rules"
     name: "Settlement Instruction Code Enrichment"
     description: "Enrich trades with settlement instruction details"
     type: "lookup-enrichment"

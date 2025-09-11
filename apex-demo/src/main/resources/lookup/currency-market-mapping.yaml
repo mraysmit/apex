@@ -3,7 +3,7 @@
 # Use Case: Map trading currencies to their primary stock exchanges/markets
 
 metadata:
-  id: "Currency to Market Mapping"
+  id: "currency-to-market-mapping"
   name: "Currency to Market Mapping"
   version: "1.0.0"
   description: "Maps trading currencies to their primary stock exchanges using APEX YAML processing"
@@ -14,7 +14,7 @@ metadata:
 
 # Enrichment rules using verified APEX syntax
 enrichments:
-  - id: "currency-market-mapping"
+  - id: "currency-to-market-mapping"
     type: "lookup-enrichment"
     description: "Map currency to primary trading market/exchange"
     condition: "#currency != null && #currency.length() > 0"
@@ -142,7 +142,7 @@ enrichments:
 
 # Validation rules
 validations:
-  - id: "currency-format"
+  - id: "currency-to-market-mapping"
     name: "Currency Code Format Validation"
     description: "Ensure currency code is in proper 3-letter ISO format"
     type: "field-validation"

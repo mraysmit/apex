@@ -3,7 +3,7 @@
 # Replaces all hardcoded customer transformer logic from CustomerTransformerDemo (@version 1.0)
 
 metadata:
-  id: "Customer Transformer Demo"
+  id: "customer-transformer-demo"
   name: "Customer Transformer Demo"
   version: "1.0.0"
   description: "APEX-compliant customer transformer with real enrichment services"

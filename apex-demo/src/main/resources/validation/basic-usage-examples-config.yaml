@@ -3,7 +3,7 @@
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
 metadata:
-  id: "Basic Usage Examples Configuration"
+  id: "basic-usage-examples-configuration"
   name: "Basic Usage Examples Configuration"
   version: "2.0.0"
   description: "Real APEX basic usage demonstration with field validations, business object processing, and expression evaluation"
@@ -14,7 +14,7 @@ metadata:
 
 # Basic Validation Enrichments
 enrichments:
-  - id: "basic-field-validation"
+  - id: "basic-usage-examples-configuration"
     name: "basic-field-validation"
     type: "field-enrichment"
     description: "Basic field validation using real APEX processing"
@@ -30,7 +30,7 @@ enrichments:
         target-field: "validatedEmail"
         required: false
 
-  - id: "business-object-processing"
+  - id: "basic-usage-examples-configuration"
     name: "business-object-processing"
     type: "field-enrichment"
     description: "Business object processing with real APEX services"
@@ -46,7 +46,7 @@ enrichments:
         target-field: "processedTradeValue"
         required: false
 
-  - id: "expression-evaluation"
+  - id: "basic-usage-examples-configuration"
     name: "expression-evaluation"
     type: "calculation-enrichment"
     description: "Expression evaluation using real APEX SpEL processing"
@@ -72,7 +72,7 @@ enrichments:
 
 # Validation Rules Configuration
 validation-rules:
-  - id: "required-field-validation"
+  - id: "basic-usage-examples-configuration"
     name: "required-field-validation"
     description: "Required field validation patterns"
     rules:
@@ -88,7 +88,7 @@ validation-rules:
         required: false
         pattern: "^[A-Za-z0-9+_.-]+@(.+)$"
 
-  - id: "business-validation"
+  - id: "basic-usage-examples-configuration"
     name: "business-validation"
     description: "Business object validation patterns"
     rules:
@@ -102,7 +102,7 @@ validation-rules:
       - field: "membershipLevel"
         allowed-values: ["BRONZE", "SILVER", "GOLD", "PLATINUM"]
 
-  - id: "expression-validation"
+  - id: "basic-usage-examples-configuration"
     name: "expression-validation"
     description: "Expression evaluation validation patterns"
     rules:

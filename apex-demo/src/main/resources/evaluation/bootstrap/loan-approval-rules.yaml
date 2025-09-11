@@ -3,7 +3,7 @@
 # Replaces hardcoded loan approval logic from RuleConfigurationHardcodedBootstrap
 
 metadata:
-  id: "Loan Approval Rules"
+  id: "loan-approval-rules"
   name: "Loan Approval Rules"
   version: "1.0.0"
   description: "Data-driven loan approval rules for bootstrap demonstration"

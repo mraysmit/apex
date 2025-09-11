@@ -3,7 +3,7 @@
 # Replaces all hardcoded custody auto-repair logic from CustodyAutoRepairBootstrap (@version 1.0)
 
 metadata:
-  id: "Custody Auto-Repair Bootstrap Demo"
+  id: "custody-auto-repair-bootstrap-demo"
   name: "Custody Auto-Repair Bootstrap Demo"
   version: "2.0.0"
   description: "APEX-compliant custody auto-repair bootstrap with real enrichment services"

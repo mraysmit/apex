@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<products>
+  <product>
+    <id>PROD001</id>
+    <name>US Treasury Bond</name>
+    <price>1200.0</price>
+    <category>FixedIncome</category>
+    <available>true</available>
+  </product>
+  <product>
+    <id>PROD002</id>
+    <name>Apple Stock</name>
+    <price>150.0</price>
+    <category>Equity</category>
+    <available>true</available>
+  </product>
+  <product>
+    <id>PROD003</id>
+    <name>Bitcoin ETF</name>
+    <price>450.0</price>
+    <category>ETF</category>
+    <available>true</available>
+  </product>
+</products>

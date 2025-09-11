@@ -3,7 +3,7 @@
 # Replaces hardcoded exception handling logic from PerformanceAndExceptionDemo
 
 metadata:
-  id: "Exception Handling Scenarios Configuration"
+  id: "exception-handling-scenarios-configuration"
   name: "Exception Handling Scenarios Configuration"
   version: "1.0.0"
   description: "Data-driven exception handling scenarios configuration for performance and exception handling processing"
@@ -24,7 +24,7 @@ data:
       logging-level: "ERROR"
     exception-scenarios:
       syntax-error-scenario:
-        scenario-id: "SYNTAX_ERROR_SCENARIO"
+        scenario-id: "exception-handling-scenarios-configuration"
         scenario-name: "Syntax Error Handling Scenario"
         scenario-description: "Test handling of syntax errors in expressions"
         invalid-expressions:
@@ -51,7 +51,7 @@ data:
           - "Track error recovery patterns"
           
       semantic-error-scenario:
-        scenario-id: "SEMANTIC_ERROR_SCENARIO"
+        scenario-id: "exception-handling-scenarios-configuration"
         scenario-name: "Semantic Error Handling Scenario"
         scenario-description: "Test handling of semantic errors in expressions"
         invalid-expressions:
@@ -78,7 +78,7 @@ data:
           - "Track method resolution failures"
           
       compilation-error-scenario:
-        scenario-id: "COMPILATION_ERROR_SCENARIO"
+        scenario-id: "exception-handling-scenarios-configuration"
         scenario-name: "Compilation Error Handling Scenario"
         scenario-description: "Test handling of expression compilation errors"
         invalid-expressions:
@@ -118,7 +118,7 @@ data:
       logging-level: "WARN"
     exception-scenarios:
       null-context-scenario:
-        scenario-id: "NULL_CONTEXT_SCENARIO"
+        scenario-id: "exception-handling-scenarios-configuration"
         scenario-name: "Null Context Handling Scenario"
         scenario-description: "Test handling of null context values"
         null-expressions:
@@ -145,7 +145,7 @@ data:
           - "Track null safety patterns"
           
       null-safe-scenario:
-        scenario-id: "NULL_SAFE_SCENARIO"
+        scenario-id: "exception-handling-scenarios-configuration"
         scenario-name: "Null Safe Operations Scenario"
         scenario-description: "Test null-safe expression handling"
         null-safe-expressions:
@@ -172,7 +172,7 @@ data:
           - "Track preventive handling patterns"
           
       partial-null-scenario:
-        scenario-id: "PARTIAL_NULL_SCENARIO"
+        scenario-id: "exception-handling-scenarios-configuration"
         scenario-name: "Partial Null Values Scenario"
         scenario-description: "Test handling of partially null contexts"
         mixed-expressions:
@@ -212,7 +212,7 @@ data:
       logging-level: "WARN"
     exception-scenarios:
       string-to-number-scenario:
-        scenario-id: "STRING_TO_NUMBER_SCENARIO"
+        scenario-id: "exception-handling-scenarios-configuration"
         scenario-name: "String to Number Conversion Scenario"
         scenario-description: "Test handling of string to number conversion errors"
         conversion-expressions:
@@ -239,7 +239,7 @@ data:
           - "Track type conversion patterns"
           
       object-casting-scenario:
-        scenario-id: "OBJECT_CASTING_SCENARIO"
+        scenario-id: "exception-handling-scenarios-configuration"
         scenario-name: "Object Casting Exception Scenario"
         scenario-description: "Test handling of object casting exceptions"
         casting-expressions:
@@ -279,7 +279,7 @@ data:
       logging-level: "INFO"
     exception-scenarios:
       valid-invalid-mix-scenario:
-        scenario-id: "VALID_INVALID_MIX_SCENARIO"
+        scenario-id: "exception-handling-scenarios-configuration"
         scenario-name: "Valid and Invalid Rules Mix Scenario"
         scenario-description: "Test handling of mixed valid and invalid rules"
         mixed-rules:
@@ -328,7 +328,7 @@ data:
           - "Track success/failure ratios"
           
       error-recovery-scenario:
-        scenario-id: "ERROR_RECOVERY_SCENARIO"
+        scenario-id: "exception-handling-scenarios-configuration"
         scenario-name: "Error Recovery Scenario"
         scenario-description: "Test error recovery and continuation patterns"
         recovery-rules:
@@ -377,7 +377,7 @@ data:
     description: "Default exception handling scenario processing"
     exception-scenarios:
       default-scenario:
-        scenario-id: "DEFAULT_SCENARIO"
+        scenario-id: "exception-handling-scenarios-configuration"
         scenario-name: "Default Scenario"
         expected-behavior:
           error-handling: "BASIC"

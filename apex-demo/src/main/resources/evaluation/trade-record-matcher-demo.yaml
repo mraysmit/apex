@@ -3,7 +3,7 @@
 # Replaces all hardcoded trade record matcher logic from TradeRecordMatcherDemo (@version 1.0)
 
 metadata:
-  id: "Trade Record Matcher Demo"
+  id: "trade-record-matcher-demo"
   name: "Trade Record Matcher Demo"
   version: "1.0.0"
   description: "APEX-compliant trade record matcher with real enrichment services"
@@ -28,7 +28,7 @@ external-data-sources:
 
 # APEX enrichment processing for trade record matcher
 enrichments:
-  - id: "trade-matching-algorithms-processing"
+  - id: "trade-record-matcher-demo"
     name: "trade-matching-algorithms-processing"
     type: "lookup-enrichment"
     description: "Process trade matching algorithms using data-driven configuration"
@@ -37,7 +37,7 @@ enrichments:
     lookup-key: "#data.algorithmType != null ? #data.algorithmType : 'default'"
     target-field: "tradeMatchingAlgorithmsResult"
 
-  - id: "trade-validation-engines-processing"
+  - id: "trade-record-matcher-demo"
     name: "trade-validation-engines-processing"
     type: "lookup-enrichment"
     description: "Process trade validation engines using data-driven configuration"
@@ -46,7 +46,7 @@ enrichments:
     lookup-key: "#data.engineType != null ? #data.engineType : 'default'"
     target-field: "tradeValidationEnginesResult"
 
-  - id: "trade-record-processors-processing"
+  - id: "trade-record-matcher-demo"
     name: "trade-record-processors-processing"
     type: "lookup-enrichment"
     description: "Process trade record processors using data-driven configuration"
@@ -55,7 +55,7 @@ enrichments:
     lookup-key: "#data.processorType != null ? #data.processorType : 'default'"
     target-field: "tradeRecordProcessorsResult"
 
-  - id: "trade-record-matcher-summary"
+  - id: "trade-record-matcher-demo"
     name: "trade-record-matcher-summary"
     type: "expression-enrichment"
     description: "Generate trade record matcher summary"

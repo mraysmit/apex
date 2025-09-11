@@ -3,7 +3,7 @@
 # Replaces hardcoded scenario routing logic from ScenarioBasedProcessingDemo
 
 metadata:
-  id: "Scenario Routing Configuration"
+  id: "scenario-routing-configuration"
   name: "Scenario Routing Configuration"
   version: "1.0.0"
   description: "Data-driven scenario routing configuration for processing"
@@ -15,7 +15,7 @@ metadata:
 # Scenario routing configuration by routing type
 data:
   automatic-data-type-routing:
-    routing-id: "ROUTE001"
+    routing-id: "scenario-routing-configuration"
     routing-type: "automatic-data-type-routing"
     description: "Automatic data type detection and scenario routing"
     routing-rules:
@@ -97,12 +97,12 @@ data:
       performance-monitoring: true
     
   scenario-specific-routing:
-    routing-id: "ROUTE002"
+    routing-id: "scenario-routing-configuration"
     routing-type: "scenario-specific-routing"
     description: "Scenario-specific processing pipeline routing"
     scenario-configurations:
       otc-options-standard:
-        scenario-id: "otc-options-standard"
+        scenario-id: "scenario-routing-configuration"
         scenario-name: "OTC Options Standard Processing"
         processing-pipeline:
           - stage: "validation"
@@ -127,7 +127,7 @@ data:
           retry-attempts: 2
           
       otc-options-complex:
-        scenario-id: "otc-options-complex"
+        scenario-id: "scenario-routing-configuration"
         scenario-name: "OTC Options Complex Processing"
         processing-pipeline:
           - stage: "advanced-validation"
@@ -152,7 +152,7 @@ data:
           retry-attempts: 3
           
       commodity-swaps-standard:
-        scenario-id: "commodity-swaps-standard"
+        scenario-id: "scenario-routing-configuration"
         scenario-name: "Commodity Swaps Standard Processing"
         processing-pipeline:
           - stage: "swap-validation"
@@ -176,7 +176,7 @@ data:
           retry-attempts: 2
           
       commodity-swaps-complex:
-        scenario-id: "commodity-swaps-complex"
+        scenario-id: "scenario-routing-configuration"
         scenario-name: "Commodity Swaps Complex Processing"
         processing-pipeline:
           - stage: "advanced-swap-validation"
@@ -201,7 +201,7 @@ data:
           retry-attempts: 3
           
       settlement-auto-repair:
-        scenario-id: "settlement-auto-repair"
+        scenario-id: "scenario-routing-configuration"
         scenario-name: "Settlement Auto-Repair Processing"
         processing-pipeline:
           - stage: "instruction-validation"
@@ -225,7 +225,7 @@ data:
           retry-attempts: 2
           
       settlement-manual-review:
-        scenario-id: "settlement-manual-review"
+        scenario-id: "scenario-routing-configuration"
         scenario-name: "Settlement Manual Review Processing"
         processing-pipeline:
           - stage: "instruction-validation"
@@ -254,12 +254,12 @@ data:
       error-handling: "graceful-degradation"
     
   fallback-routing:
-    routing-id: "ROUTE003"
+    routing-id: "scenario-routing-configuration"
     routing-type: "fallback-routing"
     description: "Fallback routing for unknown data types"
     fallback-scenarios:
       unknown-data-type:
-        scenario-id: "unknown-data-type"
+        scenario-id: "scenario-routing-configuration"
         scenario-name: "Unknown Data Type Processing"
         processing-pipeline:
           - stage: "data-analysis"
@@ -282,7 +282,7 @@ data:
       analysis-enabled: true
     
   default:
-    routing-id: "ROUTE000"
+    routing-id: "scenario-routing-configuration"
     routing-type: "default"
     description: "Default routing configuration"
     default-scenario: "basic-processing"

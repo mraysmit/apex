@@ -14,6 +14,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -74,7 +76,12 @@ public class YamlConfigurationLoader {
             }
             
             LOGGER.info("Loading YAML configuration from file: " + filePath);
-            YamlRuleConfiguration config = yamlMapper.readValue(path.toFile(), YamlRuleConfiguration.class);
+
+            // Read raw content and resolve properties before parsing
+            String rawContent = Files.readString(path);
+            String resolvedContent = resolveProperties(rawContent);
+
+            YamlRuleConfiguration config = yamlMapper.readValue(resolvedContent, YamlRuleConfiguration.class);
 
             // Process external data-source references
             processDataSourceReferences(config);
@@ -127,7 +134,12 @@ public class YamlConfigurationLoader {
     public YamlRuleConfiguration loadFromStream(InputStream inputStream) throws YamlConfigurationException {
         try {
             LOGGER.info("Loading YAML configuration from input stream");
-            YamlRuleConfiguration config = yamlMapper.readValue(inputStream, YamlRuleConfiguration.class);
+
+            // Read raw content and resolve properties before parsing
+            String rawContent = new String(inputStream.readAllBytes());
+            String resolvedContent = resolveProperties(rawContent);
+
+            YamlRuleConfiguration config = yamlMapper.readValue(resolvedContent, YamlRuleConfiguration.class);
 
             // Process external data-source references
             processDataSourceReferences(config);
@@ -272,7 +284,10 @@ public class YamlConfigurationLoader {
      */
     public YamlRuleConfiguration fromYamlString(String yamlString) throws YamlConfigurationException {
         try {
-            YamlRuleConfiguration config = yamlMapper.readValue(yamlString, YamlRuleConfiguration.class);
+            // Resolve properties in the YAML string before parsing
+            String resolvedYamlString = resolveProperties(yamlString);
+
+            YamlRuleConfiguration config = yamlMapper.readValue(resolvedYamlString, YamlRuleConfiguration.class);
             validateConfiguration(config);
             return config;
         } catch (IOException e) {
@@ -1127,7 +1142,7 @@ public class YamlConfigurationLoader {
         }
 
         String type = dataset.getType().toLowerCase();
-        Set<String> validTypes = Set.of("inline", "yaml-file", "csv-file", "database", "rest-api");
+        Set<String> validTypes = Set.of("inline", "yaml-file", "csv-file", "file-system", "database", "rest-api");
 
         if (!validTypes.contains(type)) {
             throw new YamlConfigurationException("Invalid dataset type '" + type + "' for enrichment: " + enrichmentId + ". Valid types: " + validTypes);
@@ -1140,6 +1155,7 @@ public class YamlConfigurationLoader {
                 break;
             case "yaml-file":
             case "csv-file":
+            case "file-system":
                 validateFileDataset(dataset, enrichmentId, type);
                 break;
             case "database":
@@ -1793,5 +1809,130 @@ public class YamlConfigurationLoader {
                 }
             }
         }
+    }
+
+    // ========================================================================
+    // PROPERTY RESOLUTION METHODS (Phase 1 - Not Used Yet)
+    // ========================================================================
+
+    /**
+     * Resolve environment variables and system properties in configuration values.
+     * Supports: ${VAR}, ${VAR:default}, $(VAR), $(VAR:default)
+     *
+     * NOTE: This method is added in Phase 1 but not used yet to ensure zero impact.
+     *
+     * @param value The configuration value that may contain property placeholders
+     * @return The value with resolved properties
+     * @throws YamlConfigurationException if a required property is not found
+     */
+    private String resolveProperties(String value) throws YamlConfigurationException {
+        if (value == null || (!value.contains("${") && !value.contains("$("))) {
+            return value;
+        }
+
+        LOGGER.fine("Resolving properties in value: " + maskSensitiveValue(value));
+
+        String result = value;
+
+        // First resolve ${VAR} and ${VAR:default} patterns
+        if (result.contains("${")) {
+            Pattern curlyPattern = Pattern.compile("\\$\\{([^}]+)\\}");
+            Matcher curlyMatcher = curlyPattern.matcher(result);
+            StringBuffer curlyResult = new StringBuffer();
+            while (curlyMatcher.find()) {
+                String placeholder = curlyMatcher.group(1);
+                String resolved = resolveSingleProperty(placeholder);
+                curlyMatcher.appendReplacement(curlyResult, Matcher.quoteReplacement(resolved));
+            }
+            curlyMatcher.appendTail(curlyResult);
+            result = curlyResult.toString();
+        }
+
+        // Then resolve $(VAR) and $(VAR:default) patterns
+        if (result.contains("$(")) {
+            Pattern parenPattern = Pattern.compile("\\$\\(([^)]+)\\)");
+            Matcher parenMatcher = parenPattern.matcher(result);
+            StringBuffer parenResult = new StringBuffer();
+            while (parenMatcher.find()) {
+                String placeholder = parenMatcher.group(1);
+                String resolved = resolveSingleProperty(placeholder);
+                parenMatcher.appendReplacement(parenResult, Matcher.quoteReplacement(resolved));
+            }
+            parenMatcher.appendTail(parenResult);
+            result = parenResult.toString();
+        }
+
+        LOGGER.fine("Property resolution completed: " + maskSensitiveValue(result));
+
+        return result;
+    }
+
+    /**
+     * Resolve a single property placeholder.
+     *
+     * @param placeholder The placeholder (e.g., "VAR" or "VAR:default")
+     * @return The resolved value
+     * @throws YamlConfigurationException if the property is not found and no default is provided
+     */
+    private String resolveSingleProperty(String placeholder) throws YamlConfigurationException {
+        // Handle default values: VAR:default
+        String[] parts = placeholder.split(":", 2);
+        String key = parts[0].trim();
+        String defaultValue = parts.length > 1 ? parts[1].trim() : null;
+
+        // Resolution order: System Properties -> Environment Variables -> Default
+        String value = System.getProperty(key);
+        if (value == null) {
+            value = System.getenv(key);
+        }
+        if (value == null && defaultValue != null) {
+            value = defaultValue;
+        }
+        if (value == null) {
+            // Return the original placeholder if property not found
+            return "${" + placeholder + "}";
+        }
+
+        // Log resolution (mask sensitive values)
+        String logValue = isSensitiveProperty(key) ? "[MASKED]" : value;
+        LOGGER.fine("Resolved property: ${" + placeholder + "} -> " + logValue);
+
+        return value;
+    }
+
+    /**
+     * Check if a property key contains sensitive information.
+     *
+     * @param key The property key
+     * @return true if the property is considered sensitive
+     */
+    private boolean isSensitiveProperty(String key) {
+        String lowerKey = key.toLowerCase();
+        return lowerKey.contains("password") ||
+               lowerKey.contains("secret") ||
+               lowerKey.contains("token") ||
+               lowerKey.contains("key") ||
+               lowerKey.contains("pwd");
+    }
+
+    /**
+     * Mask sensitive values for logging.
+     *
+     * @param value The value to potentially mask
+     * @return The masked value if it appears to contain sensitive data
+     */
+    private String maskSensitiveValue(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        // If the value contains ${PASSWORD}, ${SECRET}, etc., mask the whole thing
+        String lowerValue = value.toLowerCase();
+        if (lowerValue.contains("password") || lowerValue.contains("secret") ||
+            lowerValue.contains("token") || lowerValue.contains("key")) {
+            return "[MASKED_VALUE_WITH_SENSITIVE_PLACEHOLDERS]";
+        }
+
+        return value;
     }
 }

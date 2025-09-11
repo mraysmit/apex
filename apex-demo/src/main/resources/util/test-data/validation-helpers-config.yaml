@@ -3,7 +3,7 @@
 # Replaces hardcoded validation helper logic from TestUtilities
 
 metadata:
-  id: "Validation Helpers Configuration"
+  id: "validation-helpers-configuration"
   name: "Validation Helpers Configuration"
   version: "1.0.0"
   description: "Data-driven validation helpers configuration for test utilities"
@@ -15,7 +15,7 @@ metadata:
 # Validation helpers configuration by helper type
 data:
   object-to-map-conversion:
-    helper-id: "HELPER001"
+    helper-id: "validation-helpers-configuration"
     helper-type: "object-to-map-conversion"
     description: "Object to map conversion utilities"
     conversion-rules:
@@ -86,7 +86,7 @@ data:
       nested-object-handling: "flatten"
     
   data-validation-utilities:
-    helper-id: "HELPER002"
+    helper-id: "validation-helpers-configuration"
     helper-type: "data-validation-utilities"
     description: "Data validation utility methods"
     validation-methods:
@@ -134,7 +134,7 @@ data:
       empty-string-handling: "fail"
     
   test-result-collection:
-    helper-id: "HELPER003"
+    helper-id: "validation-helpers-configuration"
     helper-type: "test-result-collection"
     description: "Test result collection and reporting utilities"
     collection-features:
@@ -170,7 +170,7 @@ data:
       thread-safe: true
     
   assertion-helpers:
-    helper-id: "HELPER004"
+    helper-id: "validation-helpers-configuration"
     helper-type: "assertion-helpers"
     description: "Assertion helper methods for testing"
     assertion-methods:
@@ -213,7 +213,7 @@ data:
       stack-trace-on-failure: false
     
   performance-helpers:
-    helper-id: "HELPER005"
+    helper-id: "validation-helpers-configuration"
     helper-type: "performance-helpers"
     description: "Performance measurement and benchmarking helpers"
     performance-features:
@@ -245,7 +245,7 @@ data:
       outlier-detection: true
     
   default:
-    helper-id: "HELPER000"
+    helper-id: "validation-helpers-configuration"
     helper-type: "default"
     description: "Default validation helpers"
     basic-features:

@@ -1,20 +1,19 @@
 # Customer Profiles Dataset
 # Infrastructure dataset for customer profile data
 
-# Dataset Metadata
-dataset-info:
-  name: "customer-profiles"
-  version: "1.0"
+metadata:
+  id: "customer-profiles-dataset"
+  name: "Customer Profiles Dataset"
+  version: "1.0.0"
   description: "Customer profile dataset for demo purposes"
-  category: "infrastructure"
-  record-count: 1000
+  type: "dataset"
+  source: "APEX Demo Infrastructure"
+  created-date: "2024-12-24"
+  tags: ["infrastructure", "customer-profiles", "dataset"]
 
 # Customer Profile Data
-data-sources:
+data:
   customer-profiles:
-    type: "inline"
-    description: "Customer profile reference data"
-    data:
       - customerId: "CUST001"
         name: "John Smith"
         riskProfile: "CONSERVATIVE"

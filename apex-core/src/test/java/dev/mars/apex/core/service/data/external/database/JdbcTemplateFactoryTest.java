@@ -122,9 +122,8 @@ class JdbcTemplateFactoryTest {
         });
 
         assertEquals(DataSourceException.ErrorType.CONFIGURATION_ERROR, exception.getErrorType());
-        // The exception might be wrapped, so check the cause chain for the original message
-        assertTrue(exception.getMessage().contains("Source type is required") ||
-                   containsInCauseChain(exception, "Source type is required"));
+        // The exception should contain the proper validation message
+        assertTrue(exception.getMessage().contains("Source type is required"));
     }
 
     // ========================================
@@ -292,11 +291,11 @@ class JdbcTemplateFactoryTest {
     void testDifferentConfigurationsDifferentInstances() throws DataSourceException {
         DataSourceConfiguration config1 = createH2Configuration();
         config1.setName("db1");
-        config1.getConnection().setDatabase("testdb1");
-        
+        config1.getConnection().setDatabase("mem:testdb1");
+
         DataSourceConfiguration config2 = createH2Configuration();
         config2.setName("db2");
-        config2.getConnection().setDatabase("testdb2");
+        config2.getConnection().setDatabase("mem:testdb2");
         
         DataSource dataSource1 = JdbcTemplateFactory.createDataSource(config1);
         DataSource dataSource2 = JdbcTemplateFactory.createDataSource(config2);
@@ -345,7 +344,7 @@ class JdbcTemplateFactoryTest {
         config.setSourceType("postgresql"); // Use PostgreSQL but with invalid connection details
         config.getConnection().setHost("invalid-host-that-does-not-exist");
         config.getConnection().setPort(5432);
-        config.getConnection().setDatabase("testdb");
+        config.getConnection().setDatabase("mem:testdb");
 
         DataSourceException exception = assertThrows(DataSourceException.class, () -> {
             JdbcTemplateFactory.createDataSource(config);
@@ -425,7 +424,7 @@ class JdbcTemplateFactoryTest {
 
         ConnectionConfig connectionConfig = new ConnectionConfig();
         connectionConfig.setHost(null); // In-memory H2
-        connectionConfig.setDatabase("testdb_" + System.nanoTime()); // Unique database name per test
+        connectionConfig.setDatabase("mem:testdb_" + System.nanoTime()); // Unique in-memory database name per test
         connectionConfig.setUsername("sa");
         connectionConfig.setPassword("");
 

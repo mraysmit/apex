@@ -3,7 +3,7 @@
 # Use Case: Enrich trades with settlement instructions and risk assessment data from database
 
 metadata:
-  id: "Settlement Instruction Multi-Parameter Enrichment Demo - Database Version"
+  id: "settlement-instruction-multi-parameter-enrichment-demo---database-version"
   name: "Settlement Instruction Multi-Parameter Enrichment Demo - Database Version"
   version: "2.0.0"
   description: "Demonstrates complex multi-parameter database lookup enrichment using APEX YAML processing"
@@ -26,7 +26,7 @@ data-sources:
 # Multi-step enrichment rules using verified APEX syntax with database lookups
 enrichments:
   # Step 1: Settlement Instruction Database Lookup
-  - id: "settlement-instruction-database-lookup"
+  - id: "settlement-instruction-multi-parameter-enrichment-demo---database-version"
     type: "lookup-enrichment"
     description: "Enrich trades with settlement instructions using database lookup"
     condition: "#counterpartyId != null && #counterpartyId != ''"

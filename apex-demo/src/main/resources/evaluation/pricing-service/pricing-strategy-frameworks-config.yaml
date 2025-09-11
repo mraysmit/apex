@@ -3,7 +3,7 @@
 # Replaces hardcoded pricing strategy logic from PricingServiceDemo
 
 metadata:
-  id: "Pricing Strategy Frameworks Configuration"
+  id: "pricing-strategy-frameworks-configuration"
   name: "Pricing Strategy Frameworks Configuration"
   version: "1.0.0"
   description: "Data-driven pricing strategy frameworks configuration for pricing service"
@@ -24,7 +24,7 @@ data:
       decision-model: "COMPETITOR_BASED"
     pricing-strategies:
       market-leader-strategy:
-        strategy-id: "MARKET_LEADER_STRATEGY"
+        strategy-id: "pricing-strategy-frameworks-configuration"
         strategy-name: "Market Leader Pricing Strategy"
         strategy-description: "Premium pricing strategy for market leaders"
         competitive-analysis:
@@ -55,7 +55,7 @@ data:
           - "Track premium pricing effectiveness"
           
       market-follower-strategy:
-        strategy-id: "MARKET_FOLLOWER_STRATEGY"
+        strategy-id: "pricing-strategy-frameworks-configuration"
         strategy-name: "Market Follower Pricing Strategy"
         strategy-description: "Competitive pricing strategy for market followers"
         competitive-analysis:
@@ -86,7 +86,7 @@ data:
           - "Track market share impact"
           
       price-challenger-strategy:
-        strategy-id: "PRICE_CHALLENGER_STRATEGY"
+        strategy-id: "pricing-strategy-frameworks-configuration"
         strategy-name: "Price Challenger Strategy"
         strategy-description: "Aggressive pricing strategy to challenge market leaders"
         competitive-analysis:
@@ -130,7 +130,7 @@ data:
       decision-model: "VALUE_PROPOSITION"
     pricing-strategies:
       premium-value-strategy:
-        strategy-id: "PREMIUM_VALUE_STRATEGY"
+        strategy-id: "pricing-strategy-frameworks-configuration"
         strategy-name: "Premium Value Pricing Strategy"
         strategy-description: "Premium pricing based on superior value proposition"
         value-analysis:
@@ -161,7 +161,7 @@ data:
           - "Track customer value perception"
           
       standard-value-strategy:
-        strategy-id: "STANDARD_VALUE_STRATEGY"
+        strategy-id: "pricing-strategy-frameworks-configuration"
         strategy-name: "Standard Value Pricing Strategy"
         strategy-description: "Standard pricing based on balanced value proposition"
         value-analysis:
@@ -192,7 +192,7 @@ data:
           - "Track market alignment effectiveness"
           
       economy-value-strategy:
-        strategy-id: "ECONOMY_VALUE_STRATEGY"
+        strategy-id: "pricing-strategy-frameworks-configuration"
         strategy-name: "Economy Value Pricing Strategy"
         strategy-description: "Economy pricing based on cost-effective value proposition"
         value-analysis:
@@ -236,7 +236,7 @@ data:
       decision-model: "MARGIN_BASED"
     pricing-strategies:
       standard-margin-strategy:
-        strategy-id: "STANDARD_MARGIN_STRATEGY"
+        strategy-id: "pricing-strategy-frameworks-configuration"
         strategy-name: "Standard Margin Pricing Strategy"
         strategy-description: "Standard cost-plus pricing with fixed margin"
         cost-analysis:
@@ -266,7 +266,7 @@ data:
           - "Track margin achievement"
           
       tiered-margin-strategy:
-        strategy-id: "TIERED_MARGIN_STRATEGY"
+        strategy-id: "pricing-strategy-frameworks-configuration"
         strategy-name: "Tiered Margin Pricing Strategy"
         strategy-description: "Cost-plus pricing with tiered margins based on cost levels"
         cost-analysis:
@@ -310,7 +310,7 @@ data:
       decision-model: "ALGORITHMIC"
     pricing-strategies:
       demand-based-strategy:
-        strategy-id: "DEMAND_BASED_STRATEGY"
+        strategy-id: "pricing-strategy-frameworks-configuration"
         strategy-name: "Demand-Based Dynamic Pricing Strategy"
         strategy-description: "Dynamic pricing based on real-time demand patterns"
         dynamic-analysis:
@@ -341,7 +341,7 @@ data:
           - "Track demand pattern analysis"
           
       inventory-based-strategy:
-        strategy-id: "INVENTORY_BASED_STRATEGY"
+        strategy-id: "pricing-strategy-frameworks-configuration"
         strategy-name: "Inventory-Based Dynamic Pricing Strategy"
         strategy-description: "Dynamic pricing based on inventory levels and turnover"
         dynamic-analysis:
@@ -381,7 +381,7 @@ data:
     description: "Default pricing strategy framework processing"
     pricing-strategies:
       default-strategy:
-        strategy-id: "DEFAULT_STRATEGY"
+        strategy-id: "pricing-strategy-frameworks-configuration"
         strategy-name: "Default Strategy"
         pricing-rules:
           - rule-name: "default-pricing"

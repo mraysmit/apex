@@ -3,7 +3,7 @@
 # Replaces all hardcoded advanced features logic from ApexAdvancedFeaturesDemo (@version 1.0)
 
 metadata:
-  id: "APEX Advanced Features Demo"
+  id: "apex-advanced-features-demo"
   name: "APEX Advanced Features Demo"
   version: "2.0.0"
   description: "APEX-compliant advanced features with real enrichment services"
@@ -41,7 +41,7 @@ external-data-sources:
 
 # APEX enrichment processing for advanced features
 enrichments:
-  - id: "collection-operations-processing"
+  - id: "apex-advanced-features-demo"
     name: "collection-operations-processing"
     type: "field-enrichment"
     description: "Process collection operations using data-driven configuration"
@@ -52,62 +52,62 @@ enrichments:
         target-field: "collectionResult"
         default-value: "collection-operations-processed"
 
-  - id: "rule-engine-processing"
+  - id: "apex-advanced-features-demo"
     name: "rule-engine-processing"
     type: "field-enrichment"
     description: "Process rule engine operations using data-driven configuration"
     enabled: true
-    condition: "false"
+    condition: "true"
     field-mappings:
       - source-field: "ruleType"
         target-field: "ruleEngineResult"
         default-value: "rule-engine-processed"
 
-  - id: "template-processing"
+  - id: "apex-advanced-features-demo"
     name: "template-processing"
     type: "field-enrichment"
     description: "Process template operations using data-driven configuration"
     enabled: true
-    condition: "false"
+    condition: "true"
     field-mappings:
       - source-field: "templateType"
         target-field: "templateResult"
         default-value: "template-processing-processed"
 
-  - id: "dynamic-lookup-processing"
+  - id: "apex-advanced-features-demo"
     name: "dynamic-lookup-processing"
     type: "field-enrichment"
     description: "Process dynamic lookup operations using data-driven configuration"
     enabled: true
-    condition: "false"
+    condition: "true"
     field-mappings:
       - source-field: "lookupType"
         target-field: "lookupResult"
         default-value: "dynamic-lookup-processed"
 
-  - id: "rule-result-processing"
+  - id: "apex-advanced-features-demo"
     name: "rule-result-processing"
     type: "field-enrichment"
     description: "Process rule result features using data-driven configuration"
     enabled: true
-    condition: "false"
+    condition: "true"
     field-mappings:
       - source-field: "featureType"
         target-field: "ruleResultFeature"
         default-value: "rule-result-features-processed"
 
-  - id: "dynamic-method-execution"
+  - id: "apex-advanced-features-demo"
     name: "dynamic-method-execution"
     type: "field-enrichment"
     description: "Execute dynamic methods using real APEX expressions"
     enabled: true
-    condition: "false"
+    condition: "true"
     field-mappings:
       - source-field: "methodName"
         target-field: "dynamicMethodResult"
         default-value: "dynamic-method-executed"
 
-  - id: "advanced-features-summary"
+  - id: "apex-advanced-features-demo"
     name: "advanced-features-summary"
     type: "field-enrichment"
     description: "Generate advanced features processing summary"

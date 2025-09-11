@@ -3,7 +3,7 @@
 # Replaces hardcoded pricing calculation logic from PricingServiceDemo
 
 metadata:
-  id: "Pricing Calculation Models Configuration"
+  id: "pricing-calculation-models-configuration"
   name: "Pricing Calculation Models Configuration"
   version: "1.0.0"
   description: "Data-driven pricing calculation models configuration for pricing service"
@@ -24,7 +24,7 @@ data:
       adjustment-type: "NONE"
     calculation-models:
       base-price-model:
-        model-id: "BASE_PRICE_MODEL"
+        model-id: "pricing-calculation-models-configuration"
         model-name: "Base Price Calculation Model"
         model-description: "Standard base price calculation without adjustments"
         calculation-parameters:
@@ -56,7 +56,7 @@ data:
           - "Track base price validation"
           
       standard-price-range-model:
-        model-id: "STANDARD_PRICE_RANGE_MODEL"
+        model-id: "pricing-calculation-models-configuration"
         model-name: "Standard Price Range Model"
         model-description: "Standard pricing with range validation"
         calculation-parameters:
@@ -95,7 +95,7 @@ data:
       adjustment-type: "PERCENTAGE_INCREASE"
     calculation-models:
       premium-markup-model:
-        model-id: "PREMIUM_MARKUP_MODEL"
+        model-id: "pricing-calculation-models-configuration"
         model-name: "Premium Markup Calculation Model"
         model-description: "Premium pricing with 20% markup"
         calculation-parameters:
@@ -128,7 +128,7 @@ data:
           - "Track premium markup applications"
           
       premium-tiered-model:
-        model-id: "PREMIUM_TIERED_MODEL"
+        model-id: "pricing-calculation-models-configuration"
         model-name: "Premium Tiered Pricing Model"
         model-description: "Tiered premium pricing based on price ranges"
         calculation-parameters:
@@ -175,7 +175,7 @@ data:
       adjustment-type: "PERCENTAGE_DECREASE"
     calculation-models:
       sale-discount-model:
-        model-id: "SALE_DISCOUNT_MODEL"
+        model-id: "pricing-calculation-models-configuration"
         model-name: "Sale Discount Calculation Model"
         model-description: "Sale pricing with 20% discount"
         calculation-parameters:
@@ -208,7 +208,7 @@ data:
           - "Track discount effectiveness"
           
       sale-tiered-discount-model:
-        model-id: "SALE_TIERED_DISCOUNT_MODEL"
+        model-id: "pricing-calculation-models-configuration"
         model-name: "Sale Tiered Discount Model"
         model-description: "Tiered sale discounts based on price ranges"
         calculation-parameters:
@@ -255,7 +255,7 @@ data:
       adjustment-type: "PERCENTAGE_DECREASE"
     calculation-models:
       clearance-discount-model:
-        model-id: "CLEARANCE_DISCOUNT_MODEL"
+        model-id: "pricing-calculation-models-configuration"
         model-name: "Clearance Discount Calculation Model"
         model-description: "Clearance pricing with 50% discount"
         calculation-parameters:
@@ -288,7 +288,7 @@ data:
           - "Track price floor applications"
           
       clearance-liquidation-model:
-        model-id: "CLEARANCE_LIQUIDATION_MODEL"
+        model-id: "pricing-calculation-models-configuration"
         model-name: "Clearance Liquidation Model"
         model-description: "Aggressive clearance pricing for liquidation"
         calculation-parameters:
@@ -330,7 +330,7 @@ data:
     description: "Default pricing calculation model processing"
     calculation-models:
       default-model:
-        model-id: "DEFAULT_MODEL"
+        model-id: "pricing-calculation-models-configuration"
         model-name: "Default Model"
         calculation-rules:
           - rule-name: "default-calculation"

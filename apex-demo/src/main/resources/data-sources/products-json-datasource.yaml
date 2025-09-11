@@ -1,0 +1,78 @@
+# Products JSON File Data Source Configuration
+# Defines connection to JSON files in demo-data/json directory
+
+metadata:
+  id: "products-json-data-source"
+  name: "Products JSON Data Source"
+  version: "1.0.0"
+  description: "File system data source for products JSON files"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-09-05"
+  tags: ["apex-demo", "data-source", "json", "products"]
+
+# Data source definitions
+dataSources:
+  - name: "products-json-files"
+    type: "file-system"
+    enabled: true
+    description: "Product catalog from JSON files"
+    tags:
+      - "json"
+      - "products"
+      - "catalog"
+    
+    connection:
+      basePath: "demo-data/json"
+      filePattern: "products.json"
+      recursive: false
+      watchForChanges: true
+      encoding: "UTF-8"
+    
+    # JSON format configuration
+    fileFormat:
+      type: "json"
+      rootPath: "$"  # Root of JSON array
+      flattenArrays: false
+      
+      # Field mappings (if needed)
+      columnMappings:
+        "id": "id"
+        "name": "name"
+        "price": "price"
+        "category": "category"
+        "available": "available"
+    
+    parameterNames:
+      - "productId"
+    
+    cache:
+      enabled: true
+      ttlSeconds: 1800  # 30 minutes for product data
+      maxSize: 1000
+      keyPrefix: "products"
+      cacheKeyIncludesFileModTime: true
+    
+    healthCheck:
+      enabled: true
+      intervalSeconds: 600  # 10 minutes
+      timeoutSeconds: 15
+      checkFileAccess: true
+
+# Named queries for common operations
+namedQueries:
+  findProductById:
+    query: "$[?(@.id == ':productId')]"
+    description: "Find product by ID"
+    parameters:
+      - name: "productId"
+        type: "string"
+        required: true
+  
+  findProductsByCategory:
+    query: "$[?(@.category == ':category')]"
+    description: "Find products by category"
+    parameters:
+      - name: "category"
+        type: "string"
+        required: true

@@ -401,7 +401,7 @@ class DatabaseHealthIndicatorTest {
 
         ConnectionConfig connectionConfig = new ConnectionConfig();
         connectionConfig.setHost(null); // In-memory H2
-        connectionConfig.setDatabase("testdb_" + System.nanoTime()); // Unique database name per test
+        connectionConfig.setDatabase("mem:testdb_" + System.nanoTime()); // Unique in-memory database name per test
         connectionConfig.setUsername("sa");
         connectionConfig.setPassword("");
 

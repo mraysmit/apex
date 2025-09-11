@@ -19,17 +19,13 @@ package dev.mars.apex.demo.etl;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.pipeline.DataPipelineEngine;
-import dev.mars.apex.core.engine.pipeline.PipelineExecutionResult;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Demonstration of CSV to H2 Database ETL Pipeline using APEX Data Sinks.
@@ -66,21 +62,22 @@ public class CsvToH2PipelineDemo {
     public void runDemo() throws Exception {
         LOGGER.info("=== APEX ETL Demo: CSV to H2 Database Pipeline ===");
 
-        // Create required CSV file
+        // JDBC drivers are automatically loaded by apex-core JdbcTemplateFactory
+
+        // Step 1: Create required CSV file
         createSampleCsvFile();
 
-        // Step 1: Load YAML configuration
+        // Step 2: Load YAML configuration
         YamlRuleConfiguration config = loadConfiguration();
 
-        // Step 2: Call APEX core processing engine
+        // Step 3: Call APEX core processing engine
         DataPipelineEngine pipelineEngine = new DataPipelineEngine();
         pipelineEngine.initialize(config);
 
-        // Step 3: Execute pipeline
-        pipelineEngine.execute("getAllCustomers", "customer-csv-input",
-                              "customer-h2-database", "insertCustomer");
+        // Step 4: Execute YAML-defined pipeline (following APEX core principle)
+        pipelineEngine.executePipeline("customer-etl-pipeline");
 
-        // Step 4: Cleanup
+        // Step 5: Cleanup
         pipelineEngine.shutdown();
 
         LOGGER.info("=== Demo completed successfully ===");
@@ -114,6 +111,8 @@ public class CsvToH2PipelineDemo {
         LOGGER.info("✓ Created sample CSV file: {}", csvFile);
     }
 
+
+
     /**
      * Load YAML configuration (APEX way).
      */
@@ -121,6 +120,7 @@ public class CsvToH2PipelineDemo {
         YamlConfigurationLoader loader = new YamlConfigurationLoader();
         return loader.loadFromClasspath("etl/csv-to-h2-pipeline.yaml");
     }
-    
+
+
 
 }

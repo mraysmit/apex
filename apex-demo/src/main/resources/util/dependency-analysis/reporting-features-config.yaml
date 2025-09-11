@@ -3,7 +3,7 @@
 # Replaces hardcoded reporting logic from YamlDependencyAnalysisDemo
 
 metadata:
-  id: "Reporting Features Configuration"
+  id: "reporting-features-configuration"
   name: "Reporting Features Configuration"
   version: "1.0.0"
   description: "Data-driven reporting features configuration for dependency analysis"
@@ -29,9 +29,9 @@ data:
       continuation-symbol: "│"
       leaf-symbol: "└──"
       status-symbols:
-        valid: "✓"
+        valid: "reporting-features-configuration"
         missing: "✗"
-        invalid: "!"
+        invalid: "reporting-features-configuration"
         circular: "~"
         unknown: "?"
     visualization-stages:

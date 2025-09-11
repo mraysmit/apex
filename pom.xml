@@ -29,6 +29,7 @@
 
     <modules>
         <module>apex-core</module>
+        <module>apex-compiler</module>
         <module>apex-demo</module>
         <module>apex-rest-api</module>
         <module>apex-playground</module>

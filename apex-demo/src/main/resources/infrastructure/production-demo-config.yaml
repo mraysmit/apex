@@ -1,5 +1,5 @@
 metadata:
-  id: "Production Demo Configuration"
+  id: "production-demo-configuration"
   name: "Production Demo Configuration"
   version: "1.0.0"
   description: "Configuration for ProductionDemoDataServiceManager that demonstrates proper usage of production ExternalDataSource implementations"

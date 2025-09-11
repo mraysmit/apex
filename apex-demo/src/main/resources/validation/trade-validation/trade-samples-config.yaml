@@ -3,7 +3,7 @@
 # Replaces hardcoded trade sample creation from IntegratedTradeValidatorComplexDemo
 
 metadata:
-  id: "Trade Samples Configuration"
+  id: "trade-samples-configuration"
   name: "Trade Samples Configuration"
   version: "1.0.0"
   description: "Data-driven trade samples configuration for complex trade validation testing"
@@ -15,13 +15,13 @@ metadata:
 # Trade samples configuration by sample type
 data:
   valid-equity-trade:
-    sample-id: "SAMPLE001"
+    sample-id: "trade-samples-configuration"
     sample-type: "valid-equity-trade"
     description: "Valid equity trade sample for testing"
     trade-data:
-      tradeId: "EQ001"
+      tradeid: "trade-samples-configuration"
       instrumentType: "Equity"
-      instrumentId: "AAPL.US"
+      instrumentid: "trade-samples-configuration"
       ticker: "AAPL"
       exchange: "NASDAQ"
       quantity: 1000
@@ -35,7 +35,7 @@ data:
       counterparty: "Goldman Sachs"
       country: "US"
       customer:
-        customerId: "CUST001"
+        customerid: "trade-samples-configuration"
         kycStatus: "APPROVED"
         riskRating: "Low"
       settlementInstructions: "Standard DVP settlement via DTCC"
@@ -43,13 +43,13 @@ data:
     validation-categories: ["settlement", "instrument", "risk"]
     
   valid-bond-trade:
-    sample-id: "SAMPLE002"
+    sample-id: "trade-samples-configuration"
     sample-type: "valid-bond-trade"
     description: "Valid bond trade sample for testing"
     trade-data:
-      tradeId: "BD001"
+      tradeid: "trade-samples-configuration"
       instrumentType: "Bond"
-      instrumentId: "US10Y.BOND"
+      instrumentid: "trade-samples-configuration"
       maturityDate: "2035-08-30"
       couponRate: 3.5
       quantity: 100
@@ -63,7 +63,7 @@ data:
       counterparty: "JPMorgan"
       country: "US"
       customer:
-        customerId: "CUST002"
+        customerid: "trade-samples-configuration"
         kycStatus: "APPROVED"
         riskRating: "Low"
       settlementInstructions: "T+1 bond settlement via DTCC"
@@ -71,13 +71,13 @@ data:
     validation-categories: ["settlement", "instrument", "compliance"]
     
   valid-derivative-trade:
-    sample-id: "SAMPLE003"
+    sample-id: "trade-samples-configuration"
     sample-type: "valid-derivative-trade"
     description: "Valid derivative trade sample for testing"
     trade-data:
-      tradeId: "DV001"
+      tradeid: "trade-samples-configuration"
       instrumentType: "Option"
-      instrumentId: "AAPL.OPT.C.160.20250930"
+      instrumentid: "trade-samples-configuration"
       underlyingAsset: "AAPL"
       optionType: "CALL"
       strikePrice: 160.00
@@ -93,7 +93,7 @@ data:
       counterparty: "Morgan Stanley"
       country: "US"
       customer:
-        customerId: "CUST003"
+        customerid: "trade-samples-configuration"
         kycStatus: "APPROVED"
         riskRating: "Medium"
       settlementInstructions: "Option settlement via DTCC"
@@ -101,13 +101,13 @@ data:
     validation-categories: ["settlement", "instrument", "risk"]
     
   invalid-sanctions-trade:
-    sample-id: "SAMPLE004"
+    sample-id: "trade-samples-configuration"
     sample-type: "invalid-sanctions-trade"
     description: "Invalid trade with sanctioned counterparty"
     trade-data:
-      tradeId: "SN001"
+      tradeid: "trade-samples-configuration"
       instrumentType: "Equity"
-      instrumentId: "MSFT.US"
+      instrumentid: "trade-samples-configuration"
       ticker: "MSFT"
       exchange: "NASDAQ"
       quantity: 500
@@ -121,7 +121,7 @@ data:
       counterparty: "EntityA"  # Sanctioned entity
       country: "US"
       customer:
-        customerId: "CUST004"
+        customerid: "trade-samples-configuration"
         kycStatus: "APPROVED"
         riskRating: "Low"
       settlementInstructions: "Standard DVP settlement"
@@ -130,13 +130,13 @@ data:
     validation-categories: ["compliance"]
     
   invalid-high-risk-country-trade:
-    sample-id: "SAMPLE005"
+    sample-id: "trade-samples-configuration"
     sample-type: "invalid-high-risk-country-trade"
     description: "Invalid trade involving high-risk country"
     trade-data:
-      tradeId: "HR001"
+      tradeid: "trade-samples-configuration"
       instrumentType: "Bond"
-      instrumentId: "GOVT.BOND.XYZ"
+      instrumentid: "trade-samples-configuration"
       quantity: 50
       price: 1000.00
       amount: 50000.00
@@ -148,7 +148,7 @@ data:
       counterparty: "Local Bank XYZ"
       country: "CountryX"  # High-risk country
       customer:
-        customerId: "CUST005"
+        customerid: "trade-samples-configuration"
         kycStatus: "APPROVED"
         riskRating: "Medium"
       settlementInstructions: "International settlement"
@@ -157,13 +157,13 @@ data:
     validation-categories: ["compliance"]
     
   invalid-settlement-method-trade:
-    sample-id: "SAMPLE006"
+    sample-id: "trade-samples-configuration"
     sample-type: "invalid-settlement-method-trade"
     description: "Invalid trade with unsupported settlement method"
     trade-data:
-      tradeId: "SM001"
+      tradeid: "trade-samples-configuration"
       instrumentType: "Equity"
-      instrumentId: "GOOGL.US"
+      instrumentid: "trade-samples-configuration"
       ticker: "GOOGL"
       exchange: "NASDAQ"
       quantity: 100
@@ -177,7 +177,7 @@ data:
       counterparty: "Citigroup"
       country: "US"
       customer:
-        customerId: "CUST006"
+        customerid: "trade-samples-configuration"
         kycStatus: "APPROVED"
         riskRating: "Low"
       settlementInstructions: "Invalid settlement method test"
@@ -186,13 +186,13 @@ data:
     validation-categories: ["settlement"]
     
   large-amount-aml-trade:
-    sample-id: "SAMPLE007"
+    sample-id: "trade-samples-configuration"
     sample-type: "large-amount-aml-trade"
     description: "Large amount trade requiring AML approval"
     trade-data:
-      tradeId: "AML001"
+      tradeid: "trade-samples-configuration"
       instrumentType: "Equity"
-      instrumentId: "TSLA.US"
+      instrumentid: "trade-samples-configuration"
       ticker: "TSLA"
       exchange: "NASDAQ"
       quantity: 50000
@@ -206,7 +206,7 @@ data:
       counterparty: "Bank of America"
       country: "US"
       customer:
-        customerId: "CUST007"
+        customerid: "trade-samples-configuration"
         kycStatus: "APPROVED"
         riskRating: "High"
       amlApproval: false  # No AML approval
@@ -216,11 +216,11 @@ data:
     validation-categories: ["compliance"]
     
   incomplete-trade-data:
-    sample-id: "SAMPLE008"
+    sample-id: "trade-samples-configuration"
     sample-type: "incomplete-trade-data"
     description: "Trade with missing required data"
     trade-data:
-      tradeId: "INC001"
+      tradeid: "trade-samples-configuration"
       instrumentType: "Equity"
       # Missing instrumentId, ticker, exchange
       quantity: 1000
@@ -234,7 +234,7 @@ data:
       counterparty: "Wells Fargo"
       country: "US"
       customer:
-        customerId: "CUST008"
+        customerid: "trade-samples-configuration"
         kycStatus: "PENDING"  # KYC not approved
         riskRating: "Medium"
       settlementInstructions: "Incomplete trade test"
@@ -243,13 +243,13 @@ data:
     validation-categories: ["instrument", "compliance"]
     
   default:
-    sample-id: "SAMPLE000"
+    sample-id: "trade-samples-configuration"
     sample-type: "default"
     description: "Default trade sample"
     trade-data:
-      tradeId: "DEFAULT001"
+      tradeid: "trade-samples-configuration"
       instrumentType: "Equity"
-      instrumentId: "DEFAULT.STOCK"
+      instrumentid: "trade-samples-configuration"
       quantity: 100
       price: 50.00
       amount: 5000.00
@@ -261,7 +261,7 @@ data:
       counterparty: "Default Bank"
       country: "US"
       customer:
-        customerId: "DEFAULT_CUST"
+        customerid: "trade-samples-configuration"
         kycStatus: "APPROVED"
         riskRating: "Low"
       settlementInstructions: "Default settlement"

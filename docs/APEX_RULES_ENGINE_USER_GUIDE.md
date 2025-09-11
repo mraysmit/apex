@@ -18,6 +18,8 @@ APEX's scenario-based processing system provides a sophisticated architecture fo
 - **YAML Validation System**: Enterprise-grade validation with comprehensive error reporting
 - **External Data Source Integration**: Connect to databases, REST APIs, file systems, and caches
 - **YAML Dataset Enrichment**: Embed reference data directly in configuration files
+- **Pipeline Orchestration**: YAML-driven data processing workflows with ETL capabilities **🆕 NEW**
+- **Data Sink Architecture**: Comprehensive output capabilities with database and file sinks **🆕 NEW**
 - **Progressive API Design**: Three-layer API from simple to advanced use cases
 - **Enterprise Features**: Connection pooling, health monitoring, caching, failover
 - **High Performance**: Optimized for production workloads with comprehensive monitoring
@@ -59,6 +61,13 @@ graph TB
         R[YAML Datasets]
         S[Lookup Service]
         T[Transformation Engine]
+    end
+
+    subgraph "Pipeline Orchestration"
+        U[Pipeline Executor]
+        V[Data Sinks]
+        W[Step Dependencies]
+        X[Error Handling]
     end
 
     subgraph "Output Layer"
@@ -4268,6 +4277,876 @@ For detailed configuration guides, see:
 - [File System Configuration Guide](external-data-sources/file-system-configuration.md)
 - [Best Practices Guide](external-data-sources/best-practices.md)
 
+---
+
+# APEX Data Management Guide
+
+**Version:** 2.1
+**Date:** 2025-08-28
+**Author:** Mark Andrew Ray-Smith Cityline Ltd
+
+## Data Management Overview
+
+APEX (Advanced Processing Engine for eXpressions) provides comprehensive data management capabilities designed for enterprise-grade applications, including scenario-based configuration management, enterprise YAML validation, and the revolutionary **external data-source reference system**. This guide takes you on a journey from basic data concepts to advanced enterprise implementations, ensuring you understand each concept thoroughly before moving to the next level.
+
+**🆕 APEX 2.1 Features:**
+- **External Data-Source Reference System**: Clean separation of infrastructure and business logic
+- **Configuration Caching**: Automatic caching of external configurations for performance
+- **Enterprise Architecture**: Production-ready patterns for scalable configuration management
+
+**All YAML examples in this guide are validated and tested** through the apex-demo module demonstration suite. Each configuration has been verified to work correctly with the APEX Rules Engine.
+
+> **🎯 Validation Status**: This guide contains **production-ready, tested examples**. All YAML configurations have been verified through comprehensive testing in the apex-demo module. Performance metrics and execution results are included where applicable.
+
+## Data Management Table of Contents
+
+**Part 1: Getting Started with Data**
+1. [Introduction to Data Configuration](#1-introduction-to-data-configuration)
+2. [Understanding YAML Basics](#2-understanding-yaml-basics)
+3. [Your First Data Configuration](#3-your-first-data-configuration)
+4. [Basic Data Types and Structures](#4-basic-data-types-and-structures)
+
+**Part 2: Core Data Concepts**
+5. [Dataset Files vs Rule Configuration Files](#5-dataset-files-vs-rule-configuration-files)
+6. [Working with Simple Datasets](#6-working-with-simple-datasets)
+7. [Basic Data Enrichment](#7-basic-data-enrichment)
+8. [Simple Validation with Data](#8-simple-validation-with-data)
+
+**Part 3: Intermediate Data Management**
+9. [Advanced YAML Data Structures](#9-advanced-yaml-data-structures)
+10. [Complex Data Enrichment Patterns](#10-complex-data-enrichment-patterns)
+11. [Data Validation Strategies](#11-data-validation-strategies)
+12. [Organizing and Managing Multiple Datasets](#12-organizing-and-managing-multiple-datasets)
+13. [Using Parameters in Data Management](#13-using-parameters-in-data-management)
+
+**Part 4: Advanced Topics**
+14. [Scenario-Based Configuration Management](#14-scenario-based-configuration-management)
+15. [YAML Validation and Quality Assurance](#15-yaml-validation-and-quality-assurance)
+16. [External Data Source Integration](#16-external-data-source-integration)
+17. [Pipeline Orchestration for Data Management](#17-pipeline-orchestration-for-data-management)
+18. [Database Integration](#18-database-integration)
+19. [REST API Integration](#19-rest-api-integration)
+20. [File System Data Sources](#20-file-system-data-sources)
+21. [Cache Data Sources](#21-cache-data-sources)
+22. [Financial Services Data Patterns](#22-financial-services-data-patterns)
+23. [Performance and Optimization](#23-performance-and-optimization)
+24. [Enterprise Data Architecture](#24-enterprise-data-architecture)
+
+**Part 5: Reference and Examples**
+25. [Complete Examples and Use Cases](#25-complete-examples-and-use-cases)
+26. [Best Practices and Patterns](#26-best-practices-and-patterns)
+27. [Troubleshooting Common Issues](#27-troubleshooting-common-issues)
+
+---
+
+# Part 1: Getting Started with Data
+
+## 1. Introduction to Data Configuration
+
+### What is Data Configuration?
+
+Data configuration in APEX is the process of defining and organizing the information that your business rules need to make decisions. Think of it as creating reference books that your rules can consult when processing transactions, validating information, or enriching data.
+
+### Why Do We Need Data Configuration?
+
+Imagine you're writing a rule to validate currency codes. Without data configuration, you might write:
+
+```java
+// Hard-coded approach (not recommended)
+if (currency.equals("USD") || currency.equals("EUR") || currency.equals("GBP")) {
+    // Valid currency
+}
+```
+
+This approach has problems:
+- **Hard to maintain**: Adding new currencies requires code changes
+- **Not flexible**: Different environments might need different currency lists
+- **No additional information**: You only know if a currency is valid, not its name, region, or other properties
+
+With data configuration, you can create a currency dataset that your rules reference:
+
+```yaml
+# Much better approach
+rules:
+  - id: "currency-validation"
+    condition: "#currencyCode != null && #currencyName != null"
+    message: "Valid currency found"
+```
+
+The rule automatically gets enriched with currency information from your dataset, making it both more powerful and easier to maintain.
+
+### Key Benefits of Data Configuration
+
+1. **Separation of Data and Logic**: Business rules focus on logic, while data is managed separately
+2. **Easy Updates**: Change reference data without touching rule code
+3. **Environment Flexibility**: Different data for development, testing, and production
+4. **Rich Information**: Access to complete data records, not just validation flags
+5. **Business User Friendly**: Non-technical users can update reference data
+
+### What You'll Learn in This Guide
+
+This guide will teach you:
+- How to create and structure data files
+- Different types of data configurations
+- How to use data in your business rules
+- Best practices for organizing and maintaining data
+- Advanced patterns for complex scenarios
+
+Let's start with the basics of YAML, the format we use for data configuration.
+
+## 2. Understanding YAML Basics
+
+### What is YAML?
+
+YAML (YAML Ain't Markup Language) is a human-readable data format that's perfect for configuration files. It uses indentation and simple syntax to represent data structures, making it easy for both humans and computers to read and write.
+
+### Why YAML for Data Configuration?
+
+- **Human-readable**: Easy to read and understand
+- **Simple syntax**: No complex brackets or tags
+- **Hierarchical**: Naturally represents nested data structures
+- **Comments supported**: You can document your data
+- **Version control friendly**: Easy to track changes in Git
+
+### Basic YAML Syntax
+
+Let's start with the simplest YAML concepts:
+
+#### 1. Key-Value Pairs (Properties)
+
+```yaml
+# Simple properties
+name: "US Dollar"
+code: "USD"
+active: true
+decimal-places: 2
+```
+
+**Explanation**: Each line defines a property with a name (key) and value. Strings can be quoted or unquoted, numbers are written as-is, and booleans use `true`/`false`.
+
+#### 2. Lists (Arrays)
+
+```yaml
+# Simple list
+currencies:
+  - "USD"
+  - "EUR"
+  - "GBP"
+
+# Alternative compact format
+currencies: ["USD", "EUR", "GBP"]
+```
+
+**Explanation**: Lists use dashes (`-`) for each item. You can write them vertically or in a compact horizontal format.
+
+#### 3. Objects (Maps)
+
+```yaml
+# Object with properties
+currency:
+  code: "USD"
+  name: "US Dollar"
+  active: true
+```
+
+**Explanation**: Objects group related properties together using indentation. All properties of an object must be indented at the same level.
+
+#### 4. Combining Lists and Objects
+
+```yaml
+# List of objects
+currencies:
+  - code: "USD"
+    name: "US Dollar"
+    active: true
+  - code: "EUR"
+    name: "Euro"
+    active: true
+```
+
+**Explanation**: This creates a list where each item is an object with multiple properties.
+
+### YAML Indentation Rules
+
+**Critical**: YAML uses indentation to show structure. Follow these rules:
+- Use **spaces only**, never tabs
+- Use **consistent indentation** (typically 2 spaces per level)
+- **Align items at the same level** with the same indentation
+
+```yaml
+# Correct indentation
+currencies:
+  - code: "USD"
+    name: "US Dollar"
+  - code: "EUR"
+    name: "Euro"
+
+# Incorrect indentation (will cause errors)
+currencies:
+  - code: "USD"
+   name: "US Dollar"  # Wrong indentation
+  -  code: "EUR"      # Wrong indentation
+    name: "Euro"
+```
+
+### Comments in YAML
+
+```yaml
+# This is a comment
+currencies:  # Comments can go at the end of lines
+  - code: "USD"  # US Dollar
+    name: "US Dollar"
+    # This currency is widely used
+    active: true
+```
+
+**Explanation**: Comments start with `#` and continue to the end of the line. Use them to document your data.
+
+### Common YAML Mistakes to Avoid
+
+1. **Mixing tabs and spaces**: Always use spaces
+2. **Inconsistent indentation**: Keep the same level aligned
+3. **Missing quotes for special characters**: Quote strings with colons, brackets, etc.
+4. **Forgetting the space after colons**: Write `key: value`, not `key:value`
+
+Now that you understand basic YAML syntax, let's create your first data configuration file.
+
+## 3. Your First Data Configuration
+
+### Creating a Simple Currency Dataset
+
+Let's create your first data configuration file. We'll start with a simple currency dataset that contains basic information about three major currencies.
+
+**Step 1: Create the file structure**
+
+Create a new file called `currencies.yaml`:
+
+```yaml
+# currencies.yaml - My first data configuration
+metadata:
+  name: "Basic Currency Data"
+  version: "1.0.0"
+  description: "Simple currency reference data for learning"
+
+data:
+  - code: "USD"
+    name: "US Dollar"
+    active: true
+  - code: "EUR"
+    name: "Euro"
+    active: true
+  - code: "GBP"
+    name: "British Pound"
+    active: true
+```
+
+**Let's break this down:**
+
+#### The `metadata` Section
+```yaml
+metadata:
+  name: "Basic Currency Data"
+  version: "1.0.0"
+  description: "Simple currency reference data for learning"
+```
+
+**Purpose**: The metadata section describes your dataset. It's like the title page of a book.
+- `name`: A human-readable name for your dataset
+- `version`: Helps track changes over time
+- `description`: Explains what this dataset contains
+
+#### The `data` Section
+```yaml
+data:
+  - code: "USD"
+    name: "US Dollar"
+    active: true
+  - code: "EUR"
+    name: "Euro"
+    active: true
+  - code: "GBP"
+    name: "British Pound"
+    active: true
+```
+
+**Purpose**: The data section contains your actual records. Each item in the list represents one currency with three properties:
+- `code`: The currency code (like "USD")
+- `name`: The full currency name (like "US Dollar")
+- `active`: Whether this currency is currently in use
+
+### Using Your Dataset in a Rule
+
+Now let's create a simple rule that uses this currency data:
+
+```yaml
+# simple-currency-rule.yaml
+metadata:
+  name: "Currency Validation Rule"
+  version: "1.0.0"
+
+# This tells the system to enrich data with currency information
+enrichments:
+  - id: "currency-lookup"
+    type: "lookup-enrichment"
+    condition: "#transaction.currency != null"
+    lookup-config:
+      lookup-dataset:
+        type: "yaml-file"
+        file-path: "currencies.yaml"
+        key-field: "code"
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+      - source-field: "active"
+        target-field: "currencyActive"
+
+# This rule validates that the currency is active
+rules:
+  - id: "currency-active-check"
+    name: "Currency Must Be Active"
+    condition: "#currencyActive == true"
+    message: "Currency {{#transaction.currency}} is active and valid"
+    severity: "ERROR"
+```
+
+**What happens when this runs:**
+
+1. **Input**: A transaction comes in with `currency: "USD"`
+2. **Enrichment**: The system looks up "USD" in your currency dataset
+3. **Data Added**: The transaction gets enriched with:
+   - `currencyName: "US Dollar"`
+   - `currencyActive: true`
+4. **Rule Evaluation**: The rule checks if `currencyActive == true`
+5. **Result**: The rule passes and shows the success message
+
+### Testing Your Configuration
+
+You can test this with sample data:
+
+```json
+{
+  "transaction": {
+    "currency": "USD",
+    "amount": 100.00
+  }
+}
+```
+
+**Expected Result**: The rule passes because USD is active in your dataset.
+
+If you test with an unknown currency:
+
+```json
+{
+  "transaction": {
+    "currency": "XYZ",
+    "amount": 100.00
+  }
+}
+```
+
+**Expected Result**: The enrichment won't find "XYZ", so `currencyActive` will be null, and the rule will fail.
+
+### Key Concepts You've Learned
+
+1. **Dataset Structure**: Metadata + Data sections
+2. **Simple Data Records**: Objects with properties
+3. **Enrichment**: How rules get additional data
+4. **Field Mapping**: How dataset fields become rule variables
+5. **Rule Conditions**: Using enriched data in rule logic
+
+This is the foundation of data configuration. Next, we'll explore different types of data structures you can create.
+
+## 4. Basic Data Types and Structures
+
+Now that you've created your first dataset, let's explore the different types of data you can store and how to structure them effectively.
+
+### Simple Data Types
+
+#### Strings (Text)
+```yaml
+data:
+  - code: "USD"                    # Simple string
+    name: "US Dollar"              # String with spaces
+    description: "The official currency of the United States"  # Longer text
+```
+
+**When to use**: Names, codes, descriptions, any text information.
+
+#### Numbers
+```yaml
+data:
+  - decimal-places: 2              # Integer (whole number)
+    exchange-rate: 1.0850          # Decimal number
+    market-cap: 1500000000         # Large numbers
+```
+
+**When to use**: Amounts, quantities, rates, percentages, counts.
+
+#### Booleans (True/False)
+```yaml
+data:
+  - active: true                   # Boolean true
+    major-currency: false          # Boolean false
+    trading-enabled: true          # Boolean true
+```
+
+**When to use**: Yes/no flags, enabled/disabled states, true/false conditions.
+
+#### Dates and Times
+```yaml
+data:
+  - created-date: "2024-01-15"                    # Date only
+    last-updated: "2024-01-15T10:30:00Z"         # Date and time
+    market-open: "09:30"                         # Time only
+```
+
+**When to use**: Creation dates, timestamps, schedules, deadlines.
+
+### Structured Data Types
+
+#### Lists (Arrays)
+```yaml
+# Simple list of strings
+data:
+  - supported-currencies: ["USD", "EUR", "GBP", "JPY"]
+
+# List of numbers
+data:
+  - exchange-rates: [1.0, 0.85, 0.73, 110.5]
+
+# List of objects (more complex)
+data:
+  - trading-sessions:
+      - market: "NEW_YORK"
+        open: "09:30"
+        close: "16:00"
+      - market: "LONDON"
+        open: "08:00"
+        close: "17:00"
+```
+
+**When to use**: Multiple values of the same type, collections, arrays.
+
+#### Nested Objects
+```yaml
+data:
+  - code: "USD"
+    name: "US Dollar"
+    details:                       # Nested object
+      central-bank: "Federal Reserve"
+      country: "United States"
+      region: "North America"
+    trading-info:                  # Another nested object
+      major-currency: true
+      daily-volume: 5000000000
+      volatility: 0.12
+```
+
+**When to use**: Grouping related information, hierarchical data.
+
+### Practical Examples
+
+#### Example 1: Simple Product Catalog
+```yaml
+# products.yaml
+metadata:
+  name: "Product Catalog"
+  version: "1.0.0"
+
+data:
+  - id: "PROD001"
+    name: "Laptop Computer"
+    price: 999.99
+    category: "Electronics"
+    in-stock: true
+
+  - id: "PROD002"
+    name: "Office Chair"
+    price: 299.50
+    category: "Furniture"
+    in-stock: false
+```
+
+**Use case**: Product validation rules, pricing rules, inventory checks.
+
+#### Example 2: Customer Categories
+```yaml
+# customer-categories.yaml
+metadata:
+  name: "Customer Categories"
+  version: "1.0.0"
+
+data:
+  - category: "PREMIUM"
+    min-balance: 100000
+    benefits: ["Priority Support", "Fee Waivers", "Investment Advice"]
+    discount-rate: 0.15
+
+  - category: "STANDARD"
+    min-balance: 10000
+    benefits: ["Online Support", "Basic Reports"]
+    discount-rate: 0.05
+
+  - category: "BASIC"
+    min-balance: 0
+    benefits: ["Online Support"]
+    discount-rate: 0.00
+```
+
+**Use case**: Customer classification rules, benefit determination, pricing tiers.
+
+### Choosing the Right Data Structure
+
+**Use simple types when**:
+- You need basic validation (is currency active?)
+- You're storing single values (price, quantity)
+- The data is straightforward (yes/no, name, code)
+
+**Use lists when**:
+- You have multiple values of the same type
+- You need to check if something is "in" a collection
+- You're storing arrays of data
+
+**Use nested objects when**:
+- You have related information that belongs together
+- You need hierarchical data structures
+- You want to organize complex data logically
+
+### Best Practices for Data Structure
+
+1. **Keep it simple**: Start with simple structures and add complexity only when needed
+2. **Be consistent**: Use the same field names across similar records
+3. **Use meaningful names**: `active` is better than `flag1`
+4. **Group related data**: Put related fields in nested objects
+5. **Document with comments**: Explain complex structures
+
+Next, we'll learn about the important distinction between dataset files and rule configuration files.
+
+# Part 2: Core Data Concepts
+
+## 5. Dataset Files vs Rule Configuration Files
+
+One of the most important concepts to understand is the difference between **Dataset Files** and **Rule Configuration Files**. They serve different purposes and have different structures.
+
+### Dataset Files: Your Data Storage
+
+**Purpose**: Store structured data records that rules can look up and use.
+
+**Think of them as**: Reference books, lookup tables, or databases in YAML format.
+
+**Structure**: Always have a `data` section containing records.
+
+```yaml
+# currencies.yaml (Dataset File)
+metadata:
+  type: "dataset"                    # Identifies this as a dataset
+  name: "Currency Reference Data"
+
+data:                                # Contains the actual data records
+  - code: "USD"
+    name: "US Dollar"
+    active: true
+  - code: "EUR"
+    name: "Euro"
+    active: true
+```
+
+**Key characteristics**:
+- Contains actual data records
+- Used for lookups and enrichment
+- Updated when reference data changes
+- Shared across multiple rule configurations
+
+### Rule Configuration Files: Your Business Logic
+
+**Purpose**: Define business rules, validation logic, and enrichment instructions.
+
+**Think of them as**: The instruction manual that tells the system what to do with data.
+
+**Structure**: Have `rules` and/or `enrichments` sections, but no `data` section.
+
+```yaml
+# validation-rules.yaml (Rule Configuration File)
+metadata:
+  type: "rules"                      # Identifies this as a rule configuration
+  name: "Currency Validation Rules"
+
+enrichments:                         # Instructions for data enrichment
+  - id: "currency-lookup"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-dataset:
+        type: "yaml-file"
+        file-path: "currencies.yaml"  # References the dataset file
+        key-field: "code"
+
+rules:                               # Business rules and validation logic
+  - id: "currency-active-check"
+    condition: "#currencyActive == true"
+    message: "Currency must be active"
+```
+
+**Key characteristics**:
+- Contains business logic and rules
+- References dataset files for data
+- Updated when business requirements change
+- Defines how data should be processed
+
+### Visual Comparison
+
+| Aspect | Dataset Files | Rule Configuration Files |
+|--------|---------------|-------------------------|
+| **Contains** | Data records | Business logic |
+| **Purpose** | Store information | Define what to do |
+| **Key Section** | `data:` | `rules:` and `enrichments:` |
+| **Example** | Currency list | Currency validation rule |
+| **Updated When** | Reference data changes | Business rules change |
+| **File Names** | `currencies.yaml`, `products.yaml` | `validation-rules.yaml`, `business-rules.yaml` |
+
+### How They Work Together
+
+Here's a complete example showing how dataset files and rule configuration files work together:
+
+**Step 1: Create a dataset file**
+```yaml
+# datasets/countries.yaml
+metadata:
+  type: "dataset"
+  name: "Country Reference Data"
+
+data:
+  - code: "US"
+    name: "United States"
+    region: "North America"
+    eu-member: false
+  - code: "GB"
+    name: "United Kingdom"
+    region: "Europe"
+    eu-member: false
+  - code: "DE"
+    name: "Germany"
+    region: "Europe"
+    eu-member: true
+```
+
+**Step 2: Create a rule configuration that uses the dataset**
+```yaml
+# rules/country-validation.yaml
+metadata:
+  type: "rules"
+  name: "Country Validation Rules"
+
+enrichments:
+  - id: "country-lookup"
+    type: "lookup-enrichment"
+    condition: "#transaction.countryCode != null"
+    lookup-config:
+      lookup-dataset:
+        type: "yaml-file"
+        file-path: "datasets/countries.yaml"    # Reference to dataset
+        key-field: "code"
+    field-mappings:
+      - source-field: "name"
+        target-field: "countryName"
+      - source-field: "region"
+        target-field: "countryRegion"
+      - source-field: "eu-member"
+        target-field: "isEuMember"
+
+rules:
+  - id: "valid-country-check"
+    name: "Country Must Be Valid"
+    condition: "#countryName != null"
+    message: "Country {{#transaction.countryCode}} is valid: {{#countryName}}"
+    severity: "ERROR"
+
+  - id: "eu-compliance-check"
+    name: "EU Member Compliance"
+    condition: "#isEuMember == true"
+    message: "Additional EU compliance rules apply"
+    severity: "INFO"
+```
+
+**Step 3: Process a transaction**
+```json
+{
+  "transaction": {
+    "countryCode": "DE",
+    "amount": 1000
+  }
+}
+```
+
+**What happens**:
+1. The enrichment looks up "DE" in the countries dataset
+2. It adds `countryName: "Germany"`, `countryRegion: "Europe"`, `isEuMember: true`
+3. The first rule passes because `countryName` is not null
+4. The second rule triggers because `isEuMember` is true
+
+### File Organization Best Practices
+
+```
+project-root/
+├── datasets/                    # All dataset files here
+│   ├── reference-data/
+│   │   ├── currencies.yaml
+│   │   ├── countries.yaml
+│   │   └── markets.yaml
+│   └── operational-data/
+│       ├── products.yaml
+│       └── customers.yaml
+│
+└── rules/                       # All rule configuration files here
+    ├── validation-rules.yaml
+    ├── enrichment-rules.yaml
+    └── business-rules.yaml
+```
+
+## 6. Working with Simple Datasets
+
+Now that you understand the difference between dataset files and rule configuration files, let's dive deeper into creating and using simple datasets effectively.
+
+### Creating Your First Dataset
+
+Let's create a practical dataset for validating payment methods:
+
+```yaml
+# datasets/payment-methods.yaml
+metadata:
+  type: "dataset"
+  name: "Payment Methods Reference"
+  version: "1.0.0"
+  description: "Supported payment methods with validation rules"
+
+data:
+  - method: "CREDIT_CARD"
+    name: "Credit Card"
+    requires-verification: true
+    max-amount: 10000
+    processing-time: "instant"
+
+  - method: "BANK_TRANSFER"
+    name: "Bank Transfer"
+    requires-verification: true
+    max-amount: 100000
+    processing-time: "1-3 days"
+
+  - method: "PAYPAL"
+    name: "PayPal"
+    requires-verification: false
+    max-amount: 5000
+    processing-time: "instant"
+
+  - method: "CASH"
+    name: "Cash Payment"
+    requires-verification: false
+    max-amount: 1000
+    processing-time: "instant"
+```
+
+### Using the Dataset in Rules
+
+Now let's create rules that use this payment methods dataset:
+
+```yaml
+# rules/payment-validation.yaml
+metadata:
+  type: "rules"
+  name: "Payment Method Validation"
+  version: "1.0.0"
+
+enrichments:
+  - id: "payment-method-lookup"
+    type: "lookup-enrichment"
+    condition: "#payment.method != null"
+    lookup-config:
+      lookup-dataset:
+        type: "yaml-file"
+        file-path: "datasets/payment-methods.yaml"
+        key-field: "method"
+    field-mappings:
+      - source-field: "name"
+        target-field: "paymentMethodName"
+      - source-field: "requires-verification"
+        target-field: "requiresVerification"
+      - source-field: "max-amount"
+        target-field: "maxAmount"
+      - source-field: "processing-time"
+        target-field: "processingTime"
+
+rules:
+  - id: "payment-method-supported"
+    name: "Payment Method Must Be Supported"
+    condition: "#paymentMethodName != null"
+    message: "Payment method {{#payment.method}} is supported"
+    severity: "ERROR"
+
+  - id: "amount-within-limits"
+    name: "Amount Within Method Limits"
+    condition: "#payment.amount <= #maxAmount"
+    message: "Payment amount ${{#payment.amount}} is within {{#paymentMethodName}} limit of ${{#maxAmount}}"
+    severity: "ERROR"
+
+  - id: "verification-required"
+    name: "Verification Required Check"
+    condition: "#requiresVerification == false || (#requiresVerification == true && #payment.verified == true)"
+    message: "{{#paymentMethodName}} verification requirements met"
+    severity: "WARNING"
+```
+
+### Testing Your Dataset
+
+Test with this sample data:
+
+```json
+{
+  "payment": {
+    "method": "CREDIT_CARD",
+    "amount": 5000,
+    "verified": true
+  }
+}
+```
+
+**Expected Results**:
+- ✅ Payment method is supported (CREDIT_CARD found in dataset)
+- ✅ Amount $5000 is within limit of $10000
+- ✅ Verification requirement met (verified: true)
+
+### Key Dataset Design Principles
+
+1. **Use meaningful keys**: `method: "CREDIT_CARD"` is better than `id: 1`
+2. **Include all necessary fields**: Think about what rules will need
+3. **Use consistent data types**: Don't mix strings and numbers for the same concept
+4. **Keep records complete**: Each record should have all required fields
+5. **Use clear field names**: `max-amount` is clearer than `limit`
+
+## Advanced Data Management Topics
+
+The sections above provide a solid foundation for data management in APEX. For comprehensive coverage of advanced topics including:
+
+- **Scenario-Based Configuration Management**
+- **YAML Validation and Quality Assurance**
+- **External Data Source Integration**
+- **Pipeline Orchestration for Data Management**
+- **Database Integration**
+- **REST API Integration**
+- **Financial Services Data Patterns**
+- **Performance and Optimization**
+- **Enterprise Data Architecture**
+
+Please refer to the complete **APEX Data Management Guide** which contains detailed explanations, examples, and best practices for all advanced data management scenarios.
+
+The complete guide includes:
+- **Part 3: Intermediate Data Management** (Sections 9-13)
+- **Part 4: Advanced Topics** (Sections 14-24)
+- **Part 5: Reference and Examples** (Sections 25-27)
+
+Each section builds upon the foundation established here and provides production-ready patterns for enterprise-grade data management implementations.
+
+---
+
 ## Rule Groups Configuration
 
 ### Overview
@@ -6604,3 +7483,1172 @@ public class ScenarioAuditLogger {
 - **Production-Ready**: Enterprise-grade patterns with monitoring, audit trails, and error handling
 - **Educational**: Comprehensive documentation and guided tours of advanced APEX features
 - **Extensible**: Templates for creating custom bootstrap scenarios for specific business domains
+
+---
+
+# Appendix A: APEX Comprehensive Demos Guide
+
+**Version:** 3.0
+**Date:** 2025-09-06
+**Author:** Mark Andrew Ray-Smith Cityline Ltd
+
+## Overview
+
+This appendix documents the **complete APEX demonstration suite** featuring 59 comprehensive demos organized into 6 specialized categories. These demos showcase real APEX engine integration, production-ready patterns, and enterprise-grade functionality across all APEX capabilities.
+
+**APEX Demo Suite Features:**
+- **59 Total Demonstrations**: Complete coverage of all APEX functionality
+- **6 Specialized Categories**: Organized by APEX operation types
+- **Real APEX Engine Integration**: All demos use actual APEX services (no hardcoded simulation)
+- **Interactive Demo Runners**: Professional command-line interfaces for each category
+- **Production-Ready Examples**: Enterprise-grade patterns and configurations
+- **Comprehensive YAML Configurations**: 100+ validated YAML configuration files
+
+## Demo Categories Overview
+
+### 1. **Validation Demos** (8 Demonstrations)
+Data quality and business rule validation patterns
+- **Runner**: `ValidationRunner.java`
+- **Focus**: Field validation, business rules, compliance checking
+- **Key Demos**: Quick Start, Commodity Swap Validation, Integrated Validators
+
+### 2. **Enrichment Demos** (10 Demonstrations)
+Data transformation and enhancement workflows
+- **Runner**: `EnrichmentRunner.java`
+- **Focus**: Data enrichment, transformation, external data integration
+- **Key Demos**: Financial Settlement, Custody Auto-Repair, OTC Options Bootstrap
+
+### 3. **Lookup Demos** (14 Demonstrations)
+Data lookup and reference operations
+- **Runner**: `LookupRunner.java`
+- **Focus**: Database lookups, external references, compound key operations
+- **Key Demos**: PostgreSQL Integration, Multi-Parameter Lookups, JSON/XML File Lookups
+
+### 4. **Evaluation Demos** (20 Demonstrations)
+Expression and rule evaluation capabilities
+- **Runner**: `EvaluationRunner.java`
+- **Focus**: SpEL expressions, rule chains, scenario-based processing
+- **Key Demos**: Advanced Features, Compliance Service, Risk Management
+
+### 5. **Infrastructure Demos** (4 Demonstrations)
+Configuration and setup patterns
+- **Runner**: `InfrastructureRunner.java`
+- **Focus**: Data providers, configuration management, enterprise setup
+- **Key Demos**: Demo Data Bootstrap, Production Configuration
+
+### 6. **Utility Demos** (3 Demonstrations)
+Testing and validation utilities
+- **Runner**: `UtilRunner.java`
+- **Focus**: YAML validation, dependency analysis, test utilities
+- **Key Demos**: YAML Dependency Analysis, Test Data Generation
+
+## Quick Start Guide
+
+### Running All Demos
+```bash
+# Interactive mode - choose categories
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.AllDemosRunner
+
+# Run all categories automatically
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.AllDemosRunner all
+```
+
+### Running Specific Categories
+```bash
+# Validation demos
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.ValidationRunner
+
+# Enrichment demos
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.EnrichmentRunner
+
+# Lookup demos
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.LookupRunner
+```
+
+---
+
+## A.1 Validation Demos (8 Demonstrations)
+
+### Overview
+Validation demos demonstrate APEX's comprehensive data quality and business rule validation capabilities. These demos showcase field validation, business rule enforcement, compliance checking, and integrated validation workflows using real APEX services.
+
+### Available Validation Demos
+
+#### A.1.1 Quick Start Demo
+**Class:** `dev.mars.apex.demo.validation.QuickStartDemo`
+**Purpose:** Perfect introduction to APEX validation capabilities
+**Features:**
+- Simple field validations
+- Basic business rule patterns
+- Real APEX service integration
+- Minimal setup requirements
+
+#### A.1.2 Basic Usage Examples
+**Class:** `dev.mars.apex.demo.validation.BasicUsageExamples`
+**YAML:** `validation/basic-usage-examples-config.yaml`
+**Purpose:** Fundamental validation patterns and examples
+**Features:**
+- Customer validation with YAML-driven rules
+- Product validation with business rule enforcement
+- Trade validation with financial domain examples
+- Numeric, date, and string operations with SpEL expressions
+
+#### A.1.3 Commodity Swap Validation (Bootstrap)
+**Class:** `dev.mars.apex.demo.validation.CommoditySwapValidationBootstrap`
+**YAML:** `validation/commodity-swap-validation-bootstrap-demo.yaml`
+**Purpose:** Complete commodity swap validation workflow
+**Features:**
+- Comprehensive commodity swap validation rules
+- Bootstrap configuration with inline datasets
+- Financial domain-specific validation patterns
+- Multi-step validation workflows
+
+#### A.1.4 Commodity Swap Validation (Quick)
+**Class:** `dev.mars.apex.demo.validation.CommoditySwapValidationQuickDemo`
+**YAML:** `validation/commodity-swap-validation-quick-demo.yaml`
+**Purpose:** Streamlined commodity swap validation demo
+**Features:**
+- Simplified validation workflow
+- Quick setup and execution
+- Essential validation patterns
+- Performance-optimized processing
+
+#### A.1.5 Integrated Customer Validator
+**Class:** `dev.mars.apex.demo.validation.IntegratedValidatorDemo` (Customer mode)
+**YAML:** `validation/integrated-validator-demo.yaml`
+**Purpose:** Multi-entity customer validation
+**Features:**
+- Customer data validation
+- Cross-field validation rules
+- Data quality checks
+- Integrated validation workflows
+
+#### A.1.6 Integrated Trade Validator
+**Class:** `dev.mars.apex.demo.validation.IntegratedValidatorDemo` (Trade mode)
+**YAML:** `validation/integrated-validator-demo.yaml`
+**Purpose:** Trading validation workflows
+**Features:**
+- Trade data validation
+- Financial instrument validation
+- Risk-based validation rules
+- Settlement validation patterns
+
+#### A.1.7 Integrated Trade Validator (Complex)
+**Class:** `dev.mars.apex.demo.validation.IntegratedTradeValidatorComplexDemo`
+**YAML:** `validation/integrated-trade-validator-complex-demo.yaml`
+**Purpose:** Advanced trading validation scenarios
+**Features:**
+- Complex multi-step validation
+- Advanced business rule patterns
+- Exception handling workflows
+- Performance optimization techniques
+
+#### A.1.8 Integrated Product Validator
+**Class:** `dev.mars.apex.demo.validation.IntegratedValidatorDemo` (Product mode)
+**YAML:** `validation/integrated-validator-demo.yaml`
+**Purpose:** Product validation patterns
+**Features:**
+- Product data validation
+- Catalog validation rules
+- Inventory validation patterns
+- Quality assurance workflows
+
+### Running Validation Demos
+
+#### Interactive Mode
+```bash
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.ValidationRunner
+```
+
+#### Direct Execution
+```bash
+# Run specific demo
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.ValidationRunner quickstart
+
+# Run all validation demos
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.ValidationRunner all
+```
+
+---
+
+## A.2 Enrichment Demos (10 Demonstrations)
+
+### Overview
+Enrichment demos showcase APEX's powerful data transformation and enhancement capabilities. These demos demonstrate data enrichment, external data integration, batch processing, and complex transformation workflows using real APEX services.
+
+### Available Enrichment Demos
+
+#### A.2.1 Data Management Demo
+**Class:** `dev.mars.apex.demo.enrichment.DataManagementDemo`
+**YAML:** `enrichment/data-management-demo-config.yaml`
+**Purpose:** Core data handling patterns and management
+**Features:**
+- YAML dataset configuration and loading
+- Data enrichment with lookup operations
+- Nested object structures and complex mappings
+- Multi-dataset scenarios and relationships
+- Error handling and default value strategies
+
+#### A.2.2 YAML Dataset Demo
+**Class:** `dev.mars.apex.demo.enrichment.YamlDatasetDemo`
+**YAML:** `enrichment/yaml-dataset-demo-config.yaml`
+**Purpose:** Inline dataset enrichment patterns
+**Features:**
+- Inline datasets embedded directly in YAML files
+- Field mappings for data transformation
+- Conditional processing based on data content
+- Performance benefits of in-memory lookups
+- Business-editable reference data management
+
+#### A.2.3 External Data Source Demo
+**Class:** `dev.mars.apex.demo.enrichment.ExternalDataSourceDemo`
+**YAML:** `enrichment/external-data-source-demo-config.yaml`
+**Purpose:** Database and API enrichment integration
+**Features:**
+- REST API integration with authentication
+- File system integration (CSV, JSON)
+- Cache integration with TTL and performance optimization
+- Health monitoring and metrics collection
+- Error handling and resilience patterns
+
+#### A.2.4 Batch Processing Demo
+**Class:** `dev.mars.apex.demo.enrichment.BatchProcessingDemo`
+**YAML:** `transformation/batch-processing-demo-config.yaml`
+**Purpose:** High-volume transformations and processing
+**Features:**
+- Batch processing patterns for large datasets
+- Performance optimization techniques
+- Memory management for high-volume processing
+- Error handling in batch scenarios
+- Progress monitoring and reporting
+
+#### A.2.5 Comprehensive Financial Settlement Demo
+**Class:** `dev.mars.apex.demo.enrichment.ComprehensiveFinancialSettlementDemo`
+**YAML:** `enrichment/comprehensive-financial-settlement-demo-config.yaml`
+**Purpose:** Complete trading settlement workflows
+**Features:**
+- End-to-end settlement processing
+- Multi-currency settlement patterns
+- Regulatory compliance integration
+- Exception handling workflows
+- Audit trail and reporting capabilities
+
+#### A.2.6 Custody Auto-Repair Demo
+**Class:** `dev.mars.apex.demo.enrichment.CustodyAutoRepairDemo`
+**YAML:** `enrichment/custody-auto-repair-demo-config.yaml`
+**Purpose:** Exception handling workflows for custody operations
+**Features:**
+- Standing Instruction (SI) auto-repair rules
+- Weighted rule-based decision making
+- Hierarchical rule prioritization (Client > Market > Instrument)
+- Asian market-specific settlement conventions
+- Comprehensive audit trail and compliance tracking
+
+#### A.2.7 Custody Auto-Repair Bootstrap
+**Class:** `dev.mars.apex.demo.enrichment.CustodyAutoRepairBootstrap`
+**YAML:** `enrichment/custody-auto-repair-bootstrap-demo.yaml`
+**Purpose:** Complete custody workflow with bootstrap configuration
+**Features:**
+- Complete custody processing pipeline
+- Bootstrap configuration with inline datasets
+- Real-world custody scenarios
+- Exception handling and repair workflows
+- Performance monitoring and metrics
+
+#### A.2.8 OTC Options Bootstrap
+**Class:** `dev.mars.apex.demo.enrichment.OtcOptionsBootstrapDemo`
+**YAML:** `enrichment/otc-options-bootstrap-demo.yaml`
+**Purpose:** Options processing pipeline demonstration
+**Features:**
+- OTC options processing workflows
+- Options pricing and risk calculations
+- Bootstrap configuration patterns
+- Financial derivatives processing
+- Regulatory compliance integration
+
+#### A.2.9 Customer Transformer Demo
+**Class:** `dev.mars.apex.demo.enrichment.CustomerTransformerDemo`
+**YAML:** `enrichment/customer-transformer-demo.yaml`
+**Purpose:** Customer data enrichment and transformation
+**Features:**
+- Customer data transformation patterns
+- Profile enrichment workflows
+- Data quality improvement processes
+- Customer segmentation logic
+- CRM integration patterns
+
+#### A.2.10 Trade Transformer Demo
+**Class:** `dev.mars.apex.demo.enrichment.TradeTransformerDemo`
+**YAML:** `enrichment/trade-transformer-demo.yaml`
+**Purpose:** Trade data transformation workflows
+**Features:**
+- Trade data transformation patterns
+- Financial instrument enrichment
+- Market data integration
+- Risk calculation workflows
+- Settlement preparation processes
+
+### Running Enrichment Demos
+
+#### Interactive Mode
+```bash
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.EnrichmentRunner
+```
+
+#### Direct Execution
+```bash
+# Run specific demo
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.EnrichmentRunner data
+
+# Run all enrichment demos
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.EnrichmentRunner all
+```
+
+---
+
+## A.3 Lookup Demos (14 Demonstrations)
+
+### Overview
+Lookup demos demonstrate APEX's comprehensive data lookup and reference capabilities. These demos showcase database lookups, external references, compound key operations, and various lookup patterns using real APEX services.
+
+### Available Lookup Demos
+
+#### A.3.1 Simple Field Lookup Demo
+**Class:** `dev.mars.apex.demo.lookup.SimpleFieldLookupDemo`
+**YAML:** `lookup/simple-field-lookup.yaml`
+**Purpose:** Basic single-field lookup patterns
+**Features:**
+- Simple field lookup using currency codes
+- Inline dataset lookups
+- Basic SpEL expression evaluation
+- Single-parameter lookup operations
+
+#### A.3.2 Compound Key Lookup Demo
+**Class:** `dev.mars.apex.demo.lookup.CompoundKeyLookupDemo`
+**YAML:** `lookup/compound-key-lookup.yaml`
+**Purpose:** Multi-field compound key lookup operations
+**Features:**
+- Compound key lookup patterns
+- Multi-parameter lookup operations
+- Complex key construction
+- Advanced lookup strategies
+
+#### A.3.3 Nested Field Lookup Demo
+**Class:** `dev.mars.apex.demo.lookup.NestedFieldLookupDemo`
+**YAML:** `lookup/nested-field-lookup.yaml`
+**Purpose:** Complex nested object lookup patterns
+**Features:**
+- Nested field access patterns
+- Complex object navigation
+- Deep field extraction
+- Hierarchical data lookups
+
+#### A.3.4 External Data Source Reference Demo
+**Class:** `dev.mars.apex.demo.lookup.ExternalDataSourceReferenceDemo`
+**Purpose:** External data source integration patterns
+**Features:**
+- External data source references
+- Clean architecture patterns
+- Infrastructure separation
+- Reusable data source configurations
+
+#### A.3.5 Database Connection Test
+**Class:** `dev.mars.apex.demo.lookup.DatabaseConnectionTest`
+**Purpose:** Database connectivity validation
+**Features:**
+- Database connection testing
+- Connection pool validation
+- Health check patterns
+- Error handling for database issues
+
+#### A.3.6 Simple PostgreSQL Lookup Demo
+**Class:** `dev.mars.apex.demo.lookup.SimplePostgreSQLLookupDemo`
+**YAML:** `lookup/postgresql-simple-lookup.yaml`
+**Purpose:** Basic PostgreSQL database integration
+**Features:**
+- H2 database in PostgreSQL compatibility mode
+- Simple database lookup patterns
+- Real database connection and SQL queries
+- Basic field mapping
+
+#### A.3.7 PostgreSQL Multi-Parameter Lookup
+**Class:** `dev.mars.apex.demo.lookup.PostgreSQLMultiParamLookupDemo`
+**YAML:** `lookup/postgresql-multi-param-lookup.yaml`
+**Purpose:** Advanced multi-parameter database lookups
+**Features:**
+- Multi-parameter database queries
+- Complex SQL operations
+- Parameter binding patterns
+- Advanced field mapping
+
+#### A.3.8 PostgreSQL Simple Database Enrichment
+**Class:** `dev.mars.apex.demo.lookup.PostgreSQLSimpleDatabaseEnrichmentDemo`
+**YAML:** `lookup/postgresql-simple-database-enrichment.yaml`
+**Purpose:** Database enrichment workflows
+**Features:**
+- Database-driven enrichment patterns
+- Data transformation workflows
+- Field mapping and conversion
+- Error handling for database operations
+
+#### A.3.9 JSON File Lookup Demo
+**Class:** `dev.mars.apex.demo.lookup.JsonFileLookupDemo`
+**YAML:** `lookup/json-file-lookup.yaml`
+**Purpose:** JSON file-based lookup operations
+**Features:**
+- JSON file data source integration
+- File-based lookup patterns
+- JSON parsing and navigation
+- File system data source handling
+
+#### A.3.10 XML File Lookup Demo
+**Class:** `dev.mars.apex.demo.lookup.XmlFileLookupDemo`
+**YAML:** `lookup/xml-file-lookup.yaml`
+**Purpose:** XML file-based lookup operations
+**Features:**
+- XML file data source integration
+- XML parsing and XPath navigation
+- File-based reference data
+- XML data transformation patterns
+
+#### A.3.11 Currency Market Mapping Demo
+**Class:** `dev.mars.apex.demo.lookup.CurrencyMarketMappingDemo`
+**YAML:** `lookup/currency-market-mapping.yaml`
+**Purpose:** Financial market data lookup patterns
+**Features:**
+- Currency and market data lookups
+- Financial reference data integration
+- Market-specific lookup patterns
+- Currency conversion workflows
+
+#### A.3.12 Customer Profile Enrichment Demo
+**Class:** `dev.mars.apex.demo.lookup.CustomerProfileEnrichmentDemo`
+**YAML:** `lookup/customer-profile-enrichment.yaml`
+**Purpose:** Customer data enrichment workflows
+**Features:**
+- Customer profile lookup and enrichment
+- Multi-source customer data integration
+- Profile completion workflows
+- Customer segmentation patterns
+
+#### A.3.13 Settlement Instruction Enrichment Demo
+**Class:** `dev.mars.apex.demo.lookup.SettlementInstructionEnrichmentDemo`
+**YAML:** `lookup/settlement-instruction-enrichment.yaml`
+**Purpose:** Settlement instruction lookup patterns
+**Features:**
+- Settlement instruction lookups
+- Financial settlement workflows
+- Multi-currency settlement patterns
+- Regulatory compliance integration
+
+#### A.3.14 Shared DataSource Demo
+**Class:** `dev.mars.apex.demo.lookup.SharedDataSourceDemo`
+**YAML:** `lookup/shared-datasource-demo.yaml`
+**Purpose:** Shared data source configuration patterns
+**Features:**
+- Shared data source configurations
+- Resource optimization patterns
+- Connection pooling demonstrations
+- Multi-demo data source sharing
+
+### Running Lookup Demos
+
+#### Interactive Mode
+```bash
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.LookupRunner
+```
+
+#### Direct Execution
+```bash
+# Run specific demo
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.LookupRunner simple
+
+# Run all lookup demos
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.LookupRunner all
+```
+
+---
+
+## A.4 Evaluation Demos (20 Demonstrations)
+
+### Overview
+Evaluation demos showcase APEX's powerful expression and rule evaluation capabilities. These demos demonstrate SpEL expressions, rule chains, scenario-based processing, and advanced evaluation patterns using real APEX services.
+
+### Available Evaluation Demos
+
+#### A.4.1 APEX Rules Engine Demo
+**Class:** `dev.mars.apex.demo.evaluation.ApexRulesEngineDemo`
+**YAML:** `evaluation/apex-rules-engine-demo-config.yaml`
+**Purpose:** Core rules engine functionality demonstration
+**Features:**
+- Basic rules engine operations
+- Rule evaluation patterns
+- Expression processing
+- Core APEX functionality showcase
+
+#### A.4.2 Simplified API Demo
+**Class:** `dev.mars.apex.demo.evaluation.SimplifiedAPIDemo`
+**YAML:** `evaluation/simplified-api-demo-config.yaml`
+**Purpose:** Ultra-simple API for common use cases
+**Features:**
+- One-liner rule evaluations
+- Simple field validations
+- Template-based validation patterns
+- Performance-optimized simple operations
+
+#### A.4.3 Layered API Demo
+**Class:** `dev.mars.apex.demo.evaluation.LayeredAPIDemo`
+**YAML:** `evaluation/layered-api-demo-config.yaml`
+**Purpose:** Layered API architecture demonstration
+**Features:**
+- Multi-layer API design patterns
+- Service layer abstractions
+- API composition patterns
+- Enterprise API architecture
+
+#### A.4.4 YAML Configuration Demo
+**Class:** `dev.mars.apex.demo.evaluation.YamlConfigurationDemo`
+**YAML:** `evaluation/yaml-configuration-demo-config.yaml`
+**Purpose:** YAML-driven configuration management
+**Features:**
+- External YAML configuration for business rules
+- Dynamic rule loading and validation
+- Configuration-driven processing workflows
+- Hot-reloading of configuration changes
+
+#### A.4.5 Rule Configuration Demo
+**Class:** `dev.mars.apex.demo.evaluation.RuleConfigurationDemo`
+**YAML:** `evaluation/rule-configuration-demo.yaml`
+**Purpose:** Rule configuration patterns and management
+**Features:**
+- Rule configuration management
+- Rule versioning patterns
+- Configuration validation
+- Rule deployment workflows
+
+#### A.4.6 Rule Configuration Bootstrap Demo
+**Class:** `dev.mars.apex.demo.evaluation.RuleConfigurationBootstrapDemo`
+**YAML:** `evaluation/rule-configuration-bootstrap-demo.yaml`
+**Purpose:** Bootstrap rule configuration patterns
+**Features:**
+- Bootstrap configuration setup
+- Self-contained rule configurations
+- Inline dataset integration
+- Complete workflow demonstrations
+
+#### A.4.7 Scenario-Based Processing Demo
+**Class:** `dev.mars.apex.demo.evaluation.ScenarioBasedProcessingDemo`
+**YAML:** `evaluation/scenario-based-processing-demo.yaml`
+**Purpose:** Scenario-driven processing workflows
+**Features:**
+- Scenario-based rule selection
+- Dynamic processing workflows
+- Context-aware rule evaluation
+- Multi-scenario handling patterns
+
+#### A.4.8 Advanced Features Demo
+**Class:** `dev.mars.apex.demo.evaluation.AdvancedFeaturesDemo`
+**YAML:** `evaluation/apex-advanced-features-demo.yaml`
+**Purpose:** Advanced APEX functionality showcase
+**Features:**
+- Advanced SpEL expressions
+- Complex rule patterns
+- Performance optimization techniques
+- Enterprise-grade features
+
+#### A.4.9 Bootstrap Comprehensive Demo
+**Class:** `dev.mars.apex.demo.evaluation.BootstrapComprehensiveDemo`
+**Purpose:** Comprehensive bootstrap demonstration
+**Features:**
+- Complete bootstrap workflow
+- Multi-component integration
+- End-to-end processing
+- Production-ready patterns
+
+#### A.4.10 Compliance Service Demo
+**Class:** `dev.mars.apex.demo.evaluation.ComplianceServiceDemo`
+**YAML:** `evaluation/compliance-service-demo.yaml`
+**Purpose:** Compliance and regulatory processing
+**Features:**
+- Regulatory compliance rules
+- Audit trail generation
+- Compliance reporting workflows
+- Risk assessment patterns
+
+#### A.4.11 Dynamic Method Execution Demo
+**Class:** `dev.mars.apex.demo.evaluation.DynamicMethodExecutionDemo`
+**YAML:** `evaluation/dynamic-method-execution-demo.yaml`
+**Purpose:** Dynamic method execution patterns
+**Features:**
+- Dynamic method invocation
+- Runtime method resolution
+- Flexible execution patterns
+- Method chaining capabilities
+
+#### A.4.12 Fluent Rule Builder Demo
+**Class:** `dev.mars.apex.demo.evaluation.FluentRuleBuilderDemo`
+**YAML:** `evaluation/fluent-rule-builder-demo.yaml`
+**Purpose:** Fluent API rule building patterns
+**Features:**
+- Fluent rule builder API
+- Programmatic rule construction
+- Builder pattern implementation
+- Type-safe rule building
+
+#### A.4.13 Performance and Exception Demo
+**Class:** `dev.mars.apex.demo.evaluation.PerformanceAndExceptionDemo`
+**YAML:** `evaluation/performance-and-exception-demo.yaml`
+**Purpose:** Performance optimization and exception handling
+**Features:**
+- Performance monitoring and optimization
+- Exception handling patterns
+- Error recovery strategies
+- Performance benchmarking
+
+#### A.4.14 Post-Trade Processing Service Demo
+**Class:** `dev.mars.apex.demo.evaluation.PostTradeProcessingServiceDemo`
+**YAML:** `evaluation/post-trade-processing-service-demo.yaml`
+**Purpose:** Post-trade processing workflows
+**Features:**
+- Post-trade processing patterns
+- Settlement workflows
+- Trade lifecycle management
+- Regulatory reporting integration
+
+#### A.4.15 Pricing Service Demo
+**Class:** `dev.mars.apex.demo.evaluation.PricingServiceDemo`
+**YAML:** `evaluation/pricing-service-demo.yaml`
+**Purpose:** Financial pricing service patterns
+**Features:**
+- Pricing calculation workflows
+- Market data integration
+- Pricing model implementations
+- Real-time pricing updates
+
+#### A.4.16 Risk Management Service Demo
+**Class:** `dev.mars.apex.demo.evaluation.RiskManagementServiceDemo`
+**YAML:** `evaluation/risk-management-service-demo.yaml`
+**Purpose:** Risk management and assessment
+**Features:**
+- Risk calculation workflows
+- Risk limit monitoring
+- Portfolio risk assessment
+- Regulatory risk reporting
+
+#### A.4.17 Rule Definition Service Demo
+**Class:** `dev.mars.apex.demo.evaluation.RuleDefinitionServiceDemo`
+**YAML:** `evaluation/rule-definition-service-demo.yaml`
+**Purpose:** Rule definition and management service
+**Features:**
+- Rule definition management
+- Rule versioning and deployment
+- Rule validation and testing
+- Rule lifecycle management
+
+#### A.4.18 Trade Record Matcher Demo
+**Class:** `dev.mars.apex.demo.evaluation.TradeRecordMatcherDemo`
+**YAML:** `evaluation/trade-record-matcher-demo.yaml`
+**Purpose:** Trade matching and reconciliation
+**Features:**
+- Trade record matching algorithms
+- Reconciliation workflows
+- Exception handling for unmatched trades
+- Matching rule configuration
+
+#### A.4.19 Rules Demo
+**Class:** `dev.mars.apex.demo.evaluation.RulesDemo`
+**Purpose:** General rules processing demonstration
+**Features:**
+- General rule processing patterns
+- Rule execution workflows
+- Rule result handling
+- Multi-rule coordination
+
+#### A.4.20 Scenario Processing Demo
+**Class:** `dev.mars.apex.demo.evaluation.ScenarioProcessingDemo`
+**Purpose:** Advanced scenario processing patterns
+**Features:**
+- Complex scenario handling
+- Multi-path processing
+- Conditional scenario execution
+- Scenario result aggregation
+
+### Running Evaluation Demos
+
+#### Interactive Mode
+```bash
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.EvaluationRunner
+```
+
+#### Direct Execution
+```bash
+# Run specific demo
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.EvaluationRunner simplified
+
+# Run all evaluation demos
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.EvaluationRunner all
+```
+
+---
+
+## A.5 Infrastructure Demos (4 Demonstrations)
+
+### Overview
+Infrastructure demos showcase APEX's configuration and setup patterns. These demos demonstrate data providers, configuration management, enterprise setup patterns, and infrastructure bootstrapping using real APEX services.
+
+### Available Infrastructure Demos
+
+#### A.5.1 Demo Data Bootstrap
+**Class:** `dev.mars.apex.demo.infrastructure.DemoDataBootstrap`
+**YAML:** `infrastructure/demo-data-provider.yaml`
+**Purpose:** Complete infrastructure setup for data management
+**Features:**
+- PostgreSQL database setup and configuration
+- In-memory fallback mode for development
+- Database schema creation and population
+- Sample data generation and loading
+- Infrastructure health monitoring
+
+#### A.5.2 Demo Data Provider
+**Class:** `dev.mars.apex.demo.infrastructure.DemoDataProvider`
+**YAML:** `infrastructure/demo-data-sources.yaml`
+**Purpose:** Data provider infrastructure patterns
+**Features:**
+- Multi-source data provider setup
+- Data source abstraction patterns
+- Provider configuration management
+- Data source health monitoring
+- Fallback and resilience patterns
+
+#### A.5.3 Financial Static Data Provider
+**Class:** `dev.mars.apex.demo.infrastructure.FinancialStaticDataProvider`
+**YAML:** `infrastructure/financial-static-data-provider.yaml`
+**Purpose:** Financial reference data infrastructure
+**Features:**
+- Financial static data management
+- Market data provider setup
+- Reference data caching patterns
+- Financial data validation
+- Regulatory data compliance
+
+#### A.5.4 Production Demo Configuration
+**Class:** `dev.mars.apex.demo.infrastructure.ProductionDemoConfiguration`
+**YAML:** `infrastructure/production-demo-config.yaml`
+**Purpose:** Production-ready configuration patterns
+**Features:**
+- Production configuration management
+- Environment-specific settings
+- Security configuration patterns
+- Performance optimization settings
+- Monitoring and alerting setup
+
+### Running Infrastructure Demos
+
+#### Interactive Mode
+```bash
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.InfrastructureRunner
+```
+
+#### Direct Execution
+```bash
+# Run specific demo
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.InfrastructureRunner bootstrap
+
+# Run all infrastructure demos
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.InfrastructureRunner all
+```
+
+---
+
+## A.6 Utility Demos (3 Demonstrations)
+
+### Overview
+Utility demos showcase APEX's testing and validation utilities. These demos demonstrate YAML validation, dependency analysis, test data generation, and development utilities using real APEX services.
+
+### Available Utility Demos
+
+#### A.6.1 Test Utilities
+**Class:** `dev.mars.apex.demo.util.TestUtilities`
+**YAML:** `util/test-utilities-demo.yaml`
+**Purpose:** Testing and validation utilities
+**Features:**
+- Test data generation utilities
+- Validation testing patterns
+- Test result analysis
+- Performance testing utilities
+- Test automation patterns
+
+#### A.6.2 YAML Dependency Analysis Demo
+**Class:** `dev.mars.apex.demo.util.YamlDependencyAnalysisDemo`
+**YAML:** `util/yaml-dependency-analysis-demo.yaml`
+**Purpose:** YAML configuration dependency analysis
+**Features:**
+- YAML dependency graph analysis
+- Configuration validation
+- Dependency cycle detection
+- Configuration health checks
+- Dependency visualization
+
+#### A.6.3 YAML Validation Demo
+**Class:** `dev.mars.apex.demo.util.YamlValidationDemo`
+**Purpose:** YAML configuration validation utilities
+**Features:**
+- YAML syntax validation
+- Schema validation patterns
+- Configuration compliance checking
+- Validation error reporting
+- Configuration quality metrics
+
+### Running Utility Demos
+
+#### Interactive Mode
+```bash
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.UtilRunner
+```
+
+#### Direct Execution
+```bash
+# Run specific demo
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.UtilRunner test
+
+# Run all utility demos
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.UtilRunner all
+```
+
+---
+
+## A.7 ETL Demo (Pipeline Orchestration)
+
+### Overview
+The ETL demo showcases APEX's new pipeline orchestration capabilities, demonstrating complete YAML-driven ETL workflows with data sinks, error handling, and monitoring.
+
+### Available ETL Demo
+
+#### A.7.1 CSV to H2 Pipeline Demo
+**Class:** `dev.mars.apex.demo.etl.CsvToH2PipelineDemo`
+**YAML:** `etl/csv-to-h2-pipeline.yaml`
+**Purpose:** Complete ETL pipeline orchestration demonstration
+**Features:**
+- **YAML-Driven Orchestration**: Complete pipeline workflow defined in YAML
+- **Step Dependencies**: Automatic dependency resolution and validation
+- **Data Sinks**: Database and file system output capabilities
+- **Error Handling**: Configurable error handling with optional steps
+- **Monitoring**: Built-in step timing and execution tracking
+- **Schema Management**: Automatic database table creation and management
+- **Batch Processing**: Efficient bulk operations with configurable batch sizes
+
+**Architecture:**
+```
+CSV Data → APEX Processing → H2 Database
+    ↓           ↓              ↓
+Sample     Enrichment/     customer_database
+Records    Validation      + audit_log.json
+```
+
+**Key Configuration Elements:**
+- **Data Pipeline Configuration**: Complete pipeline metadata and settings
+- **Step Definitions**: Extract, transform, and load step configurations
+- **Data Sink Configuration**: H2 database with connection pooling
+- **SQL Operations**: INSERT, UPDATE, UPSERT operations
+- **Health Checks**: Connection monitoring and circuit breaker
+- **Audit Logging**: Secondary file-based data sink for audit trail
+
+### Running ETL Demo
+
+#### Direct Execution
+```bash
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.etl.CsvToH2PipelineDemo
+```
+
+#### Maven Execution
+```bash
+cd apex-demo
+mvn exec:java@csv-to-h2-etl
+```
+
+---
+
+## A.8 Demo Configuration Files
+
+### YAML Configuration Structure
+
+The APEX demo suite includes over 100 YAML configuration files organized by category:
+
+#### Validation Configurations
+- `validation/basic-usage-examples-config.yaml` - Basic validation patterns
+- `validation/commodity-swap-validation-bootstrap-demo.yaml` - Commodity swap validation
+- `validation/integrated-validator-demo.yaml` - Multi-entity validation
+- `validation/integrated-trade-validator-complex-demo.yaml` - Complex trade validation
+
+#### Enrichment Configurations
+- `enrichment/data-management-demo-config.yaml` - Core data management
+- `enrichment/comprehensive-financial-settlement-demo-config.yaml` - Settlement workflows
+- `enrichment/custody-auto-repair-demo-config.yaml` - Custody exception handling
+- `enrichment/otc-options-bootstrap-demo.yaml` - Options processing
+
+#### Lookup Configurations
+- `lookup/simple-field-lookup.yaml` - Basic lookup patterns
+- `lookup/postgresql-multi-param-lookup.yaml` - Database lookups
+- `lookup/json-file-lookup.yaml` - File-based lookups
+- `lookup/settlement-instruction-enrichment.yaml` - Settlement lookups
+
+#### Evaluation Configurations
+- `evaluation/apex-rules-engine-demo-config.yaml` - Core rules engine
+- `evaluation/simplified-api-demo-config.yaml` - Simplified API patterns
+- `evaluation/compliance-service-demo.yaml` - Compliance processing
+- `evaluation/risk-management-service-demo.yaml` - Risk management
+
+#### Infrastructure Configurations
+- `infrastructure/demo-data-provider.yaml` - Data provider setup
+- `infrastructure/production-demo-config.yaml` - Production patterns
+- `infrastructure/financial-static-data-provider.yaml` - Financial reference data
+
+#### Utility Configurations
+- `util/test-utilities-demo.yaml` - Testing utilities
+- `util/yaml-dependency-analysis-demo.yaml` - Dependency analysis
+
+### Data Sources and External References
+
+#### Database Configurations
+- `data-sources/products-json-datasource.yaml` - Product data source
+- H2 database configurations with PostgreSQL compatibility mode
+- Connection pooling and health monitoring
+
+#### File-Based Data Sources
+- JSON file data sources for product catalogs
+- XML file data sources for configuration data
+- CSV file processing for batch operations
+
+---
+
+## A.9 Demo Testing and Validation
+
+### Comprehensive Test Coverage
+
+The APEX demo suite includes comprehensive test coverage with automated validation:
+
+#### Test Classes
+- `DemoTestBase.java` - Base class for all demo tests
+- `YamlConfigurationValidationTest.java` - YAML configuration validation
+- `CsvToH2PipelineDemoTest.java` - ETL pipeline testing
+- Various lookup and validation test classes
+
+#### Test Features
+- **Automated YAML Validation**: All configuration files validated
+- **Integration Testing**: Real APEX service integration tests
+- **Performance Testing**: Demo execution performance monitoring
+- **Error Handling Testing**: Exception and error scenario validation
+
+### Demo Data and Resources
+
+#### Sample Data Files
+- `demo-data/json/` - JSON sample data files
+- `demo-data/xml/` - XML sample data files
+- CSV sample data generated dynamically by demos
+
+#### Resource Organization
+- Organized by demo category (validation, enrichment, lookup, etc.)
+- Shared resources for common data patterns
+- Environment-specific configurations
+
+---
+
+## A.10 Advanced Demo Features
+
+### Real APEX Service Integration
+
+All demos use **real APEX services** with no hardcoded simulation:
+
+#### Core Services Used
+- **EnrichmentService**: Real APEX enrichment processor
+- **YamlConfigurationLoader**: Real YAML configuration loading and validation
+- **ExpressionEvaluatorService**: Real SpEL expression evaluation
+- **LookupServiceRegistry**: Real lookup service management
+- **DatabaseLookupService**: Real database lookups with SQL queries
+
+#### Architecture Benefits
+- **Authentic Functionality**: Demonstrates actual APEX capabilities
+- **Production Readiness**: Patterns directly applicable to production
+- **Performance Accuracy**: Real performance characteristics
+- **Error Handling**: Actual error scenarios and handling
+
+### Enterprise Patterns Demonstrated
+
+#### Clean Architecture
+- Separation of infrastructure and business logic
+- External data-source reference patterns
+- Reusable configuration components
+- Environment-specific deployments
+
+#### Performance Optimization
+- Configuration caching strategies
+- Connection pooling patterns
+- Lazy loading implementations
+- Batch processing optimizations
+
+#### Error Handling and Resilience
+- Comprehensive error classification
+- Graceful degradation patterns
+- Retry and circuit breaker implementations
+- Health monitoring and alerting
+
+---
+
+## A.11 Getting Started Guide
+
+### Prerequisites
+
+#### System Requirements
+- Java 11 or higher
+- Maven 3.6 or higher
+- 4GB RAM minimum (8GB recommended)
+- PostgreSQL (optional - H2 fallback available)
+
+#### Build and Setup
+```bash
+# Clone the repository
+git clone <repository-url>
+cd apex-rules-engine
+
+# Build the project
+mvn clean install
+
+# Build demo module
+cd apex-demo
+mvn clean package
+```
+
+### Running Your First Demo
+
+#### Quick Start - Validation Demo
+```bash
+# Run the Quick Start validation demo
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.ValidationRunner quickstart
+```
+
+#### Interactive Demo Selection
+```bash
+# Launch interactive demo selector
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.AllDemosRunner
+```
+
+#### Category-Specific Demos
+```bash
+# Run enrichment demos
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.EnrichmentRunner
+
+# Run lookup demos
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.LookupRunner
+```
+
+### Demo Learning Path
+
+#### Beginner Path
+1. **Quick Start Demo** - Basic APEX introduction
+2. **Simple Field Lookup** - Basic lookup patterns
+3. **Basic Usage Examples** - Fundamental validation patterns
+4. **Data Management Demo** - Core data handling
+
+#### Intermediate Path
+1. **External Data Source Demo** - Database integration
+2. **Batch Processing Demo** - High-volume processing
+3. **Customer Transformer Demo** - Data transformation
+4. **PostgreSQL Lookup Demos** - Database patterns
+
+#### Advanced Path
+1. **Comprehensive Financial Settlement** - Complex workflows
+2. **Custody Auto-Repair Bootstrap** - Exception handling
+3. **OTC Options Bootstrap** - Financial derivatives
+4. **CSV to H2 Pipeline** - ETL orchestration
+
+#### Expert Path
+1. **Advanced Features Demo** - Complex APEX features
+2. **Performance and Exception Demo** - Optimization patterns
+3. **Risk Management Service** - Enterprise risk patterns
+4. **Compliance Service Demo** - Regulatory compliance
+
+---
+
+## A.12 Troubleshooting and Support
+
+### Common Issues
+
+#### Database Connection Issues
+- **PostgreSQL not available**: Demos automatically fall back to H2 in-memory mode
+- **Connection timeouts**: Check database connectivity and firewall settings
+- **Schema issues**: Demos automatically create required schemas
+
+#### Configuration Issues
+- **YAML validation errors**: Use YAML validation demos to check configurations
+- **Missing dependencies**: Ensure all Maven dependencies are resolved
+- **Classpath issues**: Verify jar-with-dependencies is built correctly
+
+#### Performance Issues
+- **Slow demo execution**: Increase JVM heap size with `-Xmx4g`
+- **Memory issues**: Monitor memory usage and adjust batch sizes
+- **Connection pool exhaustion**: Review connection pool configurations
+
+### Getting Help
+
+#### Documentation Resources
+- **APEX Technical Reference**: Complete technical documentation
+- **APEX Pipeline Orchestration Guide**: ETL and pipeline documentation
+- **APEX Financial Services Guide**: Financial domain patterns
+
+#### Demo-Specific Help
+- Each demo includes comprehensive logging and error messages
+- Interactive runners provide help and usage information
+- Configuration files include detailed comments and examples
+
+---
+
+## A.13 Conclusion
+
+The APEX Comprehensive Demos Guide provides complete coverage of APEX's capabilities through 59 real-world demonstrations. These demos showcase:
+
+- **Production-Ready Patterns**: Enterprise-grade implementations
+- **Real APEX Integration**: Authentic service usage without simulation
+- **Comprehensive Coverage**: All major APEX functionality areas
+- **Learning Progression**: Structured path from beginner to expert
+- **Interactive Experience**: Professional demo runners and interfaces
+
+Whether you're new to APEX or an experienced developer, these demos provide the practical examples and patterns needed to build robust, scalable APEX-based applications.
+
+**Start your APEX journey today with the Quick Start Demo!**
+
+```bash
+java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" \
+  dev.mars.apex.demo.runners.ValidationRunner quickstart
+```
+
+---
+
+*End of Appendix A: APEX Comprehensive Demos Guide*

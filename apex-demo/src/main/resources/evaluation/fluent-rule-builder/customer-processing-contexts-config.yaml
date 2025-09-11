@@ -3,7 +3,7 @@
 # Replaces hardcoded Map.of context creation from FluentRuleBuilderExample
 
 metadata:
-  id: "Customer Processing Contexts Configuration"
+  id: "customer-processing-contexts-configuration"
   name: "Customer Processing Contexts Configuration"
   version: "1.0.0"
   description: "Data-driven customer processing contexts configuration for fluent rule builder processing"

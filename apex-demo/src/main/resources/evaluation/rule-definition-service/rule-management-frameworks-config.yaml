@@ -3,7 +3,7 @@
 # Replaces hardcoded rule management logic from RuleDefinitionServiceDemo
 
 metadata:
-  id: "Rule Management Frameworks Configuration"
+  id: "rule-management-frameworks-configuration"
   name: "Rule Management Frameworks Configuration"
   version: "1.0.0"
   description: "Data-driven rule management frameworks configuration for rule definition service"
@@ -24,7 +24,7 @@ data:
       transition-control: "AUTOMATED"
     management-frameworks:
       rule-state-management-framework:
-        framework-id: "RULE_STATE_MANAGEMENT_FRAMEWORK"
+        framework-id: "rule-management-frameworks-configuration"
         framework-name: "Rule State Management Framework"
         framework-description: "Framework for managing rule states and transitions"
         lifecycle-states:
@@ -82,7 +82,7 @@ data:
           - "Track transition approval workflows"
           
       rule-approval-workflow-framework:
-        framework-id: "RULE_APPROVAL_WORKFLOW_FRAMEWORK"
+        framework-id: "rule-management-frameworks-configuration"
         framework-name: "Rule Approval Workflow Framework"
         framework-description: "Framework for managing rule approval workflows"
         approval-workflows:
@@ -154,7 +154,7 @@ data:
       change-tracking: "DETAILED"
     management-frameworks:
       rule-version-control-framework:
-        framework-id: "RULE_VERSION_CONTROL_FRAMEWORK"
+        framework-id: "rule-management-frameworks-configuration"
         framework-name: "Rule Version Control Framework"
         framework-description: "Framework for managing rule versions and changes"
         versioning-strategy:
@@ -203,7 +203,7 @@ data:
           - "Track version lineage and dependencies"
           
       rule-change-impact-framework:
-        framework-id: "RULE_CHANGE_IMPACT_FRAMEWORK"
+        framework-id: "rule-management-frameworks-configuration"
         framework-name: "Rule Change Impact Framework"
         framework-description: "Framework for analyzing rule change impacts"
         impact-analysis-dimensions:
@@ -256,7 +256,7 @@ data:
       rollback-capability: "COMPREHENSIVE"
     management-frameworks:
       rule-deployment-pipeline-framework:
-        framework-id: "RULE_DEPLOYMENT_PIPELINE_FRAMEWORK"
+        framework-id: "rule-management-frameworks-configuration"
         framework-name: "Rule Deployment Pipeline Framework"
         framework-description: "Framework for managing rule deployment pipelines"
         deployment-environments:
@@ -314,7 +314,7 @@ data:
       policy-enforcement: "AUTOMATED"
     management-frameworks:
       rule-compliance-framework:
-        framework-id: "RULE_COMPLIANCE_FRAMEWORK"
+        framework-id: "rule-management-frameworks-configuration"
         framework-name: "Rule Compliance Framework"
         framework-description: "Framework for ensuring rule compliance with policies and regulations"
         compliance-policies:
@@ -364,7 +364,7 @@ data:
     description: "Default rule management framework processing"
     management-frameworks:
       default-framework:
-        framework-id: "DEFAULT_FRAMEWORK"
+        framework-id: "rule-management-frameworks-configuration"
         framework-name: "Default Framework"
         management-rules:
           - rule-name: "default-management"

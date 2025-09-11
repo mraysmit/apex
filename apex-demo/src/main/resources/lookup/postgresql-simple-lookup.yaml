@@ -3,7 +3,7 @@
 # Use Case: Customer profile data source for enrichment lookups
 
 metadata:
-  id: "Self-Contained Database Data Source Demo"
+  id: "self-contained-database-data-source-demo"
   name: "Self-Contained Database Data Source Demo"
   version: "1.0.0"
   description: "Data source configuration for embedded H2 database with connection pooling and caching"
@@ -85,7 +85,7 @@ data-sources:
 
 # Enrichment rules using database lookups
 enrichments:
-  - id: "customer-profile-simple-lookup"
+  - id: "self-contained-database-data-source-demo"
     name: "customer-profile-simple-lookup"
     description: "Simple customer profile lookup using H2 database"
     type: "lookup-enrichment"

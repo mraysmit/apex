@@ -2,7 +2,7 @@
 # Real APEX YAML configuration for commodity swap validation bootstrap processing
 
 metadata:
-  id: "Commodity Swap Validation Bootstrap Demo"
+  id: "commodity-swap-validation-bootstrap-demo"
   name: "Commodity Swap Validation Bootstrap Demo"
   version: "1.0.0"
   description: "APEX-compliant commodity swap validation bootstrap with real enrichment services"
@@ -15,7 +15,7 @@ metadata:
 
 # APEX enrichment processing for commodity swap validation bootstrap
 enrichments:
-  - id: "commodity-swap-validation-summary"
+  - id: "commodity-swap-validation-bootstrap-demo"
     name: "commodity-swap-validation-summary"
     type: "field-enrichment"
     description: "Generate commodity swap validation bootstrap summary"

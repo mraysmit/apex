@@ -1,5 +1,5 @@
 metadata:
-  id: "File Processing Rules Configuration"
+  id: "file-processing-rules-configuration"
   name: "File Processing Rules Configuration"
   version: "1.0.0"
   description: "Comprehensive file processing pipeline using APEX Rules Engine for customer data validation and enrichment"
@@ -101,7 +101,7 @@ metadata:
 # - categories: Tags for rule organization and filtering
 #
 rules:
-  - id: "required-fields-validation"
+  - id: "file-processing-rules-configuration"
     name: "Required Fields Validation"
     condition: "#customerId != null && #firstName != null && #lastName != null && #email != null"
     message: "Customer must have ID, first name, last name, and email"
@@ -109,7 +109,7 @@ rules:
     priority: 1
     categories: ["validation", "required-fields"]
     
-  - id: "age-validation"
+  - id: "file-processing-rules-configuration"
     name: "Age Validation"
     condition: "#age != null && #age >= 18 && #age <= 120"
     message: "Customer age must be between 18 and 120"
@@ -117,7 +117,7 @@ rules:
     priority: 2
     categories: ["validation", "age"]
     
-  - id: "email-format-validation"
+  - id: "file-processing-rules-configuration"
     name: "Email Format Validation"
     condition: "#email != null && #email.contains('@') && #email.contains('.') && #email.length() >= 5"
     message: "Email must be in valid format"
@@ -125,7 +125,7 @@ rules:
     priority: 3
     categories: ["validation", "email"]
     
-  - id: "account-balance-validation"
+  - id: "file-processing-rules-configuration"
     name: "Account Balance Validation"
     condition: "#accountBalance != null && #accountBalance >= 0"
     message: "Account balance must be non-negative"
@@ -133,7 +133,7 @@ rules:
     priority: 4
     categories: ["validation", "financial"]
     
-  - id: "status-validation"
+  - id: "file-processing-rules-configuration"
     name: "Status Validation"
     condition: "#status != null && (#status == 'ACTIVE' || #status == 'PENDING' || #status == 'INACTIVE')"
     message: "Customer status must be ACTIVE, PENDING, or INACTIVE"
@@ -141,7 +141,7 @@ rules:
     priority: 5
     categories: ["validation", "status"]
     
-  - id: "country-validation"
+  - id: "file-processing-rules-configuration"
     name: "Country Validation"
     condition: "#country != null && (#country == 'US' || #country == 'CA' || #country == 'GB' || #country == 'DE' || #country == 'FR')"
     message: "Customer country must be supported (US, CA, GB, DE, FR)"
@@ -149,7 +149,7 @@ rules:
     priority: 6
     categories: ["validation", "geography"]
     
-  - id: "minimum-balance-check"
+  - id: "file-processing-rules-configuration"
     name: "Minimum Balance Check"
     condition: "#accountBalance >= 1000"
     message: "Account balance should be at least $1000 for premium services"
@@ -193,7 +193,7 @@ rules:
 #
 enrichments:
   # Customer Tier Enrichment
-  - id: "customer-tier-enrichment"
+  - id: "file-processing-rules-configuration"
     type: "calculation-enrichment"
     name: "Customer Tier Calculation"
     condition: "#accountBalance != null"
@@ -207,7 +207,7 @@ enrichments:
         required: true
 
   # Discount Rate Enrichment
-  - id: "discount-rate-enrichment"
+  - id: "file-processing-rules-configuration"
     type: "calculation-enrichment"
     name: "Discount Rate Calculation"
     condition: "#age != null && #customerTier != null"
@@ -223,7 +223,7 @@ enrichments:
         required: true
 
   # Country Information Enrichment
-  - id: "country-info-enrichment"
+  - id: "file-processing-rules-configuration"
     type: "lookup-enrichment"
     name: "Country Information Lookup"
     condition: "#country != null"
@@ -283,7 +283,7 @@ enrichments:
         target-field: "primaryLanguage"
 
   # Credit Limit Enrichment
-  - id: "credit-limit-enrichment"
+  - id: "file-processing-rules-configuration"
     type: "calculation-enrichment"
     name: "Credit Limit Calculation"
     condition: "#accountBalance != null && #age != null && #customerTier != null"
@@ -300,7 +300,7 @@ enrichments:
         required: true
 
   # Risk Assessment Enrichment
-  - id: "risk-assessment-enrichment"
+  - id: "file-processing-rules-configuration"
     type: "calculation-enrichment"
     name: "Risk Assessment Calculation"
     condition: "#age != null && #accountBalance != null"
@@ -337,7 +337,7 @@ enrichments:
 # - Ability to skip entire rule categories based on business logic
 #
 ruleGroups:
-  - id: "basic-validation-group"
+  - id: "file-processing-rules-configuration"
     name: "Basic Validation Rules"
     description: "Essential validation rules that must pass"
     operator: "AND"
@@ -347,7 +347,7 @@ ruleGroups:
       - "email-format-validation"
       - "account-balance-validation"
     
-  - id: "business-validation-group"
+  - id: "file-processing-rules-configuration"
     name: "Business Validation Rules"
     description: "Business-specific validation rules"
     operator: "AND"

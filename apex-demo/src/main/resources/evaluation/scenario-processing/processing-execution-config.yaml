@@ -3,7 +3,7 @@
 # Replaces hardcoded processing execution logic from ScenarioBasedProcessingDemo
 
 metadata:
-  id: "Processing Execution Configuration"
+  id: "processing-execution-configuration"
   name: "Processing Execution Configuration"
   version: "1.0.0"
   description: "Data-driven processing execution configuration for scenarios"
@@ -15,15 +15,15 @@ metadata:
 # Processing execution configuration by execution type
 data:
   scenario-processing-execution:
-    execution-id: "EXEC001"
+    execution-id: "processing-execution-configuration"
     execution-type: "scenario-processing-execution"
     description: "Scenario-specific processing pipeline execution"
     execution-patterns:
       otc-options-execution:
-        scenario-id: "otc-options-standard"
+        scenario-id: "processing-execution-configuration"
         execution-name: "OTC Options Processing Execution"
         execution-stages:
-          - stage-id: "validation"
+          - stage-id: "processing-execution-configuration"
             stage-name: "OTC Option Validation"
             stage-description: "Validate OTC option data and business rules"
             execution-steps:
@@ -39,7 +39,7 @@ data:
             stage-timeout: 2000
             retry-attempts: 2
             
-          - stage-id: "enrichment"
+          - stage-id: "processing-execution-configuration"
             stage-name: "Data Enrichment"
             stage-description: "Enrich OTC option with market and reference data"
             execution-steps:
@@ -55,7 +55,7 @@ data:
             stage-timeout: 3000
             retry-attempts: 2
             
-          - stage-id: "risk-assessment"
+          - stage-id: "processing-execution-configuration"
             stage-name: "Risk Assessment"
             stage-description: "Assess risk for OTC option"
             execution-steps:
@@ -71,7 +71,7 @@ data:
             stage-timeout: 2000
             retry-attempts: 1
             
-          - stage-id: "settlement"
+          - stage-id: "processing-execution-configuration"
             stage-name: "Settlement Processing"
             stage-description: "Process OTC option settlement"
             execution-steps:
@@ -90,10 +90,10 @@ data:
           performance-monitoring: true
           
       commodity-swaps-execution:
-        scenario-id: "commodity-swaps-standard"
+        scenario-id: "processing-execution-configuration"
         execution-name: "Commodity Swaps Processing Execution"
         execution-stages:
-          - stage-id: "swap-validation"
+          - stage-id: "processing-execution-configuration"
             stage-name: "Commodity Swap Validation"
             stage-description: "Validate commodity swap data and business rules"
             execution-steps:
@@ -109,7 +109,7 @@ data:
             stage-timeout: 2500
             retry-attempts: 2
             
-          - stage-id: "commodity-enrichment"
+          - stage-id: "processing-execution-configuration"
             stage-name: "Commodity Data Enrichment"
             stage-description: "Enrich commodity swap with reference data"
             execution-steps:
@@ -125,7 +125,7 @@ data:
             stage-timeout: 3500
             retry-attempts: 2
             
-          - stage-id: "pricing-calculation"
+          - stage-id: "processing-execution-configuration"
             stage-name: "Pricing Calculation"
             stage-description: "Calculate commodity swap pricing"
             execution-steps:
@@ -141,7 +141,7 @@ data:
             stage-timeout: 2000
             retry-attempts: 1
             
-          - stage-id: "risk-monitoring"
+          - stage-id: "processing-execution-configuration"
             stage-name: "Risk Monitoring"
             stage-description: "Monitor commodity swap risk"
             execution-steps:
@@ -160,10 +160,10 @@ data:
           performance-monitoring: true
           
       settlement-auto-repair-execution:
-        scenario-id: "settlement-auto-repair"
+        scenario-id: "processing-execution-configuration"
         execution-name: "Settlement Auto-Repair Execution"
         execution-stages:
-          - stage-id: "instruction-validation"
+          - stage-id: "processing-execution-configuration"
             stage-name: "Settlement Instruction Validation"
             stage-description: "Validate settlement instruction data"
             execution-steps:
@@ -179,7 +179,7 @@ data:
             stage-timeout: 1500
             retry-attempts: 2
             
-          - stage-id: "auto-repair-assessment"
+          - stage-id: "processing-execution-configuration"
             stage-name: "Auto-Repair Assessment"
             stage-description: "Assess feasibility of auto-repair"
             execution-steps:
@@ -195,7 +195,7 @@ data:
             stage-timeout: 2500
             retry-attempts: 1
             
-          - stage-id: "standing-instruction-lookup"
+          - stage-id: "processing-execution-configuration"
             stage-name: "Standing Instruction Lookup"
             stage-description: "Lookup and match standing instructions"
             execution-steps:
@@ -211,7 +211,7 @@ data:
             stage-timeout: 2000
             retry-attempts: 2
             
-          - stage-id: "repair-execution"
+          - stage-id: "processing-execution-configuration"
             stage-name: "Repair Execution"
             stage-description: "Execute automated repair"
             execution-steps:
@@ -238,7 +238,7 @@ data:
       result-caching: false
     
   performance-monitoring-execution:
-    execution-id: "EXEC002"
+    execution-id: "processing-execution-configuration"
     execution-type: "performance-monitoring-execution"
     description: "Performance monitoring and metrics collection during execution"
     monitoring-aspects:
@@ -272,7 +272,7 @@ data:
       reporting-enabled: true
     
   result-aggregation-execution:
-    execution-id: "EXEC003"
+    execution-id: "processing-execution-configuration"
     execution-type: "result-aggregation-execution"
     description: "Aggregation and reporting of processing results"
     aggregation-aspects:
@@ -298,7 +298,7 @@ data:
       reporting-format: "JSON"
     
   default:
-    execution-id: "EXEC000"
+    execution-id: "processing-execution-configuration"
     execution-type: "default"
     description: "Default processing execution"
     basic-execution:

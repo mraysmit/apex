@@ -13,17 +13,18 @@
 2. [Document Structure & Metadata](#2-document-structure--metadata)
 3. [Core Syntax Elements](#3-core-syntax-elements)
 4. [Rules Section](#4-rules-section)
-5. [Rule Groups Section](#5-rule-groups-section) **🆕 NEW**
+5. [Rule Groups Section](#5-rule-groups-section) 
 6. [Enrichments Section](#6-enrichments-section)
 7. [Dataset Definitions](#7-dataset-definitions)
-8. [External Data-Source References](#8-external-data-source-references) **🆕 NEW**
-9. [Advanced Features](#9-advanced-features)
-10. [Best Practices](#10-best-practices)
-11. [Common Patterns](#11-common-patterns)
-12. [Examples & Use Cases](#12-examples--use-cases)
-13. [Troubleshooting](#13-troubleshooting)
-14. [Reference](#14-reference)
-15. [Migration & Compatibility](#15-migration--compatibility)
+8. [External Data-Source References](#8-external-data-source-references)
+9. [Pipeline Orchestration](#9-pipeline-orchestration) 
+10. [Advanced Features](#10-advanced-features)
+11. [Best Practices](#11-best-practices)
+12. [Common Patterns](#12-common-patterns)
+13. [Examples & Use Cases](#13-examples--use-cases)
+14. [Troubleshooting](#14-troubleshooting)
+15. [Reference](#15-reference)
+16. [Migration & Compatibility](#16-migration--compatibility)
 
 ---
 
@@ -73,6 +74,9 @@ metadata:
 data-source-refs:  # Optional: External data-source references
   # References to external infrastructure configurations
 
+pipeline:  # Optional: Pipeline orchestration
+  # Complete ETL/data processing workflows
+
 rules:
   # Validation and business rules
 
@@ -102,6 +106,7 @@ Every APEX YAML document must begin with a metadata section:
 
 ```yaml
 metadata:
+  id: "unique-document-identifier"
   name: "Document Name"
   version: "1.0.0"
   description: "Document description"
@@ -109,7 +114,8 @@ metadata:
   author: "author@company.com"
   created-by: "author@company.com"
   created-date: "2024-12-24"
-  domain: "Business Domain"
+  business-domain: "Business Domain"
+  source: "Data Source System"
   tags: ["tag1", "tag2", "tag3"]
 ```
 
@@ -117,6 +123,7 @@ metadata:
 
 | Property | Required | Description | Example |
 |----------|----------|-------------|---------|
+| `id` | Yes | Unique document identifier | "financial-settlement-rules-v1" |
 | `name` | Yes | Human-readable document name | "Financial Settlement Rules" |
 | `version` | Yes | Semantic version number | "1.2.3" |
 | `description` | Yes | Brief description of purpose | "Post-trade settlement enrichment" |
@@ -124,8 +131,29 @@ metadata:
 | `author` | No | Document author | "john.doe@bank.com" |
 | `created-by` | No | Creator identifier | "settlement-team@bank.com" |
 | `created-date` | No | Creation date (ISO format) | "2024-12-24" |
-| `domain` | No | Business domain | "Financial Services" |
+| `business-domain` | No | Business domain for scenarios/bootstrap | "Financial Services" |
+| `source` | No | Data source system (for dataset types) | "Reference Data Service" |
 | `tags` | No | Categorization tags | ["finance", "settlement"] |
+
+### Metadata Validation and Best Practices
+
+#### Required vs Optional Fields
+- **Always Required**: `id`, `name`, `version`, `description`, `type`
+- **Type-Specific Requirements**: See document types table below
+- **Recommended**: `author`, `created-date`, `tags` for better maintainability
+
+#### Consistency Guidelines
+- **Version Format**: Use semantic versioning (e.g., "2.1.0") for all documents
+- **Date Format**: Use ISO format "YYYY-MM-DD" for `created-date`
+- **Email Format**: Use consistent email format for `author` and `created-by`
+- **Tag Format**: Use lowercase, hyphenated tags: `["apex-demo", "trade-validation"]`
+
+#### Validation Notes
+APEX validates metadata at configuration load time and will reject documents with:
+- Missing required fields for the document type
+- Invalid `type` values not in the supported list
+- Malformed version numbers or dates
+- Duplicate `id` values within the same deployment
 
 ### Document-Level Configuration
 
@@ -133,26 +161,45 @@ Additional configuration options:
 
 ```yaml
 metadata:
+  id: "example-configuration"
   name: "Example Configuration"
   version: "1.0.0"
   type: "rule-config"
-  
+
   # Processing configuration
   processing:
     parallel: true
     timeout: 30000  # milliseconds
     retry-count: 3
-    
+
   # Logging configuration
   logging:
     level: "INFO"
     include-context: true
-    
+
   # Performance configuration
   performance:
     cache-enabled: true
     cache-ttl: 3600  # seconds
 ```
+
+### Important Notes on Metadata
+
+#### The `id` Attribute
+The `id` attribute is **critical** for APEX document identification and is used throughout the system for:
+- **Configuration Loading**: APEX services use the `id` to identify and cache configurations
+- **Error Reporting**: Error messages reference the document `id` for troubleshooting
+- **Dependency Resolution**: Other configurations reference documents by their `id`
+- **Audit Trails**: All processing logs include the document `id` for traceability
+
+**Best Practices for `id` Values**:
+- Use descriptive, kebab-case identifiers: `"customer-profile-enrichment-v2"`
+- Include version information when appropriate: `"trade-validation-rules-2024"`
+- Keep them unique across your APEX deployment
+- Avoid spaces and special characters except hyphens and underscores
+
+#### Date Field Standardization
+Use `created-date` with ISO format (`YYYY-MM-DD`) for consistency across all APEX configurations.
 
 ### Document Types
 
@@ -160,14 +207,15 @@ APEX supports several document types, each with specific purposes and validation
 
 | Type | Purpose | Required Fields | Top-level Sections |
 |------|---------|----------------|-------------------|
-| `rule-config` | Business rules and validation logic | `author` | `rules`, `enrichments` |
-| `enrichment` | Data enrichment configurations | `author` | `enrichments` |
-| `dataset` | Reference data and lookup tables | `source` | `data` |
-| `scenario` | End-to-end processing scenarios | `business-domain`, `owner` | `scenario`, `data-types`, `rule-configurations` |
-| `scenario-registry` | Scenario collection management | `created-by` | `scenarios` |
-| `bootstrap` | Demo and initialization configurations | `business-domain`, `created-by` | `bootstrap`, `data-sources` |
-| `rule-chain` | Sequential rule execution definitions | `author` | `rule-chains` |
-| `external-data-config` | External data source configurations | `author` | `dataSources`, `configuration` |
+| `rule-config` | Business rules and validation logic | `id`, `author` | `rules`, `enrichments` |
+| `enrichment` | Data enrichment configurations | `id`, `author` | `enrichments` |
+| `dataset` | Reference data and lookup tables | `id`, `source` | `data` |
+| `scenario` | End-to-end processing scenarios | `id`, `business-domain`, `owner` | `scenario`, `data-types`, `rule-configurations` |
+| `scenario-registry` | Scenario collection management | `id`, `created-by` | `scenarios` |
+| `bootstrap` | Demo and initialization configurations | `id`, `business-domain`, `created-by` | `bootstrap`, `data-sources` |
+| `rule-chain` | Sequential rule execution definitions | `id`, `author` | `rule-chains` |
+| `external-data-config` | External data source configurations | `id`, `author` | `dataSources`, `configuration` |
+| `pipeline` | ETL and data processing pipeline orchestration | `id`, `author` | `pipeline`, `data-sources`, `data-sinks` |
 
 #### External Data Configuration
 
@@ -240,6 +288,104 @@ dataSources:
       type: "api-key"
       keyHeader: "X-API-Key"
       keyValue: "${EXCHANGE_API_KEY}"
+```
+
+#### Pipeline Configuration
+
+Pipeline configuration files define complete ETL (Extract, Transform, Load) workflows that orchestrate data processing from multiple sources to multiple destinations.
+
+**Example: CSV to Database Pipeline**
+```yaml
+metadata:
+  id: "csv-to-h2-pipeline-demo"
+  name: "CSV to H2 ETL Pipeline Demo"
+  version: "1.0.0"
+  description: "Demonstration of CSV data processing with H2 database output"
+  type: "pipeline"
+  author: "APEX Demo Team"
+  tags: ["demo", "etl", "csv", "h2", "pipeline"]
+
+# Pipeline orchestration - defines the complete ETL workflow
+pipeline:
+  name: "customer-etl-pipeline"
+  description: "Extract customer data from CSV, transform, and load into H2 database"
+
+  # Pipeline steps executed in sequence
+  steps:
+    - name: "extract-customers"
+      type: "extract"
+      source: "customer-csv-input"
+      operation: "getAllCustomers"
+      description: "Read all customer records from CSV file"
+
+    - name: "load-to-database"
+      type: "load"
+      sink: "customer-h2-database"
+      operation: "insertCustomer"
+      description: "Insert customer records into H2 database"
+      depends-on: ["extract-customers"]
+
+  # Pipeline execution configuration
+  execution:
+    mode: "sequential"  # or "parallel" for independent steps
+    error-handling: "stop-on-error"  # or "continue-on-error"
+    max-retries: 3
+    retry-delay-ms: 1000
+
+# Input data source configuration
+data-sources:
+  - name: "customer-csv-input"
+    type: "file-system"
+    source-type: "csv"
+    enabled: true
+    description: "Customer CSV file input for ETL processing"
+
+    connection:
+      base-path: "./target/demo/etl/data"
+      file-pattern: "customers.csv"
+      encoding: "UTF-8"
+
+    file-format:
+      type: "csv"
+      has-header-row: true
+      delimiter: ","
+      column-mappings:
+        "customer_id": "id"
+        "customer_name": "customerName"
+        "email_address": "email"
+
+# Output data sink configuration
+data-sinks:
+  - name: "customer-h2-database"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "H2 database for storing processed customer data"
+
+    connection:
+      database: "./target/demo/etl/output/customer_database"
+      username: "sa"
+      password: ""
+      mode: "PostgreSQL"
+
+    operations:
+      insertCustomer: |
+        INSERT INTO customers (
+          customer_id, customer_name, email, processed_at
+        ) VALUES (
+          :id, :customerName, :email, CURRENT_TIMESTAMP
+        )
+
+    schema:
+      auto-create: true
+      table-name: "customers"
+      init-script: |
+        CREATE TABLE IF NOT EXISTS customers (
+          customer_id INTEGER PRIMARY KEY,
+          customer_name VARCHAR(255) NOT NULL,
+          email VARCHAR(255),
+          processed_at TIMESTAMP
+        );
 ```
 
 ---
@@ -1667,7 +1813,316 @@ data-sinks:
 
 ---
 
-## 9. Advanced Features
+## 9. Pipeline Orchestration
+
+### 9.1 Overview
+
+**Pipeline Orchestration** is APEX's approach to YAML-driven data processing workflows. This system embodies the core APEX principle that **all processing logic should be contained in the YAML configuration file**, eliminating hardcoded orchestration in Java code.
+
+#### Key Benefits
+
+- **YAML-Driven Processing**: Complete pipeline workflows defined in YAML
+- **Dependency Management**: Automatic step dependency resolution and validation
+- **Error Handling**: Configurable error handling strategies with optional steps
+- **Data Flow**: Automatic data passing between pipeline steps
+- **Monitoring**: Built-in step timing and execution tracking
+- **Validation**: Pipeline configuration validation with circular dependency detection
+
+#### Core Principle
+
+**Before (Hardcoded Java):**
+```java
+pipelineEngine.execute("getAllCustomers", "customer-csv-input",
+                      "customer-h2-database", "insertCustomer");
+```
+
+**After (YAML-Driven):**
+```java
+pipelineEngine.executePipeline("customer-etl-pipeline");
+```
+
+### 9.2 Pipeline Configuration Structure
+
+#### Basic Pipeline Syntax
+
+```yaml
+pipeline:
+  name: "pipeline-name"
+  description: "Pipeline description"
+
+  steps:
+    - name: "step-name"
+      type: "step-type"
+      # Step-specific configuration
+
+  execution:
+    mode: "sequential"  # or "parallel"
+    error-handling: "stop-on-error"  # or "continue-on-error"
+
+  monitoring:
+    enabled: true
+    log-progress: true
+```
+
+#### Complete Pipeline Example
+
+```yaml
+metadata:
+  name: "CSV to H2 ETL Pipeline Demo"
+  version: "1.0.0"
+  description: "Complete ETL pipeline using APEX orchestration"
+
+# Pipeline orchestration - defines the complete ETL workflow
+pipeline:
+  name: "customer-etl-pipeline"
+  description: "Extract customer data from CSV, transform, and load into H2 database"
+
+  # Pipeline steps executed in sequence
+  steps:
+    - name: "extract-customers"
+      type: "extract"
+      source: "customer-csv-input"
+      operation: "getAllCustomers"
+      description: "Read all customer records from CSV file"
+
+    - name: "load-to-database"
+      type: "load"
+      sink: "customer-h2-database"
+      operation: "insertCustomer"
+      description: "Insert customer records into H2 database"
+      depends-on: ["extract-customers"]
+
+    - name: "audit-logging"
+      type: "audit"
+      sink: "audit-log-file"
+      operation: "writeAuditRecord"
+      description: "Write audit records to JSON file"
+      depends-on: ["load-to-database"]
+      optional: true
+
+  # Pipeline execution configuration
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+    max-retries: 3
+    retry-delay-ms: 1000
+
+  # Pipeline monitoring and metrics
+  monitoring:
+    enabled: true
+    log-progress: true
+    collect-metrics: true
+    alert-on-failure: true
+
+# Data sources and sinks referenced by pipeline steps
+data-sources:
+  - name: "customer-csv-input"
+    type: "file-system"
+    # ... data source configuration
+
+data-sinks:
+  - name: "customer-h2-database"
+    type: "database"
+    # ... database sink configuration
+
+  - name: "audit-log-file"
+    type: "file-system"
+    # ... file sink configuration
+```
+
+### 9.3 Pipeline Steps
+
+#### Step Types
+
+| Type | Purpose | Required Fields | Description |
+|------|---------|----------------|-------------|
+| `extract` | Data extraction | `source`, `operation` | Read data from external sources |
+| `load` | Data loading | `sink`, `operation` | Write data to external sinks |
+| `transform` | Data transformation | `transformation` | Transform data between steps |
+| `audit` | Audit logging | `sink`, `operation` | Write audit records |
+
+#### Extract Steps
+
+Extract steps read data from external data sources:
+
+```yaml
+steps:
+  - name: "extract-customers"
+    type: "extract"
+    source: "customer-csv-input"  # Data source name
+    operation: "getAllCustomers"  # Named query/operation
+    description: "Read customer data from CSV"
+    parameters:
+      limit: 1000
+      offset: 0
+```
+
+#### Load Steps
+
+Load steps write data to external data sinks:
+
+```yaml
+steps:
+  - name: "load-to-database"
+    type: "load"
+    sink: "customer-h2-database"  # Data sink name
+    operation: "insertCustomer"   # Named operation
+    description: "Insert customers into database"
+    depends-on: ["extract-customers"]
+    parameters:
+      batch-size: 100
+      upsert: true
+```
+
+#### Transform Steps
+
+Transform steps modify data between extraction and loading:
+
+```yaml
+steps:
+  - name: "transform-data"
+    type: "transform"
+    description: "Apply business transformations"
+    depends-on: ["extract-customers"]
+    transformations:
+      - name: "add-processing-timestamp"
+        type: "field-addition"
+        field: "processed_at"
+        value: "CURRENT_TIMESTAMP"
+
+      - name: "validate-email"
+        type: "validation"
+        field: "email"
+        rule: "email-format"
+```
+
+#### Audit Steps
+
+Audit steps create audit trails and logging:
+
+```yaml
+steps:
+  - name: "audit-logging"
+    type: "audit"
+    sink: "audit-log-file"
+    operation: "writeAuditRecord"
+    description: "Create audit trail"
+    depends-on: ["load-to-database"]
+    optional: true  # Won't fail pipeline if it fails
+```
+
+### 9.4 Step Dependencies
+
+#### Dependency Declaration
+
+Steps can declare dependencies on other steps:
+
+```yaml
+steps:
+  - name: "step-a"
+    type: "extract"
+    # ... configuration
+
+  - name: "step-b"
+    type: "transform"
+    depends-on: ["step-a"]  # Wait for step-a to complete
+
+  - name: "step-c"
+    type: "load"
+    depends-on: ["step-a", "step-b"]  # Wait for both steps
+```
+
+#### Dependency Validation
+
+APEX automatically validates dependencies:
+
+- **Circular Dependency Detection**: Prevents infinite loops
+- **Missing Dependency Validation**: Ensures all referenced steps exist
+- **Topological Sorting**: Executes steps in correct dependency order
+
+### 9.5 Error Handling
+
+#### Pipeline-Level Error Handling
+
+```yaml
+pipeline:
+  execution:
+    error-handling: "stop-on-error"  # Stop pipeline on any error
+    # OR
+    error-handling: "continue-on-error"  # Continue with remaining steps
+    max-retries: 3
+    retry-delay-ms: 1000
+```
+
+#### Step-Level Error Handling
+
+```yaml
+steps:
+  - name: "optional-step"
+    type: "audit"
+    optional: true  # Pipeline continues if this step fails
+    retry:
+      max-attempts: 3
+      delay-ms: 1000
+      backoff-multiplier: 2.0
+```
+
+### 9.6 Data Flow
+
+#### Automatic Data Passing
+
+Data flows automatically between pipeline steps:
+
+1. **Extract Step** → Stores data in pipeline context
+2. **Transform Step** → Reads from context, transforms, stores result
+3. **Load Step** → Reads transformed data, writes to sink
+4. **Audit Step** → Reads original/transformed data for auditing
+
+#### Data Context
+
+```yaml
+# Data automatically available in pipeline context:
+# - extractedData: Raw data from extract steps
+# - transformedData: Processed data from transform steps
+# - stepResults: Results from each completed step
+```
+
+### 9.7 Monitoring and Metrics
+
+#### Built-in Monitoring
+
+```yaml
+pipeline:
+  monitoring:
+    enabled: true
+    log-progress: true      # Log step start/completion
+    collect-metrics: true   # Collect timing metrics
+    alert-on-failure: true  # Alert on pipeline failures
+```
+
+#### Execution Results
+
+Pipeline execution provides detailed results:
+
+```java
+YamlPipelineExecutionResult result = pipelineEngine.executePipeline("pipeline-name");
+
+// Overall pipeline status
+boolean success = result.isSuccess();
+long duration = result.getDurationMs();
+int totalSteps = result.getTotalSteps();
+
+// Individual step results
+for (PipelineStepResult stepResult : result.getStepResults()) {
+    String stepName = stepResult.getStepName();
+    boolean stepSuccess = stepResult.isSuccess();
+    long stepDuration = stepResult.getDurationMs();
+}
+```
+
+---
+
+## 10. Advanced Features
 
 ### 9.1 Conditional Logic
 

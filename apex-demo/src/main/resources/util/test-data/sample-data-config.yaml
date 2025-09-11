@@ -3,7 +3,7 @@
 # Replaces hardcoded sample data creation from TestUtilities
 
 metadata:
-  id: "Sample Data Configuration"
+  id: "sample-data-configuration"
   name: "Sample Data Configuration"
   version: "1.0.0"
   description: "Data-driven sample data configuration for test utilities"
@@ -15,11 +15,11 @@ metadata:
 # Sample data configuration by data type
 data:
   sample-customers:
-    data-id: "DATA001"
+    data-id: "sample-data-configuration"
     data-type: "sample-customers"
     description: "Sample customer data for testing"
     sample-records:
-      - customer-id: "CUST001"
+      - customer-id: "sample-data-configuration"
         name: "John Smith"
         age: 35
         email: "john.smith@example.com"
@@ -27,7 +27,7 @@ data:
         balance: 50000.0
         customer-type: "premium-customer"
         
-      - customer-id: "CUST002"
+      - customer-id: "sample-data-configuration"
         name: "Jane Doe"
         age: 28
         email: "jane.doe@example.com"
@@ -35,7 +35,7 @@ data:
         balance: 75000.0
         customer-type: "standard-customer"
         
-      - customer-id: "CUST003"
+      - customer-id: "sample-data-configuration"
         name: "Bob Johnson"
         age: 45
         email: "bob.johnson@example.com"
@@ -43,7 +43,7 @@ data:
         balance: 120000.0
         customer-type: "gold-customer"
         
-      - customer-id: "CUST004"
+      - customer-id: "sample-data-configuration"
         name: "Alice Brown"
         age: 32
         email: "alice.brown@example.com"
@@ -51,7 +51,7 @@ data:
         balance: 85000.0
         customer-type: "basic-customer"
         
-      - customer-id: "CUST005"
+      - customer-id: "sample-data-configuration"
         name: "Charlie Wilson"
         age: 17
         email: "charlie.wilson@example.com"
@@ -66,35 +66,35 @@ data:
       - "Balances must be non-negative"
     
   sample-products:
-    data-id: "DATA002"
+    data-id: "sample-data-configuration"
     data-type: "sample-products"
     description: "Sample product data for testing"
     sample-records:
-      - product-id: "PROD001"
+      - product-id: "sample-data-configuration"
         name: "Premium Savings Account"
         price: 1000.00
         category: "SAVINGS"
         product-type: "savings-account"
         
-      - product-id: "PROD002"
+      - product-id: "sample-data-configuration"
         name: "Business Checking Account"
         price: 5000.00
         category: "CHECKING"
         product-type: "checking-account"
         
-      - product-id: "PROD003"
+      - product-id: "sample-data-configuration"
         name: "Investment Portfolio"
         price: 25000.00
         category: "INVESTMENT"
         product-type: "investment-product"
         
-      - product-id: "PROD004"
+      - product-id: "sample-data-configuration"
         name: "Student Loan"
         price: 500.00
         category: "LOAN"
         product-type: "loan-product"
         
-      - product-id: "PROD005"
+      - product-id: "sample-data-configuration"
         name: "Credit Card"
         price: 0.00
         category: "CREDIT"
@@ -106,31 +106,31 @@ data:
       - "Product IDs must be unique"
     
   sample-trades:
-    data-id: "DATA003"
+    data-id: "sample-data-configuration"
     data-type: "sample-trades"
     description: "Sample trade data for testing"
     sample-records:
-      - trade-id: "TRD001"
+      - trade-id: "sample-data-configuration"
         amount: "10000.00"
         type: "EQUITY"
         trade-type: "equity-trade"
         
-      - trade-id: "TRD002"
+      - trade-id: "sample-data-configuration"
         amount: "25000.00"
         type: "BOND"
         trade-type: "bond-trade"
         
-      - trade-id: "TRD003"
+      - trade-id: "sample-data-configuration"
         amount: "5000.00"
         type: "OPTION"
         trade-type: "option-trade"
         
-      - trade-id: "TRD004"
+      - trade-id: "sample-data-configuration"
         amount: "15000.00"
         type: "FUTURE"
         trade-type: "future-trade"
         
-      - trade-id: "TRD005"
+      - trade-id: "sample-data-configuration"
         amount: "50000.00"
         type: "SWAP"
         trade-type: "swap-trade"
@@ -141,35 +141,35 @@ data:
       - "Trade data must be complete"
     
   sample-financial-trades:
-    data-id: "DATA004"
+    data-id: "sample-data-configuration"
     data-type: "sample-financial-trades"
     description: "Sample financial trade data for testing"
     sample-records:
-      - trade-id: "FT001"
+      - trade-id: "sample-data-configuration"
         amount: 15000.00
         currency: "USD"
         counterparty: "GOLDMAN_SACHS"
         trade-type: "financial-trade"
         
-      - trade-id: "FT002"
+      - trade-id: "sample-data-configuration"
         amount: 22000.00
         currency: "EUR"
         counterparty: "JPMORGAN"
         trade-type: "financial-trade"
         
-      - trade-id: "FT003"
+      - trade-id: "sample-data-configuration"
         amount: 8500.00
         currency: "GBP"
         counterparty: "MORGAN_STANLEY"
         trade-type: "financial-trade"
         
-      - trade-id: "FT004"
+      - trade-id: "sample-data-configuration"
         amount: 35000.00
         currency: "USD"
         counterparty: "CITIGROUP"
         trade-type: "financial-trade"
         
-      - trade-id: "FT005"
+      - trade-id: "sample-data-configuration"
         amount: 12000.00
         currency: "JPY"
         counterparty: "BARCLAYS"
@@ -181,41 +181,41 @@ data:
       - "Counterparties must be recognized institutions"
     
   sample-commodity-swaps:
-    data-id: "DATA005"
+    data-id: "sample-data-configuration"
     data-type: "sample-commodity-swaps"
     description: "Sample commodity swap data for testing"
     sample-records:
-      - swap-id: "SWAP001"
+      - swap-id: "sample-data-configuration"
         counterparty: "GOLDMAN_SACHS"
-        client-id: "CLIENT001"
+        client-id: "sample-data-configuration"
         underlying-commodity: "CRUDE_OIL"
         notional-amount: 1000000.00
         swap-type: "commodity-swap"
         
-      - swap-id: "SWAP002"
+      - swap-id: "sample-data-configuration"
         counterparty: "JPMORGAN"
-        client-id: "CLIENT002"
+        client-id: "sample-data-configuration"
         underlying-commodity: "NATURAL_GAS"
         notional-amount: 750000.00
         swap-type: "commodity-swap"
         
-      - swap-id: "SWAP003"
+      - swap-id: "sample-data-configuration"
         counterparty: "MORGAN_STANLEY"
-        client-id: "CLIENT003"
+        client-id: "sample-data-configuration"
         underlying-commodity: "GOLD"
         notional-amount: 500000.00
         swap-type: "commodity-swap"
         
-      - swap-id: "SWAP004"
+      - swap-id: "sample-data-configuration"
         counterparty: "CITIGROUP"
-        client-id: "CLIENT004"
+        client-id: "sample-data-configuration"
         underlying-commodity: "SILVER"
         notional-amount: 300000.00
         swap-type: "commodity-swap"
         
-      - swap-id: "SWAP005"
+      - swap-id: "sample-data-configuration"
         counterparty: "BARCLAYS"
-        client-id: "CLIENT005"
+        client-id: "sample-data-configuration"
         underlying-commodity: "COPPER"
         notional-amount: 400000.00
         swap-type: "commodity-swap"
@@ -227,11 +227,11 @@ data:
       - "Notional amounts must be positive"
     
   default:
-    data-id: "DATA000"
+    data-id: "sample-data-configuration"
     data-type: "default"
     description: "Default sample data"
     sample-records:
-      - record-id: "DEFAULT001"
+      - record-id: "sample-data-configuration"
         name: "Default Record"
         value: "Default Value"
         type: "default"

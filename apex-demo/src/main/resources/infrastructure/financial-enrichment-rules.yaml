@@ -83,7 +83,7 @@
 # ============================================================================
 
 metadata:
-  id: "Financial Enrichment Rules"
+  id: "financial-enrichment-rules"
   name: "Financial Enrichment Rules"
   version: "1.0.0"
   description: "Data enrichment and transformation rules for financial instruments"
@@ -144,7 +144,7 @@ metadata:
 # - Disaster recovery support with cached data persistence
 #
 enrichments:
-  - id: "counterparty-enrichment"
+  - id: "financial-enrichment-rules"
     name: "Counterparty Data Enrichment"
     description: "Enriches trade with counterparty static data"
     type: "lookup-enrichment"
@@ -158,15 +158,15 @@ enrichments:
         type: "inline"
         key-field: "id"
         data:
-          - id: "CP001"
+          - id: "financial-enrichment-rules"
             name: "Goldman Sachs"
             rating: "A+"
             riskWeight: 0.20
-          - id: "CP002"
+          - id: "financial-enrichment-rules"
             name: "JP Morgan"
             rating: "A+"
             riskWeight: 0.18
-          - id: "CP003"
+          - id: "financial-enrichment-rules"
             name: "Deutsche Bank"
             rating: "A"
             riskWeight: 0.25
@@ -185,7 +185,7 @@ enrichments:
         default-value: "UNKNOWN"
     tags: ["counterparty", "static-data", "lookup"]
 
-  - id: "currency-enrichment"
+  - id: "financial-enrichment-rules"
     name: "Currency Data Enrichment"
     description: "Enriches trade with currency static data"
     type: "lookup-enrichment"
@@ -223,7 +223,7 @@ enrichments:
         default-value: true
     tags: ["currency", "static-data", "lookup"]
 
-  - id: "commodity-enrichment"
+  - id: "financial-enrichment-rules"
     name: "Commodity Reference Data Enrichment"
     description: "Enriches commodity swap with reference index data"
     type: "lookup-enrichment"
@@ -267,7 +267,7 @@ enrichments:
         required: false
     tags: ["commodity", "reference-data", "lookup"]
 
-  - id: "fee-calculation"
+  - id: "financial-enrichment-rules"
     name: "Fee Calculation Enrichment"
     description: "Calculates various fees and commissions for trades"
     type: "calculation-enrichment"
@@ -289,7 +289,7 @@ enrichments:
         required: true
     tags: ["fee-calculation", "commission"]
 
-  - id: "risk-metrics-calculation"
+  - id: "financial-enrichment-rules"
     name: "Risk Metrics Calculation"
     description: "Calculates basic risk metrics for the trade"
     type: "calculation-enrichment"
@@ -311,7 +311,7 @@ enrichments:
 
 # Define transformation configurations
 transformations:
-  - id: "trade-standardization"
+  - id: "financial-enrichment-rules"
     name: "TradeB Data Standardization"
     description: "Standardizes trade data formats and values"
     type: "field-transformation"
@@ -336,7 +336,7 @@ transformations:
             expression: "#counterpartyId.trim().toUpperCase()"
     tags: ["standardization", "data-quality"]
 
-  - id: "commodity-swap-enrichment"
+  - id: "financial-enrichment-rules"
     name: "Commodity Swap Specific Enrichment"
     description: "Applies commodity swap specific transformations"
     type: "conditional-transformation"
@@ -370,7 +370,7 @@ transformations:
             value: "SENIOR_MANAGEMENT"
     tags: ["commodity-swap", "conditional-logic"]
 
-  - id: "audit-trail-enrichment"
+  - id: "financial-enrichment-rules"
     name: "Audit Trail Enrichment"
     description: "Adds audit trail information to trades"
     type: "field-transformation"

@@ -3,7 +3,7 @@
 # Replaces hardcoded trade record processing logic from TradeRecordMatcherDemo
 
 metadata:
-  id: "Trade Record Processors Configuration"
+  id: "trade-record-processors-configuration"
   name: "Trade Record Processors Configuration"
   version: "1.0.0"
   description: "Data-driven trade record processors configuration for trade record matcher"
@@ -24,7 +24,7 @@ data:
       multi-format-support: true
     record-processors:
       csv-trade-record-parser:
-        processor-id: "CSV_TRADE_RECORD_PARSER"
+        processor-id: "trade-record-processors-configuration"
         processor-name: "CSV Trade Record Parser"
         processor-description: "Parser for CSV format trade records"
         format-specifications:
@@ -81,7 +81,7 @@ data:
           - "Track field mapping success rates"
           
       xml-trade-record-parser:
-        processor-id: "XML_TRADE_RECORD_PARSER"
+        processor-id: "trade-record-processors-configuration"
         processor-name: "XML Trade Record Parser"
         processor-description: "Parser for XML format trade records"
         format-specifications:
@@ -137,7 +137,7 @@ data:
           - "Track XPath mapping effectiveness"
           
       json-trade-record-parser:
-        processor-id: "JSON_TRADE_RECORD_PARSER"
+        processor-id: "trade-record-processors-configuration"
         processor-name: "JSON Trade Record Parser"
         processor-description: "Parser for JSON format trade records"
         format-specifications:
@@ -206,7 +206,7 @@ data:
       normalization-support: true
     record-processors:
       data-normalization-processor:
-        processor-id: "DATA_NORMALIZATION_PROCESSOR"
+        processor-id: "trade-record-processors-configuration"
         processor-name: "Data Normalization Processor"
         processor-description: "Processor for normalizing trade record data"
         normalization-rules:
@@ -242,7 +242,7 @@ data:
           - "Track normalization rule effectiveness"
           
       field-mapping-processor:
-        processor-id: "FIELD_MAPPING_PROCESSOR"
+        processor-id: "trade-record-processors-configuration"
         processor-name: "Field Mapping Processor"
         processor-description: "Processor for mapping fields between different trade record formats"
         mapping-rules:
@@ -288,7 +288,7 @@ data:
           - "Track mapping rule success rates"
           
       data-enrichment-processor:
-        processor-id: "DATA_ENRICHMENT_PROCESSOR"
+        processor-id: "trade-record-processors-configuration"
         processor-name: "Data Enrichment Processor"
         processor-description: "Processor for enriching trade records with additional data"
         enrichment-rules:
@@ -350,7 +350,7 @@ data:
       multi-destination-support: true
     record-processors:
       standard-format-output-processor:
-        processor-id: "STANDARD_FORMAT_OUTPUT_PROCESSOR"
+        processor-id: "trade-record-processors-configuration"
         processor-name: "Standard Format Output Processor"
         processor-description: "Processor for generating standard format trade record output"
         output-formats:
@@ -400,7 +400,7 @@ data:
           - "Track delivery success rates"
           
       custom-format-output-processor:
-        processor-id: "CUSTOM_FORMAT_OUTPUT_PROCESSOR"
+        processor-id: "trade-record-processors-configuration"
         processor-name: "Custom Format Output Processor"
         processor-description: "Processor for generating custom format trade record output"
         custom-formats:
@@ -449,7 +449,7 @@ data:
     description: "Default trade record processor processing"
     record-processors:
       default-processor:
-        processor-id: "DEFAULT_PROCESSOR"
+        processor-id: "trade-record-processors-configuration"
         processor-name: "Default Processor"
         parsing-rules:
           - rule-name: "default-processing"

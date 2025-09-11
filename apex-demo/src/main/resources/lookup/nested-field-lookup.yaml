@@ -3,7 +3,7 @@
 # Use Case: Country-specific settlement information lookup using nested counterparty data
 
 metadata:
-  id: "Nested Field Reference Lookup Demo"
+  id: "nested-field-reference-lookup-demo"
   name: "Nested Field Reference Lookup Demo"
   version: "1.0.0"
   description: "Demonstrates nested field navigation '#trade.counterparty.countryCode' for settlement enrichment"
@@ -14,7 +14,7 @@ metadata:
 
 # Define the enrichment rules
 enrichments:
-  - id: "country-settlement-enrichment"
+  - id: "nested-field-reference-lookup-demo"
     name: "Country Settlement Information Lookup"
     description: "Enrich trade settlements with country-specific settlement information using nested field navigation"
     type: "lookup-enrichment"
@@ -187,7 +187,7 @@ enrichments:
 
 # Optional validation rules
 validations:
-  - id: "trade-exists"
+  - id: "nested-field-reference-lookup-demo"
     name: "TradeB Object Validation"
     description: "Ensure trade object exists"
     type: "field-validation"
@@ -200,7 +200,7 @@ validations:
         - type: "not-null"
           message: "TradeB object must not be null"
           
-  - id: "counterparty-exists"
+  - id: "nested-field-reference-lookup-demo"
     name: "Counterparty Object Validation"
     description: "Ensure counterparty object exists within trade"
     type: "field-validation"
@@ -213,7 +213,7 @@ validations:
         - type: "not-null"
           message: "TradeB counterparty must not be null"
           
-  - id: "country-code-format"
+  - id: "nested-field-reference-lookup-demo"
     name: "Country Code Format Validation"
     description: "Ensure country code follows ISO format"
     type: "field-validation"
@@ -227,7 +227,7 @@ validations:
           pattern: "^[A-Z]{2}$"
           message: "Country code must be 2-letter ISO format (e.g., US, GB, DE)"
           
-  - id: "settlement-amount-positive"
+  - id: "nested-field-reference-lookup-demo"
     name: "Settlement Amount Validation"
     description: "Ensure settlement amount is positive"
     type: "field-validation"

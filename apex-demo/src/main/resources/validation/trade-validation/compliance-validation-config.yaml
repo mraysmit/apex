@@ -3,7 +3,7 @@
 # Replaces hardcoded compliance logic from IntegratedTradeValidatorComplexDemo
 
 metadata:
-  id: "Compliance Validation Configuration"
+  id: "compliance-validation-configuration"
   name: "Compliance Validation Configuration"
   version: "1.0.0"
   description: "Data-driven compliance validation configuration for complex trade validation"
@@ -15,7 +15,7 @@ metadata:
 # Compliance validation configuration by compliance type
 data:
   standard-compliance:
-    validation-id: "COMP001"
+    validation-id: "compliance-validation-configuration"
     compliance-type: "standard"
     description: "Standard compliance validation parameters"
     high-risk-countries:
@@ -39,7 +39,7 @@ data:
       - "AML screening must pass"
     
   enhanced-compliance:
-    validation-id: "COMP002"
+    validation-id: "compliance-validation-configuration"
     compliance-type: "enhanced"
     description: "Enhanced compliance validation with extended screening"
     high-risk-countries:
@@ -72,7 +72,7 @@ data:
       - "Adverse media check required"
     
   institutional-compliance:
-    validation-id: "COMP003"
+    validation-id: "compliance-validation-configuration"
     compliance-type: "institutional"
     description: "Institutional compliance validation for large entities"
     high-risk-countries:
@@ -100,7 +100,7 @@ data:
       - "Institutional AML compliance"
     
   default:
-    validation-id: "COMP000"
+    validation-id: "compliance-validation-configuration"
     compliance-type: "default"
     description: "Default compliance validation"
     high-risk-countries:

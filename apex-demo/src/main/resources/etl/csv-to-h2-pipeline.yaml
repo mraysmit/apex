@@ -5,11 +5,67 @@
 # to process CSV customer data and write it to an H2 database.
 
 metadata:
+  id: "csv-to-h2-pipeline-demo"
   name: "CSV to H2 ETL Pipeline Demo"
   version: "1.0.0"
   description: "Demonstration of CSV data processing with H2 database output using APEX data sinks"
+  type: "pipeline-config"
   author: "APEX Demo Team"
   tags: ["demo", "etl", "csv", "h2", "pipeline"]
+
+# Pipeline orchestration - defines the complete ETL workflow
+pipeline:
+  name: "customer-etl-pipeline"
+  description: "Extract customer data from CSV, transform, and load into H2 database"
+
+  # Pipeline steps executed in sequence
+  steps:
+    - name: "extract-customers"
+      type: "extract"
+      source: "customer-csv-input"
+      operation: "getAllCustomers"
+      description: "Read all customer records from CSV file"
+
+    - name: "load-to-database"
+      type: "load"
+      sink: "customer-h2-database"
+      operation: "insertCustomer"
+      description: "Insert customer records into H2 database"
+      depends-on: ["extract-customers"]
+
+    - name: "audit-logging"
+      type: "audit"
+      sink: "audit-log-file"
+      operation: "writeAuditRecord"
+      description: "Write audit records to JSON file"
+      depends-on: ["load-to-database"]
+      optional: true
+
+  # Pipeline execution configuration
+  execution:
+    mode: "sequential"  # or "parallel" for independent steps
+    error-handling: "stop-on-error"  # or "continue-on-error"
+    max-retries: 3
+    retry-delay-ms: 1000
+
+  # Pipeline-level transformations (optional)
+  transformations:
+    - name: "add-processing-timestamp"
+      type: "field-addition"
+      field: "processed_at"
+      value: "CURRENT_TIMESTAMP"
+
+    - name: "validate-email"
+      type: "validation"
+      field: "email"
+      rule: "email-format"
+
+  # Pipeline monitoring and metrics
+  monitoring:
+    enabled: true
+    log-progress: true
+    collect-metrics: true
+    alert-on-failure: true
 
 # Input data source configuration
 data-sources:
@@ -61,7 +117,7 @@ data-sources:
     operations:
       getAllCustomers: "SELECT * FROM csv"
       getActiveCustomers: "SELECT * FROM csv WHERE status = 'ACTIVE'"
-      getCustomerById: "SELECT * FROM csv WHERE id = :id"
+      getCustomerByid: "csv-to-h2-pipeline-demo"
 
     # Parameter names for operations
     parameter-names: ["id", "status"]
@@ -101,18 +157,18 @@ data-sinks:
       # Insert new customer record
       insertCustomer: |
         INSERT INTO customers (
-          customer_id, 
-          customer_name, 
-          email, 
-          status, 
+          customer_id,
+          customer_name,
+          email,
+          status,
           processed_at,
           created_at
         ) VALUES (
-          :id, 
-          :customerName, 
-          :email, 
-          :status, 
-          :processedAt,
+          :id,
+          :customerName,
+          :email,
+          :status,
+          CURRENT_TIMESTAMP,
           CURRENT_TIMESTAMP
         )
       
@@ -251,7 +307,7 @@ data-sinks:
       demo-description: "CSV to H2 ETL Pipeline Demo"
       
     # Parameter names for operations
-    parameter-names: ["id", "customerName", "email", "status", "processedAt"]
+    parameter-names: ["id", "customerName", "email", "status"]
 
 # Additional data sink for audit logging (file-based)
   - name: "audit-log-file"

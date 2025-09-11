@@ -3,7 +3,7 @@
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
 metadata:
-  id: "Layered API Demo Configuration"
+  id: "layered-api-demo-configuration"
   name: "Layered API Demo Configuration"
   version: "2.0.0"
   description: "Real APEX layered API demonstration with Layer 1 simple validation, Layer 2 business rule management, and Layer 3 advanced features"
@@ -14,7 +14,7 @@ metadata:
 
 # Layer 1: Simple Validation Enrichments
 enrichments:
-  - id: "layer1-simple-validation"
+  - id: "layered-api-demo-configuration"
     name: "layer1-simple-validation"
     type: "validation-enrichment"
     description: "Layer 1 simple validation using real APEX processing"
@@ -46,7 +46,7 @@ enrichments:
               api-type: "SIMPLE_VALIDATION"
               performance-tier: "BASIC"
 
-  - id: "layer2-business-rule-management"
+  - id: "layered-api-demo-configuration"
     name: "layer2-business-rule-management"
     type: "business-rule-enrichment"
     description: "Layer 2 business rule management with real APEX services"
@@ -81,7 +81,7 @@ enrichments:
               api-type: "BUSINESS_RULE_MANAGEMENT"
               performance-tier: "INTERMEDIATE"
 
-  - id: "layer3-advanced-features"
+  - id: "layered-api-demo-configuration"
     name: "layer3-advanced-features"
     type: "advanced-enrichment"
     description: "Layer 3 advanced rule engine features with complex processing"

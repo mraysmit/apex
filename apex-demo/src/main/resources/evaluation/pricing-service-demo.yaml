@@ -3,7 +3,7 @@
 # Replaces all hardcoded pricing service logic from PricingServiceDemo (@version 1.0)
 
 metadata:
-  id: "Pricing Service Demo"
+  id: "pricing-service-demo"
   name: "Pricing Service Demo"
   version: "1.0.0"
   description: "APEX-compliant pricing service with real enrichment services"
@@ -28,7 +28,7 @@ external-data-sources:
 
 # APEX enrichment processing for pricing service
 enrichments:
-  - id: "pricing-calculation-models-processing"
+  - id: "pricing-service-demo"
     name: "pricing-calculation-models-processing"
     type: "lookup-enrichment"
     description: "Process pricing calculation models using data-driven configuration"
@@ -37,7 +37,7 @@ enrichments:
     lookup-key: "#data.modelType != null ? #data.modelType : 'default'"
     target-field: "pricingCalculationModelsResult"
 
-  - id: "pricing-rule-engines-processing"
+  - id: "pricing-service-demo"
     name: "pricing-rule-engines-processing"
     type: "lookup-enrichment"
     description: "Process pricing rule engines using data-driven configuration"
@@ -46,7 +46,7 @@ enrichments:
     lookup-key: "#data.engineType != null ? #data.engineType : 'default'"
     target-field: "pricingRuleEnginesResult"
 
-  - id: "pricing-strategy-frameworks-processing"
+  - id: "pricing-service-demo"
     name: "pricing-strategy-frameworks-processing"
     type: "lookup-enrichment"
     description: "Process pricing strategy frameworks using data-driven configuration"
@@ -55,7 +55,7 @@ enrichments:
     lookup-key: "#data.frameworkType != null ? #data.frameworkType : 'default'"
     target-field: "pricingStrategyFrameworksResult"
 
-  - id: "pricing-service-summary"
+  - id: "pricing-service-demo"
     name: "pricing-service-summary"
     type: "expression-enrichment"
     description: "Generate pricing service summary"

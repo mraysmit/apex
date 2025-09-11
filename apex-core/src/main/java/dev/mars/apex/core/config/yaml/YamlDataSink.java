@@ -458,12 +458,83 @@ public class YamlDataSink {
     }
     
     private SchemaConfig convertToSchemaConfig(Map<String, Object> map) {
-        // TODO: Implement conversion logic for SchemaConfig
-        return new SchemaConfig();
+        SchemaConfig config = new SchemaConfig();
+
+        // Basic settings
+        config.setEnabled(getBooleanValue(map, "enabled", true));
+        config.setStrategy(getStringValue(map, "strategy", "validate-only"));
+        config.setSchemaName(getStringValue(map, "schema-name"));
+        config.setTableName(getStringValue(map, "table-name"));
+        config.setCatalogName(getStringValue(map, "catalog-name"));
+
+        // Schema creation settings
+        config.setAutoCreate(getBooleanValue(map, "auto-create", false));
+        config.setAutoUpdate(getBooleanValue(map, "auto-update", false));
+        config.setDropIfExists(getBooleanValue(map, "drop-if-exists", false));
+        config.setInitScript(getStringValue(map, "init-script"));
+
+        // Handle init-scripts as a list
+        @SuppressWarnings("unchecked")
+        List<String> initScripts = (List<String>) map.get("init-scripts");
+        if (initScripts != null) {
+            config.setInitScripts(initScripts);
+        }
+
+        // Data validation settings
+        config.setValidateData(getBooleanValue(map, "validate-data", true));
+        config.setStrictMode(getBooleanValue(map, "strict-mode", false));
+        config.setAllowNulls(getBooleanValue(map, "allow-nulls", true));
+        config.setTruncateStrings(getBooleanValue(map, "truncate-strings", false));
+        config.setMaxStringLength(getIntegerValue(map, "max-string-length", 255));
+
+        return config;
     }
     
     private RetryConfig convertToRetryConfig(Map<String, Object> map) {
         // TODO: Implement conversion logic for RetryConfig
         return new RetryConfig();
+    }
+
+    // Helper methods for type conversion
+
+    private String getStringValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        return value != null ? value.toString() : null;
+    }
+
+    private String getStringValue(Map<String, Object> map, String key, String defaultValue) {
+        String value = getStringValue(map, key);
+        return value != null ? value : defaultValue;
+    }
+
+    private Integer getIntegerValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+        if (value instanceof String) {
+            try {
+                return Integer.parseInt((String) value);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private Integer getIntegerValue(Map<String, Object> map, String key, Integer defaultValue) {
+        Integer value = getIntegerValue(map, key);
+        return value != null ? value : defaultValue;
+    }
+
+    private Boolean getBooleanValue(Map<String, Object> map, String key, Boolean defaultValue) {
+        Object value = map.get(key);
+        if (value instanceof Boolean) {
+            return (Boolean) value;
+        }
+        if (value instanceof String) {
+            return Boolean.parseBoolean((String) value);
+        }
+        return defaultValue;
     }
 }

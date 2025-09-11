@@ -3,7 +3,7 @@
 # Replaces embedded YAML validation rules from CommoditySwapValidationBootstrap
 
 metadata:
-  id: "Validation Rules Configuration"
+  id: "validation-rules-configuration"
   name: "Validation Rules Configuration"
   version: "1.0.0"
   description: "Data-driven validation rules configuration for commodity swap processing"
@@ -24,7 +24,7 @@ data:
       priority: 100
     validation-rules:
       trigger-rule:
-        rule-id: "basic-fields-check"
+        rule-id: "validation-rules-configuration"
         rule-name: "Basic Required Fields Validation"
         condition: "tradeId != null && counterpartyId != null && clientId != null"
         message: "Basic required fields validation"
@@ -33,21 +33,21 @@ data:
         
       conditional-rules:
         on-trigger:
-          - rule-id: "notional-positive"
+          - rule-id: "validation-rules-configuration"
             rule-name: "Notional Amount Positive Validation"
             condition: "notionalAmount != null && notionalAmount > 0"
             message: "Notional amount must be positive"
             description: "Validates notional amount is greater than zero"
             severity: "error"
             
-          - rule-id: "commodity-type-required"
+          - rule-id: "validation-rules-configuration"
             rule-name: "Commodity Type Required Validation"
             condition: "commodityType != null && commodityType.trim().length() > 0"
             message: "Commodity type is required"
             description: "Ensures commodity type is specified"
             severity: "error"
             
-          - rule-id: "trade-date-valid"
+          - rule-id: "validation-rules-configuration"
             rule-name: "Trade Date Validation"
             condition: "tradeDate != null && !tradeDate.isAfter(java.time.LocalDate.now())"
             message: "Trade date must be valid and not in future"
@@ -55,7 +55,7 @@ data:
             severity: "warning"
             
         on-no-trigger:
-          - rule-id: "basic-validation-failure"
+          - rule-id: "validation-rules-configuration"
             rule-name: "Basic Validation Failure"
             condition: "true"
             message: "Basic field validation failed"
@@ -77,7 +77,7 @@ data:
       accumulator-variable: "businessRuleScore"
     validation-rules:
       accumulation-rules:
-        - rule-id: "maturity-eligibility"
+        - rule-id: "validation-rules-configuration"
           rule-name: "Maturity Eligibility Validation"
           condition: "maturityDate != null && maturityDate.isBefore(tradeDate.plusYears(5))"
           weight: 25
@@ -85,7 +85,7 @@ data:
           description: "Validates trade maturity is within acceptable range"
           severity: "warning"
           
-        - rule-id: "currency-consistency"
+        - rule-id: "validation-rules-configuration"
           rule-name: "Currency Consistency Validation"
           condition: "notionalCurrency == paymentCurrency && paymentCurrency == settlementCurrency"
           weight: 20
@@ -93,7 +93,7 @@ data:
           description: "Ensures currency consistency across trade fields"
           severity: "error"
           
-        - rule-id: "counterparty-validation"
+        - rule-id: "validation-rules-configuration"
           rule-name: "Counterparty Validation"
           condition: "counterpartyId != null && counterpartyId.matches('^CP[0-9]{3}$')"
           weight: 15
@@ -101,7 +101,7 @@ data:
           description: "Validates counterparty ID follows CP### format"
           severity: "error"
           
-        - rule-id: "regulatory-compliance"
+        - rule-id: "validation-rules-configuration"
           rule-name: "Regulatory Compliance Validation"
           condition: "regulatoryInfo != null && regulatoryInfo.containsKey('jurisdiction')"
           weight: 30
@@ -109,7 +109,7 @@ data:
           description: "Ensures regulatory compliance information is present"
           severity: "error"
           
-        - rule-id: "client-validation"
+        - rule-id: "validation-rules-configuration"
           rule-name: "Client Validation"
           condition: "clientId != null && clientId.matches('^CL[0-9]{4}$')"
           weight: 10
@@ -131,7 +131,7 @@ data:
       priority: 300
     validation-rules:
       trigger-rule:
-        rule-id: "advanced-eligibility"
+        rule-id: "validation-rules-configuration"
         rule-name: "Advanced Eligibility Validation"
         condition: "tradeId != null && tradeId.matches('^TRS[0-9]{3}$')"
         message: "Trade ID format validation"
@@ -140,28 +140,28 @@ data:
         
       conditional-rules:
         on-trigger:
-          - rule-id: "notional-range-check"
+          - rule-id: "validation-rules-configuration"
             rule-name: "Notional Range Validation"
             condition: "notionalAmount >= 1000000 && notionalAmount <= 100000000"
             message: "Notional must be between $1M and $100M"
             description: "Validates notional amount is within acceptable range"
             severity: "error"
             
-          - rule-id: "regulatory-compliance-advanced"
+          - rule-id: "validation-rules-configuration"
             rule-name: "Advanced Regulatory Compliance"
             condition: "regulatoryInfo != null && regulatoryInfo.containsKey('regime') && regulatoryInfo.get('regime') != null"
             message: "Regulatory regime information required"
             description: "Ensures specific regulatory regime is identified"
             severity: "error"
             
-          - rule-id: "commodity-specification"
+          - rule-id: "validation-rules-configuration"
             rule-name: "Commodity Specification Validation"
             condition: "commoditySpecification != null && commoditySpecification.containsKey('index')"
             message: "Commodity index specification required"
             description: "Ensures commodity index is properly specified"
             severity: "error"
             
-          - rule-id: "risk-assessment"
+          - rule-id: "validation-rules-configuration"
             rule-name: "Risk Assessment Validation"
             condition: "riskMetrics != null && riskMetrics.containsKey('var') && riskMetrics.get('var') != null"
             message: "Risk assessment required for large trades"
@@ -169,7 +169,7 @@ data:
             severity: "warning"
             
         on-no-trigger:
-          - rule-id: "advanced-validation-skip"
+          - rule-id: "validation-rules-configuration"
             rule-name: "Advanced Validation Skipped"
             condition: "true"
             message: "Advanced validation not applicable"
@@ -190,39 +190,39 @@ data:
       priority: 250
     validation-rules:
       energy-commodities:
-        - rule-id: "energy-index-validation"
+        - rule-id: "validation-rules-configuration"
           condition: "commodityType == 'ENERGY' && energyIndex != null && ['WTI', 'BRENT', 'HENRY_HUB'].contains(energyIndex)"
           message: "Valid energy index required"
           description: "Ensures energy commodity has valid index"
           severity: "error"
           
-        - rule-id: "energy-delivery-validation"
+        - rule-id: "validation-rules-configuration"
           condition: "commodityType == 'ENERGY' && deliveryLocation != null"
           message: "Energy delivery location required"
           description: "Ensures delivery location is specified for energy commodities"
           severity: "warning"
           
       metals-commodities:
-        - rule-id: "metals-index-validation"
+        - rule-id: "validation-rules-configuration"
           condition: "commodityType == 'METALS' && metalsIndex != null && ['COMEX_GOLD', 'COMEX_SILVER', 'LME_COPPER'].contains(metalsIndex)"
           message: "Valid metals index required"
           description: "Ensures metals commodity has valid index"
           severity: "error"
           
-        - rule-id: "metals-quality-validation"
+        - rule-id: "validation-rules-configuration"
           condition: "commodityType == 'METALS' && qualitySpecification != null"
           message: "Metals quality specification required"
           description: "Ensures quality specification for metals commodities"
           severity: "warning"
           
       agricultural-commodities:
-        - rule-id: "agricultural-index-validation"
+        - rule-id: "validation-rules-configuration"
           condition: "commodityType == 'AGRICULTURAL' && agriculturalIndex != null && ['CBOT_CORN', 'CBOT_WHEAT', 'CBOT_SOYBEANS'].contains(agriculturalIndex)"
           message: "Valid agricultural index required"
           description: "Ensures agricultural commodity has valid index"
           severity: "error"
           
-        - rule-id: "agricultural-grade-validation"
+        - rule-id: "validation-rules-configuration"
           condition: "commodityType == 'AGRICULTURAL' && gradeSpecification != null"
           message: "Agricultural grade specification required"
           description: "Ensures grade specification for agricultural commodities"
@@ -238,7 +238,7 @@ data:
     description: "Default validation processing"
     validation-rules:
       basic-validation:
-        - rule-id: "default-validation"
+        - rule-id: "validation-rules-configuration"
           condition: "true"
           message: "Default validation applied"
           description: "Basic default validation"

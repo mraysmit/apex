@@ -20,7 +20,7 @@
 # ============================================================================
 
 metadata:
-  id: "Derivatives Validation Rules"
+  id: "derivatives-validation-rules"
   name: "Derivatives Validation Rules"
   version: "1.0.0"
   description: "Comprehensive validation rules for derivatives trading and risk management"
@@ -41,7 +41,7 @@ metadata:
 #
 rules:
   # TradeB Identification Rules
-  - id: "trade-id-format"
+  - id: "derivatives-validation-rules"
     name: "TradeB ID Format Validation"
     condition: "#tradeId != null && #tradeId.matches('^[A-Z]{2}[0-9]{8}$')"
     message: "TradeB ID must follow format: 2 letters followed by 8 digits"
@@ -49,7 +49,7 @@ rules:
     priority: 1
     categories: ["structural", "identification"]
 
-  - id: "unique-trade-reference"
+  - id: "derivatives-validation-rules"
     name: "Unique TradeB Reference"
     condition: "#uniqueTradeReference != null && #uniqueTradeReference.length() >= 10"
     message: "Unique trade reference must be at least 10 characters"
@@ -58,7 +58,7 @@ rules:
     categories: ["structural", "identification"]
 
   # Counterparty Validation Rules
-  - id: "counterparty-lei-required"
+  - id: "derivatives-validation-rules"
     name: "Counterparty LEI Required"
     condition: "#counterpartyLei != null && #counterpartyLei.matches('^[A-Z0-9]{20}$')"
     message: "Counterparty LEI must be 20 alphanumeric characters"
@@ -66,7 +66,7 @@ rules:
     priority: 2
     categories: ["structural", "counterparty", "regulatory"]
 
-  - id: "counterparty-jurisdiction"
+  - id: "derivatives-validation-rules"
     name: "Counterparty Jurisdiction Validation"
     condition: "#counterpartyJurisdiction != null && #counterpartyJurisdiction in {'US', 'EU', 'UK', 'JP', 'CA', 'AU'}"
     message: "Counterparty jurisdiction must be a supported jurisdiction"
@@ -82,7 +82,7 @@ rules:
 # and ensure compliance with trading policies and procedures.
 #
   # Notional Amount Rules
-  - id: "minimum-notional-amount"
+  - id: "derivatives-validation-rules"
     name: "Minimum Notional Amount"
     condition: "#notionalAmount != null && #notionalAmount >= 1000"
     message: "Notional amount must be at least 1,000"
@@ -90,7 +90,7 @@ rules:
     priority: 4
     categories: ["business-logic", "sizing"]
 
-  - id: "maximum-notional-limit"
+  - id: "derivatives-validation-rules"
     name: "Maximum Notional Limit Check"
     condition: "#notionalAmount != null && #notionalAmount <= 100000000"
     message: "Notional amount exceeds maximum limit of 100 million"
@@ -99,7 +99,7 @@ rules:
     categories: ["risk-management", "limits"]
 
   # Maturity and Tenor Rules
-  - id: "maximum-maturity-period"
+  - id: "derivatives-validation-rules"
     name: "Maximum Maturity Period"
     condition: "#maturityDate != null && #tradeDate != null && T(java.time.temporal.ChronoUnit).YEARS.between(#tradeDate, #maturityDate) <= 30"
     message: "Maturity period cannot exceed 30 years"
@@ -107,7 +107,7 @@ rules:
     priority: 2
     categories: ["business-logic", "temporal", "risk-management"]
 
-  - id: "minimum-maturity-period"
+  - id: "derivatives-validation-rules"
     name: "Minimum Maturity Period"
     condition: "#maturityDate != null && #tradeDate != null && T(java.time.temporal.ChronoUnit).DAYS.between(#tradeDate, #maturityDate) >= 1"
     message: "Maturity date must be at least 1 day after trade date"
@@ -123,7 +123,7 @@ rules:
 # comply with risk limits and exposure guidelines.
 #
   # Credit Risk Rules
-  - id: "counterparty-credit-rating"
+  - id: "derivatives-validation-rules"
     name: "Counterparty Credit Rating Check"
     condition: "#counterpartyCreditRating != null && #counterpartyCreditRating in {'AAA', 'AA+', 'AA', 'AA-', 'A+', 'A', 'A-', 'BBB+', 'BBB', 'BBB-'}"
     message: "Counterparty must have investment grade credit rating"
@@ -131,7 +131,7 @@ rules:
     priority: 3
     categories: ["risk-management", "credit-risk"]
 
-  - id: "high-risk-counterparty"
+  - id: "derivatives-validation-rules"
     name: "High Risk Counterparty Check"
     condition: "#counterpartyCreditRating == null || !#counterpartyCreditRating in {'CCC', 'CC', 'C', 'D'}"
     message: "TradeB with high-risk counterparty requires additional approval"
@@ -140,7 +140,7 @@ rules:
     categories: ["risk-management", "credit-risk", "approval"]
 
   # Market Risk Rules
-  - id: "currency-risk-check"
+  - id: "derivatives-validation-rules"
     name: "Currency Risk Assessment"
     condition: "#baseCurrency != null && #quoteCurrency != null && (#baseCurrency == #quoteCurrency || (#baseCurrency in {'USD', 'EUR', 'GBP'} && #quoteCurrency in {'USD', 'EUR', 'GBP'}))"
     message: "Cross-currency trades require additional risk assessment"
@@ -156,7 +156,7 @@ rules:
 # derivatives trading and reporting.
 #
   # Reporting Requirements
-  - id: "regulatory-reporting-required"
+  - id: "derivatives-validation-rules"
     name: "Regulatory Reporting Required"
     condition: "#notionalAmount != null && #notionalAmount >= 50000"
     message: "TradeB requires regulatory reporting due to notional amount threshold"
@@ -164,7 +164,7 @@ rules:
     priority: 5
     categories: ["regulatory", "reporting"]
 
-  - id: "clearing-requirement"
+  - id: "derivatives-validation-rules"
     name: "Central Clearing Requirement"
     condition: "#productType != null && #productType in {'IRS', 'CDS'} && #notionalAmount >= 1000000"
     message: "TradeB may be subject to central clearing requirements"
@@ -173,7 +173,7 @@ rules:
     categories: ["regulatory", "clearing"]
 
   # Documentation Requirements
-  - id: "isda-agreement-required"
+  - id: "derivatives-validation-rules"
     name: "ISDA Agreement Required"
     condition: "#isdaAgreement != null && #isdaAgreement == true"
     message: "Valid ISDA agreement required for OTC derivatives"

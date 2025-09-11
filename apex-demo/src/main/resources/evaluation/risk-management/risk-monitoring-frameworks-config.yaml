@@ -3,7 +3,7 @@
 # Replaces hardcoded risk monitoring logic from RiskManagementService
 
 metadata:
-  id: "Risk Monitoring Frameworks Configuration"
+  id: "risk-monitoring-frameworks-configuration"
   name: "Risk Monitoring Frameworks Configuration"
   version: "1.0.0"
   description: "Data-driven risk monitoring frameworks configuration for risk management service"
@@ -24,7 +24,7 @@ data:
       real-time-capability: true
     monitoring-frameworks:
       total-risk-level-framework:
-        framework-id: "TOTAL_RISK_LEVEL_FRAMEWORK"
+        framework-id: "risk-monitoring-frameworks-configuration"
         framework-name: "Total Risk Level Determination Framework"
         framework-description: "Framework for determining overall risk level"
         risk-thresholds:
@@ -86,7 +86,7 @@ data:
           - "Track threshold breaches"
           
       component-risk-level-framework:
-        framework-id: "COMPONENT_RISK_LEVEL_FRAMEWORK"
+        framework-id: "risk-monitoring-frameworks-configuration"
         framework-name: "Component Risk Level Determination Framework"
         framework-description: "Framework for determining individual risk component levels"
         component-thresholds:
@@ -155,7 +155,7 @@ data:
       alert-capability: true
     monitoring-frameworks:
       breach-detection-framework:
-        framework-id: "BREACH_DETECTION_FRAMEWORK"
+        framework-id: "risk-monitoring-frameworks-configuration"
         framework-name: "Risk Threshold Breach Detection Framework"
         framework-description: "Framework for detecting risk threshold breaches"
         breach-thresholds:
@@ -212,7 +212,7 @@ data:
           - "Track breach response times"
           
       trend-monitoring-framework:
-        framework-id: "TREND_MONITORING_FRAMEWORK"
+        framework-id: "risk-monitoring-frameworks-configuration"
         framework-name: "Risk Trend Monitoring Framework"
         framework-description: "Framework for monitoring risk trends and patterns"
         trend-parameters:
@@ -265,7 +265,7 @@ data:
       correlation-adjustment: true
     monitoring-frameworks:
       total-risk-aggregation-framework:
-        framework-id: "TOTAL_RISK_AGGREGATION_FRAMEWORK"
+        framework-id: "risk-monitoring-frameworks-configuration"
         framework-name: "Total Risk Aggregation Framework"
         framework-description: "Framework for aggregating total risk from components"
         aggregation-weights:
@@ -308,7 +308,7 @@ data:
           - "Track diversification benefits"
           
       portfolio-risk-aggregation-framework:
-        framework-id: "PORTFOLIO_RISK_AGGREGATION_FRAMEWORK"
+        framework-id: "risk-monitoring-frameworks-configuration"
         framework-name: "Portfolio Risk Aggregation Framework"
         framework-description: "Framework for aggregating risk across portfolio positions"
         aggregation-methods:
@@ -355,7 +355,7 @@ data:
       stakeholder-focused: true
     monitoring-frameworks:
       executive-risk-reporting-framework:
-        framework-id: "EXECUTIVE_RISK_REPORTING_FRAMEWORK"
+        framework-id: "risk-monitoring-frameworks-configuration"
         framework-name: "Executive Risk Reporting Framework"
         framework-description: "Framework for executive-level risk reporting"
         reporting-frequency:
@@ -403,7 +403,7 @@ data:
     description: "Default risk monitoring framework processing"
     monitoring-frameworks:
       default-framework:
-        framework-id: "DEFAULT_FRAMEWORK"
+        framework-id: "risk-monitoring-frameworks-configuration"
         framework-name: "Default Framework"
         determination-rules:
           - rule-name: "default-monitoring"

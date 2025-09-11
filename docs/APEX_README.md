@@ -14,6 +14,8 @@ A powerful expression processor for Java applications with comprehensive data so
 - **Enhanced Bootstrap Demos**: 4 complete financial services scenarios with infrastructure setup
 - **Advanced Lookup Patterns**: 4 comprehensive lookup pattern examples with real-world use cases
 - **8 Advanced Feature Demos**: Specialized demonstrations of sophisticated APEX capabilities
+- **Pipeline Orchestration**: YAML-driven data processing workflows with ETL capabilities **🆕 NEW**
+- **Data Sink Architecture**: Comprehensive output capabilities with database and file sinks **🆕 NEW**
 - **Updated YAML Specification**: Modern syntax with enhanced validation and performance features
 - **Complete REST API**: Comprehensive HTTP API with OpenAPI/Swagger documentation
 - **100% Test Coverage**: Complete test coverage with cross-browser UI testing
@@ -29,6 +31,7 @@ graph TB
         C[Dataset Definitions]
         D[Scenario Management]
         E[Configuration Validation]
+        F[Pipeline Orchestration]
     end
 
     subgraph "Rules Engine Core"
@@ -53,6 +56,8 @@ graph TB
         O[External APIs]
         P[Database Lookups]
         Q[Transformation Engine]
+        R[Data Sinks]
+        S[Pipeline Context]
     end
 
     subgraph "Enterprise Features"
@@ -1030,6 +1035,14 @@ Object enrichedTrade = service.enrichObject(config, trade);
 ```
 
 ## Use Cases
+
+### Pipeline Orchestration **🆕 NEW**
+- **ETL Workflows**: Complete Extract-Transform-Load pipelines defined in YAML
+- **Data Processing**: Multi-step data processing with automatic dependency resolution
+- **Audit Trails**: Built-in audit logging and compliance record generation
+- **Error Handling**: Configurable error handling with optional steps and retry strategies
+- **Monitoring**: Real-time pipeline execution monitoring with detailed metrics
+- **YAML-Driven**: All orchestration logic contained in YAML configuration files
 
 ### External Data Source Integration
 - **Database Integration**: Connect to PostgreSQL, MySQL, Oracle, SQL Server for transactional data

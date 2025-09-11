@@ -3,7 +3,7 @@
 # Replaces hardcoded settlement logic from IntegratedTradeValidatorComplexDemo
 
 metadata:
-  id: "Settlement Validation Configuration"
+  id: "settlement-validation-configuration"
   name: "Settlement Validation Configuration"
   version: "1.0.0"
   description: "Data-driven settlement validation configuration for complex trade validation"
@@ -15,7 +15,7 @@ metadata:
 # Settlement validation configuration by settlement type
 data:
   standard-settlement:
-    validation-id: "SETTLE001"
+    validation-id: "settlement-validation-configuration"
     settlement-type: "standard"
     description: "Standard settlement validation parameters"
     allowed-settlement-methods:
@@ -41,7 +41,7 @@ data:
       - "Amount must be within limits"
     
   enhanced-settlement:
-    validation-id: "SETTLE002"
+    validation-id: "settlement-validation-configuration"
     settlement-type: "enhanced"
     description: "Enhanced settlement validation with additional methods"
     allowed-settlement-methods:
@@ -76,7 +76,7 @@ data:
       - "Amount must be within enhanced limits"
     
   institutional-settlement:
-    validation-id: "SETTLE003"
+    validation-id: "settlement-validation-configuration"
     settlement-type: "institutional"
     description: "Institutional settlement validation for large trades"
     allowed-settlement-methods:
@@ -106,7 +106,7 @@ data:
       - "Amount must meet institutional minimums"
     
   default:
-    validation-id: "SETTLE000"
+    validation-id: "settlement-validation-configuration"
     settlement-type: "default"
     description: "Default settlement validation"
     allowed-settlement-methods:

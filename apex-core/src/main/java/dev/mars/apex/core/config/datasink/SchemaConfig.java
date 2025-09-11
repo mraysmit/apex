@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Configuration for schema management in data sinks.
  * 
@@ -81,10 +83,15 @@ public class SchemaConfig {
     private String catalogName;
     
     // Schema creation settings
+    @JsonProperty("auto-create")
     private Boolean autoCreate = false;
+    @JsonProperty("auto-update")
     private Boolean autoUpdate = false;
+    @JsonProperty("drop-if-exists")
     private Boolean dropIfExists = false;
+    @JsonProperty("init-script")
     private String initScript;
+    @JsonProperty("init-scripts")
     private List<String> initScripts;
     
     // Column definitions

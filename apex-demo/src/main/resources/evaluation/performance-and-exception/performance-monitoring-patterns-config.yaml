@@ -3,7 +3,7 @@
 # Replaces hardcoded performance monitoring logic from PerformanceAndExceptionDemo
 
 metadata:
-  id: "Performance Monitoring Patterns Configuration"
+  id: "performance-monitoring-patterns-configuration"
   name: "Performance Monitoring Patterns Configuration"
   version: "1.0.0"
   description: "Data-driven performance monitoring patterns configuration for performance and exception handling processing"
@@ -24,7 +24,7 @@ data:
       aggregation-strategy: "STATISTICAL"
     monitoring-patterns:
       basic-timing-pattern:
-        pattern-id: "BASIC_TIMING_PATTERN"
+        pattern-id: "performance-monitoring-patterns-configuration"
         pattern-name: "Basic Timing Monitoring Pattern"
         pattern-description: "Basic pattern for measuring rule execution time"
         timing-metrics:
@@ -60,7 +60,7 @@ data:
           - "Track performance trends"
           
       advanced-timing-pattern:
-        pattern-id: "ADVANCED_TIMING_PATTERN"
+        pattern-id: "performance-monitoring-patterns-configuration"
         pattern-name: "Advanced Timing Monitoring Pattern"
         pattern-description: "Advanced pattern with detailed timing breakdown"
         timing-metrics:
@@ -91,7 +91,7 @@ data:
           - "Track performance component analysis"
           
       trend-analysis-pattern:
-        pattern-id: "TREND_ANALYSIS_PATTERN"
+        pattern-id: "performance-monitoring-patterns-configuration"
         pattern-name: "Trend Analysis Monitoring Pattern"
         pattern-description: "Pattern for analyzing performance trends over time"
         trend-metrics:
@@ -137,7 +137,7 @@ data:
       tracking-strategy: "HEAP_ANALYSIS"
     monitoring-patterns:
       heap-memory-pattern:
-        pattern-id: "HEAP_MEMORY_PATTERN"
+        pattern-id: "performance-monitoring-patterns-configuration"
         pattern-name: "Heap Memory Monitoring Pattern"
         pattern-description: "Pattern for monitoring heap memory usage"
         memory-metrics:
@@ -165,7 +165,7 @@ data:
           - "Track allocation efficiency"
           
       object-allocation-pattern:
-        pattern-id: "OBJECT_ALLOCATION_PATTERN"
+        pattern-id: "performance-monitoring-patterns-configuration"
         pattern-name: "Object Allocation Monitoring Pattern"
         pattern-description: "Pattern for monitoring object allocation during execution"
         allocation-metrics:
@@ -205,7 +205,7 @@ data:
       analysis-strategy: "CONTENTION_ANALYSIS"
     monitoring-patterns:
       thread-contention-pattern:
-        pattern-id: "THREAD_CONTENTION_PATTERN"
+        pattern-id: "performance-monitoring-patterns-configuration"
         pattern-name: "Thread Contention Analysis Pattern"
         pattern-description: "Pattern for analyzing thread contention during concurrent execution"
         contention-metrics:
@@ -238,7 +238,7 @@ data:
           - "Track scalability metrics"
           
       throughput-analysis-pattern:
-        pattern-id: "THROUGHPUT_ANALYSIS_PATTERN"
+        pattern-id: "performance-monitoring-patterns-configuration"
         pattern-name: "Throughput Analysis Pattern"
         pattern-description: "Pattern for analyzing throughput in concurrent scenarios"
         throughput-metrics:
@@ -281,7 +281,7 @@ data:
       analysis-strategy: "ERROR_PATTERN_ANALYSIS"
     monitoring-patterns:
       exception-frequency-pattern:
-        pattern-id: "EXCEPTION_FREQUENCY_PATTERN"
+        pattern-id: "performance-monitoring-patterns-configuration"
         pattern-name: "Exception Frequency Monitoring Pattern"
         pattern-description: "Pattern for monitoring exception frequency and types"
         exception-metrics:
@@ -309,7 +309,7 @@ data:
           - "Track error impact analysis"
           
       error-recovery-pattern:
-        pattern-id: "ERROR_RECOVERY_PATTERN"
+        pattern-id: "performance-monitoring-patterns-configuration"
         pattern-name: "Error Recovery Performance Pattern"
         pattern-description: "Pattern for monitoring error recovery performance"
         recovery-metrics:
@@ -349,7 +349,7 @@ data:
     description: "Default performance monitoring pattern processing"
     monitoring-patterns:
       default-pattern:
-        pattern-id: "DEFAULT_PATTERN"
+        pattern-id: "performance-monitoring-patterns-configuration"
         pattern-name: "Default Pattern"
         timing-metrics:
           basic-timing: "Basic execution time measurement"

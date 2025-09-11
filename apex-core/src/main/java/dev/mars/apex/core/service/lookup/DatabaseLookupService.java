@@ -71,6 +71,7 @@ public class DatabaseLookupService extends LookupService {
      */
     @Override
     public Object transform(Object key) {
+        LOGGER.info("TRACE: DatabaseLookupService.transform called with key: {}", key);
         if (key == null) {
             LOGGER.debug("Lookup key is null, returning default values");
             return defaultValues.isEmpty() ? null : new HashMap<>(defaultValues);
@@ -81,7 +82,8 @@ public class DatabaseLookupService extends LookupService {
             Map<String, Object> parameters = buildParametersMap(key);
 
             LOGGER.info("Executing database lookup with parameters: {} for query: {}", parameters, query);
-            
+            LOGGER.info("TRACE: DatabaseLookupService calling dataSource.queryForObject - dataSource type: {}", dataSource.getClass().getName());
+
             // Execute database query
             Object result = dataSource.queryForObject(query, parameters);
             

@@ -2,6 +2,7 @@
 # This demonstrates various database configurations including PostgreSQL, MySQL, and H2
 
 metadata:
+  id: "database-data-sources-example"
   name: "Database Data Sources Example"
   version: "1.0.0"
   description: "Example configuration showing different database data source setups"

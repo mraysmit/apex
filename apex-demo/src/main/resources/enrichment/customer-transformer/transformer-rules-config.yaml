@@ -3,7 +3,7 @@
 # Replaces hardcoded transformer rule creation from CustomerTransformerDemo
 
 metadata:
-  id: "Transformer Rules Configuration"
+  id: "transformer-rules-configuration"
   name: "Transformer Rules Configuration"
   version: "1.0.0"
   description: "Data-driven transformer rules configuration for customer transformation processing"

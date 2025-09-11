@@ -3,7 +3,7 @@
 # Replaces embedded enrichment patterns from CommoditySwapValidationBootstrap
 
 metadata:
-  id: "Enrichment Patterns Configuration"
+  id: "enrichment-patterns-configuration"
   name: "Enrichment Patterns Configuration"
   version: "1.0.0"
   description: "Data-driven enrichment patterns configuration for commodity swap processing"

@@ -3,7 +3,7 @@
 # Replaces hardcoded template logic from ApexAdvancedFeaturesDemo
 
 metadata:
-  id: "Template Processing Configuration"
+  id: "template-processing-configuration"
   name: "Template Processing Configuration"
   version: "1.0.0"
   description: "Data-driven template processing configuration for advanced features"
@@ -15,7 +15,7 @@ metadata:
 # Template processing configuration by template type
 data:
   xml-template:
-    template-id: "TMPL001"
+    template-id: "template-processing-configuration"
     template-type: "xml-processing"
     description: "XML template processing with dynamic content generation"
     template-features:
@@ -30,7 +30,7 @@ data:
       encoding: "UTF-8"
     
   json-template:
-    template-id: "TMPL002"
+    template-id: "template-processing-configuration"
     template-type: "json-processing"
     description: "JSON template processing with object manipulation"
     template-features:
@@ -45,7 +45,7 @@ data:
       encoding: "UTF-8"
     
   text-template:
-    template-id: "TMPL003"
+    template-id: "template-processing-configuration"
     template-type: "text-processing"
     description: "Text template processing with variable substitution"
     template-features:
@@ -60,7 +60,7 @@ data:
       encoding: "UTF-8"
     
   html-template:
-    template-id: "TMPL004"
+    template-id: "template-processing-configuration"
     template-type: "html-processing"
     description: "HTML template processing with dynamic content"
     template-features:
@@ -75,7 +75,7 @@ data:
       encoding: "UTF-8"
     
   default:
-    template-id: "TMPL000"
+    template-id: "template-processing-configuration"
     template-type: "default"
     description: "Default template processing"
     template-features:

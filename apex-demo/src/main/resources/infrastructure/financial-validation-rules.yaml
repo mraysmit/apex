@@ -78,7 +78,7 @@
 # ============================================================================
 
 metadata:
-  id: "Financial Validation Rules"
+  id: "financial-validation-rules"
   name: "Financial Validation Rules"
   version: "1.0.0"
   description: "Comprehensive validation rules for financial instruments, particularly OTC Commodity Total Return Swaps"
@@ -169,7 +169,7 @@ categories:
 # Define individual rules
 rules:
   # Basic Field Validation Rules
-  - id: "trade-id-required"
+  - id: "financial-validation-rules"
     name: "TradeB ID Required"
     description: "Validates that trade ID is present and not empty"
     category: "validation"
@@ -179,7 +179,7 @@ rules:
     enabled: true
     tags: ["required-field", "trade-identification"]
 
-  - id: "trade-id-format"
+  - id: "financial-validation-rules"
     name: "TradeB ID Format"
     description: "Validates trade ID format: 3 letters + 3-6 digits"
     category: "validation"
@@ -189,7 +189,7 @@ rules:
     enabled: true
     tags: ["format-validation", "trade-identification"]
 
-  - id: "trade-date-required"
+  - id: "financial-validation-rules"
     name: "TradeB Date Required"
     description: "Validates that trade date is present"
     category: "validation"
@@ -199,7 +199,7 @@ rules:
     enabled: true
     tags: ["required-field", "date-validation"]
 
-  - id: "effective-date-required"
+  - id: "financial-validation-rules"
     name: "Effective Date Required"
     description: "Validates that effective date is present"
     category: "validation"
@@ -209,7 +209,7 @@ rules:
     enabled: true
     tags: ["required-field", "date-validation"]
 
-  - id: "maturity-date-required"
+  - id: "financial-validation-rules"
     name: "Maturity Date Required"
     description: "Validates that maturity date is present"
     category: "validation"
@@ -219,7 +219,7 @@ rules:
     enabled: true
     tags: ["required-field", "date-validation"]
 
-  - id: "date-sequence-valid"
+  - id: "financial-validation-rules"
     name: "Date Sequence Validation"
     description: "Validates that dates are in correct sequence"
     category: "validation"
@@ -230,7 +230,7 @@ rules:
     tags: ["date-validation", "sequence-validation"]
 
   # Business Logic Rules
-  - id: "notional-amount-positive"
+  - id: "financial-validation-rules"
     name: "Notional Amount Positive"
     description: "Validates that notional amount is positive"
     category: "business-logic"
@@ -240,7 +240,7 @@ rules:
     enabled: true
     tags: ["amount-validation", "business-rule"]
 
-  - id: "notional-amount-limit"
+  - id: "financial-validation-rules"
     name: "Notional Amount Limit"
     description: "Validates notional amount against maximum limit"
     category: "business-logic"
@@ -250,7 +250,7 @@ rules:
     enabled: true
     tags: ["amount-validation", "limit-check"]
 
-  - id: "currency-supported"
+  - id: "financial-validation-rules"
     name: "Currency Supported"
     description: "Validates that the currency is supported"
     category: "business-logic"
@@ -261,7 +261,7 @@ rules:
     tags: ["currency-validation", "supported-values"]
 
   # Regulatory Compliance Rules
-  - id: "counterparty-lei-required"
+  - id: "financial-validation-rules"
     name: "Counterparty LEI Required"
     description: "Validates that counterparty LEI is present for regulatory reporting"
     category: "regulatory"
@@ -271,7 +271,7 @@ rules:
     enabled: true
     tags: ["regulatory", "lei", "counterparty"]
 
-  - id: "counterparty-lei-format"
+  - id: "financial-validation-rules"
     name: "Counterparty LEI Format"
     description: "Validates LEI format (20 alphanumeric characters)"
     category: "regulatory"
@@ -282,7 +282,7 @@ rules:
     tags: ["regulatory", "lei", "format-validation"]
 
   # Risk Management Rules
-  - id: "high-risk-counterparty"
+  - id: "financial-validation-rules"
     name: "High Risk Counterparty Check"
     description: "Flags trades with high-risk counterparties"
     category: "risk-management"
@@ -292,7 +292,7 @@ rules:
     enabled: true
     tags: ["risk-assessment", "counterparty-risk"]
 
-  - id: "large-exposure-check"
+  - id: "financial-validation-rules"
     name: "Large Exposure Check"
     description: "Flags large exposures requiring additional oversight"
     category: "risk-management"
@@ -304,7 +304,7 @@ rules:
 
 # Define rule groups for organized execution
 rule-groups:
-  - id: "basic-validation"
+  - id: "financial-validation-rules"
     name: "Basic Field Validation"
     description: "Essential field validation rules that must pass before further processing"
     category: "validation"
@@ -320,7 +320,7 @@ rule-groups:
       - "maturity-date-required"
       - "date-sequence-valid"
 
-  - id: "business-validation"
+  - id: "financial-validation-rules"
     name: "Business Logic Validation"
     description: "Business rules and constraints validation"
     category: "business-logic"
@@ -333,7 +333,7 @@ rule-groups:
       - "notional-amount-limit"
       - "currency-supported"
 
-  - id: "regulatory-compliance"
+  - id: "financial-validation-rules"
     name: "Regulatory Compliance Checks"
     description: "Regulatory and compliance validation rules"
     category: "regulatory"
@@ -345,7 +345,7 @@ rule-groups:
       - "counterparty-lei-required"
       - "counterparty-lei-format"
 
-  - id: "risk-assessment"
+  - id: "financial-validation-rules"
     name: "Risk Assessment Rules"
     description: "Risk management and assessment rules"
     category: "risk-management"
