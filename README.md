@@ -5,8 +5,6 @@
 [![Java](https://img.shields.io/badge/Java-23-orange.svg)](https://openjdk.java.net/projects/jdk/23/)
 [![Maven](https://img.shields.io/badge/Maven-3.8+-blue.svg)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-
-
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Compatible-blue.svg)](https://www.postgresql.org/)
 [![Documentation](https://img.shields.io/badge/Docs-Complete-blue.svg)](docs/)
 [![Demos](https://img.shields.io/badge/Demos-16%2B-orange.svg)](apex-demo/)
@@ -18,7 +16,7 @@
 **Date:** 2025-08-28
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
-A powerful expression processor for Java applications with comprehensive data source integration, **external data-source reference system**, scenario-based configuration management, and enterprise-grade YAML validation.
+A powerful expression processor for Java applications with comprehensive **data validation and enrichment capabilities**, **external data-source reference system**, scenario-based configuration management, and enterprise-grade YAML validation.
 
 ## Quick Start
 
@@ -39,6 +37,7 @@ mvn spring-boot:run
 ### Run Demonstrations
 ```bash
 cd apex-demo
+
 # External Data-Source Reference Demos (APEX 2.1)
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.SimplePostgreSQLLookupDemo"
 mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.examples.PostgreSQLLookupDemo"
@@ -54,6 +53,18 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo
 
 ## Key Features
 
+### Core Capabilities - Data Validation and Enrichment
+- **Data Validation**: Comprehensive rule-based validation with enterprise-grade error reporting
+- **Data Enrichment**: Multi-source data enrichment with YAML datasets and external lookups
+- **YAML Dataset Enrichment**: Embed reference data directly in configuration files
+- **External Data Integration**: Connect to databases, REST APIs, file systems, and caches
+
+### Interactive Playground - Development Environment
+- **4-Panel Web Interface**: Real-time rule development and testing
+- **Built-in Templates**: Financial services patterns and examples
+- **Live Preview**: See validation and enrichment results instantly
+- **Cross-Browser Support**: Comprehensive UI testing with 100% coverage
+
 ### APEX 2.1 - External Data-Source Reference System
 - **Clean Architecture**: Separation of infrastructure and business logic configurations
 - **Configuration Caching**: Automatic caching of external configurations for performance
@@ -61,14 +72,22 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo
 - **Enterprise Scalability**: Environment-specific infrastructure with shared business logic
 - **Enhanced H2 Support**: Custom H2 parameters directly in YAML configuration for performance tuning and debugging
 
-### Core Features
-- **Interactive Playground**: 4-panel web interface for real-time rule development and testing
-- **Scenario-Based Configuration**: Centralized management and routing of data processing pipelines
-- **External Data Integration**: Connect to databases, REST APIs, file systems, and caches
-- **Advanced H2 Database Support**: Custom parameters for performance tuning, debugging, and compatibility modes
-- **YAML Dataset Enrichment**: Embed reference data directly in configuration files
-- **Financial Services Ready**: OTC derivatives validation, regulatory compliance, risk assessment
-- **Enterprise Features**: Connection pooling, health monitoring, caching, circuit breakers
+### Scenario-Based Configuration
+- **Centralized Management**: Single registry manages all processing pipelines
+- **Automatic Routing**: Data type detection and rule selection
+- **Lightweight Configuration**: Clean separation of routing logic and business rules
+- **Dependency Management**: Complete YAML dependency chain analysis
+
+### Financial Services Ready
+- **OTC Derivatives Validation**: Multi-tier validation framework
+- **Regulatory Compliance**: MiFID II, EMIR, Dodd-Frank reporting
+- **Trade Settlement**: Post-trade processing and auto-repair workflows
+- **Risk Assessment**: Credit, market, and operational risk scoring
+
+### Enterprise Features
+- **Connection Pooling**: Production-ready database connection management
+- **Health Monitoring**: Comprehensive system health checks
+- **Caching**: Multi-level caching with circuit breakers
 - **100% Test Coverage**: Comprehensive testing with cross-browser UI support
 
 ## External Data-Source Reference System
@@ -82,68 +101,99 @@ APEX 2.1 introduces a revolutionary **external data-source reference system** th
 # Everything mixed together - infrastructure + business logic
 metadata:
   name: "Legacy Configuration"
+  version: "1.0.0"
+  type: "rule-config"
 
-data-sources:  # Infrastructure mixed with business logic
+data-sources:
   - name: "customer-database"
     type: "database"
     connection:
       url: "jdbc:postgresql://localhost:5432/customers"
       username: "user"
       password: "pass"
+    queries:
+      getCustomer:
+        sql: "SELECT * FROM customers WHERE customer_id = :customerId"
 
-enrichments:  # Business logic
+enrichments:
   - id: "customer-lookup"
     type: "lookup-enrichment"
-    # ... business logic configuration
+    lookup-config:
+      lookup-dataset:
+        type: "database"
+        data-source: "customer-database"
+        query: "getCustomer"
 ```
 
 **Modern Approach (Clean Architecture):**
 ```yaml
 # Business Logic Configuration (Clean and Focused)
 metadata:
+  id: "Modern Configuration"
   name: "Modern Configuration"
   version: "2.1.0"
+  description: "Business logic using external data-source references"
+  type: "rule-config"
+  author: "business.rules.team@company.com"
 
 # External data-source references (infrastructure configuration - reusable)
 data-source-refs:
   - name: "customer-database"
-    source: "data-sources/customer-database.yaml"  # External infrastructure file
+    source: "data-sources/customer-database.yaml"
     enabled: true
+    description: "Customer database for profile enrichment"
 
 # Business logic enrichments (lean and focused)
 enrichments:
   - id: "customer-lookup"
     type: "lookup-enrichment"
     lookup-config:
+      lookup-key: "#customerId"
       lookup-dataset:
-        data-source-ref: "customer-database"  # References external data-source
-        query-ref: "getActiveCustomer"        # Named query from external config
+        type: "database"
+        data-source-ref: "customer-database"
+        query-ref: "getActiveCustomer"
 ```
 
 ```yaml
 # External Infrastructure Configuration (Reusable)
 # File: data-sources/customer-database.yaml
 metadata:
+  id: "Customer Database Configuration"
   name: "Customer Database Configuration"
+  version: "1.0.0"
+  description: "Database connections for customer data"
   type: "external-data-config"
+  author: "data.team@company.com"
+  tags: ["database", "production", "postgresql"]
 
-connection:
-  type: "database"
-  driver: "postgresql"
-  url: "jdbc:postgresql://localhost:5432/customers"
-  username: "${DB_USERNAME}"
-  password: "${DB_PASSWORD}"
-  pool:
-    initial-size: 5
-    max-size: 20
+dataSources:
+  - name: "customer-database"
+    type: "database"
+    sourceType: "postgresql"
+    enabled: true
+    description: "Primary customer database"
 
-queries:
-  getActiveCustomer:
-    sql: "SELECT * FROM customers WHERE customer_id = :customerId AND status = 'ACTIVE'"
-    parameters:
-      - name: "customerId"
-        type: "string"
-        required: true
+    connection:
+      host: "localhost"
+      port: 5432
+      database: "customers"
+      username: "${DB_USERNAME}"
+      password: "${DB_PASSWORD}"
+
+    queries:
+      getActiveCustomer: "SELECT * FROM customers WHERE customer_id = :customerId AND status = 'ACTIVE'"
+
+    cache:
+      enabled: true
+      ttlSeconds: 300
+      maxSize: 1000
+
+configuration:
+  defaultConnectionTimeout: 30000
+  monitoring:
+    enabled: true
+    healthCheckLogging: true
 ```
 
 ### Key Benefits
@@ -241,6 +291,25 @@ graph TB
 1. **Complete Demo Ecosystem** (180 minutes) - All 16 demonstrations
 2. **Documentation Deep Dive** (120-180 minutes) - All 6 guides
 3. **Custom Implementation** (varies) - Build your own configurations
+
+## Demo Categories
+
+### Bootstrap Demonstrations - Complete End-to-End Scenarios
+- **OTC Options Bootstrap Demo** - Multi-source data integration with PostgreSQL
+- **Commodity Swap Bootstrap Demo** - Complex validation workflows
+- **Financial Services Demos** - Regulatory compliance and risk assessment
+
+### Lookup Pattern Examples
+- **Simple PostgreSQL Lookup Demo** - Basic external data-source references
+- **PostgreSQL Lookup Demo** - Advanced multi-table database lookups
+- **External Data Source Working Demo** - Production-ready patterns
+- **Simple Field Lookup Demo** - YAML dataset enrichment
+
+### Advanced Feature Demonstrations
+- **Dynamic Method Execution** - Runtime method invocation
+- **Performance and Exception Handling** - Error handling and metrics
+- **Data Service Management** - Infrastructure management
+- **YAML Configuration Patterns** - Advanced configuration examples
 
 ## Documentation
 
