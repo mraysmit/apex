@@ -1,0 +1,16 @@
+metadata:
+  id: "separate-rule-3-config"
+  name: "Separate Rule 3"
+  version: "1.0.0"
+  description: "Always true rule for testing separate file loading"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+
+rules:
+  - id: "separate-rule-3"
+    name: "Always True Rule 3"
+    condition: "true"
+    message: "Separate Rule 3 passed"
+    severity: "ERROR"
+    priority: 3

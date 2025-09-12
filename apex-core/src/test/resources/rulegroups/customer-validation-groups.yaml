@@ -1,0 +1,19 @@
+metadata:
+  name: "Customer Validation Groups"
+  version: "1.0.0"
+
+# Reference external rule files
+rule-refs:
+  - name: "customer-rules"
+    source: "rulegroups/customer-rules.yaml"
+    enabled: true
+    description: "Customer validation rules"
+
+rule-groups:
+  - id: "customer-validation"
+    name: "Customer Validation Group"
+    description: "Validates customer data"
+    rule-ids:
+      - "age-check"
+      - "email-validation"
+    execution-mode: "all"

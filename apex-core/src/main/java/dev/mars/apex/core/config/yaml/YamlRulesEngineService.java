@@ -4,6 +4,7 @@ import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 /*
@@ -195,20 +196,25 @@ public class YamlRulesEngineService {
      */
     public RulesEngine createRulesEngineFromMultipleFiles(String... filePaths) throws YamlConfigurationException {
         LOGGER.info("Creating rules engine from multiple YAML files: " + String.join(", ", filePaths));
-        
-        RulesEngineConfiguration mergedConfig = new RulesEngineConfiguration();
-        
+
+        // First, load all YAML files without validation and merge them
+        YamlRuleConfiguration mergedYamlConfig = new YamlRuleConfiguration();
+
         for (String filePath : filePaths) {
-            LOGGER.fine("Processing file: " + filePath);
-            YamlRuleConfiguration yamlConfig = configLoader.loadFromFile(filePath);
-            RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
-            
-            // Merge configurations
-            mergeConfigurations(mergedConfig, config);
+            LOGGER.fine("Loading file without validation: " + filePath);
+            YamlRuleConfiguration yamlConfig = configLoader.loadFromFileWithoutValidation(filePath);
+
+            // Merge YAML configurations
+            mergeYamlConfigurations(mergedYamlConfig, yamlConfig);
         }
-        
-        RulesEngine engine = new RulesEngine(mergedConfig);
-        
+
+        // Now process rule references and data source references on the merged configuration
+        configLoader.processReferencesAndValidate(mergedYamlConfig);
+
+        // Create the final rules engine configuration
+        RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(mergedYamlConfig);
+        RulesEngine engine = new RulesEngine(config);
+
         LOGGER.info("Successfully created rules engine from " + filePaths.length + " YAML files");
         return engine;
     }
@@ -279,10 +285,98 @@ public class YamlRulesEngineService {
         // Add all rule groups from source to target
         source.getAllRuleGroups().forEach(target::registerRuleGroup);
         
-        LOGGER.fine("Merged configuration with " + source.getAllRules().size() + 
+        LOGGER.fine("Merged configuration with " + source.getAllRules().size() +
                    " rules and " + source.getAllRuleGroups().size() + " rule groups");
     }
-    
+
+    /**
+     * Merge two YAML rule configurations.
+     *
+     * This method merges all components from the source configuration into the target configuration.
+     */
+    private void mergeYamlConfigurations(YamlRuleConfiguration target, YamlRuleConfiguration source) {
+        // Merge metadata (prefer target if both exist)
+        if (target.getMetadata() == null && source.getMetadata() != null) {
+            target.setMetadata(source.getMetadata());
+        }
+
+        // Merge data sources
+        if (source.getDataSources() != null) {
+            if (target.getDataSources() == null) {
+                target.setDataSources(new ArrayList<>());
+            }
+            target.getDataSources().addAll(source.getDataSources());
+        }
+
+        // Merge data source references
+        if (source.getDataSourceRefs() != null) {
+            if (target.getDataSourceRefs() == null) {
+                target.setDataSourceRefs(new ArrayList<>());
+            }
+            target.getDataSourceRefs().addAll(source.getDataSourceRefs());
+        }
+
+        // Merge rule references
+        if (source.getRuleRefs() != null) {
+            if (target.getRuleRefs() == null) {
+                target.setRuleRefs(new ArrayList<>());
+            }
+            target.getRuleRefs().addAll(source.getRuleRefs());
+        }
+
+        // Merge data sinks
+        if (source.getDataSinks() != null) {
+            if (target.getDataSinks() == null) {
+                target.setDataSinks(new ArrayList<>());
+            }
+            target.getDataSinks().addAll(source.getDataSinks());
+        }
+
+        // Merge categories
+        if (source.getCategories() != null) {
+            if (target.getCategories() == null) {
+                target.setCategories(new ArrayList<>());
+            }
+            target.getCategories().addAll(source.getCategories());
+        }
+
+        // Merge rules
+        if (source.getRules() != null) {
+            if (target.getRules() == null) {
+                target.setRules(new ArrayList<>());
+            }
+            target.getRules().addAll(source.getRules());
+        }
+
+        // Merge rule groups
+        if (source.getRuleGroups() != null) {
+            if (target.getRuleGroups() == null) {
+                target.setRuleGroups(new ArrayList<>());
+            }
+            target.getRuleGroups().addAll(source.getRuleGroups());
+        }
+
+        // Merge enrichments
+        if (source.getEnrichments() != null) {
+            if (target.getEnrichments() == null) {
+                target.setEnrichments(new ArrayList<>());
+            }
+            target.getEnrichments().addAll(source.getEnrichments());
+        }
+
+        // Merge rule chains
+        if (source.getRuleChains() != null) {
+            if (target.getRuleChains() == null) {
+                target.setRuleChains(new ArrayList<>());
+            }
+            target.getRuleChains().addAll(source.getRuleChains());
+        }
+
+        LOGGER.fine("Merged YAML configuration with " +
+                   (source.getRules() != null ? source.getRules().size() : 0) + " rules and " +
+                   (source.getRuleGroups() != null ? source.getRuleGroups().size() : 0) + " rule groups");
+    }
+
     /**
      * Convert RulesEngineConfiguration back to YAML format.
      * This is a simplified conversion for basic export functionality.

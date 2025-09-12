@@ -1,0 +1,17 @@
+metadata:
+  name: "Customer Rules"
+  version: "1.0.0"
+
+rules:
+  - id: "age-check"
+    name: "Age Validation"
+    condition: "#age >= 18"
+    message: "Customer must be 18 or older"
+    severity: "ERROR"
+    priority: 1
+  - id: "email-validation"
+    name: "Email Validation"
+    condition: "#email != null && #email.contains('@')"
+    message: "Valid email required"
+    severity: "ERROR"
+    priority: 2

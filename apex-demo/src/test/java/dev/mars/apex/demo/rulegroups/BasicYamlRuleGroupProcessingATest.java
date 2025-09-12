@@ -41,10 +41,10 @@ import static dev.mars.apex.demo.ColoredTestOutputExtension.*;
 
 /**
  * Basic YAML Rule Group Processing Tests.
- * 
- * Tests fundamental AND/OR logic with hardcoded true/false rules in YAML.
- * This is the simplest possible rule group test focusing purely on group 
- * processing logic rather than rule evaluation complexity.
+ *
+ * Tests fundamental AND/OR logic using separate YAML files for rules and rule groups.
+ * This demonstrates APEX's multi-file loading capability and tests basic group
+ * processing logic with hardcoded true/false rules.
  */
 @ExtendWith(ColoredTestOutputExtension.class)
 @DisplayName("Basic YAML Rule Group Processing Tests")
@@ -68,80 +68,32 @@ public class BasicYamlRuleGroupProcessingATest {
         @Test
         @DisplayName("AND group with all true rules should pass")
         void testAndGroupAllTrue() {
-            logInfo("Testing AND group with all true rules");
-            
-            String yamlContent = """
-                metadata:
-                  name: "AND Group All True Test"
-                  version: "1.0.0"
-                  description: "Test AND group with all true rules"
+            logInfo("Testing AND group with all true rules using separate files");
 
-                rules:
-                  - id: "rule1"
-                    name: "Always True Rule 1"
-                    condition: "true"
-                    message: "Rule 1 passed"
-                    severity: "ERROR"
-                    priority: 1
-                  - id: "rule2"
-                    name: "Always True Rule 2"
-                    condition: "true"
-                    message: "Rule 2 passed"
-                    severity: "ERROR"
-                    priority: 2
-                  - id: "rule3"
-                    name: "Always True Rule 3"
-                    condition: "true"
-                    message: "Rule 3 passed"
-                    severity: "ERROR"
-                    priority: 3
-
-                rule-groups:
-                  - id: "and-all-true"
-                    name: "AND All True Group"
-                    description: "AND group with all true rules"
-                    operator: "AND"
-                    rule-ids:
-                      - "rule1"
-                      - "rule2"
-                      - "rule3"
-                """;
-            
-            YamlRuleConfiguration config;
             try {
-                config = yamlLoader.fromYamlString(yamlContent);
+                // Load using classpath resources for separate files
+                RulesEngine engine = rulesEngineService.createRulesEngineFromClasspath("separate-rules-test/combined-config.yaml");
+
+                RuleGroup ruleGroup = engine.getConfiguration().getRuleGroupById("separate-and-group");
+                assertNotNull(ruleGroup, "Rule group should be found");
+
+                // Execute rule group - uses separate-rule-1 (true) and separate-rule-3 (true), so AND group should pass
+                Map<String, Object> testData = Map.of();
+                RuleResult result = engine.executeRuleGroupsList(List.of(ruleGroup), testData);
+
+                // Validate results
+                assertNotNull(result, "Result should not be null");
+                assertTrue(result.isTriggered(), "AND group with all true rules should pass");
+
+                // Print RuleResult message
+                logInfo("RuleResult message: " + (result.getMessage() != null ? result.getMessage() : "No message"));
+
+                logSuccess("AND group with all true rules executed successfully using separate files - group passed");
+
             } catch (YamlConfigurationException e) {
-                logError("Failed to load YAML configuration: " + e.getMessage());
-                fail("Failed to load YAML configuration: " + e.getMessage());
-                return;
+                logError("Failed to load configuration from separate files: " + e.getMessage());
+                fail("Failed to load configuration from separate files: " + e.getMessage());
             }
-            assertNotNull(config, "Configuration should load successfully");
-
-            // Create RulesEngine and execute the rule group
-            RulesEngine engine;
-            try {
-                engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
-            } catch (YamlConfigurationException e) {
-                logError("Failed to create RulesEngine: " + e.getMessage());
-                fail("Failed to create RulesEngine: " + e.getMessage());
-                return;
-            }
-
-            RuleGroup ruleGroup = engine.getConfiguration().getRuleGroupById("and-all-true");
-            assertNotNull(ruleGroup, "Rule group should be found");
-
-            // Execute rule group - all rules are true, so AND group should pass
-            Map<String, Object> testData = Map.of();
-            RuleResult result = engine.executeRuleGroupsList(List.of(ruleGroup), testData);
-
-            // Validate results
-            assertNotNull(result, "Result should not be null");
-            assertTrue(result.isTriggered(), "AND group with all true rules should pass");
-
-            // Print RuleResult message
-            logInfo("RuleResult message: " + (result.getMessage() != null ? result.getMessage() : "No message"));
-
-            logSuccess("AND group with all true rules executed successfully - group passed");
         }
 
         //=======================================================================================================
@@ -149,76 +101,36 @@ public class BasicYamlRuleGroupProcessingATest {
         @Test
         @DisplayName("AND group with one false rule should fail")
         void testAndGroupOneFalse() {
-            logInfo("Testing AND group with one false rule");
-            
-            String yamlContent = """
-                metadata:
-                  name: "AND Group One False Test"
-                  version: "1.0.0"
+            logInfo("Testing AND group with one false rule using separate files");
 
-                rules:
-                  - id: "rule1"
-                    name: "Always True Rule"
-                    condition: "true"
-                    message: "Rule 1 passed"
-                    severity: "ERROR"
-                  - id: "rule2"
-                    name: "Always False Rule"
-                    condition: "false"
-                    message: "Rule 2 failed"
-                    severity: "ERROR"
-                  - id: "rule3"
-                    name: "Always True Rule"
-                    condition: "true"
-                    message: "Rule 3 passed"
-                    severity: "ERROR"
-
-                rule-groups:
-                  - id: "and-one-false"
-                    name: "AND One False Group"
-                    description: "AND group with one false rule"
-                    operator: "AND"
-                    rule-ids:
-                      - "rule1"
-                      - "rule2"
-                      - "rule3"
-                """;
-            
-            YamlRuleConfiguration config;
             try {
-                config = yamlLoader.fromYamlString(yamlContent);
+                // Load using multi-file approach with separate rules and rule groups files
+                RulesEngine engine = rulesEngineService.createRulesEngineFromMultipleFiles(
+                    "separate-rules-test/rules.yaml",
+                    "separate-rules-test/rule-groups.yaml"
+                );
+
+                RuleGroup ruleGroup = engine.getConfiguration().getRuleGroupById("separate-and-mixed-group");
+                assertNotNull(ruleGroup, "Rule group should be found");
+
+                // Execute rule group - uses separate-rule-1 (true), separate-rule-2 (false), separate-rule-3 (true)
+                // Since it's AND group and one rule is false, the group should fail
+                Map<String, Object> testData = Map.of();
+                RuleResult result = engine.executeRuleGroupsList(List.of(ruleGroup), testData);
+
+                // Validate results
+                assertNotNull(result, "Result should not be null");
+                assertFalse(result.isTriggered(), "AND group with one false rule should fail");
+
+                // Print RuleResult message
+                logInfo("RuleResult message: " + (result.getMessage() != null ? result.getMessage() : "No message"));
+
+                logSuccess("AND group with mixed rules executed successfully using separate files - group failed as expected");
+
             } catch (YamlConfigurationException e) {
-                logError("Failed to load YAML configuration: " + e.getMessage());
-                fail("Failed to load YAML configuration: " + e.getMessage());
-                return;
+                logError("Failed to load configuration from separate files: " + e.getMessage());
+                fail("Failed to load configuration from separate files: " + e.getMessage());
             }
-            assertNotNull(config, "Configuration should load successfully");
-
-            // Create RulesEngine and execute the rule group
-            RulesEngine engine;
-            try {
-                engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
-            } catch (YamlConfigurationException e) {
-                logError("Failed to create RulesEngine: " + e.getMessage());
-                fail("Failed to create RulesEngine: " + e.getMessage());
-                return;
-            }
-
-            RuleGroup ruleGroup = engine.getConfiguration().getRuleGroupById("and-one-false");
-            assertNotNull(ruleGroup, "Rule group should be found");
-
-            // Execute rule group - one rule is false, so AND group should fail
-            Map<String, Object> testData = Map.of();
-            RuleResult result = engine.executeRuleGroupsList(List.of(ruleGroup), testData);
-
-            // Validate results
-            assertNotNull(result, "Result should not be null");
-            assertFalse(result.isTriggered(), "AND group with one false rule should fail");
-
-            // Print RuleResult message
-            logInfo("RuleResult message: " + (result.getMessage() != null ? result.getMessage() : "No message"));
-
-            logSuccess("AND group with mixed rules executed successfully - group failed as expected");
         }
 
         //=======================================================================================================

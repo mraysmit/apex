@@ -1278,13 +1278,103 @@ rule-groups:
 | **Basic Processing** | ✅ Fully implemented | ✅ Fully implemented | **COMPLETE** |
 | **Sequence Control** | ✅ Auto-sequence (1,2,3...) | ✅ Custom `sequence` property | **COMPLETE** |
 | **Enable/Disable** | ✅ All rules enabled | ✅ Individual `enabled` property | **COMPLETE** |
-| **Priority Override** | ✅ Uses rule's priority | ❌ `override-priority` documented only | **FUTURE FEATURE** |
+| **Priority Override** | ✅ Uses rule's priority | ❌ `override-priority` documented only | **PLANNED FEATURE** |
 
 **Key Points:**
 - Both `rule-ids` and `rule-references` are production-ready
 - `sequence` and `enabled` properties work correctly in `rule-references`
 - `override-priority` is documented but not yet implemented in the engine
 - All examples in this documentation have been validated with working tests
+
+#### `override-priority` Implementation Plan
+
+**Use Cases for Priority Override:**
+The `override-priority` feature enables context-sensitive rule behavior where the same rule needs different priorities in different scenarios:
+
+**Simplest Example:**
+```yaml
+metadata:
+  name: "Priority Override Demo"
+  version: "1.0.0"
+
+rules:
+  - id: "data-validation"
+    name: "Data Validation Rule"
+    condition: "#value != null && #value > 0"
+    message: "Data validation passed"
+    severity: "ERROR"
+    priority: 50  # Default medium priority
+
+rule-groups:
+  # Critical processing - validation is highest priority
+  - id: "critical-processing"
+    name: "Critical Data Processing"
+    operator: "AND"
+    rule-references:
+      - rule-id: "data-validation"
+        sequence: 1
+        enabled: true
+        override-priority: 1    # Override to highest priority
+
+  # Batch processing - validation is lower priority
+  - id: "batch-processing"
+    name: "Batch Data Processing"
+    operator: "AND"
+    rule-references:
+      - rule-id: "data-validation"
+        sequence: 1
+        enabled: true
+        override-priority: 100  # Override to lowest priority
+```
+
+**Result**: Same rule, different priorities based on processing context.
+
+- **Regulatory Compliance**: KYC rules have higher priority for high-value transactions
+- **Customer Tiers**: VIP customers get different rule priorities than standard customers
+- **Environment-Specific**: Production vs development environments need different rule priorities
+- **Seasonal Adjustments**: Holiday trading rules with adjusted priorities
+- **Context Sensitivity**: Same validation rule, different importance based on business context
+
+**Example Use Case:**
+```yaml
+rules:
+  - id: "credit-limit-check"
+    name: "Credit Limit Validation"
+    condition: "#transactionAmount <= #creditLimit"
+    message: "Transaction exceeds credit limit"
+    priority: 20  # Standard priority
+
+rule-groups:
+  # VIP customers - more lenient credit checks
+  - id: "vip-processing"
+    name: "VIP Customer Processing"
+    operator: "AND"
+    rule-references:
+      - rule-id: "credit-limit-check"
+        sequence: 3
+        enabled: true
+        override-priority: 80   # Lower priority - allow flexibility
+      - rule-id: "fraud-detection"
+        sequence: 1
+        enabled: true
+        override-priority: 1    # Fraud still top priority
+
+  # Standard customers - strict credit enforcement
+  - id: "standard-processing"
+    name: "Standard Customer Processing"
+    operator: "AND"
+    rule-references:
+      - rule-id: "credit-limit-check"
+        sequence: 1
+        enabled: true
+        override-priority: 1    # HIGHEST priority - strict enforcement
+```
+
+**Implementation Status**: This feature is planned for a future release. The YAML syntax is documented and ready, but the engine implementation is pending.
+
+**📋 Implementation Plan**: See [Override Priority Implementation Plan](OVERRIDE_PRIORITY_IMPLEMENTATION_PLAN.md) for detailed technical specifications, implementation steps, and testing strategy.
+
+**🧪 Test Specifications**: Ready-to-use test cases are available in `OverridePriorityTest.java` (currently disabled) that demonstrate expected behavior and serve as acceptance criteria for the implementation.
 
 ---
 

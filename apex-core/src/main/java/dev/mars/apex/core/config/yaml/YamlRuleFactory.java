@@ -64,7 +64,7 @@ public class YamlRuleFactory {
      * @param yamlConfig The YAML configuration
      * @return A configured RulesEngineConfiguration
      */
-    public RulesEngineConfiguration createRulesEngineConfiguration(YamlRuleConfiguration yamlConfig) {
+    public RulesEngineConfiguration createRulesEngineConfiguration(YamlRuleConfiguration yamlConfig) throws YamlConfigurationException {
         LOGGER.info("Creating RulesEngineConfiguration from YAML configuration using generic architecture");
 
         RulesEngineConfiguration config = new RulesEngineConfiguration();
@@ -120,15 +120,25 @@ public class YamlRuleFactory {
 
         // Process rule groups (legacy support)
         if (yamlConfig.getRuleGroups() != null) {
+            LOGGER.info("Processing " + yamlConfig.getRuleGroups().size() + " rule groups");
             for (YamlRuleGroup yamlGroup : yamlConfig.getRuleGroups()) {
+                LOGGER.info("Processing rule group: " + yamlGroup.getId() + ", enabled: " + yamlGroup.getEnabled());
                 if (yamlGroup.getEnabled() == null || yamlGroup.getEnabled()) {
                     try {
+                        LOGGER.info("Creating rule group: " + yamlGroup.getId());
                         RuleGroup group = createRuleGroup(yamlGroup, config);
                         config.registerRuleGroup(group);
+                        LOGGER.info("Successfully registered rule group: " + yamlGroup.getId());
+                    } catch (YamlConfigurationException e) {
+                        // Re-throw configuration exceptions to fail fast
+                        LOGGER.severe("YamlConfigurationException for rule group " + yamlGroup.getId() + ": " + e.getMessage());
+                        throw e;
                     } catch (Exception e) {
                         LOGGER.warning("Failed to create rule group '" + yamlGroup.getId() +
                                       "': " + e.getMessage());
                     }
+                } else {
+                    LOGGER.info("Skipping disabled rule group: " + yamlGroup.getId());
                 }
             }
         }
@@ -472,7 +482,8 @@ public class YamlRuleFactory {
      * @param config The rules engine configuration (to lookup existing rules)
      * @return A RuleGroup object
      */
-    public RuleGroup createRuleGroup(YamlRuleGroup yamlGroup, RulesEngineConfiguration config) {
+    public RuleGroup createRuleGroup(YamlRuleGroup yamlGroup, RulesEngineConfiguration config) throws YamlConfigurationException {
+
         String id = yamlGroup.getId();
         String name = yamlGroup.getName();
         String description = yamlGroup.getDescription() != null ? yamlGroup.getDescription() : "";
@@ -506,7 +517,9 @@ public class YamlRuleFactory {
                                        isAndOperator, stopOnFirstFailure, parallelExecution, debugMode);
 
         // Add rules to the group
+        LOGGER.info("About to add rules to group: " + yamlGroup.getId());
         addRulesToGroup(yamlGroup, group, config);
+        LOGGER.info("Finished adding rules to group: " + yamlGroup.getId());
 
         return group;
     }
@@ -514,7 +527,8 @@ public class YamlRuleFactory {
     /**
      * Add rules to a rule group based on YAML configuration.
      */
-    private void addRulesToGroup(YamlRuleGroup yamlGroup, RuleGroup group, RulesEngineConfiguration config) {
+    private void addRulesToGroup(YamlRuleGroup yamlGroup, RuleGroup group, RulesEngineConfiguration config) throws YamlConfigurationException {
+
         // Add rules by ID
         if (yamlGroup.getRuleIds() != null) {
             int sequence = 1;
@@ -529,16 +543,29 @@ public class YamlRuleFactory {
         
         // Add rules by reference (with more detailed configuration)
         if (yamlGroup.getRuleReferences() != null) {
+            LOGGER.info("Processing " + yamlGroup.getRuleReferences().size() + " rule references for group: " + yamlGroup.getId());
             for (YamlRuleGroup.RuleReference ref : yamlGroup.getRuleReferences()) {
+                LOGGER.info("Processing rule reference: " + ref.getRuleId() + ", enabled: " + ref.getEnabled() + ", override-priority: " + ref.getOverridePriority());
                 if (ref.getEnabled() == null || ref.getEnabled()) {
-                    Rule rule = config.getRuleById(ref.getRuleId());
-                    if (rule != null) {
+                    Rule originalRule = config.getRuleById(ref.getRuleId());
+                    if (originalRule != null) {
                         int sequence = ref.getSequence() != null ? ref.getSequence() : 1;
-                        group.addRule(rule, sequence);
+
+                        // Handle priority override
+                        Rule ruleToAdd = originalRule;
+                        if (ref.getOverridePriority() != null) {
+                            validatePriorityOverride(ref.getOverridePriority(), ref.getRuleId());
+                            ruleToAdd = createRuleWithOverriddenPriority(originalRule, ref.getOverridePriority(), yamlGroup.getId());
+                            LOGGER.fine("Applied priority override " + ref.getOverridePriority() + " to rule " + ref.getRuleId() + " in group " + yamlGroup.getId());
+                        }
+
+                        group.addRule(ruleToAdd, sequence);
                         LOGGER.fine("Added rule " + ref.getRuleId() + " to group " + group.getId() + " with sequence " + sequence);
                     } else {
                         LOGGER.warning("Rule not found for ID: " + ref.getRuleId() + " in group: " + group.getId());
                     }
+                } else {
+                    LOGGER.info("Skipping disabled rule: " + ref.getRuleId());
                 }
             }
         }
@@ -593,7 +620,7 @@ public class YamlRuleFactory {
      * @return List of RuleGroup objects
      */
     @SuppressWarnings("unused") // Public API method for independent rule group creation
-    public List<RuleGroup> createRuleGroups(YamlRuleConfiguration yamlConfig, RulesEngineConfiguration config) {
+    public List<RuleGroup> createRuleGroups(YamlRuleConfiguration yamlConfig, RulesEngineConfiguration config) throws YamlConfigurationException {
         List<RuleGroup> groups = new ArrayList<>();
         
         if (yamlConfig.getRuleGroups() != null) {
@@ -670,5 +697,59 @@ public class YamlRuleFactory {
     public void clearCache() {
         categoryCache.clear();
         yamlCategoryCache.clear();
+    }
+
+    /**
+     * Validate priority override value.
+     *
+     * @param priority The priority value to validate
+     * @param ruleId The rule ID for error reporting
+     * @throws YamlConfigurationException if priority is invalid
+     */
+    private void validatePriorityOverride(Integer priority, String ruleId) throws YamlConfigurationException {
+        if (priority == null) return;
+
+        if (priority < 1) {
+            throw new YamlConfigurationException(
+                "override-priority must be >= 1 for rule: " + ruleId + ", got: " + priority);
+        }
+
+        if (priority > 1000) {
+            LOGGER.warning("Very high priority override (" + priority + ") for rule: " + ruleId +
+                          ". Consider using priorities between 1-100.");
+        }
+    }
+
+    /**
+     * Create a copy of a rule with overridden priority for use in a specific rule group.
+     * This preserves the original rule while allowing group-specific priority behavior.
+     *
+     * @param originalRule The original rule to copy
+     * @param newPriority The new priority to apply
+     * @param groupId The rule group ID for unique identification
+     * @return A new rule instance with the overridden priority
+     */
+    private Rule createRuleWithOverriddenPriority(Rule originalRule, int newPriority, String groupId) {
+        // Create new categories with overridden priority
+        Set<Category> newCategories = originalRule.getCategories().stream()
+            .map(cat -> new Category(cat.getName(), newPriority))
+            .collect(Collectors.toSet());
+
+        // Create unique ID for this group-specific rule instance
+        String newRuleId = originalRule.getId() + "_group_" + groupId + "_priority_" + newPriority;
+
+        // Create new rule with same properties but different priority and ID
+        Rule newRule = new Rule(
+            newRuleId,
+            newCategories,
+            originalRule.getName(),
+            originalRule.getCondition(),
+            originalRule.getMessage(),
+            originalRule.getDescription(),
+            newPriority,
+            originalRule.getMetadata()
+        );
+
+        return newRule;
     }
 }

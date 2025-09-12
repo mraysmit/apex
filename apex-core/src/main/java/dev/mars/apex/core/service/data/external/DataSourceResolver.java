@@ -6,6 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -41,7 +44,7 @@ public class DataSourceResolver {
     
     /**
      * Resolve an external data-source configuration by reference.
-     * 
+     *
      * @param reference The reference to the external configuration (e.g., "data-sources/customer-database.yaml")
      * @return The resolved data-source configuration
      * @throws DataSourceResolutionException if the reference cannot be resolved
@@ -50,28 +53,28 @@ public class DataSourceResolver {
         if (reference == null || reference.trim().isEmpty()) {
             throw new DataSourceResolutionException("Data-source reference cannot be null or empty");
         }
-        
+
         // Check cache first
         ExternalDataSourceConfig cached = configCache.get(reference);
         if (cached != null) {
             logger.debug("Returning cached data-source configuration for reference: {}", reference);
             return cached;
         }
-        
+
         logger.info("Resolving external data-source configuration: {}", reference);
-        
+
         try {
-            // Load configuration from classpath
-            ExternalDataSourceConfig config = loadFromClasspath(reference);
-            
+            // Try file system first, then classpath
+            ExternalDataSourceConfig config = loadFromFileSystemOrClasspath(reference);
+
             // Cache the loaded configuration
             configCache.put(reference, config);
-            
-            logger.info("Successfully resolved and cached data-source configuration: {} (name: {})", 
+
+            logger.info("Successfully resolved and cached data-source configuration: {} (name: {})",
                        reference, config.getMetadata().getName());
-            
+
             return config;
-            
+
         } catch (Exception e) {
             throw new DataSourceResolutionException(
                 "Failed to resolve data-source reference: " + reference, e);
@@ -79,24 +82,92 @@ public class DataSourceResolver {
     }
     
     /**
+     * Load external data-source configuration from file system or classpath.
+     * Tries file system first, then falls back to classpath.
+     */
+    private ExternalDataSourceConfig loadFromFileSystemOrClasspath(String reference) {
+        logger.debug("Attempting to load data-source configuration from file system or classpath: {}", reference);
+
+        // Try file system first
+        try {
+            ExternalDataSourceConfig config = loadFromFileSystem(reference);
+            logger.debug("Successfully loaded data-source configuration from file system: {}", reference);
+            return config;
+        } catch (DataSourceResolutionException e) {
+            // Check if this is a validation error - if so, don't try classpath
+            if (e.getMessage().contains("metadata is missing") ||
+                e.getMessage().contains("name is missing") ||
+                e.getMessage().contains("spec is missing")) {
+                logger.debug("Validation error from file system, not trying classpath: {}", e.getMessage());
+                throw e; // Re-throw validation errors immediately
+            }
+            logger.debug("Failed to load from file system, trying classpath: {}", e.getMessage());
+        } catch (Exception e) {
+            logger.debug("Failed to load from file system, trying classpath: {}", e.getMessage());
+        }
+
+        // Fall back to classpath
+        try {
+            ExternalDataSourceConfig config = loadFromClasspath(reference);
+            logger.debug("Successfully loaded data-source configuration from classpath: {}", reference);
+            return config;
+        } catch (Exception e) {
+            logger.debug("Failed to load from classpath: {}", e.getMessage());
+        }
+
+        // Both failed
+        throw new DataSourceResolutionException(
+            "Data-source configuration not found in file system or classpath: " + reference);
+    }
+
+    /**
+     * Load external data-source configuration from file system.
+     */
+    private ExternalDataSourceConfig loadFromFileSystem(String reference) {
+        logger.debug("Loading data-source configuration from file system: {}", reference);
+
+        Path path = Paths.get(reference);
+        if (!Files.exists(path)) {
+            throw new DataSourceResolutionException(
+                "Data-source configuration file not found: " + reference);
+        }
+
+        try {
+            ExternalDataSourceConfig config = yamlMapper.readValue(path.toFile(), ExternalDataSourceConfig.class);
+
+            // Validate the loaded configuration
+            validateConfiguration(config, reference);
+
+            return config;
+
+        } catch (DataSourceResolutionException e) {
+            // Re-throw validation exceptions as-is
+            throw e;
+        } catch (Exception e) {
+            throw new DataSourceResolutionException(
+                "Failed to load data-source configuration from file system: " + reference, e);
+        }
+    }
+
+    /**
      * Load external data-source configuration from classpath.
      */
     private ExternalDataSourceConfig loadFromClasspath(String reference) {
         logger.debug("Loading data-source configuration from classpath: {}", reference);
-        
+
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(reference)) {
             if (inputStream == null) {
                 throw new DataSourceResolutionException(
                     "Data-source configuration not found on classpath: " + reference);
             }
-            
+
             ExternalDataSourceConfig config = yamlMapper.readValue(inputStream, ExternalDataSourceConfig.class);
-            
+
             // Validate the loaded configuration
             validateConfiguration(config, reference);
-            
+
             return config;
-            
+
         } catch (Exception e) {
             throw new DataSourceResolutionException(
                 "Failed to load data-source configuration from classpath: " + reference, e);

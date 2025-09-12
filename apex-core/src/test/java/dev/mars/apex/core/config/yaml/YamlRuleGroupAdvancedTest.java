@@ -40,7 +40,7 @@ class YamlRuleGroupAdvancedTest {
 
         @Test
         @DisplayName("Should parse operator configuration")
-        void testOperatorConfiguration() {
+        void testOperatorConfiguration() throws YamlConfigurationException {
             // Test AND operator
             YamlRuleGroup andGroup = new YamlRuleGroup();
             andGroup.setId("and-group");
@@ -64,7 +64,7 @@ class YamlRuleGroupAdvancedTest {
 
         @Test
         @DisplayName("Should handle case-insensitive operator configuration")
-        void testCaseInsensitiveOperator() {
+        void testCaseInsensitiveOperator() throws YamlConfigurationException {
             YamlRuleGroup group = new YamlRuleGroup();
             group.setId("case-test");
             group.setName("Case Test");
@@ -77,7 +77,7 @@ class YamlRuleGroupAdvancedTest {
 
         @Test
         @DisplayName("Should default to AND operator for invalid values")
-        void testInvalidOperatorDefaultsToAnd() {
+        void testInvalidOperatorDefaultsToAnd() throws YamlConfigurationException {
             YamlRuleGroup group = new YamlRuleGroup();
             group.setId("invalid-op");
             group.setName("Invalid Operator");
@@ -90,7 +90,7 @@ class YamlRuleGroupAdvancedTest {
 
         @Test
         @DisplayName("Should parse stop-on-first-failure configuration")
-        void testStopOnFirstFailureConfiguration() {
+        void testStopOnFirstFailureConfiguration() throws YamlConfigurationException {
             // Test enabled
             YamlRuleGroup enabledGroup = new YamlRuleGroup();
             enabledGroup.setId("enabled-stop");
@@ -114,7 +114,7 @@ class YamlRuleGroupAdvancedTest {
 
         @Test
         @DisplayName("Should parse parallel-execution configuration")
-        void testParallelExecutionConfiguration() {
+        void testParallelExecutionConfiguration() throws YamlConfigurationException {
             // Test enabled
             YamlRuleGroup parallelGroup = new YamlRuleGroup();
             parallelGroup.setId("parallel-group");
@@ -138,7 +138,7 @@ class YamlRuleGroupAdvancedTest {
 
         @Test
         @DisplayName("Should parse debug-mode configuration")
-        void testDebugModeConfiguration() {
+        void testDebugModeConfiguration() throws YamlConfigurationException {
             // Test enabled
             YamlRuleGroup debugGroup = new YamlRuleGroup();
             debugGroup.setId("debug-group");
@@ -171,7 +171,7 @@ class YamlRuleGroupAdvancedTest {
 
         @Test
         @DisplayName("Should use correct default values")
-        void testDefaultValues() {
+        void testDefaultValues() throws YamlConfigurationException {
             YamlRuleGroup group = new YamlRuleGroup();
             group.setId("default-test");
             group.setName("Default Test");
@@ -188,7 +188,7 @@ class YamlRuleGroupAdvancedTest {
 
         @Test
         @DisplayName("Should handle null configuration values")
-        void testNullConfigurationValues() {
+        void testNullConfigurationValues() throws YamlConfigurationException {
             YamlRuleGroup group = new YamlRuleGroup();
             group.setId("null-test");
             group.setName("Null Test");
@@ -217,7 +217,7 @@ class YamlRuleGroupAdvancedTest {
 
         @Test
         @DisplayName("Should respect system property for debug mode")
-        void testSystemPropertyDebugMode() {
+        void testSystemPropertyDebugMode() throws YamlConfigurationException {
             // Set system property
             System.setProperty("apex.rulegroup.debug", "true");
             
@@ -239,7 +239,7 @@ class YamlRuleGroupAdvancedTest {
 
         @Test
         @DisplayName("YAML configuration should override system property")
-        void testYamlOverridesSystemProperty() {
+        void testYamlOverridesSystemProperty() throws YamlConfigurationException {
             // Set system property to true
             System.setProperty("apex.rulegroup.debug", "true");
             
@@ -270,7 +270,7 @@ class YamlRuleGroupAdvancedTest {
 
         @Test
         @DisplayName("Should handle all advanced features together")
-        void testAllAdvancedFeaturesTogether() {
+        void testAllAdvancedFeaturesTogether() throws YamlConfigurationException {
             YamlRuleGroup group = new YamlRuleGroup();
             group.setId("complex-group");
             group.setName("Complex Group");
@@ -290,7 +290,7 @@ class YamlRuleGroupAdvancedTest {
 
         @Test
         @DisplayName("Should handle production-optimized configuration")
-        void testProductionOptimizedConfiguration() {
+        void testProductionOptimizedConfiguration() throws YamlConfigurationException {
             YamlRuleGroup group = new YamlRuleGroup();
             group.setId("production-group");
             group.setName("Production Group");
@@ -310,7 +310,7 @@ class YamlRuleGroupAdvancedTest {
 
         @Test
         @DisplayName("Should handle debug-optimized configuration")
-        void testDebugOptimizedConfiguration() {
+        void testDebugOptimizedConfiguration() throws YamlConfigurationException {
             YamlRuleGroup group = new YamlRuleGroup();
             group.setId("debug-optimized");
             group.setName("Debug Optimized");

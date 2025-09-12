@@ -1,0 +1,26 @@
+metadata:
+  name: "Separate Rules Test - Rules Only"
+  version: "1.0.0"
+  description: "Test rules for separate file testing"
+
+rules:
+  - id: "separate-rule-1"
+    name: "Always True Rule 1"
+    condition: "true"
+    message: "Separate Rule 1 passed"
+    severity: "ERROR"
+    priority: 1
+    
+  - id: "separate-rule-2"
+    name: "Always False Rule 2"
+    condition: "false"
+    message: "Separate Rule 2 failed"
+    severity: "ERROR"
+    priority: 2
+    
+  - id: "separate-rule-3"
+    name: "Always True Rule 3"
+    condition: "true"
+    message: "Separate Rule 3 passed"
+    severity: "ERROR"
+    priority: 3

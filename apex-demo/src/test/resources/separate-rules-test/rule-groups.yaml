@@ -1,0 +1,31 @@
+metadata:
+  name: "Separate Rules Test - Rule Groups Only"
+  version: "1.0.0"
+  description: "Test rule groups for separate file testing"
+
+rule-groups:
+  - id: "separate-and-group"
+    name: "Separate AND Group"
+    description: "AND group using separate rules"
+    operator: "AND"
+    rule-ids:
+      - "separate-rule-1"
+      - "separate-rule-3"
+      
+  - id: "separate-or-group"
+    name: "Separate OR Group"
+    description: "OR group using separate rules"
+    operator: "OR"
+    rule-ids:
+      - "separate-rule-1"
+      - "separate-rule-2"
+      - "separate-rule-3"
+      
+  - id: "separate-and-mixed-group"
+    name: "Separate AND Mixed Group"
+    description: "AND group with mixed true/false rules"
+    operator: "AND"
+    rule-ids:
+      - "separate-rule-1"
+      - "separate-rule-2"
+      - "separate-rule-3"

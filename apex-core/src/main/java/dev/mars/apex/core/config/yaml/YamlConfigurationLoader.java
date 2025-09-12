@@ -83,6 +83,9 @@ public class YamlConfigurationLoader {
 
             YamlRuleConfiguration config = yamlMapper.readValue(resolvedContent, YamlRuleConfiguration.class);
 
+            // Process external rule references
+            processRuleReferences(config);
+
             // Process external data-source references
             processDataSourceReferences(config);
 
@@ -99,7 +102,7 @@ public class YamlConfigurationLoader {
     
     /**
      * Load configuration from a File object.
-     * 
+     *
      * @param file The YAML configuration file
      * @return The loaded configuration
      * @throws YamlConfigurationException if loading fails
@@ -109,16 +112,27 @@ public class YamlConfigurationLoader {
             if (!file.exists()) {
                 throw new YamlConfigurationException("Configuration file not found: " + file.getAbsolutePath());
             }
-            
+
             LOGGER.info("Loading YAML configuration from file: " + file.getAbsolutePath());
-            YamlRuleConfiguration config = yamlMapper.readValue(file, YamlRuleConfiguration.class);
-            
+
+            // Read raw content and resolve properties before parsing
+            String rawContent = Files.readString(file.toPath());
+            String resolvedContent = resolveProperties(rawContent);
+
+            YamlRuleConfiguration config = yamlMapper.readValue(resolvedContent, YamlRuleConfiguration.class);
+
+            // Process external rule references
+            processRuleReferences(config);
+
+            // Process external data-source references
+            processDataSourceReferences(config);
+
             validateConfiguration(config);
-            LOGGER.info("Successfully loaded configuration: " + 
+            LOGGER.info("Successfully loaded configuration: " +
                        (config.getMetadata() != null ? config.getMetadata().getName() : "unnamed"));
-            
+
             return config;
-            
+
         } catch (IOException e) {
             throw new YamlConfigurationException("Failed to load configuration from file: " + file.getAbsolutePath(), e);
         }
@@ -140,6 +154,9 @@ public class YamlConfigurationLoader {
             String resolvedContent = resolveProperties(rawContent);
 
             YamlRuleConfiguration config = yamlMapper.readValue(resolvedContent, YamlRuleConfiguration.class);
+
+            // Process external rule references
+            processRuleReferences(config);
 
             // Process external data-source references
             processDataSourceReferences(config);
@@ -365,6 +382,193 @@ public class YamlConfigurationLoader {
         }
 
         LOGGER.info("Successfully processed all external data-source references");
+    }
+
+    /**
+     * Process external rule references in the configuration.
+     *
+     * This method loads external rule files referenced in the rule-refs
+     * section and merges them with any existing inline rules.
+     *
+     * @param config The configuration to process
+     * @throws YamlConfigurationException if reference resolution fails
+     */
+    private void processRuleReferences(YamlRuleConfiguration config) throws YamlConfigurationException {
+        if (config.getRuleRefs() == null || config.getRuleRefs().isEmpty()) {
+            LOGGER.fine("No external rule references to process");
+            return;
+        }
+
+        LOGGER.info("Processing " + config.getRuleRefs().size() + " external rule references");
+
+        // Process each rule reference
+        for (YamlRuleRef ref : config.getRuleRefs()) {
+            if (!ref.isEnabled()) {
+                LOGGER.info("Skipping disabled rule reference: " + ref.getName());
+                continue;
+            }
+
+            try {
+                LOGGER.info("Resolving external rule reference: " + ref.getName() + " from " + ref.getSource());
+
+                // Load the referenced rule file
+                YamlRuleConfiguration referencedConfig = loadRuleFile(ref.getSource());
+
+                // Merge rules from referenced file
+                if (referencedConfig.getRules() != null) {
+                    // Initialize rules list if it doesn't exist and we have rules to add
+                    if (config.getRules() == null) {
+                        config.setRules(new ArrayList<>());
+                    }
+                    config.getRules().addAll(referencedConfig.getRules());
+                    LOGGER.info("Merged " + referencedConfig.getRules().size() + " rules from: " + ref.getName());
+                }
+
+                LOGGER.info("Successfully resolved and merged rules from: " + ref.getName());
+
+            } catch (Exception e) {
+                throw new YamlConfigurationException(
+                    "Failed to resolve rule reference '" + ref.getName() + "' from '" + ref.getSource() + "'", e);
+            }
+        }
+
+        LOGGER.info("Successfully processed all external rule references");
+    }
+
+    /**
+     * Load a rule file from either file system or classpath.
+     *
+     * This method loads rule files without processing their own rule-refs or data-source-refs
+     * to avoid infinite recursion.
+     *
+     * @param source The source path (file system or classpath)
+     * @return The loaded rule configuration
+     * @throws YamlConfigurationException if loading fails
+     */
+    private YamlRuleConfiguration loadRuleFile(String source) throws YamlConfigurationException {
+        try {
+            // Try file system first, then classpath (same pattern as DataSourceResolver)
+            Path path = Paths.get(source);
+            if (Files.exists(path)) {
+                // Load from file system
+                LOGGER.fine("Loading rule file from file system: " + source);
+                return loadFromFileWithoutProcessing(path.toFile());
+            } else {
+                // Load from classpath
+                LOGGER.fine("Loading rule file from classpath: " + source);
+                return loadFromClasspathWithoutProcessing(source);
+            }
+        } catch (Exception e) {
+            throw new YamlConfigurationException("Failed to load rule file: " + source, e);
+        }
+    }
+
+    /**
+     * Load configuration from a file without processing rule-refs or data-source-refs.
+     *
+     * This method is used when loading referenced rule files to avoid infinite recursion.
+     *
+     * @param file The file to load
+     * @return The loaded configuration (without processing)
+     * @throws YamlConfigurationException if loading fails
+     */
+    private YamlRuleConfiguration loadFromFileWithoutProcessing(File file) throws YamlConfigurationException {
+        try {
+            if (!file.exists()) {
+                throw new YamlConfigurationException("Configuration file not found: " + file.getAbsolutePath());
+            }
+
+            LOGGER.fine("Loading YAML configuration from file (without processing): " + file.getAbsolutePath());
+
+            // Read raw content and resolve properties before parsing
+            String rawContent = Files.readString(file.toPath());
+            String resolvedContent = resolveProperties(rawContent);
+
+            YamlRuleConfiguration config = yamlMapper.readValue(resolvedContent, YamlRuleConfiguration.class);
+
+            // Skip processRuleReferences() and processDataSourceReferences() to avoid recursion
+            // Skip validateConfiguration() as this will be done on the merged configuration
+
+            LOGGER.fine("Successfully loaded configuration (without processing): " +
+                       (config.getMetadata() != null ? config.getMetadata().getName() : "unnamed"));
+
+            return config;
+
+        } catch (IOException e) {
+            throw new YamlConfigurationException("Failed to load configuration from file: " + file.getAbsolutePath(), e);
+        }
+    }
+
+    /**
+     * Load configuration from classpath without processing rule-refs or data-source-refs.
+     *
+     * This method is used when loading referenced rule files to avoid infinite recursion.
+     *
+     * @param resourcePath The classpath resource path
+     * @return The loaded configuration (without processing)
+     * @throws YamlConfigurationException if loading fails
+     */
+    private YamlRuleConfiguration loadFromClasspathWithoutProcessing(String resourcePath) throws YamlConfigurationException {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+            if (inputStream == null) {
+                throw new YamlConfigurationException("Configuration resource not found: " + resourcePath);
+            }
+
+            LOGGER.fine("Loading YAML configuration from classpath (without processing): " + resourcePath);
+
+            // Read raw content and resolve properties before parsing
+            String rawContent = new String(inputStream.readAllBytes());
+            String resolvedContent = resolveProperties(rawContent);
+
+            YamlRuleConfiguration config = yamlMapper.readValue(resolvedContent, YamlRuleConfiguration.class);
+
+            // Skip processRuleReferences() and processDataSourceReferences() to avoid recursion
+            // Skip validateConfiguration() as this will be done on the merged configuration
+
+            LOGGER.fine("Successfully loaded configuration (without processing): " +
+                       (config.getMetadata() != null ? config.getMetadata().getName() : "unnamed"));
+
+            return config;
+
+        } catch (IOException e) {
+            throw new YamlConfigurationException("Failed to load configuration from classpath: " + resourcePath, e);
+        }
+    }
+
+    /**
+     * Load configuration from a file without processing references or validation.
+     *
+     * This method is used for multi-file loading where validation should happen
+     * after all files are merged.
+     *
+     * @param filePath The file path to load
+     * @return The loaded configuration (without processing or validation)
+     * @throws YamlConfigurationException if loading fails
+     */
+    public YamlRuleConfiguration loadFromFileWithoutValidation(String filePath) throws YamlConfigurationException {
+        return loadFromFileWithoutProcessing(new File(filePath));
+    }
+
+    /**
+     * Process rule references, data source references, and validate configuration.
+     *
+     * This method is used for multi-file loading after all files are merged.
+     *
+     * @param config The configuration to process and validate
+     * @throws YamlConfigurationException if processing or validation fails
+     */
+    public void processReferencesAndValidate(YamlRuleConfiguration config) throws YamlConfigurationException {
+        // Process external rule references
+        processRuleReferences(config);
+
+        // Process external data-source references
+        processDataSourceReferences(config);
+
+        // Validate the complete merged configuration
+        validateConfiguration(config);
+
+        LOGGER.info("Successfully processed references and validated merged configuration: " +
+                   (config.getMetadata() != null ? config.getMetadata().getName() : "unnamed"));
     }
 
     /**
