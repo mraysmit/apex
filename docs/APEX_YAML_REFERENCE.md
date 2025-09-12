@@ -776,25 +776,63 @@ rules:
 
 Rule Groups allow you to organize related rules and apply logical operators (AND/OR) to combine their results. Rule Groups support advanced execution features including parallel processing, configurable short-circuiting, and debug mode for comprehensive testing and troubleshooting.
 
-### 5.2 Basic Rule Group Configuration
+### 5.2 Rule Group Configuration Approaches
+
+APEX supports two approaches for referencing rules in rule groups: **`rule-ids`** (simple) and **`rule-references`** (advanced).
+
+#### 5.2.1 Simple Approach: `rule-ids`
+
+Use `rule-ids` for straightforward rule grouping with automatic sequencing:
 
 ```yaml
 rule-groups:
-  - id: "validation-group"
-    name: "Input Validation"
-    description: "Validates all input parameters"
-    category: "validation"
-    priority: 10
-    enabled: true
-    operator: "AND"                    # "AND" or "OR" - how to combine rule results
-    stop-on-first-failure: true       # Enable/disable short-circuit evaluation
-    parallel-execution: false         # Execute rules in parallel when possible
-    debug-mode: false                 # Enable debug logging and disable short-circuiting
+  - id: "simple-validation-group"
+    name: "Simple Input Validation"
+    description: "Basic validation using rule-ids"
+    operator: "AND"
+    stop-on-first-failure: true
     rule-ids:
-      - "trade-id-required"
-      - "isin-format-validation"
-      - "trade-value-positive"
+      - "trade-id-required"      # Executes first (sequence 1)
+      - "isin-format-validation" # Executes second (sequence 2)
+      - "trade-value-positive"   # Executes third (sequence 3)
 ```
+
+#### 5.2.2 Advanced Approach: `rule-references`
+
+Use `rule-references` for fine-grained control over rule execution:
+
+```yaml
+rule-groups:
+  - id: "advanced-validation-group"
+    name: "Advanced Input Validation"
+    description: "Advanced validation using rule-references"
+    operator: "AND"
+    stop-on-first-failure: true
+    rule-references:
+      - rule-id: "trade-value-positive"   # Custom sequence: executes first
+        sequence: 1
+        enabled: true
+      - rule-id: "trade-id-required"      # Custom sequence: executes second
+        sequence: 2
+        enabled: true
+      - rule-id: "isin-format-validation" # Disabled: skipped entirely
+        sequence: 3
+        enabled: false
+        override-priority: 5              # Future feature: priority override
+```
+
+#### 5.2.3 Comparison: `rule-ids` vs `rule-references`
+
+| Feature | `rule-ids` | `rule-references` | Use Case |
+|---------|------------|-------------------|----------|
+| **Syntax** | Simple string array | Complex object array | Quick setup vs detailed control |
+| **Execution Sequence** | Auto (1, 2, 3...) | Custom `sequence` property | Default order vs custom order |
+| **Enable/Disable** | All rules enabled | Individual `enabled: true/false` | All rules vs selective execution |
+| **Priority Override** | Uses rule's priority | `override-priority` property* | Fixed priority vs custom priority |
+| **Configuration Size** | Minimal | Larger | Simple configs vs complex workflows |
+| **Performance** | Slightly faster | Slightly slower | High-performance vs flexibility |
+
+*Note: `override-priority` is documented but not yet implemented in the engine.
 
 #### Rule Group Properties
 
@@ -810,23 +848,109 @@ rule-groups:
 | `stop-on-first-failure` | No | false | Enable short-circuit evaluation | true |
 | `parallel-execution` | No | false | Execute rules in parallel | false |
 | `debug-mode` | No | false | Enable debug logging | false |
-| `rule-ids` | Yes | - | List of rule IDs to include | ["rule1", "rule2"] |
+| `rule-ids` | Conditional* | - | Simple: List of rule IDs | ["rule1", "rule2"] |
+| `rule-references` | Conditional* | - | Advanced: Rule reference objects | See examples below |
+
+*Either `rule-ids` OR `rule-references` is required, but not both.
+
+#### 5.2.4 Rule Reference Properties
+
+When using `rule-references`, each rule reference supports the following properties:
+
+| Property | Required | Default | Description | Example |
+|----------|----------|---------|-------------|---------|
+| `rule-id` | Yes | - | ID of the rule to reference | "trade-id-required" |
+| `sequence` | No | Auto-assigned | Execution order (1 = first) | 1 |
+| `enabled` | No | true | Whether to execute this rule | true |
+| `override-priority` | No | Rule's priority | Override rule's default priority* | 5 |
+
+*Note: `override-priority` is documented but not yet implemented in the engine.
+
+#### 5.2.5 Practical Examples
+
+**Example 1: Custom Execution Order**
+```yaml
+rule-groups:
+  - id: "custom-order-group"
+    operator: "AND"
+    rule-references:
+      - rule-id: "expensive-rule"    # Execute last
+        sequence: 3
+      - rule-id: "quick-check"       # Execute first
+        sequence: 1
+      - rule-id: "medium-rule"       # Execute second
+        sequence: 2
+```
+
+**Example 2: Conditional Rule Execution**
+```yaml
+rule-groups:
+  - id: "conditional-group"
+    operator: "AND"
+    rule-references:
+      - rule-id: "always-check"
+        enabled: true
+      - rule-id: "optional-check"    # Disabled for this group
+        enabled: false
+      - rule-id: "debug-only-rule"   # Can be toggled
+        enabled: false
+```
+
+**Example 3: Mixed Configuration**
+```yaml
+rule-groups:
+  - id: "mixed-group"
+    operator: "OR"
+    rule-references:
+      - rule-id: "primary-validation"
+        sequence: 1
+        enabled: true
+        override-priority: 1          # Highest priority (future feature)
+      - rule-id: "fallback-validation"
+        sequence: 2
+        enabled: true
+        override-priority: 10         # Lower priority (future feature)
+      - rule-id: "legacy-validation"
+        sequence: 3
+        enabled: false                # Disabled legacy rule
+```
 
 ### 5.3 Execution Behavior
 
 #### AND Groups (All Rules Must Pass)
 
+**Using `rule-ids` (Simple Approach):**
 ```yaml
 rule-groups:
-  - id: "strict-validation"
-    name: "Strict Validation Group"
+  - id: "strict-validation-simple"
+    name: "Strict Validation Group (Simple)"
     description: "All validation rules must pass"
     operator: "AND"
     stop-on-first-failure: true  # Stop on first failure for efficiency
     rule-ids:
-      - "trade-id-required"      # Must pass
-      - "isin-format-validation" # Must pass
-      - "trade-value-positive"   # Must pass
+      - "trade-id-required"      # Must pass (sequence 1)
+      - "isin-format-validation" # Must pass (sequence 2)
+      - "trade-value-positive"   # Must pass (sequence 3)
+```
+
+**Using `rule-references` (Advanced Approach):**
+```yaml
+rule-groups:
+  - id: "strict-validation-advanced"
+    name: "Strict Validation Group (Advanced)"
+    description: "All validation rules must pass with custom control"
+    operator: "AND"
+    stop-on-first-failure: true
+    rule-references:
+      - rule-id: "trade-value-positive"   # Execute first (fastest check)
+        sequence: 1
+        enabled: true
+      - rule-id: "trade-id-required"      # Execute second
+        sequence: 2
+        enabled: true
+      - rule-id: "isin-format-validation" # Execute third (slowest check)
+        sequence: 3
+        enabled: true
 ```
 
 **Execution Flow (Short-Circuit Enabled)**:
@@ -838,17 +962,41 @@ Rule 3: FAIL → STOP (return false) - Remaining rules NOT evaluated
 
 #### OR Groups (Any Rule Can Pass)
 
+**Using `rule-ids` (Simple Approach):**
 ```yaml
 rule-groups:
-  - id: "eligibility-check"
-    name: "Customer Eligibility Check"
+  - id: "eligibility-check-simple"
+    name: "Customer Eligibility Check (Simple)"
     description: "Customer meets at least one eligibility criteria"
     operator: "OR"
     stop-on-first-failure: true  # Stop on first success for OR groups
     rule-ids:
-      - "high-value-customer"    # Any can pass
-      - "premium-member"         # Any can pass
-      - "long-term-client"       # Any can pass
+      - "high-value-customer"    # Any can pass (sequence 1)
+      - "premium-member"         # Any can pass (sequence 2)
+      - "long-term-client"       # Any can pass (sequence 3)
+```
+
+**Using `rule-references` (Advanced Approach):**
+```yaml
+rule-groups:
+  - id: "eligibility-check-advanced"
+    name: "Customer Eligibility Check (Advanced)"
+    description: "Customer meets eligibility criteria with selective rules"
+    operator: "OR"
+    stop-on-first-failure: true
+    rule-references:
+      - rule-id: "premium-member"       # Check most likely first
+        sequence: 1
+        enabled: true
+      - rule-id: "high-value-customer"  # Check second most likely
+        sequence: 2
+        enabled: true
+      - rule-id: "long-term-client"     # Check least likely
+        sequence: 3
+        enabled: true
+      - rule-id: "legacy-vip-status"    # Disabled legacy rule
+        sequence: 4
+        enabled: false
 ```
 
 **Execution Flow (Short-Circuit Enabled)**:
@@ -988,18 +1136,57 @@ rule-groups:
 
 ### 5.7 Best Practices
 
+#### Choosing Between `rule-ids` and `rule-references`
+
+**Use `rule-ids` when:**
+- You need simple, straightforward rule grouping
+- Rules should execute in definition order
+- All rules should always be enabled
+- You want minimal configuration overhead
+- Performance is critical (slightly faster)
+
+**Use `rule-references` when:**
+- You need custom execution sequence
+- You want to enable/disable individual rules
+- You're building complex rule workflows
+- You need fine-grained control over rule behavior
+- You want future-proof configuration
+
 #### Performance Best Practices
 
+**With `rule-ids` (Simple Approach):**
 ```yaml
 rule-groups:
   # Order rules by likelihood of failure (most likely to fail first)
-  - id: "optimized-validation"
+  - id: "optimized-validation-simple"
     operator: "AND"
     stop-on-first-failure: true
     rule-ids:
       - "quick-null-check"      # Fast, likely to fail
       - "format-validation"     # Medium speed
       - "complex-business-rule" # Slow, unlikely to fail
+```
+
+**With `rule-references` (Advanced Approach):**
+```yaml
+rule-groups:
+  # Custom sequence for optimal performance
+  - id: "optimized-validation-advanced"
+    operator: "AND"
+    stop-on-first-failure: true
+    rule-references:
+      - rule-id: "quick-null-check"      # Execute first (fastest, most likely to fail)
+        sequence: 1
+        enabled: true
+      - rule-id: "format-validation"     # Execute second (medium speed)
+        sequence: 2
+        enabled: true
+      - rule-id: "complex-business-rule" # Execute last (slowest, least likely to fail)
+        sequence: 3
+        enabled: true
+      - rule-id: "debug-only-rule"       # Disabled in production
+        sequence: 4
+        enabled: false
 ```
 
 #### Error Handling Best Practices
@@ -1022,16 +1209,82 @@ rule-groups:
 
 #### Testing Best Practices
 
+**Simple Testing with `rule-ids`:**
 ```yaml
 rule-groups:
   # Use debug mode for comprehensive testing
-  - id: "test-validation"
-    name: "Test Environment Validation"
+  - id: "test-validation-simple"
+    name: "Test Environment Validation (Simple)"
     operator: "AND"
     debug-mode: true           # Enable for testing
     stop-on-first-failure: false # See all test results
     rule-ids: ["test-rule1", "test-rule2", "test-rule3"]
 ```
+
+**Advanced Testing with `rule-references`:**
+```yaml
+rule-groups:
+  # Selective testing with rule control
+  - id: "test-validation-advanced"
+    name: "Test Environment Validation (Advanced)"
+    operator: "AND"
+    debug-mode: true
+    stop-on-first-failure: false
+    rule-references:
+      - rule-id: "test-rule1"
+        sequence: 1
+        enabled: true
+      - rule-id: "test-rule2"
+        sequence: 2
+        enabled: true
+      - rule-id: "experimental-rule"  # Can be toggled for testing
+        sequence: 3
+        enabled: false
+```
+
+#### Migration and Compatibility
+
+**Converting from `rule-ids` to `rule-references`:**
+
+```yaml
+# Before: Simple rule-ids approach
+rule-groups:
+  - id: "validation-group"
+    operator: "AND"
+    rule-ids: ["rule1", "rule2", "rule3"]
+
+# After: Equivalent rule-references approach
+rule-groups:
+  - id: "validation-group"
+    operator: "AND"
+    rule-references:
+      - rule-id: "rule1"
+        sequence: 1
+        enabled: true
+      - rule-id: "rule2"
+        sequence: 2
+        enabled: true
+      - rule-id: "rule3"
+        sequence: 3
+        enabled: true
+```
+
+**Both approaches are fully supported and can coexist in the same APEX configuration.**
+
+#### Implementation Status Summary
+
+| Feature | `rule-ids` | `rule-references` | Status |
+|---------|------------|-------------------|---------|
+| **Basic Processing** | ✅ Fully implemented | ✅ Fully implemented | **COMPLETE** |
+| **Sequence Control** | ✅ Auto-sequence (1,2,3...) | ✅ Custom `sequence` property | **COMPLETE** |
+| **Enable/Disable** | ✅ All rules enabled | ✅ Individual `enabled` property | **COMPLETE** |
+| **Priority Override** | ✅ Uses rule's priority | ❌ `override-priority` documented only | **FUTURE FEATURE** |
+
+**Key Points:**
+- Both `rule-ids` and `rule-references` are production-ready
+- `sequence` and `enabled` properties work correctly in `rule-references`
+- `override-priority` is documented but not yet implemented in the engine
+- All examples in this documentation have been validated with working tests
 
 ---
 

@@ -61,4 +61,13 @@ module dev.mars.apex.demo {
     exports dev.mars.apex.demo.enrichment;
     exports dev.mars.apex.demo.infrastructure;
     exports dev.mars.apex.demo.util;
+
+    // Open packages for JUnit testing and reflection access
+    // Open packages to allow JUnit (org.junit.platform.commons) reflective access to lifecycle methods
+    opens dev.mars.apex.demo;
+    opens dev.mars.apex.demo.lookup;
+    opens dev.mars.apex.demo.validation;
+    opens dev.mars.apex.demo.enrichment;
+    opens dev.mars.apex.demo.evaluation;
+    opens dev.mars.apex.demo.runners;
 }
