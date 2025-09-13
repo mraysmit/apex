@@ -1,0 +1,357 @@
+# Enhanced REST API Lookup Demo with Enterprise Features
+# Demonstrates REST API integration with OAuth2, circuit breaker, and comprehensive monitoring
+# Use Case: Enterprise-grade external API integration for real-time data enrichment
+
+metadata:
+  id: "enhanced-rest-api-lookup-demo"
+  name: "Enhanced REST API Lookup Demo with Enterprise Features"
+  version: "2.0.0"
+  description: "Demonstrates enterprise-grade REST API integration with OAuth2, circuit breaker, comprehensive monitoring, and parameterized queries"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-01-13"
+  updated-date: "2025-01-13"
+  tags: ["apex-demo", "rest-api", "enterprise", "oauth2", "circuit-breaker", "monitoring"]
+
+# Enterprise REST API data sources
+data-sources:
+  - name: "market-data-api-enterprise"
+    type: "rest-api"
+    enabled: true
+    description: "Enterprise market data API with OAuth2 authentication and circuit breaker"
+    tags: ["market-data", "enterprise", "oauth2"]
+
+    # Enterprise API configuration
+    api-config:
+      base-url: "https://api.marketdata.company.com/v2"
+      timeout: 30000
+      max-retries: 3
+      retry-delay: 1000
+      
+      # OAuth2 Authentication
+      authentication:
+        type: "oauth2"
+        oauth2:
+          grant-type: "client_credentials"
+          client-id: "${MARKET_DATA_CLIENT_ID}"
+          client-secret: "${MARKET_DATA_CLIENT_SECRET}"
+          token-url: "https://auth.marketdata.company.com/oauth/token"
+          scope: "market-data:read pricing:read"
+          token-cache-ttl: 3600  # 1 hour
+          
+      # Request configuration
+      headers:
+        "Accept": "application/json"
+        "Content-Type": "application/json"
+        "User-Agent": "APEX-Rules-Engine/2.0"
+        "X-API-Version": "2.0"
+        
+      # Rate limiting
+      rate-limiting:
+        enabled: true
+        requests-per-second: 100
+        burst-capacity: 200
+        
+      # Circuit breaker configuration
+      circuit-breaker:
+        enabled: true
+        failure-threshold: 5
+        recovery-timeout: 60000  # 1 minute
+        half-open-max-calls: 3
+        slow-call-threshold: 10000  # 10 seconds
+        slow-call-rate-threshold: 0.5  # 50%
+
+    # API endpoints with parameterized queries
+    endpoints:
+      priceQuote: 
+        path: "/quotes/{symbol}"
+        method: "GET"
+        parameters:
+          - name: "symbol"
+            type: "path"
+            required: true
+          - name: "currency"
+            type: "query"
+            required: false
+          - name: "exchange"
+            type: "query"
+            required: false
+            
+      historicalPrices:
+        path: "/historical/{symbol}"
+        method: "GET"
+        parameters:
+          - name: "symbol"
+            type: "path"
+            required: true
+          - name: "startDate"
+            type: "query"
+            required: true
+          - name: "endDate"
+            type: "query"
+            required: true
+          - name: "interval"
+            type: "query"
+            required: false
+            default: "1d"
+
+    # Enterprise caching
+    cache:
+      enabled: true
+      ttlSeconds: 300  # 5 minutes for market data
+      maxSize: 10000
+      eviction-policy: "LRU"
+      statistics-enabled: true
+      
+      # API-specific caching
+      cache-by-endpoint: true
+      cache-null-responses: false
+      cache-error-responses: false
+
+    # Health monitoring
+    healthCheck:
+      enabled: true
+      intervalSeconds: 60
+      endpoint: "/health"
+      timeout: 10000
+      expected-status: 200
+
+  - name: "credit-rating-api-enterprise"
+    type: "rest-api"
+    enabled: true
+    description: "Enterprise credit rating API with comprehensive security"
+    tags: ["credit-rating", "enterprise", "security"]
+
+    api-config:
+      base-url: "https://api.creditrating.company.com/v1"
+      timeout: 45000
+      max-retries: 2
+      retry-delay: 2000
+      
+      # API Key Authentication with rotation
+      authentication:
+        type: "api-key"
+        api-key:
+          header-name: "X-API-Key"
+          key-value: "${CREDIT_RATING_API_KEY}"
+          rotation-enabled: true
+          rotation-interval: 86400  # 24 hours
+          
+      # Enhanced security headers
+      headers:
+        "Accept": "application/json"
+        "Content-Type": "application/json"
+        "X-Request-ID": "${requestId}"
+        "X-Client-Version": "APEX-2.0"
+        
+      # Strict rate limiting for credit data
+      rate-limiting:
+        enabled: true
+        requests-per-second: 10
+        burst-capacity: 20
+        
+      # Conservative circuit breaker for credit data
+      circuit-breaker:
+        enabled: true
+        failure-threshold: 3
+        recovery-timeout: 120000  # 2 minutes
+        half-open-max-calls: 1
+        slow-call-threshold: 15000  # 15 seconds
+        slow-call-rate-threshold: 0.3  # 30%
+
+    endpoints:
+      creditScore:
+        path: "/credit-score"
+        method: "POST"
+        parameters:
+          - name: "customerId"
+            type: "body"
+            required: true
+          - name: "ssn"
+            type: "body"
+            required: true
+            sensitive: true  # Mark as sensitive for logging
+          - name: "includeHistory"
+            type: "body"
+            required: false
+            default: false
+
+    # Longer cache for credit data
+    cache:
+      enabled: true
+      ttlSeconds: 3600  # 1 hour for credit data
+      maxSize: 5000
+      eviction-policy: "LFU"
+      statistics-enabled: true
+      
+      # Security considerations for caching
+      encrypt-cached-data: true
+      exclude-sensitive-fields: ["ssn", "personalInfo"]
+
+    healthCheck:
+      enabled: true
+      intervalSeconds: 300  # 5 minutes for credit API
+      endpoint: "/status"
+      timeout: 15000
+
+# Enterprise REST API enrichments
+enrichments:
+  - id: "market-data-enrichment-enterprise"
+    name: "Market Data Enrichment with Enterprise Features"
+    description: "Enrich trading data with real-time market prices using enterprise API"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#symbol != null && #currency != null"
+    
+    lookup-config:
+      lookup-key: "{'symbol': #symbol, 'currency': #currency, 'exchange': #exchange}"
+      
+      lookup-dataset:
+        type: "rest-api"
+        connection-name: "market-data-api-enterprise"
+        endpoint: "priceQuote"
+        parameters:
+          - field: "symbol"
+            type: "string"
+          - field: "currency"
+            type: "string"
+          - field: "exchange"
+            type: "string"
+      
+      # Enrichment-level caching
+      cache:
+        enabled: true
+        ttlSeconds: 180  # 3 minutes for real-time data
+        maxSize: 2000
+        eviction-policy: "LRU"
+        statistics-enabled: true
+
+    field-mappings:
+      - source-field: "price"
+        target-field: "currentPrice"
+        required: true
+      - source-field: "currency"
+        target-field: "priceCurrency"
+        required: true
+      - source-field: "timestamp"
+        target-field: "priceTimestamp"
+        required: true
+      - source-field: "bid"
+        target-field: "bidPrice"
+        required: false
+      - source-field: "ask"
+        target-field: "askPrice"
+        required: false
+
+  - id: "credit-rating-enrichment-enterprise"
+    name: "Credit Rating Enrichment with Security"
+    description: "Enrich customer data with credit ratings using secure enterprise API"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#customerId != null && #ssn != null"
+    
+    lookup-config:
+      lookup-key: "{'customerId': #customerId, 'includeHistory': false}"
+      
+      lookup-dataset:
+        type: "rest-api"
+        connection-name: "credit-rating-api-enterprise"
+        endpoint: "creditScore"
+        parameters:
+          - field: "customerId"
+            type: "string"
+          - field: "ssn"
+            type: "string"
+            sensitive: true
+          - field: "includeHistory"
+            type: "boolean"
+      
+      # Secure caching for credit data
+      cache:
+        enabled: true
+        ttlSeconds: 1800  # 30 minutes for credit data
+        maxSize: 1000
+        eviction-policy: "LFU"
+        statistics-enabled: true
+        encrypt-cached-data: true
+
+    field-mappings:
+      - source-field: "creditScore"
+        target-field: "customerCreditScore"
+        required: true
+      - source-field: "rating"
+        target-field: "creditRating"
+        required: true
+      - source-field: "riskLevel"
+        target-field: "creditRiskLevel"
+        required: true
+      - source-field: "lastUpdated"
+        target-field: "creditScoreDate"
+        required: false
+
+# Enterprise API Monitoring
+api-monitoring:
+  enabled: true
+  metrics-collection-interval: 60  # seconds
+  
+  # API performance metrics
+  performance-metrics:
+    - "api-response-time"
+    - "api-success-rate"
+    - "api-error-rate"
+    - "api-throughput"
+    - "circuit-breaker-state"
+    - "rate-limit-violations"
+    - "oauth2-token-refresh-rate"
+    
+  # Security metrics
+  security-metrics:
+    - "authentication-failures"
+    - "authorization-failures"
+    - "api-key-rotation-events"
+    - "sensitive-data-access-count"
+    
+  # Business metrics
+  business-metrics:
+    - "market-data-requests-per-minute"
+    - "credit-checks-per-hour"
+    - "data-freshness-score"
+
+# Enterprise alerting for APIs
+api-alerting:
+  enabled: true
+  
+  alerts:
+    - name: "api-high-error-rate"
+      condition: "api_error_rate > 0.1"  # 10% error rate
+      severity: "CRITICAL"
+      notification-channels: ["console", "log"]
+      
+    - name: "circuit-breaker-open"
+      condition: "circuit_breaker_state == 'OPEN'"
+      severity: "CRITICAL"
+      notification-channels: ["console", "log"]
+      
+    - name: "oauth2-token-refresh-failure"
+      condition: "oauth2_token_refresh_failure_rate > 0.5"
+      severity: "CRITICAL"
+      notification-channels: ["console", "log"]
+      
+    - name: "rate-limit-exceeded"
+      condition: "rate_limit_violations > 10"
+      severity: "WARNING"
+      notification-channels: ["console", "log"]
+
+# Processing configuration
+processing:
+  continue-on-error: true
+  max-errors: 5
+  error-handling: "log-and-continue"
+  api-timeout-handling: "graceful-degradation"
+
+# Output configuration
+output:
+  include-api-metrics: true
+  include-security-info: false  # Don't expose sensitive security details
+  include-performance-data: true
+  format: "enhanced"

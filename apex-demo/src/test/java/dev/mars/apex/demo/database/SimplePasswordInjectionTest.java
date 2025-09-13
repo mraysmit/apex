@@ -37,6 +37,7 @@ class SimplePasswordInjectionTest {
         System.setProperty("TEST_PASSWORD", "secret123");
         System.setProperty("TEST_USER", "testuser");
         System.setProperty("TEST_DATABASE", "testdb");
+        System.setProperty("PASSWD", "secret123");  // Add missing PASSWD property
     }
 
     @AfterEach
@@ -47,6 +48,7 @@ class SimplePasswordInjectionTest {
         System.clearProperty("TEST_PASSWORD");
         System.clearProperty("TEST_USER");
         System.clearProperty("TEST_DATABASE");
+        System.clearProperty("PASSWD");
     }
 
     @Test

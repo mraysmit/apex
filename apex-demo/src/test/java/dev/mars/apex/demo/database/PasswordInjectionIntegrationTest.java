@@ -49,6 +49,7 @@ class PasswordInjectionIntegrationTest {
         System.setProperty("H2_PASSWORD", "h2secret");
         System.setProperty("H2_USER", "sa");
         System.setProperty("H2_DATABASE", "mem:testdb;MODE=PostgreSQL");
+        System.setProperty("PASSWD", "h2secret");  // Add missing PASSWD property
     }
 
     @AfterEach
@@ -59,6 +60,7 @@ class PasswordInjectionIntegrationTest {
         System.clearProperty("H2_PASSWORD");
         System.clearProperty("H2_USER");
         System.clearProperty("H2_DATABASE");
+        System.clearProperty("PASSWD");
     }
 
     @Test
@@ -76,7 +78,7 @@ class PasswordInjectionIntegrationTest {
             data-sources:
               - name: "h2-test-database"
                 type: "database"
-                sourceType: "h2"
+                source-type: "h2"
                 enabled: true
                 description: "H2 database with password injection"
                 
@@ -88,7 +90,7 @@ class PasswordInjectionIntegrationTest {
                 queries:
                   createTestTable: |
                     CREATE TABLE IF NOT EXISTS test_users (
-                      id INTEGER PRIMARY KEY,
+                      id SERIAL PRIMARY KEY,
                       name VARCHAR(255) NOT NULL,
                       email VARCHAR(255)
                     )
@@ -123,16 +125,20 @@ class PasswordInjectionIntegrationTest {
         ExternalDataSource externalDataSource = factory.createDataSource(dsConfig);
         assertNotNull(externalDataSource);
 
-        // Create test table using query method
-        externalDataSource.query("CREATE TABLE IF NOT EXISTS test_users (id INTEGER PRIMARY KEY, name VARCHAR(255) NOT NULL, email VARCHAR(255))", Map.of());
+        // Create test table using named query from YAML configuration
+        String createTableSql = dataSource.getQueries().get("createTestTable");
+        assertNotNull(createTableSql, "createTestTable query should be defined");
+        externalDataSource.query(createTableSql, Map.of());
         logger.info("✓ Test table created successfully");
 
-        // Insert test data using query method
+        // Insert test data using named query from YAML configuration
         Map<String, Object> insertParams = Map.of(
             "name", "Test User",
             "email", "test@example.com"
         );
-        externalDataSource.query("INSERT INTO test_users (name, email) VALUES (:name, :email)", insertParams);
+        String insertUserSql = dataSource.getQueries().get("insertTestUser");
+        assertNotNull(insertUserSql, "insertTestUser query should be defined");
+        externalDataSource.query(insertUserSql, insertParams);
         logger.info("✓ Test data inserted successfully");
 
         // Query test data
@@ -159,7 +165,7 @@ class PasswordInjectionIntegrationTest {
             data-sources:
               - name: "h2-operations-database"
                 type: "database"
-                sourceType: "h2"
+                source-type: "h2"
                 enabled: true
                 description: "H2 database with password injection for operations"
 
@@ -171,7 +177,7 @@ class PasswordInjectionIntegrationTest {
                 queries:
                   createUsersTable: |
                     CREATE TABLE IF NOT EXISTS users (
-                      id INTEGER PRIMARY KEY AUTO_INCREMENT,
+                      id SERIAL PRIMARY KEY,
                       username VARCHAR(50) NOT NULL UNIQUE,
                       email VARCHAR(100) NOT NULL,
                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -210,46 +216,58 @@ class PasswordInjectionIntegrationTest {
         ExternalDataSource externalDataSource = factory.createDataSource(dsConfig);
         assertNotNull(externalDataSource);
 
-        // Create users table
-        externalDataSource.query("createUsersTable", Map.of());
+        // Create users table - resolve named query to actual SQL
+        String createTableSql = dataSource.getQueries().get("createUsersTable");
+        assertNotNull(createTableSql, "createUsersTable query should be defined");
+        externalDataSource.query(createTableSql, Map.of());
         logger.info("✓ Users table created successfully");
 
-        // Insert test users
+        // Insert test users - resolve named queries to actual SQL
         Map<String, Object> user1 = Map.of("username", "john_doe", "email", "john@example.com");
         Map<String, Object> user2 = Map.of("username", "jane_smith", "email", "jane@example.com");
 
-        externalDataSource.query("insertUser", user1);
-        externalDataSource.query("insertUser", user2);
+        String insertUserSql = dataSource.getQueries().get("insertUser");
+        assertNotNull(insertUserSql, "insertUser query should be defined");
+        externalDataSource.query(insertUserSql, user1);
+        externalDataSource.query(insertUserSql, user2);
         logger.info("✓ Test users inserted successfully");
 
         // Query specific user
-        List<Object> johnResults = externalDataSource.query("getUserByUsername", Map.of("username", "john_doe"));
+        String getUserByUsernameSql = dataSource.getQueries().get("getUserByUsername");
+        assertNotNull(getUserByUsernameSql, "getUserByUsername query should be defined");
+        List<Object> johnResults = externalDataSource.query(getUserByUsernameSql, Map.of("username", "john_doe"));
         assertNotNull(johnResults);
         assertFalse(johnResults.isEmpty());
         logger.info("✓ User query successful: found {} records for john_doe", johnResults.size());
 
         // Query all users
-        List<Object> allUsers = externalDataSource.query("getAllUsers", Map.of());
+        String getAllUsersSql = dataSource.getQueries().get("getAllUsers");
+        assertNotNull(getAllUsersSql, "getAllUsers query should be defined");
+        List<Object> allUsers = externalDataSource.query(getAllUsersSql, Map.of());
         assertNotNull(allUsers);
         assertEquals(2, allUsers.size());
         logger.info("✓ All users query successful: found {} total users", allUsers.size());
 
-        // Update user email
-        externalDataSource.query("updateUserEmail", Map.of("username", "john_doe", "email", "john.doe@newdomain.com"));
+        // Update user email - resolve named query to actual SQL
+        String updateUserEmailSql = dataSource.getQueries().get("updateUserEmail");
+        assertNotNull(updateUserEmailSql, "updateUserEmail query should be defined");
+        externalDataSource.query(updateUserEmailSql, Map.of("username", "john_doe", "email", "john.doe@newdomain.com"));
         logger.info("✓ User email updated successfully");
 
-        // Verify update
-        List<Object> updatedUser = externalDataSource.query("getUserByUsername", Map.of("username", "john_doe"));
+        // Verify update - resolve named query to actual SQL
+        List<Object> updatedUser = externalDataSource.query(getUserByUsernameSql, Map.of("username", "john_doe"));
         assertNotNull(updatedUser);
         assertFalse(updatedUser.isEmpty());
         logger.info("✓ User update verified successfully");
 
-        // Delete user
-        externalDataSource.query("deleteUser", Map.of("username", "jane_smith"));
+        // Delete user - resolve named query to actual SQL
+        String deleteUserSql = dataSource.getQueries().get("deleteUser");
+        assertNotNull(deleteUserSql, "deleteUser query should be defined");
+        externalDataSource.query(deleteUserSql, Map.of("username", "jane_smith"));
         logger.info("✓ User deleted successfully");
 
-        // Verify deletion
-        List<Object> remainingUsers = externalDataSource.query("getAllUsers", Map.of());
+        // Verify deletion - resolve named query to actual SQL
+        List<Object> remainingUsers = externalDataSource.query(getAllUsersSql, Map.of());
         assertNotNull(remainingUsers);
         assertEquals(1, remainingUsers.size());
         logger.info("✓ User deletion verified: {} users remaining", remainingUsers.size());

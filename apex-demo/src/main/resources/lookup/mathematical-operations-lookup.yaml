@@ -1,0 +1,261 @@
+# Mathematical Operations in Lookup Keys Demo
+# Demonstrates SpEL mathematical expressions in lookup-key configurations
+# Use Case: Dynamic pricing and financial calculations using mathematical operations
+
+metadata:
+  id: "mathematical-operations-lookup-demo"
+  name: "Mathematical Operations Lookup Demo"
+  version: "1.0.0"
+  description: "Demonstrates SpEL mathematical expressions in lookup keys for dynamic pricing and financial calculations"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-01-13"
+  tags: ["apex-demo", "mathematical-operations", "spel", "pricing"]
+
+# Mathematical operations enrichment demonstrations
+enrichments:
+  - id: "dynamic-pricing-calculation"
+    name: "Dynamic Pricing with Mathematical Operations"
+    description: "Calculate total amount and discount rate using mathematical expressions"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#quantity != null && #unitPrice != null && #customerTier != null"
+    
+    lookup-config:
+      # Mathematical operations in lookup key - from technical report
+      lookup-key: "{'totalAmount': #quantity * #unitPrice, 'discountRate': #customerTier == 'PLATINUM' ? 0.15 : (#customerTier == 'GOLD' ? 0.10 : 0.05)}"
+      
+      lookup-dataset:
+        type: "inline"
+        key-field: "pricingKey"
+        data:
+          # Platinum tier pricing (15% discount)
+          - pricingKey: "PLATINUM_PRICING"
+            totalAmount: 10000.0
+            discountRate: 0.15
+            finalAmount: 8500.0
+            tierBenefits: "Premium support, expedited processing"
+            volumeDiscount: 0.02
+            
+          - pricingKey: "PLATINUM_PRICING"
+            totalAmount: 25000.0
+            discountRate: 0.15
+            finalAmount: 21250.0
+            tierBenefits: "Premium support, expedited processing"
+            volumeDiscount: 0.03
+            
+          # Gold tier pricing (10% discount)
+          - pricingKey: "GOLD_PRICING"
+            totalAmount: 10000.0
+            discountRate: 0.10
+            finalAmount: 9000.0
+            tierBenefits: "Priority support"
+            volumeDiscount: 0.01
+            
+          # Standard tier pricing (5% discount)
+          - pricingKey: "STANDARD_PRICING"
+            totalAmount: 10000.0
+            discountRate: 0.05
+            finalAmount: 9500.0
+            tierBenefits: "Standard support"
+            volumeDiscount: 0.0
+
+    field-mappings:
+      - source-field: "finalAmount"
+        target-field: "calculatedFinalAmount"
+        required: true
+      - source-field: "tierBenefits"
+        target-field: "customerTierBenefits"
+        required: true
+      - source-field: "volumeDiscount"
+        target-field: "additionalVolumeDiscount"
+        required: false
+
+  - id: "financial-risk-calculation"
+    name: "Financial Risk Assessment with Complex Math"
+    description: "Calculate risk scores using complex mathematical expressions"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#creditScore != null && #income != null && #debtRatio != null"
+    
+    lookup-config:
+      # Complex mathematical expression for risk assessment
+      lookup-key: "{'riskScore': (#creditScore * 0.4) + ((#income / 1000) * 0.3) - (#debtRatio * 100 * 0.3), 'incomeCategory': #income >= 100000 ? 'HIGH' : (#income >= 50000 ? 'MEDIUM' : 'LOW')}"
+      
+      lookup-dataset:
+        type: "inline"
+        key-field: "riskCategory"
+        data:
+          - riskCategory: "LOW_RISK"
+            riskScore: 750.0
+            incomeCategory: "HIGH"
+            interestRate: 3.25
+            maxLoanAmount: 1000000.0
+            approvalProbability: 0.95
+            
+          - riskCategory: "MEDIUM_RISK"
+            riskScore: 650.0
+            incomeCategory: "MEDIUM"
+            interestRate: 4.75
+            maxLoanAmount: 500000.0
+            approvalProbability: 0.80
+            
+          - riskCategory: "HIGH_RISK"
+            riskScore: 550.0
+            incomeCategory: "LOW"
+            interestRate: 6.25
+            maxLoanAmount: 250000.0
+            approvalProbability: 0.60
+
+    field-mappings:
+      - source-field: "interestRate"
+        target-field: "calculatedInterestRate"
+        required: true
+      - source-field: "maxLoanAmount"
+        target-field: "calculatedMaxLoan"
+        required: true
+      - source-field: "approvalProbability"
+        target-field: "loanApprovalProbability"
+        required: true
+
+  - id: "trading-commission-calculation"
+    name: "Trading Commission with Tiered Calculations"
+    description: "Calculate trading commissions using tiered mathematical formulas"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#tradeAmount != null && #tradeType != null && #accountTier != null"
+    
+    lookup-config:
+      # Tiered commission calculation with mathematical operations
+      lookup-key: "{'commission': #tradeAmount <= 10000 ? #tradeAmount * 0.001 : (#tradeAmount <= 100000 ? 10 + (#tradeAmount - 10000) * 0.0005 : 55 + (#tradeAmount - 100000) * 0.0002), 'tierMultiplier': #accountTier == 'VIP' ? 0.5 : (#accountTier == 'PREMIUM' ? 0.75 : 1.0)}"
+      
+      lookup-dataset:
+        type: "inline"
+        key-field: "commissionTier"
+        data:
+          - commissionTier: "TIER_1"  # <= $10,000
+            commission: 10.0
+            tierMultiplier: 1.0
+            finalCommission: 10.0
+            commissionRate: 0.001
+            
+          - commissionTier: "TIER_2"  # $10,001 - $100,000
+            commission: 55.0
+            tierMultiplier: 0.75
+            finalCommission: 41.25
+            commissionRate: 0.0005
+            
+          - commissionTier: "TIER_3"  # > $100,000
+            commission: 255.0
+            tierMultiplier: 0.5
+            finalCommission: 127.50
+            commissionRate: 0.0002
+
+    field-mappings:
+      - source-field: "finalCommission"
+        target-field: "calculatedCommission"
+        required: true
+      - source-field: "commissionRate"
+        target-field: "effectiveCommissionRate"
+        required: true
+
+  - id: "portfolio-allocation-calculation"
+    name: "Portfolio Allocation with Mathematical Optimization"
+    description: "Calculate optimal portfolio allocation using mathematical formulas"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#totalInvestment != null && #riskTolerance != null && #investmentHorizon != null"
+    
+    lookup-config:
+      # Portfolio allocation calculation with risk-adjusted returns
+      lookup-key: "{'equityAllocation': #riskTolerance * 0.01 * (100 - #investmentHorizon), 'bondAllocation': 100 - (#riskTolerance * 0.01 * (100 - #investmentHorizon)), 'expectedReturn': (#riskTolerance * 0.01 * 0.08) + ((100 - #riskTolerance) * 0.01 * 0.04)}"
+      
+      lookup-dataset:
+        type: "inline"
+        key-field: "allocationStrategy"
+        data:
+          - allocationStrategy: "AGGRESSIVE"
+            equityAllocation: 80.0
+            bondAllocation: 20.0
+            expectedReturn: 0.072
+            volatility: 0.15
+            sharpeRatio: 0.48
+            
+          - allocationStrategy: "MODERATE"
+            equityAllocation: 60.0
+            bondAllocation: 40.0
+            expectedReturn: 0.064
+            volatility: 0.12
+            sharpeRatio: 0.53
+            
+          - allocationStrategy: "CONSERVATIVE"
+            equityAllocation: 40.0
+            bondAllocation: 60.0
+            expectedReturn: 0.056
+            volatility: 0.08
+            sharpeRatio: 0.70
+
+    field-mappings:
+      - source-field: "expectedReturn"
+        target-field: "portfolioExpectedReturn"
+        required: true
+      - source-field: "volatility"
+        target-field: "portfolioVolatility"
+        required: true
+      - source-field: "sharpeRatio"
+        target-field: "portfolioSharpeRatio"
+        required: true
+
+  - id: "currency-conversion-calculation"
+    name: "Currency Conversion with Mathematical Operations"
+    description: "Calculate currency conversions with fees and spreads"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#amount != null && #fromCurrency != null && #toCurrency != null && #exchangeRate != null"
+    
+    lookup-config:
+      # Currency conversion with fees and spreads
+      lookup-key: "{'convertedAmount': #amount * #exchangeRate, 'conversionFee': #amount * #exchangeRate * 0.002, 'totalCost': (#amount * #exchangeRate) + (#amount * #exchangeRate * 0.002)}"
+      
+      lookup-dataset:
+        type: "inline"
+        key-field: "conversionType"
+        data:
+          - conversionType: "STANDARD"
+            convertedAmount: 1000.0
+            conversionFee: 2.0
+            totalCost: 1002.0
+            feeRate: 0.002
+            spread: 0.001
+            
+          - conversionType: "PREMIUM"
+            convertedAmount: 1000.0
+            conversionFee: 1.0
+            totalCost: 1001.0
+            feeRate: 0.001
+            spread: 0.0005
+
+    field-mappings:
+      - source-field: "totalCost"
+        target-field: "finalConversionCost"
+        required: true
+      - source-field: "feeRate"
+        target-field: "appliedFeeRate"
+        required: true
+      - source-field: "spread"
+        target-field: "currencySpread"
+        required: true
+
+# Processing configuration
+processing:
+  continue-on-error: true
+  max-errors: 5
+  error-handling: "log-and-continue"
+  mathematical-precision: "high"
+
+# Output configuration
+output:
+  include-calculation-details: true
+  include-mathematical-expressions: true
+  include-intermediate-results: true
+  format: "enhanced"

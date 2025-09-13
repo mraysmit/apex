@@ -51,6 +51,7 @@ class ComprehensivePasswordInjectionTest {
         System.setProperty("H2_DATABASE", "mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1");
         System.setProperty("H2_DRIVER", "org.h2.Driver");
         System.setProperty("H2_URL", "jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1");
+        System.setProperty("PASSWD", "h2secret");  // Add missing PASSWD property
     }
 
     @AfterEach
@@ -63,6 +64,7 @@ class ComprehensivePasswordInjectionTest {
         System.clearProperty("H2_DATABASE");
         System.clearProperty("H2_DRIVER");
         System.clearProperty("H2_URL");
+        System.clearProperty("PASSWD");
     }
 
     @Test
@@ -123,11 +125,11 @@ class ComprehensivePasswordInjectionTest {
                 "jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "h2secret");
              Statement stmt = conn.createStatement()) {
             
-            // Create test table
-            stmt.execute("CREATE TABLE IF NOT EXISTS password_test (id INTEGER PRIMARY KEY, name VARCHAR(255), value VARCHAR(255))");
-            
+            // Create test table (use test_value instead of value to avoid reserved keyword)
+            stmt.execute("CREATE TABLE IF NOT EXISTS password_test (id INTEGER PRIMARY KEY, name VARCHAR(255), test_value VARCHAR(255))");
+
             // Insert test data
-            stmt.execute("INSERT INTO password_test (id, name, value) VALUES (1, 'test', 'direct_connection_works')");
+            stmt.execute("INSERT INTO password_test (id, name, test_value) VALUES (1, 'test', 'direct_connection_works')");
             
             // Verify data
             try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM password_test")) {

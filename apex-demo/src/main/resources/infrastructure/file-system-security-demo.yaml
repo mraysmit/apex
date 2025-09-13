@@ -1,0 +1,357 @@
+# File System Security Demo
+# Demonstrates enterprise-grade file system security features
+# Use Case: Secure file processing with virus scanning, encryption, and access controls
+
+metadata:
+  id: "file-system-security-demo"
+  name: "File System Security Demo"
+  version: "1.0.0"
+  description: "Demonstrates enterprise-grade file system security with virus scanning, encryption, access controls, and audit logging"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-01-13"
+  tags: ["apex-demo", "file-security", "encryption", "virus-scanning", "audit"]
+
+# Secure file system data sources
+data-sources:
+  - name: "secure-trade-files"
+    type: "file-system"
+    enabled: true
+    description: "Secure file system for trade data with comprehensive security features"
+    tags: ["secure", "trade-data", "encrypted"]
+
+    # File system configuration with security
+    file-config:
+      base-path: "./target/secure-files/trades"
+      file-pattern: "trade_*.{csv,json,xml}"
+      recursive: true
+      
+      # Access control configuration
+      access-control:
+        enabled: true
+        read-only: true
+        allowed-extensions: [".csv", ".json", ".xml", ".txt"]
+        blocked-extensions: [".exe", ".bat", ".sh", ".ps1", ".dll"]
+        max-file-size: 104857600  # 100MB
+        
+        # Path traversal protection
+        prevent-path-traversal: true
+        allowed-paths:
+          - "./target/secure-files/trades"
+          - "./target/secure-files/reference"
+        blocked-paths:
+          - "/etc"
+          - "/var"
+          - "C:\\Windows"
+          - "C:\\Program Files"
+
+    # Virus scanning configuration
+    virus-scanning:
+      enabled: true
+      scanner-type: "clamav"  # or "windows-defender", "custom"
+      
+      # Scanning configuration
+      scan-on-access: true
+      scan-on-write: false  # Read-only access
+      quarantine-infected: true
+      quarantine-path: "./target/quarantine"
+      
+      # Scanning policies
+      scan-policies:
+        - policy: "STRICT"
+          scan-archives: true
+          scan-compressed: true
+          max-scan-time: 30000  # 30 seconds
+          
+      # Virus definition updates
+      definition-updates:
+        enabled: true
+        update-interval: 3600  # 1 hour
+        update-source: "official"
+
+    # Encryption configuration
+    encryption:
+      enabled: true
+      
+      # File encryption
+      file-encryption:
+        algorithm: "AES-256-GCM"
+        key-source: "key-management-service"
+        key-id: "${FILE_ENCRYPTION_KEY_ID}"
+        
+        # Encryption policies
+        encrypt-at-rest: true
+        encrypt-in-transit: true
+        key-rotation-interval: 86400  # 24 hours
+        
+      # Data encryption
+      data-encryption:
+        encrypt-sensitive-fields: true
+        sensitive-field-patterns:
+          - "*ssn*"
+          - "*account*"
+          - "*credit*"
+          - "*personal*"
+        encryption-algorithm: "AES-256-CBC"
+
+    # Audit logging configuration
+    audit-logging:
+      enabled: true
+      log-level: "DETAILED"
+      
+      # Audit events
+      audit-events:
+        - "FILE_ACCESS"
+        - "FILE_READ"
+        - "VIRUS_SCAN_RESULT"
+        - "ENCRYPTION_OPERATION"
+        - "ACCESS_DENIED"
+        - "SECURITY_VIOLATION"
+        
+      # Audit log configuration
+      audit-log:
+        file-path: "./target/audit/file-security-audit.log"
+        rotation-policy: "DAILY"
+        retention-days: 90
+        format: "JSON"
+        include-stack-traces: true
+
+    # File integrity monitoring
+    integrity-monitoring:
+      enabled: true
+      
+      # Hash verification
+      hash-verification:
+        algorithm: "SHA-256"
+        verify-on-access: true
+        store-hashes: true
+        hash-storage-path: "./target/hashes"
+        
+      # Change detection
+      change-detection:
+        enabled: true
+        monitor-modifications: true
+        monitor-permissions: true
+        monitor-ownership: true
+        alert-on-changes: true
+
+    # Secure caching
+    cache:
+      enabled: true
+      ttlSeconds: 1800  # 30 minutes
+      maxSize: 5000
+      eviction-policy: "LRU"
+      
+      # Security for cached data
+      cache-security:
+        encrypt-cached-data: true
+        exclude-sensitive-data: true
+        secure-cache-location: "./target/secure-cache"
+        cache-access-logging: true
+
+    # Health monitoring with security focus
+    healthCheck:
+      enabled: true
+      intervalSeconds: 300  # 5 minutes
+      
+      security-health-checks:
+        - name: "virus-scanner-status"
+          check-type: "SERVICE_STATUS"
+          critical: true
+          
+        - name: "encryption-key-availability"
+          check-type: "KEY_AVAILABILITY"
+          critical: true
+          
+        - name: "file-system-permissions"
+          check-type: "PERMISSION_CHECK"
+          critical: true
+          
+        - name: "audit-log-writability"
+          check-type: "LOG_WRITABILITY"
+          critical: false
+
+  - name: "secure-reference-files"
+    type: "file-system"
+    enabled: true
+    description: "Secure reference data files with different security profile"
+    tags: ["secure", "reference-data", "read-only"]
+
+    file-config:
+      base-path: "./target/secure-files/reference"
+      file-pattern: "ref_*.{json,xml}"
+      recursive: false
+      
+      # Stricter access control for reference data
+      access-control:
+        enabled: true
+        read-only: true
+        allowed-extensions: [".json", ".xml"]
+        max-file-size: 10485760  # 10MB
+        prevent-path-traversal: true
+
+    # Lighter virus scanning for reference data
+    virus-scanning:
+      enabled: true
+      scanner-type: "quick-scan"
+      scan-on-access: true
+      scan-policies:
+        - policy: "STANDARD"
+          scan-archives: false
+          max-scan-time: 10000  # 10 seconds
+
+    # Reference data encryption
+    encryption:
+      enabled: true
+      file-encryption:
+        algorithm: "AES-128-GCM"  # Lighter encryption for reference data
+        key-source: "local-key-store"
+        encrypt-at-rest: true
+
+    # Simplified audit for reference data
+    audit-logging:
+      enabled: true
+      log-level: "STANDARD"
+      audit-events:
+        - "FILE_ACCESS"
+        - "ACCESS_DENIED"
+
+# Security monitoring configuration
+security-monitoring:
+  enabled: true
+  monitoring-interval: 60  # seconds
+  
+  # Security metrics
+  security-metrics:
+    - "virus-scan-results"
+    - "access-denied-count"
+    - "encryption-operations"
+    - "file-integrity-violations"
+    - "suspicious-access-patterns"
+    - "security-policy-violations"
+    
+  # Threat detection
+  threat-detection:
+    enabled: true
+    
+    # Behavioral analysis
+    behavioral-analysis:
+      enabled: true
+      unusual-access-patterns: true
+      rapid-file-access-threshold: 100  # files per minute
+      off-hours-access-monitoring: true
+      
+    # Anomaly detection
+    anomaly-detection:
+      enabled: true
+      file-size-anomalies: true
+      access-frequency-anomalies: true
+      permission-change-detection: true
+
+# Security alerting
+security-alerting:
+  enabled: true
+  
+  # Security alerts
+  security-alerts:
+    - name: "virus-detected"
+      condition: "virus_detected == true"
+      severity: "CRITICAL"
+      immediate-notification: true
+      notification-channels: ["console", "log", "security-team"]
+      
+    - name: "unauthorized-access-attempt"
+      condition: "access_denied_count > 5"
+      severity: "HIGH"
+      threshold-duration: 300  # 5 minutes
+      notification-channels: ["console", "log", "security-team"]
+      
+    - name: "file-integrity-violation"
+      condition: "file_integrity_violation == true"
+      severity: "HIGH"
+      immediate-notification: true
+      notification-channels: ["console", "log", "security-team"]
+      
+    - name: "encryption-failure"
+      condition: "encryption_failure_rate > 0.01"  # 1% failure rate
+      severity: "CRITICAL"
+      threshold-duration: 60  # 1 minute
+      notification-channels: ["console", "log", "security-team"]
+      
+    - name: "suspicious-access-pattern"
+      condition: "suspicious_access_pattern_detected == true"
+      severity: "MEDIUM"
+      notification-channels: ["console", "log", "security-team"]
+
+# Compliance configuration
+compliance:
+  enabled: true
+  
+  # Compliance frameworks
+  frameworks:
+    - name: "PCI-DSS"
+      enabled: true
+      requirements:
+        - "encrypt-cardholder-data"
+        - "restrict-access-by-business-need"
+        - "assign-unique-id"
+        - "track-access-to-network-resources"
+        
+    - name: "GDPR"
+      enabled: true
+      requirements:
+        - "data-encryption"
+        - "access-logging"
+        - "data-minimization"
+        - "right-to-erasure"
+        
+    - name: "SOX"
+      enabled: true
+      requirements:
+        - "access-controls"
+        - "audit-trails"
+        - "data-integrity"
+        - "change-management"
+
+  # Compliance reporting
+  reporting:
+    enabled: true
+    report-interval: 86400  # Daily
+    report-path: "./target/compliance-reports"
+    include-metrics: true
+    include-violations: true
+
+# Data Loss Prevention (DLP)
+data-loss-prevention:
+  enabled: true
+  
+  # DLP policies
+  policies:
+    - name: "credit-card-detection"
+      pattern: "\\b(?:\\d{4}[-\\s]?){3}\\d{4}\\b"
+      action: "BLOCK"
+      severity: "HIGH"
+      
+    - name: "ssn-detection"
+      pattern: "\\b\\d{3}-\\d{2}-\\d{4}\\b"
+      action: "ENCRYPT"
+      severity: "HIGH"
+      
+    - name: "email-detection"
+      pattern: "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b"
+      action: "LOG"
+      severity: "MEDIUM"
+
+# Processing configuration
+processing:
+  continue-on-error: false  # Strict security - stop on security violations
+  max-errors: 0
+  error-handling: "fail-fast"
+  security-first: true
+
+# Output configuration
+output:
+  include-security-metrics: true
+  include-audit-summary: true
+  exclude-sensitive-data: true
+  format: "secure"

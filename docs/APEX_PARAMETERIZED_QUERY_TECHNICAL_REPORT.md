@@ -200,7 +200,7 @@ data-sources:
       password: ""
     queries:
       customerLookup: "SELECT customer_id, customer_name, customer_type, tier, region, status FROM customers WHERE customer_id = :customerId"
-    parameterNames:
+    parameter-names:
       - "customerId"
 ```
 
@@ -208,16 +208,16 @@ data-sources:
 
 #### JSON File Lookup with JSONPath Parameters
 ```yaml
-dataSources:
+data-sources:
   - name: "products-json-files"
     type: "file-system"
     connection:
-      basePath: "demo-data/json"
-      filePattern: "products.json"
-    parameterNames:
+      base-path: "demo-data/json"
+      file-pattern: "products.json"
+    parameter-names:
       - "productId"
 
-namedQueries:
+queries:
   findProductById:
     query: "$[?(@.id == ':productId')]"
     parameters:
@@ -398,7 +398,8 @@ APEX provides multiple sophisticated YAML configuration patterns for parameteriz
 #### 1. **Inline Query Configuration**
 ```yaml
 enrichments:
-  - name: "settlement-instruction-lookup"
+  - id: "settlement-instruction-lookup"
+    name: "Settlement Instruction Lookup"
     type: "lookup-enrichment"
     lookup-config:
       lookup-key: "{'counterpartyId': #counterpartyId, 'instrumentType': #instrumentType}"
@@ -437,33 +438,46 @@ data-sources:
           AND (:maxAmount IS NULL OR si.max_amount >= :maxAmount)
         ORDER BY si.priority ASC, si.created_date DESC
         LIMIT 1
-    parameterNames:
+    parameter-names:
       - "counterpartyId"
       - "instrumentType"
       - "minAmount"
       - "maxAmount"
 
 enrichments:
-  - name: "settlement-lookup"
+  - id: "settlement-lookup"
+    name: "Settlement Lookup"
     type: "lookup-enrichment"
     lookup-config:
       lookup-dataset:
         type: "database"
-        data-source-ref: "trading-database"
-        query-ref: "settlementInstructions"
+        connection-name: "trading-database"
+        query: |
+          SELECT si.instruction_id, si.counterparty_id, cp.counterparty_name,
+                 mk.market_name, mk.settlement_cycle, mk.cut_off_time
+          FROM settlement_instructions si
+          LEFT JOIN counterparties cp ON si.counterparty_id = cp.counterparty_id
+          LEFT JOIN markets mk ON si.market = mk.market_code
+          WHERE si.counterparty_id = :counterpartyId
+            AND si.instrument_type = :instrumentType
+            AND (:minAmount IS NULL OR si.min_amount <= :minAmount)
+            AND (:maxAmount IS NULL OR si.max_amount >= :maxAmount)
+          ORDER BY si.priority ASC, si.created_date DESC
+          LIMIT 1
 ```
 
 #### 3. **External Data Source References**
 ```yaml
 # File: lookup/multi-parameter-lookup.yaml
 enrichments:
-  - name: "settlement-instruction-lookup"
+  - id: "settlement-instruction-lookup"
+    name: "Settlement Instruction Lookup"
     type: "lookup-enrichment"
     lookup-config:
       lookup-dataset:
         type: "database"
         connection-name: "settlement-database"
-        query: "SELECT ... WHERE counterparty_id = :counterpartyId"
+        query: "SELECT instruction_id, counterparty_name FROM settlement_instructions WHERE counterparty_id = :counterpartyId"
 
 # File: data-sources/settlement-database.yaml
 data-sources:
@@ -474,7 +488,7 @@ data-sources:
       database: "./target/h2-demo/settlement_demo"
       username: "sa"
       password: ""
-    parameterNames:
+    parameter-names:
       - "counterpartyId"
       - "instrumentType"
 ```
@@ -553,9 +567,9 @@ lookup-config:
 
   # Conditional parameter mapping
   parameters:
-    customerId: "#data.customerId"
-    region: "#data.region != null ? #data.region : 'GLOBAL'"
-    amount: "#data.amount > 0 ? #data.amount : 0"
+    customerId: "#customerId"
+    region: "#region != null ? #region : 'GLOBAL'"
+    amount: "#amount > 0 ? #amount : 0"
 ```
 
 #### Mathematical Operations in Parameters
@@ -621,7 +635,8 @@ data-sources:
 
 # Level 2: Lookup Service Caching
 enrichments:
-  - name: "settlement-lookup"
+  - id: "settlement-lookup"
+    name: "Settlement Lookup"
     lookup-config:
       cache:
         enabled: true

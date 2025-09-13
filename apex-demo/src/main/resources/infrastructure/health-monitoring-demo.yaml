@@ -1,0 +1,273 @@
+# Comprehensive Health Monitoring Demo
+# Demonstrates parameter-aware health checks and comprehensive monitoring
+# Use Case: Enterprise-grade health monitoring with parameter validation
+
+metadata:
+  id: "comprehensive-health-monitoring-demo"
+  name: "Comprehensive Health Monitoring Demo"
+  version: "1.0.0"
+  description: "Demonstrates advanced health monitoring with parameter-aware health checks, metrics collection, and alerting"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-01-13"
+  tags: ["apex-demo", "health-monitoring", "metrics", "alerting"]
+
+# Data sources with comprehensive health monitoring
+data-sources:
+  - name: "monitored-trading-database"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "Trading database with comprehensive health monitoring and parameter validation"
+
+    connection:
+      database: "./target/h2-demo/apex_demo_shared"
+      username: "sa"
+      password: ""
+      
+      # Connection pool with monitoring
+      connection-pool:
+        max-size: 50
+        min-size: 10
+        initial-size: 15
+        connection-timeout: 30000
+        idle-timeout: 600000
+        max-lifetime: 1800000
+        leak-detection-threshold: 60000
+        connection-test-query: "SELECT 1"
+        test-on-borrow: true
+        test-while-idle: true
+
+    # Comprehensive health check configuration
+    healthCheck:
+      enabled: true
+      intervalSeconds: 30
+      timeoutSeconds: 10
+      
+      # Advanced health check configuration with parameter validation
+      health-validation:
+        # Multiple health check queries for comprehensive validation
+        queries:
+          - name: "connectivity-check"
+            query: "SELECT 1"
+            timeout: 5
+            critical: true
+            description: "Basic database connectivity test"
+
+          - name: "data-integrity-check"
+            query: "SELECT COUNT(*) as count FROM settlement_instructions WHERE status = :status"
+            parameters:
+              status: "ACTIVE"
+            timeout: 10
+            critical: true
+            expected-result-validation:
+              min-count: 1  # Expect at least 1 active instruction
+            description: "Verify active settlement instructions exist"
+
+          - name: "parameter-validation-check"
+            query: "SELECT COUNT(*) FROM counterparties WHERE counterparty_id = :testId"
+            parameters:
+              testId: "TEST_CP_001"
+            timeout: 15
+            critical: false
+            expected-result-validation:
+              exact-count: 1  # Test counterparty should exist
+            description: "Validate test data integrity"
+
+          - name: "performance-check"
+            query: |
+              SELECT AVG(CASE WHEN created_date >= CURRENT_DATE - 1 
+                         THEN EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - created_date)) * 1000 
+                         ELSE NULL END) as avg_time
+              FROM settlement_instructions
+              WHERE created_date >= CURRENT_DATE - 1
+            timeout: 20
+            critical: false
+            expected-result-validation:
+              max-avg-time: 1000  # Average processing time should be under 1 second
+            description: "Monitor average processing performance"
+
+          - name: "table-health-check"
+            query: |
+              SELECT 
+                (SELECT COUNT(*) FROM settlement_instructions) as si_count,
+                (SELECT COUNT(*) FROM counterparties) as cp_count,
+                (SELECT COUNT(*) FROM customers) as cust_count
+            timeout: 15
+            critical: true
+            expected-result-validation:
+              min-si-count: 1
+              min-cp-count: 1
+              min-cust-count: 1
+            description: "Verify all critical tables have data"
+
+        # Health check failure handling
+        failure-handling:
+          retry-attempts: 3
+          retry-delay-seconds: 5
+          circuit-breaker:
+            enabled: true
+            failure-threshold: 5
+            recovery-timeout: 60
+
+        # Health status reporting
+        reporting:
+          include-query-details: true
+          include-parameter-values: false  # Security: don't log sensitive parameters
+          log-successful-checks: false
+          log-failed-checks: true
+
+    # Cache configuration with monitoring
+    cache:
+      enabled: true
+      ttlSeconds: 300
+      maxSize: 10000
+      eviction-policy: "LRU"
+      statistics-enabled: true
+
+# Comprehensive monitoring configuration
+monitoring:
+  enabled: true
+  metrics-collection-interval-seconds: 60
+
+  # Database Operation Metrics
+  database-metrics:
+    enabled: true
+    collect-query-metrics: true
+    collect-connection-metrics: true
+    collect-parameter-metrics: true
+    
+    # Query performance tracking
+    query-metrics:
+      - "query-execution-time"
+      - "parameter-binding-time"
+      - "result-processing-time"
+      - "query-success-rate"
+      - "query-failure-rate"
+    
+    # Connection pool metrics
+    connection-metrics:
+      - "active-connections"
+      - "idle-connections"
+      - "pending-requests"
+      - "connection-creation-rate"
+      - "connection-usage-time"
+      - "pool-exhaustion-events"
+    
+    # Parameter processing metrics
+    parameter-metrics:
+      - "parameter-validation-time"
+      - "parameter-binding-success-rate"
+      - "parameter-type-conversion-errors"
+
+  # Health monitoring metrics
+  health-metrics:
+    enabled: true
+    track-health-check-duration: true
+    track-health-check-success-rate: true
+    track-parameter-validation-results: true
+
+  # Performance thresholds and alerting
+  alerting:
+    enabled: true
+    
+    # Database alerts
+    database-alerts:
+      - name: "slow-query-alert"
+        condition: "avg_query_time > 5000"  # 5 seconds
+        severity: "WARNING"
+        notification-channels: ["console", "log"]
+        description: "Database queries are running slower than expected"
+
+      - name: "high-error-rate-alert"
+        condition: "query_failure_rate > 0.05"  # 5% failure rate
+        severity: "CRITICAL"
+        notification-channels: ["console", "log"]
+        description: "High database query failure rate detected"
+
+      - name: "connection-pool-exhaustion-alert"
+        condition: "connection_pool_utilization > 0.9"  # 90% utilization
+        severity: "CRITICAL"
+        notification-channels: ["console", "log"]
+        description: "Database connection pool near exhaustion"
+
+    # Parameter alerts
+    parameter-alerts:
+      - name: "parameter-validation-failure-alert"
+        condition: "parameter_validation_failure_rate > 0.1"  # 10% failure rate
+        severity: "WARNING"
+        notification-channels: ["console", "log"]
+        description: "High parameter validation failure rate"
+
+      - name: "parameter-binding-slow-alert"
+        condition: "avg_parameter_binding_time > 100"  # 100ms
+        severity: "WARNING"
+        notification-channels: ["console", "log"]
+        description: "Parameter binding taking longer than expected"
+
+    # Health check alerts
+    health-alerts:
+      - name: "health-check-failure-alert"
+        condition: "health_check_failure_rate > 0.2"  # 20% failure rate
+        severity: "CRITICAL"
+        notification-channels: ["console", "log"]
+        description: "Health checks are failing frequently"
+
+      - name: "critical-health-check-failure"
+        condition: "critical_health_check_failed == true"
+        severity: "CRITICAL"
+        notification-channels: ["console", "log"]
+        description: "Critical health check has failed"
+
+# Health monitoring enrichment for demonstration
+enrichments:
+  - id: "health-monitoring-enrichment-demo"
+    name: "Health Monitoring Enrichment"
+    description: "Demonstrates health monitoring integration with enrichment processing"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#healthCheckType != null"
+    
+    lookup-config:
+      lookup-key: "#healthCheckType"
+      lookup-dataset:
+        type: "inline"
+        key-field: "checkType"
+        data:
+          - checkType: "CONNECTIVITY"
+            expectedResult: "SUCCESS"
+            timeoutMs: 5000
+            criticalLevel: "HIGH"
+          - checkType: "DATA_INTEGRITY"
+            expectedResult: "VALID"
+            timeoutMs: 10000
+            criticalLevel: "HIGH"
+          - checkType: "PERFORMANCE"
+            expectedResult: "ACCEPTABLE"
+            timeoutMs: 20000
+            criticalLevel: "MEDIUM"
+
+    field-mappings:
+      - source-field: "expectedResult"
+        target-field: "healthExpectedResult"
+        required: true
+      - source-field: "timeoutMs"
+        target-field: "healthTimeout"
+        required: true
+      - source-field: "criticalLevel"
+        target-field: "healthCriticalLevel"
+        required: true
+
+# Processing configuration
+processing:
+  continue-on-error: true
+  max-errors: 10
+  error-handling: "log-and-continue"
+  health-monitoring-enabled: true
+
+# Output configuration
+output:
+  include-health-metrics: true
+  include-monitoring-data: true
+  include-alert-status: true
+  format: "enhanced"

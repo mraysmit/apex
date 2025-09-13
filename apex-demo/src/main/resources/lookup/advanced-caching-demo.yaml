@@ -1,0 +1,218 @@
+# Advanced Parameter-Aware Caching Demo
+# Demonstrates sophisticated caching strategies with parameter isolation
+# Use Case: Enterprise-grade caching with parameter-aware key generation
+
+metadata:
+  id: "advanced-parameter-aware-caching-demo"
+  name: "Advanced Parameter-Aware Caching Demo"
+  version: "1.0.0"
+  description: "Demonstrates advanced caching features including parameter-aware caching, eviction policies, and statistics collection"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-01-13"
+  tags: ["apex-demo", "caching", "performance", "parameters"]
+
+# External data source with advanced caching configuration
+data-sources:
+  - name: "customer-database-advanced-cache"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "Customer database with advanced parameter-aware caching"
+
+    connection:
+      database: "./target/h2-demo/apex_demo_shared"
+      username: "sa"
+      password: ""
+
+    # Advanced parameter-aware caching configuration
+    cache:
+      enabled: true
+      ttlSeconds: 1800  # 30 minutes
+      maxSize: 50000
+      keyPrefix: "customer"
+      
+      # Advanced caching features from technical report
+      cacheKeyIncludesParameters: true
+      eviction-policy: "LRU"  # Least Recently Used
+      statistics-enabled: true
+      preload-on-startup: false
+      cache-null-values: false
+      
+      # Cache key generation strategy
+      key-generation-strategy: "PARAMETER_HASH"
+      include-query-in-key: true
+      parameter-serialization: "JSON"
+
+    # Named queries for caching demonstration
+    queries:
+      customerByIdAndRegion: |
+        SELECT customer_id, customer_name, customer_type, tier, region, status, credit_score
+        FROM customers 
+        WHERE customer_id = :customerId AND region = :region
+      
+      customersByTierAndStatus: |
+        SELECT customer_id, customer_name, tier, region, status
+        FROM customers 
+        WHERE tier = :tier AND status = :status
+        ORDER BY customer_name
+        LIMIT :limit
+
+    parameter-names:
+      - "customerId"
+      - "region"
+      - "tier"
+      - "status"
+      - "limit"
+
+    healthCheck:
+      enabled: true
+      query: "SELECT COUNT(*) as customer_count FROM customers"
+      timeout: 5000
+
+# Multi-level caching demonstration
+enrichments:
+  - id: "customer-profile-advanced-caching"
+    name: "Customer Profile with Advanced Caching"
+    description: "Demonstrates parameter-aware caching with different cache strategies"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#customerId != null && #region != null"
+    
+    lookup-config:
+      # Compound lookup key for parameter isolation
+      lookup-key: "{'customerId': #customerId, 'region': #region}"
+      
+      lookup-dataset:
+        type: "database"
+        connection-name: "customer-database-advanced-cache"
+        query: |
+          SELECT customer_id, customer_name, customer_type, tier, region, status, credit_score
+          FROM customers 
+          WHERE customer_id = :customerId AND region = :region
+        parameters:
+          - field: "customerId"
+            type: "string"
+          - field: "region"
+            type: "string"
+      
+      # Enrichment-level caching (Level 2)
+      cache:
+        enabled: true
+        ttlSeconds: 1800  # 30 minutes for reference data
+        maxSize: 5000
+        # Cache at enrichment level for processed results
+        cache-processed-results: true
+        eviction-policy: "LFU"  # Least Frequently Used for hot data
+        statistics-enabled: true
+
+    # Field mappings with caching considerations
+    field-mappings:
+      - source-field: "CUSTOMER_ID"
+        target-field: "customerId"
+        required: true
+      - source-field: "CUSTOMER_NAME"
+        target-field: "customerName"
+        required: true
+      - source-field: "CUSTOMER_TYPE"
+        target-field: "customerType"
+        required: true
+      - source-field: "TIER"
+        target-field: "customerTier"
+        required: true
+      - source-field: "REGION"
+        target-field: "customerRegion"
+        required: true
+      - source-field: "STATUS"
+        target-field: "customerStatus"
+        required: true
+      - source-field: "CREDIT_SCORE"
+        target-field: "creditScore"
+        required: false
+
+  - id: "tier-based-lookup-with-caching"
+    name: "Tier-Based Lookup with Different Cache Strategy"
+    description: "Demonstrates different caching strategy for tier-based lookups"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#customerTier != null && #customerStatus != null"
+    
+    lookup-config:
+      # Different lookup key pattern for different cache behavior
+      lookup-key: "{'tier': #customerTier, 'status': #customerStatus, 'limit': 10}"
+      
+      lookup-dataset:
+        type: "database"
+        connection-name: "customer-database-advanced-cache"
+        query: |
+          SELECT customer_id, customer_name, tier, region, status
+          FROM customers 
+          WHERE tier = :tier AND status = :status
+          ORDER BY customer_name
+          LIMIT :limit
+        parameters:
+          - field: "tier"
+            type: "string"
+          - field: "status"
+            type: "string"
+          - field: "limit"
+            type: "integer"
+      
+      # Different cache configuration for tier-based data
+      cache:
+        enabled: true
+        ttlSeconds: 300  # 5 minutes for frequently changing data
+        maxSize: 10000
+        eviction-policy: "LFU"  # Least Frequently Used for hot data
+        cache-processed-results: true
+        statistics-enabled: true
+
+    field-mappings:
+      - source-field: "CUSTOMER_ID"
+        target-field: "tierCustomerId"
+        required: true
+      - source-field: "CUSTOMER_NAME"
+        target-field: "tierCustomerName"
+        required: true
+      - source-field: "TIER"
+        target-field: "tierLevel"
+        required: true
+
+# Processing configuration for caching optimization
+processing:
+  continue-on-error: true
+  max-errors: 5
+  error-handling: "log-and-continue"
+  
+  # Performance optimization settings
+  performance:
+    enable-caching: true
+    cache-statistics-logging: true
+    cache-hit-ratio-threshold: 0.7  # Log warning if hit ratio below 70%
+
+# Cache monitoring configuration
+cache-monitoring:
+  enabled: true
+  metrics-collection-interval: 60  # seconds
+  
+  # Key Performance Indicators
+  track-metrics:
+    - "cache-hit-ratio"
+    - "cache-miss-ratio"
+    - "cache-eviction-rate"
+    - "cache-size-utilization"
+    - "parameter-hash-distribution"
+    - "query-cache-effectiveness"
+
+  # Cache performance alerts
+  alerts:
+    low-hit-ratio-threshold: 0.6      # Below 60% hit ratio
+    high-eviction-rate-threshold: 100  # More than 100 evictions per minute
+    cache-size-warning-threshold: 0.9  # 90% cache utilization
+
+# Output configuration
+output:
+  include-cache-statistics: true
+  include-parameter-hash-info: true
+  include-performance-metrics: true
+  format: "enhanced"

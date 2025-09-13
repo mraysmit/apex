@@ -105,9 +105,13 @@ public class BasicYamlRuleGroupProcessingATest {
 
             try {
                 // Load using multi-file approach with separate rules and rule groups files
+                // Get the absolute paths to the test resources
+                String rulesPath = getClass().getClassLoader().getResource("separate-rules-test/rules.yaml").getPath();
+                String ruleGroupsPath = getClass().getClassLoader().getResource("separate-rules-test/rule-groups.yaml").getPath();
+
                 RulesEngine engine = rulesEngineService.createRulesEngineFromMultipleFiles(
-                    "separate-rules-test/rules.yaml",
-                    "separate-rules-test/rule-groups.yaml"
+                    rulesPath,
+                    ruleGroupsPath
                 );
 
                 RuleGroup ruleGroup = engine.getConfiguration().getRuleGroupById("separate-and-mixed-group");
