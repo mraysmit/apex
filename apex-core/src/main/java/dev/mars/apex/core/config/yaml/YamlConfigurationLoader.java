@@ -634,6 +634,9 @@ public class YamlConfigurationLoader {
         // Step 3: Validate for duplicates
         validateDuplicates(config);
 
+        // Step 4: Validate no unresolved property placeholders remain
+        validateNoUnresolvedPlaceholdersInConfiguration(config);
+
         LOGGER.fine("Configuration validation completed successfully");
     }
     
@@ -2102,6 +2105,57 @@ public class YamlConfigurationLoader {
         LOGGER.fine("Resolved property: ${" + placeholder + "} -> " + logValue);
 
         return value;
+    }
+
+    /**
+     * Validate that no unresolved property placeholders remain in the entire configuration.
+     *
+     * @param config The configuration to check for unresolved placeholders
+     * @throws YamlConfigurationException if unresolved placeholders are found
+     */
+    private void validateNoUnresolvedPlaceholdersInConfiguration(YamlRuleConfiguration config) throws YamlConfigurationException {
+        try {
+            // Convert the configuration back to YAML string to check for placeholders
+            String yamlString = yamlMapper.writeValueAsString(config);
+            validateNoUnresolvedPlaceholders(yamlString);
+        } catch (Exception e) {
+            if (e instanceof YamlConfigurationException) {
+                throw (YamlConfigurationException) e;
+            }
+            throw new YamlConfigurationException("Failed to validate configuration for unresolved placeholders", e);
+        }
+    }
+
+    /**
+     * Validate that no unresolved property placeholders remain in the value.
+     *
+     * @param value The value to check for unresolved placeholders
+     * @throws YamlConfigurationException if unresolved placeholders are found
+     */
+    private void validateNoUnresolvedPlaceholders(String value) throws YamlConfigurationException {
+        if (value == null) {
+            return;
+        }
+
+        // Check for unresolved ${...} placeholders
+        Pattern curlyPattern = Pattern.compile("\\$\\{([^}]+)\\}");
+        Matcher curlyMatcher = curlyPattern.matcher(value);
+        if (curlyMatcher.find()) {
+            String placeholder = curlyMatcher.group(1);
+            // Extract property name (before any colon for default values)
+            String propertyName = placeholder.split(":", 2)[0].trim();
+            throw new YamlConfigurationException("Property not found: " + propertyName);
+        }
+
+        // Check for unresolved $(...) placeholders
+        Pattern parenPattern = Pattern.compile("\\$\\(([^)]+)\\)");
+        Matcher parenMatcher = parenPattern.matcher(value);
+        if (parenMatcher.find()) {
+            String placeholder = parenMatcher.group(1);
+            // Extract property name (before any colon for default values)
+            String propertyName = placeholder.split(":", 2)[0].trim();
+            throw new YamlConfigurationException("Property not found: " + propertyName);
+        }
     }
 
     /**
