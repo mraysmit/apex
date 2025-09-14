@@ -1,0 +1,32 @@
+metadata:
+  name: "Scenario Registry Metadata Validation Test"
+  version: "1.0.0"
+  description: "Test scenario-registry document metadata validation with all required fields"
+  type: "scenario-registry"
+  id: "scenario-registry-metadata-test"
+  created-by: "apex-test-suite@example.com"
+  created: "2025-09-14"
+  last-modified: "2025-09-14"
+  tags: ["test", "metadata", "validation", "scenario-registry"]
+
+scenario-registry:
+  # Minimal scenario entry for metadata validation
+  - scenario-id: "metadata-validation-test-scenario"
+    config-file: "scenarios/test/metadata-validation-scenario.yaml"
+    data-types:
+      - "TestDataType"
+      - "ValidationTestObject"
+    description: "Simple scenario for testing metadata validation requirements"
+    business-domain: "Testing"
+    owner: "test.team@example.com"
+    enabled: true
+
+  # Second scenario entry to ensure registry is not empty
+  - scenario-id: "metadata-validation-secondary-test"
+    config-file: "scenarios/test/secondary-validation-scenario.yaml"
+    data-types:
+      - "SecondaryTestType"
+    description: "Secondary scenario for comprehensive metadata testing"
+    business-domain: "Testing"
+    owner: "test.team@example.com"
+    enabled: false

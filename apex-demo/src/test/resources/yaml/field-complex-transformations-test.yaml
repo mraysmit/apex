@@ -1,0 +1,83 @@
+metadata:
+  id: "field-complex-transformations-test"
+  name: "Field Complex Transformations Test"
+  version: "1.0.0"
+  description: "Test complex field transformation operations and expressions"
+  type: "rule-config"
+  author: "apex-test-suite@example.com"
+  created-date: "2025-09-14"
+  tags: ["apex-test", "field-transformation", "complex-operations", "advanced-expressions"]
+
+# Complex field transformation testing
+enrichments:
+  - id: "name-cleaning-transformation"
+    name: "name-cleaning-transformation"
+    type: "calculation-enrichment"
+    description: "Clean and normalize customer name"
+    condition: "#customerName != null"
+    calculation-config:
+      expression: "#customerName.trim().toUpperCase()"
+      result-field: "cleanedName"
+    field-mappings:
+      - source-field: "cleanedName"
+        target-field: "cleanedName"
+
+  - id: "account-masking-transformation"
+    name: "account-masking-transformation"
+    type: "calculation-enrichment"
+    description: "Mask account number showing only last 4 digits"
+    condition: "#accountNumber != null && #accountNumber.length() >= 4"
+    calculation-config:
+      expression: "'****' + #accountNumber.substring(#accountNumber.length() - 4)"
+      result-field: "maskedAccount"
+    field-mappings:
+      - source-field: "maskedAccount"
+        target-field: "maskedAccount"
+
+  - id: "amount-formatting-transformation"
+    name: "amount-formatting-transformation"
+    type: "calculation-enrichment"
+    description: "Format transaction amount as currency"
+    condition: "#transactionAmount != null"
+    calculation-config:
+      expression: "'$' + T(java.lang.String).format('%,.2f', #transactionAmount)"
+      result-field: "formattedAmount"
+    field-mappings:
+      - source-field: "formattedAmount"
+        target-field: "formattedAmount"
+
+  - id: "date-processing-transformation"
+    name: "date-processing-transformation"
+    type: "calculation-enrichment"
+    description: "Process and format transaction date"
+    condition: "#transactionDate != null"
+    calculation-config:
+      expression: "'Processed on: ' + #transactionDate"
+      result-field: "processedDate"
+    field-mappings:
+      - source-field: "processedDate"
+        target-field: "processedDate"
+
+  - id: "risk-categorization-transformation"
+    name: "risk-categorization-transformation"
+    type: "calculation-enrichment"
+    description: "Transform risk score to category"
+    condition: "#riskScore != null"
+    calculation-config:
+      expression: "#riskScore >= 80 ? 'HIGH' : (#riskScore >= 50 ? 'MEDIUM' : 'LOW')"
+      result-field: "riskCategory"
+    field-mappings:
+      - source-field: "riskCategory"
+        target-field: "riskCategory"
+
+  - id: "tier-status-transformation"
+    name: "tier-status-transformation"
+    type: "calculation-enrichment"
+    description: "Transform customer tier to status"
+    condition: "#customerTier != null"
+    calculation-config:
+      expression: "#customerTier.toUpperCase() + '_CUSTOMER'"
+      result-field: "tierStatus"
+    field-mappings:
+      - source-field: "tierStatus"
+        target-field: "tierStatus"

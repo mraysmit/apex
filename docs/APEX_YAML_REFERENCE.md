@@ -2120,7 +2120,7 @@ data-source-refs:
 # Data transformation
 enrichments:
   - id: "customer-data-enrichment"
-    type: "field-transformation"
+    type: "field-enrichment"
     description: "Enrich and validate customer data"
     condition: "true"
 

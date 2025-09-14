@@ -1,0 +1,91 @@
+metadata:
+  name: "Scenario Registry Regulatory Scope Test"
+  version: "1.0.0"
+  description: "Test scenario-registry document with regulatory compliance information"
+  type: "scenario-registry"
+  id: "scenario-registry-regulatory-test"
+  created-by: "regulatory.compliance@firm.com"
+  created: "2025-09-14"
+  last-modified: "2025-09-14"
+  tags: ["test", "scenario-registry", "regulatory", "compliance"]
+
+scenario-registry:
+  # EMIR Regulatory Reporting
+  - scenario-id: "emir-reporting"
+    config-file: "scenarios/regulatory/emir-reporting-scenario.yaml"
+    data-types:
+      - "EmirReportableTransaction"
+      - "DerivativeTrade"
+    description: "EMIR regulatory reporting validation and enrichment"
+    business-domain: "Regulatory Reporting"
+    regulatory-scope: "European Union (EMIR)"
+    owner: "regulatory.emir@firm.com"
+    compliance-reviewed: true
+    compliance-reviewer: "compliance.derivatives@firm.com"
+    compliance-date: "2025-09-01"
+    risk-approved: true
+    enabled: true
+
+  # CFTC Regulatory Reporting
+  - scenario-id: "cftc-reporting"
+    config-file: "scenarios/regulatory/cftc-reporting-scenario.yaml"
+    data-types:
+      - "CftcReportableTransaction"
+      - "SwapTransaction"
+    description: "CFTC regulatory reporting for US jurisdiction"
+    business-domain: "Regulatory Reporting"
+    regulatory-scope: "United States (CFTC)"
+    owner: "regulatory.cftc@firm.com"
+    compliance-reviewed: true
+    compliance-reviewer: "compliance.us@firm.com"
+    compliance-date: "2025-09-01"
+    risk-approved: true
+    enabled: true
+
+  # MiFID II Transaction Reporting
+  - scenario-id: "mifid-transaction-reporting"
+    config-file: "scenarios/regulatory/mifid-transaction-reporting-scenario.yaml"
+    data-types:
+      - "MifidTransaction"
+      - "EuEquityTransaction"
+    description: "MiFID II transaction reporting compliance"
+    business-domain: "Regulatory Reporting"
+    regulatory-scope: "European Union (MiFID II)"
+    owner: "regulatory.mifid@firm.com"
+    compliance-reviewed: true
+    compliance-reviewer: "compliance.eu@firm.com"
+    compliance-date: "2025-09-01"
+    risk-approved: true
+    enabled: true
+
+  # Asian Markets Settlement with Regulatory Compliance
+  - scenario-id: "settlement-auto-repair-asia"
+    config-file: "scenarios/settlements/settlement-auto-repair-asia-scenario.yaml"
+    data-types:
+      - "SettlementInstruction"
+      - "AsianMarketSettlement"
+    description: "Intelligent auto-repair for failed settlement instructions in Asian markets"
+    business-domain: "Post-Trade Settlement"
+    regulatory-scope: "Asian Markets (Japan, Hong Kong, Singapore, Korea)"
+    owner: "settlements.asia@firm.com"
+    compliance-reviewed: true
+    compliance-reviewer: "compliance.asia@firm.com"
+    compliance-date: "2025-09-01"
+    risk-approved: true
+    enabled: true
+
+  # Basel III Capital Adequacy
+  - scenario-id: "basel-capital-adequacy"
+    config-file: "scenarios/regulatory/basel-capital-adequacy-scenario.yaml"
+    data-types:
+      - "CapitalPosition"
+      - "RiskWeightedAsset"
+    description: "Basel III capital adequacy calculation and reporting"
+    business-domain: "Risk Management"
+    regulatory-scope: "Global (Basel III)"
+    owner: "risk.capital@firm.com"
+    compliance-reviewed: true
+    compliance-reviewer: "compliance.basel@firm.com"
+    compliance-date: "2025-09-01"
+    risk-approved: true
+    enabled: true

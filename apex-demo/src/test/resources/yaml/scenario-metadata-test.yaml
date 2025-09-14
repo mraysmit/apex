@@ -1,0 +1,26 @@
+metadata:
+  name: "Scenario Document Metadata Validation Test"
+  version: "1.0.0"
+  description: "Test scenario document metadata validation with all required fields"
+  type: "scenario"
+  id: "scenario-metadata-test"
+  business-domain: "Financial Services"
+  owner: "apex-test-suite@example.com"
+  created: "2025-09-14"
+  last-modified: "2025-09-14"
+  tags: ["test", "metadata", "validation"]
+
+scenario:
+  scenario-id: "metadata-validation-test"
+  name: "Metadata Validation Test Scenario"
+  description: "Simple scenario for testing metadata validation requirements"
+  
+  # Minimal data types for validation
+  data-types:
+    - "TestDataType"
+    - "ValidationTestObject"
+  
+  # Minimal rule configurations for validation
+  rule-configurations:
+    - "config/test-validation-rules.yaml"
+    - "config/test-enrichment-rules.yaml"

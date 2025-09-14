@@ -1,0 +1,127 @@
+metadata:
+  id: "lookup-complex-keys-test"
+  name: "Lookup Complex Keys Test"
+  version: "1.0.0"
+  description: "Test complex lookup key expressions and computed lookups"
+  type: "rule-config"
+  author: "apex-test-suite@example.com"
+  created-date: "2025-09-14"
+  tags: ["apex-test", "lookup-operations", "complex-keys", "computed-lookups"]
+
+# Complex lookup key expressions testing
+enrichments:
+  - id: "amount-based-lookup"
+    name: "amount-based-lookup"
+    type: "lookup-enrichment"
+    description: "Lookup processing tier based on trade amount"
+    condition: "#tradeAmount != null"
+    lookup-config:
+      lookup-key: "#tradeAmount > 1000000 ? 'HIGH_VALUE' : 'STANDARD'"
+      lookup-dataset:
+        type: "inline"
+        key-field: "category"
+        data:
+          - category: "HIGH_VALUE"
+            processingTier: "TIER_1"
+            approvalRequired: true
+            reviewLevel: "SENIOR"
+          - category: "STANDARD"
+            processingTier: "TIER_2"
+            approvalRequired: false
+            reviewLevel: "STANDARD"
+    field-mappings:
+      - source-field: "category"
+        target-field: "amountCategory"
+      - source-field: "processingTier"
+        target-field: "processingTier"
+      - source-field: "approvalRequired"
+        target-field: "approvalRequired"
+
+  - id: "concatenated-key-lookup"
+    name: "concatenated-key-lookup"
+    type: "lookup-enrichment"
+    description: "Lookup using concatenated field values"
+    condition: "#counterpartyLEI != null && #currency != null"
+    lookup-config:
+      lookup-key: "#counterpartyLEI + '_' + #currency"
+      lookup-dataset:
+        type: "inline"
+        key-field: "compositeKey"
+        data:
+          - compositeKey: "7LTWFZYICNSX8D621K86_USD"
+            riskRating: "A+"
+            creditLimit: 50000000
+            relationship: "PRIME_BROKERAGE"
+          - compositeKey: "8EE8DF3643E15DBFDA05_USD"
+            riskRating: "AA-"
+            creditLimit: 100000000
+            relationship: "INVESTMENT_BANKING"
+    field-mappings:
+      - source-field: "compositeKey"
+        target-field: "compositeKey"
+      - source-field: "riskRating"
+        target-field: "riskRating"
+      - source-field: "creditLimit"
+        target-field: "creditLimit"
+
+  - id: "conditional-expression-lookup"
+    name: "conditional-expression-lookup"
+    type: "lookup-enrichment"
+    description: "Lookup using conditional expression for regulatory codes"
+    condition: "#jurisdiction != null"
+    lookup-config:
+      lookup-key: "#jurisdiction == 'US' ? 'CFTC_CODE_US' : (#jurisdiction == 'EU' ? 'EMIR_CODE_EU' : 'OTHER_CODE')"
+      lookup-dataset:
+        type: "inline"
+        key-field: "regulatoryCode"
+        data:
+          - regulatoryCode: "CFTC_CODE_US"
+            regulator: "CFTC"
+            reportingRequired: true
+            clearingMandatory: true
+          - regulatoryCode: "EMIR_CODE_EU"
+            regulator: "ESMA"
+            reportingRequired: true
+            clearingMandatory: false
+          - regulatoryCode: "OTHER_CODE"
+            regulator: "LOCAL"
+            reportingRequired: false
+            clearingMandatory: false
+    field-mappings:
+      - source-field: "regulatoryCode"
+        target-field: "regulatoryCode"
+      - source-field: "regulator"
+        target-field: "regulator"
+      - source-field: "reportingRequired"
+        target-field: "reportingRequired"
+
+  - id: "risk-score-lookup"
+    name: "risk-score-lookup"
+    type: "lookup-enrichment"
+    description: "Lookup risk tier based on risk score ranges"
+    condition: "#riskScore != null"
+    lookup-config:
+      lookup-key: "#riskScore >= 80 ? 'HIGH_RISK' : (#riskScore >= 50 ? 'MEDIUM_RISK' : 'LOW_RISK')"
+      lookup-dataset:
+        type: "inline"
+        key-field: "riskTier"
+        data:
+          - riskTier: "HIGH_RISK"
+            monitoringLevel: "ENHANCED"
+            reviewFrequency: "DAILY"
+            escalationRequired: true
+          - riskTier: "MEDIUM_RISK"
+            monitoringLevel: "STANDARD"
+            reviewFrequency: "WEEKLY"
+            escalationRequired: false
+          - riskTier: "LOW_RISK"
+            monitoringLevel: "BASIC"
+            reviewFrequency: "MONTHLY"
+            escalationRequired: false
+    field-mappings:
+      - source-field: "riskTier"
+        target-field: "riskTier"
+      - source-field: "monitoringLevel"
+        target-field: "monitoringLevel"
+      - source-field: "reviewFrequency"
+        target-field: "reviewFrequency"

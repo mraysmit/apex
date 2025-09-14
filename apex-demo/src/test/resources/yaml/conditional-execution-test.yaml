@@ -1,0 +1,71 @@
+metadata:
+  id: "conditional-execution-test"
+  name: "Conditional Enrichment Execution Test"
+  version: "1.0.0"
+  description: "Test conditional enrichment execution based on data conditions"
+  type: "rule-config"
+  author: "apex-test-suite@example.com"
+  created-date: "2025-09-14"
+  tags: ["apex-test", "conditional", "execution", "enrichment-conditions"]
+
+# Conditional enrichment execution testing
+enrichments:
+  - id: "high-value-compliance-check"
+    name: "high-value-compliance-check"
+    type: "calculation-enrichment"
+    description: "Execute compliance check only for high-value transactions"
+    condition: "#amount > 50000"
+    calculation-config:
+      expression: "'HIGH_VALUE_COMPLIANCE_CHECK: Transaction amount ' + #amount + ' requires enhanced compliance review'"
+      result-field: "complianceCheck"
+    field-mappings:
+      - source-field: "complianceCheck"
+        target-field: "complianceCheck"
+
+  - id: "international-transaction-flags"
+    name: "international-transaction-flags"
+    type: "calculation-enrichment"
+    description: "Set international flags only for cross-border transactions"
+    condition: "#sourceCountry != null && #destinationCountry != null && #sourceCountry != #destinationCountry"
+    calculation-config:
+      expression: "'CROSS_BORDER_TRANSACTION: ' + #sourceCountry + ' to ' + #destinationCountry + ' - International compliance required'"
+      result-field: "internationalFlags"
+    field-mappings:
+      - source-field: "internationalFlags"
+        target-field: "internationalFlags"
+
+  - id: "wire-transfer-validation"
+    name: "wire-transfer-validation"
+    type: "calculation-enrichment"
+    description: "Execute wire transfer validation only for wire transfers"
+    condition: "#transactionType == 'WIRE_TRANSFER'"
+    calculation-config:
+      expression: "'WIRE_VALIDATED: Wire transfer validation completed for ' + #transactionType + ' transaction'"
+      result-field: "wireTransferValidation"
+    field-mappings:
+      - source-field: "wireTransferValidation"
+        target-field: "wireTransferValidation"
+
+  - id: "risk-based-assessment"
+    name: "risk-based-assessment"
+    type: "calculation-enrichment"
+    description: "Execute risk assessment only for medium and high risk customers"
+    condition: "#customerRisk == 'MEDIUM' || #customerRisk == 'HIGH'"
+    calculation-config:
+      expression: "'RISK_ASSESSMENT: ' + #customerRisk + '_RISK customer requires additional screening'"
+      result-field: "riskAssessment"
+    field-mappings:
+      - source-field: "riskAssessment"
+        target-field: "riskAssessment"
+
+  - id: "documentation-verification"
+    name: "documentation-verification"
+    type: "calculation-enrichment"
+    description: "Execute documentation verification only when documentation is available"
+    condition: "#hasDocumentation == true"
+    calculation-config:
+      expression: "'DOCUMENTATION_VERIFIED: Customer documentation is available and verified'"
+      result-field: "documentationVerification"
+    field-mappings:
+      - source-field: "documentationVerification"
+        target-field: "documentationVerification"

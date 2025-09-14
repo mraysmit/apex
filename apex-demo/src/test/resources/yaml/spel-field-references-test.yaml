@@ -1,0 +1,59 @@
+metadata:
+  id: "spel-field-references-test"
+  name: "SpEL Field References Test"
+  version: "1.0.0"
+  description: "Test SpEL field reference expressions with #fieldName syntax"
+  type: "rule-config"
+  author: "apex-test-suite@example.com"
+  created-date: "2025-09-14"
+  tags: ["apex-test", "spel", "field-references"]
+
+# SpEL field reference expressions testing
+enrichments:
+  - id: "full-name-calculation"
+    name: "full-name-calculation"
+    type: "calculation-enrichment"
+    description: "Calculate full name using field references"
+    condition: "#firstName != null && #lastName != null"
+    calculation-config:
+      expression: "#firstName + ' ' + #lastName"
+      result-field: "fullName"
+    field-mappings:
+      - source-field: "fullName"
+        target-field: "fullName"
+
+  - id: "display-name-calculation"
+    name: "display-name-calculation"
+    type: "calculation-enrichment"
+    description: "Calculate display name with department"
+    condition: "#firstName != null && #lastName != null && #department != null"
+    calculation-config:
+      expression: "#firstName + ' ' + #lastName + ' (' + #department + ')'"
+      result-field: "displayName"
+    field-mappings:
+      - source-field: "displayName"
+        target-field: "displayName"
+
+  - id: "eligibility-calculation"
+    name: "eligibility-calculation"
+    type: "calculation-enrichment"
+    description: "Calculate eligibility based on age and active status"
+    condition: "#age != null && #isActive != null"
+    calculation-config:
+      expression: "#age >= 18 && #isActive == true"
+      result-field: "isEligible"
+    field-mappings:
+      - source-field: "isEligible"
+        target-field: "isEligible"
+
+  - id: "salary-category-calculation"
+    name: "salary-category-calculation"
+    type: "calculation-enrichment"
+    description: "Calculate salary category based on salary amount"
+    condition: "#salary != null"
+    calculation-config:
+      expression: "#salary > 100000 ? 'VERY_HIGH' : (#salary > 70000 ? 'HIGH' : (#salary > 50000 ? 'MEDIUM' : 'LOW'))"
+      result-field: "salaryCategory"
+    field-mappings:
+      - source-field: "salaryCategory"
+        target-field: "salaryCategory"

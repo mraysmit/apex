@@ -1,0 +1,106 @@
+metadata:
+  id: "external-data-config-database-test"
+  name: "External Data Config Database Test"
+  version: "1.0.0"
+  description: "Test external-data-config document with database data sources"
+  type: "external-data-config"
+  author: "apex-test-suite@example.com"
+  created-date: "2025-09-14"
+  tags: ["apex-test", "external-data-config", "database"]
+
+dataSources:
+  - name: "customer-database"
+    type: "database"
+    sourceType: "postgresql"
+    enabled: true
+    description: "Customer database for profile enrichment"
+    
+    connection:
+      host: "localhost"
+      port: 5432
+      database: "customer_db"
+      username: "app_user"
+      password: "${DB_PASSWORD}"
+      
+    queries:
+      getCustomerById: "SELECT * FROM customers WHERE customer_id = :customerId"
+      getCustomerByEmail: "SELECT * FROM customers WHERE email = :email"
+      getAllActiveCustomers: "SELECT * FROM customers WHERE status = 'ACTIVE' ORDER BY created_at DESC"
+      
+    cache:
+      enabled: true
+      ttlSeconds: 300
+      maxSize: 1000
+      
+    healthCheck:
+      enabled: true
+      query: "SELECT 1"
+      intervalSeconds: 60
+      
+  - name: "transaction-database"
+    type: "database"
+    sourceType: "h2"
+    enabled: true
+    description: "Transaction database for financial data"
+    
+    connection:
+      host: "localhost"
+      port: 9092
+      database: "transactions"
+      username: "sa"
+      password: ""
+      
+    queries:
+      getTransactionById: "SELECT * FROM transactions WHERE transaction_id = :transactionId"
+      getTransactionsByCustomer: "SELECT * FROM transactions WHERE customer_id = :customerId ORDER BY transaction_date DESC"
+      getTransactionsByDateRange: "SELECT * FROM transactions WHERE transaction_date BETWEEN :startDate AND :endDate"
+      
+    cache:
+      enabled: true
+      ttlSeconds: 600
+      maxSize: 5000
+      
+  - name: "reference-database"
+    type: "database"
+    sourceType: "mysql"
+    enabled: true
+    description: "Reference data database for lookups"
+    
+    connection:
+      host: "reference-db.company.com"
+      port: 3306
+      database: "reference_data"
+      username: "readonly_user"
+      password: "${REF_DB_PASSWORD}"
+      
+    queries:
+      getCurrencyByCode: "SELECT * FROM currencies WHERE currency_code = :currencyCode"
+      getCountryByCode: "SELECT * FROM countries WHERE country_code = :countryCode"
+      getInstrumentById: "SELECT * FROM instruments WHERE instrument_id = :instrumentId"
+      
+    cache:
+      enabled: true
+      ttlSeconds: 3600
+      maxSize: 10000
+
+configuration:
+  defaultConnectionTimeout: 30000
+  maxConnectionPoolSize: 20
+  connectionValidationTimeout: 5000
+  
+  retryPolicy:
+    maxRetries: 3
+    backoffStrategy: "exponential"
+    initialDelayMs: 1000
+    maxDelayMs: 10000
+    
+  monitoring:
+    enabled: true
+    healthCheckLogging: true
+    performanceMetrics: true
+    slowQueryThresholdMs: 5000
+    
+  security:
+    encryptionEnabled: true
+    sslRequired: true
+    certificateValidation: true

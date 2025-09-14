@@ -1,0 +1,76 @@
+metadata:
+  id: "dataset-inline-test"
+  name: "Dataset Document Inline Data Test"
+  version: "1.0.0"
+  description: "Test dataset document type with inline reference data"
+  type: "dataset"
+  source: "Test Reference Data Service"
+  created-by: "APEX Test Suite"
+  created-date: "2025-01-14"
+  business-domain: "Testing"
+
+data:
+  # Counterparties data
+  - recordType: "counterparty"
+    name: "Goldman Sachs"
+    lei: "784F5XWPLTWKTBV3E584"
+    jurisdiction: "US"
+    entityType: "INVESTMENT_BANK"
+    creditRating: "A+"
+    sector: "FINANCIAL_SERVICES"
+    establishedYear: 1869
+    headquarters: "New York, NY"
+
+  - recordType: "counterparty"
+    name: "JPMorgan Chase"
+    lei: "8EE8DF3643E15DBFDA05"
+    jurisdiction: "US"
+    entityType: "BANK"
+    creditRating: "AA-"
+    sector: "FINANCIAL_SERVICES"
+    establishedYear: 1799
+    headquarters: "New York, NY"
+
+  - recordType: "counterparty"
+    name: "Deutsche Bank"
+    lei: "7LTWFZYICNSX8D621K86"
+    jurisdiction: "DE"
+    entityType: "BANK"
+    creditRating: "A+"
+    sector: "FINANCIAL_SERVICES"
+    establishedYear: 1870
+    headquarters: "Frankfurt, Germany"
+
+  # Currency data
+  - recordType: "currency"
+    code: "USD"
+    name: "US Dollar"
+    symbol: "$"
+    country: "United States"
+    region: "North America"
+    isBaseCurrency: true
+
+  - recordType: "currency"
+    code: "EUR"
+    name: "Euro"
+    symbol: "€"
+    country: "European Union"
+    region: "Europe"
+    isBaseCurrency: true
+
+  # Instrument data
+  - recordType: "instrument"
+    id: "US912828XG93"
+    type: "TREASURY_NOTE"
+    maturity: "10Y"
+    issuer: "US_TREASURY"
+    currency: "USD"
+    couponRate: 2.5
+
+  - recordType: "instrument"
+    id: "DE0001102309"
+    type: "GOVERNMENT_BOND"
+    maturity: "30Y"
+    issuer: "GERMAN_GOVERNMENT"
+    currency: "EUR"
+    couponRate: 1.75

@@ -1,0 +1,121 @@
+metadata:
+  name: "Rule-Chain Document Conditional Chaining Test"
+  version: "1.0.0"
+  description: "Test rule-chain document with conditional chaining pattern"
+  type: "rule-chain"
+  id: "rule-chain-conditional-test"
+  author: "apex-test-suite@example.com"
+  created: "2025-09-14"
+  last-modified: "2025-09-14"
+  tags: ["test", "rule-chain", "conditional", "chaining"]
+
+rule-chains:
+  # Fraud Detection Conditional Pipeline
+  - id: "fraud-detection-pipeline"
+    name: "Fraud Detection Conditional Pipeline"
+    description: "Conditional chaining for fraud detection processing"
+    pattern: "conditional-chaining"
+    enabled: true
+    priority: 10
+    category: "fraud-detection"
+    
+    configuration:
+      rules:
+        # Basic Fraud Check
+        - id: "basic-fraud-check"
+          name: "Basic Fraud Check"
+          condition: "#amount <= 5000 && #merchantCategory != 'HIGH_RISK'"
+          message: "Basic fraud check passed - low risk transaction"
+          severity: "INFO"
+          next-rule: "velocity-check"
+          failure-action: "escalate-to-manual-review"
+
+        # Velocity Check
+        - id: "velocity-check"
+          name: "Transaction Velocity Check"
+          condition: "#dailyTransactionCount <= 10 && #dailyTransactionAmount <= 50000"
+          message: "Velocity check passed - normal transaction pattern"
+          severity: "INFO"
+          next-rule: "geo-location-check"
+          failure-action: "flag-high-velocity"
+
+        # Geographic Location Check
+        - id: "geo-location-check"
+          name: "Geographic Location Check"
+          condition: "#transactionLocation == #customerHomeLocation || #travelNotificationActive == true"
+          message: "Geographic location check passed"
+          severity: "INFO"
+          next-rule: "merchant-verification"
+          failure-action: "flag-unusual-location"
+
+        # Merchant Verification
+        - id: "merchant-verification"
+          name: "Merchant Verification"
+          condition: "#merchantId != null && #merchantStatus == 'ACTIVE' && #merchantRiskScore <= 50"
+          message: "Merchant verification passed"
+          severity: "INFO"
+          next-rule: "final-approval"
+          failure-action: "flag-merchant-risk"
+
+        # Final Approval
+        - id: "final-approval"
+          name: "Final Transaction Approval"
+          condition: "true"  # Always execute if reached
+          message: "Transaction approved - all fraud checks passed"
+          severity: "INFO"
+          success-action: "approve-transaction"
+
+  # Customer Onboarding Conditional Chain
+  - id: "customer-onboarding-conditional"
+    name: "Customer Onboarding Conditional Chain"
+    description: "Conditional processing for customer onboarding"
+    pattern: "conditional-chaining"
+    enabled: true
+    priority: 20
+    category: "customer-onboarding"
+    
+    configuration:
+      rules:
+        # Identity Verification
+        - id: "identity-verification"
+          name: "Identity Verification"
+          condition: "#identityDocument != null && #identityVerified == true"
+          message: "Identity verification completed"
+          severity: "INFO"
+          next-rule: "address-verification"
+          failure-action: "request-additional-documents"
+
+        # Address Verification
+        - id: "address-verification"
+          name: "Address Verification"
+          condition: "#addressDocument != null && #addressVerified == true"
+          message: "Address verification completed"
+          severity: "INFO"
+          next-rule: "credit-check"
+          failure-action: "request-address-proof"
+
+        # Credit Check
+        - id: "credit-check"
+          name: "Credit Score Check"
+          condition: "#creditScore >= 650"
+          message: "Credit check passed - acceptable credit score"
+          severity: "INFO"
+          next-rule: "income-verification"
+          failure-action: "offer-secured-products"
+
+        # Income Verification
+        - id: "income-verification"
+          name: "Income Verification"
+          condition: "#incomeDocuments != null && #monthlyIncome >= 3000"
+          message: "Income verification completed"
+          severity: "INFO"
+          next-rule: "final-onboarding"
+          failure-action: "limit-account-features"
+
+        # Final Onboarding
+        - id: "final-onboarding"
+          name: "Complete Customer Onboarding"
+          condition: "true"  # Always execute if reached
+          message: "Customer onboarding completed successfully"
+          severity: "INFO"
+          success-action: "activate-full-account"

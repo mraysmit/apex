@@ -1,0 +1,153 @@
+metadata:
+  id: "pipeline-etl-test"
+  name: "Pipeline ETL Workflow Test"
+  version: "1.0.0"
+  description: "Test pipeline document with complete ETL workflow orchestration"
+  type: "pipeline"
+  author: "apex-test-suite@example.com"
+  created-date: "2025-09-14"
+  tags: ["apex-test", "pipeline", "etl", "workflow"]
+
+# Pipeline orchestration - defines the complete ETL workflow
+pipeline:
+  name: "customer-etl-pipeline"
+  description: "Extract customer data from CSV, transform, and load into H2 database"
+
+  # Pipeline steps executed in sequence
+  steps:
+    - name: "extract-customers"
+      type: "extract"
+      source: "customer-csv-input"
+      operation: "getAllCustomers"
+      description: "Read all customer records from CSV file"
+
+    - name: "validate-customers"
+      type: "transform"
+      description: "Validate customer data quality and format"
+      depends-on: ["extract-customers"]
+      transformations:
+        - name: "validate-email"
+          type: "validation"
+          field: "email"
+          rule: "email-format"
+        - name: "validate-phone"
+          type: "validation"
+          field: "phone"
+          rule: "phone-format"
+
+    - name: "enrich-customers"
+      type: "transform"
+      description: "Enrich customer data with additional information"
+      depends-on: ["validate-customers"]
+      transformations:
+        - name: "add-processing-timestamp"
+          type: "field-addition"
+          field: "processed_at"
+          value: "CURRENT_TIMESTAMP"
+        - name: "calculate-customer-score"
+          type: "calculation"
+          field: "customer_score"
+          expression: "#creditScore * 0.7 + #loyaltyPoints * 0.3"
+
+    - name: "load-to-database"
+      type: "load"
+      sink: "customer-h2-database"
+      operation: "insertCustomer"
+      description: "Insert customer records into H2 database"
+      depends-on: ["enrich-customers"]
+
+    - name: "audit-logging"
+      type: "audit"
+      sink: "audit-log-file"
+      operation: "writeAuditRecord"
+      description: "Write audit records to JSON file"
+      depends-on: ["load-to-database"]
+      optional: true
+
+  # Execution configuration
+  execution:
+    mode: "sequential"
+    errorHandling: "stop-on-error"
+    maxRetries: 3
+    retryDelay: 1000
+    timeout: 300000
+
+  # Monitoring configuration
+  monitoring:
+    enabled: true
+    logLevel: "INFO"
+    metricsEnabled: true
+    performanceTracking: true
+
+# Input data sources
+data-sources:
+  - name: "customer-csv-input"
+    type: "file-system"
+    enabled: true
+    description: "Customer data CSV file input"
+    
+    connection:
+      basePath: "./data/input"
+      filePattern: "customers.csv"
+      
+    fileFormat:
+      type: "csv"
+      hasHeaderRow: true
+      delimiter: ","
+      encoding: "UTF-8"
+      
+    queries:
+      getAllCustomers: "SELECT * FROM csv"
+
+# Output data sinks
+data-sinks:
+  - name: "customer-h2-database"
+    type: "database"
+    sourceType: "h2"
+    enabled: true
+    description: "H2 database for customer records"
+    
+    connection:
+      database: "./output/customers"
+      username: "sa"
+      password: ""
+      
+    operations:
+      insertCustomer: |
+        INSERT INTO customers (customer_id, customer_name, email, phone, processed_at, customer_score) 
+        VALUES (:customer_id, :customer_name, :email, :phone, :processed_at, :customer_score)
+        
+    schema:
+      autoCreate: true
+      init-script: |
+        CREATE TABLE IF NOT EXISTS customers (
+          customer_id INTEGER PRIMARY KEY,
+          customer_name VARCHAR(255) NOT NULL,
+          email VARCHAR(255) UNIQUE,
+          phone VARCHAR(50),
+          processed_at TIMESTAMP,
+          customer_score DECIMAL(10,2),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+  - name: "audit-log-file"
+    type: "file-system"
+    enabled: true
+    description: "JSON audit log file"
+    
+    connection:
+      basePath: "./output/audit"
+      filePattern: "audit-{date}.json"
+      
+    fileFormat:
+      type: "json"
+      prettyPrint: true
+      
+    operations:
+      writeAuditRecord: |
+        {
+          "timestamp": ":timestamp",
+          "operation": ":operation",
+          "recordCount": ":recordCount",
+          "status": ":status"
+        }

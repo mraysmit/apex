@@ -204,7 +204,7 @@ metadata:
   name: "Descriptive Name"                    # Required: Clear identification
   version: "1.0.0"                           # Required: Semantic versioning
   description: "Clear purpose description"   # Required: Functionality explanation
-  type: "file-type"                          # Required: One of supported types
+  type: "rule-config"                        # Required: One of supported types
 ```
 
 **Financial Services Specific Requirements:**
@@ -383,6 +383,14 @@ Financial services organizations require access to diverse data sources includin
 Connect to trade repositories and transaction databases:
 
 ```yaml
+metadata:
+  id: "trade-database-config"
+  name: "Trade Database Configuration"
+  version: "1.0.0"
+  type: "external-data-config"
+  description: "Trade repository and transaction database connections"
+  author: "data.team@firm.com"
+
 dataSources:
   - name: "trade-database"
     type: "database"
@@ -437,6 +445,14 @@ dataSources:
 Connect to real-time market data providers:
 
 ```yaml
+metadata:
+  id: "market-data-api-config"
+  name: "Market Data API Configuration"
+  version: "1.0.0"
+  type: "external-data-config"
+  description: "Real-time market data provider connections"
+  author: "integration.team@firm.com"
+
 dataSources:
   - name: "market-data-api"
     type: "rest-api"
@@ -487,6 +503,14 @@ dataSources:
 Process regulatory reference data files:
 
 ```yaml
+metadata:
+  id: "regulatory-files-config"
+  name: "Regulatory Files Configuration"
+  version: "1.0.0"
+  type: "external-data-config"
+  description: "Regulatory reference data file processing"
+  author: "compliance.team@firm.com"
+
 dataSources:
   - name: "regulatory-files"
     type: "file-system"
@@ -527,6 +551,14 @@ dataSources:
 Cache frequently accessed reference data:
 
 ```yaml
+metadata:
+  id: "reference-cache-config"
+  name: "Reference Data Cache Configuration"
+  version: "1.0.0"
+  type: "external-data-config"
+  description: "High-performance reference data caching"
+  author: "infrastructure.team@firm.com"
+
 dataSources:
   - name: "reference-cache"
     type: "cache"
@@ -663,8 +695,8 @@ enrichments:
     condition: "['underlyingCommodity'] != null"
     lookup-config:
       lookup-dataset:
-        type: "yaml-file"
-        file-path: "datasets/commodities.yaml"
+        type: "external"
+        source: "commodities-dataset"
         key-field: "code"
         cache-enabled: true
     field-mappings:
@@ -688,8 +720,8 @@ enrichments:
     condition: "['counterpartyLEI'] != null"
     lookup-config:
       lookup-dataset:
-        type: "yaml-file"
-        file-path: "datasets/lei-registry.yaml"
+        type: "external"
+        source: "lei-registry-dataset"
         key-field: "lei"
         cache-enabled: true
         cache-ttl-seconds: 86400  # 24 hours
@@ -710,8 +742,8 @@ enrichments:
     condition: "['isin'] != null || ['cusip'] != null || ['sedol'] != null"
     lookup-config:
       lookup-dataset:
-        type: "yaml-file"
-        file-path: "datasets/security-identifiers.yaml"
+        type: "external"
+        source: "security-identifiers-dataset"
         key-field: "primaryId"
         cache-enabled: true
     field-mappings:
@@ -765,8 +797,8 @@ enrichments:
     condition: "['counterpartyLEI'] != null"
     lookup-config:
       lookup-dataset:
-        type: "yaml-file"
-        file-path: "datasets/credit-ratings.yaml"
+        type: "external"
+        source: "credit-ratings-dataset"
         key-field: "lei"
         cache-enabled: true
     field-mappings:
@@ -885,8 +917,8 @@ enrichments:
     condition: "['instrumentType'] != null && ['notionalAmount'] != null"
     lookup-config:
       lookup-dataset:
-        type: "yaml-file"
-        file-path: "datasets/var-parameters.yaml"
+        type: "external"
+        source: "var-parameters-dataset"
         key-field: "instrumentType"
         cache-enabled: true
     field-mappings:
@@ -1139,8 +1171,8 @@ enrichments:
     condition: "['currency'] != null"
     lookup-config:
       lookup-dataset:
-        type: "yaml-file"
-        file-path: "datasets/currencies.yaml"
+        type: "external"
+        source: "currencies-dataset"
         key-field: "code"
     field-mappings:
       - source-field: "name"
@@ -1153,8 +1185,8 @@ enrichments:
     condition: "['counterpartyLEI'] != null"
     lookup-config:
       lookup-dataset:
-        type: "yaml-file"
-        file-path: "datasets/counterparties.yaml"
+        type: "external"
+        source: "counterparties-dataset"
         key-field: "lei"
     field-mappings:
       - source-field: "name"
@@ -1980,8 +2012,8 @@ enrichments:
     condition: "['counterpartyLEI'] != null && ['currency'] != null"
     lookup-config:
       lookup-dataset:
-        type: "yaml-file"
-        file-path: "datasets/settlement-instructions.yaml"
+        type: "external"
+        source: "settlement-instructions-dataset"
         key-field: "counterpartyLEI_currency"
         cache-enabled: true
     field-mappings:
@@ -2033,8 +2065,8 @@ enrichments:
     condition: "['underlyingAsset'] != null"
     lookup-config:
       lookup-dataset:
-        type: "yaml-file"
-        file-path: "datasets/market-data.yaml"
+        type: "external"
+        source: "market-data-dataset"
         key-field: "assetId"
         cache-enabled: true
         cache-ttl-seconds: 300  # 5 minutes for market data
@@ -2055,8 +2087,8 @@ enrichments:
     condition: "['currency'] != null && ['tenor'] != null"
     lookup-config:
       lookup-dataset:
-        type: "yaml-file"
-        file-path: "datasets/yield-curves.yaml"
+        type: "external"
+        source: "yield-curves-dataset"
         key-field: "currency_tenor"
         cache-enabled: true
         cache-ttl-seconds: 600  # 10 minutes
@@ -2077,8 +2109,8 @@ enrichments:
     condition: "['counterpartyLEI'] != null"
     lookup-config:
       lookup-dataset:
-        type: "yaml-file"
-        file-path: "datasets/isda-agreements.yaml"
+        type: "external"
+        source: "isda-agreements-dataset"
         key-field: "counterpartyLEI"
         cache-enabled: true
     field-mappings:
@@ -2307,8 +2339,8 @@ enrichments:
     condition: "['counterpartyLEI'] != null"
     lookup-config:
       lookup-dataset:
-        type: "yaml-file"
-        file-path: "datasets/lei-registry.yaml"
+        type: "external"
+        source: "lei-registry-dataset"
         key-field: "lei"
 ```
 
@@ -2326,8 +2358,8 @@ enrichments:
     lookup-config:
       lookup-key: "#counterpartyLEI"
       lookup-dataset:
-        type: "yaml-file"
-        file-path: "datasets/lei-registry.yaml"
+        type: "external"
+        source: "lei-registry-dataset"
         key-field: "lei"
         cache-enabled: true
         cache-ttl-seconds: 86400
@@ -2459,7 +2491,7 @@ enrichments:
   - id: "mifid-classification"
     name: "MiFID II Client Classification"
     condition: "#jurisdiction == 'EU'"
-    enrichmentType: "computed"
+    type: "calculation-enrichment"
     computedFields:
       mifidClassification: |
         #clientType == 'PROFESSIONAL' ? 'PROFESSIONAL' :
@@ -3231,14 +3263,14 @@ metadata:
 rules:
   - id: "isin-format-validation"
     name: "ISIN Format Validation"
-    condition: "#data.security != null && #data.security.instrumentId != null && #data.security.instrumentId.matches('^[A-Z]{2}[A-Z0-9]{9}[0-9]$')"
+    condition: "#security != null && #security.instrumentId != null && #security.instrumentId.matches('^[A-Z]{2}[A-Z0-9]{9}[0-9]$')"
     message: "ISIN must follow format: 2 country letters + 9 alphanumeric + 1 check digit"
     severity: "ERROR"
 
 enrichments:
   - id: "lei-enrichment"
     type: "lookup-enrichment"
-    condition: "#data.counterparty != null && #data.counterparty.partyName != null"
+    condition: "#counterparty != null && #counterparty.partyName != null"
     lookup-config:
       lookup-key: "counterparty.partyName"
       lookup-dataset:
@@ -3262,7 +3294,7 @@ enrichments:
 
   - id: "isin-security-enrichment"
     type: "lookup-enrichment"
-    condition: "#data.security != null && #data.security.instrumentId != null"
+    condition: "#security != null && #security.instrumentId != null"
     lookup-config:
       lookup-key: "security.instrumentId"
       lookup-dataset:
@@ -3287,7 +3319,7 @@ enrichments:
 
   - id: "mic-code-enrichment"
     type: "lookup-enrichment"
-    condition: "#data.tradingVenue != null"
+    condition: "#tradingVenue != null"
     lookup-config:
       lookup-key: "tradingVenue"
       lookup-dataset:
@@ -3311,7 +3343,7 @@ enrichments:
 
   - id: "bic-code-enrichment"
     type: "lookup-enrichment"
-    condition: "#data.counterparty != null && #data.counterparty.partyName != null"
+    condition: "#counterparty != null && #counterparty.partyName != null"
     lookup-config:
       lookup-key: "counterparty.partyName"
       lookup-dataset:
@@ -3330,7 +3362,7 @@ enrichments:
 
   - id: "ssi-enrichment"
     type: "lookup-enrichment"
-    condition: "#data.counterparty != null && #data.counterparty.lei != null && #data.venue != null && #data.venue.country != null"
+    condition: "#counterparty != null && #counterparty.lei != null && #venue != null && #venue.country != null"
     lookup-config:
       lookup-key: "#counterparty.lei + '_' + #venue.country"
       lookup-dataset:
@@ -3369,7 +3401,7 @@ enrichments:
 
   - id: "bond-specific-enrichment"
     type: "lookup-enrichment"
-    condition: "#data.trade.security.instrumentType == 'GOVERNMENT_BOND'"
+    condition: "#trade.security.instrumentType == 'GOVERNMENT_BOND'"
     lookup-config:
       lookup-key: "trade.security.instrumentId"
       lookup-dataset:
@@ -3394,7 +3426,7 @@ enrichments:
 
   - id: "derivative-enrichment"
     type: "lookup-enrichment"
-    condition: "#data.trade.derivative != null && #data.trade.derivative.productType != null"
+    condition: "#trade.derivative != null && #trade.derivative.productType != null"
     lookup-config:
       lookup-key: "trade.derivative.productType"
       lookup-dataset:
@@ -3507,7 +3539,7 @@ metadata:
 enrichments:
   - id: "credit-rating-enrichment"
     type: "lookup-enrichment"
-    condition: "#data.counterpartyId != null && #data.counterpartyId.lei != null"
+    condition: "#counterpartyId != null && #counterpartyId.lei != null"
     lookup-config:
       lookup-key: "counterpartyId.lei"
       lookup-dataset:
@@ -3536,7 +3568,7 @@ enrichments:
 
   - id: "counterparty-classification"
     type: "lookup-enrichment"
-    condition: "#data.counterpartyId != null && #data.counterpartyId.lei != null"
+    condition: "#counterpartyId != null && #counterpartyId.lei != null"
     lookup-config:
       lookup-key: "counterpartyId.lei"
       lookup-dataset:
@@ -3565,7 +3597,7 @@ enrichments:
 
   - id: "relationship-tier-enrichment"
     type: "lookup-enrichment"
-    condition: "#data.accountInfo != null && #data.accountInfo.accountNumber != null"
+    condition: "#accountInfo != null && #accountInfo.accountNumber != null"
     lookup-config:
       lookup-key: "accountInfo.accountNumber"
       lookup-dataset:
@@ -3608,7 +3640,7 @@ Regulatory enrichment ensures compliance with financial regulations by adding re
 enrichments:
   - id: "regulatory-jurisdiction-flags"
     type: "calculation-enrichment"
-    condition: "#data.reportHeader != null && #data.reportHeader.reportingEntity != null"
+    condition: "#reportHeader != null && #reportHeader.reportingEntity != null"
     calculations:
       - field: "regulatory.mifidII.applicable"
         expression: "#reportHeader.reportingEntity.jurisdiction == 'EU'"
@@ -3619,7 +3651,7 @@ enrichments:
 
   - id: "uti-generation"
     type: "calculation-enrichment"
-    condition: "#data.transactionDetails != null && #data.transactionDetails.transactionId != null"
+    condition: "#transactionDetails != null && #transactionDetails.transactionId != null"
     calculations:
       - field: "regulatory.uti"
         expression: "#reportHeader.reportingEntity.lei + '-' + #transactionDetails.transactionId + '-' + T(java.time.LocalDate).now().format(T(java.time.format.DateTimeFormatter).ofPattern('yyyyMMdd'))"
@@ -3641,7 +3673,7 @@ Risk enrichment adds critical risk metrics, exposure calculations, and margin re
 enrichments:
   - id: "var-calculation"
     type: "calculation-enrichment"
-    condition: "#data.positions != null && #data.positions.position != null"
+    condition: "#positions != null && #positions.position != null"
     calculations:
       - field: "riskMetrics.var1Day99"
         expression: "#positions.position.marketValue * 0.025"
@@ -3650,7 +3682,7 @@ enrichments:
 
   - id: "counterparty-exposure-calculation"
     type: "calculation-enrichment"
-    condition: "#data.counterparty != null && #data.positions != null"
+    condition: "#counterparty != null && #positions != null"
     calculations:
       - field: "exposure.currentExposure"
         expression: "T(java.lang.Math).max(#positions.position.marketValue, 0)"
@@ -3673,7 +3705,7 @@ Settlement enrichment adds critical settlement processing information including 
 enrichments:
   - id: "settlement-date-calculation"
     type: "calculation-enrichment"
-    condition: "#data.tradeDetails != null && #data.tradeDetails.tradeDate != null"
+    condition: "#tradeDetails != null && #tradeDetails.tradeDate != null"
     calculations:
       - field: "settlement.settlementDate"
         expression: "#tradeDetails.tradeDate.plusDays(#venue.country == 'US' ? 2 : 3)"
@@ -3682,12 +3714,12 @@ enrichments:
 
   - id: "ssi-lookup"
     type: "lookup-enrichment"
-    condition: "#data.counterparty != null && #data.currency != null"
+    condition: "#counterparty != null && #currency != null"
     lookup-config:
       lookup-key: "#counterparty.lei + '_' + #currency"
       lookup-dataset:
-        type: "yaml-file"
-        file-path: "datasets/settlement-instructions.yaml"
+        type: "external"
+        source: "settlement-instructions-dataset"
         key-field: "key"
     field-mappings:
       - source-field: "method"

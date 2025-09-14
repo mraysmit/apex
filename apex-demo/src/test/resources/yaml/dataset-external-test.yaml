@@ -1,0 +1,64 @@
+metadata:
+  id: "dataset-external-test"
+  name: "Dataset Document External Data Test"
+  version: "1.0.0"
+  description: "Test dataset document type with external data source configuration"
+  type: "dataset"
+  source: "External Reference Data API"
+  created-by: "APEX Test Suite"
+  created-date: "2025-01-14"
+  business-domain: "Testing"
+
+data:
+  # External data source configuration record
+  - recordType: "source-config"
+    type: "external"
+    name: "counterparty-reference-api"
+    description: "External API for counterparty reference data"
+    endpoint: "https://api.referencedata.com/v1/counterparties"
+    authType: "oauth2"
+    clientId: "apex-test-client"
+    scope: "read:counterparties"
+    timeout: 30000
+    maxRetries: 3
+    cachingEnabled: true
+    cacheTtl: 3600
+
+  # Schema definition record
+  - recordType: "schema-definition"
+    keyField: "lei"
+    fieldName: "lei"
+    fieldType: "string"
+    required: true
+    description: "Legal Entity Identifier"
+    pattern: "^[A-Z0-9]{18}[0-9]{2}$"
+
+  - recordType: "schema-definition"
+    keyField: "lei"
+    fieldName: "name"
+    fieldType: "string"
+    required: true
+    description: "Counterparty legal name"
+
+  - recordType: "schema-definition"
+    keyField: "lei"
+    fieldName: "jurisdiction"
+    fieldType: "string"
+    required: true
+    description: "Legal jurisdiction code"
+    allowedValues: "US,GB,DE,FR,CH,JP,CA,AU"
+
+  # Sample external data records (for testing purposes)
+  - recordType: "external-data-sample"
+    lei: "784F5XWPLTWKTBV3E584"
+    name: "Goldman Sachs"
+    jurisdiction: "US"
+    entityType: "INVESTMENT_BANK"
+    creditRating: "A+"
+
+  - recordType: "external-data-sample"
+    lei: "8EE8DF3643E15DBFDA05"
+    name: "JPMorgan Chase"
+    jurisdiction: "US"
+    entityType: "BANK"
+    creditRating: "AA-"

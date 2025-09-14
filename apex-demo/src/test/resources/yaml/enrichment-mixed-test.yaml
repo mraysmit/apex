@@ -1,0 +1,69 @@
+metadata:
+  id: "enrichment-mixed-test"
+  name: "Enrichment Document Mixed Types Test"
+  version: "1.0.0"
+  description: "Test enrichment document type with mixed enrichment types"
+  type: "enrichment"
+  author: "apex-test-suite@example.com"
+  created-by: "APEX Test Suite"
+  created-date: "2025-01-14"
+  business-domain: "Testing"
+
+enrichments:
+  - id: "counterparty-lookup"
+    name: "Counterparty Lookup Enrichment"
+    type: "lookup-enrichment"
+    description: "Lookup counterparty information by name"
+    condition: "#counterpartyName != null"
+    lookup-config:
+      lookup-key: "#counterpartyName"
+      lookup-dataset:
+        type: "inline"
+        key-field: "name"
+        data:
+          - name: "Goldman Sachs"
+            lei: "784F5XWPLTWKTBV3E584"
+            jurisdiction: "US"
+            entityType: "INVESTMENT_BANK"
+            creditRating: "A+"
+          - name: "JPMorgan Chase"
+            lei: "8EE8DF3643E15DBFDA05"
+            jurisdiction: "US"
+            entityType: "BANK"
+            creditRating: "AA-"
+          - name: "Deutsche Bank"
+            lei: "7LTWFZYICNSX8D621K86"
+            jurisdiction: "DE"
+            entityType: "BANK"
+            creditRating: "A+"
+    field-mappings:
+      - source-field: "lei"
+        target-field: "counterpartyLei"
+      - source-field: "jurisdiction"
+        target-field: "counterpartyJurisdiction"
+      - source-field: "creditRating"
+        target-field: "counterpartyCreditRating"
+
+  - id: "fee-calculation"
+    name: "Fee Calculation Enrichment"
+    type: "calculation-enrichment"
+    description: "Calculate transaction fee from trade amount and fee rate"
+    condition: "#tradeAmount != null && #feeRate != null"
+    calculation-config:
+      expression: "#tradeAmount * #feeRate"
+      result-field: "calculatedFee"
+    field-mappings:
+      - source-field: "calculatedFee"
+        target-field: "calculatedFee"
+
+  - id: "net-amount-calculation"
+    name: "Net Amount Calculation"
+    type: "calculation-enrichment"
+    description: "Calculate net amount after fees"
+    condition: "#tradeAmount != null && #calculatedFee != null"
+    calculation-config:
+      expression: "#tradeAmount - #calculatedFee"
+      result-field: "netAmount"
+    field-mappings:
+      - source-field: "netAmount"
+        target-field: "netAmount"

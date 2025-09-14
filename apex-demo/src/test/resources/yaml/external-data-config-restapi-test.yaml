@@ -1,0 +1,129 @@
+metadata:
+  id: "external-data-config-restapi-test"
+  name: "External Data Config REST API Test"
+  version: "1.0.0"
+  description: "Test external-data-config document with REST API data sources"
+  type: "external-data-config"
+  author: "apex-test-suite@example.com"
+  created-date: "2025-09-14"
+  tags: ["apex-test", "external-data-config", "rest-api"]
+
+dataSources:
+  - name: "currency-rates-api"
+    type: "rest-api"
+    enabled: true
+    description: "Real-time currency exchange rates API"
+    
+    connection:
+      baseUrl: "https://api.exchangerates.com/v1"
+      timeout: 5000
+      maxConnections: 10
+      
+    authentication:
+      type: "api-key"
+      keyHeader: "X-API-Key"
+      keyValue: "${EXCHANGE_API_KEY}"
+      
+    endpoints:
+      getCurrentRate: "/rates/{currency}"
+      getHistoricalRate: "/rates/{currency}/{date}"
+      getAllRates: "/rates/latest"
+      
+    cache:
+      enabled: true
+      ttlSeconds: 300
+      maxSize: 1000
+      
+    circuitBreaker:
+      enabled: true
+      failureThreshold: 5
+      recoveryTimeoutMs: 30000
+      
+  - name: "counterparty-reference-api"
+    type: "rest-api"
+    enabled: true
+    description: "External API for counterparty reference data"
+    
+    connection:
+      baseUrl: "https://api.referencedata.com/v1"
+      timeout: 10000
+      maxConnections: 5
+      
+    authentication:
+      type: "oauth2"
+      clientId: "${REFERENCE_CLIENT_ID}"
+      clientSecret: "${REFERENCE_CLIENT_SECRET}"
+      tokenUrl: "https://auth.referencedata.com/oauth/token"
+      scope: "read:counterparties"
+      
+    endpoints:
+      getCounterpartyByLei: "/counterparties/{lei}"
+      searchCounterparties: "/counterparties/search?q={query}"
+      getCounterpartyRating: "/counterparties/{lei}/rating"
+      
+    cache:
+      enabled: true
+      ttlSeconds: 3600
+      maxSize: 5000
+      
+    retryPolicy:
+      maxRetries: 3
+      backoffStrategy: "linear"
+      delayMs: 2000
+      
+  - name: "market-data-api"
+    type: "rest-api"
+    enabled: true
+    description: "Bloomberg-style market data API"
+    
+    connection:
+      baseUrl: "https://api.bloomberg.com/v1"
+      timeout: 15000
+      maxConnections: 20
+      
+    authentication:
+      type: "bearer"
+      token: "${BLOOMBERG_API_TOKEN}"
+      
+    endpoints:
+      getInstrumentPrice: "/market-data/{symbol}/price"
+      getInstrumentDetails: "/market-data/{symbol}/details"
+      getHistoricalPrices: "/market-data/{symbol}/history"
+      
+    cache:
+      enabled: true
+      ttlSeconds: 60
+      maxSize: 10000
+      
+    rateLimiting:
+      enabled: true
+      requestsPerSecond: 100
+      burstCapacity: 200
+
+configuration:
+  defaultConnectionTimeout: 10000
+  globalRetryPolicy:
+    maxRetries: 2
+    backoffStrategy: "exponential"
+    initialDelayMs: 500
+    maxDelayMs: 5000
+    
+  monitoring:
+    enabled: true
+    healthCheckInterval: 30000
+    performanceLogging: true
+    errorThreshold: 10
+    
+  security:
+    sslVerification: true
+    certificatePinning: false
+    allowSelfSignedCerts: false
+    
+  circuitBreaker:
+    globalFailureThreshold: 10
+    globalRecoveryTimeoutMs: 60000
+    
+  cache:
+    globalTtlSeconds: 1800
+    globalMaxSize: 50000
+    evictionPolicy: "LRU"

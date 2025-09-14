@@ -1,0 +1,33 @@
+metadata:
+  id: "dataset-metadata-test"
+  name: "Dataset Document Metadata Validation Test"
+  version: "1.0.0"
+  description: "Test dataset document type metadata validation with all required fields"
+  type: "dataset"
+  source: "Test Metadata Validation Service"
+  created-by: "APEX Test Suite"
+  created-date: "2025-01-14"
+  business-domain: "Testing"
+  tags: ["test", "validation", "metadata", "dataset"]
+
+# Data section is required for dataset document type
+data:
+  - recordType: "metadata-validation"
+    id: "test-record-1"
+    name: "Test Record One"
+    value: "Dataset document metadata validation"
+    timestamp: "2025-01-14T10:00:00Z"
+    description: "Simple data structure for metadata validation testing"
+
+  - recordType: "metadata-validation"
+    id: "test-record-2"
+    name: "Test Record Two"
+    value: "All required fields validated"
+    timestamp: "2025-01-14T10:01:00Z"
+    description: "Validation test record"
+
+  - recordType: "validation-summary"
+    totalRecords: 2
+    validationStatus: "PASSED"
+    validatedFields: "id,source,type,name,version,description"
+    validationTimestamp: "2025-01-14T10:02:00Z"

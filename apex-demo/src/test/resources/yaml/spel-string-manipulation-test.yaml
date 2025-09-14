@@ -1,0 +1,95 @@
+metadata:
+  id: "spel-string-manipulation-test"
+  name: "SpEL String Manipulation Test"
+  version: "1.0.0"
+  description: "Test SpEL string manipulation expressions and functions"
+  type: "rule-config"
+  author: "apex-test-suite@example.com"
+  created-date: "2025-09-14"
+  tags: ["apex-test", "spel", "string-manipulation", "text-processing"]
+
+# SpEL string manipulation expressions testing
+enrichments:
+  - id: "name-uppercase-conversion"
+    name: "name-uppercase-conversion"
+    type: "calculation-enrichment"
+    description: "Convert customer name to uppercase"
+    condition: "#customerName != null"
+    calculation-config:
+      expression: "#customerName.toUpperCase()"
+      result-field: "nameUpperCase"
+    field-mappings:
+      - source-field: "nameUpperCase"
+        target-field: "nameUpperCase"
+
+  - id: "initials-extraction"
+    name: "initials-extraction"
+    type: "calculation-enrichment"
+    description: "Extract initials from customer name"
+    condition: "#customerName != null && #customerName.contains(' ')"
+    calculation-config:
+      expression: "#customerName.split(' ')[0].substring(0,1).toUpperCase() + #customerName.split(' ')[1].substring(0,1).toUpperCase()"
+      result-field: "initials"
+    field-mappings:
+      - source-field: "initials"
+        target-field: "initials"
+
+  - id: "account-masking"
+    name: "account-masking"
+    type: "calculation-enrichment"
+    description: "Mask account number showing only last 4 digits"
+    condition: "#accountNumber != null && #accountNumber.length() >= 4"
+    calculation-config:
+      expression: "'****' + #accountNumber.substring(#accountNumber.length() - 4)"
+      result-field: "maskedAccount"
+    field-mappings:
+      - source-field: "maskedAccount"
+        target-field: "maskedAccount"
+
+  - id: "email-normalization"
+    name: "email-normalization"
+    type: "calculation-enrichment"
+    description: "Normalize email to lowercase"
+    condition: "#email != null"
+    calculation-config:
+      expression: "#email.toLowerCase()"
+      result-field: "normalizedEmail"
+    field-mappings:
+      - source-field: "normalizedEmail"
+        target-field: "normalizedEmail"
+
+  - id: "country-code-extraction"
+    name: "country-code-extraction"
+    type: "calculation-enrichment"
+    description: "Extract country code from instrument ID"
+    condition: "#instrumentId != null && #instrumentId.length() >= 2"
+    calculation-config:
+      expression: "#instrumentId.substring(0, 2)"
+      result-field: "countryCode"
+    field-mappings:
+      - source-field: "countryCode"
+        target-field: "countryCode"
+
+  - id: "description-trimming"
+    name: "description-trimming"
+    type: "calculation-enrichment"
+    description: "Trim whitespace from description"
+    condition: "#description != null"
+    calculation-config:
+      expression: "#description.trim()"
+      result-field: "trimmedDescription"
+    field-mappings:
+      - source-field: "trimmedDescription"
+        target-field: "trimmedDescription"
+
+  - id: "email-validation"
+    name: "email-validation"
+    type: "calculation-enrichment"
+    description: "Validate email format using regex"
+    condition: "#email != null"
+    calculation-config:
+      expression: "#email.toLowerCase().matches('[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}')"
+      result-field: "isValidEmail"
+    field-mappings:
+      - source-field: "isValidEmail"
+        target-field: "isValidEmail"

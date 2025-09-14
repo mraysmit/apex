@@ -1,0 +1,116 @@
+metadata:
+  name: "Bootstrap Document Data Sources Test"
+  version: "1.0.0"
+  description: "Test bootstrap document with data sources infrastructure configuration"
+  type: "bootstrap"
+  id: "bootstrap-datasources-test"
+  business-domain: "Data Infrastructure"
+  created-by: "data.infrastructure@firm.com"
+  created: "2025-09-14"
+  last-modified: "2025-09-14"
+  tags: ["test", "bootstrap", "data-sources", "infrastructure"]
+
+bootstrap:
+  infrastructure:
+    data-integration: true
+    multi-source-support: true
+    real-time-processing: true
+  
+  demo-scenarios:
+    - scenario-id: "multi-source-integration-demo"
+      description: "Demonstrates integration across multiple data sources"
+      data-types: ["MultiSourceData"]
+      business-domain: "Data Integration"
+      enabled: true
+
+data-sources:
+  # Primary database configuration
+  database:
+    type: "postgresql"
+    url: "jdbc:postgresql://localhost:5432/apex_bootstrap_test"
+    username: "bootstrap_user"
+    password: "bootstrap_password"
+    connection-pool:
+      initial-size: 5
+      max-size: 20
+      timeout: 30000
+    
+    tables:
+      - "counterparties"
+      - "instruments"
+      - "market_data"
+      - "reference_data"
+    
+    queries:
+      getCounterpartyById: "SELECT * FROM counterparties WHERE id = :id"
+      getInstrumentBySymbol: "SELECT * FROM instruments WHERE symbol = :symbol"
+      getMarketData: "SELECT * FROM market_data WHERE symbol = :symbol AND date = :date"
+
+  # External API configurations
+  external-apis:
+    # Bloomberg Market Data API
+    - name: "bloomberg-api"
+      base-url: "https://api.bloomberg.com/v1"
+      authentication:
+        type: "api-key"
+        key-header: "X-API-Key"
+        key-value: "${BLOOMBERG_API_KEY}"
+      
+      endpoints:
+        market-data: "/market-data/{symbol}"
+        historical-data: "/historical/{symbol}?from={startDate}&to={endDate}"
+      
+      timeout: 10000
+      max-retries: 3
+      cache:
+        enabled: true
+        ttl-seconds: 300
+
+    # Reuters Reference Data API
+    - name: "reuters-api"
+      base-url: "https://api.reuters.com/v2"
+      authentication:
+        type: "oauth2"
+        client-id: "${REUTERS_CLIENT_ID}"
+        client-secret: "${REUTERS_CLIENT_SECRET}"
+        scope: "read:reference-data"
+      
+      endpoints:
+        counterparty-data: "/counterparties/{lei}"
+        instrument-data: "/instruments/{isin}"
+      
+      timeout: 15000
+      max-retries: 2
+      cache:
+        enabled: true
+        ttl-seconds: 600
+
+    # Internal Risk Management API
+    - name: "risk-management-api"
+      base-url: "https://internal-risk.firm.com/api/v1"
+      authentication:
+        type: "bearer"
+        token: "${RISK_API_TOKEN}"
+      
+      endpoints:
+        risk-metrics: "/risk/{portfolioId}"
+        var-calculation: "/var/{portfolioId}?confidence={confidence}"
+      
+      timeout: 5000
+      max-retries: 1
+      cache:
+        enabled: false
+
+  # File-based data sources
+  file-sources:
+    - name: "regulatory-data"
+      type: "csv"
+      path: "data/regulatory/mifid-instruments.csv"
+      delimiter: ","
+      headers: true
+      encoding: "UTF-8"
+    
+    - name: "holiday-calendar"
+      type: "json"
+      path: "data/calendars/business-holidays.json"
+      encoding: "UTF-8"

@@ -1,0 +1,83 @@
+metadata:
+  id: "spel-conditional-test"
+  name: "SpEL Conditional Expressions Test"
+  version: "1.0.0"
+  description: "Test SpEL conditional expressions and ternary operators"
+  type: "rule-config"
+  author: "apex-test-suite@example.com"
+  created-date: "2025-09-14"
+  tags: ["apex-test", "spel", "conditional", "ternary-operators"]
+
+# SpEL conditional expressions testing
+enrichments:
+  - id: "risk-category-calculation"
+    name: "risk-category-calculation"
+    type: "calculation-enrichment"
+    description: "Calculate risk category based on risk score"
+    condition: "#riskScore != null"
+    calculation-config:
+      expression: "#riskScore > 80 ? 'HIGH' : (#riskScore > 50 ? 'MEDIUM' : 'LOW')"
+      result-field: "riskCategory"
+    field-mappings:
+      - source-field: "riskCategory"
+        target-field: "riskCategory"
+
+  - id: "approval-level-calculation"
+    name: "approval-level-calculation"
+    type: "calculation-enrichment"
+    description: "Calculate approval level based on trade amount"
+    condition: "#tradeAmount != null"
+    calculation-config:
+      expression: "#tradeAmount > 1000000 ? 'SENIOR_MANAGEMENT' : (#tradeAmount > 500000 ? 'MANAGEMENT' : 'SUPERVISOR')"
+      result-field: "approvalLevel"
+    field-mappings:
+      - source-field: "approvalLevel"
+        target-field: "approvalLevel"
+
+  - id: "approval-requirement-calculation"
+    name: "approval-requirement-calculation"
+    type: "calculation-enrichment"
+    description: "Determine if approval is required based on risk and amount"
+    condition: "#riskScore != null && #tradeAmount != null"
+    calculation-config:
+      expression: "#riskScore > 70 || #tradeAmount > 1000000"
+      result-field: "requiresApproval"
+    field-mappings:
+      - source-field: "requiresApproval"
+        target-field: "requiresApproval"
+
+  - id: "regulatory-tier-calculation"
+    name: "regulatory-tier-calculation"
+    type: "calculation-enrichment"
+    description: "Calculate regulatory tier based on counterparty type and jurisdiction"
+    condition: "#counterpartyType != null && #jurisdiction != null"
+    calculation-config:
+      expression: "#counterpartyType == 'BANK' && #jurisdiction == 'US' ? 'TIER_1' : (#counterpartyType == 'BANK' ? 'TIER_2' : 'TIER_3')"
+      result-field: "regulatoryTier"
+    field-mappings:
+      - source-field: "regulatoryTier"
+        target-field: "regulatoryTier"
+
+  - id: "adjusted-amount-calculation"
+    name: "adjusted-amount-calculation"
+    type: "calculation-enrichment"
+    description: "Calculate adjusted amount based on risk category"
+    condition: "#tradeAmount != null && #riskScore != null"
+    calculation-config:
+      expression: "#riskScore > 80 ? #tradeAmount * 0.95 : (#riskScore > 50 ? #tradeAmount * 0.98 : #tradeAmount)"
+      result-field: "adjustedAmount"
+    field-mappings:
+      - source-field: "adjustedAmount"
+        target-field: "adjustedAmount"
+
+  - id: "maturity-bucket-calculation"
+    name: "maturity-bucket-calculation"
+    type: "calculation-enrichment"
+    description: "Calculate maturity bucket based on days to maturity"
+    condition: "#maturityDays != null"
+    calculation-config:
+      expression: "#maturityDays <= 30 ? '1M' : (#maturityDays <= 90 ? '3M' : (#maturityDays <= 180 ? '6M' : (#maturityDays <= 365 ? '1Y' : '1Y+')))"
+      result-field: "maturityBucket"
+    field-mappings:
+      - source-field: "maturityBucket"
+        target-field: "maturityBucket"

@@ -1,0 +1,71 @@
+metadata:
+  id: "conditional-boolean-test"
+  name: "Conditional Boolean Expressions Test"
+  version: "1.0.0"
+  description: "Test boolean expressions and logical operations in conditions"
+  type: "rule-config"
+  author: "apex-test-suite@example.com"
+  created-date: "2025-09-14"
+  tags: ["apex-test", "conditional", "boolean", "logical-operators"]
+
+# Boolean expressions and logical operations testing
+enrichments:
+  - id: "simple-boolean-check"
+    name: "simple-boolean-check"
+    type: "calculation-enrichment"
+    description: "Test simple boolean field access"
+    condition: "#isActive"
+    calculation-config:
+      expression: "#isActive"
+      result-field: "simpleBoolean"
+    field-mappings:
+      - source-field: "simpleBoolean"
+        target-field: "simpleBoolean"
+
+  - id: "negated-boolean-check"
+    name: "negated-boolean-check"
+    type: "calculation-enrichment"
+    description: "Test negated boolean expression"
+    condition: "!#isDeleted"
+    calculation-config:
+      expression: "!#isDeleted"
+      result-field: "negatedBoolean"
+    field-mappings:
+      - source-field: "negatedBoolean"
+        target-field: "negatedBoolean"
+
+  - id: "and-expression-check"
+    name: "and-expression-check"
+    type: "calculation-enrichment"
+    description: "Test AND logical operator"
+    condition: "#isActive && !#isDeleted"
+    calculation-config:
+      expression: "#isActive && !#isDeleted"
+      result-field: "andExpression"
+    field-mappings:
+      - source-field: "andExpression"
+        target-field: "andExpression"
+
+  - id: "or-expression-check"
+    name: "or-expression-check"
+    type: "calculation-enrichment"
+    description: "Test OR logical operator"
+    condition: "#isVisible || #hasPermission"
+    calculation-config:
+      expression: "#isVisible || #hasPermission"
+      result-field: "orExpression"
+    field-mappings:
+      - source-field: "orExpression"
+        target-field: "orExpression"
+
+  - id: "complex-boolean-expression"
+    name: "complex-boolean-expression"
+    type: "calculation-enrichment"
+    description: "Test complex boolean expression with parentheses"
+    condition: "(#isActive && #isVisible) && (!#isDeleted && !#isExpired && !#isLocked)"
+    calculation-config:
+      expression: "(#isActive && #isVisible) && (!#isDeleted && !#isExpired && !#isLocked)"
+      result-field: "complexExpression"
+    field-mappings:
+      - source-field: "complexExpression"
+        target-field: "complexExpression"

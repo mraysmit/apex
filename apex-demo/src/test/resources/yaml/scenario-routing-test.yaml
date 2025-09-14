@@ -1,0 +1,39 @@
+metadata:
+  name: "Scenario Document Routing Rules Test"
+  version: "1.0.0"
+  description: "Test scenario document with conditional routing rules configuration"
+  type: "scenario"
+  id: "scenario-routing-test"
+  business-domain: "Post-Trade Settlement"
+  owner: "settlements.team@firm.com"
+  created: "2025-09-14"
+  last-modified: "2025-09-14"
+  tags: ["test", "scenario", "routing", "settlement"]
+
+scenario:
+  scenario-id: "settlement-auto-repair"
+  name: "Settlement Auto-Repair with Routing"
+  description: "Intelligent auto-repair for failed settlement instructions with conditional routing"
+  
+  # Data types this scenario applies to
+  data-types:
+    - "dev.mars.apex.demo.model.SettlementInstruction"
+    - "SettlementInstruction"
+  
+  # Base rule configurations
+  rule-configurations:
+    - "bootstrap/settlement-auto-repair-bootstrap.yaml"
+    - "config/settlement-validation-rules.yaml"
+  
+  # Conditional routing rules
+  routing-rules:
+    - condition: "#data.market == 'ASIA'"
+      config-override: "config/asia-market-specific-rules.yaml"
+      enrichment-override: "config/asia-market-enrichment.yaml"
+    
+    - condition: "#data.currency == 'JPY'"
+      config-override: "config/jpy-settlement-rules.yaml"
+    
+    - condition: "#data.settlementType == 'DVP' && #data.amount > 1000000"
+      enrichment-override: "config/high-value-dvp-enrichment.yaml"
+      validation-override: "config/high-value-validation.yaml"

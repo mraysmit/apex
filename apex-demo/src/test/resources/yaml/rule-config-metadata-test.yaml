@@ -1,0 +1,25 @@
+metadata:
+  id: "rule-config-metadata-test"
+  name: "Rule-Config Metadata Validation Test"
+  version: "1.0.0"
+  description: "Test rule-config document type metadata validation with all required and optional fields"
+  type: "rule-config"
+  author: "apex-test-suite@example.com"
+  created-by: "APEX Test Suite"
+  created-date: "2025-01-14"
+  business-domain: "Testing"
+  tags: ["test", "validation", "metadata"]
+
+# Minimal enrichment to make the configuration valid
+enrichments:
+  - id: "metadata-test-enrichment"
+    name: "Metadata Test Enrichment"
+    type: "calculation-enrichment"
+    description: "Simple enrichment for metadata validation testing"
+    condition: "true"
+    calculation-config:
+      expression: "'Metadata validation test completed at ' + T(java.time.LocalDateTime).now().toString()"
+      result-field: "metadataTestResult"
+    field-mappings:
+      - source-field: "metadataTestResult"
+        target-field: "metadataTestResult"

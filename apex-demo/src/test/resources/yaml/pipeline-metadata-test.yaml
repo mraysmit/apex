@@ -1,0 +1,63 @@
+metadata:
+  id: "pipeline-metadata-test"
+  name: "Pipeline Metadata Validation Test"
+  version: "1.0.0"
+  description: "Test pipeline document metadata validation requirements"
+  type: "pipeline"
+  author: "apex-test-suite@example.com"
+  created-date: "2025-09-14"
+  tags: ["apex-test", "pipeline", "metadata-validation"]
+
+# Pipeline orchestration
+pipeline:
+  name: "metadata-validation-pipeline"
+  description: "Minimal pipeline for metadata validation testing"
+
+  steps:
+    - name: "extract-test-data"
+      type: "extract"
+      source: "test-input-source"
+      operation: "getAllData"
+      description: "Extract test data"
+
+    - name: "load-test-data"
+      type: "load"
+      sink: "test-output-sink"
+      operation: "insertData"
+      description: "Load test data"
+      depends-on: ["extract-test-data"]
+
+# Input data sources
+data-sources:
+  - name: "test-input-source"
+    type: "file-system"
+    enabled: true
+    description: "Test input data source for metadata validation"
+    
+    connection:
+      basePath: "./test/input"
+      filePattern: "test-data.json"
+      
+    fileFormat:
+      type: "json"
+      
+    queries:
+      getAllData: "$[*]"
+
+# Output data sinks
+data-sinks:
+  - name: "test-output-sink"
+    type: "database"
+    sourceType: "h2"
+    enabled: true
+    description: "Test output data sink for metadata validation"
+    
+    connection:
+      database: "./test/output"
+      username: "sa"
+      password: ""
+      
+    operations:
+      insertData: |
+        INSERT INTO test_table (data_json, created_at) 
+        VALUES (:data_json, CURRENT_TIMESTAMP)
