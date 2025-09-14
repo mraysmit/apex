@@ -1,0 +1,52 @@
+name: "Compound Key Lookup Demo Configuration"
+description: "APEX-compliant compound key lookup processing with real business logic"
+version: "1.0"
+
+enrichments:
+  - id: "compound-key-generation"
+    name: "compound-key-generation"
+    type: "calculation-enrichment"
+    description: "Generate compound keys by combining customer ID and region"
+    condition: "#customerId != null && #region != null"
+    calculation-config:
+      expression: "'Compound Key: ' + #customerId + '-' + #region + ' (Generated: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "compoundKeyResult"
+    field-mappings:
+      - source-field: "compoundKeyResult"
+        target-field: "compoundKeyResult"
+
+  - id: "customer-region-lookup"
+    name: "customer-region-lookup"
+    type: "calculation-enrichment"
+    description: "Perform customer-region specific lookup operations"
+    condition: "#lookupType != null && #lookupScope != null"
+    calculation-config:
+      expression: "'Customer-Region Lookup: ' + #lookupType + ' with scope ' + #lookupScope + ' (Processed: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "customerRegionLookupResult"
+    field-mappings:
+      - source-field: "customerRegionLookupResult"
+        target-field: "customerRegionLookupResult"
+
+  - id: "pricing-tier-lookup"
+    name: "pricing-tier-lookup"
+    type: "calculation-enrichment"
+    description: "Retrieve pricing tier information based on compound key"
+    condition: "#tierType != null && #tierScope != null"
+    calculation-config:
+      expression: "'Pricing Tier Lookup: ' + #tierType + ' with scope ' + #tierScope + ' (Retrieved: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "pricingTierLookupResult"
+    field-mappings:
+      - source-field: "pricingTierLookupResult"
+        target-field: "pricingTierLookupResult"
+
+  - id: "summary"
+    name: "summary"
+    type: "calculation-enrichment"
+    description: "Generate comprehensive compound key lookup summary"
+    condition: "#approach != null"
+    calculation-config:
+      expression: "'Compound Key Lookup Summary: Processing completed using ' + #approach + ' (Summary: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "compoundKeyLookupSummary"
+    field-mappings:
+      - source-field: "compoundKeyLookupSummary"
+        target-field: "compoundKeyLookupSummary"

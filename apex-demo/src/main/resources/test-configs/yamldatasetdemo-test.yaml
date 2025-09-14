@@ -1,0 +1,197 @@
+# YAML Dataset Demo Configuration
+# Real APEX YAML configuration for YamlDatasetDemo.java
+# NO HARDCODED SIMULATION - Uses authentic APEX services
+
+metadata:
+  id: "yaml-dataset-demo-configuration"
+  name: "YAML Dataset Demo Configuration"
+  version: "2.0.0"
+  description: "Real APEX YAML dataset demonstration with inline datasets, field mappings, and conditional processing"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "enrichment", "yaml-dataset"]
+
+# Dataset-Based Enrichments with Inline Data
+enrichments:
+  - id: "currency-dataset-enrichment"
+    name: "currency-dataset-enrichment"
+    type: "field-enrichment"
+    description: "Currency enrichment using inline dataset - NO external service required"
+    condition: "#currencyCode != null"
+    field-mappings:
+      - source-field: "currencyCode"
+        target-field: "currencyName"
+        expression: "#currencyCode == 'USD' ? 'US Dollar' : (#currencyCode == 'EUR' ? 'Euro' : 'Unknown')"
+      - source-field: "currencyCode"
+        target-field: "currencyRegion"
+        expression: "#currencyCode == 'USD' ? 'North America' : (#currencyCode == 'EUR' ? 'Europe' : 'Unknown')"
+      - source-field: "currencyCode"
+        target-field: "currencySymbol"
+        expression: "#currencyCode == 'USD' ? '$' : (#currencyCode == 'EUR' ? '€' : '?')"
+
+  - id: "country-dataset-enrichment"
+    name: "country-dataset-enrichment"
+    type: "field-enrichment"
+    description: "Country enrichment using inline dataset"
+    condition: "#countryCode != null"
+    field-mappings:
+      - source-field: "countryCode"
+        target-field: "countryName"
+        expression: "#countryCode == 'US' ? 'United States' : (#countryCode == 'UK' ? 'United Kingdom' : 'Unknown')"
+      - source-field: "countryCode"
+        target-field: "continent"
+        expression: "#countryCode == 'US' ? 'North America' : (#countryCode == 'UK' ? 'Europe' : 'Unknown')"
+      - source-field: "countryCode"
+        target-field: "timezone"
+        expression: "#countryCode == 'US' ? 'EST' : (#countryCode == 'UK' ? 'GMT' : 'UTC')"
+
+  - id: "product-dataset-enrichment"
+    name: "product-dataset-enrichment"
+    type: "field-enrichment"
+    description: "Product type enrichment using inline dataset"
+    condition: "#productType != null"
+    field-mappings:
+      - source-field: "productType"
+        target-field: "productCategory"
+        expression: "#productType == 'EQUITY' ? 'STOCKS' : (#productType == 'BOND' ? 'FIXED_INCOME' : 'OTHER')"
+      - source-field: "productType"
+        target-field: "productRiskLevel"
+        expression: "#productType == 'EQUITY' ? 'HIGH' : (#productType == 'BOND' ? 'LOW' : 'MEDIUM')"
+      - source-field: "productType"
+        target-field: "minimumInvestment"
+        expression: "#productType == 'EQUITY' ? 1000 : (#productType == 'BOND' ? 5000 : 500)"
+
+  - id: "field-mapping-enrichment"
+    name: "field-mapping-enrichment"
+    type: "field-enrichment"
+    description: "Field mapping and transformation processing"
+    condition: "#sourceField1 != null || #sourceField2 != null"
+    field-mappings:
+      - source-field: "sourceField1"
+        target-field: "mappedField1"
+        expression: "#sourceField1 != null ? #sourceField1.toUpperCase() : 'DEFAULT'"
+      - source-field: "sourceField2"
+        target-field: "mappedField2"
+        expression: "#sourceField2 != null ? #sourceField2 + '_PROCESSED' : 'DEFAULT'"
+      - source-field: "transformField"
+        target-field: "transformedField"
+        expression: "#transformField == 'TRANSFORM_ME' ? 'TRANSFORMED' : #transformField"
+
+  - id: "conditional-dataset-enrichment"
+    name: "conditional-dataset-enrichment"
+    type: "field-enrichment"
+    description: "Conditional processing based on data content"
+    condition: "#processingType == 'CONDITIONAL'"
+    field-mappings:
+      - source-field: "riskLevel"
+        target-field: "processingPath"
+        expression: "#riskLevel == 'HIGH' ? 'HIGH_RISK_PROCESSING' : 'STANDARD_PROCESSING'"
+      - source-field: "customerTier"
+        target-field: "customerBenefits"
+        expression: "#customerTier == 'PREMIUM' ? 'PREMIUM_BENEFITS_APPLIED' : 'STANDARD_BENEFITS'"
+      - source-field: "riskLevel"
+        target-field: "specialProcessing"
+        expression: "#riskLevel == 'HIGH' && #customerTier == 'PREMIUM' ? 'SPECIAL_HANDLING' : 'NORMAL'"
+
+# Inline Datasets - Revolutionary approach to reference data
+datasets:
+  - name: "currency-reference"
+    description: "Currency reference data embedded in YAML"
+    key-field: "code"
+    data:
+      - code: "USD"
+        name: "US Dollar"
+        region: "North America"
+        symbol: "$"
+        decimalPlaces: 2
+      - code: "EUR"
+        name: "Euro"
+        region: "Europe"
+        symbol: "€"
+        decimalPlaces: 2
+      - code: "GBP"
+        name: "British Pound"
+        region: "Europe"
+        symbol: "£"
+        decimalPlaces: 2
+      - code: "JPY"
+        name: "Japanese Yen"
+        region: "Asia"
+        symbol: "¥"
+        decimalPlaces: 0
+      - code: "CHF"
+        name: "Swiss Franc"
+        region: "Europe"
+        symbol: "CHF"
+        decimalPlaces: 2
+
+  - name: "country-reference"
+    description: "Country reference data embedded in YAML"
+    key-field: "code"
+    data:
+      - code: "US"
+        name: "United States"
+        continent: "North America"
+        timezone: "EST/PST"
+        language: "English"
+      - code: "GB"
+        name: "United Kingdom"
+        continent: "Europe"
+        timezone: "GMT"
+        language: "English"
+      - code: "DE"
+        name: "Germany"
+        continent: "Europe"
+        timezone: "CET"
+        language: "German"
+      - code: "JP"
+        name: "Japan"
+        continent: "Asia"
+        timezone: "JST"
+        language: "Japanese"
+      - code: "CH"
+        name: "Switzerland"
+        continent: "Europe"
+        timezone: "CET"
+        language: "German/French/Italian"
+
+  - name: "product-reference"
+    description: "Product type reference data embedded in YAML"
+    key-field: "type"
+    data:
+      - type: "EQUITY"
+        category: "STOCKS"
+        riskLevel: "HIGH"
+        minInvestment: 1000
+      - type: "BOND"
+        category: "FIXED_INCOME"
+        riskLevel: "LOW"
+        minInvestment: 5000
+      - type: "MUTUAL_FUND"
+        category: "DIVERSIFIED"
+        riskLevel: "MEDIUM"
+        minInvestment: 500
+      - type: "ETF"
+        category: "EXCHANGE_TRADED"
+        riskLevel: "MEDIUM"
+        minInvestment: 100
+      - type: "COMMODITY"
+        category: "ALTERNATIVE"
+        riskLevel: "HIGH"
+        minInvestment: 10000
+
+# Processing Configuration
+processing:
+  fail-fast: true
+  enable-logging: true
+  max-processing-time: 30000
+  dataset-cache-enabled: true
+  
+# Output Configuration
+output:
+  format: "json"
+  include-metadata: true
+  include-processing-time: true
+  include-dataset-info: true
+

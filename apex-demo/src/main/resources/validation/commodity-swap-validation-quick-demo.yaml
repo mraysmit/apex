@@ -14,60 +14,66 @@ metadata:
 
 # APEX enrichment processing for layered API demonstration
 enrichments:
-  - id: "commodity-swap-validation-quick-demo"
+  - id: "ultra-simple-api-layer"
     name: "ultra-simple-api-layer"
     type: "calculation-enrichment"
     description: "Layer 1: Ultra-Simple API validation processing"
     enabled: true
-    condition: "#data.apiLayer == 'ultra-simple-api'"
+    condition: "#apiLayer == 'ultra-simple-api'"
+    calculation-config:
+      expression: "'Layer 1 (Ultra-Simple API): Basic field validations completed for ' + #tradeId"
+      result-field: "layerResult"
     field-mappings:
-      - source-field: "tradeId"
+      - source-field: "layerResult"
         target-field: "layerResult"
-        expression: "'Layer 1 (Ultra-Simple API): Basic field validations completed for ' + #data.tradeId + ' - Trade ID: ' + (#data.tradeId != null ? 'VALID' : 'INVALID') + ', Notional: ' + (#data.notionalAmount != null ? 'VALID' : 'INVALID') + ', Currency: ' + (#data.notionalCurrency != null ? 'VALID' : 'INVALID')"
 
-  - id: "commodity-swap-validation-quick-demo"
+  - id: "template-based-rules-layer"
     name: "template-based-rules-layer"
     type: "calculation-enrichment"
     description: "Layer 2: Template-Based Rules validation processing"
     enabled: true
-    condition: "#data.apiLayer == 'template-based-rules'"
+    condition: "#apiLayer == 'template-based-rules'"
+    calculation-config:
+      expression: "'Layer 2 (Template-Based Rules): Structured validation completed for ' + #tradeId"
+      result-field: "layerResult"
     field-mappings:
-      - source-field: "tradeId"
+      - source-field: "layerResult"
         target-field: "layerResult"
-        expression: "'Layer 2 (Template-Based Rules): Structured validation completed for ' + #data.tradeId + ' - Validation Engine: PASSED, Business Engine: PASSED, Rules Applied: 8 total (5 validation + 3 business)'"
 
-  - id: "commodity-swap-validation-quick-demo"
+  - id: "advanced-configuration-layer"
     name: "advanced-configuration-layer"
     type: "calculation-enrichment"
     description: "Layer 3: Advanced Configuration with performance monitoring"
     enabled: true
-    condition: "#data.apiLayer == 'advanced-configuration'"
+    condition: "#apiLayer == 'advanced-configuration'"
     field-mappings:
       - source-field: "tradeId"
         target-field: "layerResult"
         expression: "'Layer 3 (Advanced Configuration): Performance monitoring enabled for ' + #data.tradeId + ' - Rules Executed: 3, Average Time: 1.2ms, Success Rate: 100%'"
 
-  - id: "commodity-swap-validation-quick-demo"
+  - id: "static-data-validation-layer"
     name: "static-data-validation-layer"
     type: "calculation-enrichment"
     description: "Static Data Validation and Enrichment"
     enabled: true
-    condition: "#data.apiLayer == 'static-data-validation'"
+    condition: "#apiLayer == 'static-data-validation'"
     field-mappings:
       - source-field: "clientId"
         target-field: "layerResult"
         expression: "'Static Data Validation: Client ' + #data.clientId + ' validated, Counterparty ' + #data.counterpartyId + ' validated, Currency ' + #data.notionalCurrency + ' validated, Commodity ' + #data.referenceIndex + ' validated'"
 
-  - id: "commodity-swap-validation-quick-demo"
+  - id: "validation-summary"
     name: "validation-summary"
     type: "calculation-enrichment"
     description: "Generate comprehensive validation summary"
     enabled: true
     condition: "true"
+    calculation-config:
+      expression: "'Commodity Swap Validation Quick Demo completed: ' + (#apiLayer != null ? #apiLayer : 'unknown-layer') + ' using pure APEX YAML-driven configuration'"
+      result-field: "validationSummary"
     field-mappings:
-      - source-field: "apiLayer"
+      - source-field: "validationSummary"
         target-field: "validationSummary"
-        expression: "'Commodity Swap Validation Quick Demo completed: ' + (#data.apiLayer != null ? #data.apiLayer : 'unknown-layer') + ' using pure APEX YAML-driven configuration'"
 
 # Layered API demonstration categories
 api-layers:

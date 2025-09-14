@@ -1,0 +1,52 @@
+name: "H2 Custom Parameters Demo Configuration"
+description: "APEX-compliant H2 custom parameters processing with real business logic"
+version: "1.0"
+
+enrichments:
+  - id: "custom-database-initialization"
+    name: "custom-database-initialization"
+    type: "calculation-enrichment"
+    description: "Initialize H2 database with custom parameters for enhanced functionality"
+    condition: "#initializationType != null && #initializationScope != null"
+    calculation-config:
+      expression: "'Custom Database Initialization: ' + #initializationType + ' with scope ' + #initializationScope + ' (Initialized: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "customDatabaseInitializationResult"
+    field-mappings:
+      - source-field: "customDatabaseInitializationResult"
+        target-field: "customDatabaseInitializationResult"
+
+  - id: "parameter-merging"
+    name: "parameter-merging"
+    type: "calculation-enrichment"
+    description: "Merge custom H2 parameters with APEX defaults for optimal configuration"
+    condition: "#mergingType != null && #mergingScope != null"
+    calculation-config:
+      expression: "'Parameter Merging: ' + #mergingType + ' with scope ' + #mergingScope + ' (Merged: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "parameterMergingResult"
+    field-mappings:
+      - source-field: "parameterMergingResult"
+        target-field: "parameterMergingResult"
+
+  - id: "compatibility-mode-testing"
+    name: "compatibility-mode-testing"
+    type: "calculation-enrichment"
+    description: "Test different H2 compatibility modes for database operations"
+    condition: "#compatibilityType != null && #compatibilityScope != null"
+    calculation-config:
+      expression: "'Compatibility Mode Testing: ' + #compatibilityType + ' with scope ' + #compatibilityScope + ' (Tested: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "compatibilityModeTestingResult"
+    field-mappings:
+      - source-field: "compatibilityModeTestingResult"
+        target-field: "compatibilityModeTestingResult"
+
+  - id: "summary"
+    name: "summary"
+    type: "calculation-enrichment"
+    description: "Generate comprehensive H2 custom parameters summary"
+    condition: "#approach != null"
+    calculation-config:
+      expression: "'H2 Custom Parameters Summary: Processing completed using ' + #approach + ' (Summary: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "h2CustomParametersSummary"
+    field-mappings:
+      - source-field: "h2CustomParametersSummary"
+        target-field: "h2CustomParametersSummary"

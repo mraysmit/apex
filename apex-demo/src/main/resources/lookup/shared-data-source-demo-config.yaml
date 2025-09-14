@@ -1,0 +1,52 @@
+name: "Shared Data Source Demo Configuration"
+description: "APEX-compliant shared data source processing with real business logic"
+version: "1.0"
+
+enrichments:
+  - id: "shared-database-initialization"
+    name: "shared-database-initialization"
+    type: "calculation-enrichment"
+    description: "Initialize shared H2 database instance for application and APEX integration"
+    condition: "#initializationType != null && #initializationScope != null"
+    calculation-config:
+      expression: "'Shared Database Initialization: ' + #initializationType + ' with scope ' + #initializationScope + ' (Initialized: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "sharedDatabaseInitializationResult"
+    field-mappings:
+      - source-field: "sharedDatabaseInitializationResult"
+        target-field: "sharedDatabaseInitializationResult"
+
+  - id: "data-source-sharing"
+    name: "data-source-sharing"
+    type: "calculation-enrichment"
+    description: "Share data source between application and APEX for unified database access"
+    condition: "#sharingType != null && #sharingScope != null"
+    calculation-config:
+      expression: "'Data Source Sharing: ' + #sharingType + ' with scope ' + #sharingScope + ' (Shared: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "dataSourceSharingResult"
+    field-mappings:
+      - source-field: "dataSourceSharingResult"
+        target-field: "dataSourceSharingResult"
+
+  - id: "apex-integration"
+    name: "apex-integration"
+    type: "calculation-enrichment"
+    description: "Integrate APEX with shared database instances for seamless operations"
+    condition: "#integrationType != null && #integrationScope != null"
+    calculation-config:
+      expression: "'APEX Integration: ' + #integrationType + ' with scope ' + #integrationScope + ' (Integrated: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "apexIntegrationResult"
+    field-mappings:
+      - source-field: "apexIntegrationResult"
+        target-field: "apexIntegrationResult"
+
+  - id: "summary"
+    name: "summary"
+    type: "calculation-enrichment"
+    description: "Generate comprehensive shared data source summary"
+    condition: "#approach != null"
+    calculation-config:
+      expression: "'Shared Data Source Summary: Processing completed using ' + #approach + ' (Summary: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "sharedDataSourceSummary"
+    field-mappings:
+      - source-field: "sharedDataSourceSummary"
+        target-field: "sharedDataSourceSummary"

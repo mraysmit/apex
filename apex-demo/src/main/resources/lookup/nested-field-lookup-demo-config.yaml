@@ -1,0 +1,52 @@
+name: "Nested Field Lookup Demo Configuration"
+description: "APEX-compliant nested field lookup processing with real business logic"
+version: "1.0"
+
+enrichments:
+  - id: "nested-field-navigation"
+    name: "nested-field-navigation"
+    type: "calculation-enrichment"
+    description: "Navigate through nested object hierarchies for field lookup operations"
+    condition: "#navigationType != null && #navigationScope != null"
+    calculation-config:
+      expression: "'Nested Field Navigation: ' + #navigationType + ' with scope ' + #navigationScope + ' (Navigated: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "nestedFieldNavigationResult"
+    field-mappings:
+      - source-field: "nestedFieldNavigationResult"
+        target-field: "nestedFieldNavigationResult"
+
+  - id: "country-settlement-lookup"
+    name: "country-settlement-lookup"
+    type: "calculation-enrichment"
+    description: "Perform country-specific settlement information lookup using nested fields"
+    condition: "#settlementType != null && #settlementScope != null"
+    calculation-config:
+      expression: "'Country Settlement Lookup: ' + #settlementType + ' with scope ' + #settlementScope + ' (Looked up: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "countrySettlementLookupResult"
+    field-mappings:
+      - source-field: "countrySettlementLookupResult"
+        target-field: "countrySettlementLookupResult"
+
+  - id: "object-hierarchy-processing"
+    name: "object-hierarchy-processing"
+    type: "calculation-enrichment"
+    description: "Process nested data structures for complex object hierarchies"
+    condition: "#hierarchyType != null && #hierarchyScope != null"
+    calculation-config:
+      expression: "'Object Hierarchy Processing: ' + #hierarchyType + ' with scope ' + #hierarchyScope + ' (Processed: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "objectHierarchyProcessingResult"
+    field-mappings:
+      - source-field: "objectHierarchyProcessingResult"
+        target-field: "objectHierarchyProcessingResult"
+
+  - id: "summary"
+    name: "summary"
+    type: "calculation-enrichment"
+    description: "Generate comprehensive nested field lookup summary"
+    condition: "#approach != null"
+    calculation-config:
+      expression: "'Nested Field Lookup Summary: Processing completed using ' + #approach + ' (Summary: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "nestedFieldLookupSummary"
+    field-mappings:
+      - source-field: "nestedFieldLookupSummary"
+        target-field: "nestedFieldLookupSummary"

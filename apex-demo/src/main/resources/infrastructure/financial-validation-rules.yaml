@@ -169,7 +169,7 @@ categories:
 # Define individual rules
 rules:
   # Basic Field Validation Rules
-  - id: "financial-validation-rules"
+  - id: "trade-id-required"
     name: "TradeB ID Required"
     description: "Validates that trade ID is present and not empty"
     category: "validation"
@@ -179,7 +179,7 @@ rules:
     enabled: true
     tags: ["required-field", "trade-identification"]
 
-  - id: "financial-validation-rules"
+  - id: "trade-id-format"
     name: "TradeB ID Format"
     description: "Validates trade ID format: 3 letters + 3-6 digits"
     category: "validation"

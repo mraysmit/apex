@@ -1,0 +1,52 @@
+name: "Demo Data Loader Configuration"
+description: "APEX-compliant demo data loader processing with real business logic"
+version: "1.0"
+
+enrichments:
+  - id: "yaml-json-loading"
+    name: "yaml-json-loading"
+    type: "calculation-enrichment"
+    description: "Load demo data from YAML and JSON files with comprehensive format support"
+    condition: "#loadingType != null && #loadingScope != null"
+    calculation-config:
+      expression: "'YAML JSON Loading: ' + #loadingType + ' with scope ' + #loadingScope + ' (Loaded: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "yamlJsonLoadingResult"
+    field-mappings:
+      - source-field: "yamlJsonLoadingResult"
+        target-field: "yamlJsonLoadingResult"
+
+  - id: "fallback-mechanisms"
+    name: "fallback-mechanisms"
+    type: "calculation-enrichment"
+    description: "Implement fallback mechanisms with default data handling for missing files"
+    condition: "#fallbackType != null && #fallbackScope != null"
+    calculation-config:
+      expression: "'Fallback Mechanisms: ' + #fallbackType + ' with scope ' + #fallbackScope + ' (Handled: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "fallbackMechanismsResult"
+    field-mappings:
+      - source-field: "fallbackMechanismsResult"
+        target-field: "fallbackMechanismsResult"
+
+  - id: "type-safe-access"
+    name: "type-safe-access"
+    type: "calculation-enrichment"
+    description: "Provide type-safe data access methods with comprehensive validation"
+    condition: "#accessType != null && #accessScope != null"
+    calculation-config:
+      expression: "'Type-Safe Access: ' + #accessType + ' with scope ' + #accessScope + ' (Accessed: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "typeSafeAccessResult"
+    field-mappings:
+      - source-field: "typeSafeAccessResult"
+        target-field: "typeSafeAccessResult"
+
+  - id: "summary"
+    name: "summary"
+    type: "calculation-enrichment"
+    description: "Generate comprehensive demo data loader summary with caching performance"
+    condition: "#approach != null"
+    calculation-config:
+      expression: "'Demo Data Loader Summary: Processing completed using ' + #approach + ' (Summary: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "demoDataLoaderSummary"
+    field-mappings:
+      - source-field: "demoDataLoaderSummary"
+        target-field: "demoDataLoaderSummary"

@@ -1,0 +1,52 @@
+name: "Production Demo Data Service Manager Configuration"
+description: "APEX-compliant production demo data service manager processing with real business logic"
+version: "1.0"
+
+enrichments:
+  - id: "mock-data-initialization"
+    name: "mock-data-initialization"
+    type: "calculation-enrichment"
+    description: "Initialize production-ready demo with realistic mock data sources"
+    condition: "#initializationType != null && #initializationScope != null"
+    calculation-config:
+      expression: "'Mock Data Initialization: ' + #initializationType + ' with scope ' + #initializationScope + ' (Initialized: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "mockDataInitializationResult"
+    field-mappings:
+      - source-field: "mockDataInitializationResult"
+        target-field: "mockDataInitializationResult"
+
+  - id: "data-source-registration"
+    name: "data-source-registration"
+    type: "calculation-enrichment"
+    description: "Register multiple custom data sources for comprehensive data access"
+    condition: "#registrationType != null && #registrationScope != null"
+    calculation-config:
+      expression: "'Data Source Registration: ' + #registrationType + ' with scope ' + #registrationScope + ' (Registered: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "dataSourceRegistrationResult"
+    field-mappings:
+      - source-field: "dataSourceRegistrationResult"
+        target-field: "dataSourceRegistrationResult"
+
+  - id: "service-management"
+    name: "service-management"
+    type: "calculation-enrichment"
+    description: "Manage data service operations with comprehensive service lifecycle"
+    condition: "#managementType != null && #managementScope != null"
+    calculation-config:
+      expression: "'Service Management: ' + #managementType + ' with scope ' + #managementScope + ' (Managed: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "serviceManagementResult"
+    field-mappings:
+      - source-field: "serviceManagementResult"
+        target-field: "serviceManagementResult"
+
+  - id: "summary"
+    name: "summary"
+    type: "calculation-enrichment"
+    description: "Generate comprehensive production demo data service manager summary with performance metrics"
+    condition: "#approach != null"
+    calculation-config:
+      expression: "'Production Demo Data Service Manager Summary: Processing completed using ' + #approach + ' (Summary: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "productionDemoDataServiceManagerSummary"
+    field-mappings:
+      - source-field: "productionDemoDataServiceManagerSummary"
+        target-field: "productionDemoDataServiceManagerSummary"

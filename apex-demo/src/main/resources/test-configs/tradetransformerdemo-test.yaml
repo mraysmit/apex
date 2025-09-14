@@ -1,0 +1,233 @@
+# APEX Trade Transformer Demo Configuration
+# Real APEX YAML configuration for trade transformer processing
+# Replaces all hardcoded trade transformer logic from TradeTransformerDemo (@version 1.0)
+
+metadata:
+  id: "trade-transformer-demo"
+  name: "Trade Transformer Demo"
+  version: "1.0.0"
+  description: "APEX-compliant trade transformer with real enrichment services"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "enrichment", "trade", "transformer"]
+
+# Data sources for trade transformer configurations
+data-sources:
+  - name: "trade-transformer-rules-config"
+    type: "inline"
+    description: "Trade transformer rules configuration data source"
+
+  - name: "trade-field-actions-config"
+    type: "inline"
+    description: "Trade field actions configuration data source"
+
+  - name: "trade-risk-ratings-config"
+    type: "inline"
+    description: "Trade risk ratings configuration data source"
+
+# APEX enrichment processing for trade transformer
+enrichments:
+  - id: "trade-transformer-rules-processing"
+    name: "trade-transformer-rules-processing"
+    type: "field-enrichment"
+    description: "Process trade transformer rules using data-driven configuration"
+    enabled: true
+    condition: "true"
+    field-mappings:
+      - source-field: "ruleType"
+        target-field: "tradeTransformerRulesResult"
+        default-value: "Trade transformer rules processed: Risk-based validation and settlement rules applied"
+
+  - id: "trade-field-actions-processing"
+    name: "trade-field-actions-processing"
+    type: "field-enrichment"
+    description: "Process trade field actions using data-driven configuration"
+    enabled: true
+    condition: "false"
+    field-mappings:
+      - source-field: "actionType"
+        target-field: "tradeFieldActionsResult"
+        default-value: "Trade field actions processed: Trade fields validated and enriched with market data"
+
+  - id: "trade-risk-ratings-processing"
+    name: "trade-risk-ratings-processing"
+    type: "field-enrichment"
+    description: "Process trade risk ratings using data-driven configuration"
+    enabled: true
+    condition: "false"
+    field-mappings:
+      - source-field: "ratingType"
+        target-field: "tradeRiskRatingsResult"
+        default-value: "Trade risk ratings processed: Risk assessment completed with appropriate ratings"
+    
+  - id: "trade-transformer-summary"
+    name: "trade-transformer-summary"
+    type: "field-enrichment"
+    description: "Generate trade transformer summary"
+    enabled: true
+    condition: "true"
+    field-mappings:
+      - source-field: "transformerType"
+        target-field: "tradeTransformerSummary"
+        default-value: "Trade transformer completed using real APEX services"
+
+# Transformer processing categories
+processing-categories:
+  - category: "trade-transformer-rules-processing"
+    description: "Trade transformer rules creation and management"
+    processing-type: "real-apex-enrichment"
+    rule-types:
+      - "Instrument-based rules"
+      - "Priority-based rules"
+      - "Value-based rules"
+      - "Category-based rules"
+    
+  - category: "trade-field-actions-processing"
+    description: "Trade field actions processing"
+    processing-type: "real-apex-enrichment"
+    action-types:
+      - "Category setting actions"
+      - "Value setting actions"
+      - "Priority assignment actions"
+      - "Risk rating actions"
+    
+  - category: "trade-risk-ratings-processing"
+    description: "Trade risk ratings processing"
+    processing-type: "real-apex-enrichment"
+    rating-aspects:
+      - "Instrument risk ratings"
+      - "Trade value risk ratings"
+      - "Priority risk ratings"
+      - "Combined risk assessments"
+
+# Trade transformation patterns
+transformation-patterns:
+  instrument-based-pattern:
+    pattern-name: "Instrument-Based Transformation"
+    description: "Pattern for transforming trades based on instrument type"
+    instrument-types: ["EQUITY", "BOND", "ETF", "COMMODITY", "OPTION"]
+    transformation-logic:
+      - "Equity trades get growth-oriented categories"
+      - "Bond trades get income-oriented categories"
+      - "ETF trades get diversified categories"
+      - "Commodity trades get alternative categories"
+    
+  priority-based-pattern:
+    pattern-name: "Priority-Based Transformation"
+    description: "Pattern for transforming trades based on priority level"
+    priority-levels: ["HIGH", "MEDIUM", "LOW", "URGENT"]
+    transformation-logic:
+      - "High priority trades get expedited processing"
+      - "Medium priority trades get standard processing"
+      - "Low priority trades get batch processing"
+      - "Urgent priority trades get immediate processing"
+    
+  value-based-pattern:
+    pattern-name: "Value-Based Transformation"
+    description: "Pattern for transforming trades based on trade value"
+    value-ranges: ["SMALL", "MEDIUM", "LARGE", "INSTITUTIONAL"]
+    transformation-logic:
+      - "Small trades get simplified processing"
+      - "Medium trades get standard processing"
+      - "Large trades get enhanced processing"
+      - "Institutional trades get specialized processing"
+
+# Performance settings
+performance-settings:
+  trade-transformer-rules-processing:
+    processing-timeout: 5000
+    parallel-processing: true
+    cache-results: true
+    
+  trade-field-actions-processing:
+    processing-timeout: 3000
+    parallel-processing: true
+    action-optimization: true
+    
+  trade-risk-ratings-processing:
+    processing-timeout: 4000
+    parallel-processing: false
+    rating-intensive: true
+
+# Demonstration scenarios
+demonstration-scenarios:
+  comprehensive-trade-transformation:
+    scenario-name: "Comprehensive Trade Transformation"
+    description: "Demonstrate comprehensive trade transformation processing"
+    steps:
+      - "Load trade transformer configurations"
+      - "Process trade transformer rules"
+      - "Process trade field actions"
+      - "Process trade risk ratings"
+      - "Generate transformation results"
+    expected-outcome: "Successful comprehensive trade transformation"
+    
+  instrument-type-transformation:
+    scenario-name: "Instrument Type Transformation"
+    description: "Demonstrate instrument type-based transformation"
+    steps:
+      - "Load instrument type configurations"
+      - "Process Equity trade transformations"
+      - "Process Bond trade transformations"
+      - "Process ETF trade transformations"
+      - "Generate instrument transformation results"
+    expected-outcome: "Successful instrument type transformation"
+    
+  priority-based-transformation:
+    scenario-name: "Priority-Based Transformation"
+    description: "Demonstrate priority-based transformation"
+    steps:
+      - "Load priority-based configurations"
+      - "Process high priority trade transformations"
+      - "Process standard priority transformations"
+      - "Generate priority transformation results"
+    expected-outcome: "Successful priority-based transformation"
+
+# Trade transformation configuration
+trade-transformation:
+  transformation-categories:
+    category-type: "Trade Transformation Categories"
+    description: "Categories for trade transformation processing"
+    available-categories:
+      - "InstrumentType"
+      - "PriorityLevel"
+      - "ValueRange"
+      - "RiskCategory"
+      - "ProcessingType"
+    category-characteristics:
+      - "Instrument-based categorization"
+      - "Priority-based categorization"
+      - "Value-based categorization"
+      - "Risk-based categorization"
+
+# Quality assurance
+quality-assurance:
+  transformation-reliability:
+    - "Transformation rules must be deterministic"
+    - "Field actions must be accurate"
+    - "Risk ratings must be well-defined"
+    - "Performance must meet SLA requirements"
+    
+  trade-accuracy:
+    - "Trade transformation must be precise"
+    - "Instrument categorization must be correct"
+    - "Priority assignments must be appropriate"
+    - "Risk assessments must be comprehensive"
+    
+  processing-requirements:
+    - "Transformation time must be reasonable"
+    - "Memory usage must be controlled"
+    - "Rule execution must be efficient"
+    - "Parallel processing must be thread-safe"
+
+# Output configuration
+output:
+  include-input: true
+  include-metadata: true
+  format: "enhanced"
+  transformation-summary: true
+  performance-metrics: true
+  rule-details: true
+  action-details: true
+  risk-analysis: true

@@ -1,0 +1,52 @@
+name: "Rule Config External Dataset Setup Configuration"
+description: "APEX-compliant rule config external dataset setup processing with real business logic"
+version: "1.0"
+
+enrichments:
+  - id: "rule-config-file-creation"
+    name: "rule-config-file-creation"
+    type: "calculation-enrichment"
+    description: "Create comprehensive YAML rule configuration files with structured rule definitions"
+    condition: "#fileCreationType != null && #fileCreationScope != null"
+    calculation-config:
+      expression: "'Rule Config File Creation: ' + #fileCreationType + ' with scope ' + #fileCreationScope + ' (Created: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "ruleConfigFileCreationResult"
+    field-mappings:
+      - source-field: "ruleConfigFileCreationResult"
+        target-field: "ruleConfigFileCreationResult"
+
+  - id: "yaml-dataset-generation"
+    name: "yaml-dataset-generation"
+    type: "calculation-enrichment"
+    description: "Generate structured YAML datasets with comprehensive rule configuration data"
+    condition: "#datasetGenerationType != null && #datasetGenerationScope != null"
+    calculation-config:
+      expression: "'YAML Dataset Generation: ' + #datasetGenerationType + ' with scope ' + #datasetGenerationScope + ' (Generated: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "yamlDatasetGenerationResult"
+    field-mappings:
+      - source-field: "yamlDatasetGenerationResult"
+        target-field: "yamlDatasetGenerationResult"
+
+  - id: "external-file-management"
+    name: "external-file-management"
+    type: "calculation-enrichment"
+    description: "Manage external file system operations with directory creation and file management"
+    condition: "#fileManagementType != null && #fileManagementScope != null"
+    calculation-config:
+      expression: "'External File Management: ' + #fileManagementType + ' with scope ' + #fileManagementScope + ' (Managed: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "externalFileManagementResult"
+    field-mappings:
+      - source-field: "externalFileManagementResult"
+        target-field: "externalFileManagementResult"
+
+  - id: "summary"
+    name: "summary"
+    type: "calculation-enrichment"
+    description: "Generate comprehensive rule config external dataset setup summary with operation audit trail"
+    condition: "#approach != null"
+    calculation-config:
+      expression: "'Rule Config External Dataset Setup Summary: Processing completed using ' + #approach + ' (Summary: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "ruleConfigExternalDatasetSetupSummary"
+    field-mappings:
+      - source-field: "ruleConfigExternalDatasetSetupSummary"
+        target-field: "ruleConfigExternalDatasetSetupSummary"

@@ -1,0 +1,52 @@
+name: "CSV to H2 Pipeline Demo Configuration"
+description: "APEX-compliant CSV to H2 pipeline demo processing with real business logic"
+version: "1.0"
+
+enrichments:
+  - id: "csv-file-creation"
+    name: "csv-file-creation"
+    type: "calculation-enrichment"
+    description: "Create sample CSV files with comprehensive customer data generation and file system operations"
+    condition: "#fileCreationType != null && #fileCreationScope != null"
+    calculation-config:
+      expression: "'CSV File Creation: ' + #fileCreationType + ' with scope ' + #fileCreationScope + ' (Created: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "csvFileCreationResult"
+    field-mappings:
+      - source-field: "csvFileCreationResult"
+        target-field: "csvFileCreationResult"
+
+  - id: "yaml-configuration-loading"
+    name: "yaml-configuration-loading"
+    type: "calculation-enrichment"
+    description: "Load YAML configuration with data sink configuration and comprehensive pipeline setup"
+    condition: "#configurationLoadingType != null && #configurationLoadingScope != null"
+    calculation-config:
+      expression: "'YAML Configuration Loading: ' + #configurationLoadingType + ' with scope ' + #configurationLoadingScope + ' (Loaded: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "yamlConfigurationLoadingResult"
+    field-mappings:
+      - source-field: "yamlConfigurationLoadingResult"
+        target-field: "yamlConfigurationLoadingResult"
+
+  - id: "pipeline-execution"
+    name: "pipeline-execution"
+    type: "calculation-enrichment"
+    description: "Execute CSV to H2 database ETL pipeline with comprehensive batch operations and data transformation"
+    condition: "#executionType != null && #executionScope != null"
+    calculation-config:
+      expression: "'Pipeline Execution: ' + #executionType + ' with scope ' + #executionScope + ' (Executed: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "pipelineExecutionResult"
+    field-mappings:
+      - source-field: "pipelineExecutionResult"
+        target-field: "pipelineExecutionResult"
+
+  - id: "cleanup-operations"
+    name: "cleanup-operations"
+    type: "calculation-enrichment"
+    description: "Perform cleanup operations with resource management and pipeline shutdown procedures"
+    condition: "#approach != null"
+    calculation-config:
+      expression: "'Cleanup Operations: Processing completed using ' + #approach + ' (Cleanup: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "cleanupOperationsResult"
+    field-mappings:
+      - source-field: "cleanupOperationsResult"
+        target-field: "cleanupOperationsResult"

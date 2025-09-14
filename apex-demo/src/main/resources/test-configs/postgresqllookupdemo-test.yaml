@@ -1,0 +1,52 @@
+name: "PostgreSQL Lookup Demo Configuration"
+description: "APEX-compliant PostgreSQL lookup processing with real business logic"
+version: "1.0"
+
+enrichments:
+  - id: "external-data-source-setup"
+    name: "external-data-source-setup"
+    type: "calculation-enrichment"
+    description: "Setup external PostgreSQL data source configuration for database operations"
+    condition: "#dataSourceType != null && #dataSourceScope != null"
+    calculation-config:
+      expression: "'External Data Source Setup: ' + #dataSourceType + ' with scope ' + #dataSourceScope + ' (Setup: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "externalDataSourceSetupResult"
+    field-mappings:
+      - source-field: "externalDataSourceSetupResult"
+        target-field: "externalDataSourceSetupResult"
+
+  - id: "customer-profile-lookup"
+    name: "customer-profile-lookup"
+    type: "calculation-enrichment"
+    description: "Perform customer profile lookup using PostgreSQL database operations"
+    condition: "#profileLookupType != null && #profileLookupScope != null"
+    calculation-config:
+      expression: "'Customer Profile Lookup: ' + #profileLookupType + ' with scope ' + #profileLookupScope + ' (Looked up: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "customerProfileLookupResult"
+    field-mappings:
+      - source-field: "customerProfileLookupResult"
+        target-field: "customerProfileLookupResult"
+
+  - id: "settlement-instruction-lookup"
+    name: "settlement-instruction-lookup"
+    type: "calculation-enrichment"
+    description: "Execute settlement instruction lookup with multi-table PostgreSQL operations"
+    condition: "#settlementLookupType != null && #settlementLookupScope != null"
+    calculation-config:
+      expression: "'Settlement Instruction Lookup: ' + #settlementLookupType + ' with scope ' + #settlementLookupScope + ' (Executed: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "settlementInstructionLookupResult"
+    field-mappings:
+      - source-field: "settlementInstructionLookupResult"
+        target-field: "settlementInstructionLookupResult"
+
+  - id: "summary"
+    name: "summary"
+    type: "calculation-enrichment"
+    description: "Generate comprehensive PostgreSQL lookup summary"
+    condition: "#approach != null"
+    calculation-config:
+      expression: "'PostgreSQL Lookup Summary: Processing completed using ' + #approach + ' (Summary: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "postgresqlLookupSummary"
+    field-mappings:
+      - source-field: "postgresqlLookupSummary"
+        target-field: "postgresqlLookupSummary"

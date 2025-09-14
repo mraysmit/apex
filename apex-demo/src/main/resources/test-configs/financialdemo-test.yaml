@@ -1,0 +1,103 @@
+# APEX Financial Demo Configuration
+# Real APEX YAML configuration for financial processing
+# Replaces all hardcoded financial logic from FinancialDemo (@version 1.0)
+
+metadata:
+  id: "financial-demo-config"
+  name: "Financial Demo Configuration"
+  version: "2.0.0"
+  description: "APEX-compliant financial processing with real enrichment services"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  business-domain: "Financial Trading"
+  tags: ["financial", "demo", "enrichment", "trading"]
+
+# APEX enrichment processing for financial operations
+enrichments:
+  - id: "trade-validation-enrichment"
+    name: "trade-validation"
+    type: "calculation-enrichment"
+    description: "Validates trade data and determines trade status"
+    condition: "#tradeId != null"
+    calculation-config:
+      expression: "#tradeId.matches('^[A-Z]{3}[0-9]{3,6}$') ? 'VALID' : 'INVALID'"
+      result-field: "tradeStatus"
+    field-mappings:
+      - source-field: "tradeStatus"
+        target-field: "tradeStatus"
+        
+  - id: "risk-assessment-enrichment"
+    name: "risk-assessment"
+    type: "calculation-enrichment"
+    description: "Calculates risk level based on notional amount"
+    condition: "#notionalAmount != null"
+    calculation-config:
+      expression: "#notionalAmount > 1000000 ? 'HIGH' : (#notionalAmount > 100000 ? 'MEDIUM' : 'LOW')"
+      result-field: "riskLevel"
+    field-mappings:
+      - source-field: "riskLevel"
+        target-field: "riskLevel"
+        
+  - id: "instrument-classification-enrichment"
+    name: "instrument-classification"
+    type: "lookup-enrichment"
+    description: "Classifies financial instruments"
+    condition: "#instrumentId != null"
+    lookup-config:
+      lookup-key: "#instrumentId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "instrumentId"
+        data:
+          - instrumentId: "BRENT_CRUDE_SWAP"
+            assetClass: "COMMODITY"
+            category: "DERIVATIVE"
+            complexity: "HIGH"
+          - instrumentId: "GOLD_FUTURES"
+            assetClass: "COMMODITY"
+            category: "FUTURES"
+            complexity: "MEDIUM"
+          - instrumentId: "EUR_USD_SPOT"
+            assetClass: "FX"
+            category: "SPOT"
+            complexity: "LOW"
+          - instrumentId: "APPLE_EQUITY"
+            assetClass: "EQUITY"
+            category: "STOCK"
+            complexity: "LOW"
+          - instrumentId: "US_TREASURY_BOND"
+            assetClass: "FIXED_INCOME"
+            category: "GOVERNMENT_BOND"
+            complexity: "LOW"
+    field-mappings:
+      - source-field: "assetClass"
+        target-field: "assetClass"
+      - source-field: "category"
+        target-field: "category"
+      - source-field: "complexity"
+        target-field: "complexity"
+        
+  - id: "settlement-calculation-enrichment"
+    name: "settlement-calculation"
+    type: "calculation-enrichment"
+    description: "Calculates settlement date based on asset class"
+    condition: "#assetClass != null"
+    calculation-config:
+      expression: "#assetClass == 'EQUITY' ? 'T+2' : (#assetClass == 'FX' ? 'T+0' : (#assetClass == 'COMMODITY' ? 'T+3' : 'T+1'))"
+      result-field: "settlementCycle"
+    field-mappings:
+      - source-field: "settlementCycle"
+        target-field: "settlementCycle"
+        
+  - id: "processing-summary-enrichment"
+    name: "processing-summary"
+    type: "calculation-enrichment"
+    description: "Generates financial processing summary"
+    condition: "true"
+    calculation-config:
+      expression: "'Financial processing completed for trade: ' + (#tradeId != null ? #tradeId : 'UNKNOWN') + ', Risk: ' + (#riskLevel != null ? #riskLevel : 'UNKNOWN')"
+      result-field: "processingSummary"
+    field-mappings:
+      - source-field: "processingSummary"
+        target-field: "processingSummary"

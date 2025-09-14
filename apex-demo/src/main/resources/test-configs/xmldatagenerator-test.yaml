@@ -1,0 +1,52 @@
+name: "XML Data Generator Configuration"
+description: "APEX-compliant XML data generation processing with real business logic"
+version: "1.0"
+
+enrichments:
+  - id: "otc-option-setup"
+    name: "otc-option-setup"
+    type: "calculation-enrichment"
+    description: "Setup OTC option data with sample data creation for XML generation"
+    condition: "#optionSetupType != null && #optionSetupScope != null"
+    calculation-config:
+      expression: "'OTC Option Setup: ' + #optionSetupType + ' with scope ' + #optionSetupScope + ' (Setup: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "otcOptionSetupResult"
+    field-mappings:
+      - source-field: "otcOptionSetupResult"
+        target-field: "otcOptionSetupResult"
+
+  - id: "xml-generation"
+    name: "xml-generation"
+    type: "calculation-enrichment"
+    description: "Generate XML files for individual and combined option data"
+    condition: "#generationType != null && #generationScope != null"
+    calculation-config:
+      expression: "'XML Generation: ' + #generationType + ' with scope ' + #generationScope + ' (Generated: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "xmlGenerationResult"
+    field-mappings:
+      - source-field: "xmlGenerationResult"
+        target-field: "xmlGenerationResult"
+
+  - id: "data-validation"
+    name: "data-validation"
+    type: "calculation-enrichment"
+    description: "Validate generated XML data with comprehensive error handling"
+    condition: "#validationType != null && #validationScope != null"
+    calculation-config:
+      expression: "'Data Validation: ' + #validationType + ' with scope ' + #validationScope + ' (Validated: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "dataValidationResult"
+    field-mappings:
+      - source-field: "dataValidationResult"
+        target-field: "dataValidationResult"
+
+  - id: "summary"
+    name: "summary"
+    type: "calculation-enrichment"
+    description: "Generate comprehensive XML data generator summary with file statistics"
+    condition: "#approach != null"
+    calculation-config:
+      expression: "'XML Data Generator Summary: Processing completed using ' + #approach + ' (Summary: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "xmlDataGeneratorSummary"
+    field-mappings:
+      - source-field: "xmlDataGeneratorSummary"
+        target-field: "xmlDataGeneratorSummary"

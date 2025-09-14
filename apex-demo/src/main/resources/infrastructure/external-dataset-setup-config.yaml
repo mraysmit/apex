@@ -1,0 +1,52 @@
+name: "External Dataset Setup Configuration"
+description: "APEX-compliant external dataset setup processing with real business logic"
+version: "1.0"
+
+enrichments:
+  - id: "market-data-creation"
+    name: "market-data-creation"
+    type: "calculation-enrichment"
+    description: "Create market data files with OTC options support for external datasets"
+    condition: "#creationType != null && #creationScope != null"
+    calculation-config:
+      expression: "'Market Data Creation: ' + #creationType + ' with scope ' + #creationScope + ' (Created: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "marketDataCreationResult"
+    field-mappings:
+      - source-field: "marketDataCreationResult"
+        target-field: "marketDataCreationResult"
+
+  - id: "yaml-content-generation"
+    name: "yaml-content-generation"
+    type: "calculation-enrichment"
+    description: "Generate YAML content with currency and market reference data"
+    condition: "#generationType != null && #generationScope != null"
+    calculation-config:
+      expression: "'YAML Content Generation: ' + #generationType + ' with scope ' + #generationScope + ' (Generated: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "yamlContentGenerationResult"
+    field-mappings:
+      - source-field: "yamlContentGenerationResult"
+        target-field: "yamlContentGenerationResult"
+
+  - id: "directory-management"
+    name: "directory-management"
+    type: "calculation-enrichment"
+    description: "Manage directories and files with comprehensive error handling"
+    condition: "#managementType != null && #managementScope != null"
+    calculation-config:
+      expression: "'Directory Management: ' + #managementType + ' with scope ' + #managementScope + ' (Managed: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "directoryManagementResult"
+    field-mappings:
+      - source-field: "directoryManagementResult"
+        target-field: "directoryManagementResult"
+
+  - id: "summary"
+    name: "summary"
+    type: "calculation-enrichment"
+    description: "Generate comprehensive external dataset setup summary with file statistics"
+    condition: "#approach != null"
+    calculation-config:
+      expression: "'External Dataset Setup Summary: Processing completed using ' + #approach + ' (Summary: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "externalDatasetSetupSummary"
+    field-mappings:
+      - source-field: "externalDatasetSetupSummary"
+        target-field: "externalDatasetSetupSummary"

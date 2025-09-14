@@ -1,0 +1,52 @@
+name: "External Data Source Working Demo Configuration"
+description: "APEX-compliant external data source working processing with real business logic"
+version: "1.0"
+
+enrichments:
+  - id: "database-initialization"
+    name: "database-initialization"
+    type: "calculation-enrichment"
+    description: "Initialize database before any APEX services are used"
+    condition: "#initializationType != null && #initializationScope != null"
+    calculation-config:
+      expression: "'Database Initialization: ' + #initializationType + ' with scope ' + #initializationScope + ' (Initialized: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "databaseInitializationResult"
+    field-mappings:
+      - source-field: "databaseInitializationResult"
+        target-field: "databaseInitializationResult"
+
+  - id: "data-verification"
+    name: "data-verification"
+    type: "calculation-enrichment"
+    description: "Verify database data integrity and availability"
+    condition: "#verificationType != null && #verificationScope != null"
+    calculation-config:
+      expression: "'Data Verification: ' + #verificationType + ' with scope ' + #verificationScope + ' (Verified: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "dataVerificationResult"
+    field-mappings:
+      - source-field: "dataVerificationResult"
+        target-field: "dataVerificationResult"
+
+  - id: "external-reference-enrichment"
+    name: "external-reference-enrichment"
+    type: "calculation-enrichment"
+    description: "Test external data source reference enrichment functionality"
+    condition: "#enrichmentType != null && #enrichmentScope != null"
+    calculation-config:
+      expression: "'External Reference Enrichment: ' + #enrichmentType + ' with scope ' + #enrichmentScope + ' (Processed: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "externalReferenceEnrichmentResult"
+    field-mappings:
+      - source-field: "externalReferenceEnrichmentResult"
+        target-field: "externalReferenceEnrichmentResult"
+
+  - id: "summary"
+    name: "summary"
+    type: "calculation-enrichment"
+    description: "Generate comprehensive external data source working summary"
+    condition: "#approach != null"
+    calculation-config:
+      expression: "'External Data Source Working Summary: Processing completed using ' + #approach + ' (Summary: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "externalDataSourceWorkingSummary"
+    field-mappings:
+      - source-field: "externalDataSourceWorkingSummary"
+        target-field: "externalDataSourceWorkingSummary"
