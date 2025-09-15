@@ -1,0 +1,76 @@
+metadata:
+  id: "base-validation-rules"
+  name: "Base Validation Rules"
+  version: "1.0.0"
+  description: "Foundational validation rules for customer onboarding"
+  type: "rule-config"
+  author: "APEX Demo Team"
+  created-date: "2025-01-15"
+  tags: ["demo", "hierarchical", "base-rules", "validation"]
+
+rules:
+  # Basic customer validation rules
+  - id: "age-validation"
+    name: "Age Validation"
+    condition: "#customer != null && #customer.age != null && #customer.age >= 18"
+    message: "Customer must be 18 or older"
+    severity: "ERROR"
+    priority: 1
+
+  - id: "email-validation"
+    name: "Email Validation"
+    condition: "#customer != null && #customer.email != null && #customer.email.contains('@') && #customer.email.contains('.')"
+    message: "Valid email address required"
+    severity: "ERROR"
+    priority: 2
+
+  - id: "name-validation"
+    name: "Name Validation"
+    condition: "#customer != null && #customer.name != null && #customer.name.trim().length() > 0"
+    message: "Customer name is required"
+    severity: "ERROR"
+    priority: 1
+
+  # Financial validation rules
+  - id: "credit-check"
+    name: "Credit Score Check"
+    condition: "#customer != null && #customer.creditScore != null && #customer.creditScore >= 600"
+    message: "Minimum credit score of 600 required"
+    severity: "ERROR"
+    priority: 3
+
+  - id: "income-verification"
+    name: "Income Verification"
+    condition: "#customer != null && #customer.annualIncome != null && #customer.annualIncome >= 25000"
+    message: "Minimum annual income of $25,000 required"
+    severity: "ERROR"
+    priority: 4
+
+  - id: "debt-to-income-ratio"
+    name: "Debt to Income Ratio"
+    condition: "#customer != null && #customer.monthlyDebt != null && #customer.annualIncome != null && (#customer.monthlyDebt * 12.0) / #customer.annualIncome <= 0.4"
+    message: "Debt-to-income ratio must not exceed 40%"
+    severity: "WARNING"
+    priority: 5
+
+  # Compliance validation rules
+  - id: "kyc-documentation"
+    name: "KYC Documentation Check"
+    condition: "#customer != null && #customer.kycDocuments != null && #customer.kycDocuments.size() >= 2"
+    message: "At least 2 KYC documents required"
+    severity: "ERROR"
+    priority: 2
+
+  - id: "sanctions-screening"
+    name: "Sanctions List Screening"
+    condition: "#customer != null && #customer.sanctionsStatus != null && #customer.sanctionsStatus == 'CLEAR'"
+    message: "Customer must pass sanctions screening"
+    severity: "ERROR"
+    priority: 1
+
+  - id: "pep-screening"
+    name: "PEP Screening"
+    condition: "#customer != null && #customer.pepStatus != null && (#customer.pepStatus == 'NOT_PEP' || #customer.pepStatus == 'PEP_APPROVED')"
+    message: "PEP status must be verified"
+    severity: "WARNING"
+    priority: 3

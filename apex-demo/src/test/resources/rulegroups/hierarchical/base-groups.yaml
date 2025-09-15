@@ -1,0 +1,68 @@
+metadata:
+  id: "base-rule-groups"
+  name: "Base Rule Groups"
+  version: "1.0.0"
+  description: "Base rule groups that combine individual validation rules"
+  type: "rule-config"
+  author: "APEX Demo Team"
+  created-date: "2025-01-15"
+  tags: ["demo", "hierarchical", "base-groups", "validation"]
+
+rule-groups:
+  # Basic customer validation group
+  - id: "customer-basic-validation"
+    name: "Customer Basic Validation"
+    description: "Basic customer information validation"
+    operator: "AND"
+    stop-on-first-failure: true
+    priority: 10
+    rule-ids:
+      - "name-validation"
+      - "age-validation"
+      - "email-validation"
+
+  # Financial validation group
+  - id: "financial-validation"
+    name: "Financial Validation"
+    description: "Customer financial eligibility validation"
+    operator: "AND"
+    stop-on-first-failure: false  # Check all financial criteria
+    priority: 20
+    rule-ids:
+      - "credit-check"
+      - "income-verification"
+      - "debt-to-income-ratio"
+
+  # Compliance validation group
+  - id: "compliance-checks"
+    name: "Compliance Checks"
+    description: "Regulatory compliance validation"
+    operator: "AND"
+    stop-on-first-failure: true
+    priority: 5  # High priority for compliance
+    rule-ids:
+      - "sanctions-screening"
+      - "kyc-documentation"
+      - "pep-screening"
+
+  # Alternative validation paths
+  - id: "premium-customer-validation"
+    name: "Premium Customer Validation"
+    description: "Relaxed validation for premium customers"
+    operator: "OR"  # More lenient - any one can pass
+    stop-on-first-failure: true
+    priority: 15
+    rule-ids:
+      - "credit-check"
+      - "income-verification"
+
+  # Quick validation for existing customers
+  - id: "existing-customer-validation"
+    name: "Existing Customer Validation"
+    description: "Simplified validation for existing customers"
+    operator: "AND"
+    stop-on-first-failure: true
+    priority: 25
+    rule-ids:
+      - "sanctions-screening"
+      - "email-validation"

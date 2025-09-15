@@ -141,6 +141,10 @@ public class YamlRuleFactory {
                     LOGGER.info("Skipping disabled rule group: " + yamlGroup.getId());
                 }
             }
+
+            // Second phase: Process rule group references now that all rule groups are created
+            LOGGER.info("Processing rule group references in second phase");
+            processRuleGroupReferences(yamlConfig, config);
         }
 
         LOGGER.info("Successfully created RulesEngineConfiguration with " +
@@ -567,6 +571,65 @@ public class YamlRuleFactory {
                 } else {
                     LOGGER.info("Skipping disabled rule: " + ref.getRuleId());
                 }
+            }
+        }
+
+        // Note: Rule group references are processed in a separate phase after all rule groups are created
+        // This is handled by processRuleGroupReferences() method
+    }
+
+    /**
+     * Process rule group references in a second phase after all rule groups have been created.
+     * This allows rule groups to reference other rule groups that might be defined later in the configuration.
+     */
+    private void processRuleGroupReferences(YamlRuleConfiguration yamlConfig, RulesEngineConfiguration config) throws YamlConfigurationException {
+        if (yamlConfig.getRuleGroups() == null) {
+            return;
+        }
+
+        for (YamlRuleGroup yamlGroup : yamlConfig.getRuleGroups()) {
+            if ((yamlGroup.getEnabled() == null || yamlGroup.getEnabled()) && yamlGroup.getRuleGroupReferences() != null) {
+                LOGGER.info("Processing rule group references for group: " + yamlGroup.getId());
+
+                RuleGroup targetGroup = config.getRuleGroupById(yamlGroup.getId());
+                if (targetGroup == null) {
+                    LOGGER.warning("Target rule group not found: " + yamlGroup.getId());
+                    continue;
+                }
+
+                addRuleGroupReferencesToGroup(yamlGroup, targetGroup, config);
+            }
+        }
+    }
+
+    /**
+     * Add rules from referenced rule groups to the target rule group.
+     */
+    private void addRuleGroupReferencesToGroup(YamlRuleGroup yamlGroup, RuleGroup targetGroup, RulesEngineConfiguration config) throws YamlConfigurationException {
+        if (yamlGroup.getRuleGroupReferences() == null) {
+            return;
+        }
+
+        LOGGER.info("Processing " + yamlGroup.getRuleGroupReferences().size() + " rule group references for group: " + yamlGroup.getId());
+
+        // Calculate starting sequence number (after existing rules)
+        int nextSequence = targetGroup.getRules().size() + 1;
+
+        for (String referencedGroupId : yamlGroup.getRuleGroupReferences()) {
+            LOGGER.info("Processing rule group reference: " + referencedGroupId);
+
+            RuleGroup referencedGroup = config.getRuleGroupById(referencedGroupId);
+            if (referencedGroup != null) {
+                // Add all rules from the referenced group to the target group
+                for (Rule rule : referencedGroup.getRules()) {
+                    targetGroup.addRule(rule, nextSequence++);
+                    LOGGER.fine("Added rule " + rule.getId() + " from group " + referencedGroupId + " to group " + targetGroup.getId());
+                }
+                LOGGER.info("Successfully added " + referencedGroup.getRules().size() + " rules from group " + referencedGroupId + " to group " + targetGroup.getId());
+            } else {
+                String errorMsg = "Referenced rule group not found: " + referencedGroupId + " in group: " + yamlGroup.getId();
+                LOGGER.severe(errorMsg);
+                throw new YamlConfigurationException(errorMsg);
             }
         }
     }

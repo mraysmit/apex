@@ -1,0 +1,82 @@
+metadata:
+  id: "composite-rule-groups"
+  name: "Composite Rule Groups"
+  version: "1.0.0"
+  description: "Composite rule groups that reference other rule groups to create hierarchical validation"
+  type: "rule-config"
+  author: "APEX Demo Team"
+  created-date: "2025-01-15"
+  tags: ["demo", "hierarchical", "composite-groups", "validation"]
+
+rule-groups:
+  # Complete onboarding validation - references multiple base groups
+  - id: "complete-onboarding"
+    name: "Complete Customer Onboarding"
+    description: "Comprehensive validation for new customer onboarding"
+    operator: "AND"
+    stop-on-first-failure: false  # Check all aspects for complete feedback
+    priority: 1
+    rule-group-references:
+      - "customer-basic-validation"
+      - "financial-validation"
+      - "compliance-checks"
+
+  # Express onboarding for premium customers
+  - id: "premium-onboarding"
+    name: "Premium Customer Onboarding"
+    description: "Streamlined onboarding for premium customers"
+    operator: "AND"
+    stop-on-first-failure: true
+    priority: 5
+    rule-group-references:
+      - "customer-basic-validation"
+      - "premium-customer-validation"  # More lenient financial validation
+      - "compliance-checks"
+
+  # Existing customer update validation
+  - id: "customer-update-validation"
+    name: "Customer Update Validation"
+    description: "Validation for updating existing customer information"
+    operator: "AND"
+    stop-on-first-failure: true
+    priority: 10
+    rule-group-references:
+      - "existing-customer-validation"
+      - "compliance-checks"
+
+  # Mixed validation - combines rule groups and individual rules
+  - id: "mixed-validation"
+    name: "Mixed Validation Example"
+    description: "Example combining rule group references with individual rule references"
+    operator: "AND"
+    stop-on-first-failure: false
+    priority: 15
+    rule-group-references:
+      - "customer-basic-validation"
+      - "compliance-checks"
+    rule-ids:
+      - "debt-to-income-ratio"  # Additional individual rule
+
+  # Tiered validation - different levels based on customer type
+  - id: "tiered-validation"
+    name: "Tiered Customer Validation"
+    description: "Different validation tiers based on customer classification"
+    operator: "OR"  # Any tier can pass
+    stop-on-first-failure: true
+    priority: 8
+    rule-group-references:
+      - "premium-onboarding"      # For premium customers
+      - "complete-onboarding"     # For standard customers
+      - "customer-update-validation"  # For existing customers
+
+  # Compliance-focused validation
+  - id: "compliance-focused"
+    name: "Compliance-Focused Validation"
+    description: "Prioritizes compliance over financial criteria"
+    operator: "AND"
+    stop-on-first-failure: true
+    priority: 3
+    rule-group-references:
+      - "compliance-checks"
+      - "customer-basic-validation"
+    # Note: Deliberately excludes financial validation for certain scenarios
