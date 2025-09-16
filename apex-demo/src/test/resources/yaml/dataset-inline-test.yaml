@@ -1,3 +1,13 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Test configuration for dataset document type with inline reference data
+#          containing counterparty information, currencies, and instruments for
+#          testing APEX dataset loading and inline data functionality
+# Status: Available for integration with dataset inline data tests
+# ============================================================================
+
 metadata:
   id: "dataset-inline-test"
   name: "Dataset Document Inline Data Test"

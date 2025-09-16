@@ -1,3 +1,13 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Test configuration for conditional boolean operations and logical expressions
+#          using APEX rules with complex boolean conditions, AND/OR logic, and
+#          conditional enrichments for testing boolean evaluation capabilities
+# Status: Available for integration with conditional boolean logic tests
+# ============================================================================
+
 metadata:
   id: "conditional-boolean-test"
   name: "Conditional Boolean Expressions Test"

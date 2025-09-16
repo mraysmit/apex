@@ -1,0 +1,93 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Test configuration for mathematical calculation operations including
+#          trigonometry, logarithms, square roots, and rounding functions
+#          using APEX calculation enrichments with Java Math library functions
+# Status: Available for integration with mathematical calculation tests
+# ============================================================================
+
+metadata:
+  id: "calculation-mathematical-test"
+  name: "Calculation Mathematical Operations Test"
+  version: "1.0.0"
+  description: "Test mathematical calculation operations including trigonometry, logarithms, and rounding"
+  type: "rule-config"
+  author: "apex-test-suite@example.com"
+  created-date: "2025-09-16"
+  tags: ["apex-test", "calculation-engine", "mathematical-operations", "trigonometry"]
+
+# Mathematical calculation operations testing
+enrichments:
+  - id: "square-root-calculation"
+    name: "square-root-calculation"
+    type: "calculation-enrichment"
+    description: "Calculate square root using Math.sqrt function"
+    condition: "#value1 != null"
+    calculation-config:
+      expression: "T(java.lang.Math).sqrt(#value1)"
+      result-field: "squareRoot"
+    field-mappings:
+      - source-field: "squareRoot"
+        target-field: "squareRoot"
+
+  - id: "power-calculation"
+    name: "power-calculation"
+    type: "calculation-enrichment"
+    description: "Calculate power using Math.pow function"
+    condition: "#base != null && #exponent != null"
+    calculation-config:
+      expression: "T(java.lang.Math).pow(#base, #exponent)"
+      result-field: "powerResult"
+    field-mappings:
+      - source-field: "powerResult"
+        target-field: "powerResult"
+
+  - id: "trigonometric-calculation"
+    name: "trigonometric-calculation"
+    type: "calculation-enrichment"
+    description: "Calculate sine value with degree to radian conversion"
+    condition: "#angle != null"
+    calculation-config:
+      expression: "T(java.lang.Math).sin(T(java.lang.Math).toRadians(#angle))"
+      result-field: "sineValue"
+    field-mappings:
+      - source-field: "sineValue"
+        target-field: "sineValue"
+
+  - id: "logarithm-calculation"
+    name: "logarithm-calculation"
+    type: "calculation-enrichment"
+    description: "Calculate natural logarithm using Math.log function"
+    condition: "#value1 != null"
+    calculation-config:
+      expression: "T(java.lang.Math).log(#value1)"
+      result-field: "logarithm"
+    field-mappings:
+      - source-field: "logarithm"
+        target-field: "logarithm"
+
+  - id: "rounding-calculation"
+    name: "rounding-calculation"
+    type: "calculation-enrichment"
+    description: "Round number to nearest integer using Math.round function"
+    condition: "#number != null"
+    calculation-config:
+      expression: "T(java.lang.Math).round(#number)"
+      result-field: "roundedValue"
+    field-mappings:
+      - source-field: "roundedValue"
+        target-field: "roundedValue"
+
+  - id: "ceiling-calculation"
+    name: "ceiling-calculation"
+    type: "calculation-enrichment"
+    description: "Calculate ceiling value using Math.ceil function"
+    condition: "#number != null"
+    calculation-config:
+      expression: "T(java.lang.Math).ceil(#number)"
+      result-field: "ceilingValue"
+    field-mappings:
+      - source-field: "ceilingValue"
+        target-field: "ceilingValue"

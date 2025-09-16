@@ -1,0 +1,200 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ComprehensiveBusinessScenariosTest.java (testRiskManagementSystem method)
+# Purpose: Comprehensive risk management system demonstration with real-time risk calculations,
+#          portfolio Value-at-Risk (VaR) calculations, credit limit monitoring, and alert
+#          generation for financial risk management scenarios
+# ============================================================================
+
+metadata:
+  id: "risk-management-comprehensive"
+  name: "Risk Management Comprehensive System"
+  version: "1.0.0"
+  description: "Comprehensive risk management system with real-time risk calculations, limit monitoring, and alert generation"
+  type: "rule-config"
+  author: "apex-business-tests"
+  business-domain: "Risk Management"
+  tags: ["risk-management", "real-time-monitoring", "limit-checking", "alert-generation"]
+
+# Real risk management enrichments with complex calculations and business logic
+enrichments:
+  # 1. REAL CALCULATION ENRICHMENT - Portfolio Value-at-Risk (VaR) calculation
+  - id: "portfolio-var-calculation"
+    name: "Portfolio Value-at-Risk Calculation"
+    type: "calculation-enrichment"
+    description: "Calculate portfolio VaR using historical simulation method with real financial formulas"
+    condition: "#portfolioValue != null && #volatility != null && #confidenceLevel != null"
+    calculation-config:
+      expression: "#portfolioValue * #volatility * T(java.lang.Math).sqrt(1) * (#confidenceLevel == 0.95 ? 1.645 : (#confidenceLevel == 0.99 ? 2.326 : 1.96))"
+      result-field: "portfolioVaR"
+    field-mappings:
+      - source-field: "portfolioVaR"
+        target-field: "portfolioVaR"
+
+  # 2. REAL CALCULATION ENRICHMENT - Counterparty exposure calculation
+  - id: "counterparty-exposure-calculation"
+    name: "Counterparty Exposure Calculation"
+    type: "calculation-enrichment"
+    description: "Calculate current counterparty exposure including potential future exposure"
+    condition: "#currentExposure != null && #potentialExposure != null && #collateralValue != null"
+    calculation-config:
+      expression: "T(java.lang.Math).max(0.0, (#currentExposure + #potentialExposure) - #collateralValue)"
+      result-field: "netCounterpartyExposure"
+    field-mappings:
+      - source-field: "netCounterpartyExposure"
+        target-field: "netCounterpartyExposure"
+
+  # 3. REAL LOOKUP ENRICHMENT - Risk limit lookup and validation
+  - id: "risk-limit-lookup"
+    name: "Risk Limit Lookup and Validation"
+    type: "lookup-enrichment"
+    description: "Lookup risk limits by counterparty and product type from risk limit database"
+    condition: "#counterpartyId != null && #productType != null"
+    lookup-config:
+      lookup-key: "#counterpartyId + '_' + #productType"
+      lookup-dataset:
+        type: "inline"
+        key-field: "limit_key"
+        data:
+          - limit_key: "CP001_BONDS"
+            counterparty_limit: 50000000
+            product_limit: 25000000
+            var_limit: 1000000
+            concentration_limit: 0.15
+            limit_currency: "USD"
+          - limit_key: "CP002_EQUITIES"
+            counterparty_limit: 75000000
+            product_limit: 40000000
+            var_limit: 2000000
+            concentration_limit: 0.20
+            limit_currency: "USD"
+          - limit_key: "CP003_DERIVATIVES"
+            counterparty_limit: 100000000
+            product_limit: 60000000
+            var_limit: 5000000
+            concentration_limit: 0.25
+            limit_currency: "USD"
+    field-mappings:
+      - source-field: "counterparty_limit"
+        target-field: "counterpartyLimit"
+      - source-field: "product_limit"
+        target-field: "productLimit"
+      - source-field: "var_limit"
+        target-field: "varLimit"
+      - source-field: "concentration_limit"
+        target-field: "concentrationLimit"
+
+  # 4. REAL CALCULATION ENRICHMENT - Limit utilization calculation
+  - id: "limit-utilization-calculation"
+    name: "Limit Utilization Calculation"
+    type: "calculation-enrichment"
+    description: "Calculate current limit utilization percentages for monitoring and alerting"
+    condition: "#netCounterpartyExposure != null && #counterpartyLimit != null"
+    calculation-config:
+      expression: "(#netCounterpartyExposure / #counterpartyLimit) * 100"
+      result-field: "limitUtilizationPercent"
+    field-mappings:
+      - source-field: "limitUtilizationPercent"
+        target-field: "limitUtilizationPercent"
+
+  # 5. REAL FIELD ENRICHMENT - Risk alert generation
+  - id: "risk-alert-generation"
+    name: "Risk Alert Generation"
+    type: "field-enrichment"
+    description: "Generate risk alerts based on limit breaches and threshold violations"
+    condition: "#limitUtilizationPercent != null && #portfolioVaR != null && #varLimit != null"
+    field-mappings:
+      - source-field: "limitUtilizationPercent"
+        target-field: "riskAlertLevel"
+        transformation: "#limitUtilizationPercent > 90 ? 'CRITICAL' : (#limitUtilizationPercent > 75 ? 'HIGH' : (#limitUtilizationPercent > 50 ? 'MEDIUM' : 'LOW'))"
+
+  # 6. REAL FIELD ENRICHMENT - VaR limit breach check
+  - id: "var-limit-breach-check"
+    name: "VaR Limit Breach Check"
+    type: "field-enrichment"
+    description: "Check if portfolio VaR exceeds approved limits and generate breach notifications"
+    condition: "#portfolioVaR != null && #varLimit != null"
+    field-mappings:
+      - source-field: "portfolioVaR"
+        target-field: "varBreachStatus"
+        transformation: "#portfolioVaR > #varLimit ? 'BREACH' : (#portfolioVaR > (#varLimit * 0.9) ? 'WARNING' : 'NORMAL')"
+
+  # 7. REAL CALCULATION ENRICHMENT - Stress test scenario calculation
+  - id: "stress-test-calculation"
+    name: "Stress Test Scenario Calculation"
+    type: "calculation-enrichment"
+    description: "Calculate portfolio impact under stress scenarios (market crash, credit crisis)"
+    condition: "#portfolioValue != null && #stressScenario != null"
+    calculation-config:
+      expression: "#portfolioValue * (#stressScenario == 'MARKET_CRASH' ? -0.30 : (#stressScenario == 'CREDIT_CRISIS' ? -0.20 : (#stressScenario == 'INTEREST_RATE_SHOCK' ? -0.15 : 0)))"
+      result-field: "stressTestImpact"
+    field-mappings:
+      - source-field: "stressTestImpact"
+        target-field: "stressTestImpact"
+
+  # 8. REAL CALCULATION ENRICHMENT - Regulatory capital calculation
+  - id: "regulatory-capital-calculation"
+    name: "Regulatory Capital Calculation"
+    type: "calculation-enrichment"
+    description: "Calculate regulatory capital requirements under Basel III framework"
+    condition: "#netCounterpartyExposure != null && #riskWeight != null"
+    calculation-config:
+      expression: "#netCounterpartyExposure * #riskWeight * 0.08 * 1.25"
+      result-field: "regulatoryCapitalRequired"
+    field-mappings:
+      - source-field: "regulatoryCapitalRequired"
+        target-field: "regulatoryCapitalRequired"
+
+  # 9. REAL FIELD ENRICHMENT - Risk dashboard status
+  - id: "risk-dashboard-status"
+    name: "Risk Dashboard Status Determination"
+    type: "field-enrichment"
+    description: "Determine overall risk dashboard status based on all risk metrics and alerts"
+    condition: "#riskAlertLevel != null && #varBreachStatus != null"
+    field-mappings:
+      - source-field: "riskAlertLevel"
+        target-field: "overallRiskStatus"
+        transformation: "#riskAlertLevel == 'CRITICAL' || #varBreachStatus == 'BREACH' ? 'RED' : (#riskAlertLevel == 'HIGH' || #varBreachStatus == 'WARNING' ? 'AMBER' : 'GREEN')"
+
+  # 10. REAL LOOKUP ENRICHMENT - Risk mitigation actions lookup
+  - id: "risk-mitigation-lookup"
+    name: "Risk Mitigation Actions Lookup"
+    type: "lookup-enrichment"
+    description: "Lookup appropriate risk mitigation actions based on risk status and alert level"
+    condition: "#overallRiskStatus != null && #riskAlertLevel != null"
+    lookup-config:
+      lookup-key: "#overallRiskStatus + '_' + #riskAlertLevel"
+      lookup-dataset:
+        type: "inline"
+        key-field: "status_alert_key"
+        data:
+          - status_alert_key: "RED_CRITICAL"
+            mitigation_action: "IMMEDIATE_POSITION_REDUCTION"
+            escalation_level: "SENIOR_MANAGEMENT"
+            notification_required: true
+            trading_halt: true
+          - status_alert_key: "AMBER_HIGH"
+            mitigation_action: "ENHANCED_MONITORING"
+            escalation_level: "RISK_MANAGER"
+            notification_required: true
+            trading_halt: false
+          - status_alert_key: "RED_LOW"
+            mitigation_action: "ENHANCED_MONITORING"
+            escalation_level: "RISK_MANAGER"
+            notification_required: true
+            trading_halt: false
+          - status_alert_key: "GREEN_LOW"
+            mitigation_action: "ROUTINE_MONITORING"
+            escalation_level: "NONE"
+            notification_required: false
+            trading_halt: false
+    field-mappings:
+      - source-field: "mitigation_action"
+        target-field: "recommendedAction"
+      - source-field: "escalation_level"
+        target-field: "escalationLevel"
+      - source-field: "notification_required"
+        target-field: "notificationRequired"
+      - source-field: "trading_halt"
+        target-field: "tradingHaltRequired"

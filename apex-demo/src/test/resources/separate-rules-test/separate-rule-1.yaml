@@ -1,8 +1,8 @@
 metadata:
-  id: "separate-rule-1-config"
-  name: "Separate Rule 1"
+  id: "separate-rules-consolidated-config"
+  name: "Separate Rules Consolidated"
   version: "1.0.0"
-  description: "Always true rule for testing separate file loading"
+  description: "Consolidated separate rules for testing file loading - includes both true and false conditions"
   type: "rule-config"
   author: "apex.demo.team@company.com"
   created-date: "2024-12-24"
@@ -14,3 +14,17 @@ rules:
     message: "Separate Rule 1 passed"
     severity: "ERROR"
     priority: 1
+
+  - id: "separate-rule-2"
+    name: "Always False Rule 2"
+    condition: "false"
+    message: "Separate Rule 2 failed"
+    severity: "ERROR"
+    priority: 2
+
+  - id: "separate-rule-3"
+    name: "Always True Rule 3"
+    condition: "true"
+    message: "Separate Rule 3 passed"
+    severity: "ERROR"
+    priority: 3

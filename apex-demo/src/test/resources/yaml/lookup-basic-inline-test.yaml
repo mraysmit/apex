@@ -1,3 +1,13 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Basic lookup enrichment test with inline datasets for testing APEX
+#          lookup functionality with simple counterparty and currency lookups
+#          using inline reference data
+# Status: Available for integration with basic lookup enrichment tests
+# ============================================================================
+
 metadata:
   id: "lookup-basic-inline-test"
   name: "Lookup Basic Inline Operations Test"

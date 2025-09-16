@@ -1,0 +1,212 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ComprehensiveBusinessScenariosTest.java (testFinancialTradeProcessing method)
+# Purpose: Comprehensive financial trade processing demonstration with real APEX features
+#          including counterparty lookups, instrument enrichment, trade calculations,
+#          and settlement processing for US Treasury Notes and other financial instruments
+# ============================================================================
+
+metadata:
+  id: "financial-trade-processing-comprehensive"
+  name: "Financial Trade Processing Comprehensive Test"
+  version: "1.0.0"
+  description: "Comprehensive financial trade processing with real APEX features: lookups, calculations, validations, and enrichments"
+  type: "rule-config"
+  author: "apex-business-tests"
+  business-domain: "Financial Services"
+  tags: ["financial", "trade-processing", "comprehensive", "business-scenario"]
+
+# Real financial trade processing enrichments using actual APEX features
+enrichments:
+  # 1. REAL LOOKUP ENRICHMENT - Counterparty enrichment from dataset
+  - id: "counterparty-enrichment"
+    name: "Counterparty Information Lookup"
+    type: "lookup-enrichment"
+    description: "Enrich trade with counterparty information using real dataset lookup"
+    condition: "#counterpartyId != null"
+    lookup-config:
+      lookup-key: "#counterpartyId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "id"
+        data:
+          - id: "CP001"
+            name: "Goldman Sachs International"
+            lei: "W22LROWP2IHZNBB6K528"
+            jurisdiction: "GB"
+            creditRating: "A+"
+            riskCategory: "LOW"
+            settlementDays: 2
+          - id: "CP002"
+            name: "JPMorgan Securities LLC"
+            lei: "ZBUT11V806EZRVTWT807"
+            jurisdiction: "US"
+            creditRating: "AA-"
+            riskCategory: "LOW"
+            settlementDays: 1
+          - id: "CP003"
+            name: "Deutsche Bank AG"
+            lei: "7LTWFZYICNSX8D621K86"
+            jurisdiction: "DE"
+            creditRating: "A"
+            riskCategory: "MEDIUM"
+            settlementDays: 3
+    field-mappings:
+      - source-field: "name"
+        target-field: "counterpartyName"
+      - source-field: "lei"
+        target-field: "counterpartyLEI"
+      - source-field: "jurisdiction"
+        target-field: "counterpartyJurisdiction"
+      - source-field: "creditRating"
+        target-field: "counterpartyCreditRating"
+      - source-field: "riskCategory"
+        target-field: "counterpartyRiskCategory"
+      - source-field: "settlementDays"
+        target-field: "standardSettlementDays"
+
+  # 2. REAL CALCULATION ENRICHMENT - Trade valuation calculations
+  - id: "trade-valuation-calculation"
+    name: "Trade Valuation Calculation"
+    type: "calculation-enrichment"
+    description: "Calculate trade notional value, fees, and net settlement amount using real mathematical expressions"
+    condition: "#quantity != null && #price != null"
+    calculation-config:
+      expression: "#quantity * #price / 100"
+      result-field: "notionalValue"
+    field-mappings:
+      - source-field: "notionalValue"
+        target-field: "notionalValue"
+
+  # 3. REAL CALCULATION ENRICHMENT - Commission and fee calculations
+  - id: "commission-fee-calculation"
+    name: "Commission and Fee Calculation"
+    type: "calculation-enrichment"
+    description: "Calculate commission and fees based on notional value and counterparty risk"
+    condition: "#notionalValue != null && #counterpartyRiskCategory != null"
+    calculation-config:
+      expression: "#notionalValue * (#counterpartyRiskCategory == 'LOW' ? 0.001 : (#counterpartyRiskCategory == 'MEDIUM' ? 0.0015 : 0.002))"
+      result-field: "commissionAmount"
+    field-mappings:
+      - source-field: "commissionAmount"
+        target-field: "commissionAmount"
+
+  # 4. REAL CALCULATION ENRICHMENT - Net settlement amount
+  - id: "net-settlement-calculation"
+    name: "Net Settlement Amount Calculation"
+    type: "calculation-enrichment"
+    description: "Calculate final net settlement amount after fees and commissions"
+    condition: "#notionalValue != null && #commissionAmount != null"
+    calculation-config:
+      expression: "#notionalValue - #commissionAmount"
+      result-field: "netSettlementAmount"
+    field-mappings:
+      - source-field: "netSettlementAmount"
+        target-field: "netSettlementAmount"
+
+  # 5. REAL LOOKUP ENRICHMENT - Instrument details lookup
+  - id: "instrument-details-lookup"
+    name: "Instrument Details Lookup"
+    type: "lookup-enrichment"
+    description: "Lookup instrument details including maturity, coupon, and issuer information"
+    condition: "#instrumentId != null"
+    lookup-config:
+      lookup-key: "#instrumentId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "isin"
+        data:
+          - isin: "US912828XG93"
+            instrumentType: "TREASURY_NOTE"
+            maturity: "2034-05-15"
+            couponRate: 2.5
+            issuer: "US_TREASURY"
+            currency: "USD"
+            riskWeight: 0.0
+          - isin: "DE0001102309"
+            instrumentType: "GOVERNMENT_BOND"
+            maturity: "2054-07-04"
+            couponRate: 1.75
+            issuer: "GERMAN_GOVERNMENT"
+            currency: "EUR"
+            riskWeight: 0.0
+          - isin: "GB00B03MLX29"
+            instrumentType: "GILT"
+            maturity: "2029-03-07"
+            couponRate: 4.25
+            issuer: "UK_TREASURY"
+            currency: "GBP"
+            riskWeight: 0.0
+    field-mappings:
+      - source-field: "instrumentType"
+        target-field: "instrumentType"
+      - source-field: "maturity"
+        target-field: "maturityDate"
+      - source-field: "couponRate"
+        target-field: "couponRate"
+      - source-field: "issuer"
+        target-field: "issuer"
+      - source-field: "currency"
+        target-field: "instrumentCurrency"
+      - source-field: "riskWeight"
+        target-field: "riskWeight"
+
+  # 6. REAL CALCULATION ENRICHMENT - Risk-adjusted capital calculation
+  - id: "risk-capital-calculation"
+    name: "Risk-Adjusted Capital Calculation"
+    type: "calculation-enrichment"
+    description: "Calculate risk-adjusted capital requirement based on notional value and risk weight"
+    condition: "#notionalValue != null && #riskWeight != null"
+    calculation-config:
+      expression: "#notionalValue * #riskWeight * 0.08"
+      result-field: "riskAdjustedCapital"
+    field-mappings:
+      - source-field: "riskAdjustedCapital"
+        target-field: "riskAdjustedCapital"
+
+  # 7. REAL FIELD ENRICHMENT - Settlement date calculation
+  - id: "settlement-date-calculation"
+    name: "Settlement Date Calculation"
+    type: "field-enrichment"
+    description: "Calculate settlement date based on trade date and standard settlement days"
+    condition: "#tradeDate != null && #standardSettlementDays != null"
+    field-mappings:
+      - source-field: "tradeDate"
+        target-field: "settlementDate"
+        transformation: "T(java.time.LocalDate).parse(#tradeDate).plusDays(#standardSettlementDays).toString()"
+
+  # 8. REAL FIELD ENRICHMENT - Trade status determination
+  - id: "trade-status-determination"
+    name: "Trade Status Determination"
+    type: "field-enrichment"
+    description: "Determine trade status based on validation results and risk assessment"
+    condition: "#netSettlementAmount != null && #counterpartyRiskCategory != null"
+    field-mappings:
+      - source-field: "netSettlementAmount"
+        target-field: "tradeStatus"
+        transformation: "#netSettlementAmount > 0 && #counterpartyRiskCategory != 'HIGH' ? 'APPROVED' : 'PENDING_REVIEW'"
+
+  # 9. REAL CALCULATION ENRICHMENT - Regulatory capital calculation
+  - id: "regulatory-capital-calculation"
+    name: "Regulatory Capital Calculation"
+    type: "calculation-enrichment"
+    description: "Calculate regulatory capital requirement using Basel III formulas"
+    condition: "#riskAdjustedCapital != null && #counterpartyCreditRating != null"
+    calculation-config:
+      expression: "#riskAdjustedCapital * (#counterpartyCreditRating.startsWith('AA') ? 1.0 : (#counterpartyCreditRating.startsWith('A') ? 1.2 : 1.5))"
+      result-field: "regulatoryCapital"
+    field-mappings:
+      - source-field: "regulatoryCapital"
+        target-field: "regulatoryCapital"
+
+  # 10. REAL FIELD ENRICHMENT - Compliance validation
+  - id: "compliance-validation"
+    name: "Trade Compliance Validation"
+    type: "field-enrichment"
+    description: "Validate trade compliance with regulatory requirements and internal limits"
+    condition: "#regulatoryCapital != null && #tradeStatus != null"
+    field-mappings:
+      - source-field: "regulatoryCapital"
+        target-field: "complianceStatus"
+        transformation: "#regulatoryCapital < 1000000 && #tradeStatus == 'APPROVED' ? 'COMPLIANT' : 'NON_COMPLIANT'"

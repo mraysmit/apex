@@ -1,3 +1,13 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Test configuration for enrichment document type with lookup enrichments
+#          demonstrating APEX lookup functionality with inline datasets for
+#          counterparty and currency lookups
+# Status: Available for integration with enrichment lookup tests
+# ============================================================================
+
 metadata:
   id: "enrichment-lookup-test"
   name: "Enrichment Document Lookup Test"

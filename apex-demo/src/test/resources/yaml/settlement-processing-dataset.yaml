@@ -1,0 +1,263 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ComprehensiveBusinessScenariosTest.java (testSettlementProcessingDataset method)
+# Purpose: Reference dataset for settlement processing operations containing comprehensive
+#          reference data for counterparties, financial instruments, currencies, and
+#          settlement instructions used in financial settlement workflows
+# ============================================================================
+
+metadata:
+  id: "settlement-processing-dataset"
+  name: "Settlement Processing Reference Dataset"
+  version: "1.0.0"
+  description: "Comprehensive reference dataset for settlement processing including counterparties, instruments, currencies, and settlement instructions"
+  type: "dataset"
+  source: "Settlement Operations Reference Data Service"
+  author: "apex-business-tests"
+  business-domain: "Settlement Operations"
+  tags: ["settlement", "reference-data", "counterparties", "instruments", "currencies"]
+
+# Comprehensive settlement processing reference data
+data:
+  # Counterparty settlement information
+  - recordType: "counterparty"
+    counterpartyId: "CP001"
+    name: "Goldman Sachs International"
+    lei: "W22LROWP2IHZNBB6K528"
+    jurisdiction: "GB"
+    entityType: "INVESTMENT_BANK"
+    creditRating: "A+"
+    riskCategory: "LOW"
+    standardSettlementDays: 2
+    preferredSettlementMethod: "DVP"
+    custodianBank: "HSBC Bank plc"
+    custodianBIC: "HBUKGB4B"
+    cashAccount: "GB29HBUK40972911111111"
+    securityAccount: "GB29HBUK40972911111112"
+    
+  - recordType: "counterparty"
+    counterpartyId: "CP002"
+    name: "JPMorgan Securities LLC"
+    lei: "ZBUT11V806EZRVTWT807"
+    jurisdiction: "US"
+    entityType: "BROKER_DEALER"
+    creditRating: "AA-"
+    riskCategory: "LOW"
+    standardSettlementDays: 1
+    preferredSettlementMethod: "DVP"
+    custodianBank: "JPMorgan Chase Bank"
+    custodianBIC: "CHASUS33"
+    cashAccount: "US64JPMC12345678901234"
+    securityAccount: "US64JPMC12345678901235"
+    
+  - recordType: "counterparty"
+    counterpartyId: "CP003"
+    name: "Deutsche Bank AG"
+    lei: "7LTWFZYICNSX8D621K86"
+    jurisdiction: "DE"
+    entityType: "BANK"
+    creditRating: "A"
+    riskCategory: "MEDIUM"
+    standardSettlementDays: 3
+    preferredSettlementMethod: "DVP"
+    custodianBank: "Deutsche Bank AG"
+    custodianBIC: "DEUTDEFF"
+    cashAccount: "DE89370400440532013000"
+    securityAccount: "DE89370400440532013001"
+
+  # Instrument settlement specifications
+  - recordType: "instrument"
+    instrumentId: "US912828XG93"
+    isin: "US912828XG93"
+    instrumentType: "TREASURY_NOTE"
+    currency: "USD"
+    maturityDate: "2034-05-15"
+    couponRate: 2.5
+    issuer: "US_TREASURY"
+    settlementCurrency: "USD"
+    standardSettlementDays: 1
+    settlementSystem: "FEDWIRE"
+    custodyEligible: true
+    marginEligible: true
+    riskWeight: 0.0
+    
+  - recordType: "instrument"
+    instrumentId: "DE0001102309"
+    isin: "DE0001102309"
+    instrumentType: "GOVERNMENT_BOND"
+    currency: "EUR"
+    maturityDate: "2054-07-04"
+    couponRate: 1.75
+    issuer: "GERMAN_GOVERNMENT"
+    settlementCurrency: "EUR"
+    standardSettlementDays: 2
+    settlementSystem: "TARGET2"
+    custodyEligible: true
+    marginEligible: true
+    riskWeight: 0.0
+    
+  - recordType: "instrument"
+    instrumentId: "GB00B03MLX29"
+    isin: "GB00B03MLX29"
+    instrumentType: "GILT"
+    currency: "GBP"
+    maturityDate: "2029-03-07"
+    couponRate: 4.25
+    issuer: "UK_TREASURY"
+    settlementCurrency: "GBP"
+    standardSettlementDays: 1
+    settlementSystem: "CREST"
+    custodyEligible: true
+    marginEligible: true
+    riskWeight: 0.0
+
+  # Currency settlement information
+  - recordType: "currency"
+    currencyCode: "USD"
+    currencyName: "US Dollar"
+    symbol: "$"
+    decimalPlaces: 2
+    isBaseCurrency: true
+    settlementSystem: "FEDWIRE"
+    cutoffTime: "18:00"
+    timezone: "America/New_York"
+    businessDayConvention: "MODIFIED_FOLLOWING"
+    
+  - recordType: "currency"
+    currencyCode: "EUR"
+    currencyName: "Euro"
+    symbol: "€"
+    decimalPlaces: 2
+    isBaseCurrency: true
+    settlementSystem: "TARGET2"
+    cutoffTime: "17:00"
+    timezone: "Europe/Frankfurt"
+    businessDayConvention: "MODIFIED_FOLLOWING"
+    
+  - recordType: "currency"
+    currencyCode: "GBP"
+    currencyName: "British Pound Sterling"
+    symbol: "£"
+    decimalPlaces: 2
+    isBaseCurrency: false
+    settlementSystem: "CHAPS"
+    cutoffTime: "16:00"
+    timezone: "Europe/London"
+    businessDayConvention: "MODIFIED_FOLLOWING"
+
+  # Settlement instruction templates
+  - recordType: "settlement_instruction"
+    instructionId: "SI001"
+    counterpartyId: "CP001"
+    currency: "USD"
+    settlementMethod: "DVP"
+    paymentMethod: "WIRE_TRANSFER"
+    beneficiaryBank: "HSBC Bank USA"
+    beneficiaryBIC: "HBUKUS33"
+    beneficiaryAccount: "US64HSBC12345678901234"
+    intermediaryBank: "Federal Reserve Bank"
+    intermediaryBIC: "FRNYUS33"
+    specialInstructions: "Same day settlement required"
+    
+  - recordType: "settlement_instruction"
+    instructionId: "SI002"
+    counterpartyId: "CP002"
+    currency: "EUR"
+    settlementMethod: "DVP"
+    paymentMethod: "SEPA_TRANSFER"
+    beneficiaryBank: "JPMorgan AG"
+    beneficiaryBIC: "CHASDEFX"
+    beneficiaryAccount: "DE89100000000123456789"
+    intermediaryBank: "Deutsche Bundesbank"
+    intermediaryBIC: "MARKDEFF"
+    specialInstructions: "TARGET2 settlement preferred"
+
+  # Market calendar and business days
+  - recordType: "market_calendar"
+    marketId: "NYSE"
+    marketName: "New York Stock Exchange"
+    currency: "USD"
+    timezone: "America/New_York"
+    tradingHours: "09:30-16:00"
+    settlementDays: [1, 2, 3, 4, 5]  # Monday to Friday
+    holidays: ["2024-01-01", "2024-07-04", "2024-12-25"]
+    
+  - recordType: "market_calendar"
+    marketId: "LSE"
+    marketName: "London Stock Exchange"
+    currency: "GBP"
+    timezone: "Europe/London"
+    tradingHours: "08:00-16:30"
+    settlementDays: [1, 2, 3, 4, 5]  # Monday to Friday
+    holidays: ["2024-01-01", "2024-12-25", "2024-12-26"]
+    
+  - recordType: "market_calendar"
+    marketId: "XETRA"
+    marketName: "Deutsche Börse XETRA"
+    currency: "EUR"
+    timezone: "Europe/Frankfurt"
+    tradingHours: "09:00-17:30"
+    settlementDays: [1, 2, 3, 4, 5]  # Monday to Friday
+    holidays: ["2024-01-01", "2024-05-01", "2024-12-25"]
+
+  # Settlement fees and charges
+  - recordType: "settlement_fee"
+    feeId: "FEE001"
+    feeType: "SETTLEMENT_FEE"
+    currency: "USD"
+    feeStructure: "FLAT_RATE"
+    amount: 25.00
+    minimumFee: 10.00
+    maximumFee: 100.00
+    applicableInstrumentTypes: ["TREASURY_NOTE", "CORPORATE_BOND"]
+    
+  - recordType: "settlement_fee"
+    feeId: "FEE002"
+    feeType: "CUSTODY_FEE"
+    currency: "EUR"
+    feeStructure: "PERCENTAGE"
+    rate: 0.001  # 0.1% per annum
+    minimumFee: 5.00
+    maximumFee: 500.00
+    applicableInstrumentTypes: ["GOVERNMENT_BOND", "CORPORATE_BOND"]
+
+  # Risk and compliance parameters
+  - recordType: "risk_parameter"
+    parameterId: "RISK001"
+    parameterType: "COUNTERPARTY_LIMIT"
+    counterpartyId: "CP001"
+    currency: "USD"
+    limitAmount: 100000000
+    utilizationThreshold: 0.8
+    alertThreshold: 0.9
+    breachAction: "BLOCK_SETTLEMENT"
+    
+  - recordType: "risk_parameter"
+    parameterId: "RISK002"
+    parameterType: "SETTLEMENT_LIMIT"
+    currency: "EUR"
+    dailyLimit: 500000000
+    transactionLimit: 50000000
+    utilizationThreshold: 0.85
+    alertThreshold: 0.95
+    breachAction: "REQUIRE_APPROVAL"
+
+  # Regulatory reporting requirements
+  - recordType: "regulatory_requirement"
+    requirementId: "REG001"
+    regulatorName: "SEC"
+    jurisdiction: "US"
+    reportingType: "TRADE_REPORTING"
+    applicableInstruments: ["TREASURY_NOTE", "CORPORATE_BOND"]
+    reportingDeadline: "T+1"
+    mandatoryFields: ["tradeId", "counterpartyLEI", "instrumentISIN", "quantity", "price"]
+    
+  - recordType: "regulatory_requirement"
+    requirementId: "REG002"
+    regulatorName: "ESMA"
+    jurisdiction: "EU"
+    reportingType: "MIFID_REPORTING"
+    applicableInstruments: ["GOVERNMENT_BOND", "CORPORATE_BOND"]
+    reportingDeadline: "T+1"
+    mandatoryFields: ["transactionReferenceNumber", "instrumentIdentification", "quantity", "price", "tradingDateTime"]

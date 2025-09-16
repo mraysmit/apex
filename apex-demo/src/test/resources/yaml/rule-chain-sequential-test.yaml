@@ -1,3 +1,13 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Sequential rule chain test configuration demonstrating APEX rule chain
+#          functionality with sequential rule execution, dependencies, and
+#          multi-stage rule processing workflows
+# Status: Available for integration with rule chain sequential execution tests
+# ============================================================================
+
 metadata:
   name: "Rule-Chain Document Sequential Execution Test"
   version: "1.0.0"

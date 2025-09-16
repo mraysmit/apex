@@ -8217,7 +8217,7 @@ Infrastructure demos showcase APEX's configuration and setup patterns. These dem
 
 #### A.5.1 Demo Data Bootstrap
 **Class:** `dev.mars.apex.demo.infrastructure.DemoDataBootstrap`
-**YAML:** `infrastructure/demo-data-provider.yaml`
+**YAML:** `infrastructure/bootstrap/demo-data-bootstrap.yaml`
 **Purpose:** Complete infrastructure setup for data management
 **Features:**
 - PostgreSQL database setup and configuration
@@ -8226,10 +8226,9 @@ Infrastructure demos showcase APEX's configuration and setup patterns. These dem
 - Sample data generation and loading
 - Infrastructure health monitoring
 
-#### A.5.2 Demo Data Provider
-**Class:** `dev.mars.apex.demo.infrastructure.DemoDataProvider`
-**YAML:** `infrastructure/demo-data-sources.yaml`
-**Purpose:** Data provider infrastructure patterns
+#### A.5.2 Infrastructure Configuration Examples
+**YAML Files:** Various infrastructure configuration examples
+**Purpose:** Infrastructure configuration patterns and examples
 **Features:**
 - Multi-source data provider setup
 - Data source abstraction patterns
@@ -8237,21 +8236,10 @@ Infrastructure demos showcase APEX's configuration and setup patterns. These dem
 - Data source health monitoring
 - Fallback and resilience patterns
 
-#### A.5.3 Financial Static Data Provider
-**Class:** `dev.mars.apex.demo.infrastructure.FinancialStaticDataProvider`
-**YAML:** `infrastructure/financial-static-data-provider.yaml`
-**Purpose:** Financial reference data infrastructure
-**Features:**
-- Financial static data management
-- Market data provider setup
-- Reference data caching patterns
-- Financial data validation
-- Regulatory data compliance
+**Note:** Infrastructure demos use test classes and configuration files rather than standalone demo classes.
 
-#### A.5.4 Production Demo Configuration
-**Class:** `dev.mars.apex.demo.infrastructure.ProductionDemoConfiguration`
-**YAML:** `infrastructure/production-demo-config.yaml`
-**Purpose:** Production-ready configuration patterns
+#### A.5.4 Infrastructure Configuration Examples
+**Purpose:** Infrastructure configuration patterns and examples
 **Features:**
 - Production configuration management
 - Environment-specific settings
@@ -8423,9 +8411,9 @@ The APEX demo suite includes over 100 YAML configuration files organized by cate
 - `evaluation/risk-management-service-demo.yaml` - Risk management
 
 #### Infrastructure Configurations
-- `infrastructure/demo-data-provider.yaml` - Data provider setup
-- `infrastructure/production-demo-config.yaml` - Production patterns
-- `infrastructure/financial-static-data-provider.yaml` - Financial reference data
+- `infrastructure/database-setup-config.yaml` - Database setup configuration
+- `infrastructure/external-dataset-setup-config.yaml` - External dataset configuration
+- `infrastructure/bootstrap/` - Bootstrap configuration files for various scenarios
 
 #### Utility Configurations
 - `util/test-utilities-demo.yaml` - Testing utilities

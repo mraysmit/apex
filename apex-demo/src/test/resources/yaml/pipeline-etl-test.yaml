@@ -1,3 +1,13 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: ETL pipeline demonstration using APEX pipeline functionality for
+#          data extraction, transformation, and loading operations with
+#          customer data processing and file-based data sources
+# Status: Available for integration with ETL pipeline tests
+# ============================================================================
+
 metadata:
   id: "pipeline-etl-test"
   name: "Pipeline ETL Workflow Test"

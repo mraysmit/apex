@@ -51,7 +51,7 @@ public class SimpleCompilerDemoTest extends DemoTestBase {
         logger.info("=== Testing Comprehensive Simple Compiler Demo Functionality ===");
         
         // Load YAML configuration for simple compiler demo
-        var config = loadAndValidateYaml("test-configs/simplecompilerdemo-test.yaml");
+        var config = loadAndValidateYaml("compiler/simple-compiler-demo-config.yaml");
         
         // Create comprehensive test data that triggers ALL 4 enrichments
         Map<String, Object> testData = new HashMap<>();
@@ -106,7 +106,7 @@ public class SimpleCompilerDemoTest extends DemoTestBase {
         logger.info("=== Testing Static Analysis Processing ===");
         
         // Load YAML configuration for simple compiler demo
-        var config = loadAndValidateYaml("test-configs/simplecompilerdemo-test.yaml");
+        var config = loadAndValidateYaml("compiler/simple-compiler-demo-config.yaml");
         
         // Test different analysis types
         String[] analysisTypes = {"static-analysis", "yaml-analysis", "configuration-analysis"};
@@ -140,7 +140,7 @@ public class SimpleCompilerDemoTest extends DemoTestBase {
         logger.info("=== Testing Expression Validation Processing ===");
         
         // Load YAML configuration for simple compiler demo
-        var config = loadAndValidateYaml("test-configs/simplecompilerdemo-test.yaml");
+        var config = loadAndValidateYaml("compiler/simple-compiler-demo-config.yaml");
         
         // Test different validation types
         String[] validationTypes = {"expression-validation", "spel-validation", "optimization-validation"};
@@ -174,7 +174,7 @@ public class SimpleCompilerDemoTest extends DemoTestBase {
         logger.info("=== Testing Code Generation Processing ===");
         
         // Load YAML configuration for simple compiler demo
-        var config = loadAndValidateYaml("test-configs/simplecompilerdemo-test.yaml");
+        var config = loadAndValidateYaml("compiler/simple-compiler-demo-config.yaml");
         
         // Test different generation types
         String[] generationTypes = {"code-generation", "java-generation", "compilation-simulation"};

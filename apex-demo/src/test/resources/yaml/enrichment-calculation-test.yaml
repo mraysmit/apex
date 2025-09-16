@@ -1,3 +1,13 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Test configuration for enrichment document type with calculation enrichments
+#          including interest calculations, notional value calculations, and financial
+#          computations for testing APEX calculation enrichment functionality
+# Status: Available for integration with enrichment calculation tests
+# ============================================================================
+
 metadata:
   id: "enrichment-calculation-test"
   name: "Enrichment Document Calculation Test"

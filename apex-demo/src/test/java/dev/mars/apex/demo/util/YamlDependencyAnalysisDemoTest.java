@@ -51,7 +51,7 @@ public class YamlDependencyAnalysisDemoTest extends DemoTestBase {
         logger.info("=== Testing Comprehensive YAML Dependency Analysis Demo Functionality ===");
         
         // Load YAML configuration for YAML dependency analysis demo
-        var config = loadAndValidateYaml("util/yaml-dependency-analysis-demo-config.yaml");
+        var config = loadAndValidateYaml("util/comprehensive-util-demo-config.yaml");
         
         // Create comprehensive test data that triggers ALL 4 enrichments
         Map<String, Object> testData = new HashMap<>();

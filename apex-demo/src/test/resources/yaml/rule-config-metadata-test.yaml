@@ -1,3 +1,13 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Rule configuration metadata test demonstrating APEX metadata handling,
+#          configuration validation, and rule configuration structure testing
+#          with comprehensive metadata fields and validation
+# Status: Available for integration with rule configuration metadata tests
+# ============================================================================
+
 metadata:
   id: "rule-config-metadata-test"
   name: "Rule-Config Metadata Validation Test"

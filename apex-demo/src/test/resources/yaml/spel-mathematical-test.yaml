@@ -1,3 +1,13 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: SpEL (Spring Expression Language) mathematical operations test
+#          demonstrating APEX SpEL integration with complex mathematical
+#          expressions, functions, and calculations
+# Status: Available for integration with SpEL mathematical expression tests
+# ============================================================================
+
 metadata:
   id: "spel-mathematical-test"
   name: "SpEL Mathematical Expressions Test"

@@ -1,3 +1,13 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Test configuration for external data source configuration with database
+#          connections, demonstrating APEX external data integration capabilities
+#          with H2 database setup and connection management
+# Status: Available for integration with external database configuration tests
+# ============================================================================
+
 metadata:
   id: "external-data-config-database-test"
   name: "External Data Config Database Test"
