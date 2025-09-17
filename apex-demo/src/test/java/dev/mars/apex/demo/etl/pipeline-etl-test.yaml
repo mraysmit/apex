@@ -97,8 +97,8 @@ data-sources:
     description: "Customer data CSV file input"
     
     connection:
-      basePath: "./data/input"
-      filePattern: "customers.csv"
+      base-path: "./data/input"
+      file-pattern: "customers.csv"
       
     fileFormat:
       type: "csv"
@@ -113,22 +113,17 @@ data-sources:
 data-sinks:
   - name: "customer-h2-database"
     type: "database"
-    sourceType: "h2"
+    source-type: "h2"
     enabled: true
     description: "H2 database for customer records"
-    
+
     connection:
       database: "./output/customers"
       username: "sa"
       password: ""
       
-    operations:
-      insertCustomer: |
-        INSERT INTO customers (customer_id, customer_name, email, phone, processed_at, customer_score) 
-        VALUES (:customer_id, :customer_name, :email, :phone, :processed_at, :customer_score)
-        
     schema:
-      autoCreate: true
+      auto-create: true
       init-script: |
         CREATE TABLE IF NOT EXISTS customers (
           customer_id INTEGER PRIMARY KEY,
@@ -140,14 +135,22 @@ data-sinks:
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
+    operations:
+      insertCustomer: |
+        INSERT INTO customers (
+          customer_id, customer_name, email, phone, processed_at, customer_score
+        ) VALUES (
+          :column_1, :column_2, :column_3, :column_4, CURRENT_TIMESTAMP, :column_6
+        )
+
   - name: "audit-log-file"
     type: "file-system"
     enabled: true
     description: "JSON audit log file"
     
     connection:
-      basePath: "./output/audit"
-      filePattern: "audit-{date}.json"
+      base-path: "./output/audit"
+      file-pattern: "audit-{date}.json"
       
     fileFormat:
       type: "json"
