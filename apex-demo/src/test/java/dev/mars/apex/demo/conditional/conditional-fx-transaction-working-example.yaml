@@ -1,0 +1,225 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ConditionalFxTransactionWorkingExampleTest.java (5 test methods)
+# Purpose: Demonstrate conditional field mapping using ONLY existing APEX syntax
+#          Uses field-enrichment with complex SpEL expressions for FX transaction processing
+#          Works immediately with current APEX - no new implementation needed
+# Status: ACTIVELY TESTED - Follows prompts.txt advice and APEX_YAML_REFERENCE patterns
+# ============================================================================
+
+metadata:
+  name: "Conditional FX Transaction Processing"
+  version: "1.0.0"
+  description: "Working example of conditional field mapping using existing APEX syntax"
+  type: "scenario"
+  author: "APEX Demo Team"
+  created: "2025-09-17"
+  tags: ["fx-transaction", "conditional-mapping", "field-enrichment", "working-example"]
+
+# Self-contained configuration - no external dependencies needed
+
+enrichments:
+  # 1. Currency ranking enrichment (standard lookup - unchanged)
+  - id: "enrich-currency-ranks"
+    name: "Currency Ranking Enrichment"
+    type: "lookup-enrichment"
+    description: "Enrich with currency rankings for buy and sell currencies"
+    condition: "#BUY_CURRENCY != null || #SELL_CURRENCY != null"
+    
+    lookup-config:
+      lookup-key: "#BUY_CURRENCY"
+      lookup-dataset:
+        type: "inline"
+        key-field: "currency"
+        data:
+          - currency: "USD"
+            rank: 1
+            region: "Americas"
+          - currency: "EUR"
+            rank: 2
+            region: "Europe"
+          - currency: "GBP"
+            rank: 3
+            region: "Europe"
+          - currency: "JPY"
+            rank: 4
+            region: "Asia"
+          - currency: "CHF"
+            rank: 5
+            region: "Europe"
+    
+    field-mappings:
+      - source-field: "rank"
+        target-field: "BUY_CURRENCY_RANK"
+      - source-field: "region"
+        target-field: "BUY_CURRENCY_REGION"
+
+  # 2. CONDITIONAL NDF MAPPING using existing field-enrichment with complex SpEL
+  - id: "conditional-ndf-mapping"
+    name: "Conditional NDF Field Mapping"
+    type: "field-enrichment"
+    description: "Dynamic NDF field mapping using complex SpEL expressions - replaces 12 enrichments with 1"
+    condition: "#IS_NDF != null && #SYSTEM_CODE != null"
+    
+    field-mappings:
+      # Main conditional mapping logic using nested ternary operators
+      - source-field: "IS_NDF"
+        target-field: "IS_NDF"
+        transformation: |
+          #SYSTEM_CODE == 'SWIFT' && ({'0', '1'}.contains(#IS_NDF)) ?
+            #IS_NDF :
+          #SYSTEM_CODE == 'SWIFT' && ({'Y', 'N', 'YES', 'NO'}.contains(#IS_NDF?.toUpperCase())) ?
+            ({'Y', 'YES'}.contains(#IS_NDF?.toUpperCase()) ? '1' : '0') :
+          #SYSTEM_CODE == 'REUTERS' && #IS_NDF != null ?
+            (#IS_NDF?.toUpperCase() == 'TRUE' ? '1' : '0') :
+          #SYSTEM_CODE == 'BLOOMBERG' && #IS_NDF != null ?
+            (#IS_NDF?.startsWith('NDF') ? '1' : '0') :
+          #IS_NDF != null ?
+            #IS_NDF :
+            '0'
+        required: true
+
+      # Additional mapping for translation type (for audit/logging)
+      - source-field: "SYSTEM_CODE"
+        target-field: "TRANSLATION_TYPE"
+        transformation: |
+          #SYSTEM_CODE == 'SWIFT' && !({'0', '1', 'Y', 'N', 'YES', 'NO'}.contains(#IS_NDF?.toUpperCase())) ?
+            'DATABASE_TRANSLATION_REQUIRED' :
+          #SYSTEM_CODE == 'SWIFT' ?
+            'DIRECT_MAPPING' :
+          {'REUTERS', 'BLOOMBERG'}.contains(#SYSTEM_CODE) ?
+            'SYSTEM_SPECIFIC_MAPPING' :
+            'DEFAULT_MAPPING'
+
+  # 3. CONDITIONAL SETTLEMENT INSTRUCTION MAPPING
+  - id: "conditional-settlement-mapping"
+    name: "Conditional Settlement Instruction Mapping"
+    type: "field-enrichment"
+    description: "Dynamic settlement instruction mapping based on currency and amount"
+    condition: "#BUY_CURRENCY != null || #SELL_CURRENCY != null"
+    
+    field-mappings:
+      # Settlement instruction based on currency and amount
+      - source-field: "BUY_CURRENCY"
+        target-field: "SETTLEMENT_INSTRUCTION"
+        transformation: |
+          (#BUY_CURRENCY == 'USD' || #SELL_CURRENCY == 'USD') ?
+            (#NOTIONAL_AMOUNT != null && #NOTIONAL_AMOUNT > 50000000 ? 'HIGH_VALUE_MANUAL_REVIEW' :
+             ('FEDWIRE_' + (#COUNTERPARTY_REGION ?: 'US'))) :
+          (#BUY_CURRENCY == 'EUR' || #SELL_CURRENCY == 'EUR') ?
+            (#NOTIONAL_AMOUNT != null && #NOTIONAL_AMOUNT > 50000000 ? 'HIGH_VALUE_MANUAL_REVIEW' :
+             ('TARGET2_' + (#COUNTERPARTY_REGION ?: 'EU'))) :
+          (#BUY_CURRENCY == 'GBP' || #SELL_CURRENCY == 'GBP') ?
+            (#NOTIONAL_AMOUNT != null && #NOTIONAL_AMOUNT > 50000000 ? 'HIGH_VALUE_MANUAL_REVIEW' :
+             ('CHAPS_' + (#COUNTERPARTY_REGION ?: 'UK'))) :
+          (#BUY_CURRENCY == 'JPY' || #SELL_CURRENCY == 'JPY') ?
+            (#NOTIONAL_AMOUNT != null && #NOTIONAL_AMOUNT > 50000000 ? 'HIGH_VALUE_MANUAL_REVIEW' :
+             ('BOJ_NET_' + (#COUNTERPARTY_REGION ?: 'JP'))) :
+          #NOTIONAL_AMOUNT != null && #NOTIONAL_AMOUNT > 50000000 ?
+            'HIGH_VALUE_MANUAL_REVIEW' :
+            'STANDARD_CORRESPONDENT_BANKING'
+
+      # Settlement priority based on currency ranking
+      - source-field: "BUY_CURRENCY_RANK"
+        target-field: "SETTLEMENT_PRIORITY"
+        transformation: |
+          #BUY_CURRENCY_RANK != null && #BUY_CURRENCY_RANK <= 2 ?
+            'HIGH' :
+          #BUY_CURRENCY_RANK != null && #BUY_CURRENCY_RANK <= 4 ?
+            'MEDIUM' :
+            'STANDARD'
+
+  # 4. CONDITIONAL RISK SCORE CALCULATION
+  - id: "conditional-risk-score-calculation"
+    name: "Conditional Risk Score Calculation"
+    type: "calculation-enrichment"
+    description: "Calculate risk score based on multiple conditional factors"
+    condition: "#NOTIONAL_AMOUNT != null && #SYSTEM_CODE != null"
+
+    calculation-config:
+      expression: |
+        (#NOTIONAL_AMOUNT > 50000000 ? 30 :
+         #NOTIONAL_AMOUNT > 10000000 ? 20 :
+         #NOTIONAL_AMOUNT > 1000000 ? 10 : 5) +
+        (#SYSTEM_CODE == 'SWIFT' ? 0 :
+         #SYSTEM_CODE == 'REUTERS' ? 5 :
+         #SYSTEM_CODE == 'BLOOMBERG' ? 3 : 10) +
+        (#BUY_CURRENCY_RANK != null && #BUY_CURRENCY_RANK <= 2 ? 0 :
+         #BUY_CURRENCY_RANK != null && #BUY_CURRENCY_RANK <= 4 ? 5 : 10) +
+        ({'US', 'EU', 'UK'}.contains(#COUNTERPARTY_REGION) ? 0 : 15)
+      result-field: "riskScore"
+
+    field-mappings:
+      - source-field: "riskScore"
+        target-field: "riskScore"
+
+  # 4b. RISK CATEGORY ASSIGNMENT
+  - id: "risk-category-assignment"
+    name: "Risk Category Assignment"
+    type: "field-enrichment"
+    description: "Assign risk category based on calculated risk score"
+    condition: "#riskScore != null"
+
+    field-mappings:
+      - source-field: "riskScore"
+        target-field: "riskCategory"
+        transformation: |
+          #riskScore <= 15 ? 'LOW' :
+          #riskScore <= 25 ? 'MEDIUM' :
+          #riskScore <= 45 ? 'HIGH' :
+          'CRITICAL'
+
+  # 5. CONDITIONAL COMPLIANCE CHECK
+  - id: "conditional-compliance-check"
+    name: "Conditional Compliance Check"
+    type: "field-enrichment"
+    description: "Compliance validation based on multiple business rules"
+    condition: "#riskCategory != null && #SETTLEMENT_INSTRUCTION != null"
+    
+    field-mappings:
+      # Compliance status based on risk and settlement
+      - source-field: "riskCategory"
+        target-field: "complianceStatus"
+        transformation: |
+          #riskCategory == 'CRITICAL' ?
+            'REJECTED_HIGH_RISK' :
+          #riskCategory == 'HIGH' && #SETTLEMENT_INSTRUCTION?.contains('MANUAL') ?
+            'APPROVED_WITH_MANUAL_REVIEW' :
+          {'LOW', 'MEDIUM'}.contains(#riskCategory) && #SETTLEMENT_INSTRUCTION != null ?
+            'APPROVED_AUTOMATED' :
+            'PENDING_REVIEW'
+
+      # Processing workflow assignment
+      - source-field: "complianceStatus"
+        target-field: "processingWorkflow"
+        transformation: |
+          #complianceStatus?.startsWith('REJECTED') ?
+            'REJECTION_WORKFLOW' :
+          #complianceStatus?.contains('MANUAL') ?
+            'MANUAL_REVIEW_WORKFLOW' :
+          #complianceStatus?.contains('AUTOMATED') ?
+            'STRAIGHT_THROUGH_PROCESSING' :
+            'STANDARD_REVIEW_WORKFLOW'
+
+  # 6. AUDIT TRAIL ENRICHMENT
+  - id: "audit-trail-enrichment"
+    name: "Audit Trail Enrichment"
+    type: "field-enrichment"
+    description: "Create comprehensive audit trail for conditional processing decisions"
+    condition: "true"  # Always execute for audit purposes
+    
+    field-mappings:
+      # Processing summary
+      - source-field: "SYSTEM_CODE"
+        target-field: "processingDecisions"
+        transformation: |
+          'NDF_MAPPING: ' + (#TRANSLATION_TYPE ?: 'NONE') + 
+          '; SETTLEMENT: ' + (#SETTLEMENT_INSTRUCTION ?: 'NONE') + 
+          '; RISK: ' + (#riskCategory ?: 'NONE') + 
+          '; COMPLIANCE: ' + (#complianceStatus ?: 'NONE')
+
+      # Timestamp for processing
+      - source-field: "processingDecisions"
+        target-field: "processedTimestamp"
+        transformation: "T(java.time.LocalDateTime).now().toString()"

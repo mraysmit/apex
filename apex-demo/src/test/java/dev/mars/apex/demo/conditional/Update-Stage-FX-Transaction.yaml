@@ -1,0 +1,154 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: REFERENCED - Referenced by other YAML files but no dedicated Java test
+# Purpose: Demonstrate FX transaction stage updates with conditional logic
+#          Database updates, conditional field mapping, transaction staging
+# Status: Available for integration with conditional mapping tests
+# ============================================================================
+
+metadata:
+  name: "Update Stage FX Transaction"
+  version: "1.0.0"
+  description: "Update Stage FX Transaction"
+  type: "external-data-config"
+  author: "APEX Demo Team"
+  created: "2025-09-12"
+  tags: ["external-data", "database", "rest-api", "caching", "monitoring"]
+
+# External data-source references (infrastructure configuration)
+#data-source-refs:
+#  - name: "postgresql-database-localtest"
+#    source: "postgresql-database-localtest.yaml"
+#    enabled: true
+#    description: "PostgreSQL local database for test"
+data-source-refs:
+  - name: "pg-database-test"
+#    source: "postgresql-database-localtest.yaml"
+    source: "database-h2.yaml"
+    enabled: true
+    description: "pg local database for test"
+  
+rule-refs:
+  - name: "Map External to Internal Code"
+    source: "rulebuilderfunction/Map-External-to-Internal-Code.yaml"
+    enabled: true
+    description: "Map External to Internal Code"
+      
+enrichments:
+  # add buy_currency_rank into source data derived from VW_REF_CURRENCY_RANK(T_REF_CURRENCY)
+  - id: "enrich-buy-currency-rank"
+    type: "lookup-enrichment"
+    condition: "#BUY_CURRENCY != null"
+    lookup-config:
+      lookup-key: "#BUY_CURRENCY"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "pg-database-test"
+        query-ref: "getCurrencyRank"
+        parameters:
+          - field: "BUY_CURRENCY"
+            type: "string"
+            name: "CURRENCY_CODE"
+    field-mappings:
+      - source-field: "currency_rank" #always lower case returned from db query
+        target-field: "BUY_CURRENCY_RANK"
+  
+  # add sell_currency_rank into source data derived from VW_REF_CURRENCY_RANK(T_REF_CURRENCY)
+  - id: "enrich-sell-currency-rank"
+    type: "lookup-enrichment"
+    condition: "#SELL_CURRENCY != null"
+    lookup-config:
+      lookup-key: "#SELL_CURRENCY"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "pg-database-test"
+        query-ref: "getCurrencyRank"
+        parameters:
+          - field: "CURRENCY_CODE"
+            type: "string"
+    field-mappings:
+      - source-field: "currency_rank"
+        target-field: "SELL_CURRENCY_RANK"
+
+  # IS_NDF rule1 IF branch
+  - id: "is-ndf-if-rule1"                # Unique enrichment identifier
+    name: "is-ndf-if-rule1"
+    description: "is-ndf-if-rule1"
+    type: "calculation-enrichment"                # Enrichment type
+    target-type: "LinkedHashMap"
+    enabled: true
+    condition: true # SpEL condition for when to apply
+    calculation-config: # Calculation configuration (see: CalculationConfig in Java model)
+      expression: "({'0', '1'}.contains(#IS_NDF)) && (#SYSTEM_CODE == 'SWIFT')"             # SpEL expression for calculation
+      result-field: "is_ndf_if_result"                   # Field to store calculation result
+    field-mappings: # Optionally map calculated fields to output
+      - source-field: "is_ndf_if_result"
+        target-field: "is_ndf_if_result"
+        required: true
+  
+  # IS_NDF rule1 THEN branch
+  - id: "is-ndf-then-rule1"
+    name: "is-ndf-then-rule1"
+    type: "field-enrichment"
+    description: "is-ndf-then-rule1"
+    enabled: true
+    condition: "#is_ndf_if_result"
+    field-mappings:
+      - source-field: "isNdf"
+        target-field: "isNdf"
+
+  # IS_NDF rule2 IF branch
+  - id: "is-ndf-if"
+    name: "if-is-ndf"
+    type: "calculation-enrichment"
+    description: "if-is-ndf"
+    enabled: true
+    condition: "!#is_ndf_if_result"
+    calculation-config: # Calculation configuration (see: CalculationConfig in Java model)
+      expression: "#IS_NDF != null && #SYSTEM_CODE == 'SWIFT'"             # SpEL expression for calculation
+      result-field: "run_rule_builder_function_flag"                   # Field to store calculation result
+    field-mappings:
+      - source-field: "is_ndf_if_result"
+        target-field: "run_rule_builder_function_flag"
+      
+  #  pass in rule builder function input param: 'IS_NDF' => translation_type
+  - id: "map-translation-type"
+    name: "map-translation-type"
+    type: "field-enrichment"
+    description: "map-translation-type"
+    enabled: true
+    condition: "#run_rule_builder_function_flag"
+    field-mappings:
+      - source-field: "'IS_NDF'"
+        target-field: "TRANSLATION_TYPE"
+        
+  #  pass in rule builder function input param: IS_NDF => external_code
+  - id: "map-external-code"
+    name: "map-external-code"
+    type: "field-enrichment"
+    description: "map-external-code"
+    enabled: true
+    condition: "#run_rule_builder_function_flag"
+    field-mappings:
+      - source-field: "IS_NDF"
+        target-field: "EXTERNAL_CODE"
+        
+  # rule builder function execution
+  - id: "run-ref"
+    name: "Run Referenced Enrichments"
+    type: "enrichment-ref"
+    ref: "Map External to Internal Code"
+    enabled: true
+#    condition: "#run_rule_builder_function_flag"
+  
+  # after rule builder function, we should assign INTERNAL_CODE to IS_NDF
+  - id: "map-internal-code"
+    name: "map-internal-code"
+    type: "field-enrichment"
+    description: "map-internal-code"
+    enabled: true
+    condition: "#run_rule_builder_function_flag"
+    field-mappings:
+      - source-field: "INTERNAL_CODE"
+        target-field: "IS_NDF"

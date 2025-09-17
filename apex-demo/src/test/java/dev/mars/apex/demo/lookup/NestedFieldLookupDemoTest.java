@@ -51,7 +51,9 @@ public class NestedFieldLookupDemoTest extends DemoTestBase {
         logger.info("=== Testing Comprehensive Nested Field Lookup Functionality ===");
         
         // Load YAML configuration for nested field lookup
-        var config = loadAndValidateYaml("test-configs/nestedfieldlookupdemo-test.yaml");
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/nested-field-lookup.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
         
         // Create comprehensive test data that triggers ALL 4 enrichments
         Map<String, Object> testData = new HashMap<>();
@@ -98,7 +100,10 @@ public class NestedFieldLookupDemoTest extends DemoTestBase {
         String nestedFieldLookupSummary = (String) enrichedData.get("nestedFieldLookupSummary");
         assertTrue(nestedFieldLookupSummary.contains("real-apex-services"), "Nested field lookup summary should reference approach");
         
-        logger.info("✅ Comprehensive nested field lookup functionality test completed successfully");
+            logger.info("✅ Comprehensive nested field lookup functionality test completed successfully");
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+        }
     }
 
     @Test
@@ -106,7 +111,9 @@ public class NestedFieldLookupDemoTest extends DemoTestBase {
         logger.info("=== Testing Nested Field Navigation Processing ===");
         
         // Load YAML configuration for nested field lookup
-        var config = loadAndValidateYaml("test-configs/nestedfieldlookupdemo-test.yaml");
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/nested-field-lookup.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
         
         // Test different navigation types
         String[] navigationTypes = {"nested-field-navigation", "object-navigation", "field-hierarchy-navigation"};
@@ -132,7 +139,10 @@ public class NestedFieldLookupDemoTest extends DemoTestBase {
             assertTrue(nestedFieldNavigationResult.contains(navigationType), "Nested field navigation result should contain " + navigationType);
         }
         
-        logger.info("✅ Nested field navigation processing test completed successfully");
+            logger.info("✅ Nested field navigation processing test completed successfully");
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+        }
     }
 
     @Test
@@ -140,7 +150,9 @@ public class NestedFieldLookupDemoTest extends DemoTestBase {
         logger.info("=== Testing Country Settlement Lookup Processing ===");
         
         // Load YAML configuration for nested field lookup
-        var config = loadAndValidateYaml("test-configs/nestedfieldlookupdemo-test.yaml");
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/nested-field-lookup.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
         
         // Test different settlement types
         String[] settlementTypes = {"country-settlement-lookup", "settlement-information-lookup", "country-specific-lookup"};
@@ -166,7 +178,10 @@ public class NestedFieldLookupDemoTest extends DemoTestBase {
             assertTrue(countrySettlementLookupResult.contains(settlementType), "Country settlement lookup result should reference settlement type " + settlementType);
         }
         
-        logger.info("✅ Country settlement lookup processing test completed successfully");
+            logger.info("✅ Country settlement lookup processing test completed successfully");
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+        }
     }
 
     @Test
@@ -174,7 +189,9 @@ public class NestedFieldLookupDemoTest extends DemoTestBase {
         logger.info("=== Testing Object Hierarchy Processing Processing ===");
         
         // Load YAML configuration for nested field lookup
-        var config = loadAndValidateYaml("test-configs/nestedfieldlookupdemo-test.yaml");
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/nested-field-lookup.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
         
         // Test different hierarchy types
         String[] hierarchyTypes = {"object-hierarchy-processing", "nested-structure-processing", "hierarchy-navigation"};
@@ -200,6 +217,9 @@ public class NestedFieldLookupDemoTest extends DemoTestBase {
             assertTrue(objectHierarchyProcessingResult.contains(hierarchyType), "Object hierarchy processing result should reference hierarchy type " + hierarchyType);
         }
         
-        logger.info("✅ Object hierarchy processing processing test completed successfully");
+            logger.info("✅ Object hierarchy processing processing test completed successfully");
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+        }
     }
 }

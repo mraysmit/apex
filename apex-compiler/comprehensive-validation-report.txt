@@ -2,46 +2,52 @@ COMPREHENSIVE APEX YAML VALIDATION REPORT
 =========================================
 
 OVERALL STATISTICS:
-  Total YAML files: 189
-  Fully valid files: 39
-  Structurally valid: 53
-  Dependency issues only: 14
-  Invalid files: 150
+  Total YAML files: 13
+  Fully valid files: 1
+  Structurally valid: 1
+  Dependency issues only: 0
+  Invalid files: 12
 
 SUCCESS RATES:
-  Overall success rate: 20.6%
-  Structural success rate: 28.0%
+  Overall success rate: 7.7%
+  Structural success rate: 7.7%
 
 ERROR BREAKDOWN:
-  Other Issues: 115 occurrences
-  Dependency Issues: 67 occurrences
-  Missing Required Fields: 31 occurrences
+  Missing Required Fields: 14 occurrences
+  Other Issues: 2 occurrences
 
 SAMPLE VALID FILES:
-  • products-json-datasource.yaml
-  • comprehensive-financial-settlement-demo-config.yaml
-  • custody-auto-repair-demo-config.yaml
-  • customer-transformer-demo.yaml
-  • data-management-demo-config.yaml
-  • external-data-source-demo-config.yaml
-  • trade-transformer-demo.yaml
-  • yaml-dataset-demo-config.yaml
-  • csv-to-h2-pipeline.yaml
-  • apex-rules-engine-demo-config.yaml
+  • test-config-with-properties.yaml
 
 SAMPLE INVALID FILES:
-  • comprehensive-financial-settlement-demo-config.yaml - ..\apex-demo\src\main\resources\comprehensive-financial-settlement-demo-config.yaml: Missing required metadata field: id
-  • custody-auto-repair-demo-config.yaml - ..\apex-demo\src\main\resources\custody-auto-repair-demo-config.yaml: Missing required metadata field: id
-  • comprehensive-financial-settlement-demo-data.yaml - ..\apex-demo\src\main\resources\enrichment\comprehensive-financial-settlement-demo-data.yaml: Document type 'dataset' requires at least one of: [data]
-  • custody-auto-repair-bootstrap-demo.yaml - ..\apex-demo\src\main\resources\enrichment\custody-auto-repair-bootstrap-demo.yaml: Document type 'bootstrap' requires at least one of: [data-sources, bootstrap]
-  • custody-auto-repair-demo-data.yaml - ..\apex-demo\src\main\resources\enrichment\custody-auto-repair-demo-data.yaml: Document type 'dataset' requires at least one of: [data]
-  • auto-repair-rules-config.yaml - ..\apex-demo\src\main\resources\enrichment\custody-bootstrap\auto-repair-rules-config.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
-  • settlement-scenarios-config.yaml - ..\apex-demo\src\main\resources\enrichment\custody-bootstrap\settlement-scenarios-config.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
-  • standing-instructions-config.yaml - ..\apex-demo\src\main\resources\enrichment\custody-bootstrap\standing-instructions-config.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
-  • customer-segments-config.yaml - ..\apex-demo\src\main\resources\enrichment\customer-transformer\customer-segments-config.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
-  • field-actions-config.yaml - ..\apex-demo\src\main\resources\enrichment\customer-transformer\field-actions-config.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
+  • customer-rules.yaml - ..\apex-core\src\test\resources\rulegroups\customer-rules.yaml: Missing required metadata field: type
+  • customer-validation-groups.yaml - ..\apex-core\src\test\resources\rulegroups\customer-validation-groups.yaml: Missing required metadata field: type
+  • application.yml - ..\apex-rest-api\src\main\resources\application.yml: YAML syntax error: expected a single document in the stream
+ in 'string', line 2, column 1:
+    spring:
+    ^
+but found another document
+ in 'string', line 132, column 1:
+    ---
+    ^
+
+  • application-test.yml - ..\apex-rest-api\src\test\resources\application-test.yml: Missing required 'metadata' section
+  • default-rules.yaml - ..\apex-rest-api\src\test\resources\rules\default-rules.yaml: Missing required metadata field: id
+  • test-rules.yaml - ..\apex-rest-api\src\test\resources\rules\test-rules.yaml: Missing required metadata field: id
+  • application.yml - ..\apex-rest-api\target\classes\application.yml: YAML syntax error: expected a single document in the stream
+ in 'string', line 2, column 1:
+    spring:
+    ^
+but found another document
+ in 'string', line 132, column 1:
+    ---
+    ^
+
+  • application-test.yml - ..\apex-rest-api\target\test-classes\application-test.yml: Missing required 'metadata' section
+  • default-rules.yaml - ..\apex-rest-api\target\test-classes\rules\default-rules.yaml: Missing required metadata field: id
+  • test-rules.yaml - ..\apex-rest-api\target\test-classes\rules\test-rules.yaml: Missing required metadata field: id
 
 BULK FIX IMPACT ASSESSMENT:
   Previous estimated rate: 21.3%
-  Current actual rate: 20.6%
-  Improvement: +-0.7 percentage points
+  Current actual rate: 7.7%
+  Improvement: +-13.6 percentage points

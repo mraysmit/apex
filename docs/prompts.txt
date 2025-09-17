@@ -248,3 +248,19 @@ read the document APEX_RULES_ENGINE_USER_GUIDE.md and the document  RULE_REFEREN
 5. **Only then proceed** to next conversion
 
 **Key Reminder: BUSINESS LOGIC ≠ YAML SYNTAX**
+
+remember there are dozens of examples already of how to use apex 
+
+Do not guess. 
+
+Use the coding principles. 
+
+Test after every change. 
+
+Read the test log output.
+
+Do not continue with the next step until the tests are passing.
+
+rememeber the dependent peegeeq modules need to be installed to the local Maven repository first. 
+
+we are coding on a windows  machine

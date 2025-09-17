@@ -16,88 +16,137 @@ package dev.mars.apex.demo.etl;
  * limitations under the License.
  */
 
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.pipeline.DataPipelineEngine;
+import dev.mars.apex.core.engine.pipeline.YamlPipelineExecutionResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * JUnit 5 test for CsvToH2PipelineDemo functionality.
- * 
- * CRITICAL VALIDATION CHECKLIST APPLIED:
- * ✅ Count enrichments in YAML - 4 enrichments expected (csv-file-creation, yaml-configuration-loading, pipeline-execution, cleanup-operations)
- * ✅ Verify log shows "Processed: 4 out of 4" - Must be 100% execution rate
- * ✅ Check EVERY enrichment condition - Test data triggers ALL 4 conditions
- * ✅ Validate EVERY business calculation - Test actual CSV to H2 pipeline demo logic
- * ✅ Assert ALL enrichment results - Every result-field has corresponding assertEquals
- * 
+ * JUnit 5 test for CSV to H2 Pipeline functionality using APEX DataPipelineEngine.
+ *
+ * PIPELINE VALIDATION CHECKLIST:
+ * ✅ Load pipeline YAML configuration with data sources and sinks
+ * ✅ Initialize DataPipelineEngine with YAML configuration
+ * ✅ Execute pipeline with extract, load, and audit steps
+ * ✅ Validate pipeline execution results and step completion
+ * ✅ Verify actual CSV to H2 database processing functionality
+ *
  * BUSINESS LOGIC VALIDATION:
- * - CSV file creation with sample customer data generation with real APEX processing
- * - YAML configuration loading with data sink configuration and pipeline setup
- * - Pipeline execution with CSV to H2 database ETL processing and batch operations
- * - Cleanup operations with resource management and pipeline shutdown procedures
+ * - Extract step: Read customer data from CSV file using data source
+ * - Load step: Insert customer records into H2 database using data sink
+ * - Audit step: Write audit records to JSON file for compliance
+ * - Pipeline orchestration: Dependency management and error handling
  */
 public class CsvToH2PipelineTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(CsvToH2PipelineTest.class);
 
     @Test
-    void testComprehensiveCsvToH2PipelineDemoFunctionality() {
-        logger.info("=== Testing Comprehensive CSV to H2 Pipeline Demo Functionality ===");
-        
-        // Load YAML configuration for CSV to H2 pipeline demo
-        var config = loadAndValidateYaml("test-configs/csvtoh2pipeline-test.yaml");
-        
-        // Create comprehensive test data that triggers ALL 4 enrichments
-        Map<String, Object> testData = new HashMap<>();
-        
-        // Data for csv-file-creation enrichment
-        testData.put("fileCreationType", "csv-file-creation");
-        testData.put("fileCreationScope", "sample-customer-data");
-        
-        // Data for yaml-configuration-loading enrichment
-        testData.put("configurationLoadingType", "yaml-configuration-loading");
-        testData.put("configurationLoadingScope", "data-sink-pipeline-setup");
-        
-        // Data for pipeline-execution enrichment
-        testData.put("executionType", "pipeline-execution");
-        testData.put("executionScope", "csv-h2-etl-batch-operations");
-        
-        // Common data for cleanup-operations enrichment
-        testData.put("approach", "real-apex-services");
-        
-        // Execute APEX enrichment processing
-        Object result = enrichmentService.enrichObject(config, testData);
-        
-        // Validate enrichment results using proper casting pattern
-        assertNotNull(result, "CSV to H2 pipeline demo enrichment result should not be null");
-        @SuppressWarnings("unchecked")
-        Map<String, Object> enrichedData = (Map<String, Object>) result;
-        
-        // Validate ALL business logic results (all 4 enrichments should be processed)
-        assertNotNull(enrichedData.get("csvFileCreationResult"), "CSV file creation result should be generated");
-        assertNotNull(enrichedData.get("yamlConfigurationLoadingResult"), "YAML configuration loading result should be generated");
-        assertNotNull(enrichedData.get("pipelineExecutionResult"), "Pipeline execution result should be generated");
-        assertNotNull(enrichedData.get("cleanupOperationsResult"), "Cleanup operations result should be generated");
-        
-        // Validate specific business calculations
-        String csvFileCreationResult = (String) enrichedData.get("csvFileCreationResult");
-        assertTrue(csvFileCreationResult.contains("csv-file-creation"), "CSV file creation result should contain creation type");
-        
-        String yamlConfigurationLoadingResult = (String) enrichedData.get("yamlConfigurationLoadingResult");
-        assertTrue(yamlConfigurationLoadingResult.contains("yaml-configuration-loading"), "YAML configuration loading result should reference loading type");
-        
-        String pipelineExecutionResult = (String) enrichedData.get("pipelineExecutionResult");
-        assertTrue(pipelineExecutionResult.contains("pipeline-execution"), "Pipeline execution result should reference execution type");
-        
-        String cleanupOperationsResult = (String) enrichedData.get("cleanupOperationsResult");
-        assertTrue(cleanupOperationsResult.contains("real-apex-services"), "Cleanup operations result should reference approach");
-        
-        logger.info("✅ Comprehensive CSV to H2 pipeline demo functionality test completed successfully");
+    void testCsvToH2PipelineExecution() {
+        logger.info("=== Testing CSV to H2 Pipeline Execution ===");
+
+        try {
+            // Create required directories and sample CSV file
+            setupTestData();
+            // Load YAML pipeline configuration from same directory as test
+            String yamlPath = "src/test/java/dev/mars/apex/demo/etl/csv-to-h2-pipeline.yaml";
+            YamlRuleConfiguration config = yamlLoader.loadFromFile(yamlPath);
+            assertNotNull(config, "Pipeline configuration should not be null");
+
+            // Debug logging to understand what's loaded
+            logger.info("Configuration loaded successfully");
+            logger.info("Metadata: " + (config.getMetadata() != null ? config.getMetadata().getName() : "null"));
+            logger.info("Data sources count: " + (config.getDataSources() != null ? config.getDataSources().size() : "null"));
+            logger.info("Data sinks count: " + (config.getDataSinks() != null ? config.getDataSinks().size() : "null"));
+            logger.info("Pipeline object: " + (config.getPipeline() != null ? "present" : "null"));
+
+            if (config.getPipeline() != null) {
+                logger.info("Pipeline name: " + config.getPipeline().getName());
+                logger.info("Pipeline steps count: " + (config.getPipeline().getSteps() != null ? config.getPipeline().getSteps().size() : "null"));
+            }
+
+            assertNotNull(config.getPipeline(), "Pipeline definition should not be null");
+
+            logger.info("✓ Pipeline configuration loaded: " + config.getMetadata().getName());
+
+            // Initialize DataPipelineEngine
+            DataPipelineEngine pipelineEngine = new DataPipelineEngine();
+            pipelineEngine.initialize(config);
+
+            logger.info("✓ DataPipelineEngine initialized successfully");
+
+            // Execute the pipeline
+            String pipelineName = config.getPipeline().getName();
+            logger.info("Executing pipeline: " + pipelineName);
+
+            YamlPipelineExecutionResult result = pipelineEngine.executePipeline(pipelineName);
+
+            // Validate pipeline execution results
+            assertNotNull(result, "Pipeline execution result should not be null");
+            assertTrue(result.isSuccess(), "Pipeline should execute successfully");
+            assertTrue(result.getDurationMs() > 0, "Pipeline should have positive execution time");
+            assertTrue(result.getTotalSteps() > 0, "Pipeline should have executed steps");
+
+            logger.info("✓ Pipeline executed successfully");
+            logger.info("Pipeline Results:");
+            logger.info("  - Success: " + result.isSuccess());
+            logger.info("  - Duration: " + result.getDurationMs() + "ms");
+            logger.info("  - Total Steps: " + result.getTotalSteps());
+            logger.info("  - Successful Steps: " + result.getSuccessfulSteps());
+            logger.info("  - Failed Steps: " + result.getFailedSteps());
+
+            // Validate step execution (audit step is optional and may fail)
+            assertTrue(result.getSuccessfulSteps() >= 2,
+                "At least 2 pipeline steps (extract and load) should execute successfully");
+            assertTrue(result.getFailedSteps() <= 1, "At most 1 optional step should fail");
+
+            logger.info("✅ CSV to H2 pipeline execution test completed successfully");
+
+        } catch (Exception e) {
+            logger.error("Pipeline execution test failed: " + e.getMessage(), e);
+            fail("Pipeline execution should not throw exceptions: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Set up test data directories and sample CSV file for pipeline testing.
+     */
+    private void setupTestData() throws IOException {
+        logger.info("Setting up test data for CSV to H2 pipeline");
+
+        // Create required directories
+        Path dataDir = Paths.get("./target/demo/etl/data");
+        Path outputDir = Paths.get("./target/demo/etl/output");
+        Path auditDir = Paths.get("./target/demo/etl/output/audit");
+
+        Files.createDirectories(dataDir);
+        Files.createDirectories(outputDir);
+        Files.createDirectories(auditDir);
+
+        // Create sample CSV file
+        Path csvFile = dataDir.resolve("customers.csv");
+        try (FileWriter writer = new FileWriter(csvFile.toFile())) {
+            writer.write("customer_id,customer_name,email_address,registration_date,status\n");
+            writer.write("1,John Doe,john.doe@example.com,2023-01-15,ACTIVE\n");
+            writer.write("2,Jane Smith,jane.smith@example.com,2023-02-20,ACTIVE\n");
+            writer.write("3,Bob Johnson,bob.johnson@example.com,2023-03-10,INACTIVE\n");
+        }
+
+        logger.info("✓ Test data setup completed");
+        logger.info("  - Data directory: " + dataDir.toAbsolutePath());
+        logger.info("  - CSV file: " + csvFile.toAbsolutePath());
+        logger.info("  - Output directory: " + outputDir.toAbsolutePath());
+        logger.info("  - Audit directory: " + auditDir.toAbsolutePath());
     }
 }

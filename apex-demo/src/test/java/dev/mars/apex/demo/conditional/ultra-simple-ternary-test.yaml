@@ -1,0 +1,30 @@
+# ============================================================================
+# ULTRA SIMPLE TERNARY TEST - EVEN SIMPLER THAN RULE GROUPS!
+# ============================================================================
+# Purpose: Achieve the same result with just 1 enrichment using ternary operators
+#          No rules, no rule groups - just pure SpEL conditional logic
+# ============================================================================
+
+metadata:
+  name: "Ultra Simple Ternary Test"
+  version: "1.0.0"
+  description: "Single enrichment with ternary operators - simpler than rule groups"
+  type: "scenario"
+
+# NO RULES NEEDED!
+# NO RULE GROUPS NEEDED!
+
+# Just one enrichment with conditional transformation
+enrichments:
+  - id: "simple-ternary-mapping"
+    type: "field-enrichment"
+    description: "Single enrichment with ternary logic - replaces 3 rules + 3 enrichments"
+    
+    field-mappings:
+      - source-field: "input"
+        target-field: "output"
+        transformation: |
+          #input == 'A' ? 'FIRST' :
+          #input == 'B' ? 'SECOND' :
+          #input == 'C' ? 'THIRD' :
+          null

@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test to validate $(PASSWD) password injection functionality with actual database operations.
  *
  * FOLLOWS APEX TEST GUIDELINES:
+ * - Uses embedded yaml configuration directly in this class
  * - Tests actual database connectivity with resolved passwords
  * - Creates real H2 tables with actual test data
  * - Executes actual APEX enrichment operations using database lookups

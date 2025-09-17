@@ -6,6 +6,10 @@ import dev.mars.apex.core.service.lookup.DatasetLookupService;
 import dev.mars.apex.core.service.lookup.DatasetLookupServiceFactory;
 import dev.mars.apex.core.service.lookup.LookupService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.core.engine.model.RuleGroup;
+import dev.mars.apex.core.config.yaml.YamlRule;
+import dev.mars.apex.core.config.yaml.YamlRuleGroup;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -65,6 +69,10 @@ public class YamlEnrichmentProcessor {
 
     // Current configuration context for database lookups
     private dev.mars.apex.core.config.yaml.YamlRuleConfiguration currentConfiguration;
+
+    // Rule result tracking for conditional mapping support
+    private final Map<String, Map<String, Boolean>> ruleGroupResults = new ConcurrentHashMap<>();
+    private final Map<String, Boolean> individualRuleResults = new ConcurrentHashMap<>();
     
     public YamlEnrichmentProcessor(LookupServiceRegistry serviceRegistry,
                                    ExpressionEvaluatorService evaluatorService) {
@@ -99,6 +107,11 @@ public class YamlEnrichmentProcessor {
                                    dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
         // Set current configuration for database lookups
         this.currentConfiguration = configuration;
+
+        // Process rules and rule groups first to populate rule results
+        if (configuration != null && (configuration.getRules() != null || configuration.getRuleGroups() != null)) {
+            processRulesAndRuleGroups(configuration, targetObject);
+        }
 
         if (enrichments == null || enrichments.isEmpty()) {
             LOGGER.fine("No enrichments to process");
@@ -165,6 +178,8 @@ public class YamlEnrichmentProcessor {
                 return processCalculationEnrichment(enrichment, targetObject);
             case "field-enrichment":
                 return processFieldEnrichment(enrichment, targetObject);
+            case "conditional-mapping-enrichment":
+                return processConditionalMappingEnrichment(enrichment, targetObject);
             default:
                 LOGGER.warning("Unknown enrichment type: " + enrichment.getType());
                 return targetObject;
@@ -181,6 +196,8 @@ public class YamlEnrichmentProcessor {
     private boolean shouldProcessEnrichment(YamlEnrichment enrichment, Object targetObject) {
         LOGGER.fine("Evaluating enrichment: " + enrichment.getId() + " for object type: " +
                    targetObject.getClass().getSimpleName());
+
+
 
         // Check if enrichment is enabled
         if (enrichment.getEnabled() != null && !enrichment.getEnabled()) {
@@ -317,16 +334,223 @@ public class YamlEnrichmentProcessor {
     
     /**
      * Process a field-based enrichment.
-     * 
+     *
      * @param enrichment The enrichment configuration
      * @param targetObject The target object
      * @return The enriched object
      */
     private Object processFieldEnrichment(YamlEnrichment enrichment, Object targetObject) {
-        // Apply field mappings directly
-        return applyFieldMappings(enrichment.getFieldMappings(), targetObject, targetObject);
+        // Process conditional mappings first (if present)
+        if (enrichment.getConditionalMappings() != null && !enrichment.getConditionalMappings().isEmpty()) {
+            targetObject = processConditionalMappings(enrichment.getConditionalMappings(), targetObject);
+        }
+
+        // Apply regular field mappings (if present)
+        if (enrichment.getFieldMappings() != null && !enrichment.getFieldMappings().isEmpty()) {
+            targetObject = applyFieldMappings(enrichment.getFieldMappings(), targetObject, targetObject);
+        }
+
+        return targetObject;
     }
-    
+
+    /**
+     * Process conditional mappings for field-enrichment.
+     *
+     * @param conditionalMappings The conditional mapping configurations
+     * @param targetObject The target object
+     * @return The enriched object
+     */
+    private Object processConditionalMappings(List<YamlEnrichment.ConditionalMapping> conditionalMappings, Object targetObject) {
+        LOGGER.fine("Processing " + conditionalMappings.size() + " conditional mappings");
+
+        for (YamlEnrichment.ConditionalMapping conditionalMapping : conditionalMappings) {
+            try {
+                // Evaluate condition group
+                if (evaluateConditionGroup(conditionalMapping.getConditions(), targetObject)) {
+                    LOGGER.fine("Conditional mapping conditions met, applying field mappings");
+                    // Apply field mappings for this conditional mapping
+                    targetObject = applyFieldMappings(conditionalMapping.getFieldMappings(), targetObject, targetObject);
+                    // Continue to next conditional mapping (don't break - multiple can apply)
+                } else {
+                    LOGGER.finest("Conditional mapping conditions not met, skipping");
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to process conditional mapping: " + e.getMessage(), e);
+            }
+        }
+
+        return targetObject;
+    }
+
+    /**
+     * Process a conditional-mapping-enrichment.
+     * This enrichment type uses priority-based mapping rules with first-match-wins logic.
+     *
+     * @param enrichment The enrichment configuration
+     * @param targetObject The target object
+     * @return The enriched object
+     */
+    private Object processConditionalMappingEnrichment(YamlEnrichment enrichment, Object targetObject) {
+        String targetField = enrichment.getTargetField();
+        List<YamlEnrichment.MappingRule> mappingRules = enrichment.getMappingRules();
+        YamlEnrichment.ExecutionSettings executionSettings = enrichment.getExecutionSettings();
+
+        if (targetField == null || targetField.trim().isEmpty()) {
+            LOGGER.warning("Conditional mapping enrichment '" + enrichment.getId() + "' has no target field");
+            return targetObject;
+        }
+
+        if (mappingRules == null || mappingRules.isEmpty()) {
+            LOGGER.warning("Conditional mapping enrichment '" + enrichment.getId() + "' has no mapping rules");
+            return targetObject;
+        }
+
+        LOGGER.fine("Processing conditional mapping enrichment for target field: " + targetField);
+
+        // Sort mapping rules by priority (lower numbers = higher priority)
+        mappingRules.sort((r1, r2) -> {
+            int priority1 = r1.getPriority() != null ? r1.getPriority() : 999;
+            int priority2 = r2.getPriority() != null ? r2.getPriority() : 999;
+            return Integer.compare(priority1, priority2);
+        });
+
+        // Default execution settings
+        boolean stopOnFirstMatch = executionSettings != null && executionSettings.getStopOnFirstMatch() != null ?
+                                  executionSettings.getStopOnFirstMatch() : true;
+        boolean logMatchedRule = executionSettings != null && executionSettings.getLogMatchedRule() != null ?
+                                executionSettings.getLogMatchedRule() : false;
+
+        // Process rules in priority order
+        for (YamlEnrichment.MappingRule rule : mappingRules) {
+            try {
+                // Check if rule conditions are met
+                if (evaluateMappingRuleConditions(rule, targetObject)) {
+                    if (logMatchedRule) {
+                        LOGGER.info("Matched mapping rule: " + rule.getId() + " (priority: " + rule.getPriority() + ")");
+                    }
+
+                    // Apply the mapping
+                    Object mappedValue = applyMappingRule(rule, targetObject);
+
+                    // Set the target field
+                    setFieldValue(targetObject, targetField, mappedValue);
+
+                    LOGGER.fine("Applied mapping rule '" + rule.getId() + "' to field '" + targetField + "' with value: " + mappedValue);
+
+                    // Stop on first match if configured to do so
+                    if (stopOnFirstMatch) {
+                        LOGGER.fine("Stopping after first match as configured");
+                        break;
+                    }
+                } else {
+                    LOGGER.finest("Mapping rule '" + rule.getId() + "' conditions not met, skipping");
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to process mapping rule '" + rule.getId() + "': " + e.getMessage(), e);
+            }
+        }
+
+        return targetObject;
+    }
+
+    /**
+     * Evaluate a condition group with OR/AND logic.
+     *
+     * @param conditionGroup The condition group to evaluate
+     * @param targetObject The target object for context
+     * @return true if conditions are met, false otherwise
+     */
+    private boolean evaluateConditionGroup(YamlEnrichment.ConditionGroup conditionGroup, Object targetObject) {
+        if (conditionGroup == null || conditionGroup.getRules() == null || conditionGroup.getRules().isEmpty()) {
+            LOGGER.fine("No conditions to evaluate, returning true");
+            return true;
+        }
+
+        String operator = conditionGroup.getOperator();
+        if (operator == null) {
+            operator = "AND"; // Default to AND if not specified
+        }
+
+        LOGGER.finest("Evaluating condition group with operator: " + operator);
+
+        StandardEvaluationContext context = createEvaluationContext(targetObject);
+
+        boolean result;
+        if ("OR".equalsIgnoreCase(operator)) {
+            result = evaluateOrConditions(conditionGroup.getRules(), context);
+        } else if ("AND".equalsIgnoreCase(operator)) {
+            result = evaluateAndConditions(conditionGroup.getRules(), context);
+        } else {
+            LOGGER.warning("Unknown condition operator: " + operator + ", defaulting to AND");
+            result = evaluateAndConditions(conditionGroup.getRules(), context);
+        }
+
+        LOGGER.fine("Condition group evaluation result: " + result);
+        return result;
+    }
+
+    /**
+     * Evaluate conditions with OR logic.
+     */
+    private boolean evaluateOrConditions(List<YamlEnrichment.ConditionRule> rules, StandardEvaluationContext context) {
+        for (YamlEnrichment.ConditionRule rule : rules) {
+            try {
+                if (evaluateConditionRule(rule, context)) {
+                    LOGGER.finest("OR condition met: " + rule.getCondition());
+                    return true; // Short-circuit on first true condition
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to evaluate OR condition: " + rule.getCondition() + " - " + e.getMessage(), e);
+            }
+        }
+        return false; // No conditions were true
+    }
+
+    /**
+     * Evaluate conditions with AND logic.
+     */
+    private boolean evaluateAndConditions(List<YamlEnrichment.ConditionRule> rules, StandardEvaluationContext context) {
+        for (YamlEnrichment.ConditionRule rule : rules) {
+            try {
+                if (!evaluateConditionRule(rule, context)) {
+                    LOGGER.finest("AND condition failed: " + rule.getCondition());
+                    return false; // Short-circuit on first false condition
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to evaluate AND condition: " + rule.getCondition() + " - " + e.getMessage(), e);
+                return false; // Treat evaluation errors as false for AND logic
+            }
+        }
+        return true; // All conditions were true
+    }
+
+    /**
+     * Evaluate a single condition rule.
+     */
+    private boolean evaluateConditionRule(YamlEnrichment.ConditionRule rule, StandardEvaluationContext context) {
+        if (rule.getCondition() == null || rule.getCondition().trim().isEmpty()) {
+            return true; // Empty condition is considered true
+        }
+
+        try {
+            Expression expression = parser.parseExpression(rule.getCondition());
+            Object result = expression.getValue(context);
+
+            // Convert result to boolean
+            if (result instanceof Boolean) {
+                return (Boolean) result;
+            } else if (result != null) {
+                // Non-null values are considered true
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Failed to evaluate condition: " + rule.getCondition() + " - " + e.getMessage(), e);
+            return false;
+        }
+    }
+
     /**
      * Perform lookup operation with caching support.
      * 
@@ -575,6 +799,14 @@ public class YamlEnrichmentProcessor {
         // Add common variables and functions
         context.setVariable("serviceRegistry", serviceRegistry);
 
+        // Add rule results for conditional mapping support (only if they exist)
+        if (!ruleGroupResults.isEmpty()) {
+            context.setVariable("ruleGroupResults", ruleGroupResults);
+        }
+        if (!individualRuleResults.isEmpty()) {
+            context.setVariable("ruleResults", individualRuleResults);
+        }
+
         // If the root object is a Map, add its entries as variables for easier access
         if (rootObject instanceof Map) {
             Map<?, ?> rootMap = (Map<?, ?>) rootObject;
@@ -672,6 +904,129 @@ public class YamlEnrichmentProcessor {
     }
 
     /**
+     * Process rules and rule groups to populate rule results for conditional mapping.
+     *
+     * @param configuration The YAML configuration containing rules and rule groups
+     * @param targetObject The object to evaluate rules against
+     */
+    private void processRulesAndRuleGroups(dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration, Object targetObject) {
+        // Clear previous results
+        ruleGroupResults.clear();
+        individualRuleResults.clear();
+
+        LOGGER.fine("Processing rules and rule groups for conditional mapping...");
+
+        try {
+            StandardEvaluationContext context = createEvaluationContext(targetObject);
+
+            // Process individual rules first
+            if (configuration.getRules() != null) {
+                LOGGER.fine("Processing " + configuration.getRules().size() + " individual rules...");
+                for (YamlRule yamlRule : configuration.getRules()) {
+                    try {
+                        // Create Rule object from YAML configuration
+                        Rule rule = new Rule(yamlRule.getName() != null ? yamlRule.getName() : yamlRule.getId(),
+                                           yamlRule.getCondition(),
+                                           yamlRule.getMessage() != null ? yamlRule.getMessage() : "Rule " + yamlRule.getId());
+
+                        // Evaluate rule
+                        Expression exp = getOrCompileExpression(rule.getCondition());
+                        Boolean result = exp.getValue(context, Boolean.class);
+
+                        if (result == null) {
+                            result = false;
+                        }
+
+                        // Store individual rule result using YAML rule ID
+                        individualRuleResults.put(yamlRule.getId(), result);
+
+                        LOGGER.fine("Rule '" + yamlRule.getId() + "' evaluated to: " + result);
+
+                    } catch (Exception e) {
+                        LOGGER.log(Level.WARNING, "Error evaluating rule '" + yamlRule.getId() + "': " + e.getMessage(), e);
+                        individualRuleResults.put(yamlRule.getId(), false);
+                    }
+                }
+            }
+
+            // Process rule groups
+            if (configuration.getRuleGroups() != null) {
+                LOGGER.fine("Processing " + configuration.getRuleGroups().size() + " rule groups...");
+                for (YamlRuleGroup yamlRuleGroup : configuration.getRuleGroups()) {
+                    try {
+                        // Create RuleGroup object from YAML configuration
+                        boolean isAndOperator = "AND".equalsIgnoreCase(yamlRuleGroup.getOperator());
+                        RuleGroup ruleGroup = new RuleGroup(
+                            yamlRuleGroup.getId(),
+                            "default",
+                            yamlRuleGroup.getName(),
+                            yamlRuleGroup.getDescription(),
+                            yamlRuleGroup.getPriority() != null ? yamlRuleGroup.getPriority() : 100,
+                            isAndOperator,
+                            yamlRuleGroup.getStopOnFirstFailure() != null ? yamlRuleGroup.getStopOnFirstFailure() : false,
+                            yamlRuleGroup.getParallelExecution() != null ? yamlRuleGroup.getParallelExecution() : false,
+                            yamlRuleGroup.getDebugMode() != null ? yamlRuleGroup.getDebugMode() : false
+                        );
+
+                        // Add rules to the group
+                        if (yamlRuleGroup.getRuleIds() != null) {
+                            int sequence = 1;
+                            for (String ruleId : yamlRuleGroup.getRuleIds()) {
+                                // Find the rule in the configuration
+                                YamlRule yamlRule = findRuleById(configuration, ruleId);
+                                if (yamlRule != null) {
+                                    Rule rule = new Rule(yamlRule.getName() != null ? yamlRule.getName() : yamlRule.getId(),
+                                                       yamlRule.getCondition(),
+                                                       yamlRule.getMessage() != null ? yamlRule.getMessage() : "Rule " + yamlRule.getId());
+                                    ruleGroup.addRule(rule, sequence++);
+                                }
+                            }
+                        }
+
+                        // Evaluate rule group
+                        boolean groupResult = ruleGroup.evaluate(context);
+
+                        // Store rule group results
+                        Map<String, Boolean> groupRuleResults = new HashMap<>();
+                        groupRuleResults.put("passed", groupResult);
+                        groupRuleResults.putAll(ruleGroup.getRuleResults());
+                        ruleGroupResults.put(yamlRuleGroup.getId(), groupRuleResults);
+
+                        LOGGER.fine("Rule group '" + yamlRuleGroup.getId() + "' evaluated to: " + groupResult);
+
+                    } catch (Exception e) {
+                        LOGGER.log(Level.WARNING, "Error evaluating rule group '" + yamlRuleGroup.getId() + "': " + e.getMessage(), e);
+                        Map<String, Boolean> failedResult = new HashMap<>();
+                        failedResult.put("passed", false);
+                        ruleGroupResults.put(yamlRuleGroup.getId(), failedResult);
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error processing rules and rule groups: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Find a rule by ID in the configuration.
+     *
+     * @param configuration The YAML configuration
+     * @param ruleId The rule ID to find
+     * @return The YamlRule if found, null otherwise
+     */
+    private YamlRule findRuleById(dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration, String ruleId) {
+        if (configuration.getRules() != null) {
+            for (YamlRule rule : configuration.getRules()) {
+                if (ruleId.equals(rule.getId())) {
+                    return rule;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Cached lookup result with TTL support.
      */
     private static class CachedLookupResult {
@@ -690,5 +1045,112 @@ public class YamlEnrichmentProcessor {
         public boolean isExpired() {
             return System.currentTimeMillis() > expirationTime;
         }
+    }
+
+    /**
+     * Evaluate conditions for a mapping rule.
+     *
+     * @param rule The mapping rule
+     * @param targetObject The target object for context
+     * @return true if conditions are met, false otherwise
+     */
+    private boolean evaluateMappingRuleConditions(YamlEnrichment.MappingRule rule, Object targetObject) {
+        YamlEnrichment.ConditionGroup conditions = rule.getConditions();
+
+        // If no conditions specified, this is a default rule that always matches
+        if (conditions == null) {
+            LOGGER.finest("No conditions specified for rule '" + rule.getId() + "', treating as default rule");
+            return true;
+        }
+
+        // Use existing condition group evaluation logic
+        return evaluateConditionGroup(conditions, targetObject);
+    }
+
+    /**
+     * Apply a mapping rule to get the mapped value.
+     *
+     * @param rule The mapping rule
+     * @param targetObject The target object for context
+     * @return The mapped value
+     */
+    private Object applyMappingRule(YamlEnrichment.MappingRule rule, Object targetObject) {
+        YamlEnrichment.MappingConfig mapping = rule.getMapping();
+
+        if (mapping == null) {
+            LOGGER.warning("Mapping rule '" + rule.getId() + "' has no mapping configuration");
+            return null;
+        }
+
+        String mappingType = mapping.getType();
+        if (mappingType == null) {
+            mappingType = "direct"; // Default to direct mapping
+        }
+
+        try {
+            if ("direct".equalsIgnoreCase(mappingType)) {
+                return applyDirectMapping(mapping, targetObject);
+            } else if ("lookup".equalsIgnoreCase(mappingType)) {
+                return applyLookupMapping(mapping, targetObject);
+            } else {
+                LOGGER.warning("Unknown mapping type '" + mappingType + "' for rule: " + rule.getId());
+                return null;
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Failed to apply mapping for rule '" + rule.getId() + "': " + e.getMessage(), e);
+
+            // Try fallback value if available
+            if (mapping.getFallbackValue() != null && !mapping.getFallbackValue().trim().isEmpty()) {
+                try {
+                    StandardEvaluationContext context = createEvaluationContext(targetObject);
+                    Expression fallbackExpr = getOrCompileExpression(mapping.getFallbackValue());
+                    return fallbackExpr.getValue(context);
+                } catch (Exception fallbackException) {
+                    LOGGER.log(Level.WARNING, "Failed to apply fallback value: " + fallbackException.getMessage(), fallbackException);
+                }
+            }
+
+            return null;
+        }
+    }
+
+    /**
+     * Apply direct mapping (source field with optional transformation).
+     */
+    private Object applyDirectMapping(YamlEnrichment.MappingConfig mapping, Object targetObject) {
+        StandardEvaluationContext context = createEvaluationContext(targetObject);
+
+        // If transformation is specified, use it
+        if (mapping.getTransformation() != null && !mapping.getTransformation().trim().isEmpty()) {
+            Expression transformExpr = getOrCompileExpression(mapping.getTransformation());
+            return transformExpr.getValue(context);
+        }
+
+        // Otherwise, use source field directly
+        if (mapping.getSourceField() != null && !mapping.getSourceField().trim().isEmpty()) {
+            Expression sourceExpr = getOrCompileExpression("#" + mapping.getSourceField());
+            return sourceExpr.getValue(context);
+        }
+
+        LOGGER.warning("Direct mapping has neither transformation nor source-field");
+        return null;
+    }
+
+    /**
+     * Apply lookup mapping (database/external lookup with transformation).
+     */
+    private Object applyLookupMapping(YamlEnrichment.MappingConfig mapping, Object targetObject) {
+        // This is a simplified implementation - in a full implementation,
+        // you would use the lookup-config to perform the actual lookup
+        LOGGER.warning("Lookup mapping not fully implemented yet for conditional-mapping-enrichment");
+
+        // For now, fall back to transformation if available
+        if (mapping.getTransformation() != null && !mapping.getTransformation().trim().isEmpty()) {
+            StandardEvaluationContext context = createEvaluationContext(targetObject);
+            Expression transformExpr = getOrCompileExpression(mapping.getTransformation());
+            return transformExpr.getValue(context);
+        }
+
+        return null;
     }
 }

@@ -1,0 +1,70 @@
+# ============================================================================
+# ULTRA SIMPLE RULE OR TEST
+# ============================================================================
+# Purpose: Prove 3 rules in sequence with OR logic
+#          Each rule maps a different constant to the same target field
+#          First matching rule wins
+# ============================================================================
+
+metadata:
+  name: "Ultra Simple Rule OR Test"
+  version: "1.0.0"
+  description: "3 rules in sequence with OR logic, constants to same target field"
+  type: "scenario"
+
+# 3 rules in sequence
+rules:
+  - id: "rule-1"
+    name: "First Rule"
+    condition: "#input == 'A'"
+    message: "First rule matched"
+    
+  - id: "rule-2" 
+    name: "Second Rule"
+    condition: "#input == 'B'"
+    message: "Second rule matched"
+    
+  - id: "rule-3"
+    name: "Third Rule" 
+    condition: "#input == 'C'"
+    message: "Third rule matched"
+
+# Rule group with OR logic
+rule-groups:
+  - id: "simple-or-group"
+    name: "Simple OR Group"
+    operator: "OR"
+    stop-on-first-failure: true
+    rule-ids:
+      - "rule-1"
+      - "rule-2" 
+      - "rule-3"
+
+# Enrichments - each rule maps different constant to same target field
+enrichments:
+  # Rule 1: input='A' -> output='FIRST'
+  - id: "mapping-1"
+    type: "field-enrichment"
+    condition: "#ruleResults['rule-1'] == true"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "output"
+        transformation: "'FIRST'"
+        
+  # Rule 2: input='B' -> output='SECOND'  
+  - id: "mapping-2"
+    type: "field-enrichment"
+    condition: "#ruleResults['rule-2'] == true"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "output"
+        transformation: "'SECOND'"
+        
+  # Rule 3: input='C' -> output='THIRD'
+  - id: "mapping-3"
+    type: "field-enrichment"
+    condition: "#ruleResults['rule-3'] == true"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "output"
+        transformation: "'THIRD'"

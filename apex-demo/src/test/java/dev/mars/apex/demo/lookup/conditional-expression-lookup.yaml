@@ -1,0 +1,212 @@
+# Conditional Expression Lookup Example Configuration
+# Demonstrates conditional expression evaluation in lookup-key
+# Use Case: Risk-based loan assessment with conditional credit score categorization
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Conditional expression lookup demonstration using APEX lookup
+#          enrichments with conditional logic, expression-based lookups, and
+#          dynamic lookup conditions for complex business scenarios
+# Status: Available for integration with conditional expression lookup tests
+# ============================================================================
+
+metadata:
+  id: "conditional-expression-lookup-demo"
+  name: "Conditional Expression Lookup Demo"
+  version: "1.0.0"
+  description: "Demonstrates conditional expression lookup using credit score-based risk categorization"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "lookup", "conditional"]
+
+# Define the enrichment rules
+enrichments:
+  - id: "conditional-expression-lookup-demo"
+    name: "Risk-Based Assessment Lookup"
+    description: "Enrich risk assessments with conditional credit score-based risk parameters"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#creditScore != null"
+    
+    lookup-config:
+      # Conditional expression - evaluates credit score and returns risk category
+      lookup-key: "#creditScore >= 750 ? 'EXCELLENT' : (#creditScore >= 650 ? 'GOOD' : (#creditScore >= 550 ? 'FAIR' : 'POOR'))"
+      
+      lookup-dataset:
+        type: "inline"
+        key-field: "riskCategory"
+        data:
+          # Excellent credit (750+)
+          - riskCategory: "EXCELLENT"
+            riskLevel: "LOW"
+            interestRate: 3.25
+            maxLoanAmount: 1000000.00
+            approvalStatus: "AUTO_APPROVED"
+            requiredDocuments: "Income verification only"
+            processingDays: 1
+            riskMitigationActions: "None required"
+            collateralRequirement: 0.00
+            reviewerLevel: "JUNIOR"
+            
+          # Good credit (650-749)
+          - riskCategory: "GOOD"
+            riskLevel: "LOW_MEDIUM"
+            interestRate: 4.75
+            maxLoanAmount: 750000.00
+            approvalStatus: "FAST_TRACK"
+            requiredDocuments: "Income verification, employment letter"
+            processingDays: 2
+            riskMitigationActions: "Employment verification"
+            collateralRequirement: 0.10
+            reviewerLevel: "JUNIOR"
+            
+          # Fair credit (550-649)
+          - riskCategory: "FAIR"
+            riskLevel: "MEDIUM"
+            interestRate: 7.25
+            maxLoanAmount: 500000.00
+            approvalStatus: "MANUAL_REVIEW"
+            requiredDocuments: "Income verification, employment letter, bank statements (3 months)"
+            processingDays: 5
+            riskMitigationActions: "Enhanced due diligence, co-signer evaluation"
+            collateralRequirement: 0.25
+            reviewerLevel: "SENIOR"
+            
+          # Poor credit (<550)
+          - riskCategory: "POOR"
+            riskLevel: "HIGH"
+            interestRate: 12.50
+            maxLoanAmount: 250000.00
+            approvalStatus: "DETAILED_REVIEW"
+            requiredDocuments: "Full financial disclosure, tax returns (2 years), bank statements (6 months), references"
+            processingDays: 10
+            riskMitigationActions: "Mandatory co-signer, asset verification, debt consolidation plan"
+            collateralRequirement: 0.50
+            reviewerLevel: "EXECUTIVE"
+    
+    # Map the lookup results to target fields
+    field-mappings:
+      - source-field: "riskCategory"
+        target-field: "riskCategory"
+        required: true
+        
+      - source-field: "riskLevel"
+        target-field: "riskLevel"
+        required: true
+        
+      - source-field: "interestRate"
+        target-field: "interestRate"
+        required: true
+        
+      - source-field: "maxLoanAmount"
+        target-field: "maxLoanAmount"
+        required: true
+        
+      - source-field: "approvalStatus"
+        target-field: "approvalStatus"
+        required: true
+        
+      - source-field: "requiredDocuments"
+        target-field: "requiredDocuments"
+        required: true
+        
+      - source-field: "processingDays"
+        target-field: "processingDays"
+        required: true
+        
+      - source-field: "riskMitigationActions"
+        target-field: "riskMitigationActions"
+        required: true
+        
+      - source-field: "collateralRequirement"
+        target-field: "collateralRequirement"
+        required: true
+        
+      - source-field: "reviewerLevel"
+        target-field: "reviewerLevel"
+        required: true
+
+# Optional validation rules
+validations:
+  - id: "conditional-expression-lookup-demo"
+    name: "Credit Score Range Validation"
+    description: "Ensure credit score is within valid range"
+    type: "field-validation"
+    enabled: true
+    condition: "#creditScore != null"
+    
+    validation-config:
+      field: "creditScore"
+      rules:
+        - type: "range"
+          min: 300
+          max: 850
+          message: "Credit score must be between 300 and 850"
+          
+  - id: "conditional-expression-lookup-demo"
+    name: "Annual Income Validation"
+    description: "Ensure annual income is positive"
+    type: "field-validation"
+    enabled: true
+    condition: "#annualIncome != null"
+    
+    validation-config:
+      field: "annualIncome"
+      rules:
+        - type: "range"
+          min: 0.01
+          message: "Annual income must be positive"
+          
+  - id: "conditional-expression-lookup-demo"
+    name: "Requested Amount Validation"
+    description: "Ensure requested loan amount is positive"
+    type: "field-validation"
+    enabled: true
+    condition: "#requestedAmount != null"
+    
+    validation-config:
+      field: "requestedAmount"
+      rules:
+        - type: "range"
+          min: 1000.00
+          max: 10000000.00
+          message: "Requested amount must be between $1,000 and $10,000,000"
+          
+  - id: "conditional-expression-lookup-demo"
+    name: "Employment Status Validation"
+    description: "Ensure employment status is valid"
+    type: "field-validation"
+    enabled: true
+    condition: "#employmentStatus != null"
+    
+    validation-config:
+      field: "employmentStatus"
+      rules:
+        - type: "enum"
+          allowedValues: ["FULL_TIME", "PART_TIME", "CONTRACT", "SELF_EMPLOYED", "UNEMPLOYED", "RETIRED"]
+          message: "Employment status must be one of: FULL_TIME, PART_TIME, CONTRACT, SELF_EMPLOYED, UNEMPLOYED, RETIRED"
+          
+  - id: "conditional-expression-lookup-demo"
+    name: "Years Employed Validation"
+    description: "Ensure years employed is reasonable"
+    type: "field-validation"
+    enabled: true
+    condition: "#yearsEmployed != null"
+    
+    validation-config:
+      field: "yearsEmployed"
+      rules:
+        - type: "range"
+          min: 0
+          max: 50
+          message: "Years employed must be between 0 and 50"
+
+# Processing configuration
+processing:
+  continue-on-error: true
+  max-errors: 5
+  error-handling: "log-and-continue"
+

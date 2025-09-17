@@ -1,0 +1,249 @@
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Comprehensive rule configuration demonstration with complex rule
+#          definitions, rule evaluation, and comprehensive rule processing
+#          using APEX rules engine capabilities for advanced rule scenarios
+# Status: Available for integration with comprehensive rule configuration tests
+# ============================================================================
+
+metadata:
+  id: "comprehensive-rule-configuration"
+  name: "Comprehensive Rule Configuration"
+  version: "3.0.0"
+  description: "Consolidated APEX-compliant rule configuration covering all evaluation scenarios"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  business-domain: "Comprehensive Rule Configuration"
+  tags: ["rule", "configuration", "comprehensive", "evaluation", "demo", "bootstrap", "hardcoded", "service", "scenario", "trade", "risk", "simplified", "api", "yaml"]
+
+# APEX enrichment processing for comprehensive rule configuration operations
+enrichments:
+  # Rule Configuration Demo Enrichments
+  - id: "rule-creation-enrichment"
+    name: "rule-creation"
+    type: "calculation-enrichment"
+    description: "Processes rule creation with real APEX processing"
+    condition: "#creationType != null"
+    calculation-config:
+      expression: "'Rule creation processing: ' + #creationType + ' with ' + (#creationScope != null ? #creationScope : 'default-scope') + ' rules'"
+      result-field: "ruleCreationResult"
+    field-mappings:
+      - source-field: "ruleCreationResult"
+        target-field: "ruleCreationResult"
+        
+  - id: "configuration-management-enrichment"
+    name: "configuration-management"
+    type: "calculation-enrichment"
+    description: "Processes configuration management with real APEX processing"
+    condition: "#managementType != null"
+    calculation-config:
+      expression: "'Configuration management processing: ' + #managementType + ' with ' + (#managementScope != null ? #managementScope : 'default-scope') + ' management'"
+      result-field: "configurationManagementResult"
+    field-mappings:
+      - source-field: "configurationManagementResult"
+        target-field: "configurationManagementResult"
+
+  # Bootstrap Configuration Enrichments
+  - id: "bootstrap-initialization-enrichment"
+    name: "bootstrap-initialization"
+    type: "calculation-enrichment"
+    description: "Processes bootstrap initialization with real APEX processing"
+    condition: "#initializationType != null"
+    calculation-config:
+      expression: "'Bootstrap initialization processing: ' + #initializationType + ' with ' + (#initializationScope != null ? #initializationScope : 'default-scope') + ' bootstrap'"
+      result-field: "bootstrapInitializationResult"
+    field-mappings:
+      - source-field: "bootstrapInitializationResult"
+        target-field: "bootstrapInitializationResult"
+        
+  - id: "configuration-loading-enrichment"
+    name: "configuration-loading"
+    type: "calculation-enrichment"
+    description: "Processes configuration loading with real APEX processing"
+    condition: "#loadingType != null"
+    calculation-config:
+      expression: "'Configuration loading processing: ' + #loadingType + ' with ' + (#loadingScope != null ? #loadingScope : 'default-scope') + ' loading'"
+      result-field: "configurationLoadingResult"
+    field-mappings:
+      - source-field: "configurationLoadingResult"
+        target-field: "configurationLoadingResult"
+
+  # Hardcoded Migration Enrichments
+  - id: "hardcoded-migration-enrichment"
+    name: "hardcoded-migration"
+    type: "calculation-enrichment"
+    description: "Processes hardcoded migration with real APEX processing"
+    condition: "#migrationType != null"
+    calculation-config:
+      expression: "'Hardcoded migration processing: ' + #migrationType + ' with ' + (#migrationScope != null ? #migrationScope : 'default-scope') + ' modernization'"
+      result-field: "hardcodedMigrationResult"
+    field-mappings:
+      - source-field: "hardcodedMigrationResult"
+        target-field: "hardcodedMigrationResult"
+        
+  - id: "rule-transformation-enrichment"
+    name: "rule-transformation"
+    type: "calculation-enrichment"
+    description: "Processes rule transformation with real APEX processing"
+    condition: "#transformationType != null"
+    calculation-config:
+      expression: "'Rule transformation processing: ' + #transformationType + ' with ' + (#transformationScope != null ? #transformationScope : 'default-scope') + ' transformation'"
+      result-field: "ruleTransformationResult"
+    field-mappings:
+      - source-field: "ruleTransformationResult"
+        target-field: "ruleTransformationResult"
+
+  # Rule Definition Service Enrichments
+  - id: "rule-creation-engines-enrichment"
+    name: "rule-creation-engines"
+    type: "calculation-enrichment"
+    description: "Processes rule creation engines with real APEX processing"
+    condition: "#engineType != null"
+    calculation-config:
+      expression: "'Rule creation engines processing: ' + #engineType + ' with ' + (#engineScope != null ? #engineScope : 'default-scope') + ' creation'"
+      result-field: "ruleCreationEnginesResult"
+    field-mappings:
+      - source-field: "ruleCreationEnginesResult"
+        target-field: "ruleCreationEnginesResult"
+        
+  - id: "management-frameworks-enrichment"
+    name: "management-frameworks"
+    type: "calculation-enrichment"
+    description: "Processes management frameworks with real APEX processing"
+    condition: "#frameworkType != null"
+    calculation-config:
+      expression: "'Management frameworks processing: ' + #frameworkType + ' with ' + (#frameworkScope != null ? #frameworkScope : 'default-scope') + ' frameworks'"
+      result-field: "managementFrameworksResult"
+    field-mappings:
+      - source-field: "managementFrameworksResult"
+        target-field: "managementFrameworksResult"
+
+  # Scenario-Based Processing Enrichments
+  - id: "sample-data-generation-enrichment"
+    name: "sample-data-generation"
+    type: "calculation-enrichment"
+    description: "Processes sample data generation with real APEX processing"
+    condition: "#generationType != null"
+    calculation-config:
+      expression: "'Sample data generation processing: ' + #generationType + ' with ' + (#generationScope != null ? #generationScope : 'default-scope') + ' samples'"
+      result-field: "sampleDataGenerationResult"
+    field-mappings:
+      - source-field: "sampleDataGenerationResult"
+        target-field: "sampleDataGenerationResult"
+        
+  - id: "scenario-routing-enrichment"
+    name: "scenario-routing"
+    type: "calculation-enrichment"
+    description: "Processes scenario routing with real APEX processing"
+    condition: "#routingType != null"
+    calculation-config:
+      expression: "'Scenario routing processing: ' + #routingType + ' with ' + (#routingScope != null ? #routingScope : 'default-scope') + ' routing'"
+      result-field: "scenarioRoutingResult"
+    field-mappings:
+      - source-field: "scenarioRoutingResult"
+        target-field: "scenarioRoutingResult"
+
+  # Trade Record Matcher Enrichments
+  - id: "trade-matching-algorithms-enrichment"
+    name: "trade-matching-algorithms"
+    type: "calculation-enrichment"
+    description: "Processes trade matching algorithms with real APEX processing"
+    condition: "#matchingType != null"
+    calculation-config:
+      expression: "'Trade matching algorithms processing: ' + #matchingType + ' with ' + (#matchingScope != null ? #matchingScope : 'default-scope') + ' matching'"
+      result-field: "tradeMatchingAlgorithmsResult"
+    field-mappings:
+      - source-field: "tradeMatchingAlgorithmsResult"
+        target-field: "tradeMatchingAlgorithmsResult"
+        
+  - id: "validation-engines-enrichment"
+    name: "validation-engines"
+    type: "calculation-enrichment"
+    description: "Processes validation engines with real APEX processing"
+    condition: "#validationType != null"
+    calculation-config:
+      expression: "'Validation engines processing: ' + #validationType + ' with ' + (#validationScope != null ? #validationScope : 'default-scope') + ' validation'"
+      result-field: "validationEnginesResult"
+    field-mappings:
+      - source-field: "validationEnginesResult"
+        target-field: "validationEnginesResult"
+
+  # Risk Management Service Enrichments
+  - id: "risk-assessment-enrichment"
+    name: "risk-assessment"
+    type: "calculation-enrichment"
+    description: "Processes risk assessment with real APEX processing"
+    condition: "#riskType != null"
+    calculation-config:
+      expression: "'Risk assessment processing: ' + #riskType + ' with ' + (#riskScope != null ? #riskScope : 'default-scope') + ' assessment'"
+      result-field: "riskAssessmentResult"
+    field-mappings:
+      - source-field: "riskAssessmentResult"
+        target-field: "riskAssessmentResult"
+
+  # Simplified API Enrichments
+  - id: "ultra-simple-api-enrichment"
+    name: "ultra-simple-api"
+    type: "calculation-enrichment"
+    description: "Processes ultra-simple API with real APEX processing"
+    condition: "#apiType != null"
+    calculation-config:
+      expression: "'Ultra-simple API processing: ' + #apiType + ' with ' + (#apiScope != null ? #apiScope : 'default-scope') + ' processing'"
+      result-field: "ultraSimpleApiResult"
+    field-mappings:
+      - source-field: "ultraSimpleApiResult"
+        target-field: "ultraSimpleApiResult"
+
+  - id: "one-liner-evaluations-enrichment"
+    name: "one-liner-evaluations"
+    type: "calculation-enrichment"
+    description: "Processes one-liner evaluations with real APEX processing"
+    condition: "#evaluationType != null"
+    calculation-config:
+      expression: "'One-liner evaluations processing: ' + #evaluationType + ' with ' + (#evaluationScope != null ? #evaluationScope : 'default-scope') + ' evaluations'"
+      result-field: "oneLinerEvaluationsResult"
+    field-mappings:
+      - source-field: "oneLinerEvaluationsResult"
+        target-field: "oneLinerEvaluationsResult"
+
+  # YAML Configuration Enrichments
+  - id: "external-yaml-configuration-enrichment"
+    name: "external-yaml-configuration"
+    type: "calculation-enrichment"
+    description: "Processes external YAML configuration with real APEX processing"
+    condition: "#configurationType != null"
+    calculation-config:
+      expression: "'External YAML configuration processing: ' + #configurationType + ' with ' + (#configurationScope != null ? #configurationScope : 'default-scope') + ' configuration'"
+      result-field: "externalYamlConfigurationResult"
+    field-mappings:
+      - source-field: "externalYamlConfigurationResult"
+        target-field: "externalYamlConfigurationResult"
+
+  - id: "business-rules-enrichment"
+    name: "business-rules"
+    type: "calculation-enrichment"
+    description: "Processes business rules with real APEX processing"
+    condition: "#rulesType != null"
+    calculation-config:
+      expression: "'Business rules processing: ' + #rulesType + ' with ' + (#rulesScope != null ? #rulesScope : 'default-scope') + ' rules'"
+      result-field: "businessRulesResult"
+    field-mappings:
+      - source-field: "businessRulesResult"
+        target-field: "businessRulesResult"
+
+  # Summary Enrichment
+  - id: "comprehensive-summary-enrichment"
+    name: "comprehensive-summary"
+    type: "calculation-enrichment"
+    description: "Generate comprehensive rule configuration summary with operation audit trail"
+    condition: "#approach != null"
+    calculation-config:
+      expression: "'Comprehensive Rule Configuration Summary: Processing completed using ' + #approach + ' (Summary: ' + T(java.time.LocalDateTime).now().toString() + ')'"
+      result-field: "comprehensiveRuleConfigurationSummary"
+    field-mappings:
+      - source-field: "comprehensiveRuleConfigurationSummary"
+        target-field: "comprehensiveRuleConfigurationSummary"

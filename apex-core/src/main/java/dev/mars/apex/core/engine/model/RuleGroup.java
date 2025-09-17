@@ -49,6 +49,10 @@ public class RuleGroup implements RuleBase {
     private final boolean debugMode;
     private String message;
 
+    // Rule result tracking for conditional mapping support
+    private final Map<String, Boolean> ruleResults = new HashMap<>();
+    private boolean groupResult = false;
+
     /**
      * Create a new rule group with default execution settings.
      *
@@ -232,6 +236,9 @@ public class RuleGroup implements RuleBase {
             result = evaluateSequential(context);
         }
 
+        // Store group result
+        groupResult = result;
+
         // If the group evaluated to true, update the message
         if (result) {
             updateMessage();
@@ -247,6 +254,9 @@ public class RuleGroup implements RuleBase {
      * @return True if the rule group condition is satisfied, false otherwise
      */
     private boolean evaluateSequential(StandardEvaluationContext context) {
+        // Clear previous results
+        ruleResults.clear();
+
         // Sort rules by sequence number
         List<Integer> sequenceNumbers = new ArrayList<>(rulesBySequence.keySet());
         sequenceNumbers.sort(Integer::compareTo);
@@ -274,6 +284,9 @@ public class RuleGroup implements RuleBase {
                 if (ruleResult == null) {
                     ruleResult = false;
                 }
+
+                // Store individual rule result
+                ruleResults.put(rule.getId(), ruleResult);
 
                 evaluatedCount++;
                 if (ruleResult) {
@@ -327,6 +340,9 @@ public class RuleGroup implements RuleBase {
                              ", Failed: " + failedCount + ", Final result: " + result);
         }
 
+        // Store group result
+        groupResult = result;
+
         return result;
     }
 
@@ -338,6 +354,9 @@ public class RuleGroup implements RuleBase {
      * @return True if the rule group condition is satisfied, false otherwise
      */
     private boolean evaluateParallel(StandardEvaluationContext context) {
+        // Clear previous results
+        ruleResults.clear();
+
         // Sort rules by sequence number
         List<Integer> sequenceNumbers = new ArrayList<>(rulesBySequence.keySet());
         sequenceNumbers.sort(Integer::compareTo);
@@ -345,6 +364,7 @@ public class RuleGroup implements RuleBase {
         // Create a list of evaluation tasks
         List<java.util.concurrent.Callable<Boolean>> tasks = new ArrayList<>();
         List<String> ruleNames = new ArrayList<>();
+        List<String> ruleIds = new ArrayList<>();
 
         for (Integer seq : sequenceNumbers) {
             Rule rule = rulesBySequence.get(seq);
@@ -354,6 +374,7 @@ public class RuleGroup implements RuleBase {
             }
 
             ruleNames.add(rule.getName());
+            ruleIds.add(rule.getId());
             tasks.add(() -> {
                 try {
                     Expression exp = parser.parseExpression(rule.getCondition());
@@ -393,9 +414,13 @@ public class RuleGroup implements RuleBase {
                 try {
                     Boolean result = futures.get(i).get();
                     results.add(result);
+                    // Store individual rule result
+                    ruleResults.put(ruleIds.get(i), result);
                 } catch (Exception e) {
                     System.err.println("Error getting result for rule '" + ruleNames.get(i) + "' in group '" + name + "': " + e.getMessage());
                     results.add(false);
+                    // Store failed result
+                    ruleResults.put(ruleIds.get(i), false);
                 }
             }
 
@@ -423,6 +448,9 @@ public class RuleGroup implements RuleBase {
                                  "Total: " + results.size() + ", Passed: " + passedCount +
                                  ", Failed: " + failedCount + ", Final result: " + finalResult);
             }
+
+            // Store group result
+            groupResult = finalResult;
 
             return finalResult;
 
@@ -547,5 +575,23 @@ public class RuleGroup implements RuleBase {
      */
     public String getMessage() {
         return message;
+    }
+
+    /**
+     * Get the individual rule results from the last evaluation.
+     *
+     * @return Map of rule ID to boolean result
+     */
+    public Map<String, Boolean> getRuleResults() {
+        return new HashMap<>(ruleResults);
+    }
+
+    /**
+     * Get the overall group result from the last evaluation.
+     *
+     * @return True if the group passed, false otherwise
+     */
+    public boolean getGroupResult() {
+        return groupResult;
     }
 }

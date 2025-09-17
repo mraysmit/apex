@@ -1,4 +1,4 @@
-# APEX ETL Demo: CSV to H2 Database Pipeline
+ APEX ETL Demo: CSV to H2 Database Pipeline
 
 This demo showcases APEX's new data sink capabilities by implementing a complete ETL (Extract, Transform, Load) pipeline that processes CSV customer data and writes it to an H2 database.
 

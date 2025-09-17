@@ -1,0 +1,84 @@
+# JSON File Lookup Example Configuration
+# Demonstrates file-system data source lookup using JSON files
+# Use Case: Enrich product data using JSON file lookup
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: JSON file lookup demonstration using APEX lookup enrichments with
+#          JSON file data sources, file-based lookups, and JSON data processing
+#          for external file-based reference data integration
+# Status: Available for integration with JSON file lookup tests
+# ============================================================================
+
+metadata:
+  id: "json-file-lookup-demo"
+  name: "JSON File Lookup Demo"
+  version: "1.0.0"
+  description: "Demonstrates file-system lookup using JSON files from demo-data/json"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-09-05"
+  tags: ["apex-demo", "lookup", "json", "file-system"]
+
+# Note: Using inline data for simplicity in this test
+# For file-system data sources, use external-data-sources configuration
+
+# Define the enrichment rules
+enrichments:
+  - id: "json-file-lookup-demo"
+    name: "Product Details Lookup"
+    description: "Enrich transactions with product details using JSON file lookup"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#productId != null && #productId != ''"
+    
+    lookup-config:
+      # Simple field reference - extract product ID from input
+      lookup-key: "#productId"
+
+      lookup-dataset:
+        type: "file-system"
+        key-field: "id"
+        file-path: "demo-data/json/products.json"
+    
+    # Map the lookup results to target fields
+    field-mappings:
+      - source-field: "name"
+        target-field: "productName"
+        required: true
+        
+      - source-field: "price"
+        target-field: "productPrice"
+        required: true
+        
+      - source-field: "category"
+        target-field: "productCategory"
+        required: true
+        
+      - source-field: "available"
+        target-field: "productAvailable"
+        required: false
+
+# Optional validation rules
+validations:
+  - id: "json-file-lookup-demo"
+    name: "Product ID Format Validation"
+    description: "Ensure product ID is not empty"
+    type: "field-validation"
+    enabled: true
+    condition: "#productId != null"
+    
+    validation-config:
+      field: "productId"
+      rules:
+        - type: "regex"
+          pattern: "^PROD\\d{3}$"
+          message: "Product ID must be in format PROD### (e.g., PROD001)"
+
+# Processing configuration
+processing:
+  continue-on-error: true
+  max-errors: 10
+  error-handling: "log-and-continue"

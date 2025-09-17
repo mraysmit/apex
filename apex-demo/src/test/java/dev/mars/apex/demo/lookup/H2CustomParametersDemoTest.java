@@ -21,6 +21,9 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,28 +49,78 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(H2CustomParametersDemoTest.class);
 
+    /**
+     * Setup H2 database with customers table and test data.
+     * Following the exact pattern from YamlConfigurationValidationTest.java
+     */
+    private void setupCustomerDatabase() {
+        logger.info("Setting up H2 database with customer test data...");
+
+        String jdbcUrl = "jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+
+        try (Connection connection = DriverManager.getConnection(jdbcUrl, "sa", "")) {
+            Statement statement = connection.createStatement();
+
+            // Drop existing table
+            statement.execute("DROP TABLE IF EXISTS customers");
+
+            // Create customers table with exact columns expected by customer-profile-enrichment.yaml
+            statement.execute("""
+                CREATE TABLE customers (
+                    customer_id VARCHAR(20) PRIMARY KEY,
+                    customer_name VARCHAR(100) NOT NULL,
+                    customer_type VARCHAR(20),
+                    tier VARCHAR(10),
+                    region VARCHAR(20),
+                    status VARCHAR(20),
+                    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                """);
+
+            // Insert test data that matches the customerId used in tests
+            statement.execute("""
+                INSERT INTO customers (customer_id, customer_name, customer_type, tier, region, status) VALUES
+                ('CUST001', 'Test Customer Corp', 'CORPORATE', 'GOLD', 'NA', 'ACTIVE')
+                """);
+
+            logger.info("✓ H2 database setup completed successfully");
+
+        } catch (Exception e) {
+            logger.error("Failed to setup H2 database: " + e.getMessage(), e);
+            throw new RuntimeException("Database setup failed", e);
+        }
+    }
+
     @Test
     void testComprehensiveH2CustomParametersFunctionality() {
         logger.info("=== Testing Comprehensive H2 Custom Parameters Functionality ===");
-        
+
+        // Setup database with required tables and data
+        setupCustomerDatabase();
+
         // Load YAML configuration for H2 custom parameters
-        var config = loadAndValidateYaml("test-configs/h2customparametersdemo-test.yaml");
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/h2-custom-parameters-enrichment.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
         
         // Create comprehensive test data that triggers ALL 4 enrichments
         Map<String, Object> testData = new HashMap<>();
-        
+
+        // Data required for customer-profile-enrichment.yaml condition
+        testData.put("customerId", "CUST001");
+
         // Data for custom-database-initialization enrichment
         testData.put("initializationType", "custom-database-initialization");
         testData.put("initializationScope", "h2-custom-parameters");
-        
+
         // Data for parameter-merging enrichment
         testData.put("mergingType", "parameter-merging");
         testData.put("mergingScope", "apex-defaults");
-        
+
         // Data for compatibility-mode-testing enrichment
         testData.put("compatibilityType", "compatibility-mode-testing");
         testData.put("compatibilityScope", "h2-modes");
-        
+
         // Common data for summary enrichment
         testData.put("approach", "real-apex-services");
         
@@ -98,21 +151,30 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
         String h2CustomParametersSummary = (String) enrichedData.get("h2CustomParametersSummary");
         assertTrue(h2CustomParametersSummary.contains("real-apex-services"), "H2 custom parameters summary should reference approach");
         
-        logger.info("✅ Comprehensive H2 custom parameters functionality test completed successfully");
+            logger.info("✅ Comprehensive H2 custom parameters functionality test completed successfully");
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+        }
     }
 
     @Test
     void testCustomDatabaseInitializationProcessing() {
         logger.info("=== Testing Custom Database Initialization Processing ===");
-        
+
+        // Setup database with required tables and data
+        setupCustomerDatabase();
+
         // Load YAML configuration for H2 custom parameters
-        var config = loadAndValidateYaml("test-configs/h2customparametersdemo-test.yaml");
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/h2-custom-parameters-enrichment.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
         
         // Test different initialization types
         String[] initializationTypes = {"custom-database-initialization", "h2-parameter-setup", "database-configuration"};
         
         for (String initializationType : initializationTypes) {
             Map<String, Object> testData = new HashMap<>();
+            testData.put("customerId", "CUST001"); // Required for enrichment condition
             testData.put("initializationType", initializationType);
             testData.put("initializationScope", "h2-custom-parameters");
             testData.put("approach", "real-apex-services");
@@ -132,21 +194,30 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
             assertTrue(customDatabaseInitializationResult.contains(initializationType), "Custom database initialization result should contain " + initializationType);
         }
         
-        logger.info("✅ Custom database initialization processing test completed successfully");
+            logger.info("✅ Custom database initialization processing test completed successfully");
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+        }
     }
 
     @Test
     void testParameterMergingProcessing() {
         logger.info("=== Testing Parameter Merging Processing ===");
-        
+
+        // Setup database with required tables and data
+        setupCustomerDatabase();
+
         // Load YAML configuration for H2 custom parameters
-        var config = loadAndValidateYaml("test-configs/h2customparametersdemo-test.yaml");
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/h2-custom-parameters-enrichment.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
         
         // Test different merging types
         String[] mergingTypes = {"parameter-merging", "apex-defaults-merging", "configuration-merging"};
         
         for (String mergingType : mergingTypes) {
             Map<String, Object> testData = new HashMap<>();
+            testData.put("customerId", "CUST001"); // Required for enrichment condition
             testData.put("mergingType", mergingType);
             testData.put("mergingScope", "apex-defaults");
             testData.put("approach", "real-apex-services");
@@ -166,21 +237,30 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
             assertTrue(parameterMergingResult.contains(mergingType), "Parameter merging result should reference merging type " + mergingType);
         }
         
-        logger.info("✅ Parameter merging processing test completed successfully");
+            logger.info("✅ Parameter merging processing test completed successfully");
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+        }
     }
 
     @Test
     void testCompatibilityModeTestingProcessing() {
         logger.info("=== Testing Compatibility Mode Testing Processing ===");
-        
+
+        // Setup database with required tables and data
+        setupCustomerDatabase();
+
         // Load YAML configuration for H2 custom parameters
-        var config = loadAndValidateYaml("test-configs/h2customparametersdemo-test.yaml");
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/h2-custom-parameters-enrichment.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
         
         // Test different compatibility types
         String[] compatibilityTypes = {"compatibility-mode-testing", "h2-mode-testing", "database-mode-validation"};
         
         for (String compatibilityType : compatibilityTypes) {
             Map<String, Object> testData = new HashMap<>();
+            testData.put("customerId", "CUST001"); // Required for enrichment condition
             testData.put("compatibilityType", compatibilityType);
             testData.put("compatibilityScope", "h2-modes");
             testData.put("approach", "real-apex-services");
@@ -200,6 +280,9 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
             assertTrue(compatibilityModeTestingResult.contains(compatibilityType), "Compatibility mode testing result should reference compatibility type " + compatibilityType);
         }
         
-        logger.info("✅ Compatibility mode testing processing test completed successfully");
+            logger.info("✅ Compatibility mode testing processing test completed successfully");
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+        }
     }
 }

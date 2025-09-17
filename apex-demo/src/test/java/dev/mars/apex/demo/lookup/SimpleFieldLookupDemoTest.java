@@ -51,7 +51,9 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
         logger.info("=== Testing Comprehensive Simple Field Lookup Functionality ===");
         
         // Load YAML configuration for simple field lookup
-        var config = loadAndValidateYaml("lookup/simple-field-lookup-demo-config.yaml");
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/simple-field-lookup.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
         
         // Create comprehensive test data that triggers ALL 4 enrichments
         Map<String, Object> testData = new HashMap<>();
@@ -98,7 +100,10 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
         String simpleFieldLookupSummary = (String) enrichedData.get("simpleFieldLookupSummary");
         assertTrue(simpleFieldLookupSummary.contains("real-apex-services"), "Simple field lookup summary should reference approach");
         
-        logger.info("✅ Comprehensive simple field lookup functionality test completed successfully");
+            logger.info("✅ Comprehensive simple field lookup functionality test completed successfully");
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+        }
     }
 
     @Test
@@ -106,7 +111,9 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
         logger.info("=== Testing Currency Dataset Setup Processing ===");
         
         // Load YAML configuration for simple field lookup
-        var config = loadAndValidateYaml("lookup/simple-field-lookup-demo-config.yaml");
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/simple-field-lookup.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
         
         // Test different dataset setup types
         String[] datasetSetupTypes = {"currency-dataset-setup", "inline-dataset-setup", "reference-data-setup"};
@@ -132,7 +139,10 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
             assertTrue(currencyDatasetSetupResult.contains(datasetSetupType), "Currency dataset setup result should contain " + datasetSetupType);
         }
         
-        logger.info("✅ Currency dataset setup processing test completed successfully");
+            logger.info("✅ Currency dataset setup processing test completed successfully");
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+        }
     }
 
     @Test
@@ -140,7 +150,9 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
         logger.info("=== Testing Simple Field Lookup Processing ===");
         
         // Load YAML configuration for simple field lookup
-        var config = loadAndValidateYaml("lookup/simple-field-lookup-demo-config.yaml");
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/simple-field-lookup.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
         
         // Test different field lookup types
         String[] fieldLookupTypes = {"simple-field-lookup", "currency-code-lookup", "field-based-lookup"};
@@ -166,7 +178,10 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
             assertTrue(simpleFieldLookupResult.contains(fieldLookupType), "Simple field lookup result should reference field lookup type " + fieldLookupType);
         }
         
-        logger.info("✅ Simple field lookup processing test completed successfully");
+            logger.info("✅ Simple field lookup processing test completed successfully");
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+        }
     }
 
     @Test
@@ -174,7 +189,9 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
         logger.info("=== Testing Currency Enrichment Processing ===");
         
         // Load YAML configuration for simple field lookup
-        var config = loadAndValidateYaml("lookup/simple-field-lookup-demo-config.yaml");
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/simple-field-lookup.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
         
         // Test different enrichment types
         String[] enrichmentTypes = {"currency-enrichment", "reference-data-enrichment", "lookup-enrichment"};
@@ -200,6 +217,9 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
             assertTrue(currencyEnrichmentResult.contains(enrichmentType), "Currency enrichment result should reference enrichment type " + enrichmentType);
         }
         
-        logger.info("✅ Currency enrichment processing test completed successfully");
+            logger.info("✅ Currency enrichment processing test completed successfully");
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+        }
     }
 }

@@ -1,0 +1,135 @@
+# Self-Contained Database Multi-Parameter Data Source Configuration
+# Demonstrates complex database data source with multiple parameters and advanced SQL queries
+# Use Case: Trade settlement instruction data source for multi-parameter lookups
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: PostgreSQL multi-parameter lookup demonstration using APEX lookup
+#          enrichments with PostgreSQL database integration, multi-parameter
+#          queries, and advanced database lookup capabilities
+# Status: Available for integration with PostgreSQL multi-parameter lookup tests
+# ============================================================================
+
+metadata:
+  id: "self-contained-database-multi-parameter-data-source-demo"
+  name: "Self-Contained Database Multi-Parameter Data Source Demo"
+  version: "1.0.0"
+  description: "Data source configuration for complex database lookups with multiple parameters using embedded H2 database"
+  type: "external-data-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "lookup", "database", "multi-parameter"]
+
+# External data source configuration
+data-sources:
+  - name: "trading-database"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "Trading and settlement data from self-contained H2 database"
+
+    connection:
+      # H2 file-based database for true sharing between demo and APEX
+      database: "./target/h2-demo/apex_demo_shared"
+      username: "sa"
+      password: ""
+
+      # Advanced connection pool configuration (verified against YamlDataSource.java)
+      connection-pool:
+        max-size: 50
+        min-size: 10
+        initial-size: 15
+        connection-timeout: 30000
+        idle-timeout: 600000
+        max-lifetime: 1800000
+        leak-detection-threshold: 60000
+        connection-test-query: "SELECT 1"
+        test-on-borrow: true
+        test-while-idle: true
+        
+    # Caching configuration
+    cache:
+      enabled: true
+      ttlSeconds: 1800  # 30 minutes
+      maxSize: 50000
+
+    # Health monitoring
+    healthCheck:
+      enabled: true
+      query: "SELECT COUNT(*) FROM settlement_instructions LIMIT 1"
+      intervalSeconds: 30
+      timeoutSeconds: 10
+      
+    # Query definitions for this data source
+    queries:
+      settlementInstructions: |
+        SELECT
+          si.instruction_id,
+          si.counterparty_id,
+          si.custodian_id,
+          si.settlement_method,
+          si.delivery_instruction,
+          si.special_instructions,
+          cp.counterparty_name,
+          cp.counterparty_type,
+          cp.credit_rating,
+          cp.jurisdiction,
+          cust.custodian_name,
+          cust.custodian_bic,
+          cust.custodian_address,
+          mk.market_name,
+          mk.settlement_cycle,
+          mk.cut_off_time,
+          mk.time_zone,
+          inst.instrument_name,
+          inst.instrument_class,
+          inst.settlement_currency
+        FROM settlement_instructions si
+        LEFT JOIN counterparties cp ON si.counterparty_id = cp.counterparty_id
+        LEFT JOIN custodians cust ON si.custodian_id = cust.custodian_id
+        LEFT JOIN markets mk ON si.market = mk.market_code
+        LEFT JOIN instruments inst ON si.instrument_type = inst.instrument_type
+        WHERE si.counterparty_id = :counterpartyId
+          AND si.instrument_type = :instrumentType
+          AND si.currency = :currency
+          AND si.market = :market
+          AND si.status = 'ACTIVE'
+          AND (:minAmount IS NULL OR si.min_amount <= :minAmount)
+          AND (:maxAmount IS NULL OR si.max_amount >= :maxAmount)
+        ORDER BY si.priority ASC, si.created_date DESC
+        LIMIT 1
+      riskAssessment: |
+        SELECT
+          ra.risk_category,
+          ra.risk_score,
+          ra.max_exposure,
+          ra.approval_required,
+          ra.monitoring_level,
+          cp.credit_rating,
+          cp.credit_limit,
+          mk.volatility_rating,
+          mk.liquidity_rating
+        FROM risk_assessments ra
+        JOIN counterparties cp ON ra.counterparty_id = cp.counterparty_id
+        JOIN markets mk ON ra.market = mk.market_code
+        WHERE ra.counterparty_id = :counterpartyId
+          AND ra.instrument_type = :instrumentType
+          AND ra.market = :market
+          AND (:tradeAmount IS NULL OR ra.max_single_trade >= :tradeAmount)
+          AND ra.effective_date <= CURRENT_DATE
+          AND (ra.expiry_date IS NULL OR ra.expiry_date > CURRENT_DATE)
+        ORDER BY ra.effective_date DESC
+        LIMIT 1
+
+    # Parameter definitions
+    parameterNames:
+      - "counterpartyId"
+      - "instrumentType"
+      - "currency"
+      - "market"
+      - "minAmount"
+      - "maxAmount"
+      - "tradeAmount"
+

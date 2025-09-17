@@ -1030,7 +1030,7 @@ public class YamlConfigurationLoader {
         String type = enrichment.getType();
         String enrichmentId = enrichment.getId();
 
-        Set<String> validTypes = Set.of("lookup-enrichment", "field-enrichment", "calculation-enrichment");
+        Set<String> validTypes = Set.of("lookup-enrichment", "field-enrichment", "calculation-enrichment", "conditional-mapping-enrichment");
         if (!validTypes.contains(type)) {
             throw new YamlConfigurationException("Invalid enrichment type '" + type + "' for enrichment: " + enrichmentId + ". Valid types: " + validTypes);
         }
@@ -1043,8 +1043,17 @@ public class YamlConfigurationLoader {
                 }
                 break;
             case "field-enrichment":
-                if (enrichment.getFieldMappings() == null || enrichment.getFieldMappings().isEmpty()) {
-                    throw new YamlConfigurationException("field-enrichment type requires 'field-mappings' for enrichment: " + enrichmentId);
+                // field-enrichment requires either field-mappings OR conditional-mappings (or both)
+                boolean hasFieldMappings = enrichment.getFieldMappings() != null && !enrichment.getFieldMappings().isEmpty();
+                boolean hasConditionalMappings = enrichment.getConditionalMappings() != null && !enrichment.getConditionalMappings().isEmpty();
+
+                if (!hasFieldMappings && !hasConditionalMappings) {
+                    throw new YamlConfigurationException("field-enrichment type requires either 'field-mappings' or 'conditional-mappings' for enrichment: " + enrichmentId);
+                }
+
+                // Validate conditional mappings if present
+                if (hasConditionalMappings) {
+                    validateConditionalMappings(enrichment.getConditionalMappings(), enrichmentId);
                 }
                 break;
             case "calculation-enrichment":
@@ -1052,6 +1061,17 @@ public class YamlConfigurationLoader {
                 if (enrichment.getFieldMappings() == null || enrichment.getFieldMappings().isEmpty()) {
                     throw new YamlConfigurationException("calculation-enrichment type requires 'field-mappings' for enrichment: " + enrichmentId);
                 }
+                break;
+            case "conditional-mapping-enrichment":
+                // conditional-mapping-enrichment requires target-field and mapping-rules
+                if (enrichment.getTargetField() == null || enrichment.getTargetField().trim().isEmpty()) {
+                    throw new YamlConfigurationException("conditional-mapping-enrichment type requires 'target-field' for enrichment: " + enrichmentId);
+                }
+                if (enrichment.getMappingRules() == null || enrichment.getMappingRules().isEmpty()) {
+                    throw new YamlConfigurationException("conditional-mapping-enrichment type requires 'mapping-rules' for enrichment: " + enrichmentId);
+                }
+                // Validate mapping rules
+                validateMappingRules(enrichment.getMappingRules(), enrichmentId);
                 break;
         }
     }
@@ -1540,6 +1560,141 @@ public class YamlConfigurationLoader {
         // The current YamlEnrichment.FieldMapping class doesn't have conditional mapping support
         // but this method is here for future extensibility
         LOGGER.finest("Conditional mapping validation for field mapping " + mappingIndex + " in enrichment: " + enrichmentId);
+    }
+
+    /**
+     * Validate conditional mappings for field-enrichment.
+     */
+    private void validateConditionalMappings(List<YamlEnrichment.ConditionalMapping> conditionalMappings, String enrichmentId) throws YamlConfigurationException {
+        if (conditionalMappings == null || conditionalMappings.isEmpty()) {
+            return;
+        }
+
+        LOGGER.fine("Validating " + conditionalMappings.size() + " conditional mappings for enrichment: " + enrichmentId);
+
+        for (int i = 0; i < conditionalMappings.size(); i++) {
+            YamlEnrichment.ConditionalMapping conditionalMapping = conditionalMappings.get(i);
+
+            // Validate condition group
+            validateConditionGroup(conditionalMapping.getConditions(), enrichmentId, i);
+
+            // Validate field mappings within conditional mapping
+            if (conditionalMapping.getFieldMappings() == null || conditionalMapping.getFieldMappings().isEmpty()) {
+                throw new YamlConfigurationException("Conditional mapping at index " + i + " missing 'field-mappings' for enrichment: " + enrichmentId);
+            }
+
+            // Validate each field mapping
+            validateFieldMappings(conditionalMapping.getFieldMappings(), enrichmentId + ".conditional-mapping[" + i + "]");
+        }
+    }
+
+    /**
+     * Validate condition group for conditional mappings.
+     */
+    private void validateConditionGroup(YamlEnrichment.ConditionGroup conditionGroup, String enrichmentId, int mappingIndex) throws YamlConfigurationException {
+        if (conditionGroup == null) {
+            throw new YamlConfigurationException("Conditional mapping at index " + mappingIndex + " missing 'conditions' for enrichment: " + enrichmentId);
+        }
+
+        // Validate operator
+        String operator = conditionGroup.getOperator();
+        if (operator != null && !"OR".equalsIgnoreCase(operator) && !"AND".equalsIgnoreCase(operator)) {
+            throw new YamlConfigurationException("Invalid condition operator '" + operator + "' at conditional mapping " + mappingIndex + " for enrichment: " + enrichmentId + ". Valid operators: OR, AND");
+        }
+
+        // Validate rules
+        if (conditionGroup.getRules() == null || conditionGroup.getRules().isEmpty()) {
+            throw new YamlConfigurationException("Conditional mapping at index " + mappingIndex + " missing condition 'rules' for enrichment: " + enrichmentId);
+        }
+
+        // Validate each condition rule
+        for (int j = 0; j < conditionGroup.getRules().size(); j++) {
+            YamlEnrichment.ConditionRule rule = conditionGroup.getRules().get(j);
+            if (rule.getCondition() == null || rule.getCondition().trim().isEmpty()) {
+                throw new YamlConfigurationException("Condition rule at index " + j + " in conditional mapping " + mappingIndex + " missing 'condition' for enrichment: " + enrichmentId);
+            }
+
+            // Validate condition expression syntax
+            if (!isValidSpELExpression(rule.getCondition())) {
+                throw new YamlConfigurationException("Invalid SpEL expression in condition '" + rule.getCondition() + "' for enrichment: " + enrichmentId + ".conditional-mapping[" + mappingIndex + "].rule[" + j + "]");
+            }
+
+            // Validate condition patterns
+            validateConditionPatterns(rule.getCondition(), enrichmentId + ".conditional-mapping[" + mappingIndex + "].rule[" + j + "]");
+        }
+    }
+
+    /**
+     * Validate mapping rules for conditional-mapping-enrichment.
+     */
+    private void validateMappingRules(List<YamlEnrichment.MappingRule> mappingRules, String enrichmentId) throws YamlConfigurationException {
+        if (mappingRules == null || mappingRules.isEmpty()) {
+            return;
+        }
+
+        LOGGER.fine("Validating " + mappingRules.size() + " mapping rules for enrichment: " + enrichmentId);
+
+        for (int i = 0; i < mappingRules.size(); i++) {
+            YamlEnrichment.MappingRule rule = mappingRules.get(i);
+
+            // Validate rule ID
+            if (rule.getId() == null || rule.getId().trim().isEmpty()) {
+                throw new YamlConfigurationException("Mapping rule at index " + i + " missing 'id' for enrichment: " + enrichmentId);
+            }
+
+            // Validate priority
+            if (rule.getPriority() == null) {
+                throw new YamlConfigurationException("Mapping rule '" + rule.getId() + "' missing 'priority' for enrichment: " + enrichmentId);
+            }
+
+            // Validate conditions (unless it's a default rule)
+            if (rule.getConditions() != null) {
+                validateConditionGroup(rule.getConditions(), enrichmentId, i);
+            }
+
+            // Validate mapping configuration
+            if (rule.getMapping() == null) {
+                throw new YamlConfigurationException("Mapping rule '" + rule.getId() + "' missing 'mapping' configuration for enrichment: " + enrichmentId);
+            }
+
+            validateMappingConfig(rule.getMapping(), enrichmentId, rule.getId());
+        }
+    }
+
+    /**
+     * Validate mapping configuration for conditional mapping rules.
+     */
+    private void validateMappingConfig(YamlEnrichment.MappingConfig mappingConfig, String enrichmentId, String ruleId) throws YamlConfigurationException {
+        // Validate mapping type
+        String type = mappingConfig.getType();
+        if (type == null || type.trim().isEmpty()) {
+            throw new YamlConfigurationException("Mapping configuration missing 'type' for rule '" + ruleId + "' in enrichment: " + enrichmentId);
+        }
+
+        if (!"direct".equalsIgnoreCase(type) && !"lookup".equalsIgnoreCase(type)) {
+            throw new YamlConfigurationException("Invalid mapping type '" + type + "' for rule '" + ruleId + "' in enrichment: " + enrichmentId + ". Valid types: direct, lookup");
+        }
+
+        // Type-specific validation
+        if ("direct".equalsIgnoreCase(type)) {
+            // Direct mapping should have source-field or transformation
+            if ((mappingConfig.getSourceField() == null || mappingConfig.getSourceField().trim().isEmpty()) &&
+                (mappingConfig.getTransformation() == null || mappingConfig.getTransformation().trim().isEmpty())) {
+                throw new YamlConfigurationException("Direct mapping requires either 'source-field' or 'transformation' for rule '" + ruleId + "' in enrichment: " + enrichmentId);
+            }
+        } else if ("lookup".equalsIgnoreCase(type)) {
+            // Lookup mapping should have lookup-config
+            if (mappingConfig.getLookupConfig() == null) {
+                throw new YamlConfigurationException("Lookup mapping requires 'lookup-config' for rule '" + ruleId + "' in enrichment: " + enrichmentId);
+            }
+        }
+
+        // Validate transformation expression if present
+        if (mappingConfig.getTransformation() != null && !mappingConfig.getTransformation().trim().isEmpty()) {
+            if (!isValidSpELExpression(mappingConfig.getTransformation())) {
+                throw new YamlConfigurationException("Invalid SpEL expression in transformation '" + mappingConfig.getTransformation() + "' for rule '" + ruleId + "' in enrichment: " + enrichmentId);
+            }
+        }
     }
 
     /**

@@ -1,0 +1,55 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ConditionalMappingsPhase2Test.java (4 test methods)
+# Purpose: Test Phase 2 conditional-mappings syntax in field-enrichment
+#          Simple test cases for OR/AND logic validation
+# Status: PHASE 2 TEST - Validates new conditional-mappings functionality
+# ============================================================================
+
+metadata:
+  name: "Conditional Mappings Phase 2 Test"
+  version: "1.0.0"
+  description: "Phase 2 test for conditional-mappings syntax"
+  type: "scenario"
+  author: "APEX Enhancement Team"
+  created: "2025-09-17"
+  tags: ["conditional-mapping", "phase-2", "test"]
+
+enrichments:
+  # Test enrichment with conditional-mappings syntax
+  - id: "test-conditional-mapping"
+    type: "field-enrichment"
+    description: "Test conditional field mapping with OR/AND conditions"
+    condition: "#testField != null"
+    
+    # NEW SYNTAX: conditional-mappings with OR/AND logic
+    conditional-mappings:
+      # Condition 1: OR logic test
+      - conditions:
+          operator: "OR"
+          rules:
+            - condition: "#testField == 'VALUE1'"
+              description: "Test value 1"
+            - condition: "#testField == 'VALUE2'"
+              description: "Test value 2"
+        field-mappings:
+          - source-field: "testField"
+            target-field: "result"
+            transformation: "'OR_MATCHED'"
+            
+      # Condition 2: AND logic test
+      - conditions:
+          operator: "AND"
+          rules:
+            - condition: "#testField == 'VALUE3'"
+              description: "Test value 3"
+            - condition: "#systemCode == 'TEST'"
+              description: "Test system"
+        field-mappings:
+          - source-field: "testField"
+            target-field: "result"
+            transformation: "'AND_MATCHED'"
+          - source-field: "systemCode"
+            target-field: "system"
+            transformation: "#systemCode"

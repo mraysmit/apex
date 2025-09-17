@@ -78,7 +78,7 @@ public class ComprehensiveBusinessScenariosTest extends DemoTestBase {
         
         try {
             // Load comprehensive financial trade processing configuration
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("yaml/financial-trade-processing-comprehensive.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/business/financial-trade-processing-comprehensive.yaml");
             assertNotNull(config, "Financial trade processing configuration should be loaded");
             logger.info("✅ Configuration loaded: " + config.getMetadata().getName());
             
@@ -167,7 +167,7 @@ public class ComprehensiveBusinessScenariosTest extends DemoTestBase {
         
         try {
             // Load comprehensive risk management configuration
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("yaml/risk-management-comprehensive.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/business/risk-management-comprehensive.yaml");
             assertNotNull(config, "Risk management configuration should be loaded");
             logger.info("✅ Configuration loaded: " + config.getMetadata().getName());
             
@@ -279,7 +279,7 @@ public class ComprehensiveBusinessScenariosTest extends DemoTestBase {
 
         try {
             // Load settlement processing dataset using YAML configuration loader
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("yaml/settlement-processing-dataset.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/business/settlement-processing-dataset.yaml");
             assertNotNull(config, "Settlement dataset configuration should be loaded");
 
             // Validate metadata (this is what we can access from YamlRuleConfiguration)

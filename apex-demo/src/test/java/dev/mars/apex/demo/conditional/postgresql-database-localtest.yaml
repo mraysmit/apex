@@ -1,0 +1,124 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: EXTERNAL DATA SOURCE - Referenced by other configurations but no dedicated Java test
+# Purpose: PostgreSQL test database configuration for external reference testing
+#          Local database connection, test data access, external data integration
+# Status: Available for integration with database-dependent tests
+# ============================================================================
+
+metadata:
+  name: "postgresql-database-localtest"
+  version: "1.0.0"
+  description: "PostgreSQL test database configuration for external reference testing"
+  environment: "PostgreSQL local database for test"
+  labels:
+    team: "APEX Demo Team"
+    type: "external-data-config"
+    created: "2024-06-10"
+spec:
+  type: "database"
+  source-type: "postgresql"
+  enabled: true
+
+  # Database connection configuration
+  connection:
+    # Postgresql database configuration with shared access (PostgreSQL mode)
+    host: "localhost"
+    port: 5432
+    database: "postgres"
+    username: "postgres"
+    password: "pguser"
+    schema: "public"
+
+    # Connection pool configuration
+    maxPoolSize: 10
+    minPoolSize: 2
+    connectionTimeout: 30000
+    idleTimeout: 600000
+    maxLifetime: 1800000
+
+  # Named SQL queries for customer operations
+  queries:
+    getClientCodeAndSystemCodeBySourceIdentifier: |
+      SELECT client_code, system_code FROM T_REF_OMS_PARMS WHERE source_identifier = :source_identifier and status = 'ACTIVE'
+    
+    getInternalCodeFromExternalCodeWithoutSubcode: |
+      SELECT internal_code
+      FROM t_map_translation
+      WHERE
+          translation_type = :translation_type
+          AND client_code = :client_code
+          AND system_code = :system_code
+          AND external_code = :external_code
+      LIMIT 1
+    
+    getAssetClass: |
+      select asset_class 
+      from T_REF_ASSET_CLASSIFICATION 
+      where 
+        conf_sett_asset_type= :CONF_SETT_ASSET_TYPE 
+        and status='ACTIVE' 
+      LIMIT 1
+
+    getConfSettAssetType: |
+      select CONF_SETT_ASSET_TYPE 
+      from T_REF_asset_type 
+      where 
+        asset_type= :ASSET_TYPE 
+        and (dual_rules= :DUAL_RULES or dual_rules = '*') 
+        and status='ACTIVE'
+      LIMIT 1
+    getCurrencyRank: |
+        select CURRENCY_RANK 
+        from vw_ref_currency_rank 
+        where 
+            CURRENCY_CODE= :CURRENCY_CODE
+        LIMIT 1
+      
+    getIsTranslate: |
+      SELECT IS_TRANSLATE 
+      FROM T_REF_TRANSLATION_PARMS 
+      WHERE translation_type = :TRANSLATION_TYPE
+      AND   ( CLIENT_CODE      = :CLIENT_CODE OR CLIENT_CODE      = '*')
+      AND   SYSTEM_CODE      = :SYSTEM_CODE
+      AND   STATUS           = 'ACTIVE'
+      LIMIT 1
+      
+    getInternalCodeWithoutSubcode: |
+      SELECT CASE WHEN INTERNAL_CODE = 'NULL' THEN NULL ELSE INTERNAL_CODE END as INTERNAL_CODE 
+      FROM V_MAP_TRANSLATION_RULE 
+      WHERE TRANSLATION_TYPE = :TRANSLATION_TYPE
+      AND   CLIENT_CODE      = :CLIENT_CODE
+      AND   SYSTEM_CODE      = :SYSTEM_CODE
+      AND   EXTERNAL_CODE    = :EXTERNAL_CODE
+      LIMIT 1
+      
+    getInternalCodeWithSubcode: |
+      SELECT CASE WHEN INTERNAL_CODE = 'NULL' THEN NULL ELSE INTERNAL_CODE END as INTERNAL_CODE 
+      FROM V_MAP_TRANSLATION_RULE 
+      WHERE TRANSLATION_TYPE = :TRANSLATION_TYPE
+      AND   CLIENT_CODE      = :CLIENT_CODE
+      AND   SYSTEM_CODE      = :SYSTEM_CODE
+      AND   EXTERNAL_CODE    = :EXTERNAL_CODE
+      AND   EXTERNAL_SUBCODE = :EXTERNAL_SUBCODE
+      LIMIT 1
+    # Health check query
+    healthCheck: "SELECT 1 as health_check"
+
+  # Parameter definitions for named parameter binding
+  parameters:
+    source_identifier:
+      type: "string"
+      description: "source identifier"
+      required: true
+    region:
+      type: "string"
+      description: "Customer region code"
+      required: false
+
+  # Infrastructure settings
+  cache:
+    enabled: true
+    ttlSeconds: 300
+    maxSize: 1000

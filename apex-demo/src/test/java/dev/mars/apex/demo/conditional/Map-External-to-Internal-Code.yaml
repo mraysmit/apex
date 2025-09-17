@@ -1,0 +1,108 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: REFERENCED - Referenced by other YAML files but no dedicated Java test
+# Purpose: Demonstrate external to internal code mapping with conditional logic
+#          Database lookups, conditional field mapping, translation parameters
+# Status: Available for integration with conditional mapping tests
+# ============================================================================
+
+metadata:
+  name: "Map External to Internal Code"
+  version: "1.0.0"
+  description: "Map External to Internal Code"
+  type: "external-data-config"
+  author: "APEX Demo Team"
+  created: "2025-09-14"
+  tags: ["external-data", "database", "rest-api", "caching", "monitoring"]
+
+# External data-source references (infrastructure configuration)
+data-source-refs:
+  - name: "postgresql-database-localtest"
+    source: "postgresql-database-localtest.yaml"
+    enabled: true
+    description: "PostgreSQL local database for test"
+
+enrichments:
+  # check translation_params to know whether need to do translation or not
+  - id: "get-is-translate"
+    type: "lookup-enrichment"
+    condition: "#run_rule_builder_function_flag"
+    lookup-config:
+      lookup-key: "#TranslationType"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "postgresql-database-localtest"
+        query-ref: "getIsTranslate"  # Named query from external config
+        parameters:
+          - field: "TRANSLATION_TYPE"
+            type: "string"
+#            name: "TRANSLATION_TYPE"
+          - field: "CLIENT_CODE"
+            type: "string"
+#            name: "CLIENT_CODE"
+          - field: "SYSTEM_CODE"
+            type: "string"
+#            name: "SYSTEM_CODE"
+    field-mappings:
+      - source-field: "is_translate"
+        target-field: "IS_TRANSLATE"
+        default-value: 0
+        
+  - id: "translate-without-subcode"
+    type: "lookup-enrichment"
+    condition: "#IS_TRANSLATE == 1 && #EXTERNAL_SUBCODE == null"
+    lookup-config:
+      lookup-key: "#TranslationType"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "postgresql-database-localtest"
+        query-ref: "getInternalCodeWithoutSubcode"  # Named query from external config
+        parameters:
+          - field: "TRANSLATION_TYPE"
+            type: "string"
+          #            name: "TRANSLATION_TYPE"
+          - field: "CLIENT_CODE"
+            type: "string"
+          #            name: "CLIENT_CODE"
+          - field: "SYSTEM_CODE"
+            type: "string"
+    #            name: "SYSTEM_CODE"
+          - field: "EXTERNAL_CODE"
+            type: "string"
+#            name: "externalCode"
+    field-mappings:
+      - source-field: "internal_code"
+        target-field: "INTERNAL_CODE"
+        default-value: 0
+        
+  - id: "translate-with-subcode"
+    type: "lookup-enrichment"
+    condition: "#IS_TRANSLATE == 1 && #EXTERNAL_SUBCODE != null"
+    lookup-config:
+      lookup-key: "#TranslationType"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "postgresql-database-localtest"
+        query-ref: "getInternalCodeWithoutSubcode"  # Named query from external config
+        parameters:
+          - field: "TRANSLATION_TYPE"
+            type: "string"
+          #            name: "TRANSLATION_TYPE"
+          - field: "CLIENT_CODE"
+            type: "string"
+          #            name: "CLIENT_CODE"
+          - field: "SYSTEM_CODE"
+            type: "string"
+          #            name: "SYSTEM_CODE"
+          - field: "EXTERNAL_CODE"
+            type: "string"
+#            name: "externalCode"
+          - field: "EXTERNAL_SUBCODE"
+            type: "string"
+#            name: "externalSubcode"
+    field-mappings:
+      - source-field: "internal_code"
+        target-field: "INTERNAL_CODE"
+        default-value: 0
+ 

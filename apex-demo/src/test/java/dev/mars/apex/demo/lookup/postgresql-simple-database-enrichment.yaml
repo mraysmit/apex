@@ -1,0 +1,107 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: PostgreSQL simple database enrichment demonstration using APEX
+#          enrichment capabilities with PostgreSQL database integration,
+#          simple database queries, and basic database enrichment operations
+# Status: Available for integration with PostgreSQL database enrichment tests
+# ============================================================================
+
+metadata:
+  id: "simple-postgresql-database-enrichment-demo"
+  name: "Simple PostgreSQL Database Enrichment Demo"
+  version: "1.0.0"
+  description: "Simple customer profile enrichment using H2 database (PostgreSQL mode) with real SQL queries"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "lookup", "database", "postgresql"]
+
+# External data source configuration for H2 database
+data-sources:
+  - name: "customer-database"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "Customer database using H2 in PostgreSQL compatibility mode"
+
+    connection:
+      # H2 file-based database for true sharing between demo and APEX
+      database: "./target/h2-demo/apex_demo_shared"
+      username: "sa"
+      password: ""
+
+      # Connection pool configuration
+      maxPoolSize: 10
+      minPoolSize: 2
+      connectionTimeout: 30000
+
+    # SQL queries for customer lookup
+    queries:
+      getCustomerById: |
+        SELECT
+          customer_id,
+          customer_name,
+          customer_type,
+          tier,
+          region,
+          status,
+          created_date,
+          last_updated
+        FROM customers
+        WHERE customer_id = :customerId
+
+      default: "SELECT 1 as health_check"
+
+    parameterNames:
+      - "customerId"
+
+    # Caching configuration
+    cache:
+      enabled: true
+      ttlSeconds: 300
+      maxSize: 1000
+
+# Enrichment rules using real database lookups
+enrichments:
+  - id: "simple-postgresql-database-enrichment-demo"
+    name: "customer-profile-database-lookup"
+    description: "Enrich customer data using H2 database lookup with real SQL queries"
+    type: "lookup-enrichment"
+
+    # Condition: Only process if customerId is present
+    condition: "#customerId != null && #customerId != ''"
+
+    # Database lookup configuration
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        connection-name: "customer-database"
+        query: "SELECT customer_name, customer_type, tier, region, status, created_date FROM customers WHERE customer_id = :customerId"
+        parameters:
+          - field: "customerId"
+            type: "string"
+
+    # Field mappings from lookup result to enriched object (H2 returns uppercase column names)
+    field-mappings:
+      - source-field: "CUSTOMER_NAME"
+        target-field: "customerName"
+        required: true
+      - source-field: "CUSTOMER_TYPE"
+        target-field: "customerType"
+        required: true
+      - source-field: "TIER"
+        target-field: "customerTier"
+        required: true
+      - source-field: "REGION"
+        target-field: "customerRegion"
+        required: true
+      - source-field: "STATUS"
+        target-field: "customerStatus"
+        required: true
+      - source-field: "CREATED_DATE"
+        target-field: "customerCreatedDate"
+        required: false
+

@@ -1,0 +1,140 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: RuleResultReferencesTest.java (4 test methods)
+# Purpose: Demonstrate rule result references in field mappings for Phase 1 implementation
+#          Individual rule results, rule group results, conditional field mapping
+# Status: ACTIVELY TESTED - Complete validation of Phase 1 rule result references
+# ============================================================================
+
+metadata:
+  name: "Rule Result References Demo"
+  version: "1.0.0"
+  description: "Phase 1 implementation of conditional mapping using rule result references"
+  type: "scenario"
+  author: "APEX Enhancement Team"
+  created: "2025-09-17"
+  tags: ["conditional-mapping", "rule-results", "phase-1"]
+
+# Individual rules for testing
+rules:
+  - id: "high-value-rule"
+    name: "High Value Transaction Rule"
+    condition: "#amount > 10000"
+    message: "Transaction amount exceeds $10,000"
+    description: "Identifies high-value transactions requiring special processing"
+    
+  - id: "premium-customer-rule"
+    name: "Premium Customer Rule"
+    condition: "#customerType == 'PREMIUM'"
+    message: "Customer has premium status"
+    description: "Identifies premium customers for enhanced service"
+    
+  - id: "urgent-processing-rule"
+    name: "Urgent Processing Rule"
+    condition: "#priority == 'URGENT' || #amount > 50000"
+    message: "Transaction requires urgent processing"
+    description: "Identifies transactions needing immediate attention"
+
+# Rule groups with OR and AND logic
+rule-groups:
+  - id: "validation-group"
+    name: "Transaction Validation Group"
+    description: "Basic transaction validation checks"
+    operator: "OR"  # Any rule can pass
+    stop-on-first-failure: false
+    rule-ids:
+      - "high-value-rule"
+      - "premium-customer-rule"
+      
+  - id: "processing-group"
+    name: "Processing Requirements Group"
+    description: "Processing requirement checks"
+    operator: "AND"  # All rules must pass
+    stop-on-first-failure: true
+    rule-ids:
+      - "premium-customer-rule"
+      - "urgent-processing-rule"
+
+# Enrichments using rule result references
+enrichments:
+  # 1. Basic rule result reference
+  - id: "basic-rule-reference"
+    name: "Basic Rule Result Reference"
+    type: "field-enrichment"
+    description: "Simple field mapping based on individual rule result"
+    condition: "#ruleResults['high-value-rule'] == true"
+    field-mappings:
+      - source-field: "amount"
+        target-field: "processedAmount"
+        transformation: "#amount * 1.05"  # Add 5% processing fee
+        
+  # 2. Rule group result reference
+  - id: "rule-group-reference"
+    name: "Rule Group Result Reference"
+    type: "field-enrichment"
+    description: "Field mapping based on rule group result"
+    condition: "#ruleGroupResults['validation-group']['passed'] == true"
+    field-mappings:
+      - source-field: "customerType"
+        target-field: "validationStatus"
+        transformation: "'VALIDATED'"
+        
+  # 3. Complex conditional mapping using multiple rule results
+  - id: "complex-conditional-mapping"
+    name: "Complex Conditional Mapping"
+    type: "field-enrichment"
+    description: "Complex field mapping using multiple rule results"
+    condition: "#ruleResults != null && #ruleGroupResults != null"
+    field-mappings:
+      # Processing priority based on rule results
+      - source-field: "priority"
+        target-field: "processingPriority"
+        transformation: |
+          #ruleResults['urgent-processing-rule'] == true ? 'IMMEDIATE' :
+          #ruleResults['high-value-rule'] == true ? 'HIGH' :
+          #ruleResults['premium-customer-rule'] == true ? 'ELEVATED' :
+          'STANDARD'
+          
+      # Processing fee based on validation results
+      - source-field: "amount"
+        target-field: "processingFee"
+        transformation: |
+          #ruleGroupResults['validation-group']['passed'] == true ?
+            (#ruleResults['high-value-rule'] == true ? (#amount * 0.02) : (#amount * 0.01)) :
+            (#amount * 0.05)
+            
+      # Service level based on multiple conditions
+      - source-field: "customerType"
+        target-field: "serviceLevel"
+        transformation: |
+          #ruleGroupResults['processing-group']['passed'] == true ? 'PREMIUM_PLUS' :
+          #ruleResults['premium-customer-rule'] == true ? 'PREMIUM' :
+          #ruleResults['high-value-rule'] == true ? 'ENHANCED' :
+          'STANDARD'
+
+  # 4. Conditional enrichment with fallback
+  - id: "conditional-with-fallback"
+    name: "Conditional Mapping with Fallback"
+    type: "field-enrichment"
+    description: "Conditional mapping with fallback values"
+    condition: "true"  # Always process
+    field-mappings:
+      # Status mapping with comprehensive fallback logic
+      - source-field: "status"
+        target-field: "finalStatus"
+        transformation: |
+          #ruleGroupResults.containsKey('validation-group') && #ruleGroupResults['validation-group']['passed'] == true ?
+            'APPROVED' :
+          #ruleResults.containsKey('high-value-rule') && #ruleResults['high-value-rule'] == true ?
+            'REVIEW_REQUIRED' :
+          #status != null ? #status : 'PENDING'
+          
+      # Notification level based on rule combinations
+      - source-field: "customerType"
+        target-field: "notificationLevel"
+        transformation: |
+          (#ruleResults.get('urgent-processing-rule') == true && #ruleResults.get('premium-customer-rule') == true) ? 'IMMEDIATE' :
+          #ruleResults.get('urgent-processing-rule') == true ? 'HIGH' :
+          #ruleResults.get('premium-customer-rule') == true ? 'MEDIUM' :
+          'LOW'

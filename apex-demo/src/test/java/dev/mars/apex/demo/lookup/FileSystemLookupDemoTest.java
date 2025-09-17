@@ -51,7 +51,9 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
         logger.info("=== Testing Comprehensive File System Lookup Functionality ===");
         
         // Load YAML configuration for file system lookup
-        var config = loadAndValidateYaml("test-configs/filesystemlookupdemo-test.yaml");
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/json-file-lookup.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
         
         // Create comprehensive test data that triggers ALL 4 enrichments
         Map<String, Object> testData = new HashMap<>();
@@ -98,7 +100,10 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
         String fileSystemLookupSummary = (String) enrichedData.get("fileSystemLookupSummary");
         assertTrue(fileSystemLookupSummary.contains("real-apex-services"), "File system lookup summary should reference approach");
         
-        logger.info("✅ Comprehensive file system lookup functionality test completed successfully");
+            logger.info("✅ Comprehensive file system lookup functionality test completed successfully");
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+        }
     }
 
     @Test
@@ -106,7 +111,9 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
         logger.info("=== Testing File System Setup Processing ===");
         
         // Load YAML configuration for file system lookup
-        var config = loadAndValidateYaml("test-configs/filesystemlookupdemo-test.yaml");
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/json-file-lookup.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
         
         // Test different dataset types
         String[] datasetTypes = {"file-system", "json-dataset", "xml-dataset"};
@@ -132,7 +139,10 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
             assertTrue(fileSystemSetupResult.contains(datasetType), "File system setup result should contain " + datasetType);
         }
         
-        logger.info("✅ File system setup processing test completed successfully");
+            logger.info("✅ File system setup processing test completed successfully");
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+        }
     }
 
     @Test
@@ -140,7 +150,9 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
         logger.info("=== Testing JSON File Lookup Processing ===");
         
         // Load YAML configuration for file system lookup
-        var config = loadAndValidateYaml("test-configs/filesystemlookupdemo-test.yaml");
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/json-file-lookup.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
         
         // Test different JSON lookup types
         String[] jsonLookupTypes = {"json-file-lookup", "json-data-lookup", "json-enrichment"};
@@ -166,7 +178,10 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
             assertTrue(jsonFileLookupResult.contains(jsonLookupType), "JSON file lookup result should reference lookup type " + jsonLookupType);
         }
         
-        logger.info("✅ JSON file lookup processing test completed successfully");
+            logger.info("✅ JSON file lookup processing test completed successfully");
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+        }
     }
 
     @Test
@@ -174,7 +189,9 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
         logger.info("=== Testing XML File Lookup Processing ===");
         
         // Load YAML configuration for file system lookup
-        var config = loadAndValidateYaml("test-configs/filesystemlookupdemo-test.yaml");
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/xml-file-lookup.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
         
         // Test different XML lookup types
         String[] xmlLookupTypes = {"xml-file-lookup", "xml-data-lookup", "xml-enrichment"};
@@ -200,6 +217,9 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
             assertTrue(xmlFileLookupResult.contains(xmlLookupType), "XML file lookup result should reference lookup type " + xmlLookupType);
         }
         
-        logger.info("✅ XML file lookup processing test completed successfully");
+            logger.info("✅ XML file lookup processing test completed successfully");
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+        }
     }
 }

@@ -51,7 +51,9 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
         logger.info("=== Testing Comprehensive Compound Key Lookup Functionality ===");
         
         // Load YAML configuration for compound key lookup
-        var config = loadAndValidateYaml("test-configs/compoundkeylookupdemo-test.yaml");
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/compound-key-lookup.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
         
         // Create comprehensive test data that triggers ALL 4 enrichments
         Map<String, Object> testData = new HashMap<>();
@@ -98,7 +100,10 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
         String compoundKeyLookupSummary = (String) enrichedData.get("compoundKeyLookupSummary");
         assertTrue(compoundKeyLookupSummary.contains("real-apex-services"), "Compound key lookup summary should reference approach");
         
-        logger.info("✅ Comprehensive compound key lookup functionality test completed successfully");
+            logger.info("✅ Comprehensive compound key lookup functionality test completed successfully");
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+        }
     }
 
     @Test
@@ -106,7 +111,9 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
         logger.info("=== Testing Compound Key Generation Processing ===");
         
         // Load YAML configuration for compound key lookup
-        var config = loadAndValidateYaml("test-configs/compoundkeylookupdemo-test.yaml");
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/compound-key-lookup.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
         
         // Test different customer-region combinations
         String[][] customerRegionPairs = {
@@ -140,7 +147,10 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
             assertTrue(compoundKeyResult.contains(expectedCompoundKey), "Compound key result should contain " + expectedCompoundKey);
         }
         
-        logger.info("✅ Compound key generation processing test completed successfully");
+            logger.info("✅ Compound key generation processing test completed successfully");
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+        }
     }
 
     @Test
@@ -148,7 +158,9 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
         logger.info("=== Testing Customer-Region Lookup Processing ===");
         
         // Load YAML configuration for compound key lookup
-        var config = loadAndValidateYaml("test-configs/compoundkeylookupdemo-test.yaml");
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/compound-key-lookup.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
         
         // Test different lookup types
         String[] lookupTypes = {"customer-region-lookup", "region-specific-lookup", "customer-specific-lookup"};
@@ -176,7 +188,10 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
             assertTrue(customerRegionLookupResult.contains(lookupType), "Customer-region lookup result should reference lookup type " + lookupType);
         }
         
-        logger.info("✅ Customer-region lookup processing test completed successfully");
+            logger.info("✅ Customer-region lookup processing test completed successfully");
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+        }
     }
 
     @Test
@@ -184,7 +199,9 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
         logger.info("=== Testing Pricing Tier Lookup Processing ===");
         
         // Load YAML configuration for compound key lookup
-        var config = loadAndValidateYaml("test-configs/compoundkeylookupdemo-test.yaml");
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/compound-key-lookup.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
         
         // Test different tier types
         String[] tierTypes = {"pricing-tier-lookup", "customer-tier-lookup", "region-tier-lookup"};
@@ -212,6 +229,9 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
             assertTrue(pricingTierLookupResult.contains(tierType), "Pricing tier lookup result should reference tier type " + tierType);
         }
         
-        logger.info("✅ Pricing tier lookup processing test completed successfully");
+            logger.info("✅ Pricing tier lookup processing test completed successfully");
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+        }
     }
 }

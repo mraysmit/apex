@@ -1,0 +1,105 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: DESIGN PROPOSAL - No Java test currently uses this file
+# Purpose: Use rule groups with OR operator for conditional field mapping
+#          Leverages existing APEX rule group OR logic, clear separation
+# Status: Phase 2 functionality - Not implemented yet
+# ============================================================================
+
+metadata:
+  name: "Rule Group OR Logic - FX Transaction"
+  version: "2.0.0"
+  description: "Rule group approach with OR logic for conditional mapping"
+  type: "scenario"
+  author: "APEX Enhancement Team"
+  created: "2025-09-17"
+
+# External data-source references
+data-source-refs:
+  - name: "translation-db"
+    source: "database-h2.yaml"
+    enabled: true
+
+# Individual rules for each mapping condition
+rules:
+  - id: "swift-valid-ndf-rule"
+    name: "SWIFT Valid NDF Rule"
+    description: "Handle SWIFT system with valid NDF values"
+    condition: "({'0', '1'}.contains(#IS_NDF)) && (#SYSTEM_CODE == 'SWIFT')"
+    message: "Using direct NDF mapping for SWIFT system"
+    severity: "INFO"
+    
+  - id: "swift-y-flag-rule"
+    name: "SWIFT Y Flag Rule"
+    description: "Handle SWIFT system with Y flag"
+    condition: "#IS_NDF == 'Y' && #SYSTEM_CODE == 'SWIFT'"
+    message: "Using Y flag mapping for SWIFT system"
+    severity: "INFO"
+    
+  - id: "translation-required-rule"
+    name: "Translation Required Rule"
+    description: "Handle cases requiring database translation"
+    condition: "#IS_NDF != null && #SYSTEM_CODE == 'SWIFT' && !({'0', '1', 'Y'}.contains(#IS_NDF))"
+    message: "Database translation required"
+    severity: "INFO"
+
+# Rule group with OR logic - any rule can trigger mapping
+rule-groups:
+  - id: "ndf-mapping-group"
+    name: "NDF Conditional Mapping Group"
+    description: "OR group for conditional NDF field mapping"
+    operator: "OR"  # Any rule can pass
+    stop-on-first-failure: true  # Stop on first success
+    priority: 10
+    enabled: true
+    rule-ids:
+      - "swift-valid-ndf-rule"
+      - "swift-y-flag-rule"
+      - "translation-required-rule"
+
+enrichments:
+  # Currency ranking (unchanged)
+  - id: "enrich-currency-ranks"
+    type: "lookup-enrichment"
+    condition: "#BUY_CURRENCY != null"
+    lookup-config:
+      lookup-key: "#BUY_CURRENCY"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "translation-db"
+        query-ref: "getCurrencyRank"
+    field-mappings:
+      - source-field: "currency_rank"
+        target-field: "BUY_CURRENCY_RANK"
+
+  # Conditional mapping based on rule group results
+  - id: "ndf-field-mapping"
+    type: "field-enrichment"
+    description: "Map NDF field based on rule group evaluation"
+    condition: "#ruleGroupResults['ndf-mapping-group'].passed"
+    
+    field-mappings:
+      # Direct mapping for valid cases
+      - source-field: "IS_NDF"
+        target-field: "IS_NDF"
+        condition: "#ruleResults['swift-valid-ndf-rule'].passed || #ruleResults['swift-y-flag-rule'].passed"
+        transformation: "#IS_NDF"
+        
+      # Translation mapping for complex cases
+      - source-field: "lookup"
+        target-field: "IS_NDF"
+        condition: "#ruleResults['translation-required-rule'].passed"
+        lookup-config:
+          lookup-dataset:
+            type: "database"
+            data-source-ref: "translation-db"
+            query-ref: "getInternalCodeWithoutSubcode"
+            parameters:
+              - field: "TRANSLATION_TYPE"
+                value: "'IS_NDF'"
+              - field: "CLIENT_CODE"
+              - field: "SYSTEM_CODE"
+              - field: "EXTERNAL_CODE"
+                value: "#IS_NDF"
+        transformation: "#lookup.internal_code ?: #IS_NDF"

@@ -1,0 +1,86 @@
+# ============================================================================
+# APEX YAML Configuration File - Conditional Mapping Design V2 Test
+# ============================================================================
+# Purpose: Test rule groups with OR operator for conditional field mapping
+#          Proves sequential rule evaluation with first-match-wins logic
+# Status: Phase 1 Test - Core functionality validation
+# ============================================================================
+
+metadata:
+  name: "Rule Group OR Logic - FX Transaction Test"
+  version: "2.0.0"
+  description: "Test rule group approach with OR logic for conditional mapping"
+  type: "scenario"
+  author: "APEX Enhancement Team"
+  created: "2025-09-18"
+
+# Individual rules for each mapping condition (evaluated in sequence)
+rules:
+  - id: "swift-valid-ndf-rule"
+    name: "SWIFT Valid NDF Rule"
+    description: "Handle SWIFT system with valid NDF values"
+    condition: "({'0', '1'}.contains(#IS_NDF)) && (#SYSTEM_CODE == 'SWIFT')"
+    message: "Using direct NDF mapping for SWIFT system"
+    severity: "INFO"
+    
+  - id: "swift-y-flag-rule"
+    name: "SWIFT Y Flag Rule"
+    description: "Handle SWIFT system with Y flag"
+    condition: "#IS_NDF == 'Y' && #SYSTEM_CODE == 'SWIFT'"
+    message: "Using Y flag mapping for SWIFT system"
+    severity: "INFO"
+    
+  - id: "translation-required-rule"
+    name: "Translation Required Rule"
+    description: "Handle cases requiring default translation"
+    condition: "#IS_NDF != null && #SYSTEM_CODE == 'SWIFT' && !({'0', '1', 'Y'}.contains(#IS_NDF))"
+    message: "Default translation required"
+    severity: "INFO"
+
+# Rule group with OR logic - any rule can trigger mapping
+rule-groups:
+  - id: "ndf-mapping-group"
+    name: "NDF Conditional Mapping Group"
+    description: "OR group for conditional NDF field mapping"
+    operator: "OR"  # Any rule can pass
+    stop-on-first-failure: true  # Stop on first success
+    priority: 10
+    enabled: true
+    rule-ids:
+      - "swift-valid-ndf-rule"
+      - "swift-y-flag-rule"
+      - "translation-required-rule"
+
+enrichments:
+  # Direct mapping for valid cases (first rule)
+  - id: "ndf-direct-mapping"
+    type: "field-enrichment"
+    description: "Direct mapping for valid SWIFT NDF values"
+    condition: "#ruleResults != null && #ruleResults['swift-valid-ndf-rule'] == true"
+
+    field-mappings:
+      - source-field: "IS_NDF"
+        target-field: "IS_NDF"
+        transformation: "#IS_NDF"
+
+  # Y flag conversion (second rule)
+  - id: "ndf-y-flag-conversion"
+    type: "field-enrichment"
+    description: "Convert Y flag to 1 for SWIFT systems"
+    condition: "#ruleResults != null && #ruleResults['swift-y-flag-rule'] == true"
+
+    field-mappings:
+      - source-field: "constant"
+        target-field: "IS_NDF"
+        transformation: "'1'"  # Convert Y to 1
+
+  # Default translation (third rule)
+  - id: "ndf-default-translation"
+    type: "field-enrichment"
+    description: "Apply default translation for complex codes"
+    condition: "#ruleResults != null && #ruleResults['translation-required-rule'] == true"
+
+    field-mappings:
+      - source-field: "constant"
+        target-field: "IS_NDF"
+        transformation: "'DEFAULT_TRANSLATION'"  # Default value

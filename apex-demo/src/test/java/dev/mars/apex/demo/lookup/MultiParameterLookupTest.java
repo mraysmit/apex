@@ -204,7 +204,7 @@ public class MultiParameterLookupTest {
             logger.info("Loading multi-parameter lookup YAML configuration...");
 
             // Load main configuration
-            YamlRuleConfiguration mainConfig = yamlLoader.loadFromClasspath("lookup/multi-parameter-lookup.yaml");
+            YamlRuleConfiguration mainConfig = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/multi-parameter-lookup.yaml");
             logger.info("✓ Loaded main configuration: {}", mainConfig.getMetadata().getName());
 
             logger.info("Configuration loaded successfully");
@@ -242,7 +242,7 @@ public class MultiParameterLookupTest {
 
         try {
             // Load configuration and perform enrichment
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("lookup/multi-parameter-lookup.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/multi-parameter-lookup.yaml");
             Map<String, Object> enrichedResult = new HashMap<>(inputData);
             
             // Apply enrichment using APEX services

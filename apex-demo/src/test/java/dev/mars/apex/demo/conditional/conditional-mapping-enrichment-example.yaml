@@ -1,0 +1,225 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: DESIGN EXAMPLE - No Java test currently uses this file
+# Purpose: Demonstrate the new conditional-mapping-enrichment type
+#          FX Transaction processing with dynamic field mapping
+#          Replaces 12 enrichments with 1, clear business logic
+# Status: Phase 3 functionality - Not implemented yet
+# ============================================================================
+
+metadata:
+  name: "Conditional Mapping Enrichment Example"
+  version: "1.0.0"
+  description: "Comprehensive example of conditional-mapping-enrichment for FX transactions"
+  type: "scenario"
+  author: "APEX Enhancement Team"
+  created: "2025-09-17"
+  tags: ["conditional-mapping", "fx-transaction", "field-mapping", "enhancement"]
+
+# External data sources
+data-source-refs:
+  - name: "fx-database"
+    source: "database-h2.yaml"
+    enabled: true
+    description: "FX transaction database"
+
+enrichments:
+  # Standard lookup enrichment (unchanged)
+  - id: "enrich-currency-ranks"
+    type: "lookup-enrichment"
+    description: "Enrich with currency rankings"
+    condition: "#BUY_CURRENCY != null || #SELL_CURRENCY != null"
+    lookup-config:
+      lookup-key: "#BUY_CURRENCY"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "fx-database"
+        query-ref: "getCurrencyRank"
+        parameters:
+          - field: "BUY_CURRENCY"
+            type: "string"
+            name: "CURRENCY_CODE"
+    field-mappings:
+      - source-field: "currency_rank"
+        target-field: "BUY_CURRENCY_RANK"
+
+  # NEW: Conditional mapping enrichment for NDF field
+  - id: "conditional-ndf-mapping"
+    type: "conditional-mapping-enrichment"
+    name: "NDF Conditional Field Mapping"
+    description: "Dynamic NDF field mapping based on system and value conditions"
+    enabled: true
+    
+    # Target field to be conditionally mapped
+    target-field: "IS_NDF"
+    
+    # Conditional mapping rules (evaluated in priority order)
+    mapping-rules:
+      
+      # Rule 1: SWIFT system with standard NDF values (0, 1)
+      - id: "swift-standard-ndf"
+        name: "SWIFT Standard NDF Values"
+        description: "Handle SWIFT system with standard 0/1 NDF values"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#SYSTEM_CODE == 'SWIFT'"
+              description: "Must be SWIFT system"
+            - condition: "({'0', '1'}.contains(#IS_NDF))"
+              description: "NDF value must be 0 or 1"
+        mapping:
+          type: "direct"
+          source-field: "IS_NDF"
+          transformation: "#IS_NDF"
+          description: "Keep original NDF value"
+          
+      # Rule 2: SWIFT system with Y/N flags
+      - id: "swift-yn-flags"
+        name: "SWIFT Y/N Flag Mapping"
+        description: "Convert Y/N flags to 1/0 for SWIFT system"
+        priority: 2
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#SYSTEM_CODE == 'SWIFT'"
+            - condition: "({'Y', 'N', 'YES', 'NO'}.contains(#IS_NDF?.toUpperCase()))"
+        mapping:
+          type: "transformation"
+          source-field: "IS_NDF"
+          transformation: "#IS_NDF?.toUpperCase() in {'Y', 'YES'} ? '1' : '0'"
+          description: "Convert Y/N to 1/0"
+          
+      # Rule 3: Database translation for complex codes
+      - id: "database-translation"
+        name: "Database Code Translation"
+        description: "Translate external codes using database lookup"
+        priority: 3
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#IS_NDF != null"
+            - condition: "#SYSTEM_CODE == 'SWIFT'"
+            - condition: "!({'0', '1', 'Y', 'N', 'YES', 'NO'}.contains(#IS_NDF?.toUpperCase()))"
+              description: "Not a standard value, needs translation"
+            - condition: "#CLIENT_CODE != null"
+              description: "Client code required for translation"
+        mapping:
+          type: "lookup"
+          lookup-config:
+            lookup-key: "{'translationType': 'IS_NDF', 'clientCode': #CLIENT_CODE, 'systemCode': #SYSTEM_CODE, 'externalCode': #IS_NDF}"
+            lookup-dataset:
+              type: "database"
+              data-source-ref: "fx-database"
+              query-ref: "getInternalCodeWithoutSubcode"
+          transformation: "#lookup?.internal_code"
+          fallback-value: "#IS_NDF"
+          description: "Database lookup with fallback to original"
+          
+      # Rule 4: Non-SWIFT systems
+      - id: "non-swift-systems"
+        name: "Non-SWIFT System Mapping"
+        description: "Handle non-SWIFT systems with different logic"
+        priority: 4
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#SYSTEM_CODE != 'SWIFT'"
+            - condition: "#IS_NDF != null"
+        mapping:
+          type: "transformation"
+          source-field: "IS_NDF"
+          transformation: |
+            #SYSTEM_CODE == 'REUTERS' ? 
+              (#IS_NDF == 'TRUE' ? '1' : '0') :
+            #SYSTEM_CODE == 'BLOOMBERG' ?
+              (#IS_NDF?.startsWith('NDF') ? '1' : '0') :
+            #IS_NDF
+          description: "System-specific transformation logic"
+          
+      # Rule 5: Default fallback
+      - id: "default-fallback"
+        name: "Default Fallback"
+        description: "Default mapping when no other rules match"
+        priority: 999
+        conditions:
+          default: true
+        mapping:
+          type: "direct"
+          source-field: "IS_NDF"
+          transformation: "#IS_NDF ?: '0'"
+          description: "Use original value or default to '0'"
+          
+    # Execution settings
+    execution-settings:
+      stop-on-first-match: true
+      log-matched-rule: true
+      validate-result: true
+      debug-mode: false
+
+  # NEW: Conditional mapping for settlement instructions
+  - id: "conditional-settlement-mapping"
+    type: "conditional-mapping-enrichment"
+    name: "Settlement Instruction Mapping"
+    description: "Dynamic settlement instruction mapping based on currency and region"
+    enabled: true
+    
+    target-field: "SETTLEMENT_INSTRUCTION"
+    
+    mapping-rules:
+      # USD transactions
+      - id: "usd-settlement"
+        priority: 1
+        conditions:
+          operator: "OR"
+          rules:
+            - condition: "#BUY_CURRENCY == 'USD'"
+            - condition: "#SELL_CURRENCY == 'USD'"
+        mapping:
+          type: "transformation"
+          transformation: "'FEDWIRE_' + (#COUNTERPARTY_REGION ?: 'US')"
+          
+      # EUR transactions
+      - id: "eur-settlement"
+        priority: 2
+        conditions:
+          operator: "OR"
+          rules:
+            - condition: "#BUY_CURRENCY == 'EUR'"
+            - condition: "#SELL_CURRENCY == 'EUR'"
+        mapping:
+          type: "transformation"
+          transformation: "'TARGET2_' + (#COUNTERPARTY_REGION ?: 'EU')"
+          
+      # High value transactions (special handling)
+      - id: "high-value-settlement"
+        priority: 3
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#NOTIONAL_AMOUNT > 10000000"
+            - condition: "#SETTLEMENT_DATE != null"
+        mapping:
+          type: "lookup"
+          lookup-config:
+            lookup-key: "{'currencyPair': #BUY_CURRENCY + #SELL_CURRENCY, 'notionalAmount': #NOTIONAL_AMOUNT, 'counterpartyRegion': #COUNTERPARTY_REGION}"
+            lookup-dataset:
+              type: "database"
+              data-source-ref: "fx-database"
+              query-ref: "getHighValueSettlementInstructions"
+          transformation: "#lookup?.settlement_instruction"
+          fallback-value: "'MANUAL_REVIEW_REQUIRED'"
+          
+      # Default settlement
+      - id: "default-settlement"
+        priority: 999
+        conditions:
+          default: true
+        mapping:
+          type: "transformation"
+          transformation: "'STANDARD_SETTLEMENT'"
+          
+    execution-settings:
+      stop-on-first-match: true
+      log-matched-rule: true

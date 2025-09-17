@@ -39,7 +39,7 @@ public class YamlDatasetDemoTest extends DemoTestBase {
         
         try {
             // Load YAML configuration
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("enrichment/yaml-dataset-demo-config.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/enrichment/yaml-dataset-demo-config.yaml");
             assertNotNull(config, "Configuration should not be null");
             logger.info("✓ Configuration loaded successfully: " + config.getMetadata().getName());
             
@@ -87,7 +87,7 @@ public class YamlDatasetDemoTest extends DemoTestBase {
         
         try {
             // Load YAML configuration
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("enrichment/yaml-dataset-demo-config.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/enrichment/yaml-dataset-demo-config.yaml");
             assertNotNull(config, "Configuration should not be null");
             
             // Create test data for field mapping processing
@@ -124,7 +124,7 @@ public class YamlDatasetDemoTest extends DemoTestBase {
         
         try {
             // Load YAML configuration
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("enrichment/yaml-dataset-demo-config.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/enrichment/yaml-dataset-demo-config.yaml");
             assertNotNull(config, "Configuration should not be null");
             
             // Create test data for conditional dataset processing
@@ -161,7 +161,7 @@ public class YamlDatasetDemoTest extends DemoTestBase {
         
         try {
             // Load YAML configuration
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("enrichment/yaml-dataset-demo-config.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/enrichment/yaml-dataset-demo-config.yaml");
             assertNotNull(config, "Configuration should not be null");
             
             // Create test data for comprehensive dataset processing

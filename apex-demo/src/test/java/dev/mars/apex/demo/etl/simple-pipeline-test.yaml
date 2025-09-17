@@ -1,0 +1,57 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: CsvToH2PipelineTest.java
+# Purpose: Simple pipeline test to debug YAML parsing issues
+# Status: Test configuration
+# ============================================================================
+
+metadata:
+  id: "simple-pipeline-test"
+  name: "Simple Pipeline Test"
+  version: "1.0.0"
+  description: "Simple pipeline for testing YAML parsing"
+  type: "pipeline-config"
+  author: "APEX Demo Team"
+  tags: ["demo", "test", "pipeline"]
+
+# Pipeline orchestration
+pipeline:
+  name: "simple-test-pipeline"
+  description: "Simple test pipeline"
+  
+  steps:
+    - name: "test-step"
+      type: "extract"
+      source: "test-source"
+      operation: "testOperation"
+      description: "Test step"
+
+# Input data sources
+data-sources:
+  - name: "test-source"
+    type: "file-system"
+    enabled: true
+    description: "Test data source"
+    
+    connection:
+      base-path: "./target/test"
+      file-pattern: "test.csv"
+    
+    operations:
+      testOperation: "SELECT * FROM csv"
+
+# Output data sinks
+data-sinks:
+  - name: "test-sink"
+    type: "database"
+    enabled: true
+    description: "Test data sink"
+    
+    connection:
+      database: "./target/test/db"
+      username: "sa"
+      password: ""
+    
+    operations:
+      testWrite: "INSERT INTO test VALUES (:data)"

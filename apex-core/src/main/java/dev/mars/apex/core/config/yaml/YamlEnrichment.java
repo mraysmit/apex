@@ -62,7 +62,20 @@ public class YamlEnrichment {
     
     @JsonProperty("field-mappings")
     private List<FieldMapping> fieldMappings;
-    
+
+    @JsonProperty("conditional-mappings")
+    private List<ConditionalMapping> conditionalMappings;
+
+    // Fields for conditional-mapping-enrichment type
+    @JsonProperty("target-field")
+    private String targetField;
+
+    @JsonProperty("mapping-rules")
+    private List<MappingRule> mappingRules;
+
+    @JsonProperty("execution-settings")
+    private ExecutionSettings executionSettings;
+
     @JsonProperty("lookup-config")
     private LookupConfig lookupConfig;
     
@@ -149,11 +162,19 @@ public class YamlEnrichment {
     public List<FieldMapping> getFieldMappings() {
         return fieldMappings;
     }
-    
+
     public void setFieldMappings(List<FieldMapping> fieldMappings) {
         this.fieldMappings = fieldMappings;
     }
-    
+
+    public List<ConditionalMapping> getConditionalMappings() {
+        return conditionalMappings;
+    }
+
+    public void setConditionalMappings(List<ConditionalMapping> conditionalMappings) {
+        this.conditionalMappings = conditionalMappings;
+    }
+
     public LookupConfig getLookupConfig() {
         return lookupConfig;
     }
@@ -185,7 +206,31 @@ public class YamlEnrichment {
     public void setMetadata(Map<String, Object> metadata) {
         this.metadata = metadata;
     }
-    
+
+    public String getTargetField() {
+        return targetField;
+    }
+
+    public void setTargetField(String targetField) {
+        this.targetField = targetField;
+    }
+
+    public List<MappingRule> getMappingRules() {
+        return mappingRules;
+    }
+
+    public void setMappingRules(List<MappingRule> mappingRules) {
+        this.mappingRules = mappingRules;
+    }
+
+    public ExecutionSettings getExecutionSettings() {
+        return executionSettings;
+    }
+
+    public void setExecutionSettings(ExecutionSettings executionSettings) {
+        this.executionSettings = executionSettings;
+    }
+
     /**
      * Field mapping configuration for enrichments.
      */
@@ -530,6 +575,275 @@ public class YamlEnrichment {
 
         public void setParameters(List<ParameterMapping> parameters) {
             this.parameters = parameters;
+        }
+    }
+
+    /**
+     * Conditional mapping configuration for field-enrichment.
+     * Supports conditional field mappings with OR/AND logic.
+     */
+    public static class ConditionalMapping {
+        @JsonProperty("conditions")
+        private ConditionGroup conditions;
+
+        @JsonProperty("field-mappings")
+        private List<FieldMapping> fieldMappings;
+
+        // Default constructor
+        public ConditionalMapping() {}
+
+        // Getters and setters
+        public ConditionGroup getConditions() {
+            return conditions;
+        }
+
+        public void setConditions(ConditionGroup conditions) {
+            this.conditions = conditions;
+        }
+
+        public List<FieldMapping> getFieldMappings() {
+            return fieldMappings;
+        }
+
+        public void setFieldMappings(List<FieldMapping> fieldMappings) {
+            this.fieldMappings = fieldMappings;
+        }
+    }
+
+    /**
+     * Condition group with OR/AND logic for conditional mappings.
+     */
+    public static class ConditionGroup {
+        @JsonProperty("operator")
+        private String operator; // "OR" or "AND"
+
+        @JsonProperty("rules")
+        private List<ConditionRule> rules;
+
+        // Default constructor
+        public ConditionGroup() {}
+
+        // Getters and setters
+        public String getOperator() {
+            return operator;
+        }
+
+        public void setOperator(String operator) {
+            this.operator = operator;
+        }
+
+        public List<ConditionRule> getRules() {
+            return rules;
+        }
+
+        public void setRules(List<ConditionRule> rules) {
+            this.rules = rules;
+        }
+    }
+
+    /**
+     * Individual condition rule for conditional mappings.
+     */
+    public static class ConditionRule {
+        @JsonProperty("condition")
+        private String condition; // SpEL expression
+
+        @JsonProperty("description")
+        private String description;
+
+        // Default constructor
+        public ConditionRule() {}
+
+        // Getters and setters
+        public String getCondition() {
+            return condition;
+        }
+
+        public void setCondition(String condition) {
+            this.condition = condition;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+    }
+
+    /**
+     * Mapping rule for conditional-mapping-enrichment type.
+     * Represents a single conditional mapping rule with priority and conditions.
+     */
+    public static class MappingRule {
+        @JsonProperty("id")
+        private String id;
+
+        @JsonProperty("name")
+        private String name;
+
+        @JsonProperty("priority")
+        private Integer priority;
+
+        @JsonProperty("conditions")
+        private ConditionGroup conditions;
+
+        @JsonProperty("mapping")
+        private MappingConfig mapping;
+
+        // Default constructor
+        public MappingRule() {}
+
+        // Getters and setters
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Integer getPriority() {
+            return priority;
+        }
+
+        public void setPriority(Integer priority) {
+            this.priority = priority;
+        }
+
+        public ConditionGroup getConditions() {
+            return conditions;
+        }
+
+        public void setConditions(ConditionGroup conditions) {
+            this.conditions = conditions;
+        }
+
+        public MappingConfig getMapping() {
+            return mapping;
+        }
+
+        public void setMapping(MappingConfig mapping) {
+            this.mapping = mapping;
+        }
+    }
+
+    /**
+     * Mapping configuration for conditional mapping rules.
+     */
+    public static class MappingConfig {
+        @JsonProperty("type")
+        private String type; // "direct" or "lookup"
+
+        @JsonProperty("source-field")
+        private String sourceField;
+
+        @JsonProperty("transformation")
+        private String transformation;
+
+        @JsonProperty("fallback-value")
+        private String fallbackValue;
+
+        @JsonProperty("lookup-config")
+        private LookupConfig lookupConfig;
+
+        // Default constructor
+        public MappingConfig() {}
+
+        // Getters and setters
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getSourceField() {
+            return sourceField;
+        }
+
+        public void setSourceField(String sourceField) {
+            this.sourceField = sourceField;
+        }
+
+        public String getTransformation() {
+            return transformation;
+        }
+
+        public void setTransformation(String transformation) {
+            this.transformation = transformation;
+        }
+
+        public String getFallbackValue() {
+            return fallbackValue;
+        }
+
+        public void setFallbackValue(String fallbackValue) {
+            this.fallbackValue = fallbackValue;
+        }
+
+        public LookupConfig getLookupConfig() {
+            return lookupConfig;
+        }
+
+        public void setLookupConfig(LookupConfig lookupConfig) {
+            this.lookupConfig = lookupConfig;
+        }
+    }
+
+    /**
+     * Execution settings for conditional-mapping-enrichment type.
+     */
+    public static class ExecutionSettings {
+        @JsonProperty("stop-on-first-match")
+        private Boolean stopOnFirstMatch;
+
+        @JsonProperty("log-matched-rule")
+        private Boolean logMatchedRule;
+
+        @JsonProperty("validate-result")
+        private Boolean validateResult;
+
+        // Default constructor
+        public ExecutionSettings() {
+            this.stopOnFirstMatch = true; // Default to stop on first match
+            this.logMatchedRule = false;
+            this.validateResult = false;
+        }
+
+        // Getters and setters
+        public Boolean getStopOnFirstMatch() {
+            return stopOnFirstMatch;
+        }
+
+        public void setStopOnFirstMatch(Boolean stopOnFirstMatch) {
+            this.stopOnFirstMatch = stopOnFirstMatch;
+        }
+
+        public Boolean getLogMatchedRule() {
+            return logMatchedRule;
+        }
+
+        public void setLogMatchedRule(Boolean logMatchedRule) {
+            this.logMatchedRule = logMatchedRule;
+        }
+
+        public Boolean getValidateResult() {
+            return validateResult;
+        }
+
+        public void setValidateResult(Boolean validateResult) {
+            this.validateResult = validateResult;
         }
     }
 }
