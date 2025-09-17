@@ -1,13 +1,12 @@
 # ============================================================================
-# APEX Rules Engine - Derivatives Validation Rules Configuration
+# APEX YAML Configuration File
 # ============================================================================
-#
-# This configuration file contains comprehensive validation rules for
-# derivatives trading, specifically focused on OTC (Over-the-Counter)
-# derivatives including options, swaps, forwards, and other structured products.
-#
-# SCOPE:
-# - Structural validation for derivatives data
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Comprehensive validation rules for derivatives trading, specifically
+#          focused on OTC derivatives including options, swaps, forwards, and
+#          structured products with structural and business validation logic
+# Status: Available for integration with derivatives validation tests
+# ============================================================================
 # - Business logic validation for trading rules
 # - Risk management and compliance checks
 # - Regulatory validation requirements

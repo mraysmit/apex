@@ -2,6 +2,16 @@
 # External data source configuration for trade samples
 # Replaces hardcoded trade sample creation from IntegratedTradeValidatorComplexDemo
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Trade samples configuration providing sample trade data for
+#          validation testing, trade templates, and reference trade scenarios
+#          for comprehensive trade validation demonstrations
+# Status: Available for integration with trade samples tests
+# ============================================================================
+
 metadata:
   id: "trade-samples-configuration"
   name: "Trade Samples Configuration"

@@ -2,6 +2,16 @@
 # Test data scenarios for BatchProcessingDemo.java
 # NO HARDCODED SIMULATION - Real APEX data processing
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Batch processing demo data providing test data for batch processing
+#          demonstrations, sample datasets for batch operations, and reference
+#          data for batch transformation testing scenarios
+# Status: Available for integration with batch processing data tests
+# ============================================================================
+
 metadata:
   id: "batch-processing-demo-data"
   name: "Batch Processing Demo Data"

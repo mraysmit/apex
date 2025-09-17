@@ -2,6 +2,16 @@
 # External data source configuration for commodity data processing
 # Replaces embedded commodity data from CommoditySwapValidationBootstrap
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Commodity data configuration for commodity bootstrap operations with
+#          commodity reference data, market data, and commodity-specific
+#          validation and enrichment processing
+# Status: Available for integration with commodity data configuration tests
+# ============================================================================
+
 metadata:
   id: "commodity-data-configuration"
   name: "Commodity Data Configuration"

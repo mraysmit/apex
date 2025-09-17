@@ -3,6 +3,16 @@
 # This demo showcases the enhanced H2 parameter support in APEX
 # You can now specify custom H2 parameters directly in the database field
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: H2 database custom parameters demonstration using APEX lookup
+#          enrichments with custom database parameters, parameterized queries,
+#          and advanced H2 database integration capabilities
+# Status: Available for integration with H2 custom parameters tests
+# ============================================================================
+
 metadata:
   name: "H2 Custom Parameters Demo"
   version: "1.0.0"

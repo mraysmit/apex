@@ -2,6 +2,16 @@
 # Demonstrates conditional expression evaluation in lookup-key
 # Use Case: Risk-based loan assessment with conditional credit score categorization
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Conditional expression lookup demonstration using APEX lookup
+#          enrichments with conditional logic, expression-based lookups, and
+#          dynamic lookup conditions for complex business scenarios
+# Status: Available for integration with conditional expression lookup tests
+# ============================================================================
+
 metadata:
   id: "conditional-expression-lookup-demo"
   name: "Conditional Expression Lookup Demo"

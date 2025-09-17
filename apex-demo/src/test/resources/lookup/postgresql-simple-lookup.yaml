@@ -2,6 +2,15 @@
 # Demonstrates external database data source using embedded H2 database (PostgreSQL compatible mode)
 # Use Case: Customer profile data source for enrichment lookups
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: PostgreSQL simple lookup demonstration using APEX lookup enrichments
+#          with basic PostgreSQL database integration and simple lookup operations
+# Status: Available for integration with PostgreSQL simple lookup tests
+# ============================================================================
+
 metadata:
   id: "self-contained-database-data-source-demo"
   name: "Self-Contained Database Data Source Demo"

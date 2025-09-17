@@ -1,8 +1,11 @@
 # ============================================================================
-# APEX Demo Data Bootstrap - Product Catalog
+# APEX YAML Configuration File
 # ============================================================================
-# Generated: 2025-08-27
-# Purpose: Realistic financial product catalog for APEX demonstrations
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Product catalog reference dataset containing realistic financial
+#          product catalog for APEX demonstrations, product management, and
+#          financial instrument enrichment processing
+# Status: Available for integration with product catalog tests
 # ============================================================================
 
 metadata:

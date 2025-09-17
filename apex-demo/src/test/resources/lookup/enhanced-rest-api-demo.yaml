@@ -2,6 +2,16 @@
 # Demonstrates REST API integration with OAuth2, circuit breaker, and comprehensive monitoring
 # Use Case: Enterprise-grade external API integration for real-time data enrichment
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Enhanced REST API demonstration using APEX lookup enrichments with
+#          REST API data sources, external API integration, and web service
+#          lookups for real-time data enrichment capabilities
+# Status: Available for integration with enhanced REST API tests
+# ============================================================================
+
 metadata:
   id: "enhanced-rest-api-lookup-demo"
   name: "Enhanced REST API Lookup Demo with Enterprise Features"

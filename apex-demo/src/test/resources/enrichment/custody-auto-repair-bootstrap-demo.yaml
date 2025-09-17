@@ -1,6 +1,12 @@
-# APEX Custody Auto-Repair Bootstrap Demo Configuration
-# Real APEX YAML configuration for custody auto-repair bootstrap processing
-# Replaces all hardcoded custody auto-repair logic from CustodyAutoRepairBootstrap (@version 1.0)
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Custody auto-repair bootstrap demonstration with real APEX enrichment
+#          services for automated custody operations, trade repair processing,
+#          and custody data validation using comprehensive business logic
+# Status: Available for integration with custody auto-repair tests
+# ============================================================================
 
 metadata:
   id: "custody-auto-repair-bootstrap-demo"

@@ -2,6 +2,16 @@
 # Demonstrates basic lookup-key usage with currency code enrichment
 # Use Case: Enrich currency transactions with detailed currency information
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Simple field lookup demonstration using APEX lookup enrichments with
+#          basic field-based lookups, simple data retrieval, and fundamental
+#          lookup operations for straightforward enrichment scenarios
+# Status: Available for integration with simple field lookup tests
+# ============================================================================
+
 metadata:
   id: "simple-field-lookup-demo"
   name: "Simple Field Lookup Demo"

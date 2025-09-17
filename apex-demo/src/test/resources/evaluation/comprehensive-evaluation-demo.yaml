@@ -2,6 +2,16 @@
 # Real APEX YAML configuration for comprehensive evaluation capabilities
 # Replaces 73+ deleted files with focused, business-meaningful evaluation scenarios
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Comprehensive evaluation demonstration using APEX evaluation capabilities
+#          for testing complex evaluation scenarios, expression evaluation, and
+#          dynamic processing with comprehensive business logic evaluation
+# Status: Available for integration with comprehensive evaluation tests
+# ============================================================================
+
 metadata:
   id: "comprehensive-evaluation-demo"
   name: "Comprehensive Evaluation Demo"

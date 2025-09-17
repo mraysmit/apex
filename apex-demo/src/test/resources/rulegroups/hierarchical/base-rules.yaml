@@ -1,3 +1,13 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Hierarchical base rules configuration with fundamental rule definitions
+#          for hierarchical rule structures, base rule templates, and reusable
+#          rule components for complex rule hierarchies
+# Status: Available for integration with hierarchical base rules tests
+# ============================================================================
+
 metadata:
   id: "base-validation-rules"
   name: "Base Validation Rules"

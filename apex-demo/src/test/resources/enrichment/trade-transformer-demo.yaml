@@ -1,6 +1,11 @@
-# APEX Trade Transformer Demo Configuration
-# Real APEX YAML configuration for trade transformer processing
-# Replaces all hardcoded trade transformer logic from TradeTransformerDemo (@version 1.0)
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: YamlConfigurationValidationTest.java (testTradeTransformerValidation method)
+# Purpose: Trade data transformation demonstration using APEX enrichment capabilities
+#          for testing trade processing, settlement calculations, and financial
+#          data transformation logic with real business scenarios
+# ============================================================================
 
 metadata:
   id: "trade-transformer-demo"

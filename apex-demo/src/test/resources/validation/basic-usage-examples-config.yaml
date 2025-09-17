@@ -2,6 +2,16 @@
 # Real APEX YAML configuration for BasicUsageExamples.java
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Basic usage examples configuration demonstrating fundamental APEX
+#          validation capabilities, basic validation rules, and introductory
+#          validation scenarios for learning and testing purposes
+# Status: Available for integration with basic usage examples tests
+# ============================================================================
+
 metadata:
   id: "basic-usage-examples-configuration"
   name: "Basic Usage Examples Configuration"

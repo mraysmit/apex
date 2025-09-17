@@ -1,8 +1,11 @@
 # ============================================================================
-# APEX Demo Data Bootstrap - Trading Scenarios
+# APEX YAML Configuration File
 # ============================================================================
-# Generated: 2025-08-27
-# Purpose: Realistic trading scenarios for APEX demonstrations
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Trading scenarios reference dataset containing realistic trading
+#          scenarios for APEX demonstrations, trade processing, and scenario-based
+#          testing with comprehensive trading patterns and templates
+# Status: Available for integration with trading scenario tests
 # ============================================================================
 
 metadata:

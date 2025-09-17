@@ -1,5 +1,11 @@
 # ============================================================================
-# APEX Rules Engine - Financial Enrichment Rules Configuration
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Financial enrichment rules configuration for comprehensive financial
+#          data processing, trade enrichment, and financial calculations using
+#          APEX enrichment capabilities for financial services applications
+# Status: Available for integration with financial enrichment tests
 # ============================================================================
 #
 # This YAML configuration demonstrates advanced financial data enrichment

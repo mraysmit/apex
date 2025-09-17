@@ -1,3 +1,13 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: OTC options scenario configuration with comprehensive over-the-counter
+#          options trading scenarios, options validation rules, and options
+#          processing logic using APEX capabilities for derivatives trading
+# Status: Available for integration with OTC options scenario tests
+# ============================================================================
+
 metadata:
   id: "otc-options-processing-scenario"
   name: "OTC Options Processing Scenario"

@@ -2,6 +2,16 @@
 # External data source configuration for settlement validation
 # Replaces hardcoded settlement logic from IntegratedTradeValidatorComplexDemo
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Settlement validation configuration for trade validation with
+#          settlement validation rules, post-trade settlement processing,
+#          and settlement instruction validation using APEX capabilities
+# Status: Available for integration with settlement validation tests
+# ============================================================================
+
 metadata:
   id: "settlement-validation-configuration"
   name: "Settlement Validation Configuration"

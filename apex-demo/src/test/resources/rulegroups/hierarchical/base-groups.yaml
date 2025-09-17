@@ -1,3 +1,13 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Hierarchical base groups configuration demonstrating APEX rule group
+#          hierarchies, base rule group definitions, and hierarchical rule
+#          organization for complex rule management scenarios
+# Status: Available for integration with hierarchical rule group tests
+# ============================================================================
+
 metadata:
   id: "base-rule-groups"
   name: "Base Rule Groups"

@@ -2,6 +2,16 @@
 # Test data scenarios for BasicUsageExamples.java
 # NO HARDCODED SIMULATION - Real APEX data processing
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Basic usage examples data providing test data for basic validation
+#          scenarios, sample datasets for validation testing, and reference
+#          data for fundamental APEX validation demonstrations
+# Status: Available for integration with basic usage examples data tests
+# ============================================================================
+
 metadata:
   id: "basic-usage-examples-data"
   name: "Basic Usage Examples Data"

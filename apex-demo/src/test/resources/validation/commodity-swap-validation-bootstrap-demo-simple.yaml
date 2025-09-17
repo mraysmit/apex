@@ -1,5 +1,12 @@
-# APEX Commodity Swap Validation Bootstrap Demo Configuration - Simplified
-# Real APEX YAML configuration for commodity swap validation bootstrap processing
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Commodity swap validation bootstrap demonstration (simplified version)
+#          with streamlined commodity derivatives validation and processing using
+#          APEX rules engine for simplified commodity trading scenarios
+# Status: Available for integration with commodity swap validation tests
+# ============================================================================
 
 metadata:
   id: "commodity-swap-validation-bootstrap-demo"

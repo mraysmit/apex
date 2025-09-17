@@ -1,5 +1,11 @@
 # ============================================================================
-# APEX Rules Engine - Custody Auto-Repair Bootstrap Configuration
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Custody auto-repair bootstrap configuration for automated custody
+#          operations, trade repair processing, and custody data validation
+#          using APEX rules engine for custody management systems
+# Status: Available for integration with custody auto-repair tests
 # ============================================================================
 #
 # This YAML configuration provides a complete, production-ready demonstration

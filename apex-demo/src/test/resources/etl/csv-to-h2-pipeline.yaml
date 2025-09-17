@@ -1,8 +1,14 @@
-# APEX ETL Demo Configuration
-# CSV to H2 Database Pipeline Example
-#
-# This configuration demonstrates a complete ETL pipeline using APEX data sinks
-# to process CSV customer data and write it to an H2 database.
+
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: ETL pipeline demonstration for CSV to H2 database data loading
+#          using APEX pipeline functionality for data extraction, transformation,
+#          and loading operations with customer and trade data
+# Status: Available for integration with ETL pipeline tests
+# ============================================================================
 
 metadata:
   id: "csv-to-h2-pipeline-demo"

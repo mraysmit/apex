@@ -1,3 +1,12 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: BasicYamlRuleGroupProcessingATest.java (testBasicRuleGroupProcessingWithSeparateFiles method)
+# Purpose: Rule groups configuration for testing separate file concept with
+#          APEX rule group processing, demonstrating rule group definitions
+#          and rule group management functionality
+# ============================================================================
+
 metadata:
   name: "Separate Rules Test - Rule Groups Only"
   version: "1.0.0"

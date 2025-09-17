@@ -1,5 +1,14 @@
-# Products JSON File Data Source Configuration
-# Defines connection to JSON files in demo-data/json directory
+
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: JSON data source configuration demonstrating APEX external data source
+#          integration with JSON file-based data sources for product catalog
+#          and reference data management
+# Status: Available for integration with JSON data source tests
+# ============================================================================
 
 metadata:
   id: "products-json-data-source"

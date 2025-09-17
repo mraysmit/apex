@@ -1,3 +1,12 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: SimpleCompilerDemoTest.java (testStaticAnalysis, testExpressionValidation, testCodeGeneration methods)
+# Purpose: APEX-compliant compiler demo configuration demonstrating static analysis,
+#          expression validation, and code generation with real business logic
+#          for testing APEX compilation and validation capabilities
+# ============================================================================
+
 name: "Simple Compiler Demo Configuration"
 description: "APEX-compliant simple compiler demo processing with real business logic"
 version: "1.0"

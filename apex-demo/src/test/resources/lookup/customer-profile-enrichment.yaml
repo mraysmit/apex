@@ -2,6 +2,16 @@
 # Demonstrates database lookup enrichment using APEX YAML processing with real H2 database
 # Use Case: Enrich transactions with customer profile data from database
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Customer profile enrichment demonstration using APEX lookup enrichments
+#          for customer data enhancement, profile lookups, and customer information
+#          enrichment with comprehensive customer management capabilities
+# Status: Available for integration with customer profile enrichment tests
+# ============================================================================
+
 metadata:
   id: "customer-profile-enrichment-demo---database-version"
   name: "Customer Profile Enrichment Demo - Database Version"

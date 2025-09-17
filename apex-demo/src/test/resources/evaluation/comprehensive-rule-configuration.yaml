@@ -2,6 +2,16 @@
 # Consolidated APEX YAML configuration for all rule configuration scenarios
 # Replaces 8 duplicate AI-generated files with single comprehensive configuration
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Comprehensive rule configuration demonstration with complex rule
+#          definitions, rule evaluation, and comprehensive rule processing
+#          using APEX rules engine capabilities for advanced rule scenarios
+# Status: Available for integration with comprehensive rule configuration tests
+# ============================================================================
+
 metadata:
   id: "comprehensive-rule-configuration"
   name: "Comprehensive Rule Configuration"

@@ -1,3 +1,13 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: PostgreSQL simple database enrichment demonstration using APEX
+#          enrichment capabilities with PostgreSQL database integration,
+#          simple database queries, and basic database enrichment operations
+# Status: Available for integration with PostgreSQL database enrichment tests
+# ============================================================================
+
 metadata:
   id: "simple-postgresql-database-enrichment-demo"
   name: "Simple PostgreSQL Database Enrichment Demo"

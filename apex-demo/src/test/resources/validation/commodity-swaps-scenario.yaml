@@ -1,3 +1,13 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Commodity swaps scenario configuration with comprehensive commodity
+#          swap trading scenarios, validation rules, and business logic for
+#          commodity derivatives processing using APEX capabilities
+# Status: Available for integration with commodity swaps scenario tests
+# ============================================================================
+
 metadata:
   id: "commodity-swaps-processing-scenario"
   name: "Commodity Swaps Processing Scenario"

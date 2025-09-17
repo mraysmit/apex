@@ -2,6 +2,16 @@
 # APEX Rules Engine - Batch Processing Configuration
 # ============================================================================
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Batch processing rules configuration with comprehensive batch
+#          processing rules, batch validation logic, and batch transformation
+#          operations using APEX rules engine capabilities
+# Status: Available for integration with batch processing rules tests
+# ============================================================================
+
 metadata:
   id: "batch-processing-rules-configuration"
   name: "Batch Processing Rules Configuration"

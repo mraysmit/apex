@@ -2,6 +2,16 @@
 # Demonstrates YAML-based business logic instead of hardcoded switch statements
 # Use Case: Map trading currencies to their primary stock exchanges/markets
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Currency market mapping demonstration using APEX lookup enrichments
+#          for currency data enrichment, market data lookups, and financial
+#          instrument currency mapping with comprehensive market data
+# Status: Available for integration with currency market mapping tests
+# ============================================================================
+
 metadata:
   id: "currency-to-market-mapping"
   name: "Currency to Market Mapping"

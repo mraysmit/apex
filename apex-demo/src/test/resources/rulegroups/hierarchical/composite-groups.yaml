@@ -1,3 +1,13 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Hierarchical composite groups configuration demonstrating complex
+#          rule group compositions, composite rule structures, and advanced
+#          rule group relationships for sophisticated rule management
+# Status: Available for integration with hierarchical composite group tests
+# ============================================================================
+
 metadata:
   id: "composite-rule-groups"
   name: "Composite Rule Groups"

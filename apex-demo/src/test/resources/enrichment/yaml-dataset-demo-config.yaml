@@ -1,6 +1,13 @@
-# YAML Dataset Demo Configuration
-# Real APEX YAML configuration for YamlDatasetDemo.java
-# NO HARDCODED SIMULATION - Uses authentic APEX services
+
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: YamlDatasetDemoTest.java (testYamlDatasetLoading, testYamlDatasetProcessing methods)
+# Purpose: YAML dataset demonstration showing APEX dataset loading capabilities
+#          with inline reference data for testing dataset functionality and
+#          data source integration with enrichment processing
+# ============================================================================
 
 metadata:
   id: "yaml-dataset-demo-configuration"

@@ -1,3 +1,13 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Separate rule configuration demonstrating individual rule definitions
+#          for separate file testing, standalone rule components, and modular
+#          rule architecture for flexible rule management
+# Status: Available for integration with separate rule tests
+# ============================================================================
+
 metadata:
   id: "separate-rules-consolidated-config"
   name: "Separate Rules Consolidated"

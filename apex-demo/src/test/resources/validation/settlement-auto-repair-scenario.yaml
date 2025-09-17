@@ -1,3 +1,13 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Settlement auto-repair scenario configuration with automated settlement
+#          repair processing, settlement validation, and post-trade settlement
+#          operations using APEX rules engine for settlement management
+# Status: Available for integration with settlement auto-repair scenario tests
+# ============================================================================
+
 metadata:
   id: "settlement-auto-repair-processing-scenario"
   name: "Settlement Auto-Repair Processing Scenario"

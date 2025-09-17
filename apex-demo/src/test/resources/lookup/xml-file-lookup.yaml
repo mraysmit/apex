@@ -2,6 +2,16 @@
 # Demonstrates file-system data source lookup using XML files
 # Use Case: Enrich product data using XML file lookup
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: XML file lookup demonstration using APEX lookup enrichments with
+#          XML file data sources, XML data processing, and file-based XML
+#          reference data integration for structured document processing
+# Status: Available for integration with XML file lookup tests
+# ============================================================================
+
 metadata:
   id: "xml-file-lookup-demo"
   name: "XML File Lookup Demo"

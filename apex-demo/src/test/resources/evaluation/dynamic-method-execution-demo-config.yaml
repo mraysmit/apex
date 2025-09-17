@@ -1,6 +1,13 @@
-# APEX Dynamic Method Execution Demo Configuration
-# Real APEX YAML configuration for dynamic method execution processing
-# Replaces all hardcoded dynamic method execution logic from DynamicMethodExecutionDemo (@version 2.0)
+
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: DynamicMethodExecutionDemoTest.java (testDynamicMethodExecution, testDynamicMethodExecutionWithComplexData methods)
+# Purpose: Dynamic method execution demonstration using APEX evaluation capabilities
+#          for testing dynamic method invocation, expression evaluation, and
+#          runtime method execution with complex business logic
+# ============================================================================
 
 metadata:
   id: "dynamic-method-execution-demo-config"

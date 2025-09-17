@@ -2,6 +2,16 @@
 # Demonstrates SpEL mathematical expressions in lookup-key configurations
 # Use Case: Dynamic pricing and financial calculations using mathematical operations
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Mathematical operations lookup demonstration using APEX lookup
+#          enrichments with mathematical calculations, formula-based lookups,
+#          and computational data enrichment for quantitative analysis
+# Status: Available for integration with mathematical operations lookup tests
+# ============================================================================
+
 metadata:
   id: "mathematical-operations-lookup-demo"
   name: "Mathematical Operations Lookup Demo"

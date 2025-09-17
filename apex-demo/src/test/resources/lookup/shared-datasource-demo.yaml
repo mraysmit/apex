@@ -1,6 +1,16 @@
 # Shared DataSource Demo Configuration
 # This demonstrates proper H2 database integration with APEX
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Shared data source demonstration using APEX lookup enrichments with
+#          shared data source configurations, data source reuse, and centralized
+#          data source management for efficient resource utilization
+# Status: Available for integration with shared data source tests
+# ============================================================================
+
 metadata:
   name: "Shared DataSource Demo"
   version: "1.0.0"

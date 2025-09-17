@@ -2,6 +2,16 @@
 # External data source configuration for compliance validation
 # Replaces hardcoded compliance logic from IntegratedTradeValidatorComplexDemo
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Compliance validation configuration for trade validation with
+#          regulatory compliance rules, compliance checking logic, and
+#          regulatory validation processing using APEX validation capabilities
+# Status: Available for integration with compliance validation tests
+# ============================================================================
+
 metadata:
   id: "compliance-validation-configuration"
   name: "Compliance Validation Configuration"

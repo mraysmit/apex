@@ -1,3 +1,13 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: File processing rules configuration with comprehensive file processing
+#          validation, file transformation operations, and file-based data
+#          processing using APEX rules engine capabilities
+# Status: Available for integration with file processing rules tests
+# ============================================================================
+
 metadata:
   id: "file-processing-rules-configuration"
   name: "File Processing Rules Configuration"

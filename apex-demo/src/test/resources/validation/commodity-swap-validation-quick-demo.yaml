@@ -1,6 +1,12 @@
-# APEX Commodity Swap Validation Quick Demo Configuration
-# Pure YAML-driven configuration for layered API demonstration with performance monitoring
-# Unique features: Ultra-Simple API, Template-Based Rules, Advanced Configuration, Performance Monitoring
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Commodity swap validation quick demonstration with layered API
+#          demonstration, performance monitoring, and ultra-simple API features
+#          using APEX rules engine for fast commodity trading validation
+# Status: Available for integration with commodity swap quick validation tests
+# ============================================================================
 
 metadata:
   id: "commodity-swap-validation-quick-demo"

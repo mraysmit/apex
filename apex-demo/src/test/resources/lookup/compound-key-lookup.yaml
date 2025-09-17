@@ -2,6 +2,16 @@
 # Demonstrates compound lookup-key using string concatenation
 # Use Case: Customer-region specific pricing and tier information lookup
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Compound key lookup demonstration using APEX lookup enrichments with
+#          multi-field lookup keys, complex key matching, and composite key
+#          lookup operations for advanced data retrieval scenarios
+# Status: Available for integration with compound key lookup tests
+# ============================================================================
+
 metadata:
   id: "compound-key-lookup-demo"
   name: "Compound Key Lookup Demo"

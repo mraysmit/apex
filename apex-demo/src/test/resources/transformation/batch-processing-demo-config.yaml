@@ -2,6 +2,16 @@
 # Real APEX YAML configuration for BatchProcessingDemo.java
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Batch processing demonstration using APEX transformation capabilities
+#          for batch data processing, bulk operations, and high-volume data
+#          transformation with comprehensive batch processing logic
+# Status: Available for integration with batch processing tests
+# ============================================================================
+
 metadata:
   name: "Batch Processing Demo Configuration"
   version: "2.0.0"

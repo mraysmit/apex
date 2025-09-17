@@ -2,6 +2,16 @@
 # External data source configuration for validation rules
 # Replaces hardcoded validation rule logic from IntegratedTradeValidatorComplexDemo
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Validation rules configuration for trade validation with comprehensive
+#          trade validation rules, business validation logic, and trade
+#          processing validation using APEX rules engine capabilities
+# Status: Available for integration with validation rules tests
+# ============================================================================
+
 metadata:
   id: "validation-rules-configuration"
   name: "Validation Rules Configuration"

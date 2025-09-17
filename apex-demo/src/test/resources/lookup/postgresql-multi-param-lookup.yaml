@@ -2,6 +2,16 @@
 # Demonstrates complex database data source with multiple parameters and advanced SQL queries
 # Use Case: Trade settlement instruction data source for multi-parameter lookups
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: PostgreSQL multi-parameter lookup demonstration using APEX lookup
+#          enrichments with PostgreSQL database integration, multi-parameter
+#          queries, and advanced database lookup capabilities
+# Status: Available for integration with PostgreSQL multi-parameter lookup tests
+# ============================================================================
+
 metadata:
   id: "self-contained-database-multi-parameter-data-source-demo"
   name: "Self-Contained Database Multi-Parameter Data Source Demo"

@@ -1,6 +1,13 @@
-# Multi-Parameter Database Lookup Demo
-# Demonstrates database lookup with multiple parameters using settlement instructions
-# Use Case: Simple settlement instruction lookup with multiple query parameters
+
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: MultiParameterLookupTest.java (testMultiParameterLookup, testMultiParameterLookupWithComplexData methods)
+# Purpose: Multi-parameter lookup demonstration using APEX lookup enrichment
+#          capabilities for testing complex lookup operations with multiple
+#          parameters and compound key lookups
+# ============================================================================
 
 metadata:
   id: "multi-parameter-database-lookup-demo"

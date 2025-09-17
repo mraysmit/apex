@@ -1,6 +1,12 @@
-# APEX Lookup Services Configuration
-# External data source configuration for lookup services
-# Replaces hardcoded lookup service logic from IntegratedTradeValidatorComplexDemo
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Lookup services configuration for trade validation with external
+#          data source configuration, lookup service definitions, and reference
+#          data lookups for complex trade validation processing
+# Status: Available for integration with lookup services tests
+# ============================================================================
 
 metadata:
   id: "lookup-services-configuration"

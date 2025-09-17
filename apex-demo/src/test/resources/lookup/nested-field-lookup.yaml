@@ -2,6 +2,16 @@
 # Demonstrates nested field navigation in lookup-key expressions
 # Use Case: Country-specific settlement information lookup using nested counterparty data
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Nested field lookup demonstration using APEX lookup enrichments with
+#          nested data structures, hierarchical field access, and complex
+#          object navigation for advanced data retrieval scenarios
+# Status: Available for integration with nested field lookup tests
+# ============================================================================
+
 metadata:
   id: "nested-field-reference-lookup-demo"
   name: "Nested Field Reference Lookup Demo"

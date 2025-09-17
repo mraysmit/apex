@@ -1,6 +1,12 @@
-# APEX Integrated Validator Demo Configuration
-# Consolidated configuration for Customer, Product, and Trade validation
-# Pure YAML-driven configuration replacing redundant individual validators
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Integrated validator demonstration with consolidated configuration for
+#          customer, product, and trade validation using pure YAML-driven
+#          configuration replacing redundant individual validators
+# Status: Available for integration with integrated validator tests
+# ============================================================================
 
 metadata:
   id: "integrated-validator-demo"

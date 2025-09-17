@@ -2,6 +2,16 @@
 # Demonstrates sophisticated caching strategies with parameter isolation
 # Use Case: Enterprise-grade caching with parameter-aware key generation
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Advanced caching demonstration for APEX lookup enrichments with
+#          caching strategies, cache management, and performance optimization
+#          for high-performance lookup operations
+# Status: Available for integration with advanced caching tests
+# ============================================================================
+
 metadata:
   id: "advanced-parameter-aware-caching-demo"
   name: "Advanced Parameter-Aware Caching Demo"

@@ -1,6 +1,12 @@
-# APEX Integrated Trade Validator Complex Demo Configuration
-# Real APEX YAML configuration for complex trade validation processing
-# Replaces all hardcoded trade validation logic from IntegratedTradeValidatorComplexDemo (@version 1.0)
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Integrated trade validator complex demonstration with comprehensive
+#          complex trade validation processing, advanced validation scenarios,
+#          and sophisticated trade processing using APEX validation capabilities
+# Status: Available for integration with integrated trade validator complex tests
+# ============================================================================
 
 metadata:
   id: "integrated-trade-validator-complex-demo"

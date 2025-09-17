@@ -1,6 +1,12 @@
-# APEX Customer Transformer Demo Configuration
-# Real APEX YAML configuration for customer transformer processing
-# Replaces all hardcoded customer transformer logic from CustomerTransformerDemo (@version 1.0)
+
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: YamlConfigurationValidationTest.java (testCustomerTransformerValidation method)
+# Purpose: Customer data transformation demonstration using APEX enrichment capabilities
+#          for testing customer data processing, field mapping, and transformation logic
+# ============================================================================
 
 metadata:
   id: "customer-transformer-demo"

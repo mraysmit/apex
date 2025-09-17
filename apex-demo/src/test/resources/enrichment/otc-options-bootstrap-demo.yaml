@@ -1,6 +1,12 @@
-# APEX OTC Options Bootstrap Demo Configuration
-# Real APEX YAML configuration for OTC options bootstrap processing
-# Replaces all hardcoded OTC options logic from OtcOptionsBootstrapDemo (@version 1.0)
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: OTC options bootstrap demonstration with real APEX enrichment services
+#          for over-the-counter options processing, options validation, pricing
+#          calculations, and options lifecycle management
+# Status: Available for integration with OTC options tests
+# ============================================================================
 
 metadata:
   id: "otc-options-bootstrap-demo"

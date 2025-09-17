@@ -2,6 +2,16 @@
 # Demonstrates file-system data source lookup using JSON files
 # Use Case: Enrich product data using JSON file lookup
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: JSON file lookup demonstration using APEX lookup enrichments with
+#          JSON file data sources, file-based lookups, and JSON data processing
+#          for external file-based reference data integration
+# Status: Available for integration with JSON file lookup tests
+# ============================================================================
+
 metadata:
   id: "json-file-lookup-demo"
   name: "JSON File Lookup Demo"

@@ -2,6 +2,16 @@
 # External data source configuration for enrichment patterns processing
 # Replaces embedded enrichment patterns from CommoditySwapValidationBootstrap
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Enrichment patterns configuration for commodity bootstrap with
+#          enrichment patterns, data enhancement strategies, and commodity
+#          enrichment processing using APEX enrichment capabilities
+# Status: Available for integration with enrichment patterns tests
+# ============================================================================
+
 metadata:
   id: "enrichment-patterns-configuration"
   name: "Enrichment Patterns Configuration"

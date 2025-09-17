@@ -2,6 +2,16 @@
 # External data source configuration for validation rules processing
 # Replaces embedded YAML validation rules from CommoditySwapValidationBootstrap
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Validation rules configuration for commodity bootstrap with
+#          comprehensive commodity validation rules, business validation logic,
+#          and commodity-specific validation processing
+# Status: Available for integration with commodity validation rules tests
+# ============================================================================
+
 metadata:
   id: "validation-rules-configuration"
   name: "Validation Rules Configuration"

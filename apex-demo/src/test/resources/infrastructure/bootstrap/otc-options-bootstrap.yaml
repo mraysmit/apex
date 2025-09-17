@@ -1,5 +1,11 @@
 # ============================================================================
-# APEX Rules Engine - OTC Options Bootstrap Configuration
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: OTC options bootstrap configuration for over-the-counter options
+#          processing, options validation, pricing calculations, and options
+#          lifecycle management using APEX rules engine capabilities
+# Status: Available for integration with OTC options tests
 # ============================================================================
 #
 # This YAML configuration demonstrates comprehensive OTC Options validation

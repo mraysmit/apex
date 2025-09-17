@@ -1,5 +1,11 @@
 # ============================================================================
-# APEX Rules Engine - Settlement Validation Rules Configuration
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Settlement validation rules configuration for comprehensive settlement
+#          processing validation, settlement instruction validation, and
+#          post-trade settlement operations using APEX validation capabilities
+# Status: Available for integration with settlement validation tests
 # ============================================================================
 #
 # This configuration file contains comprehensive validation rules for

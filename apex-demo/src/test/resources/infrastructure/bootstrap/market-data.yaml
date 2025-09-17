@@ -1,10 +1,12 @@
 # ============================================================================
-# APEX Rules Engine - Market Data Reference Dataset
+# APEX YAML Configuration File
 # ============================================================================
-#
-# External YAML dataset containing currency and market reference data
-# for OTC Options Bootstrap Demo enrichment processing.
-#
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Market data reference dataset containing currency and market reference
+#          data for OTC options bootstrap demo enrichment processing with
+#          comprehensive market data for financial instruments
+# Status: Available for integration with market data tests
+# ============================================================================
 # Generated on: 2025-08-02
 # Used by: OTC Options Bootstrap Demo
 # Purpose: Currency enrichment and market data lookup

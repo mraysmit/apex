@@ -1,8 +1,11 @@
 # ============================================================================
-# APEX Demo Data Bootstrap - Customer Profiles
+# APEX YAML Configuration File
 # ============================================================================
-# Generated: 2025-08-27
-# Purpose: Realistic customer profile data for APEX demonstrations
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Customer profiles reference dataset containing realistic customer
+#          profile data for APEX demonstrations, customer management, and
+#          enrichment processing with comprehensive customer attributes
+# Status: Available for integration with customer profile tests
 # ============================================================================
 
 metadata:

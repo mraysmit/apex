@@ -1,13 +1,12 @@
 # ============================================================================
-# APEX Rules Engine - Commodity Swap Validation Bootstrap
+# APEX YAML Configuration File
 # ============================================================================
-#
-# This YAML configuration provides a complete, self-contained demonstration
-# of commodity derivatives validation and enrichment using the APEX Rules Engine.
-# It serves as a bootstrap configuration for commodity trading systems.
-#
-# OVERVIEW:
-# This configuration implements comprehensive validation and enrichment logic
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Commodity swap validation bootstrap configuration providing complete
+#          self-contained demonstration of commodity derivatives validation and
+#          enrichment using APEX Rules Engine for commodity trading systems
+# Status: Available for integration with commodity swap validation tests
+# ============================================================================
 # for commodity swap transactions, covering all aspects from basic field
 # validation to complex business rules and regulatory compliance.
 #

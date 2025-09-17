@@ -2,6 +2,16 @@
 # Demonstrates complex multi-parameter database lookup enrichment using APEX YAML processing
 # Use Case: Enrich trades with settlement instructions and risk assessment data from database
 
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Settlement instruction enrichment demonstration using APEX lookup
+#          enrichments for settlement processing, instruction validation, and
+#          post-trade settlement operations with comprehensive settlement data
+# Status: Available for integration with settlement instruction enrichment tests
+# ============================================================================
+
 metadata:
   id: "settlement-instruction-multi-parameter-enrichment-demo---database-version"
   name: "Settlement Instruction Multi-Parameter Enrichment Demo - Database Version"

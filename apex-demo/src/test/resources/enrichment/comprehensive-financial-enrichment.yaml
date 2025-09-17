@@ -1,6 +1,11 @@
-# Comprehensive Financial Enrichment Configuration
-# Real APEX YAML configuration demonstrating comprehensive financial services enrichment capabilities
-# Replaces multiple generic demo configurations with meaningful business scenarios
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: YamlConfigurationValidationTest.java (testYamlConfigurationValidation, testYamlConfigurationLoading methods)
+# Purpose: Comprehensive financial services enrichment demonstration with real APEX
+#          capabilities including trade processing, risk management, settlement processing,
+#          and regulatory compliance for testing YAML configuration validation
+# ============================================================================
 
 metadata:
   id: "comprehensive-financial-enrichment"
