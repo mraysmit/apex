@@ -5,11 +5,11 @@
 # ============================================================================
 # APEX YAML Configuration File
 # ============================================================================
-# Used by: ORPHANED - No Java test currently uses this file
+# Used by: CurrencyMarketMappingTest.java (Active test implementation)
 # Purpose: Currency market mapping demonstration using APEX lookup enrichments
 #          for currency data enrichment, market data lookups, and financial
 #          instrument currency mapping with comprehensive market data
-# Status: Available for integration with currency market mapping tests
+# Status: ACTIVE - Integrated with currency market mapping tests
 # ============================================================================
 
 metadata:
@@ -30,7 +30,7 @@ enrichments:
     condition: "#currency != null && #currency.length() > 0"
     
     lookup-config:
-      lookup-key: "currency"
+      lookup-key: "#currency"
       lookup-dataset:
         type: "inline"
         key-field: "currency_code"
@@ -119,14 +119,6 @@ enrichments:
             region: "Europe"
             timezone: "Europe/Copenhagen"
             trading_hours: "09:00-17:00"
-            
-        # Fallback data when currency is not found
-        default-values:
-          market: "NYSE"
-          market_name: "New York Stock Exchange"
-          region: "North America"
-          timezone: "America/New_York"
-          trading_hours: "09:30-16:00"
     
     # Map lookup results to enriched data fields
     field-mappings:

@@ -1,0 +1,50 @@
+# APEX Nested Validation Rules Configuration
+# Validates APEX validation engine can enforce business rules on nested structures
+
+metadata:
+  id: "barrier-option-nested-validation"
+  name: "APEX Nested Validation Rules"
+  version: "1.0.0"
+  description: "Validates APEX validation engine nested business rule enforcement"
+  business-domain: "Financial Derivatives - Barrier Options"
+  author: "apex.validation.team@company.com"
+  created-date: "2025-09-19"
+  tags: ["apex-validation", "nested-data", "barrier-options", "validation"]
+
+# APEX Validation Rules - All validation logic defined here
+rules:
+  # VALIDATES: APEX can validate nested field relationships
+  - id: "nested-barrier-strike-validation"
+    name: "Nested Barrier vs Strike Price Validation"
+    description: "Validates barrier level is above strike price for up-and-out options"
+    condition: "#barrierTerms != null && #barrierTerms['barrierLevel'] != null && #pricingTerms != null && #pricingTerms['strikePrice'] != null && #barrierTerms['barrierDirection'] == 'Up-and-Out'"
+    validation-expression: "T(java.lang.Double).parseDouble(#barrierTerms['barrierLevel']) > T(java.lang.Double).parseDouble(#pricingTerms['strikePrice'])"
+    message: "Barrier level must be above strike price for up-and-out options"
+    severity: "ERROR"
+    categories: ["nested-validation", "business-rule"]
+    
+  # VALIDATES: APEX can validate 3-level nested date consistency
+  - id: "nested-date-consistency-validation"
+    name: "Nested Date Consistency Validation"
+    description: "Validates observation period dates are consistent with expiry"
+    condition: "#barrierTerms != null && #barrierTerms['knockoutConditions'] != null && #barrierTerms['knockoutConditions']['observationPeriod'] != null && #barrierTerms['knockoutConditions']['observationPeriod']['endDate'] != null && #expiryDate != null"
+    validation-expression: "T(java.time.LocalDate).parse(#barrierTerms['knockoutConditions']['observationPeriod']['endDate']).equals(T(java.time.LocalDate).parse(#expiryDate))"
+    message: "Observation period end date must match option expiry date"
+    severity: "ERROR"
+    categories: ["date-validation", "level-3-nested"]
+    
+  # VALIDATES: APEX can validate nested rebate business logic
+  - id: "nested-rebate-validation"
+    name: "Nested Rebate Amount Validation"
+    description: "Validates rebate amount is reasonable percentage of premium"
+    condition: "#barrierTerms != null && #barrierTerms['knockoutConditions'] != null && #barrierTerms['knockoutConditions']['rebateTerms'] != null && #barrierTerms['knockoutConditions']['rebateTerms']['rebateAmount'] != null && #pricingTerms != null && #pricingTerms['premium'] != null"
+    validation-expression: "(T(java.lang.Double).parseDouble(#barrierTerms['knockoutConditions']['rebateTerms']['rebateAmount']) / T(java.lang.Double).parseDouble(#pricingTerms['premium'])) <= 0.5"
+    message: "Rebate amount cannot exceed 50% of premium"
+    severity: "WARNING"
+    categories: ["rebate-validation", "business-logic"]
+
+# Processing Configuration
+processing:
+  continue-on-error: true
+  max-errors: 10
+  error-handling: "collect-all"

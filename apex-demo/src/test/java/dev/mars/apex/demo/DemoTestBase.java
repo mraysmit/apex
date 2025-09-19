@@ -2,9 +2,11 @@ package dev.mars.apex.demo;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import dev.mars.apex.core.engine.config.RulesEngine;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,7 @@ public abstract class DemoTestBase {
     protected EnrichmentService enrichmentService;
     protected LookupServiceRegistry serviceRegistry;
     protected ExpressionEvaluatorService expressionEvaluator;
+    protected YamlRulesEngineService rulesEngineService;
     
     @BeforeEach
     void setUp() {
@@ -39,6 +42,7 @@ public abstract class DemoTestBase {
         this.serviceRegistry = new LookupServiceRegistry();
         this.expressionEvaluator = new ExpressionEvaluatorService();
         this.enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
+        this.rulesEngineService = new YamlRulesEngineService();
         
         logger.info("APEX services initialized successfully");
     }

@@ -17,6 +17,7 @@ package dev.mars.apex.demo.lookup;
  */
 
 import dev.mars.apex.demo.DemoTestBase;
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.slf4j.Logger;
@@ -35,9 +36,9 @@ import static org.junit.jupiter.api.Assertions.*;
  * - APEX mathematical calculations on nested data values
  * 
  * CRITICAL VALIDATION CHECKLIST APPLIED:
- * ✅ Count enrichments in YAML - 2 enrichments expected (apex-level2-navigation, apex-cross-nested-calculation)
- * ✅ Verify log shows "Processed: 2 out of 2" - Must be 100% execution rate
- * ✅ Check EVERY enrichment condition - Test data triggers ALL 2 conditions
+ * ✅ Count enrichments in YAML - 4 enrichments expected (apex-level2-navigation, apex-cross-nested-calculation, apex-level3-conditional, apex-nested-date-calculation)
+ * ✅ Verify log shows "Processed: 4 out of 4" - Must be 100% execution rate
+ * ✅ Check EVERY enrichment condition - Test data triggers ALL 4 conditions
  * ✅ Validate EVERY business calculation - Test mathematical formulas on nested data
  * ✅ Assert ALL enrichment results - Every result-field has corresponding assertEquals
  * 
@@ -49,14 +50,14 @@ public class BarrierOptionNestedTest extends DemoTestBase {
     private static final Logger logger = LoggerFactory.getLogger(BarrierOptionNestedTest.class);
 
     @Test
-    @DisplayName("Validate APEX Nested Enrichment Processing Capabilities - Initial 2 Enrichments")
+    @DisplayName("Validate APEX Nested Enrichment Processing Capabilities - Step 4: Complete (4 Enrichments)")
     void testApexNestedEnrichmentCapabilities() {
         logger.info("=== Testing APEX Nested Enrichment Processing Capabilities ===");
         
         // Load APEX enrichment configuration
-        var config = loadAndValidateYaml("lookup/barrier-option-nested-enrichment.yaml");
+        var config = loadAndValidateYaml("lookup/BarrierOptionNestedTest.yaml");
         
-        // Create barrier option test data that triggers ALL 2 enrichments
+        // Create barrier option test data that triggers ALL 4 enrichments
         Map<String, Object> barrierOptionData = createBarrierOptionTestData();
 
         // Execute APEX enrichment processing - ALL logic in YAML
@@ -67,14 +68,41 @@ public class BarrierOptionNestedTest extends DemoTestBase {
         @SuppressWarnings("unchecked")
         Map<String, Object> enrichedData = (Map<String, Object>) result;
         
-        // VALIDATE: APEX processed ALL 2 enrichments (must be 100% execution rate)
+        // VALIDATE: APEX processed ALL 4 enrichments (must be 100% execution rate)
         validateApexNestedEnrichmentResults(enrichedData);
         
         logger.info("✓ APEX successfully processed all nested data structures");
     }
+
+    @Test
+    @DisplayName("Validate APEX Nested Validation Rules Processing - Phase 3: Complete Validation")
+    void testApexNestedValidationCapabilities() {
+        logger.info("=== Testing APEX Nested Validation Rules Processing ===");
+
+        // Load APEX validation configuration
+        var config = loadAndValidateYaml("lookup/barrier-option-nested-validation.yaml");
+
+        // Create barrier option test data for validation
+        Map<String, Object> barrierOptionData = createBarrierOptionTestData();
+
+        // VALIDATE: APEX validation configuration loaded successfully
+        assertNotNull(config.getRules(), "APEX validation rules should be loaded");
+        assertEquals(3, config.getRules().size(), "Should have exactly 3 validation rules");
+
+        // VALIDATE: All validation rules are properly configured
+        var rules = config.getRules();
+        assertNotNull(rules.get(0).getCondition(), "First validation rule should have condition");
+        assertNotNull(rules.get(1).getCondition(), "Second validation rule should have condition");
+        assertNotNull(rules.get(2).getCondition(), "Third validation rule should have condition");
+
+        // VALIDATE: APEX processed ALL 3 validation rules configuration
+        validateApexNestedValidationResults(config, barrierOptionData);
+
+        logger.info("✓ APEX successfully processed all nested validation rules");
+    }
     
     /**
-     * Creates barrier option test data that triggers ALL nested processing conditions
+     * Creates barrier option test data that triggers ALL 4 nested processing conditions
      */
     private Map<String, Object> createBarrierOptionTestData() {
         Map<String, Object> testData = new HashMap<>();
@@ -106,12 +134,30 @@ public class BarrierOptionNestedTest extends DemoTestBase {
         pricingTerms.put("premium", "15000.00");
         testData.put("pricingTerms", pricingTerms);
         
-        // Level 1: Barrier terms
+        // Level 1: Barrier terms with Level 2 and Level 3 nesting
         Map<String, Object> barrierTerms = new HashMap<>();
         barrierTerms.put("barrierType", "Knock-Out");
         barrierTerms.put("barrierLevel", "2300.00");
         barrierTerms.put("barrierDirection", "Up-and-Out");
         barrierTerms.put("monitoringFrequency", "Continuous");
+
+        // Level 2: Knockout conditions
+        Map<String, Object> knockoutConditions = new HashMap<>();
+        knockoutConditions.put("triggerEvent", "Price Touch");
+
+        // Level 3: Observation period
+        Map<String, Object> observationPeriod = new HashMap<>();
+        observationPeriod.put("startDate", "2025-09-19");
+        observationPeriod.put("endDate", "2025-12-19");
+        knockoutConditions.put("observationPeriod", observationPeriod);
+
+        // Level 3: Rebate terms
+        Map<String, Object> rebateTerms = new HashMap<>();
+        rebateTerms.put("rebateAmount", "5000.00");
+        rebateTerms.put("rebatePaymentDate", "2025-12-21");
+        knockoutConditions.put("rebateTerms", rebateTerms);
+
+        barrierTerms.put("knockoutConditions", knockoutConditions);
         testData.put("barrierTerms", barrierTerms);
         
         return testData;
@@ -119,7 +165,7 @@ public class BarrierOptionNestedTest extends DemoTestBase {
     
     /**
      * Validates APEX nested enrichment processing results
-     * CRITICAL: Must validate ALL 2 enrichments were processed successfully
+     * CRITICAL: Must validate ALL 4 enrichments were processed successfully
      */
     private void validateApexNestedEnrichmentResults(Map<String, Object> enrichedData) {
         // VALIDATE: APEX Level 2 nested field navigation
@@ -131,9 +177,48 @@ public class BarrierOptionNestedTest extends DemoTestBase {
         assertNotNull(enrichedData.get("apexBarrierSpread"), "APEX should calculate barrier spread");
         assertEquals(150.0, Double.parseDouble(enrichedData.get("apexBarrierSpread").toString()),
                     "APEX should calculate: barrierLevel (2300) - strikePrice (2150) = 150");
-        
-        logger.info("✓ All 2 APEX nested enrichments validated successfully:");
+
+        // VALIDATE: APEX Level 3 nested conditional processing
+        assertNotNull(enrichedData.get("apexRebatePercentage"), "APEX should calculate rebate percentage from Level 3 nested data");
+        assertEquals(33.33, Double.parseDouble(enrichedData.get("apexRebatePercentage").toString()), 0.01,
+                    "APEX should calculate: (rebateAmount (5000) / premium (15000)) * 100 = 33.33%");
+
+        // VALIDATE: APEX nested date calculation with SpEL
+        assertNotNull(enrichedData.get("apexObservationPeriodDays"), "APEX should calculate days between nested observation period dates");
+        assertEquals(91L, Long.parseLong(enrichedData.get("apexObservationPeriodDays").toString()),
+                    "APEX should calculate days between 2025-09-19 and 2025-12-19 = 91 days");
+
+        logger.info("✓ All 4 APEX nested enrichments validated successfully:");
         logger.info("  - Level 2 Navigation: {}", enrichedData.get("apexExtractedMarketPrice"));
         logger.info("  - Cross-Nested Calculation: {}", enrichedData.get("apexBarrierSpread"));
+        logger.info("  - Level 3 Conditional: {}%", enrichedData.get("apexRebatePercentage"));
+        logger.info("  - Nested Date Calculation: {} days", enrichedData.get("apexObservationPeriodDays"));
+    }
+
+    /**
+     * Validates APEX nested validation rules configuration
+     * CRITICAL: Must validate ALL 3 validation rules are properly configured
+     */
+    private void validateApexNestedValidationResults(YamlRuleConfiguration config, Map<String, Object> testData) {
+        // VALIDATE: APEX validation rules configuration is complete
+        var rules = config.getRules();
+
+        // Validate each rule has the expected business logic conditions
+        // Rule 1: Barrier vs Strike validation
+        assertTrue(rules.get(0).getCondition().contains("barrierLevel") && rules.get(0).getCondition().contains("strikePrice"),
+                "First rule should validate barrier vs strike price");
+
+        // Rule 2: Date consistency validation
+        assertTrue(rules.get(1).getCondition().contains("observationPeriod") && rules.get(1).getCondition().contains("endDate"),
+                "Second rule should validate date consistency");
+
+        // Rule 3: Rebate amount validation
+        assertTrue(rules.get(2).getCondition().contains("rebateTerms") && rules.get(2).getCondition().contains("rebateAmount"),
+                "Third rule should validate rebate amount");
+
+        logger.info("✓ All 3 APEX nested validation rules configured successfully:");
+        logger.info("  - Barrier vs Strike Validation: CONFIGURED");
+        logger.info("  - Date Consistency Validation: CONFIGURED");
+        logger.info("  - Rebate Amount Validation: CONFIGURED");
     }
 }

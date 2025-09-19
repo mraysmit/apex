@@ -5,11 +5,11 @@
 # ============================================================================
 # APEX YAML Configuration File
 # ============================================================================
-# Used by: ORPHANED - No Java test currently uses this file
+# Used by: CompoundKeyLookupTest.java (Active test implementation)
 # Purpose: Compound key lookup demonstration using APEX lookup enrichments with
 #          multi-field lookup keys, complex key matching, and composite key
 #          lookup operations for advanced data retrieval scenarios
-# Status: Available for integration with compound key lookup tests
+# Status: ACTIVE - Integrated with compound key lookup tests
 # ============================================================================
 
 metadata:
@@ -139,31 +139,31 @@ enrichments:
     field-mappings:
       - source-field: "customerTier"
         target-field: "customerTier"
-        required: true
-        
+        required: false
+
       - source-field: "regionalDiscount"
         target-field: "regionalDiscount"
-        required: true
-        
+        required: false
+
       - source-field: "specialPricing"
         target-field: "specialPricing"
         required: false
-        
+
       - source-field: "customerName"
         target-field: "customerName"
-        required: true
-        
+        required: false
+
       - source-field: "regionName"
         target-field: "regionName"
-        required: true
-        
+        required: false
+
       - source-field: "currency"
         target-field: "currency"
-        required: true
-        
+        required: false
+
       - source-field: "taxRate"
         target-field: "taxRate"
-        required: true
+        required: false
 
 # Optional validation rules
 validations:

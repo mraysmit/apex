@@ -23,6 +23,7 @@ module dev.mars.apex.demo {
     requires java.base;
     requires java.logging;
     requires java.sql;
+    requires jdk.httpserver;  // For REST API testing with JDK HTTP server
 
     // APEX dependencies
     requires transitive dev.mars.apex.core;

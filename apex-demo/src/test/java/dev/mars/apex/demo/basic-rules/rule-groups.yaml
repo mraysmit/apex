@@ -12,6 +12,13 @@ metadata:
   version: "1.0.0"
   description: "Test rule groups for separate file testing"
 
+# Reference external rule files
+rule-refs:
+  - name: "separate-rules"
+    source: "src/test/java/dev/mars/apex/demo/basic-rules/rules.yaml"
+    enabled: true
+    description: "Separate rules for testing"
+
 rule-groups:
   - id: "separate-and-group"
     name: "Separate AND Group"

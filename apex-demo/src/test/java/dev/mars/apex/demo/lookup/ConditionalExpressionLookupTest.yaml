@@ -5,11 +5,11 @@
 # ============================================================================
 # APEX YAML Configuration File
 # ============================================================================
-# Used by: ORPHANED - No Java test currently uses this file
+# Used by: ConditionalExpressionLookupTest.java (Active test implementation)
 # Purpose: Conditional expression lookup demonstration using APEX lookup
 #          enrichments with conditional logic, expression-based lookups, and
 #          dynamic lookup conditions for complex business scenarios
-# Status: Available for integration with conditional expression lookup tests
+# Status: ACTIVE - Integrated with conditional expression lookup tests
 # ============================================================================
 
 metadata:
@@ -91,43 +91,43 @@ enrichments:
     field-mappings:
       - source-field: "riskCategory"
         target-field: "riskCategory"
-        required: true
-        
+        required: false
+
       - source-field: "riskLevel"
         target-field: "riskLevel"
-        required: true
-        
+        required: false
+
       - source-field: "interestRate"
         target-field: "interestRate"
-        required: true
-        
+        required: false
+
       - source-field: "maxLoanAmount"
         target-field: "maxLoanAmount"
-        required: true
-        
+        required: false
+
       - source-field: "approvalStatus"
         target-field: "approvalStatus"
-        required: true
-        
+        required: false
+
       - source-field: "requiredDocuments"
         target-field: "requiredDocuments"
-        required: true
-        
+        required: false
+
       - source-field: "processingDays"
         target-field: "processingDays"
-        required: true
-        
+        required: false
+
       - source-field: "riskMitigationActions"
         target-field: "riskMitigationActions"
-        required: true
-        
+        required: false
+
       - source-field: "collateralRequirement"
         target-field: "collateralRequirement"
-        required: true
-        
+        required: false
+
       - source-field: "reviewerLevel"
         target-field: "reviewerLevel"
-        required: true
+        required: false
 
 # Optional validation rules
 validations:

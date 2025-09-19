@@ -1,0 +1,152 @@
+# Basic REST API Lookup Configuration
+# Demonstrates JDK HTTP Server integration for REST API testing
+# Use Case: Currency exchange rate lookup using built-in JDK HTTP server (no external dependencies)
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: BasicRestApiLookupTest.java (Phase 2.1 implementation)
+# Purpose: Basic REST API demonstration using APEX lookup enrichments with
+#          JDK built-in HTTP server integration and simple REST API operations
+# Status: ACTIVE - Integrated with basic REST API tests
+# ============================================================================
+
+metadata:
+  id: "basic-rest-api-lookup-demo"
+  name: "Basic REST API Lookup Demo"
+  version: "1.0.0"
+  description: "Basic REST API integration using JDK built-in HTTP server for testing"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-09-20"
+  tags: ["apex-demo", "rest-api", "jdk-http-server", "phase-2"]
+
+# Basic REST API data source configuration (will be updated by test with real server details)
+dataSources:
+  - name: "currency-api-basic"
+    type: "rest-api"
+    enabled: true
+    description: "Currency exchange rate API using JDK HTTP server"
+
+    # Basic API configuration (will be dynamically updated by test)
+    connection:
+      # Base URL will be updated with real JDK HTTP server port
+      baseUrl: "http://localhost:8080"
+      timeout: 5000
+      retryAttempts: 2
+      retryDelay: 500
+
+    # Basic endpoints for currency data
+    endpoints:
+      currencyRate: "/api/currency/{currencyCode}"
+      currencyConversion: "/api/convert?from={from}&to={to}&amount={amount}"
+      default: "/api/health"
+
+    parameterNames:
+      - "currencyCode"
+      - "from"
+      - "to"
+      - "amount"
+
+    # Basic caching configuration
+    cache:
+      enabled: true
+      ttlSeconds: 300  # 5 minutes cache for currency data
+      maxSize: 1000
+      keyPrefix: "currency"
+
+    # Basic health check
+    healthCheck:
+      enabled: true
+      intervalSeconds: 60
+      timeoutSeconds: 5
+      endpoint: "/api/health"
+
+# Basic REST API enrichments
+enrichments:
+  - id: "currency-rate-lookup-basic"
+    name: "Basic Currency Rate Lookup"
+    description: "Simple currency rate lookup using JDK HTTP server"
+    type: "lookup-enrichment"
+    enabled: true
+    priority: 10
+
+    # Condition: Only process if currency code is present
+    condition: "#currencyCode != null && #currencyCode != ''"
+
+    # Basic REST API lookup configuration
+    lookup-config:
+      lookup-key: "#currencyCode"
+      lookup-dataset:
+        type: "rest-api"
+        connection-name: "currency-api-basic"
+        endpoint: "currencyRate"
+
+    # Field mappings for currency rate enrichment results
+    field-mappings:
+      - source-field: "code"
+        target-field: "currencyCode"
+        required: true
+      - source-field: "name"
+        target-field: "currencyName"
+        required: true
+      - source-field: "rate"
+        target-field: "exchangeRate"
+        required: true
+        transformation: "#value != null ? T(java.math.BigDecimal).valueOf(T(java.lang.Double).parseDouble(#value.toString())) : null"
+      - source-field: "symbol"
+        target-field: "currencySymbol"
+        required: false
+      - source-field: "lastUpdated"
+        target-field: "rateTimestamp"
+        required: false
+
+  # Additional enrichment for testing currency conversion
+  - id: "currency-conversion-basic"
+    name: "Basic Currency Conversion"
+    description: "Simple currency conversion using JDK HTTP server"
+    type: "lookup-enrichment"
+    enabled: true
+    priority: 20
+
+    condition: "#fromCurrency != null && #toCurrency != null && #amount != null"
+
+    lookup-config:
+      lookup-key: "{'from': #fromCurrency, 'to': #toCurrency, 'amount': #amount}"
+      lookup-dataset:
+        type: "rest-api"
+        connection-name: "currency-api-basic"
+        endpoint: "currencyConversion"
+
+    field-mappings:
+      - source-field: "fromCurrency"
+        target-field: "conversionFromCurrency"
+        required: true
+      - source-field: "toCurrency"
+        target-field: "conversionToCurrency"
+        required: true
+      - source-field: "originalAmount"
+        target-field: "conversionOriginalAmount"
+        required: true
+      - source-field: "convertedAmount"
+        target-field: "conversionResult"
+        required: true
+        transformation: "#value != null ? T(java.math.BigDecimal).valueOf(T(java.lang.Double).parseDouble(#value.toString())) : null"
+      - source-field: "exchangeRate"
+        target-field: "conversionRate"
+        required: true
+      - source-field: "timestamp"
+        target-field: "conversionTimestamp"
+        required: false
+
+# Basic processing configuration
+processing:
+  continue-on-error: true
+  max-errors: 3
+  error-handling: "log-and-continue"
+
+# Basic output configuration
+output:
+  include-api-metrics: true
+  include-performance-data: true
+  format: "basic"

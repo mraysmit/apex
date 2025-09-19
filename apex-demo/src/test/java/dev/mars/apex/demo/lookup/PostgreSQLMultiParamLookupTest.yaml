@@ -1,0 +1,365 @@
+# PostgreSQL Multi-Parameter Lookup Configuration
+# Demonstrates complex database data source with multiple parameters and advanced SQL queries
+# Use Case: Trade settlement instruction data source for multi-parameter lookups with real PostgreSQL
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: PostgreSQLMultiParamLookupTest.java (Phase 1.2 implementation)
+# Purpose: PostgreSQL multi-parameter lookup demonstration using APEX lookup
+#          enrichments with real PostgreSQL database integration, multi-parameter
+#          queries, and advanced database lookup capabilities
+# Status: ACTIVE - Integrated with PostgreSQL multi-parameter lookup tests
+# ============================================================================
+
+metadata:
+  id: "postgresql-multi-parameter-lookup-demo"
+  name: "PostgreSQL Multi-Parameter Lookup Demo"
+  version: "2.0.0"
+  description: "Data source configuration for complex database lookups with multiple parameters using real PostgreSQL database"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  updated-date: "2025-09-20"
+  tags: ["apex-demo", "lookup", "postgresql", "multi-parameter", "testcontainers", "phase-1"]
+
+# PostgreSQL data source configuration (will be updated by test with real connection details)
+data-sources:
+  - name: "postgresql-trading-database"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    description: "Trading and settlement data from real PostgreSQL database via Testcontainers"
+
+    connection:
+      # PostgreSQL connection details (will be dynamically updated by test)
+      # These are placeholder values - test will inject real Testcontainers connection
+      database: "apex_test"
+      username: "apex_user"
+      password: "apex_pass"
+      host: "localhost"
+      port: 5432
+
+      # PostgreSQL-optimized connection pool configuration for trading workloads
+      connection-pool:
+        max-size: 25
+        min-size: 5
+        initial-size: 10
+        connection-timeout: 30000
+        idle-timeout: 600000
+        max-lifetime: 1800000
+        leak-detection-threshold: 60000
+        connection-test-query: "SELECT 1"
+        test-on-borrow: true
+        test-while-idle: true
+        validation-timeout: 5000
+
+    # PostgreSQL-optimized caching configuration for trading data
+    cache:
+      enabled: true
+      ttlSeconds: 900  # 15 minutes for trading data
+      maxSize: 25000
+      eviction-policy: "LRU"
+      statistics-enabled: true
+
+    # PostgreSQL health monitoring for trading database
+    healthCheck:
+      enabled: true
+      query: "SELECT COUNT(*) FROM settlement_instructions WHERE status = 'ACTIVE'"
+      intervalSeconds: 60
+      timeoutSeconds: 15
+      
+    # Query definitions for this data source
+    queries:
+      settlementInstructions: |
+        SELECT
+          si.instruction_id,
+          si.counterparty_id,
+          si.custodian_id,
+          si.settlement_method,
+          si.delivery_instruction,
+          si.special_instructions,
+          cp.counterparty_name,
+          cp.counterparty_type,
+          cp.credit_rating,
+          cp.jurisdiction,
+          cust.custodian_name,
+          cust.custodian_bic,
+          cust.custodian_address,
+          mk.market_name,
+          mk.settlement_cycle,
+          mk.cut_off_time,
+          mk.time_zone,
+          inst.instrument_name,
+          inst.instrument_class,
+          inst.settlement_currency
+        FROM settlement_instructions si
+        LEFT JOIN counterparties cp ON si.counterparty_id = cp.counterparty_id
+        LEFT JOIN custodians cust ON si.custodian_id = cust.custodian_id
+        LEFT JOIN markets mk ON si.market = mk.market_code
+        LEFT JOIN instruments inst ON si.instrument_type = inst.instrument_type
+        WHERE si.counterparty_id = :counterpartyId
+          AND si.instrument_type = :instrumentType
+          AND si.currency = :currency
+          AND si.market = :market
+          AND si.status = 'ACTIVE'
+          AND (:minAmount IS NULL OR si.min_amount <= :minAmount)
+          AND (:maxAmount IS NULL OR si.max_amount >= :maxAmount)
+        ORDER BY si.priority ASC, si.created_date DESC
+        LIMIT 1
+      riskAssessment: |
+        SELECT
+          ra.risk_category,
+          ra.risk_score,
+          ra.max_exposure,
+          ra.approval_required,
+          ra.monitoring_level,
+          cp.credit_rating,
+          cp.credit_limit,
+          mk.volatility_rating,
+          mk.liquidity_rating
+        FROM risk_assessments ra
+        JOIN counterparties cp ON ra.counterparty_id = cp.counterparty_id
+        JOIN markets mk ON ra.market = mk.market_code
+        WHERE ra.counterparty_id = :counterpartyId
+          AND ra.instrument_type = :instrumentType
+          AND ra.market = :market
+          AND (:tradeAmount IS NULL OR ra.max_single_trade >= :tradeAmount)
+          AND ra.effective_date <= CURRENT_DATE
+          AND (ra.expiry_date IS NULL OR ra.expiry_date > CURRENT_DATE)
+        ORDER BY ra.effective_date DESC
+        LIMIT 1
+
+    # Parameter definitions
+    parameterNames:
+      - "counterpartyId"
+      - "instrumentType"
+      - "currency"
+      - "market"
+      - "minAmount"
+      - "maxAmount"
+      - "tradeAmount"
+
+# PostgreSQL enrichment rules using multi-parameter database lookups
+enrichments:
+  - id: "postgresql-settlement-instruction-lookup"
+    name: "PostgreSQL Settlement Instruction Multi-Parameter Lookup"
+    description: "Complex settlement instruction lookup using multiple parameters with real PostgreSQL database"
+    type: "lookup-enrichment"
+    enabled: true
+    priority: 10
+
+    # Condition: Only process if required parameters are present
+    condition: "#counterpartyId != null && #instrumentType != null && #currency != null && #market != null"
+
+    # PostgreSQL multi-parameter database lookup configuration
+    lookup-config:
+      lookup-key: "{'counterpartyId': #counterpartyId, 'instrumentType': #instrumentType, 'currency': #currency, 'market': #market, 'minAmount': #minAmount, 'maxAmount': #maxAmount}"
+      lookup-dataset:
+        type: "database"
+        connection-name: "postgresql-trading-database"
+        query: |
+          SELECT
+            si.instruction_id,
+            si.counterparty_id,
+            si.custodian_id,
+            si.settlement_method,
+            si.delivery_instruction,
+            si.special_instructions,
+            cp.counterparty_name,
+            cp.counterparty_type,
+            cp.credit_rating,
+            cp.jurisdiction,
+            cust.custodian_name,
+            cust.custodian_bic,
+            cust.custodian_address,
+            mk.market_name,
+            mk.settlement_cycle,
+            mk.cut_off_time,
+            mk.time_zone,
+            inst.instrument_name,
+            inst.instrument_class,
+            inst.settlement_currency
+          FROM settlement_instructions si
+          LEFT JOIN counterparties cp ON si.counterparty_id = cp.counterparty_id
+          LEFT JOIN custodians cust ON si.custodian_id = cust.custodian_id
+          LEFT JOIN markets mk ON si.market = mk.market_code
+          LEFT JOIN instruments inst ON si.instrument_type = inst.instrument_type
+          WHERE si.counterparty_id = :counterpartyId
+            AND si.instrument_type = :instrumentType
+            AND si.currency = :currency
+            AND si.market = :market
+            AND si.status = 'ACTIVE'
+            AND (CAST(:minAmount AS DECIMAL) IS NULL OR si.min_amount <= CAST(:minAmount AS DECIMAL))
+            AND (CAST(:maxAmount AS DECIMAL) IS NULL OR si.max_amount >= CAST(:maxAmount AS DECIMAL))
+          ORDER BY si.priority ASC, si.created_date DESC
+          LIMIT 1
+        parameters:
+          - field: "counterpartyId"
+            type: "string"
+          - field: "instrumentType"
+            type: "string"
+          - field: "currency"
+            type: "string"
+          - field: "market"
+            type: "string"
+          - field: "minAmount"
+            type: "decimal"
+          - field: "maxAmount"
+            type: "decimal"
+
+        # PostgreSQL-specific caching for settlement instructions
+        cache-enabled: true
+        cache-ttl-seconds: 600  # 10 minutes for settlement instructions
+
+    # Field mappings for settlement instruction enrichment results
+    field-mappings:
+      - source-field: "instruction_id"
+        target-field: "settlementInstructionId"
+        required: true
+      - source-field: "counterparty_id"
+        target-field: "settlementCounterpartyId"
+        required: true
+      - source-field: "custodian_id"
+        target-field: "settlementCustodianId"
+        required: true
+      - source-field: "settlement_method"
+        target-field: "settlementMethod"
+        required: true
+      - source-field: "delivery_instruction"
+        target-field: "deliveryInstruction"
+        required: false
+      - source-field: "special_instructions"
+        target-field: "specialInstructions"
+        required: false
+      - source-field: "counterparty_name"
+        target-field: "counterpartyName"
+        required: true
+      - source-field: "counterparty_type"
+        target-field: "counterpartyType"
+        required: true
+      - source-field: "credit_rating"
+        target-field: "counterpartyCreditRating"
+        required: false
+      - source-field: "jurisdiction"
+        target-field: "counterpartyJurisdiction"
+        required: true
+      - source-field: "custodian_name"
+        target-field: "custodianName"
+        required: true
+      - source-field: "custodian_bic"
+        target-field: "custodianBic"
+        required: true
+      - source-field: "custodian_address"
+        target-field: "custodianAddress"
+        required: false
+      - source-field: "market_name"
+        target-field: "marketName"
+        required: true
+      - source-field: "settlement_cycle"
+        target-field: "settlementCycle"
+        required: true
+        transformation: "#value != null ? T(java.lang.Integer).parseInt(#value.toString()) : 2"
+      - source-field: "cut_off_time"
+        target-field: "cutOffTime"
+        required: false
+      - source-field: "time_zone"
+        target-field: "timeZone"
+        required: false
+      - source-field: "instrument_name"
+        target-field: "instrumentName"
+        required: true
+      - source-field: "instrument_class"
+        target-field: "instrumentClass"
+        required: true
+      - source-field: "settlement_currency"
+        target-field: "settlementCurrency"
+        required: true
+
+  # Additional enrichment for risk assessment with multi-parameter lookup
+  - id: "postgresql-risk-assessment-lookup"
+    name: "PostgreSQL Risk Assessment Multi-Parameter Lookup"
+    description: "Complex risk assessment lookup using multiple parameters with real PostgreSQL database"
+    type: "lookup-enrichment"
+    enabled: true
+    priority: 20
+
+    # Condition: Only process if required parameters are present
+    condition: "#counterpartyId != null && #instrumentType != null && #market != null"
+
+    # PostgreSQL multi-parameter risk assessment lookup
+    lookup-config:
+      lookup-key: "{'counterpartyId': #counterpartyId, 'instrumentType': #instrumentType, 'market': #market, 'tradeAmount': #tradeAmount}"
+      lookup-dataset:
+        type: "database"
+        connection-name: "postgresql-trading-database"
+        query: |
+          SELECT
+            ra.risk_category,
+            ra.risk_score,
+            ra.max_exposure,
+            ra.approval_required,
+            ra.monitoring_level,
+            cp.credit_rating,
+            cp.credit_limit,
+            mk.volatility_rating,
+            mk.liquidity_rating
+          FROM risk_assessments ra
+          JOIN counterparties cp ON ra.counterparty_id = cp.counterparty_id
+          JOIN markets mk ON ra.market = mk.market_code
+          WHERE ra.counterparty_id = :counterpartyId
+            AND ra.instrument_type = :instrumentType
+            AND ra.market = :market
+            AND (CAST(:tradeAmount AS DECIMAL) IS NULL OR ra.max_single_trade >= CAST(:tradeAmount AS DECIMAL))
+            AND ra.effective_date <= CURRENT_DATE
+            AND (ra.expiry_date IS NULL OR ra.expiry_date > CURRENT_DATE)
+          ORDER BY ra.effective_date DESC
+          LIMIT 1
+        parameters:
+          - field: "counterpartyId"
+            type: "string"
+          - field: "instrumentType"
+            type: "string"
+          - field: "market"
+            type: "string"
+          - field: "tradeAmount"
+            type: "decimal"
+
+        # PostgreSQL-specific caching for risk assessments
+        cache-enabled: true
+        cache-ttl-seconds: 1800  # 30 minutes for risk assessments
+
+    # Field mappings for risk assessment enrichment results
+    field-mappings:
+      - source-field: "risk_category"
+        target-field: "riskCategory"
+        required: true
+      - source-field: "risk_score"
+        target-field: "riskScore"
+        required: true
+        transformation: "#value != null ? T(java.lang.Integer).parseInt(#value.toString()) : 0"
+      - source-field: "max_exposure"
+        target-field: "maxExposure"
+        required: false
+        transformation: "#value != null ? T(java.math.BigDecimal).new(#value.toString()) : null"
+      - source-field: "approval_required"
+        target-field: "approvalRequired"
+        required: true
+        transformation: "#value != null ? T(java.lang.Boolean).parseBoolean(#value.toString()) : false"
+      - source-field: "monitoring_level"
+        target-field: "monitoringLevel"
+        required: true
+      - source-field: "credit_rating"
+        target-field: "counterpartyCreditRating"
+        required: false
+      - source-field: "credit_limit"
+        target-field: "counterpartyCreditLimit"
+        required: false
+        transformation: "#value != null ? T(java.lang.Long).parseLong(#value.toString()) : 0L"
+      - source-field: "volatility_rating"
+        target-field: "marketVolatilityRating"
+        required: false
+      - source-field: "liquidity_rating"
+        target-field: "marketLiquidityRating"
+        required: false
+
