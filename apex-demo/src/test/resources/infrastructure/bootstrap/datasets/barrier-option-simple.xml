@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BarrierOption>
+    <!-- Level 0: Root elements -->
+    <tradeDate>2025-09-19</tradeDate>
+    <buyerParty>GOLDMAN_SACHS</buyerParty>
+    <sellerParty>JP_MORGAN</sellerParty>
+    <optionType>Call</optionType>
+    
+    <!-- Level 1: Nested underlying asset -->
+    <underlyingAsset>
+        <commodity>Gold</commodity>
+        <unit>Troy Ounce</unit>
+        <exchange>COMEX</exchange>
+        <!-- Level 2: Market data nesting -->
+        <marketData>
+            <currentPrice currency="USD">2100.00</currentPrice>
+            <volatility>0.18</volatility>
+        </marketData>
+    </underlyingAsset>
+    
+    <!-- Level 1: Nested pricing terms -->
+    <pricingTerms>
+        <strikePrice currency="USD">2150.00</strikePrice>
+        <notionalQuantity>100</notionalQuantity>
+        <premium currency="USD">15000.00</premium>
+    </pricingTerms>
+    
+    <!-- Level 1: Nested barrier terms -->
+    <barrierTerms>
+        <barrierType>Knock-Out</barrierType>
+        <barrierLevel currency="USD">2300.00</barrierLevel>
+        <barrierDirection>Up-and-Out</barrierDirection>
+        <monitoringFrequency>Continuous</monitoringFrequency>
+        <!-- Level 2: Knockout conditions -->
+        <knockoutConditions>
+            <triggerEvent>Price Touch</triggerEvent>
+            <!-- Level 3: Observation period -->
+            <observationPeriod>
+                <startDate>2025-09-19</startDate>
+                <endDate>2025-12-19</endDate>
+            </observationPeriod>
+            <!-- Level 3: Rebate terms -->
+            <rebateTerms>
+                <rebateAmount currency="USD">5000.00</rebateAmount>
+                <rebatePaymentDate>2025-12-21</rebatePaymentDate>
+            </rebateTerms>
+        </knockoutConditions>
+    </barrierTerms>
+    
+    <!-- Level 0: Simple settlement -->
+    <expiryDate>2025-12-19</expiryDate>
+    <settlementType>Cash</settlementType>
+</BarrierOption>

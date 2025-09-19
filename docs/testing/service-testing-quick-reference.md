@@ -336,14 +336,56 @@ mvn test -Dtest.file.streaming=true
 
 ## Test Environment Setup
 
+### Docker Image Version Management
+
+**APEX uses centralized Docker image version constants to ensure consistency across all tests:**
+
+#### **Global Constants Classes:**
+- **apex-core**: `dev.mars.apex.core.test.TestContainerImages`
+- **apex-demo**: `dev.mars.apex.demo.test.TestContainerImages`
+
+#### **Version Definitions:**
+All Docker image versions are defined in the root `pom.xml`:
+```xml
+<properties>
+    <!-- Docker Image Versions for Testcontainers -->
+    <docker.postgres.version>postgres:15-alpine</docker.postgres.version>
+    <docker.vault.version>hashicorp/vault:1.15</docker.vault.version>
+    <docker.redis.version>redis:6-alpine</docker.redis.version>
+</properties>
+```
+
+#### **Usage in Tests:**
+```java
+import dev.mars.apex.core.test.TestContainerImages;
+
+@Container
+static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(TestContainerImages.POSTGRES)
+        .withDatabaseName("test")
+        .withUsername("test")
+        .withPassword("test");
+
+@Container
+static VaultContainer<?> vault = new VaultContainer<>(TestContainerImages.VAULT)
+        .withVaultToken("myroot");
+```
+
+#### **Benefits:**
+- ✅ **Single source of truth** for all Docker image versions
+- ✅ **Easy version updates** across entire project
+- ✅ **Consistent testing environment**
+- ✅ **Reduced Docker downloads** (same versions reused)
+- ✅ **Better CI/CD performance** with Docker layer caching
+
 ### Required Services
 ```bash
 # PostgreSQL (for database tests)
+# Version defined in pom.xml as docker.postgres.version
 docker run -d --name test-postgres \
   -e POSTGRES_DB=apex_test \
   -e POSTGRES_USER=test \
   -e POSTGRES_PASSWORD=test \
-  -p 5432:5432 postgres:13
+  -p 5432:5432 postgres:15-alpine
 
 # Redis (for cache tests)
 docker run -d --name test-redis \
@@ -371,7 +413,8 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:13
+        # Version defined in pom.xml as docker.postgres.version
+        image: postgres:15-alpine
         env:
           POSTGRES_DB: apex_test
           POSTGRES_USER: test

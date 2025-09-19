@@ -86,7 +86,7 @@ class CacheDataSourceTest {
 @Testcontainers
 class DatabaseDataSourceIntegrationTest {
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:13")
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(TestContainerImages.POSTGRES)
             .withDatabaseName("test")
             .withUsername("test")
             .withPassword("test");

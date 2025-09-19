@@ -38,6 +38,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.DockerClientFactory;
+import dev.mars.apex.core.test.TestContainerImages;
 
 import java.util.HashMap;
 import java.util.List;
@@ -78,7 +79,7 @@ class PostgreSQLIntegrationTest {
 
     @Container
     @SuppressWarnings("resource") // Testcontainers manages lifecycle automatically
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(TestContainerImages.POSTGRES)
             .withDatabaseName("testdb")
             .withUsername("testuser")
             .withPassword("testpass")

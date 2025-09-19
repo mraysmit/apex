@@ -796,6 +796,9 @@ public class YamlEnrichmentProcessor {
     private StandardEvaluationContext createEvaluationContext(Object rootObject) {
         StandardEvaluationContext context = new StandardEvaluationContext(rootObject);
 
+        // Add custom property accessor for Maps to enable nested field access
+        context.addPropertyAccessor(new dev.mars.apex.core.engine.config.MapPropertyAccessor());
+
         // Add common variables and functions
         context.setVariable("serviceRegistry", serviceRegistry);
 

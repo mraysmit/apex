@@ -88,6 +88,11 @@
             <artifactId>testcontainers</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>vault</artifactId>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
@@ -242,7 +247,6 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>dev.mars.apex.demo.runners.DemoRunner</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

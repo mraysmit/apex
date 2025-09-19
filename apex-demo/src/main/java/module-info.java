@@ -58,6 +58,4 @@ module dev.mars.apex.demo {
 
     // Open packages for JUnit testing and reflection access
     // Open packages to allow JUnit (org.junit.platform.commons) reflective access to lifecycle methods
-    opens dev.mars.apex.demo;
-    opens dev.mars.apex.demo.validation;
 }
