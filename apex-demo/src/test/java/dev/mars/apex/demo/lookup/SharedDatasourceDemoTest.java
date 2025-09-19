@@ -40,7 +40,46 @@ public class SharedDatasourceDemoTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(SharedDatasourceDemoTest.class);
 
+    /**
+     * Setup minimal H2 database with customer test data.
+     * This is infrastructure setup, not business logic - business logic is in YAML.
+     */
+    @BeforeEach
+    void setupH2Database() {
+        logger.info("Setting up H2 database for shared datasource demo...");
 
+        String jdbcUrl = "jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+
+        try (Connection connection = DriverManager.getConnection(jdbcUrl, "sa", "")) {
+            Statement statement = connection.createStatement();
+
+            // Drop and create table
+            statement.execute("DROP TABLE IF EXISTS customers");
+            statement.execute("""
+                CREATE TABLE customers (
+                    customer_id VARCHAR(20) PRIMARY KEY,
+                    customer_name VARCHAR(100) NOT NULL,
+                    customer_type VARCHAR(20),
+                    tier VARCHAR(10),
+                    region VARCHAR(20),
+                    status VARCHAR(20)
+                )
+                """);
+
+            // Insert minimal test data
+            statement.execute("""
+                INSERT INTO customers (customer_id, customer_name, customer_type, tier, region, status) VALUES
+                ('CUST001', 'Acme Corporation', 'CORPORATE', 'PLATINUM', 'NA', 'ACTIVE'),
+                ('CUST002', 'Global Investment Partners', 'INSTITUTIONAL', 'GOLD', 'EU', 'ACTIVE')
+                """);
+
+            logger.info("✓ H2 database setup completed");
+
+        } catch (Exception e) {
+            logger.error("Failed to setup H2 database: " + e.getMessage(), e);
+            throw new RuntimeException("Database setup failed", e);
+        }
+    }
 
     @Test
     void testSharedDatasourceDemoFunctionality() {
@@ -64,11 +103,19 @@ public class SharedDatasourceDemoTest extends DemoTestBase {
         @SuppressWarnings("unchecked")
         Map<String, Object> enrichedData = (Map<String, Object>) result;
 
-        // Validate YAML-driven results only
-        assertNotNull(enrichedData.get("sharedDatasourceDemoResult"), "Shared datasource demo result should be generated");
+        // Validate YAML-driven H2 database lookup results
+        assertNotNull(enrichedData.get("customerName"), "Customer name should be retrieved from H2 database");
+        assertNotNull(enrichedData.get("customerType"), "Customer type should be retrieved from H2 database");
+        assertNotNull(enrichedData.get("customerTier"), "Customer tier should be retrieved from H2 database");
+        assertNotNull(enrichedData.get("customerRegion"), "Customer region should be retrieved from H2 database");
+        assertNotNull(enrichedData.get("customerStatus"), "Customer status should be retrieved from H2 database");
 
-        String sharedDatasourceDemoResult = (String) enrichedData.get("sharedDatasourceDemoResult");
-        assertTrue(sharedDatasourceDemoResult.contains("CUST001"), "Result should reference customer ID");
+        // Validate specific H2 database lookup results for CUST001
+        assertEquals("Acme Corporation", enrichedData.get("customerName"), "CUST001 should map to Acme Corporation");
+        assertEquals("CORPORATE", enrichedData.get("customerType"), "CUST001 should be CORPORATE type");
+        assertEquals("PLATINUM", enrichedData.get("customerTier"), "CUST001 should have PLATINUM tier");
+        assertEquals("NA", enrichedData.get("customerRegion"), "CUST001 should be in NA region");
+        assertEquals("ACTIVE", enrichedData.get("customerStatus"), "CUST001 should have ACTIVE status");
 
             logger.info("✅ Shared datasource demo functionality test completed successfully");
         } catch (Exception e) {

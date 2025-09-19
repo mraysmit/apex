@@ -1,5 +1,5 @@
 # Conditional Expression Lookup Example Configuration
-# Demonstrates conditional expression evaluation in lookup-key
+# Demonstrates conditional expression evaluation in lookup-key with H2 database
 # Use Case: Risk-based loan assessment with conditional credit score categorization
 
 # ============================================================================
@@ -8,7 +8,7 @@
 # Used by: ConditionalExpressionLookupTest.java (Active test implementation)
 # Purpose: Conditional expression lookup demonstration using APEX lookup
 #          enrichments with conditional logic, expression-based lookups, and
-#          dynamic lookup conditions for complex business scenarios
+#          dynamic lookup conditions for complex business scenarios using H2 database
 # Status: ACTIVE - Integrated with conditional expression lookup tests
 # ============================================================================
 
@@ -16,116 +16,79 @@ metadata:
   id: "conditional-expression-lookup-demo"
   name: "Conditional Expression Lookup Demo"
   version: "1.0.0"
-  description: "Demonstrates conditional expression lookup using credit score-based risk categorization"
+  description: "Demonstrates conditional expression lookup using credit score-based risk categorization with H2 database"
   type: "enrichment"
   author: "apex.demo.team@company.com"
   created-date: "2024-12-24"
-  tags: ["apex-demo", "lookup", "conditional"]
+  tags: ["apex-demo", "lookup", "conditional", "h2-database"]
+
+# Data source configuration using H2 database
+data-sources:
+  - name: "risk-assessment-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      # H2 file-based database for conditional expression lookup
+      database: "./target/h2-demo/apex_demo_conditional"
+      username: "sa"
+      password: ""
 
 # Define the enrichment rules
 enrichments:
   - id: "conditional-expression-lookup-demo"
     name: "Risk-Based Assessment Lookup"
-    description: "Enrich risk assessments with conditional credit score-based risk parameters"
+    description: "Enrich risk assessments with conditional credit score-based risk parameters using H2 database"
     type: "lookup-enrichment"
     enabled: true
     condition: "#creditScore != null"
-    
+
     lookup-config:
       # Conditional expression - evaluates credit score and returns risk category
       lookup-key: "#creditScore >= 750 ? 'EXCELLENT' : (#creditScore >= 650 ? 'GOOD' : (#creditScore >= 550 ? 'FAIR' : 'POOR'))"
-      
-      lookup-dataset:
-        type: "inline"
-        key-field: "riskCategory"
-        data:
-          # Excellent credit (750+)
-          - riskCategory: "EXCELLENT"
-            riskLevel: "LOW"
-            interestRate: 3.25
-            maxLoanAmount: 1000000.00
-            approvalStatus: "AUTO_APPROVED"
-            requiredDocuments: "Income verification only"
-            processingDays: 1
-            riskMitigationActions: "None required"
-            collateralRequirement: 0.00
-            reviewerLevel: "JUNIOR"
-            
-          # Good credit (650-749)
-          - riskCategory: "GOOD"
-            riskLevel: "LOW_MEDIUM"
-            interestRate: 4.75
-            maxLoanAmount: 750000.00
-            approvalStatus: "FAST_TRACK"
-            requiredDocuments: "Income verification, employment letter"
-            processingDays: 2
-            riskMitigationActions: "Employment verification"
-            collateralRequirement: 0.10
-            reviewerLevel: "JUNIOR"
-            
-          # Fair credit (550-649)
-          - riskCategory: "FAIR"
-            riskLevel: "MEDIUM"
-            interestRate: 7.25
-            maxLoanAmount: 500000.00
-            approvalStatus: "MANUAL_REVIEW"
-            requiredDocuments: "Income verification, employment letter, bank statements (3 months)"
-            processingDays: 5
-            riskMitigationActions: "Enhanced due diligence, co-signer evaluation"
-            collateralRequirement: 0.25
-            reviewerLevel: "SENIOR"
-            
-          # Poor credit (<550)
-          - riskCategory: "POOR"
-            riskLevel: "HIGH"
-            interestRate: 12.50
-            maxLoanAmount: 250000.00
-            approvalStatus: "DETAILED_REVIEW"
-            requiredDocuments: "Full financial disclosure, tax returns (2 years), bank statements (6 months), references"
-            processingDays: 10
-            riskMitigationActions: "Mandatory co-signer, asset verification, debt consolidation plan"
-            collateralRequirement: 0.50
-            reviewerLevel: "EXECUTIVE"
-    
-    # Map the lookup results to target fields
-    field-mappings:
-      - source-field: "riskCategory"
-        target-field: "riskCategory"
-        required: false
 
-      - source-field: "riskLevel"
+      lookup-dataset:
+        type: "database"
+        connection-name: "risk-assessment-database"
+        query: "SELECT risk_level, interest_rate, max_loan_amount, approval_status, required_documents, processing_days, risk_mitigation_actions, collateral_requirement, reviewer_level FROM risk_parameters WHERE risk_category = :riskCategory"
+        parameters:
+          - field: "riskCategory"
+            type: "string"
+
+    # Map the lookup results to target fields (H2 returns uppercase column names)
+    field-mappings:
+      - source-field: "RISK_LEVEL"
         target-field: "riskLevel"
         required: false
 
-      - source-field: "interestRate"
+      - source-field: "INTEREST_RATE"
         target-field: "interestRate"
         required: false
 
-      - source-field: "maxLoanAmount"
+      - source-field: "MAX_LOAN_AMOUNT"
         target-field: "maxLoanAmount"
         required: false
 
-      - source-field: "approvalStatus"
+      - source-field: "APPROVAL_STATUS"
         target-field: "approvalStatus"
         required: false
 
-      - source-field: "requiredDocuments"
+      - source-field: "REQUIRED_DOCUMENTS"
         target-field: "requiredDocuments"
         required: false
 
-      - source-field: "processingDays"
+      - source-field: "PROCESSING_DAYS"
         target-field: "processingDays"
         required: false
 
-      - source-field: "riskMitigationActions"
+      - source-field: "RISK_MITIGATION_ACTIONS"
         target-field: "riskMitigationActions"
         required: false
 
-      - source-field: "collateralRequirement"
+      - source-field: "COLLATERAL_REQUIREMENT"
         target-field: "collateralRequirement"
         required: false
 
-      - source-field: "reviewerLevel"
+      - source-field: "REVIEWER_LEVEL"
         target-field: "reviewerLevel"
         required: false
 

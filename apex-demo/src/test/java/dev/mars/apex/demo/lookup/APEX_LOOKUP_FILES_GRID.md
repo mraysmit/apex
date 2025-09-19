@@ -9,7 +9,7 @@
 | 3 | `BasicRestApiLookupTest.yaml` | ✅ `BasicRestApiLookupTest.java` | REST_API | ACTIVE | ✅ RENAMED - Phase 2.1 implementation |
 | 4 | `CompoundKeyLookupTest.yaml` | ✅ `CompoundKeyLookupTest.java` | INLINE | ACTIVE | ✅ COMPLETE - Compound key lookup with 5 test methods |
 | 5 | `ComprehensiveLookupTest.yaml` | ✅ `ComprehensiveLookupTest.java` | H2_DB | ACTIVE | ✅ RENAMED - Consolidated test |
-| 6 | `ConditionalExpressionLookupTest.yaml` | ✅ `ConditionalExpressionLookupTest.java` | INLINE | ACTIVE | ✅ COMPLETE - **FIXED YAML FIRST VIOLATION** |
+| 6 | `ConditionalExpressionLookupTest.yaml` | ✅ `ConditionalExpressionLookupTest.java` | H2_DB | ACTIVE | ✅ COMPLETE - **FIXED YAML FIRST VIOLATION** |
 | 7 | `CurrencyMarketMappingTest.yaml` | ✅ `CurrencyMarketMappingTest.java` | INLINE | ACTIVE | ✅ COMPLETE - Currency to market mapping with 5 test methods |
 | 8 | `customer-profile-enrichment.yaml` | ❌ None | UNKNOWN | ORPHANED | No test file exists |
 | 9 | `enhanced-rest-api-demo.yaml` | ✅ `EnhancedRestApiDemoTest.java` | REST_API | ACTIVE | Phase 2.2 implementation |
@@ -25,7 +25,7 @@
 | 19 | `postgresql-simple-database-enrichment.yaml` | ❌ None | UNKNOWN | ORPHANED | No test file exists |
 | 20 | `PostgreSQLSimpleLookupTest.yaml` | ✅ `PostgreSQLSimpleLookupTest.java` | POSTGRESQL_DB | ACTIVE | ✅ RENAMED - Phase 1.1 implementation |
 | 21 | `settlement-instruction-enrichment.yaml` | ❌ None | UNKNOWN | ORPHANED | No test file exists |
-| 22 | `SharedDatasourceDemoTest.yaml` | ✅ `SharedDatasourceDemoTest.java` | INLINE | ACTIVE | ✅ COMPLETE - **FIXED YAML FIRST VIOLATION** |
+| 22 | `SharedDatasourceDemoTest.yaml` | ✅ `SharedDatasourceDemoTest.java` | H2_DB | ACTIVE | ✅ COMPLETE - **FIXED YAML FIRST VIOLATION** |
 | 23 | `SimpleFieldLookupDemoTest.yaml` | ✅ `SimpleFieldLookupDemoTest.java` | INLINE | ACTIVE | ✅ RENAMED - Simple field lookup demo |
 
 ---
@@ -55,8 +55,8 @@
 
 | **Data Source Type** | **Count** | **Test Files** | **Coverage Status** |
 |---------------------|-----------|----------------|-------------------|
-| **INLINE** | 7 | `BarrierOptionNestedTest`, `CompoundKeyLookupTest`, `ConditionalExpressionLookupTest`, `CurrencyMarketMappingTest`, `NestedFieldLookupDemoTest`, `SharedDatasourceDemoTest`, `SimpleFieldLookupDemoTest` | ✅ **EXCELLENT** |
-| **H2_DB** | 3 | `ComprehensiveLookupTest`, `H2CustomParametersDemoTest`, `MultiParameterLookupTest` | ✅ **GOOD** |
+| **INLINE** | 5 | `BarrierOptionNestedTest`, `CompoundKeyLookupTest`, `CurrencyMarketMappingTest`, `NestedFieldLookupDemoTest`, `SimpleFieldLookupDemoTest` | ✅ **EXCELLENT** |
+| **H2_DB** | 5 | `ComprehensiveLookupTest`, `ConditionalExpressionLookupTest`, `H2CustomParametersDemoTest`, `MultiParameterLookupTest`, `SharedDatasourceDemoTest` | ✅ **EXCELLENT** |
 | **POSTGRESQL_DB** | 2 | `PostgreSQLMultiParamLookupTest`, `PostgreSQLSimpleLookupTest` | ✅ **GOOD** |
 | **REST_API** | 2 | `BasicRestApiLookupTest`, `EnhancedRestApiDemoTest` | ✅ **GOOD** |
 | **JSON_FILE** | 1 | `FileSystemLookupDemoTest` | ⚠️ **LIMITED** |
@@ -66,8 +66,8 @@
 | **UNKNOWN** | 5 | Orphaned YAML files | ❓ **NEEDS ANALYSIS** |
 
 ### **🎯 Pattern Coverage Analysis**
-- ✅ **INLINE patterns**: Excellent coverage (7 tests)
-- ✅ **Database patterns**: Good coverage (H2: 3, PostgreSQL: 2)
+- ✅ **INLINE patterns**: Excellent coverage (5 tests)
+- ✅ **Database patterns**: Excellent coverage (H2: 5, PostgreSQL: 2)
 - ✅ **REST API patterns**: Good coverage (2 tests)
 - ⚠️ **File-based patterns**: Limited coverage (JSON: 1, XML: 1, YAML: 1)
 - 🚨 **YAML First violations**: 2 tests bypass YAML entirely
@@ -91,8 +91,8 @@
 
 | **File** | **Violation Type** | **Issue** | **Correct Data Source** | **Fix Required** |
 |----------|-------------------|-----------|------------------------|------------------|
-| ~~`ConditionalExpressionLookupTest.java`~~ | ~~Business Logic in Java~~ | ~~Complex credit score logic, validation loops, custom test scenarios~~ | ~~INLINE~~ | ✅ **FIXED** - Removed Java business logic, kept conditional expressions in YAML |
-| ~~`SharedDatasourceDemoTest.java`~~ | ~~Database Setup in Java~~ | ~~50+ lines of H2 database setup, SQL execution, connection management~~ | ~~INLINE~~ | ✅ **FIXED** - Removed Java database setup, used YAML inline configuration |
+| ~~`ConditionalExpressionLookupTest.java`~~ | ~~Business Logic in Java~~ | ~~Complex credit score logic, validation loops, custom test scenarios~~ | ~~H2_DB~~ | ✅ **FIXED** - Removed Java business logic, kept conditional expressions in YAML with H2 database |
+| ~~`SharedDatasourceDemoTest.java`~~ | ~~Database Setup in Java~~ | ~~50+ lines of H2 database setup, SQL execution, connection management~~ | ~~H2_DB~~ | ✅ **FIXED** - Removed Java business logic, kept minimal H2 setup, used YAML database configuration |
 | `DatabaseConnectionTest.java` | No YAML Usage | Direct JDBC testing, bypasses APEX entirely | H2_DB or POSTGRESQL_DB | Create YAML configuration, use APEX services |
 | `EnhancedRestApiDemoTest.java` | No YAML Usage | Uses JDK HTTP server directly, bypasses APEX | REST_API | Create YAML configuration, use APEX REST lookup |
 
