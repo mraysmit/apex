@@ -100,7 +100,7 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
 
         // Load YAML configuration for H2 custom parameters
         try {
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/h2-custom-parameters-enrichment.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/H2CustomParametersDemoTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
         
         // Create comprehensive test data that triggers ALL 4 enrichments
@@ -166,7 +166,7 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
 
         // Load YAML configuration for H2 custom parameters
         try {
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/h2-custom-parameters-enrichment.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/H2CustomParametersDemoTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
         
         // Test different initialization types
@@ -209,7 +209,7 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
 
         // Load YAML configuration for H2 custom parameters
         try {
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/h2-custom-parameters-enrichment.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/H2CustomParametersDemoTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
         
         // Test different merging types
@@ -252,7 +252,7 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
 
         // Load YAML configuration for H2 custom parameters
         try {
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/h2-custom-parameters-enrichment.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/H2CustomParametersDemoTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
         
         // Test different compatibility types

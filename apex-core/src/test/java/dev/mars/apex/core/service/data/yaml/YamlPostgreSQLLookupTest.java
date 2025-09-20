@@ -26,6 +26,7 @@ import org.junit.jupiter.api.*;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import dev.mars.apex.core.test.TestContainerImages;
 
 import java.util.*;
 
@@ -51,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class YamlPostgreSQLLookupTest {
 
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(TestContainerImages.POSTGRES)
             .withDatabaseName("testdb")
             .withUsername("testuser")
             .withPassword("testpass");

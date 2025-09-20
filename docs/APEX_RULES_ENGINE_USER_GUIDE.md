@@ -71,10 +71,10 @@ graph TB
     end
 
     subgraph "Output Layer"
-        U[Rule Results]
-        V[Execution Metrics]
-        W[Audit Trail]
-        X[Performance Data]
+        Y[Rule Results]
+        Z[Execution Metrics]
+        AA[Audit Trail]
+        BB[Performance Data]
     end
 
     A --> D
@@ -95,13 +95,19 @@ graph TB
     E --> N
     N --> O
     O --> P
+    P --> Q
 
-    H --> Q
-    I --> Q
-    J --> Q
-    K --> Q
-    L --> Q
-    M --> Q
+    H --> R
+    I --> R
+    J --> R
+    K --> R
+    L --> R
+    M --> R
+
+    U --> Y
+    V --> Z
+    W --> AA
+    X --> BB
 
     G --> R
     G --> S
@@ -114,10 +120,13 @@ graph TB
     style E fill:#fff3e0
     style F fill:#fff3e0
     style G fill:#fff3e0
-    style Q fill:#e8f5e8
     style R fill:#e8f5e8
     style S fill:#e8f5e8
     style T fill:#e8f5e8
+    style Y fill:#f3e5f5
+    style Z fill:#f3e5f5
+    style AA fill:#f3e5f5
+    style BB fill:#f3e5f5
 ```
 
 ## Scenario-Based Processing Architecture

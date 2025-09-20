@@ -1,0 +1,72 @@
+# Shared DataSource Demo Configuration
+# This demonstrates proper H2 database integration with APEX
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: SharedDatasourceDemoTest.java (Active test implementation)
+# Purpose: Shared data source demonstration using APEX lookup enrichments with
+#          shared data source configurations, data source reuse, and centralized
+#          data source management for efficient resource utilization
+# Status: ACTIVE - Integrated with shared data source tests
+# ============================================================================
+
+metadata:
+  name: "Shared DataSource Demo"
+  version: "1.0.0"
+  description: "Simple demo showing proper H2 database integration with APEX"
+  type: "external-data-config"
+  author: "apex.demo@company.com"
+  created: "2025-09-03"
+  tags: ["demo", "h2", "shared-datasource", "simple"]
+
+# Data source configuration using shared H2 database approach
+data-sources:
+  - name: "customer-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      # H2 file-based database for true sharing between demo and APEX
+      database: "./target/h2-demo/apex_demo_shared"
+      username: "sa"
+      password: ""
+
+# Simple enrichment rule using YAML-first principle with H2 database
+enrichments:
+  - id: "shared-datasource-demo"
+    type: "lookup-enrichment"
+    enabled: true
+    description: "Shared datasource demonstration using H2 database"
+    priority: 1
+
+    # Condition for when to apply this enrichment
+    condition: "#customerId != null"
+
+    # Lookup configuration using H2 database
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        connection-name: "customer-database"
+        query: "SELECT customer_name, customer_type, tier, region, status FROM customers WHERE customer_id = :customerId"
+        parameters:
+          - field: "customerId"
+            type: "string"
+
+    # Field mappings from lookup result to enriched object (H2 returns uppercase column names)
+    field-mappings:
+      - source-field: "CUSTOMER_NAME"
+        target-field: "customerName"
+        required: false
+      - source-field: "CUSTOMER_TYPE"
+        target-field: "customerType"
+        required: false
+      - source-field: "TIER"
+        target-field: "customerTier"
+        required: false
+      - source-field: "REGION"
+        target-field: "customerRegion"
+        required: false
+      - source-field: "STATUS"
+        target-field: "customerStatus"
+        required: false

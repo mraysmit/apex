@@ -52,7 +52,7 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
         
         // Load YAML configuration for file system lookup
         try {
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/json-file-lookup.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/FileSystemLookupDemoTest-json.yaml");
             assertNotNull(config, "YAML configuration should not be null");
         
         // Create comprehensive test data that triggers ALL 4 enrichments
@@ -112,7 +112,7 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
         
         // Load YAML configuration for file system lookup
         try {
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/json-file-lookup.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/FileSystemLookupDemoTest-json.yaml");
             assertNotNull(config, "YAML configuration should not be null");
         
         // Test different dataset types
@@ -151,7 +151,7 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
         
         // Load YAML configuration for file system lookup
         try {
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/json-file-lookup.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/FileSystemLookupDemoTest-json.yaml");
             assertNotNull(config, "YAML configuration should not be null");
         
         // Test different JSON lookup types
@@ -190,7 +190,7 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
         
         // Load YAML configuration for file system lookup
         try {
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/xml-file-lookup.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/FileSystemLookupDemoTest-xml.yaml");
             assertNotNull(config, "YAML configuration should not be null");
         
         // Test different XML lookup types

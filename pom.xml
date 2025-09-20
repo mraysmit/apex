@@ -25,6 +25,11 @@
         <awaitility.version>4.2.0</awaitility.version>
         <postgresql.version>42.7.7</postgresql.version>
         <hikaricp.version>5.0.1</hikaricp.version>
+
+        <!-- Docker Image Versions for Testcontainers -->
+        <docker.postgres.version>postgres:15-alpine</docker.postgres.version>
+        <docker.vault.version>hashicorp/vault:1.15</docker.vault.version>
+        <docker.redis.version>redis:6-alpine</docker.redis.version>
     </properties>
 
     <modules>

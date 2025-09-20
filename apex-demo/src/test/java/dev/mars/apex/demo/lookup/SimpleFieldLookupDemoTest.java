@@ -52,7 +52,7 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
         
         // Load YAML configuration for simple field lookup
         try {
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/simple-field-lookup.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/SimpleFieldLookupDemoTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
         
         // Create comprehensive test data that triggers ALL 4 enrichments
@@ -112,7 +112,7 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
         
         // Load YAML configuration for simple field lookup
         try {
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/simple-field-lookup.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/SimpleFieldLookupDemoTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
         
         // Test different dataset setup types
@@ -151,7 +151,7 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
         
         // Load YAML configuration for simple field lookup
         try {
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/simple-field-lookup.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/SimpleFieldLookupDemoTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
         
         // Test different field lookup types
@@ -190,7 +190,7 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
         
         // Load YAML configuration for simple field lookup
         try {
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/simple-field-lookup.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/SimpleFieldLookupDemoTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
         
         // Test different enrichment types

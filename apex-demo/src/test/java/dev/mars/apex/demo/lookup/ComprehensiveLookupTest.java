@@ -130,7 +130,7 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             // Setup database with required tables and data
             setupCustomerDatabase();
 
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/comprehensive-lookup-enrichment.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/ComprehensiveLookupTest.yaml");
 
             Map<String, Object> testData = new HashMap<>();
             testData.put("customerId", "CUST001");
@@ -161,7 +161,7 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             // Setup database with required tables and data
             setupCustomerDatabase();
 
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/comprehensive-lookup-enrichment.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/ComprehensiveLookupTest.yaml");
 
             Map<String, Object> testData = new HashMap<>();
             testData.put("tradeId", "TRD001");
@@ -191,7 +191,7 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             // Setup database with required tables and data
             setupCustomerDatabase();
 
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/comprehensive-lookup-enrichment.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/ComprehensiveLookupTest.yaml");
 
             Map<String, Object> testData = new HashMap<>();
             testData.put("region", "AMERICAS");
@@ -223,7 +223,7 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             // Setup database with required tables and data
             setupCustomerDatabase();
 
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/comprehensive-lookup-enrichment.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/ComprehensiveLookupTest.yaml");
 
             Map<String, Object> testData = new HashMap<>();
             testData.put("fileType", "JSON");
@@ -253,7 +253,7 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             // Setup database with required tables and data
             setupCustomerDatabase();
 
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/comprehensive-lookup-enrichment.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/ComprehensiveLookupTest.yaml");
 
             Map<String, Object> testData = new HashMap<>();
             testData.put("dataSourceType", "DATABASE");

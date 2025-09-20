@@ -52,7 +52,7 @@ public class NestedFieldLookupDemoTest extends DemoTestBase {
         
         // Load YAML configuration for nested field lookup
         try {
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/nested-field-lookup.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/NestedFieldLookupDemoTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
         
         // Create comprehensive test data that triggers ALL 4 enrichments
@@ -112,7 +112,7 @@ public class NestedFieldLookupDemoTest extends DemoTestBase {
         
         // Load YAML configuration for nested field lookup
         try {
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/nested-field-lookup.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/NestedFieldLookupDemoTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
         
         // Test different navigation types
@@ -151,7 +151,7 @@ public class NestedFieldLookupDemoTest extends DemoTestBase {
         
         // Load YAML configuration for nested field lookup
         try {
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/nested-field-lookup.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/NestedFieldLookupDemoTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
         
         // Test different settlement types
@@ -190,7 +190,7 @@ public class NestedFieldLookupDemoTest extends DemoTestBase {
         
         // Load YAML configuration for nested field lookup
         try {
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/nested-field-lookup.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/NestedFieldLookupDemoTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
         
         // Test different hierarchy types

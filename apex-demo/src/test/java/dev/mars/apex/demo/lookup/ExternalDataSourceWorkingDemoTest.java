@@ -100,7 +100,7 @@ public class ExternalDataSourceWorkingDemoTest extends DemoTestBase {
             setupCustomerDatabase();
 
             // Load YAML configuration for external data source working
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/external-data-source-working-enrichment.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/ExternalDataSourceWorkingDemoTest.yaml");
 
             // Create comprehensive test data that triggers ALL 5 enrichments
             Map<String, Object> testData = new HashMap<>();
@@ -165,7 +165,7 @@ public class ExternalDataSourceWorkingDemoTest extends DemoTestBase {
             setupCustomerDatabase();
 
             // Load YAML configuration for external data source working
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/external-data-source-working-enrichment.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/ExternalDataSourceWorkingDemoTest.yaml");
         
         // Test different initialization types
         String[] initializationTypes = {"database-initialization", "early-setup", "pre-apex-initialization"};
@@ -207,7 +207,7 @@ public class ExternalDataSourceWorkingDemoTest extends DemoTestBase {
             setupCustomerDatabase();
 
             // Load YAML configuration for external data source working
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/external-data-source-working-enrichment.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/ExternalDataSourceWorkingDemoTest.yaml");
         
         // Test different verification types
         String[] verificationTypes = {"data-verification", "database-verification", "data-integrity-check"};
@@ -249,7 +249,7 @@ public class ExternalDataSourceWorkingDemoTest extends DemoTestBase {
             setupCustomerDatabase();
 
             // Load YAML configuration for external data source working
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/external-data-source-working-enrichment.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/ExternalDataSourceWorkingDemoTest.yaml");
         
         // Test different enrichment types
         String[] enrichmentTypes = {"external-reference-enrichment", "working-enrichment", "reference-processing"};

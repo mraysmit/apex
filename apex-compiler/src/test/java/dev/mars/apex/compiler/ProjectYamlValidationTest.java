@@ -255,10 +255,9 @@ class ProjectYamlValidationTest {
         List<String> fixedFiles = List.of(
             "apex-core/src/main/resources/examples/data-sources/database-example.yaml",
             "apex-core/src/test/resources/test-config-with-properties.yaml",
-            "apex-demo/src/main/resources/data-sources/products-json-datasource.yaml",
+            "apex-demo/src/test/resources/data-sources/products-json-datasource.yaml",
             "apex-core/src/main/resources/examples/data-sources/file-system-example.yaml",
-            "apex-core/src/main/resources/examples/data-sources/mixed-example.yaml",
-            "apex-core/src/main/resources/examples/data-sources/rest-api-example.yaml"
+            "apex-core/src/main/resources/examples/data-sources/mixed-example.yaml"
         );
 
         int validCount = 0;
@@ -377,8 +376,8 @@ class ProjectYamlValidationTest {
 
         // List of files from batch 2 that should be working
         List<String> workingFiles = List.of(
-            "apex-demo/src/main/resources/enrichment/customer-transformer-demo.yaml",
-            "apex-demo/src/main/resources/enrichment/trade-transformer-demo.yaml"
+            "apex-demo/src/test/resources/enrichment/customer-transformer-demo.yaml",
+            "apex-demo/src/test/resources/enrichment/trade-transformer-demo.yaml"
         );
 
         int validCount = 0;

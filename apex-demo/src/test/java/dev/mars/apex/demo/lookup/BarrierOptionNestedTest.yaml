@@ -1,0 +1,51 @@
+# APEX Nested Data Processing Validation Configuration
+# Validates APEX enrichment engine can handle complex nested XML structures
+
+metadata:
+  id: "barrier-option-nested-enrichment"
+  name: "APEX Nested Data Processing Validation"
+  version: "1.0.0"
+  description: "Validates APEX enrichment engine nested data processing capabilities"
+  business-domain: "Financial Derivatives - Barrier Options"
+  author: "apex.validation.team@company.com"
+  created-date: "2025-09-19"
+  tags: ["apex-validation", "nested-data", "barrier-options", "enrichment"]
+
+# APEX Enrichment Rules - All processing logic defined here
+# INITIAL VERSION: 2 enrichments for Level 1 and Level 2 nesting
+enrichments:
+  # VALIDATES: APEX can navigate 2-level nested structures
+  - id: "apex-level2-navigation"
+    name: "APEX Level 2 Nested Field Navigation"
+    description: "Validates APEX can extract underlyingAsset['marketData']['currentPrice']"
+    type: "calculation-enrichment"
+    condition: "#underlyingAsset != null && #underlyingAsset['marketData'] != null && #underlyingAsset['marketData']['currentPrice'] != null"
+    calculation-config:
+      expression: "#underlyingAsset['marketData']['currentPrice']"
+      result-field: "apexExtractedMarketPrice"
+    field-mappings:
+      - source-field: "apexExtractedMarketPrice"
+        target-field: "apexExtractedMarketPrice"
+    priority: 1
+    categories: ["nested-navigation", "level-2"]
+    
+  # VALIDATES: APEX can perform cross-nested-field business calculations
+  - id: "apex-cross-nested-calculation"
+    name: "APEX Cross-Nested Business Calculation"
+    description: "Validates APEX can calculate barrier spread across nested structures"
+    type: "calculation-enrichment"
+    condition: "#barrierTerms != null && #barrierTerms['barrierLevel'] != null && #pricingTerms != null && #pricingTerms['strikePrice'] != null"
+    calculation-config:
+      expression: "T(java.lang.Double).parseDouble(#barrierTerms['barrierLevel']) - T(java.lang.Double).parseDouble(#pricingTerms['strikePrice'])"
+      result-field: "apexBarrierSpread"
+    field-mappings:
+      - source-field: "apexBarrierSpread"
+        target-field: "apexBarrierSpread"
+    priority: 2
+    categories: ["business-calculation", "cross-nested"]
+
+# Processing Configuration
+processing:
+  continue-on-error: false
+  max-errors: 0
+  error-handling: "fail-fast"
