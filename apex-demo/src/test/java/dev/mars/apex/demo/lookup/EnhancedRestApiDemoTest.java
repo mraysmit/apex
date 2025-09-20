@@ -11,24 +11,36 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Phase 2.2: Enhanced REST API Features Test
- * 
- * Tests advanced REST API functionality including:
- * - Multiple data source endpoints
- * - Error handling and retry logic
- * - Request/response validation
- * - Performance monitoring
- * - Advanced JSON processing
- * 
+ * Enhanced REST API Demo Test - YAML First Approach
+ *
+ * DEMONSTRATES:
+ * - Enhanced REST API lookup functionality using APEX enrichments
+ * - Currency rates, market data, and metrics lookup through REST API endpoints
+ * - YAML-driven REST API connectivity and JSON processing
+ *
+ * BUSINESS LOGIC VALIDATION:
+ * - REST API lookup enrichments with multiple endpoints
+ * - Advanced JSON processing and field mapping through YAML
+ * - YAML-driven REST API connectivity validation
+ *
+ * YAML FIRST PRINCIPLE:
+ * - ALL business logic is in YAML enrichments
+ * - Java test only sets up minimal HTTP server, loads YAML and calls APEX
+ * - NO direct HTTP client calls or JSON processing logic
+ * - Simple server setup and basic assertions only
+ *
  * @author APEX Demo Team
  * @since 2025-09-20
- * @version 1.0.0
+ * @version 2.0.0 - Converted to YAML First approach
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class EnhancedRestApiDemoTest extends DemoTestBase {
@@ -40,35 +52,37 @@ class EnhancedRestApiDemoTest extends DemoTestBase {
     private static AtomicInteger requestCounter = new AtomicInteger(0);
     private static AtomicInteger errorCounter = new AtomicInteger(0);
 
+    /**
+     * Setup minimal HTTP server for REST API testing.
+     * This is infrastructure setup, not business logic - business logic is in YAML.
+     */
     @BeforeAll
     static void setupEnhancedRestApiTestSuite() throws IOException {
-        logger.info("================================================================================");
-        logger.info("PHASE 2.2: Enhanced REST API Features Setup");
-        logger.info("================================================================================");
+        logger.info("Setting up HTTP server for enhanced REST API demo...");
 
-        // Setup enhanced JDK HTTP Server with multiple endpoints
+        // Setup enhanced JDK HTTP Server with multiple endpoints (infrastructure only)
         setupEnhancedHttpServer();
 
-        logger.info("✅ Enhanced REST API test suite setup completed successfully");
+        logger.info("✓ Enhanced REST API test suite setup completed successfully");
     }
 
     @AfterAll
     static void teardownEnhancedRestApiTestSuite() {
         if (httpServer != null) {
-            logger.info("🛑 Stopping enhanced HTTP server...");
+            logger.info("Stopping enhanced HTTP server...");
             httpServer.stop(0);
-            logger.info("✅ Enhanced HTTP server stopped successfully");
+            logger.info("✓ Enhanced HTTP server stopped successfully");
         }
     }
 
     private static void setupEnhancedHttpServer() throws IOException {
-        logger.info("🌐 Setting up enhanced JDK HTTP server for advanced REST API testing...");
+        logger.info("Setting up enhanced JDK HTTP server for REST API testing...");
 
         // Create HTTP server on available port
         httpServer = HttpServer.create(new InetSocketAddress(0), 0);
         serverPort = httpServer.getAddress().getPort();
 
-        // Setup multiple enhanced endpoints
+        // Setup multiple enhanced endpoints (infrastructure only)
         setupCurrencyRatesEndpoint();
         setupMarketDataEndpoint();
         setupErrorSimulationEndpoint();
@@ -78,7 +92,7 @@ class EnhancedRestApiDemoTest extends DemoTestBase {
         // Start the server
         httpServer.start();
 
-        logger.info("✅ Enhanced JDK HTTP server started successfully:");
+        logger.info("✓ Enhanced JDK HTTP server started successfully:");
         logger.info("  Server URL: http://localhost:{}", serverPort);
         logger.info("  Currency Rates Endpoint: /api/v2/currency/rates");
         logger.info("  Market Data Endpoint: /api/v2/market/data");
@@ -195,220 +209,186 @@ class EnhancedRestApiDemoTest extends DemoTestBase {
 
     @Test
     @Order(1)
-    @DisplayName("Should validate enhanced HTTP server setup")
-    void testEnhancedHttpServerSetup() {
-        logger.info("================================================================================");
-        logger.info("PHASE 2.2: Enhanced HTTP Server Setup Validation");
-        logger.info("================================================================================");
+    @DisplayName("Should test enhanced currency rates lookup functionality")
+    void testEnhancedCurrencyRatesLookup() {
+        logger.info("=== Testing Enhanced Currency Rates Lookup Functionality ===");
 
-        // Validate server is running
-        assertNotNull(httpServer, "Enhanced HTTP server should be initialized");
-        assertTrue(serverPort > 0, "Server port should be assigned");
+        // Load YAML configuration for enhanced REST API demo
+        try {
+            // Update YAML configuration with dynamic server port
+            String tempYamlPath = updateYamlWithServerPort("src/test/java/dev/mars/apex/demo/lookup/EnhancedRestApiDemoTest.yaml");
+            var config = yamlLoader.loadFromFile(tempYamlPath);
+            assertNotNull(config, "YAML configuration should not be null");
 
-        logger.info("🔧 Enhanced HTTP Server Details:");
-        logger.info("  Server Address: {}", httpServer.getAddress());
-        logger.info("  Server Port: {}", serverPort);
-        logger.info("  Server Running: true");
+            // Test data - currency rates lookup
+            Map<String, Object> inputData = new HashMap<>();
+            inputData.put("lookupType", "currency_rates");
 
-        logger.info("✅ Enhanced HTTP server setup validation completed successfully");
+            // Execute APEX enrichment processing - ALL logic in YAML
+            Object result = enrichmentService.enrichObject(config, inputData);
+
+            // Validate enrichment results
+            assertNotNull(result, "Enhanced currency rates lookup result should not be null");
+            @SuppressWarnings("unchecked")
+            Map<String, Object> enrichedData = (Map<String, Object>) result;
+
+            // Validate YAML-driven REST API lookup results
+            assertNotNull(enrichedData.get("currencySource"), "Currency source should be retrieved from REST API");
+            assertNotNull(enrichedData.get("apiVersion"), "API version should be retrieved from REST API");
+            assertNotNull(enrichedData.get("totalRates"), "Total rates should be retrieved from REST API");
+            assertNotNull(enrichedData.get("currencyRates"), "Currency rates should be retrieved from REST API");
+
+            // Validate specific REST API lookup results
+            assertEquals("APEX Enhanced Currency API", enrichedData.get("currencySource"), "Should retrieve correct currency source");
+            assertEquals("2.0", enrichedData.get("apiVersion"), "Should retrieve correct API version");
+            assertEquals(4, ((Number) enrichedData.get("totalRates")).intValue(), "Should retrieve correct total rates count");
+
+            logger.info("✓ Enhanced currency rates lookup functionality test completed successfully");
+
+        } catch (Exception e) {
+            logger.error("Enhanced currency rates lookup test failed: " + e.getMessage(), e);
+            fail("Enhanced currency rates lookup test failed: " + e.getMessage());
+        }
     }
 
     @Test
     @Order(2)
-    @DisplayName("Should test enhanced currency rates endpoint")
-    void testEnhancedCurrencyRatesEndpoint() throws Exception {
-        logger.info("================================================================================");
-        logger.info("PHASE 2.2: Enhanced Currency Rates Endpoint Test");
-        logger.info("================================================================================");
+    @DisplayName("Should test market data lookup functionality")
+    void testMarketDataLookup() {
+        logger.info("=== Testing Market Data Lookup Functionality ===");
 
-        String url = "http://localhost:" + serverPort + "/api/v2/currency/rates";
-        logger.info("🔧 Testing enhanced currency rates endpoint:");
-        logger.info("  URL: {}", url);
+        // Load YAML configuration for market data lookup
+        try {
+            // Update YAML configuration with dynamic server port
+            String tempYamlPath = updateYamlWithServerPort("src/test/java/dev/mars/apex/demo/lookup/EnhancedRestApiDemoTest.yaml");
+            var config = yamlLoader.loadFromFile(tempYamlPath);
+            assertNotNull(config, "YAML configuration should not be null");
 
-        // Make HTTP call using Java's built-in HTTP client
-        java.net.http.HttpClient httpClient = java.net.http.HttpClient.newHttpClient();
-        java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
-            .uri(java.net.URI.create(url))
-            .header("Accept", "application/json")
-            .GET()
-            .build();
+            // Test data - market data lookup for EURUSD
+            Map<String, Object> inputData = new HashMap<>();
+            inputData.put("lookupType", "market_data");
+            inputData.put("symbol", "EURUSD");
 
-        long startTime = System.currentTimeMillis();
-        java.net.http.HttpResponse<String> response = httpClient.send(request,
-            java.net.http.HttpResponse.BodyHandlers.ofString());
-        long endTime = System.currentTimeMillis();
+            // Execute APEX enrichment processing - ALL logic in YAML
+            Object result = enrichmentService.enrichObject(config, inputData);
 
-        // Validate HTTP response
-        assertEquals(200, response.statusCode(), "HTTP status should be 200 OK");
-        assertNotNull(response.body(), "Response body should not be null");
+            // Validate enrichment results
+            assertNotNull(result, "Market data lookup result should not be null");
+            @SuppressWarnings("unchecked")
+            Map<String, Object> enrichedData = (Map<String, Object>) result;
 
-        logger.info("✅ Enhanced Currency Rates Response:");
-        logger.info("  Status Code: {}", response.statusCode());
-        logger.info("  Response Body: {}", response.body());
+            // DEBUG: Print the actual enriched data
+            System.out.println("DEBUG: Enriched data keys: " + enrichedData.keySet());
+            System.out.println("DEBUG: Enriched data: " + enrichedData);
 
-        // Validate enhanced JSON structure
-        String jsonResponse = response.body();
-        assertTrue(jsonResponse.contains("\"rates\""), "Response should contain rates array");
-        assertTrue(jsonResponse.contains("\"metadata\""), "Response should contain metadata");
-        assertTrue(jsonResponse.contains("\"timestamp\""), "Response should contain timestamp");
-        assertTrue(jsonResponse.contains("\"source\""), "Response should contain data source");
+            // Validate YAML-driven REST API lookup results
+            assertNotNull(enrichedData.get("marketSymbol"), "Market symbol should be retrieved from REST API");
+            assertNotNull(enrichedData.get("marketName"), "Market name should be retrieved from REST API");
+            assertNotNull(enrichedData.get("bidPrice"), "Bid price should be retrieved from REST API");
+            assertNotNull(enrichedData.get("askPrice"), "Ask price should be retrieved from REST API");
+            assertNotNull(enrichedData.get("tradingVolume"), "Trading volume should be retrieved from REST API");
+            assertNotNull(enrichedData.get("changePercent"), "Change percent should be retrieved from REST API");
 
-        // Validate performance
-        long responseTime = endTime - startTime;
-        assertTrue(responseTime < 1000, "Response time should be < 1000ms, was: " + responseTime + "ms");
+            // Validate specific REST API lookup results for EURUSD
+            assertEquals("EURUSD", enrichedData.get("marketSymbol"), "Should retrieve correct market symbol");
+            assertEquals("Euro/US Dollar", enrichedData.get("marketName"), "Should retrieve correct market name");
+            assertEquals(1.0850, ((Number) enrichedData.get("bidPrice")).doubleValue(), 0.0001, "Should retrieve correct bid price");
+            assertEquals(1.0852, ((Number) enrichedData.get("askPrice")).doubleValue(), 0.0001, "Should retrieve correct ask price");
+            assertEquals(1250000, ((Number) enrichedData.get("tradingVolume")).intValue(), "Should retrieve correct trading volume");
+            assertEquals(0.14, ((Number) enrichedData.get("changePercent")).doubleValue(), 0.01, "Should retrieve correct change percent");
 
-        logger.info("✅ Enhanced currency rates endpoint test completed successfully in {}ms", responseTime);
+            logger.info("✓ Market data lookup functionality test completed successfully");
+
+        } catch (Exception e) {
+            logger.error("Market data lookup test failed: " + e.getMessage(), e);
+            fail("Market data lookup test failed: " + e.getMessage());
+        }
     }
 
     @Test
     @Order(3)
-    @DisplayName("Should test market data endpoint with parameters")
-    void testMarketDataEndpoint() throws Exception {
-        logger.info("================================================================================");
-        logger.info("PHASE 2.2: Market Data Endpoint Test");
-        logger.info("================================================================================");
+    @DisplayName("Should test metrics lookup functionality")
+    void testMetricsLookup() {
+        logger.info("=== Testing Metrics Lookup Functionality ===");
 
-        String symbol = "EURUSD";
-        String url = "http://localhost:" + serverPort + "/api/v2/market/data?symbol=" + symbol;
-        logger.info("🔧 Testing market data endpoint:");
-        logger.info("  URL: {}", url);
-        logger.info("  Symbol: {}", symbol);
+        // Load YAML configuration for metrics lookup
+        try {
+            // Update YAML configuration with dynamic server port
+            String tempYamlPath = updateYamlWithServerPort("src/test/java/dev/mars/apex/demo/lookup/EnhancedRestApiDemoTest.yaml");
+            var config = yamlLoader.loadFromFile(tempYamlPath);
+            assertNotNull(config, "YAML configuration should not be null");
 
-        // Make HTTP call
-        java.net.http.HttpClient httpClient = java.net.http.HttpClient.newHttpClient();
-        java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
-            .uri(java.net.URI.create(url))
-            .header("Accept", "application/json")
-            .GET()
-            .build();
+            // Test data - metrics lookup
+            Map<String, Object> inputData = new HashMap<>();
+            inputData.put("lookupType", "metrics");
 
-        long startTime = System.currentTimeMillis();
-        java.net.http.HttpResponse<String> response = httpClient.send(request,
-            java.net.http.HttpResponse.BodyHandlers.ofString());
-        long endTime = System.currentTimeMillis();
+            // Execute APEX enrichment processing - ALL logic in YAML
+            Object result = enrichmentService.enrichObject(config, inputData);
 
-        // Validate response
-        assertEquals(200, response.statusCode(), "HTTP status should be 200 OK");
-        assertNotNull(response.body(), "Response body should not be null");
+            // Validate enrichment results
+            assertNotNull(result, "Metrics lookup result should not be null");
+            @SuppressWarnings("unchecked")
+            Map<String, Object> enrichedData = (Map<String, Object>) result;
 
-        logger.info("✅ Market Data Response:");
-        logger.info("  Status Code: {}", response.statusCode());
-        logger.info("  Response Body: {}", response.body());
+            // Validate YAML-driven REST API lookup results
+            assertNotNull(enrichedData.get("totalRequests"), "Total requests should be retrieved from REST API");
+            assertNotNull(enrichedData.get("errorCount"), "Error count should be retrieved from REST API");
+            assertNotNull(enrichedData.get("successRate"), "Success rate should be retrieved from REST API");
+            assertNotNull(enrichedData.get("uptimeSeconds"), "Uptime seconds should be retrieved from REST API");
+            assertNotNull(enrichedData.get("endpointMetrics"), "Endpoint metrics should be retrieved from REST API");
 
-        // Validate market data structure
-        String jsonResponse = response.body();
-        assertTrue(jsonResponse.contains("\"symbol\": \"" + symbol + "\""), "Response should contain requested symbol");
-        assertTrue(jsonResponse.contains("\"bid\""), "Response should contain bid price");
-        assertTrue(jsonResponse.contains("\"ask\""), "Response should contain ask price");
-        assertTrue(jsonResponse.contains("\"volume\""), "Response should contain volume");
+            // Validate specific REST API lookup results for metrics
+            assertTrue(((Number) enrichedData.get("totalRequests")).intValue() >= 0, "Total requests should be non-negative");
+            assertTrue(((Number) enrichedData.get("errorCount")).intValue() >= 0, "Error count should be non-negative");
+            assertTrue(((Number) enrichedData.get("successRate")).doubleValue() >= 0.0, "Success rate should be non-negative");
+            assertTrue(((Number) enrichedData.get("uptimeSeconds")).longValue() >= 0, "Uptime should be non-negative");
 
-        long responseTime = endTime - startTime;
-        assertTrue(responseTime < 1000, "Response time should be < 1000ms, was: " + responseTime + "ms");
+            logger.info("✓ Metrics lookup functionality test completed successfully");
 
-        logger.info("✅ Market data endpoint test completed successfully in {}ms", responseTime);
+        } catch (Exception e) {
+            logger.error("Metrics lookup test failed: " + e.getMessage(), e);
+            fail("Metrics lookup test failed: " + e.getMessage());
+        }
     }
 
     @Test
     @Order(4)
-    @DisplayName("Should test error handling and simulation")
-    void testErrorHandlingAndSimulation() throws Exception {
-        logger.info("================================================================================");
-        logger.info("PHASE 2.2: Error Handling and Simulation Test");
-        logger.info("================================================================================");
+    @DisplayName("Should complete enhanced REST API demo validation")
+    void testEnhancedRestApiDemoCompletion() {
+        logger.info("=== Enhanced REST API Demo - COMPLETION VALIDATION ===");
 
-        // Test different error scenarios
-        testErrorScenario("server_error", 500);
-        testErrorScenario("not_found", 404);
-        testErrorScenario("rate_limit", 429);
+        // Validate all enhanced features are working through APEX
+        assertTrue(requestCounter.get() > 0, "Request counter should show activity from APEX REST API lookups");
 
-        logger.info("✅ Error handling and simulation test completed successfully");
-    }
-
-    @Test
-    @Order(5)
-    @DisplayName("Should test metrics endpoint")
-    void testMetricsEndpoint() throws Exception {
-        logger.info("================================================================================");
-        logger.info("PHASE 2.2: Metrics Endpoint Test");
-        logger.info("================================================================================");
-
-        String url = "http://localhost:" + serverPort + "/api/v2/metrics";
-        logger.info("🔧 Testing metrics endpoint:");
-        logger.info("  URL: {}", url);
-
-        // Make HTTP call
-        java.net.http.HttpClient httpClient = java.net.http.HttpClient.newHttpClient();
-        java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
-            .uri(java.net.URI.create(url))
-            .header("Accept", "application/json")
-            .GET()
-            .build();
-
-        long startTime = System.currentTimeMillis();
-        java.net.http.HttpResponse<String> response = httpClient.send(request,
-            java.net.http.HttpResponse.BodyHandlers.ofString());
-        long endTime = System.currentTimeMillis();
-
-        // Validate response
-        assertEquals(200, response.statusCode(), "HTTP status should be 200 OK");
-        assertNotNull(response.body(), "Response body should not be null");
-
-        logger.info("✅ Metrics Response:");
-        logger.info("  Status Code: {}", response.statusCode());
-        logger.info("  Response Body: {}", response.body());
-
-        // Validate metrics structure
-        String jsonResponse = response.body();
-        assertTrue(jsonResponse.contains("\"server_metrics\""), "Response should contain server metrics");
-        assertTrue(jsonResponse.contains("\"total_requests\""), "Response should contain total requests");
-        assertTrue(jsonResponse.contains("\"endpoint_metrics\""), "Response should contain endpoint metrics");
-
-        long responseTime = endTime - startTime;
-        assertTrue(responseTime < 1000, "Response time should be < 1000ms, was: " + responseTime + "ms");
-
-        logger.info("✅ Metrics endpoint test completed successfully in {}ms", responseTime);
-    }
-
-    @Test
-    @Order(6)
-    @DisplayName("Should complete Phase 2.2 validation")
-    void testPhase22Completion() {
-        logger.info("================================================================================");
-        logger.info("PHASE 2.2: Enhanced REST API Features - COMPLETION VALIDATION");
-        logger.info("================================================================================");
-
-        // Validate all enhanced features are working
-        assertTrue(requestCounter.get() > 0, "Request counter should show activity");
-
-        logger.info("📊 Phase 2.2 Statistics:");
+        logger.info("📊 Enhanced REST API Demo Statistics:");
         logger.info("  Total Requests Processed: {}", requestCounter.get());
         logger.info("  Error Requests Processed: {}", errorCounter.get());
         logger.info("  Success Rate: {}%", requestCounter.get() > 0 ?
             (double)(requestCounter.get() - errorCounter.get()) / requestCounter.get() * 100 : 100.0);
 
-        logger.info("================================================================================");
-        logger.info("🎉 PHASE 2.2: Enhanced REST API Features - ALL TESTS PASSED!");
-        logger.info("================================================================================");
+        // Validate server is still running
+        assertNotNull(httpServer, "Enhanced HTTP server should still be running");
+        assertTrue(serverPort > 0, "Server port should be assigned");
+
+        logger.info("✓ Enhanced REST API demo validation completed successfully");
+        logger.info("🎉 Enhanced REST API Demo - ALL YAML FIRST TESTS PASSED!");
     }
 
-    private void testErrorScenario(String errorType, int expectedStatus) throws Exception {
-        String url = "http://localhost:" + serverPort + "/api/v2/test/errors?type=" + errorType;
-        logger.info("🔧 Testing error scenario: {} (expecting {})", errorType, expectedStatus);
+    /**
+     * Helper method to update YAML configuration with dynamic server port.
+     * This allows APEX to connect to the test HTTP server.
+     */
+    private String updateYamlWithServerPort(String yamlFilePath) throws IOException {
+        String yamlContent = Files.readString(Paths.get(yamlFilePath));
 
-        java.net.http.HttpClient httpClient = java.net.http.HttpClient.newHttpClient();
-        java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
-            .uri(java.net.URI.create(url))
-            .header("Accept", "application/json")
-            .GET()
-            .build();
+        // Replace placeholder port with actual server port
+        yamlContent = yamlContent.replace("${PORT}", String.valueOf(serverPort));
 
-        java.net.http.HttpResponse<String> response = httpClient.send(request,
-            java.net.http.HttpResponse.BodyHandlers.ofString());
+        // Write to temporary file
+        String tempYamlPath = yamlFilePath.replace(".yaml", "_temp_" + serverPort + ".yaml");
+        Files.writeString(Paths.get(tempYamlPath), yamlContent);
 
-        assertEquals(expectedStatus, response.statusCode(),
-            "Error scenario " + errorType + " should return " + expectedStatus);
-
-        logger.info("✅ Error scenario {} returned expected status {}", errorType, expectedStatus);
+        return tempYamlPath;
     }
 
     // Utility methods

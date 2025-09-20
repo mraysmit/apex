@@ -104,9 +104,15 @@ public class DatasetLookupServiceFactory {
                 }
                 return createDatabaseDatasetService(serviceName, dataset, configuration);
 
+            case "rest-api":
+                if (configuration == null) {
+                    throw new EnrichmentException("REST API lookups require configuration context. Use createDatasetLookupService(serviceName, dataset, configuration) method instead.");
+                }
+                return createRestApiDatasetService(serviceName, dataset, configuration);
+
             default:
                 throw new EnrichmentException("Unsupported dataset type: " + datasetType +
-                                            ". Supported types: inline, yaml-file, csv-file, file-system, database");
+                                            ". Supported types: inline, yaml-file, csv-file, file-system, database, rest-api");
         }
     }
     
@@ -602,6 +608,17 @@ public class DatasetLookupServiceFactory {
                 }
                 break;
 
+            case "database":
+            case "rest-api":
+                // Database and REST API datasets require connection configuration
+                String connectionName = dataset.getConnectionName();
+                String dataSourceRef = dataset.getDataSourceRef();
+                if ((connectionName == null || connectionName.trim().isEmpty()) &&
+                    (dataSourceRef == null || dataSourceRef.trim().isEmpty())) {
+                    throw new EnrichmentException(type.toUpperCase() + " dataset must specify either a connection-name or data-source-ref");
+                }
+                break;
+
             default:
                 throw new EnrichmentException("Unsupported dataset type: " + type);
         }
@@ -657,6 +674,95 @@ public class DatasetLookupServiceFactory {
     }
 
     /**
+     * Create a service for REST API datasets.
+     *
+     * @param serviceName The service name
+     * @param dataset The dataset configuration
+     * @param configuration The full YAML configuration containing dataSources
+     * @return A configured DatasetLookupService
+     */
+    private static DatasetLookupService createRestApiDatasetService(String serviceName,
+                                                                   YamlEnrichment.LookupDataset dataset,
+                                                                   dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
+        LOGGER.fine("Creating REST API dataset service: " + serviceName);
+
+        // Validate REST API-specific configuration
+        // Support both connection-name (traditional) and data-source-ref (external reference)
+        String connectionName = dataset.getConnectionName();
+        String dataSourceRef = dataset.getDataSourceRef();
+
+        if ((connectionName == null || connectionName.trim().isEmpty()) &&
+            (dataSourceRef == null || dataSourceRef.trim().isEmpty())) {
+            throw new EnrichmentException("REST API dataset must specify either a connection-name or data-source-ref");
+        }
+
+        // For external data-source references, use the reference name as connection name
+        if (dataSourceRef != null && !dataSourceRef.trim().isEmpty()) {
+            connectionName = dataSourceRef;
+        }
+
+        // Validate endpoint configuration - use operation-ref if available, otherwise endpoint
+        String operationRef = dataset.getOperationRef();
+        String endpoint = dataset.getEndpoint();
+
+        if ((operationRef == null || operationRef.trim().isEmpty()) &&
+            (endpoint == null || endpoint.trim().isEmpty())) {
+            throw new EnrichmentException("REST API dataset must specify either operation-ref or endpoint");
+        }
+
+        // Use operation-ref as the primary endpoint identifier
+        String endpointIdentifier = operationRef != null && !operationRef.trim().isEmpty() ? operationRef : endpoint;
+
+        // Find the data source configuration using the resolved connection name
+        dev.mars.apex.core.config.yaml.YamlDataSource dataSourceConfig = null;
+        if (configuration.getDataSources() != null) {
+            for (dev.mars.apex.core.config.yaml.YamlDataSource ds : configuration.getDataSources()) {
+                if (connectionName.equals(ds.getName())) {
+                    dataSourceConfig = ds;
+                    break;
+                }
+            }
+        }
+
+        if (dataSourceConfig == null) {
+            throw new EnrichmentException("Data source not found: " + connectionName +
+                                        ". Available data sources: " + getAvailableDataSourceNames(configuration));
+        }
+
+        try {
+            // Create REST API data source using existing infrastructure
+            dev.mars.apex.core.service.data.external.factory.DataSourceFactory factory =
+                dev.mars.apex.core.service.data.external.factory.DataSourceFactory.getInstance();
+
+            dev.mars.apex.core.service.data.external.ExternalDataSource dataSource =
+                factory.createDataSource(dataSourceConfig.toDataSourceConfiguration());
+
+            // Extract parameter field names from dataset configuration
+            java.util.List<String> parameterFields = new java.util.ArrayList<>();
+            if (dataset.getParameters() != null) {
+                for (YamlEnrichment.LookupDataset.ParameterMapping param : dataset.getParameters()) {
+                    parameterFields.add(param.getName()); // Use getName() which returns name or field as fallback
+                }
+            }
+
+            // Create REST API lookup service
+            RestApiLookupService restApiService = new RestApiLookupService(
+                serviceName,
+                dataSource,
+                endpointIdentifier,
+                parameterFields,
+                dataset.getDefaultValues()
+            );
+
+            // Create a simple wrapper that delegates to the REST API service
+            return new RestApiDatasetLookupService(serviceName, restApiService, dataset);
+
+        } catch (Exception e) {
+            throw new EnrichmentException("Failed to create REST API dataset service '" + serviceName + "': " + e.getMessage(), e);
+        }
+    }
+
+    /**
      * Simple wrapper that extends DatasetLookupService to delegate to DatabaseLookupService.
      * This allows database lookups to work with the existing DatasetLookupService interface.
      */
@@ -697,6 +803,55 @@ public class DatasetLookupServiceFactory {
             return "DatabaseDatasetLookupService{" +
                     "name='" + getName() + '\'' +
                     ", databaseService=" + databaseService +
+                    '}';
+        }
+    }
+
+    /**
+     * Simple wrapper that extends DatasetLookupService to delegate to RestApiLookupService.
+     * This allows REST API lookups to work with the existing DatasetLookupService interface.
+     */
+    private static class RestApiDatasetLookupService extends DatasetLookupService {
+        private final RestApiLookupService restApiService;
+
+        public RestApiDatasetLookupService(String serviceName,
+                                         RestApiLookupService restApiService,
+                                         YamlEnrichment.LookupDataset dataset) {
+            // Create a minimal dataset configuration for the parent constructor
+            super(serviceName, createEmptyDataset(dataset));
+            this.restApiService = restApiService;
+        }
+
+        private static YamlEnrichment.LookupDataset createEmptyDataset(YamlEnrichment.LookupDataset original) {
+            YamlEnrichment.LookupDataset emptyDataset = new YamlEnrichment.LookupDataset();
+            emptyDataset.setType("rest-api");
+            emptyDataset.setKeyField("key"); // Placeholder
+            emptyDataset.setData(java.util.Collections.emptyList());
+            emptyDataset.setDefaultValues(original != null ? original.getDefaultValues() : null);
+            return emptyDataset;
+        }
+
+        @Override
+        public Object transform(Object key) {
+            // Delegate to the REST API service
+            System.out.println("DEBUG: RestApiDatasetLookupService.transform called with key: " + key);
+            Object result = restApiService.transform(key);
+            System.out.println("DEBUG: RestApiDatasetLookupService.transform returning: " + result);
+            System.out.println("DEBUG: RestApiDatasetLookupService.transform result type: " + (result != null ? result.getClass().getName() : "null"));
+            return result;
+        }
+
+        @Override
+        public java.util.Map<String, java.util.Map<String, Object>> getAllRecords() {
+            // REST API services don't preload all records
+            return java.util.Collections.emptyMap();
+        }
+
+        @Override
+        public String toString() {
+            return "RestApiDatasetLookupService{" +
+                    "name='" + getName() + '\'' +
+                    ", restApiService=" + restApiService +
                     '}';
         }
     }

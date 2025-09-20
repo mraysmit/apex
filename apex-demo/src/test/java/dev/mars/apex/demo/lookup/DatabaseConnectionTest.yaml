@@ -1,0 +1,98 @@
+# Database Connection Test Configuration
+# Demonstrates database connectivity testing using APEX lookup enrichments
+# Use Case: Verify database connection isolation and data access patterns
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: DatabaseConnectionTest.java (Converted to YAML First approach)
+# Purpose: Database connection testing demonstration using APEX lookup
+#          enrichments with database connectivity validation and
+#          data access verification for H2 database integration
+# Status: ACTIVE - Converted from direct JDBC to YAML First approach
+# ============================================================================
+
+metadata:
+  id: "database-connection-test"
+  name: "Database Connection Test"
+  version: "1.0.0"
+  description: "Demonstrates database connectivity testing using H2 database with APEX enrichments"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "lookup", "database", "h2-database", "connectivity"]
+
+# Data source configuration using H2 database
+data-sources:
+  - name: "connection-test-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      # H2 file-based database for connection testing
+      database: "./target/h2-demo/apex_demo_connection_test"
+      username: "sa"
+      password: ""
+
+# Define the enrichment rules for database connection testing
+enrichments:
+  - id: "database-connection-test"
+    name: "Database Connection Validation"
+    description: "Test database connectivity and data access using H2 database"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#customerId != null"
+    
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        connection-name: "connection-test-database"
+        query: "SELECT customer_name, customer_type, tier, region, status, created_date FROM customers WHERE customer_id = :customerId"
+        parameters:
+          - field: "customerId"
+            type: "string"
+    
+    # Map the lookup results to target fields (H2 returns uppercase column names)
+    field-mappings:
+      - source-field: "CUSTOMER_NAME"
+        target-field: "customerName"
+        required: false
+      - source-field: "CUSTOMER_TYPE"
+        target-field: "customerType"
+        required: false
+      - source-field: "TIER"
+        target-field: "customerTier"
+        required: false
+      - source-field: "REGION"
+        target-field: "customerRegion"
+        required: false
+      - source-field: "STATUS"
+        target-field: "customerStatus"
+        required: false
+      - source-field: "CREATED_DATE"
+        target-field: "createdDate"
+        required: false
+
+# Optional validation rules for database connection testing
+validations:
+  - id: "database-connection-test"
+    name: "Customer ID Validation"
+    description: "Ensure customer ID is provided for database lookup"
+    type: "field-validation"
+    enabled: true
+    condition: "#customerId != null"
+    
+    validation-config:
+      field: "customerId"
+      rules:
+        - type: "required"
+          message: "Customer ID is required for database connection test"
+        - type: "pattern"
+          pattern: "^CUST[0-9]{6}$"
+          message: "Customer ID must follow pattern CUST######"
+
+# Processing configuration
+processing:
+  continue-on-error: true
+  max-errors: 5
+  error-handling: "log-and-continue"

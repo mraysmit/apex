@@ -436,3 +436,23 @@ assertTrue(responseTime < maxTimeMs, "Response time should be acceptable");
 - Recovery Mechanisms: System continues processing after recoverable errors
 
 This comprehensive validation approach ensures that **every operation coded in YAML files is thoroughly tested and verified** to work correctly in real-world scenarios, providing confidence that the YAML configurations will perform as expected in production environments.
+
+
+🎯 CODING PRINCIPLES REMINDER
+Before implementing REST API support, let me remind myself of the key coding principles:
+APEX Architecture Principles
+YAML First: ALL business logic must be in YAML configurations, Java only handles infrastructure
+No Mocking: Use real services, databases, and APIs - no mocks or simulations
+Reuse Existing Infrastructure: Leverage existing APEX components rather than duplicating functionality
+Conservative Approach: Respect the codebase, make minimal changes, follow established patterns
+Package Manager Usage: Always use appropriate package managers for dependencies
+Implementation Principles
+Follow Existing Patterns: Mirror the structure of createDatabaseDatasetService() exactly
+Comprehensive Error Handling: Proper validation and meaningful error messages
+Incremental Development: Break down into small, testable chunks
+Parallel Tool Calls: Use multiple tools simultaneously when possible
+Detailed Information Gathering: Always call codebase-retrieval before making edits
+Testing Principles
+Write Tests First: Create comprehensive unit tests for new functionality
+Real Data Sources: Tests must use actual REST APIs, not inline data simulations
+Step-by-Step Validation: Test each component individually before integration
