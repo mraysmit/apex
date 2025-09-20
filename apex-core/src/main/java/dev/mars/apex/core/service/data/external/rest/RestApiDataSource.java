@@ -21,6 +21,7 @@ import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import dev.mars.apex.core.service.data.external.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.net.URI;
@@ -218,17 +219,42 @@ public class RestApiDataSource implements ExternalDataSource {
         long startTime = System.currentTimeMillis();
 
         try {
+            System.out.println("DEBUG: RestApiDataSource.query called with query='" + query + "', parameters=" + parameters);
             // First, resolve named query from configuration
             String actualQuery = resolveNamedQuery(query);
+            System.out.println("DEBUG: query='" + query + "', actualQuery='" + actualQuery + "', parameters=" + parameters);
             String endpoint = buildEndpoint(actualQuery, parameters);
+            System.out.println("DEBUG: Final endpoint URL: " + endpoint);
+            System.out.println("DEBUG: About to build HTTP request...");
             HttpRequest request = buildHttpRequest(endpoint, "GET", null);
+            System.out.println("DEBUG: HTTP request built successfully");
 
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println("DEBUG: About to send HTTP request...");
+            HttpResponse<String> response;
+            try {
+                response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                System.out.println("DEBUG: HTTP response status: " + response.statusCode());
+                System.out.println("DEBUG: HTTP response body length: " + response.body().length());
+                System.out.println("DEBUG: HTTP response body: " + response.body());
+            } catch (Exception e) {
+                System.out.println("DEBUG: HTTP request failed with exception: " + e.getClass().getName() + ": " + e.getMessage());
+                e.printStackTrace();
+                throw e;
+            }
 
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                List<T> result = parseResponseToList(response.body());
-                metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
-                return result;
+                System.out.println("DEBUG: HTTP response successful, about to parse response");
+                try {
+                    List<T> result = parseResponseToList(response.body());
+                    System.out.println("DEBUG: Parsed result: " + result);
+                    System.out.println("DEBUG: Parsed result size: " + (result != null ? result.size() : "null"));
+                    metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
+                    return result;
+                } catch (Exception e) {
+                    System.out.println("DEBUG: Exception during response parsing: " + e.getClass().getName() + ": " + e.getMessage());
+                    e.printStackTrace();
+                    throw e;
+                }
             } else {
                 metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
                 throw new DataSourceException(DataSourceException.ErrorType.EXECUTION_ERROR,
@@ -248,8 +274,16 @@ public class RestApiDataSource implements ExternalDataSource {
     
     @Override
     public <T> T queryForObject(String query, Map<String, Object> parameters) throws DataSourceException {
-        List<T> results = query(query, parameters);
-        return results.isEmpty() ? null : results.get(0);
+        System.out.println("DEBUG: queryForObject called with query='" + query + "', parameters=" + parameters);
+        try {
+            List<T> results = query(query, parameters);
+            System.out.println("DEBUG: queryForObject got results: " + results);
+            return results.isEmpty() ? null : results.get(0);
+        } catch (Exception e) {
+            System.out.println("DEBUG: queryForObject caught exception: " + e.getClass().getName() + ": " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
     
     @Override
@@ -378,17 +412,20 @@ public class RestApiDataSource implements ExternalDataSource {
      * Build endpoint URL from query and parameters.
      */
     private String buildEndpoint(String query, Map<String, Object> parameters) {
+        LOGGER.info("DEBUG: buildEndpoint called with query='{}', parameters={}", query, parameters);
         String endpoint = query;
-        
+
         // Replace named parameters
         for (Map.Entry<String, Object> entry : parameters.entrySet()) {
             String placeholder = "{" + entry.getKey() + "}";
             endpoint = endpoint.replace(placeholder, entry.getValue().toString());
+            LOGGER.info("DEBUG: Replaced '{}' with '{}' in endpoint: {}", placeholder, entry.getValue(), endpoint);
         }
-        
+
         // Ensure it's a complete URL
         if (!endpoint.startsWith("http")) {
             String baseUrl = configuration.getConnection().getBaseUrl();
+            LOGGER.info("DEBUG: Building complete URL - baseUrl='{}', endpoint='{}'", baseUrl, endpoint);
             if (baseUrl.endsWith("/") && endpoint.startsWith("/")) {
                 endpoint = baseUrl + endpoint.substring(1);
             } else if (!baseUrl.endsWith("/") && !endpoint.startsWith("/")) {
@@ -397,18 +434,36 @@ public class RestApiDataSource implements ExternalDataSource {
                 endpoint = baseUrl + endpoint;
             }
         }
-        
+
+        LOGGER.info("DEBUG: Final complete endpoint URL: {}", endpoint);
         return endpoint;
     }
 
     /**
      * Resolve named query from configuration.
+     * Checks both queries and endpoints maps for the query name.
      */
     private String resolveNamedQuery(String query) {
+        System.out.println("DEBUG: resolveNamedQuery called with query='" + query + "'");
+        System.out.println("DEBUG: Available queries: " + configuration.getQueries());
+        System.out.println("DEBUG: Available endpoints: " + configuration.getEndpoints());
+
+        // First check queries map (for backward compatibility)
         if (configuration.getQueries() != null && configuration.getQueries().containsKey(query)) {
-            return configuration.getQueries().get(query);
+            String result = configuration.getQueries().get(query);
+            System.out.println("DEBUG: Found query '" + query + "' in queries map: '" + result + "'");
+            return result;
         }
-        return query; // Return as-is if not found in named queries
+
+        // Then check endpoints map (for REST API endpoint names)
+        if (configuration.getEndpoints() != null && configuration.getEndpoints().containsKey(query)) {
+            String result = configuration.getEndpoints().get(query);
+            System.out.println("DEBUG: Found query '" + query + "' in endpoints map: '" + result + "'");
+            return result;
+        }
+
+        System.out.println("DEBUG: Query '" + query + "' not found in queries or endpoints, returning as-is");
+        return query; // Return as-is if not found in named queries or endpoints
     }
 
     /**
@@ -529,11 +584,19 @@ public class RestApiDataSource implements ExternalDataSource {
      */
     @SuppressWarnings("unchecked")
     private <T> List<T> parseResponseToList(String responseBody) {
+        System.out.println("DEBUG: parseResponseToList called with: " + responseBody);
         Object parsed = parseResponse(responseBody);
+        System.out.println("DEBUG: parseResponse returned: " + parsed);
+        System.out.println("DEBUG: parseResponse type: " + (parsed != null ? parsed.getClass().getName() : "null"));
+
         if (parsed instanceof List) {
+            System.out.println("DEBUG: Parsed result is a List, returning as-is");
             return (List<T>) parsed;
         } else {
-            return Collections.singletonList((T) parsed);
+            System.out.println("DEBUG: Parsed result is not a List, wrapping in singletonList");
+            List<T> result = Collections.singletonList((T) parsed);
+            System.out.println("DEBUG: Wrapped result: " + result);
+            return result;
         }
     }
     
@@ -541,10 +604,22 @@ public class RestApiDataSource implements ExternalDataSource {
      * Simple JSON object parsing (placeholder implementation).
      */
     private Map<String, Object> parseJsonObject(String json) {
-        // This is a very basic implementation - use Jackson in production
-        Map<String, Object> result = new HashMap<>();
-        result.put("raw", json);
-        return result;
+        System.out.println("DEBUG: parseJsonObject called with: " + json);
+
+        // Use Jackson ObjectMapper for proper JSON parsing
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = mapper.readValue(json, Map.class);
+            System.out.println("DEBUG: parseJsonObject returning: " + result);
+            return result;
+        } catch (Exception e) {
+            System.out.println("DEBUG: JSON parsing failed: " + e.getMessage());
+            // Fallback to raw JSON if parsing fails
+            Map<String, Object> result = new HashMap<>();
+            result.put("raw", json);
+            return result;
+        }
     }
     
     /**

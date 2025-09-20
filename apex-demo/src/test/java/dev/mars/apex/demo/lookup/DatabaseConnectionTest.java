@@ -1,75 +1,63 @@
 package dev.mars.apex.demo.lookup;
 
-import dev.mars.apex.core.config.datasource.ConnectionConfig;
-import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
-// Note: JdbcTemplateFactory is not exported from apex-core module
-// Using direct JDBC connections instead
+import dev.mars.apex.demo.DemoTestBase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test to verify database connection isolation between demo setup and external data-source system.
- * 
+ * Database Connection Test - YAML First Approach
+ *
+ * DEMONSTRATES:
+ * - Database connectivity testing using APEX lookup enrichments
+ * - H2 database integration with connection validation
+ * - YAML-driven database access patterns
+ *
+ * BUSINESS LOGIC VALIDATION:
+ * - Database connection isolation testing using H2 database
+ * - Customer data access verification through APEX enrichments
+ * - YAML-driven database connectivity validation
+ *
+ * YAML FIRST PRINCIPLE:
+ * - ALL business logic is in YAML enrichments
+ * - Java test only sets up minimal H2 data, loads YAML and calls APEX
+ * - NO direct JDBC business logic or complex database operations
+ * - Simple database setup and basic assertions only
+ *
  * @author APEX Demo Team
  * @since 2025-08-28
- * @version 1.0.0
+ * @version 2.0.0 - Converted to YAML First approach
  */
-public class DatabaseConnectionTest {
-    
-    private static final Logger logger = LoggerFactory.getLogger(DatabaseConnectionTest.class);
-    
-    public static void main(String[] args) {
-        DatabaseConnectionTest test = new DatabaseConnectionTest();
-        test.runTest();
-    }
-    
-    public void runTest() {
-        logger.info("====================================================================================");
-        logger.info("DATABASE CONNECTION ISOLATION TEST");
-        logger.info("====================================================================================");
-        
-        try {
-            // Test 1: Create tables using demo approach
-            testDemoApproach();
-            
-            // Test 2: Try to access tables using external data-source approach
-            testExternalDataSourceApproach();
-            
-            logger.info("====================================================================================");
-            logger.info("DATABASE CONNECTION TEST COMPLETED");
-            logger.info("====================================================================================");
-            
-        } catch (Exception e) {
-            logger.error("Database connection test failed: " + e.getMessage(), e);
-        }
-    }
-    
-    private void testDemoApproach() throws Exception {
-        logger.info("\n============================================================");
-        logger.info("TEST 1: Demo Approach - Direct JDBC Connection");
-        logger.info("============================================================");
-        
-        // Create database using demo approach
-        String jdbcUrl = "jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
-        logger.info("Demo JDBC URL: " + jdbcUrl);
+public class DatabaseConnectionTest extends DemoTestBase {
 
-        // JDBC drivers are automatically loaded by apex-core JdbcTemplateFactory
-        logger.info("✅ JDBC drivers handled by apex-core");
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseConnectionTest.class);
+
+    /**
+     * Setup minimal H2 database with customer data for connection testing.
+     * This is infrastructure setup, not business logic - business logic is in YAML.
+     */
+    @BeforeEach
+    void setupH2Database() {
+        logger.info("Setting up H2 database for connection testing demo...");
+
+        String jdbcUrl = "jdbc:h2:./target/h2-demo/apex_demo_connection_test;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
 
         try (Connection connection = DriverManager.getConnection(jdbcUrl, "sa", "")) {
             Statement statement = connection.createStatement();
 
-            // Clean up existing data to prevent primary key violations
+            // Drop and create table
             statement.execute("DROP TABLE IF EXISTS customers");
-            
-            // Create customers table
             statement.execute("""
-                CREATE TABLE IF NOT EXISTS customers (
+                CREATE TABLE customers (
                     customer_id VARCHAR(20) PRIMARY KEY,
                     customer_name VARCHAR(100) NOT NULL,
                     customer_type VARCHAR(20) NOT NULL,
@@ -78,82 +66,145 @@ public class DatabaseConnectionTest {
                     status VARCHAR(20) NOT NULL,
                     created_date DATE NOT NULL
                 )
-            """);
-            
-            // Insert test data
+                """);
+
+            // Insert test customer data for connection testing
             statement.execute("""
                 INSERT INTO customers (customer_id, customer_name, customer_type, tier, region, status, created_date) VALUES
-                ('CUST000001', 'Acme Corporation', 'CORPORATE', 'PLATINUM', 'NA', 'ACTIVE', '2023-01-15')
-            """);
-            
-            // Verify data
-            ResultSet rs = statement.executeQuery("SELECT * FROM customers WHERE customer_id = 'CUST000001'");
-            if (rs.next()) {
-                logger.info("✅ Demo approach - Found customer:");
-                logger.info("  ID: " + rs.getString("customer_id"));
-                logger.info("  Name: " + rs.getString("customer_name"));
-                logger.info("  Type: " + rs.getString("customer_type"));
-                logger.info("  Status: " + rs.getString("status"));
-            } else {
-                logger.error("❌ Demo approach - Customer not found");
-            }
+                ('CUST000001', 'Acme Corporation', 'CORPORATE', 'PLATINUM', 'NA', 'ACTIVE', '2023-01-15'),
+                ('CUST000002', 'Global Industries', 'CORPORATE', 'GOLD', 'EU', 'ACTIVE', '2023-02-20'),
+                ('CUST000003', 'Tech Solutions Ltd', 'CORPORATE', 'SILVER', 'APAC', 'PENDING', '2023-03-10')
+                """);
+
+            logger.info("✓ H2 database setup completed for connection testing");
+
+        } catch (Exception e) {
+            logger.error("Failed to setup H2 database: " + e.getMessage(), e);
+            throw new RuntimeException("Database setup failed", e);
         }
     }
-    
-    private void testExternalDataSourceApproach() throws Exception {
-        logger.info("\n============================================================");
-        logger.info("TEST 2: External Data-Source Approach - APEX DataSource");
-        logger.info("============================================================");
-        
-        // Create configuration matching external data-source config
-        DataSourceConfiguration config = new DataSourceConfiguration();
-        config.setName("customer-database");
-        config.setType("database");
-        config.setSourceType("h2");
-        config.setEnabled(true);
-        
-        ConnectionConfig connectionConfig = new ConnectionConfig();
-        connectionConfig.setDatabase("apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL");
-        connectionConfig.setUsername("sa");
-        connectionConfig.setPassword("");
-        
-        config.setConnection(connectionConfig);
-        
-        // Create direct JDBC connection (JdbcTemplateFactory not exported from apex-core)
-        // Use the exact same JDBC URL as the working demos
-        String jdbcUrl = "jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
-        String username = connectionConfig.getUsername();
-        String password = connectionConfig.getPassword();
-        logger.info("Creating direct JDBC connection to: " + jdbcUrl);
 
-        // Test connection
-        try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password)) {
-            logger.info("External DataSource connection established");
-            
-            Statement statement = connection.createStatement();
-            
-            // Check if customers table exists
-            try {
-                ResultSet rs = statement.executeQuery("SELECT COUNT(*) FROM customers");
-                rs.next();
-                int count = rs.getInt(1);
-                logger.info("✅ External approach - Found customers table with " + count + " records");
-                
-                // Try to query specific customer
-                rs = statement.executeQuery("SELECT * FROM customers WHERE customer_id = 'CUST000001'");
-                if (rs.next()) {
-                    logger.info("✅ External approach - Found customer:");
-                    logger.info("  ID: " + rs.getString("customer_id"));
-                    logger.info("  Name: " + rs.getString("customer_name"));
-                    logger.info("  Type: " + rs.getString("customer_type"));
-                    logger.info("  Status: " + rs.getString("status"));
-                } else {
-                    logger.error("❌ External approach - Customer CUST000001 not found");
-                }
-                
-            } catch (Exception e) {
-                logger.error("❌ External approach - Cannot access customers table: " + e.getMessage());
-            }
+    @Test
+    void testDatabaseConnectionFunctionality() {
+        logger.info("=== Testing Database Connection Functionality ===");
+
+        // Load YAML configuration for database connection test
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/DatabaseConnectionTest.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
+
+            // Test data - customer ID to lookup
+            Map<String, Object> inputData = new HashMap<>();
+            inputData.put("customerId", "CUST000001");
+
+            // Execute APEX enrichment processing - ALL logic in YAML
+            Object result = enrichmentService.enrichObject(config, inputData);
+
+            // Validate enrichment results
+            assertNotNull(result, "Database connection test result should not be null");
+            @SuppressWarnings("unchecked")
+            Map<String, Object> enrichedData = (Map<String, Object>) result;
+
+        // Validate YAML-driven H2 database connection and lookup results
+        assertNotNull(enrichedData.get("customerName"), "Customer name should be retrieved from H2 database");
+        assertNotNull(enrichedData.get("customerType"), "Customer type should be retrieved from H2 database");
+        assertNotNull(enrichedData.get("customerTier"), "Customer tier should be retrieved from H2 database");
+        assertNotNull(enrichedData.get("customerRegion"), "Customer region should be retrieved from H2 database");
+        assertNotNull(enrichedData.get("customerStatus"), "Customer status should be retrieved from H2 database");
+        assertNotNull(enrichedData.get("createdDate"), "Created date should be retrieved from H2 database");
+
+        // Validate specific H2 database lookup results for CUST000001
+        assertEquals("Acme Corporation", enrichedData.get("customerName"), "Should retrieve correct customer name");
+        assertEquals("CORPORATE", enrichedData.get("customerType"), "Should retrieve correct customer type");
+        assertEquals("PLATINUM", enrichedData.get("customerTier"), "Should retrieve correct customer tier");
+        assertEquals("NA", enrichedData.get("customerRegion"), "Should retrieve correct customer region");
+        assertEquals("ACTIVE", enrichedData.get("customerStatus"), "Should retrieve correct customer status");
+
+            logger.info("✓ Database connection functionality test completed successfully");
+
+        } catch (Exception e) {
+            logger.error("Database connection functionality test failed: " + e.getMessage(), e);
+            fail("Database connection functionality test failed: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void testDatabaseConnectionIsolation() {
+        logger.info("=== Testing Database Connection Isolation ===");
+
+        // Load YAML configuration for database connection isolation test
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/DatabaseConnectionTest.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
+
+            // Test data - different customer ID to test isolation
+            Map<String, Object> inputData = new HashMap<>();
+            inputData.put("customerId", "CUST000002");
+
+            // Execute APEX enrichment processing - ALL logic in YAML
+            Object result = enrichmentService.enrichObject(config, inputData);
+
+            // Validate enrichment results
+            assertNotNull(result, "Database connection isolation test result should not be null");
+            @SuppressWarnings("unchecked")
+            Map<String, Object> enrichedData = (Map<String, Object>) result;
+
+        // Validate YAML-driven H2 database connection isolation
+        assertNotNull(enrichedData.get("customerName"), "Customer name should be retrieved from isolated H2 database");
+        assertNotNull(enrichedData.get("customerType"), "Customer type should be retrieved from isolated H2 database");
+        assertNotNull(enrichedData.get("customerTier"), "Customer tier should be retrieved from isolated H2 database");
+
+        // Validate specific H2 database lookup results for CUST000002 (different customer)
+        assertEquals("Global Industries", enrichedData.get("customerName"), "Should retrieve correct customer name for CUST000002");
+        assertEquals("CORPORATE", enrichedData.get("customerType"), "Should retrieve correct customer type for CUST000002");
+        assertEquals("GOLD", enrichedData.get("customerTier"), "Should retrieve correct customer tier for CUST000002");
+        assertEquals("EU", enrichedData.get("customerRegion"), "Should retrieve correct customer region for CUST000002");
+        assertEquals("ACTIVE", enrichedData.get("customerStatus"), "Should retrieve correct customer status for CUST000002");
+
+            logger.info("✓ Database connection isolation test completed successfully");
+
+        } catch (Exception e) {
+            logger.error("Database connection isolation test failed: " + e.getMessage(), e);
+            fail("Database connection isolation test failed: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void testDatabaseConnectionValidation() {
+        logger.info("=== Testing Database Connection Validation ===");
+
+        // Load YAML configuration for database connection validation test
+        try {
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/DatabaseConnectionTest.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
+
+            // Test data - third customer to test validation
+            Map<String, Object> inputData = new HashMap<>();
+            inputData.put("customerId", "CUST000003");
+
+            // Execute APEX enrichment processing - ALL logic in YAML
+            Object result = enrichmentService.enrichObject(config, inputData);
+
+            // Validate enrichment results
+            assertNotNull(result, "Database connection validation test result should not be null");
+            @SuppressWarnings("unchecked")
+            Map<String, Object> enrichedData = (Map<String, Object>) result;
+
+        // Validate YAML-driven H2 database connection validation
+        assertNotNull(enrichedData.get("customerName"), "Customer name should be retrieved for validation test");
+        assertNotNull(enrichedData.get("customerStatus"), "Customer status should be retrieved for validation test");
+
+        // Validate specific H2 database lookup results for CUST000003 (pending status)
+        assertEquals("Tech Solutions Ltd", enrichedData.get("customerName"), "Should retrieve correct customer name for CUST000003");
+        assertEquals("SILVER", enrichedData.get("customerTier"), "Should retrieve correct customer tier for CUST000003");
+        assertEquals("APAC", enrichedData.get("customerRegion"), "Should retrieve correct customer region for CUST000003");
+        assertEquals("PENDING", enrichedData.get("customerStatus"), "Should retrieve correct customer status for CUST000003");
+
+            logger.info("✓ Database connection validation test completed successfully");
+
+        } catch (Exception e) {
+            logger.error("Database connection validation test failed: " + e.getMessage(), e);
+            fail("Database connection validation test failed: " + e.getMessage());
         }
     }
 }

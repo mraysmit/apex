@@ -38,7 +38,7 @@
 | 2 | `BasicRestApiLookupTest.java` | ✅ `basic-rest-api-lookup.yaml` | REST_API | ACTIVE | Phase 2.1 REST API |
 | 3 | `CompoundKeyLookupDemoTest.java` | ✅ `compound-key-lookup.yaml` | INLINE | ACTIVE | References orphaned YAML |
 | 4 | `ComprehensiveLookupTest.java` | ✅ `comprehensive-lookup-enrichment.yaml` | H2_DB | ACTIVE | Consolidated lookup test |
-| 5 | `DatabaseConnectionTest.java` | ❌ None | NO_YAML | NO YAML | Direct JDBC testing |
+| 5 | `DatabaseConnectionTest.java` | ✅ `DatabaseConnectionTest.yaml` | H2_DB | ACTIVE | ✅ COMPLETE - **FIXED YAML FIRST VIOLATION** |
 | 6 | `EnhancedRestApiDemoTest.java` | ❌ None | NO_YAML | NO YAML | Uses JDK HTTP server directly |
 | 7 | `ExternalDataSourceWorkingDemoTest.java` | ✅ `external-data-source-working-enrichment.yaml` | YAML_FILE | ACTIVE | External data source demo |
 | 8 | `FileSystemLookupDemoTest.java` | ✅ `json-file-lookup.yaml` + `xml-file-lookup.yaml` | JSON_FILE + XML_FILE | ACTIVE | Uses both JSON and XML |
@@ -56,21 +56,21 @@
 | **Data Source Type** | **Count** | **Test Files** | **Coverage Status** |
 |---------------------|-----------|----------------|-------------------|
 | **INLINE** | 5 | `BarrierOptionNestedTest`, `CompoundKeyLookupTest`, `CurrencyMarketMappingTest`, `NestedFieldLookupDemoTest`, `SimpleFieldLookupDemoTest` | ✅ **EXCELLENT** |
-| **H2_DB** | 5 | `ComprehensiveLookupTest`, `ConditionalExpressionLookupTest`, `H2CustomParametersDemoTest`, `MultiParameterLookupTest`, `SharedDatasourceDemoTest` | ✅ **EXCELLENT** |
+| **H2_DB** | 6 | `ComprehensiveLookupTest`, `ConditionalExpressionLookupTest`, `DatabaseConnectionTest`, `H2CustomParametersDemoTest`, `MultiParameterLookupTest`, `SharedDatasourceDemoTest` | ✅ **EXCELLENT** |
 | **POSTGRESQL_DB** | 2 | `PostgreSQLMultiParamLookupTest`, `PostgreSQLSimpleLookupTest` | ✅ **GOOD** |
 | **REST_API** | 2 | `BasicRestApiLookupTest`, `EnhancedRestApiDemoTest` | ✅ **GOOD** |
 | **JSON_FILE** | 1 | `FileSystemLookupDemoTest` | ⚠️ **LIMITED** |
 | **XML_FILE** | 1 | `FileSystemLookupDemoTest` | ⚠️ **LIMITED** |
 | **YAML_FILE** | 1 | `ExternalDataSourceWorkingDemoTest` | ⚠️ **LIMITED** |
-| **NO_YAML** | 2 | `DatabaseConnectionTest`, `EnhancedRestApiDemoTest` | 🚨 **VIOLATIONS** |
+| **NO_YAML** | 1 | `EnhancedRestApiDemoTest` | 🚨 **VIOLATIONS** |
 | **UNKNOWN** | 5 | Orphaned YAML files | ❓ **NEEDS ANALYSIS** |
 
 ### **🎯 Pattern Coverage Analysis**
 - ✅ **INLINE patterns**: Excellent coverage (5 tests)
-- ✅ **Database patterns**: Excellent coverage (H2: 5, PostgreSQL: 2)
+- ✅ **Database patterns**: Excellent coverage (H2: 6, PostgreSQL: 2)
 - ✅ **REST API patterns**: Good coverage (2 tests)
 - ⚠️ **File-based patterns**: Limited coverage (JSON: 1, XML: 1, YAML: 1)
-- 🚨 **YAML First violations**: 2 tests bypass YAML entirely
+- 🚨 **YAML First violations**: 1 test bypasses YAML entirely
 - ❓ **Missing patterns**: 5 orphaned files need analysis
 
 ---
@@ -93,13 +93,12 @@
 |----------|-------------------|-----------|------------------------|------------------|
 | ~~`ConditionalExpressionLookupTest.java`~~ | ~~Business Logic in Java~~ | ~~Complex credit score logic, validation loops, custom test scenarios~~ | ~~H2_DB~~ | ✅ **FIXED** - Removed Java business logic, kept conditional expressions in YAML with H2 database |
 | ~~`SharedDatasourceDemoTest.java`~~ | ~~Database Setup in Java~~ | ~~50+ lines of H2 database setup, SQL execution, connection management~~ | ~~H2_DB~~ | ✅ **FIXED** - Removed Java business logic, kept minimal H2 setup, used YAML database configuration |
-| `DatabaseConnectionTest.java` | No YAML Usage | Direct JDBC testing, bypasses APEX entirely | H2_DB or POSTGRESQL_DB | Create YAML configuration, use APEX services |
+| ~~`DatabaseConnectionTest.java`~~ | ~~No YAML Usage~~ | ~~Direct JDBC testing, bypasses APEX entirely~~ | ~~H2_DB~~ | ✅ **FIXED** - Created YAML configuration, converted to use APEX services with H2 database |
 | `EnhancedRestApiDemoTest.java` | No YAML Usage | Uses JDK HTTP server directly, bypasses APEX | REST_API | Create YAML configuration, use APEX REST lookup |
 
 ### **🔧 Immediate Fix Priority**
-1. ✅ **COMPLETE**: Fixed `ConditionalExpressionLookupTest` and `SharedDatasourceDemoTest` (YAML First violations resolved)
-2. **MEDIUM**: Convert `DatabaseConnectionTest` to use YAML + APEX
-3. **MEDIUM**: Convert `EnhancedRestApiDemoTest` to use YAML + APEX
+1. ✅ **COMPLETE**: Fixed `ConditionalExpressionLookupTest`, `SharedDatasourceDemoTest`, and `DatabaseConnectionTest` (YAML First violations resolved)
+2. **MEDIUM**: Convert `EnhancedRestApiDemoTest` to use YAML + APEX
 
 ---
 
@@ -143,7 +142,7 @@
 
 | **File** | **Type** | **Status** | **Explanation** |
 |----------|----------|------------|-----------------|
-| `DatabaseConnectionTest.java` | Java Test | No YAML Needed | Direct JDBC connection testing |
+| ~~`DatabaseConnectionTest.java`~~ | ~~Java Test~~ | ~~No YAML Needed~~ | ~~Direct JDBC connection testing~~ - ✅ **CONVERTED TO YAML FIRST** |
 | `EnhancedRestApiDemoTest.java` | Java Test | No YAML Needed | Uses JDK HTTP server directly |
 | `CompoundKeyLookupDemoTest.java` | Java Test | References Orphaned YAML | Test exists but YAML is orphaned |
 | `h2-custom-parameters-demo.yaml` | YAML | Configuration Only | May not need dedicated test |

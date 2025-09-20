@@ -448,6 +448,13 @@ public class YamlEnrichment {
         @JsonProperty("parameters")
         private List<ParameterMapping> parameters; // Parameter mappings for the query
 
+        // REST API-specific fields
+        @JsonProperty("endpoint")
+        private String endpoint; // REST API endpoint name or path
+
+        @JsonProperty("operation-ref")
+        private String operationRef; // Reference to operation in data source configuration
+
         /**
          * Parameter mapping for database queries.
          */
@@ -575,6 +582,22 @@ public class YamlEnrichment {
 
         public void setParameters(List<ParameterMapping> parameters) {
             this.parameters = parameters;
+        }
+
+        public String getEndpoint() {
+            return endpoint;
+        }
+
+        public void setEndpoint(String endpoint) {
+            this.endpoint = endpoint;
+        }
+
+        public String getOperationRef() {
+            return operationRef;
+        }
+
+        public void setOperationRef(String operationRef) {
+            this.operationRef = operationRef;
         }
     }
 
