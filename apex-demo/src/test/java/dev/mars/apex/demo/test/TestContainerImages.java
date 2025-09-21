@@ -58,7 +58,7 @@ public final class TestContainerImages {
      * 
      * <p>Defined in root pom.xml as: {@code <docker.postgres.version>postgres:15-alpine</docker.postgres.version>}</p>
      */
-    public static final String POSTGRES = "postgres:15-alpine";
+    public static final String POSTGRES = System.getProperty("docker.postgres.version", "postgres:15-alpine");
 
     /**
      * HashiCorp Vault Docker image version for secret management integration tests.
@@ -68,7 +68,7 @@ public final class TestContainerImages {
      * 
      * <p>Defined in root pom.xml as: {@code <docker.vault.version>hashicorp/vault:1.15</docker.vault.version>}</p>
      */
-    public static final String VAULT = "hashicorp/vault:1.15";
+    public static final String VAULT = System.getProperty("docker.vault.version", "hashicorp/vault:1.20.0");
 
     /**
      * Redis Docker image version for cache integration tests.
@@ -78,7 +78,7 @@ public final class TestContainerImages {
      * 
      * <p>Defined in root pom.xml as: {@code <docker.redis.version>redis:6-alpine</docker.redis.version>}</p>
      */
-    public static final String REDIS = "redis:6-alpine";
+    public static final String REDIS = System.getProperty("docker.redis.version", "redis:6-alpine");
 
     /**
      * Private constructor to prevent instantiation of utility class.

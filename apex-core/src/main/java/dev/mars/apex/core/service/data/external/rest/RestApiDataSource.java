@@ -19,6 +19,7 @@ package dev.mars.apex.core.service.data.external.rest;
 
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import dev.mars.apex.core.service.data.external.*;
+import dev.mars.apex.core.service.data.external.cache.EnhancedCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -59,9 +60,9 @@ public class RestApiDataSource implements ExternalDataSource {
     private ConnectionStatus connectionStatus;
     private DataSourceMetrics metrics;
     private CircuitBreaker circuitBreaker;
-    
-    // Simple in-memory cache for API responses
-    private final Map<String, CachedResponse> responseCache = new ConcurrentHashMap<>();
+
+    // Enhanced cache manager for API responses
+    private EnhancedCacheManager cacheManager;
     
     /**
      * Constructor with HttpClient and configuration.
@@ -74,7 +75,8 @@ public class RestApiDataSource implements ExternalDataSource {
         this.configuration = configuration;
         this.connectionStatus = ConnectionStatus.notInitialized();
         this.metrics = new DataSourceMetrics();
-        
+        this.cacheManager = new EnhancedCacheManager(configuration);
+
         // Initialize circuit breaker if configured
         if (configuration.getCircuitBreaker() != null && configuration.getCircuitBreaker().isEnabled()) {
             this.circuitBreaker = new CircuitBreaker(configuration.getCircuitBreaker());
@@ -177,17 +179,17 @@ public class RestApiDataSource implements ExternalDataSource {
         
         try {
             // Check cache first if enabled
-            if (isCacheEnabled()) {
-                String cacheKey = generateCacheKey(dataType, parameters);
-                CachedResponse cached = responseCache.get(cacheKey);
-                if (cached != null && !cached.isExpired()) {
+            if (cacheManager.isEnabled()) {
+                String cacheKey = cacheManager.generateCacheKey(dataType, parameters);
+                Object cached = cacheManager.get(cacheKey);
+                if (cached != null) {
                     metrics.recordCacheHit();
                     metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
-                    return (T) cached.getData();
+                    return (T) cached;
                 }
                 metrics.recordCacheMiss();
             }
-            
+
             // Execute API call with circuit breaker if enabled
             Object result;
             if (circuitBreaker != null) {
@@ -195,14 +197,13 @@ public class RestApiDataSource implements ExternalDataSource {
             } else {
                 result = executeApiCall(dataType, parameters);
             }
-            
+
             // Cache the result if caching is enabled
-            if (isCacheEnabled() && result != null) {
-                String cacheKey = generateCacheKey(dataType, parameters);
-                long ttl = configuration.getCache().getTtlSeconds() * 1000L;
-                responseCache.put(cacheKey, new CachedResponse(result, System.currentTimeMillis() + ttl));
+            if (cacheManager.isEnabled() && result != null) {
+                String cacheKey = cacheManager.generateCacheKey(dataType, parameters);
+                cacheManager.put(cacheKey, result);
             }
-            
+
             metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
             return (T) result;
             
@@ -326,24 +327,24 @@ public class RestApiDataSource implements ExternalDataSource {
     @Override
     public void refresh() throws DataSourceException {
         // Clear cache
-        responseCache.clear();
-        
+        cacheManager.clear();
+
         // Reset circuit breaker if present
         if (circuitBreaker != null) {
             circuitBreaker.reset();
         }
-        
+
         // Test connection
         if (!testConnection()) {
             throw DataSourceException.connectionError("REST API is not available", null);
         }
-        
+
         LOGGER.info("REST API data source '{}' refreshed", getName());
     }
     
     @Override
     public void shutdown() {
-        responseCache.clear();
+        cacheManager.clear();
         if (circuitBreaker != null) {
             circuitBreaker.shutdown();
         }
@@ -633,24 +634,6 @@ public class RestApiDataSource implements ExternalDataSource {
     }
     
     /**
-     * Check if caching is enabled.
-     */
-    private boolean isCacheEnabled() {
-        return configuration.getCache() != null && configuration.getCache().isEnabled();
-    }
-    
-    /**
-     * Generate cache key for the given data type and parameters.
-     */
-    private String generateCacheKey(String dataType, Object... parameters) {
-        StringBuilder key = new StringBuilder(dataType);
-        for (Object param : parameters) {
-            key.append(":").append(param != null ? param.toString() : "null");
-        }
-        return key.toString();
-    }
-    
-    /**
      * Get timeout in milliseconds.
      */
     private long getTimeoutMillis() {
@@ -658,26 +641,5 @@ public class RestApiDataSource implements ExternalDataSource {
             return configuration.getConnection().getTimeout();
         }
         return 30000L; // Default 30 seconds
-    }
-    
-    /**
-     * Simple cached response holder.
-     */
-    private static class CachedResponse {
-        private final Object data;
-        private final long expiryTime;
-        
-        public CachedResponse(Object data, long expiryTime) {
-            this.data = data;
-            this.expiryTime = expiryTime;
-        }
-        
-        public Object getData() {
-            return data;
-        }
-        
-        public boolean isExpired() {
-            return System.currentTimeMillis() > expiryTime;
-        }
     }
 }

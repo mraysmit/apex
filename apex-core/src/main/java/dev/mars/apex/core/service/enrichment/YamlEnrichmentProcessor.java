@@ -1,6 +1,7 @@
 package dev.mars.apex.core.service.enrichment;
 
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.DatasetLookupService;
 import dev.mars.apex.core.service.lookup.DatasetLookupServiceFactory;
@@ -16,6 +17,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,6 +109,8 @@ public class YamlEnrichmentProcessor {
                                    dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
         // Set current configuration for database lookups
         this.currentConfiguration = configuration;
+
+
 
         // Process rules and rule groups first to populate rule results
         if (configuration != null && (configuration.getRules() != null || configuration.getRuleGroups() != null)) {
@@ -905,6 +909,18 @@ public class YamlEnrichmentProcessor {
 
         throw new EnrichmentException("No lookup service or dataset configured for enrichment: " + enrichmentId);
     }
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Process rules and rule groups to populate rule results for conditional mapping.

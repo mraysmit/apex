@@ -17,7 +17,7 @@ import java.net.InetSocketAddress;
 import java.util.Map;
 
 /**
- * Reusable Test REST API Server
+ * REST API Testable Server
  *
  * This class provides a standalone JDK HTTP server that can be reused
  * across multiple test classes for REST API testing. It supports:
@@ -29,7 +29,7 @@ import java.util.Map;
  *
  * Usage:
  * <pre>
- * TestableRestApiServer server = new TestableRestApiServer();
+ * RestApiTestableServer server = new RestApiTestableServer();
  * server.start();
  * String baseUrl = server.getBaseUrl();
  * // ... use the server
@@ -38,11 +38,11 @@ import java.util.Map;
  *
  * @author APEX Demo Team
  * @since 2025-09-20
- * @version 1.0.0
+ * @version 2.0.0 (Renamed with RestApi prefix for consistency)
  */
-public class TestableRestApiServer {
+public class RestApiTestableServer {
 
-    private static final Logger logger = LoggerFactory.getLogger(TestableRestApiServer.class);
+    private static final Logger logger = LoggerFactory.getLogger(RestApiTestableServer.class);
 
     private HttpServer httpServer;
     private int serverPort;
@@ -192,7 +192,7 @@ public class TestableRestApiServer {
                 String path = exchange.getRequestURI().getPath();
                 
                 // Check if this is a specific customer lookup: /api/customers/{customerId}
-                if (path.matches("/api/customers/[A-Z0-9]{5}")) {
+                if (path.startsWith("/api/customers/")) {
                     String customerId = extractCustomerIdFromPath(path);
                     if (customerId != null && !customerId.isEmpty()) {
                         String jsonResponse = createCustomerResponse(customerId);

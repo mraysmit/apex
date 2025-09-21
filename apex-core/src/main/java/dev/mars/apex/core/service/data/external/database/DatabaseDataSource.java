@@ -19,6 +19,7 @@ package dev.mars.apex.core.service.data.external.database;
 
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import dev.mars.apex.core.service.data.external.*;
+import dev.mars.apex.core.service.data.external.cache.EnhancedCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,8 +58,8 @@ public class DatabaseDataSource implements ExternalDataSource {
     // Cache for prepared statements
     private final Map<String, String> preparedQueries = new ConcurrentHashMap<>();
     
-    // Simple in-memory cache for query results
-    private final Map<String, CachedResult> resultCache = new ConcurrentHashMap<>();
+    // Enhanced cache manager for query results
+    private EnhancedCacheManager cacheManager;
     
     /**
      * Constructor with DataSource and configuration.
@@ -73,6 +74,7 @@ public class DatabaseDataSource implements ExternalDataSource {
         this.connectionStatus = ConnectionStatus.notInitialized();
         this.metrics = new DataSourceMetrics();
         this.healthIndicator = new DatabaseHealthIndicator(dataSource, configuration);
+        this.cacheManager = new EnhancedCacheManager(configuration);
     }
     
     @Override
@@ -171,15 +173,15 @@ public class DatabaseDataSource implements ExternalDataSource {
         
         try {
             // Check cache first if enabled
-            if (isCacheEnabled()) {
-                String cacheKey = generateCacheKey(dataType, parameters);
+            if (cacheManager.isEnabled()) {
+                String cacheKey = cacheManager.generateCacheKey(dataType, parameters);
                 LOGGER.debug("Checking cache for key: {}", cacheKey);
-                CachedResult cached = resultCache.get(cacheKey);
-                if (cached != null && !cached.isExpired()) {
+                Object cached = cacheManager.get(cacheKey);
+                if (cached != null) {
                     LOGGER.debug("Cache hit for key: {}", cacheKey);
                     metrics.recordCacheHit();
                     metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
-                    return (T) cached.getData();
+                    return (T) cached;
                 }
                 LOGGER.debug("Cache miss for key: {}", cacheKey);
                 metrics.recordCacheMiss();
@@ -190,11 +192,10 @@ public class DatabaseDataSource implements ExternalDataSource {
             Object result = executeQuery(dataType, parameters);
 
             // Cache the result if caching is enabled
-            if (isCacheEnabled() && result != null) {
-                String cacheKey = generateCacheKey(dataType, parameters);
-                long ttl = configuration.getCache().getTtlSeconds() * 1000L;
-                resultCache.put(cacheKey, new CachedResult(result, System.currentTimeMillis() + ttl));
-                LOGGER.debug("Cached result for key: {} with TTL: {}ms", cacheKey, ttl);
+            if (cacheManager.isEnabled() && result != null) {
+                String cacheKey = cacheManager.generateCacheKey(dataType, parameters);
+                cacheManager.put(cacheKey, result);
+                LOGGER.debug("Cached result for key: {}", cacheKey);
             }
 
             long executionTime = System.currentTimeMillis() - startTime;
@@ -405,19 +406,19 @@ public class DatabaseDataSource implements ExternalDataSource {
     @Override
     public void refresh() throws DataSourceException {
         // Clear cache
-        resultCache.clear();
-        
+        cacheManager.clear();
+
         // Test connection
         if (!testConnection()) {
             throw DataSourceException.connectionError("Database connection is not available", null);
         }
-        
+
         LOGGER.info("Database data source '{}' refreshed", getName());
     }
     
     @Override
     public void shutdown() {
-        resultCache.clear();
+        cacheManager.clear();
         preparedQueries.clear();
         connectionStatus = ConnectionStatus.shutdown();
         LOGGER.info("Database data source '{}' shut down", getName());
@@ -496,43 +497,5 @@ public class DatabaseDataSource implements ExternalDataSource {
         
         return result;
     }
-    
-    /**
-     * Check if caching is enabled.
-     */
-    private boolean isCacheEnabled() {
-        return configuration.getCache() != null && configuration.getCache().isEnabled();
-    }
-    
-    /**
-     * Generate cache key for the given data type and parameters.
-     */
-    private String generateCacheKey(String dataType, Object... parameters) {
-        StringBuilder key = new StringBuilder(dataType);
-        for (Object param : parameters) {
-            key.append(":").append(param != null ? param.toString() : "null");
-        }
-        return key.toString();
-    }
-    
-    /**
-     * Simple cached result holder.
-     */
-    private static class CachedResult {
-        private final Object data;
-        private final long expiryTime;
-        
-        public CachedResult(Object data, long expiryTime) {
-            this.data = data;
-            this.expiryTime = expiryTime;
-        }
-        
-        public Object getData() {
-            return data;
-        }
-        
-        public boolean isExpired() {
-            return System.currentTimeMillis() > expiryTime;
-        }
-    }
+
 }

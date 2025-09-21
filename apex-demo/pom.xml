@@ -86,12 +86,6 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>vault</artifactId>
-            <version>1.21.3</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>vault</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -108,6 +102,11 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <redirectTestOutputToFile>false</redirectTestOutputToFile>
+                    <systemPropertyVariables>
+                        <docker.postgres.version>${docker.postgres.version}</docker.postgres.version>
+                        <docker.vault.version>${docker.vault.version}</docker.vault.version>
+                        <docker.redis.version>${docker.redis.version}</docker.redis.version>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>

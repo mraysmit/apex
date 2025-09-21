@@ -2684,6 +2684,12 @@ data-sources:
       base-url: "https://api.marketdata.com"
     endpoints:
       quote-lookup: "/v1/quotes/{key}"
+    cache:
+      enabled: true          # ✅ Enable caching
+      ttlSeconds: 600        # ✅ 10 minutes TTL
+      maxIdleSeconds: 300    # ✅ 5 minutes max idle time
+      maxSize: 1000          # ✅ Max 1000 entries (LRU eviction)
+      keyPrefix: "market"    # ✅ Cache key prefix
 
 enrichments:
   - id: "market-data-enrichment"
@@ -2702,6 +2708,36 @@ enrichments:
       - source-field: "volume"
         target-field: "tradingVolume"
 ```
+
+#### Cache Configuration for External Data Sources
+
+APEX provides **enterprise-grade caching** for all external data sources to improve performance and reduce external API calls. Here are the **actually implemented** cache features:
+
+**✅ Supported Cache Properties:**
+```yaml
+data-sources:
+  - name: "cached-source"
+    type: "rest-api"  # Works with: rest-api, database, file-system
+    cache:
+      enabled: true          # Enable/disable caching (default: true)
+      ttlSeconds: 600        # Time-to-live in seconds (default: 3600)
+      maxIdleSeconds: 300    # Max idle time in seconds (default: 0 = disabled)
+      maxSize: 1000          # Maximum cache entries (default: 10000)
+      keyPrefix: "api"       # Cache key prefix (default: empty)
+```
+
+**Cache Features:**
+- **LRU Eviction**: When `maxSize` is reached, least recently used entries are automatically evicted
+- **Dual Expiration**: Entries expire based on both TTL (`ttlSeconds`) and idle time (`maxIdleSeconds`)
+- **Thread Safety**: All cache operations are thread-safe with concurrent access support
+- **Cache Statistics**: Built-in metrics for hit/miss ratios, eviction counts, and performance monitoring
+- **Key Prefixing**: Prevents cache key collisions between different data sources
+
+**Performance Benefits:**
+- **Reduced API Calls**: Cached responses avoid repeated external requests
+- **Faster Response Times**: In-memory lookups are significantly faster than network calls
+- **Cost Optimization**: Fewer API calls reduce costs for metered external services
+- **Resilience**: Cached data provides fallback during temporary service outages
 
 **Advanced REST API Configuration:**
 

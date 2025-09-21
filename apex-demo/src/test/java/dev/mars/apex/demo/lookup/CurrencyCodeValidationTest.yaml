@@ -41,49 +41,28 @@ dataSources:
       ttlSeconds: 300
       maxSize: 100
 
-# VALIDATION RULES - Following existing APEX patterns
-validations:
+# VALIDATION RULES - Using APEX Rules for validation
+rules:
   - id: "currency-code-format-validation"
     name: "Currency Code Format Validation"
     description: "Ensure currency code is 3 characters uppercase (ISO 4217 format)"
-    type: "field-validation"
+    condition: "#currencyCode != null && #currencyCode.matches('^[A-Z]{3}$')"
+    message: "Currency code must be 3 uppercase letters (e.g., USD, EUR, GBP)"
     enabled: true
-    condition: "#currencyCode != null"
-    
-    validation-config:
-      field: "currencyCode"
-      rules:
-        - type: "regex"
-          pattern: "^[A-Z]{3}$"
-          message: "Currency code must be 3 uppercase letters (e.g., USD, EUR, GBP)"
-          
+
   - id: "transaction-amount-validation"
     name: "Transaction Amount Validation"
     description: "Ensure transaction amount is positive"
-    type: "field-validation"
+    condition: "#amount != null && #amount >= 0.01"
+    message: "Transaction amount must be positive"
     enabled: true
-    condition: "#amount != null"
-    
-    validation-config:
-      field: "amount"
-      rules:
-        - type: "range"
-          min: 0.01
-          message: "Transaction amount must be positive"
-          
+
   - id: "transaction-id-validation"
     name: "Transaction ID Format Validation"
     description: "Ensure transaction ID follows expected format"
-    type: "field-validation"
+    condition: "#transactionId != null && #transactionId.matches('^TXN-[0-9]{3}$')"
+    message: "Transaction ID must be in format TXN-### (e.g., TXN-001)"
     enabled: true
-    condition: "#transactionId != null"
-    
-    validation-config:
-      field: "transactionId"
-      rules:
-        - type: "regex"
-          pattern: "^TXN-[0-9]{3}$"
-          message: "Transaction ID must be in format TXN-### (e.g., TXN-001)"
 
 # Processing configuration
 processing:

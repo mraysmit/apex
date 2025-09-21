@@ -16,24 +16,24 @@ import java.util.HashMap;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Simple REST API YAML Test
+ * REST API Simple YAML Test
  *
  * The simplest possible YAML-based test for REST API lookup validation.
- * Uses TestableRestApiServer + APEX enrichment + minimal YAML configuration.
+ * Uses RestApiTestableServer + APEX enrichment + minimal YAML configuration.
  *
  * @author APEX Demo Team
  * @since 2025-09-21
- * @version 1.0.0
+ * @version 2.0.0 (Renamed with RestApi prefix for consistency)
  */
-class SimpleRestApiYamlTest extends DemoTestBase {
+class RestApiSimpleYamlTest extends DemoTestBase {
 
-    private static final Logger logger = LoggerFactory.getLogger(SimpleRestApiYamlTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(RestApiSimpleYamlTest.class);
 
-    private static TestableRestApiServer testServer;
+    private static RestApiTestableServer testServer;
 
     @BeforeAll
     static void setup() throws Exception {
-        testServer = new TestableRestApiServer();
+        testServer = new RestApiTestableServer();
         testServer.start();
         logger.info("Test server started at: {}", testServer.getBaseUrl());
     }
@@ -50,7 +50,7 @@ class SimpleRestApiYamlTest extends DemoTestBase {
         logger.info("Testing simple REST API lookup with YAML...");
 
         // Load YAML configuration
-        var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/SimpleRestApiYamlTest.yaml");
+        var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/RestApiSimpleYamlTest.yaml");
 
         // Update base URL in config to use our test server
         updateRestApiBaseUrl(config, testServer.getBaseUrl());
@@ -62,29 +62,29 @@ class SimpleRestApiYamlTest extends DemoTestBase {
         testData.put("currencyCode", "USD");
         logger.info("DEBUG: Input test data: {}", testData);
 
-        // Debug: Print configuration details
-        logger.info("DEBUG: Configuration has {} data sources",
-                   config.getDataSources() != null ? config.getDataSources().size() : 0);
-        if (config.getDataSources() != null) {
-            for (var ds : config.getDataSources()) {
-                logger.info("DEBUG: Data source: {} (type: {})", ds.getName(), ds.getType());
-            }
-        }
+        logger.info("DEBUG: Configuration has {} data sources", config.getDataSources().size());
+        config.getDataSources().forEach(ds -> 
+            logger.info("DEBUG: Data source: {} (type: {})", ds.getName(), ds.getType())
+        );
 
-        // Execute APEX enrichment
         logger.info("DEBUG: About to call enrichmentService.enrichObject...");
+
+        // Debug source dataset
         logger.info("DEBUG: Source dataset (before enrichment): {}", testData);
         logger.info("DEBUG: Source dataset keys: {}", testData.keySet());
-        testData.forEach((key, value) ->
+        testData.forEach((key, value) -> 
             logger.info("DEBUG: Source field: {} = {}", key, value)
         );
 
-        var result = enrichmentService.enrichObject(config, testData);
+        // Process with APEX
+        Object result = enrichmentService.enrichObject(config, testData);
+
         logger.info("DEBUG: enrichmentService.enrichObject completed");
 
+        // Debug enriched dataset
         logger.info("DEBUG: Source dataset (after enrichment): {}", testData);
         logger.info("DEBUG: Source dataset keys after enrichment: {}", testData.keySet());
-        testData.forEach((key, value) ->
+        testData.forEach((key, value) -> 
             logger.info("DEBUG: Source field after enrichment: {} = {}", key, value)
         );
 
@@ -111,23 +111,30 @@ class SimpleRestApiYamlTest extends DemoTestBase {
         logger.info("✅ Simple REST API lookup completed successfully");
     }
 
-    private void updateRestApiBaseUrl(Object config, String baseUrl) {
-        try {
-            // Access the YamlRuleConfiguration object directly
-            if (config instanceof dev.mars.apex.core.config.yaml.YamlRuleConfiguration) {
-                var yamlConfig = (dev.mars.apex.core.config.yaml.YamlRuleConfiguration) config;
+    @Test
+    void testSimpleRestApiLookupWithEUR() throws Exception {
+        logger.info("Testing simple REST API lookup with EUR...");
 
-                // Update the data source base URL
-                if (yamlConfig.getDataSources() != null && !yamlConfig.getDataSources().isEmpty()) {
-                    var dataSource = yamlConfig.getDataSources().get(0);
-                    if (dataSource.getConnection() != null) {
-                        dataSource.getConnection().put("base-url", baseUrl);
-                        logger.info("Updated REST API base URL to: " + baseUrl);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            logger.warn("Could not update base URL: " + e.getMessage());
-        }
+        // Load YAML configuration
+        var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/RestApiSimpleYamlTest.yaml");
+
+        // Update base URL in config to use our test server
+        updateRestApiBaseUrl(config, testServer.getBaseUrl());
+
+        // Test data for EUR
+        Map<String, Object> testData = new HashMap<>();
+        testData.put("currencyCode", "EUR");
+
+        // Process with APEX
+        Object result = enrichmentService.enrichObject(config, testData);
+
+        // Cast result to Map for assertions
+        @SuppressWarnings("unchecked")
+        Map<String, Object> enrichedData = (Map<String, Object>) result;
+
+        // Assertions for EUR
+        assertEquals("Euro", enrichedData.get("currencyName"), "Currency name should be 'Euro'");
+        
+        logger.info("✅ Simple REST API lookup with EUR completed successfully");
     }
 }

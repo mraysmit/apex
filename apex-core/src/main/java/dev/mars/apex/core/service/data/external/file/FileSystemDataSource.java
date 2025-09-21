@@ -19,6 +19,7 @@ package dev.mars.apex.core.service.data.external.file;
 
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import dev.mars.apex.core.service.data.external.*;
+import dev.mars.apex.core.service.data.external.cache.EnhancedCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.nio.file.attribute.FileTime;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -69,9 +71,12 @@ public class FileSystemDataSource implements ExternalDataSource {
     // Data loaders for different file formats
     private final Map<String, DataLoader> dataLoaders = new HashMap<>();
     
-    // Cache for loaded file data
-    private final Map<String, CachedFileData> fileDataCache = new ConcurrentHashMap<>();
-    
+    // Enhanced cache manager for file data
+    private EnhancedCacheManager cacheManager;
+
+    // File modification time tracking (for file monitoring)
+    private final Map<String, Instant> fileModificationTimes = new ConcurrentHashMap<>();
+
     // File monitoring
     private ScheduledExecutorService fileMonitorExecutor;
     private volatile boolean monitoring = false;
@@ -85,7 +90,8 @@ public class FileSystemDataSource implements ExternalDataSource {
         this.configuration = configuration;
         this.connectionStatus = ConnectionStatus.notInitialized();
         this.metrics = new DataSourceMetrics();
-        
+        this.cacheManager = new EnhancedCacheManager(configuration);
+
         // Initialize data loaders
         initializeDataLoaders();
     }
@@ -180,20 +186,26 @@ public class FileSystemDataSource implements ExternalDataSource {
         
         try {
             // Check cache first if enabled
-            if (isCacheEnabled()) {
-                String cacheKey = generateCacheKey(dataType, parameters);
-                CachedFileData cached = fileDataCache.get(cacheKey);
-                if (cached != null && !cached.isExpired()) {
+            if (cacheManager.isEnabled()) {
+                String cacheKey = cacheManager.generateCacheKey(dataType, parameters);
+                Object cached = cacheManager.get(cacheKey);
+                if (cached != null) {
                     metrics.recordCacheHit();
                     metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
-                    return (T) findDataInCache(cached, parameters);
+                    return (T) cached;
                 }
                 metrics.recordCacheMiss();
             }
-            
+
             // Load data from file
             Object result = loadDataFromFile(dataType, parameters);
-            
+
+            // Cache the result if caching is enabled
+            if (cacheManager.isEnabled() && result != null) {
+                String cacheKey = cacheManager.generateCacheKey(dataType, parameters);
+                cacheManager.put(cacheKey, result);
+            }
+
             metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
             return (T) result;
             
@@ -273,7 +285,7 @@ public class FileSystemDataSource implements ExternalDataSource {
             }
 
             // Clear cache after updates to ensure fresh data on next read
-            fileDataCache.clear();
+            cacheManager.clear();
 
             metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
             LOGGER.info("Completed batch update of {} operations for file system data source '{}'",
@@ -293,11 +305,11 @@ public class FileSystemDataSource implements ExternalDataSource {
     @Override
     public void refresh() throws DataSourceException {
         // Clear cache
-        fileDataCache.clear();
-        
+        cacheManager.clear();
+
         // Reload initial data
         loadInitialData();
-        
+
         LOGGER.info("File system data source '{}' refreshed", getName());
     }
     
@@ -307,7 +319,7 @@ public class FileSystemDataSource implements ExternalDataSource {
         stopFileMonitoring();
         
         // Clear cache
-        fileDataCache.clear();
+        cacheManager.clear();
         
         connectionStatus = ConnectionStatus.shutdown();
         LOGGER.info("File system data source '{}' shut down", getName());
@@ -388,10 +400,9 @@ public class FileSystemDataSource implements ExternalDataSource {
             List<Object> fileData = loadDataFromFile(mostRecentFile);
             
             // Cache the data
-            if (isCacheEnabled()) {
-                String cacheKey = generateCacheKey(dataType, parameters);
-                long ttl = configuration.getCache().getTtlSeconds() * 1000L;
-                fileDataCache.put(cacheKey, new CachedFileData(fileData, System.currentTimeMillis() + ttl));
+            if (cacheManager.isEnabled()) {
+                String cacheKey = cacheManager.generateCacheKey(dataType, parameters);
+                cacheManager.put(cacheKey, fileData);
             }
             
             // Find specific data based on parameters
@@ -423,10 +434,16 @@ public class FileSystemDataSource implements ExternalDataSource {
         try {
             List<Object> data = loadDataFromFile(filePath);
             
-            if (isCacheEnabled()) {
+            if (cacheManager.isEnabled()) {
                 String cacheKey = filePath.toString();
-                long ttl = configuration.getCache().getTtlSeconds() * 1000L;
-                fileDataCache.put(cacheKey, new CachedFileData(data, System.currentTimeMillis() + ttl));
+                cacheManager.put(cacheKey, data);
+                // Track file modification time for monitoring
+                try {
+                    FileTime lastModified = Files.getLastModifiedTime(filePath);
+                    fileModificationTimes.put(cacheKey, lastModified.toInstant());
+                } catch (IOException e) {
+                    LOGGER.warn("Failed to get modification time for file: {}", filePath, e);
+                }
             }
             
             LOGGER.debug("Loaded and cached file: {}", filePath);
@@ -720,12 +737,12 @@ public class FileSystemDataSource implements ExternalDataSource {
             
             for (Path file : currentFiles) {
                 String cacheKey = file.toString();
-                CachedFileData cached = fileDataCache.get(cacheKey);
-                
+                Instant cachedModTime = fileModificationTimes.get(cacheKey);
+
                 try {
                     FileTime lastModified = Files.getLastModifiedTime(file);
-                    
-                    if (cached == null || cached.getLastModified().isBefore(lastModified.toInstant())) {
+
+                    if (cachedModTime == null || cachedModTime.isBefore(lastModified.toInstant())) {
                         loadAndCacheFile(file);
                         LOGGER.debug("Reloaded modified file: {}", file);
                     }
@@ -747,21 +764,7 @@ public class FileSystemDataSource implements ExternalDataSource {
         return lastDotIndex > 0 ? fileName.substring(lastDotIndex + 1) : "";
     }
     
-    private boolean isCacheEnabled() {
-        return configuration.getCache() != null && configuration.getCache().isEnabled();
-    }
-    
-    private String generateCacheKey(String dataType, Object... parameters) {
-        StringBuilder key = new StringBuilder(dataType);
-        for (Object param : parameters) {
-            key.append(":").append(param != null ? param.toString() : "null");
-        }
-        return key.toString();
-    }
-    
-    private Object findDataInCache(CachedFileData cached, Object... parameters) {
-        return findDataInList(cached.getData(), parameters);
-    }
+
     
     private Object findDataInList(List<Object> data, Object... parameters) {
         if (parameters.length == 0) {
@@ -892,30 +895,5 @@ public class FileSystemDataSource implements ExternalDataSource {
         }
     }
 
-    /**
-     * Cached file data holder.
-     */
-    private static class CachedFileData {
-        private final List<Object> data;
-        private final long expiryTime;
-        private final java.time.Instant lastModified;
-        
-        public CachedFileData(List<Object> data, long expiryTime) {
-            this.data = data;
-            this.expiryTime = expiryTime;
-            this.lastModified = java.time.Instant.now();
-        }
-        
-        public List<Object> getData() {
-            return data;
-        }
-        
-        public boolean isExpired() {
-            return System.currentTimeMillis() > expiryTime;
-        }
-        
-        public java.time.Instant getLastModified() {
-            return lastModified;
-        }
-    }
+
 }

@@ -108,4 +108,27 @@ public abstract class DemoTestBase {
         testData.put("timestamp", System.currentTimeMillis());
         return testData;
     }
+
+    /**
+     * Update REST API base URL in YAML configuration.
+     * This method updates the base-url in the first REST API data source found.
+     */
+    protected void updateRestApiBaseUrl(YamlRuleConfiguration config, String newBaseUrl) {
+        if (config == null || config.getDataSources() == null) {
+            logger.warn("No data sources found in configuration");
+            return;
+        }
+
+        config.getDataSources().stream()
+            .filter(ds -> "rest-api".equals(ds.getType()))
+            .findFirst()
+            .ifPresent(ds -> {
+                if (ds.getConnection() != null) {
+                    ds.getConnection().put("base-url", newBaseUrl);
+                    logger.info("Updated REST API base URL to: {}", newBaseUrl);
+                } else {
+                    logger.warn("No connection configuration found in REST API data source");
+                }
+            });
+    }
 }

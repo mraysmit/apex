@@ -2880,6 +2880,12 @@ data-sources:
       base-url: "http://localhost:8080"
     endpoints:
       currency-lookup: "/api/currency/{key}"
+    cache:
+      enabled: true          # ✅ Enable caching
+      ttlSeconds: 600        # ✅ 10 minutes TTL
+      maxIdleSeconds: 300    # ✅ 5 minutes max idle time
+      maxSize: 1000          # ✅ Max 1000 entries (LRU eviction)
+      keyPrefix: "test"      # ✅ Cache key prefix
 
 enrichments:
   - id: "simple-lookup"
@@ -2899,15 +2905,53 @@ enrichments:
 
 **Processing Flow:**
 1. Input data: `{currencyCode: "USD"}`
-2. Condition `#currencyCode != null` evaluates to `true`
-3. Lookup key `#currencyCode` extracts `"USD"`
-4. URL `/api/currency/{key}` becomes `/api/currency/USD`
-5. HTTP GET request to `http://localhost:8080/api/currency/USD`
-6. Response: `{"code": "USD", "name": "US Dollar", "rate": 1.0, "symbol": "$"}`
-7. Field mapping: `name` → `currencyName`
-8. Result: `{currencyCode: "USD", currencyName: "US Dollar"}`
+2. **Cache Check**: Look for cached result with key `test:rest-api:USD:currency-lookup`
+3. Condition `#currencyCode != null` evaluates to `true`
+4. Lookup key `#currencyCode` extracts `"USD"`
+5. URL `/api/currency/{key}` becomes `/api/currency/USD`
+6. HTTP GET request to `http://localhost:8080/api/currency/USD` (if not cached)
+7. Response: `{"code": "USD", "name": "US Dollar", "rate": 1.0, "symbol": "$"}`
+8. **Cache Store**: Store result with TTL and idle time tracking
+9. Field mapping: `name` → `currencyName`
+10. Result: `{currencyCode: "USD", currencyName: "US Dollar"}`
 
-### 12.2 Additional Examples
+### 12.2 Data Source Cache Configuration Reference
+
+APEX provides **comprehensive caching** for all data source types. Here are the **actually implemented** cache features:
+
+#### ✅ **Supported Cache Properties**
+
+```yaml
+data-sources:
+  - name: "cached-source"
+    type: "rest-api"  # Works with: rest-api, database, file-system
+    cache:
+      enabled: true          # Enable/disable caching (default: true)
+      ttlSeconds: 600        # Time-to-live in seconds (default: 3600)
+      maxIdleSeconds: 300    # Max idle time in seconds (default: 0 = disabled)
+      maxSize: 1000          # Maximum cache entries (default: 10000)
+      keyPrefix: "api"       # Cache key prefix (default: empty)
+```
+
+#### **Cache Feature Details**
+
+| Property | Description | Default | Implementation |
+|----------|-------------|---------|----------------|
+| `enabled` | Enable/disable caching | `true` | ✅ **Fully Implemented** |
+| `ttlSeconds` | Time-to-live expiration | `3600` (1 hour) | ✅ **Fully Implemented** |
+| `maxIdleSeconds` | Max idle time expiration | `0` (disabled) | ✅ **Fully Implemented** |
+| `maxSize` | Maximum cache entries | `10000` | ✅ **Fully Implemented** |
+| `keyPrefix` | Cache key namespace prefix | `""` (empty) | ✅ **Fully Implemented** |
+
+#### **Advanced Cache Features**
+
+- **LRU Eviction**: When `maxSize` is reached, least recently used entries are automatically evicted
+- **Dual Expiration**: Entries expire based on both TTL (`ttlSeconds`) and idle time (`maxIdleSeconds`)
+- **Thread Safety**: All cache operations are thread-safe with concurrent access support
+- **Cache Statistics**: Built-in metrics for hit/miss ratios, eviction counts, and performance monitoring
+- **Key Generation**: Automatic cache key generation with optional prefixing to prevent collisions
+
+### 12.3 Additional Examples
 
 #### Basic Lookup Example
 

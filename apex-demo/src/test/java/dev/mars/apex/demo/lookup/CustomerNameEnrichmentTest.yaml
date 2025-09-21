@@ -16,7 +16,7 @@ metadata:
   tags: ["enrichment", "customer", "rest-api", "lookup-enrichment"]
 
 # REST API data source for customer enrichment
-dataSources:
+data-sources:
   - name: "customer-enrichment-api"
     type: "rest-api"
     enabled: true
@@ -24,22 +24,22 @@ dataSources:
     tags: ["customer", "enrichment", "lookup"]
     
     connection:
-      baseUrl: "http://localhost:${PORT}"
+      base-url: "http://localhost:${PORT}"
       timeout: 5000
-      retryAttempts: 2
-      retryDelay: 1000
+      retry-attempts: 2
+      retry-delay: 1000
     
     endpoints:
-      customerLookup: "/api/customers/{customerId}"
-      allCustomers: "/api/customers"
-    
-    parameterNames:
+      customer-lookup: "/api/customers/{key}"
+      all-customers: "/api/customers"
+
+    parameter-names:
       - "customerId"
     
     cache:
       enabled: true
-      ttlSeconds: 300
-      maxSize: 500
+      ttl-seconds: 300
+      max-size: 500
 
 # ENRICHMENT RULES - Following existing APEX patterns
 enrichments:
@@ -55,7 +55,7 @@ enrichments:
       lookup-dataset:
         type: "rest-api"
         data-source-ref: "customer-enrichment-api"
-        operation-ref: "customerLookup"
+        operation-ref: "customer-lookup"
     
     field-mappings:
       - source-field: "customerName"

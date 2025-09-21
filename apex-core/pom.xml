@@ -142,6 +142,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <docker.postgres.version>${docker.postgres.version}</docker.postgres.version>
+                        <docker.vault.version>${docker.vault.version}</docker.vault.version>
+                        <docker.redis.version>${docker.redis.version}</docker.redis.version>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

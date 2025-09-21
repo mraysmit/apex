@@ -5114,6 +5114,12 @@ data-sources:
     endpoints:
       currency-lookup: "/api/currency/{key}"
       exchange-rates: "/api/rates/{from}/{to}"
+    cache:
+      enabled: true          # ✅ Enable caching
+      ttlSeconds: 600        # ✅ 10 minutes TTL
+      maxIdleSeconds: 300    # ✅ 5 minutes max idle time
+      maxSize: 1000          # ✅ Max 1000 entries (LRU eviction)
+      keyPrefix: "currency"  # ✅ Cache key prefix
 
 # Using REST API in Enrichments
 enrichments:
@@ -5132,6 +5138,40 @@ enrichments:
       - source-field: "symbol"
         target-field: "currencySymbol"
 ```
+
+#### Data Source Cache Configuration
+
+APEX provides **enterprise-grade caching** across all data source types with the following **actually implemented** features:
+
+**✅ Universally Supported Cache Features**
+```yaml
+data-sources:
+  - name: "cached-data-source"
+    type: "rest-api"  # Also works with: database, file-system
+    cache:
+      enabled: true          # Enable/disable caching
+      ttlSeconds: 600        # Time-to-live expiration (seconds)
+      maxIdleSeconds: 300    # Max idle time before expiration (seconds)
+      maxSize: 1000          # Maximum cache entries (with LRU eviction)
+      keyPrefix: "api"       # Cache key prefix for namespacing
+```
+
+**Cache Feature Details:**
+- **LRU Eviction**: Automatically evicts least recently used entries when `maxSize` is reached
+- **Dual Expiration**: Entries expire based on both TTL (`ttlSeconds`) and idle time (`maxIdleSeconds`)
+- **Key Prefixing**: Prevents cache key collisions between different data sources
+- **Thread Safety**: All cache operations are thread-safe with concurrent access support
+- **Cache Statistics**: Built-in hit/miss ratios, eviction counts, and performance metrics
+
+**Cache Implementation Status by Data Source:**
+
+| Data Source Type | Basic Caching | Advanced Features | Status |
+|------------------|---------------|-------------------|---------|
+| **RestApiDataSource** | ✅ TTL, maxIdleSeconds | ✅ maxSize, LRU, keyPrefix | **Fully Implemented** |
+| **DatabaseDataSource** | ✅ TTL, maxIdleSeconds | ✅ maxSize, LRU, keyPrefix | **Fully Implemented** |
+| **FileSystemDataSource** | ✅ TTL, maxIdleSeconds | ✅ maxSize, LRU, keyPrefix | **Fully Implemented** |
+| **CacheDataSource** | ✅ TTL, maxIdleSeconds | ✅ maxSize, LRU, keyPrefix | **Fully Implemented** |
+| **MessageQueueDataSource** | ❌ No caching | ❌ No caching | **Not Applicable** |
 
 **Advanced REST API Configuration (Enterprise)**
 

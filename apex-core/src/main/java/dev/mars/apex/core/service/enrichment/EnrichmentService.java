@@ -60,7 +60,7 @@ public class EnrichmentService {
             LOGGER.fine("No enrichments found in YAML configuration");
             return targetObject;
         }
-        
+
         return processor.processEnrichments(yamlConfig.getEnrichments(), targetObject, yamlConfig);
     }
     

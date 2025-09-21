@@ -62,7 +62,7 @@ public class YamlRuleConfiguration {
     
     @JsonProperty("enrichments")
     private List<YamlEnrichment> enrichments;
-    
+
     @JsonProperty("transformations")
     private List<YamlTransformation> transformations;
 
@@ -147,7 +147,7 @@ public class YamlRuleConfiguration {
     public void setEnrichments(List<YamlEnrichment> enrichments) {
         this.enrichments = enrichments;
     }
-    
+
     public List<YamlTransformation> getTransformations() {
         return transformations;
     }

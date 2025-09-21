@@ -12,13 +12,13 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Refactored REST API Infrastructure Test
+ * REST API Basic Lookup Test
  *
- * Tests APEX REST API integration using the reusable TestableRestApiServer.
+ * Tests APEX REST API integration using the reusable RestApiTestableServer.
  * This test demonstrates real REST API functionality without code duplication.
  *
  * Key Features Tested:
- * - Reusable TestableRestApiServer integration
+ * - Reusable RestApiTestableServer integration
  * - Real HTTP requests and responses
  * - JSON data parsing
  * - Currency rate lookup
@@ -27,10 +27,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Proper separation of concerns
  *
  * YAML Configurations:
- * - BasicRestApiLookupTest.yaml: REST API data source and enrichment configuration
+ * - RestApiBasicLookupTest.yaml: REST API data source and enrichment configuration
  *
  * Debug Logging:
- * - Enable with: -Dorg.slf4j.simpleLogger.log.dev.mars.apex.demo.lookup.BasicRestApiLookupTest=DEBUG
+ * - Enable with: -Dorg.slf4j.simpleLogger.log.dev.mars.apex.demo.lookup.RestApiBasicLookupTest=DEBUG
  * - Or set logger level to DEBUG in your IDE/logback configuration
  *
  * Test Coverage:
@@ -42,14 +42,14 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author APEX Demo Team
  * @since 2025-09-20
- * @version 2.0.0 (Refactored to use TestableRestApiServer)
+ * @version 3.0.0 (Renamed with RestApi prefix for consistency)
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class BasicRestApiLookupTest extends DemoTestBase {
+class RestApiBasicLookupTest extends DemoTestBase {
 
-    private static final Logger logger = LoggerFactory.getLogger(BasicRestApiLookupTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(RestApiBasicLookupTest.class);
 
-    private static TestableRestApiServer testServer;
+    private static RestApiTestableServer testServer;
     private static String baseUrl;
 
     @BeforeAll
@@ -58,14 +58,14 @@ class BasicRestApiLookupTest extends DemoTestBase {
         logger.info("REFACTORED: Basic REST API Infrastructure Setup");
         logger.info("================================================================================");
 
-        logger.info("🔧 Setting up TestableRestApiServer for REST API testing...");
+        logger.info("🔧 Setting up RestApiTestableServer for REST API testing...");
 
         // Create and start the reusable test server
-        testServer = new TestableRestApiServer();
+        testServer = new RestApiTestableServer();
         testServer.start();
         baseUrl = testServer.getBaseUrl();
 
-        logger.info("✅ TestableRestApiServer started successfully:");
+        logger.info("✅ RestApiTestableServer started successfully:");
         logger.info("  Base URL: {}", baseUrl);
         logger.info("  Server Port: {}", testServer.getPort());
         logger.info("  Server Running: {}", testServer.isRunning());
@@ -76,43 +76,35 @@ class BasicRestApiLookupTest extends DemoTestBase {
     @AfterAll
     static void teardownBasicRestApiTestSuite() {
         if (testServer != null && testServer.isRunning()) {
-            logger.info("🛑 Stopping TestableRestApiServer...");
+            logger.info("🛑 Stopping RestApiTestableServer...");
             testServer.stop();
-            logger.info("✅ TestableRestApiServer stopped successfully");
+            logger.info("✅ RestApiTestableServer stopped successfully");
         }
     }
 
-
-
-
-
-
-
-
-
     @Test
     @Order(1)
-    @DisplayName("Should validate TestableRestApiServer setup")
-    void testTestableRestApiServerSetup() {
+    @DisplayName("Should validate RestApiTestableServer setup")
+    void testRestApiTestableServerSetup() {
         logger.info("================================================================================");
-        logger.info("REFACTORED: TestableRestApiServer Setup Validation");
+        logger.info("REFACTORED: RestApiTestableServer Setup Validation");
         logger.info("================================================================================");
 
-        logger.info("🔧 Validating TestableRestApiServer setup...");
+        logger.info("🔧 Validating RestApiTestableServer setup...");
 
         // Validate server is running
-        assertNotNull(testServer, "TestableRestApiServer should be initialized");
-        assertTrue(testServer.isRunning(), "TestableRestApiServer should be running");
+        assertNotNull(testServer, "RestApiTestableServer should be initialized");
+        assertTrue(testServer.isRunning(), "RestApiTestableServer should be running");
         assertTrue(testServer.getPort() > 0, "Server should be running on a valid port");
         assertNotNull(baseUrl, "Base URL should be set");
         assertTrue(baseUrl.startsWith("http://localhost:"), "Base URL should be valid");
 
-        logger.info("✅ TestableRestApiServer Details:");
+        logger.info("✅ RestApiTestableServer Details:");
         logger.info("  Base URL: {}", baseUrl);
         logger.info("  Server Port: {}", testServer.getPort());
         logger.info("  Server Running: {}", testServer.isRunning());
 
-        logger.info("✅ TestableRestApiServer setup validation completed successfully");
+        logger.info("✅ RestApiTestableServer setup validation completed successfully");
     }
 
     @Test
@@ -123,9 +115,9 @@ class BasicRestApiLookupTest extends DemoTestBase {
         logger.info("REFACTORED: Direct HTTP Currency Rate Lookup");
         logger.info("================================================================================");
 
-        logger.info("🔧 Testing direct HTTP call using TestableRestApiServer...");
+        logger.info("🔧 Testing direct HTTP call using RestApiTestableServer...");
 
-        // Test direct HTTP call to our TestableRestApiServer
+        // Test direct HTTP call to our RestApiTestableServer
         String currencyCode = "EUR";
         String url = baseUrl + "/api/currency/" + currencyCode;
 
@@ -177,7 +169,7 @@ class BasicRestApiLookupTest extends DemoTestBase {
         logger.info("REFACTORED: Direct HTTP Currency Conversion");
         logger.info("================================================================================");
 
-        logger.info("🔧 Testing direct HTTP currency conversion using TestableRestApiServer...");
+        logger.info("🔧 Testing direct HTTP currency conversion using RestApiTestableServer...");
 
         // Test direct HTTP call for currency conversion
         String fromCurrency = "USD";
@@ -237,7 +229,7 @@ class BasicRestApiLookupTest extends DemoTestBase {
         logger.info("REFACTORED: Health Check Endpoint Validation");
         logger.info("================================================================================");
 
-        logger.info("🔧 Testing health check endpoint using TestableRestApiServer...");
+        logger.info("🔧 Testing health check endpoint using RestApiTestableServer...");
 
         // Test health check endpoint
         String url = baseUrl + "/api/health";

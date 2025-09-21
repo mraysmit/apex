@@ -152,14 +152,7 @@ Fail Honestly: Let tests fail when there are real problems to fix
 Read Logs Carefully: Error messages usually tell you exactly what's wrong
 Do not reinvent the wheel as you are to do. Work incrementally and test after each small incremental change. When testing make sure you scan the test logs properly for test errors, do not rely on the exit code as that is largely meaningless.
 
-run all the tests again
-Do not guess. 
-Use the coding principles. 
-Test after every change. 
-Read the test log output.
-Do not continue with the next step until the tests are passing.
-rememeber the dependent  modules need to be installed to the local Maven repository first. 
-we are coding on a windows 11 machine
+
 
 
 read the document APEX_RULES_ENGINE_USER_GUIDE.md and the document  RULE_REFERENCES_FEATURE_SUMMARY.md. APEX Rule Groups can refer to Rules that are in the same yaml file or in separate yaml files on the classpath. The APEX engine should resolve those external file references and be able to run the Rule Group Successfully. Please enhance the RULE_REFERENCES_FEATURE_SUMMARY document with a desription of this functionality. 
@@ -511,5 +504,14 @@ try {
     return getFailSafeValue();
 }
 ```
+
+run all the tests again
+Do not guess.
+Use the coding principles.
+Test after every change.
+Read the test log output.
+Do not continue with the next step until the tests are passing.
+rememeber the dependent  modules need to be installed to the local Maven repository first.
+we are coding on a windows  machine
 
 **Remember: The system should be resilient to configuration errors and provide helpful feedback to users without breaking the application flow.**

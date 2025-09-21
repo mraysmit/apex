@@ -169,11 +169,11 @@ public class JsonFieldMappingTest {
         @SuppressWarnings("unchecked")
         Map<String, Object> enrichedMap = (Map<String, Object>) enrichedData;
         
-        // Check if default values were applied (since we're not doing a lookup)
-        assertEquals("UNKNOWN", enrichedMap.get("marketSymbol"));
-        assertEquals("Unknown Currency", enrichedMap.get("marketName"));
-        assertEquals(0.0, enrichedMap.get("bidPrice"));
-        assertEquals(0.0, enrichedMap.get("askPrice"));
+        // Check if field mapping worked correctly (source field values should be copied)
+        assertEquals("EURUSD", enrichedMap.get("marketSymbol")); // Copied from "symbol" field
+        assertEquals("Unknown Currency", enrichedMap.get("marketName")); // Default value (no "name" field in target)
+        assertEquals(0.0, enrichedMap.get("bidPrice")); // Default value (no "bid" field in target)
+        assertEquals(0.0, enrichedMap.get("askPrice")); // Default value (no "ask" field in target)
         
         System.out.println("✓ Direct map field mapping test passed!");
     }

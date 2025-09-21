@@ -17,6 +17,7 @@ package dev.mars.apex.demo.lookup;
  */
 
 import dev.mars.apex.demo.DemoTestBase;
+import dev.mars.apex.demo.test.TestContainerImages;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
@@ -66,7 +67,7 @@ public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
     private static final Logger logger = LoggerFactory.getLogger(PostgreSQLMultiParamLookupTest.class);
 
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(TestContainerImages.POSTGRES)
             .withDatabaseName("apex_test")
             .withUsername("apex_user")
             .withPassword("apex_pass")

@@ -10,6 +10,16 @@
 package dev.mars.apex.demo.lookup;
 
 import dev.mars.apex.demo.DemoTestBase;
+import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.yaml.YamlDataSourceLoader;
+import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import dev.mars.apex.core.service.data.DataServiceManager;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,6 +32,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 2. Customer Name Enrichment - Data enrichment using REST API lookup
  *
  * Key Features:
- * - Uses TestableRestApiServer for realistic REST API integration
+ * - Uses RestApiTestableServer for realistic REST API integration
  * - Follows existing APEX patterns from demo codebase
  * - Comprehensive validation following APEX principles
  * - Separate YAML configurations for each test pattern
@@ -47,21 +58,35 @@ public class RestApiIntegrationTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(RestApiIntegrationTest.class);
 
-    private TestableRestApiServer testServer;
+    private RestApiTestableServer testServer;
     private String baseUrl;
     private int serverPort;
+    private YamlRulesEngineService rulesEngineService;
+    private YamlConfigurationLoader yamlLoader;
+    private YamlDataSourceLoader dataSourceLoader;
+    private EnrichmentService enrichmentService;
 
     @BeforeEach
     void setupRestApiServer() throws IOException {
-        logger.info("🌐 Setting up TestableRestApiServer for REST API integration tests...");
-        
+        logger.info("🌐 Setting up RestApiTestableServer for REST API integration tests...");
+
+        // Initialize APEX services directly
+        yamlLoader = new YamlConfigurationLoader();
+        dataSourceLoader = new YamlDataSourceLoader();
+        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
+        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
+        enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+
+        // Initialize YamlRulesEngineService
+        rulesEngineService = new YamlRulesEngineService();
+
         // Create and start the reusable test server
-        testServer = new TestableRestApiServer();
+        testServer = new RestApiTestableServer();
         testServer.start();
         baseUrl = testServer.getBaseUrl();
         serverPort = extractPortFromUrl(baseUrl);
-        
-        logger.info("✅ TestableRestApiServer ready at: {}", baseUrl);
+
+        logger.info("✅ RestApiTestableServer ready at: {}", baseUrl);
         logger.info("  Currency Endpoint: {}/api/currency/{{currencyCode}}", baseUrl);
         logger.info("  Customer Endpoint: {}/api/customers/{{customerId}}", baseUrl);
     }
@@ -75,76 +100,75 @@ public class RestApiIntegrationTest extends DemoTestBase {
     }
 
     @Test
-    @DisplayName("Test 1: Currency Code Format Validation - Simple APEX Validation")
+    @DisplayName("Test 1: Currency Code Format Validation - Using APEX Rules")
     void testCurrencyCodeFormatValidation() throws Exception {
         logger.info("=== Test 1: Currency Code Format Validation ===");
-        
+
         // Load YAML configuration with dynamic port substitution
         String tempYamlPath = updateYamlWithServerPort("src/test/java/dev/mars/apex/demo/lookup/CurrencyCodeValidationTest.yaml");
         var config = yamlLoader.loadFromFile(tempYamlPath);
         assertNotNull(config, "YAML configuration should not be null");
-        
+
+        // Create RulesEngine from configuration
+        RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+        assertNotNull(engine, "RulesEngine should be created");
+
         // Test 1a: Valid currency code format
         logger.info("Testing valid currency code format...");
-        Map<String, Object> validData = Map.of(
-            "transactionId", "TXN-001",
-            "currencyCode", "EUR",  // Valid format
-            "amount", 1000.00
-        );
-        
-        // Process through APEX - validation only
-        Object result = enrichmentService.enrichObject(config, validData);
-        assertNotNull(result, "APEX processing should return result");
-        
-        @SuppressWarnings("unchecked")
-        Map<String, Object> validatedData = (Map<String, Object>) result;
-        
-        // Validate Every Operation - Original data preserved
-        assertEquals("TXN-001", validatedData.get("transactionId"), "Original transaction ID preserved");
-        assertEquals("EUR", validatedData.get("currencyCode"), "Original currency code preserved");
-        assertEquals(1000.00, validatedData.get("amount"), "Original amount preserved");
-        
-        // Validate Actual Results - No validation errors for valid format
-        assertNull(validatedData.get("validationErrors"), "Should have no validation errors for valid EUR format");
-        
+        Map<String, Object> validData = new HashMap<>();
+        validData.put("transactionId", "TXN-001");
+        validData.put("currencyCode", "EUR");  // Valid format (3 uppercase letters)
+        validData.put("amount", 1000.00);
+
+        // Execute currency code validation rule
+        Rule currencyRule = engine.getConfiguration().getRuleById("currency-code-format-validation");
+        assertNotNull(currencyRule, "Currency validation rule should be found");
+
+        RuleResult validResult = engine.executeRulesList(List.of(currencyRule), validData);
+        assertNotNull(validResult, "Rule result should not be null");
+        assertTrue(validResult.isTriggered(), "Currency code validation should pass for 'EUR'");
+
         // Test 1b: Invalid currency code format
         logger.info("Testing invalid currency code format...");
-        Map<String, Object> invalidData = Map.of(
-            "transactionId", "TXN-002",
-            "currencyCode", "euro",  // Invalid format (lowercase)
-            "amount", 500.00
-        );
-        
-        Object invalidResult = enrichmentService.enrichObject(config, invalidData);
-        @SuppressWarnings("unchecked")
-        Map<String, Object> invalidValidated = (Map<String, Object>) invalidResult;
-        
-        // Should have validation errors for invalid format
-        assertNotNull(invalidValidated.get("validationErrors"), "Should have validation errors for 'euro'");
-        assertTrue(invalidValidated.get("validationErrors").toString().contains("3 uppercase letters"), 
-            "Should contain format validation error message");
-        
-        // Test 1c: Multiple validation errors
-        logger.info("Testing multiple validation errors...");
-        Map<String, Object> multiErrorData = Map.of(
-            "transactionId", "INVALID",  // Invalid format
-            "currencyCode", "us",        // Invalid format
-            "amount", -100.00            // Invalid amount
-        );
-        
-        Object multiErrorResult = enrichmentService.enrichObject(config, multiErrorData);
-        @SuppressWarnings("unchecked")
-        Map<String, Object> multiErrorValidated = (Map<String, Object>) multiErrorResult;
-        
-        // Should have multiple validation errors
-        assertNotNull(multiErrorValidated.get("validationErrors"), "Should have multiple validation errors");
-        String errors = multiErrorValidated.get("validationErrors").toString();
-        assertTrue(errors.contains("TXN-"), "Should contain transaction ID format error");
-        assertTrue(errors.contains("3 uppercase"), "Should contain currency format error");
-        assertTrue(errors.contains("positive"), "Should contain amount validation error");
-        
+        Map<String, Object> invalidData = new HashMap<>();
+        invalidData.put("transactionId", "TXN-002");
+        invalidData.put("currencyCode", "euro");  // Invalid format (lowercase)
+        invalidData.put("amount", 500.00);
+
+        RuleResult invalidResult = engine.executeRulesList(List.of(currencyRule), invalidData);
+        assertNotNull(invalidResult, "Rule result should not be null");
+        assertFalse(invalidResult.isTriggered(), "Currency code validation should fail for 'euro'");
+
+        // Test 1c: Test transaction amount validation
+        logger.info("Testing transaction amount validation...");
+        Rule amountRule = engine.getConfiguration().getRuleById("transaction-amount-validation");
+        assertNotNull(amountRule, "Amount validation rule should be found");
+
+        Map<String, Object> negativeAmountData = new HashMap<>();
+        negativeAmountData.put("transactionId", "TXN-003");
+        negativeAmountData.put("currencyCode", "USD");
+        negativeAmountData.put("amount", -100.00);  // Invalid negative amount
+
+        RuleResult amountResult = engine.executeRulesList(List.of(amountRule), negativeAmountData);
+        assertNotNull(amountResult, "Rule result should not be null");
+        assertFalse(amountResult.isTriggered(), "Amount validation should fail for negative amount");
+
+        // Test 1d: Test transaction ID validation
+        logger.info("Testing transaction ID validation...");
+        Rule transactionRule = engine.getConfiguration().getRuleById("transaction-id-validation");
+        assertNotNull(transactionRule, "Transaction ID validation rule should be found");
+
+        Map<String, Object> invalidTransactionData = new HashMap<>();
+        invalidTransactionData.put("transactionId", "INVALID");  // Invalid format
+        invalidTransactionData.put("currencyCode", "USD");
+        invalidTransactionData.put("amount", 100.00);
+
+        RuleResult transactionResult = engine.executeRulesList(List.of(transactionRule), invalidTransactionData);
+        assertNotNull(transactionResult, "Rule result should not be null");
+        assertFalse(transactionResult.isTriggered(), "Transaction ID validation should fail for 'INVALID'");
+
         logger.info("✅ Currency Code Format Validation test completed successfully");
-        
+
         // Cleanup temp file
         Files.deleteIfExists(Paths.get(tempYamlPath));
     }
@@ -158,15 +182,23 @@ public class RestApiIntegrationTest extends DemoTestBase {
         String tempYamlPath = updateYamlWithServerPort("src/test/java/dev/mars/apex/demo/lookup/CustomerNameEnrichmentTest.yaml");
         var config = yamlLoader.loadFromFile(tempYamlPath);
         assertNotNull(config, "YAML configuration should not be null");
+
+        // Initialize data sources from YAML configuration
+        try {
+            dataSourceLoader.loadDataSources(config);
+            logger.info("Successfully loaded data sources from YAML configuration");
+        } catch (Exception e) {
+            logger.error("Failed to load data sources from YAML configuration", e);
+            throw new RuntimeException("Failed to initialize data sources", e);
+        }
         
         // Test 2a: Enrich blank customer name with known customer ID
         logger.info("Testing customer name enrichment for known customer...");
-        Map<String, Object> enrichmentData = Map.of(
-            "orderId", "ORD-001",
-            "customerId", "CUST1",
-            "customerName", "",  // Blank - will be enriched
-            "orderAmount", 2500.00
-        );
+        Map<String, Object> enrichmentData = new HashMap<>();
+        enrichmentData.put("orderId", "ORD-001");
+        enrichmentData.put("customerId", "CUST1");
+        enrichmentData.put("customerName", "");  // Blank - will be enriched
+        enrichmentData.put("orderAmount", 2500.00);
         
         // Process through APEX - enrichment only
         Object result = enrichmentService.enrichObject(config, enrichmentData);
@@ -197,12 +229,11 @@ public class RestApiIntegrationTest extends DemoTestBase {
         
         // Test 2b: Test with unknown customer ID
         logger.info("Testing customer name enrichment for unknown customer...");
-        Map<String, Object> unknownCustomerData = Map.of(
-            "orderId", "ORD-002",
-            "customerId", "UNKN1",  // Unknown customer
-            "customerName", "",
-            "orderAmount", 1000.00
-        );
+        Map<String, Object> unknownCustomerData = new HashMap<>();
+        unknownCustomerData.put("orderId", "ORD-002");
+        unknownCustomerData.put("customerId", "UNKN1");  // Unknown customer
+        unknownCustomerData.put("customerName", "");
+        unknownCustomerData.put("orderAmount", 1000.00);
 
         Object unknownResult = enrichmentService.enrichObject(config, unknownCustomerData);
         @SuppressWarnings("unchecked")
@@ -216,12 +247,11 @@ public class RestApiIntegrationTest extends DemoTestBase {
 
         // Test 2c: Test with existing customer name (should not be overwritten)
         logger.info("Testing customer name enrichment with existing name...");
-        Map<String, Object> existingNameData = Map.of(
-            "orderId", "ORD-003",
-            "customerId", "CUST2",
-            "customerName", "Existing Customer Name",  // Not blank - should not be enriched
-            "orderAmount", 750.00
-        );
+        Map<String, Object> existingNameData = new HashMap<>();
+        existingNameData.put("orderId", "ORD-003");
+        existingNameData.put("customerId", "CUST2");
+        existingNameData.put("customerName", "Existing Customer Name");  // Not blank - should not be enriched
+        existingNameData.put("orderAmount", 750.00);
 
         Object existingResult = enrichmentService.enrichObject(config, existingNameData);
         @SuppressWarnings("unchecked")
