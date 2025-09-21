@@ -1,0 +1,92 @@
+# ============================================================================
+# APEX YAML Configuration File - Customer Name Enrichment Test
+# ============================================================================
+# Purpose: Demonstrates customer name enrichment using APEX lookup-enrichment
+#          with REST API data source for realistic testing
+# Pattern: Uses enrichments section with lookup-enrichment type (no validation)
+# ============================================================================
+
+metadata:
+  name: "Customer Name Enrichment Test"
+  version: "1.0.0"
+  description: "Customer name enrichment using REST API lookup for blank customer names"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-09-20"
+  tags: ["enrichment", "customer", "rest-api", "lookup-enrichment"]
+
+# REST API data source for customer enrichment
+dataSources:
+  - name: "customer-enrichment-api"
+    type: "rest-api"
+    enabled: true
+    description: "Customer data API for name enrichment"
+    tags: ["customer", "enrichment", "lookup"]
+    
+    connection:
+      baseUrl: "http://localhost:${PORT}"
+      timeout: 5000
+      retryAttempts: 2
+      retryDelay: 1000
+    
+    endpoints:
+      customerLookup: "/api/customers/{customerId}"
+      allCustomers: "/api/customers"
+    
+    parameterNames:
+      - "customerId"
+    
+    cache:
+      enabled: true
+      ttlSeconds: 300
+      maxSize: 500
+
+# ENRICHMENT RULES - Following existing APEX patterns
+enrichments:
+  - id: "customer-name-enrichment"
+    name: "Enrich Customer Name from REST API"
+    description: "Lookup and enrich blank customer names using customer ID"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#customerId != null && (#customerName == null || #customerName == '')"
+    
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "rest-api"
+        data-source-ref: "customer-enrichment-api"
+        operation-ref: "customerLookup"
+    
+    field-mappings:
+      - source-field: "customerName"
+        target-field: "customerName"
+        required: true
+      - source-field: "customerType"
+        target-field: "customerType"
+        required: false
+      - source-field: "creditRating"
+        target-field: "creditRating"
+        required: false
+        
+  - id: "order-summary-enrichment"
+    name: "Order Summary Calculation"
+    description: "Calculate order summary information after customer enrichment"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#orderAmount != null && #customerName != null"
+    
+    calculation-config:
+      expression: "'Order ' + #orderId + ' for customer ' + #customerName + ' with amount $' + #orderAmount"
+      result-field: "orderSummary"
+    
+    field-mappings:
+      - source-field: "orderSummary"
+        target-field: "orderSummary"
+        required: true
+
+# Processing configuration
+processing:
+  continue-on-error: true
+  max-errors: 3
+  error-handling: "log-and-continue"
+  timeout: 10000

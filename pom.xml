@@ -28,7 +28,7 @@
 
         <!-- Docker Image Versions for Testcontainers -->
         <docker.postgres.version>postgres:15-alpine</docker.postgres.version>
-        <docker.vault.version>hashicorp/vault:1.15</docker.vault.version>
+        <docker.vault.version>hashicorp/vault:1.20.0</docker.vault.version>
         <docker.redis.version>redis:6-alpine</docker.redis.version>
     </properties>
 

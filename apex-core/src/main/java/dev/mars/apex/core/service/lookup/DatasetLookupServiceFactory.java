@@ -54,6 +54,7 @@ public class DatasetLookupServiceFactory {
      */
     public static DatasetLookupService createDatasetLookupService(String serviceName,
                                                                   YamlEnrichment.LookupDataset dataset) {
+        System.out.println("DEBUG: 2-parameter createDatasetLookupService called with type: " + dataset.getType());
         return createDatasetLookupService(serviceName, dataset, null);
     }
 
@@ -84,6 +85,7 @@ public class DatasetLookupServiceFactory {
         }
         
         LOGGER.info("Creating DatasetLookupService '" + serviceName + "' with type: " + datasetType);
+        System.out.println("DEBUG: 3-parameter createDatasetLookupService called with type: " + datasetType + ", configuration: " + (configuration != null ? "NOT NULL" : "NULL"));
         
         switch (datasetType.toLowerCase()) {
             case "inline":

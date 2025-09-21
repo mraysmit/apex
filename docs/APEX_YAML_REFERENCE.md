@@ -53,6 +53,15 @@ APEX YAML follows these core principles:
 4. **Null-Safe**: Built-in null safety with optional navigation operators
 5. **Performance-Oriented**: Optimized for high-throughput processing
 
+#### Critical Syntax Note
+
+**⚠️ Field Access Syntax**: APEX processes HashMap data where fields are accessed using `#fieldName` syntax, **NOT** `#data.fieldName`. This is the correct syntax for all APEX YAML configurations:
+
+- ✅ **Correct**: `#currencyCode != null`
+- ❌ **Incorrect**: `#data.currencyCode != null`
+- ✅ **Correct**: `lookup-key: "#customerId"`
+- ❌ **Incorrect**: `lookup-key: "#data.customerId"`
+
 ### Relationship to Spring Expression Language (SpEL)
 
 APEX YAML leverages SpEL for all expressions, providing:
@@ -277,7 +286,12 @@ dataSources:
     description: "Real-time currency exchange rates"
 
     connection:
-      baseUrl: "https://api.exchangerates.com/v1"
+      base-url: "https://api.exchangerates.com/v1"
+
+    # Simple endpoints (recommended approach)
+    endpoints:
+      currency-lookup: "/rates/{key}"
+      exchange-rate: "/convert/{from}/{to}"
       timeout: 5000
 
     endpoints:
@@ -2851,7 +2865,49 @@ rules:
 
 ## 12. Examples & Use Cases
 
-### 12.1 Simple Examples
+### 12.1 Simple REST API Lookup Example
+
+This is a complete, working example based on the `SimpleRestApiYamlTest`:
+
+```yaml
+# Simple REST API YAML Test Configuration
+# The simplest possible YAML for REST API lookup validation
+
+data-sources:
+  - name: "test-api"
+    type: "rest-api"
+    connection:
+      base-url: "http://localhost:8080"
+    endpoints:
+      currency-lookup: "/api/currency/{key}"
+
+enrichments:
+  - id: "simple-lookup"
+    type: "lookup-enrichment"
+    condition: "#currencyCode != null"
+    lookup-config:
+      lookup-key: "#currencyCode"
+      lookup-dataset:
+        type: "rest-api"
+        data-source-ref: "test-api"
+        operation-ref: "currency-lookup"
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+        required: false
+```
+
+**Processing Flow:**
+1. Input data: `{currencyCode: "USD"}`
+2. Condition `#currencyCode != null` evaluates to `true`
+3. Lookup key `#currencyCode` extracts `"USD"`
+4. URL `/api/currency/{key}` becomes `/api/currency/USD`
+5. HTTP GET request to `http://localhost:8080/api/currency/USD`
+6. Response: `{"code": "USD", "name": "US Dollar", "rate": 1.0, "symbol": "$"}`
+7. Field mapping: `name` → `currencyName`
+8. Result: `{currencyCode: "USD", currencyName: "US Dollar"}`
+
+### 12.2 Additional Examples
 
 #### Basic Lookup Example
 

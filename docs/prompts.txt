@@ -404,6 +404,8 @@ long responseTime = System.currentTimeMillis() - startTime;
 assertTrue(responseTime < maxTimeMs, "Response time should be acceptable");
 ```
 
+-------------------------------------------------------
+
 ## **🎯 Key Validation Principles**
 
 1. **🔍 Test Every Operation**: Every SpEL expression, database query, field mapping, and transformation in YAML has corresponding test validation
@@ -456,3 +458,58 @@ Testing Principles
 Write Tests First: Create comprehensive unit tests for new functionality
 Real Data Sources: Tests must use actual REST APIs, not inline data simulations
 Step-by-Step Validation: Test each component individually before integration
+
+# **🚨 CRITICAL ERROR HANDLING PRINCIPLE**
+
+## **Configuration Errors Must Be Handled Gracefully**
+
+**FUNDAMENTAL RULE: Configuration errors should NEVER throw exceptions that break application flow.**
+
+### **❌ WRONG APPROACH - Throwing Exceptions:**
+```java
+// BAD: Throwing exceptions for configuration issues
+if (requiredField == null) {
+    throw new EnrichmentException("Required field 'market' is missing from lookup result");
+}
+```
+
+### **✅ CORRECT APPROACH - Graceful Error Reporting:**
+```java
+// GOOD: Log warnings and continue processing
+if (requiredField == null) {
+    logger.warn("Required field 'market' is missing from lookup result for key: {}", lookupKey);
+    return null; // or appropriate default value
+}
+```
+
+### **Key Principles:**
+1. **Log, Don't Throw**: Configuration issues should be logged as warnings, not thrown as exceptions
+2. **Graceful Degradation**: System should continue processing with reasonable defaults
+3. **User-Friendly**: Provide clear error messages that help users fix their configurations
+4. **Fail-Safe**: Missing optional fields should not break the entire enrichment process
+5. **Defensive Programming**: Always assume configurations might be incomplete or incorrect
+
+### **Examples of Configuration Issues That Should Be Handled Gracefully:**
+- Missing required fields in lookup results
+- Invalid field mappings in YAML
+- Null or empty lookup keys
+- Database connection failures
+- File not found errors
+- Invalid data type conversions
+- Missing YAML configuration sections
+
+### **Implementation Pattern:**
+```java
+try {
+    // Attempt configuration operation
+    return processConfiguration(config);
+} catch (ConfigurationException e) {
+    logger.warn("Configuration issue detected: {}. Using default behavior.", e.getMessage());
+    return getDefaultValue();
+} catch (Exception e) {
+    logger.error("Unexpected error in configuration processing: {}", e.getMessage(), e);
+    return getFailSafeValue();
+}
+```
+
+**Remember: The system should be resilient to configuration errors and provide helpful feedback to users without breaking the application flow.**

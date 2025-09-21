@@ -5040,6 +5040,16 @@ APEX provides comprehensive REST API integration capabilities that enable seamle
 
 ### REST API Configuration
 
+#### Key Implementation Details
+
+**Parameter Substitution**: APEX REST API lookups use simple parameter substitution where `{key}` in the endpoint URL is replaced with the lookup value. The lookup key is passed as a parameter named `key` by default.
+
+**Field Access**: In APEX YAML configurations, fields are accessed using `#fieldName` syntax (not `#data.fieldName`). This applies to all conditions, lookup keys, and expressions.
+
+**Endpoint Structure**: APEX supports two REST API configuration approaches:
+- **Simple endpoints** (recommended): Direct URL templates with parameter substitution
+- **Advanced operations** (enterprise): Complex parameter mapping and response transformation
+
 #### Basic HTTP Client Configuration
 
 ```yaml
@@ -5092,8 +5102,41 @@ api-endpoints:
 
 #### Data Source Integration with REST APIs
 
+**Simple REST API Configuration (Recommended)**
+
 ```yaml
-# REST API as Data Source
+# Simple REST API as Data Source
+data-sources:
+  - name: "currency-api"
+    type: "rest-api"
+    connection:
+      base-url: "https://api.example.com/v1"
+    endpoints:
+      currency-lookup: "/api/currency/{key}"
+      exchange-rates: "/api/rates/{from}/{to}"
+
+# Using REST API in Enrichments
+enrichments:
+  - id: "currency-enrichment"
+    type: "lookup-enrichment"
+    condition: "#currencyCode != null"
+    lookup-config:
+      lookup-key: "#currencyCode"
+      lookup-dataset:
+        type: "rest-api"
+        data-source-ref: "currency-api"
+        operation-ref: "currency-lookup"
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+      - source-field: "symbol"
+        target-field: "currencySymbol"
+```
+
+**Advanced REST API Configuration (Enterprise)**
+
+```yaml
+# Advanced REST API as Data Source
 data-sources:
   - name: "customer-api"
     type: "rest-api"
@@ -5111,7 +5154,12 @@ data-sources:
       read-timeout: 15000
       max-retries: 3
 
-    # API Operations
+    # Simple endpoints (recommended)
+    endpoints:
+      customer-lookup: "/customers/{key}"
+      customer-search: "/customers?query={query}&limit={limit}"
+
+    # Advanced operations (optional)
     operations:
       getCustomer:
         method: "GET"
@@ -5126,42 +5174,23 @@ data-sources:
           customer-email: "email"
           customer-status: "status"
 
-      searchCustomers:
-        method: "GET"
-        path: "/customers"
-        parameters:
-          - name: "query"
-            type: "query"
-            required: false
-          - name: "limit"
-            type: "query"
-            default: 10
-        response-mapping:
-          customers: "data"
-          total-count: "total"
-
 # Using REST API in Enrichments
 enrichments:
   - id: "customer-api-enrichment"
     type: "lookup-enrichment"
-    description: "Enrich with customer data from REST API"
-
-    lookup-dataset:
-      type: "rest-api"
-      data-source-ref: "customer-api"
-      operation-ref: "getCustomer"
-
-      parameters:
-        - name: "customerId"
-          source-field: "customerId"
-          required: true
-
+    condition: "#customerId != null"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "rest-api"
+        data-source-ref: "customer-api"
+        operation-ref: "customer-lookup"
     field-mappings:
-      - source-field: "customer-name"
+      - source-field: "name"
         target-field: "customerName"
-      - source-field: "customer-email"
+      - source-field: "email"
         target-field: "customerEmail"
-      - source-field: "customer-status"
+      - source-field: "status"
         target-field: "customerStatus"
 ```
 
@@ -5938,6 +5967,34 @@ public class AsyncApiClient {
             .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }
+```
+
+### REST API Processing Flow
+
+#### Complete End-to-End Processing
+
+Based on the working `SimpleRestApiYamlTest`, here's the complete processing flow:
+
+1. **Configuration Loading**: APEX loads YAML configuration with REST API data sources
+2. **Source Dataset Processing**: Input data (e.g., `{currencyCode: "USD"}`) is processed
+3. **Condition Evaluation**: Enrichment condition `#currencyCode != null` is evaluated
+4. **Lookup Key Extraction**: Lookup key `#currencyCode` extracts `"USD"` from source data
+5. **Parameter Substitution**: URL template `/api/currency/{key}` becomes `/api/currency/USD`
+6. **HTTP Request**: GET request sent to `http://localhost:8080/api/currency/USD`
+7. **Response Processing**: JSON response parsed into Map structure
+8. **Field Mapping**: Source field `name` mapped to target field `currencyName`
+9. **Data Enrichment**: Original data enriched with new fields
+10. **Result Return**: Enriched data returned with both original and new fields
+
+#### Debug Output Example
+
+```
+DEBUG: Source dataset (before enrichment): {currencyCode=USD}
+DEBUG: Source dataset keys: [currencyCode]
+DEBUG: Final endpoint URL: http://localhost:8080/api/currency/USD
+DEBUG: HTTP response: {"code": "USD", "name": "US Dollar", "rate": 1.0, "symbol": "$"}
+DEBUG: Source dataset (after enrichment): {currencyName=US Dollar, currencyCode=USD}
+DEBUG: Result keys: [currencyName, currencyCode]
 ```
 
 ### REST API Best Practices

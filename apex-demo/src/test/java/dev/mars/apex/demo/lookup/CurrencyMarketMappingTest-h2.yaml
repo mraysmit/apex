@@ -1,0 +1,43 @@
+# Simple H2 Currency Validation
+# Validates currency codes against H2 database
+
+metadata:
+  id: "currency-h2-validation"
+  name: "Currency H2 Database Validation"
+
+data-sources:
+  - name: "currency-validation-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "./target/h2-demo/currency_validation"
+      username: "sa"
+      password: ""
+
+enrichments:
+  - id: "currency-h2-validation"
+    type: "lookup-enrichment"
+    condition: "#currency != null && #currency.length() > 0"
+
+    lookup-config:
+      lookup-key: "#currency"
+      lookup-dataset:
+        type: "database"
+        connection-name: "currency-validation-database"
+        query: "SELECT currency_code, currency_name, is_active FROM valid_currencies WHERE currency_code = :currencyCode AND is_active = true"
+        parameters:
+          - field: "currencyCode"
+            type: "string"
+
+    field-mappings:
+      - source-field: "CURRENCY_CODE"
+        target-field: "validatedCurrencyCode"
+        required: false
+
+      - source-field: "CURRENCY_NAME"
+        target-field: "currencyName"
+        required: false
+
+      - source-field: "IS_ACTIVE"
+        target-field: "isActiveCurrency"
+        required: false

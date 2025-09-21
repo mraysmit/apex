@@ -2676,20 +2676,47 @@ enrichments:
 **REST API Integration Example:**
 
 ```yaml
-# Configuration with REST API lookup
+# Simple REST API Configuration (Recommended)
+data-sources:
+  - name: "market-api"
+    type: "rest-api"
+    connection:
+      base-url: "https://api.marketdata.com"
+    endpoints:
+      quote-lookup: "/v1/quotes/{key}"
+
 enrichments:
   - id: "market-data-enrichment"
     name: "Real-time Market Data"
     type: "lookup-enrichment"
-    condition: "['symbol'] != null"
+    condition: "#symbol != null"
     lookup-config:
+      lookup-key: "#symbol"
       lookup-dataset:
-        type: "rest-api"                   # External REST API source
-        base-url: "https://api.marketdata.com"
-        endpoint: "/v1/quotes/{symbol}"    # {symbol} will be replaced
-        method: "GET"
-        headers:
-          Authorization: "Bearer ${API_TOKEN}"  # Environment variable
+        type: "rest-api"
+        data-source-ref: "market-api"
+        operation-ref: "quote-lookup"
+    field-mappings:
+      - source-field: "price"
+        target-field: "currentPrice"
+      - source-field: "volume"
+        target-field: "tradingVolume"
+```
+
+**Advanced REST API Configuration:**
+
+```yaml
+# Advanced configuration with authentication
+data-sources:
+  - name: "secure-market-api"
+    type: "rest-api"
+    connection:
+      base-url: "https://api.marketdata.com"
+      authentication:
+        type: "bearer-token"
+        token: "${API_TOKEN}"  # Environment variable
+    endpoints:
+      quote-lookup: "/v1/quotes/{key}"
           Content-Type: "application/json"
         timeout-seconds: 5
         cache-enabled: true

@@ -1,8 +1,5 @@
 package dev.mars.apex.demo.lookup;
 
-import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpExchange;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.demo.DemoTestBase;
@@ -10,303 +7,112 @@ import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Phase 2.1: Basic REST API Infrastructure Test
+ * Refactored REST API Infrastructure Test
  *
- * Tests APEX REST API integration using JDK's built-in HTTP server.
- * This test demonstrates real REST API functionality without external dependencies.
+ * Tests APEX REST API integration using the reusable TestableRestApiServer.
+ * This test demonstrates real REST API functionality without code duplication.
  *
  * Key Features Tested:
- * - JDK HttpServer integration
+ * - Reusable TestableRestApiServer integration
  * - Real HTTP requests and responses
  * - JSON data parsing
  * - Currency rate lookup
  * - Currency conversion
  * - Basic error handling
+ * - Proper separation of concerns
+ *
+ * YAML Configurations:
+ * - BasicRestApiLookupTest.yaml: REST API data source and enrichment configuration
+ *
+ * Debug Logging:
+ * - Enable with: -Dorg.slf4j.simpleLogger.log.dev.mars.apex.demo.lookup.BasicRestApiLookupTest=DEBUG
+ * - Or set logger level to DEBUG in your IDE/logback configuration
+ *
+ * Test Coverage:
+ * - HTTP server setup validation
+ * - Direct HTTP currency rate lookup
+ * - Direct HTTP currency conversion
+ * - Health check endpoint validation
+ * - Performance requirements validation
  *
  * @author APEX Demo Team
  * @since 2025-09-20
- * @version 1.0.0
+ * @version 2.0.0 (Refactored to use TestableRestApiServer)
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class BasicRestApiLookupTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(BasicRestApiLookupTest.class);
 
-    private static HttpServer httpServer;
-    private static int serverPort;
+    private static TestableRestApiServer testServer;
+    private static String baseUrl;
 
     @BeforeAll
-    static void setupBasicRestApiTestSuite() throws IOException {
+    static void setupBasicRestApiTestSuite() throws Exception {
         logger.info("================================================================================");
-        logger.info("PHASE 2.1: Basic REST API Infrastructure Setup");
+        logger.info("REFACTORED: Basic REST API Infrastructure Setup");
         logger.info("================================================================================");
 
-        // Setup JDK HTTP Server for all tests
-        setupJdkHttpServer();
+        logger.info("🔧 Setting up TestableRestApiServer for REST API testing...");
 
-        logger.info("✅ Basic REST API test suite setup completed successfully");
+        // Create and start the reusable test server
+        testServer = new TestableRestApiServer();
+        testServer.start();
+        baseUrl = testServer.getBaseUrl();
+
+        logger.info("✅ TestableRestApiServer started successfully:");
+        logger.info("  Base URL: {}", baseUrl);
+        logger.info("  Server Port: {}", testServer.getPort());
+        logger.info("  Server Running: {}", testServer.isRunning());
+
+        logger.info("✅ Refactored REST API test suite setup completed successfully");
     }
 
     @AfterAll
     static void teardownBasicRestApiTestSuite() {
-        if (httpServer != null) {
-            logger.info("🛑 Stopping JDK HTTP server...");
-            httpServer.stop(0);
-            logger.info("✅ JDK HTTP server stopped successfully");
+        if (testServer != null && testServer.isRunning()) {
+            logger.info("🛑 Stopping TestableRestApiServer...");
+            testServer.stop();
+            logger.info("✅ TestableRestApiServer stopped successfully");
         }
     }
 
-    private static void setupJdkHttpServer() throws IOException {
-        logger.info("🌐 Setting up JDK HTTP server for REST API testing...");
 
-        // Create HTTP server on available port
-        httpServer = HttpServer.create(new InetSocketAddress(0), 0);
-        serverPort = httpServer.getAddress().getPort();
 
-        // Setup currency rate endpoint
-        setupCurrencyRateEndpoint();
 
-        // Setup currency conversion endpoint
-        setupCurrencyConversionEndpoint();
 
-        // Setup health check endpoint
-        setupHealthCheckEndpoint();
 
-        // Start the server
-        httpServer.start();
 
-        logger.info("✅ JDK HTTP server started successfully:");
-        logger.info("  Server URL: http://localhost:{}", serverPort);
-        logger.info("  Currency Rate Endpoint: /api/currency/{currencyCode}");
-        logger.info("  Currency Conversion Endpoint: /api/convert");
-        logger.info("  Health Check Endpoint: /api/health");
-    }
 
-    private static void setupCurrencyRateEndpoint() {
-        httpServer.createContext("/api/currency", new HttpHandler() {
-            public void handle(HttpExchange exchange) throws IOException {
-                logger.info("📡 Handling currency rate request: {}", exchange.getRequestURI());
-
-                if (!"GET".equals(exchange.getRequestMethod())) {
-                    sendErrorResponse(exchange, 405, "Method Not Allowed");
-                    return;
-                }
-
-                String path = exchange.getRequestURI().getPath();
-                String currencyCode = extractCurrencyCodeFromPath(path);
-
-                if (currencyCode == null || currencyCode.isEmpty()) {
-                    sendErrorResponse(exchange, 400, "Currency code is required");
-                    return;
-                }
-
-                String jsonResponse = createCurrencyRateResponse(currencyCode);
-                sendJsonResponse(exchange, 200, jsonResponse);
-            }
-        });
-    }
-
-    private static void setupCurrencyConversionEndpoint() {
-        httpServer.createContext("/api/convert", new HttpHandler() {
-            public void handle(HttpExchange exchange) throws IOException {
-                logger.info("📡 Handling currency conversion request: {}", exchange.getRequestURI());
-
-                if (!"GET".equals(exchange.getRequestMethod())) {
-                    sendErrorResponse(exchange, 405, "Method Not Allowed");
-                    return;
-                }
-
-                String query = exchange.getRequestURI().getQuery();
-                Map<String, String> params = parseQueryParameters(query);
-
-                String from = params.get("from");
-                String to = params.get("to");
-                String amountStr = params.getOrDefault("amount", "1.0");
-
-                if (from == null || to == null) {
-                    sendErrorResponse(exchange, 400, "Both 'from' and 'to' currency codes are required");
-                    return;
-                }
-
-                try {
-                    double amount = Double.parseDouble(amountStr);
-                    String jsonResponse = createCurrencyConversionResponse(from, to, amount);
-                    sendJsonResponse(exchange, 200, jsonResponse);
-                } catch (NumberFormatException e) {
-                    sendErrorResponse(exchange, 400, "Invalid amount format");
-                }
-            }
-        });
-    }
-
-    private static void setupHealthCheckEndpoint() {
-        httpServer.createContext("/api/health", new HttpHandler() {
-            public void handle(HttpExchange exchange) throws IOException {
-                logger.info("📡 Handling health check request");
-
-                String jsonResponse = """
-                    {
-                        "status": "UP",
-                        "timestamp": "%s",
-                        "service": "APEX Basic REST API Test Server",
-                        "version": "1.0.0"
-                    }
-                    """.formatted(java.time.Instant.now().toString());
-
-                sendJsonResponse(exchange, 200, jsonResponse);
-            }
-        });
-    }
-
-    private static String extractCurrencyCodeFromPath(String path) {
-        // Extract currency code from path like "/api/currency/USD"
-        String[] parts = path.split("/");
-        return parts.length >= 4 ? parts[3] : null;
-    }
-
-    private static Map<String, String> parseQueryParameters(String query) {
-        if (query == null || query.isEmpty()) {
-            return Map.of();
-        }
-
-        Map<String, String> params = new java.util.HashMap<>();
-        for (String param : query.split("&")) {
-            String[] keyValue = param.split("=", 2);
-            if (keyValue.length == 2) {
-                params.put(keyValue[0], keyValue[1]);
-            }
-        }
-        return params;
-    }
-
-    private static String createCurrencyRateResponse(String currencyCode) {
-        // Create realistic currency rate data for testing
-        return switch (currencyCode.toUpperCase()) {
-            case "USD" -> """
-                {
-                    "code": "USD",
-                    "name": "US Dollar",
-                    "rate": 1.0,
-                    "symbol": "$",
-                    "lastUpdated": "%s"
-                }
-                """.formatted(java.time.Instant.now().toString());
-            case "EUR" -> """
-                {
-                    "code": "EUR",
-                    "name": "Euro",
-                    "rate": 0.85,
-                    "symbol": "EUR",
-                    "lastUpdated": "%s"
-                }
-                """.formatted(java.time.Instant.now().toString());
-            case "GBP" -> """
-                {
-                    "code": "GBP",
-                    "name": "British Pound",
-                    "rate": 0.73,
-                    "symbol": "£",
-                    "lastUpdated": "%s"
-                }
-                """.formatted(java.time.Instant.now().toString());
-            case "JPY" -> """
-                {
-                    "code": "JPY",
-                    "name": "Japanese Yen",
-                    "rate": 110.0,
-                    "symbol": "¥",
-                    "lastUpdated": "%s"
-                }
-                """.formatted(java.time.Instant.now().toString());
-            default -> """
-                {
-                    "code": "%s",
-                    "name": "Unknown Currency",
-                    "rate": 1.0,
-                    "symbol": "?",
-                    "lastUpdated": "%s"
-                }
-                """.formatted(currencyCode, java.time.Instant.now().toString());
-        };
-    }
-
-    private static String createCurrencyConversionResponse(String from, String to, double amount) {
-        // Simple conversion logic for testing (using hardcoded rates)
-        double fromRate = getCurrencyRate(from);
-        double toRate = getCurrencyRate(to);
-        double exchangeRate = toRate / fromRate;
-        double convertedAmount = amount * exchangeRate;
-
-        return """
-            {
-                "fromCurrency": "%s",
-                "toCurrency": "%s",
-                "originalAmount": %.2f,
-                "convertedAmount": %.2f,
-                "exchangeRate": %.4f,
-                "timestamp": "%s"
-            }
-            """.formatted(from, to, amount, convertedAmount, exchangeRate, java.time.Instant.now().toString());
-    }
-
-    private static double getCurrencyRate(String currencyCode) {
-        return switch (currencyCode.toUpperCase()) {
-            case "USD" -> 1.0;
-            case "EUR" -> 0.85;
-            case "GBP" -> 0.73;
-            case "JPY" -> 110.0;
-            default -> 1.0;
-        };
-    }
-
-    private static void sendJsonResponse(HttpExchange exchange, int statusCode, String jsonResponse) throws IOException {
-        exchange.getResponseHeaders().set("Content-Type", "application/json");
-        byte[] responseBytes = jsonResponse.getBytes();
-        exchange.sendResponseHeaders(statusCode, responseBytes.length);
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(responseBytes);
-        }
-        logger.info("📤 Sent JSON response: {} bytes, status: {}", responseBytes.length, statusCode);
-    }
-
-    private static void sendErrorResponse(HttpExchange exchange, int statusCode, String message) throws IOException {
-        String errorResponse = """
-            {
-                "error": "%s",
-                "status": %d,
-                "timestamp": "%s"
-            }
-            """.formatted(message, statusCode, java.time.Instant.now().toString());
-
-        sendJsonResponse(exchange, statusCode, errorResponse);
-    }
 
     @Test
     @Order(1)
-    @DisplayName("Should validate JDK HTTP server setup")
-    void testJdkHttpServerSetup() {
+    @DisplayName("Should validate TestableRestApiServer setup")
+    void testTestableRestApiServerSetup() {
         logger.info("================================================================================");
-        logger.info("PHASE 2.1: JDK HTTP Server Setup Validation");
+        logger.info("REFACTORED: TestableRestApiServer Setup Validation");
         logger.info("================================================================================");
+
+        logger.info("🔧 Validating TestableRestApiServer setup...");
 
         // Validate server is running
-        assertNotNull(httpServer, "JDK HTTP server should be initialized");
-        assertTrue(httpServer.getAddress().getPort() > 0, "Server should be running on a valid port");
+        assertNotNull(testServer, "TestableRestApiServer should be initialized");
+        assertTrue(testServer.isRunning(), "TestableRestApiServer should be running");
+        assertTrue(testServer.getPort() > 0, "Server should be running on a valid port");
+        assertNotNull(baseUrl, "Base URL should be set");
+        assertTrue(baseUrl.startsWith("http://localhost:"), "Base URL should be valid");
 
-        logger.info("✅ JDK HTTP Server Details:");
-        logger.info("  Server Address: {}", httpServer.getAddress());
-        logger.info("  Server Port: {}", serverPort);
-        logger.info("  Server Running: {}", httpServer.getAddress() != null);
+        logger.info("✅ TestableRestApiServer Details:");
+        logger.info("  Base URL: {}", baseUrl);
+        logger.info("  Server Port: {}", testServer.getPort());
+        logger.info("  Server Running: {}", testServer.isRunning());
 
-        logger.info("✅ JDK HTTP server setup validation completed successfully");
+        logger.info("✅ TestableRestApiServer setup validation completed successfully");
     }
 
     @Test
@@ -314,12 +120,14 @@ class BasicRestApiLookupTest extends DemoTestBase {
     @DisplayName("Should perform direct HTTP currency rate lookup")
     void testDirectHttpCurrencyRateLookup() throws Exception {
         logger.info("================================================================================");
-        logger.info("PHASE 2.1: Direct HTTP Currency Rate Lookup");
+        logger.info("REFACTORED: Direct HTTP Currency Rate Lookup");
         logger.info("================================================================================");
 
-        // Test direct HTTP call to our JDK server
+        logger.info("🔧 Testing direct HTTP call using TestableRestApiServer...");
+
+        // Test direct HTTP call to our TestableRestApiServer
         String currencyCode = "EUR";
-        String url = "http://localhost:" + serverPort + "/api/currency/" + currencyCode;
+        String url = baseUrl + "/api/currency/" + currencyCode;
 
         logger.info("🔧 Testing direct HTTP call:");
         logger.info("  URL: {}", url);
@@ -351,7 +159,7 @@ class BasicRestApiLookupTest extends DemoTestBase {
         assertTrue(jsonResponse.contains("\"code\": \"EUR\""), "Response should contain EUR code");
         assertTrue(jsonResponse.contains("\"name\": \"Euro\""), "Response should contain Euro name");
         assertTrue(jsonResponse.contains("\"rate\": 0.85"), "Response should contain exchange rate");
-        assertTrue(jsonResponse.contains("\"symbol\": \"EUR\""), "Response should contain EUR symbol");
+        assertTrue(jsonResponse.contains("\"symbol\": \"€\""), "Response should contain EUR symbol");
         assertTrue(jsonResponse.contains("\"lastUpdated\""), "Response should contain timestamp");
 
         // Validate performance requirement
@@ -366,15 +174,17 @@ class BasicRestApiLookupTest extends DemoTestBase {
     @DisplayName("Should perform direct HTTP currency conversion")
     void testDirectHttpCurrencyConversion() throws Exception {
         logger.info("================================================================================");
-        logger.info("PHASE 2.1: Direct HTTP Currency Conversion");
+        logger.info("REFACTORED: Direct HTTP Currency Conversion");
         logger.info("================================================================================");
+
+        logger.info("🔧 Testing direct HTTP currency conversion using TestableRestApiServer...");
 
         // Test direct HTTP call for currency conversion
         String fromCurrency = "USD";
         String toCurrency = "EUR";
         double amount = 100.0;
-        String url = String.format("http://localhost:%d/api/convert?from=%s&to=%s&amount=%.2f",
-            serverPort, fromCurrency, toCurrency, amount);
+        String url = String.format("%s/api/convert?from=%s&to=%s&amount=%.2f",
+            baseUrl, fromCurrency, toCurrency, amount);
 
         logger.info("🔧 Testing direct HTTP currency conversion:");
         logger.info("  URL: {}", url);
@@ -424,11 +234,13 @@ class BasicRestApiLookupTest extends DemoTestBase {
     @DisplayName("Should validate health check endpoint")
     void testHealthCheckEndpoint() throws Exception {
         logger.info("================================================================================");
-        logger.info("PHASE 2.1: Health Check Endpoint Validation");
+        logger.info("REFACTORED: Health Check Endpoint Validation");
         logger.info("================================================================================");
 
+        logger.info("🔧 Testing health check endpoint using TestableRestApiServer...");
+
         // Test health check endpoint
-        String url = "http://localhost:" + serverPort + "/api/health";
+        String url = baseUrl + "/api/health";
 
         logger.info("🔧 Testing health check endpoint:");
         logger.info("  URL: {}", url);
@@ -457,9 +269,10 @@ class BasicRestApiLookupTest extends DemoTestBase {
         // Parse JSON response and validate health check data
         String jsonResponse = response.body();
         assertTrue(jsonResponse.contains("\"status\": \"UP\""), "Health status should be UP");
-        assertTrue(jsonResponse.contains("\"service\": \"APEX Basic REST API Test Server\""), "Service name should be present");
+        assertTrue(jsonResponse.contains("\"service\": \"Test REST API Server\""), "Service name should be present");
         assertTrue(jsonResponse.contains("\"version\": \"1.0.0\""), "Version should be present");
         assertTrue(jsonResponse.contains("\"timestamp\""), "Timestamp should be present");
+        assertTrue(jsonResponse.contains("\"baseUrl\""), "Base URL should be present");
 
         // Validate performance requirement
         long responseTime = endTime - startTime;
@@ -467,7 +280,7 @@ class BasicRestApiLookupTest extends DemoTestBase {
 
         logger.info("✅ Health check endpoint validation completed successfully in {}ms", responseTime);
         logger.info("================================================================================");
-        logger.info("🎉 PHASE 2.1: Basic REST API Infrastructure - ALL TESTS PASSED!");
+        logger.info("🎉 REFACTORED: Basic REST API Infrastructure - ALL TESTS PASSED!");
         logger.info("================================================================================");
     }
 }

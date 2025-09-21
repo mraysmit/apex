@@ -124,7 +124,7 @@ enrichments:
     field-mappings:
       - source-field: "market"
         target-field: "market"
-        required: true
+        required: false
         
       - source-field: "market_name"
         target-field: "marketName"

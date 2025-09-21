@@ -1,0 +1,93 @@
+# ============================================================================
+# APEX YAML Configuration File - Currency Code Format Validation Test
+# ============================================================================
+# Purpose: Demonstrates simple currency code format validation using APEX
+#          validation rules with REST API context for realistic testing
+# Pattern: Uses validations section with regex validation (no enrichment)
+# ============================================================================
+
+metadata:
+  name: "Currency Code Format Validation Test"
+  version: "1.0.0"
+  description: "Simple currency code format validation using APEX validation rules"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-09-20"
+  tags: ["validation", "currency", "rest-api", "format-validation"]
+
+# REST API data source for context (not used in validation, but available for future enrichment)
+dataSources:
+  - name: "currency-api"
+    type: "rest-api"
+    enabled: true
+    description: "Currency reference data API for validation context"
+    tags: ["currency", "reference-data", "validation"]
+    
+    connection:
+      baseUrl: "http://localhost:${PORT}"
+      timeout: 5000
+      retryAttempts: 2
+      retryDelay: 1000
+    
+    endpoints:
+      currencyLookup: "/api/currency/{currencyCode}"
+      allCurrencies: "/api/currencies"
+    
+    parameterNames:
+      - "currencyCode"
+    
+    cache:
+      enabled: true
+      ttlSeconds: 300
+      maxSize: 100
+
+# VALIDATION RULES - Following existing APEX patterns
+validations:
+  - id: "currency-code-format-validation"
+    name: "Currency Code Format Validation"
+    description: "Ensure currency code is 3 characters uppercase (ISO 4217 format)"
+    type: "field-validation"
+    enabled: true
+    condition: "#currencyCode != null"
+    
+    validation-config:
+      field: "currencyCode"
+      rules:
+        - type: "regex"
+          pattern: "^[A-Z]{3}$"
+          message: "Currency code must be 3 uppercase letters (e.g., USD, EUR, GBP)"
+          
+  - id: "transaction-amount-validation"
+    name: "Transaction Amount Validation"
+    description: "Ensure transaction amount is positive"
+    type: "field-validation"
+    enabled: true
+    condition: "#amount != null"
+    
+    validation-config:
+      field: "amount"
+      rules:
+        - type: "range"
+          min: 0.01
+          message: "Transaction amount must be positive"
+          
+  - id: "transaction-id-validation"
+    name: "Transaction ID Format Validation"
+    description: "Ensure transaction ID follows expected format"
+    type: "field-validation"
+    enabled: true
+    condition: "#transactionId != null"
+    
+    validation-config:
+      field: "transactionId"
+      rules:
+        - type: "regex"
+          pattern: "^TXN-[0-9]{3}$"
+          message: "Transaction ID must be in format TXN-### (e.g., TXN-001)"
+
+# Processing configuration
+processing:
+  continue-on-error: true
+  max-errors: 5
+  error-handling: "collect-all"
+  timeout: 10000
