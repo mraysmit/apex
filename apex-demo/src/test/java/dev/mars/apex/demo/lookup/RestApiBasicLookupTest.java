@@ -2,7 +2,7 @@ package dev.mars.apex.demo.lookup;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
-import dev.mars.apex.demo.DemoTestBase;
+import dev.mars.apex.demo.infrastructure.DemoTestBase;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @version 3.0.0 (Renamed with RestApi prefix for consistency)
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class RestApiBasicLookupTest extends DemoTestBase {
+public class RestApiBasicLookupTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(RestApiBasicLookupTest.class);
 
@@ -65,12 +65,12 @@ class RestApiBasicLookupTest extends DemoTestBase {
         testServer.start();
         baseUrl = testServer.getBaseUrl();
 
-        logger.info("✅ RestApiTestableServer started successfully:");
+        logger.info(" RestApiTestableServer started successfully:");
         logger.info("  Base URL: {}", baseUrl);
         logger.info("  Server Port: {}", testServer.getPort());
         logger.info("  Server Running: {}", testServer.isRunning());
 
-        logger.info("✅ Refactored REST API test suite setup completed successfully");
+        logger.info(" Refactored REST API test suite setup completed successfully");
     }
 
     @AfterAll
@@ -78,7 +78,7 @@ class RestApiBasicLookupTest extends DemoTestBase {
         if (testServer != null && testServer.isRunning()) {
             logger.info("🛑 Stopping RestApiTestableServer...");
             testServer.stop();
-            logger.info("✅ RestApiTestableServer stopped successfully");
+            logger.info(" RestApiTestableServer stopped successfully");
         }
     }
 
@@ -99,12 +99,12 @@ class RestApiBasicLookupTest extends DemoTestBase {
         assertNotNull(baseUrl, "Base URL should be set");
         assertTrue(baseUrl.startsWith("http://localhost:"), "Base URL should be valid");
 
-        logger.info("✅ RestApiTestableServer Details:");
+        logger.info(" RestApiTestableServer Details:");
         logger.info("  Base URL: {}", baseUrl);
         logger.info("  Server Port: {}", testServer.getPort());
         logger.info("  Server Running: {}", testServer.isRunning());
 
-        logger.info("✅ RestApiTestableServer setup validation completed successfully");
+        logger.info(" RestApiTestableServer setup validation completed successfully");
     }
 
     @Test
@@ -142,7 +142,7 @@ class RestApiBasicLookupTest extends DemoTestBase {
         assertEquals(200, response.statusCode(), "HTTP status should be 200 OK");
         assertNotNull(response.body(), "Response body should not be null");
 
-        logger.info("✅ HTTP Response Details:");
+        logger.info(" HTTP Response Details:");
         logger.info("  Status Code: {}", response.statusCode());
         logger.info("  Response Body: {}", response.body());
 
@@ -158,7 +158,7 @@ class RestApiBasicLookupTest extends DemoTestBase {
         long responseTime = endTime - startTime;
         assertTrue(responseTime < 1000, "Response time should be < 1000ms, was: " + responseTime + "ms");
 
-        logger.info("✅ Direct HTTP currency rate lookup completed successfully in {}ms", responseTime);
+        logger.info(" Direct HTTP currency rate lookup completed successfully in {}ms", responseTime);
     }
 
     @Test
@@ -201,7 +201,7 @@ class RestApiBasicLookupTest extends DemoTestBase {
         assertEquals(200, response.statusCode(), "HTTP status should be 200 OK");
         assertNotNull(response.body(), "Response body should not be null");
 
-        logger.info("✅ HTTP Response Details:");
+        logger.info(" HTTP Response Details:");
         logger.info("  Status Code: {}", response.statusCode());
         logger.info("  Response Body: {}", response.body());
 
@@ -218,7 +218,7 @@ class RestApiBasicLookupTest extends DemoTestBase {
         long responseTime = endTime - startTime;
         assertTrue(responseTime < 1000, "Response time should be < 1000ms, was: " + responseTime + "ms");
 
-        logger.info("✅ Direct HTTP currency conversion completed successfully in {}ms", responseTime);
+        logger.info(" Direct HTTP currency conversion completed successfully in {}ms", responseTime);
     }
 
     @Test
@@ -254,7 +254,7 @@ class RestApiBasicLookupTest extends DemoTestBase {
         assertEquals(200, response.statusCode(), "Health check should return 200 OK");
         assertNotNull(response.body(), "Health check response body should not be null");
 
-        logger.info("✅ Health Check Response Details:");
+        logger.info(" Health Check Response Details:");
         logger.info("  Status Code: {}", response.statusCode());
         logger.info("  Response Body: {}", response.body());
 
@@ -270,7 +270,7 @@ class RestApiBasicLookupTest extends DemoTestBase {
         long responseTime = endTime - startTime;
         assertTrue(responseTime < 500, "Health check response time should be < 500ms, was: " + responseTime + "ms");
 
-        logger.info("✅ Health check endpoint validation completed successfully in {}ms", responseTime);
+        logger.info(" Health check endpoint validation completed successfully in {}ms", responseTime);
         logger.info("================================================================================");
         logger.info("🎉 REFACTORED: Basic REST API Infrastructure - ALL TESTS PASSED!");
         logger.info("================================================================================");

@@ -16,7 +16,7 @@ package dev.mars.apex.demo.lookup;
  * limitations under the License.
  */
 
-import dev.mars.apex.demo.DemoTestBase;
+import dev.mars.apex.demo.infrastructure.DemoTestBase;
 import dev.mars.apex.demo.test.TestContainerImages;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import org.junit.jupiter.api.*;

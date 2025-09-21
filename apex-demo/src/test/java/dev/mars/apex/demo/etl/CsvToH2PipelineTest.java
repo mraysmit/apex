@@ -36,11 +36,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * JUnit 5 test for CSV to H2 Pipeline functionality using APEX DataPipelineEngine.
  *
  * PIPELINE VALIDATION CHECKLIST:
- * ✅ Load pipeline YAML configuration with data sources and sinks
- * ✅ Initialize DataPipelineEngine with YAML configuration
- * ✅ Execute pipeline with extract, load, and audit steps
- * ✅ Validate pipeline execution results and step completion
- * ✅ Verify actual CSV to H2 database processing functionality
+ *  Load pipeline YAML configuration with data sources and sinks
+ *  Initialize DataPipelineEngine with YAML configuration
+ *  Execute pipeline with extract, load, and audit steps
+ *  Validate pipeline execution results and step completion
+ *  Verify actual CSV to H2 database processing functionality
  *
  * BUSINESS LOGIC VALIDATION:
  * - Extract step: Read customer data from CSV file using data source
@@ -111,7 +111,7 @@ public class CsvToH2PipelineTest extends DemoTestBase {
                 "At least 2 pipeline steps (extract and load) should execute successfully");
             assertTrue(result.getFailedSteps() <= 1, "At most 1 optional step should fail");
 
-            logger.info("✅ CSV to H2 pipeline execution test completed successfully");
+            logger.info(" CSV to H2 pipeline execution test completed successfully");
 
         } catch (Exception e) {
             logger.error("Pipeline execution test failed: " + e.getMessage(), e);

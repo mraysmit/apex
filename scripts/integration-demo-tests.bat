@@ -90,7 +90,7 @@ if %BOOTSTRAP_EXIT_CODE% neq 0 set OVERALL_SUCCESS=0
 if %RUNNER_EXIT_CODE% neq 0 set OVERALL_SUCCESS=0
 
 if %OVERALL_SUCCESS% equ 1 (
-    echo ✅ ALL INTEGRATION TESTS PASSED SUCCESSFULLY!
+    echo  ALL INTEGRATION TESTS PASSED SUCCESSFULLY!
     echo.
     echo Test categories executed:
     echo   🔗 Integration Tests: End-to-end system validation
@@ -117,17 +117,17 @@ if %OVERALL_SUCCESS% equ 1 (
     echo.
     echo Results summary:
     if %INTEGRATION_EXIT_CODE% equ 0 (
-        echo   ✅ Integration Tests: PASSED
+        echo    Integration Tests: PASSED
     ) else (
         echo   ❌ Integration Tests: FAILED
     )
     if %BOOTSTRAP_EXIT_CODE% equ 0 (
-        echo   ✅ Bootstrap Tests: PASSED
+        echo    Bootstrap Tests: PASSED
     ) else (
         echo   ❌ Bootstrap Tests: FAILED
     )
     if %RUNNER_EXIT_CODE% equ 0 (
-        echo   ✅ Runner Tests: PASSED
+        echo    Runner Tests: PASSED
     ) else (
         echo   ❌ Runner Tests: FAILED
     )

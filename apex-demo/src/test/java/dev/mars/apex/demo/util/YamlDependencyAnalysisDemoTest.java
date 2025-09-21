@@ -30,11 +30,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * JUnit 5 test for YamlDependencyAnalysisDemo functionality.
  * 
  * CRITICAL VALIDATION CHECKLIST APPLIED:
- * ✅ Count enrichments in YAML - 4 enrichments expected (dependency-graph-analysis, yaml-node-analysis, dependency-service-analysis, expression-evaluation-analysis)
- * ✅ Verify log shows "Processed: 4 out of 4" - Must be 100% execution rate
- * ✅ Check EVERY enrichment condition - Test data triggers ALL 4 conditions
- * ✅ Validate EVERY business calculation - Test actual YAML dependency analysis demo logic
- * ✅ Assert ALL enrichment results - Every result-field has corresponding assertEquals
+ *  Count enrichments in YAML - 4 enrichments expected (dependency-graph-analysis, yaml-node-analysis, dependency-service-analysis, expression-evaluation-analysis)
+ *  Verify log shows "Processed: 4 out of 4" - Must be 100% execution rate
+ *  Check EVERY enrichment condition - Test data triggers ALL 4 conditions
+ *  Validate EVERY business calculation - Test actual YAML dependency analysis demo logic
+ *  Assert ALL enrichment results - Every result-field has corresponding assertEquals
  * 
  * BUSINESS LOGIC VALIDATION:
  * - Dependency graph analysis with comprehensive YAML dependency mapping with real APEX processing
@@ -98,6 +98,6 @@ public class YamlDependencyAnalysisDemoTest extends DemoTestBase {
         String expressionEvaluationAnalysisResult = (String) enrichedData.get("expressionEvaluationAnalysisResult");
         assertTrue(expressionEvaluationAnalysisResult.contains("real-apex-services"), "Expression evaluation analysis result should reference approach");
         
-        logger.info("✅ Comprehensive YAML dependency analysis demo functionality test completed successfully");
+        logger.info(" Comprehensive YAML dependency analysis demo functionality test completed successfully");
     }
 }

@@ -155,7 +155,7 @@ echo "Detailed Logs: target/test-logs/test-execution-$TIMESTAMP.log"
 echo
 
 if [ $TEST_EXIT_CODE -eq 0 ]; then
-    echo "✅ ALL TESTS PASSED SUCCESSFULLY!"
+    echo " ALL TESTS PASSED SUCCESSFULLY!"
     echo
     echo "Generated permanent reports:"
     echo "  📊 XML Reports: target/surefire-reports/"

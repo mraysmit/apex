@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.lookup;
 
-import dev.mars.apex.demo.DemoTestBase;
+import dev.mars.apex.demo.infrastructure.DemoTestBase;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,7 +116,7 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             assertNotNull(enrichedData.get("customerName"), "Customer name should be looked up");
             assertNotNull(enrichedData.get("customerType"), "Customer type should be looked up");
 
-            logger.info("✅ Simple field lookup validated successfully");
+            logger.info(" Simple field lookup validated successfully");
         } catch (Exception e) {
             fail("Failed to load YAML configuration: " + e.getMessage());
         }
@@ -147,7 +147,7 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             assertNotNull(enrichedData.get("customerProductRelation"), "Customer-product relation should be looked up");
             assertNotNull(enrichedData.get("relationshipType"), "Relationship type should be determined");
 
-            logger.info("✅ Compound key lookup validated successfully");
+            logger.info(" Compound key lookup validated successfully");
         } catch (Exception e) {
             fail("Failed to load YAML configuration: " + e.getMessage());
         }
@@ -177,7 +177,7 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             assertNotNull(enrichedData.get("tradeDetails"), "Trade details should be looked up");
             assertNotNull(enrichedData.get("nestedCounterparty"), "Nested counterparty should be resolved");
 
-            logger.info("✅ Nested field lookup validated successfully");
+            logger.info(" Nested field lookup validated successfully");
         } catch (Exception e) {
             fail("Failed to load YAML configuration: " + e.getMessage());
         }
@@ -209,7 +209,7 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             assertNotNull(enrichedData.get("marketData"), "Market data should be looked up");
             assertNotNull(enrichedData.get("pricingModel"), "Pricing model should be determined");
 
-            logger.info("✅ Multi-parameter lookup validated successfully");
+            logger.info(" Multi-parameter lookup validated successfully");
         } catch (Exception e) {
             fail("Failed to load YAML configuration: " + e.getMessage());
         }
@@ -239,7 +239,7 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             assertNotNull(enrichedData.get("fileData"), "File data should be looked up");
             assertNotNull(enrichedData.get("lookupStatus"), "Lookup status should be set");
 
-            logger.info("✅ File-based lookup validated successfully");
+            logger.info(" File-based lookup validated successfully");
         } catch (Exception e) {
             fail("Failed to load YAML configuration: " + e.getMessage());
         }
@@ -270,7 +270,7 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             assertNotNull(enrichedData.get("externalData"), "External data should be looked up");
             assertNotNull(enrichedData.get("connectionStatus"), "Connection status should be verified");
 
-            logger.info("✅ External data source lookup validated successfully");
+            logger.info(" External data source lookup validated successfully");
         } catch (Exception e) {
             fail("Failed to load YAML configuration: " + e.getMessage());
         }

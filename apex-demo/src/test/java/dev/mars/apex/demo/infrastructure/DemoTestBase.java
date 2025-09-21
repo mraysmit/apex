@@ -1,4 +1,4 @@
-package dev.mars.apex.demo;
+package dev.mars.apex.demo.infrastructure;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
@@ -51,7 +51,7 @@ public abstract class DemoTestBase {
      * Test that APEX services are properly initialized.
      */
     @Test
-    void testApexServicesInitialization() {
+    public void testApexServicesInitialization() {
         assertNotNull(yamlLoader, "YamlConfigurationLoader should be initialized");
         assertNotNull(serviceRegistry, "LookupServiceRegistry should be initialized");
         assertNotNull(expressionEvaluator, "ExpressionEvaluatorService should be initialized");

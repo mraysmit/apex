@@ -38,11 +38,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * JUnit 5 test for Pipeline ETL functionality using APEX DataPipelineEngine.
  *
  * PIPELINE VALIDATION CHECKLIST:
- * ✅ Load pipeline YAML configuration with complete ETL workflow
- * ✅ Initialize DataPipelineEngine with YAML configuration
- * ✅ Execute pipeline with extract, validate, enrich, load, and audit steps
- * ✅ Validate pipeline execution results and step completion
- * ✅ Verify actual ETL processing functionality
+ *  Load pipeline YAML configuration with complete ETL workflow
+ *  Initialize DataPipelineEngine with YAML configuration
+ *  Execute pipeline with extract, validate, enrich, load, and audit steps
+ *  Validate pipeline execution results and step completion
+ *  Verify actual ETL processing functionality
  *
  * BUSINESS LOGIC VALIDATION:
  * - Extract step: Read customer data from CSV file using data source
@@ -61,7 +61,8 @@ public class PipelineEtlTest extends DemoTestBase {
     private YamlRuleConfiguration pipelineConfig;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
+        super.setUp();
         try {
             logger.info("Setting up Pipeline ETL Test...");
 
@@ -83,7 +84,7 @@ public class PipelineEtlTest extends DemoTestBase {
             pipelineEngine.initialize(pipelineConfig);
             assertNotNull(pipelineEngine, "Pipeline engine should initialize successfully");
 
-            logger.info("✅ Pipeline ETL Test setup completed successfully");
+            logger.info(" Pipeline ETL Test setup completed successfully");
 
         } catch (Exception e) {
             logger.error("❌ Failed to set up Pipeline ETL Test: {}", e.getMessage());
@@ -117,7 +118,7 @@ public class PipelineEtlTest extends DemoTestBase {
             validateEnrichStep(result);
             validateLoadStep(result);
 
-            logger.info("✅ Complete ETL pipeline workflow executed successfully");
+            logger.info(" Complete ETL pipeline workflow executed successfully");
 
             // STEP 8: VALIDATE BUSINESS OUTCOMES - Following testing discipline
             validateBusinessOutcomes(result);
@@ -164,7 +165,7 @@ public class PipelineEtlTest extends DemoTestBase {
             }
         }
 
-        logger.info("✅ Business outcomes validated successfully");
+        logger.info(" Business outcomes validated successfully");
     }
 
     @Test
@@ -194,7 +195,7 @@ public class PipelineEtlTest extends DemoTestBase {
         assertNotNull(pipelineConfig.getDataSinks());
         assertTrue(pipelineConfig.getDataSinks().size() >= 2);
         
-        logger.info("✅ Pipeline configuration structure validated successfully");
+        logger.info(" Pipeline configuration structure validated successfully");
     }
 
     @Test
@@ -215,7 +216,7 @@ public class PipelineEtlTest extends DemoTestBase {
             double successRate = result.getSuccessRate();
             assertTrue(successRate >= 0.0 && successRate <= 100.0);
 
-            logger.info("✅ Pipeline monitoring validated successfully");
+            logger.info(" Pipeline monitoring validated successfully");
             logger.info("   Duration: {}ms", result.getDurationMs());
             logger.info("   Success Rate: {}%", successRate);
 
@@ -276,7 +277,7 @@ public class PipelineEtlTest extends DemoTestBase {
         assertTrue(extractStep.get().isSuccess(), "Extract step should be successful");
         assertTrue(extractStep.get().getRecordsProcessed() >= 0, "Extract step should process records");
 
-        logger.info("✅ Extract step validated: {} records processed",
+        logger.info(" Extract step validated: {} records processed",
             extractStep.get().getRecordsProcessed());
     }
 
@@ -288,7 +289,7 @@ public class PipelineEtlTest extends DemoTestBase {
         assertTrue(validateStep.isPresent(), "Validate step should be present");
         assertTrue(validateStep.get().isSuccess(), "Validate step should be successful");
 
-        logger.info("✅ Validate step validated successfully");
+        logger.info(" Validate step validated successfully");
     }
 
     private void validateEnrichStep(YamlPipelineExecutionResult result) {
@@ -299,7 +300,7 @@ public class PipelineEtlTest extends DemoTestBase {
         assertTrue(enrichStep.isPresent(), "Enrich step should be present");
         assertTrue(enrichStep.get().isSuccess(), "Enrich step should be successful");
 
-        logger.info("✅ Enrich step validated successfully");
+        logger.info(" Enrich step validated successfully");
     }
 
     private void validateLoadStep(YamlPipelineExecutionResult result) {
@@ -311,7 +312,7 @@ public class PipelineEtlTest extends DemoTestBase {
         assertTrue(loadStep.get().isSuccess(), "Load step should be successful");
         assertTrue(loadStep.get().getRecordsProcessed() >= 0, "Load step should process records");
 
-        logger.info("✅ Load step validated: {} records loaded",
+        logger.info(" Load step validated: {} records loaded",
             loadStep.get().getRecordsProcessed());
     }
 }

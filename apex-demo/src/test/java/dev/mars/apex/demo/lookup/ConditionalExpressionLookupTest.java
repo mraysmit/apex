@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.lookup;
 
-import dev.mars.apex.demo.DemoTestBase;
+import dev.mars.apex.demo.infrastructure.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -44,7 +44,7 @@ public class ConditionalExpressionLookupTest extends DemoTestBase {
      * This is infrastructure setup, not business logic - business logic is in YAML.
      */
     @BeforeEach
-    void setupH2Database() {
+    public void setupH2Database() {
         logger.info("Setting up H2 database for conditional expression demo...");
 
         String jdbcUrl = "jdbc:h2:./target/h2-demo/apex_demo_conditional;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";

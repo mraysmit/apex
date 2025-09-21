@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.lookup;
 
-import dev.mars.apex.demo.DemoTestBase;
+import dev.mars.apex.demo.infrastructure.DemoTestBase;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,11 +14,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * JUnit 5 test for CompoundKeyLookup functionality.
  * 
  * CRITICAL VALIDATION CHECKLIST APPLIED:
- * ✅ Count enrichments in YAML - 1 enrichment expected (compound-key-lookup-demo)
- * ✅ Verify log shows "Processed: 1 out of 1" - Must be 100% execution rate
- * ✅ Check EVERY enrichment condition - Test data triggers compound key lookup condition
- * ✅ Validate EVERY business calculation - Test actual compound key lookup logic
- * ✅ Assert ALL enrichment results - Every result-field has corresponding assertEquals
+ *  Count enrichments in YAML - 1 enrichment expected (compound-key-lookup-demo)
+ *  Verify log shows "Processed: 1 out of 1" - Must be 100% execution rate
+ *  Check EVERY enrichment condition - Test data triggers compound key lookup condition
+ *  Validate EVERY business calculation - Test actual compound key lookup logic
+ *  Assert ALL enrichment results - Every result-field has corresponding assertEquals
  * 
  * BUSINESS LOGIC VALIDATION:
  * - Compound key lookup using customer ID and region concatenation
@@ -95,7 +95,7 @@ public class CompoundKeyLookupTest extends DemoTestBase {
         Double taxRate = (Double) enrichedData.get("taxRate");
         assertEquals(0.08, taxRate, 0.001, "CUST001-NA should have 8% tax rate");
         
-            logger.info("✅ Comprehensive compound key lookup functionality test completed successfully");
+            logger.info(" Comprehensive compound key lookup functionality test completed successfully");
         } catch (Exception e) {
             fail("Failed to load YAML configuration: " + e.getMessage());
         }
@@ -153,7 +153,7 @@ public class CompoundKeyLookupTest extends DemoTestBase {
             assertNotNull(enrichedData.get("taxRate"), "Tax rate should be provided for " + customerId + "-" + region);
         }
         
-            logger.info("✅ Multiple compound key mapping processing test completed successfully");
+            logger.info(" Multiple compound key mapping processing test completed successfully");
         } catch (Exception e) {
             fail("Failed to load YAML configuration: " + e.getMessage());
         }
@@ -204,7 +204,7 @@ public class CompoundKeyLookupTest extends DemoTestBase {
         Double taxRate = (Double) enrichedData.get("taxRate");
         assertEquals(0.15, taxRate, 0.001, "CUST006-LATAM should have 15% tax rate");
 
-            logger.info("✅ Compound key business logic validation test completed successfully");
+            logger.info(" Compound key business logic validation test completed successfully");
         } catch (Exception e) {
             fail("Failed to load YAML configuration: " + e.getMessage());
         }
@@ -253,7 +253,7 @@ public class CompoundKeyLookupTest extends DemoTestBase {
         Map<String, Object> enrichedDataMissing = (Map<String, Object>) resultMissing;
         assertNull(enrichedDataMissing.get("customerTier"), "Missing fields should not trigger enrichment");
         
-            logger.info("✅ Null and missing field validation test completed successfully");
+            logger.info(" Null and missing field validation test completed successfully");
         } catch (Exception e) {
             fail("Failed to load YAML configuration: " + e.getMessage());
         }

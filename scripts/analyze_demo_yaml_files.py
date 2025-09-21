@@ -443,7 +443,7 @@ def generate_markdown_report(report: AnalysisReport, output_file: str):
         
         for demo_class in report.demo_classes:
             yaml_count = len(demo_class.yaml_files)
-            error_handling = "✅" if demo_class.error_handling else "❌"
+            error_handling = "" if demo_class.error_handling else "❌"
             f.write(f"| {demo_class.class_name} | {demo_class.package.split('.')[-1]} | {yaml_count} | {demo_class.loading_pattern} | {error_handling} |\n")
         
         f.write(f"""
@@ -466,7 +466,7 @@ def generate_markdown_report(report: AnalysisReport, output_file: str):
                 f.write(f"{i}. {rec}\n")
         
         f.write(f"""
-## ✅ Conclusion
+##  Conclusion
 
 The APEX demo module shows {'excellent' if report.consistency_score >= 90 else 'good' if report.consistency_score >= 70 else 'fair'} consistency in YAML file usage with a score of {report.consistency_score:.1f}%.
 """)

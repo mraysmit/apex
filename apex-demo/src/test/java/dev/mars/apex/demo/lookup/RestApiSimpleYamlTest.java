@@ -5,7 +5,7 @@
  */
 package dev.mars.apex.demo.lookup;
 
-import dev.mars.apex.demo.DemoTestBase;
+import dev.mars.apex.demo.infrastructure.DemoTestBase;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 2025-09-21
  * @version 2.0.0 (Renamed with RestApi prefix for consistency)
  */
-class RestApiSimpleYamlTest extends DemoTestBase {
+public class RestApiSimpleYamlTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(RestApiSimpleYamlTest.class);
 
@@ -108,7 +108,7 @@ class RestApiSimpleYamlTest extends DemoTestBase {
         logger.info("DEBUG: currencyName value: {} (type: {})", currencyName, currencyName != null ? currencyName.getClass().getSimpleName() : "null");
         assertEquals("US Dollar", currencyName, "Currency name should be 'US Dollar'");
         
-        logger.info("✅ Simple REST API lookup completed successfully");
+        logger.info(" Simple REST API lookup completed successfully");
     }
 
     @Test
@@ -135,6 +135,6 @@ class RestApiSimpleYamlTest extends DemoTestBase {
         // Assertions for EUR
         assertEquals("Euro", enrichedData.get("currencyName"), "Currency name should be 'Euro'");
         
-        logger.info("✅ Simple REST API lookup with EUR completed successfully");
+        logger.info(" Simple REST API lookup with EUR completed successfully");
     }
 }

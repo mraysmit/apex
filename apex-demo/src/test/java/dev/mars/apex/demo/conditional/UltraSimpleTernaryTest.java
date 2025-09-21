@@ -30,10 +30,12 @@ public class UltraSimpleTernaryTest extends DemoTestBase {
         try {
             Map<String, Object> testData = new HashMap<>();
             testData.put("input", "A");
-            
+
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ultra-simple-ternary-test.yaml");
-            Map<String, Object> result = (Map<String, Object>) enrichmentService.enrichObject(config, testData);
-            
+            Object enrichmentResult = enrichmentService.enrichObject(config, testData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichmentResult;
+
             assertEquals("FIRST", result.get("output"), "Should map A to FIRST");
             logger.info("✅ Ternary A test passed: " + result);
         } catch (Exception e) {
@@ -50,10 +52,12 @@ public class UltraSimpleTernaryTest extends DemoTestBase {
         try {
             Map<String, Object> testData = new HashMap<>();
             testData.put("input", "B");
-            
+
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ultra-simple-ternary-test.yaml");
-            Map<String, Object> result = (Map<String, Object>) enrichmentService.enrichObject(config, testData);
-            
+            Object enrichmentResult = enrichmentService.enrichObject(config, testData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichmentResult;
+
             assertEquals("SECOND", result.get("output"), "Should map B to SECOND");
             logger.info("✅ Ternary B test passed: " + result);
         } catch (Exception e) {
@@ -70,10 +74,12 @@ public class UltraSimpleTernaryTest extends DemoTestBase {
         try {
             Map<String, Object> testData = new HashMap<>();
             testData.put("input", "C");
-            
+
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ultra-simple-ternary-test.yaml");
+            Object enrichmentResult = enrichmentService.enrichObject(config, testData);
+            @SuppressWarnings("unchecked")
             Map<String, Object> result = (Map<String, Object>) enrichmentService.enrichObject(config, testData);
-            
+
             assertEquals("THIRD", result.get("output"), "Should map C to THIRD");
             logger.info("✅ Ternary C test passed: " + result);
         } catch (Exception e) {
@@ -90,10 +96,12 @@ public class UltraSimpleTernaryTest extends DemoTestBase {
         try {
             Map<String, Object> testData = new HashMap<>();
             testData.put("input", "X");
-            
+
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ultra-simple-ternary-test.yaml");
-            Map<String, Object> result = (Map<String, Object>) enrichmentService.enrichObject(config, testData);
-            
+            Object enrichmentResult = enrichmentService.enrichObject(config, testData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichmentResult;
+
             assertNull(result.get("output"), "Should be null for no match");
             logger.info("✅ Ternary X test passed: " + result);
         } catch (Exception e) {

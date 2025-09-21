@@ -48,6 +48,30 @@ public class RestApiTestableServer {
     private int serverPort;
     private String baseUrl;
     private boolean isRunning = false;
+    private final int responseDelaySeconds;
+
+    /**
+     * Default constructor with no response delay.
+     */
+    public RestApiTestableServer() {
+        this(0);
+    }
+
+    /**
+     * Constructor with configurable response delay.
+     *
+     * @param responseDelaySeconds Number of seconds to delay before returning responses (default: 0)
+     */
+    public RestApiTestableServer(int responseDelaySeconds) {
+        this.responseDelaySeconds = Math.max(0, responseDelaySeconds);
+    }
+
+    /**
+     * Get the configured response delay in seconds.
+     */
+    public int getResponseDelaySeconds() {
+        return responseDelaySeconds;
+    }
 
     /**
      * Start the HTTP server on an available port.
@@ -75,7 +99,7 @@ public class RestApiTestableServer {
         httpServer.start();
         isRunning = true;
 
-        logger.info("✅ Test REST API Server started successfully:");
+        logger.info(" Test REST API Server started successfully:");
         logger.info("  Base URL: {}", baseUrl);
         logger.info("  Currency Rate Endpoint: /api/currency/{currencyCode}");
         logger.info("  Currency Conversion Endpoint: /api/convert");
@@ -96,7 +120,7 @@ public class RestApiTestableServer {
             logger.info("🛑 Stopping Test REST API Server...");
             httpServer.stop(0);
             isRunning = false;
-            logger.info("✅ Test REST API Server stopped successfully");
+            logger.info(" Test REST API Server stopped successfully");
         }
     }
 
@@ -121,6 +145,21 @@ public class RestApiTestableServer {
         return isRunning;
     }
 
+    /**
+     * Apply the configured response delay if greater than 0.
+     */
+    private void applyResponseDelay() {
+        if (responseDelaySeconds > 0) {
+            try {
+                logger.debug("⏱️ Applying response delay of {} seconds", responseDelaySeconds);
+                Thread.sleep(responseDelaySeconds * 1000L);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.warn("Response delay interrupted", e);
+            }
+        }
+    }
+
     private void setupCurrencyRateEndpoint() {
         httpServer.createContext("/api/currency", new HttpHandler() {
             public void handle(HttpExchange exchange) throws IOException {
@@ -138,6 +177,9 @@ public class RestApiTestableServer {
                     sendErrorResponse(exchange, 400, "Currency code is required");
                     return;
                 }
+
+                // Apply configured response delay
+                applyResponseDelay();
 
                 String jsonResponse = createCurrencyRateResponse(currencyCode);
                 sendJsonResponse(exchange, 200, jsonResponse);
@@ -169,6 +211,10 @@ public class RestApiTestableServer {
 
                 try {
                     double amount = Double.parseDouble(amountStr);
+
+                    // Apply configured response delay
+                    applyResponseDelay();
+
                     String jsonResponse = createCurrencyConversionResponse(from, to, amount);
                     sendJsonResponse(exchange, 200, jsonResponse);
                 } catch (NumberFormatException e) {
@@ -190,7 +236,10 @@ public class RestApiTestableServer {
                 }
 
                 String path = exchange.getRequestURI().getPath();
-                
+
+                // Apply configured response delay
+                applyResponseDelay();
+
                 // Check if this is a specific customer lookup: /api/customers/{customerId}
                 if (path.startsWith("/api/customers/")) {
                     String customerId = extractCustomerIdFromPath(path);
@@ -216,15 +265,19 @@ public class RestApiTestableServer {
             public void handle(HttpExchange exchange) throws IOException {
                 logger.debug("📡 Handling health check request");
 
+                // Apply configured response delay
+                applyResponseDelay();
+
                 String jsonResponse = """
                     {
                         "status": "UP",
                         "timestamp": "%s",
                         "service": "Test REST API Server",
                         "version": "1.0.0",
-                        "baseUrl": "%s"
+                        "baseUrl": "%s",
+                        "responseDelaySeconds": %d
                     }
-                    """.formatted(java.time.Instant.now().toString(), baseUrl);
+                    """.formatted(java.time.Instant.now().toString(), baseUrl, responseDelaySeconds);
 
                 sendJsonResponse(exchange, 200, jsonResponse);
             }

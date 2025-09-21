@@ -23,6 +23,7 @@ module dev.mars.apex.demo {
     requires java.base;
     requires java.logging;
     requires java.sql;
+    requires java.net.http; // For HttpClient used in tests
     requires jdk.httpserver;  // For REST API testing with JDK HTTP server
 
     // APEX dependencies
@@ -58,5 +59,9 @@ module dev.mars.apex.demo {
     exports dev.mars.apex.demo.infrastructure;
 
     // Open packages for JUnit testing and reflection access
-    // Open packages to allow JUnit (org.junit.platform.commons) reflective access to lifecycle methods
+    // Open packages to allow JUnit and other testing frameworks reflective access to lifecycle methods
+    // Using ALL-UNNAMED to allow access from any unnamed module (including test frameworks)
+    // Only opening packages that actually exist in main source
+    opens dev.mars.apex.demo.model;
+    opens dev.mars.apex.demo.infrastructure;
 }

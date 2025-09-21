@@ -36,7 +36,9 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
 
             // Load configuration and process
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-mapping-design-v2-test.yaml");
-            Map<String, Object> result = (Map<String, Object>) enrichmentService.enrichObject(config, testData);
+            Object enrichmentResult = enrichmentService.enrichObject(config, testData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichmentResult;
 
             // Verify rule group results are available
             assertNotNull(result, "Result should not be null");
@@ -68,7 +70,9 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
 
             // Load configuration and process
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-mapping-design-v2-test.yaml");
-            Map<String, Object> result = (Map<String, Object>) enrichmentService.enrichObject(config, testData);
+            Object enrichmentResult = enrichmentService.enrichObject(config, testData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichmentResult;
 
             // Verify rule group results are available
             assertNotNull(result, "Result should not be null");
@@ -100,7 +104,9 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
 
             // Load configuration and process
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-mapping-design-v2-test.yaml");
-            Map<String, Object> result = (Map<String, Object>) enrichmentService.enrichObject(config, testData);
+            Object enrichmentResult = enrichmentService.enrichObject(config, testData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichmentResult;
 
             // Verify rule group results are available
             assertNotNull(result, "Result should not be null");
@@ -132,7 +138,9 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
 
             // Load configuration and process
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-mapping-design-v2-test.yaml");
-            Map<String, Object> result = (Map<String, Object>) enrichmentService.enrichObject(config, testData);
+            Object enrichmentResult = enrichmentService.enrichObject(config, testData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichmentResult;
 
             // Verify rule group results are available
             assertNotNull(result, "Result should not be null");
@@ -164,7 +172,9 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
 
             // Load configuration and process
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-mapping-design-v2-test.yaml");
-            Map<String, Object> result = (Map<String, Object>) enrichmentService.enrichObject(config, testData);
+            Object enrichmentResult = enrichmentService.enrichObject(config, testData);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = (Map<String, Object>) enrichmentResult;
 
             // Verify rule group results are available
             assertNotNull(result, "Result should not be null");

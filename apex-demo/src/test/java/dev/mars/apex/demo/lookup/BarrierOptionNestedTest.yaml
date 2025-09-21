@@ -12,7 +12,7 @@ metadata:
   tags: ["apex-validation", "nested-data", "barrier-options", "enrichment"]
 
 # APEX Enrichment Rules - All processing logic defined here
-# INITIAL VERSION: 2 enrichments for Level 1 and Level 2 nesting
+# COMPLETE VERSION: 4 enrichments for comprehensive nested processing
 enrichments:
   # VALIDATES: APEX can navigate 2-level nested structures
   - id: "apex-level2-navigation"
@@ -43,6 +43,36 @@ enrichments:
         target-field: "apexBarrierSpread"
     priority: 2
     categories: ["business-calculation", "cross-nested"]
+
+  # VALIDATES: APEX can perform Level 3 nested conditional processing
+  - id: "apex-level3-conditional-processing"
+    name: "APEX Level 3 Nested Conditional Processing"
+    description: "Validates APEX can calculate rebate percentage from Level 3 nested data"
+    type: "calculation-enrichment"
+    condition: "#barrierTerms != null && #barrierTerms['knockoutConditions'] != null && #barrierTerms['knockoutConditions']['rebateTerms'] != null && #barrierTerms['knockoutConditions']['rebateTerms']['rebateAmount'] != null && #pricingTerms != null && #pricingTerms['premium'] != null"
+    calculation-config:
+      expression: "(T(java.lang.Double).parseDouble(#barrierTerms['knockoutConditions']['rebateTerms']['rebateAmount']) / T(java.lang.Double).parseDouble(#pricingTerms['premium'])) * 100"
+      result-field: "apexRebatePercentage"
+    field-mappings:
+      - source-field: "apexRebatePercentage"
+        target-field: "apexRebatePercentage"
+    priority: 3
+    categories: ["level-3-processing", "conditional"]
+
+  # VALIDATES: APEX can perform nested date calculations with SpEL
+  - id: "apex-nested-date-calculation"
+    name: "APEX Nested Date Calculation"
+    description: "Validates APEX can calculate days between nested observation period dates"
+    type: "calculation-enrichment"
+    condition: "#barrierTerms != null && #barrierTerms['knockoutConditions'] != null && #barrierTerms['knockoutConditions']['observationPeriod'] != null && #barrierTerms['knockoutConditions']['observationPeriod']['startDate'] != null && #barrierTerms['knockoutConditions']['observationPeriod']['endDate'] != null"
+    calculation-config:
+      expression: "T(java.time.temporal.ChronoUnit).DAYS.between(T(java.time.LocalDate).parse(#barrierTerms['knockoutConditions']['observationPeriod']['startDate']), T(java.time.LocalDate).parse(#barrierTerms['knockoutConditions']['observationPeriod']['endDate']))"
+      result-field: "apexObservationPeriodDays"
+    field-mappings:
+      - source-field: "apexObservationPeriodDays"
+        target-field: "apexObservationPeriodDays"
+    priority: 4
+    categories: ["date-calculation", "nested-spel"]
 
 # Processing Configuration
 processing:

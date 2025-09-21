@@ -6,7 +6,7 @@
 package dev.mars.apex.demo.lookup;
 
 import com.sun.net.httpserver.HttpServer;
-import dev.mars.apex.demo.DemoTestBase;
+import dev.mars.apex.demo.infrastructure.DemoTestBase;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @version 2.0.0 (Renamed with RestApi prefix for consistency)
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class RestApiEnhancedDemoTest extends DemoTestBase {
+public class RestApiEnhancedDemoTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(RestApiEnhancedDemoTest.class);
 

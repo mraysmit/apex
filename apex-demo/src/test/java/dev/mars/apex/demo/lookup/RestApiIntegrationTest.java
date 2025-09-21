@@ -9,7 +9,7 @@
  */
 package dev.mars.apex.demo.lookup;
 
-import dev.mars.apex.demo.DemoTestBase;
+import dev.mars.apex.demo.infrastructure.DemoTestBase;
 import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlDataSourceLoader;
@@ -86,7 +86,7 @@ public class RestApiIntegrationTest extends DemoTestBase {
         baseUrl = testServer.getBaseUrl();
         serverPort = extractPortFromUrl(baseUrl);
 
-        logger.info("✅ RestApiTestableServer ready at: {}", baseUrl);
+        logger.info(" RestApiTestableServer ready at: {}", baseUrl);
         logger.info("  Currency Endpoint: {}/api/currency/{{currencyCode}}", baseUrl);
         logger.info("  Customer Endpoint: {}/api/customers/{{customerId}}", baseUrl);
     }
@@ -167,7 +167,7 @@ public class RestApiIntegrationTest extends DemoTestBase {
         assertNotNull(transactionResult, "Rule result should not be null");
         assertFalse(transactionResult.isTriggered(), "Transaction ID validation should fail for 'INVALID'");
 
-        logger.info("✅ Currency Code Format Validation test completed successfully");
+        logger.info(" Currency Code Format Validation test completed successfully");
 
         // Cleanup temp file
         Files.deleteIfExists(Paths.get(tempYamlPath));
@@ -261,7 +261,7 @@ public class RestApiIntegrationTest extends DemoTestBase {
         assertEquals("Existing Customer Name", existingEnriched.get("customerName"),
             "Should preserve existing customer name and not enrich");
 
-        logger.info("✅ Customer Name Enrichment test completed successfully");
+        logger.info(" Customer Name Enrichment test completed successfully");
 
         // Cleanup temp file
         Files.deleteIfExists(Paths.get(tempYamlPath));

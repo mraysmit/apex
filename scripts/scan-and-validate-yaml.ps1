@@ -107,7 +107,7 @@ foreach ($file in $yamlFiles) {
     
     if ($metadataCheck.Valid) {
         $validCount++
-        Write-Host "✅ $relativePath" -ForegroundColor Green
+        Write-Host " $relativePath" -ForegroundColor Green
     } else {
         $invalidCount++
         Write-Host "❌ $relativePath" -ForegroundColor Red
@@ -190,7 +190,7 @@ if ($GenerateReport) {
 "@
     
     foreach ($result in $results | Sort-Object File) {
-        $status = if ($result.Valid) { '<span class="valid">✅ Valid</span>' } else { '<span class="invalid">❌ Invalid</span>' }
+        $status = if ($result.Valid) { '<span class="valid"> Valid</span>' } else { '<span class="invalid">❌ Invalid</span>' }
         $issues = if ($result.Issues) { ($result.Issues -join "<br>") } else { "" }
         $size = [math]::Round($result.Size / 1KB, 1)
         
@@ -232,7 +232,7 @@ if ($GenerateReport) {
 "@
     
     $html | Out-File -FilePath $ReportPath -Encoding UTF8
-    Write-Host "✅ Report generated: $ReportPath" -ForegroundColor Green
+    Write-Host " Report generated: $ReportPath" -ForegroundColor Green
 }
 
 # Recommendations
