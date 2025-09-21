@@ -1,0 +1,41 @@
+# REST API Caching Demo - Fast Endpoint Configuration
+# Demonstrates baseline cache improvement with no-delay endpoint
+
+data-sources:
+  - name: "fast-cache-demo-api"
+    type: "rest-api"
+    enabled: true
+    description: "Fast REST API server for cache baseline demonstration"
+    
+    connection:
+      base-url: "http://localhost:8080"  # Will be updated dynamically by test
+      timeout: 5000                     # 5 seconds timeout (standard)
+      max-retries: 3                    # Standard retries
+      retry-delay-ms: 1000
+    
+    endpoints:
+      currency-lookup: "/api/currency/{key}"
+    
+    cache:
+      enabled: true                     # ✅ Enable caching for demonstration
+      ttlSeconds: 300                   # ✅ 5 minutes TTL (same as slow config)
+      maxIdleSeconds: 180               # ✅ 3 minutes max idle time
+      maxSize: 100                      # ✅ Max 100 entries (same as slow config)
+      keyPrefix: "fast-demo"            # ✅ Cache key prefix for identification
+
+enrichments:
+  - id: "fast-currency-lookup"
+    type: "lookup-enrichment"
+    description: "Currency lookup with fast endpoint for cache baseline comparison"
+    condition: "#currencyCode != null"
+    lookup-config:
+      lookup-key: "#currencyCode"
+      lookup-dataset:
+        type: "rest-api"
+        data-source-ref: "fast-cache-demo-api"
+        operation-ref: "currency-lookup"
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+        required: false
+        description: "Map currency name from API response"

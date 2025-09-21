@@ -51,14 +51,13 @@ public final class TestContainerImages {
 
     /**
      * PostgreSQL Docker image version for database integration tests.
-     * 
-     * <p>Uses PostgreSQL 15 with Alpine Linux base for smaller image size
-     * and faster container startup. This version provides all PostgreSQL
-     * features needed for APEX database testing.</p>
-     * 
-     * <p>Defined in root pom.xml as: {@code <docker.postgres.version>postgres:15-alpine</docker.postgres.version>}</p>
+     *
+     * <p>Uses PostgreSQL 15.13 with Alpine Linux 3.20 for reliable database testing.
+     * This version provides all PostgreSQL features needed for APEX database testing.</p>
+     *
+     * <p>Defined in root pom.xml as: {@code <docker.postgres.version>postgres:15.13-alpine3.20</docker.postgres.version>}</p>
      */
-    public static final String POSTGRES = System.getProperty("docker.postgres.version", "postgres:15-alpine");
+    public static final String POSTGRES = System.getProperty("docker.postgres.version", "postgres:15.13-alpine3.20");
 
     /**
      * HashiCorp Vault Docker image version for secret management integration tests.

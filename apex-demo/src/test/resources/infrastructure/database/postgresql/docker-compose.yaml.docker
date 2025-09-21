@@ -6,7 +6,7 @@ version: '3.8'
 services:
   postgres:
     # Version defined in root pom.xml as docker.postgres.version
-    image: postgres:15-alpine
+    image: postgres:15.13-alpine3.20
     container_name: apex-demo-postgres
     restart: unless-stopped
     

@@ -20,7 +20,7 @@ This plan expands APEX lookup testing from 59% to 95%+ coverage by implementing 
 1. **Setup PostgreSQL Testcontainers Infrastructure**
    ```java
    @Container
-   static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
+   static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(TestContainerImages.POSTGRES)
            .withDatabaseName("apex_test")
            .withUsername("apex_user")
            .withPassword("apex_pass")

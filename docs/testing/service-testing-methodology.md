@@ -527,7 +527,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:13
+        image: postgres:15.13-alpine3.20
         env:
           POSTGRES_DB: test
           POSTGRES_USER: test

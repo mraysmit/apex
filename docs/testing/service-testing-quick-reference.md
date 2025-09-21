@@ -349,7 +349,7 @@ All Docker image versions are defined in the root `pom.xml`:
 ```xml
 <properties>
     <!-- Docker Image Versions for Testcontainers -->
-    <docker.postgres.version>postgres:15-alpine</docker.postgres.version>
+    <docker.postgres.version>postgres:15.13-alpine3.20</docker.postgres.version>
     <docker.vault.version>hashicorp/vault:1.15</docker.vault.version>
     <docker.redis.version>redis:6-alpine</docker.redis.version>
 </properties>
@@ -385,7 +385,7 @@ docker run -d --name test-postgres \
   -e POSTGRES_DB=apex_test \
   -e POSTGRES_USER=test \
   -e POSTGRES_PASSWORD=test \
-  -p 5432:5432 postgres:15-alpine
+  -p 5432:5432 postgres:15.13-alpine3.20
 
 # Redis (for cache tests)
 docker run -d --name test-redis \
@@ -414,7 +414,7 @@ jobs:
     services:
       postgres:
         # Version defined in pom.xml as docker.postgres.version
-        image: postgres:15-alpine
+        image: postgres:15.13-alpine3.20
         env:
           POSTGRES_DB: apex_test
           POSTGRES_USER: test
