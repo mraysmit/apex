@@ -341,7 +341,7 @@ enrichments:
       - source-field: "max_exposure"
         target-field: "maxExposure"
         required: false
-        transformation: "#value != null ? T(java.math.BigDecimal).new(#value.toString()) : null"
+        transformation: "#value != null ? new java.math.BigDecimal(#value.toString()) : null"
       - source-field: "approval_required"
         target-field: "approvalRequired"
         required: true

@@ -6,7 +6,7 @@ This comprehensive test suite validates the APEX Rules Engine's password injecti
 
 ## Test Suite Architecture
 
-### 🎯 **Test Classes and Their Purpose**
+###  **Test Classes and Their Purpose**
 
 | Test Class | Purpose | Focus Area | Test Count |
 |------------|---------|------------|------------|
@@ -19,7 +19,7 @@ This comprehensive test suite validates the APEX Rules Engine's password injecti
 
 **Total: 23 Tests** - All passing ✅
 
-## 🔧 **Technical Features Tested**
+##  **Technical Features Tested**
 
 ### **1. Syntax Support**
 - **$(PROPERTY)** - Parentheses syntax
@@ -44,7 +44,7 @@ This comprehensive test suite validates the APEX Rules Engine's password injecti
 - **Secure Logging**: Production-ready security compliance
 - **No Credential Leakage**: Values resolved but not exposed in logs
 
-## 📋 **Test Class Details**
+##  **Test Class Details**
 
 ### **DebugPasswordInjectionTest**
 **Purpose**: Low-level diagnostic testing for core property resolution mechanism
@@ -133,7 +133,7 @@ This comprehensive test suite validates the APEX Rules Engine's password injecti
 1. H2 password injection with `$(PASSWD)` syntax
 2. H2 password injection with actual database operations
 
-## 🚀 **Real-World Usage Examples**
+##  **Real-World Usage Examples**
 
 ### **Docker Deployment**
 ```bash
@@ -169,7 +169,7 @@ database:
     max: $(DB_POOL_MAX:20)
 ```
 
-## 🔍 **Running the Tests**
+##  **Running the Tests**
 
 ### **All Password Injection Tests**
 ```bash
@@ -200,7 +200,7 @@ mvn test -Dtest=PostgreSQLPasswordInjectionTest -pl apex-demo
 mvn test -Dtest=VaultPasswordInjectionTest -pl apex-demo
 ```
 
-## ✅ **Test Coverage Summary**
+##  **Test Coverage Summary**
 
 **Complete coverage for**:
 - ✅ Two syntax types: `${}` and `$()`
@@ -213,6 +213,6 @@ mvn test -Dtest=VaultPasswordInjectionTest -pl apex-demo
 - ✅ Edge cases: Malformed syntax and error handling
 - ✅ Real-world scenarios: Complete application configuration examples
 - ✅ **Production databases**: PostgreSQL with Testcontainers validation
-- ✅ **Secrets management**: HashiCorp Vault integration with Testcontainers ⭐ **NEW**
+- ✅ **Secrets management**: HashiCorp Vault integration with Testcontainers 
 
 **All 20 tests passing** - Comprehensive validation of password injection functionality across all deployment scenarios, technical requirements, production database environments, and enterprise secrets management systems.

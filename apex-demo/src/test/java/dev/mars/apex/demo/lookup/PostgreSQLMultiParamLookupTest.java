@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.DockerClientFactory;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -65,6 +66,17 @@ import static org.junit.jupiter.api.Assertions.*;
 public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(PostgreSQLMultiParamLookupTest.class);
+
+    @BeforeAll
+    static void checkDockerAvailability() {
+        try {
+            DockerClientFactory.instance().client();
+        } catch (Exception e) {
+            org.junit.jupiter.api.Assumptions.assumeTrue(false,
+                "Docker is not available. Skipping PostgreSQL integration tests. " +
+                "To run these tests, ensure Docker is installed and running. Error: " + e.getMessage());
+        }
+    }
 
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(TestContainerImages.POSTGRES)
@@ -278,7 +290,7 @@ public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
         try {
             // Load configuration
             YamlRuleConfiguration config = yamlLoader.loadFromFile(
-                "src/test/java/dev/mars/apex/demo/lookup/postgresql-multi-param-lookup.yaml");
+                "src/test/java/dev/mars/apex/demo/lookup/PostgreSQLMultiParamLookupTest.yaml");
             updatePostgreSQLConnection(config);
 
             // Test data for risk assessment lookup
@@ -341,7 +353,7 @@ public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
         try {
             // Load configuration
             YamlRuleConfiguration config = yamlLoader.loadFromFile(
-                "src/test/java/dev/mars/apex/demo/lookup/postgresql-multi-param-lookup.yaml");
+                "src/test/java/dev/mars/apex/demo/lookup/PostgreSQLMultiParamLookupTest.yaml");
             updatePostgreSQLConnection(config);
 
             // Test data with only required parameters (optional parameters as null)

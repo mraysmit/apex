@@ -21,6 +21,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.vault.VaultContainer;
+import org.testcontainers.DockerClientFactory;
 
 
 import java.util.HashMap;
@@ -67,6 +68,17 @@ import static org.junit.jupiter.api.Assertions.*;
 class VaultPasswordInjectionTest {
 
     private static final Logger logger = LoggerFactory.getLogger(VaultPasswordInjectionTest.class);
+
+    @BeforeAll
+    static void checkDockerAvailability() {
+        try {
+            DockerClientFactory.instance().client();
+        } catch (Exception e) {
+            org.junit.jupiter.api.Assumptions.assumeTrue(false,
+                "Docker is not available. Skipping Vault integration tests. " +
+                "To run these tests, ensure Docker is installed and running. Error: " + e.getMessage());
+        }
+    }
 
     @Container
     static VaultContainer<?> vault = new VaultContainer<>(TestContainerImages.VAULT)

@@ -1,0 +1,98 @@
+# Compound Key Lookup Demo Configuration
+# Demonstrates compound key lookup using H2 database with customer-region composite keys
+# Use Case: Customer-region specific pricing and tier information lookup from database
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: CompoundKeyLookupDemoTest.java
+# Purpose: Compound key lookup demonstration using APEX lookup enrichments with
+#          H2 database, compound lookup keys, and customer-region specific data
+#          retrieval for pricing and tier information
+# Status: Active - Used by CompoundKeyLookupDemoTest.java
+# ============================================================================
+
+metadata:
+  id: "compound-key-lookup-demo"
+  name: "Compound Key Lookup Demo"
+  version: "1.0.0"
+  description: "Demonstrates compound key lookup using H2 database with customer-region composite keys"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "compound-key", "database", "lookup"]
+
+# H2 database configuration for customer-region data
+data-sources:
+  - name: "customer-region-database"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "Customer-region database using H2 for compound key lookups"
+
+    connection:
+      # H2 file-based database for compound key demo - using same pattern as other tests
+      database: "./target/h2-demo/apex_demo_shared"
+      username: "sa"
+      password: ""
+
+      # Connection pool configuration
+      maxPoolSize: 10
+      minPoolSize: 2
+      connectionTimeout: 30000
+
+    # SQL queries for compound key lookup
+    queries:
+      getCustomerRegionData: |
+        SELECT
+          customer_region_key,
+          customer_name,
+          region_name,
+          customer_tier,
+          regional_discount,
+          special_pricing,
+          currency,
+          tax_rate
+        FROM customer_regions
+        WHERE customer_region_key = :customerRegionKey
+
+      default: "SELECT 1 as health_check"
+
+    parameterNames:
+      - "customerRegionKey"
+
+    # Caching configuration
+    cache:
+      enabled: true
+      ttlSeconds: 300
+      maxSize: 1000
+
+# Single enrichment using compound key database lookup
+enrichments:
+  - id: "compound-key-lookup-demo"
+    name: "Customer-Region Compound Key Lookup"
+    description: "Enrich orders with customer-region specific data using compound key database lookup"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#customerId != null && #region != null"
+
+    lookup-config:
+      # Compound key using string concatenation - combines customer ID and region
+      lookup-key: "#customerId + '-' + #region"
+
+      lookup-dataset:
+        type: "database"
+        connection-name: "customer-region-database"
+        query: "SELECT customer_name, region_name, customer_tier, regional_discount, special_pricing, currency, tax_rate FROM customer_regions WHERE customer_region_key = :customerRegionKey"
+        parameters:
+          - field: "customerRegionKey"
+            type: "string"
+
+    # Map the lookup results to target fields (H2 returns uppercase column names)
+    field-mappings:
+      - source-field: "CUSTOMER_NAME"
+        target-field: "customerName"
+        required: true
+
+
+

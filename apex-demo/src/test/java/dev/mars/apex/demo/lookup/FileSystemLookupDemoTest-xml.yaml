@@ -37,11 +37,15 @@ enrichments:
     lookup-config:
       # Simple field reference - extract product ID from input
       lookup-key: "#productId"
-      
+
       lookup-dataset:
         type: "file-system"
         key-field: "id"
         file-path: "demo-data/xml/products.xml"
+        format-config:
+          type: "xml"
+          recordElement: "product"
+          rootElement: "products"
     
     # Map the lookup results to target fields
     field-mappings:

@@ -40,7 +40,7 @@ Based on my analysis of all 12 classes in the `apex-demo/src/main/java/dev/mars/
 ### **1. ComplianceServiceDemo.java**
 - **Version**: 1.0 ❌ (Should be 2.0 after refactoring)
 - **YAML Files**: None documented ❌
-- **Hardcoded Simulations**: ✅ **MAJOR VIOLATIONS**
+- **Hardcoded Simulations**:  **MAJOR VIOLATIONS**
   ```java
   // CRITICAL VIOLATIONS FOUND:
   regulatoryRequirements.put(TYPE_EQUITY, Arrays.asList(REG_MIFID_II, REG_BASEL_III));
@@ -53,7 +53,7 @@ Based on my analysis of all 12 classes in the `apex-demo/src/main/java/dev/mars/
 ### **2. CustomerTransformerDemo.java**
 - **Version**: 1.0 ❌
 - **YAML Files**: None documented ❌
-- **Hardcoded Simulations**: ✅ **MAJOR VIOLATIONS**
+- **Hardcoded Simulations**:  **MAJOR VIOLATIONS**
   ```java
   // CRITICAL VIOLATIONS FOUND:
   membershipDiscounts.put("Gold", 0.15); // Hardcoded business logic
@@ -65,7 +65,7 @@ Based on my analysis of all 12 classes in the `apex-demo/src/main/java/dev/mars/
 ### **3. TradeTransformerDemo.java**
 - **Version**: 1.0 ❌
 - **YAML Files**: None documented ❌
-- **Hardcoded Simulations**: ✅ **MAJOR VIOLATIONS**
+- **Hardcoded Simulations**:  **MAJOR VIOLATIONS**
   ```java
   // CRITICAL VIOLATIONS FOUND:
   tradeRiskRatings.put("Equity", 0.8); // Hardcoded business values
@@ -77,7 +77,7 @@ Based on my analysis of all 12 classes in the `apex-demo/src/main/java/dev/mars/
 ### **4. PostTradeProcessingServiceDemo.java**
 - **Version**: 1.0 ❌
 - **YAML Files**: None documented ❌
-- **Hardcoded Simulations**: ✅ **MAJOR VIOLATIONS**
+- **Hardcoded Simulations**:  **MAJOR VIOLATIONS**
   ```java
   // CRITICAL VIOLATIONS FOUND:
   return Arrays.asList(new Trade("T1001", TYPE_EQUITY, "Stock"), ...);
@@ -89,7 +89,7 @@ Based on my analysis of all 12 classes in the `apex-demo/src/main/java/dev/mars/
 ### **5. IntegratedTradeValidatorDemo.java**
 - **Version**: 1.0 ❌
 - **YAML Files**: None documented ❌
-- **Hardcoded Simulations**: ✅ **MAJOR VIOLATIONS**
+- **Hardcoded Simulations**:  **MAJOR VIOLATIONS**
   ```java
   // CRITICAL VIOLATIONS FOUND:
   equityParams.put("allowedValues", Arrays.asList("Equity"));
@@ -155,7 +155,7 @@ All remaining classes follow the same pattern:
    ❌ facts.put("trade", trade) // Manual assignments
 
    // REPLACE with:
-   ✅ YamlRuleConfiguration config = yamlLoader.loadFromClasspath("path/to/config.yaml");
+    YamlRuleConfiguration config = yamlLoader.loadFromClasspath("path/to/config.yaml");
    ✅ Object result = enrichmentService.enrichObject(config, inputData);
    ```
 

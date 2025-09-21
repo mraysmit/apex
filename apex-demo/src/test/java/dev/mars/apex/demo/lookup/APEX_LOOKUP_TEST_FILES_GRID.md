@@ -16,15 +16,15 @@
 | 10 | `CustomerNameEnrichmentTest.yaml` | ✅ `RestApiIntegrationTest.java` | REST_API | ✅ PASSING | ✅ Customer enrichment via REST API |
 | 11 | `DatabaseConnectionTest.yaml` | ✅ `DatabaseConnectionTest.java` | H2_DB | ✅ PASSING | ✅ COMPLETE - **FIXED YAML FIRST VIOLATION** |
 | 12 | `ExternalDataSourceWorkingDemoTest.yaml` | ✅ `ExternalDataSourceWorkingDemoTest.java` | YAML_FILE | ✅ PASSING | ✅ COMPLETE - External data source demo |
-| 13 | `FileSystemLookupDemoTest-json.yaml` | ✅ `FileSystemLookupDemoTest.java` | JSON_FILE | ⚠️ FAILING | File system setup issues |
-| 14 | `FileSystemLookupDemoTest-xml.yaml` | ✅ `FileSystemLookupDemoTest.java` | XML_FILE | ⚠️ FAILING | File system setup issues |
+| 13 | `FileSystemLookupDemoTest-json.yaml` | ✅ `FileSystemLookupDemoTest.java` | JSON_FILE | ✅ PASSING | ✅ COMPLETE - Real JSON file lookup with 6 tests passing |
+| 14 | `FileSystemLookupDemoTest-xml.yaml` | ✅ `FileSystemLookupDemoTest.java` | XML_FILE | ✅ PASSING | ✅ COMPLETE - Real JSON file lookup with 6 tests passing |
 | 15 | `h2-custom-parameters-demo.yaml` | ❌ None | UNKNOWN | ORPHANED | Configuration demo only |
 | 16 | `H2CustomParametersDemoTest.yaml` | ✅ `H2CustomParametersDemoTest.java` | H2_DB | ✅ PASSING | ✅ COMPLETE - H2 parameters with enrichment |
 | 17 | `mathematical-operations-lookup.yaml` | ❌ None | UNKNOWN | ORPHANED | No test file exists |
 | 18 | `MultiParameterLookupTest.yaml` | ✅ `MultiParameterLookupTest.java` | H2_DB | ✅ PASSING | ✅ COMPLETE - Multi-parameter database lookup |
 | 19 | `NestedFieldLookupDemoTest.yaml` | `NestedFieldLookupDemoTest.java` | INLINE | PASSING | COMPLETE - Real nested field navigation with 4 enrichments |
-| 20 | `postgresql-simple-database-enrichment.yaml` | ❌ None | UNKNOWN | ORPHANED | No test file exists |
-| 21 | `PostgreSQLMultiParamLookupTest.yaml` | ✅ `PostgreSQLMultiParamLookupTest.java` | POSTGRESQL_DB | ⚠️ FAILING | YAML exists but test fails |
+| 20 | `postgresql-simple-database-enrichment.yaml` | ✅ `PostgreSQLSimpleDatabaseEnrichmentTest.java` | H2_DB | ✅ PASSING | ✅ COMPLETE - H2 database enrichment with 6 tests passing |
+| 21 | `PostgreSQLMultiParamLookupTest.yaml` | ✅ `PostgreSQLMultiParamLookupTest.java` | POSTGRESQL_DB | ✅ PASSING | ✅ COMPLETE - Multi-parameter PostgreSQL lookup with 5 tests passing |
 | 22 | `PostgreSQLSimpleLookupTest.yaml` | ✅ `PostgreSQLSimpleLookupTest.java` | POSTGRESQL_DB | ✅ PASSING | ✅ COMPLETE - Phase 1.1 implementation |
 | 23 | `RestApiBasicLookupTest.yaml` | ✅ `RestApiBasicLookupTest.java` | REST_API | ✅ PASSING | ✅ COMPLETE - 5 tests passing |
 | 24 | `RestApiEnhancedDemoTest.yaml` | ✅ `RestApiEnhancedDemoTest.java` | REST_API | ✅ PASSING | ✅ COMPLETE - 5 tests passing |
@@ -33,7 +33,7 @@
 | 27 | `RestApiSimpleYamlTest.yaml` | ✅ `RestApiSimpleYamlTest.java` | REST_API | ✅ PASSING | ✅ COMPLETE - Simple YAML-driven REST API |
 | 28 | `settlement-instruction-enrichment.yaml` | ❌ None | UNKNOWN | ORPHANED | No test file exists |
 | 29 | `SharedDatasourceDemoTest.yaml` | ✅ `SharedDatasourceDemoTest.java` | H2_DB | ✅ PASSING | ✅ COMPLETE - **FIXED YAML FIRST VIOLATION** |
-| 30 | `SimpleFieldLookupDemoTest.yaml` | ✅ `SimpleFieldLookupDemoTest.java` | INLINE | ⚠️ FAILING | Simple field lookup issues |
+| 30 | `SimpleFieldLookupDemoTest.yaml` | ✅ `SimpleFieldLookupDemoTest.java` | INLINE | ✅ PASSING | ✅ COMPLETE - Real currency lookup with 6 tests passing |
 
 ---
 
@@ -49,11 +49,11 @@
 | 6 | `CurrencyMarketMappingTest.java` | ✅ `CurrencyMarketMappingTest.yaml` + `CurrencyMarketMappingTest-h2.yaml` | INLINE + H2_DB | ✅ PASSING | ✅ COMPLETE - Currency to market mapping |
 | 7 | `DatabaseConnectionTest.java` | ✅ `DatabaseConnectionTest.yaml` | H2_DB | ✅ PASSING | ✅ COMPLETE - **FIXED YAML FIRST VIOLATION** |
 | 8 | `ExternalDataSourceWorkingDemoTest.java` | ✅ `ExternalDataSourceWorkingDemoTest.yaml` | YAML_FILE | ✅ PASSING | ✅ COMPLETE - External data source demo |
-| 9 | `FileSystemLookupDemoTest.java` | ✅ `FileSystemLookupDemoTest-json.yaml` + `FileSystemLookupDemoTest-xml.yaml` | JSON_FILE + XML_FILE | ⚠️ FAILING | File system setup issues |
+| 9 | `FileSystemLookupDemoTest.java` | ✅ `FileSystemLookupDemoTest-json.yaml` + `FileSystemLookupDemoTest-xml.yaml` | JSON_FILE + XML_FILE | ✅ PASSING | ✅ COMPLETE - Real JSON file lookup with 6 tests passing |
 | 10 | `H2CustomParametersDemoTest.java` | ✅ `H2CustomParametersDemoTest.yaml` | H2_DB | ✅ PASSING | ✅ COMPLETE - H2 parameters with enrichment |
 | 11 | `MultiParameterLookupTest.java` | ✅ `MultiParameterLookupTest.yaml` | H2_DB | ✅ PASSING | ✅ COMPLETE - Multi-parameter database lookup |
 | 12 | `NestedFieldLookupDemoTest.java` | `NestedFieldLookupDemoTest.yaml` | INLINE | PASSING | COMPLETE - Real nested field navigation with 4 enrichments |
-| 13 | `PostgreSQLMultiParamLookupTest.java` | ✅ `PostgreSQLMultiParamLookupTest.yaml` | POSTGRESQL_DB | ⚠️ FAILING | YAML exists but test fails |
+| 13 | `PostgreSQLMultiParamLookupTest.java` | ✅ `PostgreSQLMultiParamLookupTest.yaml` | POSTGRESQL_DB | ✅ PASSING | ✅ COMPLETE - Multi-parameter PostgreSQL lookup with 5 tests passing |
 | 14 | `PostgreSQLSimpleLookupTest.java` | ✅ `PostgreSQLSimpleLookupTest.yaml` | POSTGRESQL_DB | ✅ PASSING | ✅ COMPLETE - Phase 1.1 implementation |
 | 15 | `RestApiBasicLookupTest.java` | ✅ `RestApiBasicLookupTest.yaml` | REST_API | ✅ PASSING | ✅ COMPLETE - 5 tests passing |
 | 16 | `RestApiCachingDemoTest.java` | ✅ `RestApiCachingDemoTest-fast.yaml` + `RestApiCachingDemoTest-slow.yaml` | REST_API | ✅ PASSING | ✅ COMPLETE - 4 tests passing, caching demonstration |
@@ -63,7 +63,7 @@
 | 20 | `RestApiServerValidationTest.java` | ❌ None (Direct HTTP) | REST_API | ✅ PASSING | ✅ COMPLETE - 7 tests passing |
 | 21 | `RestApiSimpleYamlTest.java` | ✅ `RestApiSimpleYamlTest.yaml` | REST_API | ✅ PASSING | ✅ COMPLETE - Simple YAML-driven REST API |
 | 22 | `SharedDatasourceDemoTest.java` | ✅ `SharedDatasourceDemoTest.yaml` | H2_DB | ✅ PASSING | ✅ COMPLETE - **FIXED YAML FIRST VIOLATION** |
-| 23 | `SimpleFieldLookupDemoTest.java` | ✅ `SimpleFieldLookupDemoTest.yaml` | INLINE | ⚠️ FAILING | Simple field lookup issues |
+| 23 | `SimpleFieldLookupDemoTest.java` | ✅ `SimpleFieldLookupDemoTest.yaml` | INLINE | ✅ PASSING | ✅ COMPLETE - Real currency lookup with 6 tests passing |
 
 ---
 
@@ -75,8 +75,8 @@
 | **H2_DB** | 6 | `ComprehensiveLookupTest`, `ConditionalExpressionLookupTest`, `DatabaseConnectionTest`, `H2CustomParametersDemoTest`, `MultiParameterLookupTest`, `SharedDatasourceDemoTest` | ✅ **EXCELLENT** |
 | **POSTGRESQL_DB** | 2 | `PostgreSQLMultiParamLookupTest`, `PostgreSQLSimpleLookupTest` | ✅ **GOOD** |
 | **REST_API** | 3 | `BasicRestApiLookupTest`, `EnhancedRestApiDemoTest`, `RestApiCachingDemoTest` | ✅ **EXCELLENT** |
-| **JSON_FILE** | 1 | `FileSystemLookupDemoTest` | ⚠️ **LIMITED** |
-| **XML_FILE** | 1 | `FileSystemLookupDemoTest` | ⚠️ **LIMITED** |
+| **JSON_FILE** | 1 | `FileSystemLookupDemoTest` | ✅ **EXCELLENT** |
+| **XML_FILE** | 1 | `FileSystemLookupDemoTest` | ✅ **EXCELLENT** |
 | **YAML_FILE** | 1 | `ExternalDataSourceWorkingDemoTest` | ⚠️ **LIMITED** |
 | **NO_YAML** | 1 | `EnhancedRestApiDemoTest` | 🚨 **VIOLATIONS** |
 | **UNKNOWN** | 5 | Orphaned YAML files | ❓ **NEEDS ANALYSIS** |
@@ -97,12 +97,12 @@
 |--------------|-----------|----------------|
 | **Total YAML Files** | 30 | 100% |
 | **Total Java Test Files** | 23 | 100% |
-| **YAML Files with Tests** | 25 | 83% |
-| **Orphaned YAML Files** | 5 | 17% |
-| **PASSING Java Tests** | 19 | 83% |
-| **FAILING Java Tests** | 4 | 17% |
-| **PASSING YAML Configs** | 21 | 70% |
-| **FAILING YAML Configs** | 4 | 13% |
+| **YAML Files with Tests** | 26 | 87% |
+| **Orphaned YAML Files** | 4 | 13% |
+| **PASSING Java Tests** | 21 | 91% |
+| **FAILING Java Tests** | 3 | 13% |
+| **PASSING YAML Configs** | 23 | 77% |
+| **FAILING YAML Configs** | 2 | 7% |
 
 ---
 
@@ -125,18 +125,20 @@
 | `MultiParameterLookupTest.java` | `MultiParameterLookupTest.yaml` | H2_DB | ✅ COMPLETE |
 | `SharedDatasourceDemoTest.java` | `SharedDatasourceDemoTest.yaml` | H2_DB | ✅ COMPLETE |
 | `ExternalDataSourceWorkingDemoTest.java` | `ExternalDataSourceWorkingDemoTest.yaml` | YAML_FILE | ✅ COMPLETE |
+| `FileSystemLookupDemoTest.java` | `FileSystemLookupDemoTest-json.yaml` + `FileSystemLookupDemoTest-xml.yaml` | JSON_FILE + XML_FILE | ✅ COMPLETE |
 | `PostgreSQLSimpleLookupTest.java` | `PostgreSQLSimpleLookupTest.yaml` | POSTGRESQL_DB | ✅ COMPLETE |
+| `SimpleFieldLookupDemoTest.java` | `SimpleFieldLookupDemoTest.yaml` | INLINE | ✅ COMPLETE |
 
-### **FAILING Tests (4)**
+### **FAILING Tests (1)**
 | **Test File** | **Issue** | **Root Cause** |
 |---------------|-----------|----------------|
 | `CompoundKeyLookupDemoTest.java` | Missing YAML | No corresponding YAML file exists - 4/5 tests failing |
-| `FileSystemLookupDemoTest.java` | Null results | File system setup result should be generated - 4/5 tests failing |
 
-| `PostgreSQLMultiParamLookupTest.java` | Missing YAML | Missing postgresql-multi-param-lookup.yaml - 2/5 tests failing |
-| `SimpleFieldLookupDemoTest.java` | Null results | Currency dataset setup result should be generated - 4/5 tests failing |
 
-### **PASSING Tests (19)**
+
+
+
+### **PASSING Tests (21)**
 | **Test File** | **Status** | **Details** |
 |---------------|------------|-------------|
 | `BarrierOptionNestedTest.java` | ✅ PASSING | 3 tests passing - Nested barrier option validation |
@@ -180,7 +182,7 @@
 | 5 | `customer-profile-enrichment.yaml` | Customer profile enrichment | LOW |
 | 6 | `h2-custom-parameters-demo.yaml` | H2 configuration demo | LOW |
 | 7 | `mathematical-operations-lookup.yaml` | Mathematical operations | HIGH |
-| 8 | `postgresql-simple-database-enrichment.yaml` | PostgreSQL enrichment | MEDIUM |
+| ~~8~~ | ~~`postgresql-simple-database-enrichment.yaml`~~ | ~~PostgreSQL enrichment~~ | ✅ **COMPLETE** |
 | 9 | `settlement-instruction-enrichment.yaml` | Settlement processing | HIGH |
 | ~~10~~ | ~~`shared-datasource-demo.yaml`~~ | ~~Shared data source demonstration~~ | ✅ **COMPLETE** |
 
@@ -226,7 +228,7 @@
 | HIGH | Create test | `settlement-instruction-enrichment.yaml` | 3 days |
 | MEDIUM | Create test | `compound-key-lookup.yaml` | 1 day |
 | ✅ COMPLETE | ~~Create test~~ | ~~`currency-market-mapping.yaml`~~ | **DONE** |
-| MEDIUM | Create test | `postgresql-simple-database-enrichment.yaml` | 2 days |
+| ✅ COMPLETE | ~~Create test~~ | ~~`postgresql-simple-database-enrichment.yaml`~~ | **DONE** |
 | LOW | Create test | `customer-profile-enrichment.yaml` | 1 day |
 | LOW | Consider test | `h2-custom-parameters-demo.yaml` | 1 day |
 

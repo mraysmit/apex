@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.DockerClientFactory;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -60,6 +61,17 @@ import static org.junit.jupiter.api.Assertions.*;
 public class PostgreSQLSimpleLookupTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(PostgreSQLSimpleLookupTest.class);
+
+    @BeforeAll
+    static void checkDockerAvailability() {
+        try {
+            DockerClientFactory.instance().client();
+        } catch (Exception e) {
+            org.junit.jupiter.api.Assumptions.assumeTrue(false,
+                "Docker is not available. Skipping PostgreSQL integration tests. " +
+                "To run these tests, ensure Docker is installed and running. Error: " + e.getMessage());
+        }
+    }
 
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(TestContainerImages.POSTGRES)

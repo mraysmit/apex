@@ -16,8 +16,9 @@ package dev.mars.apex.demo.lookup;
  * limitations under the License.
  */
 
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.demo.infrastructure.DemoTestBase;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,198 +29,310 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * JUnit 5 test for SimpleFieldLookupDemo functionality.
- * 
+ *
  * CRITICAL VALIDATION CHECKLIST APPLIED:
- * ✅ Count enrichments in YAML - 4 enrichments expected (currency-dataset-setup, simple-field-lookup, currency-enrichment, summary)
- * ✅ Verify log shows "Processed: 4 out of 4" - Must be 100% execution rate
- * ✅ Check EVERY enrichment condition - Test data triggers ALL 4 conditions
- * ✅ Validate EVERY business calculation - Test actual simple field lookup logic
- * ✅ Assert ALL enrichment results - Every result-field has corresponding assertEquals
- * 
+ * ✅ Count enrichments in YAML - 1 enrichment expected (simple-field-lookup-demo)
+ * ✅ Verify log shows "Processed: 1 out of 1" - Must be 100% execution rate
+ * ✅ Check EVERY enrichment condition - Test data triggers currency code condition
+ * ✅ Validate EVERY business calculation - Test actual currency lookup logic
+ * ✅ Assert ALL enrichment results - Every field mapping has corresponding assertEquals
+ *
  * BUSINESS LOGIC VALIDATION:
- * - Currency dataset setup with real APEX processing
- * - Simple field lookup using currency codes
- * - Currency enrichment with reference data
- * - Comprehensive simple field lookup summary
+ * - Real currency lookup using inline dataset
+ * - Currency code validation and enrichment
+ * - Field mappings for currency details
+ * - Multiple currency testing scenarios
  */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SimpleFieldLookupDemoTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(SimpleFieldLookupDemoTest.class);
 
     @Test
-    void testComprehensiveSimpleFieldLookupFunctionality() {
-        logger.info("=== Testing Comprehensive Simple Field Lookup Functionality ===");
-        
-        // Load YAML configuration for simple field lookup
+    @Order(1)
+    @DisplayName("Should perform USD currency lookup with real inline data")
+    void testUSDCurrencyLookup() {
+        logger.info("=".repeat(80));
+        logger.info("PHASE 1: USD Currency Lookup");
+        logger.info("=".repeat(80));
+
         try {
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/SimpleFieldLookupDemoTest.yaml");
+            // Load YAML configuration for simple field lookup
+            YamlRuleConfiguration config = yamlLoader.loadFromFile(
+                "src/test/java/dev/mars/apex/demo/lookup/SimpleFieldLookupDemoTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
-        
-        // Create comprehensive test data that triggers ALL 4 enrichments
-        Map<String, Object> testData = new HashMap<>();
-        
-        // Data for currency-dataset-setup enrichment
-        testData.put("datasetSetupType", "currency-dataset-setup");
-        testData.put("datasetSetupScope", "inline-reference-data");
-        
-        // Data for simple-field-lookup enrichment
-        testData.put("fieldLookupType", "simple-field-lookup");
-        testData.put("fieldLookupScope", "currency-codes");
-        
-        // Data for currency-enrichment enrichment
-        testData.put("enrichmentType", "currency-enrichment");
-        testData.put("enrichmentScope", "reference-data");
-        
-        // Common data for summary enrichment
-        testData.put("approach", "real-apex-services");
-        
-        // Execute APEX enrichment processing
-        Object result = enrichmentService.enrichObject(config, testData);
-        
-        // Validate enrichment results using proper casting pattern
-        assertNotNull(result, "Simple field lookup enrichment result should not be null");
-        @SuppressWarnings("unchecked")
-        Map<String, Object> enrichedData = (Map<String, Object>) result;
-        
-        // Validate ALL business logic results (all 4 enrichments should be processed)
-        assertNotNull(enrichedData.get("currencyDatasetSetupResult"), "Currency dataset setup result should be generated");
-        assertNotNull(enrichedData.get("simpleFieldLookupResult"), "Simple field lookup result should be generated");
-        assertNotNull(enrichedData.get("currencyEnrichmentResult"), "Currency enrichment result should be generated");
-        assertNotNull(enrichedData.get("simpleFieldLookupSummary"), "Simple field lookup summary should be generated");
-        
-        // Validate specific business calculations
-        String currencyDatasetSetupResult = (String) enrichedData.get("currencyDatasetSetupResult");
-        assertTrue(currencyDatasetSetupResult.contains("currency-dataset-setup"), "Currency dataset setup result should contain dataset setup type");
-        
-        String simpleFieldLookupResult = (String) enrichedData.get("simpleFieldLookupResult");
-        assertTrue(simpleFieldLookupResult.contains("simple-field-lookup"), "Simple field lookup result should reference field lookup type");
-        
-        String currencyEnrichmentResult = (String) enrichedData.get("currencyEnrichmentResult");
-        assertTrue(currencyEnrichmentResult.contains("currency-enrichment"), "Currency enrichment result should reference enrichment type");
-        
-        String simpleFieldLookupSummary = (String) enrichedData.get("simpleFieldLookupSummary");
-        assertTrue(simpleFieldLookupSummary.contains("real-apex-services"), "Simple field lookup summary should reference approach");
-        
-            logger.info("✅ Comprehensive simple field lookup functionality test completed successfully");
+
+            // Create test data that triggers the enrichment condition (#currencyCode != null && #currencyCode.length() == 3)
+            Map<String, Object> testData = new HashMap<>();
+            testData.put("currencyCode", "USD");
+
+            logger.info("Input Data:");
+            logger.info("  Currency Code: {}", testData.get("currencyCode"));
+
+            // Execute APEX enrichment processing
+            Object result = enrichmentService.enrichObject(config, testData);
+
+            // Validate enrichment results
+            assertNotNull(result, "USD currency lookup result should not be null");
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> enrichedData = (Map<String, Object>) result;
+
+            // Validate all field mappings from YAML configuration
+            assertNotNull(enrichedData.get("currencyName"), "Currency name should be enriched");
+            assertNotNull(enrichedData.get("currencySymbol"), "Currency symbol should be enriched");
+            assertNotNull(enrichedData.get("decimalPlaces"), "Decimal places should be enriched");
+            assertNotNull(enrichedData.get("countryCode"), "Country code should be enriched");
+            assertNotNull(enrichedData.get("isBaseCurrency"), "Is base currency should be enriched");
+            assertNotNull(enrichedData.get("currencyRegion"), "Currency region should be enriched");
+
+            // Validate specific business data values from inline dataset
+            assertEquals("US Dollar", enrichedData.get("currencyName"));
+            assertEquals("$", enrichedData.get("currencySymbol"));
+            assertEquals(2, enrichedData.get("decimalPlaces"));
+            assertEquals("US", enrichedData.get("countryCode"));
+            assertEquals(true, enrichedData.get("isBaseCurrency"));
+            assertEquals("North America", enrichedData.get("currencyRegion"));
+
+            logger.info("USD Currency Lookup Results:");
+            logger.info("  Currency Name: {}", enrichedData.get("currencyName"));
+            logger.info("  Currency Symbol: {}", enrichedData.get("currencySymbol"));
+            logger.info("  Decimal Places: {}", enrichedData.get("decimalPlaces"));
+            logger.info("  Country Code: {}", enrichedData.get("countryCode"));
+            logger.info("  Is Base Currency: {}", enrichedData.get("isBaseCurrency"));
+            logger.info("  Currency Region: {}", enrichedData.get("currencyRegion"));
+
+            logger.info("USD currency lookup completed successfully");
+
         } catch (Exception e) {
-            fail("Failed to load YAML configuration: " + e.getMessage());
+            logger.error("USD currency lookup failed: " + e.getMessage(), e);
+            fail("USD currency lookup failed: " + e.getMessage());
         }
     }
 
     @Test
-    void testCurrencyDatasetSetupProcessing() {
-        logger.info("=== Testing Currency Dataset Setup Processing ===");
-        
-        // Load YAML configuration for simple field lookup
+    @Order(2)
+    @DisplayName("Should perform EUR currency lookup with different currency")
+    void testEURCurrencyLookup() {
+        logger.info("=".repeat(80));
+        logger.info("PHASE 2: EUR Currency Lookup");
+        logger.info("=".repeat(80));
+
         try {
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/SimpleFieldLookupDemoTest.yaml");
+            // Load YAML configuration for simple field lookup
+            YamlRuleConfiguration config = yamlLoader.loadFromFile(
+                "src/test/java/dev/mars/apex/demo/lookup/SimpleFieldLookupDemoTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
-        
-        // Test different dataset setup types
-        String[] datasetSetupTypes = {"currency-dataset-setup", "inline-dataset-setup", "reference-data-setup"};
-        
-        for (String datasetSetupType : datasetSetupTypes) {
+
+            // Create test data that triggers the enrichment condition (#currencyCode != null && #currencyCode.length() == 3)
             Map<String, Object> testData = new HashMap<>();
-            testData.put("datasetSetupType", datasetSetupType);
-            testData.put("datasetSetupScope", "inline-reference-data");
-            testData.put("approach", "real-apex-services");
-            
+            testData.put("currencyCode", "EUR");
+
+            logger.info("Input Data:");
+            logger.info("  Currency Code: {}", testData.get("currencyCode"));
+
             // Execute APEX enrichment processing
             Object result = enrichmentService.enrichObject(config, testData);
-            
+
             // Validate enrichment results
-            assertNotNull(result, "Currency dataset setup result should not be null for " + datasetSetupType);
+            assertNotNull(result, "EUR currency lookup result should not be null");
+
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
-            
-            // Validate currency dataset setup business logic
-            assertNotNull(enrichedData.get("currencyDatasetSetupResult"), "Currency dataset setup result should be generated for " + datasetSetupType);
-            
-            String currencyDatasetSetupResult = (String) enrichedData.get("currencyDatasetSetupResult");
-            assertTrue(currencyDatasetSetupResult.contains(datasetSetupType), "Currency dataset setup result should contain " + datasetSetupType);
-        }
-        
-            logger.info("✅ Currency dataset setup processing test completed successfully");
+
+            // Validate all field mappings from YAML configuration
+            assertNotNull(enrichedData.get("currencyName"), "Currency name should be enriched");
+            assertNotNull(enrichedData.get("currencySymbol"), "Currency symbol should be enriched");
+            assertNotNull(enrichedData.get("decimalPlaces"), "Decimal places should be enriched");
+            assertNotNull(enrichedData.get("countryCode"), "Country code should be enriched");
+            assertNotNull(enrichedData.get("isBaseCurrency"), "Is base currency should be enriched");
+            assertNotNull(enrichedData.get("currencyRegion"), "Currency region should be enriched");
+
+            // Validate specific business data values from inline dataset
+            assertEquals("Euro", enrichedData.get("currencyName"));
+            assertEquals("€", enrichedData.get("currencySymbol"));
+            assertEquals(2, enrichedData.get("decimalPlaces"));
+            assertEquals("EU", enrichedData.get("countryCode"));
+            assertEquals(true, enrichedData.get("isBaseCurrency"));
+            assertEquals("Europe", enrichedData.get("currencyRegion"));
+
+            logger.info("EUR Currency Lookup Results:");
+            logger.info("  Currency Name: {}", enrichedData.get("currencyName"));
+            logger.info("  Currency Symbol: {}", enrichedData.get("currencySymbol"));
+            logger.info("  Decimal Places: {}", enrichedData.get("decimalPlaces"));
+            logger.info("  Country Code: {}", enrichedData.get("countryCode"));
+            logger.info("  Is Base Currency: {}", enrichedData.get("isBaseCurrency"));
+            logger.info("  Currency Region: {}", enrichedData.get("currencyRegion"));
+
+            logger.info("EUR currency lookup completed successfully");
+
         } catch (Exception e) {
-            fail("Failed to load YAML configuration: " + e.getMessage());
+            logger.error("EUR currency lookup failed: " + e.getMessage(), e);
+            fail("EUR currency lookup failed: " + e.getMessage());
         }
     }
 
     @Test
-    void testSimpleFieldLookupProcessing() {
-        logger.info("=== Testing Simple Field Lookup Processing ===");
-        
-        // Load YAML configuration for simple field lookup
+    @Order(3)
+    @DisplayName("Should test multiple currency lookups")
+    void testMultipleCurrencyLookups() {
+        logger.info("=".repeat(80));
+        logger.info("PHASE 3: Multiple Currency Lookups Testing");
+        logger.info("=".repeat(80));
+
         try {
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/SimpleFieldLookupDemoTest.yaml");
+            // Load YAML configuration for simple field lookup
+            YamlRuleConfiguration config = yamlLoader.loadFromFile(
+                "src/test/java/dev/mars/apex/demo/lookup/SimpleFieldLookupDemoTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
-        
-        // Test different field lookup types
-        String[] fieldLookupTypes = {"simple-field-lookup", "currency-code-lookup", "field-based-lookup"};
-        
-        for (String fieldLookupType : fieldLookupTypes) {
-            Map<String, Object> testData = new HashMap<>();
-            testData.put("fieldLookupType", fieldLookupType);
-            testData.put("fieldLookupScope", "currency-codes");
-            testData.put("approach", "real-apex-services");
-            
-            // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
-            
-            // Validate enrichment results
-            assertNotNull(result, "Simple field lookup result should not be null for " + fieldLookupType);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
-            
-            // Validate simple field lookup processing business logic
-            assertNotNull(enrichedData.get("simpleFieldLookupResult"), "Simple field lookup result should be generated for " + fieldLookupType);
-            
-            String simpleFieldLookupResult = (String) enrichedData.get("simpleFieldLookupResult");
-            assertTrue(simpleFieldLookupResult.contains(fieldLookupType), "Simple field lookup result should reference field lookup type " + fieldLookupType);
-        }
-        
-            logger.info("✅ Simple field lookup processing test completed successfully");
+
+            // Test multiple currencies from the inline dataset
+            String[] currencyCodes = {"USD", "EUR", "GBP", "JPY", "CHF"};
+            String[] expectedNames = {"US Dollar", "Euro", "British Pound Sterling", "Japanese Yen", "Swiss Franc"};
+            String[] expectedSymbols = {"$", "€", "£", "¥", "CHF"};
+            String[] expectedRegions = {"North America", "Europe", "Europe", "Asia", "Europe"};
+
+            for (int i = 0; i < currencyCodes.length; i++) {
+                Map<String, Object> testData = new HashMap<>();
+                testData.put("currencyCode", currencyCodes[i]);
+
+                // Execute APEX enrichment processing
+                Object result = enrichmentService.enrichObject(config, testData);
+
+                // Validate enrichment results
+                assertNotNull(result, "Currency lookup result should not be null for " + currencyCodes[i]);
+
+                @SuppressWarnings("unchecked")
+                Map<String, Object> enrichedData = (Map<String, Object>) result;
+
+                // Validate specific currency data
+                assertEquals(expectedNames[i], enrichedData.get("currencyName"));
+                assertEquals(expectedSymbols[i], enrichedData.get("currencySymbol"));
+                assertEquals(expectedRegions[i], enrichedData.get("currencyRegion"));
+
+                logger.info("Currency {}: {} - {} - {}",
+                    currencyCodes[i],
+                    enrichedData.get("currencyName"),
+                    enrichedData.get("currencySymbol"),
+                    enrichedData.get("currencyRegion"));
+            }
+
+            logger.info("Multiple currency lookups completed successfully");
+
         } catch (Exception e) {
-            fail("Failed to load YAML configuration: " + e.getMessage());
+            logger.error("Multiple currency lookups failed: " + e.getMessage(), e);
+            fail("Multiple currency lookups failed: " + e.getMessage());
         }
     }
 
     @Test
-    void testCurrencyEnrichmentProcessing() {
-        logger.info("=== Testing Currency Enrichment Processing ===");
-        
-        // Load YAML configuration for simple field lookup
+    @Order(4)
+    @DisplayName("Should handle non-existent currency gracefully")
+    void testNonExistentCurrencyHandling() {
+        logger.info("=".repeat(80));
+        logger.info("PHASE 4: Non-Existent Currency Handling");
+        logger.info("=".repeat(80));
+
         try {
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/SimpleFieldLookupDemoTest.yaml");
+            // Load YAML configuration for simple field lookup
+            YamlRuleConfiguration config = yamlLoader.loadFromFile(
+                "src/test/java/dev/mars/apex/demo/lookup/SimpleFieldLookupDemoTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
-        
-        // Test different enrichment types
-        String[] enrichmentTypes = {"currency-enrichment", "reference-data-enrichment", "lookup-enrichment"};
-        
-        for (String enrichmentType : enrichmentTypes) {
+
+            // Create test data with non-existent currency code
             Map<String, Object> testData = new HashMap<>();
-            testData.put("enrichmentType", enrichmentType);
-            testData.put("enrichmentScope", "reference-data");
-            testData.put("approach", "real-apex-services");
-            
+            testData.put("currencyCode", "XYZ");
+
+            logger.info("Input Data:");
+            logger.info("  Currency Code: {}", testData.get("currencyCode"));
+
             // Execute APEX enrichment processing
             Object result = enrichmentService.enrichObject(config, testData);
-            
-            // Validate enrichment results
-            assertNotNull(result, "Currency enrichment result should not be null for " + enrichmentType);
+
+            // Validate enrichment results - should still return the object but without enriched fields
+            assertNotNull(result, "Non-existent currency lookup result should not be null");
+
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
-            
-            // Validate currency enrichment processing business logic
-            assertNotNull(enrichedData.get("currencyEnrichmentResult"), "Currency enrichment result should be generated for " + enrichmentType);
-            
-            String currencyEnrichmentResult = (String) enrichedData.get("currencyEnrichmentResult");
-            assertTrue(currencyEnrichmentResult.contains(enrichmentType), "Currency enrichment result should reference enrichment type " + enrichmentType);
-        }
-        
-            logger.info("✅ Currency enrichment processing test completed successfully");
+
+            // Validate that original data is preserved
+            assertEquals("XYZ", enrichedData.get("currencyCode"));
+
+            // Validate that enriched fields are null (lookup failed gracefully)
+            assertNull(enrichedData.get("currencyName"), "Currency name should be null for non-existent currency");
+            assertNull(enrichedData.get("currencySymbol"), "Currency symbol should be null for non-existent currency");
+            assertNull(enrichedData.get("currencyRegion"), "Currency region should be null for non-existent currency");
+
+            logger.info("Non-existent currency handling completed successfully");
+
         } catch (Exception e) {
-            fail("Failed to load YAML configuration: " + e.getMessage());
+            logger.error("Non-existent currency handling failed: " + e.getMessage(), e);
+            fail("Non-existent currency handling failed: " + e.getMessage());
         }
+    }
+
+    @Test
+    @Order(5)
+    @DisplayName("Should validate enrichment conditions")
+    void testEnrichmentConditionValidation() {
+        logger.info("=".repeat(80));
+        logger.info("PHASE 5: Enrichment Condition Validation");
+        logger.info("=".repeat(80));
+
+        try {
+            // Load YAML configuration for simple field lookup
+            YamlRuleConfiguration config = yamlLoader.loadFromFile(
+                "src/test/java/dev/mars/apex/demo/lookup/SimpleFieldLookupDemoTest.yaml");
+            assertNotNull(config, "YAML configuration should not be null");
+
+            // Test 1: Null currency code (should not trigger enrichment)
+            Map<String, Object> testData1 = new HashMap<>();
+            testData1.put("currencyCode", null);
+            Object result1 = enrichmentService.enrichObject(config, testData1);
+            assertNotNull(result1, "Result should not be null even with null currency code");
+
+            // Test 2: Empty currency code (should not trigger enrichment)
+            Map<String, Object> testData2 = new HashMap<>();
+            testData2.put("currencyCode", "");
+            Object result2 = enrichmentService.enrichObject(config, testData2);
+            assertNotNull(result2, "Result should not be null even with empty currency code");
+
+            // Test 3: Invalid length currency code (should not trigger enrichment)
+            Map<String, Object> testData3 = new HashMap<>();
+            testData3.put("currencyCode", "US");
+            Object result3 = enrichmentService.enrichObject(config, testData3);
+            assertNotNull(result3, "Result should not be null even with invalid length currency code");
+
+            // Test 4: Valid currency code (should trigger enrichment)
+            Map<String, Object> testData4 = new HashMap<>();
+            testData4.put("currencyCode", "USD");
+            Object result4 = enrichmentService.enrichObject(config, testData4);
+            assertNotNull(result4, "Result should not be null with valid currency code");
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> enrichedData4 = (Map<String, Object>) result4;
+            assertNotNull(enrichedData4.get("currencyName"), "Currency name should be enriched for valid currency code");
+
+            logger.info("Enrichment condition validation completed successfully");
+
+        } catch (Exception e) {
+            logger.error("Enrichment condition validation failed: " + e.getMessage(), e);
+            fail("Enrichment condition validation failed: " + e.getMessage());
+        }
+    }
+
+    @Test
+    @Order(6)
+    @DisplayName("Should validate APEX services infrastructure")
+    void testInfrastructureValidation() {
+        logger.info("=".repeat(80));
+        logger.info("PHASE 6: Infrastructure Validation");
+        logger.info("=".repeat(80));
+
+        // Validate that all APEX services are properly initialized
+        assertNotNull(yamlLoader, "YAML loader should be initialized");
+        assertNotNull(enrichmentService, "Enrichment service should be initialized");
+
+        logger.info("✅ All APEX services properly initialized");
     }
 }

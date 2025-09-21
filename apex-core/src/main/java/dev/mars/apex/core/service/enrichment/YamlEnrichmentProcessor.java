@@ -301,7 +301,16 @@ public class YamlEnrichmentProcessor {
         }
 
         // 4. Apply field mappings (even if lookup result is null, to apply default values)
-        return applyFieldMappings(enrichment.getFieldMappings(), lookupResult, targetObject);
+        Object result = applyFieldMappings(enrichment.getFieldMappings(), lookupResult, targetObject);
+
+        // If applyFieldMappings returns null, it means a required field mapping failed
+        if (result == null) {
+            LOGGER.warning("Enrichment '" + enrichment.getId() + "' failed due to required field mapping failure");
+            // Return original target object to continue processing other enrichments
+            return targetObject;
+        }
+
+        return result;
     }
     
     /**
@@ -610,6 +619,9 @@ public class YamlEnrichmentProcessor {
         boolean isFailedLookup = sourceObject != null && !(sourceObject instanceof Map) &&
                                 sourceObject.getClass().equals(String.class);
 
+        // Track if any required field mapping failed
+        boolean hasRequiredFieldFailure = false;
+
         if (isFailedLookup) {
             LOGGER.fine("Source object is a simple value (likely failed lookup), applying only default values");
         }
@@ -631,8 +643,11 @@ public class YamlEnrichmentProcessor {
 
                     // Handle missing required fields (only for successful lookups)
                     if (sourceValue == null && mapping.getRequired() != null && mapping.getRequired()) {
-                        throw new EnrichmentException("Required field '" + mapping.getSourceField() +
-                                                    "' is missing from lookup result");
+                        LOGGER.severe("CRITICAL ERROR: Required field '" + mapping.getSourceField() +
+                                    "' is missing from lookup result");
+                        hasRequiredFieldFailure = true;
+                        // Skip this mapping and continue with next one
+                        continue;
                     }
                 }
 
@@ -658,6 +673,11 @@ public class YamlEnrichmentProcessor {
                           mapping.getSourceField() + " -> " + mapping.getTargetField() +
                           ": " + e.getMessage(), e);
             }
+        }
+
+        // Return null if any required field mapping failed to signal enrichment failure
+        if (hasRequiredFieldFailure) {
+            return null;
         }
 
         return targetObject;
