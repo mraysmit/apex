@@ -1,10 +1,12 @@
 package dev.mars.apex.core.engine.config;
 
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleBase;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.exception.RuleEvaluationException;
+import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMetrics;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
@@ -58,6 +60,7 @@ public class RulesEngine {
     private final RulesEngineConfiguration configuration;
     private final ErrorRecoveryService errorRecoveryService;
     private final RulePerformanceMonitor performanceMonitor;
+    private final EnrichmentService enrichmentService;
 
 
     /**
@@ -66,7 +69,7 @@ public class RulesEngine {
      * @param configuration The configuration for this rules engine
      */
     public RulesEngine(RulesEngineConfiguration configuration) {
-        this(configuration, new SpelExpressionParser(), new ErrorRecoveryService(), new RulePerformanceMonitor());
+        this(configuration, new SpelExpressionParser(), new ErrorRecoveryService(), new RulePerformanceMonitor(), null);
     }
 
     /**
@@ -76,7 +79,7 @@ public class RulesEngine {
      * @param parser The expression parser to use
      */
     public RulesEngine(RulesEngineConfiguration configuration, ExpressionParser parser) {
-        this(configuration, parser, new ErrorRecoveryService(), new RulePerformanceMonitor());
+        this(configuration, parser, new ErrorRecoveryService(), new RulePerformanceMonitor(), null);
     }
 
     /**
@@ -87,7 +90,7 @@ public class RulesEngine {
      * @param errorRecoveryService The error recovery service to use for handling evaluation errors
      */
     public RulesEngine(RulesEngineConfiguration configuration, ExpressionParser parser, ErrorRecoveryService errorRecoveryService) {
-        this(configuration, parser, errorRecoveryService, new RulePerformanceMonitor());
+        this(configuration, parser, errorRecoveryService, new RulePerformanceMonitor(), null);
     }
 
     /**
@@ -97,13 +100,16 @@ public class RulesEngine {
      * @param parser The expression parser to use
      * @param errorRecoveryService The error recovery service to use for handling evaluation errors
      * @param performanceMonitor The performance monitor to use for tracking rule evaluation metrics
+     * @param enrichmentService The enrichment service to use for processing enrichments (optional)
      */
     public RulesEngine(RulesEngineConfiguration configuration, ExpressionParser parser,
-                      ErrorRecoveryService errorRecoveryService, RulePerformanceMonitor performanceMonitor) {
+                      ErrorRecoveryService errorRecoveryService, RulePerformanceMonitor performanceMonitor,
+                      EnrichmentService enrichmentService) {
         this.configuration = configuration;
         this.parser = parser;
         this.errorRecoveryService = errorRecoveryService;
         this.performanceMonitor = performanceMonitor;
+        this.enrichmentService = enrichmentService;
 
         // Initialize logging context
         LoggingContext.initializeContext();
@@ -112,6 +118,7 @@ public class RulesEngine {
         logger.debug("Using parser: {}", parser.getClass().getSimpleName());
         logger.debug("Using error recovery service: {}", errorRecoveryService.getClass().getSimpleName());
         logger.debug("Using performance monitor: {}", performanceMonitor.getClass().getSimpleName());
+        logger.debug("Using enrichment service: {}", enrichmentService != null ? enrichmentService.getClass().getSimpleName() : "none");
     }
 
     /**
@@ -478,5 +485,168 @@ public class RulesEngine {
     public boolean evaluateRulesForCategory(String category, Map<String, Object> facts) {
         RuleResult result = executeRulesForCategory(category, facts);
         return result.isTriggered();
+    }
+
+    /**
+     * Unified evaluation method that processes both enrichments and rules, returning comprehensive results.
+     * This method provides the complete APEX evaluation workflow with enrichment processing followed by rule evaluation.
+     *
+     * @param yamlConfig The YAML configuration containing enrichments and rules
+     * @param inputData The input data to process
+     * @return A comprehensive RuleResult containing success status, enriched data, and failure messages
+     */
+    public RuleResult evaluate(YamlRuleConfiguration yamlConfig, Map<String, Object> inputData) {
+        logger.info("Starting unified evaluation with enrichments and rules");
+
+        // Handle null inputs gracefully
+        if (yamlConfig == null) {
+            logger.warn("YAML configuration is null");
+            List<String> failureMessages = new ArrayList<>();
+            failureMessages.add("YAML configuration is null");
+            Map<String, Object> enrichedData = inputData != null ? new HashMap<>(inputData) : new HashMap<>();
+            return RuleResult.evaluationFailure(failureMessages, enrichedData, "evaluation", "Null YAML configuration");
+        }
+
+        if (inputData == null) {
+            logger.warn("Input data is null");
+            List<String> failureMessages = new ArrayList<>();
+            failureMessages.add("Input data is null");
+            return RuleResult.evaluationFailure(failureMessages, new HashMap<>(), "evaluation", "Null input data");
+        }
+
+        List<String> failureMessages = new ArrayList<>();
+        Map<String, Object> enrichedData = new HashMap<>(inputData);
+        boolean overallSuccess = true;
+
+        try {
+            // Phase 1: Process enrichments if available and EnrichmentService is configured
+            if (enrichmentService != null && yamlConfig.getEnrichments() != null && !yamlConfig.getEnrichments().isEmpty()) {
+                logger.info("Processing {} enrichments", yamlConfig.getEnrichments().size());
+
+                try {
+                    // Store original data size to detect enrichment failures
+                    int originalDataSize = enrichedData.size();
+
+                    Object enrichmentResult = enrichmentService.enrichObject(yamlConfig, enrichedData);
+
+                    if (enrichmentResult instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> enrichmentMap = (Map<String, Object>) enrichmentResult;
+
+                        // Check for enrichment failures by detecting missing required fields
+                        boolean enrichmentFailed = detectEnrichmentFailures(yamlConfig, enrichmentMap, originalDataSize);
+
+                        if (enrichmentFailed) {
+                            overallSuccess = false;
+                            failureMessages.add("Required field enrichment failed - check logs for CRITICAL ERROR details");
+                            logger.warn("Enrichment failed due to required field mapping failures");
+                        }
+
+                        enrichedData = enrichmentMap;
+                        logger.debug("Enrichment completed successfully, enriched data size: {}", enrichedData.size());
+                    } else {
+                        logger.warn("Enrichment result is not a Map, using original data");
+                        overallSuccess = false;
+                        failureMessages.add("Enrichment result format is invalid");
+                    }
+                } catch (Exception e) {
+                    logger.warn("Enrichment processing failed: {}", e.getMessage(), e);
+                    overallSuccess = false;
+                    failureMessages.add("Enrichment processing failed: " + e.getMessage());
+                }
+            } else if (yamlConfig.getEnrichments() != null && !yamlConfig.getEnrichments().isEmpty()) {
+                logger.warn("Enrichments defined in configuration but no EnrichmentService available");
+                overallSuccess = false;
+                failureMessages.add("Enrichments defined but no EnrichmentService configured");
+            }
+
+            // Phase 2: Process individual rules if available
+            List<Rule> allRules = configuration.getAllRules();
+            if (allRules != null && !allRules.isEmpty()) {
+                logger.info("Processing {} individual rules", allRules.size());
+                RuleResult ruleResult = executeRulesList(allRules, enrichedData);
+
+                if (ruleResult.getResultType() == RuleResult.ResultType.ERROR) {
+                    overallSuccess = false;
+                    failureMessages.add("Rule evaluation error: " + ruleResult.getMessage());
+                }
+            }
+
+            // Phase 3: Process rule groups if available
+            List<RuleGroup> allRuleGroups = configuration.getAllRuleGroups();
+            if (allRuleGroups != null && !allRuleGroups.isEmpty()) {
+                logger.info("Processing {} rule groups", allRuleGroups.size());
+                RuleResult ruleGroupResult = executeRuleGroupsList(allRuleGroups, enrichedData);
+
+                if (ruleGroupResult.getResultType() == RuleResult.ResultType.ERROR) {
+                    overallSuccess = false;
+                    failureMessages.add("Rule group evaluation error: " + ruleGroupResult.getMessage());
+                }
+            }
+
+            // Return comprehensive result
+            if (overallSuccess && failureMessages.isEmpty()) {
+                logger.info("Unified evaluation completed successfully");
+                return RuleResult.evaluationSuccess(enrichedData, "evaluation", "Evaluation completed successfully");
+            } else {
+                logger.warn("Unified evaluation completed with {} failures", failureMessages.size());
+                return RuleResult.evaluationFailure(failureMessages, enrichedData, "evaluation", "Evaluation completed with failures");
+            }
+
+        } catch (Exception e) {
+            logger.error("Unified evaluation failed with exception: {}", e.getMessage(), e);
+            failureMessages.add("Evaluation failed: " + e.getMessage());
+            return RuleResult.evaluationFailure(failureMessages, enrichedData, "evaluation", "Evaluation failed");
+        }
+    }
+
+    /**
+     * Detect enrichment failures by checking if required fields were successfully enriched.
+     * This method examines the enrichment configuration and checks if required target fields
+     * are present in the enriched data.
+     */
+    private boolean detectEnrichmentFailures(YamlRuleConfiguration yamlConfig, Map<String, Object> enrichedData, int originalDataSize) {
+        if (yamlConfig.getEnrichments() == null || yamlConfig.getEnrichments().isEmpty()) {
+            return false;
+        }
+
+        boolean hasFailures = false;
+
+        for (var enrichment : yamlConfig.getEnrichments()) {
+            if (enrichment.getFieldMappings() != null) {
+                for (var mapping : enrichment.getFieldMappings()) {
+                    // Check if this is a required field mapping
+                    if (mapping.getRequired() != null && mapping.getRequired()) {
+                        String targetField = mapping.getTargetField();
+
+                        // Check if the required target field is missing or null in enriched data
+                        if (!enrichedData.containsKey(targetField) || enrichedData.get(targetField) == null) {
+                            logger.debug("Required field '{}' is missing from enriched data", targetField);
+                            hasFailures = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return hasFailures;
+    }
+
+    /**
+     * Simplified unified evaluation method that processes both enrichments and rules.
+     * This is a convenience method for when you only have input data and want complete processing.
+     *
+     * @param inputData The input data to process
+     * @return A comprehensive RuleResult containing success status, enriched data, and failure messages
+     */
+    public RuleResult evaluate(Map<String, Object> inputData) {
+        // This method requires that the RulesEngine was created with a YamlRuleConfiguration
+        // We'll need to extract it from the configuration or require it to be passed
+        logger.warn("evaluate(Map) method called but requires YamlRuleConfiguration - use evaluate(YamlRuleConfiguration, Map) instead");
+
+        // For now, return a basic result indicating this method needs the YAML config
+        List<String> failureMessages = new ArrayList<>();
+        failureMessages.add("evaluate(Map) method requires YamlRuleConfiguration parameter");
+        return RuleResult.evaluationFailure(failureMessages, inputData, "evaluation", "Missing YAML configuration");
     }
 }

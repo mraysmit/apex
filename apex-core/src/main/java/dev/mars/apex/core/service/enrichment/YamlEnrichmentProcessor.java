@@ -9,6 +9,7 @@ import dev.mars.apex.core.service.lookup.LookupService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleGroup;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.config.yaml.YamlRule;
 import dev.mars.apex.core.config.yaml.YamlRuleGroup;
 import org.springframework.expression.Expression;
@@ -1191,5 +1192,148 @@ public class YamlEnrichmentProcessor {
         }
 
         return null;
+    }
+
+    // ========================================
+    // RuleResult-returning methods (Phase 4)
+    // ========================================
+
+    /**
+     * Process a list of enrichments on a target object and return detailed results.
+     * This method provides programmatic access to enrichment success/failure status and detailed error information.
+     *
+     * @param enrichments List of YAML enrichment configurations
+     * @param targetObject The object to enrich
+     * @return A RuleResult containing success status, enriched data, and failure messages
+     */
+    public RuleResult processEnrichmentsWithResult(List<YamlEnrichment> enrichments, Object targetObject) {
+        return processEnrichmentsWithResult(enrichments, targetObject, null);
+    }
+
+    /**
+     * Process a list of enrichments on a target object with full configuration context and return detailed results.
+     * This method provides programmatic access to enrichment success/failure status and detailed error information.
+     *
+     * @param enrichments The list of enrichments to apply
+     * @param targetObject The object to enrich
+     * @param configuration The full YAML configuration (required for database lookups)
+     * @return A RuleResult containing success status, enriched data, and failure messages
+     */
+    public RuleResult processEnrichmentsWithResult(List<YamlEnrichment> enrichments, Object targetObject,
+                                                  dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
+        LOGGER.fine("Processing enrichments with result tracking for " + (enrichments != null ? enrichments.size() : 0) + " enrichments");
+
+        // Convert target object to Map for consistent handling
+        Map<String, Object> originalData = convertToMap(targetObject);
+        List<String> failureMessages = new ArrayList<>();
+        boolean overallSuccess = true;
+
+        try {
+            // Process enrichments using existing method
+            Object enrichmentResult = processEnrichments(enrichments, targetObject, configuration);
+
+            // Convert result to Map for analysis
+            Map<String, Object> enrichedData = convertToMap(enrichmentResult);
+
+            // Detect enrichment failures by checking for required field mapping failures
+            if (enrichments != null && !enrichments.isEmpty()) {
+                boolean enrichmentFailed = detectEnrichmentFailures(enrichments, enrichedData);
+
+                if (enrichmentFailed) {
+                    overallSuccess = false;
+                    failureMessages.add("Required field enrichment failed - check logs for CRITICAL ERROR details");
+                    LOGGER.warning("Enrichment failed due to required field mapping failures");
+                }
+            }
+
+            // Return appropriate RuleResult
+            if (overallSuccess) {
+                LOGGER.fine("Enrichment processing completed successfully");
+                return RuleResult.enrichmentSuccess(enrichedData);
+            } else {
+                LOGGER.warning("Enrichment processing completed with failures");
+                return RuleResult.enrichmentFailure(failureMessages, enrichedData);
+            }
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Exception during enrichment processing: " + e.getMessage(), e);
+            failureMessages.add("Enrichment processing exception: " + e.getMessage());
+            return RuleResult.enrichmentFailure(failureMessages, originalData);
+        }
+    }
+
+    /**
+     * Process a single enrichment on a target object and return detailed results.
+     * This method provides programmatic access to enrichment success/failure status and detailed error information.
+     *
+     * @param enrichment The YAML enrichment configuration
+     * @param targetObject The object to enrich
+     * @return A RuleResult containing success status, enriched data, and failure messages
+     */
+    public RuleResult processEnrichmentWithResult(YamlEnrichment enrichment, Object targetObject) {
+        if (enrichment == null) {
+            LOGGER.fine("No enrichment provided");
+            Map<String, Object> resultData = convertToMap(targetObject);
+            return RuleResult.enrichmentSuccess(resultData);
+        }
+
+        List<YamlEnrichment> enrichmentList = new ArrayList<>();
+        enrichmentList.add(enrichment);
+        return processEnrichmentsWithResult(enrichmentList, targetObject, null);
+    }
+
+    /**
+     * Detect enrichment failures by checking if required fields were successfully enriched.
+     * This method examines the enrichment configuration and checks if required target fields
+     * are present in the enriched data.
+     *
+     * @param enrichments The list of enrichments that were processed
+     * @param enrichedData The enriched data map
+     * @return true if enrichment failures were detected, false otherwise
+     */
+    private boolean detectEnrichmentFailures(List<YamlEnrichment> enrichments, Map<String, Object> enrichedData) {
+        if (enrichments == null || enrichments.isEmpty()) {
+            return false;
+        }
+
+        boolean hasFailures = false;
+
+        for (YamlEnrichment enrichment : enrichments) {
+            if (enrichment.getFieldMappings() != null) {
+                for (YamlEnrichment.FieldMapping mapping : enrichment.getFieldMappings()) {
+                    // Check if this is a required field mapping
+                    if (mapping.getRequired() != null && mapping.getRequired()) {
+                        String targetField = mapping.getTargetField();
+
+                        // Check if the required target field is missing or null in enriched data
+                        if (!enrichedData.containsKey(targetField) || enrichedData.get(targetField) == null) {
+                            LOGGER.fine("Required field '" + targetField + "' is missing from enriched data");
+                            hasFailures = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return hasFailures;
+    }
+
+    /**
+     * Convert an object to a Map for consistent data handling.
+     * This method handles both Map objects and regular objects.
+     *
+     * @param object The object to convert
+     * @return A Map representation of the object
+     */
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> convertToMap(Object object) {
+        if (object instanceof Map) {
+            return new HashMap<>((Map<String, Object>) object);
+        } else {
+            // For non-Map objects, create a simple wrapper
+            Map<String, Object> result = new HashMap<>();
+            result.put("data", object);
+            return result;
+        }
     }
 }

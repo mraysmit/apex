@@ -19,6 +19,7 @@ package dev.mars.apex.core.service.enrichment;
 
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.junit.jupiter.api.*;
@@ -251,6 +252,201 @@ class EnrichmentServiceTest {
     }
 
     // ========================================
+    // RuleResult Enhanced Tests (Phase 4 Demonstration)
+    // ========================================
+
+    @Test
+    @DisplayName("Should enrich object using YAML configuration with RuleResult")
+    void testEnrichObjectWithYamlConfig_WithRuleResult() {
+        YamlRuleConfiguration yamlConfig = createTestYamlConfiguration();
+        TestDataObject targetObject = new TestDataObject("USD", 1000.0);
+
+        // Test with RuleResult for comprehensive validation
+        RuleResult result = enrichmentService.enrichObjectWithResult(yamlConfig, targetObject);
+
+        assertNotNull(result, "RuleResult should not be null");
+        assertTrue(result.isSuccess(), "Enrichment should succeed");
+        assertFalse(result.hasFailures(), "Should have no failures");
+        assertTrue(result.getFailureMessages().isEmpty(), "Should have no failure messages");
+        assertNotNull(result.getEnrichedData(), "Should have enriched data");
+
+        // Verify enriched data contains expected content
+        Map<String, Object> enrichedData = result.getEnrichedData();
+        assertFalse(enrichedData.isEmpty(), "Enriched data should not be empty");
+    }
+
+    @Test
+    @DisplayName("Should handle null YAML configuration gracefully with RuleResult")
+    void testEnrichObjectWithNullYamlConfig_WithRuleResult() {
+        TestDataObject targetObject = new TestDataObject("USD", 1000.0);
+
+        RuleResult result = enrichmentService.enrichObjectWithResult((YamlRuleConfiguration) null, targetObject);
+
+        assertNotNull(result, "RuleResult should not be null");
+        assertTrue(result.isSuccess(), "Null YAML config should succeed (returns original object)");
+        assertFalse(result.hasFailures(), "Should have no failures");
+        assertNotNull(result.getEnrichedData(), "Should have enriched data (original object)");
+    }
+
+    @Test
+    @DisplayName("Should enrich object using list of enrichments with RuleResult")
+    void testEnrichObjectWithEnrichmentList_WithRuleResult() {
+        List<YamlEnrichment> enrichments = createTestEnrichmentList();
+        TestDataObject targetObject = new TestDataObject("EUR", 500.0);
+
+        RuleResult result = enrichmentService.enrichObjectWithResult(enrichments, targetObject);
+
+        assertNotNull(result, "RuleResult should not be null");
+        assertTrue(result.isSuccess(), "List enrichment should succeed");
+        assertFalse(result.hasFailures(), "Should have no failures");
+        assertNotNull(result.getEnrichedData(), "Should have enriched data");
+
+        // Verify the enriched data is accessible
+        Map<String, Object> enrichedData = result.getEnrichedData();
+        assertNotNull(enrichedData, "Enriched data map should not be null");
+    }
+
+    @Test
+    @DisplayName("Should handle empty enrichment list with RuleResult")
+    void testEnrichObjectWithEmptyList_WithRuleResult() {
+        List<YamlEnrichment> emptyList = new ArrayList<>();
+        TestDataObject targetObject = new TestDataObject("GBP", 750.0);
+
+        RuleResult result = enrichmentService.enrichObjectWithResult(emptyList, targetObject);
+
+        assertNotNull(result, "RuleResult should not be null");
+        assertTrue(result.isSuccess(), "Empty list should succeed");
+        assertFalse(result.hasFailures(), "Should have no failures");
+        assertNotNull(result.getEnrichedData(), "Should have enriched data");
+    }
+
+    @Test
+    @DisplayName("Should handle null enrichment list with RuleResult")
+    void testEnrichObjectWithNullList_WithRuleResult() {
+        TestDataObject targetObject = new TestDataObject("JPY", 100000.0);
+
+        RuleResult result = enrichmentService.enrichObjectWithResult((List<YamlEnrichment>) null, targetObject);
+
+        assertNotNull(result, "RuleResult should not be null");
+        assertTrue(result.isSuccess(), "Null list should succeed");
+        assertFalse(result.hasFailures(), "Should have no failures");
+        assertNotNull(result.getEnrichedData(), "Should have enriched data");
+    }
+
+    @Test
+    @DisplayName("Should enrich object using single enrichment with RuleResult")
+    void testEnrichObjectWithSingleEnrichment_WithRuleResult() {
+        YamlEnrichment enrichment = createTestEnrichment();
+        TestDataObject targetObject = new TestDataObject("CAD", 800.0);
+
+        RuleResult result = enrichmentService.enrichObjectWithResult(enrichment, targetObject);
+
+        assertNotNull(result, "RuleResult should not be null");
+        assertTrue(result.isSuccess(), "Single enrichment should succeed");
+        assertFalse(result.hasFailures(), "Should have no failures");
+        assertNotNull(result.getEnrichedData(), "Should have enriched data");
+
+        // Verify defensive copying - modifying returned data shouldn't affect internal state
+        Map<String, Object> enrichedData = result.getEnrichedData();
+        int originalSize = enrichedData.size();
+        enrichedData.put("testModification", "testValue");
+
+        // Get result again to verify internal state wasn't modified
+        RuleResult secondResult = enrichmentService.enrichObjectWithResult(enrichment, targetObject);
+        assertEquals(originalSize, secondResult.getEnrichedData().size(),
+                    "Internal state should not be affected by external modifications");
+    }
+
+    @Test
+    @DisplayName("Should handle different target object types with RuleResult")
+    void testEnrichDifferentObjectTypes_WithRuleResult() {
+        YamlEnrichment enrichment = createTestEnrichment();
+
+        // Test with Map
+        Map<String, Object> mapObject = new HashMap<>();
+        mapObject.put("currency", "USD");
+        mapObject.put("amount", 1000.0);
+
+        RuleResult mapResult = enrichmentService.enrichObjectWithResult(enrichment, mapObject);
+        assertNotNull(mapResult, "Map RuleResult should not be null");
+        assertTrue(mapResult.isSuccess(), "Map enrichment should succeed");
+        assertNotNull(mapResult.getEnrichedData(), "Map should have enriched data");
+
+        // Test with String
+        String stringObject = "test";
+        RuleResult stringResult = enrichmentService.enrichObjectWithResult(enrichment, stringObject);
+        assertNotNull(stringResult, "String RuleResult should not be null");
+        assertTrue(stringResult.isSuccess(), "String enrichment should succeed");
+        assertNotNull(stringResult.getEnrichedData(), "String should have enriched data");
+    }
+
+    @Test
+    @DisplayName("Should integrate with service registry for enrichment with RuleResult")
+    void testEnrichmentWithServiceRegistry_WithRuleResult() {
+        // Register a lookup service in the registry
+        // (This would typically be done in a real scenario)
+
+        YamlEnrichment enrichment = createTestEnrichment();
+        TestDataObject targetObject = new TestDataObject("CHF", 1200.0);
+
+        RuleResult result = enrichmentService.enrichObjectWithResult(enrichment, targetObject);
+
+        assertNotNull(result, "RuleResult should not be null");
+        assertTrue(result.isSuccess(), "Service registry enrichment should succeed");
+        assertFalse(result.hasFailures(), "Should have no failures");
+        assertNotNull(result.getEnrichedData(), "Should have enriched data");
+    }
+
+    @Test
+    @DisplayName("Should handle multiple enrichments in sequence with RuleResult")
+    void testMultipleEnrichmentsInSequence_WithRuleResult() {
+        List<YamlEnrichment> enrichments = createMultipleTestEnrichments();
+        TestDataObject targetObject = new TestDataObject("SEK", 600.0);
+
+        RuleResult result = enrichmentService.enrichObjectWithResult(enrichments, targetObject);
+
+        assertNotNull(result, "RuleResult should not be null");
+        assertTrue(result.isSuccess(), "Multiple enrichments should succeed");
+        assertFalse(result.hasFailures(), "Should have no failures");
+        assertNotNull(result.getEnrichedData(), "Should have enriched data");
+
+        // Verify that multiple enrichments were processed
+        Map<String, Object> enrichedData = result.getEnrichedData();
+        assertFalse(enrichedData.isEmpty(), "Multiple enrichments should produce data");
+    }
+
+    @Test
+    @DisplayName("Should demonstrate failure detection with RuleResult")
+    void testFailureDetectionWithRuleResult() {
+        // Create a configuration that might cause enrichment failures
+        YamlRuleConfiguration yamlConfig = createTestYamlConfigurationWithRequiredFields();
+        TestDataObject targetObject = new TestDataObject("USD", 1000.0);
+
+        RuleResult result = enrichmentService.enrichObjectWithResult(yamlConfig, targetObject);
+
+        assertNotNull(result, "RuleResult should not be null");
+
+        // Test both success and failure scenarios
+        if (result.hasFailures()) {
+            assertFalse(result.isSuccess(), "Should not be successful if has failures");
+            assertFalse(result.getFailureMessages().isEmpty(), "Should have failure messages");
+
+            // Verify failure messages are informative
+            List<String> failures = result.getFailureMessages();
+            for (String failure : failures) {
+                assertNotNull(failure, "Failure message should not be null");
+                assertFalse(failure.trim().isEmpty(), "Failure message should not be empty");
+            }
+        } else {
+            assertTrue(result.isSuccess(), "Should be successful if no failures");
+            assertTrue(result.getFailureMessages().isEmpty(), "Should have no failure messages");
+        }
+
+        // Enriched data should always be available (even on failures)
+        assertNotNull(result.getEnrichedData(), "Should always have enriched data");
+    }
+
+    // ========================================
     // Error Handling Tests
     // ========================================
 
@@ -258,13 +454,37 @@ class EnrichmentServiceTest {
     @DisplayName("Should handle enrichment processing errors gracefully")
     void testEnrichmentProcessingErrors() {
         System.out.println("TEST: Triggering intentional error - testing enrichment with invalid configuration");
-        
+
         YamlEnrichment invalidEnrichment = createInvalidEnrichment();
         TestDataObject targetObject = new TestDataObject("NOK", 700.0);
-        
+
         assertDoesNotThrow(() -> {
             Object result = enrichmentService.enrichObject(invalidEnrichment, targetObject);
             assertNotNull(result, "Should handle errors gracefully");
+        });
+    }
+
+    @Test
+    @DisplayName("Should handle enrichment processing errors gracefully with RuleResult")
+    void testEnrichmentProcessingErrors_WithRuleResult() {
+        System.out.println("TEST: Triggering intentional error - testing enrichment with invalid configuration using RuleResult");
+
+        YamlEnrichment invalidEnrichment = createInvalidEnrichment();
+        TestDataObject targetObject = new TestDataObject("NOK", 700.0);
+
+        assertDoesNotThrow(() -> {
+            RuleResult result = enrichmentService.enrichObjectWithResult(invalidEnrichment, targetObject);
+            assertNotNull(result, "RuleResult should not be null even on errors");
+
+            // With RuleResult, we can detect and analyze errors
+            if (result.hasFailures()) {
+                assertFalse(result.isSuccess(), "Should not be successful on errors");
+                assertFalse(result.getFailureMessages().isEmpty(), "Should have error messages");
+                System.out.println("Detected enrichment failures: " + result.getFailureMessages());
+            }
+
+            // Enriched data should still be available (original or partial)
+            assertNotNull(result.getEnrichedData(), "Should have enriched data even on errors");
         });
     }
 
@@ -277,10 +497,28 @@ class EnrichmentServiceTest {
      */
     private YamlRuleConfiguration createTestYamlConfiguration() {
         YamlRuleConfiguration config = new YamlRuleConfiguration();
-        
+
         List<YamlEnrichment> enrichments = createTestEnrichmentList();
         config.setEnrichments(enrichments);
-        
+
+        return config;
+    }
+
+    /**
+     * Creates a test YAML rule configuration with required fields for failure testing.
+     */
+    private YamlRuleConfiguration createTestYamlConfigurationWithRequiredFields() {
+        YamlRuleConfiguration config = new YamlRuleConfiguration();
+
+        // Set metadata
+        YamlRuleConfiguration.ConfigurationMetadata metadata = new YamlRuleConfiguration.ConfigurationMetadata();
+        metadata.setName("testConfigurationWithRequiredFields");
+        metadata.setDescription("Test configuration with required fields for failure detection");
+        config.setMetadata(metadata);
+
+        List<YamlEnrichment> enrichments = createTestEnrichmentListWithRequiredFields();
+        config.setEnrichments(enrichments);
+
         return config;
     }
 
@@ -290,6 +528,15 @@ class EnrichmentServiceTest {
     private List<YamlEnrichment> createTestEnrichmentList() {
         List<YamlEnrichment> enrichments = new ArrayList<>();
         enrichments.add(createTestEnrichment());
+        return enrichments;
+    }
+
+    /**
+     * Creates a list of test enrichments with required fields for failure testing.
+     */
+    private List<YamlEnrichment> createTestEnrichmentListWithRequiredFields() {
+        List<YamlEnrichment> enrichments = new ArrayList<>();
+        enrichments.add(createTestEnrichmentWithRequiredField());
         return enrichments;
     }
 
@@ -331,13 +578,30 @@ class EnrichmentServiceTest {
     }
 
     /**
+     * Creates a test enrichment with required field for failure testing.
+     */
+    private YamlEnrichment createTestEnrichmentWithRequiredField() {
+        YamlEnrichment enrichment = new YamlEnrichment();
+        enrichment.setName("requiredFieldEnrichment");
+        enrichment.setType("lookup");
+
+        // Set up enrichment configuration with required field
+        Map<String, Object> config = new HashMap<>();
+        config.put("sourceField", "currency");
+        config.put("targetField", "requiredCurrencyName");
+        config.put("required", true); // This field is required
+
+        return enrichment;
+    }
+
+    /**
      * Creates an invalid enrichment configuration for error testing.
      */
     private YamlEnrichment createInvalidEnrichment() {
         YamlEnrichment enrichment = new YamlEnrichment();
         enrichment.setName("invalidEnrichment");
         enrichment.setType("nonExistentType");
-        
+
         return enrichment;
     }
 

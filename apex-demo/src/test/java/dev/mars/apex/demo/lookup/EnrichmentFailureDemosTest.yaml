@@ -1,0 +1,257 @@
+# EnrichmentFailureDemosTest.yaml
+# APEX Enrichment Failure Scenarios Demo Configuration
+# Demonstrates realistic enrichment failure handling with comprehensive error reporting
+
+metadata:
+  id: "enrichment-failure-demos"
+  name: "APEX Enrichment Failure Scenarios Demo"
+  version: "1.0.0"
+  description: "Demonstrates realistic enrichment failure handling with RuleResult integration"
+  business-domain: "Financial Transaction Processing - Enrichment Failure Management"
+  author: "Mark Andrew Ray-Smith Cityline Ltd"
+  created-date: "2025-09-22"
+  tags: ["apex-demo", "negative-cases", "enrichment-failures", "error-handling"]
+
+# Enrichments that will detect and report enrichment failures
+enrichments:
+  - id: "required-field-validation"
+    name: "Required Field Validation"
+    description: "Validates that required fields are present for enrichment processing"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "true"  # Always run validation
+
+    calculation-config:
+      expression: "(#customerId != null && #currencyCode != null) ? 'VALID' : 'MISSING_REQUIRED_FIELDS'"
+      result-field: "requiredFieldValidationResult"
+    field-mappings:
+      - source-field: "requiredFieldValidationResult"
+        target-field: "requiredFieldValidationResult"
+      
+  - id: "customer-enrichment"
+    name: "Customer Data Enrichment"
+    description: "Enriches transaction with customer information"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#customerId != null"  # Only run if customerId is present
+
+    calculation-config:
+      expression: "#customerId == 'CUST001' ? 'John Smith' : (#customerId == 'CUST002' ? 'Jane Doe' : 'UNKNOWN_CUSTOMER')"
+      result-field: "customerName"
+    field-mappings:
+      - source-field: "customerName"
+        target-field: "customerName"
+      
+  - id: "currency-validation"
+    name: "Currency Code Validation"
+    description: "Validates and enriches currency information"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#currencyCode != null"
+
+    calculation-config:
+      expression: "#currencyCode == 'USD' ? 'US Dollar' : (#currencyCode == 'EUR' ? 'Euro' : (#currencyCode == 'GBP' ? 'British Pound' : 'INVALID_CURRENCY'))"
+      result-field: "currencyName"
+    field-mappings:
+      - source-field: "currencyName"
+        target-field: "currencyName"
+      
+  - id: "external-customer-lookup"
+    name: "External Customer Lookup"
+    description: "Simulates external data source lookup for customer information"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#lookupType == 'EXTERNAL_CUSTOMER_LOOKUP'"
+
+    calculation-config:
+      expression: "#customerId == 'CUST999' ? 'CUSTOMER_NOT_FOUND' : 'EXTERNAL_LOOKUP_SUCCESS'"
+      result-field: "externalCustomerData"
+    field-mappings:
+      - source-field: "externalCustomerData"
+        target-field: "externalCustomerData"
+      
+  - id: "data-quality-check"
+    name: "Data Quality Validation"
+    description: "Validates data quality and format compliance"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "true"
+
+    calculation-config:
+      expression: |
+        (#customerId != null && #customerId.toString().matches('CUST\\d{3}') &&
+         #amount != null && #amount instanceof T(java.lang.Number) &&
+         #currencyCode != null && #currencyCode.toString().matches('[A-Z]{3}')) ? 'HIGH' : 'LOW'
+      result-field: "dataQualityScore"
+    field-mappings:
+      - source-field: "dataQualityScore"
+        target-field: "dataQualityScore"
+         
+  - id: "amount-validation"
+    name: "Transaction Amount Validation"
+    description: "Validates transaction amount is positive and within limits"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#amount != null"
+
+    calculation-config:
+      expression: |
+        (#amount instanceof T(java.lang.Number) && #amount > 0 && #amount <= 1000000) ? 'VALID' : 'INVALID_AMOUNT'
+      result-field: "amountValidationResult"
+    field-mappings:
+      - source-field: "amountValidationResult"
+        target-field: "amountValidationResult"
+        
+  - id: "enrichment-completeness-summary"
+    name: "Enrichment Completeness Summary"
+    description: "Summarizes overall enrichment success and failure status"
+    type: "field-enrichment"
+    enabled: true
+    condition: "true"
+
+    field-mappings:
+      - source-field: "enrichmentSummary"
+        target-field: "enrichmentSummary"
+        expression: |
+          (#requiredFieldValidationResult == 'VALID' &&
+           #dataQualityScore == 'HIGH' &&
+           #amountValidationResult == 'VALID') ? 'ENRICHMENT_SUCCESS' : 'ENRICHMENT_FAILED'
+         
+  - id: "failure-recovery-strategy"
+    name: "Failure Recovery Strategy"
+    description: "Determines appropriate recovery strategy based on failure type"
+    type: "field-enrichment"
+    enabled: true
+    condition: "#recoveryScenario == 'COMPREHENSIVE_FAILURE'"
+
+    field-mappings:
+      - source-field: "recoveryStrategy"
+        target-field: "recoveryStrategy"
+        expression: |
+          (#customerId == null && #amount != null && #amount < 0) ? 'DATA_CORRECTION_REQUIRED' :
+          (#customerId == null) ? 'MISSING_REQUIRED_DATA' :
+          (#amount < 0) ? 'INVALID_BUSINESS_VALUE' : 'GRACEFUL_DEGRADATION'
+
+# Validation rules that will trigger enrichment-related failures
+validations:
+  - id: "customer-id-required"
+    name: "Customer ID Required Validation"
+    description: "Customer ID is mandatory for transaction enrichment"
+    type: "field-validation"
+    enabled: true
+    condition: "true"
+    
+    validation-config:
+      field: "customerId"
+      rules:
+        - type: "required"
+          message: "Customer ID is required for transaction enrichment processing"
+          
+  - id: "currency-code-required"
+    name: "Currency Code Required Validation"
+    description: "Currency code is mandatory for transaction enrichment"
+    type: "field-validation"
+    enabled: true
+    condition: "true"
+    
+    validation-config:
+      field: "currencyCode"
+      rules:
+        - type: "required"
+          message: "Currency code is required for transaction enrichment processing"
+          
+  - id: "customer-id-format"
+    name: "Customer ID Format Validation"
+    description: "Customer ID must follow CUST### format"
+    type: "field-validation"
+    enabled: true
+    condition: "#customerId != null"
+    
+    validation-config:
+      field: "customerId"
+      rules:
+        - type: "regex"
+          pattern: "^CUST\\d{3}$"
+          message: "Customer ID must be in format CUST### (e.g., CUST001)"
+          
+  - id: "currency-code-format"
+    name: "Currency Code Format Validation"
+    description: "Currency code must be 3 uppercase letters"
+    type: "field-validation"
+    enabled: true
+    condition: "#currencyCode != null"
+    
+    validation-config:
+      field: "currencyCode"
+      rules:
+        - type: "regex"
+          pattern: "^[A-Z]{3}$"
+          message: "Currency code must be 3 uppercase letters (e.g., USD, EUR, GBP)"
+          
+  - id: "amount-positive"
+    name: "Positive Amount Validation"
+    description: "Transaction amount must be positive"
+    type: "field-validation"
+    enabled: true
+    condition: "#amount != null"
+    
+    validation-config:
+      field: "amount"
+      rules:
+        - type: "range"
+          min: 0.01
+          message: "Transaction amount must be positive"
+          
+  - id: "amount-limit"
+    name: "Amount Limit Validation"
+    description: "Transaction amount must be within acceptable limits"
+    type: "field-validation"
+    enabled: true
+    condition: "#amount != null"
+    
+    validation-config:
+      field: "amount"
+      rules:
+        - type: "range"
+          max: 1000000
+          message: "Transaction amount must not exceed $1,000,000"
+
+# Data sources for external lookup simulation (optional - for future enhancement)
+data-sources:
+  - id: "customer-reference-data"
+    name: "Customer Reference Data"
+    type: "inline-dataset"
+    description: "Inline customer reference data for enrichment testing"
+    
+    dataset:
+      - customerId: "CUST001"
+        customerName: "John Smith"
+        customerType: "PREMIUM"
+        status: "ACTIVE"
+      - customerId: "CUST002"
+        customerName: "Jane Doe"
+        customerType: "STANDARD"
+        status: "ACTIVE"
+      - customerId: "CUST003"
+        customerName: "Bob Johnson"
+        customerType: "STANDARD"
+        status: "INACTIVE"
+        
+  - id: "currency-reference-data"
+    name: "Currency Reference Data"
+    type: "inline-dataset"
+    description: "Inline currency reference data for validation testing"
+    
+    dataset:
+      - currencyCode: "USD"
+        currencyName: "US Dollar"
+        decimalPlaces: 2
+        symbol: "$"
+      - currencyCode: "EUR"
+        currencyName: "Euro"
+        decimalPlaces: 2
+        symbol: "€"
+      - currencyCode: "GBP"
+        currencyName: "British Pound"
+        decimalPlaces: 2
+        symbol: "£"

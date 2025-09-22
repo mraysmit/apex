@@ -1,15 +1,35 @@
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package dev.mars.apex.demo.infrastructure;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.engine.config.RulesEngine;
-
+import dev.mars.apex.core.engine.RulesEngine;
+import dev.mars.apex.core.engine.RulesEngineConfiguration;
+import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.engine.services.ErrorRecoveryService;
+import dev.mars.apex.core.engine.services.RulePerformanceMonitor;
+import dev.mars.apex.core.enrichment.EnrichmentService;
+import dev.mars.apex.core.expression.ExpressionEvaluatorService;
+import dev.mars.apex.core.lookup.LookupServiceRegistry;
+import dev.mars.apex.core.rules.YamlRulesEngineService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +52,7 @@ public abstract class DemoTestBase {
     protected LookupServiceRegistry serviceRegistry;
     protected ExpressionEvaluatorService expressionEvaluator;
     protected YamlRulesEngineService rulesEngineService;
+    protected RulesEngineConfiguration rulesEngineConfiguration;
     
     @BeforeEach
     public void setUp() {
@@ -43,7 +64,8 @@ public abstract class DemoTestBase {
         this.expressionEvaluator = new ExpressionEvaluatorService();
         this.enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
         this.rulesEngineService = new YamlRulesEngineService();
-        
+        this.rulesEngineConfiguration = new RulesEngineConfiguration();
+
         logger.info("APEX services initialized successfully");
     }
     
@@ -57,7 +79,7 @@ public abstract class DemoTestBase {
         assertNotNull(expressionEvaluator, "ExpressionEvaluatorService should be initialized");
         assertNotNull(enrichmentService, "EnrichmentService should be initialized");
         
-        logger.info("✅ All APEX services properly initialized");
+        logger.info("** All APEX services properly initialized");
     }
     
     /**
@@ -69,11 +91,11 @@ public abstract class DemoTestBase {
             YamlRuleConfiguration config = yamlLoader.loadFromClasspath(yamlPath);
             
             assertNotNull(config, "YAML configuration should not be null");
-            logger.info("✅ YAML configuration loaded successfully: {}", yamlPath);
+            logger.info("** YAML configuration loaded successfully: {}", yamlPath);
             
             return config;
         } catch (Exception e) {
-            logger.error("❌ Failed to load YAML configuration: {}", yamlPath, e);
+            logger.error("** Failed to load YAML configuration: {}", yamlPath, e);
             fail("Failed to load YAML configuration: " + yamlPath + " - " + e.getMessage());
             return null;
         }
@@ -86,14 +108,54 @@ public abstract class DemoTestBase {
         try {
             logger.info("Testing enrichment with config and test data...");
             Object result = enrichmentService.enrichObject(config, testData);
-            
+
             assertNotNull(result, "Enrichment result should not be null");
-            logger.info("✅ Enrichment processing successful");
-            
+            logger.info("** Enrichment processing successful");
+
             return result;
         } catch (Exception e) {
-            logger.error("❌ Enrichment processing failed", e);
+            logger.error("** Enrichment processing failed", e);
             fail("Enrichment processing failed: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Utility method to create RulesEngine for complete evaluation workflow.
+     */
+    protected RulesEngine createRulesEngine() {
+        try {
+            logger.info("Creating RulesEngine with EnrichmentService...");
+            RulesEngine engine = new RulesEngine(rulesEngineConfiguration, new SpelExpressionParser(),
+                                                new ErrorRecoveryService(), new RulePerformanceMonitor(), enrichmentService);
+
+            assertNotNull(engine, "RulesEngine should not be null");
+            logger.info("** RulesEngine created successfully");
+
+            return engine;
+        } catch (Exception e) {
+            logger.error("** RulesEngine creation failed", e);
+            fail("RulesEngine creation failed: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Utility method to test complete APEX evaluation workflow.
+     */
+    protected RuleResult testEvaluation(YamlRuleConfiguration config, Map<String, Object> testData) {
+        try {
+            logger.info("Testing complete APEX evaluation with config and test data...");
+            RulesEngine engine = createRulesEngine();
+            RuleResult result = engine.evaluate(config, testData);
+
+            assertNotNull(result, "RuleResult should not be null");
+            logger.info("** APEX evaluation successful");
+
+            return result;
+        } catch (Exception e) {
+            logger.error("** APEX evaluation failed", e);
+            fail("APEX evaluation failed: " + e.getMessage());
             return null;
         }
     }

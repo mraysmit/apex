@@ -4,8 +4,7 @@ import dev.mars.apex.core.service.monitoring.RulePerformanceMetrics;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -49,6 +48,11 @@ public class RuleResult implements Serializable {
     private final ResultType resultType;
     private final RulePerformanceMetrics performanceMetrics;
 
+    // New fields for comprehensive evaluation results
+    private final Map<String, Object> enrichedData;
+    private final List<String> failureMessages;
+    private final boolean success;
+
     /**
      * Enum representing the type of result.
      */
@@ -79,6 +83,11 @@ public class RuleResult implements Serializable {
         this.timestamp = Instant.now();
         this.resultType = resultType;
         this.performanceMetrics = null; // No performance metrics for basic constructor
+
+        // Initialize new fields with defaults for backward compatibility
+        this.enrichedData = new HashMap<>();
+        this.failureMessages = new ArrayList<>();
+        this.success = (resultType == ResultType.MATCH || resultType == ResultType.NO_MATCH);
     }
 
     /**
@@ -98,6 +107,11 @@ public class RuleResult implements Serializable {
         this.timestamp = Instant.now();
         this.resultType = resultType;
         this.performanceMetrics = performanceMetrics;
+
+        // Initialize new fields with defaults for backward compatibility
+        this.enrichedData = new HashMap<>();
+        this.failureMessages = new ArrayList<>();
+        this.success = (resultType == ResultType.MATCH || resultType == ResultType.NO_MATCH);
     }
 
     /**
@@ -123,6 +137,36 @@ public class RuleResult implements Serializable {
      */
     public RuleResult(String ruleName, String message, ResultType resultType, RulePerformanceMetrics performanceMetrics) {
         this(ruleName, message, resultType == ResultType.MATCH, resultType, performanceMetrics);
+    }
+
+    /**
+     * Create a new rule result with comprehensive evaluation information.
+     * This constructor supports the complete APEX evaluation workflow including enrichments.
+     *
+     * @param ruleName The name of the rule that was evaluated
+     * @param message The message associated with the rule
+     * @param triggered Whether the rule was triggered (true) or not (false)
+     * @param resultType The type of result
+     * @param performanceMetrics The performance metrics for this rule evaluation
+     * @param enrichedData The enriched data map containing all enrichment results
+     * @param failureMessages List of failure messages from enrichments and rules
+     * @param success Overall success status of the evaluation
+     */
+    public RuleResult(String ruleName, String message, boolean triggered, ResultType resultType,
+                     RulePerformanceMetrics performanceMetrics, Map<String, Object> enrichedData,
+                     List<String> failureMessages, boolean success) {
+        this.id = UUID.randomUUID();
+        this.ruleName = ruleName;
+        this.message = message;
+        this.triggered = triggered;
+        this.timestamp = Instant.now();
+        this.resultType = resultType;
+        this.performanceMetrics = performanceMetrics;
+
+        // Initialize new fields with provided values
+        this.enrichedData = enrichedData != null ? new HashMap<>(enrichedData) : new HashMap<>();
+        this.failureMessages = failureMessages != null ? new ArrayList<>(failureMessages) : new ArrayList<>();
+        this.success = success;
     }
 
     /**
@@ -199,6 +243,63 @@ public class RuleResult implements Serializable {
         return new RuleResult(ruleName, errorMessage, false, ResultType.ERROR, performanceMetrics);
     }
 
+    // New factory methods for enrichment results
+
+    /**
+     * Create a new rule result for successful enrichment evaluation.
+     * This method is used when all enrichments complete successfully.
+     *
+     * @param enrichedData The enriched data map containing all enrichment results
+     * @return A new RuleResult instance representing successful enrichment
+     */
+    public static RuleResult enrichmentSuccess(Map<String, Object> enrichedData) {
+        return new RuleResult("enrichment", "Enrichment completed successfully",
+                             true, ResultType.MATCH, null, enrichedData, new ArrayList<>(), true);
+    }
+
+    /**
+     * Create a new rule result for failed enrichment evaluation.
+     * This method is used when enrichments fail due to required field mapping failures or other errors.
+     *
+     * @param failureMessages List of failure messages from enrichments
+     * @param enrichedData The enriched data map (may be partial if some enrichments failed)
+     * @return A new RuleResult instance representing failed enrichment
+     */
+    public static RuleResult enrichmentFailure(List<String> failureMessages, Map<String, Object> enrichedData) {
+        return new RuleResult("enrichment", "Enrichment failed",
+                             false, ResultType.ERROR, null, enrichedData, failureMessages, false);
+    }
+
+    /**
+     * Create a new rule result for successful complete evaluation (enrichments + rules).
+     * This method is used when both enrichments and rules complete successfully.
+     *
+     * @param enrichedData The enriched data map containing all enrichment results
+     * @param ruleName The name of the final rule that was evaluated
+     * @param ruleMessage The message from the final rule evaluation
+     * @return A new RuleResult instance representing successful complete evaluation
+     */
+    public static RuleResult evaluationSuccess(Map<String, Object> enrichedData, String ruleName, String ruleMessage) {
+        return new RuleResult(ruleName, ruleMessage,
+                             true, ResultType.MATCH, null, enrichedData, new ArrayList<>(), true);
+    }
+
+    /**
+     * Create a new rule result for failed complete evaluation (enrichments + rules).
+     * This method is used when either enrichments or rules fail during evaluation.
+     *
+     * @param failureMessages List of failure messages from enrichments and rules
+     * @param enrichedData The enriched data map (may be partial if enrichments failed)
+     * @param ruleName The name of the rule or enrichment that failed
+     * @param errorMessage The primary error message
+     * @return A new RuleResult instance representing failed complete evaluation
+     */
+    public static RuleResult evaluationFailure(List<String> failureMessages, Map<String, Object> enrichedData,
+                                              String ruleName, String errorMessage) {
+        return new RuleResult(ruleName, errorMessage,
+                             false, ResultType.ERROR, null, enrichedData, failureMessages, false);
+    }
+
     /**
      * Constructor for backward compatibility.
      * This constructor tries to determine the result type based on the ruleName.
@@ -224,6 +325,11 @@ public class RuleResult implements Serializable {
             this.resultType = ResultType.MATCH;
             this.triggered = true;
         }
+
+        // Initialize new fields with defaults for backward compatibility
+        this.enrichedData = new HashMap<>();
+        this.failureMessages = new ArrayList<>();
+        this.success = (this.resultType == ResultType.MATCH || this.resultType == ResultType.NO_MATCH);
     }
 
     /**
@@ -296,6 +402,48 @@ public class RuleResult implements Serializable {
      */
     public boolean hasPerformanceMetrics() {
         return performanceMetrics != null;
+    }
+
+    // New API methods for comprehensive evaluation results
+
+    /**
+     * Check if all enrichments and rules succeeded.
+     * This method provides programmatic access to the overall evaluation status.
+     *
+     * @return true if all operations succeeded, false otherwise
+     */
+    public boolean isSuccess() {
+        return success;
+    }
+
+    /**
+     * Check if there were any failures during evaluation.
+     * This method allows applications to detect failures without parsing logs.
+     *
+     * @return true if there were failures, false otherwise
+     */
+    public boolean hasFailures() {
+        return !success || (failureMessages != null && !failureMessages.isEmpty());
+    }
+
+    /**
+     * Get list of failure messages from enrichments and rules.
+     * This method provides detailed error information for programmatic handling.
+     *
+     * @return List of failure messages, empty if no failures
+     */
+    public List<String> getFailureMessages() {
+        return failureMessages != null ? new ArrayList<>(failureMessages) : new ArrayList<>();
+    }
+
+    /**
+     * Get the enriched data map containing all enrichment results.
+     * This method provides access to the data that was enriched during evaluation.
+     *
+     * @return Map of enriched data, empty if no enrichments
+     */
+    public Map<String, Object> getEnrichedData() {
+        return enrichedData != null ? new HashMap<>(enrichedData) : new HashMap<>();
     }
 
     @Override

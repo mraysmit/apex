@@ -1,3 +1,19 @@
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package dev.mars.apex.demo;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
@@ -38,7 +54,7 @@ public class YamlConfigurationValidationTest extends DemoTestBase {
     @Test
     @Disabled("Missing YAML configuration file: enrichment/customer-transformer-demo.yaml")
     void testCustomerTransformerFunctionality() {
-        String yamlPath = "enrichment/customer-transformer-demo.yaml";
+        String yamlPath = "dev/mars/apex/demo/lookup/customer-transformer-demo.yaml";
         logger.info("Testing customer transformer functionality: {}", yamlPath);
 
         YamlRuleConfiguration config = loadAndValidateYaml(yamlPath);
@@ -72,7 +88,7 @@ public class YamlConfigurationValidationTest extends DemoTestBase {
     @Test
     @Disabled("Missing YAML configuration file: enrichment/trade-transformer-demo.yaml")
     void testTradeTransformerFunctionality() {
-        String yamlPath = "enrichment/trade-transformer-demo.yaml";
+        String yamlPath = "dev/mars/apex/demo/lookup/trade-transformer-demo.yaml";
         logger.info("Testing trade transformer functionality: {}", yamlPath);
 
         YamlRuleConfiguration config = loadAndValidateYaml(yamlPath);
