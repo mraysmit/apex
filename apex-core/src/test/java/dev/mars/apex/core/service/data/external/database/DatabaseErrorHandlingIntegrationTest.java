@@ -1,4 +1,4 @@
-﻿package dev.mars.apex.core.service.data.external.database;
+package dev.mars.apex.core.service.data.external.database;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd

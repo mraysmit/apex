@@ -1,4 +1,4 @@
-﻿package dev.mars.apex.demo.lookup;
+package dev.mars.apex.demo.lookup;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
