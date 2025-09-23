@@ -288,6 +288,18 @@ public class RuleResult implements Serializable {
     }
 
     /**
+     * Create a new rule result for when no rule was matched, with specific rule name, message, and severity.
+     *
+     * @param ruleName The name of the rule that was not matched
+     * @param message The message associated with the rule
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @return A new RuleResult instance
+     */
+    public static RuleResult noMatch(String ruleName, String message, String severity) {
+        return new RuleResult(ruleName, message, severity, false, ResultType.NO_MATCH);
+    }
+
+    /**
      * Create a new rule result for when no rules were provided.
      * 
      * @return A new RuleResult instance
@@ -305,6 +317,18 @@ public class RuleResult implements Serializable {
      */
     public static RuleResult error(String ruleName, String errorMessage) {
         return new RuleResult(ruleName, errorMessage, false, ResultType.ERROR);
+    }
+
+    /**
+     * Create a new rule result for when an error occurred during rule evaluation, with severity.
+     *
+     * @param ruleName The name of the rule that caused the error
+     * @param errorMessage The error message
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @return A new RuleResult instance
+     */
+    public static RuleResult error(String ruleName, String errorMessage, String severity) {
+        return new RuleResult(ruleName, errorMessage, severity, false, ResultType.ERROR);
     }
 
     /**

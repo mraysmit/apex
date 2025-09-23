@@ -4,6 +4,7 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleBase;
 import dev.mars.apex.core.engine.model.RuleGroup;
+import dev.mars.apex.core.engine.model.RuleGroupEvaluationResult;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.exception.RuleEvaluationException;
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
@@ -323,6 +324,7 @@ public class RulesEngine {
      * @return The result of the first rule group that matches, or a default result if no rule groups match
      */
     public RuleResult executeRuleGroupsList(List<RuleGroup> ruleGroups, Map<String, Object> facts) {
+
         if (ruleGroups == null || ruleGroups.isEmpty()) {
             logger.info("No rule groups provided for execution");
             return RuleResult.noRules();
@@ -333,16 +335,33 @@ public class RulesEngine {
 
         StandardEvaluationContext context = createContext(facts);
 
+        // Track the highest severity from failed rule groups
+        String highestFailedSeverity = "INFO";
+        String lastFailedGroupName = null;
+        String lastFailedGroupMessage = null;
+
         // Evaluate rule groups in priority order
         for (RuleGroup group : ruleGroups) {
             logger.debug("Evaluating rule group: {}", group.getName());
             try {
-                boolean result = group.evaluate(context);
-                logger.debug("Rule group '{}' evaluated to: {}", group.getName(), result);
+                // Use detailed evaluation to get severity aggregation
+                RuleGroupEvaluationResult evaluationResult = group.evaluateWithDetails(context);
+                boolean result = evaluationResult.isGroupResult();
+                String aggregatedSeverity = evaluationResult.getAggregatedSeverity();
+
+                logger.debug("Rule group '{}' evaluated to: {} with aggregated severity: {}",
+                           group.getName(), result, aggregatedSeverity);
 
                 if (result) {
                     logger.info("Rule group matched: {}", group.getName());
-                    return RuleResult.match(group.getName(), group.getMessage());
+                    return RuleResult.match(group.getName(), group.getMessage(), aggregatedSeverity);
+                } else {
+                    // Track failed group with highest severity
+                    if (getSeverityPriority(aggregatedSeverity) > getSeverityPriority(highestFailedSeverity)) {
+                        highestFailedSeverity = aggregatedSeverity;
+                        lastFailedGroupName = group.getName();
+                        lastFailedGroupMessage = group.getMessage();
+                    }
                 }
             } catch (Exception e) {
                 logger.warn("Error evaluating rule group '{}': {}", group.getName(), e.getMessage(), e);
@@ -350,7 +369,13 @@ public class RulesEngine {
         }
 
         logger.info("No rule groups matched");
-        return RuleResult.noMatch();
+
+        // Return result with highest severity from failed groups
+        if (lastFailedGroupName != null) {
+            return RuleResult.noMatch(lastFailedGroupName, lastFailedGroupMessage, highestFailedSeverity);
+        } else {
+            return RuleResult.noMatch();
+        }
     }
 
     /**
@@ -649,5 +674,28 @@ public class RulesEngine {
         List<String> failureMessages = new ArrayList<>();
         failureMessages.add("evaluate(Map) method requires YamlRuleConfiguration parameter");
         return RuleResult.evaluationFailure(failureMessages, inputData, "evaluation", "Missing YAML configuration");
+    }
+
+    /**
+     * Get the priority value for a severity level.
+     * Higher values indicate higher severity.
+     *
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @return The priority value (3 for ERROR, 2 for WARNING, 1 for INFO)
+     */
+    private int getSeverityPriority(String severity) {
+        if (severity == null) {
+            return 1; // Default to INFO priority
+        }
+
+        switch (severity.toUpperCase()) {
+            case "ERROR":
+                return 3;
+            case "WARNING":
+                return 2;
+            case "INFO":
+            default:
+                return 1;
+        }
     }
 }

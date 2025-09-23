@@ -53,6 +53,10 @@ public class RuleGroup implements RuleBase {
     private final Map<String, Boolean> ruleResults = new HashMap<>();
     private boolean groupResult = false;
 
+    // Individual rule results for severity aggregation
+    private final List<RuleResult> individualRuleResults = new ArrayList<>();
+    private final RuleGroupSeverityAggregator severityAggregator = new RuleGroupSeverityAggregator();
+
     /**
      * Create a new rule group with default execution settings.
      *
@@ -225,7 +229,10 @@ public class RuleGroup implements RuleBase {
      */
     public boolean evaluate(StandardEvaluationContext context) {
         if (rulesBySequence.isEmpty()) {
-            return false;
+            // Empty group behavior:
+            // - AND groups: return true (all conditions vacuously satisfied)
+            // - OR groups: return false (no conditions satisfied)
+            return isAndOperator;
         }
 
         // Choose evaluation strategy based on configuration
@@ -245,6 +252,57 @@ public class RuleGroup implements RuleBase {
         }
 
         return result;
+    }
+
+    /**
+     * Evaluate this rule group against the provided context with detailed results.
+     * This method provides comprehensive evaluation results including individual rule results
+     * and aggregated severity information.
+     *
+     * @param context The evaluation context
+     * @return Complete evaluation result with individual rule results and aggregated severity
+     */
+    public RuleGroupEvaluationResult evaluateWithDetails(StandardEvaluationContext context) {
+        long startTime = System.currentTimeMillis();
+
+        // Clear previous results
+        individualRuleResults.clear();
+
+        if (rulesBySequence.isEmpty()) {
+            // Empty group behavior:
+            // - AND groups: return true (all conditions vacuously satisfied)
+            // - OR groups: return false (no conditions satisfied)
+            boolean emptyGroupResult = isAndOperator;
+            long duration = System.currentTimeMillis() - startTime;
+            return new RuleGroupEvaluationResult(
+                id, name, emptyGroupResult, new ArrayList<>(), "INFO", isAndOperator, duration
+            );
+        }
+
+        // Choose evaluation strategy based on configuration
+        boolean result;
+        if (parallelExecution && rulesBySequence.size() > 1) {
+            result = evaluateParallelWithDetails(context);
+        } else {
+            result = evaluateSequentialWithDetails(context);
+        }
+
+        // Store group result
+        groupResult = result;
+
+        // If the group evaluated to true, update the message
+        if (result) {
+            updateMessage();
+        }
+
+        // Aggregate severity from individual rule results
+        String aggregatedSeverity = severityAggregator.aggregateSeverity(individualRuleResults, isAndOperator);
+
+        long duration = System.currentTimeMillis() - startTime;
+        return new RuleGroupEvaluationResult(
+            id, name, result, new ArrayList<>(individualRuleResults),
+            aggregatedSeverity, isAndOperator, duration
+        );
     }
 
     /**
@@ -322,6 +380,122 @@ public class RuleGroup implements RuleBase {
                 evaluatedCount++;
                 failedCount++;
                 System.err.println("Error evaluating rule '" + rule.getName() + "' in group '" + name + "': " + e.getMessage());
+
+                if (isAndOperator) {
+                    // For AND groups, any error means the group fails
+                    if (useShortCircuit) {
+                        return false;
+                    }
+                    result = false;
+                }
+                // For OR groups, continue evaluating other rules
+            }
+        }
+
+        if (debugMode) {
+            System.out.println("DEBUG: Group '" + name + "' evaluation complete. " +
+                             "Evaluated: " + evaluatedCount + ", Passed: " + passedCount +
+                             ", Failed: " + failedCount + ", Final result: " + result);
+        }
+
+        // Store group result
+        groupResult = result;
+
+        return result;
+    }
+
+    /**
+     * Evaluate rules sequentially with detailed result tracking.
+     * This method creates RuleResult objects for each evaluated rule.
+     *
+     * @param context The evaluation context
+     * @return True if the rule group condition is satisfied, false otherwise
+     */
+    private boolean evaluateSequentialWithDetails(StandardEvaluationContext context) {
+        // Clear previous results
+        ruleResults.clear();
+
+        // Sort rules by sequence number
+        List<Integer> sequenceNumbers = new ArrayList<>(rulesBySequence.keySet());
+        sequenceNumbers.sort(Integer::compareTo);
+
+        // Determine if short-circuiting should be used
+        boolean useShortCircuit = stopOnFirstFailure && !debugMode;
+
+        // Evaluate rules in sequence order
+        boolean result = isAndOperator; // Start with true for AND, false for OR
+        int evaluatedCount = 0;
+        int passedCount = 0;
+        int failedCount = 0;
+
+        // Debug logging for empty groups
+        if (sequenceNumbers.isEmpty()) {
+            System.out.println("DEBUG: Empty group '" + name + "' with operator: " + (isAndOperator ? "AND" : "OR") + ", initial result: " + result);
+        }
+
+        for (Integer seq : sequenceNumbers) {
+            Rule rule = rulesBySequence.get(seq);
+            if (rule == null) {
+                System.err.println("Null rule found at sequence " + seq + " in group '" + name + "', skipping");
+                continue;
+            }
+
+            try {
+                Expression exp = parser.parseExpression(rule.getCondition());
+                Boolean ruleResult = exp.getValue(context, Boolean.class);
+
+                if (ruleResult == null) {
+                    ruleResult = false;
+                }
+
+                // Store individual rule result
+                ruleResults.put(rule.getId(), ruleResult);
+
+                // Create RuleResult object for severity aggregation
+                RuleResult ruleResultObj = ruleResult ?
+                    RuleResult.match(rule.getName(), rule.getMessage(), rule.getSeverity()) :
+                    RuleResult.noMatch(rule.getName(), rule.getMessage(), rule.getSeverity());
+                individualRuleResults.add(ruleResultObj);
+
+                evaluatedCount++;
+                if (ruleResult) {
+                    passedCount++;
+                } else {
+                    failedCount++;
+                }
+
+                if (debugMode) {
+                    System.out.println("DEBUG: Rule '" + rule.getName() + "' in group '" + name + "' evaluated to: " + ruleResult + " (severity: " + rule.getSeverity() + ")");
+                }
+
+                if (isAndOperator) {
+                    // AND logic: if any rule is false, the result is false
+                    result = result && ruleResult;
+                    if (!result && useShortCircuit) {
+                        if (debugMode) {
+                            System.out.println("DEBUG: AND group '" + name + "' short-circuited after " + evaluatedCount + " rules");
+                        }
+                        break; // Short-circuit for AND
+                    }
+                } else {
+                    // OR logic: if any rule is true, the result is true
+                    result = result || ruleResult;
+                    if (result && useShortCircuit) {
+                        if (debugMode) {
+                            System.out.println("DEBUG: OR group '" + name + "' short-circuited after " + evaluatedCount + " rules");
+                        }
+                        break; // Short-circuit for OR
+                    }
+                }
+            } catch (Exception e) {
+                evaluatedCount++;
+                failedCount++;
+                System.err.println("Error evaluating rule '" + rule.getName() + "' in group '" + name + "': " + e.getMessage());
+
+                // Create error RuleResult object
+                RuleResult errorResult = RuleResult.error(rule.getName(),
+                    "Error evaluating rule: " + e.getMessage(), rule.getSeverity());
+                individualRuleResults.add(errorResult);
 
                 if (isAndOperator) {
                     // For AND groups, any error means the group fails
@@ -464,6 +638,136 @@ public class RuleGroup implements RuleBase {
     }
 
     /**
+     * Evaluate rules in parallel with detailed result tracking.
+     * Note: Parallel execution disables short-circuiting to ensure all rules are evaluated.
+     *
+     * @param context The evaluation context
+     * @return True if the rule group condition is satisfied, false otherwise
+     */
+    private boolean evaluateParallelWithDetails(StandardEvaluationContext context) {
+        // Clear previous results
+        ruleResults.clear();
+
+        // Sort rules by sequence number
+        List<Integer> sequenceNumbers = new ArrayList<>(rulesBySequence.keySet());
+        sequenceNumbers.sort(Integer::compareTo);
+
+        // Create a list of evaluation tasks with rule references
+        List<java.util.concurrent.Callable<RuleResult>> tasks = new ArrayList<>();
+        List<String> ruleNames = new ArrayList<>();
+        List<String> ruleIds = new ArrayList<>();
+
+        for (Integer seq : sequenceNumbers) {
+            Rule rule = rulesBySequence.get(seq);
+            if (rule == null) {
+                System.err.println("Null rule found at sequence " + seq + " in group '" + name + "', skipping");
+                continue;
+            }
+
+            ruleNames.add(rule.getName());
+            ruleIds.add(rule.getId());
+            tasks.add(() -> {
+                try {
+                    Expression exp = parser.parseExpression(rule.getCondition());
+                    Boolean ruleResult = exp.getValue(context, Boolean.class);
+
+                    if (ruleResult == null) {
+                        ruleResult = false;
+                    }
+
+                    if (debugMode) {
+                        System.out.println("DEBUG: Rule '" + rule.getName() + "' in group '" + name + "' (parallel) evaluated to: " + ruleResult + " (severity: " + rule.getSeverity() + ")");
+                    }
+
+                    // Create RuleResult object
+                    return ruleResult ?
+                        RuleResult.match(rule.getName(), rule.getMessage(), rule.getSeverity()) :
+                        RuleResult.noMatch(rule.getName(), rule.getMessage(), rule.getSeverity());
+
+                } catch (Exception e) {
+                    System.err.println("Error evaluating rule '" + rule.getName() + "' in group '" + name + "' (parallel): " + e.getMessage());
+                    return RuleResult.error(rule.getName(), "Error evaluating rule: " + e.getMessage(), rule.getSeverity());
+                }
+            });
+        }
+
+        if (tasks.isEmpty()) {
+            return false;
+        }
+
+        // Execute tasks in parallel
+        java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(
+            Math.min(tasks.size(), Runtime.getRuntime().availableProcessors())
+        );
+
+        try {
+            List<java.util.concurrent.Future<RuleResult>> futures = executor.invokeAll(tasks);
+
+            // Collect results
+            List<Boolean> booleanResults = new ArrayList<>();
+            for (int i = 0; i < futures.size(); i++) {
+                try {
+                    RuleResult ruleResult = futures.get(i).get();
+                    individualRuleResults.add(ruleResult);
+
+                    boolean boolResult = ruleResult.isTriggered();
+                    booleanResults.add(boolResult);
+
+                    // Store individual rule result
+                    ruleResults.put(ruleIds.get(i), boolResult);
+                } catch (Exception e) {
+                    System.err.println("Error getting result for rule '" + ruleNames.get(i) + "' in group '" + name + "': " + e.getMessage());
+
+                    // Create error result
+                    RuleResult errorResult = RuleResult.error(ruleNames.get(i),
+                        "Error getting result: " + e.getMessage(), "ERROR");
+                    individualRuleResults.add(errorResult);
+
+                    booleanResults.add(false);
+                    ruleResults.put(ruleIds.get(i), false);
+                }
+            }
+
+            // Apply AND/OR logic to results
+            boolean finalResult = isAndOperator;
+            int passedCount = 0;
+            int failedCount = 0;
+
+            for (Boolean result : booleanResults) {
+                if (result) {
+                    passedCount++;
+                } else {
+                    failedCount++;
+                }
+
+                if (isAndOperator) {
+                    finalResult = finalResult && result;
+                } else {
+                    finalResult = finalResult || result;
+                }
+            }
+
+            if (debugMode) {
+                System.out.println("DEBUG: Group '" + name + "' parallel evaluation complete. " +
+                                 "Total: " + booleanResults.size() + ", Passed: " + passedCount +
+                                 ", Failed: " + failedCount + ", Final result: " + finalResult);
+            }
+
+            // Store group result
+            groupResult = finalResult;
+
+            return finalResult;
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.err.println("Parallel evaluation interrupted for group '" + name + "': " + e.getMessage());
+            return false;
+        } finally {
+            executor.shutdown();
+        }
+    }
+
+    /**
      * Update the message based on the evaluation result
      */
     private void updateMessage() {
@@ -584,6 +888,16 @@ public class RuleGroup implements RuleBase {
      */
     public Map<String, Boolean> getRuleResults() {
         return new HashMap<>(ruleResults);
+    }
+
+    /**
+     * Get the individual rule results with severity information from the last detailed evaluation.
+     * This method returns results only if evaluateWithDetails() was called.
+     *
+     * @return List of individual rule results with severity information
+     */
+    public List<RuleResult> getIndividualRuleResults() {
+        return new ArrayList<>(individualRuleResults);
     }
 
     /**
