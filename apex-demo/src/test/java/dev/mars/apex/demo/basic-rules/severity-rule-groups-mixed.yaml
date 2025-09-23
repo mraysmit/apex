@@ -1,0 +1,160 @@
+# ============================================================================
+# APEX YAML Configuration File - Rule Groups with Mixed Severities
+# ============================================================================
+# Purpose: Test rule groups containing rules with different severity levels
+#          to verify severity aggregation and inheritance behavior
+# Used by: SeverityRuleGroupTest.java
+# ============================================================================
+
+metadata:
+  name: "Rule Groups Mixed Severity Test"
+  version: "1.0.0"
+  description: "Test configuration for rule groups with mixed severity levels and aggregation testing"
+
+rules:
+  # High severity rules (ERROR)
+  - id: "security-breach-detected"
+    name: "Security Breach Detection"
+    condition: "#securityFlags != null && #securityFlags.contains('BREACH')"
+    message: "CRITICAL SECURITY ALERT: Potential security breach detected"
+    severity: "ERROR"
+    priority: 1
+
+  - id: "fraud-pattern-detected"
+    name: "Fraud Pattern Detection"
+    condition: "#fraudScore != null && #fraudScore > 90"
+    message: "FRAUD ALERT: High fraud score {{#fraudScore}} detected"
+    severity: "ERROR"
+    priority: 1
+
+  - id: "regulatory-violation"
+    name: "Regulatory Violation Check"
+    condition: "#complianceScore != null && #complianceScore < 60"
+    message: "REGULATORY VIOLATION: Compliance score {{#complianceScore}} below threshold"
+    severity: "ERROR"
+    priority: 1
+
+  # Medium severity rules (WARNING)
+  - id: "suspicious-activity"
+    name: "Suspicious Activity Detection"
+    condition: "#activityScore != null && #activityScore > 75"
+    message: "SUSPICIOUS ACTIVITY: Activity score {{#activityScore}} requires review"
+    severity: "WARNING"
+    priority: 2
+
+  - id: "data-quality-issue"
+    name: "Data Quality Issue"
+    condition: "#dataQualityScore != null && #dataQualityScore < 80"
+    message: "DATA QUALITY: Score {{#dataQualityScore}} indicates potential data issues"
+    severity: "WARNING"
+    priority: 2
+
+  - id: "performance-degradation"
+    name: "Performance Degradation Warning"
+    condition: "#responseTime != null && #responseTime > 5000"
+    message: "PERFORMANCE: Response time {{#responseTime}}ms exceeds optimal threshold"
+    severity: "WARNING"
+    priority: 2
+
+  # Low severity rules (INFO)
+  - id: "processing-milestone"
+    name: "Processing Milestone"
+    condition: "#processedCount != null && #processedCount % 1000 == 0"
+    message: "MILESTONE: Processed {{#processedCount}} transactions"
+    severity: "INFO"
+    priority: 3
+
+  - id: "system-health-check"
+    name: "System Health Check"
+    condition: "#systemHealth != null && #systemHealth == 'HEALTHY'"
+    message: "SYSTEM STATUS: All systems operating normally"
+    severity: "INFO"
+    priority: 3
+
+  - id: "audit-checkpoint"
+    name: "Audit Checkpoint"
+    condition: "true"
+    message: "AUDIT: Transaction processing checkpoint reached"
+    severity: "INFO"
+    priority: 3
+
+rule-groups:
+  # Test Case 1: AND group with highest severity (ERROR) - should result in ERROR
+  - id: "critical-security-and-group"
+    name: "Critical Security AND Group"
+    description: "AND group with ERROR + WARNING + INFO - should aggregate to ERROR severity"
+    operator: "AND"
+    rule-ids:
+      - "security-breach-detected"
+      - "suspicious-activity"
+      - "audit-checkpoint"
+
+  # Test Case 2: OR group with mixed severities - should use first matching rule's severity
+  - id: "mixed-detection-or-group"
+    name: "Mixed Detection OR Group"
+    description: "OR group with ERROR + WARNING + INFO - severity depends on first match"
+    operator: "OR"
+    rule-ids:
+      - "fraud-pattern-detected"
+      - "data-quality-issue"
+      - "processing-milestone"
+
+  # Test Case 3: AND group with only WARNING rules - should result in WARNING
+  - id: "warning-only-and-group"
+    name: "Warning Only AND Group"
+    description: "AND group with only WARNING severity rules"
+    operator: "AND"
+    rule-ids:
+      - "suspicious-activity"
+      - "data-quality-issue"
+      - "performance-degradation"
+
+  # Test Case 4: OR group with only INFO rules - should result in INFO
+  - id: "info-only-or-group"
+    name: "Info Only OR Group"
+    description: "OR group with only INFO severity rules"
+    operator: "OR"
+    rule-ids:
+      - "processing-milestone"
+      - "system-health-check"
+      - "audit-checkpoint"
+
+  # Test Case 5: Complex nested scenario - ERROR + WARNING combination
+  - id: "compliance-security-group"
+    name: "Compliance Security Group"
+    description: "AND group combining regulatory and security checks with mixed severities"
+    operator: "AND"
+    rule-ids:
+      - "regulatory-violation"
+      - "suspicious-activity"
+      - "system-health-check"
+
+  # Test Case 6: Performance monitoring group - WARNING + INFO
+  - id: "performance-monitoring-group"
+    name: "Performance Monitoring Group"
+    description: "OR group for performance and system monitoring with WARNING + INFO"
+    operator: "OR"
+    rule-ids:
+      - "performance-degradation"
+      - "system-health-check"
+      - "processing-milestone"
+
+  # Test Case 7: All severity levels in single AND group
+  - id: "comprehensive-validation-group"
+    name: "Comprehensive Validation Group"
+    description: "AND group with all three severity levels - tests complete aggregation logic"
+    operator: "AND"
+    rule-ids:
+      - "fraud-pattern-detected"
+      - "data-quality-issue"
+      - "audit-checkpoint"
+
+  # Test Case 8: All severity levels in single OR group
+  - id: "comprehensive-detection-group"
+    name: "Comprehensive Detection Group"
+    description: "OR group with all three severity levels - tests first-match severity logic"
+    operator: "OR"
+    rule-ids:
+      - "processing-milestone"
+      - "suspicious-activity"
+      - "security-breach-detected"

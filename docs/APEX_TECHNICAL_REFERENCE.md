@@ -235,6 +235,190 @@ public class YamlMetadataValidator {
 - Circular dependency detection
 - YAML syntax validation
 
+### Rule Severity Technical Architecture
+
+#### Severity Processing Pipeline
+
+APEX implements a comprehensive severity processing system that flows severity information from YAML configuration through the entire rule processing pipeline to final API responses.
+
+```java
+// Severity Processing Flow
+YamlRule (YAML) → Rule (Core Model) → RuleResult (Execution) → API Response (REST)
+
+// Core Components
+public class YamlRule {
+    @JsonProperty("severity")
+    private String severity;  // Parsed from YAML
+}
+
+public class Rule {
+    private final String severity;  // Immutable severity field
+
+    // Backward-compatible constructors
+    public Rule(String name, String condition, String message) {
+        this(name, condition, message, "INFO"); // Default severity
+    }
+
+    public Rule(String name, String condition, String message, String severity) {
+        this.severity = severity != null ? severity : "INFO";
+    }
+}
+
+public class RuleResult {
+    private final String severity;  // Severity from rule execution
+
+    // Factory methods with severity support
+    public static RuleResult match(Rule rule, String message) {
+        return new RuleResult(rule.getName(), message, true,
+                            ResultType.MATCH, rule.getSeverity());
+    }
+}
+```
+
+#### Severity Validation Logic
+
+```java
+@Component
+public class SeverityValidator {
+
+    private static final Set<String> VALID_SEVERITIES =
+        Set.of("ERROR", "WARNING", "INFO");
+
+    public ValidationResult validateSeverity(String severity) {
+        if (severity == null) {
+            return ValidationResult.success("INFO"); // Default
+        }
+
+        String normalizedSeverity = severity.trim().toUpperCase();
+
+        if (!VALID_SEVERITIES.contains(normalizedSeverity)) {
+            return ValidationResult.error(
+                "Invalid severity: " + severity +
+                ". Must be one of: ERROR, WARNING, INFO");
+        }
+
+        return ValidationResult.success(normalizedSeverity);
+    }
+}
+```
+
+#### Rule Group Severity Aggregation
+
+APEX implements intelligent severity aggregation for rule groups containing rules with mixed severity levels:
+
+```java
+public class RuleGroupSeverityAggregator {
+
+    public String aggregateSeverity(List<RuleResult> results, GroupOperator operator) {
+        List<String> severities = results.stream()
+            .map(RuleResult::getSeverity)
+            .collect(Collectors.toList());
+
+        return switch (operator) {
+            case AND -> aggregateAndGroupSeverity(severities, results);
+            case OR -> aggregateOrGroupSeverity(severities, results);
+        };
+    }
+
+    private String aggregateAndGroupSeverity(List<String> severities, List<RuleResult> results) {
+        // For AND groups: If any rule fails, use highest severity of failed rules
+        // If all pass, use highest severity of all rules
+        boolean hasFailures = results.stream().anyMatch(r -> !r.isTriggered());
+
+        if (hasFailures) {
+            return results.stream()
+                .filter(r -> !r.isTriggered())
+                .map(RuleResult::getSeverity)
+                .max(this::compareSeverity)
+                .orElse("INFO");
+        } else {
+            return severities.stream()
+                .max(this::compareSeverity)
+                .orElse("INFO");
+        }
+    }
+
+    private int compareSeverity(String s1, String s2) {
+        Map<String, Integer> severityOrder = Map.of(
+            "ERROR", 3, "WARNING", 2, "INFO", 1
+        );
+        return Integer.compare(
+            severityOrder.get(s1), severityOrder.get(s2)
+        );
+    }
+}
+```
+
+#### REST API Severity Integration
+
+```java
+@RestController
+@RequestMapping("/api/rules")
+public class RulesController {
+
+    @PostMapping("/evaluate")
+    public ResponseEntity<RuleEvaluationResponse> evaluateRule(
+            @RequestBody RuleEvaluationRequest request) {
+
+        try {
+            // Create rule with severity from request
+            Rule rule = new Rule(
+                request.getRuleName(),
+                request.getCondition(),
+                request.getMessage(),
+                request.getSeverity() // Severity from API request
+            );
+
+            // Execute rule
+            RuleResult result = rulesEngine.evaluate(rule, request.getData());
+
+            // Create response with severity
+            RuleEvaluationResponse response = new RuleEvaluationResponse(
+                result.isTriggered(),
+                result.getRuleName(),
+                result.getMessage(),
+                result.getSeverity() // Severity in API response
+            );
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                .body(RuleEvaluationResponse.error(e.getMessage()));
+        }
+    }
+}
+```
+
+#### Severity Performance Optimization
+
+```java
+@Component
+public class SeverityOptimizedRulesEngine {
+
+    // Early termination based on severity
+    public RuleResult evaluateWithSeverityOptimization(
+            List<Rule> rules, Map<String, Object> data) {
+
+        // Sort rules by severity priority (ERROR first)
+        List<Rule> sortedRules = rules.stream()
+            .sorted((r1, r2) -> compareSeverity(r2.getSeverity(), r1.getSeverity()))
+            .collect(Collectors.toList());
+
+        for (Rule rule : sortedRules) {
+            RuleResult result = evaluateRule(rule, data);
+
+            // Early termination for critical errors
+            if ("ERROR".equals(result.getSeverity()) && !result.isTriggered()) {
+                return RuleResult.error(rule, "Critical validation failed: " + result.getMessage());
+            }
+        }
+
+        return RuleResult.success("All validations passed");
+    }
+}
+```
+
 #### File Type System
 
 APEX supports the following standardized file types:

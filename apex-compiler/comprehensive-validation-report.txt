@@ -20,8 +20,8 @@ SAMPLE VALID FILES:
   • test-config-with-properties.yaml
 
 SAMPLE INVALID FILES:
-  • customer-rules.yaml - ..\apex-core\src\test\resources\rulegroups\customer-rules.yaml: Missing required metadata field: type
-  • customer-validation-groups.yaml - ..\apex-core\src\test\resources\rulegroups\customer-validation-groups.yaml: Missing required metadata field: type
+  • customer-rules.yaml - ..\apex-core\src\test\resources\rulegroups\customer-rules.yaml: Missing required metadata field: description
+  • customer-validation-groups.yaml - ..\apex-core\src\test\resources\rulegroups\customer-validation-groups.yaml: Missing required metadata field: description
   • application.yml - ..\apex-rest-api\src\main\resources\application.yml: YAML syntax error: expected a single document in the stream
  in 'string', line 2, column 1:
     spring:

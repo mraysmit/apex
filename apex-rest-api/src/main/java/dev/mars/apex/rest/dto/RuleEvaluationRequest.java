@@ -58,7 +58,11 @@ public class RuleEvaluationRequest {
     @Schema(description = "Optional message to return when rule matches", example = "Customer validation passed")
     @JsonProperty("message")
     private String message;
-    
+
+    @Schema(description = "Optional severity level for the rule", example = "INFO", allowableValues = {"ERROR", "WARNING", "INFO"})
+    @JsonProperty("severity")
+    private String severity;
+
     @Schema(description = "Whether to include performance metrics in the response", example = "true")
     @JsonProperty("includeMetrics")
     private boolean includeMetrics = false;
@@ -73,12 +77,24 @@ public class RuleEvaluationRequest {
     }
     
     // Full constructor
-    public RuleEvaluationRequest(String condition, Map<String, Object> data, 
+    public RuleEvaluationRequest(String condition, Map<String, Object> data,
                                 String ruleName, String message, boolean includeMetrics) {
         this.condition = condition;
         this.data = data;
         this.ruleName = ruleName;
         this.message = message;
+        this.includeMetrics = includeMetrics;
+        this.severity = "INFO"; // Default severity
+    }
+
+    // Full constructor with severity
+    public RuleEvaluationRequest(String condition, Map<String, Object> data,
+                                String ruleName, String message, String severity, boolean includeMetrics) {
+        this.condition = condition;
+        this.data = data;
+        this.ruleName = ruleName;
+        this.message = message;
+        this.severity = severity != null ? severity : "INFO";
         this.includeMetrics = includeMetrics;
     }
     
@@ -114,7 +130,15 @@ public class RuleEvaluationRequest {
     public void setMessage(String message) {
         this.message = message;
     }
-    
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(String severity) {
+        this.severity = severity;
+    }
+
     public boolean isIncludeMetrics() {
         return includeMetrics;
     }
@@ -130,6 +154,7 @@ public class RuleEvaluationRequest {
                 ", data=" + data +
                 ", ruleName='" + ruleName + '\'' +
                 ", message='" + message + '\'' +
+                ", severity='" + severity + '\'' +
                 ", includeMetrics=" + includeMetrics +
                 '}';
     }

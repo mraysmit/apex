@@ -43,6 +43,7 @@ public class RuleResult implements Serializable {
     private final UUID id;
     private final String ruleName;
     private final String message;
+    private final String severity;
     private final boolean triggered;
     private final Instant timestamp;
     private final ResultType resultType;
@@ -76,9 +77,23 @@ public class RuleResult implements Serializable {
      * @param resultType The type of result
      */
     public RuleResult(String ruleName, String message, boolean triggered, ResultType resultType) {
+        this(ruleName, message, "INFO", triggered, resultType); // Default severity for backward compatibility
+    }
+
+    /**
+     * Create a new rule result with the specified parameters including severity.
+     *
+     * @param ruleName The name of the rule that was evaluated
+     * @param message The message associated with the rule
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @param triggered Whether the rule was triggered (true) or not (false)
+     * @param resultType The type of result
+     */
+    public RuleResult(String ruleName, String message, String severity, boolean triggered, ResultType resultType) {
         this.id = UUID.randomUUID();
         this.ruleName = ruleName;
         this.message = message;
+        this.severity = severity != null ? severity : "INFO"; // Default to INFO if null
         this.triggered = triggered;
         this.timestamp = Instant.now();
         this.resultType = resultType;
@@ -100,9 +115,24 @@ public class RuleResult implements Serializable {
      * @param performanceMetrics The performance metrics for this rule evaluation
      */
     public RuleResult(String ruleName, String message, boolean triggered, ResultType resultType, RulePerformanceMetrics performanceMetrics) {
+        this(ruleName, message, "INFO", triggered, resultType, performanceMetrics); // Default severity
+    }
+
+    /**
+     * Create a new rule result with the specified parameters including performance metrics and severity.
+     *
+     * @param ruleName The name of the rule that was evaluated
+     * @param message The message associated with the rule
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @param triggered Whether the rule was triggered (true) or not (false)
+     * @param resultType The type of result
+     * @param performanceMetrics The performance metrics for this rule evaluation
+     */
+    public RuleResult(String ruleName, String message, String severity, boolean triggered, ResultType resultType, RulePerformanceMetrics performanceMetrics) {
         this.id = UUID.randomUUID();
         this.ruleName = ruleName;
         this.message = message;
+        this.severity = severity != null ? severity : "INFO"; // Default to INFO if null
         this.triggered = triggered;
         this.timestamp = Instant.now();
         this.resultType = resultType;
@@ -155,9 +185,30 @@ public class RuleResult implements Serializable {
     public RuleResult(String ruleName, String message, boolean triggered, ResultType resultType,
                      RulePerformanceMetrics performanceMetrics, Map<String, Object> enrichedData,
                      List<String> failureMessages, boolean success) {
+        this(ruleName, message, "INFO", triggered, resultType, performanceMetrics, enrichedData, failureMessages, success); // Default severity
+    }
+
+    /**
+     * Create a new rule result with comprehensive evaluation information including severity.
+     * This constructor supports the complete APEX evaluation workflow including enrichments and severity.
+     *
+     * @param ruleName The name of the rule that was evaluated
+     * @param message The message associated with the rule
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @param triggered Whether the rule was triggered (true) or not (false)
+     * @param resultType The type of result
+     * @param performanceMetrics The performance metrics for this rule evaluation
+     * @param enrichedData The enriched data map containing all enrichment results
+     * @param failureMessages List of failure messages from enrichments and rules
+     * @param success Overall success status of the evaluation
+     */
+    public RuleResult(String ruleName, String message, String severity, boolean triggered, ResultType resultType,
+                     RulePerformanceMetrics performanceMetrics, Map<String, Object> enrichedData,
+                     List<String> failureMessages, boolean success) {
         this.id = UUID.randomUUID();
         this.ruleName = ruleName;
         this.message = message;
+        this.severity = severity != null ? severity : "INFO"; // Default to INFO if null
         this.triggered = triggered;
         this.timestamp = Instant.now();
         this.resultType = resultType;
@@ -190,6 +241,31 @@ public class RuleResult implements Serializable {
      */
     public static RuleResult match(String ruleName, String message, RulePerformanceMetrics performanceMetrics) {
         return new RuleResult(ruleName, message, true, ResultType.MATCH, performanceMetrics);
+    }
+
+    /**
+     * Create a new rule result for a rule that was triggered with severity.
+     *
+     * @param ruleName The name of the rule that was triggered
+     * @param message The message associated with the rule
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @return A new RuleResult instance
+     */
+    public static RuleResult match(String ruleName, String message, String severity) {
+        return new RuleResult(ruleName, message, severity, true, ResultType.MATCH);
+    }
+
+    /**
+     * Create a new rule result for a rule that was triggered with severity and performance metrics.
+     *
+     * @param ruleName The name of the rule that was triggered
+     * @param message The message associated with the rule
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @param performanceMetrics The performance metrics for this rule evaluation
+     * @return A new RuleResult instance
+     */
+    public static RuleResult match(String ruleName, String message, String severity, RulePerformanceMetrics performanceMetrics) {
+        return new RuleResult(ruleName, message, severity, true, ResultType.MATCH, performanceMetrics);
     }
 
     /**
@@ -241,6 +317,19 @@ public class RuleResult implements Serializable {
      */
     public static RuleResult error(String ruleName, String errorMessage, RulePerformanceMetrics performanceMetrics) {
         return new RuleResult(ruleName, errorMessage, false, ResultType.ERROR, performanceMetrics);
+    }
+
+    /**
+     * Create a new rule result for when an error occurred during rule evaluation, with severity and performance metrics.
+     *
+     * @param ruleName The name of the rule that caused the error
+     * @param errorMessage The error message
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @param performanceMetrics The performance metrics for this rule evaluation
+     * @return A new RuleResult instance
+     */
+    public static RuleResult error(String ruleName, String errorMessage, String severity, RulePerformanceMetrics performanceMetrics) {
+        return new RuleResult(ruleName, errorMessage, severity, false, ResultType.ERROR, performanceMetrics);
     }
 
     // New factory methods for enrichment results
@@ -311,6 +400,7 @@ public class RuleResult implements Serializable {
         this.id = UUID.randomUUID();
         this.ruleName = ruleName;
         this.message = message;
+        this.severity = "INFO"; // Default severity for backward compatibility
         this.timestamp = Instant.now();
         this.performanceMetrics = null; // No performance metrics for backward compatibility
 
@@ -352,11 +442,20 @@ public class RuleResult implements Serializable {
 
     /**
      * Get the message associated with the rule.
-     * 
+     *
      * @return The rule message
      */
     public String getMessage() {
         return message;
+    }
+
+    /**
+     * Get the severity level of the rule.
+     *
+     * @return The rule severity (ERROR, WARNING, INFO)
+     */
+    public String getSeverity() {
+        return severity;
     }
 
     /**

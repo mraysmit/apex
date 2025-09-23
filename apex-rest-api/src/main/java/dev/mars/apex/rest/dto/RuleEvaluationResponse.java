@@ -54,11 +54,15 @@ public class RuleEvaluationResponse {
     @JsonProperty("ruleName")
     private String ruleName;
     
-    @Schema(description = "Message associated with the rule result", 
+    @Schema(description = "Message associated with the rule result",
             example = "Customer validation passed")
     @JsonProperty("message")
     private String message;
-    
+
+    @Schema(description = "Severity level of the rule", example = "INFO")
+    @JsonProperty("severity")
+    private String severity;
+
     @Schema(description = "Timestamp when the evaluation was performed")
     @JsonProperty("timestamp")
     private Instant timestamp;
@@ -95,6 +99,17 @@ public class RuleEvaluationResponse {
         this.matched = matched;
         this.ruleName = ruleName;
         this.message = message;
+        this.severity = "INFO"; // Default severity
+    }
+
+    // Success constructor with severity
+    public RuleEvaluationResponse(boolean matched, String ruleName, String message, String severity) {
+        this();
+        this.success = true;
+        this.matched = matched;
+        this.ruleName = ruleName;
+        this.message = message;
+        this.severity = severity != null ? severity : "INFO";
     }
     
     // Error constructor
@@ -109,6 +124,10 @@ public class RuleEvaluationResponse {
     // Static factory methods
     public static RuleEvaluationResponse success(boolean matched, String ruleName, String message) {
         return new RuleEvaluationResponse(matched, ruleName, message);
+    }
+
+    public static RuleEvaluationResponse success(boolean matched, String ruleName, String message, String severity) {
+        return new RuleEvaluationResponse(matched, ruleName, message, severity);
     }
     
     public static RuleEvaluationResponse error(String error) {
@@ -151,7 +170,15 @@ public class RuleEvaluationResponse {
     public void setMessage(String message) {
         this.message = message;
     }
-    
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(String severity) {
+        this.severity = severity;
+    }
+
     public Instant getTimestamp() {
         return timestamp;
     }

@@ -1,0 +1,126 @@
+# ============================================================================
+# APEX YAML Configuration File - Negative Severity Validation Testing
+# ============================================================================
+# Purpose: Test invalid severity values and edge cases to ensure proper
+#          error handling and validation in the APEX severity system
+# Used by: SeverityNegativeTest.java
+# ============================================================================
+
+metadata:
+  name: "Severity Validation Negative Test Cases"
+  version: "1.0.0"
+  description: "Test configuration with invalid severity values for negative testing"
+
+# NOTE: These rules contain intentionally invalid severity values
+# They should cause validation errors when loaded by the APEX system
+
+rules:
+  # Test Case 1: Invalid severity value - should cause ConfigurationException
+  - id: "invalid-severity-critical"
+    name: "Invalid Severity Critical"
+    condition: "true"
+    message: "This rule has an invalid severity value"
+    severity: "CRITICAL"  # Invalid - not in {ERROR, WARNING, INFO}
+    priority: 1
+
+  # Test Case 2: Invalid severity value - should cause ConfigurationException
+  - id: "invalid-severity-high"
+    name: "Invalid Severity High"
+    condition: "true"
+    message: "This rule has an invalid severity value"
+    severity: "HIGH"  # Invalid - not in {ERROR, WARNING, INFO}
+    priority: 1
+
+  # Test Case 3: Invalid severity value - should cause ConfigurationException
+  - id: "invalid-severity-low"
+    name: "Invalid Severity Low"
+    condition: "true"
+    message: "This rule has an invalid severity value"
+    severity: "LOW"  # Invalid - not in {ERROR, WARNING, INFO}
+    priority: 1
+
+  # Test Case 4: Invalid severity value - should cause ConfigurationException
+  - id: "invalid-severity-debug"
+    name: "Invalid Severity Debug"
+    condition: "true"
+    message: "This rule has an invalid severity value"
+    severity: "DEBUG"  # Invalid - not in {ERROR, WARNING, INFO}
+    priority: 1
+
+  # Test Case 5: Invalid severity value - should cause ConfigurationException
+  - id: "invalid-severity-fatal"
+    name: "Invalid Severity Fatal"
+    condition: "true"
+    message: "This rule has an invalid severity value"
+    severity: "FATAL"  # Invalid - not in {ERROR, WARNING, INFO}
+    priority: 1
+
+  # Test Case 6: Numeric severity - should cause ConfigurationException
+  - id: "invalid-severity-numeric"
+    name: "Invalid Severity Numeric"
+    condition: "true"
+    message: "This rule has a numeric severity value"
+    severity: "1"  # Invalid - severity must be string enum
+    priority: 1
+
+  # Test Case 7: Mixed case severity - should test case sensitivity
+  - id: "mixed-case-severity-error"
+    name: "Mixed Case Severity Error"
+    condition: "true"
+    message: "This rule has mixed case severity"
+    severity: "error"  # Test: should this be normalized to "ERROR"?
+    priority: 1
+
+  # Test Case 8: Mixed case severity - should test case sensitivity
+  - id: "mixed-case-severity-warning"
+    name: "Mixed Case Severity Warning"
+    condition: "true"
+    message: "This rule has mixed case severity"
+    severity: "Warning"  # Test: should this be normalized to "WARNING"?
+    priority: 1
+
+  # Test Case 9: Mixed case severity - should test case sensitivity
+  - id: "mixed-case-severity-info"
+    name: "Mixed Case Severity Info"
+    condition: "true"
+    message: "This rule has mixed case severity"
+    severity: "info"  # Test: should this be normalized to "INFO"?
+    priority: 1
+
+  # Test Case 10: Empty string severity - should cause validation error
+  - id: "empty-severity"
+    name: "Empty Severity"
+    condition: "true"
+    message: "This rule has empty severity"
+    severity: ""  # Invalid - empty string
+    priority: 1
+
+  # Test Case 11: Whitespace severity - should cause validation error
+  - id: "whitespace-severity"
+    name: "Whitespace Severity"
+    condition: "true"
+    message: "This rule has whitespace severity"
+    severity: "   "  # Invalid - only whitespace
+    priority: 1
+
+  # Test Case 12: Special characters in severity - should cause validation error
+  - id: "special-chars-severity"
+    name: "Special Characters Severity"
+    condition: "true"
+    message: "This rule has special characters in severity"
+    severity: "ERROR!"  # Invalid - contains special characters
+    priority: 1
+
+# NOTE: Rule groups are intentionally omitted from this file
+# as the focus is on testing individual rule severity validation
+# Rule group testing with invalid severities would be handled
+# in the rule group specific test files
+
+# Test Cases for Missing Severity Field:
+# These test cases cannot be represented in YAML as they involve
+# completely omitting the severity field, which would be tested
+# programmatically in the Java test classes:
+#
+# Test Case A: Rule with no severity field - should default to "INFO"
+# Test Case B: Rule with null severity field - should default to "INFO"
+# Test Case C: Rule with undefined severity field - should default to "INFO"

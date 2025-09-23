@@ -1,0 +1,77 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Purpose: Single rule that checks if an attribute value is greater than 100
+#          Demonstrates basic numeric comparison with incoming dataset
+# ============================================================================
+
+metadata:
+  name: "Value Threshold Test - Single Rule"
+  version: "1.0.0"
+  description: "Test rule for checking attribute value greater than 100"
+
+rules:
+  - id: "value-threshold-check"
+    name: "Value Greater Than 100"
+    condition: "#amount != null && #amount > 100"
+    message: "Amount {{#amount}} is greater than 100"
+    severity: "INFO"
+    priority: 1
+
+  - id: "high-value-warning"
+    name: "High Value Warning Check"
+    condition: "#amount != null && #amount > 1000"
+    message: "WARNING: Amount {{#amount}} is high and requires review"
+    severity: "WARNING"
+    priority: 2
+
+  - id: "critical-value-error"
+    name: "Critical Value Error Check"
+    condition: "#amount != null && #amount > 10000"
+    message: "CRITICAL: Amount {{#amount}} exceeds maximum allowed limit"
+    severity: "ERROR"
+    priority: 1
+
+  - id: "currency-validation"
+    name: "Currency Validation"
+    condition: "#currency != null && #currency.length() == 3"
+    message: "Currency {{#currency}} format is valid"
+    severity: "INFO"
+    priority: 3
+
+  - id: "customer-id-required"
+    name: "Customer ID Required"
+    condition: "#customerId != null && #customerId.trim().length() > 0"
+    message: "Customer ID {{#customerId}} is present"
+    severity: "ERROR"
+    priority: 1
+
+rule-groups:
+  # Test group with mixed severities for aggregation testing
+  - id: "value-validation-mixed-group"
+    name: "Value Validation Mixed Severity Group"
+    description: "AND group with ERROR, WARNING, and INFO severities"
+    operator: "AND"
+    rule-ids:
+      - "customer-id-required"
+      - "high-value-warning"
+      - "value-threshold-check"
+
+  # Test group with escalating severity checks
+  - id: "amount-escalation-group"
+    name: "Amount Escalation Group"
+    description: "OR group testing amount thresholds with escalating severities"
+    operator: "OR"
+    rule-ids:
+      - "critical-value-error"
+      - "high-value-warning"
+      - "value-threshold-check"
+
+  # Test group with validation requirements
+  - id: "validation-requirements-group"
+    name: "Validation Requirements Group"
+    description: "AND group for basic validation requirements"
+    operator: "AND"
+    rule-ids:
+      - "customer-id-required"
+      - "currency-validation"

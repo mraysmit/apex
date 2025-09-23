@@ -59,7 +59,10 @@ public class YamlRule {
     
     @JsonProperty("priority")
     private Integer priority;
-    
+
+    @JsonProperty("severity")
+    private String severity;
+
     @JsonProperty("enabled")
     private Boolean enabled;
     
@@ -164,7 +167,15 @@ public class YamlRule {
     public void setPriority(Integer priority) {
         this.priority = priority;
     }
-    
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(String severity) {
+        this.severity = severity;
+    }
+
     public Boolean getEnabled() {
         return enabled;
     }

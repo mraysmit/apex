@@ -169,6 +169,208 @@ mvn test -pl apex-core -Dtest="*Configuration*Test" # Configuration services
 mvn test -pl apex-core -Dtest="*Integration*Test"  # Integration tests
 ```
 
+## Rule Severity Testing
+
+Rule severity is a critical aspect of APEX that determines how rule failures are handled in business logic. Comprehensive severity testing ensures proper validation, error handling, and business decision-making.
+
+### **Severity Testing Categories**
+
+#### **1. Basic Severity Testing**
+Test that severity flows correctly from YAML configuration to RuleResult:
+
+```java
+@Test
+void testRuleSeverityHandling() {
+    // Load YAML configuration with specific severity
+    String yamlConfig = """
+        rules:
+          - id: "test-rule"
+            name: "Test Rule"
+            condition: "#value > 100"
+            message: "Value exceeds threshold"
+            severity: "ERROR"
+        """;
+
+    // Execute rule and verify severity
+    RuleResult result = rulesEngine.evaluate(data);
+    assertEquals("ERROR", result.getSeverity());
+    assertTrue(result.isTriggered());
+}
+```
+
+#### **2. Severity Validation Testing**
+Test handling of invalid severity values and edge cases:
+
+```java
+@Test
+void testInvalidSeverityHandling() {
+    // Test invalid severity values
+    String[] invalidSeverities = {"CRITICAL", "HIGH", "LOW", "DEBUG", "", null};
+
+    for (String invalidSeverity : invalidSeverities) {
+        assertThrows(ValidationException.class, () -> {
+            createRuleWithSeverity(invalidSeverity);
+        });
+    }
+}
+
+@Test
+void testDefaultSeverityBehavior() {
+    // Test that rules without severity default to INFO
+    String yamlConfig = """
+        rules:
+          - id: "default-severity-rule"
+            name: "Default Severity Rule"
+            condition: "true"
+            message: "No severity specified"
+            # severity field omitted
+        """;
+
+    RuleResult result = rulesEngine.evaluate(data);
+    assertEquals("INFO", result.getSeverity()); // Should default to INFO
+}
+```
+
+#### **3. Rule Group Severity Testing**
+Test severity aggregation in rule groups with mixed severity levels:
+
+```java
+@Test
+void testRuleGroupSeverityAggregation() {
+    String yamlConfig = """
+        rules:
+          - id: "error-rule"
+            severity: "ERROR"
+            condition: "false"
+          - id: "warning-rule"
+            severity: "WARNING"
+            condition: "true"
+          - id: "info-rule"
+            severity: "INFO"
+            condition: "true"
+
+        rule-groups:
+          - id: "mixed-severity-group"
+            operator: "AND"
+            rule-ids: ["error-rule", "warning-rule", "info-rule"]
+        """;
+
+    RuleResult result = rulesEngine.evaluateRuleGroup("mixed-severity-group", data);
+
+    // Test severity aggregation logic (highest severity wins)
+    assertEquals("ERROR", result.getSeverity());
+    assertFalse(result.isTriggered()); // AND group fails due to error-rule
+}
+```
+
+#### **4. API Integration Severity Testing**
+Test severity in REST API requests and responses:
+
+```java
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class SeverityApiIntegrationTest {
+
+    @Test
+    void testRuleEvaluationRequestWithSeverity() {
+        RuleEvaluationRequest request = new RuleEvaluationRequest();
+        request.setCondition("#age >= 18");
+        request.setData(Map.of("age", 25));
+        request.setSeverity("ERROR");
+
+        ResponseEntity<RuleEvaluationResponse> response =
+            restTemplate.postForEntity("/api/rules/evaluate", request, RuleEvaluationResponse.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("ERROR", response.getBody().getSeverity());
+    }
+
+    @Test
+    void testBulkRuleEvaluationWithMixedSeverities() {
+        // Test multiple rules with different severities
+        List<RuleEvaluationRequest> requests = Arrays.asList(
+            createRequest("ERROR", "#critical > 0"),
+            createRequest("WARNING", "#warning > 0"),
+            createRequest("INFO", "#info > 0")
+        );
+
+        ResponseEntity<List<RuleEvaluationResponse>> response =
+            restTemplate.postForEntity("/api/rules/evaluate-bulk", requests,
+                new ParameterizedTypeReference<List<RuleEvaluationResponse>>() {});
+
+        List<RuleEvaluationResponse> results = response.getBody();
+        assertEquals("ERROR", results.get(0).getSeverity());
+        assertEquals("WARNING", results.get(1).getSeverity());
+        assertEquals("INFO", results.get(2).getSeverity());
+    }
+}
+```
+
+### **Severity Testing Best Practices**
+
+#### **1. Test All Severity Levels**
+```java
+@ParameterizedTest
+@ValueSource(strings = {"ERROR", "WARNING", "INFO"})
+void testAllSeverityLevels(String severity) {
+    RuleResult result = createAndEvaluateRuleWithSeverity(severity);
+    assertEquals(severity, result.getSeverity());
+}
+```
+
+#### **2. Test Severity in Business Logic**
+```java
+@Test
+void testSeverityBasedBusinessLogic() {
+    List<RuleResult> results = Arrays.asList(
+        createResult("ERROR", false),
+        createResult("WARNING", true),
+        createResult("INFO", true)
+    );
+
+    BusinessProcessor processor = new BusinessProcessor();
+    ProcessingResult result = processor.processResults(results);
+
+    // ERROR should stop processing
+    assertFalse(result.isSuccessful());
+    assertEquals(1, result.getErrorCount());
+    assertEquals(1, result.getWarningCount());
+    assertEquals(1, result.getInfoCount());
+}
+```
+
+#### **3. Test Severity Edge Cases**
+```java
+@Test
+void testSeverityEdgeCases() {
+    // Test case sensitivity
+    assertThrows(ValidationException.class, () ->
+        createRuleWithSeverity("error")); // lowercase should fail
+
+    // Test whitespace handling
+    RuleResult result = createRuleWithSeverity(" ERROR ");
+    assertEquals("ERROR", result.getSeverity()); // Should be trimmed
+
+    // Test null handling
+    RuleResult defaultResult = createRuleWithSeverity(null);
+    assertEquals("INFO", defaultResult.getSeverity()); // Should default to INFO
+}
+```
+
+### **Running Severity Tests**
+
+```bash
+# Run all severity-related tests
+mvn test -Dtest="*Severity*Test"
+
+# Run specific severity test categories
+mvn test -Dtest="SeverityValidationTest"
+mvn test -Dtest="SeverityApiIntegrationTest"
+mvn test -Dtest="SeverityRuleGroupTest"
+
+# Run severity tests with detailed logging
+mvn test -Dtest="*Severity*Test" -Dlogging.level.dev.mars.apex=DEBUG
+```
+
 ## Granular Testing Strategies
 
 ### Test Categories by Speed

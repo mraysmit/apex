@@ -1,0 +1,120 @@
+# ============================================================================
+# APEX YAML Configuration File - Comprehensive Severity Testing
+# ============================================================================
+# Purpose: Test all three severity levels (ERROR, WARNING, INFO) in various
+#          combinations to ensure comprehensive severity support across APEX
+# Used by: SeverityComprehensiveTest.java
+# ============================================================================
+
+metadata:
+  name: "Comprehensive Severity Test - All Levels"
+  version: "1.0.0"
+  description: "Test configuration demonstrating all severity levels with various rule scenarios"
+
+rules:
+  # ERROR severity rules - Critical business logic violations
+  - id: "critical-amount-check"
+    name: "Critical Amount Validation"
+    condition: "#amount != null && #amount > 100000"
+    message: "CRITICAL: Amount {{#amount}} exceeds maximum allowed limit of 100,000"
+    severity: "ERROR"
+    priority: 1
+
+  - id: "mandatory-field-check"
+    name: "Mandatory Field Validation"
+    condition: "#customerId != null && #customerId.trim().length() > 0"
+    message: "CRITICAL: Customer ID is mandatory and cannot be empty"
+    severity: "ERROR"
+    priority: 1
+
+  - id: "compliance-violation-check"
+    name: "Compliance Violation Check"
+    condition: "#riskScore != null && #riskScore <= 85"
+    message: "CRITICAL: Risk score {{#riskScore}} violates compliance threshold (max 85)"
+    severity: "ERROR"
+    priority: 1
+
+  # WARNING severity rules - Important but not critical issues
+  - id: "high-amount-warning"
+    name: "High Amount Warning"
+    condition: "#amount != null && #amount > 50000 && #amount <= 100000"
+    message: "WARNING: Amount {{#amount}} is high and requires additional review"
+    severity: "WARNING"
+    priority: 2
+
+  - id: "incomplete-data-warning"
+    name: "Incomplete Data Warning"
+    condition: "#email == null || #phone == null"
+    message: "WARNING: Contact information is incomplete - missing email or phone"
+    severity: "WARNING"
+    priority: 2
+
+  - id: "unusual-pattern-warning"
+    name: "Unusual Pattern Detection"
+    condition: "#transactionCount != null && #transactionCount > 100"
+    message: "WARNING: Unusual transaction pattern detected - {{#transactionCount}} transactions"
+    severity: "WARNING"
+    priority: 2
+
+  # INFO severity rules - Informational processing and logging
+  - id: "processing-info"
+    name: "Processing Information"
+    condition: "#amount != null && #amount > 0"
+    message: "INFO: Processing transaction for amount {{#amount}}"
+    severity: "INFO"
+    priority: 3
+
+  - id: "data-enrichment-info"
+    name: "Data Enrichment Information"
+    condition: "#currency != null"
+    message: "INFO: Currency {{#currency}} detected for processing"
+    severity: "INFO"
+    priority: 3
+
+  - id: "audit-trail-info"
+    name: "Audit Trail Information"
+    condition: "true"
+    message: "INFO: Transaction processed successfully with all validations"
+    severity: "INFO"
+    priority: 3
+
+rule-groups:
+  # Test group with all ERROR severity rules
+  - id: "critical-validations-group"
+    name: "Critical Validations Group"
+    description: "AND group containing only ERROR severity rules"
+    operator: "AND"
+    rule-ids:
+      - "critical-amount-check"
+      - "mandatory-field-check"
+      - "compliance-violation-check"
+
+  # Test group with all WARNING severity rules
+  - id: "warning-checks-group"
+    name: "Warning Checks Group"
+    description: "OR group containing only WARNING severity rules"
+    operator: "OR"
+    rule-ids:
+      - "high-amount-warning"
+      - "incomplete-data-warning"
+      - "unusual-pattern-warning"
+
+  # Test group with all INFO severity rules
+  - id: "info-processing-group"
+    name: "Information Processing Group"
+    description: "AND group containing only INFO severity rules"
+    operator: "AND"
+    rule-ids:
+      - "processing-info"
+      - "data-enrichment-info"
+      - "audit-trail-info"
+
+  # Test group with mixed severity levels (CRITICAL TEST CASE)
+  - id: "mixed-severity-group"
+    name: "Mixed Severity Group"
+    description: "AND group with ERROR, WARNING, and INFO rules - tests severity aggregation"
+    operator: "AND"
+    rule-ids:
+      - "critical-amount-check"
+      - "high-amount-warning"
+      - "processing-info"

@@ -222,10 +222,11 @@ public class YamlRuleFactory {
                                 "Rule " + name + " triggered";
                 String description = yamlRule.getDescription() != null ? yamlRule.getDescription() :
                                    message;
+                String severity = yamlRule.getSeverity() != null ? yamlRule.getSeverity() : "INFO";
 
-                ruleSet.customRule(name, condition, message, description);
+                ruleSet.customRuleWithSeverity(name, condition, message, description, severity);
 
-                LOGGER.fine("Added rule '" + name + "' to GenericRuleSet for category: " + categoryName);
+                LOGGER.fine("Added rule '" + name + "' with severity '" + severity + "' to GenericRuleSet for category: " + categoryName);
 
             } catch (Exception e) {
                 LOGGER.warning("Failed to add rule '" + yamlRule.getName() +
@@ -416,9 +417,12 @@ public class YamlRuleFactory {
         Set<Category> categories = new HashSet<>();
         categories.add(new Category(categoryName, yamlRule.getPriority() != null ? yamlRule.getPriority() : 100));
 
+        // Extract severity from YAML rule, default to "INFO" if not specified
+        String severity = yamlRule.getSeverity() != null ? yamlRule.getSeverity() : "INFO";
+
         Rule createdRule = new Rule(ruleId, categories, name, condition, message, description,
                                    yamlRule.getPriority() != null ? yamlRule.getPriority() : 100,
-                                   metadata);
+                                   severity, metadata);
 
         // Apply custom properties if available
         if (yamlRule.getCustomProperties() != null && !yamlRule.getCustomProperties().isEmpty()) {
@@ -463,6 +467,9 @@ public class YamlRuleFactory {
             String description = yamlRule.getDescription() != null ? yamlRule.getDescription() : "";
             int priority = yamlRule.getPriority() != null ? yamlRule.getPriority() : 100;
 
+            // Extract severity from YAML rule, default to "INFO" if not specified
+            String severity = yamlRule.getSeverity() != null ? yamlRule.getSeverity() : "INFO";
+
             // Determine category
             Category category = null;
             if (yamlRule.getCategory() != null) {
@@ -475,7 +482,7 @@ public class YamlRuleFactory {
                 category = getOrCreateCategory("default", priority);
             }
 
-            return new Rule(id, category, name, condition, message, description, priority);
+            return new Rule(id, category, name, condition, message, description, priority, severity);
         }
     }
     

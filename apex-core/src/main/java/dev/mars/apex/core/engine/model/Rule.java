@@ -53,6 +53,7 @@ public class Rule implements RuleBase {
     private final String condition;
     private final String message;
     private final String description;
+    private final String severity;
     private final int priority;
     private final RuleMetadata metadata;
 
@@ -66,6 +67,20 @@ public class Rule implements RuleBase {
      * @param message The message to display when the rule applies
      */
     public Rule(String name, String condition, String message) {
+        this(name, condition, message, "INFO"); // Default severity for backward compatibility
+    }
+
+    /**
+     * Create a new business rule with minimal information and severity.
+     * This constructor is provided for compatibility with the legacy Rule class.
+     * It automatically generates an ID, uses a default category, and sets a default priority.
+     *
+     * @param name The name of the rule
+     * @param condition The SpEL condition that determines if the rule applies
+     * @param message The message to display when the rule applies
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     */
+    public Rule(String name, String condition, String message, String severity) {
         this.uuid = UUID.randomUUID();
         this.id = "R" + UUID.randomUUID().toString().substring(0, 8);
         this.categories = new HashSet<>();
@@ -74,6 +89,7 @@ public class Rule implements RuleBase {
         this.condition = condition;
         this.message = message;
         this.description = message; // Use message as description for backward compatibility
+        this.severity = severity != null ? severity : "INFO"; // Default to INFO if null
         this.priority = 100; // Default priority
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
@@ -93,6 +109,23 @@ public class Rule implements RuleBase {
      */
     public Rule(String id, String category, String name, String condition,
                 String message, String description, int priority) {
+        this(id, category, name, condition, message, description, priority, "INFO"); // Default severity
+    }
+
+    /**
+     * Create a new business rule with a single category and severity.
+     *
+     * @param id The unique identifier of the rule
+     * @param category The category of the rule
+     * @param name The name of the rule
+     * @param condition The SpEL condition that determines if the rule applies
+     * @param message The message to display when the rule applies
+     * @param description The description of what the rule does
+     * @param priority The priority of the rule (lower numbers = higher priority)
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     */
+    public Rule(String id, String category, String name, String condition,
+                String message, String description, int priority, String severity) {
         this.uuid = UUID.randomUUID();
         this.id = id;
         this.categories = new HashSet<>();
@@ -101,6 +134,7 @@ public class Rule implements RuleBase {
         this.condition = condition;
         this.message = message;
         this.description = description;
+        this.severity = severity != null ? severity : "INFO"; // Default to INFO if null
         this.priority = priority;
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
@@ -121,10 +155,15 @@ public class Rule implements RuleBase {
      */
     public static Rule fromCategoryNames(String id, Set<String> categoryNames, String name, String condition,
                                         String message, String description, int priority) {
+        return fromCategoryNames(id, categoryNames, name, condition, message, description, priority, "INFO");
+    }
+
+    public static Rule fromCategoryNames(String id, Set<String> categoryNames, String name, String condition,
+                                        String message, String description, int priority, String severity) {
         Set<Category> categoryObjects = categoryNames.stream()
             .map(c -> new Category(c, priority))
             .collect(Collectors.toSet());
-        return new Rule(id, categoryObjects, name, condition, message, description, priority);
+        return new Rule(id, categoryObjects, name, condition, message, description, priority, severity);
     }
 
     /**
@@ -140,6 +179,23 @@ public class Rule implements RuleBase {
      */
     public Rule(String id, Category category, String name, String condition,
                 String message, String description, int priority) {
+        this(id, category, name, condition, message, description, priority, "INFO"); // Default severity
+    }
+
+    /**
+     * Create a new business rule with a single category object and severity.
+     *
+     * @param id The unique identifier of the rule
+     * @param category The category object of the rule
+     * @param name The name of the rule
+     * @param condition The SpEL condition that determines if the rule applies
+     * @param message The message to display when the rule applies
+     * @param description The description of what the rule does
+     * @param priority The priority of the rule (lower numbers = higher priority)
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     */
+    public Rule(String id, Category category, String name, String condition,
+                String message, String description, int priority, String severity) {
         this.uuid = UUID.randomUUID();
         this.id = id;
         this.categories = new HashSet<>();
@@ -148,6 +204,7 @@ public class Rule implements RuleBase {
         this.condition = condition;
         this.message = message;
         this.description = description;
+        this.severity = severity != null ? severity : "INFO"; // Default to INFO if null
         this.priority = priority;
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
@@ -167,6 +224,23 @@ public class Rule implements RuleBase {
      */
     public Rule(String id, Set<Category> categories, String name, String condition,
                 String message, String description, int priority) {
+        this(id, categories, name, condition, message, description, priority, "INFO"); // Default severity
+    }
+
+    /**
+     * Create a new business rule with multiple category objects and severity.
+     *
+     * @param id The unique identifier of the rule
+     * @param categories The category objects of the rule
+     * @param name The name of the rule
+     * @param condition The SpEL condition that determines if the rule applies
+     * @param message The message to display when the rule applies
+     * @param description The description of what the rule does
+     * @param priority The priority of the rule (lower numbers = higher priority)
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     */
+    public Rule(String id, Set<Category> categories, String name, String condition,
+                String message, String description, int priority, String severity) {
         this.uuid = UUID.randomUUID();
         this.id = id;
         this.categories = new HashSet<>(categories);
@@ -174,6 +248,7 @@ public class Rule implements RuleBase {
         this.condition = condition;
         this.message = message;
         this.description = description;
+        this.severity = severity != null ? severity : "INFO"; // Default to INFO if null
         this.priority = priority;
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
@@ -195,6 +270,25 @@ public class Rule implements RuleBase {
      */
     public Rule(String id, Set<Category> categories, String name, String condition,
                 String message, String description, int priority, RuleMetadata metadata) {
+        this(id, categories, name, condition, message, description, priority, "INFO", metadata); // Default severity
+    }
+
+    /**
+     * Create a new business rule with full metadata support and severity.
+     * This is the primary constructor for creating rules with comprehensive metadata and severity.
+     *
+     * @param id The unique identifier of the rule
+     * @param categories The category objects of the rule
+     * @param name The name of the rule
+     * @param condition The SpEL condition that determines if the rule applies
+     * @param message The message to display when the rule applies
+     * @param description The description of what the rule does
+     * @param priority The priority of the rule (lower numbers = higher priority)
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @param metadata The extensible metadata for the rule
+     */
+    public Rule(String id, Set<Category> categories, String name, String condition,
+                String message, String description, int priority, String severity, RuleMetadata metadata) {
         this.uuid = UUID.randomUUID();
         this.id = id;
         this.categories = new HashSet<>(categories);
@@ -202,6 +296,7 @@ public class Rule implements RuleBase {
         this.condition = condition;
         this.message = message;
         this.description = description;
+        this.severity = severity != null ? severity : "INFO"; // Default to INFO if null
         this.priority = priority;
         this.metadata = metadata != null ? metadata : RuleMetadata.builder().createdByUser("system").build();
     }
@@ -292,7 +387,7 @@ public class Rule implements RuleBase {
 
     /**
      * Get the description of the rule.
-     * 
+     *
      * @return The rule description
      */
     public String getDescription() {
@@ -300,8 +395,17 @@ public class Rule implements RuleBase {
     }
 
     /**
+     * Get the severity of the rule.
+     *
+     * @return The rule severity (ERROR, WARNING, INFO)
+     */
+    public String getSeverity() {
+        return severity;
+    }
+
+    /**
      * Get the priority of the rule.
-     * 
+     *
      * @return The rule priority
      */
     public int getPriority() {

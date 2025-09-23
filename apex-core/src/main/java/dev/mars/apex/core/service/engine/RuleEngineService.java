@@ -86,7 +86,7 @@ public class RuleEngineService {
                 // Create a proper RuleResult with the rule name and message
                 RuleResult ruleResult;
                 if (baseResult.getResultType() == RuleResult.ResultType.MATCH) {
-                    ruleResult = RuleResult.match(rule.getName(), rule.getMessage());
+                    ruleResult = RuleResult.match(rule.getName(), rule.getMessage(), rule.getSeverity());
                 } else if (baseResult.getResultType() == RuleResult.ResultType.ERROR) {
                     ruleResult = RuleResult.error(rule.getName(), baseResult.getMessage());
                     // Print to System.err for test verification

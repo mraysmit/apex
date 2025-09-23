@@ -19,19 +19,19 @@ rules:
     message: "Separate Rule 1 passed"
     severity: "ERROR"
     priority: 1
-    
+
   - id: "separate-rule-2"
     name: "Always False Rule 2"
     condition: "false"
     message: "Separate Rule 2 failed"
-    severity: "ERROR"
+    severity: "WARNING"
     priority: 2
-    
+
   - id: "separate-rule-3"
     name: "Always True Rule 3"
     condition: "true"
     message: "Separate Rule 3 passed"
-    severity: "ERROR"
+    severity: "INFO"
     priority: 3
 
 rule-groups:
@@ -55,6 +55,25 @@ rule-groups:
   - id: "separate-and-mixed-group"
     name: "Separate AND Mixed Group"
     description: "AND group with mixed true/false rules"
+    operator: "AND"
+    rule-ids:
+      - "separate-rule-1"
+      - "separate-rule-2"
+      - "separate-rule-3"
+
+  # Additional rule groups for mixed severity testing
+  - id: "severity-escalation-group"
+    name: "Severity Escalation Group"
+    description: "OR group testing severity escalation from INFO to WARNING to ERROR"
+    operator: "OR"
+    rule-ids:
+      - "separate-rule-3"
+      - "separate-rule-2"
+      - "separate-rule-1"
+
+  - id: "mixed-severity-validation-group"
+    name: "Mixed Severity Validation Group"
+    description: "AND group with all three severity levels for comprehensive testing"
     operator: "AND"
     rule-ids:
       - "separate-rule-1"

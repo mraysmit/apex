@@ -267,6 +267,26 @@ public class RuleSet {
         }
 
         /**
+         * Add a custom rule with additional description and severity.
+         *
+         * @param name The name of the rule
+         * @param condition The SpEL condition
+         * @param message The message when the rule matches
+         * @param description Detailed description of what the rule does
+         * @param severity The severity level (ERROR, WARNING, INFO)
+         * @return This builder for method chaining
+         */
+        public GenericRuleSet customRuleWithSeverity(String name, String condition, String message, String description, String severity) {
+            validateRuleParameters(name, condition, message);
+            validateParameter(description, "description cannot be null or empty");
+            checkForDuplicateRuleName(name);
+
+            Rule rule = createRuleWithMetadata(name, condition, message, description, severity);
+            rules.add(rule);
+            return this;
+        }
+
+        /**
          * Add multiple rules at once for bulk operations.
          *
          * @param ruleDefinitions List of rule definitions
@@ -356,6 +376,13 @@ public class RuleSet {
          * Create a rule with comprehensive metadata support and custom description.
          */
         private Rule createRuleWithMetadata(String name, String condition, String message, String description) {
+            return createRuleWithMetadata(name, condition, message, description, "INFO");
+        }
+
+        /**
+         * Create a rule with comprehensive metadata support, custom description, and severity.
+         */
+        private Rule createRuleWithMetadata(String name, String condition, String message, String description, String severity) {
             String uniqueId = generateUniqueRuleId(name);
 
             return config.rule(uniqueId)
@@ -365,6 +392,7 @@ public class RuleSet {
                     .withMessage(message)
                     .withDescription(description)
                     .withPriority(priorityCounter.getAndIncrement())
+                    .withSeverity(severity != null ? severity : "INFO")
                     .withCreatedByUser(createdByUser)
                     .withBusinessDomain(businessDomain)
                     .withBusinessOwner(businessOwner)

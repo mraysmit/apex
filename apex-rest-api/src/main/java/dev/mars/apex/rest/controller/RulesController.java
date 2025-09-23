@@ -110,11 +110,13 @@ public class RulesController {
 
         boolean result = rulesService.check(request.getCondition(), request.getData());
 
+        String severity = request.getSeverity() != null ? request.getSeverity() : "INFO";
         RuleEvaluationResponse response = RuleEvaluationResponse.success(
             result,
             request.getRuleName() != null ? request.getRuleName() : "check-rule",
             result ? (request.getMessage() != null ? request.getMessage() : "Rule matched")
-                   : "Rule did not match"
+                   : "Rule did not match",
+            severity
         );
 
         response.setEvaluationId(UUID.randomUUID().toString());
@@ -365,10 +367,12 @@ public class RulesController {
 
         try {
             // Create Rule object from request
+            String severity = request.getRule().getSeverity() != null ? request.getRule().getSeverity() : "INFO";
             Rule rule = new Rule(
                 request.getRule().getName(),
                 request.getRule().getCondition(),
-                request.getRule().getMessage()
+                request.getRule().getMessage(),
+                severity
             );
 
             // Execute the rule
@@ -381,6 +385,7 @@ public class RulesController {
                 "name", rule.getName(),
                 "condition", rule.getCondition(),
                 "message", rule.getMessage(),
+                "severity", rule.getSeverity(),
                 "priority", rule.getPriority()
             ));
             response.put("facts", request.getFacts());
@@ -388,6 +393,7 @@ public class RulesController {
                 "triggered", result.isTriggered(),
                 "ruleName", result.getRuleName(),
                 "message", result.getMessage(),
+                "severity", result.getSeverity(),
                 "resultType", result.getResultType().toString(),
                 "timestamp", result.getTimestamp(),
                 "hasPerformanceMetrics", result.hasPerformanceMetrics()
@@ -426,7 +432,8 @@ public class RulesController {
             // Convert DTOs to Rule objects
             List<Rule> rules = new ArrayList<>();
             for (RuleDto ruleDto : request.getRules()) {
-                Rule rule = new Rule(ruleDto.getName(), ruleDto.getCondition(), ruleDto.getMessage());
+                String severity = ruleDto.getSeverity() != null ? ruleDto.getSeverity() : "INFO";
+                Rule rule = new Rule(ruleDto.getName(), ruleDto.getCondition(), ruleDto.getMessage(), severity);
                 rules.add(rule);
             }
 
@@ -444,6 +451,7 @@ public class RulesController {
                     "triggered", result.isTriggered(),
                     "ruleName", result.getRuleName(),
                     "message", result.getMessage(),
+                    "severity", result.getSeverity(),
                     "resultType", result.getResultType().toString(),
                     "timestamp", result.getTimestamp()
                 ));
@@ -494,6 +502,7 @@ public class RulesController {
         private String condition;
         private String message;
         private String priority;
+        private String severity;
 
         // Constructors
         public RuleDto() {}
@@ -502,6 +511,14 @@ public class RulesController {
             this.name = name;
             this.condition = condition;
             this.message = message;
+            this.severity = "INFO"; // Default severity
+        }
+
+        public RuleDto(String name, String condition, String message, String severity) {
+            this.name = name;
+            this.condition = condition;
+            this.message = message;
+            this.severity = severity != null ? severity : "INFO";
         }
 
         // Getters and setters
@@ -513,6 +530,8 @@ public class RulesController {
         public void setMessage(String message) { this.message = message; }
         public String getPriority() { return priority; }
         public void setPriority(String priority) { this.priority = priority; }
+        public String getSeverity() { return severity; }
+        public void setSeverity(String severity) { this.severity = severity; }
     }
 
     public static class BatchRuleExecutionRequest {

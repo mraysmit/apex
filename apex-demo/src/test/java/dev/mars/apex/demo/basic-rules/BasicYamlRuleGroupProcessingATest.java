@@ -68,7 +68,7 @@ public class BasicYamlRuleGroupProcessingATest {
         logger.info("Setting up APEX services for basic rule group processing tests...");
         this.yamlLoader = new YamlConfigurationLoader();
         this.rulesEngineService = new YamlRulesEngineService();
-        logger.info("✅ APEX services initialized successfully");
+        logger.info(" APEX services initialized successfully");
     }
 
     /**
@@ -97,7 +97,7 @@ public class BasicYamlRuleGroupProcessingATest {
             assertEquals(3, config.getRules().size(), "Should have 3 rules");
             assertEquals(3, config.getRuleGroups().size(), "Should have 3 rule groups");
             
-            logger.info("✅ Configuration loaded: {} rules, {} rule groups", 
+            logger.info(" Configuration loaded: {} rules, {} rule groups", 
                 config.getRules().size(), config.getRuleGroups().size());
             
             // Create RulesEngine
@@ -113,7 +113,7 @@ public class BasicYamlRuleGroupProcessingATest {
             // Test AND group with mixed rules (should fail)
             testAndGroupWithMixedRules(engine);
             
-            logger.info("✅ All combined configuration tests passed");
+            logger.info(" All combined configuration tests passed");
             
         } catch (YamlConfigurationException e) {
             logger.error("❌ Failed to load or process configuration: {}", e.getMessage());
@@ -151,7 +151,7 @@ public class BasicYamlRuleGroupProcessingATest {
             assertEquals(3, config.getRules().size(), "Should have 3 rules from referenced file");
             assertEquals(3, config.getRuleGroups().size(), "Should have 3 rule groups");
 
-            logger.info("✅ Configuration with automatic rule references loaded: {} rules, {} rule groups",
+            logger.info(" Configuration with automatic rule references loaded: {} rules, {} rule groups",
                 config.getRules().size(), config.getRuleGroups().size());
 
             // Create RulesEngine from the configuration with resolved references
@@ -166,13 +166,13 @@ public class BasicYamlRuleGroupProcessingATest {
             assertNotNull(engine.getConfiguration().getRuleGroupById("separate-and-mixed-group"),
                 "AND mixed group should be found");
 
-            logger.info("✅ Automatic rule reference resolution successful");
+            logger.info(" Automatic rule reference resolution successful");
             
             // Test rule group processing with merged configuration
             testAndGroupWithTrueRules(engine);
             testOrGroupWithMixedRules(engine);
             
-            logger.info("✅ All separate files tests passed");
+            logger.info(" All separate files tests passed");
             
         } catch (YamlConfigurationException e) {
             logger.error("❌ Failed to load or process separate configurations: {}", e.getMessage());
@@ -182,65 +182,192 @@ public class BasicYamlRuleGroupProcessingATest {
 
     /**
      * Test AND group with true rules (should pass).
+     * Enhanced with comprehensive RuleResult API validation.
      */
     private void testAndGroupWithTrueRules(RulesEngine engine) {
         logger.info("Testing AND group with true rules...");
-        
+
         RuleGroup andGroup = engine.getConfiguration().getRuleGroupById("separate-and-group");
         assertNotNull(andGroup, "AND group should be found");
         assertTrue(andGroup.isAndOperator(), "Should be AND operator");
-        
+
         // Execute rule group - uses separate-rule-1 (true) and separate-rule-3 (true)
         Map<String, Object> testData = Map.of();
         RuleResult result = engine.executeRuleGroupsList(List.of(andGroup), testData);
-        
+
+        // Enhanced RuleResult validation using new API methods
         assertNotNull(result, "Result should not be null");
         assertTrue(result.isTriggered(), "AND group with all true rules should pass");
-        
-        logger.info("✅ AND group with true rules passed: {}", 
-            result.getMessage() != null ? result.getMessage() : "No message");
+        assertTrue(result.isSuccess(), "RuleResult.isSuccess() should return true for successful rule group");
+        assertFalse(result.hasFailures(), "RuleResult.hasFailures() should return false for successful rule group");
+        assertTrue(result.getFailureMessages().isEmpty(), "RuleResult.getFailureMessages() should be empty for success");
+        assertNotNull(result.getEnrichedData(), "RuleResult.getEnrichedData() should not be null");
+
+        // Log comprehensive RuleResult details
+        logger.info("=== AND Group Success - RuleResult API Details ===");
+        logger.info("result.isTriggered(): {}", result.isTriggered());
+        logger.info("result.isSuccess(): {}", result.isSuccess());
+        logger.info("result.hasFailures(): {}", result.hasFailures());
+        logger.info("result.getFailureMessages(): {}", result.getFailureMessages());
+        logger.info("result.getEnrichedData(): {}", result.getEnrichedData());
+        logger.info("result.getMessage(): {}", result.getMessage() != null ? result.getMessage() : "No message");
+
+        logger.info(" AND group with true rules passed with comprehensive validation");
     }
 
     /**
      * Test OR group with mixed rules (should pass).
+     * Enhanced with comprehensive RuleResult API validation.
      */
     private void testOrGroupWithMixedRules(RulesEngine engine) {
         logger.info("Testing OR group with mixed rules...");
-        
+
         RuleGroup orGroup = engine.getConfiguration().getRuleGroupById("separate-or-group");
         assertNotNull(orGroup, "OR group should be found");
         assertFalse(orGroup.isAndOperator(), "Should be OR operator");
-        
+
         // Execute rule group - uses separate-rule-1 (true), separate-rule-2 (false), separate-rule-3 (true)
         Map<String, Object> testData = Map.of();
         RuleResult result = engine.executeRuleGroupsList(List.of(orGroup), testData);
-        
+
+        // Enhanced RuleResult validation using new API methods
         assertNotNull(result, "Result should not be null");
         assertTrue(result.isTriggered(), "OR group with at least one true rule should pass");
-        
-        logger.info("✅ OR group with mixed rules passed: {}", 
-            result.getMessage() != null ? result.getMessage() : "No message");
+        assertTrue(result.isSuccess(), "RuleResult.isSuccess() should return true for successful OR group");
+        assertFalse(result.hasFailures(), "RuleResult.hasFailures() should return false for successful OR group");
+        assertTrue(result.getFailureMessages().isEmpty(), "RuleResult.getFailureMessages() should be empty for success");
+        assertNotNull(result.getEnrichedData(), "RuleResult.getEnrichedData() should not be null");
+
+        // Log comprehensive RuleResult details
+        logger.info("=== OR Group Success - RuleResult API Details ===");
+        logger.info("result.isTriggered(): {}", result.isTriggered());
+        logger.info("result.isSuccess(): {}", result.isSuccess());
+        logger.info("result.hasFailures(): {}", result.hasFailures());
+        logger.info("result.getFailureMessages(): {}", result.getFailureMessages());
+        logger.info("result.getEnrichedData(): {}", result.getEnrichedData());
+        logger.info("result.getMessage(): {}", result.getMessage() != null ? result.getMessage() : "No message");
+
+        logger.info(" OR group with mixed rules passed with comprehensive validation");
     }
 
     /**
      * Test AND group with mixed rules (should fail).
+     * Enhanced with comprehensive RuleResult API validation for failure scenarios.
      */
     private void testAndGroupWithMixedRules(RulesEngine engine) {
         logger.info("Testing AND group with mixed rules...");
-        
+
         RuleGroup andMixedGroup = engine.getConfiguration().getRuleGroupById("separate-and-mixed-group");
         assertNotNull(andMixedGroup, "AND mixed group should be found");
         assertTrue(andMixedGroup.isAndOperator(), "Should be AND operator");
-        
+
         // Execute rule group - uses separate-rule-1 (true), separate-rule-2 (false), separate-rule-3 (true)
         Map<String, Object> testData = Map.of();
         RuleResult result = engine.executeRuleGroupsList(List.of(andMixedGroup), testData);
-        
+
+        // Enhanced RuleResult validation for failure scenario
         assertNotNull(result, "Result should not be null");
         assertFalse(result.isTriggered(), "AND group with mixed rules should fail");
-        
-        logger.info("✅ AND group with mixed rules failed as expected: {}", 
-            result.getMessage() != null ? result.getMessage() : "No message");
+
+        // Note: For rule group failures, isSuccess() may still be true as the evaluation completed successfully
+        // The failure is in the business logic (rule group didn't match), not in the execution
+        assertNotNull(result.getEnrichedData(), "RuleResult.getEnrichedData() should not be null even for failures");
+
+        // Log comprehensive RuleResult details for failure case
+        logger.info("=== AND Group Failure - RuleResult API Details ===");
+        logger.info("result.isTriggered(): {}", result.isTriggered());
+        logger.info("result.isSuccess(): {}", result.isSuccess());
+        logger.info("result.hasFailures(): {}", result.hasFailures());
+        logger.info("result.getFailureMessages(): {}", result.getFailureMessages());
+        logger.info("result.getEnrichedData(): {}", result.getEnrichedData());
+        logger.info("result.getMessage(): {}", result.getMessage() != null ? result.getMessage() : "No message");
+
+        logger.info(" AND group with mixed rules failed as expected with comprehensive validation");
+    }
+
+    /**
+     * Test comprehensive RuleResult API methods for rule group processing.
+     * This test demonstrates all the enhanced RuleResult API methods added for
+     * comprehensive result validation and programmatic access.
+     */
+    @Test
+    @DisplayName("Test comprehensive RuleResult API methods for rule groups")
+    void testRuleResultApiMethodsForRuleGroups() {
+        logger.info("=== Testing Comprehensive RuleResult API Methods for Rule Groups ===");
+
+        try {
+            // Load combined configuration for this test
+            YamlRuleConfiguration config = yamlLoader.loadFromFile(
+                "src/test/java/dev/mars/apex/demo/basic-rules/combined-config.yaml"
+            );
+
+            assertNotNull(config, "Configuration should be loaded");
+
+            // Create RulesEngine
+            RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+            assertNotNull(engine, "RulesEngine should be created");
+
+            // Test 1: Successful rule group (AND with all true rules)
+            logger.info("--- Test 1: Successful AND Rule Group ---");
+            RuleGroup successGroup = engine.getConfiguration().getRuleGroupById("separate-and-group");
+            assertNotNull(successGroup, "Success group should be found");
+
+            Map<String, Object> testData = Map.of();
+            RuleResult successResult = engine.executeRuleGroupsList(List.of(successGroup), testData);
+
+            // Demonstrate all RuleResult API methods for success case
+            logger.info("=== Demonstrating RuleResult API Methods - Success Case ===");
+            logger.info("result.isTriggered(): {}", successResult.isTriggered());
+            logger.info("result.isSuccess(): {}", successResult.isSuccess());
+            logger.info("result.hasFailures(): {}", successResult.hasFailures());
+            logger.info("result.getFailureMessages(): {}", successResult.getFailureMessages());
+            logger.info("result.getEnrichedData(): {}", successResult.getEnrichedData());
+            logger.info("result.getRuleName(): {}", successResult.getRuleName());
+            logger.info("result.getMessage(): {}", successResult.getMessage());
+            logger.info("result.getResultType(): {}", successResult.getResultType());
+            logger.info("result.getTimestamp(): {}", successResult.getTimestamp());
+
+            // Verify API methods work correctly for success case
+            assertTrue(successResult.isTriggered(), "isTriggered() should return true for successful rule group");
+            assertTrue(successResult.isSuccess(), "isSuccess() should return true for successful rule group");
+            assertFalse(successResult.hasFailures(), "hasFailures() should return false for successful rule group");
+            assertTrue(successResult.getFailureMessages().isEmpty(), "getFailureMessages() should return empty list for success");
+            assertNotNull(successResult.getEnrichedData(), "getEnrichedData() should return data map");
+            assertNotNull(successResult.getRuleName(), "getRuleName() should not be null");
+            assertNotNull(successResult.getTimestamp(), "getTimestamp() should not be null");
+
+            // Test 2: Failed rule group (AND with mixed rules)
+            logger.info("--- Test 2: Failed AND Rule Group ---");
+            RuleGroup failGroup = engine.getConfiguration().getRuleGroupById("separate-and-mixed-group");
+            assertNotNull(failGroup, "Fail group should be found");
+
+            RuleResult failResult = engine.executeRuleGroupsList(List.of(failGroup), testData);
+
+            // Demonstrate all RuleResult API methods for failure case
+            logger.info("=== Demonstrating RuleResult API Methods - Failure Case ===");
+            logger.info("result.isTriggered(): {}", failResult.isTriggered());
+            logger.info("result.isSuccess(): {}", failResult.isSuccess());
+            logger.info("result.hasFailures(): {}", failResult.hasFailures());
+            logger.info("result.getFailureMessages(): {}", failResult.getFailureMessages());
+            logger.info("result.getEnrichedData(): {}", failResult.getEnrichedData());
+            logger.info("result.getRuleName(): {}", failResult.getRuleName());
+            logger.info("result.getMessage(): {}", failResult.getMessage());
+            logger.info("result.getResultType(): {}", failResult.getResultType());
+            logger.info("result.getTimestamp(): {}", failResult.getTimestamp());
+
+            // Verify API methods work correctly for failure case
+            assertFalse(failResult.isTriggered(), "isTriggered() should return false for failed rule group");
+            assertNotNull(failResult.getEnrichedData(), "getEnrichedData() should still return data map even on failure");
+            assertNotNull(failResult.getRuleName(), "getRuleName() should not be null");
+            assertNotNull(failResult.getTimestamp(), "getTimestamp() should not be null");
+
+            logger.info(" All RuleResult API methods working correctly for rule groups");
+            logger.info(" APEX system provides complete programmatic access to rule group results");
+
+        } catch (YamlConfigurationException e) {
+            logger.error("❌ Failed to load or process configuration: {}", e.getMessage());
+            fail("Failed to load or process configuration: " + e.getMessage());
+        }
     }
 
 

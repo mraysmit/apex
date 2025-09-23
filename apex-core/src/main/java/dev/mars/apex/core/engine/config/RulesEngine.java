@@ -205,7 +205,7 @@ public class RulesEngine {
             TestAwareLogger.warn(logger, "Missing parameters for rule '{}': {}", rule.getName(), missingParameters);
             RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition());
             LoggingContext.clearRuleContext();
-            return RuleResult.error(rule.getName(), "Missing parameters: " + missingParameters, metrics);
+            return RuleResult.error(rule.getName(), "Missing parameters: " + missingParameters, rule.getSeverity(), metrics);
         }
 
         StandardEvaluationContext context = createContext(facts);
@@ -224,7 +224,8 @@ public class RulesEngine {
             if (result != null && result) {
                 logger.audit("RULE_MATCH", rule.getName(), "Rule matched successfully");
                 LoggingContext.clearRuleContext();
-                return RuleResult.match(rule.getName(), rule.getMessage(), metrics);
+
+                return RuleResult.match(rule.getName(), rule.getMessage(), rule.getSeverity(), metrics);
             } else {
                 LoggingContext.clearRuleContext();
                 return RuleResult.noMatch(metrics);
@@ -303,7 +304,7 @@ public class RulesEngine {
 
                 if (result != null && result) {
                     logger.info("Rule matched: {}", rule.getName());
-                    return RuleResult.match(rule.getName(), rule.getMessage());
+                    return RuleResult.match(rule.getName(), rule.getMessage(), rule.getSeverity());
                 }
             } catch (Exception e) {
                 logger.warn("Error evaluating rule '{}': {}", rule.getName(), e.getMessage(), e);
@@ -412,7 +413,7 @@ public class RulesEngine {
 
                     if (result != null && result) {
                         logger.info("Rule matched: {}", rule.getName());
-                        return RuleResult.match(rule.getName(), rule.getMessage());
+                        return RuleResult.match(rule.getName(), rule.getMessage(), rule.getSeverity());
                     }
                 } else if (ruleObj instanceof RuleGroup) {
                     RuleGroup group = (RuleGroup) ruleObj;

@@ -204,7 +204,7 @@ public class RuleEvaluationService {
             boolean result = rulesService.check(condition, data);
             
             RuleEvaluationResponse response = RuleEvaluationResponse.success(
-                result, "rule-evaluation", result ? "Rule matched" : "Rule did not match"
+                result, "rule-evaluation", result ? "Rule matched" : "Rule did not match", "INFO"
             );
             
             // Add performance metrics if requested

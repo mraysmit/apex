@@ -1244,21 +1244,44 @@ open http://localhost:8080/swagger-ui.html
 ### Example Usage
 
 ```bash
-# Simple rule evaluation
+# Simple rule evaluation with severity
 curl -X POST http://localhost:8080/api/rules/check \
   -H "Content-Type: application/json" \
   -d '{
     "condition": "#age >= 18",
     "data": {"age": 25},
-    "ruleName": "age-check"
+    "ruleName": "age-check",
+    "severity": "ERROR"
   }'
 
-# Response
+# Response with severity
 {
   "success": true,
   "matched": true,
   "ruleName": "age-check",
   "message": "Rule matched",
+  "severity": "ERROR",
+  "timestamp": "2024-07-27T10:30:00Z"
+}
+
+# Example with different severity levels
+curl -X POST http://localhost:8080/api/rules/check \
+  -H "Content-Type: application/json" \
+  -d '{
+    "condition": "#amount > 10000",
+    "data": {"amount": 15000},
+    "ruleName": "high-value-check",
+    "severity": "WARNING",
+    "message": "High value transaction requires review"
+  }'
+
+# Warning response
+{
+  "success": true,
+  "matched": true,
+  "ruleName": "high-value-check",
+  "message": "High value transaction requires review",
+  "severity": "WARNING",
   "timestamp": "2024-07-27T10:30:00Z"
 }
 ```
@@ -1270,6 +1293,8 @@ curl -X POST http://localhost:8080/api/rules/check \
 - **Performance Monitoring**: Built-in health checks and metrics
 - **Named Rules**: Define and reuse named rules
 - **Comprehensive Validation**: Multi-rule validation with detailed error reporting
+- **Severity Support**: Full support for ERROR, WARNING, and INFO severity levels in requests and responses
+- **Rule Group Evaluation**: Evaluate multiple rules with severity aggregation
 
 See the [REST API README](apex-rest-api/README.md) for complete documentation.
 

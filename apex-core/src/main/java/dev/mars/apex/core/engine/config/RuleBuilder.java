@@ -49,6 +49,7 @@ public class RuleBuilder {
     private String message;
     private String description;
     private int priority = 100; // Default priority
+    private String severity = "INFO"; // Default severity
 
     // Metadata builder
     private RuleMetadata.Builder metadataBuilder = RuleMetadata.builder();
@@ -192,6 +193,17 @@ public class RuleBuilder {
      */
     public RuleBuilder withPriority(int priority) {
         this.priority = priority;
+        return this;
+    }
+
+    /**
+     * Set the severity for the rule.
+     *
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @return This builder for method chaining
+     */
+    public RuleBuilder withSeverity(String severity) {
+        this.severity = severity != null ? severity : "INFO";
         return this;
     }
 
@@ -359,7 +371,7 @@ public class RuleBuilder {
         // Build metadata
         RuleMetadata metadata = metadataBuilder.build();
 
-        Rule rule = new Rule(id, categories, name, condition, message, description, priority, metadata);
+        Rule rule = new Rule(id, categories, name, condition, message, description, priority, severity, metadata);
 
         // Auto-register the rule if configuration is available
         if (configuration != null) {
