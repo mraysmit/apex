@@ -1,6 +1,7 @@
 package dev.mars.apex.core.config.yaml;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.mars.apex.core.constants.SeverityConstants;
 
 import java.util.List;
 import java.util.Map;
@@ -59,7 +60,10 @@ public class YamlEnrichment {
     
     @JsonProperty("condition")
     private String condition; // SpEL condition for when to apply this enrichment
-    
+
+    @JsonProperty("severity")
+    private String severity; // Severity level: ERROR, WARNING, INFO
+
     @JsonProperty("field-mappings")
     private List<FieldMapping> fieldMappings;
 
@@ -92,6 +96,7 @@ public class YamlEnrichment {
     public YamlEnrichment() {
         this.enabled = true;
         this.priority = 100;
+        this.severity = SeverityConstants.INFO; // Default severity
     }
     
     // Getters and setters
@@ -158,7 +163,15 @@ public class YamlEnrichment {
     public void setCondition(String condition) {
         this.condition = condition;
     }
-    
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(String severity) {
+        this.severity = severity;
+    }
+
     public List<FieldMapping> getFieldMappings() {
         return fieldMappings;
     }

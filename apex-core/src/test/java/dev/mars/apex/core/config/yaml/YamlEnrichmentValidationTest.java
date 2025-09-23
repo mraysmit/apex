@@ -277,4 +277,91 @@ class YamlEnrichmentValidationTest {
                     target-field: "customerName"
             """;
     }
+
+    @Test
+    @DisplayName("Should validate enrichment with valid severity successfully")
+    void shouldValidateEnrichmentWithValidSeveritySuccessfully() {
+        // Given
+        String validYaml = createEnrichmentYamlWithValidSeverity();
+
+        // When & Then
+        assertDoesNotThrow(() -> {
+            InputStream inputStream = new ByteArrayInputStream(validYaml.getBytes(StandardCharsets.UTF_8));
+            configurationLoader.loadFromStream(inputStream);
+        });
+    }
+
+    @Test
+    @DisplayName("Should fail validation when enrichment has invalid severity")
+    void shouldFailValidationWhenEnrichmentHasInvalidSeverity() {
+        // Given
+        String invalidYaml = createEnrichmentYamlWithInvalidSeverity();
+
+        // When & Then
+        YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
+            InputStream inputStream = new ByteArrayInputStream(invalidYaml.getBytes(StandardCharsets.UTF_8));
+            configurationLoader.loadFromStream(inputStream);
+        });
+
+        assertTrue(exception.getMessage().contains("invalid severity"),
+                   "Expected message to contain 'invalid severity', but was: " + exception.getMessage());
+        assertTrue(exception.getMessage().contains("Must be one of:"),
+                   "Expected message to contain 'Must be one of:', but was: " + exception.getMessage());
+        assertTrue(exception.getMessage().contains("INFO") &&
+                   exception.getMessage().contains("WARNING") &&
+                   exception.getMessage().contains("ERROR"),
+                   "Expected message to contain all severity levels, but was: " + exception.getMessage());
+    }
+
+    private String createEnrichmentYamlWithValidSeverity() {
+        return """
+            metadata:
+              name: "Test Configuration"
+              version: "1.0.0"
+              description: "Test configuration for enrichment validation"
+              type: "rule-config"
+
+            data-sources:
+              - name: "testService"
+                type: "inline"
+
+            enrichments:
+              - id: "test-enrichment"
+                type: "lookup-enrichment"
+                severity: "WARNING"
+                condition: "#customerId != null"
+                lookup-config:
+                  lookup-service: "testService"
+                  lookup-key: "#customerId"
+                field-mappings:
+                  - source-field: "name"
+                    target-field: "customerName"
+            """;
+    }
+
+    private String createEnrichmentYamlWithInvalidSeverity() {
+        return """
+            metadata:
+              name: "Test Configuration"
+              version: "1.0.0"
+              description: "Test configuration for enrichment validation"
+              type: "rule-config"
+
+            data-sources:
+              - name: "testService"
+                type: "inline"
+
+            enrichments:
+              - id: "test-enrichment"
+                type: "lookup-enrichment"
+                severity: "CRITICAL"
+                condition: "#customerId != null"
+                lookup-config:
+                  lookup-service: "testService"
+                  lookup-key: "#customerId"
+                field-mappings:
+                  - source-field: "name"
+                    target-field: "customerName"
+            """;
+    }
 }

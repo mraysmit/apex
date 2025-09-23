@@ -1002,6 +1002,15 @@ public class YamlConfigurationLoader {
         // Validate condition expression if present
         validateEnrichmentCondition(enrichment);
 
+        // Validate severity if present
+        if (enrichment.getSeverity() != null) {
+            String severity = enrichment.getSeverity().trim().toUpperCase();
+            if (!SeverityConstants.VALID_SEVERITIES.contains(severity)) {
+                throw new YamlConfigurationException("Enrichment '" + enrichmentId + "' has invalid severity '" +
+                    enrichment.getSeverity() + "'. Must be one of: " + String.join(", ", SeverityConstants.VALID_SEVERITIES));
+            }
+        }
+
         // Validate lookup configuration for lookup enrichments
         if ("lookup-enrichment".equals(enrichment.getType())) {
             validateLookupConfiguration(enrichment);

@@ -361,27 +361,52 @@ public class RuleResult implements Serializable {
 
     /**
      * Create a new rule result for successful enrichment evaluation.
-     * This method is used when all enrichments complete successfully.
+     * This method is used when enrichments complete successfully.
      *
      * @param enrichedData The enriched data map containing all enrichment results
      * @return A new RuleResult instance representing successful enrichment
      */
     public static RuleResult enrichmentSuccess(Map<String, Object> enrichedData) {
+        return enrichmentSuccess(enrichedData, SeverityConstants.INFO);
+    }
+
+    /**
+     * Create a new rule result for successful enrichment evaluation with specified severity.
+     * This method is used when all enrichments complete successfully with a specific severity level.
+     *
+     * @param enrichedData The enriched data map containing all enrichment results
+     * @param severity The severity level of the enrichment result
+     * @return A new RuleResult instance representing successful enrichment
+     */
+    public static RuleResult enrichmentSuccess(Map<String, Object> enrichedData, String severity) {
         return new RuleResult("enrichment", "Enrichment completed successfully",
-                             true, ResultType.MATCH, null, enrichedData, new ArrayList<>(), true);
+                             severity, true, ResultType.MATCH, null, enrichedData, new ArrayList<>(), true);
     }
 
     /**
      * Create a new rule result for failed enrichment evaluation.
      * This method is used when enrichments fail due to required field mapping failures or other errors.
      *
-     * @param failureMessages List of failure messages from enrichments
+     * @param failureMessages List of failure messages describing what went wrong
      * @param enrichedData The enriched data map (may be partial if some enrichments failed)
      * @return A new RuleResult instance representing failed enrichment
      */
     public static RuleResult enrichmentFailure(List<String> failureMessages, Map<String, Object> enrichedData) {
+        return enrichmentFailure(failureMessages, enrichedData, SeverityConstants.ERROR);
+    }
+
+    /**
+     * Create a new rule result for failed enrichment evaluation with specified severity.
+     * This method is used when enrichments fail due to required field mapping failures or other errors.
+     *
+     * @param failureMessages List of failure messages from enrichments
+     * @param enrichedData The enriched data map (may be partial if some enrichments failed)
+     * @param severity The severity level of the enrichment failure
+     * @return A new RuleResult instance representing failed enrichment
+     */
+    public static RuleResult enrichmentFailure(List<String> failureMessages, Map<String, Object> enrichedData, String severity) {
         return new RuleResult("enrichment", "Enrichment failed",
-                             false, ResultType.ERROR, null, enrichedData, failureMessages, false);
+                             severity, false, ResultType.ERROR, null, enrichedData, failureMessages, false);
     }
 
     /**

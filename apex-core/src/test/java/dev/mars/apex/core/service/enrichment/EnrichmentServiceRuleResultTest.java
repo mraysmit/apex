@@ -345,4 +345,81 @@ class EnrichmentServiceRuleResultTest {
 
         return config;
     }
+
+    @Test
+    @DisplayName("Should aggregate severity from enrichments with INFO severity")
+    void testEnrichObjectWithResult_InfoSeverity() {
+        logger.info("=== Testing enrichObjectWithResult with INFO severity ===");
+
+        // Create enrichment with INFO severity
+        YamlEnrichment enrichment = createInlineDatasetEnrichment("test-enrichment", false);
+        enrichment.setSeverity("INFO");
+
+        List<YamlEnrichment> enrichments = new ArrayList<>();
+        enrichments.add(enrichment);
+
+        Map<String, Object> inputData = new HashMap<>();
+        inputData.put("id", 1);
+
+        RuleResult result = enrichmentService.enrichObjectWithResult(enrichments, inputData);
+
+        assertNotNull(result);
+        assertTrue(result.isSuccess(), "Should succeed for valid enrichment");
+        assertEquals("INFO", result.getSeverity(), "Should have INFO severity");
+        assertFalse(result.hasFailures(), "Should have no failures");
+    }
+
+    @Test
+    @DisplayName("Should aggregate severity from enrichments with WARNING severity")
+    void testEnrichObjectWithResult_WarningSeverity() {
+        logger.info("=== Testing enrichObjectWithResult with WARNING severity ===");
+
+        // Create enrichment with WARNING severity
+        YamlEnrichment enrichment = createInlineDatasetEnrichment("test-enrichment", false);
+        enrichment.setSeverity("WARNING");
+
+        List<YamlEnrichment> enrichments = new ArrayList<>();
+        enrichments.add(enrichment);
+
+        Map<String, Object> inputData = new HashMap<>();
+        inputData.put("id", 1);
+
+        RuleResult result = enrichmentService.enrichObjectWithResult(enrichments, inputData);
+
+        assertNotNull(result);
+        assertTrue(result.isSuccess(), "Should succeed for valid enrichment");
+        assertEquals("WARNING", result.getSeverity(), "Should have WARNING severity");
+        assertFalse(result.hasFailures(), "Should have no failures");
+    }
+
+    @Test
+    @DisplayName("Should aggregate highest severity from multiple enrichments")
+    void testEnrichObjectWithResult_MultipleSeverities() {
+        logger.info("=== Testing enrichObjectWithResult with multiple severities ===");
+
+        // Create enrichments with different severities
+        YamlEnrichment infoEnrichment = createInlineDatasetEnrichment("info-enrichment", false);
+        infoEnrichment.setSeverity("INFO");
+
+        YamlEnrichment warningEnrichment = createInlineDatasetEnrichment("warning-enrichment", false);
+        warningEnrichment.setSeverity("WARNING");
+
+        YamlEnrichment errorEnrichment = createInlineDatasetEnrichment("error-enrichment", false);
+        errorEnrichment.setSeverity("ERROR");
+
+        List<YamlEnrichment> enrichments = new ArrayList<>();
+        enrichments.add(infoEnrichment);
+        enrichments.add(warningEnrichment);
+        enrichments.add(errorEnrichment);
+
+        Map<String, Object> inputData = new HashMap<>();
+        inputData.put("id", 1);
+
+        RuleResult result = enrichmentService.enrichObjectWithResult(enrichments, inputData);
+
+        assertNotNull(result);
+        assertTrue(result.isSuccess(), "Should succeed for valid enrichments");
+        assertEquals("ERROR", result.getSeverity(), "Should have highest severity (ERROR)");
+        assertFalse(result.hasFailures(), "Should have no failures");
+    }
 }

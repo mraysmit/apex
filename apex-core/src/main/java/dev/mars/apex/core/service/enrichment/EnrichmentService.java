@@ -2,6 +2,7 @@ package dev.mars.apex.core.service.enrichment;
 
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
@@ -200,77 +201,28 @@ public class EnrichmentService {
     private RuleResult processEnrichmentsWithFailureDetection(List<YamlEnrichment> enrichments, Object targetObject, YamlRuleConfiguration yamlConfig) {
         LOGGER.fine("Processing enrichments with failure detection for " + enrichments.size() + " enrichments");
 
-        // Store original data size for failure detection
+        // Store original data for exception handling
         Map<String, Object> originalData = convertToMap(targetObject);
-        int originalDataSize = originalData.size();
-
         List<String> failureMessages = new ArrayList<>();
 
         try {
-            // Process enrichments using existing processor
-            Object enrichmentResult;
+            // Process enrichments using severity-aware processor method
+            RuleResult processorResult;
             if (yamlConfig != null) {
-                enrichmentResult = processor.processEnrichments(enrichments, targetObject, yamlConfig);
+                processorResult = processor.processEnrichmentsWithResult(enrichments, targetObject, yamlConfig);
             } else {
-                enrichmentResult = processor.processEnrichments(enrichments, targetObject);
+                processorResult = processor.processEnrichmentsWithResult(enrichments, targetObject);
             }
 
-            // Convert result to Map for analysis
-            Map<String, Object> enrichedData = convertToMap(enrichmentResult);
-
-            // Detect enrichment failures using the same logic as RulesEngine
-            boolean enrichmentFailed = detectEnrichmentFailures(enrichments, enrichedData, originalDataSize);
-
-            if (enrichmentFailed) {
-                failureMessages.add("Required field enrichment failed - check logs for CRITICAL ERROR details");
-                LOGGER.warning("Enrichment failed due to required field mapping failures");
-                return RuleResult.enrichmentFailure(failureMessages, enrichedData);
-            } else {
-                LOGGER.fine("Enrichment completed successfully");
-                return RuleResult.enrichmentSuccess(enrichedData);
-            }
+            // The processor already handles severity aggregation and failure detection
+            LOGGER.fine("Enrichment processing completed with severity: " + processorResult.getSeverity());
+            return processorResult;
 
         } catch (Exception e) {
             LOGGER.severe("Exception during enrichment processing: " + e.getMessage());
             failureMessages.add("Enrichment processing exception: " + e.getMessage());
-            return RuleResult.enrichmentFailure(failureMessages, originalData);
+            return RuleResult.enrichmentFailure(failureMessages, originalData, SeverityConstants.ERROR);
         }
-    }
-
-    /**
-     * Detect enrichment failures by checking if required fields were successfully enriched.
-     * This method replicates the logic from RulesEngine.detectEnrichmentFailures().
-     *
-     * @param enrichments The list of enrichments that were processed
-     * @param enrichedData The enriched data map
-     * @param originalDataSize The original data size before enrichment
-     * @return true if enrichment failures were detected, false otherwise
-     */
-    private boolean detectEnrichmentFailures(List<YamlEnrichment> enrichments, Map<String, Object> enrichedData, int originalDataSize) {
-        if (enrichments == null || enrichments.isEmpty()) {
-            return false;
-        }
-
-        boolean hasFailures = false;
-
-        for (YamlEnrichment enrichment : enrichments) {
-            if (enrichment.getFieldMappings() != null) {
-                for (YamlEnrichment.FieldMapping mapping : enrichment.getFieldMappings()) {
-                    // Check if this is a required field mapping
-                    if (mapping.getRequired() != null && mapping.getRequired()) {
-                        String targetField = mapping.getTargetField();
-
-                        // Check if the required target field is missing or null in enriched data
-                        if (!enrichedData.containsKey(targetField) || enrichedData.get(targetField) == null) {
-                            LOGGER.fine("Required field '" + targetField + "' is missing from enriched data");
-                            hasFailures = true;
-                        }
-                    }
-                }
-            }
-        }
-
-        return hasFailures;
     }
 
     /**

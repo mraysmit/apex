@@ -2,6 +2,7 @@ package dev.mars.apex.core.service.enrichment;
 
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.DatasetLookupService;
 import dev.mars.apex.core.service.lookup.DatasetLookupServiceFactory;
@@ -1246,19 +1247,22 @@ public class YamlEnrichmentProcessor {
                 }
             }
 
-            // Return appropriate RuleResult
+            // Aggregate severity from processed enrichments
+            String aggregatedSeverity = aggregateEnrichmentSeverity(enrichments, overallSuccess);
+
+            // Return appropriate RuleResult with aggregated severity
             if (overallSuccess) {
-                LOGGER.fine("Enrichment processing completed successfully");
-                return RuleResult.enrichmentSuccess(enrichedData);
+                LOGGER.fine("Enrichment processing completed successfully with severity: " + aggregatedSeverity);
+                return RuleResult.enrichmentSuccess(enrichedData, aggregatedSeverity);
             } else {
-                LOGGER.warning("Enrichment processing completed with failures");
-                return RuleResult.enrichmentFailure(failureMessages, enrichedData);
+                LOGGER.warning("Enrichment processing completed with failures, severity: " + aggregatedSeverity);
+                return RuleResult.enrichmentFailure(failureMessages, enrichedData, aggregatedSeverity);
             }
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Exception during enrichment processing: " + e.getMessage(), e);
             failureMessages.add("Enrichment processing exception: " + e.getMessage());
-            return RuleResult.enrichmentFailure(failureMessages, originalData);
+            return RuleResult.enrichmentFailure(failureMessages, originalData, SeverityConstants.ERROR);
         }
     }
 
@@ -1335,5 +1339,45 @@ public class YamlEnrichmentProcessor {
             result.put("data", object);
             return result;
         }
+    }
+
+    /**
+     * Aggregate severity from a list of enrichments.
+     * This method determines the overall severity based on the enrichments processed
+     * and whether the processing was successful.
+     *
+     * @param enrichments The list of enrichments that were processed
+     * @param overallSuccess Whether the enrichment processing was successful
+     * @return The aggregated severity level
+     */
+    private String aggregateEnrichmentSeverity(List<YamlEnrichment> enrichments, boolean overallSuccess) {
+        if (enrichments == null || enrichments.isEmpty()) {
+            return SeverityConstants.INFO;
+        }
+
+        // If processing failed, use ERROR severity
+        if (!overallSuccess) {
+            return SeverityConstants.ERROR;
+        }
+
+        // Find the highest severity among all enrichments
+        String highestSeverity = SeverityConstants.INFO;
+        int highestPriority = SeverityConstants.SEVERITY_PRIORITY.get(SeverityConstants.INFO);
+
+        for (YamlEnrichment enrichment : enrichments) {
+            String enrichmentSeverity = enrichment.getSeverity();
+            if (enrichmentSeverity == null) {
+                enrichmentSeverity = SeverityConstants.INFO; // Default severity
+            }
+
+            Integer priority = SeverityConstants.SEVERITY_PRIORITY.get(enrichmentSeverity);
+            if (priority != null && priority > highestPriority) {
+                highestSeverity = enrichmentSeverity;
+                highestPriority = priority;
+            }
+        }
+
+        LOGGER.fine("Aggregated enrichment severity: " + highestSeverity + " from " + enrichments.size() + " enrichments");
+        return highestSeverity;
     }
 }
