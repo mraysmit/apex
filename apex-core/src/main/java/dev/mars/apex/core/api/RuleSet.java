@@ -1,5 +1,6 @@
 package dev.mars.apex.core.api;
 
+import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.Rule;
@@ -376,7 +377,7 @@ public class RuleSet {
          * Create a rule with comprehensive metadata support and custom description.
          */
         private Rule createRuleWithMetadata(String name, String condition, String message, String description) {
-            return createRuleWithMetadata(name, condition, message, description, "INFO");
+            return createRuleWithMetadata(name, condition, message, description, SeverityConstants.INFO);
         }
 
         /**
@@ -392,7 +393,7 @@ public class RuleSet {
                     .withMessage(message)
                     .withDescription(description)
                     .withPriority(priorityCounter.getAndIncrement())
-                    .withSeverity(severity != null ? severity : "INFO")
+                    .withSeverity(severity != null ? severity : SeverityConstants.INFO)
                     .withCreatedByUser(createdByUser)
                     .withBusinessDomain(businessDomain)
                     .withBusinessOwner(businessOwner)

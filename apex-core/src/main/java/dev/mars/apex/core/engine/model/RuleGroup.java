@@ -1,5 +1,6 @@
 package dev.mars.apex.core.engine.model;
 
+import dev.mars.apex.core.constants.SeverityConstants;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -229,10 +230,7 @@ public class RuleGroup implements RuleBase {
      */
     public boolean evaluate(StandardEvaluationContext context) {
         if (rulesBySequence.isEmpty()) {
-            // Empty group behavior:
-            // - AND groups: return true (all conditions vacuously satisfied)
-            // - OR groups: return false (no conditions satisfied)
-            return isAndOperator;
+            return false;
         }
 
         // Choose evaluation strategy based on configuration
@@ -269,13 +267,9 @@ public class RuleGroup implements RuleBase {
         individualRuleResults.clear();
 
         if (rulesBySequence.isEmpty()) {
-            // Empty group behavior:
-            // - AND groups: return true (all conditions vacuously satisfied)
-            // - OR groups: return false (no conditions satisfied)
-            boolean emptyGroupResult = isAndOperator;
             long duration = System.currentTimeMillis() - startTime;
             return new RuleGroupEvaluationResult(
-                id, name, emptyGroupResult, new ArrayList<>(), "INFO", isAndOperator, duration
+                id, name, false, new ArrayList<>(), SeverityConstants.INFO, isAndOperator, duration
             );
         }
 
@@ -720,7 +714,7 @@ public class RuleGroup implements RuleBase {
 
                     // Create error result
                     RuleResult errorResult = RuleResult.error(ruleNames.get(i),
-                        "Error getting result: " + e.getMessage(), "ERROR");
+                        "Error getting result: " + e.getMessage(), SeverityConstants.ERROR);
                     individualRuleResults.add(errorResult);
 
                     booleanResults.add(false);

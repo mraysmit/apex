@@ -1,5 +1,6 @@
 package dev.mars.apex.core.engine.model;
 
+import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMetrics;
 
 import java.io.Serializable;
@@ -77,7 +78,7 @@ public class RuleResult implements Serializable {
      * @param resultType The type of result
      */
     public RuleResult(String ruleName, String message, boolean triggered, ResultType resultType) {
-        this(ruleName, message, "INFO", triggered, resultType); // Default severity for backward compatibility
+        this(ruleName, message, SeverityConstants.INFO, triggered, resultType); // Default severity for backward compatibility
     }
 
     /**
@@ -93,7 +94,7 @@ public class RuleResult implements Serializable {
         this.id = UUID.randomUUID();
         this.ruleName = ruleName;
         this.message = message;
-        this.severity = severity != null ? severity : "INFO"; // Default to INFO if null
+        this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.triggered = triggered;
         this.timestamp = Instant.now();
         this.resultType = resultType;
@@ -115,7 +116,7 @@ public class RuleResult implements Serializable {
      * @param performanceMetrics The performance metrics for this rule evaluation
      */
     public RuleResult(String ruleName, String message, boolean triggered, ResultType resultType, RulePerformanceMetrics performanceMetrics) {
-        this(ruleName, message, "INFO", triggered, resultType, performanceMetrics); // Default severity
+        this(ruleName, message, SeverityConstants.INFO, triggered, resultType, performanceMetrics); // Default severity
     }
 
     /**
@@ -132,7 +133,7 @@ public class RuleResult implements Serializable {
         this.id = UUID.randomUUID();
         this.ruleName = ruleName;
         this.message = message;
-        this.severity = severity != null ? severity : "INFO"; // Default to INFO if null
+        this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.triggered = triggered;
         this.timestamp = Instant.now();
         this.resultType = resultType;
@@ -185,7 +186,7 @@ public class RuleResult implements Serializable {
     public RuleResult(String ruleName, String message, boolean triggered, ResultType resultType,
                      RulePerformanceMetrics performanceMetrics, Map<String, Object> enrichedData,
                      List<String> failureMessages, boolean success) {
-        this(ruleName, message, "INFO", triggered, resultType, performanceMetrics, enrichedData, failureMessages, success); // Default severity
+        this(ruleName, message, SeverityConstants.INFO, triggered, resultType, performanceMetrics, enrichedData, failureMessages, success); // Default severity
     }
 
     /**
@@ -208,7 +209,7 @@ public class RuleResult implements Serializable {
         this.id = UUID.randomUUID();
         this.ruleName = ruleName;
         this.message = message;
-        this.severity = severity != null ? severity : "INFO"; // Default to INFO if null
+        this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.triggered = triggered;
         this.timestamp = Instant.now();
         this.resultType = resultType;
@@ -424,7 +425,7 @@ public class RuleResult implements Serializable {
         this.id = UUID.randomUUID();
         this.ruleName = ruleName;
         this.message = message;
-        this.severity = "INFO"; // Default severity for backward compatibility
+        this.severity = SeverityConstants.INFO; // Default severity for backward compatibility
         this.timestamp = Instant.now();
         this.performanceMetrics = null; // No performance metrics for backward compatibility
 

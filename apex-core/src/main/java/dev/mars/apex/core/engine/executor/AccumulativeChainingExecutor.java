@@ -1,6 +1,7 @@
 package dev.mars.apex.core.engine.executor;
 
 import dev.mars.apex.core.config.yaml.YamlRuleChain;
+import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.context.ChainedEvaluationContext;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleChainResult;
@@ -487,7 +488,7 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
 
         } catch (Exception e) {
             logger.severe("Error executing final decision rule: " + e.getMessage());
-            return "ERROR";
+            return SeverityConstants.ERROR;
         }
     }
 

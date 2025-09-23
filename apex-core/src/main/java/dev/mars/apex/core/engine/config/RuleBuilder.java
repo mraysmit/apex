@@ -1,5 +1,6 @@
 package dev.mars.apex.core.engine.config;
 
+import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.Category;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.metadata.RuleMetadata;
@@ -49,7 +50,7 @@ public class RuleBuilder {
     private String message;
     private String description;
     private int priority = 100; // Default priority
-    private String severity = "INFO"; // Default severity
+    private String severity = SeverityConstants.INFO; // Default severity
 
     // Metadata builder
     private RuleMetadata.Builder metadataBuilder = RuleMetadata.builder();
@@ -203,7 +204,7 @@ public class RuleBuilder {
      * @return This builder for method chaining
      */
     public RuleBuilder withSeverity(String severity) {
-        this.severity = severity != null ? severity : "INFO";
+        this.severity = severity != null ? severity : SeverityConstants.INFO;
         return this;
     }
 

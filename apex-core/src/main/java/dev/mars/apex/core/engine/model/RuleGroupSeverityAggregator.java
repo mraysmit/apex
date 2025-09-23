@@ -16,6 +16,7 @@
 
 package dev.mars.apex.core.engine.model;
 
+import dev.mars.apex.core.constants.SeverityConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,12 +43,9 @@ public class RuleGroupSeverityAggregator {
     /**
      * Severity priority mapping for comparison.
      * Higher numbers indicate higher severity.
+     * Uses centralized constants from SeverityConstants.
      */
-    private static final Map<String, Integer> SEVERITY_PRIORITY = Map.of(
-        "ERROR", 3,
-        "WARNING", 2,
-        "INFO", 1
-    );
+    private static final Map<String, Integer> SEVERITY_PRIORITY = SeverityConstants.SEVERITY_PRIORITY;
     
     /**
      * Aggregate severity from multiple rule results based on group operator.
@@ -59,7 +57,7 @@ public class RuleGroupSeverityAggregator {
     public String aggregateSeverity(List<RuleResult> results, boolean isAndOperator) {
         if (results == null || results.isEmpty()) {
             logger.debug("No rule results provided, defaulting to INFO severity");
-            return "INFO";
+            return SeverityConstants.INFO;
         }
         
         logger.debug("Aggregating severity for {} rule results with {} operator", 
@@ -131,7 +129,7 @@ public class RuleGroupSeverityAggregator {
      */
     private String getHighestSeverity(List<RuleResult> results) {
         if (results == null || results.isEmpty()) {
-            return "INFO";
+            return SeverityConstants.INFO;
         }
         
         String highestSeverity = results.stream()
@@ -140,7 +138,7 @@ public class RuleGroupSeverityAggregator {
             .max((s1, s2) -> Integer.compare(
                 SEVERITY_PRIORITY.get(s1), 
                 SEVERITY_PRIORITY.get(s2)))
-            .orElse("INFO");
+            .orElse(SeverityConstants.INFO);
             
         logger.debug("Highest severity from {} results: {}", results.size(), highestSeverity);
         return highestSeverity;

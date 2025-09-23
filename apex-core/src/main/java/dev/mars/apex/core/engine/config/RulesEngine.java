@@ -1,6 +1,7 @@
 package dev.mars.apex.core.engine.config;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleBase;
 import dev.mars.apex.core.engine.model.RuleGroup;
@@ -336,7 +337,7 @@ public class RulesEngine {
         StandardEvaluationContext context = createContext(facts);
 
         // Track the highest severity from failed rule groups
-        String highestFailedSeverity = "INFO";
+        String highestFailedSeverity = SeverityConstants.INFO;
         String lastFailedGroupName = null;
         String lastFailedGroupMessage = null;
 
@@ -684,18 +685,6 @@ public class RulesEngine {
      * @return The priority value (3 for ERROR, 2 for WARNING, 1 for INFO)
      */
     private int getSeverityPriority(String severity) {
-        if (severity == null) {
-            return 1; // Default to INFO priority
-        }
-
-        switch (severity.toUpperCase()) {
-            case "ERROR":
-                return 3;
-            case "WARNING":
-                return 2;
-            case "INFO":
-            default:
-                return 1;
-        }
+        return SeverityConstants.getSeverityPriority(severity);
     }
 }

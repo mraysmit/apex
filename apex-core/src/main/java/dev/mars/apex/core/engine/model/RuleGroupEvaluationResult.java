@@ -16,6 +16,7 @@
 
 package dev.mars.apex.core.engine.model;
 
+import dev.mars.apex.core.constants.SeverityConstants;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -71,7 +72,7 @@ public class RuleGroupEvaluationResult {
         this.groupResult = groupResult;
         this.individualResults = individualResults != null ? 
             new ArrayList<>(individualResults) : new ArrayList<>();
-        this.aggregatedSeverity = aggregatedSeverity != null ? aggregatedSeverity : "INFO";
+        this.aggregatedSeverity = aggregatedSeverity != null ? aggregatedSeverity : SeverityConstants.INFO;
         this.isAndOperator = isAndOperator;
         this.evaluationTimestamp = Instant.now();
         this.evaluationDurationMs = evaluationDurationMs;

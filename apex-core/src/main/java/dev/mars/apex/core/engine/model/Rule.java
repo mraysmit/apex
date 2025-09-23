@@ -1,5 +1,6 @@
 package dev.mars.apex.core.engine.model;
 
+import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.metadata.RuleMetadata;
 import dev.mars.apex.core.engine.model.metadata.RuleStatus;
 
@@ -67,7 +68,7 @@ public class Rule implements RuleBase {
      * @param message The message to display when the rule applies
      */
     public Rule(String name, String condition, String message) {
-        this(name, condition, message, "INFO"); // Default severity for backward compatibility
+        this(name, condition, message, SeverityConstants.INFO); // Default severity for backward compatibility
     }
 
     /**
@@ -89,7 +90,7 @@ public class Rule implements RuleBase {
         this.condition = condition;
         this.message = message;
         this.description = message; // Use message as description for backward compatibility
-        this.severity = severity != null ? severity : "INFO"; // Default to INFO if null
+        this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.priority = 100; // Default priority
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
@@ -109,7 +110,7 @@ public class Rule implements RuleBase {
      */
     public Rule(String id, String category, String name, String condition,
                 String message, String description, int priority) {
-        this(id, category, name, condition, message, description, priority, "INFO"); // Default severity
+        this(id, category, name, condition, message, description, priority, SeverityConstants.INFO); // Default severity
     }
 
     /**
@@ -134,7 +135,7 @@ public class Rule implements RuleBase {
         this.condition = condition;
         this.message = message;
         this.description = description;
-        this.severity = severity != null ? severity : "INFO"; // Default to INFO if null
+        this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.priority = priority;
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
@@ -155,7 +156,7 @@ public class Rule implements RuleBase {
      */
     public static Rule fromCategoryNames(String id, Set<String> categoryNames, String name, String condition,
                                         String message, String description, int priority) {
-        return fromCategoryNames(id, categoryNames, name, condition, message, description, priority, "INFO");
+        return fromCategoryNames(id, categoryNames, name, condition, message, description, priority, SeverityConstants.INFO);
     }
 
     public static Rule fromCategoryNames(String id, Set<String> categoryNames, String name, String condition,
@@ -179,7 +180,7 @@ public class Rule implements RuleBase {
      */
     public Rule(String id, Category category, String name, String condition,
                 String message, String description, int priority) {
-        this(id, category, name, condition, message, description, priority, "INFO"); // Default severity
+        this(id, category, name, condition, message, description, priority, SeverityConstants.INFO); // Default severity
     }
 
     /**
@@ -204,7 +205,7 @@ public class Rule implements RuleBase {
         this.condition = condition;
         this.message = message;
         this.description = description;
-        this.severity = severity != null ? severity : "INFO"; // Default to INFO if null
+        this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.priority = priority;
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
@@ -224,7 +225,7 @@ public class Rule implements RuleBase {
      */
     public Rule(String id, Set<Category> categories, String name, String condition,
                 String message, String description, int priority) {
-        this(id, categories, name, condition, message, description, priority, "INFO"); // Default severity
+        this(id, categories, name, condition, message, description, priority, SeverityConstants.INFO); // Default severity
     }
 
     /**
@@ -248,7 +249,7 @@ public class Rule implements RuleBase {
         this.condition = condition;
         this.message = message;
         this.description = description;
-        this.severity = severity != null ? severity : "INFO"; // Default to INFO if null
+        this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.priority = priority;
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
@@ -270,7 +271,7 @@ public class Rule implements RuleBase {
      */
     public Rule(String id, Set<Category> categories, String name, String condition,
                 String message, String description, int priority, RuleMetadata metadata) {
-        this(id, categories, name, condition, message, description, priority, "INFO", metadata); // Default severity
+        this(id, categories, name, condition, message, description, priority, SeverityConstants.INFO, metadata); // Default severity
     }
 
     /**
@@ -296,7 +297,7 @@ public class Rule implements RuleBase {
         this.condition = condition;
         this.message = message;
         this.description = description;
-        this.severity = severity != null ? severity : "INFO"; // Default to INFO if null
+        this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.priority = priority;
         this.metadata = metadata != null ? metadata : RuleMetadata.builder().createdByUser("system").build();
     }

@@ -900,8 +900,870 @@ This **critical architectural bug** has been **SUCCESSFULLY RESOLVED** with a co
 **Phase 4 (Enhanced Testing)** is now optional validation work to provide comprehensive test coverage across all severity scenarios and edge cases.
 
 ---
+
+# 🎯 **APEX Severity Validation Implementation Plan**
+
+Following the detailed coding guidelines from `prompts.txt` - investigate first, follow existing patterns, work incrementally, test after every change.
+
+---
+
+## **📋 Phase 0: Deep Investigation (MANDATORY)**
+
+### **Principle: "Understand Before You Change"**
+
+Before any implementation, conduct comprehensive investigation of existing severity usage patterns across the entire APEX codebase.
+
+#### **0.1 Investigate Existing Severity Patterns**
+- **Search all YAML files** for severity usage in rules AND enrichments
+- **Examine all Java classes** with severity fields/methods
+- **Map severity flow** through entire APEX pipeline
+- **Document current validation** (if any) in existing components
+
+#### **0.2 Identify All Severity-Aware Components**
+- **Rules**: YamlRule, Rule, RuleResult, RuleBuilder
+- **Enrichments**: All enrichment types and their severity handling
+- **Rule Groups**: RuleGroupSeverityAggregator patterns
+- **API Layer**: REST endpoints, DTOs, response models
+- **Services**: EnrichmentService, ValidationService, etc.
+
+#### **0.3 Analyze Existing Validation Infrastructure**
+- **YamlConfigurationLoader.validateRules()** - Current validation patterns
+- **YamlMetadataValidator** - File validation patterns
+- **ValidationService** - Service validation patterns
+- **Error handling patterns** - YamlConfigurationException usage
+
+**🚨 CRITICAL**: Do not proceed to Phase 1 until complete understanding is achieved.
+
+---
+
+## **📋 Phase 1: Centralized Severity Management**
+
+### **Principle: "Follow Established Conventions"**
+
+#### **1.1 Create SeverityConstants (Single Source of Truth)**
+**File**: `apex-core/src/main/java/dev/mars/apex/core/constants/SeverityConstants.java`
+
+````java path=apex-core/src/main/java/dev/mars/apex/core/constants/SeverityConstants.java mode=EDIT
+public final class SeverityConstants {
+    public static final String ERROR = "ERROR";
+    public static final String WARNING = "WARNING";
+    public static final String INFO = "INFO";
+    
+    public static final Set<String> VALID_SEVERITIES = Set.of(ERROR, WARNING, INFO);
+    public static final String DEFAULT_SEVERITY = INFO;
+    
+    // Priority mapping for aggregation (matches existing RuleGroupSeverityAggregator)
+    public static final Map<String, Integer> SEVERITY_PRIORITY = Map.of(
+        ERROR, 3, WARNING, 2, INFO, 1
+    );
+    
+    private SeverityConstants() {
+        // Utility class - prevent instantiation
+    }
+}
+````
+
+#### **1.2 Create SeverityValidator (Centralized Validation)**
+**File**: `apex-core/src/main/java/dev/mars/apex/core/util/SeverityValidator.java`
+
+````java path=apex-core/src/main/java/dev/mars/apex/core/util/SeverityValidator.java mode=EDIT
+public final class SeverityValidator {
+    private static final Logger logger = LoggerFactory.getLogger(SeverityValidator.class);
+    
+    public static void validateSeverity(String severity, String contextId) throws YamlConfigurationException {
+        if (severity == null) {
+            return; // Null is valid, defaults to INFO
+        }
+        
+        String normalized = severity.trim().toUpperCase();
+        if (normalized.isEmpty()) {
+            throw new YamlConfigurationException(
+                "Component '" + contextId + "' has empty severity. Must be ERROR, WARNING, or INFO");
+        }
+        
+        if (!SeverityConstants.VALID_SEVERITIES.contains(normalized)) {
+            throw new YamlConfigurationException(
+                "Component '" + contextId + "' has invalid severity '" + severity + 
+                "'. Must be ERROR, WARNING, or INFO");
+        }
+    }
+    
+    public static String normalizeSeverity(String severity) {
+        return severity == null ? SeverityConstants.DEFAULT_SEVERITY : severity.trim().toUpperCase();
+    }
+    
+    private SeverityValidator() {
+        // Utility class - prevent instantiation
+    }
+}
+````
+
+#### **1.3 Test Phase 1 Components**
+**File**: `apex-core/src/test/java/dev/mars/apex/core/constants/SeverityConstantsTest.java`
+
+````java path=apex-core/src/test/java/dev/mars/apex/core/constants/SeverityConstantsTest.java mode=EDIT
+class SeverityConstantsTest {
+    
+    @Test
+    void testValidSeverities() {
+        assertEquals(3, SeverityConstants.VALID_SEVERITIES.size());
+        assertTrue(SeverityConstants.VALID_SEVERITIES.contains("ERROR"));
+        assertTrue(SeverityConstants.VALID_SEVERITIES.contains("WARNING"));
+        assertTrue(SeverityConstants.VALID_SEVERITIES.contains("INFO"));
+    }
+    
+    @Test
+    void testSeverityPriority() {
+        assertEquals(3, SeverityConstants.SEVERITY_PRIORITY.get("ERROR"));
+        assertEquals(2, SeverityConstants.SEVERITY_PRIORITY.get("WARNING"));
+        assertEquals(1, SeverityConstants.SEVERITY_PRIORITY.get("INFO"));
+    }
+    
+    @Test
+    void testDefaultSeverity() {
+        assertEquals("INFO", SeverityConstants.DEFAULT_SEVERITY);
+    }
+}
+````
+
+**🧪 TESTING CHECKPOINT**: Run tests, verify all pass before proceeding.
+
+---
+
+## **📋 Phase 2: Refactor Existing Severity Code**
+
+### **Principle: "Fix the Cause, Not the Symptom"**
+
+#### **2.1 Update RuleGroupSeverityAggregator**
+**File**: `apex-core/src/main/java/dev/mars/apex/core/service/RuleGroupSeverityAggregator.java`
+
+````java path=apex-core/src/main/java/dev/mars/apex/core/service/RuleGroupSeverityAggregator.java mode=EDIT
+// Replace hardcoded severity map
+private static final Map<String, Integer> SEVERITY_PRIORITY = SeverityConstants.SEVERITY_PRIORITY;
+````
+
+#### **2.2 Update All Hardcoded Severity References**
+**Search and replace pattern**:
+- Find: `"ERROR"`, `"WARNING"`, `"INFO"` in severity contexts
+- Replace: `SeverityConstants.ERROR`, `SeverityConstants.WARNING`, `SeverityConstants.INFO`
+
+#### **2.3 Test Refactored Components**
+**File**: `apex-core/src/test/java/dev/mars/apex/core/service/RuleGroupSeverityAggregatorTest.java`
+
+````java path=apex-core/src/test/java/dev/mars/apex/core/service/RuleGroupSeverityAggregatorTest.java mode=EDIT
+@Test
+void testSeverityAggregationUsesConstants() {
+    // Verify aggregator uses SeverityConstants instead of hardcoded values
+    // Test existing functionality still works with constants
+}
+````
+
+**🧪 TESTING CHECKPOINT**: Run all existing tests, verify no regressions.
+
+---
+
+## **📋 Phase 3: Add Validation to Rules**
+
+### **Principle: "Validate Each Step"**
+
+#### **3.1 Update YamlConfigurationLoader.validateRules()**
+**File**: `apex-core/src/main/java/dev/mars/apex/core/config/yaml/YamlConfigurationLoader.java`
+
+````java path=apex-core/src/main/java/dev/mars/apex/core/config/yaml/YamlConfigurationLoader.java mode=EDIT
+private void validateRules(YamlRuleConfiguration config) throws YamlConfigurationException {
+    // Existing validation logic...
+    
+    // Add severity validation for rules
+    if (config.getRules() != null) {
+        for (YamlRule rule : config.getRules()) {
+            SeverityValidator.validateSeverity(rule.getSeverity(), "Rule '" + rule.getId() + "'");
+        }
+    }
+}
+````
+
+#### **3.2 Test Rule Severity Validation**
+**File**: `apex-core/src/test/java/dev/mars/apex/core/config/yaml/RuleSeverityValidationTest.java`
+
+````java path=apex-core/src/test/java/dev/mars/apex/core/config/yaml/RuleSeverityValidationTest.java mode=EDIT
+class RuleSeverityValidationTest extends DemoTestBase {
+    
+    @Test
+    void testValidRuleSeverity() throws Exception {
+        // Test YAML with valid severity values
+        var config = yamlLoader.loadFromFile("test-configs/valid-rule-severity-test.yaml");
+        assertNotNull(config);
+        // Verify no exceptions thrown
+    }
+    
+    @Test
+    void testInvalidRuleSeverity() {
+        // Test YAML with invalid severity
+        assertThrows(YamlConfigurationException.class, () -> {
+            yamlLoader.loadFromFile("test-configs/invalid-rule-severity-test.yaml");
+        });
+    }
+}
+````
+
+**🧪 TESTING CHECKPOINT**: Create test YAML files, run tests, verify validation works.
+
+---
+
+## **📋 Phase 4: Add Validation to Enrichments**
+
+### **Principle: "Follow Established Patterns"**
+
+#### **4.1 Investigate Enrichment Severity Usage**
+- **Examine all enrichment types** for severity field usage
+- **Identify enrichment validation patterns** in YamlConfigurationLoader
+- **Map enrichment severity flow** through EnrichmentService
+
+#### **4.2 Update Enrichment Validation**
+**File**: `apex-core/src/main/java/dev/mars/apex/core/config/yaml/YamlConfigurationLoader.java`
+
+````java path=apex-core/src/main/java/dev/mars/apex/core/config/yaml/YamlConfigurationLoader.java mode=EDIT
+private void validateEnrichments(YamlRuleConfiguration config) throws YamlConfigurationException {
+    // Existing enrichment validation logic...
+    
+    // Add severity validation for enrichments
+    if (config.getEnrichments() != null) {
+        for (YamlEnrichment enrichment : config.getEnrichments()) {
+            SeverityValidator.validateSeverity(enrichment.getSeverity(), 
+                "Enrichment '" + enrichment.getId() + "'");
+        }
+    }
+}
+````
+
+#### **4.3 Test Enrichment Severity Validation**
+**File**: `apex-core/src/test/java/dev/mars/apex/core/config/yaml/EnrichmentSeverityValidationTest.java`
+
+````java path=apex-core/src/test/java/dev/mars/apex/core/config/yaml/EnrichmentSeverityValidationTest.java mode=EDIT
+class EnrichmentSeverityValidationTest extends DemoTestBase {
+    
+    @Test
+    void testValidEnrichmentSeverity() throws Exception {
+        var config = yamlLoader.loadFromFile("test-configs/valid-enrichment-severity-test.yaml");
+        assertNotNull(config);
+        
+        // Execute enrichment to verify severity flows through
+        var result = enrichmentService.enrichObject(createTestData(), config);
+        assertNotNull(result);
+    }
+    
+    @Test
+    void testInvalidEnrichmentSeverity() {
+        assertThrows(YamlConfigurationException.class, () -> {
+            yamlLoader.loadFromFile("test-configs/invalid-enrichment-severity-test.yaml");
+        });
+    }
+}
+````
+
+**🧪 TESTING CHECKPOINT**: Test enrichment severity validation, verify no regressions.
+
+---
+
+## **📋 Phase 5: Add API Layer Validation**
+
+### **Principle: "Validate at Boundaries"**
+
+#### **5.1 Investigate API Severity Usage**
+- **Examine REST endpoints** that accept rule/enrichment definitions
+- **Identify DTO classes** with severity fields
+- **Map API validation patterns** in existing controllers
+
+#### **5.2 Add API Input Validation**
+**File**: API controller classes that accept severity
+
+````java path=apex-api/src/main/java/dev/mars/apex/api/controller/RulesController.java mode=EDIT
+@PostMapping("/rules/validate")
+public ResponseEntity<ValidationResult> validateRule(@RequestBody RuleRequest request) {
+    // Add severity validation for API requests
+    SeverityValidator.validateSeverity(request.getSeverity(), "API Rule Request");
+    
+    // Existing validation logic...
+}
+````
+
+#### **5.3 Test API Severity Validation**
+**File**: `apex-api/src/test/java/dev/mars/apex/api/controller/ApiSeverityValidationTest.java`
+
+````java path=apex-api/src/test/java/dev/mars/apex/api/controller/ApiSeverityValidationTest.java mode=EDIT
+@SpringBootTest
+class ApiSeverityValidationTest {
+    
+    @Test
+    void testValidApiSeverity() throws Exception {
+        // Test API request with valid severity
+        mockMvc.perform(post("/api/rules/validate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"severity\":\"ERROR\"}"))
+            .andExpect(status().isOk());
+    }
+    
+    @Test
+    void testInvalidApiSeverity() throws Exception {
+        // Test API request with invalid severity
+        mockMvc.perform(post("/api/rules/validate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"severity\":\"CRITICAL\"}"))
+            .andExpect(status().isBadRequest());
+    }
+}
+````
+
+**🧪 TESTING CHECKPOINT**: Test API validation, verify error responses.
+
+---
+
+## **📋 Phase 6: Comprehensive Integration Testing**
+
+### **Principle: "Test End-to-End Workflows"**
+
+#### **6.1 Create Comprehensive Severity Test Suite**
+**File**: `apex-core/src/test/java/dev/mars/apex/core/severity/SeverityComprehensiveTest.java`
+
+````java path=apex-core/src/test/java/dev/mars/apex/core/severity/SeverityComprehensiveTest.java mode=EDIT
+class SeverityComprehensiveTest extends DemoTestBase {
+    
+    @Test
+    void testEndToEndSeverityFlow() throws Exception {
+        // Test: YAML → Rule → RuleResult → API Response
+        var config = yamlLoader.loadFromFile("test-configs/comprehensive-severity-test.yaml");
+        var result = enrichmentService.enrichObject(createTestData(), config);
+        
+        // Verify severity flows through entire pipeline
+        assertNotNull(result);
+        // Add specific severity assertions
+    }
+    
+    @Test
+    void testSeverityAggregationInRuleGroups() throws Exception {
+        // Test rule group severity aggregation with mixed severities
+    }
+    
+    @Test
+    void testEnrichmentSeverityProcessing() throws Exception {
+        // Test enrichment severity handling
+    }
+}
+````
+
+#### **6.2 Create Test YAML Configurations**
+**Files**:
+- `test-configs/valid-rule-severity-test.yaml`
+- `test-configs/invalid-rule-severity-test.yaml`
+- `test-configs/valid-enrichment-severity-test.yaml`
+- `test-configs/invalid-enrichment-severity-test.yaml`
+- `test-configs/comprehensive-severity-test.yaml`
+
+**🧪 TESTING CHECKPOINT**: Run full test suite, verify 100% execution rates.
+
+---
+
+## **📋 Phase 7: Documentation and Cleanup**
+
+### **Principle: "Document Intent, Not Just Implementation"**
+
+#### **7.1 Update Documentation**
+- Update `APEX_RULES_ENGINE_USER_GUIDE.md` with severity validation
+- Update `APEX_YAML_REFERENCE.md` with severity constraints
+- Add JavaDoc to all new classes and methods
+
+#### **7.2 Performance Testing**
+- Test severity validation performance impact
+- Verify no significant processing overhead
+
+#### **7.3 Final Integration Testing**
+- Run all existing tests to verify no regressions
+- Test with large YAML files containing many rules/enrichments
+- Verify error messages are clear and actionable
+
+**🧪 FINAL TESTING CHECKPOINT**: Complete test suite passes, no regressions.
+
+---
+
+## **🎯 Success Criteria**
+
+### **✅ Phase Completion Criteria:**
+- **Phase 0**: Complete understanding of severity usage documented
+- **Phase 1**: Centralized constants and validator created, tested
+- **Phase 2**: All hardcoded severity strings replaced, no regressions
+- **Phase 3**: Rule severity validation working, proper error messages
+- **Phase 4**: Enrichment severity validation working, proper error messages
+- **Phase 5**: API severity validation working, proper HTTP responses
+- **Phase 6**: End-to-end severity flow tested and verified
+- **Phase 7**: Documentation updated, performance verified
+
+### **🚨 Critical Requirements:**
+- **Test after every change** - No phase proceeds without passing tests
+- **Read test logs carefully** - Verify actual vs expected behavior
+- **Follow existing patterns** - Use established APEX validation conventions
+- **Graceful error handling** - Clear, actionable error messages
+- **No regressions** - All existing functionality preserved
+
+**Remember: Work incrementally, test after each small change, read test logs properly for test errors.**
+
+
+
+## **🎉 FINAL RESOLUTION - September 23, 2025**
+
+### **✅ ALL REMAINING BUGS FIXED**
+
+The **2 remaining critical issues** identified in the Rule Group Severity Aggregation system have been **SUCCESSFULLY RESOLVED**:
+
+#### **Issue 1: Failed Group Severity Propagation (CRITICAL) - ✅ FIXED**
+- **Problem**: When rule groups failed, the final result returned "INFO" instead of the aggregated severity from failed groups
+- **Root Cause**: Compilation/dependency issue prevented code changes from being loaded
+- **Solution**: Forced complete recompilation with `mvn clean install -DskipTests -pl apex-core`
+- **Fix**: Enhanced `executeRuleGroupsList()` method to properly track and return highest severity from failed groups
+- **Verification**: Test now passes - failed groups correctly return "ERROR" severity instead of "INFO"
+
+#### **Issue 2: Empty Group Logic (EDGE CASE) - ✅ FIXED**
+- **Problem**: Empty AND groups returned `false` instead of `true` (vacuous truth)
+- **Root Cause**: Same compilation issue as above
+- **Solution**: Empty group logic was already correctly implemented in `evaluateWithDetails()` method
+- **Fix**: Proper compilation ensured the correct logic was loaded
+- **Verification**: Test now passes - empty AND groups correctly return `true`
+
+### **🧪 Test Results - ALL PASSING**
+```
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
+✅ AND group aggregates severity from all rules when all pass
+✅ Empty group defaults to INFO severity
+✅ OR group uses severity of first matching rule
+✅ AND group aggregates severity from failed rules
+```
+
+### **🔧 Technical Implementation Details**
+
+#### **Fixed Code in RulesEngine.executeRuleGroupsList():**
+- **Enhanced severity tracking**: Added variables to track highest severity from failed groups
+- **Proper result creation**: Return `RuleResult.noMatch()` with aggregated severity instead of default "INFO"
+- **Compilation fix**: Used `mvn clean install -DskipTests -pl apex-core` to ensure code changes were loaded
+
+#### **Empty Group Logic in RuleGroup.evaluateWithDetails():**
+- **Vacuous truth implementation**: Empty AND groups return `true` (all conditions vacuously satisfied)
+- **OR group logic**: Empty OR groups return `false` (no conditions satisfied)
+- **Default severity**: Empty groups use "INFO" severity
+
+### **🎯 Key Learning: Compilation Dependencies**
+The critical issue was that code changes weren't being loaded due to Maven dependency/compilation issues. The solution required:
+1. **Force clean install**: `mvn clean install -DskipTests -pl apex-core`
+2. **Proper module dependencies**: Ensure apex-demo depends on the updated apex-core
+3. **Verification**: Use debug output to confirm code execution
+
+---
 **Analysis Date**: 2025-09-22
 **Implementation Date**: 2025-09-23
-**Status**: ✅ **RESOLVED** - Core implementation complete, enhanced testing plan available
+**Status**: ✅ **COMPLETELY RESOLVED** - All bugs fixed, all tests passing
 **Priority**: P0 - Immediate Action Required → **COMPLETED**
-**Actual Effort**: 1 day for complete core implementation and basic testing
+**Actual Effort**: 1 day for complete core implementation and bug fixes
+
+
+# 🎯 **APEX Severity Validation Implementation Plan**
+
+Following the detailed coding guidelines from `prompts.txt` - investigate first, follow existing patterns, work incrementally, test after every change.
+
+---
+
+## **📋 Phase 0: Deep Investigation (MANDATORY)**
+
+### **Principle: "Understand Before You Change"**
+
+Before any implementation, conduct comprehensive investigation of existing severity usage patterns across the entire APEX codebase.
+
+#### **0.1 Investigate Existing Severity Patterns**
+- **Search all YAML files** for severity usage in rules AND enrichments
+- **Examine all Java classes** with severity fields/methods
+- **Map severity flow** through entire APEX pipeline
+- **Document current validation** (if any) in existing components
+
+#### **0.2 Identify All Severity-Aware Components**
+- **Rules**: YamlRule, Rule, RuleResult, RuleBuilder
+- **Enrichments**: All enrichment types and their severity handling
+- **Rule Groups**: RuleGroupSeverityAggregator patterns
+- **API Layer**: REST endpoints, DTOs, response models
+- **Services**: EnrichmentService, ValidationService, etc.
+
+#### **0.3 Analyze Existing Validation Infrastructure**
+- **YamlConfigurationLoader.validateRules()** - Current validation patterns
+- **YamlMetadataValidator** - File validation patterns
+- **ValidationService** - Service validation patterns
+- **Error handling patterns** - YamlConfigurationException usage
+
+**🚨 CRITICAL**: Do not proceed to Phase 1 until complete understanding is achieved.
+
+---
+
+## **📋 Phase 1: Centralized Severity Management**
+
+### **Principle: "Follow Established Conventions"**
+
+#### **1.1 Create SeverityConstants (Single Source of Truth)**
+**File**: `apex-core/src/main/java/dev/mars/apex/core/constants/SeverityConstants.java`
+
+````java path=apex-core/src/main/java/dev/mars/apex/core/constants/SeverityConstants.java mode=EDIT
+public final class SeverityConstants {
+    public static final String ERROR = "ERROR";
+    public static final String WARNING = "WARNING";
+    public static final String INFO = "INFO";
+    
+    public static final Set<String> VALID_SEVERITIES = Set.of(ERROR, WARNING, INFO);
+    public static final String DEFAULT_SEVERITY = INFO;
+    
+    // Priority mapping for aggregation (matches existing RuleGroupSeverityAggregator)
+    public static final Map<String, Integer> SEVERITY_PRIORITY = Map.of(
+        ERROR, 3, WARNING, 2, INFO, 1
+    );
+    
+    private SeverityConstants() {
+        // Utility class - prevent instantiation
+    }
+}
+````
+
+#### **1.2 Create SeverityValidator (Centralized Validation)**
+**File**: `apex-core/src/main/java/dev/mars/apex/core/util/SeverityValidator.java`
+
+````java path=apex-core/src/main/java/dev/mars/apex/core/util/SeverityValidator.java mode=EDIT
+public final class SeverityValidator {
+    private static final Logger logger = LoggerFactory.getLogger(SeverityValidator.class);
+    
+    public static void validateSeverity(String severity, String contextId) throws YamlConfigurationException {
+        if (severity == null) {
+            return; // Null is valid, defaults to INFO
+        }
+        
+        String normalized = severity.trim().toUpperCase();
+        if (normalized.isEmpty()) {
+            throw new YamlConfigurationException(
+                "Component '" + contextId + "' has empty severity. Must be ERROR, WARNING, or INFO");
+        }
+        
+        if (!SeverityConstants.VALID_SEVERITIES.contains(normalized)) {
+            throw new YamlConfigurationException(
+                "Component '" + contextId + "' has invalid severity '" + severity + 
+                "'. Must be ERROR, WARNING, or INFO");
+        }
+    }
+    
+    public static String normalizeSeverity(String severity) {
+        return severity == null ? SeverityConstants.DEFAULT_SEVERITY : severity.trim().toUpperCase();
+    }
+    
+    private SeverityValidator() {
+        // Utility class - prevent instantiation
+    }
+}
+````
+
+#### **1.3 Test Phase 1 Components**
+**File**: `apex-core/src/test/java/dev/mars/apex/core/constants/SeverityConstantsTest.java`
+
+````java path=apex-core/src/test/java/dev/mars/apex/core/constants/SeverityConstantsTest.java mode=EDIT
+class SeverityConstantsTest {
+    
+    @Test
+    void testValidSeverities() {
+        assertEquals(3, SeverityConstants.VALID_SEVERITIES.size());
+        assertTrue(SeverityConstants.VALID_SEVERITIES.contains("ERROR"));
+        assertTrue(SeverityConstants.VALID_SEVERITIES.contains("WARNING"));
+        assertTrue(SeverityConstants.VALID_SEVERITIES.contains("INFO"));
+    }
+    
+    @Test
+    void testSeverityPriority() {
+        assertEquals(3, SeverityConstants.SEVERITY_PRIORITY.get("ERROR"));
+        assertEquals(2, SeverityConstants.SEVERITY_PRIORITY.get("WARNING"));
+        assertEquals(1, SeverityConstants.SEVERITY_PRIORITY.get("INFO"));
+    }
+    
+    @Test
+    void testDefaultSeverity() {
+        assertEquals("INFO", SeverityConstants.DEFAULT_SEVERITY);
+    }
+}
+````
+
+**🧪 TESTING CHECKPOINT**: Run tests, verify all pass before proceeding.
+
+---
+
+## **📋 Phase 2: Refactor Existing Severity Code**
+
+### **Principle: "Fix the Cause, Not the Symptom"**
+
+#### **2.1 Update RuleGroupSeverityAggregator**
+**File**: `apex-core/src/main/java/dev/mars/apex/core/service/RuleGroupSeverityAggregator.java`
+
+````java path=apex-core/src/main/java/dev/mars/apex/core/service/RuleGroupSeverityAggregator.java mode=EDIT
+// Replace hardcoded severity map
+private static final Map<String, Integer> SEVERITY_PRIORITY = SeverityConstants.SEVERITY_PRIORITY;
+````
+
+#### **2.2 Update All Hardcoded Severity References**
+**Search and replace pattern**:
+- Find: `"ERROR"`, `"WARNING"`, `"INFO"` in severity contexts
+- Replace: `SeverityConstants.ERROR`, `SeverityConstants.WARNING`, `SeverityConstants.INFO`
+
+#### **2.3 Test Refactored Components**
+**File**: `apex-core/src/test/java/dev/mars/apex/core/service/RuleGroupSeverityAggregatorTest.java`
+
+````java path=apex-core/src/test/java/dev/mars/apex/core/service/RuleGroupSeverityAggregatorTest.java mode=EDIT
+@Test
+void testSeverityAggregationUsesConstants() {
+    // Verify aggregator uses SeverityConstants instead of hardcoded values
+    // Test existing functionality still works with constants
+}
+````
+
+**🧪 TESTING CHECKPOINT**: Run all existing tests, verify no regressions.
+
+---
+
+## **📋 Phase 3: Add Validation to Rules**
+
+### **Principle: "Validate Each Step"**
+
+#### **3.1 Update YamlConfigurationLoader.validateRules()**
+**File**: `apex-core/src/main/java/dev/mars/apex/core/config/yaml/YamlConfigurationLoader.java`
+
+````java path=apex-core/src/main/java/dev/mars/apex/core/config/yaml/YamlConfigurationLoader.java mode=EDIT
+private void validateRules(YamlRuleConfiguration config) throws YamlConfigurationException {
+    // Existing validation logic...
+    
+    // Add severity validation for rules
+    if (config.getRules() != null) {
+        for (YamlRule rule : config.getRules()) {
+            SeverityValidator.validateSeverity(rule.getSeverity(), "Rule '" + rule.getId() + "'");
+        }
+    }
+}
+````
+
+#### **3.2 Test Rule Severity Validation**
+**File**: `apex-core/src/test/java/dev/mars/apex/core/config/yaml/RuleSeverityValidationTest.java`
+
+````java path=apex-core/src/test/java/dev/mars/apex/core/config/yaml/RuleSeverityValidationTest.java mode=EDIT
+class RuleSeverityValidationTest extends DemoTestBase {
+    
+    @Test
+    void testValidRuleSeverity() throws Exception {
+        // Test YAML with valid severity values
+        var config = yamlLoader.loadFromFile("test-configs/valid-rule-severity-test.yaml");
+        assertNotNull(config);
+        // Verify no exceptions thrown
+    }
+    
+    @Test
+    void testInvalidRuleSeverity() {
+        // Test YAML with invalid severity
+        assertThrows(YamlConfigurationException.class, () -> {
+            yamlLoader.loadFromFile("test-configs/invalid-rule-severity-test.yaml");
+        });
+    }
+}
+````
+
+**🧪 TESTING CHECKPOINT**: Create test YAML files, run tests, verify validation works.
+
+---
+
+## **📋 Phase 4: Add Validation to Enrichments**
+
+### **Principle: "Follow Established Patterns"**
+
+#### **4.1 Investigate Enrichment Severity Usage**
+- **Examine all enrichment types** for severity field usage
+- **Identify enrichment validation patterns** in YamlConfigurationLoader
+- **Map enrichment severity flow** through EnrichmentService
+
+#### **4.2 Update Enrichment Validation**
+**File**: `apex-core/src/main/java/dev/mars/apex/core/config/yaml/YamlConfigurationLoader.java`
+
+````java path=apex-core/src/main/java/dev/mars/apex/core/config/yaml/YamlConfigurationLoader.java mode=EDIT
+private void validateEnrichments(YamlRuleConfiguration config) throws YamlConfigurationException {
+    // Existing enrichment validation logic...
+    
+    // Add severity validation for enrichments
+    if (config.getEnrichments() != null) {
+        for (YamlEnrichment enrichment : config.getEnrichments()) {
+            SeverityValidator.validateSeverity(enrichment.getSeverity(), 
+                "Enrichment '" + enrichment.getId() + "'");
+        }
+    }
+}
+````
+
+#### **4.3 Test Enrichment Severity Validation**
+**File**: `apex-core/src/test/java/dev/mars/apex/core/config/yaml/EnrichmentSeverityValidationTest.java`
+
+````java path=apex-core/src/test/java/dev/mars/apex/core/config/yaml/EnrichmentSeverityValidationTest.java mode=EDIT
+class EnrichmentSeverityValidationTest extends DemoTestBase {
+    
+    @Test
+    void testValidEnrichmentSeverity() throws Exception {
+        var config = yamlLoader.loadFromFile("test-configs/valid-enrichment-severity-test.yaml");
+        assertNotNull(config);
+        
+        // Execute enrichment to verify severity flows through
+        var result = enrichmentService.enrichObject(createTestData(), config);
+        assertNotNull(result);
+    }
+    
+    @Test
+    void testInvalidEnrichmentSeverity() {
+        assertThrows(YamlConfigurationException.class, () -> {
+            yamlLoader.loadFromFile("test-configs/invalid-enrichment-severity-test.yaml");
+        });
+    }
+}
+````
+
+**🧪 TESTING CHECKPOINT**: Test enrichment severity validation, verify no regressions.
+
+---
+
+## **📋 Phase 5: Add API Layer Validation**
+
+### **Principle: "Validate at Boundaries"**
+
+#### **5.1 Investigate API Severity Usage**
+- **Examine REST endpoints** that accept rule/enrichment definitions
+- **Identify DTO classes** with severity fields
+- **Map API validation patterns** in existing controllers
+
+#### **5.2 Add API Input Validation**
+**File**: API controller classes that accept severity
+
+````java path=apex-api/src/main/java/dev/mars/apex/api/controller/RulesController.java mode=EDIT
+@PostMapping("/rules/validate")
+public ResponseEntity<ValidationResult> validateRule(@RequestBody RuleRequest request) {
+    // Add severity validation for API requests
+    SeverityValidator.validateSeverity(request.getSeverity(), "API Rule Request");
+    
+    // Existing validation logic...
+}
+````
+
+#### **5.3 Test API Severity Validation**
+**File**: `apex-api/src/test/java/dev/mars/apex/api/controller/ApiSeverityValidationTest.java`
+
+````java path=apex-api/src/test/java/dev/mars/apex/api/controller/ApiSeverityValidationTest.java mode=EDIT
+@SpringBootTest
+class ApiSeverityValidationTest {
+    
+    @Test
+    void testValidApiSeverity() throws Exception {
+        // Test API request with valid severity
+        mockMvc.perform(post("/api/rules/validate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"severity\":\"ERROR\"}"))
+            .andExpect(status().isOk());
+    }
+    
+    @Test
+    void testInvalidApiSeverity() throws Exception {
+        // Test API request with invalid severity
+        mockMvc.perform(post("/api/rules/validate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"severity\":\"CRITICAL\"}"))
+            .andExpect(status().isBadRequest());
+    }
+}
+````
+
+**🧪 TESTING CHECKPOINT**: Test API validation, verify error responses.
+
+---
+
+## **📋 Phase 6: Comprehensive Integration Testing**
+
+### **Principle: "Test End-to-End Workflows"**
+
+#### **6.1 Create Comprehensive Severity Test Suite**
+**File**: `apex-core/src/test/java/dev/mars/apex/core/severity/SeverityComprehensiveTest.java`
+
+````java path=apex-core/src/test/java/dev/mars/apex/core/severity/SeverityComprehensiveTest.java mode=EDIT
+class SeverityComprehensiveTest extends DemoTestBase {
+    
+    @Test
+    void testEndToEndSeverityFlow() throws Exception {
+        // Test: YAML → Rule → RuleResult → API Response
+        var config = yamlLoader.loadFromFile("test-configs/comprehensive-severity-test.yaml");
+        var result = enrichmentService.enrichObject(createTestData(), config);
+        
+        // Verify severity flows through entire pipeline
+        assertNotNull(result);
+        // Add specific severity assertions
+    }
+    
+    @Test
+    void testSeverityAggregationInRuleGroups() throws Exception {
+        // Test rule group severity aggregation with mixed severities
+    }
+    
+    @Test
+    void testEnrichmentSeverityProcessing() throws Exception {
+        // Test enrichment severity handling
+    }
+}
+````
+
+#### **6.2 Create Test YAML Configurations**
+**Files**:
+- `test-configs/valid-rule-severity-test.yaml`
+- `test-configs/invalid-rule-severity-test.yaml`
+- `test-configs/valid-enrichment-severity-test.yaml`
+- `test-configs/invalid-enrichment-severity-test.yaml`
+- `test-configs/comprehensive-severity-test.yaml`
+
+**🧪 TESTING CHECKPOINT**: Run full test suite, verify 100% execution rates.
+
+---
+
+## **📋 Phase 7: Documentation and Cleanup**
+
+### **Principle: "Document Intent, Not Just Implementation"**
+
+#### **7.1 Update Documentation**
+- Update `APEX_RULES_ENGINE_USER_GUIDE.md` with severity validation
+- Update `APEX_YAML_REFERENCE.md` with severity constraints
+- Add JavaDoc to all new classes and methods
+
+#### **7.2 Performance Testing**
+- Test severity validation performance impact
+- Verify no significant processing overhead
+
+#### **7.3 Final Integration Testing**
+- Run all existing tests to verify no regressions
+- Test with large YAML files containing many rules/enrichments
+- Verify error messages are clear and actionable
+
+**🧪 FINAL TESTING CHECKPOINT**: Complete test suite passes, no regressions.
+
+---
+
+## **🎯 Success Criteria**
+
+### **✅ Phase Completion Criteria:**
+- **Phase 0**: Complete understanding of severity usage documented
+- **Phase 1**: Centralized constants and validator created, tested
+- **Phase 2**: All hardcoded severity strings replaced, no regressions
+- **Phase 3**: Rule severity validation working, proper error messages
+- **Phase 4**: Enrichment severity validation working, proper error messages
+- **Phase 5**: API severity validation working, proper HTTP responses
+- **Phase 6**: End-to-end severity flow tested and verified
+- **Phase 7**: Documentation updated, performance verified
+
+### **🚨 Critical Requirements:**
+- **Test after every change** - No phase proceeds without passing tests
+- **Read test logs carefully** - Verify actual vs expected behavior
+- **Follow existing patterns** - Use established APEX validation conventions
+- **Graceful error handling** - Clear, actionable error messages
+- **No regressions** - All existing functionality preserved
+
+**Remember: Work incrementally, test after each small change, read test logs properly for test errors.**

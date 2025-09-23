@@ -1,6 +1,7 @@
 package dev.mars.apex.core.config.yaml;
 
 import dev.mars.apex.core.api.RuleSet;
+import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.Category;
 import dev.mars.apex.core.engine.model.Rule;
@@ -222,7 +223,7 @@ public class YamlRuleFactory {
                                 "Rule " + name + " triggered";
                 String description = yamlRule.getDescription() != null ? yamlRule.getDescription() :
                                    message;
-                String severity = yamlRule.getSeverity() != null ? yamlRule.getSeverity() : "INFO";
+                String severity = yamlRule.getSeverity() != null ? yamlRule.getSeverity() : SeverityConstants.INFO;
 
                 ruleSet.customRuleWithSeverity(name, condition, message, description, severity);
 
@@ -417,8 +418,8 @@ public class YamlRuleFactory {
         Set<Category> categories = new HashSet<>();
         categories.add(new Category(categoryName, yamlRule.getPriority() != null ? yamlRule.getPriority() : 100));
 
-        // Extract severity from YAML rule, default to "INFO" if not specified
-        String severity = yamlRule.getSeverity() != null ? yamlRule.getSeverity() : "INFO";
+        // Extract severity from YAML rule, default to INFO if not specified
+        String severity = yamlRule.getSeverity() != null ? yamlRule.getSeverity() : SeverityConstants.INFO;
 
         Rule createdRule = new Rule(ruleId, categories, name, condition, message, description,
                                    yamlRule.getPriority() != null ? yamlRule.getPriority() : 100,
@@ -467,8 +468,8 @@ public class YamlRuleFactory {
             String description = yamlRule.getDescription() != null ? yamlRule.getDescription() : "";
             int priority = yamlRule.getPriority() != null ? yamlRule.getPriority() : 100;
 
-            // Extract severity from YAML rule, default to "INFO" if not specified
-            String severity = yamlRule.getSeverity() != null ? yamlRule.getSeverity() : "INFO";
+            // Extract severity from YAML rule, default to INFO if not specified
+            String severity = yamlRule.getSeverity() != null ? yamlRule.getSeverity() : SeverityConstants.INFO;
 
             // Determine category
             Category category = null;

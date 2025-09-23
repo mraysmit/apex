@@ -3,6 +3,7 @@ package dev.mars.apex.core.config.yaml;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.service.data.external.DataSourceResolver;
 import dev.mars.apex.core.service.data.external.ExternalDataSourceConfig;
 
@@ -663,6 +664,15 @@ public class YamlConfigurationLoader {
         }
         if (rule.getCondition() == null || rule.getCondition().trim().isEmpty()) {
             throw new YamlConfigurationException("Rule condition is required for rule: " + rule.getId());
+        }
+
+        // Validate severity if present
+        if (rule.getSeverity() != null) {
+            String severity = rule.getSeverity().trim().toUpperCase();
+            if (!SeverityConstants.VALID_SEVERITIES.contains(severity)) {
+                throw new YamlConfigurationException("Rule '" + rule.getId() + "' has invalid severity '" +
+                    rule.getSeverity() + "'. Must be one of: " + String.join(", ", SeverityConstants.VALID_SEVERITIES));
+            }
         }
     }
     
