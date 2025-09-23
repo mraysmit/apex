@@ -6,9 +6,12 @@
 # ============================================================================
 
 metadata:
+  id: "basic-rules-value-threshold"
   name: "Value Threshold Test - Single Rule"
   version: "1.0.0"
   description: "Test rule for checking attribute value greater than 100"
+  type: "rule-config"
+  author: "apex-demo-team@example.com"
 
 rules:
   - id: "value-threshold-check"

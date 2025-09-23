@@ -7,9 +7,12 @@
 # ============================================================================
 
 metadata:
+  id: "basic-rules-severity-edge-cases"
   name: "Severity Edge Cases Test"
   version: "1.0.0"
   description: "Test configuration for severity edge cases and boundary conditions"
+  type: "rule-config"
+  author: "apex-demo-team@example.com"
 
 rules:
   # Test Case 1: Severity with leading/trailing whitespace (should be trimmed)

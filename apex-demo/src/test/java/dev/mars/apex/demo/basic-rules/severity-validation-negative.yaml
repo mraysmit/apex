@@ -7,9 +7,12 @@
 # ============================================================================
 
 metadata:
+  id: "basic-rules-severity-negative"
   name: "Severity Validation Negative Test Cases"
   version: "1.0.0"
   description: "Test configuration with invalid severity values for negative testing"
+  type: "rule-config"
+  author: "apex-demo-team@example.com"
 
 # NOTE: These rules contain intentionally invalid severity values
 # They should cause validation errors when loaded by the APEX system

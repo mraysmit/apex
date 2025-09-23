@@ -7,9 +7,12 @@
 # ============================================================================
 
 metadata:
+  id: "basic-rules-severity-groups-mixed"
   name: "Rule Groups Mixed Severity Test"
   version: "1.0.0"
   description: "Test configuration for rule groups with mixed severity levels and aggregation testing"
+  type: "rule-config"
+  author: "apex-demo-team@example.com"
 
 rules:
   # High severity rules (ERROR)

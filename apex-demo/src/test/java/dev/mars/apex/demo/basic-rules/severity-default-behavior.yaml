@@ -7,9 +7,12 @@
 # ============================================================================
 
 metadata:
+  id: "basic-rules-severity-default"
   name: "Default Severity Behavior Test"
   version: "1.0.0"
   description: "Test configuration for default severity behavior when severity is not specified"
+  type: "rule-config"
+  author: "apex-demo-team@example.com"
 
 rules:
   # Test Case 1: Rule with no severity field - should default to "INFO"

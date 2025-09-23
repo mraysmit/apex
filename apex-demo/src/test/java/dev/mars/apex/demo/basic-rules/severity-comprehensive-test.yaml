@@ -7,9 +7,12 @@
 # ============================================================================
 
 metadata:
+  id: "basic-rules-severity-comprehensive"
   name: "Comprehensive Severity Test - All Levels"
   version: "1.0.0"
   description: "Test configuration demonstrating all severity levels with various rule scenarios"
+  type: "rule-config"
+  author: "apex-demo-team@example.com"
 
 rules:
   # ERROR severity rules - Critical business logic violations

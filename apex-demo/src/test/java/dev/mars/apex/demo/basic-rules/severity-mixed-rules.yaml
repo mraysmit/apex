@@ -7,9 +7,12 @@
 # ============================================================================
 
 metadata:
+  id: "basic-rules-severity-mixed"
   name: "Mixed Severity Rules Test"
   version: "1.0.0"
   description: "Test configuration with mixed severity levels in various combinations"
+  type: "rule-config"
+  author: "apex-demo-team@example.com"
 
 rules:
   # Financial validation rules with different severities

@@ -8,9 +8,12 @@
 # ============================================================================
 
 metadata:
+  id: "basic-rules-separate-rules"
   name: "Separate Rules Test - Rules Only"
   version: "1.0.0"
   description: "Test rules for separate file testing"
+  type: "rule-config"
+  author: "apex-demo-team@example.com"
 
 rules:
   - id: "separate-rule-1"

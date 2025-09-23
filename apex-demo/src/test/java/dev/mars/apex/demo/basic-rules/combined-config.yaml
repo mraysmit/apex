@@ -8,9 +8,12 @@
 # ============================================================================
 
 metadata:
+  id: "basic-rules-combined-config"
   name: "Separate Rules Test - Combined Configuration"
   version: "1.0.0"
   description: "Test configuration demonstrating separate file concept with combined YAML"
+  type: "rule-config"
+  author: "apex-demo-team@example.com"
 
 rules:
   - id: "separate-rule-1"
