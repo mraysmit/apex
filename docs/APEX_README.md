@@ -205,7 +205,7 @@ Welcome to the comprehensive documentation for APEX (Advanced Processing Engine 
 **Who should read:** Developers and architects implementing the Rules Engine
 **Time to read:** 35-40 minutes
 
-#### **3. [Financial Services Guide](APEX_FINANCIAL_SERVICES_GUIDE.md)**
+#### **3. [Financial Services Guide](old/APEX_FINANCIAL_SERVICES_GUIDE.md)**
 **Target Audience:** Financial services teams, business analysts, and domain experts
 **What it covers:**
 - Financial services use cases and patterns with updated YAML specification
@@ -761,7 +761,7 @@ Start here if you're migrating from external services to datasets:
 1. **[APEX Playground](http://localhost:8081/playground)** - Interactive development environment
 2. **[Rules Engine User Guide](APEX_RULES_ENGINE_USER_GUIDE.md)** - Complete user documentation (YAML spec)
 3. **[Technical Reference](APEX_TECHNICAL_REFERENCE.md)** - Architecture and implementation details
-4. **[Financial Services Guide](APEX_FINANCIAL_SERVICES_GUIDE.md)** - Domain-specific patterns and compliance
+4. **[Financial Services Guide](old/APEX_FINANCIAL_SERVICES_GUIDE.md)** - Domain-specific patterns and compliance
 5. **[Bootstrap Demos Guide](APEX_BOOTSTRAP_DEMOS_GUIDE.md)** - 16 comprehensive demonstrations
 6. **[REST API Guide](APEX_REST_API_GUIDE.md)** - Complete HTTP API reference
 7. **[Data Management Guide](APEX_DATA_MANAGEMENT_GUIDE.md)** - Data integration and management
@@ -787,7 +787,7 @@ Start here if you're migrating from external services to datasets:
 4. **Result**: Complete mastery and production deployment readiness
 
 ### **Migration Path**
-1. **Review changes** in [Financial Services Guide](APEX_FINANCIAL_SERVICES_GUIDE.md) (15 minutes)
+1. **Review changes** in [Financial Services Guide](old/APEX_FINANCIAL_SERVICES_GUIDE.md) (15 minutes)
 2. **Use APEX Playground** to test updated YAML syntax (20 minutes)
 3. **Run migration scripts** for automated syntax updates (10 minutes)
 4. **Test updated configurations** using bootstrap demos (30 minutes)

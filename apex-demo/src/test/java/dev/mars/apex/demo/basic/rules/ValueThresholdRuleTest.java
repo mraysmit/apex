@@ -59,7 +59,7 @@ public class ValueThresholdRuleTest {
         logger.info("=== Testing Value Threshold Rule ===");
         
         // Load YAML configuration
-        YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/basic-rules/value-threshold-rule.yaml");
+        YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/value-threshold-rule.yaml");
         assertNotNull(config, "Configuration should be loaded");
         logger.info("✓ Configuration loaded: {} rules", config.getRules().size());
         

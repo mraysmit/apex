@@ -1,0 +1,50 @@
+# ============================================================================
+# APEX YAML Configuration File - Validation Rule Groups (Multi-File Architecture)
+# ============================================================================
+# Used by: UpdateStageFxTransactionMultiFileTest.java
+# Purpose: Cross-system validation groups - PROPERLY ALIGNED RULE IDs
+# Status: APEX-Compliant - Uses verified APEX syntax with correct cross-file references
+# ============================================================================
+
+metadata:
+  id: "validation-rule-groups-multifile"
+  name: "Validation Rule Groups - Multi-File"
+  version: "1.0.0"
+  description: "Cross-system validation groups with aligned rule references"
+  type: "rule-config"
+  author: "APEX Demo Team"
+  created-date: "2025-09-23"
+  tags: ["validation", "rule-groups", "multi-file", "cross-system"]
+
+# Cross-file rule references - VERIFIED APEX SYNTAX
+rule-refs:
+  - name: "fx-currency-rules"
+    source: "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionMultiFileTest_rules_A.yaml"
+    enabled: true
+    description: "FX currency validation rules"
+  - name: "fx-risk-rules"
+    source: "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionMultiFileTest_rules_C.yaml"
+    enabled: true
+    description: "FX risk assessment rules"
+
+# Cross-system validation groups - ALIGNED RULE IDs
+rule-groups:
+  - id: "cross-region-validation"
+    name: "Cross-Region Validation Group"
+    description: "Validation for cross-region transactions"
+    operator: "AND"
+    stop-on-first-failure: false
+    priority: 1
+    rule-ids:
+      - "currency-cross-region"
+      - "risk-cross-region-warning"
+      
+  - id: "currency-ranking-validation"
+    name: "Currency Ranking Validation Group"
+    description: "Validation based on currency rankings"
+    operator: "AND"
+    stop-on-first-failure: false
+    priority: 2
+    rule-ids:
+      - "currency-ranks-available"
+      - "risk-currency-ranking-check"

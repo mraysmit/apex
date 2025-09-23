@@ -67,7 +67,7 @@ public class SeverityValidationTest {
         logger.info("=== Testing Severity Loading from YAML ===");
 
         // Load the value threshold rule which has severity: "INFO"
-        YamlRuleConfiguration yamlConfig = configLoader.loadFromFile("src/test/java/dev/mars/apex/demo/basic-rules/value-threshold-rule.yaml");
+        YamlRuleConfiguration yamlConfig = configLoader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/value-threshold-rule.yaml");
         assertNotNull(yamlConfig, "YAML configuration should be loaded");
         logger.info("✅ Configuration loaded: {} rules", yamlConfig.getRules().size());
 
@@ -151,7 +151,7 @@ public class SeverityValidationTest {
         logger.info("=== Testing End-to-End Severity Flow: YAML → Rule → RuleResult ===");
 
         // Load the value threshold rule which has severity: "INFO"
-        YamlRuleConfiguration yamlConfig = configLoader.loadFromFile("src/test/java/dev/mars/apex/demo/basic-rules/value-threshold-rule.yaml");
+        YamlRuleConfiguration yamlConfig = configLoader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/value-threshold-rule.yaml");
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
         engine = new RulesEngine(config);
 

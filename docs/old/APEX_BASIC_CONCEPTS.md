@@ -1,4 +1,4 @@
-![APEX System Logo](APEX%20System%20logo.png)
+![APEX System Logo](../APEX%20System%20logo.png)
 
 **Version:** 1.0
 **Date:** 2025-09-06

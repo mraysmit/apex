@@ -37,7 +37,7 @@ enrichments:
             - condition: "#SYSTEM_CODE == 'SWIFT'"
             - condition: "#IS_NDF == 'Y'"
         mapping:
-          type: "direct"
+          type: "direct"yes start
           transformation: "'HIGH_PRIORITY_NDF'"
           
       # Rule 2: Medium priority - SWIFT system general

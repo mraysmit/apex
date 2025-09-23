@@ -1946,3 +1946,273 @@ Focus: OR groups with stop-on-first-failure behavior - **ACTUAL RULE EXECUTION**
 **Architecture Status**: ✅ **THIS IS HOW APEX WORKS**
 
 This comprehensive document describes the **FUNDAMENTAL ARCHITECTURE** of APEX Rules Engine, including the deep analysis of rule group processing capabilities that enable the separation architecture. Rule groups are not just a feature - they are **THE MECHANISM** that makes APEX's rule separation and reusability possible. Every production APEX system uses rule groups to reference rules from separate files because this IS the APEX way.
+
+---
+
+## 🏗️ **THE FUNDAMENTAL APEX PRINCIPLES - COMPLETE REFERENCE**
+
+### **Understanding APEX at Its Core**
+
+The following principles represent the foundational architecture that makes APEX a powerful enterprise rules engine. These are not optional features or advanced capabilities - **this IS how APEX fundamentally works**.
+
+### **1. SEPARATION = REUSABILITY (The Core Philosophy)**
+
+**APEX's foundational principle**: Rules and Rule Groups are **ALWAYS SEPARATE** in production systems.
+
+- **Rules** = Atomic business logic (defined once)
+- **Rule Groups** = Orchestration logic (reference rules)
+- **Scenarios** = Business contexts (reference rule groups)
+
+This isn't a convenience feature - **this IS the APEX architecture**.
+
+### **2. ONE RULE → MANY CONTEXTS (Maximum Reusability)**
+
+```
+Single Rule Definition → Used by Multiple Rule Groups → Serves Infinite Scenarios
+```
+
+- A "credit-score-check" rule might be used in 50+ different business contexts
+- Update the rule once → automatically updates across ALL scenarios
+- **Enterprise Scale**: 130 rules → 200+ rule groups → 1000+ business scenarios
+
+### **3. YAML-FIRST CONFIGURATION (External Configuration)**
+
+APEX is designed around **external YAML configuration**, not hardcoded rules:
+
+- **100% generic rules engine** with no default rules in main resources
+- All business logic comes from **external YAML files**
+- Rules are **data-driven**, not code-driven
+- Configuration can be changed without code deployment
+
+### **4. MULTI-FILE ARCHITECTURE (Production Standard)**
+
+**99% of production APEX systems** use this pattern:
+
+```
+enterprise-rules/
+├── rules/           # Reusable atomic business rules
+├── rule-groups/     # Orchestration logic referencing rules
+└── scenarios/       # Business contexts referencing rule groups
+```
+
+**Standard loading pattern**:
+```java
+RulesEngine engine = service.createRulesEngineFromMultipleFiles(
+    "rules/customer-rules.yaml",      // Reusable rules
+    "rule-groups/validation-groups.yaml"  // References rules
+);
+```
+
+### **5. CROSS-FILE RULE RESOLUTION (Automatic Merging)**
+
+APEX automatically resolves rule references across file boundaries:
+
+- Rule Groups can reference rules from **any loaded file**
+- **Automatic merging** creates unified rule registry
+- **No manual wiring** required - APEX handles the complexity
+- **Validation happens after merging** for complete configuration validation
+
+### **6. HIERARCHICAL COMPOSITION (3-Level Architecture)**
+
+APEX supports sophisticated hierarchical composition:
+
+1. **Level 1**: Individual Rules (atomic business logic)
+2. **Level 2**: Base Rule Groups (reference individual rules)
+3. **Level 3**: Composite Rule Groups (reference other rule groups)
+
+### **7. FLEXIBLE RULE ORCHESTRATION (Multiple Approaches)**
+
+APEX provides 4 rule group variations for different needs:
+
+1. **Simple** (`rule-ids`) - Basic grouping
+2. **Advanced** (`rule-references`) - Fine-grained control
+3. **Hierarchical** (`rule-group-references`) - Reusable components
+4. **Mixed** - All approaches combined
+
+### **8. ENTERPRISE COLLABORATION (Team Boundaries)**
+
+The architecture enables team collaboration:
+
+- **Rules Team** owns business logic (rules/)
+- **Process Team** owns orchestration (rule-groups/)
+- **Business Team** owns scenarios (scenarios/)
+- **No conflicts, no bottlenecks**
+
+### **9. CHANGE MANAGEMENT THROUGH ARCHITECTURE**
+
+- **Single Source of Truth** for each business rule
+- **Automatic Propagation** of rule changes
+- **Consistent Application** across all business processes
+- **Regulatory Compliance** through architectural design
+
+### **10. PERFORMANCE THROUGH DESIGN**
+
+- **Lazy Loading** - Rules copied only when needed
+- **Efficient Merging** - No duplication in memory
+- **Optimized Lookup** - Fast cross-file rule resolution
+- **Linear Scaling** - Performance scales with configuration complexity
+
+## **🎯 THE APEX VALUE PROPOSITION**
+
+### **Business Value**
+- **Massive Rule Reusability** - Write once, use everywhere
+- **Enterprise Scalability** - Thousands of rules and scenarios
+- **Team Productivity** - Parallel development without conflicts
+- **Regulatory Compliance** - Consistent rule application
+
+### **Technical Value**
+- **Configuration-Driven** - No code changes for business logic
+- **Modular Architecture** - Clean separation of concerns
+- **Flexible Orchestration** - Multiple composition patterns
+- **Robust Error Handling** - Clear validation and error messages
+
+### **Operational Value**
+- **Change Agility** - Update rules without deployment
+- **Audit Trail** - Clear lineage from rules to scenarios
+- **Testing Strategy** - Test at rule, group, and scenario levels
+- **Maintenance Efficiency** - Single point of change for rules
+
+## **🚨 CRITICAL UNDERSTANDING**
+
+**This is not about advanced features or optional capabilities.**
+
+**This IS how APEX fundamentally works.**
+
+The separation of rules and rule groups, cross-file references, and hierarchical composition are not add-ons - they are the **core architectural principles** that make APEX a powerful enterprise rules engine.
+
+**Production Reality**: Enterprise APEX systems routinely manage thousands of rules across hundreds of files, with complex hierarchical relationships, all orchestrated through this fundamental architecture.
+
+The system is designed from the ground up to support this level of complexity while maintaining simplicity at each individual layer - **separation enables scale**.
+
+## **🚨 CRITICAL SYNTAX REQUIREMENTS - MANDATORY READING**
+
+### **APEX HAS STRICT YAML SYNTAX - NO INVENTED KEYWORDS ALLOWED**
+
+**FUNDAMENTAL RULE**: APEX uses a **STRICT SET OF KEYWORDS** that are processed by `apex-core`. You **CANNOT INVENT** your own YAML syntax.
+
+#### **❌ COMMON MISTAKES - NEVER DO THIS**
+
+**WRONG - Invented Keywords:**
+```yaml
+# These keywords DO NOT EXIST in APEX
+rule-refs:
+  - file: "some-file.yaml"           # ❌ INVALID - "file" keyword doesn't exist
+enrichment-refs:
+  - file: "enrichments.yaml"         # ❌ INVALID - "enrichment-refs" doesn't exist
+rule-group-refs:
+  - file: "groups.yaml"              # ❌ INVALID - "rule-group-refs" doesn't exist
+scenarios:                           # ❌ INVALID - "scenarios" doesn't exist
+  - id: "my-scenario"
+metadata:
+  type: "rules"                      # ❌ INVALID - "rules" type doesn't exist
+  type: "rule-groups"                # ❌ INVALID - "rule-groups" type doesn't exist
+  type: "enrichments"                # ❌ INVALID - "enrichments" type doesn't exist
+```
+
+#### **✅ ACTUAL APEX SYNTAX - ALWAYS USE THIS**
+
+**CORRECT - Real APEX Keywords:**
+```yaml
+# Valid cross-file rule references
+rule-refs:
+  - name: "my-rules"                 # ✅ VALID - "name" keyword exists
+    source: "path/to/rules.yaml"     # ✅ VALID - "source" keyword exists
+    enabled: true                    # ✅ VALID - "enabled" keyword exists
+    description: "Description"       # ✅ VALID - "description" keyword exists
+
+# Valid metadata types
+metadata:
+  type: "rule-config"                # ✅ VALID - "rule-config" type exists
+  type: "scenario"                   # ✅ VALID - "scenario" type exists
+
+# Valid rule groups
+rule-groups:
+  - id: "my-group"                   # ✅ VALID - standard rule group syntax
+    operator: "AND"                  # ✅ VALID - "operator" keyword exists
+    rule-ids:                        # ✅ VALID - "rule-ids" keyword exists
+      - "rule-1"
+      - "rule-2"
+
+# Valid enrichments (inline in scenario files)
+enrichments:
+  - id: "my-enrichment"              # ✅ VALID - standard enrichment syntax
+    type: "lookup-enrichment"        # ✅ VALID - "lookup-enrichment" type exists
+    condition: "#field != null"      # ✅ VALID - "condition" keyword exists
+```
+
+### **🔍 HOW TO VERIFY APEX SYNTAX**
+
+#### **1. ALWAYS CHECK EXISTING WORKING FILES FIRST**
+Before proposing ANY YAML syntax, examine these reference files:
+- `apex-demo/src/test/java/dev/mars/apex/demo/basic-rules/rules.yaml`
+- `apex-demo/src/test/java/dev/mars/apex/demo/basic-rules/rule-groups.yaml`
+- `apex-rest-api/src/test/resources/rules/test-rules.yaml`
+- `apex-demo/src/test/java/dev/mars/apex/demo/conditional/conditional-mapping-enrichment-phase3-test.yaml`
+
+#### **2. USE CODEBASE-RETRIEVAL TO FIND VALID SYNTAX**
+```
+Query: "Show me examples of valid APEX YAML syntax for [specific feature]"
+```
+
+#### **3. NEVER ASSUME - ALWAYS VERIFY**
+- ❌ Don't assume keywords exist
+- ❌ Don't invent "logical" syntax
+- ❌ Don't copy from documentation without verification
+- ✅ Only use syntax found in working APEX files
+- ✅ Test syntax with actual APEX processor
+- ✅ Verify keywords exist in codebase
+
+### **📋 MANDATORY CHECKLIST BEFORE PROPOSING YAML**
+
+**Before proposing ANY APEX YAML configuration:**
+
+1. **☐ SYNTAX VERIFICATION**: Have I verified every keyword exists in working APEX files?
+2. **☐ REFERENCE CHECK**: Have I examined at least 2 working APEX YAML files?
+3. **☐ KEYWORD VALIDATION**: Are all my keywords found in actual APEX configurations?
+4. **☐ TYPE VALIDATION**: Are all metadata types valid APEX types?
+5. **☐ STRUCTURE VALIDATION**: Does my structure match working APEX patterns?
+6. **☐ NO INVENTION**: Have I avoided inventing any new keywords or syntax?
+
+**If ANY checkbox is unchecked, DO NOT PROPOSE the YAML configuration.**
+
+### **🎯 INSTRUCTIONS TO PREVENT FUTURE MISTAKES**
+
+#### **FOR AI ASSISTANT (CRITICAL SELF-INSTRUCTIONS)**
+
+**BEFORE proposing ANY APEX YAML refactoring:**
+
+1. **MANDATORY STEP 1**: Use `codebase-retrieval` to find actual working APEX YAML examples
+2. **MANDATORY STEP 2**: Use `view` tool to examine at least 3 working YAML files
+3. **MANDATORY STEP 3**: Verify EVERY keyword I plan to use exists in working files
+4. **MANDATORY STEP 4**: Copy exact syntax patterns from working files
+5. **MANDATORY STEP 5**: Never assume or invent keywords - only use verified syntax
+
+**FAILURE TO FOLLOW THESE STEPS RESULTS IN INVALID PROPOSALS**
+
+#### **RED FLAGS - STOP IMMEDIATELY IF YOU SEE THESE**
+
+- ❌ Using keywords not found in working APEX files
+- ❌ Inventing "logical" syntax that "should work"
+- ❌ Assuming documentation examples are complete
+- ❌ Creating new metadata types
+- ❌ Proposing syntax without verification
+
+#### **RECOVERY PROCESS WHEN MISTAKES ARE MADE**
+
+1. **ACKNOWLEDGE**: "I made a syntax error by inventing keywords"
+2. **RESEARCH**: Use codebase-retrieval to find correct syntax
+3. **VERIFY**: Check working files for actual keyword usage
+4. **CORRECT**: Propose only verified, working APEX syntax
+5. **TEST**: Validate proposed syntax against working examples
+
+### **🚨 FINAL WARNING**
+
+**APEX syntax is NOT negotiable. The `apex-core` processor expects EXACT keywords.**
+
+**Inventing syntax wastes time and breaks systems.**
+
+**ALWAYS verify syntax before proposing configurations.**
+
+---
+
+*Last Updated: 2025-09-23 - Complete Rule References Design Documentation with Fundamental Principles and Critical Syntax Requirements*

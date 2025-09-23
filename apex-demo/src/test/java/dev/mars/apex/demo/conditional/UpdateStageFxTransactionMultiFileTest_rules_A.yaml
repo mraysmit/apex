@@ -1,0 +1,47 @@
+# ============================================================================
+# APEX YAML Configuration File - FX Currency Rules (Multi-File Architecture)
+# ============================================================================
+# Used by: UpdateStageFxTransactionMultiFileTest.java
+# Purpose: Reusable currency validation rules - PROPERLY ALIGNED RULE IDs
+# Status: APEX-Compliant - Uses verified APEX syntax with correct rule IDs
+# ============================================================================
+
+metadata:
+  id: "fx-currency-rules-multifile"
+  name: "FX Currency Rules - Multi-File"
+  version: "1.0.0"
+  description: "Reusable currency validation rules with aligned IDs"
+  type: "rule-config"
+  author: "APEX Demo Team"
+  created-date: "2025-09-23"
+  tags: ["fx-transaction", "currency-validation", "multi-file", "reusable-rules"]
+
+# Reusable currency validation rules - ALIGNED IDs
+rules:
+  - id: "currency-usd-detected"
+    name: "USD Currency Detection"
+    condition: "#BUY_CURRENCY == 'USD' || #SELL_CURRENCY == 'USD'"
+    message: "USD currency detected in transaction"
+    severity: "INFO"
+    priority: 1
+    
+  - id: "currency-major-pair"
+    name: "Major Currency Pair Validation"
+    condition: "({'USD', 'EUR', 'GBP', 'JPY'}.contains(#BUY_CURRENCY) && {'USD', 'EUR', 'GBP', 'JPY'}.contains(#SELL_CURRENCY))"
+    message: "Major currency pair detected"
+    severity: "INFO"
+    priority: 2
+    
+  - id: "currency-cross-region"
+    name: "Cross-Region Transaction Detection"
+    condition: "#BUY_CURRENCY_REGION != null && #SELL_CURRENCY_REGION != null && #BUY_CURRENCY_REGION != #SELL_CURRENCY_REGION"
+    message: "Cross-region transaction detected"
+    severity: "WARNING"
+    priority: 3
+    
+  - id: "currency-ranks-available"
+    name: "Currency Rankings Available"
+    condition: "#BUY_CURRENCY_RANK != null && #SELL_CURRENCY_RANK != null"
+    message: "Currency rankings are available for risk assessment"
+    severity: "INFO"
+    priority: 4

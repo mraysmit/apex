@@ -1,0 +1,177 @@
+# ============================================================================
+# APEX YAML Configuration File - SIMPLIFIED VERSION
+# ============================================================================
+# Used by: UpdateStageFxTransactionSimplifiedTest.java
+# Purpose: Simplified version of Update-Stage-FX-Transaction.yaml for testing core logic
+#          Removes external dependencies (database, external rule files)
+#          Focuses on core conditional FX transaction processing logic
+# Status: ACTIVELY TESTED - Follows APEX fundamental principles
+# ============================================================================
+
+metadata:
+  name: "Update Stage FX Transaction - Simplified"
+  version: "1.0.0"
+  description: "Simplified FX transaction stage updates with inline data for testing"
+  type: "scenario"
+  author: "APEX Demo Team"
+  created: "2025-09-23"
+  tags: ["fx-transaction", "conditional-mapping", "simplified-testing"]
+
+# Self-contained configuration - no external dependencies
+
+enrichments:
+  # 1. Currency ranking enrichment (inline dataset instead of database)
+  - id: "enrich-buy-currency-rank"
+    name: "Buy Currency Ranking Enrichment"
+    type: "lookup-enrichment"
+    description: "Enrich with buy currency ranking using inline dataset"
+    condition: "#BUY_CURRENCY != null"
+    
+    lookup-config:
+      lookup-key: "#BUY_CURRENCY"
+      lookup-dataset:
+        type: "inline"
+        key-field: "currency"
+        data:
+          - currency: "USD"
+            currency_rank: 1
+            region: "Americas"
+          - currency: "EUR"
+            currency_rank: 2
+            region: "Europe"
+          - currency: "GBP"
+            currency_rank: 3
+            region: "Europe"
+          - currency: "JPY"
+            currency_rank: 4
+            region: "Asia"
+          - currency: "CHF"
+            currency_rank: 5
+            region: "Europe"
+    
+    field-mappings:
+      - source-field: "currency_rank"
+        target-field: "BUY_CURRENCY_RANK"
+      - source-field: "region"
+        target-field: "BUY_CURRENCY_REGION"
+
+  # 2. Sell currency ranking enrichment (inline dataset)
+  - id: "enrich-sell-currency-rank"
+    name: "Sell Currency Ranking Enrichment"
+    type: "lookup-enrichment"
+    description: "Enrich with sell currency ranking using inline dataset"
+    condition: "#SELL_CURRENCY != null"
+    
+    lookup-config:
+      lookup-key: "#SELL_CURRENCY"
+      lookup-dataset:
+        type: "inline"
+        key-field: "currency"
+        data:
+          - currency: "USD"
+            currency_rank: 1
+            region: "Americas"
+          - currency: "EUR"
+            currency_rank: 2
+            region: "Europe"
+          - currency: "GBP"
+            currency_rank: 3
+            region: "Europe"
+          - currency: "JPY"
+            currency_rank: 4
+            region: "Asia"
+          - currency: "CHF"
+            currency_rank: 5
+            region: "Europe"
+    
+    field-mappings:
+      - source-field: "currency_rank"
+        target-field: "SELL_CURRENCY_RANK"
+      - source-field: "region"
+        target-field: "SELL_CURRENCY_REGION"
+
+  # 3. NDF processing logic - simplified conditional mapping
+  - id: "ndf-processing-logic"
+    name: "NDF Processing Logic"
+    type: "field-enrichment"
+    description: "Process NDF values with conditional mapping logic"
+    condition: "#SYSTEM_CODE != null"
+    
+    field-mappings:
+      # Main NDF processing with complex conditional logic
+      - source-field: "IS_NDF"
+        target-field: "PROCESSED_NDF"
+        transformation: |
+          #SYSTEM_CODE == 'SWIFT' ?
+            (({'0', '1'}.contains(#IS_NDF)) ? #IS_NDF :
+             (#IS_NDF == 'Y') ? '1' :
+             (#IS_NDF == 'N') ? '0' :
+             'REQUIRES_TRANSLATION') :
+          #SYSTEM_CODE == 'REUTERS' ?
+            (({'TRUE', 'FALSE'}.contains(#IS_NDF?.toUpperCase())) ? 
+             (#IS_NDF?.toUpperCase() == 'TRUE' ? '1' : '0') :
+             'REQUIRES_TRANSLATION') :
+          'UNSUPPORTED_SYSTEM'
+      
+      # Processing status indicator
+      - source-field: "SYSTEM_CODE"
+        target-field: "PROCESSING_STATUS"
+        transformation: |
+          #SYSTEM_CODE == 'SWIFT' ? 'SWIFT_PROCESSED' :
+          #SYSTEM_CODE == 'REUTERS' ? 'REUTERS_PROCESSED' :
+          'UNKNOWN_SYSTEM'
+      
+      # Translation requirement flag
+      - source-field: "IS_NDF"
+        target-field: "REQUIRES_TRANSLATION"
+        transformation: |
+          (#SYSTEM_CODE == 'SWIFT' && !({'0', '1', 'Y', 'N'}.contains(#IS_NDF))) ||
+          (#SYSTEM_CODE == 'REUTERS' && !({'TRUE', 'FALSE'}.contains(#IS_NDF?.toUpperCase()))) ||
+          (#SYSTEM_CODE != 'SWIFT' && #SYSTEM_CODE != 'REUTERS')
+
+  # 4. Risk assessment based on currency and system
+  - id: "risk-assessment"
+    name: "Risk Assessment"
+    type: "field-enrichment"
+    description: "Assess transaction risk based on currencies and system"
+    condition: "#BUY_CURRENCY_RANK != null && #SELL_CURRENCY_RANK != null"
+    
+    field-mappings:
+      # Risk level calculation
+      - source-field: "BUY_CURRENCY_RANK"
+        target-field: "RISK_LEVEL"
+        transformation: |
+          (#BUY_CURRENCY_RANK <= 2 && #SELL_CURRENCY_RANK <= 2) ? 'LOW' :
+          (#BUY_CURRENCY_RANK <= 3 && #SELL_CURRENCY_RANK <= 3) ? 'MEDIUM' :
+          'HIGH'
+      
+      # Cross-region indicator
+      - source-field: "BUY_CURRENCY_REGION"
+        target-field: "CROSS_REGION"
+        transformation: "#BUY_CURRENCY_REGION != #SELL_CURRENCY_REGION"
+
+  # 5. Final validation and audit trail
+  - id: "validation-and-audit"
+    name: "Validation and Audit Trail"
+    type: "field-enrichment"
+    description: "Final validation and create audit trail"
+    condition: "true"
+    
+    field-mappings:
+      # Validation status
+      - source-field: "PROCESSED_NDF"
+        target-field: "VALIDATION_STATUS"
+        transformation: |
+          #PROCESSED_NDF == 'REQUIRES_TRANSLATION' ? 'NEEDS_TRANSLATION' :
+          #PROCESSED_NDF == 'UNSUPPORTED_SYSTEM' ? 'SYSTEM_ERROR' :
+          ({'0', '1'}.contains(#PROCESSED_NDF)) ? 'VALIDATED' :
+          'VALIDATION_ERROR'
+      
+      # Processing summary
+      - source-field: "SYSTEM_CODE"
+        target-field: "PROCESSING_SUMMARY"
+        transformation: |
+          'System: ' + #SYSTEM_CODE + 
+          ', NDF: ' + (#IS_NDF ?: 'null') + 
+          ' -> ' + (#PROCESSED_NDF ?: 'null') +
+          ', Status: ' + (#VALIDATION_STATUS ?: 'unknown')

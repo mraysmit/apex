@@ -18,12 +18,12 @@ metadata:
   business-domain: "testing"
 
 rule-configurations:
-  - source: "src/test/java/dev/mars/apex/demo/basic-rules/rules.yaml"
+  - source: "src/test/java/dev/mars/apex/demo/basic/rules.yaml"
 
 # Reference external rule files
 rule-refs:
   - name: "separate-rules"
-    source: "src/test/java/dev/mars/apex/demo/basic-rules/rules.yaml"
+    source: "src/test/java/dev/mars/apex/demo/basic/rules.yaml"
     enabled: true
     description: "Separate rules for testing"
 

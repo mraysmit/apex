@@ -1,0 +1,47 @@
+# ============================================================================
+# APEX YAML Configuration File - FX Risk Assessment Rules (Multi-File Architecture)
+# ============================================================================
+# Used by: UpdateStageFxTransactionMultiFileTest.java
+# Purpose: Reusable risk assessment rules - PROPERLY ALIGNED RULE IDs
+# Status: APEX-Compliant - Uses verified APEX syntax with correct rule IDs
+# ============================================================================
+
+metadata:
+  id: "fx-risk-rules-multifile"
+  name: "FX Risk Assessment Rules - Multi-File"
+  version: "1.0.0"
+  description: "Reusable risk assessment rules with aligned IDs"
+  type: "rule-config"
+  author: "APEX Demo Team"
+  created-date: "2025-09-23"
+  tags: ["fx-transaction", "risk-assessment", "multi-file", "reusable-rules"]
+
+# Reusable risk assessment rules - ALIGNED IDs
+rules:
+  - id: "risk-low-level"
+    name: "Low Risk Transaction"
+    condition: "#RISK_LEVEL == 'LOW'"
+    message: "Transaction classified as low risk"
+    severity: "INFO"
+    priority: 1
+    
+  - id: "risk-major-currencies"
+    name: "Major Currency Risk Assessment"
+    condition: "({'USD', 'EUR', 'GBP', 'JPY'}.contains(#BUY_CURRENCY) && {'USD', 'EUR', 'GBP', 'JPY'}.contains(#SELL_CURRENCY))"
+    message: "Major currency pair - lower risk profile"
+    severity: "INFO"
+    priority: 2
+    
+  - id: "risk-cross-region-warning"
+    name: "Cross-Region Risk Warning"
+    condition: "#CROSS_REGION == true"
+    message: "Cross-region transaction requires additional risk monitoring"
+    severity: "WARNING"
+    priority: 3
+    
+  - id: "risk-currency-ranking-check"
+    name: "Currency Ranking Risk Check"
+    condition: "#BUY_CURRENCY_RANK <= 5 && #SELL_CURRENCY_RANK <= 5"
+    message: "Both currencies are in top 5 rankings - acceptable risk"
+    severity: "INFO"
+    priority: 4

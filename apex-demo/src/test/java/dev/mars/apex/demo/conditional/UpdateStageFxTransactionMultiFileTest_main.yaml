@@ -1,0 +1,124 @@
+# ============================================================================
+# APEX YAML Configuration File - FX Transaction Multi-File Scenario
+# ============================================================================
+# Used by: UpdateStageFxTransactionMultiFileTest.java
+# Purpose: Main scenario with cross-file rule group references - PROPERLY ALIGNED
+# Status: APEX-Compliant - Uses verified APEX syntax with correct cross-file references
+# ============================================================================
+
+metadata:
+  id: "fx-transaction-multifile-scenario"
+  name: "FX Transaction Multi-File Scenario"
+  version: "1.0.0"
+  description: "Complete FX transaction scenario using multi-file architecture"
+  type: "scenario"
+  author: "APEX Demo Team"
+  created-date: "2025-09-23"
+  tags: ["fx-transaction", "multi-file", "scenario", "cross-file-references"]
+
+# Cross-file rule group references - VERIFIED APEX SYNTAX
+rule-refs:
+  - name: "swift-groups"
+    source: "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionMultiFileTest_groups_A.yaml"
+    enabled: true
+    description: "SWIFT processing rule groups"
+  - name: "validation-groups"
+    source: "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionMultiFileTest_groups_B.yaml"
+    enabled: true
+    description: "Cross-system validation groups"
+
+# Enrichments for data enhancement - VERIFIED APEX SYNTAX
+enrichments:
+  - id: "buy-currency-ranking"
+    name: "Buy Currency Ranking Enrichment"
+    type: "lookup-enrichment"
+    description: "Enrich with buy currency ranking"
+    condition: "#BUY_CURRENCY != null"
+
+    lookup-config:
+      lookup-key: "#BUY_CURRENCY"
+      lookup-dataset:
+        type: "inline"
+        key-field: "currency"
+        data:
+          - currency: "USD"
+            rank: 1
+            region: "Americas"
+          - currency: "EUR"
+            rank: 2
+            region: "Europe"
+          - currency: "GBP"
+            rank: 3
+            region: "Europe"
+          - currency: "JPY"
+            rank: 4
+            region: "Asia"
+          - currency: "CHF"
+            rank: 5
+            region: "Europe"
+
+      field-mappings:
+        - source-field: "rank"
+          target-field: "BUY_CURRENCY_RANK"
+        - source-field: "region"
+          target-field: "BUY_CURRENCY_REGION"
+
+  - id: "sell-currency-ranking"
+    name: "Sell Currency Ranking Enrichment"
+    type: "lookup-enrichment"
+    description: "Enrich with sell currency ranking"
+    condition: "#SELL_CURRENCY != null"
+
+    lookup-config:
+      lookup-key: "#SELL_CURRENCY"
+      lookup-dataset:
+        type: "inline"
+        key-field: "currency"
+        data:
+          - currency: "USD"
+            rank: 1
+            region: "Americas"
+          - currency: "EUR"
+            rank: 2
+            region: "Europe"
+          - currency: "GBP"
+            rank: 3
+            region: "Europe"
+          - currency: "JPY"
+            rank: 4
+            region: "Asia"
+          - currency: "CHF"
+            rank: 5
+            region: "Europe"
+
+      field-mappings:
+        - source-field: "rank"
+          target-field: "SELL_CURRENCY_RANK"
+        - source-field: "region"
+          target-field: "SELL_CURRENCY_REGION"
+
+  - id: "cross-region-flag"
+    name: "Cross-Region Flag Enrichment"
+    type: "field-enrichment"
+    description: "Calculate cross-region flag"
+    condition: "#BUY_CURRENCY_REGION != null && #SELL_CURRENCY_REGION != null"
+
+    field-mappings:
+      - source-field: "BUY_CURRENCY_REGION"
+        target-field: "CROSS_REGION"
+        transformation: "#BUY_CURRENCY_REGION != #SELL_CURRENCY_REGION"
+
+# Lookup datasets removed - now inline in enrichments
+
+# Main scenario rule groups - ALIGNED RULE GROUP IDs
+rule-groups:
+  - id: "main-fx-processing"
+    name: "Main FX Processing Group"
+    description: "Main FX transaction processing using multi-file architecture"
+    operator: "AND"
+    stop-on-first-failure: false
+    priority: 1
+    rule-group-ids:
+      - "swift-currency-validation"
+      - "swift-processing-validation"
+      - "cross-region-validation"

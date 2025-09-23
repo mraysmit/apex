@@ -1,0 +1,47 @@
+# ============================================================================
+# APEX YAML Configuration File - FX Processing Rules (Multi-File Architecture)
+# ============================================================================
+# Used by: UpdateStageFxTransactionMultiFileTest.java
+# Purpose: Reusable FX processing rules - PROPERLY ALIGNED RULE IDs
+# Status: APEX-Compliant - Uses verified APEX syntax with correct rule IDs
+# ============================================================================
+
+metadata:
+  id: "fx-processing-rules-multifile"
+  name: "FX Processing Rules - Multi-File"
+  version: "1.0.0"
+  description: "Reusable FX processing rules with aligned IDs"
+  type: "rule-config"
+  author: "APEX Demo Team"
+  created-date: "2025-09-23"
+  tags: ["fx-transaction", "processing", "multi-file", "reusable-rules"]
+
+# Reusable FX processing rules - ALIGNED IDs
+rules:
+  - id: "processing-swift-valid"
+    name: "SWIFT Processing Valid"
+    condition: "#SYSTEM_CODE == 'SWIFT' && #PROCESSING_STATUS == 'SWIFT_PROCESSED'"
+    message: "SWIFT processing completed successfully"
+    severity: "INFO"
+    priority: 1
+    
+  - id: "processing-ndf-handled"
+    name: "NDF Processing Handled"
+    condition: "#IS_NDF == 1 && #PROCESSED_NDF == 1"
+    message: "NDF processing handled correctly"
+    severity: "INFO"
+    priority: 2
+    
+  - id: "processing-validation-passed"
+    name: "Validation Status Passed"
+    condition: "#VALIDATION_STATUS == 'VALIDATED'"
+    message: "Transaction validation passed"
+    severity: "INFO"
+    priority: 3
+    
+  - id: "processing-no-translation-needed"
+    name: "No Translation Required"
+    condition: "#REQUIRES_TRANSLATION == false"
+    message: "No translation required for this transaction"
+    severity: "INFO"
+    priority: 4

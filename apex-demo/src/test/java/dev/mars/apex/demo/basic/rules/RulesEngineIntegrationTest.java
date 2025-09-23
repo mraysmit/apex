@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.mars.apex.demo.basic_rules;
+package dev.mars.apex.demo.basic.rules;
 
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;

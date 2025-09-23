@@ -1,0 +1,65 @@
+# ============================================================================
+# APEX YAML Configuration File - SWIFT Rule Groups (Multi-File Architecture)
+# ============================================================================
+# Used by: UpdateStageFxTransactionMultiFileTest.java
+# Purpose: SWIFT-specific rule orchestration - PROPERLY ALIGNED RULE IDs
+# Status: APEX-Compliant - Uses verified APEX syntax with correct cross-file references
+# ============================================================================
+
+metadata:
+  id: "swift-rule-groups-multifile"
+  name: "SWIFT Rule Groups - Multi-File"
+  version: "1.0.0"
+  description: "SWIFT-specific rule orchestration with aligned rule references"
+  type: "rule-config"
+  author: "APEX Demo Team"
+  created-date: "2025-09-23"
+  tags: ["swift", "rule-groups", "multi-file", "cross-file-references"]
+
+# Cross-file rule references - VERIFIED APEX SYNTAX
+rule-refs:
+  - name: "fx-currency-rules"
+    source: "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionMultiFileTest_rules_A.yaml"
+    enabled: true
+    description: "FX currency validation rules"
+  - name: "fx-processing-rules"
+    source: "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionMultiFileTest_rules_B.yaml"
+    enabled: true
+    description: "FX processing rules"
+  - name: "fx-risk-rules"
+    source: "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionMultiFileTest_rules_C.yaml"
+    enabled: true
+    description: "FX risk assessment rules"
+
+# SWIFT-specific rule groups - ALIGNED RULE IDs
+rule-groups:
+  - id: "swift-currency-validation"
+    name: "SWIFT Currency Validation Group"
+    description: "Currency validation for SWIFT transactions"
+    operator: "AND"
+    stop-on-first-failure: false
+    priority: 1
+    rule-ids:
+      - "currency-usd-detected"
+      - "currency-major-pair"
+      
+  - id: "swift-processing-validation"
+    name: "SWIFT Processing Validation Group"
+    description: "Processing validation for SWIFT transactions"
+    operator: "AND"
+    stop-on-first-failure: false
+    priority: 2
+    rule-ids:
+      - "processing-swift-valid"
+      - "processing-ndf-handled"
+      - "processing-validation-passed"
+      
+  - id: "swift-risk-assessment"
+    name: "SWIFT Risk Assessment Group"
+    description: "Risk assessment for SWIFT transactions"
+    operator: "AND"
+    stop-on-first-failure: false
+    priority: 3
+    rule-ids:
+      - "risk-low-level"
+      - "risk-major-currencies"
