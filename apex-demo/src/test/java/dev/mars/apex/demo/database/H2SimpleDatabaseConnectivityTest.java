@@ -19,9 +19,9 @@ import static org.junit.jupiter.api.Assertions.*;
  * 
  * The most trivial test to show database connectivity works.
  */
-public class SimpleDatabaseConnectivityTest extends DemoTestBase {
+public class H2SimpleDatabaseConnectivityTest extends DemoTestBase {
 
-    private static final Logger logger = LoggerFactory.getLogger(SimpleDatabaseConnectivityTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(H2SimpleDatabaseConnectivityTest.class);
 
     @BeforeEach
     void setupDatabase() {
@@ -50,7 +50,7 @@ public class SimpleDatabaseConnectivityTest extends DemoTestBase {
 
         try {
             YamlRuleConfiguration config = yamlLoader.loadFromFile(
-                "src/test/java/dev/mars/apex/demo/database/SimpleDatabaseConnectivityTest.yaml");
+                "src/test/java/dev/mars/apex/demo/database/H2SimpleDatabaseConnectivityTest.yaml");
 
             Map<String, Object> testData = new HashMap<>();
             testData.put("id", "1");

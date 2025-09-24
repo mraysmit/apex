@@ -14,7 +14,7 @@ public class FolderYamlValidatorTest {
     @Test
     @DisplayName("Validate Basic Rules Folder")
     public void validateBasicRulesFolder() throws Exception {
-        String folderPath = "../apex-demo/src/test/java/dev/mars/apex/demo/basic-rules";
+        String folderPath = "../apex-demo/src/test/java/dev/mars/apex/demo/basic";
         
         System.out.println("\n" + "=".repeat(60));
         System.out.println("APEX FOLDER VALIDATION TEST - BASIC RULES");
@@ -125,26 +125,26 @@ public class FolderYamlValidatorTest {
         System.out.println("\n2. COMMAND LINE EXECUTION:");
         System.out.println("   cd apex-compiler");
         System.out.println("   mvn exec:java -Dexec.mainClass=\"dev.mars.apex.compiler.FolderYamlValidator\" \\");
-        System.out.println("     -Dexec.args=\"../apex-demo/src/test/java/dev/mars/apex/demo/basic-rules\"");
-        
+        System.out.println("     -Dexec.args=\"../apex-demo/src/test/java/dev/mars/apex/demo/basic\"");
+
         System.out.println("\n3. WITH REPORT GENERATION:");
         System.out.println("   mvn exec:java -Dexec.mainClass=\"dev.mars.apex.compiler.FolderYamlValidator\" \\");
-        System.out.println("     -Dexec.args=\"../apex-demo/src/test/java/dev/mars/apex/demo/basic-rules --report\"");
-        
+        System.out.println("     -Dexec.args=\"../apex-demo/src/test/java/dev/mars/apex/demo/basic --report\"");
+
         System.out.println("\n4. DIRECT JAVA EXECUTION (with proper classpath):");
         System.out.println("   java -cp \"target/classes:../apex-core/target/classes:$(mvn dependency:build-classpath -q -Dmdep.outputFile=/dev/stdout)\" \\");
         System.out.println("     dev.mars.apex.compiler.FolderYamlValidator \\");
-        System.out.println("     \"../apex-demo/src/test/java/dev/mars/apex/demo/basic-rules\"");
-        
+        System.out.println("     \"../apex-demo/src/test/java/dev/mars/apex/demo/basic\"");
+
         System.out.println("\n5. POWERSHELL SCRIPT:");
-        System.out.println("   $folderPath = \"../apex-demo/src/test/java/dev/mars/apex/demo/basic-rules\"");
+        System.out.println("   $folderPath = \"../apex-demo/src/test/java/dev/mars/apex/demo/basic\"");
         System.out.println("   mvn exec:java -Dexec.mainClass=\"dev.mars.apex.compiler.FolderYamlValidator\" `");
         System.out.println("     -Dexec.args=\"$folderPath\"");
-        
+
         System.out.println("\n" + "=".repeat(60));
         System.out.println("AVAILABLE FOLDERS TO VALIDATE:");
         System.out.println("=".repeat(60));
-        System.out.println("• ../apex-demo/src/test/java/dev/mars/apex/demo/basic-rules");
+        System.out.println("• ../apex-demo/src/test/java/dev/mars/apex/demo/basic");
         System.out.println("• ../apex-demo/src/test/java/dev/mars/apex/demo/rulegroups");
         System.out.println("• ../apex-demo/src/test/java/dev/mars/apex/demo/lookup");
         System.out.println("• ../apex-demo/src/test/java/dev/mars/apex/demo/enrichment");
