@@ -147,7 +147,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
         
         try {
             YamlRuleConfiguration config = yamlLoader.loadFromFile(
-                "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionApexTest_main.yaml");
+                "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionApexTest.yaml");
             
             // Test data - SWIFT system with Y flag
             Map<String, Object> testData = new HashMap<>();
@@ -193,7 +193,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
         
         try {
             YamlRuleConfiguration config = yamlLoader.loadFromFile(
-                "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionApexTest_main.yaml");
+                "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionApexTest.yaml");
             
             // Test data - REUTERS system with TRUE value
             Map<String, Object> testData = new HashMap<>();
@@ -239,7 +239,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
         
         try {
             YamlRuleConfiguration config = yamlLoader.loadFromFile(
-                "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionApexTest_main.yaml");
+                "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionApexTest.yaml");
             
             // Test data - SWIFT system with complex NDF code
             Map<String, Object> testData = new HashMap<>();
@@ -276,7 +276,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
         
         try {
             YamlRuleConfiguration config = yamlLoader.loadFromFile(
-                "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionApexTest_main.yaml");
+                "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionApexTest.yaml");
             
             // Test data - Unsupported system
             Map<String, Object> testData = new HashMap<>();
@@ -315,7 +315,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
         
         try {
             YamlRuleConfiguration config = yamlLoader.loadFromFile(
-                "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionApexTest_main.yaml");
+                "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionApexTest.yaml");
             
             // Test HIGH risk scenario (lower ranked currencies)
             Map<String, Object> testData = new HashMap<>();
@@ -350,7 +350,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
      */
     private YamlRuleConfiguration loadConfiguration() throws YamlConfigurationException {
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionApexTest_main.yaml");
+            "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionApexTest.yaml");
 
         assertNotNull(config, "Configuration should be loaded");
         assertEquals("Update Stage FX Transaction - Simplified", config.getMetadata().getName());

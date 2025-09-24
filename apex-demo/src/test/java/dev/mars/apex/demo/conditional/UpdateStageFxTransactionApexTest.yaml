@@ -9,6 +9,7 @@
 # ============================================================================
 
 metadata:
+  id: "update-stage-fx-transaction-simplified"
   name: "Update Stage FX Transaction - Simplified"
   version: "1.0.0"
   description: "Simplified FX transaction stage updates with inline data for testing"

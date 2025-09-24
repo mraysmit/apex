@@ -9,6 +9,7 @@
 # ============================================================================
 
 metadata:
+  id: "conditional-mapping-enrichment-example"
   name: "Conditional Mapping Enrichment Example"
   version: "1.0.0"
   description: "Comprehensive example of conditional-mapping-enrichment for FX transactions"

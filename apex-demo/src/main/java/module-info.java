@@ -64,4 +64,5 @@ module dev.mars.apex.demo {
     // Only opening packages that actually exist in main source
     opens dev.mars.apex.demo.model;
     opens dev.mars.apex.demo.infrastructure;
+    opens dev.mars.apex.demo;
 }

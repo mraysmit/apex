@@ -68,7 +68,7 @@ public class UpdateStageFxTransactionApexTest {
             // Load using APEX automatic rule reference resolution
             // Following the pattern from BasicYamlRuleGroupProcessingATest
             YamlRuleConfiguration config = yamlLoader.loadFromFile(
-                "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionApexTest_main.yaml"
+                "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionApexTest.yaml"
             );
             
             logger.info("✅ Configuration loaded with cross-file rule references");

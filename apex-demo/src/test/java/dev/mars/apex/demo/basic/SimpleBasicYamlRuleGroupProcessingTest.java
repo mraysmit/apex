@@ -67,7 +67,7 @@ class SimpleBasicYamlRuleGroupProcessingTest {
         try {
             // Load combined configuration
             YamlRuleConfiguration config = yamlLoader.loadFromFile(
-                "src/test/java/dev/mars/apex/demo/basic/combined-config.yaml"
+                "src/test/java/dev/mars/apex/demo/basic/SimpleBasicYamlRuleGroupProcessingTest.yaml"
             );
             
             assertNotNull(config, "Configuration should be loaded");
@@ -131,7 +131,7 @@ class SimpleBasicYamlRuleGroupProcessingTest {
         try {
             // Load rule groups configuration (references external rules file)
             YamlRuleConfiguration config = yamlLoader.loadFromFile(
-                "src/test/java/dev/mars/apex/demo/basic/rule-groups.yaml"
+                "src/test/java/dev/mars/apex/demo/basic/SimpleBasicYamlRuleGroupProcessingTest-A.yaml"
             );
             
             assertNotNull(config, "Configuration should be loaded");

@@ -168,7 +168,7 @@ public class DatabaseDataSource implements ExternalDataSource {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getData(String dataType, Object... parameters) {
-        LOGGER.debug("DatabaseDataSource.getData called - dataType: {}, parameters: {}", dataType, java.util.Arrays.toString(parameters));
+        LOGGER.info("TRACE: DatabaseDataSource.getData called - dataType: {}, parameters: {}", dataType, java.util.Arrays.toString(parameters));
         long startTime = System.currentTimeMillis();
         
         try {
@@ -214,7 +214,7 @@ public class DatabaseDataSource implements ExternalDataSource {
     
     @Override
     public <T> List<T> query(String query, Map<String, Object> parameters) throws DataSourceException {
-        LOGGER.debug("DatabaseDataSource.query called - query: {}, parameters: {}", query, parameters);
+        LOGGER.info("TRACE: DatabaseDataSource.query called - query: {}, parameters: {}", query, parameters);
         // Validate inputs
         if (query == null) {
             throw DataSourceException.configurationError("Query cannot be null");
@@ -304,7 +304,7 @@ public class DatabaseDataSource implements ExternalDataSource {
     
     @Override
     public <T> T queryForObject(String query, Map<String, Object> parameters) throws DataSourceException {
-        LOGGER.debug("DatabaseDataSource.queryForObject called - query: {}, parameters: {}", query, parameters);
+        LOGGER.info("TRACE: DatabaseDataSource.queryForObject called - query: {}, parameters: {}", query, parameters);
         LOGGER.debug("Executing queryForObject on '{}' - expecting single result", getName());
         LOGGER.debug("QueryForObject query: {}", query);
         LOGGER.debug("QueryForObject parameters: {}", parameters);
@@ -428,7 +428,7 @@ public class DatabaseDataSource implements ExternalDataSource {
      * Execute a query based on data type and parameters.
      */
     private Object executeQuery(String dataType, Object... parameters) throws SQLException {
-        LOGGER.debug("DatabaseDataSource.executeQuery called - dataType: {}, parameters: {}", dataType, java.util.Arrays.toString(parameters));
+        LOGGER.info("TRACE: DatabaseDataSource.executeQuery called - dataType: {}, parameters: {}", dataType, java.util.Arrays.toString(parameters));
         String query = getQueryForDataType(dataType);
         if (query == null) {
             throw new SQLException("No query defined for data type: " + dataType);
@@ -477,7 +477,7 @@ public class DatabaseDataSource implements ExternalDataSource {
      */
     private PreparedStatement prepareStatement(Connection connection, String query,
                                              Map<String, Object> parameters) throws SQLException {
-        LOGGER.debug("DatabaseDataSource.prepareStatement called - query: {}, parameters: {}", query, parameters);
+        LOGGER.info("TRACE: DatabaseDataSource.prepareStatement called - query: {}, parameters: {}", query, parameters);
         LOGGER.debug("DatabaseDataSource.prepareStatement parameters: {}", parameters);
         return JdbcParameterUtils.prepareStatement(connection, query, parameters);
     }

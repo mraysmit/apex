@@ -49,7 +49,7 @@ public class UltraSimpleRuleOrTest extends DemoTestBase {
             Map<String, Object> testData = new HashMap<>();
             testData.put("input", "A");
 
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ultra-simple-rule-or-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/UltraSimpleRuleOrTest.yaml");
             Object enrichmentResult = enrichmentService.enrichObject(config, testData);
             @SuppressWarnings("unchecked")
             Map<String, Object> result = (Map<String, Object>) enrichmentResult;
@@ -71,7 +71,7 @@ public class UltraSimpleRuleOrTest extends DemoTestBase {
             Map<String, Object> testData = new HashMap<>();
             testData.put("input", "B");
 
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ultra-simple-rule-or-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/UltraSimpleRuleOrTest.yaml");
             Object enrichmentResult = enrichmentService.enrichObject(config, testData);
             @SuppressWarnings("unchecked")
             Map<String, Object> result = (Map<String, Object>) enrichmentResult;
@@ -93,7 +93,7 @@ public class UltraSimpleRuleOrTest extends DemoTestBase {
             Map<String, Object> testData = new HashMap<>();
             testData.put("input", "C");
 
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ultra-simple-rule-or-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/UltraSimpleRuleOrTest.yaml");
             Object enrichmentResult = enrichmentService.enrichObject(config, testData);
             @SuppressWarnings("unchecked")
             Map<String, Object> result = (Map<String, Object>) enrichmentResult;
@@ -115,7 +115,7 @@ public class UltraSimpleRuleOrTest extends DemoTestBase {
             Map<String, Object> testData = new HashMap<>();
             testData.put("input", "X");
 
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ultra-simple-rule-or-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/UltraSimpleRuleOrTest.yaml");
             Object enrichmentResult = enrichmentService.enrichObject(config, testData);
             @SuppressWarnings("unchecked")
             Map<String, Object> result = (Map<String, Object>) enrichmentResult;

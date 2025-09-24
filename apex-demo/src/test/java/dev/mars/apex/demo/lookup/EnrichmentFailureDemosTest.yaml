@@ -7,7 +7,6 @@ metadata:
   name: "APEX Enrichment Failure Scenarios Demo"
   version: "1.0.0"
   description: "Demonstrates realistic enrichment failure handling with RuleResult integration"
-  type: "enrichment"
   business-domain: "Financial Transaction Processing - Enrichment Failure Management"
   author: "Mark Andrew Ray-Smith Cityline Ltd"
   created-date: "2025-09-22"

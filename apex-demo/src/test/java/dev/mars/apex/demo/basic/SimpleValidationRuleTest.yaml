@@ -6,6 +6,7 @@
 # ============================================================================
 
 metadata:
+  id: "simple-validation-rule"
   name: "Simple Age Validation"
   version: "1.0.0"
   description: "The simplest possible YAML validation rule"

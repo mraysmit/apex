@@ -58,7 +58,7 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
 
         try {
             // Load YAML configuration
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-fx-transaction-working-example.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalFxTransactionWorkingExampleTest.yaml");
             assertNotNull(config, "Configuration should not be null");
             logger.info("✓ Configuration loaded successfully: " + config.getMetadata().getName());
 
@@ -131,7 +131,7 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
 
         try {
             // Load YAML configuration
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-fx-transaction-working-example.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalFxTransactionWorkingExampleTest.yaml");
             assertNotNull(config, "Configuration should not be null");
 
             // Given: SWIFT system with Y flag
@@ -176,7 +176,7 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
 
         try {
             // Load YAML configuration
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-fx-transaction-working-example.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalFxTransactionWorkingExampleTest.yaml");
             assertNotNull(config, "Configuration should not be null");
 
             // Given: REUTERS system with TRUE value
@@ -221,7 +221,7 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
 
         try {
             // Load YAML configuration
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-fx-transaction-working-example.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalFxTransactionWorkingExampleTest.yaml");
             assertNotNull(config, "Configuration should not be null");
 
             // Given: High-value transaction requiring manual review
@@ -272,7 +272,7 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
 
         try {
             // Load YAML configuration
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-fx-transaction-working-example.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalFxTransactionWorkingExampleTest.yaml");
             assertNotNull(config, "Configuration should not be null");
 
             // Given: Complex transaction with multiple decision points

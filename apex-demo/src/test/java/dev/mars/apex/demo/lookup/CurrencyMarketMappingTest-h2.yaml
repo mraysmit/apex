@@ -4,10 +4,6 @@
 metadata:
   id: "currency-h2-validation"
   name: "Currency H2 Database Validation"
-  version: "1.0.0"
-  description: "Currency validation using H2 database lookup enrichment"
-  type: "enrichment"
-  author: "apex.demo.team@company.com"
 
 data-sources:
   - name: "currency-validation-database"

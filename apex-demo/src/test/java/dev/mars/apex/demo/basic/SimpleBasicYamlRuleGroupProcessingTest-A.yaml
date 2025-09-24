@@ -1,0 +1,55 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: SimpleBasicYamlRuleGroupProcessingTest.java (testRuleGroupProcessingWithSeparateFiles method)
+# Purpose: Rule groups configuration for testing separate file concept with
+#          APEX rule group processing, demonstrating rule group definitions
+#          and rule group management functionality
+# ============================================================================
+
+metadata:
+  id: "basic-rules-rule-groups"
+  name: "Separate Rules Test - Rule Groups Only"
+  version: "1.0.0"
+  description: "Test rule groups for separate file testing"
+  type: "scenario"
+  author: "apex-demo-team@example.com"
+  owner: "apex-demo-team@example.com"
+  business-domain: "testing"
+
+rule-configurations:
+  - source: "src/test/java/dev/mars/apex/demo/basic/rules.yaml"
+
+# Reference external rule files
+rule-refs:
+  - name: "separate-rules"
+    source: "src/test/java/dev/mars/apex/demo/basic/rules.yaml"
+    enabled: true
+    description: "Separate rules for testing"
+
+rule-groups:
+  - id: "separate-and-group"
+    name: "Separate AND Group"
+    description: "AND group using separate rules"
+    operator: "AND"
+    rule-ids:
+      - "separate-rule-1"
+      - "separate-rule-3"
+      
+  - id: "separate-or-group"
+    name: "Separate OR Group"
+    description: "OR group using separate rules"
+    operator: "OR"
+    rule-ids:
+      - "separate-rule-1"
+      - "separate-rule-2"
+      - "separate-rule-3"
+      
+  - id: "separate-and-mixed-group"
+    name: "Separate AND Mixed Group"
+    description: "AND group with mixed true/false rules"
+    operator: "AND"
+    rule-ids:
+      - "separate-rule-1"
+      - "separate-rule-2"
+      - "separate-rule-3"

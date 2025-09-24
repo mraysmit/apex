@@ -1,0 +1,170 @@
+# ============================================================================
+# APEX YAML Configuration File - Mixed Severity Rules
+# ============================================================================
+# Purpose: Test mixed severity levels within single configuration to verify
+#          proper severity handling and isolation between different rule types
+# Used by: SeverityMixedRulesTest.java
+# ============================================================================
+
+metadata:
+  id: "basic-rules-severity-mixed"
+  name: "Mixed Severity Rules Test"
+  version: "1.0.0"
+  description: "Test configuration with mixed severity levels in various combinations"
+  type: "rule-config"
+  author: "apex-demo-team@example.com"
+
+rules:
+  # Financial validation rules with different severities
+  - id: "account-balance-critical"
+    name: "Account Balance Critical Check"
+    condition: "#balance != null && #balance < 0"
+    message: "CRITICAL: Account balance {{#balance}} is negative - immediate action required"
+    severity: "ERROR"
+    priority: 1
+
+  - id: "account-balance-warning"
+    name: "Account Balance Warning Check"
+    condition: "#balance != null && #balance < 1000 && #balance >= 0"
+    message: "WARNING: Account balance {{#balance}} is low - consider adding funds"
+    severity: "WARNING"
+    priority: 2
+
+  - id: "account-balance-info"
+    name: "Account Balance Info Check"
+    condition: "#balance != null && #balance >= 1000"
+    message: "INFO: Account balance {{#balance}} is healthy"
+    severity: "INFO"
+    priority: 3
+
+  # Customer validation rules with mixed severities
+  - id: "customer-age-error"
+    name: "Customer Age Error Check"
+    condition: "#age != null && #age < 18"
+    message: "ERROR: Customer age {{#age}} is below minimum required age"
+    severity: "ERROR"
+    priority: 4
+
+  - id: "customer-age-warning"
+    name: "Customer Age Warning Check"
+    condition: "#age != null && #age >= 65"
+    message: "WARNING: Customer age {{#age}} requires special handling"
+    severity: "WARNING"
+    priority: 5
+
+  - id: "customer-age-info"
+    name: "Customer Age Info Check"
+    condition: "#age != null && #age >= 18 && #age < 65"
+    message: "INFO: Customer age {{#age}} is within normal range"
+    severity: "INFO"
+    priority: 6
+
+  # Transaction validation rules with mixed severities
+  - id: "transaction-amount-critical"
+    name: "Transaction Amount Critical Check"
+    condition: "#amount != null && #amount > 100000"
+    message: "CRITICAL: Transaction amount {{#amount}} exceeds maximum limit"
+    severity: "ERROR"
+    priority: 7
+
+  - id: "transaction-amount-warning"
+    name: "Transaction Amount Warning Check"
+    condition: "#amount != null && #amount > 50000 && #amount <= 100000"
+    message: "WARNING: Transaction amount {{#amount}} requires approval"
+    severity: "WARNING"
+    priority: 8
+
+  - id: "transaction-amount-info"
+    name: "Transaction Amount Info Check"
+    condition: "#amount != null && #amount <= 50000"
+    message: "INFO: Transaction amount {{#amount}} is within normal limits"
+    severity: "INFO"
+    priority: 9
+
+  # Status validation rules with mixed severities
+  - id: "status-error"
+    name: "Status Error Check"
+    condition: "#status != null && #status == 'BLOCKED'"
+    message: "ERROR: Account status {{#status}} prevents transactions"
+    severity: "ERROR"
+    priority: 10
+
+  - id: "status-warning"
+    name: "Status Warning Check"
+    condition: "#status != null && #status == 'SUSPENDED'"
+    message: "WARNING: Account status {{#status}} has limited functionality"
+    severity: "WARNING"
+    priority: 11
+
+  - id: "status-info"
+    name: "Status Info Check"
+    condition: "#status != null && #status == 'ACTIVE'"
+    message: "INFO: Account status {{#status}} is operational"
+    severity: "INFO"
+    priority: 12
+
+rule-groups:
+  # Test group with all ERROR severity rules
+  - id: "error-only-group"
+    name: "Error Only Group"
+    description: "AND group containing only ERROR severity rules"
+    operator: "AND"
+    rule-ids:
+      - "account-balance-critical"
+      - "customer-age-error"
+      - "transaction-amount-critical"
+      - "status-error"
+
+  # Test group with all WARNING severity rules
+  - id: "warning-only-group"
+    name: "Warning Only Group"
+    description: "OR group containing only WARNING severity rules"
+    operator: "OR"
+    rule-ids:
+      - "account-balance-warning"
+      - "customer-age-warning"
+      - "transaction-amount-warning"
+      - "status-warning"
+
+  # Test group with all INFO severity rules
+  - id: "info-only-group"
+    name: "Info Only Group"
+    description: "AND group containing only INFO severity rules"
+    operator: "AND"
+    rule-ids:
+      - "account-balance-info"
+      - "customer-age-info"
+      - "transaction-amount-info"
+      - "status-info"
+
+  # Test group with mixed ERROR and WARNING severities
+  - id: "error-warning-mixed-group"
+    name: "Error Warning Mixed Group"
+    description: "OR group with mix of ERROR and WARNING severities"
+    operator: "OR"
+    rule-ids:
+      - "account-balance-critical"
+      - "customer-age-warning"
+      - "transaction-amount-critical"
+      - "status-warning"
+
+  # Test group with mixed WARNING and INFO severities
+  - id: "warning-info-mixed-group"
+    name: "Warning Info Mixed Group"
+    description: "AND group with mix of WARNING and INFO severities"
+    operator: "AND"
+    rule-ids:
+      - "account-balance-warning"
+      - "customer-age-info"
+      - "transaction-amount-info"
+      - "status-warning"
+
+  # Test group with all three severity levels
+  - id: "all-severities-mixed-group"
+    name: "All Severities Mixed Group"
+    description: "OR group with ERROR, WARNING, and INFO severities"
+    operator: "OR"
+    rule-ids:
+      - "account-balance-critical"
+      - "customer-age-warning"
+      - "transaction-amount-info"

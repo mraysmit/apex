@@ -6,6 +6,7 @@
 # ============================================================================
 
 metadata:
+  id: "ultra-simple-ternary-test"
   name: "Ultra Simple Ternary Test"
   version: "1.0.0"
   description: "Single enrichment with ternary operators - simpler than rule groups"

@@ -7,6 +7,7 @@
 # ============================================================================
 
 metadata:
+  id: "conditional-mapping-enrichment-phase-3-test"
   name: "Conditional Mapping Enrichment Phase 3 Test"
   version: "3.0.0"
   description: "Test configuration for new conditional-mapping-enrichment type"
@@ -37,8 +38,8 @@ enrichments:
             - condition: "#SYSTEM_CODE == 'SWIFT'"
             - condition: "#IS_NDF == 'Y'"
         mapping:
-          type: "direct"
-          transformation: "'HIGH_PRIORITY_NDF'"
+          type: "direct"                           # Direct mapping: executes SpEL transformation directly
+          transformation: "'HIGH_PRIORITY_NDF'"   # SpEL: Returns literal string "HIGH_PRIORITY_NDF"
           
       # Rule 2: Medium priority - SWIFT system general
       - id: "swift-general"
@@ -50,9 +51,9 @@ enrichments:
             - condition: "#SYSTEM_CODE == 'SWIFT'"
             - condition: "#IS_NDF != null"
         mapping:
-          type: "direct"
-          source-field: "IS_NDF"
-          transformation: "#IS_NDF + '_SWIFT'"
+          type: "direct"                           # Direct mapping: executes SpEL transformation directly
+          source-field: "IS_NDF"                  # Source field reference (optional when using transformation)
+          transformation: "#IS_NDF + '_SWIFT'"    # SpEL: Concatenates IS_NDF field value with "_SWIFT" suffix
           
       # Rule 3: Lower priority - Other systems
       - id: "other-systems"
@@ -64,8 +65,8 @@ enrichments:
             - condition: "#SYSTEM_CODE != 'SWIFT'"
             - condition: "#IS_NDF != null"
         mapping:
-          type: "direct"
-          transformation: "'OTHER_SYSTEM_VALUE'"
+          type: "direct"                           # Direct mapping: executes SpEL transformation directly
+          transformation: "'OTHER_SYSTEM_VALUE'"  # SpEL: Returns literal string "OTHER_SYSTEM_VALUE"
           
       # Rule 4: Default rule (lowest priority, no conditions)
       - id: "default-mapping"
@@ -73,8 +74,8 @@ enrichments:
         priority: 999
         # No conditions = always matches if no other rules match
         mapping:
-          type: "direct"
-          transformation: "'DEFAULT_NDF'"
+          type: "direct"                           # Direct mapping: executes SpEL transformation directly
+          transformation: "'DEFAULT_NDF'"         # SpEL: Returns literal string "DEFAULT_NDF" (fallback value)
           
     # Execution settings
     execution-settings:

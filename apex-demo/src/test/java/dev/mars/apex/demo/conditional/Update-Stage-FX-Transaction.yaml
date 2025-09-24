@@ -8,6 +8,7 @@
 # ============================================================================
 
 metadata:
+  id: "update-stage-fx-transaction"
   name: "Update Stage FX Transaction"
   version: "1.0.0"
   description: "Update Stage FX Transaction"

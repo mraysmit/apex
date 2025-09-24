@@ -8,6 +8,7 @@
 # ============================================================================
 
 metadata:
+  id: "rule-result-references-demo"
   name: "Rule Result References Demo"
   version: "1.0.0"
   description: "Phase 1 implementation of conditional mapping using rule result references"

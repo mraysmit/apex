@@ -1,5 +1,7 @@
 package dev.mars.apex.demo.lookup;
 
+import dev.mars.apex.demo.DemoTestBase;
+
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
  *
@@ -18,7 +20,6 @@ package dev.mars.apex.demo.lookup;
 
 import dev.mars.apex.demo.test.TestContainerImages;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

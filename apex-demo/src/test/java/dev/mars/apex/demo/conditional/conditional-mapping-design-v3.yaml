@@ -8,6 +8,7 @@
 # ============================================================================
 
 metadata:
+  id: "conditional-mapping-design-v3"
   name: "New Conditional Mapping Enrichment - FX Transaction"
   version: "2.0.0"
   description: "New enrichment type for conditional field mapping"

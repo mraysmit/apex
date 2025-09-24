@@ -71,15 +71,8 @@ public class BasicYamlRuleGroupProcessingTest {
             logInfo("Testing AND group with all true rules using separate files");
 
             try {
-                // Load using direct file path like the working examples
-                YamlRuleConfiguration config = yamlLoader.loadFromFile(
-                    "src/test/java/dev/mars/apex/demo/basic/combined-config.yaml"
-                );
-
-                assertNotNull(config, "Configuration should be loaded");
-
-                // Create RulesEngine from the loaded configuration
-                RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+                // Load using classpath resources for separate files
+                RulesEngine engine = rulesEngineService.createRulesEngineFromClasspath("separate-rules-test/combined-config.yaml");
 
                 RuleGroup ruleGroup = engine.getConfiguration().getRuleGroupById("separate-and-group");
                 assertNotNull(ruleGroup, "Rule group should be found");
@@ -111,15 +104,15 @@ public class BasicYamlRuleGroupProcessingTest {
             logInfo("Testing AND group with one false rule using separate files");
 
             try {
-                // Load using direct file path like the working examples
-                YamlRuleConfiguration config = yamlLoader.loadFromFile(
-                    "src/test/java/dev/mars/apex/demo/basic/rule-groups.yaml"
+                // Load using multi-file approach with separate rules and rule groups files
+                // Get the absolute paths to the test resources
+                String rulesPath = getClass().getClassLoader().getResource("separate-rules-test/rules.yaml").getPath();
+                String ruleGroupsPath = getClass().getClassLoader().getResource("separate-rules-test/rule-groups.yaml").getPath();
+
+                RulesEngine engine = rulesEngineService.createRulesEngineFromMultipleFiles(
+                    rulesPath,
+                    ruleGroupsPath
                 );
-
-                assertNotNull(config, "Configuration should be loaded");
-
-                // Create RulesEngine from the loaded configuration
-                RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
 
                 RuleGroup ruleGroup = engine.getConfiguration().getRuleGroupById("separate-and-mixed-group");
                 assertNotNull(ruleGroup, "Rule group should be found");

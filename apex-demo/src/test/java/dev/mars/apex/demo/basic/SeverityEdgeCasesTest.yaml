@@ -1,0 +1,182 @@
+# ============================================================================
+# APEX YAML Configuration File - Severity Edge Cases
+# ============================================================================
+# Purpose: Test edge cases and boundary conditions for severity handling
+#          including case sensitivity, whitespace, and special scenarios
+# Used by: SeverityEdgeCasesTest.java
+# ============================================================================
+
+metadata:
+  id: "basic-rules-severity-edge-cases"
+  name: "Severity Edge Cases Test"
+  version: "1.0.0"
+  description: "Test configuration for severity edge cases and boundary conditions"
+  type: "rule-config"
+  author: "apex-demo-team@example.com"
+
+rules:
+  # Test Case 1: Severity with leading/trailing whitespace (APEX preserves whitespace)
+  - id: "whitespace-severity-test"
+    name: "Whitespace Severity Test"
+    condition: "true"
+    message: "Testing severity with whitespace"
+    severity: "ERROR"
+    priority: 1
+
+  # Test Case 2: Mixed case severity (should be normalized)
+  - id: "mixed-case-error"
+    name: "Mixed Case Error"
+    condition: "true"
+    message: "Testing mixed case ERROR severity"
+    severity: "Error"
+    priority: 1
+
+  # Test Case 3: Lowercase severity (should be normalized)
+  - id: "lowercase-warning"
+    name: "Lowercase Warning"
+    condition: "true"
+    message: "Testing lowercase WARNING severity"
+    severity: "warning"
+    priority: 2
+
+  # Test Case 4: Uppercase INFO (should work as-is)
+  - id: "uppercase-info"
+    name: "Uppercase Info"
+    condition: "true"
+    message: "Testing uppercase INFO severity"
+    severity: "INFO"
+    priority: 3
+
+  # Test Case 5: Rule with very long message and severity
+  - id: "long-message-rule"
+    name: "Long Message Rule"
+    condition: "#testLongMessage == true"
+    message: "This is a very long message that tests how the APEX rules engine handles extremely verbose rule messages with lots of detail and information that might be used in complex business scenarios where detailed explanations are required for compliance and audit purposes"
+    severity: "WARNING"
+    priority: 2
+
+  # Test Case 6: Rule with special characters in message
+  - id: "special-chars-rule"
+    name: "Special Characters Rule"
+    condition: "#testSpecialChars == true"
+    message: "Testing special chars: !@#$%^&*()_+-=[]{}|;':\",./<>? and unicode: ñáéíóú"
+    severity: "INFO"
+    priority: 3
+
+  # Test Case 7: Rule with numeric values in condition
+  - id: "numeric-boundary-test"
+    name: "Numeric Boundary Test"
+    condition: "#value != null && (#value == 0 || #value == -1 || #value == 999999999)"
+    message: "Testing numeric boundary values: {{#value}}"
+    severity: "ERROR"
+    priority: 1
+
+  # Test Case 8: Rule with null/empty string conditions
+  - id: "null-empty-test"
+    name: "Null Empty Test"
+    condition: "#testString == null || #testString == '' || #testString.trim() == ''"
+    message: "Testing null or empty string conditions"
+    severity: "WARNING"
+    priority: 2
+
+  # Test Case 9: Rule with boolean edge cases
+  - id: "boolean-edge-test"
+    name: "Boolean Edge Test"
+    condition: "#boolValue != null && (#boolValue == true || #boolValue == false)"
+    message: "Testing boolean edge cases with value: {{#boolValue}}"
+    severity: "INFO"
+    priority: 3
+
+  # Test Case 10: Rule with collection edge cases
+  - id: "collection-edge-test"
+    name: "Collection Edge Test"
+    condition: "#collection != null && (#collection.isEmpty() || #collection.size() > 100)"
+    message: "Testing collection edge cases - empty or very large collections"
+    severity: "WARNING"
+    priority: 2
+
+  # Test Case 11: Rule with date/time edge cases
+  - id: "datetime-edge-test"
+    name: "DateTime Edge Test"
+    condition: "#timestamp != null && #timestamp > 0"
+    message: "Testing datetime edge cases with timestamp: {{#timestamp}}"
+    severity: "INFO"
+    priority: 3
+
+  # Test Case 12: Rule with nested object access
+  - id: "nested-object-test"
+    name: "Nested Object Test"
+    condition: "#customer != null && #customer.profile != null && #customer.profile.riskScore > 95"
+    message: "Testing nested object access - high risk customer detected"
+    severity: "ERROR"
+    priority: 1
+
+rule-groups:
+  # Test Case 1: Group with whitespace and case-sensitive severity rules
+  - id: "case-sensitivity-group"
+    name: "Case Sensitivity Group"
+    description: "AND group testing case sensitivity and whitespace handling"
+    operator: "AND"
+    rule-ids:
+      - "whitespace-severity-test"
+      - "mixed-case-error"
+      - "lowercase-warning"
+
+  # Test Case 2: Group with boundary condition rules
+  - id: "boundary-conditions-group"
+    name: "Boundary Conditions Group"
+    description: "OR group testing various boundary conditions"
+    operator: "OR"
+    rule-ids:
+      - "numeric-boundary-test"
+      - "null-empty-test"
+      - "boolean-edge-test"
+
+  # Test Case 3: Group with complex data structure rules
+  - id: "complex-data-group"
+    name: "Complex Data Group"
+    description: "AND group testing complex data structures"
+    operator: "AND"
+    rule-ids:
+      - "collection-edge-test"
+      - "datetime-edge-test"
+      - "nested-object-test"
+
+  # Test Case 4: Group with special character and long message rules
+  - id: "special-content-group"
+    name: "Special Content Group"
+    description: "OR group testing special content handling"
+    operator: "OR"
+    rule-ids:
+      - "long-message-rule"
+      - "special-chars-rule"
+      - "uppercase-info"
+
+  # Test Case 5: Mixed severity group with edge case rules
+  - id: "mixed-edge-cases-group"
+    name: "Mixed Edge Cases Group"
+    description: "AND group mixing different edge case scenarios"
+    operator: "AND"
+    rule-ids:
+      - "mixed-case-error"
+      - "null-empty-test"
+      - "datetime-edge-test"
+
+  # Test Case 6: Large group with all edge case rules (stress test)
+  - id: "comprehensive-edge-cases"
+    name: "Comprehensive Edge Cases"
+    description: "OR group with all edge case rules for comprehensive testing"
+    operator: "OR"
+    rule-ids:
+      - "whitespace-severity-test"
+      - "mixed-case-error"
+      - "lowercase-warning"
+      - "uppercase-info"
+      - "long-message-rule"
+      - "special-chars-rule"
+      - "numeric-boundary-test"
+      - "null-empty-test"
+      - "boolean-edge-test"
+      - "collection-edge-test"
+      - "datetime-edge-test"
+      - "nested-object-test"

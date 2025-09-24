@@ -43,7 +43,7 @@ public class ConditionalMappingsPhase2Test extends DemoTestBase {
 
         try {
             // Load YAML configuration with conditional-mappings syntax
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-mappings-phase2-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingsPhase2Test.yaml");
             assertNotNull(config, "Configuration should not be null");
             logger.info("✓ Configuration loaded successfully: " + config.getMetadata().getName());
 
@@ -79,7 +79,7 @@ public class ConditionalMappingsPhase2Test extends DemoTestBase {
 
         try {
             // Load YAML configuration
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-mappings-phase2-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingsPhase2Test.yaml");
             assertNotNull(config, "Configuration should not be null");
 
             // Create test data that should match first conditional mapping (OR conditions)
@@ -116,7 +116,7 @@ public class ConditionalMappingsPhase2Test extends DemoTestBase {
 
         try {
             // Load YAML configuration
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-mappings-phase2-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingsPhase2Test.yaml");
             assertNotNull(config, "Configuration should not be null");
 
             // Create test data that should match second OR condition
@@ -153,7 +153,7 @@ public class ConditionalMappingsPhase2Test extends DemoTestBase {
 
         try {
             // Load YAML configuration
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-mappings-phase2-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingsPhase2Test.yaml");
             assertNotNull(config, "Configuration should not be null");
 
             // Create test data that should match second conditional mapping (AND conditions)

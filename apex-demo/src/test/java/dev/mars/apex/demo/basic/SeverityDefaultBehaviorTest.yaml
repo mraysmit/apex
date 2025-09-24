@@ -1,0 +1,138 @@
+# ============================================================================
+# APEX YAML Configuration File - Default Severity Behavior Testing
+# ============================================================================
+# Purpose: Test default severity behavior when severity field is omitted
+#          or not explicitly specified in rule configurations
+# Used by: SeverityDefaultBehaviorTest.java
+# ============================================================================
+
+metadata:
+  id: "basic-rules-severity-default"
+  name: "Default Severity Behavior Test"
+  version: "1.0.0"
+  description: "Test configuration for default severity behavior when severity is not specified"
+  type: "rule-config"
+  author: "apex-demo-team@example.com"
+
+rules:
+  # Test Case 1: Rule with no severity field - should default to "INFO"
+  - id: "no-severity-field-1"
+    name: "No Severity Field Test 1"
+    condition: "#amount != null && #amount > 100"
+    message: "Amount {{#amount}} processed without explicit severity"
+    priority: 1
+    # NOTE: severity field intentionally omitted
+
+  # Test Case 2: Another rule with no severity field - should default to "INFO"
+  - id: "no-severity-field-2"
+    name: "No Severity Field Test 2"
+    condition: "#customerId != null"
+    message: "Customer {{#customerId}} validation without explicit severity"
+    priority: 2
+    # NOTE: severity field intentionally omitted
+
+  # Test Case 3: Rule with null severity - should default to "INFO"
+  - id: "null-severity-field"
+    name: "Null Severity Field Test"
+    condition: "#status != null && #status == 'ACTIVE'"
+    message: "Status validation with null severity"
+    severity: null
+    priority: 3
+
+  # Test Case 4: Rule with another no severity field - should default to "INFO"
+  - id: "another-no-severity-field"
+    name: "Another No Severity Field Test"
+    condition: "#email != null"
+    message: "Email validation without explicit severity"
+    priority: 4
+    # NOTE: severity field intentionally omitted
+
+  # Test Case 5: Explicit INFO severity for comparison
+  - id: "explicit-info-severity"
+    name: "Explicit INFO Severity Test"
+    condition: "#phone != null"
+    message: "Phone validation with explicit INFO severity"
+    severity: "INFO"
+    priority: 5
+
+  # Test Case 6: Mixed explicit and default severities
+  - id: "explicit-warning-severity"
+    name: "Explicit WARNING Severity Test"
+    condition: "#amount != null && #amount > 10000"
+    message: "High amount warning with explicit severity"
+    severity: "WARNING"
+    priority: 6
+
+  # Test Case 7: Mixed explicit and default severities
+  - id: "explicit-error-severity"
+    name: "Explicit ERROR Severity Test"
+    condition: "#amount != null && #amount > 50000"
+    message: "Critical amount error with explicit severity"
+    severity: "ERROR"
+    priority: 7
+
+  # Test Case 8: Default severity in complex condition
+  - id: "complex-condition-default"
+    name: "Complex Condition Default Severity"
+    condition: "#amount != null && #customerId != null && #status == 'PENDING'"
+    message: "Complex validation with default severity"
+    priority: 8
+    # NOTE: severity field intentionally omitted
+
+  # Test Case 9: Default severity with SpEL expression
+  - id: "spel-expression-default"
+    name: "SpEL Expression Default Severity"
+    condition: "#amount != null && T(java.lang.Math).abs(#amount) > 1000"
+    message: "SpEL expression validation with default severity"
+    priority: 9
+    # NOTE: severity field intentionally omitted
+
+rule-groups:
+  # Test group with all default severity rules
+  - id: "default-severity-group"
+    name: "Default Severity Group"
+    description: "AND group containing only rules with default severity"
+    operator: "AND"
+    rule-ids:
+      - "no-severity-field-1"
+      - "no-severity-field-2"
+      - "null-severity-field"
+      - "another-no-severity-field"
+
+  # Test group with mixed default and explicit severities
+  - id: "mixed-default-explicit-group"
+    name: "Mixed Default and Explicit Severity Group"
+    description: "OR group with mix of default and explicit severities"
+    operator: "OR"
+    rule-ids:
+      - "no-severity-field-1"
+      - "explicit-warning-severity"
+      - "explicit-error-severity"
+
+  # Test group with all explicit INFO severity (for comparison)
+  - id: "explicit-info-group"
+    name: "Explicit INFO Severity Group"
+    description: "AND group with explicit INFO severity rules"
+    operator: "AND"
+    rule-ids:
+      - "explicit-info-severity"
+      - "complex-condition-default"
+      - "spel-expression-default"
+
+  # Test group with complex default behavior
+  - id: "complex-default-group"
+    name: "Complex Default Behavior Group"
+    description: "AND group testing complex default severity scenarios"
+    operator: "AND"
+    rule-ids:
+      - "complex-condition-default"
+      - "spel-expression-default"
+      - "no-severity-field-1"
+
+  # Test group with single default severity rule
+  - id: "single-default-group"
+    name: "Single Default Severity Group"
+    description: "Group with single default severity rule"
+    operator: "AND"
+    rule-ids:
+      - "no-severity-field-2"

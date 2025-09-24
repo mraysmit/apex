@@ -1,0 +1,187 @@
+# ============================================================================
+# APEX YAML Configuration File - Rule Groups with Mixed Severities
+# ============================================================================
+# Purpose: Test rule groups containing rules with different severity levels
+#          to verify severity aggregation and inheritance behavior
+# Used by: SeverityRuleGroupTest.java
+# ============================================================================
+
+metadata:
+  id: "basic-rules-severity-groups-mixed"
+  name: "Rule Groups Mixed Severity Test"
+  version: "1.0.0"
+  description: "Test configuration for rule groups with mixed severity levels and aggregation testing"
+  type: "rule-config"
+  author: "apex-demo-team@example.com"
+
+rules:
+  # High severity rules (ERROR)
+  - id: "security-breach-detected"
+    name: "Security Breach Detection"
+    condition: "#securityFlags != null && #securityFlags.contains('BREACH')"
+    message: "CRITICAL SECURITY ALERT: Potential security breach detected"
+    severity: "ERROR"
+    priority: 1
+
+  - id: "fraud-pattern-detected"
+    name: "Fraud Pattern Detection"
+    condition: "#fraudScore != null && #fraudScore > 90"
+    message: "FRAUD ALERT: High fraud score {{#fraudScore}} detected"
+    severity: "ERROR"
+    priority: 1
+
+  - id: "regulatory-violation"
+    name: "Regulatory Violation Check"
+    condition: "#complianceScore != null && #complianceScore < 60"
+    message: "REGULATORY VIOLATION: Compliance score {{#complianceScore}} below threshold"
+    severity: "ERROR"
+    priority: 1
+
+  # Medium severity rules (WARNING)
+  - id: "unusual-activity-pattern"
+    name: "Unusual Activity Pattern"
+    condition: "#activityScore != null && #activityScore > 75"
+    message: "WARNING: Unusual activity pattern detected with score {{#activityScore}}"
+    severity: "WARNING"
+    priority: 2
+
+  - id: "high-risk-transaction"
+    name: "High Risk Transaction"
+    condition: "#riskLevel != null && #riskLevel == 'HIGH'"
+    message: "WARNING: High risk transaction requires additional review"
+    severity: "WARNING"
+    priority: 2
+
+  - id: "incomplete-kyc-data"
+    name: "Incomplete KYC Data"
+    condition: "#kycStatus != null && #kycStatus == 'INCOMPLETE'"
+    message: "WARNING: KYC data is incomplete - customer verification required"
+    severity: "WARNING"
+    priority: 2
+
+  # Low severity rules (INFO)
+  - id: "transaction-processed"
+    name: "Transaction Processing Info"
+    condition: "#transactionId != null"
+    message: "INFO: Transaction {{#transactionId}} processed successfully"
+    severity: "INFO"
+    priority: 3
+
+  - id: "customer-profile-updated"
+    name: "Customer Profile Update"
+    condition: "#profileUpdated != null && #profileUpdated == true"
+    message: "INFO: Customer profile has been updated"
+    severity: "INFO"
+    priority: 3
+
+  - id: "audit-trail-logged"
+    name: "Audit Trail Logging"
+    condition: "#auditEnabled != null && #auditEnabled == true"
+    message: "INFO: Audit trail has been logged for compliance"
+    severity: "INFO"
+    priority: 3
+
+rule-groups:
+  # Test Case 1: AND group with all ERROR severity rules
+  - id: "critical-security-checks"
+    name: "Critical Security Checks"
+    description: "AND group - all critical security rules must pass"
+    operator: "AND"
+    rule-ids:
+      - "security-breach-detected"
+      - "fraud-pattern-detected"
+      - "regulatory-violation"
+
+  # Test Case 2: OR group with all WARNING severity rules
+  - id: "risk-assessment-warnings"
+    name: "Risk Assessment Warnings"
+    description: "OR group - any risk warning triggers the group"
+    operator: "OR"
+    rule-ids:
+      - "unusual-activity-pattern"
+      - "high-risk-transaction"
+      - "incomplete-kyc-data"
+
+  # Test Case 3: AND group with all INFO severity rules
+  - id: "processing-information"
+    name: "Processing Information"
+    description: "AND group - all processing info rules"
+    operator: "AND"
+    rule-ids:
+      - "transaction-processed"
+      - "customer-profile-updated"
+      - "audit-trail-logged"
+
+  # Test Case 4: Mixed ERROR and WARNING in AND group
+  - id: "security-and-risk-checks"
+    name: "Security and Risk Checks"
+    description: "AND group mixing ERROR and WARNING severities"
+    operator: "AND"
+    rule-ids:
+      - "security-breach-detected"
+      - "unusual-activity-pattern"
+      - "regulatory-violation"
+
+  # Test Case 5: Mixed WARNING and INFO in OR group
+  - id: "monitoring-and-info"
+    name: "Monitoring and Information"
+    description: "OR group mixing WARNING and INFO severities"
+    operator: "OR"
+    rule-ids:
+      - "high-risk-transaction"
+      - "transaction-processed"
+      - "customer-profile-updated"
+
+  # Test Case 6: All three severities in AND group (complex aggregation)
+  - id: "comprehensive-validation"
+    name: "Comprehensive Validation"
+    description: "AND group with ERROR, WARNING, and INFO rules"
+    operator: "AND"
+    rule-ids:
+      - "fraud-pattern-detected"
+      - "unusual-activity-pattern"
+      - "transaction-processed"
+
+  # Test Case 7: All three severities in OR group (first match wins)
+  - id: "any-issue-detection"
+    name: "Any Issue Detection"
+    description: "OR group with ERROR, WARNING, and INFO rules"
+    operator: "OR"
+    rule-ids:
+      - "regulatory-violation"
+      - "incomplete-kyc-data"
+      - "audit-trail-logged"
+
+  # Test Case 8: Nested complexity - multiple ERROR rules with single WARNING
+  - id: "security-with-risk-warning"
+    name: "Security with Risk Warning"
+    description: "AND group - multiple ERROR rules plus one WARNING"
+    operator: "AND"
+    rule-ids:
+      - "security-breach-detected"
+      - "fraud-pattern-detected"
+      - "high-risk-transaction"
+
+  # Test Case 9: Edge case - single rule group
+  - id: "single-critical-rule"
+    name: "Single Critical Rule"
+    description: "Group with single ERROR rule"
+    operator: "AND"
+    rule-ids:
+      - "security-breach-detected"
+
+  # Test Case 10: Large mixed group for stress testing
+  - id: "full-validation-suite"
+    name: "Full Validation Suite"
+    description: "OR group with all rules for comprehensive testing"
+    operator: "OR"
+    rule-ids:
+      - "security-breach-detected"
+      - "fraud-pattern-detected"
+      - "regulatory-violation"
+      - "unusual-activity-pattern"
+      - "high-risk-transaction"
+      - "incomplete-kyc-data"
+      - "transaction-processed"
+      - "customer-profile-updated"
+      - "audit-trail-logged"

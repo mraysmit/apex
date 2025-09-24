@@ -14,15 +14,13 @@
 # ============================================================================
 
 metadata:
-  id: "h2-custom-parameters-demo"
   name: "H2 Custom Parameters Demo"
   version: "1.0.0"
   description: "Demonstrates H2 database with custom parameters support"
   type: "external-data-config"
-  author: "apex.demo.team@company.com"
 
 # External data source configuration with custom H2 parameters
-dataSources:
+data-sources:
   - name: "h2-custom-database"
     type: "database"
     source-type: "h2"

@@ -8,6 +8,7 @@
 # ============================================================================
 
 metadata:
+  id: "postgresql-database-localtest"
   name: "postgresql-database-localtest"
   version: "1.0.0"
   description: "PostgreSQL test database configuration for external reference testing"

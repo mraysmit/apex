@@ -65,7 +65,7 @@ public class SimpleAgeValidationTest {
         try {
             // Load YAML configuration
             YamlConfigurationLoader loader = new YamlConfigurationLoader();
-            YamlRuleConfiguration config = loader.loadFromClasspath("dev/mars/apex/demo/basic/simple-age-validation.yaml");
+            YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/SimpleAgeValidationTest.yaml");
             assertNotNull(config, "Configuration should be loaded");
             assertEquals("Simple Age Validation", config.getMetadata().getName());
             assertEquals(3, config.getRules().size(), "Should have exactly 3 validation rules");
@@ -112,7 +112,7 @@ public class SimpleAgeValidationTest {
         try {
             // Load YAML configuration
             YamlConfigurationLoader loader = new YamlConfigurationLoader();
-            YamlRuleConfiguration config = loader.loadFromClasspath("dev/mars/apex/demo/basic/simple-age-validation.yaml");
+            YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/SimpleAgeValidationTest.yaml");
             assertNotNull(config, "Configuration should be loaded");
             
             // Create RulesEngine
@@ -157,7 +157,7 @@ public class SimpleAgeValidationTest {
         try {
             // Load YAML configuration
             YamlConfigurationLoader loader = new YamlConfigurationLoader();
-            YamlRuleConfiguration config = loader.loadFromClasspath("dev/mars/apex/demo/basic/simple-age-validation.yaml");
+            YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/SimpleAgeValidationTest.yaml");
             assertNotNull(config, "Configuration should be loaded");
             
             // Create RulesEngine

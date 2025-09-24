@@ -142,6 +142,22 @@ enrichments:
         target-field: "tradingHours"
         required: false
 
+# Validation rules
+validations:
+  - id: "currency-to-market-mapping"
+    name: "Currency Code Format Validation"
+    description: "Ensure currency code is in proper 3-letter ISO format"
+    type: "field-validation"
+    enabled: true
+    condition: "#currency != null"
+    
+    validation-config:
+      field: "currency"
+      rules:
+        - type: "regex"
+          pattern: "^[A-Z]{3}$"
+          message: "Currency code must be 3 uppercase letters (e.g., USD, EUR, GBP)"
+
 # Processing configuration
 processing:
   continue-on-error: true

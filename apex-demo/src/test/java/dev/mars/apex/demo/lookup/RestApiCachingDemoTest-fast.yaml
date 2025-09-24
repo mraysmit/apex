@@ -1,14 +1,6 @@
 # REST API Caching Demo - Fast Endpoint Configuration
 # Demonstrates baseline cache improvement with no-delay endpoint
 
-metadata:
-  id: "rest-api-caching-demo-fast"
-  name: "REST API Caching Demo - Fast Endpoint"
-  version: "1.0.0"
-  description: "Demonstrates baseline cache improvement with no-delay endpoint for performance comparison"
-  type: "enrichment"
-  author: "apex.demo.team@company.com"
-
 data-sources:
   - name: "fast-cache-demo-api"
     type: "rest-api"

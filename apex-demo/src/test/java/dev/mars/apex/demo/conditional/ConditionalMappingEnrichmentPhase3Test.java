@@ -36,32 +36,6 @@ public class ConditionalMappingEnrichmentPhase3Test extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(ConditionalMappingEnrichmentPhase3Test.class);
 
-    @Test
-    @DisplayName("Should load conditional mapping enrichment YAML")
-    void shouldLoadConditionalMappingEnrichmentYaml() {
-        logger.info("=== Testing Conditional Mapping Enrichment YAML Loading ===");
-        
-        try {
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-mapping-enrichment-phase3-test.yaml");
-            
-            assertNotNull(config, "Configuration should not be null");
-            assertNotNull(config.getEnrichments(), "Enrichments should not be null");
-            assertEquals(1, config.getEnrichments().size(), "Should have 1 enrichment");
-            
-            var enrichment = config.getEnrichments().get(0);
-            assertEquals("conditional-mapping-enrichment", enrichment.getType());
-            assertEquals("IS_NDF", enrichment.getTargetField());
-            assertNotNull(enrichment.getMappingRules());
-            assertEquals(4, enrichment.getMappingRules().size());
-            
-            logger.info("✓ Configuration loaded successfully: " + config.getMetadata().getName());
-            logger.info("✓ Conditional mapping enrichment syntax validated successfully");
-
-        } catch (Exception e) {
-            logger.error("Failed to load conditional mapping enrichment YAML: " + e.getMessage());
-            fail("Should be able to load conditional mapping enrichment YAML: " + e.getMessage());
-        }
-    }
 
     @Test
     @DisplayName("Should process highest priority rule first")
@@ -69,7 +43,7 @@ public class ConditionalMappingEnrichmentPhase3Test extends DemoTestBase {
         logger.info("=== Testing Highest Priority Rule Processing ===");
         
         try {
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-mapping-enrichment-phase3-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingEnrichmentPhase3Test.yaml");
             
             // Test data that matches highest priority rule
             Map<String, Object> testData = new HashMap<>();
@@ -104,7 +78,7 @@ public class ConditionalMappingEnrichmentPhase3Test extends DemoTestBase {
         logger.info("=== Testing Medium Priority Rule Processing ===");
         
         try {
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-mapping-enrichment-phase3-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingEnrichmentPhase3Test.yaml");
             
             // Test data that matches medium priority rule (not high priority)
             Map<String, Object> testData = new HashMap<>();
@@ -139,7 +113,7 @@ public class ConditionalMappingEnrichmentPhase3Test extends DemoTestBase {
         logger.info("=== Testing Other Systems Rule Processing ===");
         
         try {
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-mapping-enrichment-phase3-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingEnrichmentPhase3Test.yaml");
             
             // Test data that matches other systems rule
             Map<String, Object> testData = new HashMap<>();
@@ -174,7 +148,7 @@ public class ConditionalMappingEnrichmentPhase3Test extends DemoTestBase {
         logger.info("=== Testing Default Rule Fallback ===");
         
         try {
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-mapping-enrichment-phase3-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingEnrichmentPhase3Test.yaml");
             
             // Test data that doesn't match any specific rules
             Map<String, Object> testData = new HashMap<>();

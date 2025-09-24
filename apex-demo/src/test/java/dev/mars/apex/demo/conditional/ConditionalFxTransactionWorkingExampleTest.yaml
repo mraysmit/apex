@@ -9,6 +9,7 @@
 # ============================================================================
 
 metadata:
+  id: "conditional-fx-transaction-processing"
   name: "Conditional FX Transaction Processing"
   version: "1.0.0"
   description: "Working example of conditional field mapping using existing APEX syntax"

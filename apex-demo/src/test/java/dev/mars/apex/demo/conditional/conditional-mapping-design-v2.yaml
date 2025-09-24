@@ -8,6 +8,7 @@
 # ============================================================================
 
 metadata:
+  id: "conditional-mapping-design-v2"
   name: "Rule Group OR Logic - FX Transaction"
   version: "2.0.0"
   description: "Rule group approach with OR logic for conditional mapping"

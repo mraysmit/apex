@@ -15,8 +15,8 @@
  */
 package dev.mars.apex.demo.lookup;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.demo.DemoTestBase;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;

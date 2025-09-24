@@ -18,6 +18,7 @@ package dev.mars.apex.demo.conditional;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
+
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,7 +51,7 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
             logger.info("Testing SWIFT valid NDF with data: " + testData);
 
             // Load configuration and process
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-mapping-design-v2-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingDesignV2Test.yaml");
             Object enrichmentResult = enrichmentService.enrichObject(config, testData);
             @SuppressWarnings("unchecked")
             Map<String, Object> result = (Map<String, Object>) enrichmentResult;
@@ -84,7 +85,7 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
             logger.info("Testing SWIFT Y flag with data: " + testData);
 
             // Load configuration and process
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-mapping-design-v2-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingDesignV2Test.yaml");
             Object enrichmentResult = enrichmentService.enrichObject(config, testData);
             @SuppressWarnings("unchecked")
             Map<String, Object> result = (Map<String, Object>) enrichmentResult;
@@ -118,7 +119,7 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
             logger.info("Testing translation required with data: " + testData);
 
             // Load configuration and process
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-mapping-design-v2-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingDesignV2Test.yaml");
             Object enrichmentResult = enrichmentService.enrichObject(config, testData);
             @SuppressWarnings("unchecked")
             Map<String, Object> result = (Map<String, Object>) enrichmentResult;
@@ -152,7 +153,7 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
             logger.info("Testing no rule matches with data: " + testData);
 
             // Load configuration and process
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-mapping-design-v2-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingDesignV2Test.yaml");
             Object enrichmentResult = enrichmentService.enrichObject(config, testData);
             @SuppressWarnings("unchecked")
             Map<String, Object> result = (Map<String, Object>) enrichmentResult;
@@ -186,7 +187,7 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
             logger.info("Testing OR logic with data that matches multiple rules: " + testData);
 
             // Load configuration and process
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-mapping-design-v2-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingDesignV2Test.yaml");
             Object enrichmentResult = enrichmentService.enrichObject(config, testData);
             @SuppressWarnings("unchecked")
             Map<String, Object> result = (Map<String, Object>) enrichmentResult;
@@ -211,7 +212,7 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
         logger.info("=== Testing Conditional Mapping Design V2 YAML Loading ===");
 
         try {
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/conditional-mapping-design-v2-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingDesignV2Test.yaml");
 
             // Verify configuration loaded successfully
             assertNotNull(config, "Configuration should not be null");

@@ -50,7 +50,7 @@ public class RuleResultReferencesTest extends DemoTestBase {
 
         try {
             // Load YAML configuration
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/rule-result-references-demo.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/RuleResultReferencesTest.yaml");
             assertNotNull(config, "Configuration should not be null");
             logger.info("✓ Configuration loaded successfully: " + config.getMetadata().getName());
 
@@ -89,7 +89,7 @@ public class RuleResultReferencesTest extends DemoTestBase {
 
         try {
             // Load configuration from classpath
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/rule-result-references-demo.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/RuleResultReferencesTest.yaml");
             assertNotNull(config, "Configuration should not be null");
             logger.info("✓ Configuration loaded successfully");
 
@@ -148,7 +148,7 @@ public class RuleResultReferencesTest extends DemoTestBase {
         logger.info("=== Testing Premium Customer Scenario ===");
 
         try {
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/rule-result-references-demo.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/RuleResultReferencesTest.yaml");
 
             // Create test data for premium customer
             Map<String, Object> inputData = new HashMap<>();

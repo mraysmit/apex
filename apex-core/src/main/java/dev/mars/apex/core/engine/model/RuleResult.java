@@ -42,17 +42,12 @@ public class RuleResult implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final UUID id;
-    private final String ruleMatchedName;  // Name of the rule/group that matched (only meaningful when triggered=true)
+    private final String ruleName;
     private final String message;
     private final String severity;
     private final boolean triggered;
     private final Instant timestamp;
     private final ResultType resultType;
-
-    // Failure diagnostic information (only meaningful when triggered=false)
-    private final String lastFailedGroupName;     // Which group failed with highest severity
-    private final String lastFailedGroupMessage;  // Message from the failed group
-    private final String highestFailedSeverity;   // Highest severity from failed groups
     private final RulePerformanceMetrics performanceMetrics;
 
     // New fields for comprehensive evaluation results
@@ -97,18 +92,13 @@ public class RuleResult implements Serializable {
      */
     public RuleResult(String ruleName, String message, String severity, boolean triggered, ResultType resultType) {
         this.id = UUID.randomUUID();
-        this.ruleMatchedName = triggered ? ruleName : null;  // Only set if rule actually matched
+        this.ruleName = ruleName;
         this.message = message;
         this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.triggered = triggered;
         this.timestamp = Instant.now();
         this.resultType = resultType;
         this.performanceMetrics = null; // No performance metrics for basic constructor
-
-        // Initialize failure diagnostic fields
-        this.lastFailedGroupName = !triggered ? ruleName : null;  // Use ruleName as failed group for backward compatibility
-        this.lastFailedGroupMessage = !triggered ? message : null;
-        this.highestFailedSeverity = !triggered ? severity : null;
 
         // Initialize new fields with defaults for backward compatibility
         this.enrichedData = new HashMap<>();
@@ -141,18 +131,13 @@ public class RuleResult implements Serializable {
      */
     public RuleResult(String ruleName, String message, String severity, boolean triggered, ResultType resultType, RulePerformanceMetrics performanceMetrics) {
         this.id = UUID.randomUUID();
-        this.ruleMatchedName = triggered ? ruleName : null;  // Only set if rule actually matched
+        this.ruleName = ruleName;
         this.message = message;
         this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.triggered = triggered;
         this.timestamp = Instant.now();
         this.resultType = resultType;
         this.performanceMetrics = performanceMetrics;
-
-        // Initialize failure diagnostic fields
-        this.lastFailedGroupName = !triggered ? ruleName : null;  // Use ruleName as failed group for backward compatibility
-        this.lastFailedGroupMessage = !triggered ? message : null;
-        this.highestFailedSeverity = !triggered ? severity : null;
 
         // Initialize new fields with defaults for backward compatibility
         this.enrichedData = new HashMap<>();
@@ -222,7 +207,7 @@ public class RuleResult implements Serializable {
                      RulePerformanceMetrics performanceMetrics, Map<String, Object> enrichedData,
                      List<String> failureMessages, boolean success) {
         this.id = UUID.randomUUID();
-        this.ruleMatchedName = triggered ? ruleName : null;  // Only set if rule actually matched
+        this.ruleName = ruleName;
         this.message = message;
         this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.triggered = triggered;
@@ -230,50 +215,10 @@ public class RuleResult implements Serializable {
         this.resultType = resultType;
         this.performanceMetrics = performanceMetrics;
 
-        // Initialize failure diagnostic fields
-        this.lastFailedGroupName = !triggered ? ruleName : null;  // Use ruleName as failed group for backward compatibility
-        this.lastFailedGroupMessage = !triggered ? message : null;
-        this.highestFailedSeverity = !triggered ? severity : null;
-
         // Initialize new fields with provided values
         this.enrichedData = enrichedData != null ? new HashMap<>(enrichedData) : new HashMap<>();
         this.failureMessages = failureMessages != null ? new ArrayList<>(failureMessages) : new ArrayList<>();
         this.success = success;
-    }
-
-    /**
-     * Create a new rule result with failure diagnostic information.
-     * This constructor is used for no-match results that need to provide failure diagnostics.
-     *
-     * @param ruleMatchedName The name of the matched rule (null for no-match cases)
-     * @param message The message associated with the result
-     * @param severity The severity level (ERROR, WARNING, INFO)
-     * @param triggered Whether the rule was triggered (should be false for failure diagnostics)
-     * @param resultType The type of result
-     * @param lastFailedGroupName The name of the group that failed with highest severity
-     * @param lastFailedGroupMessage The message from the failed group
-     * @param highestFailedSeverity The highest severity from failed groups
-     */
-    public RuleResult(String ruleMatchedName, String message, String severity, boolean triggered, ResultType resultType,
-                     String lastFailedGroupName, String lastFailedGroupMessage, String highestFailedSeverity) {
-        this.id = UUID.randomUUID();
-        this.ruleMatchedName = ruleMatchedName;
-        this.message = message;
-        this.severity = severity != null ? severity : SeverityConstants.INFO;
-        this.triggered = triggered;
-        this.timestamp = Instant.now();
-        this.resultType = resultType;
-        this.performanceMetrics = null;
-
-        // Set failure diagnostic fields
-        this.lastFailedGroupName = lastFailedGroupName;
-        this.lastFailedGroupMessage = lastFailedGroupMessage;
-        this.highestFailedSeverity = highestFailedSeverity;
-
-        // Initialize other fields with defaults
-        this.enrichedData = new HashMap<>();
-        this.failureMessages = new ArrayList<>();
-        this.success = (resultType == ResultType.MATCH || resultType == ResultType.NO_MATCH);
     }
 
     /**
@@ -346,32 +291,13 @@ public class RuleResult implements Serializable {
     /**
      * Create a new rule result for when no rule was matched, with specific rule name, message, and severity.
      *
-     * @deprecated Use noMatchWithFailureInfo() for clearer semantics when providing failure diagnostic information.
-     * This method creates semantic confusion by using ruleName for failure information.
      * @param ruleName The name of the rule that was not matched
      * @param message The message associated with the rule
      * @param severity The severity level (ERROR, WARNING, INFO)
      * @return A new RuleResult instance
      */
-    @Deprecated
     public static RuleResult noMatch(String ruleName, String message, String severity) {
         return new RuleResult(ruleName, message, severity, false, ResultType.NO_MATCH);
-    }
-
-    /**
-     * Create a new rule result for when no rule was matched, with failure diagnostic information.
-     * This method provides clear semantics for failure cases with diagnostic details.
-     *
-     * @param failedGroupName The name of the group that failed with highest severity
-     * @param failedGroupMessage The message from the failed group
-     * @param highestFailedSeverity The highest severity from failed groups
-     * @return A new RuleResult instance with failure diagnostics
-     */
-    public static RuleResult noMatchWithFailureInfo(String failedGroupName, String failedGroupMessage, String highestFailedSeverity) {
-        // Use the new constructor that properly handles failure diagnostic information
-        // Use the highest failed severity as the overall result severity
-        return new RuleResult(null, "No matching rules found", highestFailedSeverity, false, ResultType.NO_MATCH,
-                             failedGroupName, failedGroupMessage, highestFailedSeverity);
     }
 
     /**
@@ -522,6 +448,7 @@ public class RuleResult implements Serializable {
      */
     public RuleResult(String ruleName, String message) {
         this.id = UUID.randomUUID();
+        this.ruleName = ruleName;
         this.message = message;
         this.severity = SeverityConstants.INFO; // Default severity for backward compatibility
         this.timestamp = Instant.now();
@@ -531,24 +458,12 @@ public class RuleResult implements Serializable {
         if ("no-rule".equals(ruleName)) {
             this.resultType = ResultType.NO_RULES;
             this.triggered = false;
-            this.ruleMatchedName = null;
-            this.lastFailedGroupName = ruleName;
-            this.lastFailedGroupMessage = message;
-            this.highestFailedSeverity = SeverityConstants.INFO;
         } else if ("no-match".equals(ruleName)) {
             this.resultType = ResultType.NO_MATCH;
             this.triggered = false;
-            this.ruleMatchedName = null;
-            this.lastFailedGroupName = null;  // no-match means no specific group failed
-            this.lastFailedGroupMessage = null;
-            this.highestFailedSeverity = null;
         } else {
             this.resultType = ResultType.MATCH;
             this.triggered = true;
-            this.ruleMatchedName = ruleName;
-            this.lastFailedGroupName = null;
-            this.lastFailedGroupMessage = null;
-            this.highestFailedSeverity = null;
         }
 
         // Initialize new fields with defaults for backward compatibility
@@ -568,60 +483,11 @@ public class RuleResult implements Serializable {
 
     /**
      * Get the name of the rule that was evaluated.
-     *
-     * @deprecated Use getRuleMatchedName() for clearer semantics. This method maintains backward compatibility
-     * by returning the matched rule name when triggered=true, or failure diagnostic info when triggered=false.
-     * @return The rule name (matched rule name or failure diagnostic info)
+     * 
+     * @return The rule name
      */
-    @Deprecated
     public String getRuleName() {
-        // Backward compatibility: return matched name if triggered, otherwise return failure info
-        if (triggered) {
-            return ruleMatchedName;
-        } else {
-            // For backward compatibility, return failure diagnostic info
-            return lastFailedGroupName != null ? lastFailedGroupName : "no-match";
-        }
-    }
-
-    /**
-     * Get the name of the rule or rule group that matched.
-     * This method is only meaningful when isTriggered() returns true.
-     *
-     * @return The name of the matched rule/group, or null if no rule matched
-     */
-    public String getRuleMatchedName() {
-        return ruleMatchedName;
-    }
-
-    /**
-     * Get the name of the last failed group (highest severity failure).
-     * This method is only meaningful when isTriggered() returns false.
-     *
-     * @return The name of the failed group, or null if no specific group failed
-     */
-    public String getLastFailedGroupName() {
-        return lastFailedGroupName;
-    }
-
-    /**
-     * Get the message from the last failed group (highest severity failure).
-     * This method is only meaningful when isTriggered() returns false.
-     *
-     * @return The message from the failed group, or null if no specific group failed
-     */
-    public String getLastFailedGroupMessage() {
-        return lastFailedGroupMessage;
-    }
-
-    /**
-     * Get the highest severity from failed groups.
-     * This method is only meaningful when isTriggered() returns false.
-     *
-     * @return The highest severity from failed groups, or null if no failures
-     */
-    public String getHighestFailedSeverity() {
-        return highestFailedSeverity;
+        return ruleName;
     }
 
     /**
@@ -690,6 +556,38 @@ public class RuleResult implements Serializable {
     // New API methods for comprehensive evaluation results
 
     /**
+     * New API: Returns the matched rule/group name when a rule/group was triggered.
+     * Returns null when no rule matched or evaluation failed.
+     */
+    public String getRuleMatchedName() {
+        return isTriggered() ? this.ruleName : null;
+    }
+
+    /**
+     * New API: Returns the last failed group name when evaluation failed.
+     * For backward compatibility, this maps to ruleName when not triggered and a name is present.
+     */
+    public String getLastFailedGroupName() {
+        return !isTriggered() ? this.ruleName : null;
+    }
+
+    /**
+     * New API: Returns the last failed group message when evaluation failed.
+     * For backward compatibility, this maps to message when not triggered.
+     */
+    public String getLastFailedGroupMessage() {
+        return !isTriggered() ? this.message : null;
+    }
+
+    /**
+     * New API: Returns the highest failed severity when evaluation failed.
+     * For now, this returns the severity field when not triggered, otherwise null.
+     */
+    public String getHighestFailedSeverity() {
+        return !isTriggered() ? this.severity : null;
+    }
+
+    /**
      * Check if all enrichments and rules succeeded.
      * This method provides programmatic access to the overall evaluation status.
      *
@@ -733,13 +631,11 @@ public class RuleResult implements Serializable {
     public String toString() {
         return "RuleResult{" +
                 "id=" + id +
-                ", ruleMatchedName='" + ruleMatchedName + '\'' +
+                ", ruleName='" + ruleName + '\'' +
                 ", message='" + message + '\'' +
                 ", triggered=" + triggered +
                 ", resultType=" + resultType +
                 ", timestamp=" + timestamp +
-                ", lastFailedGroupName='" + lastFailedGroupName + '\'' +
-                ", highestFailedSeverity='" + highestFailedSeverity + '\'' +
                 '}';
     }
 
@@ -750,14 +646,13 @@ public class RuleResult implements Serializable {
         RuleResult that = (RuleResult) o;
         return triggered == that.triggered &&
                 Objects.equals(id, that.id) &&
-                Objects.equals(ruleMatchedName, that.ruleMatchedName) &&
+                Objects.equals(ruleName, that.ruleName) &&
                 Objects.equals(message, that.message) &&
-                Objects.equals(lastFailedGroupName, that.lastFailedGroupName) &&
                 resultType == that.resultType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, ruleMatchedName, message, triggered, resultType, lastFailedGroupName);
+        return Objects.hash(id, ruleName, message, triggered, resultType);
     }
 }

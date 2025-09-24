@@ -1,10 +1,15 @@
 # Minimal YAML validation rule - just the essentials
 metadata:
+  id: "minimal-rule"
   name: "Minimal Rule"
   type: "rule-config"
   version: "1.0.0"
+  description: "Minimal rule example"
+  author: "APEX Demo"
 
 rules:
   - id: "simple-check"
+    name: "Simple Age Check"
     condition: "#age >= 18"
     message: "Must be 18 or older"
+    enabled: true

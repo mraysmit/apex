@@ -1,0 +1,160 @@
+# ============================================================================
+# APEX YAML Configuration File - Negative Severity Testing
+# ============================================================================
+# Purpose: Test negative scenarios and error handling for severity functionality
+#          including malformed conditions, invalid rule references, and edge cases
+# Used by: SeverityNegativeTest.java
+# ============================================================================
+
+metadata:
+  id: "basic-rules-severity-negative"
+  name: "Severity Negative Test Cases"
+  version: "1.0.0"
+  description: "Test configuration for negative severity testing and error handling"
+  type: "rule-config"
+  author: "apex-demo-team@example.com"
+
+rules:
+  # Test Case 1: Rule with malformed condition (should handle gracefully)
+  - id: "malformed-condition-rule"
+    name: "Malformed Condition Rule"
+    condition: "#invalidSyntax && && #broken"
+    message: "This rule has a malformed condition"
+    severity: "ERROR"
+    priority: 1
+
+  # Test Case 2: Rule with condition that throws exception
+  - id: "exception-throwing-rule"
+    name: "Exception Throwing Rule"
+    condition: "#nullObject.nonExistentMethod()"
+    message: "This rule condition throws an exception"
+    severity: "WARNING"
+    priority: 2
+
+  # Test Case 3: Rule with very complex condition that might fail
+  - id: "complex-failing-rule"
+    name: "Complex Failing Rule"
+    condition: "#data != null && #data.nested.deep.property.value > 100"
+    message: "This rule has a complex condition that might fail"
+    severity: "INFO"
+    priority: 3
+
+  # Test Case 4: Rule that never triggers (always false)
+  - id: "never-triggers-rule"
+    name: "Never Triggers Rule"
+    condition: "false"
+    message: "This rule should never trigger"
+    severity: "ERROR"
+    priority: 1
+
+  # Test Case 5: Rule with unusual but valid severity (case sensitivity test)
+  - id: "unusual-severity-rule"
+    name: "Unusual Severity Rule"
+    condition: "true"
+    message: "This rule has unusual but valid severity"
+    severity: "Info"
+    priority: 2
+
+  # Test Case 6: Rule with null-like condition
+  - id: "null-condition-rule"
+    name: "Null Condition Rule"
+    condition: "#value == null"
+    message: "This rule checks for null values"
+    severity: "WARNING"
+    priority: 2
+
+  # Test Case 7: Rule with division by zero potential
+  - id: "division-by-zero-rule"
+    name: "Division By Zero Rule"
+    condition: "#numerator != null && #denominator != null && (#numerator / #denominator) > 10"
+    message: "This rule might cause division by zero"
+    severity: "ERROR"
+    priority: 1
+
+  # Test Case 8: Rule with string operations that might fail
+  - id: "string-operations-rule"
+    name: "String Operations Rule"
+    condition: "#text != null && #text.substring(0, 100).contains('test')"
+    message: "This rule performs string operations that might fail"
+    severity: "INFO"
+    priority: 3
+
+  # Test Case 9: Rule with array access that might fail
+  - id: "array-access-rule"
+    name: "Array Access Rule"
+    condition: "#array != null && #array[10] == 'value'"
+    message: "This rule accesses array elements that might not exist"
+    severity: "WARNING"
+    priority: 2
+
+  # Test Case 10: Rule with type casting issues
+  - id: "type-casting-rule"
+    name: "Type Casting Rule"
+    condition: "#value != null && ((String) #value).length() > 5"
+    message: "This rule performs type casting that might fail"
+    severity: "ERROR"
+    priority: 1
+
+rule-groups:
+  # Test Case 1: Rule group with potentially problematic rules
+  - id: "problematic-rules-group"
+    name: "Problematic Rules Group"
+    description: "AND group with rules that might have issues"
+    operator: "AND"
+    rule-ids:
+      - "malformed-condition-rule"
+      - "exception-throwing-rule"
+      - "complex-failing-rule"
+
+  # Test Case 2: Rule group with all failing rules
+  - id: "all-failing-rules-group"
+    name: "All Failing Rules Group"
+    description: "OR group where all rules might fail or not trigger"
+    operator: "OR"
+    rule-ids:
+      - "never-triggers-rule"
+      - "malformed-condition-rule"
+      - "exception-throwing-rule"
+
+  # Test Case 3: Rule group with mixed success/failure scenarios
+  - id: "mixed-success-failure-group"
+    name: "Mixed Success Failure Group"
+    description: "AND group with mix of working and potentially failing rules"
+    operator: "AND"
+    rule-ids:
+      - "null-condition-rule"
+      - "division-by-zero-rule"
+      - "string-operations-rule"
+
+  # Test Case 4: Empty rule group (no rules)
+  - id: "empty-rule-group"
+    name: "Empty Rule Group"
+    description: "Group with no rules defined"
+    operator: "AND"
+    rule-ids: []
+
+  # Test Case 5: Rule group with potentially dangerous operations
+  - id: "dangerous-operations-group"
+    name: "Dangerous Operations Group"
+    description: "OR group with rules that might throw exceptions"
+    operator: "OR"
+    rule-ids:
+      - "division-by-zero-rule"
+      - "array-access-rule"
+      - "type-casting-rule"
+
+  # Test Case 6: Large rule group for stress testing error handling
+  - id: "stress-test-group"
+    name: "Stress Test Group"
+    description: "Large group mixing valid and potentially problematic rules"
+    operator: "AND"
+    rule-ids:
+      - "malformed-condition-rule"
+      - "exception-throwing-rule"
+      - "complex-failing-rule"
+      - "never-triggers-rule"
+      - "null-condition-rule"
+      - "division-by-zero-rule"
+      - "string-operations-rule"
+      - "array-access-rule"
+      - "type-casting-rule"

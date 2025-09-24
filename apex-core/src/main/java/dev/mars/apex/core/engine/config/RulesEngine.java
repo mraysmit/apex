@@ -373,7 +373,7 @@ public class RulesEngine {
 
         // Return result with highest severity from failed groups
         if (lastFailedGroupName != null) {
-            return RuleResult.noMatchWithFailureInfo(lastFailedGroupName, lastFailedGroupMessage, highestFailedSeverity);
+            return RuleResult.noMatch(lastFailedGroupName, lastFailedGroupMessage, highestFailedSeverity);
         } else {
             return RuleResult.noMatch();
         }

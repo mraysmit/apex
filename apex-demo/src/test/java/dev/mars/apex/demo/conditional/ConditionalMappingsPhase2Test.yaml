@@ -8,6 +8,7 @@
 # ============================================================================
 
 metadata:
+  id: "conditional-mappings-phase-2-test"
   name: "Conditional Mappings Phase 2 Test"
   version: "1.0.0"
   description: "Phase 2 test for conditional-mappings syntax"

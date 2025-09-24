@@ -7,6 +7,7 @@
 # ============================================================================
 
 metadata:
+  id: "conditional-mapping-design-v2-test"
   name: "Rule Group OR Logic - FX Transaction Test"
   version: "2.0.0"
   description: "Test rule group approach with OR logic for conditional mapping"

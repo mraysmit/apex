@@ -8,6 +8,7 @@
 # ============================================================================
 
 metadata:
+  id: "map-external-to-internal-code"
   name: "Map External to Internal Code"
   version: "1.0.0"
   description: "Map External to Internal Code"
