@@ -515,3 +515,85 @@ rememeber the dependent  modules need to be installed to the local Maven reposit
 we are coding on a windows  machine
 
 **Remember: The system should be resilient to configuration errors and provide helpful feedback to users without breaking the application flow.**
+
+# 🚨 **CRITICAL: APEX YAML CREATION ANTI-HALLUCINATION PROMPT**
+
+## **MANDATORY VERIFICATION PROCESS FOR ALL YAML CREATION**
+
+**NEVER create APEX YAML configurations without first verifying syntax against actual apex-core source code!**
+
+### **🎯 Use This Exact Prompt When Asking for YAML Creation:**
+
+```
+CRITICAL INSTRUCTION: Before creating any APEX YAML configuration, you MUST:
+
+1. FIRST: Use `codebase-retrieval` to find existing working examples of the exact type of YAML I need to create
+2. SECOND: Use `view` to examine the relevant Java configuration classes:
+   - For root config: `YamlRuleConfiguration.java`
+   - For data sources: `YamlDataSource.java`
+   - For enrichments: `YamlEnrichment.java`
+   - For rules: `YamlRule.java`
+3. THIRD: Only use @JsonProperty field names that actually exist in the Java classes
+4. FOURTH: Copy syntax patterns EXACTLY from working examples - do not modify or invent
+5. FIFTH: If you cannot find a working example of what I'm asking for, tell me "I cannot find a working example of this syntax in the codebase" and ask me to provide one
+
+NEVER:
+- Invent YAML keywords that don't exist in apex-core
+- Assume syntax based on other systems
+- Create "validation-config", "validations", or other unsupported sections
+- Guess at field names or structure
+
+ALWAYS:
+- Verify against actual working YAML files in apex-demo
+- Check that every keyword exists in the corresponding Java class
+- Use exact syntax from proven examples
+```
+
+### **🔍 Why This Happens & How to Prevent It**
+
+**Root Cause:**
+- AI has training data from many different YAML-based systems
+- Unconsciously mixes syntax from different frameworks
+- Assumes logical keywords exist without verifying against APEX source code
+
+**Prevention Strategy:**
+- **Force verification first** - Make AI check the codebase before creating anything
+- **Require exact copying** - Don't allow "improving" or "standardizing" syntax
+- **Validate against Java classes** - Ensure every field has a corresponding @JsonProperty
+
+**Red Flags to Watch For:**
+- Any YAML section not in `YamlRuleConfiguration.java`
+- Field names that don't match @JsonProperty annotations exactly
+- Syntax that "looks reasonable" but isn't in working examples
+- Complex nested structures not found in existing files
+
+### **📋 Supported APEX YAML Sections (Verified Against YamlRuleConfiguration.java):**
+
+**✅ CONFIRMED SUPPORTED:**
+- `metadata` (ConfigurationMetadata)
+- `data-sources` (List<YamlDataSource>)
+- `data-source-refs` (List<YamlDataSourceRef>)
+- `rule-refs` (List<YamlRuleRef>)
+- `data-sinks` (List<YamlDataSink>)
+- `categories` (List<YamlCategory>)
+- `rules` (List<YamlRule>)
+- `rule-groups` (List<YamlRuleGroup>)
+- `enrichments` (List<YamlEnrichment>)
+- `transformations` (List<YamlTransformation>)
+- `rule-chains` (List<YamlRuleChain>)
+- `pipeline` (PipelineConfiguration)
+
+**❌ NOT SUPPORTED (DO NOT USE):**
+- `validations` (Not in YamlRuleConfiguration.java)
+- `validation-config` (Not implemented in runtime)
+- Any other sections not listed above
+
+### **🎯 MANDATORY CHECKLIST BEFORE YAML CREATION:**
+
+1. ☐ Found working example in apex-demo folder
+2. ☐ Verified section exists in YamlRuleConfiguration.java
+3. ☐ Checked field names match @JsonProperty annotations
+4. ☐ Copied syntax exactly from working example
+5. ☐ No invented or assumed keywords used
+
+**Use this prompt every time you need YAML files created to prevent hallucination of non-existent APEX keywords!**

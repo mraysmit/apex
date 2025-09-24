@@ -6,7 +6,11 @@ import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +24,24 @@ class RestApiLookupServiceDirectTest {
 
     private RestApiLookupService lookupService;
     private ExternalDataSource dataSource;
+
+    /**
+     * Check if httpbin.org is available for testing
+     */
+    static boolean isHttpBinAvailable() {
+        try {
+            URL url = new URL("https://httpbin.org/status/200");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+            int responseCode = connection.getResponseCode();
+            return responseCode == 200;
+        } catch (IOException e) {
+            System.out.println("httpbin.org is not available: " + e.getMessage());
+            return false;
+        }
+    }
 
     @BeforeEach
     void setUp() throws Exception {
@@ -61,6 +83,7 @@ class RestApiLookupServiceDirectTest {
     }
 
     @Test
+    @EnabledIf("isHttpBinAvailable")
     void testDirectTransform() throws Exception {
         System.out.println("=== Testing direct transform call ===");
         

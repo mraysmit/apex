@@ -120,9 +120,9 @@ public class YamlConfigurationValidationTest extends DemoTestBase {
      * Test financial settlement functionality using actual enrichment operations.
      */
     @Test
-    @Disabled("Missing YAML configuration file: enrichment/comprehensive-financial-enrichment.yaml")
+    @Disabled("Missing YAML configuration file: enrichment/Comprehensivefinancialsettlementdemo.yaml")
     void testFinancialSettlementFunctionality() {
-        String yamlPath = "enrichment/comprehensive-financial-enrichment.yaml";
+        String yamlPath = "enrichment/Comprehensivefinancialsettlementdemo.yaml";
         logger.info("Testing financial settlement functionality: {}", yamlPath);
 
         YamlRuleConfiguration config = loadAndValidateYaml(yamlPath);
@@ -182,9 +182,9 @@ public class YamlConfigurationValidationTest extends DemoTestBase {
      * Test comprehensive financial enrichment functionality using actual enrichment operations.
      */
     @Test
-    @Disabled("Missing YAML configuration file: enrichment/comprehensive-financial-enrichment.yaml")
+    @Disabled("Missing YAML configuration file: enrichment/Comprehensivefinancialsettlementdemo.yaml")
     void testDataManagementFunctionality() {
-        String yamlPath = "enrichment/comprehensive-financial-enrichment.yaml";
+        String yamlPath = "enrichment/Comprehensivefinancialsettlementdemo.yaml";
         logger.info("Testing comprehensive financial enrichment functionality: {}", yamlPath);
 
         YamlRuleConfiguration config = loadAndValidateYaml(yamlPath);

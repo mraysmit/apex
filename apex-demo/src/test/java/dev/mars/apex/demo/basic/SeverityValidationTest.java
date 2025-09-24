@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.mars.apex.demo.basic.rules;
+package dev.mars.apex.demo.basic;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;

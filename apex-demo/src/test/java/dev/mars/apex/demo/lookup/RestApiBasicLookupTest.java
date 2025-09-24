@@ -15,14 +15,11 @@
  */
 package dev.mars.apex.demo.lookup;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
-import dev.mars.apex.demo.infrastructure.DemoTestBase;
+import dev.mars.apex.demo.DemoTestBase;
+
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 

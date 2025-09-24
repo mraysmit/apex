@@ -165,50 +165,6 @@ enrichments:
         target-field: "taxRate"
         required: false
 
-# Optional validation rules
-validations:
-  - id: "compound-key-lookup-demo"
-    name: "Customer ID Format Validation"
-    description: "Ensure customer ID follows expected format"
-    type: "field-validation"
-    enabled: true
-    condition: "#customerId != null"
-    
-    validation-config:
-      field: "customerId"
-      rules:
-        - type: "regex"
-          pattern: "^CUST\\d{3}$"
-          message: "Customer ID must be in format CUST### (e.g., CUST001)"
-          
-  - id: "compound-key-lookup-demo"
-    name: "Region Code Validation"
-    description: "Ensure region code is valid"
-    type: "field-validation"
-    enabled: true
-    condition: "#region != null"
-    
-    validation-config:
-      field: "region"
-      rules:
-        - type: "enum"
-          allowedValues: ["NA", "EU", "APAC", "LATAM", "ME", "AFRICA"]
-          message: "Region must be one of: NA, EU, APAC, LATAM, ME, AFRICA"
-          
-  - id: "compound-key-lookup-demo"
-    name: "Positive Quantity Validation"
-    description: "Ensure order quantity is positive"
-    type: "field-validation"
-    enabled: true
-    condition: "#quantity != null"
-    
-    validation-config:
-      field: "quantity"
-      rules:
-        - type: "range"
-          min: 1
-          message: "Order quantity must be at least 1"
-
 # Processing configuration
 processing:
   continue-on-error: true

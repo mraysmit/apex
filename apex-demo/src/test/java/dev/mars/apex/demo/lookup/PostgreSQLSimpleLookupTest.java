@@ -16,9 +16,9 @@ package dev.mars.apex.demo.lookup;
  * limitations under the License.
  */
 
-import dev.mars.apex.demo.infrastructure.DemoTestBase;
 import dev.mars.apex.demo.test.TestContainerImages;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +26,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.DockerClientFactory;
+
 
 import java.sql.Connection;
 import java.sql.DriverManager;

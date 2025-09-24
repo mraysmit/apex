@@ -7,7 +7,11 @@ import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
 import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,6 +23,24 @@ import static org.junit.jupiter.api.Assertions.*;
 public class RestApiDataSourceDirectTest {
 
     private ExternalDataSource dataSource;
+
+    /**
+     * Check if httpbin.org is available for testing
+     */
+    static boolean isHttpBinAvailable() {
+        try {
+            URL url = new URL("https://httpbin.org/status/200");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+            int responseCode = connection.getResponseCode();
+            return responseCode == 200;
+        } catch (IOException e) {
+            System.out.println("httpbin.org is not available: " + e.getMessage());
+            return false;
+        }
+    }
 
     @BeforeEach
     void setUp() throws DataSourceException {
@@ -50,6 +72,7 @@ public class RestApiDataSourceDirectTest {
     }
 
     @Test
+    @EnabledIf("isHttpBinAvailable")
     void testDirectQueryForObject() throws DataSourceException {
         System.out.println("=== Testing direct queryForObject call ===");
 
@@ -91,6 +114,7 @@ public class RestApiDataSourceDirectTest {
     }
 
     @Test
+    @EnabledIf("isHttpBinAvailable")
     void testSimpleJsonResponse() throws DataSourceException {
         System.out.println("=== Testing simple JSON response ===");
 

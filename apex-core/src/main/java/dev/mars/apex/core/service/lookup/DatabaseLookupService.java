@@ -60,7 +60,7 @@ public class DatabaseLookupService extends LookupService {
         this.parameterFields = parameterFields != null ? parameterFields : Collections.emptyList();
         this.defaultValues = defaultValues != null ? defaultValues : Collections.emptyMap();
         
-        LOGGER.info("Created DatabaseLookupService '{}' with query: {}", name, query);
+        LOGGER.debug("Created DatabaseLookupService '{}' with query: {}", name, query);
     }
     
     /**
@@ -71,7 +71,7 @@ public class DatabaseLookupService extends LookupService {
      */
     @Override
     public Object transform(Object key) {
-        LOGGER.info("TRACE: DatabaseLookupService.transform called with key: {}", key);
+        LOGGER.debug("DatabaseLookupService.transform called with key: {}", key);
         if (key == null) {
             LOGGER.debug("Lookup key is null, returning default values");
             return defaultValues.isEmpty() ? null : new HashMap<>(defaultValues);
@@ -81,8 +81,8 @@ public class DatabaseLookupService extends LookupService {
             // Build parameters map from lookup key
             Map<String, Object> parameters = buildParametersMap(key);
 
-            LOGGER.info("Executing database lookup with parameters: {} for query: {}", parameters, query);
-            LOGGER.info("TRACE: DatabaseLookupService calling dataSource.queryForObject - dataSource type: {}", dataSource.getClass().getName());
+            LOGGER.debug("Executing database lookup with parameters: {} for query: {}", parameters, query);
+            LOGGER.debug("DatabaseLookupService calling dataSource.queryForObject - dataSource type: {}", dataSource.getClass().getName());
 
             // Execute database query
             Object result = dataSource.queryForObject(query, parameters);

@@ -1,6 +1,14 @@
 # REST API Caching Demo - Slow Endpoint Configuration
 # Demonstrates dramatic cache improvement with 10-second delay endpoint
 
+metadata:
+  id: "rest-api-caching-demo-slow"
+  name: "REST API Caching Demo - Slow Endpoint"
+  version: "1.0.0"
+  description: "Demonstrates dramatic cache improvement with 10-second delay endpoint for performance comparison"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+
 data-sources:
   - name: "slow-cache-demo-api"
     type: "rest-api"

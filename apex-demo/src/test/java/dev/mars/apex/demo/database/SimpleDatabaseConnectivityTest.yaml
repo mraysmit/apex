@@ -1,0 +1,34 @@
+metadata:
+  id: "simple-database-connectivity-test"
+  name: "Simple Database Connectivity Test"
+  version: "1.0.0"
+  type: "enrichment"
+
+data-sources:
+  - name: "test-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "./target/h2-demo/simple_test"
+      username: "sa"
+      password: ""
+
+enrichments:
+  - id: "simple-lookup"
+    name: "simple-database-lookup"
+    type: "lookup-enrichment"
+    condition: "#id != null"
+    
+    lookup-config:
+      lookup-key: "#id"
+      lookup-dataset:
+        type: "database"
+        connection-name: "test-database"
+        query: "SELECT name FROM test_table WHERE id = :id"
+        parameters:
+          - field: "id"
+            type: "string"
+
+    field-mappings:
+      - source-field: "NAME"
+        target-field: "name"

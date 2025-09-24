@@ -16,8 +16,8 @@ package dev.mars.apex.demo.lookup;
  * limitations under the License.
  */
 
-import dev.mars.apex.demo.infrastructure.DemoTestBase;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.slf4j.Logger;
@@ -96,7 +96,7 @@ public class BarrierOptionNestedTest extends DemoTestBase {
 
         // Load APEX validation configuration
         try {
-            var config = yamlLoader.loadFromFile("src/test/resources/lookup/barrier-option-nested-validation.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/barrier-option-nested-validation.yaml");
             assertNotNull(config, "YAML configuration should not be null");
 
         // Create barrier option test data for validation

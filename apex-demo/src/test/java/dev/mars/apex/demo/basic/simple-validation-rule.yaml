@@ -1,0 +1,21 @@
+# ============================================================================
+# APEX Simple Validation Rule Example
+# ============================================================================
+# This is the simplest possible YAML validation rule in APEX
+# It validates that a person's age is at least 18 years old
+# ============================================================================
+
+metadata:
+  name: "Simple Age Validation"
+  version: "1.0.0"
+  description: "The simplest possible YAML validation rule"
+  type: "rule-config"
+  author: "APEX Demo"
+
+# Single validation rule
+rules:
+  - id: "age-check"
+    name: "Age Validation"
+    condition: "#age >= 18"
+    message: "Age must be at least 18"
+    enabled: true

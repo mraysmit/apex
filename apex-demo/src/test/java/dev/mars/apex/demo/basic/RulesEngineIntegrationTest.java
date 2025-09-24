@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.mars.apex.demo.basic.rules;
+package dev.mars.apex.demo.basic;
 
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
@@ -72,7 +72,19 @@ public class RulesEngineIntegrationTest {
         // Verify that no match was returned (since AND group failed)
         assertNotNull(result, "Result should not be null");
         assertFalse(result.isTriggered(), "AND group should fail when one rule fails");
-        assertEquals("no-match", result.getRuleName(), "Should return no-match result");
+
+        // Test new clean API - getRuleMatchedName() should be null when no rule matched
+        assertNull(result.getRuleMatchedName(), "No rule matched, so getRuleMatchedName() should return null");
+
+        // Test failure diagnostic information - should have details about the failed group
+        assertEquals("Test AND Group", result.getLastFailedGroupName(), "Should return the failed group name");
+        assertNotNull(result.getLastFailedGroupMessage(), "Should have a failure message");
+        assertEquals("ERROR", result.getHighestFailedSeverity(), "Should return the highest failed severity");
+
+        // Test backward compatibility - deprecated getRuleName() should still work
+        @SuppressWarnings("deprecation")
+        String deprecatedRuleName = result.getRuleName();
+        assertEquals("Test AND Group", deprecatedRuleName, "Deprecated getRuleName() should return failed group name for backward compatibility");
     }
 
     /**

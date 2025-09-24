@@ -1,0 +1,36 @@
+metadata:
+  id: "postgresql-simple-database-connectivity-test"
+  name: "PostgreSQL Simple Database Connectivity Test"
+  version: "1.0.0"
+  type: "enrichment"
+
+data-sources:
+  - name: "test-database"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "localhost"
+      port: 5432
+      database: "apex_test"
+      username: "apex_user"
+      password: "apex_pass"
+
+enrichments:
+  - id: "simple-lookup"
+    name: "simple-postgresql-database-lookup"
+    type: "lookup-enrichment"
+    condition: "#id != null"
+    
+    lookup-config:
+      lookup-key: "#id"
+      lookup-dataset:
+        type: "database"
+        connection-name: "test-database"
+        query: "SELECT name FROM test_table WHERE id = :id"
+        parameters:
+          - field: "id"
+            type: "string"
+
+    field-mappings:
+      - source-field: "name"
+        target-field: "name"

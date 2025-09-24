@@ -1,6 +1,10 @@
 metadata:
   id: "required-field-validation-test"
   name: "Required Field Validation Test"
+  version: "1.0.0"
+  description: "Test configuration for required field validation using lookup enrichment"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
 
 enrichments:
   - id: "test-lookup"

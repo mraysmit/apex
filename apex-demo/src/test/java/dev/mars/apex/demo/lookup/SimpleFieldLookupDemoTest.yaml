@@ -145,36 +145,6 @@ enrichments:
         target-field: "currencyRegion"
         required: false
 
-# Optional validation rules to ensure data quality
-validations:
-  - id: "simple-field-lookup-demo"
-    name: "Currency Code Format Validation"
-    description: "Ensure currency code is 3 characters uppercase"
-    type: "field-validation"
-    enabled: true
-    condition: "#currencyCode != null"
-    
-    validation-config:
-      field: "currencyCode"
-      rules:
-        - type: "regex"
-          pattern: "^[A-Z]{3}$"
-          message: "Currency code must be 3 uppercase letters"
-          
-  - id: "simple-field-lookup-demo"
-    name: "Positive Amount Validation"
-    description: "Ensure transaction amount is positive"
-    type: "field-validation"
-    enabled: true
-    condition: "#amount != null"
-    
-    validation-config:
-      field: "amount"
-      rules:
-        - type: "range"
-          min: 0.01
-          message: "Transaction amount must be positive"
-
 # Processing configuration
 processing:
   continue-on-error: true

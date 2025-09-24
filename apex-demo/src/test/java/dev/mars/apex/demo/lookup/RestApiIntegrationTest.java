@@ -15,14 +15,14 @@
  */
 package dev.mars.apex.demo.lookup;
 
-import dev.mars.apex.demo.infrastructure.DemoTestBase;
+import dev.mars.apex.demo.DemoTestBase;
+
 import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlDataSourceLoader;
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.data.DataServiceManager;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;

@@ -1,6 +1,7 @@
 package dev.mars.apex.demo.lookup;
 
-import dev.mars.apex.demo.infrastructure.DemoTestBase;
+import dev.mars.apex.demo.DemoTestBase;
+
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

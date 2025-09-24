@@ -1,0 +1,10 @@
+# Minimal YAML validation rule - just the essentials
+metadata:
+  name: "Minimal Rule"
+  type: "rule-config"
+  version: "1.0.0"
+
+rules:
+  - id: "simple-check"
+    condition: "#age >= 18"
+    message: "Must be 18 or older"

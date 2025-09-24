@@ -23,6 +23,33 @@ metadata:
   created-date: "2024-12-24"
   tags: ["apex-demo", "validation", "test-data"]
 
+# APEX Dataset - Required data section for dataset type
+data:
+  - id: "user1"
+    name: "John Doe"
+    age: 25
+    email: "john.doe@example.com"
+    customerType: "PREMIUM"
+    productCategory: "ELECTRONICS"
+    tradeValue: 7500
+    membershipLevel: "GOLD"
+  - id: "user2"
+    name: "Jane Smith"
+    age: 30
+    email: "jane.smith@example.com"
+    customerType: "STANDARD"
+    productCategory: "CLOTHING"
+    tradeValue: 150
+    membershipLevel: "BRONZE"
+  - id: "user3"
+    name: "Alice Johnson"
+    age: 32
+    email: "alice.johnson@example.com"
+    customerType: "VIP"
+    productCategory: "BOOKS"
+    tradeValue: 8000
+    membershipLevel: "PLATINUM"
+
 # Basic Validation Test Scenarios
 basic-validation-scenarios:
   - scenario: "valid-user-data"

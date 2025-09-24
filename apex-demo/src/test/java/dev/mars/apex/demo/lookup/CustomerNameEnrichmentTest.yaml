@@ -7,6 +7,7 @@
 # ============================================================================
 
 metadata:
+  id: "customer-name-enrichment-test"
   name: "Customer Name Enrichment Test"
   version: "1.0.0"
   description: "Customer name enrichment using REST API lookup for blank customer names"

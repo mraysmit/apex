@@ -6,6 +6,7 @@ metadata:
   name: "APEX Nested Data Processing Validation"
   version: "1.0.0"
   description: "Validates APEX enrichment engine nested data processing capabilities"
+  type: "enrichment"
   business-domain: "Financial Derivatives - Barrier Options"
   author: "apex.validation.team@company.com"
   created-date: "2025-09-19"

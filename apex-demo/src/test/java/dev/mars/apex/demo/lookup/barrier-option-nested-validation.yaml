@@ -6,6 +6,7 @@ metadata:
   name: "APEX Nested Validation Rules"
   version: "1.0.0"
   description: "Validates APEX validation engine nested business rule enforcement"
+  type: "rule-config"
   business-domain: "Financial Derivatives - Barrier Options"
   author: "apex.validation.team@company.com"
   created-date: "2025-09-19"

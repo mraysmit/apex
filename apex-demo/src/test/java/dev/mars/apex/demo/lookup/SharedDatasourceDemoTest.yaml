@@ -12,10 +12,11 @@
 # ============================================================================
 
 metadata:
+  id: "shared-datasource-demo"
   name: "Shared DataSource Demo"
   version: "1.0.0"
   description: "Simple demo showing proper H2 database integration with APEX"
-  type: "external-data-config"
+  type: "enrichment"
   author: "apex.demo@company.com"
   created: "2025-09-03"
   tags: ["demo", "h2", "shared-datasource", "simple"]

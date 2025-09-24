@@ -81,7 +81,7 @@ public abstract class DemoTestBase {
     protected YamlRuleConfiguration loadAndValidateYaml(String yamlPath) {
         try {
             logger.info("Loading YAML configuration: {}", yamlPath);
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath(yamlPath);
+            YamlRuleConfiguration config = yamlLoader.loadFromFile(yamlPath);
             
             assertNotNull(config, "YAML configuration should not be null");
             logger.info("✅ YAML configuration loaded successfully: {}", yamlPath);
@@ -122,6 +122,26 @@ public abstract class DemoTestBase {
         testData.put("testType", "demo-validation");
         testData.put("timestamp", System.currentTimeMillis());
         return testData;
+    }
+
+    /**
+     * Test evaluation using RulesEngine.
+     */
+    protected dev.mars.apex.core.engine.model.RuleResult testEvaluation(YamlRuleConfiguration config, Map<String, Object> testData) {
+        try {
+            logger.info("Testing evaluation with RulesEngine...");
+
+            RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+            dev.mars.apex.core.engine.model.RuleResult result = engine.evaluate(testData);
+
+            assertNotNull(result, "RuleResult should not be null");
+            logger.info("✅ Rule evaluation successful");
+            return result;
+        } catch (Exception e) {
+            logger.error("❌ Rule evaluation failed", e);
+            fail("Rule evaluation failed: " + e.getMessage());
+            return null;
+        }
     }
 
     /**

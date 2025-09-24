@@ -1,10 +1,12 @@
 package dev.mars.apex.compiler.lexical;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.mars.apex.core.config.yaml.*;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -29,52 +31,59 @@ import java.util.regex.Pattern;
  * @version 1.0
  */
 public class ApexYamlLexicalValidator {
-    
-    // APEX YAML Grammar Constants (from APEX_YAML_REFERENCE.md)
+
+    // APEX YAML Grammar Constants - Metadata validation
     private static final Set<String> REQUIRED_METADATA_FIELDS = Set.of(
         "id", "name", "version", "description", "type"
     );
-    
+
+    // Valid document types (kept for metadata validation)
     private static final Set<String> VALID_DOCUMENT_TYPES = Set.of(
         "rule-config", "enrichment", "dataset", "scenario",
         "scenario-registry", "bootstrap", "rule-chain", "external-data-config",
         "pipeline-config"
     );
-    
-    private static final Map<String, Set<String>> TYPE_SPECIFIC_REQUIRED_FIELDS = Map.of(
-        "rule-config", Set.of("author"),
-        "enrichment", Set.of("author"),
-        "dataset", Set.of("source"),
-        "scenario", Set.of("business-domain", "owner"),
-        "scenario-registry", Set.of("created-by"),
-        "bootstrap", Set.of("business-domain", "created-by"),
-        "rule-chain", Set.of("author"),
-        "external-data-config", Set.of("author"),
-        "pipeline-config", Set.of("author")
-    );
-    
-    private static final Map<String, Set<String>> TYPE_REQUIRED_SECTIONS = Map.of(
-        "rule-config", Set.of("rules", "enrichments"), // At least one required
-        "enrichment", Set.of("enrichments"),
-        "dataset", Set.of("data"),
-        "scenario", Set.of("scenario", "data-types", "rule-configurations"),
-        "scenario-registry", Set.of("scenarios"),
-        "bootstrap", Set.of("bootstrap", "data-sources"),
-        "rule-chain", Set.of("rule-chains"),
-        "external-data-config", Set.of("dataSources", "configuration"),
-        "pipeline-config", Set.of("pipeline", "data-sources", "data-sinks") // At least one required
-    );
-    
+
     // SpEL Expression Pattern (basic validation)
-    private static final Pattern SPEL_PATTERN = Pattern.compile("#[a-zA-Z][a-zA-Z0-9_.]*");
     private static final Pattern VERSION_PATTERN = Pattern.compile("\\d+\\.\\d+(\\.\\d+)?");
-    
-    private final YamlConfigurationLoader configLoader;
+
+    // Cache for reflection-based validation
+    private static final Map<Class<?>, Set<String>> VALID_SECTIONS_CACHE = new HashMap<>();
+
     private final Yaml yamlParser;
-    
+
     public ApexYamlLexicalValidator() {
-        this.configLoader = new YamlConfigurationLoader();
         this.yamlParser = new Yaml();
+    }
+
+    /**
+     * Get valid YAML sections for a given APEX configuration class using reflection.
+     */
+    private Set<String> getValidSections(Class<?> configClass) {
+        return VALID_SECTIONS_CACHE.computeIfAbsent(configClass, this::extractJsonPropertyFields);
+    }
+
+    /**
+     * Extract @JsonProperty field names from a class using reflection.
+     */
+    private Set<String> extractJsonPropertyFields(Class<?> clazz) {
+        Set<String> fields = new HashSet<>();
+
+        // Get all declared fields from the class
+        for (Field field : clazz.getDeclaredFields()) {
+            JsonProperty jsonProperty = field.getAnnotation(JsonProperty.class);
+            if (jsonProperty != null) {
+                String propertyName = jsonProperty.value();
+                if (!propertyName.isEmpty()) {
+                    fields.add(propertyName);
+                } else {
+                    // If no explicit value, use field name
+                    fields.add(field.getName());
+                }
+            }
+        }
+
+        return fields;
     }
     
     /**
@@ -193,37 +202,131 @@ public class ApexYamlLexicalValidator {
     }
     
     /**
-     * Validate type-specific rules.
+     * Validate YAML sections against actual APEX configuration classes using reflection.
      */
-    private void validateTypeSpecificRules(Map<String, Object> yamlData, String documentType, 
+    private void validateTypeSpecificRules(Map<String, Object> yamlData, String documentType,
                                          ValidationResult result) {
-        // Validate type-specific required metadata fields
-        Set<String> typeRequiredFields = TYPE_SPECIFIC_REQUIRED_FIELDS.get(documentType);
-        if (typeRequiredFields != null) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> metadata = (Map<String, Object>) yamlData.get("metadata");
-            
-            for (String requiredField : typeRequiredFields) {
-                if (!metadata.containsKey(requiredField)) {
-                    result.addError("Missing required field for type '" + documentType + "': " + requiredField);
-                }
+        // Get the appropriate configuration class based on document type
+        Class<?> configClass = getConfigurationClass(documentType);
+
+        // Get valid sections from the appropriate configuration class
+        Set<String> validSections = getValidSections(configClass);
+
+        // Validate all top-level sections (except metadata which is handled separately)
+        for (String section : yamlData.keySet()) {
+            if (!"metadata".equals(section) && !validSections.contains(section)) {
+                result.addError("Invalid YAML section: '" + section + "'. Valid sections for " +
+                              documentType + " are: " + validSections);
             }
         }
-        
-        // Validate required sections for document type
-        Set<String> requiredSections = TYPE_REQUIRED_SECTIONS.get(documentType);
-        if (requiredSections != null) {
-            boolean hasRequiredSection = false;
-            for (String section : requiredSections) {
-                if (yamlData.containsKey(section)) {
-                    hasRequiredSection = true;
-                    break;
-                }
+
+        // Validate that we have at least one content section for certain document types
+        if ("rule-config".equals(documentType) || "external-data-config".equals(documentType)) {
+            boolean hasContentSection = yamlData.keySet().stream()
+                .anyMatch(section -> validSections.contains(section) && !"metadata".equals(section));
+
+            if (!hasContentSection) {
+                result.addError("Document type '" + documentType + "' requires at least one content section from: " + validSections);
             }
-            
-            if (!hasRequiredSection) {
-                result.addError("Document type '" + documentType + "' requires at least one of: " + requiredSections);
+        }
+
+        // Validate specific section contents if present
+        validateSectionContents(yamlData, result);
+    }
+
+    /**
+     * Get the appropriate configuration class based on document type.
+     */
+    private Class<?> getConfigurationClass(String documentType) {
+        if (documentType == null) {
+            return YamlRuleConfiguration.class; // Default fallback
+        }
+
+        switch (documentType) {
+            case "external-data-config":
+                return ExternalDataConfiguration.class;
+            case "rule-config":
+            case "enrichment":
+            case "dataset":
+            case "scenario":
+            case "scenario-registry":
+            case "bootstrap":
+            case "rule-chain":
+            case "pipeline-config":
+            default:
+                return YamlRuleConfiguration.class;
+        }
+    }
+
+    /**
+     * Validate the contents of specific YAML sections.
+     */
+    private void validateSectionContents(Map<String, Object> yamlData, ValidationResult result) {
+        // Validate enrichments section if present
+        if (yamlData.containsKey("enrichments")) {
+            validateEnrichmentsSection(yamlData.get("enrichments"), result);
+        }
+
+        // Validate data-sources section if present (rule-config format)
+        if (yamlData.containsKey("data-sources")) {
+            validateDataSourcesSection(yamlData.get("data-sources"), result);
+        }
+
+        // Validate dataSources section if present (external-data-config format)
+        if (yamlData.containsKey("dataSources")) {
+            validateDataSourcesSection(yamlData.get("dataSources"), result);
+        }
+
+        // Validate rules section if present
+        if (yamlData.containsKey("rules")) {
+            validateRulesSection(yamlData.get("rules"), result);
+        }
+    }
+
+    /**
+     * Validate enrichments section structure.
+     */
+    private void validateEnrichmentsSection(Object enrichments, ValidationResult result) {
+        if (!(enrichments instanceof List)) {
+            result.addError("'enrichments' section must be a list");
+            return;
+        }
+
+        @SuppressWarnings("unchecked")
+        List<Object> enrichmentList = (List<Object>) enrichments;
+
+        for (int i = 0; i < enrichmentList.size(); i++) {
+            Object enrichment = enrichmentList.get(i);
+            if (!(enrichment instanceof Map)) {
+                result.addError("enrichments[" + i + "] must be an object");
+                continue;
             }
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> enrichmentMap = (Map<String, Object>) enrichment;
+
+            // Validate required fields for enrichment
+            if (!enrichmentMap.containsKey("id")) {
+                result.addError("enrichments[" + i + "] missing required field: id");
+            }
+        }
+    }
+
+    /**
+     * Validate data-sources section structure.
+     */
+    private void validateDataSourcesSection(Object dataSources, ValidationResult result) {
+        if (!(dataSources instanceof List)) {
+            result.addError("'data-sources' section must be a list");
+        }
+    }
+
+    /**
+     * Validate rules section structure.
+     */
+    private void validateRulesSection(Object rules, ValidationResult result) {
+        if (!(rules instanceof List)) {
+            result.addError("'rules' section must be a list");
         }
     }
     
@@ -254,12 +357,47 @@ public class ApexYamlLexicalValidator {
             }
         } else if (obj instanceof String) {
             String str = (String) obj;
-            if (str.contains("#")) {
+            if (str.contains("#") && isSpelField(path)) {
                 validateSpelExpression(str, path, result);
             }
         }
     }
-    
+
+    /**
+     * Determine if a field path should be validated as SpEL expression.
+     * Message fields and description fields should NOT be validated as SpEL.
+     */
+    private boolean isSpelField(String path) {
+        // Fields that should NOT be validated as SpEL (they're plain text)
+        String[] nonSpelFields = {
+            "message", "description", "name", "id", "author", "version",
+            "business-domain", "owner", "created-by", "source"
+        };
+
+        String lowerPath = path.toLowerCase();
+        for (String nonSpelField : nonSpelFields) {
+            if (lowerPath.endsWith("." + nonSpelField) || lowerPath.equals(nonSpelField)) {
+                return false;
+            }
+        }
+
+        // Fields that SHOULD be validated as SpEL
+        String[] spelFields = {
+            "condition", "lookup-key", "transformation", "expression",
+            "calculation", "filter", "where-clause"
+        };
+
+        for (String spelField : spelFields) {
+            if (lowerPath.endsWith("." + spelField) || lowerPath.equals(spelField)) {
+                return true;
+            }
+        }
+
+        // Default: if it contains # and we're not sure, validate it
+        // This is conservative but better than missing real SpEL errors
+        return true;
+    }
+
     /**
      * Validate individual SpEL expression.
      */

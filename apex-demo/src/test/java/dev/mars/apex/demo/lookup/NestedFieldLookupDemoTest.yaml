@@ -130,34 +130,6 @@ enrichments:
         target-field: "calculatedTradeValue"
         required: true
 
-# Optional validation rules
-validations:
-  - id: "trade-object-validation"
-    name: "Trade Object Validation"
-    description: "Ensure trade object exists"
-    type: "field-validation"
-    enabled: true
-    condition: "true"
-
-    validation-config:
-      field: "trade"
-      rules:
-        - type: "not-null"
-          message: "Trade object must not be null"
-
-  - id: "counterparty-validation"
-    name: "Counterparty Validation"
-    description: "Ensure counterparty exists within trade"
-    type: "field-validation"
-    enabled: true
-    condition: "#trade != null"
-
-    validation-config:
-      field: "trade.counterparty"
-      rules:
-        - type: "not-null"
-          message: "Trade counterparty must not be null"
-
 # Processing configuration
 processing:
   continue-on-error: true

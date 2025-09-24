@@ -17,13 +17,19 @@
 package dev.mars.apex.demo.lookup;
 
 
-import dev.mars.apex.demo.infrastructure.DemoTestBase;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.yaml.YamlConfigurationException;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
+import dev.mars.apex.core.service.error.ErrorRecoveryService;
+import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
+import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +41,24 @@ class RequiredFieldValidationTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(RequiredFieldValidationTest.class);
 
+    /**
+     * Create RulesEngine with EnrichmentService for processing enrichments.
+     * Following the pattern from UpdateStageFxTransactionSimplifiedTest.
+     */
+    private RulesEngine createRulesEngineWithEnrichmentService(YamlRuleConfiguration config) throws YamlConfigurationException {
+        // Create basic configuration from YAML using the standard method
+        RulesEngine baseEngine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+        RulesEngineConfiguration rulesConfig = baseEngine.getConfiguration();
+
+        // Create RulesEngine with EnrichmentService
+        RulesEngine engine = new RulesEngine(rulesConfig, new SpelExpressionParser(),
+                                           new ErrorRecoveryService(), new RulePerformanceMonitor(), enrichmentService);
+
+        assertNotNull(engine, "RulesEngine should be created");
+        logger.info("✅ RulesEngine created with EnrichmentService for enrichment processing");
+        return engine;
+    }
+
     @Test
     @DisplayName("Test required field works when field exists")
     void testRequiredFieldExists() {
@@ -45,8 +69,9 @@ class RequiredFieldValidationTest extends DemoTestBase {
             Map<String, Object> inputData = new HashMap<>();
             inputData.put("id", "1");
 
-            // Use complete APEX evaluation workflow
-            RuleResult result = testEvaluation(config, inputData);
+            // Use RulesEngine with EnrichmentService for enrichment processing
+            RulesEngine engine = createRulesEngineWithEnrichmentService(config);
+            RuleResult result = engine.evaluate(config, inputData);
             assertNotNull(result, "RuleResult should not be null when required field exists");
 
             // Check APEX rule result status
@@ -79,8 +104,9 @@ class RequiredFieldValidationTest extends DemoTestBase {
             Map<String, Object> inputData = new HashMap<>();
             inputData.put("id", "999"); // Non-existent ID that will cause lookup failure
 
-            // Use complete APEX evaluation workflow
-            RuleResult result = testEvaluation(config, inputData);
+            // Use RulesEngine with EnrichmentService for enrichment processing
+            RulesEngine engine = createRulesEngineWithEnrichmentService(config);
+            RuleResult result = engine.evaluate(config, inputData);
             assertNotNull(result, "RuleResult should not be null even when required field fails");
 
             // Check APEX rule result status - should fail due to required field missing
@@ -120,7 +146,8 @@ class RequiredFieldValidationTest extends DemoTestBase {
             Map<String, Object> successData = new HashMap<>();
             successData.put("id", "2");
 
-            RuleResult successResult = testEvaluation(config, successData);
+            RulesEngine engine1 = createRulesEngineWithEnrichmentService(config);
+            RuleResult successResult = engine1.evaluate(config, successData);
             assertTrue(successResult.isSuccess(), "Should succeed when required field exists");
             assertFalse(successResult.hasFailures(), "Should have no failures for successful lookup");
             assertEquals("Test2", successResult.getEnrichedData().get("resultName"), "Should successfully map existing field");
@@ -129,7 +156,8 @@ class RequiredFieldValidationTest extends DemoTestBase {
             Map<String, Object> failData = new HashMap<>();
             failData.put("id", "nonexistent");
 
-            RuleResult failResult = testEvaluation(config, failData);
+            RulesEngine engine2 = createRulesEngineWithEnrichmentService(config);
+            RuleResult failResult = engine2.evaluate(config, failData);
             assertFalse(failResult.isSuccess(), "Should fail when required field is missing");
             assertTrue(failResult.hasFailures(), "Should have failures for missing required field");
             assertFalse(failResult.getFailureMessages().isEmpty(), "Should have failure messages");
@@ -159,7 +187,8 @@ class RequiredFieldValidationTest extends DemoTestBase {
             Map<String, Object> successData = new HashMap<>();
             successData.put("id", "1");
 
-            RuleResult successResult = testEvaluation(config, successData);
+            RulesEngine engine3 = createRulesEngineWithEnrichmentService(config);
+            RuleResult successResult = engine3.evaluate(config, successData);
 
             // Demonstrate all new RuleResult API methods
             logger.info("=== Demonstrating RuleResult API Methods ===");
@@ -179,7 +208,8 @@ class RequiredFieldValidationTest extends DemoTestBase {
             Map<String, Object> failData = new HashMap<>();
             failData.put("id", "999");
 
-            RuleResult failResult = testEvaluation(config, failData);
+            RulesEngine engine4 = createRulesEngineWithEnrichmentService(config);
+            RuleResult failResult = engine4.evaluate(config, failData);
 
             logger.info("=== Failure Case API Methods ===");
             logger.info("result.isSuccess(): {}", failResult.isSuccess());
@@ -259,7 +289,8 @@ class RequiredFieldValidationTest extends DemoTestBase {
             logger.info("--- Test Case 1: Missing optional field only ---");
             YamlRuleConfiguration config1 = yamlLoader.fromYamlString(mixedRequiredYaml);
             Map<String, Object> data1 = Map.of("id", 1);
-            RuleResult result1 = testEvaluation(config1, data1);
+            RulesEngine engine5 = createRulesEngineWithEnrichmentService(config1);
+            RuleResult result1 = engine5.evaluate(config1, data1);
 
             assertTrue(result1.isSuccess(), "Should succeed when only optional field is missing");
             assertFalse(result1.hasFailures(), "Should have no failures when only optional field is missing");
@@ -271,7 +302,8 @@ class RequiredFieldValidationTest extends DemoTestBase {
             logger.info("--- Test Case 2: Missing required field ---");
             YamlRuleConfiguration config2 = yamlLoader.fromYamlString(mixedRequiredYaml);
             Map<String, Object> data2 = Map.of("id", 2);
-            RuleResult result2 = testEvaluation(config2, data2);
+            RulesEngine engine6 = createRulesEngineWithEnrichmentService(config2);
+            RuleResult result2 = engine6.evaluate(config2, data2);
 
             assertFalse(result2.isSuccess(), "Should fail when required field is missing");
             assertTrue(result2.hasFailures(), "Should have failures when required field is missing");
@@ -281,7 +313,8 @@ class RequiredFieldValidationTest extends DemoTestBase {
             logger.info("--- Test Case 3: All fields present ---");
             YamlRuleConfiguration config3 = yamlLoader.fromYamlString(mixedRequiredYaml);
             Map<String, Object> data3 = Map.of("id", 3);
-            RuleResult result3 = testEvaluation(config3, data3);
+            RulesEngine engine7 = createRulesEngineWithEnrichmentService(config3);
+            RuleResult result3 = engine7.evaluate(config3, data3);
 
             assertTrue(result3.isSuccess(), "Should succeed when all fields are present");
             assertFalse(result3.hasFailures(), "Should have no failures when all fields are present");

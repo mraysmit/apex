@@ -1,6 +1,14 @@
 # REST API Simple YAML Test Configuration
 # The simplest possible YAML for REST API lookup validation
 
+metadata:
+  id: "rest-api-simple-yaml-test"
+  name: "REST API Simple YAML Test"
+  version: "1.0.0"
+  description: "The simplest possible YAML configuration for REST API lookup validation"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+
 data-sources:
   - name: "test-api"
     type: "rest-api"

@@ -2,6 +2,32 @@
 
 This document provides comprehensive instructions for validating YAML files using the APEX compiler.
 
+## ⚠️ CRITICAL: YAML Creation Guidelines
+
+**NEVER create APEX YAML examples without first verifying syntax against actual apex-core source code!**
+
+### Mandatory Pre-Creation Verification Process:
+
+1. **ALWAYS examine existing working YAML files first** - Look at actual files in apex-demo/src/test/java/dev/mars/apex/demo/lookup/
+2. **ALWAYS check YamlRuleConfiguration.java** - Verify what sections are actually supported (@JsonProperty fields)
+3. **ALWAYS check specific classes** - For data sources: YamlDataSource.java, for enrichments: YamlEnrichment.java, etc.
+4. **NEVER assume or guess syntax** - Only use patterns found in working examples
+5. **ALWAYS validate against APEX_YAML_REFERENCE.md** - But verify the reference is accurate against source code
+
+### Use This Prompt When Creating YAML:
+
+```
+Before creating any APEX YAML configuration:
+
+1. First, search the codebase for existing working examples of the type of YAML I need to create
+2. Examine the relevant Java configuration classes (YamlRuleConfiguration, YamlDataSource, YamlEnrichment, etc.) to see what fields are actually supported
+3. Only use syntax patterns that exist in working examples
+4. Never invent or assume YAML keywords - only use what's proven to work in the codebase
+5. If uncertain about any syntax, ask the user to clarify or provide an existing example to follow
+
+CRITICAL: Do not create YAML files with invented keywords. Always verify against actual apex-core implementation first.
+```
+
 ## Overview
 
 The APEX compiler provides robust validation capabilities for YAML configuration files, ensuring they conform to APEX standards and requirements. The validation engine checks for:
@@ -11,6 +37,33 @@ The APEX compiler provides robust validation capabilities for YAML configuration
 - Document structure and content sections
 - YAML syntax and formatting
 - Cross-reference validation and dependencies
+
+## Known Validation Issues
+
+### SpEL Expression Validation False Positives
+
+**Issue**: The APEX compiler incorrectly flags `##` patterns in message strings as SpEL validation errors.
+
+**Affected Files**: Files containing `validation-config` sections with message fields like:
+```yaml
+validation-config:
+  field: "customerId"
+  rules:
+    - type: "regex"
+      pattern: "^CUST\\d{3}$"
+      message: "Customer ID must be in format CUST### (e.g., CUST001)"  # ❌ Flagged as invalid SpEL
+```
+
+**Root Cause**: The compiler treats ALL string fields containing `#` as SpEL expressions, including plain text message fields that contain `##` for documentation purposes.
+
+**Impact**:
+- Compiler reports "double hash not allowed" errors
+- Files are marked as invalid despite working correctly at runtime
+- Tests pass because message fields are not executed as SpEL
+
+**Workaround**: These are false positives and can be safely ignored. The APEX runtime correctly treats message fields as plain text, not executable SpEL expressions.
+
+**Future Fix**: The compiler will be updated to be context-aware and only validate SpEL syntax in expression fields (`condition`, `lookup-key`, etc.), not in documentation fields (`message`, `description`, `name`).
 
 ## Validation Methods
 
