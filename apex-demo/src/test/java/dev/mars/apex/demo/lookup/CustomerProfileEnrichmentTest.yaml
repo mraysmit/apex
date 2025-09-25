@@ -1,0 +1,67 @@
+# Customer Profile Enrichment Rules - Database Version
+# Demonstrates database lookup enrichment using APEX YAML processing with real H2 database
+# Use Case: Enrich transactions with customer profile data from database
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Customer profile enrichment demonstration using APEX lookup enrichments
+#          for customer data enhancement, profile lookups, and customer information
+#          enrichment with comprehensive customer management capabilities
+# Status: Available for integration with customer profile enrichment tests
+# ============================================================================
+
+metadata:
+  id: "customer-profile-enrichment-demo---database-version"
+  name: "Customer Profile Enrichment Demo - Database Version"
+  version: "2.0.0"
+  description: "Demonstrates database lookup enrichment using APEX YAML processing with real H2 database"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "lookup", "database", "customer"]
+
+# Database configuration for customer data
+data-sources:
+  - name: "customer-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      # H2 file-based database for true sharing between demo and APEX
+      database: "./target/h2-demo/apex_demo_shared"
+      username: "sa"
+      password: ""
+
+# Enrichment rules using verified APEX syntax with database lookups
+enrichments:
+  - id: "customer-profile-enrichment-demo---database-version"
+    type: "lookup-enrichment"
+    description: "Enrich transactions with customer profile data from H2 database"
+    condition: "#customerId != null && #customerId != ''"
+
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        connection-name: "customer-database"
+        query: "SELECT customer_name, customer_type, tier, region, status, created_date FROM customers WHERE customer_id = :customerId"
+        parameters:
+          - field: "customerId"
+            type: "string"
+
+    # Field mappings from database columns to enriched object fields (H2 returns uppercase column names)
+    field-mappings:
+      - source-field: "CUSTOMER_NAME"
+        target-field: "customerName"
+      - source-field: "CUSTOMER_TYPE"
+        target-field: "customerType"
+      - source-field: "TIER"
+        target-field: "customerTier"
+      - source-field: "REGION"
+        target-field: "customerRegion"
+      - source-field: "STATUS"
+        target-field: "customerStatus"
+      - source-field: "CREATED_DATE"
+        target-field: "customerCreatedDate"
+

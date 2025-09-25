@@ -1,0 +1,101 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: YamlConfigurationValidationTest.java (testCustomerTransformerFunctionality method)
+# Purpose: Customer data transformation demonstration using APEX enrichment capabilities
+#          for testing customer processing, segmentation, and profile enrichment
+#          data transformation logic with real business scenarios
+# ============================================================================
+
+metadata:
+  id: "customer-transformer-demo"
+  name: "Customer Transformer Demo"
+  version: "1.0.0"
+  description: "APEX-compliant customer transformer with real enrichment services"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "enrichment", "customer", "transformer"]
+
+# ============================================================================
+# APEX ENRICHMENT PROCESSING - Customer Transformation Demo
+# ============================================================================
+# This section demonstrates 4 different customer enrichment scenarios:
+# 1. Customer Segments Processing - Always executes (condition: "true")
+# 2. Customer Field Actions - Disabled (condition: "false")
+# 3. Customer Profile Enrichment - Disabled (condition: "false")
+# 4. Customer Transformer Summary - Always executes (condition: "true")
+# ============================================================================
+enrichments:
+  # ========================================================================
+  # ENRICHMENT 1: Customer Segments Processing (ACTIVE)
+  # ========================================================================
+  # Purpose: Process customer segments using membership-based categorization
+  # Condition: "true" - Always executes for all customer records
+  # Business Logic: Applies segmentation based on customer tier and profile
+  # ========================================================================
+  - id: "customer-segments-processing"
+    name: "customer-segments-processing"
+    type: "field-enrichment"
+    description: "Process customer segments using data-driven configuration"
+    enabled: true
+    condition: "true"                    # Always execute this enrichment
+    field-mappings:
+      - source-field: "segmentType"     # Input: Customer segment type
+        target-field: "customerSegmentsResult"  # Output: Segmentation result
+        default-value: "Customer segments processed: Membership-based segmentation and profile enrichment applied"
+
+  # ========================================================================
+  # ENRICHMENT 2: Customer Field Actions Processing (DISABLED)
+  # ========================================================================
+  # Purpose: Process customer field actions for profile and preference updates
+  # Condition: "false" - Disabled for demonstration purposes
+  # Business Logic: Would apply profile setting and preference actions
+  # ========================================================================
+  - id: "customer-field-actions-processing"
+    name: "customer-field-actions-processing"
+    type: "field-enrichment"
+    description: "Process customer field actions using data-driven configuration"
+    enabled: true
+    condition: "false"                   # Disabled - will not execute
+    field-mappings:
+      - source-field: "actionType"      # Input: Action type for processing
+        target-field: "customerFieldActionsResult"  # Output: Action processing result
+        default-value: "Customer field actions processed: Profile and preference setting actions applied"
+
+  # ========================================================================
+  # ENRICHMENT 3: Customer Profile Enrichment (DISABLED)
+  # ========================================================================
+  # Purpose: Enhance customer profiles with additional data and insights
+  # Condition: "false" - Disabled for demonstration purposes
+  # Business Logic: Would enrich profiles with behavioral and preference data
+  # ========================================================================
+  - id: "customer-profile-enrichment"
+    name: "customer-profile-enrichment"
+    type: "field-enrichment"
+    description: "Process customer profile enrichment using data-driven configuration"
+    enabled: true
+    condition: "false"                   # Disabled - will not execute
+    field-mappings:
+      - source-field: "profileType"     # Input: Profile type for enrichment
+        target-field: "customerProfileEnrichmentResult"  # Output: Profile enrichment result
+        default-value: "Customer profile enrichment processed: Profile enhancement completed with appropriate data"
+
+  # ========================================================================
+  # ENRICHMENT 4: Customer Transformer Summary (ACTIVE)
+  # ========================================================================
+  # Purpose: Generate comprehensive summary of customer transformation process
+  # Condition: "true" - Always executes to provide processing summary
+  # Business Logic: Summarizes all transformation activities and results
+  # ========================================================================
+  - id: "customer-transformer-summary"
+    name: "customer-transformer-summary"
+    type: "field-enrichment"
+    description: "Generate customer transformer summary"
+    enabled: true
+    condition: "true"                    # Always execute this enrichment
+    field-mappings:
+      - source-field: "transformerType" # Input: Transformer type identifier
+        target-field: "customerTransformerSummary"  # Output: Transformation summary
+        default-value: "Customer transformer completed using real APEX services"
+

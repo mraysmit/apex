@@ -65,7 +65,7 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
             // Drop existing table
             statement.execute("DROP TABLE IF EXISTS customers");
 
-            // Create customers table with exact columns expected by customer-profile-enrichment.yaml
+            // Create customers table with exact columns expected by CustomerProfileEnrichmentTest.yaml
             statement.execute("""
                 CREATE TABLE customers (
                     customer_id VARCHAR(20) PRIMARY KEY,
@@ -107,7 +107,7 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
         // Create comprehensive test data that triggers ALL 4 enrichments
         Map<String, Object> testData = new HashMap<>();
 
-        // Data required for customer-profile-enrichment.yaml condition
+        // Data required for CustomerProfileEnrichmentTest.yaml condition
         testData.put("customerId", "CUST001");
 
         // Data for custom-database-initialization enrichment

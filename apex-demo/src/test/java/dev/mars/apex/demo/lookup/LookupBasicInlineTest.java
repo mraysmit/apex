@@ -95,7 +95,7 @@ public class LookupBasicInlineTest {
         
         try {
             // Load inline lookup configuration
-            config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/lookup-basic-inline-test.yaml");
+            config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/LookupBasicInlineTestB.yaml");
             
             logger.info("✅ APEX services initialized for inline lookup testing");
             logger.info("  - Configuration loaded: {}", config.getMetadata().getName());

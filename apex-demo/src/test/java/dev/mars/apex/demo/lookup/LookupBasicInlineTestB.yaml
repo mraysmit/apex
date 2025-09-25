@@ -1,0 +1,114 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Basic lookup enrichment test with inline datasets for testing APEX
+#          lookup functionality with simple counterparty and currency lookups
+#          using inline reference data
+# Status: Available for integration with basic lookup enrichment tests
+# ============================================================================
+
+metadata:
+  id: "lookup-basic-inline-test"
+  name: "Lookup Basic Inline Operations Test"
+  version: "1.0.0"
+  description: "Test basic inline lookup operations with dataset queries"
+  type: "enrichment"
+  author: "apex-test-suite@example.com"
+  created-date: "2025-09-14"
+  tags: ["apex-test", "lookup-operations", "inline-datasets", "basic-lookups"]
+
+# Basic inline lookup operations testing
+enrichments:
+  - id: "currency-lookup"
+    name: "currency-lookup"
+    type: "lookup-enrichment"
+    description: "Lookup currency information by currency code"
+    condition: "#currencyCode != null"
+    lookup-config:
+      lookup-key: "#currencyCode"
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        data:
+          - code: "USD"
+            name: "US Dollar"
+            symbol: "$"
+            country: "United States"
+          - code: "EUR"
+            name: "Euro"
+            symbol: "€"
+            country: "European Union"
+          - code: "GBP"
+            name: "British Pound"
+            symbol: "£"
+            country: "United Kingdom"
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+      - source-field: "symbol"
+        target-field: "currencySymbol"
+      - source-field: "country"
+        target-field: "currencyCountry"
+
+  - id: "instrument-lookup"
+    name: "instrument-lookup"
+    type: "lookup-enrichment"
+    description: "Lookup instrument information by instrument ID"
+    condition: "#instrumentId != null"
+    lookup-config:
+      lookup-key: "#instrumentId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "id"
+        data:
+          - id: "US912828XG93"
+            type: "TREASURY_NOTE"
+            maturity: "10Y"
+            issuer: "US_TREASURY"
+          - id: "DE0001102309"
+            type: "GOVERNMENT_BOND"
+            maturity: "30Y"
+            issuer: "GERMAN_GOVERNMENT"
+          - id: "GB00B03MLX29"
+            type: "GILT"
+            maturity: "5Y"
+            issuer: "UK_TREASURY"
+    field-mappings:
+      - source-field: "type"
+        target-field: "instrumentType"
+      - source-field: "maturity"
+        target-field: "instrumentMaturity"
+      - source-field: "issuer"
+        target-field: "instrumentIssuer"
+
+  - id: "counterparty-lookup"
+    name: "counterparty-lookup"
+    type: "lookup-enrichment"
+    description: "Lookup counterparty information by name"
+    condition: "#counterpartyName != null"
+    lookup-config:
+      lookup-key: "#counterpartyName"
+      lookup-dataset:
+        type: "inline"
+        key-field: "name"
+        data:
+          - name: "Deutsche Bank AG"
+            lei: "7LTWFZYICNSX8D621K86"
+            jurisdiction: "DE"
+            entityType: "BANK"
+          - name: "JPMorgan Chase"
+            lei: "8EE8DF3643E15DBFDA05"
+            jurisdiction: "US"
+            entityType: "BANK"
+          - name: "Barclays Bank PLC"
+            lei: "G5GSEF7VJP5I7OUK5573"
+            jurisdiction: "GB"
+            entityType: "BANK"
+    field-mappings:
+      - source-field: "lei"
+        target-field: "counterpartyLEI"
+      - source-field: "jurisdiction"
+        target-field: "counterpartyJurisdiction"
+      - source-field: "entityType"
+        target-field: "counterpartyEntityType"

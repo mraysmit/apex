@@ -9,26 +9,141 @@
 
 ## Table of Contents
 
-1. [Introduction & Overview](#1-introduction--overview)
-2. [Document Structure & Metadata](#2-document-structure--metadata)
-3. [Core Syntax Elements](#3-core-syntax-elements)
-4. [Rules Section](#4-rules-section)
-5. [Rule Groups Section](#5-rule-groups-section) 
-6. [Enrichments Section](#6-enrichments-section)
-7. [Dataset Definitions](#7-dataset-definitions)
-8. [External Data-Source References](#8-external-data-source-references)
-9. [Pipeline Orchestration](#9-pipeline-orchestration) 
-10. [Advanced Features](#10-advanced-features)
-11. [Best Practices](#11-best-practices)
-12. [Common Patterns](#12-common-patterns)
-13. [Examples & Use Cases](#13-examples--use-cases)
-14. [Troubleshooting](#14-troubleshooting)
-15. [Reference](#15-reference)
-16. [Migration & Compatibility](#16-migration--compatibility)
+1. [Quick Keyword Reference](#1-quick-keyword-reference)
+2. [Introduction & Overview](#2-introduction--overview)
+3. [Document Structure & Metadata](#3-document-structure--metadata)
+4. [Core Syntax Elements](#4-core-syntax-elements)
+5. [Rules Section](#5-rules-section)
+6. [Rule Groups Section](#6-rule-groups-section)
+7. [Enrichments Section](#7-enrichments-section)
+8. [Dataset Definitions](#8-dataset-definitions)
+9. [External Data-Source References](#9-external-data-source-references)
+10. [Pipeline Orchestration](#10-pipeline-orchestration)
+11. [Advanced Features](#11-advanced-features)
+12. [Best Practices](#12-best-practices)
+13. [Common Patterns](#13-common-patterns)
+14. [Examples & Use Cases](#14-examples--use-cases)
+15. [Troubleshooting](#15-troubleshooting)
+16. [Reference](#16-reference)
+17. [Migration & Compatibility](#17-migration--compatibility)
 
 ---
 
-## 1. Introduction & Overview
+## 1. Quick Keyword Reference
+
+This section provides a definitive reference for all 72 supported APEX YAML keywords based on actual APEX core engine implementation.
+
+### 1.1 Complete Keyword Reference Table
+
+| Keyword | Category | Required | Type | Description |
+|---------|----------|----------|------|-------------|
+| **authentication** | DataSource | No | Map | Authentication configuration for external data sources |
+| **author** | Metadata | Conditional | String | Author of the configuration (required for rule-config, enrichment) |
+| **base-path** | DataSource | No | String | Base file system path for file-based data sources |
+| **bootstrap-servers** | DataSource | No | String | Kafka bootstrap servers (connection-level property) |
+| **business-domain** | Rule | No | String | Business domain classification |
+| **business-owner** | Rule | No | String | Business owner responsible for the rule |
+| **cache** | DataSource | No | Map | Caching configuration for data sources |
+| **calculation-config** | Enrichment | No | List | Configuration for calculation-enrichment type |
+| **categories** | Document | No | List | Category definitions for the configuration |
+| **category** | Rule | No | String | Single category for rule classification |
+| **circuit-breaker** | DataSource | No | Map | Circuit breaker configuration for resilience |
+| **condition** | Rule/Enrichment | No | String | SpEL expression defining when rule/enrichment applies |
+| **conditional-mappings** | Enrichment | No | List | Conditional field mapping configurations |
+| **connection** | DataSource | Yes | Map | Database/external system connection configuration |
+| **connection-pool** | DataSource | No | Map | Connection pool settings for database sources |
+| **created** | Metadata | No | String | Creation timestamp (ISO 8601 format) |
+| **created-by** | Rule | No | String | Creator identifier |
+| **custom-properties** | Rule | No | Map | Custom extensible properties for rules |
+| **custom-validators** | ValidationConfig | No | List | Custom validation logic references |
+| **debug-mode** | RuleGroup | No | Boolean | Enable debug mode for rule group execution |
+| **data-sinks** | Document | No | List | Output destinations for processed data |
+| **data-source-refs** | Document | No | List | References to external data source configurations |
+| **data-sources** | Document | No | List | Inline data source definitions |
+| **default-value** | FieldMapping | No | Any | Fallback value when source field is missing/null |
+| **description** | Metadata | No | String | Human-readable description of the configuration |
+| **effective-date** | Rule | No | String | Date when rule becomes effective (ISO 8601) |
+| **enabled** | Rule/Enrichment | No | Boolean | Whether the rule/enrichment is active |
+| **encoding** | DataSource | No | String | Character encoding for file-based sources |
+| **endpoints** | DataSource | No | Map | REST API endpoint definitions |
+| **enrichments** | Document | No | List | Data enrichment configurations |
+| **execution-settings** | Enrichment | No | Map | Execution behavior configuration for enrichments |
+| **expiration-date** | Rule | No | String | Date when rule expires (ISO 8601) |
+| **field-mappings** | Enrichment | No | List | Field mapping configurations for enrichments |
+| **field-types** | ValidationConfig | No | Map | Expected data types for rule validation |
+| **file-format** | DataSource | No | Map | File format configuration (CSV, JSON, XML) |
+| **file-pattern** | DataSource | No | String | File name pattern for file-based sources |
+| **health-check** | DataSource | No | Map | Health check configuration for data sources |
+| **id** | Metadata | Yes | String | Unique identifier for the configuration |
+| **implementation** | DataSource | No | String | Implementation class for custom data sources |
+| **key-patterns** | DataSource | No | Map | Key pattern definitions for key-value stores |
+| **last-modified** | Metadata | No | String | Last modification timestamp (ISO 8601) |
+| **lookup-config** | Enrichment | No | Map | Configuration for lookup-enrichment type |
+| **mapping-rules** | Enrichment | No | List | Complex mapping rule definitions |
+| **message** | Rule | No | String | Message displayed when rule is triggered |
+| **metadata** | Document | Yes | Map | Document metadata section |
+| **name** | Metadata | No | String | Human-readable name for the configuration |
+| **operations** | DataSource | No | Map | Operation definitions for REST APIs |
+| **operator** | RuleGroup | No | String | Logical operator for rule group (AND/OR) |
+| **override-priority** | RuleReference | No | Integer | Override priority for rule within group |
+| **parallel-execution** | RuleGroup | No | Boolean | Enable parallel execution of rules in group |
+| **parameter-names** | DataSource | No | Array | Parameter names for parameterized queries |
+| **pipeline** | Document | No | Map | Pipeline configuration for processing |
+| **polling-interval** | DataSource | No | Integer | Polling interval for file-based sources |
+| **priority** | Rule/Enrichment | No | Integer | Execution priority (lower numbers = higher priority) |
+| **queries** | DataSource | No | Map | Named query definitions for database sources |
+| **required** | FieldMapping | No | Boolean | Whether field mapping is mandatory |
+| **required-fields** | ValidationConfig | No | List | List of required fields for rule validation |
+| **response-mapping** | DataSource | No | Map | Response transformation configuration |
+| **rule-chains** | Document | No | List | Rule chain definitions |
+| **rule-group-references** | RuleGroup | No | List | References to other rule groups |
+| **rule-groups** | Document | No | List | Rule group definitions |
+| **rule-id** | RuleReference | Yes | String | ID of rule being referenced |
+| **rule-ids** | RuleGroup | No | List | List of rule IDs in the group |
+| **rule-references** | RuleGroup | No | List | Detailed rule references with metadata |
+| **rule-refs** | Document | No | List | References to external rule configurations |
+| **rules** | Document | No | List | Rule definitions |
+| **sasl-mechanism** | DataSource | No | String | SASL mechanism for Kafka authentication (connection-level) |
+| **security-protocol** | DataSource | No | String | Security protocol for Kafka connections (connection-level) |
+| **sequence** | RuleReference | No | Integer | Execution sequence for rule within group |
+| **severity** | Rule | No | String | Severity level (ERROR, WARNING, INFO) |
+| **source-field** | FieldMapping | Yes | String | Source field name in field mappings |
+| **stop-on-first-failure** | RuleGroup | No | Boolean | Stop group execution on first rule failure |
+| **source-type** | DataSource | Yes | String | Type of data source (database, rest-api, file, etc.) |
+| **tags** | Metadata | No | List | Classification tags for the configuration |
+| **target-field** | FieldMapping | Yes | String | Target field name in field mappings |
+| **target-type** | Enrichment | No | String | Target object type for enrichment |
+| **topics** | DataSource | No | Map | Kafka topic definitions |
+| **transformation** | FieldMapping | No | String | SpEL expression for field transformation |
+| **transformation-rules** | Transformation | No | List | Transformation rule definitions |
+| **transformations** | Document | No | List | Data transformation configurations |
+| **type** | Metadata | Yes | String | Document type (rule-config, enrichment, dataset, etc.) |
+| **validation** | Rule | No | Map | Validation configuration for rules |
+| **version** | Metadata | No | String | Version identifier for the configuration |
+
+### 1.2 Document Types
+
+Valid values for the `type` field in metadata:
+
+- `rule-config` - Rule configuration documents
+- `enrichment` - Enrichment configuration documents
+- `dataset` - Dataset configuration documents
+- `scenario` - Scenario configuration documents
+- `external-data-config` - External data configuration documents
+
+### 1.3 Required Fields by Document Type
+
+| Document Type | Required Fields |
+|---------------|-----------------|
+| `rule-config` | `id`, `type`, `author` |
+| `enrichment` | `id`, `type`, `author` |
+| `dataset` | `id`, `type` |
+| `scenario` | `id`, `type`, `business-domain` |
+| `external-data-config` | `id`, `type`, `author` |
+
+---
+
+## 2. Introduction & Overview
 
 ### What is APEX YAML
 

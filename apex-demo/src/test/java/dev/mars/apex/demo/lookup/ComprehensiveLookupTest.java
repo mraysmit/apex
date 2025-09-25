@@ -66,7 +66,7 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             // Drop existing table
             statement.execute("DROP TABLE IF EXISTS customers");
 
-            // Create customers table with exact columns expected by customer-profile-enrichment.yaml
+            // Create customers table with exact columns expected by CustomerProfileEnrichmentTest.yaml
             statement.execute("""
                 CREATE TABLE customers (
                     customer_id VARCHAR(20) PRIMARY KEY,
@@ -101,7 +101,7 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             // Setup database with required tables and data
             setupCustomerDatabase();
 
-            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/customer-profile-enrichment.yaml");
+            var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/CustomerProfileEnrichmentTest.yaml");
 
             Map<String, Object> testData = new HashMap<>();
             testData.put("customerId", "CUST001");
