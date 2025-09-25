@@ -119,17 +119,17 @@ if %OVERALL_SUCCESS% equ 1 (
     if %INTEGRATION_EXIT_CODE% equ 0 (
         echo    Integration Tests: PASSED
     ) else (
-        echo   ❌ Integration Tests: FAILED
+        echo   X Integration Tests: FAILED
     )
     if %BOOTSTRAP_EXIT_CODE% equ 0 (
         echo    Bootstrap Tests: PASSED
     ) else (
-        echo   ❌ Bootstrap Tests: FAILED
+        echo   X Bootstrap Tests: FAILED
     )
     if %RUNNER_EXIT_CODE% equ 0 (
         echo    Runner Tests: PASSED
     ) else (
-        echo   ❌ Runner Tests: FAILED
+        echo   X Runner Tests: FAILED
     )
     echo.
     echo ============================================================================
