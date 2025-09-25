@@ -55,7 +55,7 @@ class ProjectYamlValidationTest {
                     System.out.println("✅ " + relativePath);
                 } else {
                     invalidFiles++;
-                    System.out.println("❌ " + relativePath);
+                    System.out.println("X " + relativePath);
                     result.getErrors().forEach(error -> 
                         System.out.println("   • " + error));
                     
@@ -279,7 +279,7 @@ class ProjectYamlValidationTest {
                     validCount++;
                     System.out.println("✅ " + filePath);
                 } else {
-                    System.out.println("❌ " + filePath);
+                    System.out.println("X " + filePath);
                     result.getErrors().forEach(error ->
                         System.out.println("   • " + error));
                 }
@@ -340,7 +340,7 @@ class ProjectYamlValidationTest {
                     validCount++;
                     System.out.println("✅ " + filePath);
                 } else {
-                    System.out.println("❌ " + filePath);
+                    System.out.println("X " + filePath);
                     result.getErrors().forEach(error ->
                         System.out.println("   • " + error));
                 }
@@ -399,7 +399,7 @@ class ProjectYamlValidationTest {
                     validCount++;
                     System.out.println("✅ " + filePath);
                 } else {
-                    System.out.println("❌ " + filePath);
+                    System.out.println("X " + filePath);
                     result.getErrors().forEach(error ->
                         System.out.println("   • " + error));
                 }
@@ -466,7 +466,7 @@ class ProjectYamlValidationTest {
                     validCount++;
                     System.out.println("✅ " + filePath);
                 } else {
-                    System.out.println("❌ " + filePath);
+                    System.out.println("X " + filePath);
                     result.getErrors().forEach(error ->
                         System.out.println("   • " + error));
                 }
@@ -531,7 +531,7 @@ class ProjectYamlValidationTest {
                     validCount++;
                     System.out.println("✅ " + filePath);
                 } else {
-                    System.out.println("❌ " + filePath);
+                    System.out.println("X " + filePath);
                     result.getErrors().forEach(error ->
                         System.out.println("   • " + error));
                 }
@@ -615,7 +615,7 @@ class ProjectYamlValidationTest {
                     validCount++;
                     System.out.println("✅ " + filePath);
                 } else {
-                    System.out.println("❌ " + filePath);
+                    System.out.println("X " + filePath);
                     result.getErrors().forEach(error ->
                         System.out.println("   • " + error));
                 }
@@ -667,7 +667,7 @@ class ProjectYamlValidationTest {
                     validCount++;
                     System.out.println("✅ " + filePath);
                 } else {
-                    System.out.println("❌ " + filePath);
+                    System.out.println("X " + filePath);
                     result.getErrors().forEach(error ->
                         System.out.println("   • " + error));
                 }
@@ -746,7 +746,7 @@ class ProjectYamlValidationTest {
                     System.out.println("✅ " + filePath);
                 } else {
                     stillInvalidFiles.add(filePath);
-                    System.out.println("❌ " + filePath);
+                    System.out.println("X " + filePath);
                     result.getErrors().forEach(error ->
                         System.out.println("   • " + error));
                 }
@@ -772,7 +772,7 @@ class ProjectYamlValidationTest {
 
         if (!stillInvalidFiles.isEmpty()) {
             System.out.println("\n⚠️  FILES STILL NEEDING WORK:");
-            stillInvalidFiles.forEach(file -> System.out.println("   ❌ " + file));
+            stillInvalidFiles.forEach(file -> System.out.println("   X " + file));
         }
 
         // Don't assert - just report results
@@ -816,7 +816,7 @@ class ProjectYamlValidationTest {
                     validCount++;
                     System.out.println("✅ " + filePath);
                 } else {
-                    System.out.println("❌ " + filePath);
+                    System.out.println("X " + filePath);
                     result.getErrors().forEach(error ->
                         System.out.println("   • " + error));
                 }
@@ -888,7 +888,7 @@ class ProjectYamlValidationTest {
 
             System.out.println("\n📋 FILE VALIDATION RESULTS:");
             result.getFileResults().forEach((file, fileResult) -> {
-                String status = fileResult.isValid() ? "✅" : "❌";
+                String status = fileResult.isValid() ? "✅" : "X";
                 System.out.println("   " + status + " " + file);
             });
 
@@ -948,7 +948,7 @@ class ProjectYamlValidationTest {
                     validFiles++;
                     System.out.println("✅ " + relativePath);
                 } else {
-                    System.out.println("❌ " + relativePath);
+                    System.out.println("X " + relativePath);
 
                     // Collect root causes
                     allRootCauses.addAll(result.getRootCauses());
@@ -1010,7 +1010,7 @@ class ProjectYamlValidationTest {
         System.out.println("   Files with circular dependencies: " + circularDependencyFiles);
 
         if (!errorPatterns.isEmpty()) {
-            System.out.println("\n❌ ERROR PATTERN ANALYSIS:");
+            System.out.println("\nX ERROR PATTERN ANALYSIS:");
             errorPatterns.entrySet().stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
                 .forEach(entry ->
@@ -1136,7 +1136,7 @@ class ProjectYamlValidationTest {
 
                 // Show validation errors
                 if (!result.getErrors().isEmpty()) {
-                    System.out.println("\n❌ VALIDATION ERRORS:");
+                    System.out.println("\nX VALIDATION ERRORS:");
                     result.getErrors().forEach(error ->
                         System.out.println("  • " + error));
                 }
@@ -1145,7 +1145,7 @@ class ProjectYamlValidationTest {
                 if (!result.getFileResults().isEmpty()) {
                     System.out.println("\n📋 FILE VALIDATION RESULTS:");
                     result.getFileResults().forEach((file, fileResult) -> {
-                        String status = fileResult.isValid() ? "✅" : "❌";
+                        String status = fileResult.isValid() ? "✅" : "X";
                         System.out.println("  " + status + " " + file);
                         if (!fileResult.isValid()) {
                             fileResult.getErrors().forEach(error ->
@@ -1184,7 +1184,7 @@ class ProjectYamlValidationTest {
                 var result = analyzer.validateWithDependencies(yamlFile);
                 System.out.println("✅ User's file valid: " + result.isValid());
                 if (!result.isValid()) {
-                    System.out.println("❌ Issues found:");
+                    System.out.println("X Issues found:");
                     result.getErrors().forEach(error -> System.out.println("  • " + error));
                 }
             } catch (Exception e) {
@@ -1198,7 +1198,7 @@ class ProjectYamlValidationTest {
         System.out.println("\n📊 REMAINING VALIDATION WORK:");
         System.out.println("From our comprehensive analysis of 178 files:");
         System.out.println("  ✅ Valid files: 38 (21.3%)");
-        System.out.println("  ❌ Invalid files: 140 (78.7%)");
+        System.out.println("  X Invalid files: 140 (78.7%)");
         System.out.println("  🔧 Files we've systematically fixed: 47");
         System.out.println("  📝 Remaining files needing work: ~131");
 
@@ -1238,7 +1238,7 @@ class ProjectYamlValidationTest {
                     validCount++;
                     System.out.println("✅ " + filePath);
                 } else {
-                    System.out.println("❌ " + filePath);
+                    System.out.println("X " + filePath);
                     // Show first few errors
                     result.getErrors().stream().limit(2).forEach(error ->
                         System.out.println("   • " + error));
@@ -1288,7 +1288,7 @@ class ProjectYamlValidationTest {
         Path yamlFile = Paths.get("..").resolve(userFile);
 
         if (!Files.exists(yamlFile)) {
-            System.out.println("❌ File not found at: " + yamlFile.toAbsolutePath());
+            System.out.println("X File not found at: " + yamlFile.toAbsolutePath());
             return;
         }
 
@@ -1307,7 +1307,7 @@ class ProjectYamlValidationTest {
                 System.out.println("   ✅ Document structure is valid");
                 System.out.println("   ✅ No dependency issues");
             } else {
-                System.out.println("   ❌ Validation issues found:");
+                System.out.println("   X Validation issues found:");
                 result.getErrors().forEach(error ->
                     System.out.println("      • " + error));
 
@@ -1335,7 +1335,7 @@ class ProjectYamlValidationTest {
             if (!result.getFileResults().isEmpty()) {
                 System.out.println("\n   📋 Detailed validation:");
                 result.getFileResults().forEach((file, fileResult) -> {
-                    String status = fileResult.isValid() ? "✅" : "❌";
+                    String status = fileResult.isValid() ? "✅" : "X";
                     System.out.println("      " + status + " " + file);
                     if (!fileResult.isValid()) {
                         fileResult.getErrors().forEach(error ->
@@ -1400,7 +1400,7 @@ class ProjectYamlValidationTest {
                     validCount++;
                     System.out.println("✅ " + filePath);
                 } else {
-                    System.out.println("❌ " + filePath);
+                    System.out.println("X " + filePath);
                     result.getErrors().stream().limit(3).forEach(error ->
                         System.out.println("   • " + error));
                     if (result.getErrors().size() > 3) {
@@ -1487,7 +1487,7 @@ class ProjectYamlValidationTest {
                     validCount++;
                     System.out.println("✅ " + filePath.substring(filePath.lastIndexOf('/') + 1));
                 } else {
-                    System.out.println("❌ " + filePath.substring(filePath.lastIndexOf('/') + 1));
+                    System.out.println("X " + filePath.substring(filePath.lastIndexOf('/') + 1));
 
                     // Check if it's just dependency issues (meaning the file itself is now good)
                     boolean hasIdFormatIssues = result.getErrors().stream()
@@ -1652,7 +1652,7 @@ class ProjectYamlValidationTest {
         System.out.println("   Invalid files: " + (totalFiles - validFiles));
         System.out.println("   SUCCESS RATE: " + String.format("%.1f%%", successRate));
 
-        System.out.println("\n❌ REMAINING FAILURE CATEGORIES:");
+        System.out.println("\nX REMAINING FAILURE CATEGORIES:");
         System.out.println("   ID Format Issues: " + idFormatIssues + " files");
         System.out.println("   Document Type Issues: " + documentTypeIssues + " files");
         System.out.println("   Missing File Issues: " + missingFileIssues + " files");
@@ -1746,7 +1746,7 @@ class ProjectYamlValidationTest {
                     validCount++;
                     System.out.println("✅ " + fileName + " - VALIDATES SUCCESSFULLY");
                 } else {
-                    System.out.println("❌ " + fileName + " - VALIDATION FAILED");
+                    System.out.println("X " + fileName + " - VALIDATION FAILED");
                     System.out.println("   Errors:");
                     result.getErrors().stream().limit(3).forEach(error ->
                         System.out.println("     • " + error));
@@ -1779,7 +1779,7 @@ class ProjectYamlValidationTest {
             System.out.println("   ⚠️  MIXED! Bulk fixes partially working");
             System.out.println("   🔍 Need to investigate remaining issues");
         } else {
-            System.out.println("   ❌ FAILED! Bulk fixes not working as expected");
+            System.out.println("   X FAILED! Bulk fixes not working as expected");
             System.out.println("   🔧 Need to fix bulk approach or use manual method");
         }
 
@@ -1803,7 +1803,7 @@ class ProjectYamlValidationTest {
         Path yamlFile = Paths.get("..").resolve(testFile);
 
         if (!Files.exists(yamlFile)) {
-            System.out.println("❌ File not found: " + testFile);
+            System.out.println("X File not found: " + testFile);
             return;
         }
 
@@ -1843,7 +1843,7 @@ class ProjectYamlValidationTest {
                 System.out.println("   ✅ File structure is valid");
                 System.out.println("   🔧 Has dependency issues only");
             } else {
-                System.out.println("   ❌ File has structural validation issues");
+                System.out.println("   X File has structural validation issues");
             }
 
         } catch (Exception e) {
@@ -2004,7 +2004,7 @@ class ProjectYamlValidationTest {
         System.out.println("   Structural success rate: " + String.format("%.1f%%", structuralSuccessRate));
 
         if (!errorCategories.isEmpty()) {
-            System.out.println("\n❌ ERROR BREAKDOWN:");
+            System.out.println("\nX ERROR BREAKDOWN:");
             errorCategories.entrySet().stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
                 .forEach(entry ->
@@ -2018,7 +2018,7 @@ class ProjectYamlValidationTest {
         }
 
         if (!sampleInvalidFiles.isEmpty()) {
-            System.out.println("\n❌ SAMPLE INVALID FILES:");
+            System.out.println("\nX SAMPLE INVALID FILES:");
             sampleInvalidFiles.forEach(file ->
                 System.out.println("   • " + file));
         }

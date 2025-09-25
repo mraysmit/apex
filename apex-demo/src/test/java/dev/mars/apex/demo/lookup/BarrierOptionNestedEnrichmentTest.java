@@ -134,7 +134,7 @@ public class BarrierOptionNestedEnrichmentTest {
             logger.info("✓ Level 2 nested field navigation enrichment passed");
 
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }
@@ -184,7 +184,7 @@ public class BarrierOptionNestedEnrichmentTest {
             logger.info("✓ Cross-nested business calculation enrichment passed");
 
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }
@@ -234,7 +234,7 @@ public class BarrierOptionNestedEnrichmentTest {
             logger.info("✓ Level 3 nested conditional processing enrichment passed");
 
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }
@@ -284,7 +284,7 @@ public class BarrierOptionNestedEnrichmentTest {
             logger.info("✓ Nested date calculation with SpEL enrichment passed");
 
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }
@@ -337,7 +337,7 @@ public class BarrierOptionNestedEnrichmentTest {
             logger.info("  - Date Calculation: {} type", enrichments.get(3).getType());
 
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }

@@ -21,12 +21,14 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import dev.mars.apex.demo.ColoredTestOutputExtension;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -57,6 +59,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Real APEX enrichment services for database processing
  * - Real APEX lookup services for parameter mapping and field enrichment
  */
+@ExtendWith(ColoredTestOutputExtension.class)
 public class MultiParameterLookupTest {
 
     private static final Logger logger = LoggerFactory.getLogger(MultiParameterLookupTest.class);

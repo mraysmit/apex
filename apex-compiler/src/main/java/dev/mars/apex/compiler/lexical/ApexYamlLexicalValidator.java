@@ -355,7 +355,7 @@ public class ApexYamlLexicalValidator {
             if (!errors.isEmpty()) {
                 sb.append("Errors (").append(errors.size()).append("):\n");
                 for (String error : errors) {
-                    sb.append("  ❌ ").append(error).append("\n");
+                    sb.append("  X ").append(error).append("\n");
                 }
             }
             

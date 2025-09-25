@@ -167,7 +167,7 @@ def generate_sample_markdown_report(report, output_file):
         
         for demo_class in report['demo_classes']:
             yaml_count = len(demo_class['yaml_files'])
-            error_handling = "✅" if demo_class['error_handling'] else "❌"
+            error_handling = "✅" if demo_class['error_handling'] else "X"
             package_short = demo_class['package'].split('.')[-1]
             f.write(f"| {demo_class['class_name']} | {package_short} | {yaml_count} | {demo_class['loading_pattern']} | {error_handling} |\n")
         

@@ -20,14 +20,14 @@ echo -e "${BLUE}=================================${NC}"
 
 # Check if we're in the right directory
 if [ ! -d "$APEX_ROOT/apex-demo" ]; then
-    echo -e "${RED}❌ Error: apex-demo directory not found${NC}"
+    echo -e "${RED}X Error: apex-demo directory not found${NC}"
     echo -e "${YELLOW}Please run this script from the APEX root directory${NC}"
     exit 1
 fi
 
 # Check Python installation
 if ! command -v python3 &> /dev/null; then
-    echo -e "${RED}❌ Error: Python 3 is required but not installed${NC}"
+    echo -e "${RED}X Error: Python 3 is required but not installed${NC}"
     exit 1
 fi
 
@@ -90,7 +90,7 @@ while [[ $# -gt 0 ]]; do
             exit 0
             ;;
         *)
-            echo -e "${RED}❌ Unknown option: $1${NC}"
+            echo -e "${RED}X Unknown option: $1${NC}"
             echo "Use --help for usage information"
             exit 1
             ;;
@@ -164,7 +164,7 @@ if [ $? -eq 0 ]; then
     fi
     
 else
-    echo -e "${RED}❌ Analysis failed!${NC}"
+    echo -e "${RED}X Analysis failed!${NC}"
     echo -e "${YELLOW}Check the error messages above for details${NC}"
     exit 1
 fi

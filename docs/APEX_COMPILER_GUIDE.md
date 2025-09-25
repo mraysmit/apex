@@ -1331,7 +1331,7 @@ ApexYamlLexicalValidator.ValidationResult result = validator.validateFile(yamlFi
 if (result.isValid()) {
     System.out.println("✅ Configuration is valid!");
 } else {
-    System.out.println("❌ Validation failed:");
+    System.out.println("X Validation failed:");
     result.getErrors().forEach(error -> System.out.println("  • " + error));
 }
 
@@ -1751,7 +1751,7 @@ java -cp "apex-compiler/target/classes:apex-core/target/classes:~/.m2/repository
 
 **Example Fix:**
 ```yaml
-# ❌ Incorrect
+# X Incorrect
 metadata:
   description: This has: special characters
 
@@ -1790,13 +1790,13 @@ metadata:
 
 **Common Issues:**
 ```yaml
-# ❌ Incomplete expression
+# X Incomplete expression
 condition: "#data.amount >"
 
-# ❌ Unmatched parentheses
+# X Unmatched parentheses
 condition: "#data.amount > (1000 + #data.fee"
 
-# ❌ Invalid operators
+# X Invalid operators
 condition: "#data.amount > && #data.currency"
 
 # ✅ Correct
@@ -2042,7 +2042,7 @@ public class ProjectYamlValidator {
             if (result.isValid()) {
                 System.out.println("✅ " + yamlFile);
             } else {
-                System.out.println("❌ " + yamlFile);
+                System.out.println("X " + yamlFile);
                 result.getErrors().forEach(error ->
                     System.out.println("   • " + error));
             }
@@ -2087,7 +2087,7 @@ foreach ($file in $yamlFiles) {
     if ($LASTEXITCODE -eq 0) {
         Write-Host "✅ $relativePath" -ForegroundColor Green
     } else {
-        Write-Host "❌ $relativePath" -ForegroundColor Red
+        Write-Host "X $relativePath" -ForegroundColor Red
         Write-Host "   $result" -ForegroundColor Red
     }
 }
@@ -2122,7 +2122,7 @@ class ApexYamlScanner:
                 print(f"✅ {yaml_file.relative_to(self.project_root)}")
                 valid_count += 1
             else:
-                print(f"❌ {yaml_file.relative_to(self.project_root)}")
+                print(f"X {yaml_file.relative_to(self.project_root)}")
                 invalid_count += 1
 
         print(f"\n📊 Results: {valid_count} valid, {invalid_count} invalid")

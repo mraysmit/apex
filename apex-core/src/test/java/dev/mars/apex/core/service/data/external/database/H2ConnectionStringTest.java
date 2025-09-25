@@ -434,12 +434,12 @@ class H2ConnectionStringTest {
                     assertTrue(actualUrl.startsWith("jdbc:h2:"), "Should be H2 JDBC URL");
 
                 } catch (SQLException e) {
-                    LOGGER.error("  ❌ Failed to connect with database path: {}", databasePath, e);
+                    LOGGER.error("  X Failed to connect with database path: {}", databasePath, e);
                     throw e;
                 }
 
             } catch (DataSourceException e) {
-                LOGGER.error("  ❌ Failed to create DataSource for database path: {}", databasePath, e);
+                LOGGER.error("  X Failed to create DataSource for database path: {}", databasePath, e);
                 throw e;
             }
         }
@@ -522,7 +522,7 @@ class H2ConnectionStringTest {
             LOGGER.info("  Connection Valid: {}", connection.isValid(5));
             
         } catch (SQLException e) {
-            LOGGER.error("❌ Failed to connect to H2 database: {}", dataSourceName, e);
+            LOGGER.error("X Failed to connect to H2 database: {}", dataSourceName, e);
             throw e;
         }
     }

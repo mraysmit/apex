@@ -130,7 +130,7 @@ public class NewRuleResultApiDemonstrationTest {
         RuleResult result = rulesEngine.executeRuleGroupsList(java.util.List.of(group), new HashMap<>());
         
         System.out.println("\n--- OLD CONFUSING API ---");
-        System.out.println("❌ PROBLEM: getRuleName() returns failed group name, not matched rule name");
+        System.out.println("X PROBLEM: getRuleName() returns failed group name, not matched rule name");
         @SuppressWarnings("deprecation")
         String oldApi = result.getRuleName();
         System.out.println("result.getRuleName(): " + oldApi + " (confusing - is this a matched rule or failed group?)");

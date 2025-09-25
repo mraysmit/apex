@@ -279,7 +279,7 @@ def main():
                 print(f"   📋 Type: {result.document_type}")
 
             for error in result.errors:
-                print(f"  ❌ ERROR: {error}")
+                print(f"  X ERROR: {error}")
 
             for warning in result.warnings:
                 print(f"  ⚠️  WARNING: {warning}")
@@ -296,7 +296,7 @@ def main():
     print(f"Total warnings: {warning_count}")
 
     if error_count > 0:
-        print(f"\n❌ {error_count} files have validation errors")
+        print(f"\nX {error_count} files have validation errors")
         sys.exit(1)
     else:
         print(f"\n✅ All files passed validation!")

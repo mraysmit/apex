@@ -17,7 +17,7 @@ metadata:
   name: "Basic Usage Examples Configuration"
   version: "2.0.0"
   description: "Real APEX basic usage demonstration with field validations, business object processing, and expression evaluation"
-  type: "rule-config"
+  type: "enrichment"
   author: "apex.demo.team@company.com"
   created-date: "2024-12-24"
   tags: ["apex-demo", "validation", "basic-usage"]
@@ -118,34 +118,5 @@ validation-rules:
         type: "numeric"
         min-value: 0
 
-# Processing Configuration
-processing:
-  fail-fast: true
-  enable-logging: true
-  max-processing-time: 30000
-  validation-enabled: true
-  expression-cache-enabled: true
-  
-# Output Configuration
-output:
-  format: "json"
-  include-metadata: true
-  include-processing-time: true
-  include-validation-results: true
-  include-expression-results: true
 
-# Performance Configuration
-performance:
-  enable-timing: true
-  log-slow-operations: true
-  slow-operation-threshold: 100
-  cache-validation-results: true
-  cache-expression-results: true
-
-# Error Handling Configuration
-error-handling:
-  validation-errors: "collect"
-  expression-errors: "fail-fast"
-  missing-field-errors: "warn"
-  type-conversion-errors: "fail"
 

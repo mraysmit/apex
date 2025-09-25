@@ -56,7 +56,7 @@ def main():
     demo_src = demo_root / "src" / "main" / "java" / "dev" / "mars" / "apex" / "demo"
     
     if not demo_root.exists():
-        print(f"❌ Error: apex-demo directory not found at {demo_root}")
+        print(f"X Error: apex-demo directory not found at {demo_root}")
         return 1
     
     # Find all demo classes
@@ -73,7 +73,7 @@ def main():
             demo_mappings.append((class_name, yaml_files))
     
     if not demo_mappings:
-        print("❌ No demo classes with YAML files found")
+        print("X No demo classes with YAML files found")
         return 1
     
     # Sort by class name

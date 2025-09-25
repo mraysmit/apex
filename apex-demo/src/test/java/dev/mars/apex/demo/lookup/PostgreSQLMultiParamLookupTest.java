@@ -190,7 +190,7 @@ public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
             }
             
         } catch (Exception e) {
-            logger.error("❌ Trading database connection failed: {}", e.getMessage(), e);
+            logger.error("X Trading database connection failed: {}", e.getMessage(), e);
             fail("Trading database connection should work: " + e.getMessage());
         }
         
@@ -275,7 +275,7 @@ public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
             logger.info("✅ PostgreSQL multi-parameter settlement lookup completed successfully in {}ms", responseTime);
             
         } catch (Exception e) {
-            logger.error("❌ PostgreSQL multi-parameter settlement lookup failed: {}", e.getMessage(), e);
+            logger.error("X PostgreSQL multi-parameter settlement lookup failed: {}", e.getMessage(), e);
             fail("PostgreSQL multi-parameter settlement lookup should work: " + e.getMessage());
         }
     }
@@ -338,7 +338,7 @@ public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
             logger.info("✅ PostgreSQL multi-parameter risk assessment lookup completed successfully");
 
         } catch (Exception e) {
-            logger.error("❌ PostgreSQL multi-parameter risk assessment lookup failed: {}", e.getMessage(), e);
+            logger.error("X PostgreSQL multi-parameter risk assessment lookup failed: {}", e.getMessage(), e);
             fail("PostgreSQL multi-parameter risk assessment lookup should work: " + e.getMessage());
         }
     }
@@ -400,7 +400,7 @@ public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
             logger.info("✅ PostgreSQL multi-parameter optional parameters testing completed successfully");
 
         } catch (Exception e) {
-            logger.error("❌ PostgreSQL multi-parameter optional parameters testing failed: {}", e.getMessage(), e);
+            logger.error("X PostgreSQL multi-parameter optional parameters testing failed: {}", e.getMessage(), e);
             fail("PostgreSQL multi-parameter optional parameters testing should work: " + e.getMessage());
         }
     }

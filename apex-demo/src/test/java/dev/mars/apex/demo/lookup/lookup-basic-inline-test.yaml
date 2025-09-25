@@ -13,7 +13,7 @@ metadata:
   name: "Lookup Basic Inline Operations Test"
   version: "1.0.0"
   description: "Test basic inline lookup operations with dataset queries"
-  type: "rule-config"
+  type: "enrichment"
   author: "apex-test-suite@example.com"
   created-date: "2025-09-14"
   tags: ["apex-test", "lookup-operations", "inline-datasets", "basic-lookups"]

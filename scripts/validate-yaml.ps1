@@ -23,7 +23,7 @@ foreach ($file in $files) {
             Write-Host "✅ $name" -ForegroundColor Green
             $valid++
         } else {
-            Write-Host "❌ $name" -ForegroundColor Red
+            Write-Host "X $name" -ForegroundColor Red
             Write-Host "   └─ Missing required APEX structure" -ForegroundColor DarkRed
             $invalid++
         }
@@ -37,6 +37,6 @@ foreach ($file in $files) {
 Write-Host ""
 Write-Host "📊 SUMMARY" -ForegroundColor Cyan
 Write-Host "✅ Valid: $valid" -ForegroundColor Green
-Write-Host "❌ Invalid: $invalid" -ForegroundColor Red
+Write-Host "X Invalid: $invalid" -ForegroundColor Red
 $rate = if (($valid + $invalid) -gt 0) { [math]::Round(($valid / ($valid + $invalid)) * 100, 1) } else { 0 }
 Write-Host "📈 Success Rate: $rate%" -ForegroundColor $(if ($rate -ge 80) { "Green" } else { "Red" })

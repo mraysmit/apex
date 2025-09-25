@@ -16,7 +16,7 @@ def find_demo_classes_with_yaml(demo_src_dir):
     demo_classes = []
     
     if not demo_src_dir.exists():
-        print(f"❌ Demo source directory not found: {demo_src_dir}")
+        print(f"X Demo source directory not found: {demo_src_dir}")
         return demo_classes
     
     for java_file in demo_src_dir.rglob("*.java"):
@@ -67,14 +67,14 @@ def main():
     
     # Check if apex-demo exists
     if not demo_root.exists():
-        print(f"❌ Error: apex-demo directory not found at {demo_root}")
+        print(f"X Error: apex-demo directory not found at {demo_root}")
         return 1
     
     # Find demo classes with YAML files
     demo_classes = find_demo_classes_with_yaml(demo_src)
     
     if not demo_classes:
-        print("❌ No demo classes with YAML files found")
+        print("X No demo classes with YAML files found")
         return 1
     
     print(f"Found {len(demo_classes)} demo classes with YAML files:\n")

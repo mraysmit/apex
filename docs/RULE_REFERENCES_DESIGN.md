@@ -896,7 +896,7 @@ rule-groups:
 
 **1. Circular References**
 ```yaml
-# ❌ INVALID: Circular reference
+# X INVALID: Circular reference
 rule-groups:
   - id: "group-a"
     rule-group-references: ["group-b"]
@@ -907,7 +907,7 @@ rule-groups:
 
 **2. Missing Rule Group References**
 ```yaml
-# ❌ INVALID: Referenced group doesn't exist
+# X INVALID: Referenced group doesn't exist
 rule-groups:
   - id: "parent-group"
     rule-group-references: ["non-existent-group"]
@@ -916,7 +916,7 @@ rule-groups:
 
 **3. Invalid Mixed References**
 ```yaml
-# ❌ INVALID: Cannot mix rule-ids with rule-references
+# X INVALID: Cannot mix rule-ids with rule-references
 rule-groups:
   - id: "invalid-group"
     rule-ids: ["rule1"]           # Simple format
@@ -978,15 +978,15 @@ rule-groups:
 | Feature | HierarchicalRuleGroupTest | RuleReferencesSequenceEnabledTest | Integration Tests | Coverage Status |
 |---------|---------------------------|-----------------------------------|-------------------|-----------------|
 | **Basic Rule Group References** | ✅ | ✅ | ✅ | **COMPLETE** |
-| **Hierarchical References** | ✅ | ❌ | ✅ | **COMPLETE** |
-| **Mixed References** | ✅ | ❌ | ✅ | **COMPLETE** |
-| **Custom Sequence** | ❌ | ✅ | ❌ | **COMPLETE** |
-| **Enable/Disable** | ❌ | ✅ | ❌ | **COMPLETE** |
-| **Priority Override** | ❌ | ✅ | ❌ | **COMPLETE** |
+| **Hierarchical References** | ✅ | X | ✅ | **COMPLETE** |
+| **Mixed References** | ✅ | X | ✅ | **COMPLETE** |
+| **Custom Sequence** | X | ✅ | X | **COMPLETE** |
+| **Enable/Disable** | X | ✅ | X | **COMPLETE** |
+| **Priority Override** | X | ✅ | X | **COMPLETE** |
 | **AND Operator** | ✅ | ✅ | ✅ | **COMPLETE** |
 | **OR Operator** | ✅ | ✅ | ✅ | **COMPLETE** |
-| **Cross-File References** | ✅ | ❌ | ✅ | **COMPLETE** |
-| **Error Handling** | ❌ | ❌ | ✅ | **COMPLETE** |
+| **Cross-File References** | ✅ | X | ✅ | **COMPLETE** |
+| **Error Handling** | X | X | ✅ | **COMPLETE** |
 
 #### **Test Scenario Matrix**
 
@@ -994,9 +994,9 @@ rule-groups:
 |----------|--------------|----------------|------------|-------|-------------|
 | **All Pass** | ✅ | ✅ | ✅ | ✅ | **PASSING** |
 | **Some Fail** | ✅ | ✅ | ✅ | ✅ | **PASSING** |
-| **Custom Order** | ❌ | ✅ | ❌ | ✅ | **PASSING** |
-| **Disabled Rules** | ❌ | ✅ | ❌ | ✅ | **PASSING** |
-| **Priority Override** | ❌ | ✅ | ❌ | ✅ | **PASSING** |
+| **Custom Order** | X | ✅ | X | ✅ | **PASSING** |
+| **Disabled Rules** | X | ✅ | X | ✅ | **PASSING** |
+| **Priority Override** | X | ✅ | X | ✅ | **PASSING** |
 | **Cross-File** | ✅ | ✅ | ✅ | ✅ | **PASSING** |
 | **Error Cases** | ✅ | ✅ | ✅ | ✅ | **PASSING** |
 
@@ -1157,7 +1157,7 @@ rule-groups:
 ```
 - ✅ **Best for**: Basic grouping, high performance, simple configuration
 - ✅ **Features**: Automatic sequencing, all rules enabled
-- ❌ **Limitations**: No custom sequence, no enable/disable, no priority override
+- X **Limitations**: No custom sequence, no enable/disable, no priority override
 
 #### **2. Advanced Rule References (`rule-references`)**
 ```yaml
@@ -1171,7 +1171,7 @@ rule-groups:
 ```
 - ✅ **Best for**: Fine-grained control, custom workflows, conditional execution
 - ✅ **Features**: Custom sequence, enable/disable, priority override
-- ❌ **Limitations**: More complex configuration, slightly higher memory usage
+- X **Limitations**: More complex configuration, slightly higher memory usage
 
 #### **3. Hierarchical Rule Group References (`rule-group-references`)**
 ```yaml
@@ -1183,7 +1183,7 @@ rule-groups:
 ```
 - ✅ **Best for**: Reusable components, team collaboration, complex workflows
 - ✅ **Features**: Rule group reusability, hierarchical composition
-- ❌ **Limitations**: Requires careful hierarchy design, potential for circular references
+- X **Limitations**: Requires careful hierarchy design, potential for circular references
 
 #### **4. Mixed References (All Combined)**
 ```yaml
@@ -1198,7 +1198,7 @@ rule-groups:
 ```
 - ✅ **Best for**: Maximum flexibility, complex business scenarios, gradual migration
 - ✅ **Features**: All capabilities combined
-- ❌ **Limitations**: Most complex configuration, requires careful planning
+- X **Limitations**: Most complex configuration, requires careful planning
 
 ### **Documentation Coverage Status**
 
@@ -1917,7 +1917,7 @@ Focus: OR groups with stop-on-first-failure behavior - **ACTUAL RULE EXECUTION**
 | Middle Fails | ✅ Class 1 | ✅ Class 2 | ✅ | ✅ |
 | Last Fails | ✅ Class 1 | ✅ Class 2 | ✅ | ✅ |
 | Multiple Rules | ✅ Class 1 | ✅ Class 2 | ✅ | ✅ |
-| Control Test | ✅ Class 1 | ✅ Class 2 | ❌ | ✅ |
+| Control Test | ✅ Class 1 | ✅ Class 2 | X | ✅ |
 
 ## Key Improvements & Changes Tracked
 
@@ -2090,23 +2090,23 @@ The system is designed from the ground up to support this level of complexity wh
 
 **FUNDAMENTAL RULE**: APEX uses a **STRICT SET OF KEYWORDS** that are processed by `apex-core`. You **CANNOT INVENT** your own YAML syntax.
 
-#### **❌ COMMON MISTAKES - NEVER DO THIS**
+#### **X COMMON MISTAKES - NEVER DO THIS**
 
 **WRONG - Invented Keywords:**
 ```yaml
 # These keywords DO NOT EXIST in APEX
 rule-refs:
-  - file: "some-file.yaml"           # ❌ INVALID - "file" keyword doesn't exist
+  - file: "some-file.yaml"           # X INVALID - "file" keyword doesn't exist
 enrichment-refs:
-  - file: "enrichments.yaml"         # ❌ INVALID - "enrichment-refs" doesn't exist
+  - file: "enrichments.yaml"         # X INVALID - "enrichment-refs" doesn't exist
 rule-group-refs:
-  - file: "groups.yaml"              # ❌ INVALID - "rule-group-refs" doesn't exist
-scenarios:                           # ❌ INVALID - "scenarios" doesn't exist
+  - file: "groups.yaml"              # X INVALID - "rule-group-refs" doesn't exist
+scenarios:                           # X INVALID - "scenarios" doesn't exist
   - id: "my-scenario"
 metadata:
-  type: "rules"                      # ❌ INVALID - "rules" type doesn't exist
-  type: "rule-groups"                # ❌ INVALID - "rule-groups" type doesn't exist
-  type: "enrichments"                # ❌ INVALID - "enrichments" type doesn't exist
+  type: "rules"                      # X INVALID - "rules" type doesn't exist
+  type: "rule-groups"                # X INVALID - "rule-groups" type doesn't exist
+  type: "enrichments"                # X INVALID - "enrichments" type doesn't exist
 ```
 
 #### **✅ ACTUAL APEX SYNTAX - ALWAYS USE THIS**
@@ -2155,9 +2155,9 @@ Query: "Show me examples of valid APEX YAML syntax for [specific feature]"
 ```
 
 #### **3. NEVER ASSUME - ALWAYS VERIFY**
-- ❌ Don't assume keywords exist
-- ❌ Don't invent "logical" syntax
-- ❌ Don't copy from documentation without verification
+- X Don't assume keywords exist
+- X Don't invent "logical" syntax
+- X Don't copy from documentation without verification
 - ✅ Only use syntax found in working APEX files
 - ✅ Test syntax with actual APEX processor
 - ✅ Verify keywords exist in codebase
@@ -2191,11 +2191,11 @@ Query: "Show me examples of valid APEX YAML syntax for [specific feature]"
 
 #### **RED FLAGS - STOP IMMEDIATELY IF YOU SEE THESE**
 
-- ❌ Using keywords not found in working APEX files
-- ❌ Inventing "logical" syntax that "should work"
-- ❌ Assuming documentation examples are complete
-- ❌ Creating new metadata types
-- ❌ Proposing syntax without verification
+- X Using keywords not found in working APEX files
+- X Inventing "logical" syntax that "should work"
+- X Assuming documentation examples are complete
+- X Creating new metadata types
+- X Proposing syntax without verification
 
 #### **RECOVERY PROCESS WHEN MISTAKES ARE MADE**
 

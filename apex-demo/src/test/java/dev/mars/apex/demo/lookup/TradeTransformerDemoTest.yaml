@@ -1,0 +1,131 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Trade data transformation demonstration using APEX enrichment capabilities
+#          for testing trade processing, settlement calculations, and financial
+#          data transformation logic with real business scenarios
+# Status: Available for integration with trade transformation tests
+# ============================================================================
+
+metadata:
+  id: "trade-transformer-demo"
+  name: "Trade Transformer Demo"
+  version: "1.0.0"
+  description: "APEX-compliant trade transformer with real enrichment services"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2024-12-24"
+  tags: ["apex-demo", "enrichment", "trade", "transformer"]
+
+# APEX enrichment processing for trade transformer
+enrichments:
+  # ============================================================================
+  # TRADE INSTRUMENT ENRICHMENT
+  # ============================================================================
+  # Purpose: Simple field mapping to categorize trades by instrument type
+  # Input: instrumentType (e.g., "EQUITY", "BOND", "OPTION")
+  # Output: instrumentCategory (direct copy of instrumentType)
+  # Business Logic: Pass-through mapping for instrument classification
+  # ============================================================================
+  - id: "trade-instrument-enrichment"
+    name: "trade-instrument-enrichment"
+    type: "field-enrichment"                    # Simple field mapping enrichment
+    description: "Enrich trade data with instrument classification"
+    condition: "#instrumentType != null"       # Only process if instrumentType is provided
+    field-mappings:
+      - source-field: "instrumentType"         # Source: instrumentType from input data
+        target-field: "instrumentCategory"     # Target: instrumentCategory in enriched data
+
+  # ============================================================================
+  # TRADE PRIORITY ENRICHMENT
+  # ============================================================================
+  # Purpose: Simple field mapping to categorize trades by priority level
+  # Input: priority (e.g., "HIGH", "MEDIUM", "LOW")
+  # Output: priorityCategory (direct copy of priority)
+  # Business Logic: Pass-through mapping for priority classification
+  # ============================================================================
+  - id: "trade-priority-enrichment"
+    name: "trade-priority-enrichment"
+    type: "field-enrichment"                   # Simple field mapping enrichment
+    description: "Enrich trade data with priority classification"
+    condition: "#priority != null"            # Only process if priority is provided
+    field-mappings:
+      - source-field: "priority"              # Source: priority from input data
+        target-field: "priorityCategory"      # Target: priorityCategory in enriched data
+
+  # ============================================================================
+  # TRADE VALUE ENRICHMENT - COMPLEX CALCULATION
+  # ============================================================================
+  # Purpose: Calculate trade value category using business rules
+  # Input: tradeValue (numeric dollar amount)
+  # Output: valueCategory ("LARGE", "MEDIUM", or "SMALL")
+  # Business Logic:
+  #   - LARGE:  > $1,000,000 (institutional trades)
+  #   - MEDIUM: $100,000 - $1,000,000 (standard trades)
+  #   - SMALL:  < $100,000 (retail trades)
+  # SpEL Expression: Nested ternary operators for multi-tier classification
+  #
+  # TWO-STAGE PROCESS:
+  # 1. CALCULATION: SpEL expression → temporary "calculatedValueTier" field
+  # 2. MAPPING: temporary field → final "valueCategory" field in enriched data
+  # ============================================================================
+  - id: "trade-value-enrichment"
+    name: "trade-value-enrichment"
+    type: "calculation-enrichment"             # Calculation-based enrichment using SpEL
+    description: "Calculate trade value metrics"
+    condition: "#tradeValue != null"          # Only process if tradeValue is provided
+    calculation-config:
+      # Complex SpEL expression with nested ternary operators:
+      # If tradeValue > 1M → "LARGE"
+      # Else if tradeValue > 100K → "MEDIUM"
+      # Else → "SMALL"
+      expression: "#tradeValue > 1000000 ? 'LARGE' : (#tradeValue > 100000 ? 'MEDIUM' : 'SMALL')"
+      result-field: "valueCategory"          # STAGE 1: Store calculation result
+    field-mappings:
+      - source-field: "valueCategory"        # STAGE 2: Source from calculation result
+        target-field: "valueCategory"        # STAGE 2: Target to final enriched data
+        # NOTE: source-field and target-field are the same because:
+        # - calculation-config creates temporary "valueCategory" field
+        # - field-mappings copies it to final enriched data "valueCategory"
+        # - Using same name is simpler than different names like "tempValueTier" → "valueCategory"
+
+  # ============================================================================
+  # TRADE RISK ENRICHMENT - ADVANCED MATHEMATICAL CALCULATION
+  # ============================================================================
+  # Purpose: Calculate risk score based on instrument type and trade value
+  # Input: tradeValue (numeric), instrumentType (string)
+  # Output: riskScore (numeric risk factor)
+  # Business Logic:
+  #   - EQUITY: 0.8 risk multiplier (higher volatility)
+  #   - BOND: 0.3 risk multiplier (lower volatility)
+  #   - OTHER: 0.5 risk multiplier (default)
+  #   - Scale by trade value in millions
+  # Formula: risk_multiplier × (tradeValue / 1,000,000)
+  # Example: EQUITY trade of $2.5M = 0.8 × 2.5 = 2.0 risk score
+  #
+  # TWO-STAGE PROCESS:
+  # 1. CALCULATION: SpEL expression → temporary "computedRiskFactor" field
+  # 2. MAPPING: temporary field → final "riskScore" field in enriched data
+  # ============================================================================
+  - id: "trade-risk-enrichment"
+    name: "trade-risk-enrichment"
+    type: "calculation-enrichment"             # Mathematical calculation enrichment
+    description: "Calculate trade risk rating"
+    condition: "#tradeValue != null && #instrumentType != null"  # Requires both fields
+    calculation-config:
+      # Complex SpEL expression combining:
+      # 1. Instrument-based risk multiplier (nested ternary)
+      # 2. Value-based scaling (division by 1M)
+      # 3. Mathematical multiplication
+      expression: "(#instrumentType == 'EQUITY' ? 0.8 : (#instrumentType == 'BOND' ? 0.3 : 0.5)) * (#tradeValue / 1000000)"
+      result-field: "riskScore"               # STAGE 1: Store calculation result
+    field-mappings:
+      - source-field: "riskScore"            # STAGE 2: Source from calculation result
+        target-field: "riskScore"            # STAGE 2: Target to final enriched data
+        # NOTE: source-field and target-field are the same because:
+        # - calculation-config creates temporary "riskScore" field
+        # - field-mappings copies it to final enriched data "riskScore"
+        # - Using same name is simpler than different names like "tempRiskFactor" → "riskScore"
+
+

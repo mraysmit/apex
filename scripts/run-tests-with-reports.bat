@@ -164,7 +164,7 @@ if %TEST_EXIT_CODE% equ 0 (
     echo   📝 Log Files: target\test-logs\
     echo   📄 Summary: test-execution-summary-%TIMESTAMP%.txt
 ) else (
-    echo ❌ SOME TESTS FAILED - Check reports for details
+    echo X SOME TESTS FAILED - Check reports for details
     goto :error
 )
 

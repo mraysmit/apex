@@ -87,7 +87,7 @@ public class PipelineEtlTest extends DemoTestBase {
             logger.info(" Pipeline ETL Test setup completed successfully");
 
         } catch (Exception e) {
-            logger.error("❌ Failed to set up Pipeline ETL Test: {}", e.getMessage());
+            logger.error("X Failed to set up Pipeline ETL Test: {}", e.getMessage());
             fail("Setup failed: " + e.getMessage());
         }
     }
@@ -124,7 +124,7 @@ public class PipelineEtlTest extends DemoTestBase {
             validateBusinessOutcomes(result);
 
         } catch (Exception e) {
-            logger.error("❌ Pipeline execution failed: {}", e.getMessage());
+            logger.error("X Pipeline execution failed: {}", e.getMessage());
             fail("Pipeline execution failed: " + e.getMessage());
         }
     }
@@ -221,7 +221,7 @@ public class PipelineEtlTest extends DemoTestBase {
             logger.info("   Success Rate: {}%", successRate);
 
         } catch (Exception e) {
-            logger.error("❌ Pipeline monitoring test failed: {}", e.getMessage());
+            logger.error("X Pipeline monitoring test failed: {}", e.getMessage());
             fail("Pipeline monitoring test failed: " + e.getMessage());
         }
     }

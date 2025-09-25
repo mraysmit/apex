@@ -58,9 +58,9 @@ APEX YAML follows these core principles:
 **⚠️ Field Access Syntax**: APEX processes HashMap data where fields are accessed using `#fieldName` syntax, **NOT** `#data.fieldName`. This is the correct syntax for all APEX YAML configurations:
 
 - ✅ **Correct**: `#currencyCode != null`
-- ❌ **Incorrect**: `#data.currencyCode != null`
+- X **Incorrect**: `#data.currencyCode != null`
 - ✅ **Correct**: `lookup-key: "#customerId"`
-- ❌ **Incorrect**: `lookup-key: "#data.customerId"`
+- X **Incorrect**: `lookup-key: "#data.customerId"`
 
 ### Relationship to Spring Expression Language (SpEL)
 
@@ -1292,7 +1292,7 @@ rule-groups:
 | **Basic Processing** | ✅ Fully implemented | ✅ Fully implemented | **COMPLETE** |
 | **Sequence Control** | ✅ Auto-sequence (1,2,3...) | ✅ Custom `sequence` property | **COMPLETE** |
 | **Enable/Disable** | ✅ All rules enabled | ✅ Individual `enabled` property | **COMPLETE** |
-| **Priority Override** | ✅ Uses rule's priority | ❌ `override-priority` documented only | **PLANNED FEATURE** |
+| **Priority Override** | ✅ Uses rule's priority | X `override-priority` documented only | **PLANNED FEATURE** |
 
 **Key Points:**
 - Both `rule-ids` and `rule-references` are production-ready
@@ -1969,7 +1969,7 @@ APEX validates external data-source references at configuration load time:
 ```yaml
 data-source-refs:
   - name: "invalid-reference"
-    source: "non-existent-file.yaml"  # ❌ Will cause validation error
+    source: "non-existent-file.yaml"  # X Will cause validation error
     enabled: true
 
   - name: "valid-reference"

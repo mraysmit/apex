@@ -133,7 +133,7 @@ public class PostgreSQLSimpleLookupTest extends DemoTestBase {
             }
             
         } catch (Exception e) {
-            logger.error("❌ Database connection failed: {}", e.getMessage(), e);
+            logger.error("X Database connection failed: {}", e.getMessage(), e);
             fail("Direct database connection should work: " + e.getMessage());
         }
         
@@ -202,7 +202,7 @@ public class PostgreSQLSimpleLookupTest extends DemoTestBase {
             logger.info("✅ PostgreSQL simple lookup completed successfully in {}ms", responseTime);
             
         } catch (Exception e) {
-            logger.error("❌ PostgreSQL simple lookup failed: {}", e.getMessage(), e);
+            logger.error("X PostgreSQL simple lookup failed: {}", e.getMessage(), e);
             fail("PostgreSQL simple lookup should work: " + e.getMessage());
         }
     }
@@ -253,7 +253,7 @@ public class PostgreSQLSimpleLookupTest extends DemoTestBase {
             logger.info("✅ PostgreSQL JSON enrichment features validated successfully");
             
         } catch (Exception e) {
-            logger.error("❌ PostgreSQL JSON enrichment failed: {}", e.getMessage(), e);
+            logger.error("X PostgreSQL JSON enrichment failed: {}", e.getMessage(), e);
             fail("PostgreSQL JSON enrichment should work: " + e.getMessage());
         }
     }

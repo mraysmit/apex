@@ -119,7 +119,7 @@ public class ApexYamlCompiler {
 
         // Display validation errors
         if (!result.getErrors().isEmpty()) {
-            System.out.println("\n❌ VALIDATION ERRORS:");
+            System.out.println("\nX VALIDATION ERRORS:");
             result.getErrors().forEach(error ->
                 System.out.println("  • " + error));
         }
@@ -127,7 +127,7 @@ public class ApexYamlCompiler {
         // Display file-specific results
         System.out.println("\n📋 FILE VALIDATION RESULTS:");
         result.getFileResults().forEach((file, fileResult) -> {
-            String status = fileResult.isValid() ? "✅" : "❌";
+            String status = fileResult.isValid() ? "✅" : "X";
             System.out.println("  " + status + " " + file);
             if (!fileResult.isValid()) {
                 fileResult.getErrors().forEach(error ->
@@ -140,7 +140,7 @@ public class ApexYamlCompiler {
             System.out.println("   All files in dependency chain are valid.");
             System.exit(0);
         } else {
-            System.out.println("\n❌ DEPENDENCY-AWARE VALIDATION FAILED!");
+            System.out.println("\nX DEPENDENCY-AWARE VALIDATION FAILED!");
             System.out.println("   Please fix the errors above, starting with root causes.");
             System.exit(1);
         }

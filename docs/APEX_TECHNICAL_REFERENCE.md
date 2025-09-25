@@ -1510,7 +1510,7 @@ enrichments:
         target-field: "customerStatus"
 ```
 
-#### ❌ DEPRECATED: In-memory H2 Configuration
+#### X DEPRECATED: In-memory H2 Configuration
 
 ```yaml
 # DON'T USE: Creates isolated database instances
@@ -1665,7 +1665,7 @@ field-mappings:
   - source-field: "CUSTOMER_TYPE"
     target-field: "customerType"
 
-# ❌ INCORRECT: Lowercase source fields won't match
+# X INCORRECT: Lowercase source fields won't match
 field-mappings:
   - source-field: "customer_name"    # Won't match H2 uppercase columns
     target-field: "customerName"
@@ -5355,7 +5355,7 @@ data-sources:
 | **DatabaseDataSource** | ✅ TTL, maxIdleSeconds | ✅ maxSize, LRU, keyPrefix | **Fully Implemented** |
 | **FileSystemDataSource** | ✅ TTL, maxIdleSeconds | ✅ maxSize, LRU, keyPrefix | **Fully Implemented** |
 | **CacheDataSource** | ✅ TTL, maxIdleSeconds | ✅ maxSize, LRU, keyPrefix | **Fully Implemented** |
-| **MessageQueueDataSource** | ❌ No caching | ❌ No caching | **Not Applicable** |
+| **MessageQueueDataSource** | X No caching | X No caching | **Not Applicable** |
 
 **Advanced REST API Configuration (Enterprise)**
 

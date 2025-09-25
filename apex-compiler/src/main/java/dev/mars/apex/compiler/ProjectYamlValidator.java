@@ -32,7 +32,7 @@ public class ProjectYamlValidator {
         try {
             projectValidator.validateAllYamlFiles();
         } catch (Exception e) {
-            System.err.println("❌ Validation failed: " + e.getMessage());
+            System.err.println("X Validation failed: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         }
@@ -61,7 +61,7 @@ public class ProjectYamlValidator {
                     System.out.println("✅ " + relativePath);
                 } else {
                     invalidFiles++;
-                    System.out.println("❌ " + relativePath);
+                    System.out.println("X " + relativePath);
                     result.getErrors().forEach(error -> 
                         System.out.println("   • " + error));
                     

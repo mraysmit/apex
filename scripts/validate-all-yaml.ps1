@@ -161,7 +161,7 @@ foreach ($file in $yamlFiles) {
         }
     } else {
         $invalidFiles++
-        Write-Host "`n❌ INVALID: $relativePath" -ForegroundColor Red
+        Write-Host "`nX INVALID: $relativePath" -ForegroundColor Red
 
         foreach ($issue in $result.Issues) {
             Write-Host "   • $issue" -ForegroundColor Red

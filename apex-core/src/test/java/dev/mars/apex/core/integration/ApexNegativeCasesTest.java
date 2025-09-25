@@ -228,7 +228,7 @@ class ApexNegativeCasesTest {
         assertTrue(failedRules.size() >= 3, "Should have at least 3 rule failures");
         
         System.out.println("Failed rules (" + failedRules.size() + " total):");
-        failedRules.forEach(failure -> System.out.println("  ❌ " + failure));
+        failedRules.forEach(failure -> System.out.println("  X " + failure));
         
         // Demonstrate failure analysis
         long failureCount = results.stream().mapToLong(r -> r.isTriggered() ? 0 : 1).sum();
@@ -275,7 +275,7 @@ class ApexNegativeCasesTest {
             assertFalse(failures.isEmpty(), "Should have detailed failure messages");
 
             System.out.println("Enrichment failures detected (" + failures.size() + " total):");
-            failures.forEach(failure -> System.out.println("  ❌ " + failure));
+            failures.forEach(failure -> System.out.println("  X " + failure));
 
             // Demonstrate failure recovery strategy
             System.out.println("Recovery strategy:");
@@ -330,7 +330,7 @@ class ApexNegativeCasesTest {
         if (result.hasFailures()) {
             List<String> failures = result.getFailureMessages();
             System.out.println("  - Failure count: " + failures.size());
-            failures.forEach(failure -> System.out.println("    ❌ " + failure));
+            failures.forEach(failure -> System.out.println("    X " + failure));
         }
 
         // Check enriched data
@@ -407,7 +407,7 @@ class ApexNegativeCasesTest {
 
         System.out.println("Cascading failure analysis:");
         System.out.println("  - Primary failures: " + cascadingFailures.size());
-        cascadingFailures.forEach(failure -> System.out.println("    ❌ " + failure));
+        cascadingFailures.forEach(failure -> System.out.println("    X " + failure));
 
         if (!dependentRulesSkipped.isEmpty()) {
             System.out.println("  - Dependent rules affected:");

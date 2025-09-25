@@ -110,7 +110,7 @@ foreach ($file in $yamlFiles) {
         Write-Host " $relativePath" -ForegroundColor Green
     } else {
         $invalidCount++
-        Write-Host "❌ $relativePath" -ForegroundColor Red
+        Write-Host "X $relativePath" -ForegroundColor Red
         $metadataCheck.Issues | ForEach-Object { Write-Host "   • $_" -ForegroundColor Red }
     }
 }
@@ -190,7 +190,7 @@ if ($GenerateReport) {
 "@
     
     foreach ($result in $results | Sort-Object File) {
-        $status = if ($result.Valid) { '<span class="valid"> Valid</span>' } else { '<span class="invalid">❌ Invalid</span>' }
+        $status = if ($result.Valid) { '<span class="valid"> Valid</span>' } else { '<span class="invalid">X Invalid</span>' }
         $issues = if ($result.Issues) { ($result.Issues -join "<br>") } else { "" }
         $size = [math]::Round($result.Size / 1KB, 1)
         

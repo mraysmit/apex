@@ -3436,7 +3436,7 @@ enrichments:
         target-field: "customerType"
 ```
 
-#### ❌ AVOID: In-memory H2 for Multi-Process Scenarios
+#### X AVOID: In-memory H2 for Multi-Process Scenarios
 
 In-memory H2 creates isolated database instances that cannot be shared:
 
@@ -3855,7 +3855,7 @@ For comprehensive configuration standards, naming conventions, and implementatio
 
 **1. Missing Type Field**
 ```yaml
-# ❌ INCORRECT - Missing type field
+# X INCORRECT - Missing type field
 metadata:
   name: "My Rules"
   version: "1.0.0"
@@ -3876,7 +3876,7 @@ metadata:
 
 **2. Invalid File Type**
 ```yaml
-# ❌ INCORRECT - Invalid type value
+# X INCORRECT - Invalid type value
 metadata:
   type: "rules"  # Invalid type
 
@@ -3890,7 +3890,7 @@ metadata:
 
 **3. Missing Type-Specific Required Fields**
 ```yaml
-# ❌ INCORRECT - Missing author for rule-config
+# X INCORRECT - Missing author for rule-config
 metadata:
   type: "rule-config"
   name: "Validation Rules"

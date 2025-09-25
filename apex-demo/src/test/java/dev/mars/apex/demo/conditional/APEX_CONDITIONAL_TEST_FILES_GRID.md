@@ -100,7 +100,7 @@ Each test file demonstrates incremental validation:
 | **INLINE** | 9 | All active YAML files use inline datasets | ✅ Active | ✅ "Processed: X out of X" = 100% |
 | **MULTI-FILE** | 1 | UpdateStageFxTransactionMultiFileTest (6 YAML files) | ✅ Active | ✅ Cross-file references validated |
 | **SHARED CONFIG** | 1 | UpdateStageFxTransactionApexTest.yaml (used by 2 tests) | ✅ Active | ✅ Multiple test validation |
-| **EXTERNAL** | 0 | No external database or file references | ❌ Not Used | N/A - No external dependencies |
+| **EXTERNAL** | 0 | No external database or file references | X Not Used | N/A - No external dependencies |
 | **POSTGRESQL** | 1 | postgresql-database-localtest.yaml (orphaned) | ⚠️ Unused | ⚠️ Orphaned files not tested |
 
 ---

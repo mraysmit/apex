@@ -282,7 +282,7 @@ enrichments:
 
 #### **2. Mathematical Operations Testing**
 ```yaml
-# mathematical-operations-lookup.yaml - Complex financial calculations with SpEL
+# LookupBasicInlineTest.yaml - Complex financial calculations with SpEL
 enrichments:
   - id: "compound-interest-calculation"
     lookup-config:

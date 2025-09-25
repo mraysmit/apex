@@ -22,8 +22,8 @@ Based on analysis of the APEX_FINANCIAL_SERVICES_GUIDE.md (3730 lines) and APEX_
 | **External Data Sources** | 8 integration patterns | ✅ 2 covered | 6 missing |
 | **Financial Use Cases** | 12 use cases | ✅ 4 covered | 8 missing |
 | **Enrichment Types** | 18 enrichment patterns | ✅ 6 covered | 12 missing |
-| **Rule Patterns** | 6 complex patterns | ❌ 0 covered | 6 missing |
-| **FpML/XML Integration** | 8 XML schemas | ❌ 0 covered | 8 missing |
+| **Rule Patterns** | 6 complex patterns | X 0 covered | 6 missing |
+| **FpML/XML Integration** | 8 XML schemas | X 0 covered | 8 missing |
 | **Post-Trade Settlement** | 25 settlement types | ✅ 3 covered | 22 missing |
 
 **TOTAL**: 92 examples identified, 18 currently covered, **74 missing**
@@ -38,7 +38,7 @@ Based on analysis of the APEX_FINANCIAL_SERVICES_GUIDE.md (3730 lines) and APEX_
 | **Rule Groups** | 18 group patterns | ✅ 5 covered | 13 missing |
 | **Enrichments** | 22 enrichment patterns | ✅ 10 covered | 12 missing |
 | **External References** | 14 reference patterns | ✅ 2 covered | 12 missing |
-| **Pipeline Orchestration** | 16 pipeline patterns | ❌ 0 covered | 16 missing |
+| **Pipeline Orchestration** | 16 pipeline patterns | X 0 covered | 16 missing |
 | **Advanced Features** | 25 advanced patterns | ✅ 3 covered | 22 missing |
 
 **TOTAL**: 130 syntax patterns identified, 39 currently covered, **91 missing**

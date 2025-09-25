@@ -12,7 +12,7 @@ This document contains critical refactoring rules and principles for the APEX ru
 - **Accuracy**: Only real APEX services provide correct processing behavior
 - **Maintainability**: Hardcoded logic becomes outdated and inconsistent with real APEX evolution
 
-### ❌ **HIGHEST PRIORITY VIOLATION - Hardcoded Business Logic:**
+### X **HIGHEST PRIORITY VIOLATION - Hardcoded Business Logic:**
 ```java
 // WRONG - Hardcoded simulation that must be eliminated immediately
 private void applyEnrichmentToData(Object enrichment, Map<String, Object> data) {
@@ -38,12 +38,12 @@ public void processWithRealApex(Map<String, Object> data, YamlRuleConfiguration 
 ```
 
 ### **Hardcoded Simulation Detection Checklist:**
-- ❌ **Switch statements** for business logic processing
-- ❌ **If-then-else chains** that manually assign field values
-- ❌ **Hardcoded data arrays** with business data (customers, products, trades)
-- ❌ **Manual field assignments** like `data.put("field", "hardcoded_value")`
-- ❌ **Fake processing methods** that simulate APEX behavior
-- ❌ **Static data blocks** that pretend to be dynamic processing
+- X **Switch statements** for business logic processing
+- X **If-then-else chains** that manually assign field values
+- X **Hardcoded data arrays** with business data (customers, products, trades)
+- X **Manual field assignments** like `data.put("field", "hardcoded_value")`
+- X **Fake processing methods** that simulate APEX behavior
+- X **Static data blocks** that pretend to be dynamic processing
 
 ### **Evidence of Real APEX Integration:**
 - ✅ **EnrichmentService.enrichObject()** method calls
@@ -58,7 +58,7 @@ public void processWithRealApex(Map<String, Object> data, YamlRuleConfiguration 
 
 **FUNDAMENTAL VIOLATION**: There is no such concept as a "fallback scenario" in APEX. Any fallback that depends on hardcoded data in Java is the **#1 violation** of APEX core principles.
 
-### ❌ **NEVER DO - "Fallback" with Hardcoded Data:**
+### X **NEVER DO - "Fallback" with Hardcoded Data:**
 ```java
 // WRONG - This is NOT a valid fallback, it's hardcoded simulation!
 private List<Customer> createFallbackCustomers() {
@@ -115,10 +115,10 @@ String defaultLevel = extractFromYaml(defaults, "customer.defaultMembershipLevel
 - ✅ **Graceful Degradation**: Disable features rather than provide fake data
 
 ### **Detection Patterns for "Fallback" Violations:**
-- ❌ **Methods named**: `createFallback*`, `createMinimal*`, `createDefault*`
-- ❌ **Comments containing**: "fallback", "minimal", "default", "when YAML fails"
-- ❌ **getOrDefault() calls**: with hardcoded business values
-- ❌ **Exception handling**: that creates hardcoded objects instead of failing
+- X **Methods named**: `createFallback*`, `createMinimal*`, `createDefault*`
+- X **Comments containing**: "fallback", "minimal", "default", "when YAML fails"
+- X **getOrDefault() calls**: with hardcoded business values
+- X **Exception handling**: that creates hardcoded objects instead of failing
 
 **CRITICAL RULE**: If YAML configuration is missing or invalid, the system should fail fast or return empty collections. There is NO scenario where hardcoded business data is acceptable in APEX.
 
@@ -131,10 +131,10 @@ java -cp [classpath] dev.mars.apex.demo.infrastructure.DataProviderComplianceTes
 ```
 
 **Look for these critical violation indicators:**
-- ❌ **"Contains hardcoded data patterns - detected via reflection analysis"**
-- ❌ **"Uses synthetic/test data patterns - detected via method analysis"**
-- ❌ **"No infrastructure integration detected - static methods only"**
-- ❌ **"Fixed implementation - requires code changes for modifications"**
+- X **"Contains hardcoded data patterns - detected via reflection analysis"**
+- X **"Uses synthetic/test data patterns - detected via method analysis"**
+- X **"No infrastructure integration detected - static methods only"**
+- X **"Fixed implementation - requires code changes for modifications"**
 
 **Success indicators (what you want to see):**
 - ✅ **"Uses external data sources - verified via reflection"**
@@ -234,7 +234,7 @@ This prompt encapsulates the critical lessons about verifying against source cod
 
 **FUNDAMENTAL PRINCIPLE**: Demos must use actual APEX core services, not hardcoded simulation logic.
 
-### ❌ **NEVER DO - Hardcoded Simulation:**
+### X **NEVER DO - Hardcoded Simulation:**
 ```java
 // WRONG - Hardcoded enrichment logic
 private void applyEnrichmentToData(Object enrichment, Map<String, Object> data) {
@@ -286,9 +286,9 @@ INFO: Processing N enrichments for object type: HashMap
 - ✅ YAML processing handled by `YamlEnrichmentProcessor`
 - ✅ Dataset lookups use `DatasetLookupService`
 - ✅ SpEL expressions evaluated by `ExpressionEvaluatorService`
-- ❌ No hardcoded field assignments in demo code
-- ❌ No switch statements for business logic
-- ❌ No manual parsing of YAML enrichment rules
+- X No hardcoded field assignments in demo code
+- X No switch statements for business logic
+- X No manual parsing of YAML enrichment rules
 
 **REMEMBER**: If you find yourself writing hardcoded business logic in demo code, you're violating the principles. Use the real APEX services instead.
 
@@ -300,10 +300,10 @@ The following classes have been successfully refactored and now serve as perfect
 - **Before**: 56% compliant - contained hardcoded simulations and fallback scenarios
 - **After**: 100% compliant - pure YAML-driven with real APEX services
 - **Violations Eliminated**:
-  - ❌ Removed all hardcoded data creation methods (`createSampleTransaction()`, `createSampleTrade()`)
-  - ❌ Removed all fallback scenario testing (`demonstrateFallbackStrategies()`)
-  - ❌ Eliminated manual field assignments (`transaction.put("amount", hardcodedValue)`)
-  - ❌ Removed hardcoded business logic and test data
+  - X Removed all hardcoded data creation methods (`createSampleTransaction()`, `createSampleTrade()`)
+  - X Removed all fallback scenario testing (`demonstrateFallbackStrategies()`)
+  - X Eliminated manual field assignments (`transaction.put("amount", hardcodedValue)`)
+  - X Removed hardcoded business logic and test data
 - **Improvements Added**:
   - ✅ Pure YAML-driven data sourcing (minimal input data with lookup keys only)
   - ✅ 100% real APEX service integration (EnrichmentService, YamlConfigurationLoader)
@@ -346,7 +346,7 @@ SCORE SUMMARY:
 ├─────────────────────────────────────┼───────┼─────────────────┤
 │ DemoDataProvider                    │ 1/4   │ ✅❌❌❌         │
 │ FinancialStaticDataProvider         │ 0/4   │ ❌❌❌❌         │
-│ DemoDataBootstrap                   │ 3/4   │ ❌✅✅✅         │
+│ DemoDataBootstrap                   │ 3/4   │ X✅✅✅         │
 └─────────────────────────────────────┴───────┴─────────────────┘
 ```
 
@@ -361,8 +361,8 @@ SCORE SUMMARY:
 - ✅ Employs actual APEX services for validation
 - ✅ Provides actionable recommendations for improvement
 - ✅ Detects violations of all 4 APEX design principles
-- ❌ No hardcoded test results or assumptions
-- ❌ No simulation of compliance analysis
+- X No hardcoded test results or assumptions
+- X No simulation of compliance analysis
 
 ### **Integration with Development Workflow:**
 ```bash
@@ -383,7 +383,7 @@ java -cp [classpath] dev.mars.apex.demo.infrastructure.DataProviderComplianceTes
 
 **FUNDAMENTAL PRINCIPLE**: YAML SpEL expressions must match the actual data structure field names.
 
-### ❌ **COMMON ERROR - Field Name Mismatch:**
+### X **COMMON ERROR - Field Name Mismatch:**
 ```yaml
 # YAML expects this field structure
 condition: "#trade != null && #trade.counterpartyId != null"
@@ -426,8 +426,8 @@ Map<String, Object> trade = Map.of(
 - ✅ YAML `condition` field names match data structure
 - ✅ SpEL expressions use correct `#` prefix for variables
 - ✅ Nested field access uses proper dot notation
-- ❌ No assumptions about field names without verification
-- ❌ No copy-paste of SpEL expressions without field validation
+- X No assumptions about field names without verification
+- X No copy-paste of SpEL expressions without field validation
 
 ### **Debugging SpEL Errors:**
 When you see `Property or field 'X' cannot be found`:
@@ -501,10 +501,10 @@ enrichments:
 4. **Performance**: Database approach shows real connection pooling benefits
 
 ### **Common Pitfalls:**
-- ❌ **Don't mix approaches** - Choose one per demo for clarity
-- ❌ **Don't hardcode database logic** - Use APEX services for both approaches
-- ❌ **Don't ignore connection management** - Properly initialize and manage database connections
-- ❌ **Don't assume database availability** - Always include database initialization in demos
+- X **Don't mix approaches** - Choose one per demo for clarity
+- X **Don't hardcode database logic** - Use APEX services for both approaches
+- X **Don't ignore connection management** - Properly initialize and manage database connections
+- X **Don't assume database availability** - Always include database initialization in demos
 
 **REMEMBER**: Both approaches should use real APEX services. The choice depends on what you want to demonstrate - database integration patterns or simple YAML processing.
 
@@ -619,24 +619,24 @@ If you want, I can codify this as a CONTRIBUTING.md “Refactoring Guide” in a
 java -cp [classpath] dev.mars.apex.demo.infrastructure.DataProviderComplianceTest
 
 # Look for critical violations:
-# ❌ "Contains hardcoded data patterns"
-# ❌ "Uses synthetic/test data patterns"
-# ❌ "No infrastructure integration detected"
+# X "Contains hardcoded data patterns"
+# X "Uses synthetic/test data patterns"
+# X "No infrastructure integration detected"
 ```
 
 ### **Step 2: PRIORITY 1 - Eliminate Hardcoded Business Logic**
 ```java
 // FIND AND REMOVE these patterns immediately:
-❌ if (customerId.equals("CUST001")) { data.put("name", "Acme Corp"); }
-❌ switch (productType) { case "PREMIUM": return "Gold"; }
-❌ Object[][] customerData = {{"CUST001", "John", "Premium"}};
-❌ data.put("enrichedField", "hardcodedValue");
+X if (customerId.equals("CUST001")) { data.put("name", "Acme Corp"); }
+X switch (productType) { case "PREMIUM": return "Gold"; }
+X Object[][] customerData = {{"CUST001", "John", "Premium"}};
+X data.put("enrichedField", "hardcodedValue");
 
 // CRITICAL: NO "FALLBACK" WITH HARDCODED DATA:
-❌ enrichedData.getOrDefault("balance", "50000.00")  // Hardcoded business value
-❌ customer.put("customerId", "DEMO_CUST");  // Hardcoded "fallback" data
-❌ new Customer("Demo Customer", 30, "demo@example.com");  // Hardcoded objects
-❌ private List<Customer> createFallbackCustomers() { ... }  // Hardcoded "fallback"
+X enrichedData.getOrDefault("balance", "50000.00")  // Hardcoded business value
+X customer.put("customerId", "DEMO_CUST");  // Hardcoded "fallback" data
+X new Customer("Demo Customer", 30, "demo@example.com");  // Hardcoded objects
+X private List<Customer> createFallbackCustomers() { ... }  // Hardcoded "fallback"
 
 // REPLACE with real APEX services:
 ✅ Object enrichedResult = enrichmentService.enrichObject(yamlConfig, data);
@@ -672,7 +672,7 @@ java -cp [classpath] dev.mars.apex.demo.infrastructure.DataProviderComplianceTes
 # Target scores:
 # ✅ 4/4: Fully compliant - no hardcoded simulations
 # ✅ 3/4: Mostly compliant - acceptable
-# ❌ 0-2/4: Still contains violations - continue refactoring
+# X 0-2/4: Still contains violations - continue refactoring
 ```
 
 ### **Step 6: FINAL - Update Documentation**

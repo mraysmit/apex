@@ -1,7 +1,5 @@
 package dev.mars.apex.demo.lookup;
 
-import dev.mars.apex.demo.DemoTestBase;
-
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
  *
@@ -18,7 +16,16 @@ import dev.mars.apex.demo.DemoTestBase;
  * limitations under the License.
  */
 
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import dev.mars.apex.demo.ColoredTestOutputExtension;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,24 +38,44 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * JUnit 5 test for ExternalDataSourceWorkingDemo functionality.
- * 
+ * JUnit 5 test for ExternalDataSourceWorkingDemo functionality using modern RuleResult pattern.
+ *
  * CRITICAL VALIDATION CHECKLIST APPLIED:
- * ✅ Count enrichments in YAML - 4 enrichments expected (database-initialization, data-verification, external-reference-enrichment, summary)
- * ✅ Verify log shows "Processed: 4 out of 4" - Must be 100% execution rate
- * ✅ Check EVERY enrichment condition - Test data triggers ALL 4 conditions
+ * ✅ Count enrichments in YAML - 5 enrichments expected (customer-profile-lookup, database-initialization, data-verification, external-reference-enrichment, summary)
+ * ✅ Verify log shows "Processed: 5 out of 5" - Must be 100% execution rate
+ * ✅ Check EVERY enrichment condition - Test data triggers ALL 5 conditions
  * ✅ Validate EVERY business calculation - Test actual external data source working logic
  * ✅ Assert ALL enrichment results - Every result-field has corresponding assertEquals
- * 
+ *
  * BUSINESS LOGIC VALIDATION:
+ * - Customer profile lookup from H2 database
  * - Database initialization with real APEX processing
  * - Data verification using external data sources
  * - External reference enrichment processing
  * - Comprehensive external data source working summary
  */
-public class ExternalDataSourceWorkingDemoTest extends DemoTestBase {
+@ExtendWith(ColoredTestOutputExtension.class)
+public class ExternalDataSourceWorkingDemoTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ExternalDataSourceWorkingDemoTest.class);
+
+    private YamlConfigurationLoader yamlLoader;
+    private EnrichmentService enrichmentService;
+
+    @BeforeEach
+    void setUp() {
+        logger.info("Setting up APEX services for ExternalDataSourceWorkingDemoTest...");
+
+        // Initialize APEX services using modern pattern
+        yamlLoader = new YamlConfigurationLoader();
+
+        // Create enrichment service with proper dependencies
+        LookupServiceRegistry lookupServiceRegistry = new LookupServiceRegistry();
+        ExpressionEvaluatorService expressionEvaluator = new ExpressionEvaluatorService();
+        enrichmentService = new EnrichmentService(lookupServiceRegistry, expressionEvaluator);
+
+        logger.info("✓ APEX services initialized successfully");
+    }
 
     /**
      * Setup H2 database with customers table and test data.
@@ -131,25 +158,36 @@ public class ExternalDataSourceWorkingDemoTest extends DemoTestBase {
             assertNotNull(result, "External data source working enrichment result should not be null");
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
-        
-        // Validate ALL business logic results (all 4 enrichments should be processed)
-        assertNotNull(enrichedData.get("databaseInitializationResult"), "Database initialization result should be generated");
-        assertNotNull(enrichedData.get("dataVerificationResult"), "Data verification result should be generated");
-        assertNotNull(enrichedData.get("externalReferenceEnrichmentResult"), "External reference enrichment result should be generated");
-        assertNotNull(enrichedData.get("externalDataSourceWorkingSummary"), "External data source working summary should be generated");
-        
-        // Validate specific business calculations
-        String databaseInitializationResult = (String) enrichedData.get("databaseInitializationResult");
-        assertTrue(databaseInitializationResult.contains("database-initialization"), "Database initialization result should contain initialization type");
-        
-        String dataVerificationResult = (String) enrichedData.get("dataVerificationResult");
-        assertTrue(dataVerificationResult.contains("data-verification"), "Data verification result should reference verification type");
-        
-        String externalReferenceEnrichmentResult = (String) enrichedData.get("externalReferenceEnrichmentResult");
-        assertTrue(externalReferenceEnrichmentResult.contains("external-reference-enrichment"), "External reference enrichment result should reference enrichment type");
-        
-        String externalDataSourceWorkingSummary = (String) enrichedData.get("externalDataSourceWorkingSummary");
-        assertTrue(externalDataSourceWorkingSummary.contains("real-apex-services"), "External data source working summary should reference approach");
+
+            // Validate ALL business logic results (all 5 enrichments should be processed)
+            // 1. Customer profile lookup results
+            assertNotNull(enrichedData.get("customerName"), "Customer name should be populated from database lookup");
+            assertNotNull(enrichedData.get("customerType"), "Customer type should be populated from database lookup");
+            assertNotNull(enrichedData.get("customerTier"), "Customer tier should be populated from database lookup");
+
+            // 2. Calculation enrichment results
+            assertNotNull(enrichedData.get("databaseInitializationResult"), "Database initialization result should be generated");
+            assertNotNull(enrichedData.get("dataVerificationResult"), "Data verification result should be generated");
+            assertNotNull(enrichedData.get("externalReferenceEnrichmentResult"), "External reference enrichment result should be generated");
+            assertNotNull(enrichedData.get("externalDataSourceWorkingSummary"), "External data source working summary should be generated");
+
+            // Validate specific business calculations
+            String databaseInitializationResult = (String) enrichedData.get("databaseInitializationResult");
+            assertTrue(databaseInitializationResult.contains("database-initialization"), "Database initialization result should contain initialization type");
+
+            String dataVerificationResult = (String) enrichedData.get("dataVerificationResult");
+            assertTrue(dataVerificationResult.contains("data-verification"), "Data verification result should reference verification type");
+
+            String externalReferenceEnrichmentResult = (String) enrichedData.get("externalReferenceEnrichmentResult");
+            assertTrue(externalReferenceEnrichmentResult.contains("external-reference-enrichment"), "External reference enrichment result should reference enrichment type");
+
+            String externalDataSourceWorkingSummary = (String) enrichedData.get("externalDataSourceWorkingSummary");
+            assertTrue(externalDataSourceWorkingSummary.contains("real-apex-services"), "External data source working summary should reference approach");
+
+            // Validate customer profile lookup results
+            assertEquals("Test Customer Corp", enrichedData.get("customerName"), "Customer name should match database record");
+            assertEquals("CORPORATE", enrichedData.get("customerType"), "Customer type should match database record");
+            assertEquals("GOLD", enrichedData.get("customerTier"), "Customer tier should match database record");
 
         logger.info("✅ Comprehensive external data source working functionality test completed successfully");
         } catch (Exception e) {

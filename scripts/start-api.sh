@@ -10,20 +10,20 @@ echo
 
 # Check if Maven is installed
 if ! command -v mvn &> /dev/null; then
-    echo "❌ Maven is not installed. Please install Maven first."
+    echo "X Maven is not installed. Please install Maven first."
     exit 1
 fi
 
 # Check if Java is installed
 if ! command -v java &> /dev/null; then
-    echo "❌ Java is not installed. Please install Java 17 or later."
+    echo "X Java is not installed. Please install Java 17 or later."
     exit 1
 fi
 
 # Check Java version
 JAVA_VERSION=$(java -version 2>&1 | head -n 1 | cut -d'"' -f2 | cut -d'.' -f1)
 if [ "$JAVA_VERSION" -lt 17 ]; then
-    echo "❌ Java 17 or later is required. Current version: $JAVA_VERSION"
+    echo "X Java 17 or later is required. Current version: $JAVA_VERSION"
     exit 1
 fi
 
@@ -36,7 +36,7 @@ echo "🔨 Building the project..."
 mvn clean package -DskipTests -q
 
 if [ $? -ne 0 ]; then
-    echo "❌ Build failed. Please check the error messages above."
+    echo "X Build failed. Please check the error messages above."
     exit 1
 fi
 

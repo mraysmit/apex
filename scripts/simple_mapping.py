@@ -22,7 +22,7 @@ def main():
     demo_resources = demo_root / "src" / "main" / "resources"
     
     if not demo_root.exists():
-        print(f"❌ Error: apex-demo directory not found")
+        print(f"X Error: apex-demo directory not found")
         return 1
     
     # Find demo classes and their YAML files
@@ -70,7 +70,7 @@ def main():
         for yaml_file in yaml_files:
             # Check if file exists
             full_path = demo_resources / yaml_file
-            exists = "✅" if full_path.exists() else "❌"
+            exists = "✅" if full_path.exists() else "X"
             print(f"  {exists} {yaml_file}")
         print()
     

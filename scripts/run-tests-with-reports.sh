@@ -164,7 +164,7 @@ if [ $TEST_EXIT_CODE -eq 0 ]; then
     echo "  📝 Log Files: target/test-logs/"
     echo "  📄 Summary: test-execution-summary-$TIMESTAMP.txt"
 else
-    echo "❌ SOME TESTS FAILED - Check reports for details"
+    echo "X SOME TESTS FAILED - Check reports for details"
     echo
     echo "============================================================================"
     echo "ERROR: Test execution encountered issues"

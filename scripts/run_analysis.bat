@@ -13,7 +13,7 @@ set "APEX_ROOT=%SCRIPT_DIR%\.."
 
 REM Check if we're in the right directory
 if not exist "%APEX_ROOT%\apex-demo" (
-    echo ❌ Error: apex-demo directory not found
+    echo X Error: apex-demo directory not found
     echo Please run this script from the APEX root directory
     exit /b 1
 )
@@ -21,7 +21,7 @@ if not exist "%APEX_ROOT%\apex-demo" (
 REM Check Python installation
 python --version >nul 2>&1
 if errorlevel 1 (
-    echo ❌ Error: Python is required but not installed
+    echo X Error: Python is required but not installed
     echo Please install Python 3.7 or higher
     exit /b 1
 )
@@ -66,7 +66,7 @@ if "%~1"=="--json" set "CUSTOM_JSON=%~2" & shift & shift & goto parse_args
 if "%~1"=="-h" goto show_help
 if "%~1"=="--help" goto show_help
 
-echo ❌ Unknown option: %~1
+echo X Unknown option: %~1
 echo Use --help for usage information
 exit /b 1
 
@@ -101,7 +101,7 @@ echo.
 python "%SCRIPT_DIR%\analyze_demo_yaml_files.py" --apex-root "%APEX_ROOT%" --output "%MARKDOWN_REPORT%" --json "%JSON_REPORT%" %VERBOSE%
 
 if errorlevel 1 (
-    echo ❌ Analysis failed!
+    echo X Analysis failed!
     echo Check the error messages above for details
     exit /b 1
 )

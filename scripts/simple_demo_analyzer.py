@@ -22,7 +22,7 @@ def find_demo_classes(demo_src_dir):
     demo_classes = []
     
     if not demo_src_dir.exists():
-        print(f"❌ Demo source directory not found: {demo_src_dir}")
+        print(f"X Demo source directory not found: {demo_src_dir}")
         return demo_classes
     
     print(f"🔍 Scanning for demo classes in: {demo_src_dir}")
@@ -97,7 +97,7 @@ def find_yaml_files(demo_resources_dir):
     yaml_files = []
     
     if not demo_resources_dir.exists():
-        print(f"❌ Demo resources directory not found: {demo_resources_dir}")
+        print(f"X Demo resources directory not found: {demo_resources_dir}")
         return yaml_files
     
     print(f"📄 Scanning for YAML files in: {demo_resources_dir}")
@@ -218,8 +218,8 @@ def generate_markdown_report(demo_classes, yaml_files, patterns, consistency_sco
         # Sort all classes by name for consistent output
         for demo_class in sorted(demo_classes, key=lambda x: x["class_name"]):
             package_short = demo_class.get('package', 'unknown').split('.')[-1] if demo_class.get('package') else 'unknown'
-            yaml_files_str = "; ".join(demo_class["yaml_files"]) if demo_class["yaml_files"] else "❌ No YAML files"
-            error_handling = "✅" if demo_class["error_handling"] else "❌"
+            yaml_files_str = "; ".join(demo_class["yaml_files"]) if demo_class["yaml_files"] else "X No YAML files"
+            error_handling = "✅" if demo_class["error_handling"] else "X"
 
             # Truncate long YAML file lists for readability
             if len(yaml_files_str) > 100:
@@ -262,7 +262,7 @@ def generate_markdown_report(demo_classes, yaml_files, patterns, consistency_sco
 """)
 
         if missing_yaml_files:
-            f.write("### ❌ Missing YAML Files\n\n")
+            f.write("### X Missing YAML Files\n\n")
             for missing_file in sorted(missing_yaml_files):
                 # Find which classes reference this missing file
                 referencing_classes = [cls["class_name"] for cls in demo_classes if missing_file in cls["yaml_files"]]
@@ -309,7 +309,7 @@ def main():
     
     # Check if apex-demo exists
     if not demo_root.exists():
-        print(f"❌ Error: apex-demo directory not found at {demo_root}")
+        print(f"X Error: apex-demo directory not found at {demo_root}")
         return 1
     
     # Analyze demo classes

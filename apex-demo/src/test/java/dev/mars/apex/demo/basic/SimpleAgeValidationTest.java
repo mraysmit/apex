@@ -100,7 +100,7 @@ public class SimpleAgeValidationTest {
             logger.info("✓ Valid age scenario test passed");
             
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }
@@ -145,7 +145,7 @@ public class SimpleAgeValidationTest {
             logger.info("✓ Invalid age scenario test passed");
             
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }
@@ -192,7 +192,7 @@ public class SimpleAgeValidationTest {
             logger.info("✓ Missing age scenario test passed");
             
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }

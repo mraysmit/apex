@@ -109,7 +109,7 @@ public class BarrierOptionNestedValidationTest {
             logger.info("✓ Barrier vs Strike validation rule passed for valid data");
 
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }
@@ -157,7 +157,7 @@ public class BarrierOptionNestedValidationTest {
             logger.info("✓ Date consistency validation rule passed for valid data");
 
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }
@@ -205,7 +205,7 @@ public class BarrierOptionNestedValidationTest {
             logger.info("✓ Rebate amount validation rule passed for valid data");
 
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }
@@ -252,7 +252,7 @@ public class BarrierOptionNestedValidationTest {
             logger.info("  - Rebate Amount Validation: {} severity", rules.get(2).getSeverity());
 
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }

@@ -93,7 +93,7 @@ public class DatasetInlineTest {
             logger.info("  - Version: {}", config.getMetadata().getVersion());
 
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }
@@ -124,7 +124,7 @@ public class DatasetInlineTest {
             logger.info("✓ Counterparty data validation passed");
 
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }
@@ -154,7 +154,7 @@ public class DatasetInlineTest {
             logger.info("✓ Currency data validation passed");
 
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }
@@ -184,7 +184,7 @@ public class DatasetInlineTest {
             logger.info("✓ Instrument data validation passed");
 
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }
@@ -225,7 +225,7 @@ public class DatasetInlineTest {
             logger.info("  - 2 Instrument records (US Treasury Note, German Government Bond)");
 
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }

@@ -93,7 +93,7 @@ public class ExternalDataConfigDatabaseTest {
             logger.info("  - Version: {}", config.getMetadata().getVersion());
 
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }
@@ -123,7 +123,7 @@ public class ExternalDataConfigDatabaseTest {
             logger.info("✓ PostgreSQL data source configuration validation passed");
 
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }
@@ -157,7 +157,7 @@ public class ExternalDataConfigDatabaseTest {
             logger.info("✓ H2 data source configuration validation passed");
 
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }
@@ -187,7 +187,7 @@ public class ExternalDataConfigDatabaseTest {
             logger.info("✓ Cache configuration validation passed");
 
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }
@@ -217,7 +217,7 @@ public class ExternalDataConfigDatabaseTest {
             logger.info("✓ Health check configuration validation passed");
 
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }
@@ -260,7 +260,7 @@ public class ExternalDataConfigDatabaseTest {
             logger.info("  - Security settings (encryption, SSL, certificate validation)");
 
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load configuration: {}", e.getMessage());
+            logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
     }

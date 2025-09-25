@@ -131,7 +131,7 @@ public class SimpleYamlValidationDemo {
             logger.info("=== Demo completed successfully! ===");
 
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Demo failed: {}", e.getMessage());
+            logger.error("X Demo failed: {}", e.getMessage());
             fail("Demo failed: " + e.getMessage());
         }
     }

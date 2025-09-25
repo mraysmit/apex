@@ -102,8 +102,4 @@ enrichments:
         target-field: "settlementCounterpartyName"
         required: false
 
-# Processing configuration
-processing:
-  continue-on-error: true
-  max-errors: 10
-  error-handling: "log-and-continue"
+

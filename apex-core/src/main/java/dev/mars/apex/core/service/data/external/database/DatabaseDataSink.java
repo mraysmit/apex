@@ -683,7 +683,7 @@ public class DatabaseDataSink implements DataSink {
                             preparedStatement.execute();
                             LOGGER.info("✓ Statement {}/{} executed successfully", i + 1, statements.length);
                         } catch (Exception e) {
-                            LOGGER.error("❌ Statement {}/{} failed: {}", i + 1, statements.length, e.getMessage());
+                            LOGGER.error("X Statement {}/{} failed: {}", i + 1, statements.length, e.getMessage());
                             throw e;
                         }
                     } else {
@@ -724,7 +724,7 @@ public class DatabaseDataSink implements DataSink {
             }
 
         } catch (Exception e) {
-            LOGGER.error("❌ Schema verification failed for database sink: {}", getName(), e);
+            LOGGER.error("X Schema verification failed for database sink: {}", getName(), e);
             throw DataSinkException.configurationError("Schema verification failed", e);
         }
     }
@@ -739,7 +739,7 @@ public class DatabaseDataSink implements DataSink {
             statement.executeQuery();
             LOGGER.info("✓ Table '{}' exists and is accessible", tableName);
         } catch (Exception e) {
-            LOGGER.error("❌ Table '{}' verification failed: {}", tableName, e.getMessage());
+            LOGGER.error("X Table '{}' verification failed: {}", tableName, e.getMessage());
             throw new Exception("Table '" + tableName + "' does not exist or is not accessible", e);
         }
     }
@@ -763,7 +763,7 @@ public class DatabaseDataSink implements DataSink {
             }
 
         } catch (Exception e) {
-            LOGGER.error("❌ Database connectivity verification failed: {}", e.getMessage());
+            LOGGER.error("X Database connectivity verification failed: {}", e.getMessage());
             throw new Exception("Database connectivity verification failed", e);
         }
     }

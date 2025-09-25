@@ -114,7 +114,7 @@ class SimpleBasicYamlRuleGroupProcessingTest {
             logger.info("✓ All simple rule group tests passed");
             
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load or process configuration: {}", e.getMessage());
+            logger.error("X Failed to load or process configuration: {}", e.getMessage());
             fail("Failed to load or process configuration: " + e.getMessage());
         }
     }
@@ -157,7 +157,7 @@ class SimpleBasicYamlRuleGroupProcessingTest {
             logger.info("✓ Separate files test passed");
             
         } catch (YamlConfigurationException e) {
-            logger.error("❌ Failed to load or process configuration: {}", e.getMessage());
+            logger.error("X Failed to load or process configuration: {}", e.getMessage());
             fail("Failed to load or process configuration: " + e.getMessage());
         }
     }

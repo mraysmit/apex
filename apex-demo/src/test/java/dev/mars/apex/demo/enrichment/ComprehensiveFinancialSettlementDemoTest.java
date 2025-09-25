@@ -126,7 +126,7 @@ class ComprehensiveFinancialSettlementDemoTest extends DemoTestBase {
             logger.info("Settlement result: " + result);
             
         } catch (Exception e) {
-            logger.error("❌ Multi-asset settlement processing test failed", e);
+            logger.error("X Multi-asset settlement processing test failed", e);
             fail("Multi-asset settlement processing test failed: " + e.getMessage());
         }
     }
@@ -200,7 +200,7 @@ class ComprehensiveFinancialSettlementDemoTest extends DemoTestBase {
             logger.info("Cross-border result: " + result);
             
         } catch (Exception e) {
-            logger.error("❌ Cross-border settlement processing test failed", e);
+            logger.error("X Cross-border settlement processing test failed", e);
             fail("Cross-border settlement processing test failed: " + e.getMessage());
         }
     }
@@ -271,7 +271,7 @@ class ComprehensiveFinancialSettlementDemoTest extends DemoTestBase {
             logger.info("High-value result: " + result);
             
         } catch (Exception e) {
-            logger.error("❌ High-value transaction processing test failed", e);
+            logger.error("X High-value transaction processing test failed", e);
             fail("High-value transaction processing test failed: " + e.getMessage());
         }
     }

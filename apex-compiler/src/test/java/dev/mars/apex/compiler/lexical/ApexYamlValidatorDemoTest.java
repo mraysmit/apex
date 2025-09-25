@@ -111,7 +111,7 @@ class ApexYamlValidatorDemoTest {
     @Test
     void demonstrateValidatorWithInvalidFile(@TempDir Path tempDir) throws Exception {
         System.out.println("\n" + "=".repeat(80));
-        System.out.println("❌ APEX YAML VALIDATION ERROR DEMONSTRATION");
+        System.out.println("X APEX YAML VALIDATION ERROR DEMONSTRATION");
         System.out.println("=".repeat(80));
         
         // Create an invalid APEX YAML file with multiple errors
@@ -143,7 +143,7 @@ class ApexYamlValidatorDemoTest {
         System.out.println(result);
         
         if (!result.isValid()) {
-            System.out.println("❌ VALIDATION FAILED: Found " + result.getErrors().size() + " errors");
+            System.out.println("X VALIDATION FAILED: Found " + result.getErrors().size() + " errors");
             System.out.println("\n🔧 The lexical validator successfully caught:");
             System.out.println("  • Missing required metadata fields");
             System.out.println("  • Invalid document type");
