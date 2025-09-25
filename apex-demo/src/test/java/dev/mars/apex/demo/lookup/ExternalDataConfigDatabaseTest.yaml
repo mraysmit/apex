@@ -70,28 +70,7 @@ dataSources:
       ttlSeconds: 600
       maxSize: 5000
       
-  - name: "reference-database"
-    type: "database"
-    sourceType: "mysql"
-    enabled: true
-    description: "Reference data database for lookups"
-    
-    connection:
-      host: "reference-db.company.com"
-      port: 3306
-      database: "reference_data"
-      username: "readonly_user"
-      password: "${REF_DB_PASSWORD}"
-      
-    queries:
-      getCurrencyByCode: "SELECT * FROM currencies WHERE currency_code = :currencyCode"
-      getCountryByCode: "SELECT * FROM countries WHERE country_code = :countryCode"
-      getInstrumentById: "SELECT * FROM instruments WHERE instrument_id = :instrumentId"
-      
-    cache:
-      enabled: true
-      ttlSeconds: 3600
-      maxSize: 10000
+
 
 configuration:
   defaultConnectionTimeout: 30000

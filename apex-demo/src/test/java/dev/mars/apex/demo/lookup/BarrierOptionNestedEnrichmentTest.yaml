@@ -74,8 +74,4 @@ enrichments:
     priority: 4
     categories: ["date-calculation", "spel-integration", "level-3-nested"]
 
-# Processing Configuration
-processing:
-  continue-on-error: false
-  max-errors: 0
-  error-handling: "fail-fast"
+

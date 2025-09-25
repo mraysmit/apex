@@ -96,7 +96,7 @@ public class BarrierOptionNestedTest extends DemoTestBase {
 
         // Load APEX validation configuration
         try {
-            var config = yamlLoader.loadFromFile("src/test/resources/lookup/barrier-option-nested-validation.yaml");
+            var config = yamlLoader.loadFromFile("src/test/resources/lookup/BarrierOptionNestedValidationTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
 
         // Create barrier option test data for validation
