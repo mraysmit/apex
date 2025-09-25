@@ -134,7 +134,7 @@ data-sources:
       password: ""
 ```
 
-### ❌ DEPRECATED: In-memory H2 Configuration
+### X DEPRECATED: In-memory H2 Configuration
 
 ```yaml
 # DON'T USE: Creates isolated database instances
@@ -413,7 +413,7 @@ field-mappings:
   - source-field: "CUSTOMER_TYPE"
     target-field: "customerType"
 
-# ❌ INCORRECT: Lowercase source fields won't match
+# X INCORRECT: Lowercase source fields won't match
 field-mappings:
   - source-field: "customer_name"    # Won't match H2 uppercase columns
     target-field: "customerName"
@@ -477,7 +477,7 @@ mkdir -p target/h2-demo
 - Use consistent JDBC URLs: `jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL`
 - Use custom H2 parameters: `database: "./target/h2-demo/custom;MODE=MySQL;CACHE_SIZE=32768"`
 
-#### ❌ DON'T:
+#### X DON'T:
 - Use in-memory H2: `database: "shared_demo"` (creates isolated instances)
 - Use lowercase field mappings: `source-field: "customer_name"` (won't match H2 columns)
 - Skip cleanup between demo runs (causes primary key violations)
