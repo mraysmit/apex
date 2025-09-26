@@ -106,12 +106,23 @@ public class RuleEngineService {
                     System.out.println("Result: " + (ruleResult.isTriggered() ? "true" : "false"));
                 }
             } catch (Exception e) {
-                RuleResult errorResult = RuleResult.error(rule.getName(), e.getMessage());
+                // Create structured error result with severity from rule configuration
+                String severity = rule.getSeverity() != null ? rule.getSeverity() : "ERROR";
+                String errorMessage = String.format("Rule evaluation failed: %s", e.getMessage());
+                RuleResult errorResult = RuleResult.error(rule.getName(), errorMessage, severity);
                 results.add(errorResult);
-                LOGGER.log(Level.WARNING, "Error evaluating rule '" + rule.getName() + "': " + e.getMessage(), e);
-                // Also print to System.err for test verification
-                System.err.println("Error evaluating rule '" + rule.getName() + "': " + e.getMessage());
-                e.printStackTrace(System.err);
+
+                // Log error details at appropriate level based on severity (no stack traces in logs)
+                if ("CRITICAL".equalsIgnoreCase(severity)) {
+                    LOGGER.log(Level.SEVERE, "CRITICAL rule evaluation error for '" + rule.getName() + "': " + e.getMessage());
+                } else if ("WARNING".equalsIgnoreCase(severity)) {
+                    LOGGER.log(Level.INFO, "Rule evaluation warning for '" + rule.getName() + "': " + e.getMessage());
+                } else {
+                    LOGGER.log(Level.INFO, "Rule evaluation error for '" + rule.getName() + "': " + e.getMessage());
+                }
+
+                // Log full exception details only at FINE level for debugging
+                LOGGER.log(Level.FINE, "Full exception details for rule '" + rule.getName() + "':", e);
             }
         }
 

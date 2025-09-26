@@ -1,0 +1,152 @@
+# ============================================================================
+# APEX Failure Policy Scenarios
+# ============================================================================
+# Demonstrates the three failure policy modes:
+# 1. "terminate" - Stop processing immediately on any stage failure
+# 2. "continue-with-warnings" - Log warnings but continue processing
+# 3. "flag-for-review" - Mark for manual review but continue processing
+# ============================================================================
+
+metadata:
+  id: "failure-policy-scenarios"
+  name: "Failure Policy Demonstration Scenarios"
+  version: "1.0.0"
+  description: "Complete scenarios showing different failure policy behaviors"
+  type: "scenario-registry"
+  author: "APEX Investigation"
+
+scenarios:
+
+  # Scenario 1: TERMINATE Policy - Strict processing
+  - scenario-id: "strict-processing"
+    name: "Strict Processing (Terminate on Failure)"
+    description: "Demonstrates terminate policy - stops immediately on any validation error"
+    data-types: ["Trade", "java.util.Map"]
+    
+    processing-stages:
+      - stage-name: "critical-validation"
+        config-file: "examples/critical-validation-rules.yaml"
+        execution-order: 1
+        failure-policy: "terminate"  # STOP on any ERROR
+        required: true
+        stage-metadata:
+          description: "Critical validation - must pass to continue"
+          sla-ms: 1000
+          
+      - stage-name: "business-enrichment"
+        config-file: "examples/enrichment-rules.yaml" 
+        execution-order: 2
+        failure-policy: "terminate"
+        required: false
+        depends-on: ["critical-validation"]
+        stage-metadata:
+          description: "This stage won't execute if validation fails"
+          sla-ms: 2000
+
+  # Scenario 2: CONTINUE-WITH-WARNINGS Policy - Resilient processing
+  - scenario-id: "resilient-processing"
+    name: "Resilient Processing (Continue with Warnings)"
+    description: "Demonstrates continue-with-warnings policy - processes all stages, logs issues"
+    data-types: ["Trade", "java.util.Map"]
+    
+    processing-stages:
+      - stage-name: "flexible-validation"
+        config-file: "examples/severity-failure-policy-examples.yaml"
+        execution-order: 1
+        failure-policy: "continue-with-warnings"  # LOG warnings, CONTINUE processing
+        required: true
+        stage-metadata:
+          description: "Flexible validation - continues even with issues"
+          sla-ms: 1000
+          
+      - stage-name: "audit-enrichment"
+        config-file: "examples/audit-enrichment-rules.yaml"
+        execution-order: 2
+        failure-policy: "continue-with-warnings" 
+        required: false
+        depends-on: ["flexible-validation"]
+        stage-metadata:
+          description: "Audit enrichment - always attempts to run"
+          sla-ms: 2000
+          
+      - stage-name: "compliance-check"
+        config-file: "examples/compliance-rules.yaml"
+        execution-order: 3
+        failure-policy: "continue-with-warnings"
+        required: false
+        depends-on: ["flexible-validation"]
+        stage-metadata:
+          description: "Compliance checking - logs issues but continues"
+          sla-ms: 3000
+
+  # Scenario 3: FLAG-FOR-REVIEW Policy - Manual review workflow  
+  - scenario-id: "review-workflow"
+    name: "Review Workflow (Flag for Manual Review)"
+    description: "Demonstrates flag-for-review policy - continues processing but flags for manual review"
+    data-types: ["Trade", "java.util.Map"]
+    
+    processing-stages:
+      - stage-name: "risk-assessment"
+        config-file: "examples/risk-assessment-rules.yaml"
+        execution-order: 1
+        failure-policy: "flag-for-review"  # FLAG for review, CONTINUE processing
+        required: true
+        stage-metadata:
+          description: "Risk assessment - flags high-risk items for review"
+          sla-ms: 1000
+          
+      - stage-name: "automated-processing"
+        config-file: "examples/automated-processing-rules.yaml"
+        execution-order: 2
+        failure-policy: "flag-for-review"
+        required: false
+        depends-on: ["risk-assessment"]
+        stage-metadata:
+          description: "Automated processing - continues even if flagged"
+          sla-ms: 2000
+          
+  # Scenario 4: MIXED Policies - Real-world complexity
+  - scenario-id: "mixed-policy-workflow"
+    name: "Mixed Policy Workflow (Real-world Complex)"
+    description: "Demonstrates mixed failure policies - different stages use different policies"
+    data-types: ["Trade", "java.util.Map"]
+    
+    processing-stages:
+      - stage-name: "mandatory-validation"
+        config-file: "examples/mandatory-validation-rules.yaml"
+        execution-order: 1
+        failure-policy: "terminate"  # MUST pass - terminate on failure
+        required: true
+        stage-metadata:
+          description: "Mandatory regulatory checks - must pass"
+          sla-ms: 1000
+          
+      - stage-name: "business-validation"
+        config-file: "examples/business-validation-rules.yaml"
+        execution-order: 2
+        failure-policy: "flag-for-review"  # Flag issues but continue
+        required: true
+        depends-on: ["mandatory-validation"]
+        stage-metadata:
+          description: "Business rule validation - flag issues for review"
+          sla-ms: 2000
+          
+      - stage-name: "optional-enrichment"
+        config-file: "examples/optional-enrichment-rules.yaml"
+        execution-order: 3
+        failure-policy: "continue-with-warnings"  # Best effort - log warnings
+        required: false
+        depends-on: ["mandatory-validation"]
+        stage-metadata:
+          description: "Optional data enrichment - best effort basis"
+          sla-ms: 5000
+          
+      - stage-name: "final-audit"
+        config-file: "examples/final-audit-rules.yaml"
+        execution-order: 4
+        failure-policy: "continue-with-warnings"
+        required: false
+        depends-on: ["business-validation", "optional-enrichment"]
+        stage-metadata:
+          description: "Final audit trail - always attempt"
+          sla-ms: 1000

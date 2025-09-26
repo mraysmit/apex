@@ -1,0 +1,45 @@
+# Basic Trade Processing Scenario Configuration - FAILING VERSION
+# Scenario designed to demonstrate validation failures and termination policies
+
+metadata:
+  id: "basic-trade-processing-failing"
+  name: "Basic Trade Processing - Failing Validation"
+  version: "1.0.0"
+  description: "Trade processing scenario with strict validation rules that will fail"
+  type: "scenario"
+  business-domain: "Trading"
+  author: "test@example.com"
+
+scenario:
+  scenario-id: "basic-trade-processing-failing"
+  name: "Basic Trade Processing - Failing Validation"
+  description: "Demonstrates validation failures and termination policies"
+  
+  data-types:
+    - "Trade"
+    - "java.util.Map"
+  
+  # Stage-based processing configuration
+  processing-stages:
+    
+    # Stage 1: Strict Validation (will fail and terminate)
+    - stage-name: "validation"
+      config-file: "src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-failing-validation-rules.yaml"
+      execution-order: 1
+      failure-policy: "terminate"
+      required: true
+      depends-on: []
+      stage-metadata:
+        description: "Strict trade validation that will fail"
+        sla-ms: 1000
+    
+    # Stage 2: Enrichment (should be skipped due to validation failure)
+    - stage-name: "enrichment"
+      config-file: "src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-enrichment-rules.yaml"
+      execution-order: 2
+      failure-policy: "continue-with-warnings"
+      required: false
+      depends-on: ["validation"]
+      stage-metadata:
+        description: "Trade enrichment (should be skipped)"
+        sla-ms: 2000

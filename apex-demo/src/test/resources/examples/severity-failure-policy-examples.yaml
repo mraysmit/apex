@@ -1,0 +1,92 @@
+# ============================================================================
+# APEX Severity and Failure Policy Configuration Examples
+# ============================================================================
+# Demonstrates how rule severity levels (ERROR, WARNING, INFO) interact 
+# with stage-level failure policies (terminate, continue-with-warnings, flag-for-review)
+# ============================================================================
+
+metadata:
+  id: "severity-failure-policy-examples"
+  name: "Severity and Failure Policy Examples"
+  version: "1.0.0"
+  description: "Examples showing rule severity and stage failure policy interactions"
+  type: "rule-config"
+  author: "APEX Investigation"
+
+# Mixed severity validation rules
+rules:
+  # Critical Error Rules (severity: ERROR) - These cause stage failure
+  - id: "critical-amount-validation"
+    name: "Critical Amount Validation"
+    description: "Amount must be positive - critical error"
+    condition: "#data.amount != null && T(java.lang.Double).parseDouble(#data.amount.toString()) > 0"
+    message: "CRITICAL: Amount must be positive, got: {{#data.amount}}"
+    severity: "ERROR"
+    priority: 1
+    enabled: true
+    
+  - id: "mandatory-field-validation"
+    name: "Mandatory Field Validation"
+    description: "Trade ID must be present - critical error"
+    condition: "#data.tradeId != null && !#data.tradeId.toString().isEmpty()"
+    message: "CRITICAL: Trade ID is mandatory"
+    severity: "ERROR"
+    priority: 1
+    enabled: true
+    
+  # Business Warning Rules (severity: WARNING) - These log warnings but don't fail stage
+  - id: "unusual-amount-warning"
+    name: "Unusual Amount Warning"
+    description: "Amount is unusually high - warning"
+    condition: "#data.amount == null || T(java.lang.Double).parseDouble(#data.amount.toString()) <= 1000000"
+    message: "WARNING: Amount {{#data.amount}} is unusually high - please verify"
+    severity: "WARNING"
+    priority: 2
+    enabled: true
+    
+  - id: "missing-optional-field-warning"
+    name: "Missing Optional Field Warning"
+    description: "Optional reference field is missing - warning"
+    condition: "#data.reference == null || true"  # Always passes but demonstrates warning usage
+    message: "WARNING: Optional reference field is missing"
+    severity: "WARNING" 
+    priority: 3
+    enabled: true
+    
+  # Informational Rules (severity: INFO) - These provide information only
+  - id: "processing-audit-info"
+    name: "Processing Audit Info"
+    description: "Audit information for processing"
+    condition: "true"  # Always matches for demonstration
+    message: "INFO: Trade processed at {{T(java.time.Instant).now()}}"
+    severity: "INFO"
+    priority: 4
+    enabled: true
+
+# Rule groups demonstrating different behaviors
+rule-groups:
+  - id: "critical-validation-group"
+    name: "Critical Validation Group"
+    description: "GROUP: Critical validations - any ERROR causes stage failure"
+    operator: "AND"  # All rules must pass
+    rules:
+      - "critical-amount-validation"
+      - "mandatory-field-validation"
+    stop-on-first-failure: true  # Stop at first ERROR
+    
+  - id: "warning-checks-group" 
+    name: "Warning Checks Group"
+    description: "GROUP: Warning checks - continue even with warnings"
+    operator: "OR"  # Any rule can match to trigger warnings
+    rules:
+      - "unusual-amount-warning"
+      - "missing-optional-field-warning"
+    stop-on-first-failure: false  # Continue processing all warnings
+    
+  - id: "info-audit-group"
+    name: "Information Audit Group"
+    description: "GROUP: Informational rules for audit trail"
+    operator: "OR" 
+    rules:
+      - "processing-audit-info"
+    stop-on-first-failure: false

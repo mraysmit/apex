@@ -1,0 +1,55 @@
+# ValidationFailureScenarioTest Scenario Configuration
+#
+# This scenario configuration demonstrates stage-based processing with validation rules
+# designed to trigger on business rule violations. It shows how APEX handles negative
+# test cases where validation rules detect and report issues with trade data.
+#
+# The scenario uses a "continue-with-warnings" failure policy to demonstrate that
+# validation rule triggering doesn't block processing, which is often the desired
+# behavior in financial systems where validation issues need to be reported but
+# processing should continue for operational efficiency.
+
+metadata:
+  id: "validation-failure-scenario"
+  name: "Validation Failure Demonstration Scenario"
+  version: "1.0.0"
+  description: "Demonstrates how APEX handles validation rule failures and negative test cases"
+  type: "scenario"
+  business-domain: "Testing"
+  author: "test@example.com"
+
+scenario:
+  scenario-id: "validation-failure-scenario"
+  name: "Validation Failure Demonstration Scenario"
+  description: "Demonstrates how APEX handles validation rule failures and negative test cases"
+
+  data-types:
+    - "Trade"
+    - "java.util.Map"
+
+  # Stage-based processing configuration
+  processing-stages:
+
+    # Stage 1: Validation (triggers on violations but continues)
+    - stage-name: "validation"
+      config-file: "src/test/java/dev/mars/apex/demo/scenario/ValidationFailureScenarioTest-validation-rules.yaml"
+      execution-order: 1
+      failure-policy: "continue-with-warnings"
+      required: true
+      depends-on: []
+      stage-metadata:
+        description: "Strict business rule validation that triggers on violations"
+        sla-ms: 5000
+
+    # Stage 2: Enrichment (optional)
+    - stage-name: "enrichment"
+      config-file: "src/test/java/dev/mars/apex/demo/scenario/ValidationFailureScenarioTest-enrichment-rules.yaml"
+      execution-order: 2
+      failure-policy: "continue-with-warnings"
+      required: false
+      depends-on: ["validation"]
+      stage-metadata:
+        description: "Trade data enrichment"
+        sla-ms: 2000
+
+

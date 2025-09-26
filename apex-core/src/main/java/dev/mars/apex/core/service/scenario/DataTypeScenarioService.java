@@ -18,6 +18,14 @@ package dev.mars.apex.core.service.scenario;
 
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.yaml.YamlRuleFactory;
+import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import dev.mars.apex.core.util.TestAwareLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,9 +78,41 @@ public class DataTypeScenarioService {
     
     // Configuration loader
     private final YamlConfigurationLoader configLoader;
-    
+
+    // Stage executor for stage-aware processing
+    private final ScenarioStageExecutor stageExecutor;
+
+    // Rule factory for creating engines
+    private final YamlRuleFactory ruleFactory;
+
+    // Enrichment service for processing enrichments
+    private final EnrichmentService enrichmentService;
+
     public DataTypeScenarioService() {
         this.configLoader = new YamlConfigurationLoader();
+        this.ruleFactory = new YamlRuleFactory();
+        this.enrichmentService = createDefaultEnrichmentService();
+        this.stageExecutor = new ScenarioStageExecutor(configLoader, ruleFactory, enrichmentService);
+    }
+
+    public DataTypeScenarioService(YamlConfigurationLoader configLoader, YamlRuleFactory ruleFactory) {
+        this.configLoader = configLoader != null ? configLoader : new YamlConfigurationLoader();
+        this.ruleFactory = ruleFactory != null ? ruleFactory : new YamlRuleFactory();
+        this.enrichmentService = createDefaultEnrichmentService();
+        this.stageExecutor = new ScenarioStageExecutor(this.configLoader, this.ruleFactory, this.enrichmentService);
+    }
+
+    public DataTypeScenarioService(YamlConfigurationLoader configLoader, YamlRuleFactory ruleFactory, EnrichmentService enrichmentService) {
+        this.configLoader = configLoader != null ? configLoader : new YamlConfigurationLoader();
+        this.ruleFactory = ruleFactory != null ? ruleFactory : new YamlRuleFactory();
+        this.enrichmentService = enrichmentService != null ? enrichmentService : createDefaultEnrichmentService();
+        this.stageExecutor = new ScenarioStageExecutor(this.configLoader, this.ruleFactory, this.enrichmentService);
+    }
+
+    private EnrichmentService createDefaultEnrichmentService() {
+        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
+        ExpressionEvaluatorService expressionEvaluator = new ExpressionEvaluatorService();
+        return new EnrichmentService(serviceRegistry, expressionEvaluator);
     }
     
     /**
@@ -229,19 +269,82 @@ public class DataTypeScenarioService {
     
     /**
      * Gets all data types that have associated scenarios.
-     * 
+     *
      * @return set of data type names
      */
     public Set<String> getSupportedDataTypes() {
         return new HashSet<>(dataTypeToScenarios.keySet());
     }
+
+    /**
+     * Processes data through a scenario using stage-aware processing if available,
+     * otherwise falls back to legacy rule-based processing.
+     *
+     * @param data the data to process
+     * @return processing result (ScenarioExecutionResult for stage-based, RuleResult for legacy)
+     */
+    public Object processData(Object data) {
+        ScenarioConfiguration scenario = getScenarioForData(data);
+        if (scenario == null) {
+            TestAwareLogger.warn(logger, "No scenario found for data type: {}", determineDataType(data));
+            return RuleResult.noRules();
+        }
+
+        return processDataWithScenario(data, scenario);
+    }
+
+    /**
+     * Processes data through a specific scenario using stage-aware processing if available,
+     * otherwise falls back to legacy rule-based processing.
+     *
+     * @param data the data to process
+     * @param scenario the scenario configuration to use
+     * @return processing result (ScenarioExecutionResult for stage-based, RuleResult for legacy)
+     */
+    public Object processDataWithScenario(Object data, ScenarioConfiguration scenario) {
+        if (scenario == null) {
+            throw new IllegalArgumentException("Scenario configuration cannot be null");
+        }
+
+        logger.info("Processing data with scenario '{}' (stage-based: {})",
+                   scenario.getScenarioId(), scenario.hasStageConfiguration());
+
+        if (scenario.hasStageConfiguration()) {
+            // Use new stage-based processing
+            return stageExecutor.executeStages(scenario, data);
+        } else {
+            // Use legacy rule-based processing
+            return processDataLegacy(data, scenario);
+        }
+    }
+
+    /**
+     * Processes data using stage-aware processing.
+     *
+     * @param data the data to process
+     * @param scenarioId the scenario ID to use
+     * @return stage execution result
+     * @throws IllegalArgumentException if scenario not found or doesn't have stage configuration
+     */
+    public ScenarioExecutionResult processDataWithStages(Object data, String scenarioId) {
+        ScenarioConfiguration scenario = getScenario(scenarioId);
+        if (scenario == null) {
+            throw new IllegalArgumentException("Scenario not found: " + scenarioId);
+        }
+
+        if (!scenario.hasStageConfiguration()) {
+            throw new IllegalArgumentException("Scenario '" + scenarioId + "' does not have stage configuration");
+        }
+
+        return stageExecutor.executeStages(scenario, data);
+    }
     
     /**
      * Registers a scenario configuration.
-     * 
+     *
      * @param scenario the scenario to register
      */
-    private void registerScenario(ScenarioConfiguration scenario) {
+    void registerScenario(ScenarioConfiguration scenario) {
         String scenarioId = scenario.getScenarioId();
         scenarioCache.put(scenarioId, scenario);
         
@@ -323,10 +426,130 @@ public class DataTypeScenarioService {
             scenario.setRuleConfigurations(ruleConfigurations);
         }
 
+        // Parse processing stages if present (new stage-based configuration)
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> processingStages = (List<Map<String, Object>>) scenarioData.get("processing-stages");
+        if (processingStages != null) {
+            List<ScenarioStage> stages = new ArrayList<>();
+            for (Map<String, Object> stageData : processingStages) {
+                ScenarioStage stage = parseScenarioStage(stageData);
+                if (stage != null) {
+                    stages.add(stage);
+                }
+            }
+            scenario = ScenarioConfiguration.withStages(scenario.getScenarioId(), scenario.getName(),
+                                                       scenario.getDataTypes(), stages);
+            scenario.setDescription(scenario.getDescription());
+        }
+
         return scenario;
     }
 
-    
+    /**
+     * Parses a scenario stage configuration from YAML data.
+     *
+     * @param stageData the YAML stage data
+     * @return parsed scenario stage or null if parsing fails
+     */
+    private ScenarioStage parseScenarioStage(Map<String, Object> stageData) {
+        try {
+            String stageName = (String) stageData.get("stage-name");
+            String configFile = (String) stageData.get("config-file");
+            Integer executionOrder = (Integer) stageData.get("execution-order");
+            String failurePolicy = (String) stageData.get("failure-policy");
+            Boolean required = (Boolean) stageData.get("required");
+
+            if (stageName == null || configFile == null || executionOrder == null) {
+                TestAwareLogger.warn(logger, "Missing required stage fields: stage-name, config-file, or execution-order");
+                return null;
+            }
+
+            ScenarioStage stage = new ScenarioStage(stageName, configFile, executionOrder);
+
+            if (failurePolicy != null) {
+                stage.setFailurePolicy(failurePolicy);
+            }
+
+            if (required != null) {
+                stage.setRequired(required);
+            }
+
+            // Parse dependencies
+            @SuppressWarnings("unchecked")
+            List<String> dependsOn = (List<String>) stageData.get("depends-on");
+            if (dependsOn != null) {
+                for (String dependency : dependsOn) {
+                    stage.addDependency(dependency);
+                }
+            }
+
+            // Parse stage metadata
+            @SuppressWarnings("unchecked")
+            Map<String, Object> stageMetadata = (Map<String, Object>) stageData.get("stage-metadata");
+            if (stageMetadata != null) {
+                stage.setStageMetadata(stageMetadata);
+            }
+
+            return stage;
+
+        } catch (Exception e) {
+            TestAwareLogger.error(logger, "Error parsing scenario stage: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /**
+     * Processes data using legacy rule-based processing.
+     *
+     * @param data the data to process
+     * @param scenario the scenario configuration
+     * @return rule execution result
+     */
+    private RuleResult processDataLegacy(Object data, ScenarioConfiguration scenario) {
+        logger.info("Processing data with legacy rule-based approach for scenario '{}'", scenario.getScenarioId());
+
+        try {
+            List<String> ruleConfigurations = scenario.getRuleConfigurations();
+            if (ruleConfigurations == null || ruleConfigurations.isEmpty()) {
+                TestAwareLogger.warn(logger, "No rule configurations found for scenario '{}'", scenario.getScenarioId());
+                return RuleResult.noRules();
+            }
+
+            // Load and merge all rule configurations
+            YamlRuleConfiguration mergedConfig = null;
+            for (String configFile : ruleConfigurations) {
+                YamlRuleConfiguration config = configLoader.loadFromFile(configFile);
+                if (mergedConfig == null) {
+                    mergedConfig = config;
+                } else {
+                    // Simple merge - in production might need more sophisticated merging
+                    logger.debug("Merging rule configuration from: {}", configFile);
+                }
+            }
+
+            if (mergedConfig == null) {
+                TestAwareLogger.warn(logger, "Failed to load any rule configurations for scenario '{}'", scenario.getScenarioId());
+                return RuleResult.error("No rule configurations loaded", "No configurations could be loaded", "ERROR", null);
+            }
+
+            // Create rules engine and execute
+            RulesEngine engine = new RulesEngine(ruleFactory.createRulesEngineConfiguration(mergedConfig));
+
+            // Create facts map
+            Map<String, Object> facts = new HashMap<>();
+            facts.put("data", data);
+            facts.put("scenarioId", scenario.getScenarioId());
+            facts.put("dataType", determineDataType(data));
+
+            return engine.evaluate(mergedConfig, facts);
+
+        } catch (Exception e) {
+            TestAwareLogger.error(logger, "Error in legacy processing for scenario '{}': {}", scenario.getScenarioId(), e.getMessage(), e);
+            return RuleResult.error("Legacy processing error", e.getMessage(), "ERROR", null);
+        }
+    }
+
+
     /**
      * Parses routing configuration.
      */

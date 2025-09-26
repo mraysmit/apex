@@ -1,0 +1,19 @@
+# Basic Stage Configuration Test Registry
+# Registry file that references the actual scenario configuration
+
+metadata:
+  id: "basic-stage-configuration-test"
+  name: "Basic Stage Configuration Test"
+  version: "1.0.0"
+  description: "Test scenario registry for stage-based processing"
+  type: "scenario-registry"
+  business-domain: "Testing"
+  author: "test@example.com"
+
+scenario-registry:
+  - scenario-id: "basic-trade-processing"
+    config-file: "src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-scenario.yaml"
+
+routing:
+  strategy: "type-based"
+  default-scenario: "basic-trade-processing"

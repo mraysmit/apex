@@ -1,0 +1,47 @@
+# Basic Trade Processing Scenario Configuration
+# Actual scenario definition with stage-based processing
+
+metadata:
+  id: "basic-trade-processing"
+  name: "Basic Trade Processing"
+  version: "1.0.0"
+  description: "Simple two-stage trade processing example"
+  type: "scenario"
+  business-domain: "Trading"
+  author: "test@example.com"
+
+scenario:
+  scenario-id: "basic-trade-processing"
+  name: "Basic Trade Processing"
+  description: "Simple two-stage trade processing example"
+  
+  data-types:
+    - "Trade"
+    - "java.util.Map"
+  
+  # Stage-based processing configuration
+  processing-stages:
+    
+    # Stage 1: Validation (must pass)
+    - stage-name: "validation"
+      config-file: "src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-validation-rules.yaml"
+      execution-order: 1
+      failure-policy: "terminate"
+      required: true
+      depends-on: []
+      stage-metadata:
+        description: "Basic trade data validation"
+        sla-ms: 1000
+
+    # Stage 2: Enrichment (optional)
+    - stage-name: "enrichment"
+      config-file: "src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-enrichment-rules.yaml"
+      execution-order: 2
+      failure-policy: "continue-with-warnings"
+      required: false
+      depends-on: ["validation"]
+      stage-metadata:
+        description: "Trade data enrichment"
+        sla-ms: 2000
+
+

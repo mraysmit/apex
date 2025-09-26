@@ -233,48 +233,60 @@ public class RulesEngine {
                 return RuleResult.noMatch(metrics);
             }
         } catch (Exception e) {
+            // Handle rule evaluation errors gracefully with proper severity handling
             logger.ruleEvaluationError(rule.getName(), e);
-
-            // Create detailed exception with context and suggestions
-            RuleEvaluationException ruleException = new RuleEvaluationException(
-                rule.getName(),
-                rule.getCondition(),
-                e.getMessage(),
-                e
-            );
 
             // Complete performance monitoring for failed evaluation
             RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition(), e);
 
-            // Attempt error recovery
-            logger.errorRecoveryAttempt(rule.getName(), "default");
-            ErrorRecoveryService.RecoveryResult recoveryResult = errorRecoveryService.attemptRecovery(
-                rule.getName(),
-                rule.getCondition(),
-                context,
-                e
-            );
+            // Create structured error result with severity from rule configuration
+            String errorMessage = String.format("Rule evaluation failed: %s", e.getMessage());
+            String severity = rule.getSeverity() != null ? rule.getSeverity() : "ERROR";
 
-            if (recoveryResult.isSuccessful()) {
-                logger.errorRecoverySuccess(rule.getName(), "default");
-                logger.audit("ERROR_RECOVERY", rule.getName(), "Error recovery successful: " + recoveryResult.getRecoveryMessage());
-
-                // Preserve performance metrics in the recovered result
-                RuleResult originalResult = recoveryResult.getRuleResult();
-                LoggingContext.clearRuleContext();
-                if (originalResult.hasPerformanceMetrics()) {
-                    return originalResult;
-                } else {
-                    // Create a new result with the same properties but include performance metrics
-                    return new RuleResult(originalResult.getRuleName(), originalResult.getMessage(),
-                                        originalResult.isTriggered(), originalResult.getResultType(), metrics);
-                }
+            // Log error details at appropriate level based on severity
+            if ("CRITICAL".equalsIgnoreCase(severity)) {
+                logger.error("CRITICAL rule evaluation error for '{}': {}", rule.getName(), e.getMessage());
+            } else if ("WARNING".equalsIgnoreCase(severity)) {
+                logger.info("Rule evaluation warning for '{}': {}", rule.getName(), e.getMessage());
             } else {
-                logger.errorRecoveryFailed(rule.getName(), "default", new RuntimeException(recoveryResult.getRecoveryMessage()));
-                logger.audit("ERROR_RECOVERY_FAILED", rule.getName(), "Error recovery failed: " + recoveryResult.getRecoveryMessage());
-                LoggingContext.clearRuleContext();
-                return RuleResult.error(rule.getName(), ruleException.getDetailedMessage(), metrics);
+                logger.info("Rule evaluation error for '{}': {}", rule.getName(), e.getMessage());
             }
+
+            // Always log full exception details at DEBUG level for troubleshooting
+            logger.debug("Full exception details for rule '{}':", rule.getName(), e);
+
+            // Attempt error recovery only for non-critical errors
+            if (!"CRITICAL".equalsIgnoreCase(severity)) {
+                logger.errorRecoveryAttempt(rule.getName(), "default");
+                ErrorRecoveryService.RecoveryResult recoveryResult = errorRecoveryService.attemptRecovery(
+                    rule.getName(),
+                    rule.getCondition(),
+                    context,
+                    e
+                );
+
+                if (recoveryResult.isSuccessful()) {
+                    logger.errorRecoverySuccess(rule.getName(), "default");
+                    logger.audit("ERROR_RECOVERY", rule.getName(), "Error recovery successful: " + recoveryResult.getRecoveryMessage());
+
+                    // Preserve performance metrics in the recovered result
+                    RuleResult originalResult = recoveryResult.getRuleResult();
+                    LoggingContext.clearRuleContext();
+                    if (originalResult.hasPerformanceMetrics()) {
+                        return originalResult;
+                    } else {
+                        // Create a new result with the same properties but include performance metrics
+                        return new RuleResult(originalResult.getRuleName(), originalResult.getMessage(),
+                                            originalResult.isTriggered(), originalResult.getResultType(), metrics);
+                    }
+                } else {
+                    logger.info("Error recovery failed for rule '{}': {}", rule.getName(), recoveryResult.getRecoveryMessage());
+                    logger.audit("ERROR_RECOVERY_FAILED", rule.getName(), "Error recovery failed: " + recoveryResult.getRecoveryMessage());
+                }
+            }
+
+            LoggingContext.clearRuleContext();
+            return RuleResult.error(rule.getName(), errorMessage, severity, metrics);
         }
     }
 
@@ -309,7 +321,24 @@ public class RulesEngine {
                     return RuleResult.match(rule.getName(), rule.getMessage(), rule.getSeverity());
                 }
             } catch (Exception e) {
-                logger.warn("Error evaluating rule '{}': {}", rule.getName(), e.getMessage(), e);
+                // Handle rule evaluation errors gracefully with proper severity handling
+                String errorMessage = String.format("Rule evaluation failed: %s", e.getMessage());
+                String severity = rule.getSeverity() != null ? rule.getSeverity() : "ERROR";
+
+                // Log error details at appropriate level based on severity
+                if ("CRITICAL".equalsIgnoreCase(severity)) {
+                    logger.error("CRITICAL rule evaluation error for '{}': {}", rule.getName(), e.getMessage());
+                } else if ("WARNING".equalsIgnoreCase(severity)) {
+                    logger.info("Rule evaluation warning for '{}': {}", rule.getName(), e.getMessage());
+                } else {
+                    logger.info("Rule evaluation error for '{}': {}", rule.getName(), e.getMessage());
+                }
+
+                // Always log full exception details at DEBUG level for troubleshooting
+                logger.debug("Full exception details for rule '{}':", rule.getName(), e);
+
+                // Return structured error result with severity from YAML configuration
+                return RuleResult.error(rule.getName(), errorMessage, severity);
             }
         }
 
@@ -365,7 +394,8 @@ public class RulesEngine {
                     }
                 }
             } catch (Exception e) {
-                logger.warn("Error evaluating rule group '{}': {}", group.getName(), e.getMessage(), e);
+                logger.info("Rule group evaluation issue for '{}': {}", group.getName(), e.getMessage());
+                logger.debug("Full exception details for rule group '{}':", group.getName(), e);
             }
         }
 
@@ -453,7 +483,28 @@ public class RulesEngine {
                 }
             } catch (Exception e) {
                 String ruleName = ruleObj.getName();
-                logger.warn("Error evaluating rule/rule group '{}': {}", ruleName, e.getMessage(), e);
+                String errorMessage = String.format("Rule evaluation failed: %s", e.getMessage());
+
+                // Get severity from rule configuration
+                String severity = "ERROR"; // Default severity for evaluation errors
+                if (ruleObj instanceof Rule) {
+                    Rule rule = (Rule) ruleObj;
+                    severity = rule.getSeverity() != null ? rule.getSeverity() : "ERROR";
+                }
+
+                // Log error details at appropriate level based on severity
+                if ("CRITICAL".equalsIgnoreCase(severity)) {
+                    logger.error("CRITICAL rule evaluation error for '{}': {}", ruleName, e.getMessage());
+                } else if ("WARNING".equalsIgnoreCase(severity)) {
+                    logger.info("Rule evaluation warning for '{}': {}", ruleName, e.getMessage());
+                } else {
+                    logger.info("Rule evaluation error for '{}': {}", ruleName, e.getMessage());
+                }
+
+                // Always log full exception details at DEBUG level for troubleshooting
+                logger.debug("Full exception details for rule/rule group '{}':", ruleName, e);
+
+                return RuleResult.error(ruleName, errorMessage, severity);
             }
         }
 
@@ -577,7 +628,8 @@ public class RulesEngine {
                         failureMessages.add("Enrichment result format is invalid");
                     }
                 } catch (Exception e) {
-                    logger.warn("Enrichment processing failed: {}", e.getMessage(), e);
+                    logger.info("Enrichment processing issue: {}", e.getMessage());
+                    logger.debug("Full enrichment exception details:", e);
                     overallSuccess = false;
                     failureMessages.add("Enrichment processing failed: " + e.getMessage());
                 }
@@ -616,12 +668,13 @@ public class RulesEngine {
                 logger.info("Unified evaluation completed successfully");
                 return RuleResult.evaluationSuccess(enrichedData, "evaluation", "Evaluation completed successfully");
             } else {
-                logger.warn("Unified evaluation completed with {} failures", failureMessages.size());
+                logger.info("Unified evaluation completed with {} failures", failureMessages.size());
                 return RuleResult.evaluationFailure(failureMessages, enrichedData, "evaluation", "Evaluation completed with failures");
             }
 
         } catch (Exception e) {
-            logger.error("Unified evaluation failed with exception: {}", e.getMessage(), e);
+            logger.error("Unified evaluation failed with exception: {}", e.getMessage());
+            logger.debug("Full unified evaluation exception details:", e);
             failureMessages.add("Evaluation failed: " + e.getMessage());
             return RuleResult.evaluationFailure(failureMessages, enrichedData, "evaluation", "Evaluation failed");
         }

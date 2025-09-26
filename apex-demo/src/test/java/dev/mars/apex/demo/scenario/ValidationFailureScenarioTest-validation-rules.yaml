@@ -1,0 +1,96 @@
+# ValidationFailureScenarioTest Validation Rules - Negative Testing Configuration
+#
+# These validation rules are specifically designed to trigger when trade data violates
+# business requirements. They demonstrate APEX's approach to validation where rules
+# return 'true' when they detect violations, allowing them to report issues while
+# maintaining the informational nature of validation in financial processing systems.
+#
+# DESIGN PATTERN: Negative Validation Rules
+# - Rules return 'true' when they detect violations (opposite of typical validation)
+# - This allows rules to "trigger" and report the specific violation found
+# - Triggered rules are logged with appropriate severity (ERROR/WARNING)
+# - Processing continues even when rules trigger, maintaining operational flow
+#
+# BUSINESS CONTEXT:
+# In real financial systems, validation rules often need to flag issues without
+# stopping processing entirely. This supports audit trails, regulatory reporting,
+# and risk management while maintaining operational efficiency.
+
+metadata:
+  id: "validation-failure-rules"
+  name: "Strict Business Rule Validation - Negative Testing"
+  version: "1.0.0"
+  description: "Validation rules that trigger when trade data violates business requirements"
+  type: "rule-config"
+  author: "APEX Demo Team"
+
+rules:
+  # Trade ID must be purely numeric (triggers on alphanumeric IDs)
+  - id: "trade-id-not-numeric"
+    name: "Trade ID Not Numeric"
+    description: "Flags trades with non-numeric trade IDs"
+    condition: "#data.tradeId != null && !#data.tradeId.toString().matches('^[0-9]+$')"
+    severity: "ERROR"
+    category: "TRADE_IDENTIFICATION"
+    message: "Trade ID contains non-numeric characters"
+    enabled: true
+
+  # Instrument type must be derivative (triggers on equity/bond trades)
+  - id: "instrument-type-not-derivative"
+    name: "Instrument Type Not Derivative"
+    description: "Flags trades that are not derivative instruments"
+    condition: "#data.instrumentType != null && !T(java.util.Arrays).asList('OPTION', 'FUTURE', 'SWAP', 'FORWARD').contains(#data.instrumentType.toString())"
+    severity: "ERROR"
+    category: "INSTRUMENT_VALIDATION"
+    message: "Non-derivative instrument type not allowed"
+    enabled: true
+
+  # Quantity must be at least 10,000 (triggers on smaller quantities)
+  - id: "quantity-too-small"
+    name: "Quantity Too Small"
+    description: "Flags trades with quantities below minimum threshold"
+    condition: "#data.quantity != null && T(java.lang.Double).parseDouble(#data.quantity.toString()) < 10000"
+    severity: "WARNING"
+    category: "QUANTITY_VALIDATION"
+    message: "Trade quantity below minimum threshold of 10,000"
+    enabled: true
+
+  # Price must be at least 1,000 (triggers on lower prices)
+  - id: "price-too-low"
+    name: "Price Too Low"
+    description: "Flags trades with prices below minimum threshold"
+    condition: "#data.price != null && T(java.lang.Double).parseDouble(#data.price.toString()) <= 1000"
+    severity: "WARNING"
+    category: "PRICE_VALIDATION"
+    message: "Trade price below minimum threshold of 1,000"
+    enabled: true
+
+  # Currency must be exotic (triggers on major currencies)
+  - id: "currency-not-exotic"
+    name: "Currency Not Exotic"
+    description: "Flags trades using major currencies instead of exotic ones"
+    condition: "#data.currency != null && T(java.util.Arrays).asList('USD', 'EUR', 'GBP', 'JPY', 'CHF').contains(#data.currency.toString())"
+    severity: "WARNING"
+    category: "CURRENCY_VALIDATION"
+    message: "Major currency used instead of exotic currency"
+    enabled: true
+
+  # Counterparty must be a bank (triggers on non-bank counterparties)
+  - id: "counterparty-not-bank"
+    name: "Counterparty Not Bank"
+    description: "Flags trades with non-bank counterparties"
+    condition: "#data.counterparty != null && !#data.counterparty.toString().matches('.*BANK.*|.*CREDIT.*|.*TRUST.*')"
+    severity: "ERROR"
+    category: "COUNTERPARTY_VALIDATION"
+    message: "Non-bank counterparty not allowed"
+    enabled: true
+
+  # Trade date must be in the future (triggers on past/current dates)
+  - id: "trade-date-not-future"
+    name: "Trade Date Not Future"
+    description: "Flags trades with past or current trade dates"
+    condition: "#data.tradeDate != null && T(java.time.LocalDate).parse(#data.tradeDate.toString()).isBefore(T(java.time.LocalDate).now().plusDays(1))"
+    severity: "WARNING"
+    category: "DATE_VALIDATION"
+    message: "Trade date should be in the future"
+    enabled: true

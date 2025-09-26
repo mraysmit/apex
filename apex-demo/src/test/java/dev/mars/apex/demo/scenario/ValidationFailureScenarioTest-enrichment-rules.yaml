@@ -1,0 +1,46 @@
+# ValidationFailureScenarioTest Enrichment Rules
+#
+# Simple enrichment configuration for the validation failure scenario test.
+# This demonstrates basic field enrichment capabilities while keeping the focus
+# on validation rule testing. The enrichment stage is configured with
+# "continue-with-warnings" policy to handle any configuration issues gracefully.
+
+metadata:
+  id: "validation-failure-enrichment"
+  name: "Basic Trade Enrichment for Validation Testing"
+  version: "1.0.0"
+  description: "Simple enrichment rules for validation failure scenario demonstration"
+  type: "enrichment-config"
+  author: "APEX Demo Team"
+
+rules:
+  # Simulate enrichment processing through validation rules
+  # Note: This demonstrates stage-based processing. In a real implementation,
+  # enrichment would be handled by a dedicated EnrichmentService.
+
+  - id: "processing-timestamp-check"
+    name: "Processing Timestamp Check"
+    description: "Verify trade has processing context (simulates enrichment)"
+    condition: "true"  # Always passes to simulate successful enrichment
+    severity: "INFO"
+    category: "enrichment"
+    message: "Trade processing timestamp added successfully"
+    enabled: true
+
+  - id: "trade-status-check"
+    name: "Trade Status Check"
+    description: "Verify trade status is set (simulates enrichment)"
+    condition: "true"  # Always passes to simulate successful enrichment
+    severity: "INFO"
+    category: "enrichment"
+    message: "Trade status set to PROCESSED"
+    enabled: true
+
+  - id: "market-determination-check"
+    name: "Market Determination Check"
+    description: "Verify market classification is determined (simulates enrichment)"
+    condition: "#data.instrumentType != null"
+    severity: "INFO"
+    category: "enrichment"
+    message: "Market classification determined successfully"
+    enabled: true

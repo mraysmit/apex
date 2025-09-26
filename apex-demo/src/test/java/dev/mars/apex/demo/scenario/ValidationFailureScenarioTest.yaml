@@ -1,0 +1,26 @@
+# ValidationFailureScenarioTest Registry Configuration
+#
+# This registry file defines the scenario routing configuration for negative validation testing.
+# It demonstrates how APEX scenarios can be configured to handle validation rule failures
+# and business rule violations in a controlled testing environment.
+#
+# The registry uses the scenario-registry pattern to reference external scenario definition files,
+# following the established APEX demo conventions for file organization and configuration management.
+
+metadata:
+  id: "validation-failure-scenario-test"
+  name: "Validation Failure Scenario Test"
+  version: "1.0.0"
+  description: "Test scenario registry for negative validation testing"
+  type: "scenario-registry"
+  business-domain: "Testing"
+  author: "test@example.com"
+
+scenario-registry:
+  - scenario-id: "validation-failure-scenario"
+    config-file: "src/test/java/dev/mars/apex/demo/scenario/ValidationFailureScenarioTest-scenario.yaml"
+
+# Routing configuration for scenario selection
+routing:
+  strategy: "type-based"
+  default-scenario: "validation-failure-scenario"

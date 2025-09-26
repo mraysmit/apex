@@ -1,0 +1,56 @@
+# ============================================================================
+# APEX Trade Validation Rules for BasicStageConfigurationTest
+# ============================================================================
+# Validation rules for basic trade data processing scenario
+# Used to demonstrate stage-based scenario execution
+# ============================================================================
+
+metadata:
+  id: "trade-validation-rules"
+  name: "Trade Validation Rules"
+  version: "1.0.0"
+  description: "Basic validation rules for trade data processing"
+  type: "rule-config"
+  author: "APEX Demo"
+
+# Trade validation rules
+rules:
+  - id: "trade-id-required"
+    name: "Trade ID Required"
+    description: "Validate that trade ID is present and not empty"
+    condition: "#data.tradeId != null && !#data.tradeId.toString().isEmpty()"
+    message: "Trade ID is required and cannot be empty"
+    severity: "ERROR"
+    enabled: true
+    
+  - id: "instrument-type-valid"
+    name: "Instrument Type Valid"
+    description: "Validate that instrument type is one of the allowed values"
+    condition: "#data.instrumentType != null && (#data.instrumentType == 'EQUITY' || #data.instrumentType == 'BOND' || #data.instrumentType == 'OPTION' || #data.instrumentType == 'FUTURE')"
+    message: "Instrument type must be one of: EQUITY, BOND, OPTION, FUTURE"
+    severity: "ERROR"
+    enabled: true
+    
+  - id: "quantity-positive"
+    name: "Quantity Positive"
+    description: "Validate that quantity is positive"
+    condition: "#data.quantity != null && T(java.lang.Double).parseDouble(#data.quantity.toString()) > 0"
+    message: "Quantity must be positive"
+    severity: "ERROR"
+    enabled: true
+    
+  - id: "price-positive"
+    name: "Price Positive"
+    description: "Validate that price is positive"
+    condition: "#data.price != null && T(java.lang.Double).parseDouble(#data.price.toString()) > 0"
+    message: "Price must be positive"
+    severity: "ERROR"
+    enabled: true
+    
+  - id: "currency-valid"
+    name: "Currency Valid"
+    description: "Validate that currency is a valid 3-character code"
+    condition: "#data.currency != null && #data.currency.toString().length() == 3"
+    message: "Currency must be a valid 3-character code"
+    severity: "WARNING"
+    enabled: true

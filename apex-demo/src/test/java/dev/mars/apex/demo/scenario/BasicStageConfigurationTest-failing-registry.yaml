@@ -1,0 +1,18 @@
+# Scenario Registry for Failing Validation Test
+# References the failing scenario configuration
+
+metadata:
+  id: "basic-stage-configuration-failing-registry"
+  name: "Basic Stage Configuration Failing Registry"
+  version: "1.0.0"
+  description: "Registry for failing validation scenario test"
+  type: "scenario-registry"
+  author: "APEX Demo"
+
+scenario-registry:
+  - scenario-id: "basic-trade-processing-failing"
+    config-file: "src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-failing-scenario.yaml"
+
+routing:
+  strategy: "type-based"
+  default-scenario: "basic-trade-processing-failing"
