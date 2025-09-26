@@ -1,0 +1,36 @@
+metadata:
+  id: "spel-error-propagation-test-scenario"
+  name: "SpEL Error Propagation Test Scenario"
+  version: "1.0.0"
+  description: "Test scenario for validating SpEL error message propagation to calling processes"
+  type: "scenario"
+  business-domain: "Testing"
+  owner: "test@example.com"
+
+scenario:
+  scenario-id: "spel-error-test"
+  name: "SpEL Error Propagation Test"
+  description: "Tests that SpEL evaluation errors are properly propagated to calling processes"
+  
+  data-types:
+    - "java.util.Map"
+    - "Trade"
+  
+  processing-stages:
+    - stage-name: "validation"
+      config-file: "src/test/java/dev/mars/apex/core/service/scenario/ScenarioStageSpelErrorPropagationTest-validation-rules.yaml"
+      execution-order: 1
+      failure-policy: "terminate"
+      required: true
+      stage-metadata:
+        description: "Validation stage that will trigger SpEL errors for testing"
+        sla-ms: 500
+        
+    - stage-name: "enrichment"
+      config-file: "src/test/java/dev/mars/apex/core/service/scenario/ScenarioStageSpelErrorPropagationTest-enrichment-rules.yaml"
+      execution-order: 2
+      failure-policy: "continue-with-warnings"
+      depends-on: ["validation"]
+      stage-metadata:
+        description: "Enrichment stage (should be skipped due to validation failure)"
+        sla-ms: 1000

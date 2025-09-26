@@ -305,14 +305,15 @@ public class RulesEngineLogger {
 
     /**
      * Log warning message with exception.
-     * 
+     * Uses TestAwareLogger to suppress stack traces in test environments.
+     *
      * @param message The message
      * @param throwable The exception
      * @param args The arguments
      */
     public void warn(String message, Throwable throwable, Object... args) {
         if (logger.isWarnEnabled()) {
-            logger.warn(String.format(message, args), throwable);
+            TestAwareLogger.warn(logger, message, throwable, args);
         }
     }
 

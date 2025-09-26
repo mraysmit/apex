@@ -255,8 +255,9 @@ public class RulesEngine {
             // Always log full exception details at DEBUG level for troubleshooting
             logger.debug("Full exception details for rule '{}':", rule.getName(), e);
 
-            // Attempt error recovery only for non-critical errors
-            if (!"CRITICAL".equalsIgnoreCase(severity)) {
+            // Attempt error recovery only for WARNING and INFO severity errors
+            // ERROR and CRITICAL severity should return ERROR results without recovery
+            if ("WARNING".equalsIgnoreCase(severity) || "INFO".equalsIgnoreCase(severity)) {
                 logger.errorRecoveryAttempt(rule.getName(), "default");
                 ErrorRecoveryService.RecoveryResult recoveryResult = errorRecoveryService.attemptRecovery(
                     rule.getName(),

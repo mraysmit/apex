@@ -64,13 +64,14 @@ class RulesEngineSpelErrorHandlingTest {
         
         // Then: Should return structured error result, not continue processing
         assertNotNull(result, "Result should not be null");
-        assertEquals(RuleResult.ResultType.ERROR, result.getResultType(), 
+        assertEquals(RuleResult.ResultType.ERROR, result.getResultType(),
                     "Should return ERROR result type for SpEL exception");
-        assertEquals("currency-validation", result.getRuleName(), 
+        assertEquals("currency-validation", result.getRuleName(),
                     "Should identify the rule that caused the error");
-        assertTrue(result.getMessage().contains("Error evaluating rule condition"), 
+
+        assertTrue(result.getMessage().contains("Rule evaluation failed"),
                   "Error message should indicate evaluation error");
-        assertTrue(result.getMessage().contains("currency"), 
+        assertTrue(result.getMessage().contains("currency"),
                   "Error message should mention the missing property");
         
         logger.info("✓ SpEL property not found exception properly converted to RuleResult.error()");

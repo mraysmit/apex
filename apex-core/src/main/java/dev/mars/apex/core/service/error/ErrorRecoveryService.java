@@ -97,7 +97,7 @@ public class ErrorRecoveryService {
     
     private RecoveryResult handleContinueWithDefault(String ruleName, Exception originalException) {
         LOGGER.info("Using default recovery for rule: " + ruleName);
-        RuleResult defaultResult = RuleResult.noMatch();
+        RuleResult defaultResult = RuleResult.noMatch(ruleName, "Rule evaluation failed, recovered with default result", "INFO");
         return RecoveryResult.recovered(ruleName, defaultResult, "Continued with default result");
     }
     
@@ -120,7 +120,7 @@ public class ErrorRecoveryService {
                 RuleResult ruleResult = RuleResult.match(ruleName, "Rule matched with safe expression");
                 return RecoveryResult.recovered(ruleName, ruleResult, "Recovered using safe expression: " + safeExpression);
             } else {
-                RuleResult ruleResult = RuleResult.noMatch();
+                RuleResult ruleResult = RuleResult.noMatch(ruleName, "Safe expression evaluated to false", "INFO");
                 return RecoveryResult.recovered(ruleName, ruleResult, "Safe expression evaluated to false");
             }
         } catch (Exception e) {

@@ -1,0 +1,58 @@
+metadata:
+  id: "spel-error-propagation-validation-rules"
+  name: "SpEL Error Propagation Validation Rules"
+  version: "1.0.0"
+  description: "Validation rules designed to trigger SpEL errors for testing error propagation"
+  type: "rule-config"
+  author: "test@example.com"
+
+rules:
+  # Rule that will trigger "Property or field 'currency' cannot be found" error
+  - id: "currency-validation"
+    name: "Currency Valid"
+    description: "Validates currency field exists and is 3 characters (will fail with SpEL error if missing)"
+    condition: "#data.currency != null && #data.currency.toString().length() == 3"
+    message: "Currency must be a valid 3-character code"
+    severity: "ERROR"
+    category: "VALIDATION"
+    enabled: true
+
+  # Rule that will trigger "Property or field 'instrumentType' cannot be found" error
+  - id: "instrument-type-validation"
+    name: "Instrument Type Valid"
+    description: "Validates instrument type field (will fail with SpEL error if missing)"
+    condition: "#data.instrumentType != null && #data.instrumentType.toString().length() > 0"
+    message: "Instrument type must be specified"
+    severity: "ERROR"
+    category: "VALIDATION"
+    enabled: true
+
+  # Rule that will trigger "Property or field 'quantity' cannot be found" error
+  - id: "quantity-validation"
+    name: "Quantity Valid"
+    description: "Validates quantity field (will fail with SpEL error if missing)"
+    condition: "#data.quantity != null && T(java.lang.Double).parseDouble(#data.quantity.toString()) > 0"
+    message: "Quantity must be positive"
+    severity: "ERROR"
+    category: "VALIDATION"
+    enabled: true
+
+  # Rule that will trigger "Property or field 'price' cannot be found" error
+  - id: "price-validation"
+    name: "Price Valid"
+    description: "Validates price field (will fail with SpEL error if missing)"
+    condition: "#data.price != null && T(java.lang.Double).parseDouble(#data.price.toString()) > 0"
+    message: "Price must be positive"
+    severity: "ERROR"
+    category: "VALIDATION"
+    enabled: true
+
+  # Rule that should pass (for control testing)
+  - id: "trade-id-validation"
+    name: "Trade ID Valid"
+    description: "Validates trade ID field (should pass if present)"
+    condition: "#data.tradeId != null && #data.tradeId.toString().length() > 0"
+    message: "Trade ID must be specified"
+    severity: "ERROR"
+    category: "VALIDATION"
+    enabled: true

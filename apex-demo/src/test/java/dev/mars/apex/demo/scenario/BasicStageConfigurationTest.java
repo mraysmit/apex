@@ -96,79 +96,127 @@ public class BasicStageConfigurationTest extends DemoTestBase {
     @DisplayName("Should execute stage-based scenario with real data processing")
     void testStageBasedScenarioExecution() throws Exception {
         logger.info("=== Testing Stage-Based Scenario Execution ===");
+        logger.info("TEST OBJECTIVE: Validate multi-stage processing with dependency management and real data");
 
         // 1. Create real test data that will trigger stage processing
         Map<String, Object> tradeData = createTestTradeData();
-        logger.info("Created test trade data: {}", tradeData);
+        logger.info("✓ STEP 1: Created test trade data with {} fields", tradeData.size());
+        logger.info("  - Trade data details: {}", tradeData);
+        logger.info("  - Data types: instrumentType={}, currency={}, quantity={}, price={}",
+                   tradeData.get("instrumentType"), tradeData.get("currency"),
+                   tradeData.get("quantity"), tradeData.get("price"));
 
         // 2. Load actual scenario configuration from YAML file
         String scenarioPath = "src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest.yaml";
+        logger.info("✓ STEP 2: Loading scenario configuration from: {}", scenarioPath);
         scenarioService.loadScenarios(scenarioPath);
-        logger.info("Loaded scenario configuration from: {}", scenarioPath);
+        logger.info("  - Scenario registry loaded successfully");
+        logger.info("  - Available scenarios: basic-trade-processing");
 
         // 3. Execute actual stage-based scenario processing
+        logger.info("✓ STEP 3: Executing stage-based scenario 'basic-trade-processing'");
+        long startTime = System.currentTimeMillis();
         ScenarioExecutionResult result = scenarioService.processDataWithStages(tradeData, "basic-trade-processing");
-        logger.info("Scenario execution completed: {}", result.getExecutionSummary());
+        long executionTime = System.currentTimeMillis() - startTime;
+
+        logger.info("  - Scenario execution completed: {}", result.getExecutionSummary());
+        logger.info("  - Total execution time: {}ms (measured: {}ms)", result.getTotalExecutionTimeMs(), executionTime);
+        logger.info("  - Execution status: {}", result.getExecutionStatus());
+        logger.info("  - Stages executed: {}", result.getStageResults().size());
+        logger.info("  - Successful: {}, Terminated: {}, Requires Review: {}",
+                   result.isSuccessful(), result.isTerminated(), result.requiresReview());
 
         // 4. Validate overall execution results
+        logger.info("✓ STEP 4: Validating execution results");
         assertNotNull(result, "Scenario execution should return result");
         // Note: Result may be PARTIAL_SUCCESS if enrichment stage has issues, but validation should pass
         assertTrue(result.isSuccessful() || result.getExecutionStatus().toString().contains("PARTIAL"),
                    "Stage processing should succeed or partially succeed with valid trade data");
         assertFalse(result.isTerminated(), "Processing should not be terminated");
         assertFalse(result.requiresReview(), "Valid trade should not require review");
+        logger.info("  - Overall execution validation: PASSED");
 
         // 5. Validate stage execution details
+        logger.info("✓ STEP 5: Validating individual stage execution details");
         validateStageExecution(result);
 
-        logger.info("=== Stage-Based Scenario Execution Test Completed Successfully ===");
+        logger.info("=== ✅ Stage-Based Scenario Execution Test COMPLETED SUCCESSFULLY ===");
     }
 
     @Test
     @DisplayName("Should demonstrate validation rule triggering for negative cases")
     void testValidationFailuresWithTermination() throws Exception {
         logger.info("=== Testing Validation Rule Triggering for Negative Cases ===");
+        logger.info("TEST OBJECTIVE: Validate that validation rules properly trigger and report violations");
 
         // 1. Create typical trade data that will trigger validation rules
         Map<String, Object> tradeData = createTestTradeData();
-        logger.info("Created typical trade data that will trigger validation rules: {}", tradeData);
+        logger.info("✓ STEP 1: Created typical trade data that will trigger validation rules");
+        logger.info("  - Trade data: {}", tradeData);
+        logger.info("  - Expected to trigger: price validation, currency validation rules");
 
         // 2. Load failing scenario configuration
         String failingRegistryPath = "src/test/java/dev/mars/apex/demo/scenario/" + getClass().getSimpleName() + "-failing-registry.yaml";
+        logger.info("✓ STEP 2: Loading failing scenario configuration from: {}", failingRegistryPath);
         scenarioService.loadScenarios(failingRegistryPath);
-        logger.info("Loaded failing scenario configuration");
+        logger.info("  - Failing scenario registry loaded successfully");
+        logger.info("  - Target scenario: basic-trade-processing-failing");
 
         // 3. Execute scenario - validation rules should trigger but processing continues
+        logger.info("✓ STEP 3: Executing scenario with validation rules that will trigger");
+        long startTime = System.currentTimeMillis();
         ScenarioExecutionResult result = scenarioService.processDataWithStages(tradeData, "basic-trade-processing-failing");
-        logger.info("Scenario execution with triggered validation rules: {}", result.getExecutionSummary());
+        long executionTime = System.currentTimeMillis() - startTime;
+
+        logger.info("  - Scenario execution completed: {}", result.getExecutionSummary());
+        logger.info("  - Execution time: {}ms", executionTime);
+        logger.info("  - Execution status: {}", result.getExecutionStatus());
+        logger.info("  - Successful: {}, Terminated: {}, Requires Review: {}",
+                   result.isSuccessful(), result.isTerminated(), result.requiresReview());
 
         // 4. Validate that validation rules were triggered and reported
+        logger.info("✓ STEP 4: Validating validation rule triggering behavior");
         validateValidationRuleTriggering(result);
 
-        logger.info("=== Validation Rule Triggering Test Completed Successfully ===");
+        logger.info("=== ✅ Validation Rule Triggering Test COMPLETED SUCCESSFULLY ===");
     }
 
     @Test
     @DisplayName("Should handle stage failure policies correctly")
     void testStageFailurePolicies() throws Exception {
         logger.info("=== Testing Stage Failure Policy Handling ===");
+        logger.info("TEST OBJECTIVE: Validate stage failure policies (terminate vs continue-with-warnings)");
 
         // 1. Create invalid test data that will cause validation to fail
         Map<String, Object> invalidTradeData = createInvalidTradeData();
-        logger.info("Created invalid test trade data: {}", invalidTradeData);
+        logger.info("✓ STEP 1: Created invalid test trade data");
+        logger.info("  - Invalid trade data: {}", invalidTradeData);
+        logger.info("  - Expected issues: missing required fields, invalid values");
 
         // 2. Load scenario configuration
         String scenarioPath = "src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest.yaml";
+        logger.info("✓ STEP 2: Loading scenario configuration from: {}", scenarioPath);
         scenarioService.loadScenarios(scenarioPath);
+        logger.info("  - Scenario configuration loaded successfully");
+        logger.info("  - Testing failure policies: validation=terminate, enrichment=continue-with-warnings");
 
         // 3. Execute scenario with invalid data
+        logger.info("✓ STEP 3: Executing scenario with invalid data to test failure policies");
+        long startTime = System.currentTimeMillis();
         ScenarioExecutionResult result = scenarioService.processDataWithStages(invalidTradeData, "basic-trade-processing");
-        logger.info("Scenario execution with invalid data: {}", result.getExecutionSummary());
+        long executionTime = System.currentTimeMillis() - startTime;
+
+        logger.info("  - Scenario execution completed: {}", result.getExecutionSummary());
+        logger.info("  - Execution time: {}ms", executionTime);
+        logger.info("  - Execution status: {}", result.getExecutionStatus());
+        logger.info("  - Stages executed: {}", result.getStageResults().size());
+        logger.info("  - Terminated: {}, Has Warnings: {}", result.isTerminated(), result.hasWarnings());
 
         // 4. Validate failure policy enforcement
+        logger.info("✓ STEP 4: Validating failure policy enforcement");
         validateFailurePolicyHandling(result);
 
-        logger.info("=== Stage Failure Policy Test Completed ===");
+        logger.info("=== ✅ Stage Failure Policy Test COMPLETED SUCCESSFULLY ===");
     }
 
     /**

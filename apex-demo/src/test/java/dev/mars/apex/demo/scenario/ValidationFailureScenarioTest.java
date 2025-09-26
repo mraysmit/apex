@@ -110,24 +110,39 @@ public class ValidationFailureScenarioTest extends DemoTestBase {
     @DisplayName("Should demonstrate validation rule triggering for business rule violations")
     void testValidationRuleTriggering() throws Exception {
         logger.info("=== Testing Validation Rule Triggering for Business Rule Violations ===");
+        logger.info("TEST OBJECTIVE: Validate that business rule violations are properly detected and reported");
 
         // 1. Create trade data that will trigger multiple validation rules
         Map<String, Object> tradeData = createTradeDataWithViolations();
-        logger.info("Created trade data with business rule violations: {}", tradeData);
+        logger.info("✓ STEP 1: Created trade data with intentional business rule violations");
+        logger.info("  - Trade data: {}", tradeData);
+        logger.info("  - Expected violations: currency not exotic, amount too high, invalid instrument type");
 
         // 2. Load scenario configuration with strict validation rules
         String registryPath = "src/test/java/dev/mars/apex/demo/scenario/" + getClass().getSimpleName() + ".yaml";
+        logger.info("✓ STEP 2: Loading validation failure scenario configuration from: {}", registryPath);
         scenarioService.loadScenarios(registryPath);
-        logger.info("Loaded validation failure scenario configuration");
+        logger.info("  - Validation failure scenario configuration loaded successfully");
+        logger.info("  - Target scenario: validation-failure-scenario");
 
         // 3. Execute scenario - validation rules should trigger but processing continues
+        logger.info("✓ STEP 3: Executing scenario with validation rules designed to trigger");
+        long startTime = System.currentTimeMillis();
         ScenarioExecutionResult result = scenarioService.processDataWithStages(tradeData, "validation-failure-scenario");
-        logger.info("Scenario execution with validation rule triggers: {}", result.getExecutionSummary());
+        long executionTime = System.currentTimeMillis() - startTime;
+
+        logger.info("  - Scenario execution completed: {}", result.getExecutionSummary());
+        logger.info("  - Execution time: {}ms", executionTime);
+        logger.info("  - Execution status: {}", result.getExecutionStatus());
+        logger.info("  - Stages executed: {}", result.getStageResults().size());
+        logger.info("  - Successful: {}, Has Warnings: {}, Requires Review: {}",
+                   result.isSuccessful(), result.hasWarnings(), result.requiresReview());
 
         // 4. Validate that validation rules were triggered and reported properly
+        logger.info("✓ STEP 4: Validating that validation rules triggered correctly");
         validateValidationRuleTriggering(result);
 
-        logger.info("=== Validation Rule Triggering Test Completed Successfully ===");
+        logger.info("=== ✅ Validation Rule Triggering Test COMPLETED SUCCESSFULLY ===");
     }
 
     /**

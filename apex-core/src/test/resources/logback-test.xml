@@ -17,6 +17,23 @@
     <logger name="dev.mars.apex.core.util.YamlDependencyAnalyzer" level="INFO"/>
     <logger name="dev.mars.apex.core.util.YamlMetadataValidator" level="INFO"/>
 
+    <!-- Enhanced logging for scenario tests -->
+    <logger name="dev.mars.apex.core.service.scenario" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="dev.mars.apex.core.service.scenario.ScenarioStageSpelErrorPropagationTest" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="dev.mars.apex.core.service.scenario.DataTypeScenarioService" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="dev.mars.apex.core.service.scenario.ScenarioStageExecutor" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
     <!-- Root logger -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>

@@ -88,7 +88,8 @@ public class RuleEngineService {
                 if (baseResult.getResultType() == RuleResult.ResultType.MATCH) {
                     ruleResult = RuleResult.match(rule.getName(), rule.getMessage(), rule.getSeverity());
                 } else if (baseResult.getResultType() == RuleResult.ResultType.ERROR) {
-                    ruleResult = RuleResult.error(rule.getName(), baseResult.getMessage());
+                    String severity = rule.getSeverity() != null ? rule.getSeverity() : "ERROR";
+                    ruleResult = RuleResult.error(rule.getName(), baseResult.getMessage(), severity);
                     // Print to System.err for test verification
                     System.err.println("Error evaluating rule '" + rule.getName() + "': " + baseResult.getMessage());
                 } else {
