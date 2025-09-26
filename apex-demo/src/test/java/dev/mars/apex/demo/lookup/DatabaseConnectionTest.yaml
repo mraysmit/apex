@@ -26,7 +26,7 @@ metadata:
 data-sources:
   - name: "connection-test-database"
     type: "database"
-    source-type: "h2"
+    sourceType: "h2"
     connection:
       # H2 file-based database for connection testing
       database: "./target/h2-demo/apex_demo_connection_test"
@@ -46,7 +46,7 @@ enrichments:
       lookup-key: "#customerId"
       lookup-dataset:
         type: "database"
-        connection-name: "connection-test-database"
+        data-source-ref: "connection-test-database"
         query: "SELECT customer_name, customer_type, tier, region, status, created_date FROM customers WHERE customer_id = :customerId"
         parameters:
           - field: "customerId"

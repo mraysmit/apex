@@ -26,7 +26,7 @@ metadata:
 data-sources:
   - name: "risk-assessment-database"
     type: "database"
-    source-type: "h2"
+    sourceType: "h2"
     connection:
       # H2 file-based database for conditional expression lookup
       database: "./target/h2-demo/apex_demo_conditional"
@@ -48,7 +48,7 @@ enrichments:
 
       lookup-dataset:
         type: "database"
-        connection-name: "risk-assessment-database"
+        data-source-ref: "risk-assessment-database"
         query: "SELECT risk_level, interest_rate, max_loan_amount, approval_status, required_documents, processing_days, risk_mitigation_actions, collateral_requirement, reviewer_level FROM risk_parameters WHERE risk_category = :riskCategory"
         parameters:
           - field: "riskCategory"

@@ -18,23 +18,26 @@ metadata:
   tags: ["external-data", "database", "rest-api", "caching", "monitoring"]
 
 # External data-source references (infrastructure configuration)
-#data-source-refs:
-#  - name: "postgresql-database-localtest"
-#    source: "postgresql-database-localtest.yaml"
-#    enabled: true
-#    description: "PostgreSQL local database for test"
-data-source-refs:
+# Inline data source configuration for testing
+data-sources:
   - name: "pg-database-test"
-#    source: "postgresql-database-localtest.yaml"
-    source: "database-h2.yaml"
+    type: "database"
     enabled: true
-    description: "pg local database for test"
+    description: "H2 local database for test"
+    configuration:
+      sourceType: "h2"
+      url: "jdbc:h2:./target/h2-demo/fx_transaction_demo"
+      username: "sa"
+      password: ""
+      driver-class-name: "org.h2.Driver"
+    queries:
+      getCurrencyRank: "SELECT currency_rank FROM VW_REF_CURRENCY_RANK WHERE currency_code = :CURRENCY_CODE"
   
-rule-refs:
-  - name: "Map External to Internal Code"
-    source: "rulebuilderfunction/Map-External-to-Internal-Code.yaml"
-    enabled: true
-    description: "Map External to Internal Code"
+# rule-refs:
+#   - name: "Map External to Internal Code"
+#     source: "Map-External-to-Internal-Code.yaml"
+#     enabled: true
+#     description: "Map External to Internal Code"
       
 enrichments:
   # add buy_currency_rank into source data derived from VW_REF_CURRENCY_RANK(T_REF_CURRENCY)
@@ -135,13 +138,13 @@ enrichments:
       - source-field: "IS_NDF"
         target-field: "EXTERNAL_CODE"
         
-  # rule builder function execution
-  - id: "run-ref"
-    name: "Run Referenced Enrichments"
-    type: "enrichment-ref"
-    ref: "Map External to Internal Code"
-    enabled: true
-#    condition: "#run_rule_builder_function_flag"
+  # rule builder function execution (commented out for testing)
+  # - id: "run-ref"
+  #   name: "Run Referenced Enrichments"
+  #   type: "enrichment-ref"
+  #   ref: "Map External to Internal Code"
+  #   enabled: true
+  #   condition: "#run_rule_builder_function_flag"
   
   # after rule builder function, we should assign INTERNAL_CODE to IS_NDF
   - id: "map-internal-code"

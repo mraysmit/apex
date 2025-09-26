@@ -26,7 +26,7 @@ metadata:
 data-sources:
   - name: "postgresql-customer-database"
     type: "database"
-    source-type: "postgresql"
+    sourceType: "postgresql"
     enabled: true
     description: "Customer master data from real PostgreSQL database via Testcontainers"
 
@@ -123,7 +123,7 @@ enrichments:
       lookup-key: "#customerId"
       lookup-dataset:
         type: "database"
-        connection-name: "postgresql-customer-database"
+        data-source-ref: "postgresql-customer-database"
         query: "SELECT customer_name, customer_type, tier, region, status, created_date, metadata, tags FROM customers WHERE customer_id = :customerId"
         parameters:
           - field: "customerId"
@@ -174,7 +174,7 @@ enrichments:
       lookup-key: "#customerId"
       lookup-dataset:
         type: "database"
-        connection-name: "postgresql-customer-database"
+        data-source-ref: "postgresql-customer-database"
         query: |
           SELECT
             metadata->>'industry' as industry,

@@ -9,6 +9,7 @@
 # ============================================================================
 
 metadata:
+  id: "conditional-mapping-design-v1"
   name: "Enhanced Conditional Field Mapping - FX Transaction"
   version: "2.0.0"
   description: "Simplified conditional field mapping for FX transactions"
@@ -19,7 +20,7 @@ metadata:
 # External data-source references (simplified)
 data-source-refs:
   - name: "translation-db"
-    source: "database-h2.yaml"
+    source: "src/test/java/dev/mars/apex/demo/conditional/database-h2.yaml"
     enabled: true
 
 enrichments:
@@ -34,7 +35,7 @@ enrichments:
         data-source-ref: "translation-db"
         query-ref: "getCurrencyRank"
     field-mappings:
-      - source-field: "currency_rank"
+      - source-field: "CURRENCY_RANK"
         target-field: "BUY_CURRENCY_RANK"
 
   # ENHANCED: Single enrichment with conditional field mapping
@@ -64,7 +65,7 @@ enrichments:
           rules:
             - condition: "#IS_NDF != null"
             - condition: "#SYSTEM_CODE == 'SWIFT'"
-            - condition: "!({'0', '1'}.contains(#IS_NDF))"  # NOT in valid set
+            - condition: "!({'0', '1', 'Y'}.contains(#IS_NDF))"  # NOT in valid set
         field-mappings:
           - source-field: "IS_NDF"
             target-field: "TRANSLATION_TYPE"
@@ -72,25 +73,45 @@ enrichments:
           - source-field: "IS_NDF"
             target-field: "EXTERNAL_CODE"
             transformation: "#IS_NDF"
-          # Database lookup for translation
-          - source-field: "lookup"
+          # Simple field mapping - translation will be handled by separate enrichment
+          - source-field: "IS_NDF"
             target-field: "IS_NDF"
-            lookup-config:
-              lookup-dataset:
-                type: "database"
-                data-source-ref: "translation-db"
-                query-ref: "getInternalCodeWithoutSubcode"
-                parameters:
-                  - field: "TRANSLATION_TYPE"
-                  - field: "CLIENT_CODE"
-                  - field: "SYSTEM_CODE"
-                  - field: "EXTERNAL_CODE"
-            transformation: "#lookup.internal_code ?: #IS_NDF"  # Fallback to original
+            transformation: "#IS_NDF"  # Keep original value for now
             
       # Default case: No mapping needed
       - conditions:
-          default: true
+          operator: "OR"
+          rules:
+            - condition: "true"  # Always true for default case
+              description: "Default case - no special mapping needed"
         field-mappings:
           - source-field: "IS_NDF"
             target-field: "IS_NDF"
             transformation: "#IS_NDF"
+
+  # Translation enrichment for non-standard values
+  - id: "translation-lookup"
+    name: "translation-lookup-enrichment"
+    description: "Translate non-standard values using database lookup"
+    type: "lookup-enrichment"
+    condition: "#TRANSLATION_TYPE != null && #EXTERNAL_CODE != null"
+
+    lookup-config:
+      lookup-key: "{'TRANSLATION_TYPE': #TRANSLATION_TYPE, 'CLIENT_CODE': #CLIENT_CODE, 'SYSTEM_CODE': #SYSTEM_CODE, 'EXTERNAL_CODE': #EXTERNAL_CODE}"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "translation-db"
+        query: "SELECT internal_code FROM translation_parameters WHERE translation_type = :TRANSLATION_TYPE AND client_code = :CLIENT_CODE AND system_code = :SYSTEM_CODE AND external_code = :EXTERNAL_CODE"
+        parameters:
+          - field: "TRANSLATION_TYPE"
+            type: "string"
+          - field: "CLIENT_CODE"
+            type: "string"
+          - field: "SYSTEM_CODE"
+            type: "string"
+          - field: "EXTERNAL_CODE"
+            type: "string"
+
+    field-mappings:
+      - source-field: "INTERNAL_CODE"
+        target-field: "IS_NDF"

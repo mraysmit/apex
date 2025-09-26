@@ -27,7 +27,7 @@ metadata:
 data-sources:
   - name: "postgresql-trading-database"
     type: "database"
-    source-type: "postgresql"
+    sourceType: "postgresql"
     enabled: true
     description: "Trading and settlement data from real PostgreSQL database via Testcontainers"
 
@@ -157,7 +157,7 @@ enrichments:
       lookup-key: "{'counterpartyId': #counterpartyId, 'instrumentType': #instrumentType, 'currency': #currency, 'market': #market, 'minAmount': #minAmount, 'maxAmount': #maxAmount}"
       lookup-dataset:
         type: "database"
-        connection-name: "postgresql-trading-database"
+        data-source-ref: "postgresql-trading-database"
         query: |
           SELECT
             si.instruction_id,
@@ -292,7 +292,7 @@ enrichments:
       lookup-key: "{'counterpartyId': #counterpartyId, 'instrumentType': #instrumentType, 'market': #market, 'tradeAmount': #tradeAmount}"
       lookup-dataset:
         type: "database"
-        connection-name: "postgresql-trading-database"
+        data-source-ref: "postgresql-trading-database"
         query: |
           SELECT
             ra.risk_category,

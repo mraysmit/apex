@@ -1,0 +1,61 @@
+# ============================================================================
+# H2 Database Configuration for Conditional Mapping Design V1
+# ============================================================================
+# Used by: ConditionalMappingDesignV1Test.yaml
+# Purpose: Database configuration for currency ranking and translation lookups
+# ============================================================================
+
+apiVersion: "apex.dev/v1"
+kind: "DataSource"
+
+metadata:
+  name: "translation-db"
+  version: "1.0.0"
+  description: "H2 database configuration for FX transaction conditional mapping"
+
+spec:
+  type: "database"
+  source-type: "h2"
+  enabled: true
+
+  connection:
+    # H2 file-based database for conditional mapping demo
+    database: "./target/h2-demo/conditional_mapping_v1"
+    username: "sa"
+    password: ""
+
+  # Query definitions for conditional mapping
+  queries:
+    # Currency ranking query
+    getCurrencyRank: |
+      SELECT currency_rank
+      FROM currency_rank
+      WHERE currency_code = :key
+
+    # Translation query without subcode
+    getInternalCodeWithoutSubcode: |
+      SELECT internal_code
+      FROM translation_parameters
+      WHERE translation_type = :TRANSLATION_TYPE
+        AND client_code = :CLIENT_CODE
+        AND system_code = :SYSTEM_CODE
+        AND external_code = :EXTERNAL_CODE
+
+    # Health check query
+    healthCheck: "SELECT COUNT(*) FROM currency_rank"
+
+  # Parameter names for queries
+  parameters:
+    parameterNames:
+      - "key"
+      - "TRANSLATION_TYPE"
+      - "CLIENT_CODE"
+      - "SYSTEM_CODE"
+      - "EXTERNAL_CODE"
+
+  # Caching configuration
+  cache:
+    enabled: true
+    ttlSeconds: 300
+    maxSize: 1000
+    keyPrefix: "conditional-mapping"

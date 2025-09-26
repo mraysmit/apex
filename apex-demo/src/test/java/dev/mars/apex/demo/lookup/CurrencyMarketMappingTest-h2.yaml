@@ -8,7 +8,7 @@ metadata:
 data-sources:
   - name: "currency-validation-database"
     type: "database"
-    source-type: "h2"
+    sourceType: "h2"
     connection:
       database: "./target/h2-demo/currency_validation"
       username: "sa"
@@ -23,7 +23,7 @@ enrichments:
       lookup-key: "#currency"
       lookup-dataset:
         type: "database"
-        connection-name: "currency-validation-database"
+        data-source-ref: "currency-validation-database"
         query: "SELECT currency_code, currency_name, is_active FROM valid_currencies WHERE currency_code = :currencyCode AND is_active = true"
         parameters:
           - field: "currencyCode"

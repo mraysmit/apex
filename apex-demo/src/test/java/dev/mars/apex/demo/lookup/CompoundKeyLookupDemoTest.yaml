@@ -26,7 +26,7 @@ metadata:
 data-sources:
   - name: "customer-region-database"
     type: "database"
-    source-type: "h2"
+    sourceType: "h2"
     enabled: true
     description: "Customer-region database using H2 for compound key lookups"
 
@@ -82,7 +82,7 @@ enrichments:
 
       lookup-dataset:
         type: "database"
-        connection-name: "customer-region-database"
+        data-source-ref: "customer-region-database"
         query: "SELECT customer_name, region_name, customer_tier, regional_discount, special_pricing, currency, tax_rate FROM customer_regions WHERE customer_region_key = :customerRegionKey"
         parameters:
           - field: "customerRegionKey"

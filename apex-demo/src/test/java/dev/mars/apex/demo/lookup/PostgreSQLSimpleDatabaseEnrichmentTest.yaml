@@ -22,7 +22,7 @@ metadata:
 data-sources:
   - name: "customer-database"
     type: "database"
-    source-type: "h2"
+    sourceType: "h2"
     enabled: true
     description: "Customer database using H2 in PostgreSQL compatibility mode"
 
@@ -78,7 +78,7 @@ enrichments:
       lookup-key: "#customerId"
       lookup-dataset:
         type: "database"
-        connection-name: "customer-database"
+        data-source-ref: "customer-database"
         query: "SELECT customer_name, customer_type, tier, region, status, created_date FROM customers WHERE customer_id = :customerId"
         parameters:
           - field: "customerId"

@@ -23,7 +23,7 @@ metadata:
 data-sources:
   - name: "settlement-database"
     type: "database"
-    source-type: "h2"
+    sourceType: "h2"
     enabled: true
     description: "Settlement instruction database for multi-parameter lookup demo"
 
@@ -58,7 +58,7 @@ enrichments:
       
       lookup-dataset:
         type: "database"
-        connection-name: "settlement-database"
+        data-source-ref: "settlement-database"
         query: |
           SELECT 
             si.instruction_id, 
