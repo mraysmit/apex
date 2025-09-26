@@ -65,16 +65,14 @@ class DefinitiveErrorHandlingProofTest {
         // Given: Rule with CRITICAL severity that will fail
         Rule rule = new Rule(
             "critical-method-error",
-            "#data.value.nonExistentMethod() > 0",
+            "#data['value'].nonExistentMethod() > 0",
             "Critical method error test",
             "CRITICAL"
         );
         
-        Map<String, Object> data = new HashMap<>();
-        data.put("value", 100);
-        
+        // Create a simple object that has a value property to test method call errors
         Map<String, Object> facts = new HashMap<>();
-        facts.put("data", data);
+        facts.put("data", Map.of("value", 100));
         
         // When: Execute rule that will fail
         RuleResult result = rulesEngine.executeRule(rule, facts);

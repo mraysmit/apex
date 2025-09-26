@@ -42,9 +42,10 @@ class RulesEngineSpelErrorHandlingTest {
     void shouldReturnErrorResultForSpelPropertyNotFound() {
         // Given: Rule that tries to access a property that doesn't exist
         Rule ruleWithMissingProperty = new Rule(
-            "currency-validation", 
-            "#data.currency != null && #data.currency.toString().length() == 3", 
-            "Currency must be a valid 3-character code"
+            "currency-validation",
+            "#data.currency != null && #data.currency.toString().length() == 3",
+            "Currency must be a valid 3-character code",
+            "CRITICAL"
         );
         
         List<Rule> rules = Collections.singletonList(ruleWithMissingProperty);
@@ -84,7 +85,8 @@ class RulesEngineSpelErrorHandlingTest {
         Rule ruleWithTypeError = new Rule(
             "price-validation",
             "#data.price > 0 && #data.price.someInvalidMethod()",
-            "Price must be positive"
+            "Price must be positive",
+            "CRITICAL"
         );
         
         List<Rule> rules = Collections.singletonList(ruleWithTypeError);
@@ -115,13 +117,15 @@ class RulesEngineSpelErrorHandlingTest {
         Rule failingRule = new Rule(
             "failing-rule",
             "#data.missingField.toString().length() > 0",
-            "This rule will fail"
+            "This rule will fail",
+            "CRITICAL"
         );
-        
+
         Rule successRule = new Rule(
             "success-rule",
             "#data.quantity > 500",
-            "Quantity is high"
+            "Quantity is high",
+            "INFO"
         );
         
         List<Rule> rules = Arrays.asList(failingRule, successRule);
@@ -153,7 +157,8 @@ class RulesEngineSpelErrorHandlingTest {
         Rule validRule = new Rule(
             "valid-rule",
             "#data.quantity > 100 && #data.instrumentType == 'EQUITY'",
-            "Large equity trade detected"
+            "Large equity trade detected",
+            "INFO"
         );
         
         List<Rule> rules = Collections.singletonList(validRule);

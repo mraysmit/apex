@@ -12,6 +12,7 @@ import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMetrics;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
+import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
 import dev.mars.apex.core.util.LoggingContext;
 import dev.mars.apex.core.util.RuleParameterExtractor;
 import dev.mars.apex.core.util.RulesEngineLogger;
@@ -63,6 +64,7 @@ public class RulesEngine {
     private final ErrorRecoveryService errorRecoveryService;
     private final RulePerformanceMonitor performanceMonitor;
     private final EnrichmentService enrichmentService;
+    private final UnifiedRuleEvaluator unifiedEvaluator;
 
 
     /**
@@ -112,6 +114,9 @@ public class RulesEngine {
         this.errorRecoveryService = errorRecoveryService;
         this.performanceMonitor = performanceMonitor;
         this.enrichmentService = enrichmentService;
+
+        // Initialize the unified evaluator with the same components
+        this.unifiedEvaluator = new UnifiedRuleEvaluator(parser, errorRecoveryService, performanceMonitor);
 
         // Initialize logging context
         LoggingContext.initializeContext();
@@ -186,109 +191,8 @@ public class RulesEngine {
      * @return The result of the rule evaluation, indicating whether it matched or not
      */
     public RuleResult executeRule(Rule rule, Map<String, Object> facts) {
-        if (rule == null) {
-            logger.info("No rule provided for execution");
-            return RuleResult.noRules();
-        }
-
-        // Set up logging context for this rule evaluation
-        LoggingContext.setRuleName(rule.getName());
-        LoggingContext.setRulePhase("evaluation");
-
-        logger.ruleEvaluationStart(rule.getName());
-        logger.debug("Facts provided: {}", facts != null ? facts.keySet() : "none");
-
-        // Start performance monitoring early to capture all scenarios
-        RulePerformanceMetrics.Builder metricsBuilder = performanceMonitor.startEvaluation(rule.getName());
-
-        // Check for missing parameters
-        Set<String> missingParameters = RuleParameterExtractor.validateParameters(rule, facts);
-        if (!missingParameters.isEmpty()) {
-            TestAwareLogger.warn(logger, "Missing parameters for rule '{}': {}", rule.getName(), missingParameters);
-            RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition());
-            LoggingContext.clearRuleContext();
-            return RuleResult.error(rule.getName(), "Missing parameters: " + missingParameters, rule.getSeverity(), metrics);
-        }
-
-        StandardEvaluationContext context = createContext(facts);
-
-        // Evaluate the rule
-        try {
-            Expression exp = parser.parseExpression(rule.getCondition());
-            Boolean result = exp.getValue(context, Boolean.class);
-
-            // Complete performance monitoring for successful evaluation
-            RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition());
-
-            // Log the completion with performance metrics
-            logger.ruleEvaluationComplete(rule.getName(), result != null && result, metrics.getEvaluationTimeMillis());
-
-            if (result != null && result) {
-                logger.audit("RULE_MATCH", rule.getName(), "Rule matched successfully");
-                LoggingContext.clearRuleContext();
-
-                return RuleResult.match(rule.getName(), rule.getMessage(), rule.getSeverity(), metrics);
-            } else {
-                LoggingContext.clearRuleContext();
-                return RuleResult.noMatch(metrics);
-            }
-        } catch (Exception e) {
-            // Handle rule evaluation errors gracefully with proper severity handling
-            logger.ruleEvaluationError(rule.getName(), e);
-
-            // Complete performance monitoring for failed evaluation
-            RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition(), e);
-
-            // Create structured error result with severity from rule configuration
-            String errorMessage = String.format("Rule evaluation failed: %s", e.getMessage());
-            String severity = rule.getSeverity() != null ? rule.getSeverity() : "ERROR";
-
-            // Log error details at appropriate level based on severity
-            if ("CRITICAL".equalsIgnoreCase(severity)) {
-                logger.error("CRITICAL rule evaluation error for '{}': {}", rule.getName(), e.getMessage());
-            } else if ("WARNING".equalsIgnoreCase(severity)) {
-                logger.info("Rule evaluation warning for '{}': {}", rule.getName(), e.getMessage());
-            } else {
-                logger.info("Rule evaluation error for '{}': {}", rule.getName(), e.getMessage());
-            }
-
-            // Always log full exception details at DEBUG level for troubleshooting
-            logger.debug("Full exception details for rule '{}':", rule.getName(), e);
-
-            // Attempt error recovery only for WARNING and INFO severity errors
-            // ERROR and CRITICAL severity should return ERROR results without recovery
-            if ("WARNING".equalsIgnoreCase(severity) || "INFO".equalsIgnoreCase(severity)) {
-                logger.errorRecoveryAttempt(rule.getName(), "default");
-                ErrorRecoveryService.RecoveryResult recoveryResult = errorRecoveryService.attemptRecovery(
-                    rule.getName(),
-                    rule.getCondition(),
-                    context,
-                    e
-                );
-
-                if (recoveryResult.isSuccessful()) {
-                    logger.errorRecoverySuccess(rule.getName(), "default");
-                    logger.audit("ERROR_RECOVERY", rule.getName(), "Error recovery successful: " + recoveryResult.getRecoveryMessage());
-
-                    // Preserve performance metrics in the recovered result
-                    RuleResult originalResult = recoveryResult.getRuleResult();
-                    LoggingContext.clearRuleContext();
-                    if (originalResult.hasPerformanceMetrics()) {
-                        return originalResult;
-                    } else {
-                        // Create a new result with the same properties but include performance metrics
-                        return new RuleResult(originalResult.getRuleName(), originalResult.getMessage(),
-                                            originalResult.isTriggered(), originalResult.getResultType(), metrics);
-                    }
-                } else {
-                    logger.info("Error recovery failed for rule '{}': {}", rule.getName(), recoveryResult.getRecoveryMessage());
-                    logger.audit("ERROR_RECOVERY_FAILED", rule.getName(), "Error recovery failed: " + recoveryResult.getRecoveryMessage());
-                }
-            }
-
-            LoggingContext.clearRuleContext();
-            return RuleResult.error(rule.getName(), errorMessage, severity, metrics);
-        }
+        // Delegate to the unified evaluator for consistent behavior
+        return unifiedEvaluator.evaluateRule(rule, facts);
     }
 
     /**
@@ -299,52 +203,8 @@ public class RulesEngine {
      * @return The result of the first rule that matches, or a default result if no rules match
      */
     public RuleResult executeRulesList(List<Rule> rules, Map<String, Object> facts) {
-        if (rules == null || rules.isEmpty()) {
-            logger.info("No rules provided for execution");
-            return RuleResult.noRules();
-        }
-
-        logger.info("Executing {} rules", rules.size());
-        logger.debug("Facts provided: {}", facts != null ? facts.keySet() : "none");
-
-        StandardEvaluationContext context = createContext(facts);
-
-        // Evaluate rules in priority order
-        for (Rule rule : rules) {
-            logger.debug("Evaluating rule: {}", rule.getName());
-            try {
-                Expression exp = parser.parseExpression(rule.getCondition());
-                Boolean result = exp.getValue(context, Boolean.class);
-                logger.debug("Rule '{}' evaluated to: {}", rule.getName(), result);
-
-                if (result != null && result) {
-                    logger.info("Rule matched: {}", rule.getName());
-                    return RuleResult.match(rule.getName(), rule.getMessage(), rule.getSeverity());
-                }
-            } catch (Exception e) {
-                // Handle rule evaluation errors gracefully with proper severity handling
-                String errorMessage = String.format("Rule evaluation failed: %s", e.getMessage());
-                String severity = rule.getSeverity() != null ? rule.getSeverity() : "ERROR";
-
-                // Log error details at appropriate level based on severity
-                if ("CRITICAL".equalsIgnoreCase(severity)) {
-                    logger.error("CRITICAL rule evaluation error for '{}': {}", rule.getName(), e.getMessage());
-                } else if ("WARNING".equalsIgnoreCase(severity)) {
-                    logger.info("Rule evaluation warning for '{}': {}", rule.getName(), e.getMessage());
-                } else {
-                    logger.info("Rule evaluation error for '{}': {}", rule.getName(), e.getMessage());
-                }
-
-                // Always log full exception details at DEBUG level for troubleshooting
-                logger.debug("Full exception details for rule '{}':", rule.getName(), e);
-
-                // Return structured error result with severity from YAML configuration
-                return RuleResult.error(rule.getName(), errorMessage, severity);
-            }
-        }
-
-        logger.info("No rules matched");
-        return RuleResult.noMatch();
+        // Delegate to the unified evaluator for consistent behavior
+        return unifiedEvaluator.evaluateRules(rules, facts);
     }
 
     /**

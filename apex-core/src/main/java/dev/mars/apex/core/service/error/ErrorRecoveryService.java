@@ -97,7 +97,7 @@ public class ErrorRecoveryService {
     
     private RecoveryResult handleContinueWithDefault(String ruleName, Exception originalException) {
         LOGGER.info("Using default recovery for rule: " + ruleName);
-        RuleResult defaultResult = RuleResult.noMatch(ruleName, "Rule evaluation failed, recovered with default result", "INFO");
+        RuleResult defaultResult = RuleResult.noMatch(ruleName, "No matching rules found", "INFO");
         return RecoveryResult.recovered(ruleName, defaultResult, "Continued with default result");
     }
     
