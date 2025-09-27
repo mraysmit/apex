@@ -23,7 +23,7 @@ metadata:
 data-sources:
   - name: "settlement-database"
     type: "database"
-    sourceType: "h2"
+    source-type: "h2"
     enabled: true
     description: "Settlement instruction database for multi-parameter lookup demo"
 

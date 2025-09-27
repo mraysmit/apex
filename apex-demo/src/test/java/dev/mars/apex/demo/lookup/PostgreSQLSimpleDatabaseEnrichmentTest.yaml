@@ -22,7 +22,7 @@ metadata:
 data-sources:
   - name: "customer-database"
     type: "database"
-    sourceType: "h2"
+    source-type: "h2"
     enabled: true
     description: "Customer database using H2 in PostgreSQL compatibility mode"
 

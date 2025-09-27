@@ -36,14 +36,16 @@ enrichments:
   # ========================================================================
   - id: "customer-segments-processing"
     name: "customer-segments-processing"
-    type: "field-enrichment"
+    type: "calculation-enrichment"
     description: "Process customer segments using data-driven configuration"
     enabled: true
     condition: "true"                    # Always execute this enrichment
+    calculation-config:
+      expression: "#segmentType != null ? ('Customer segments processed: Membership-based segmentation and profile enrichment applied for ' + #segmentType + ' tier') : 'Customer segments processed: Membership-based segmentation and profile enrichment applied'"
+      result-field: "customerSegmentsResult"
     field-mappings:
-      - source-field: "segmentType"     # Input: Customer segment type
-        target-field: "customerSegmentsResult"  # Output: Segmentation result
-        default-value: "Customer segments processed: Membership-based segmentation and profile enrichment applied"
+      - source-field: "customerSegmentsResult"
+        target-field: "customerSegmentsResult"
 
   # ========================================================================
   # ENRICHMENT 2: Customer Field Actions Processing (DISABLED)
@@ -90,12 +92,14 @@ enrichments:
   # ========================================================================
   - id: "customer-transformer-summary"
     name: "customer-transformer-summary"
-    type: "field-enrichment"
+    type: "calculation-enrichment"
     description: "Generate customer transformer summary"
     enabled: true
     condition: "true"                    # Always execute this enrichment
+    calculation-config:
+      expression: "#transformerType != null ? ('Customer transformer completed using real APEX services for ' + #transformerType + ' processing') : 'Customer transformer completed using real APEX services'"
+      result-field: "customerTransformerSummary"
     field-mappings:
-      - source-field: "transformerType" # Input: Transformer type identifier
-        target-field: "customerTransformerSummary"  # Output: Transformation summary
-        default-value: "Customer transformer completed using real APEX services"
+      - source-field: "customerTransformerSummary"
+        target-field: "customerTransformerSummary"
 

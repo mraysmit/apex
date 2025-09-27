@@ -1,0 +1,40 @@
+# ============================================================================
+# APEX YAML Configuration File - Rules Only
+# ============================================================================
+# Used by: BasicYamlRuleGroupProcessingTest$AndGroupTests.testAndGroupOneFalse
+# Purpose: Separate rules file for multi-file rule group testing
+# Status: Test configuration for separate file rule group processing
+# ============================================================================
+
+metadata:
+  id: "separate-rules-only"
+  name: "Separate Rules Only"
+  version: "1.0.0"
+  description: "Rules-only configuration for testing separate file loading"
+  type: "rule-config"
+  author: "APEX Demo Team"
+  created-date: "2025-01-15"
+  tags: ["demo", "rule-groups", "separate-files", "rules-only"]
+
+rules:
+  # Simple rules for testing rule group logic
+  - id: "separate-rule-1"
+    name: "Separate Rule 1"
+    condition: "true"  # Always true
+    message: "Separate Rule 1 passed"
+    severity: "INFO"
+    priority: 1
+
+  - id: "separate-rule-2"
+    name: "Separate Rule 2"
+    condition: "false"  # Always false
+    message: "Separate Rule 2 failed"
+    severity: "INFO"
+    priority: 2
+
+  - id: "separate-rule-3"
+    name: "Separate Rule 3"
+    condition: "true"  # Always true
+    message: "Separate Rule 3 passed"
+    severity: "INFO"
+    priority: 3

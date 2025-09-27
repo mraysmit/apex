@@ -21,7 +21,7 @@ metadata:
 dataSources:
   - name: "customer-database"
     type: "database"
-    sourceType: "postgresql"
+    source-type: "postgresql"
     enabled: true
     description: "Customer database for profile enrichment"
     
@@ -49,7 +49,7 @@ dataSources:
       
   - name: "transaction-database"
     type: "database"
-    sourceType: "h2"
+    source-type: "h2"
     enabled: true
     description: "Transaction database for financial data"
     

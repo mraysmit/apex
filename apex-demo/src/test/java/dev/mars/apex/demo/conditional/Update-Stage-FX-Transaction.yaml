@@ -25,7 +25,7 @@ data-sources:
     enabled: true
     description: "H2 local database for test"
     configuration:
-      sourceType: "h2"
+      source-type "h2"
       url: "jdbc:h2:./target/h2-demo/fx_transaction_demo"
       username: "sa"
       password: ""

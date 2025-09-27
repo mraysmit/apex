@@ -27,7 +27,7 @@ metadata:
 data-sources:
   - name: "postgresql-trading-database"
     type: "database"
-    sourceType: "postgresql"
+    source-type: "postgresql"
     enabled: true
     description: "Trading and settlement data from real PostgreSQL database via Testcontainers"
 

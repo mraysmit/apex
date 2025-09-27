@@ -1,0 +1,190 @@
+metadata:
+  id: "comprehensive-financial-settlement-demo-test"
+  name: "Comprehensive Financial Settlement Demo Test"
+  description: "Test configuration for cross-border and high-value transaction processing"
+  version: "1.0.0"
+  author: "APEX Demo Team"
+
+enrichments:
+  - id: "cross-border-classification"
+    name: "Cross-Border Classification"
+    description: "Classifies cross-border settlement requirements"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: |
+        #sourceCurrency != null && #targetCurrency != null && !#sourceCurrency.equals(#targetCurrency) ? 'CROSS_BORDER_REQUIRED' :
+        #sourceMarket != null && #targetMarket != null && !#sourceMarket.equals(#targetMarket) ? 'CROSS_BORDER_REQUIRED' :
+        'DOMESTIC_SETTLEMENT'
+      result-field: "crossBorderClassification"
+    field-mappings:
+      - source-field: "crossBorderClassification"
+        target-field: "crossBorderClassification"
+
+  - id: "regulatory-compliance-check"
+    name: "Regulatory Compliance Check"
+    description: "Checks regulatory compliance for cross-border transactions"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: |
+        #crossBorderClassification != null && #crossBorderClassification.equals('CROSS_BORDER_REQUIRED') ? 'COMPLIANCE_REVIEW_REQUIRED' :
+        'STANDARD_PROCESSING'
+      result-field: "complianceStatus"
+    field-mappings:
+      - source-field: "complianceStatus"
+        target-field: "complianceStatus"
+
+  - id: "high-value-processing"
+    name: "High-Value Processing"
+    description: "Special processing for high-value transactions"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: |
+        #totalValue != null && #totalValue > 50000000 ? 'HIGH_VALUE_PROCESSING' :
+        #totalValue != null && #totalValue > 10000000 ? 'ENHANCED_MONITORING' :
+        'STANDARD_PROCESSING'
+      result-field: "highValueProcessing"
+    field-mappings:
+      - source-field: "highValueProcessing"
+        target-field: "highValueProcessing"
+
+  - id: "settlement-workflow-summary"
+    name: "Settlement Workflow Summary"
+    description: "Comprehensive settlement workflow summary"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: |
+        'Settlement processed for ' +
+        (#assetClass != null ? #assetClass : 'UNKNOWN') +
+        ' trade ' +
+        (#tradeId != null ? #tradeId : 'UNKNOWN') +
+        ' - Market: ' +
+        (#market != null ? #market : 'UNKNOWN') +
+        ' - Status: PROCESSED'
+      result-field: "settlementResult"
+    field-mappings:
+      - source-field: "settlementResult"
+        target-field: "settlementResult"
+
+  - id: "processing-time-estimate"
+    name: "Processing Time Estimate"
+    description: "Estimates settlement processing time"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: |
+        #highValueProcessing != null && #highValueProcessing.equals('HIGH_VALUE_PROCESSING') ? '24_HOURS' :
+        #complianceStatus != null && #complianceStatus.equals('COMPLIANCE_REVIEW_REQUIRED') ? '48_HOURS' :
+        #crossBorderClassification != null && #crossBorderClassification.equals('CROSS_BORDER_REQUIRED') ? '12_HOURS' :
+        '4_HOURS'
+      result-field: "processingTimeEstimate"
+    field-mappings:
+      - source-field: "processingTimeEstimate"
+        target-field: "processingTimeEstimate"
+
+  - id: "risk-assessment-enrichment"
+    name: "Risk Assessment Enrichment"
+    description: "Assesses settlement risk based on counterparty and amount"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: |
+        (#notional != null && #price != null && (#notional * #price) > 50000000) ? 'HIGH_RISK' :
+        #totalValue != null && #totalValue > 50000000 ? 'HIGH_RISK' :
+        #counterparty != null && #counterparty.contains('Goldman') ? 'LOW_RISK' :
+        #counterparty != null && #counterparty.contains('JPMorgan') ? 'LOW_RISK' :
+        'MEDIUM_RISK'
+      result-field: "riskAssessment"
+    field-mappings:
+      - source-field: "riskAssessment"
+        target-field: "riskAssessment"
+
+  - id: "settlement-convention-enrichment"
+    name: "Settlement Convention Enrichment"
+    description: "Determines settlement convention based on market and asset class"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: |
+        #market != null && #market.equals('US') && #assetClass != null && #assetClass.equals('FIXED_INCOME') ? 'T+1' :
+        #market != null && #market.equals('US') ? 'T+2' :
+        #market != null && #market.equals('GERMANY') ? 'T+2' :
+        'T+3'
+      result-field: "settlementConvention"
+    field-mappings:
+      - source-field: "settlementConvention"
+        target-field: "settlementConvention"
+
+  - id: "regulatory-compliance-enrichment"
+    name: "Regulatory Compliance Enrichment"
+    description: "Determines regulatory compliance requirements based on market"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: |
+        #market != null && #market.equals('US') ? 'SEC_COMPLIANCE_REQUIRED' :
+        #market != null && #market.equals('GERMANY') ? 'BAFIN_COMPLIANCE_REQUIRED' :
+        #market != null && #market.equals('UK') ? 'FCA_COMPLIANCE_REQUIRED' :
+        'STANDARD_COMPLIANCE'
+      result-field: "regulatoryCompliance"
+    field-mappings:
+      - source-field: "regulatoryCompliance"
+        target-field: "regulatoryCompliance"
+
+  - id: "currency-conversion-enrichment"
+    name: "Currency Conversion Enrichment"
+    description: "Determines currency conversion requirements"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: |
+        #sourceCurrency != null && #targetCurrency != null && !#sourceCurrency.equals(#targetCurrency) ?
+        (#sourceCurrency + '/' + #targetCurrency + ' conversion required - Rate: ' +
+        (#sourceCurrency.equals('USD') && #targetCurrency.equals('EUR') ? '0.85' :
+         #sourceCurrency.equals('EUR') && #targetCurrency.equals('USD') ? '1.18' :
+         #sourceCurrency.equals('GBP') && #targetCurrency.equals('USD') ? '1.25' : '1.00')) :
+        'NO_CONVERSION_REQUIRED'
+      result-field: "currencyConversion"
+    field-mappings:
+      - source-field: "currencyConversion"
+        target-field: "currencyConversion"
+
+rules:
+  - id: "cross-border-amount-limit"
+    name: "Cross-Border Amount Limit"
+    description: "Validates cross-border transaction limits"
+    type: "validation-rule"
+    condition: "#crossBorderClassification == null || !#crossBorderClassification.equals('CROSS_BORDER_REQUIRED') || (#settlementAmount != null && #settlementAmount <= 500000000)"
+    error-message: "Cross-border transactions cannot exceed $500M"
+    severity: "ERROR"
+
+  - id: "high-value-authorization"
+    name: "High-Value Authorization"
+    description: "Requires authorization for high-value transactions"
+    type: "validation-rule"
+    condition: "#settlementAmount == null || #settlementAmount <= 100000000 || #authorizationCode != null"
+    error-message: "High-value transactions require authorization code"
+    severity: "ERROR"
+
+  - id: "compliance-documentation"
+    name: "Compliance Documentation"
+    description: "Ensures compliance documentation is present"
+    type: "validation-rule"
+    condition: "#complianceStatus == null || !#complianceStatus.equals('COMPLIANCE_REVIEW_REQUIRED') || #complianceDocuments != null"
+    error-message: "Compliance review requires supporting documentation"
+    severity: "WARNING"
+
+rule-groups:
+  - id: "cross-border-validation-group"
+    name: "Cross-Border Validation Group"
+    description: "Cross-border transaction validation rules"
+    type: "and-group"
+    rules:
+      - "cross-border-amount-limit"
+      - "high-value-authorization"
+      - "compliance-documentation"
+
+  - id: "settlement-processing-group"
+    name: "Settlement Processing Group"
+    description: "Settlement processing enrichments"
+    type: "sequential-group"
+    rules:
+      - "cross-border-classification"
+      - "regulatory-compliance-check"
+      - "high-value-processing"
+      - "processing-time-estimate"
+      - "settlement-workflow-summary"

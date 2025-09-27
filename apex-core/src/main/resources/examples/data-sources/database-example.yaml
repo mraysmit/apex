@@ -16,7 +16,7 @@ dataSources:
   # PostgreSQL production database
   - name: "user-database"
     type: "database"
-    sourceType: "postgresql"
+    source-type: "postgresql"
     enabled: true
     description: "Primary user database for production"
     tags:
@@ -76,7 +76,7 @@ dataSources:
   # MySQL analytics database
   - name: "analytics-database"
     type: "database"
-    sourceType: "mysql"
+    source-type: "mysql"
     enabled: true
     description: "Analytics database for reporting"
     tags:
@@ -155,7 +155,7 @@ dataSources:
   # H2 file-based database for testing (RECOMMENDED)
   - name: "test-database-file"
     type: "database"
-    sourceType: "h2"
+    source-type: "h2"
     enabled: false  # Only enabled in test environments
     description: "File-based H2 database for testing with true data sharing"
     tags:
@@ -175,7 +175,7 @@ dataSources:
   # H2 in-memory database (DEPRECATED - creates isolated instances)
   - name: "test-database-memory"
     type: "database"
-    sourceType: "h2"
+    source-type: "h2"
     enabled: false  # Only enabled in test environments
     description: "In-memory database for testing (WARNING: creates isolated instances)"
     tags:
@@ -196,7 +196,7 @@ dataSources:
   # H2 with custom parameters (ENHANCED - NEW!)
   - name: "test-database-custom"
     type: "database"
-    sourceType: "h2"
+    source-type: "h2"
     enabled: false  # Only enabled in test environments
     description: "H2 database with custom parameters for performance and debugging"
     tags:
@@ -220,7 +220,7 @@ dataSources:
   # H2 in-memory with custom parameters
   - name: "test-database-memory-custom"
     type: "database"
-    sourceType: "h2"
+    source-type: "h2"
     enabled: false
     description: "In-memory H2 with custom parameters for testing"
     tags:

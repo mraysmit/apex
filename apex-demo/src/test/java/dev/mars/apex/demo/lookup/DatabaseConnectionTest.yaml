@@ -26,7 +26,7 @@ metadata:
 data-sources:
   - name: "connection-test-database"
     type: "database"
-    sourceType: "h2"
+    source-type: "h2"
     connection:
       # H2 file-based database for connection testing
       database: "./target/h2-demo/apex_demo_connection_test"

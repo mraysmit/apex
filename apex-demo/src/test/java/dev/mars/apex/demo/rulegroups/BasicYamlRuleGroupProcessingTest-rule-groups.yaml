@@ -1,0 +1,53 @@
+# ============================================================================
+# APEX YAML Configuration File - Rule Groups Only
+# ============================================================================
+# Used by: BasicYamlRuleGroupProcessingTest$AndGroupTests.testAndGroupOneFalse
+# Purpose: Separate rule groups file for multi-file rule group testing
+# Status: Test configuration for separate file rule group processing
+# ============================================================================
+
+metadata:
+  id: "separate-rule-groups-only"
+  name: "Separate Rule Groups Only"
+  version: "1.0.0"
+  description: "Rule groups-only configuration for testing separate file loading"
+  type: "rule-config"
+  author: "APEX Demo Team"
+  created-date: "2025-01-15"
+  tags: ["demo", "rule-groups", "separate-files", "groups-only"]
+
+rule-groups:
+  # AND group with all true rules (separate-rule-1 and separate-rule-3)
+  - id: "separate-and-group"
+    name: "Separate AND Group"
+    description: "AND group with true rules only"
+    operator: "AND"
+    stop-on-first-failure: false
+    priority: 10
+    rule-ids:
+      - "separate-rule-1"
+      - "separate-rule-3"
+
+  # OR group with mixed rules (separate-rule-1, separate-rule-2, separate-rule-3)
+  - id: "separate-or-group"
+    name: "Separate OR Group"
+    description: "OR group with mixed true/false rules"
+    operator: "OR"
+    stop-on-first-failure: false
+    priority: 20
+    rule-ids:
+      - "separate-rule-1"
+      - "separate-rule-2"
+      - "separate-rule-3"
+
+  # AND group with mixed rules (separate-rule-1, separate-rule-2, separate-rule-3)
+  - id: "separate-and-mixed-group"
+    name: "Separate AND Mixed Group"
+    description: "AND group with mixed true/false rules"
+    operator: "AND"
+    stop-on-first-failure: false
+    priority: 30
+    rule-ids:
+      - "separate-rule-1"
+      - "separate-rule-2"
+      - "separate-rule-3"

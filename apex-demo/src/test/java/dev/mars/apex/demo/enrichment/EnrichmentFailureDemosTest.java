@@ -71,7 +71,7 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
         
         try {
             // Load YAML configuration using real APEX services (following existing patterns)
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("dev/mars/apex/demo/lookup/EnrichmentFailureDemosTest.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/EnrichmentFailureDemosTest.yaml");
             assertNotNull(config, "Configuration should be loaded successfully");
             logger.info("✅ Configuration loaded: {}", config.getMetadata().getName());
 
@@ -126,7 +126,7 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
         
         try {
             // Load YAML configuration using real APEX services
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("dev/mars/apex/demo/lookup/EnrichmentFailureDemosTest.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/EnrichmentFailureDemosTest.yaml");
             assertNotNull(config, "Configuration should be loaded successfully");
 
             // Create test data that will trigger external data source lookup
@@ -178,7 +178,7 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
         
         try {
             // Load YAML configuration using real APEX services
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("dev/mars/apex/demo/lookup/EnrichmentFailureDemosTest.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/EnrichmentFailureDemosTest.yaml");
             assertNotNull(config, "Configuration should be loaded successfully");
 
             // Create test data with invalid formats and corrupted data
@@ -236,7 +236,7 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
         
         try {
             // Load YAML configuration using real APEX services
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("dev/mars/apex/demo/lookup/EnrichmentFailureDemosTest.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/EnrichmentFailureDemosTest.yaml");
             assertNotNull(config, "Configuration should be loaded successfully");
 
             // Create test data that will trigger multiple failure scenarios

@@ -101,6 +101,13 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             // Setup database with required tables and data
             setupCustomerDatabase();
 
+            var configResult = safeLoadYamlConfiguration("src/test/java/dev/mars/apex/demo/lookup/CustomerProfileEnrichmentTest.yaml");
+            if (!configResult.isTriggered()) {
+                logger.error("CRITICAL ERROR: Configuration loading failed: {}", configResult.getFailureMessages());
+                logger.error("Cannot proceed with simple field lookup test");
+                logger.error("Test will be skipped due to configuration loading failure");
+                return;
+            }
             var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/CustomerProfileEnrichmentTest.yaml");
 
             Map<String, Object> testData = new HashMap<>();
@@ -131,6 +138,13 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             // Setup database with required tables and data
             setupCustomerDatabase();
 
+            var configResult = safeLoadYamlConfiguration("src/test/java/dev/mars/apex/demo/lookup/ComprehensiveLookupTest.yaml");
+            if (!configResult.isTriggered()) {
+                logger.error("CRITICAL ERROR: Configuration loading failed: {}", configResult.getFailureMessages());
+                logger.error("Cannot proceed with compound key lookup test");
+                logger.error("Test will be skipped due to configuration loading failure");
+                return;
+            }
             var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/ComprehensiveLookupTest.yaml");
 
             Map<String, Object> testData = new HashMap<>();
@@ -162,6 +176,13 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             // Setup database with required tables and data
             setupCustomerDatabase();
 
+            var configResult = safeLoadYamlConfiguration("src/test/java/dev/mars/apex/demo/lookup/ComprehensiveLookupTest.yaml");
+            if (!configResult.isTriggered()) {
+                logger.error("CRITICAL ERROR: Configuration loading failed: {}", configResult.getFailureMessages());
+                logger.error("Cannot proceed with nested field lookup test");
+                logger.error("Test will be skipped due to configuration loading failure");
+                return;
+            }
             var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/ComprehensiveLookupTest.yaml");
 
             Map<String, Object> testData = new HashMap<>();
@@ -192,6 +213,13 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             // Setup database with required tables and data
             setupCustomerDatabase();
 
+            var configResult = safeLoadYamlConfiguration("src/test/java/dev/mars/apex/demo/lookup/ComprehensiveLookupTest.yaml");
+            if (!configResult.isTriggered()) {
+                logger.error("CRITICAL ERROR: Configuration loading failed: {}", configResult.getFailureMessages());
+                logger.error("Cannot proceed with multi-parameter lookup test");
+                logger.error("Test will be skipped due to configuration loading failure");
+                return;
+            }
             var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/ComprehensiveLookupTest.yaml");
 
             Map<String, Object> testData = new HashMap<>();
@@ -224,6 +252,13 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             // Setup database with required tables and data
             setupCustomerDatabase();
 
+            var configResult = safeLoadYamlConfiguration("src/test/java/dev/mars/apex/demo/lookup/ComprehensiveLookupTest.yaml");
+            if (!configResult.isTriggered()) {
+                logger.error("CRITICAL ERROR: Configuration loading failed: {}", configResult.getFailureMessages());
+                logger.error("Cannot proceed with file-based lookup test");
+                logger.error("Test will be skipped due to configuration loading failure");
+                return;
+            }
             var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/ComprehensiveLookupTest.yaml");
 
             Map<String, Object> testData = new HashMap<>();
@@ -254,6 +289,13 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             // Setup database with required tables and data
             setupCustomerDatabase();
 
+            var configResult = safeLoadYamlConfiguration("src/test/java/dev/mars/apex/demo/lookup/ComprehensiveLookupTest.yaml");
+            if (!configResult.isTriggered()) {
+                logger.error("CRITICAL ERROR: Configuration loading failed: {}", configResult.getFailureMessages());
+                logger.error("Cannot proceed with external data source lookup test");
+                logger.error("Test will be skipped due to configuration loading failure");
+                return;
+            }
             var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/ComprehensiveLookupTest.yaml");
 
             Map<String, Object> testData = new HashMap<>();

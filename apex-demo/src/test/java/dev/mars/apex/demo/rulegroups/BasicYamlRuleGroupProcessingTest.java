@@ -71,8 +71,8 @@ public class BasicYamlRuleGroupProcessingTest {
             logInfo("Testing AND group with all true rules using separate files");
 
             try {
-                // Load using classpath resources for separate files
-                RulesEngine engine = rulesEngineService.createRulesEngineFromClasspath("separate-rules-test/combined-config.yaml");
+                // Load using file path following apex-demo pattern
+                RulesEngine engine = rulesEngineService.createRulesEngineFromFile("src/test/java/dev/mars/apex/demo/rulegroups/BasicYamlRuleGroupProcessingTest-combined-config.yaml");
 
                 RuleGroup ruleGroup = engine.getConfiguration().getRuleGroupById("separate-and-group");
                 assertNotNull(ruleGroup, "Rule group should be found");
@@ -105,9 +105,9 @@ public class BasicYamlRuleGroupProcessingTest {
 
             try {
                 // Load using multi-file approach with separate rules and rule groups files
-                // Get the absolute paths to the test resources
-                String rulesPath = getClass().getClassLoader().getResource("separate-rules-test/rules.yaml").getPath();
-                String ruleGroupsPath = getClass().getClassLoader().getResource("separate-rules-test/rule-groups.yaml").getPath();
+                // Use file paths following apex-demo pattern
+                String rulesPath = "src/test/java/dev/mars/apex/demo/rulegroups/BasicYamlRuleGroupProcessingTest-rules.yaml";
+                String ruleGroupsPath = "src/test/java/dev/mars/apex/demo/rulegroups/BasicYamlRuleGroupProcessingTest-rule-groups.yaml";
 
                 RulesEngine engine = rulesEngineService.createRulesEngineFromMultipleFiles(
                     rulesPath,

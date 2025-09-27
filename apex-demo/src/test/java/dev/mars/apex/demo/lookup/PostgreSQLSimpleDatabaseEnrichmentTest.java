@@ -171,6 +171,13 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
                 "src/test/java/dev/mars/apex/demo/lookup/PostgreSQLSimpleDatabaseEnrichmentTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
 
+            // Verify data sources are properly configured
+            if (config.getDataSources() != null && !config.getDataSources().isEmpty()) {
+                logger.info("Found {} data sources in configuration", config.getDataSources().size());
+            } else {
+                logger.warn("No data sources found in configuration!");
+            }
+
             // Create test data that triggers the enrichment condition
             Map<String, Object> testData = new HashMap<>();
             testData.put("customerId", "CUST001");

@@ -15,7 +15,7 @@ dataSources:
   # Primary cache for frequently accessed data
   - name: "primary-cache"
     type: "cache"
-    sourceType: "memory"
+    source-type: "memory"
     enabled: true
     description: "Primary in-memory cache for hot data"
     tags:
@@ -45,7 +45,7 @@ dataSources:
   # Session cache for user sessions
   - name: "session-cache"
     type: "cache"
-    sourceType: "memory"
+    source-type: "memory"
     enabled: true
     description: "User session cache"
     tags:
@@ -72,7 +72,7 @@ dataSources:
   # User database (primary data source)
   - name: "user-database"
     type: "database"
-    sourceType: "postgresql"
+    source-type: "postgresql"
     enabled: true
     description: "Primary user database"
     tags:

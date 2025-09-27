@@ -1,0 +1,76 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: BasicYamlRuleGroupProcessingTest$AndGroupTests.testAndGroupAllTrue
+# Purpose: Combined configuration for separate rules testing with rule groups
+# Status: Test configuration for rule group processing
+# ============================================================================
+
+metadata:
+  id: "separate-rules-combined-config"
+  name: "Separate Rules Combined Configuration"
+  version: "1.0.0"
+  description: "Combined configuration for testing separate rule group processing"
+  type: "rule-config"
+  author: "APEX Demo Team"
+  created-date: "2025-01-15"
+  tags: ["demo", "rule-groups", "separate-rules"]
+
+rules:
+  # Simple rules for testing rule group logic
+  - id: "separate-rule-1"
+    name: "Separate Rule 1"
+    condition: "true"  # Always true
+    message: "Separate Rule 1 passed"
+    severity: "INFO"
+    priority: 1
+
+  - id: "separate-rule-2"
+    name: "Separate Rule 2"
+    condition: "false"  # Always false
+    message: "Separate Rule 2 failed"
+    severity: "INFO"
+    priority: 2
+
+  - id: "separate-rule-3"
+    name: "Separate Rule 3"
+    condition: "true"  # Always true
+    message: "Separate Rule 3 passed"
+    severity: "INFO"
+    priority: 3
+
+rule-groups:
+  # AND group with all true rules (separate-rule-1 and separate-rule-3)
+  - id: "separate-and-group"
+    name: "Separate AND Group"
+    description: "AND group with true rules only"
+    operator: "AND"
+    stop-on-first-failure: false
+    priority: 10
+    rule-ids:
+      - "separate-rule-1"
+      - "separate-rule-3"
+
+  # OR group with mixed rules (separate-rule-1, separate-rule-2, separate-rule-3)
+  - id: "separate-or-group"
+    name: "Separate OR Group"
+    description: "OR group with mixed true/false rules"
+    operator: "OR"
+    stop-on-first-failure: false
+    priority: 20
+    rule-ids:
+      - "separate-rule-1"
+      - "separate-rule-2"
+      - "separate-rule-3"
+
+  # AND group with mixed rules (separate-rule-1, separate-rule-2, separate-rule-3)
+  - id: "separate-and-mixed-group"
+    name: "Separate AND Mixed Group"
+    description: "AND group with mixed true/false rules"
+    operator: "AND"
+    stop-on-first-failure: false
+    priority: 30
+    rule-ids:
+      - "separate-rule-1"
+      - "separate-rule-2"
+      - "separate-rule-3"

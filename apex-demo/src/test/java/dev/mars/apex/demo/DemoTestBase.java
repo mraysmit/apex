@@ -22,6 +22,7 @@ import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
@@ -31,6 +32,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.util.HashMap;
@@ -98,6 +103,46 @@ public abstract class DemoTestBase {
             logger.error("** Failed to load YAML configuration: {}", yamlPath, e);
             fail("Failed to load YAML configuration: " + yamlPath + " - " + e.getMessage());
             return null;
+        }
+    }
+
+    /**
+     * Safely load YAML configuration from file path with proper error handling.
+     * Returns RuleResult with error details instead of throwing exceptions.
+     * This follows APEX's error handling architecture.
+     */
+    protected RuleResult safeLoadYamlConfiguration(String filePath) {
+        try {
+            logger.info("Loading YAML configuration from file: {}", filePath);
+            YamlRuleConfiguration config = yamlLoader.loadFromFile(filePath);
+
+            if (config == null) {
+                List<String> failureMessages = new ArrayList<>();
+                failureMessages.add("YAML configuration loaded but is null: " + filePath);
+                return RuleResult.evaluationFailure(failureMessages, new HashMap<>(),
+                    "configuration-loading", "Configuration loading returned null");
+            }
+
+            logger.info("** YAML configuration loaded successfully: {}", filePath);
+            return RuleResult.evaluationSuccess(new HashMap<>(), "configuration-loading", "Configuration loaded successfully");
+
+        } catch (YamlConfigurationException e) {
+            logger.error("Configuration loading FAILED for file: {} - {}", filePath, e.getMessage());
+            List<String> failureMessages = new ArrayList<>();
+            failureMessages.add("CRITICAL ERROR: Failed to load configuration from file: " + filePath);
+            failureMessages.add("Error details: " + e.getMessage());
+
+            return RuleResult.evaluationFailure(failureMessages, new HashMap<>(),
+                "configuration-loading", "CRITICAL: Configuration file loading failed: " + e.getMessage());
+
+        } catch (Exception e) {
+            logger.error("Unexpected error loading YAML configuration: {}", e.getMessage(), e);
+            List<String> failureMessages = new ArrayList<>();
+            failureMessages.add("Unexpected error loading configuration from file: " + filePath);
+            failureMessages.add("Error: " + e.getMessage());
+
+            return RuleResult.evaluationFailure(failureMessages, new HashMap<>(),
+                "configuration-loading", "Unexpected configuration loading error: " + e.getMessage());
         }
     }
 

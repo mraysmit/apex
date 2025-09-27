@@ -65,7 +65,7 @@ class ComprehensiveFinancialSettlementDemoTest extends DemoTestBase {
         
         try {
             // Load YAML configuration using real APEX services
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("comprehensivefinancialsettlementdemo.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/enrichment/comprehensivefinancialsettlementdemo.yaml");
             assertNotNull(config, "YAML configuration should be loaded successfully");
             logger.info("✅ Configuration loaded successfully: " + config.getMetadata().getName());
             
@@ -140,7 +140,7 @@ class ComprehensiveFinancialSettlementDemoTest extends DemoTestBase {
         
         try {
             // Load YAML configuration using real APEX services
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("test-configs/comprehensivefinancialsettlementdemo-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/enrichment/test-configs/comprehensivefinancialsettlementdemo-test.yaml");
             assertNotNull(config, "YAML configuration should be loaded successfully");
             
             // Create test data for cross-border settlement processing
@@ -214,7 +214,7 @@ class ComprehensiveFinancialSettlementDemoTest extends DemoTestBase {
         
         try {
             // Load YAML configuration using real APEX services
-            YamlRuleConfiguration config = yamlLoader.loadFromClasspath("test-configs/comprehensivefinancialsettlementdemo-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/enrichment/test-configs/comprehensivefinancialsettlementdemo-test.yaml");
             assertNotNull(config, "YAML configuration should be loaded successfully");
             
             // Create test data for high-value transaction processing

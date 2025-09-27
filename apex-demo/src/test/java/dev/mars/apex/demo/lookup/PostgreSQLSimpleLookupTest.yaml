@@ -26,7 +26,7 @@ metadata:
 data-sources:
   - name: "postgresql-customer-database"
     type: "database"
-    sourceType: "postgresql"
+    source-type: "postgresql"
     enabled: true
     description: "Customer master data from real PostgreSQL database via Testcontainers"
 

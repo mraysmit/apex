@@ -8,7 +8,7 @@ metadata:
 data-sources:
   - name: "currency-validation-database"
     type: "database"
-    sourceType: "h2"
+    source-type: "h2"
     connection:
       database: "./target/h2-demo/currency_validation"
       username: "sa"

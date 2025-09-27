@@ -105,32 +105,36 @@ enrichments:
   - id: "enrichment-completeness-summary"
     name: "Enrichment Completeness Summary"
     description: "Summarizes overall enrichment success and failure status"
-    type: "field-enrichment"
+    type: "calculation-enrichment"
     enabled: true
     condition: "true"
 
+    calculation-config:
+      expression: |
+        (#requiredFieldValidationResult != null && #requiredFieldValidationResult == 'VALID' &&
+         #dataQualityScore != null && #dataQualityScore == 'HIGH' &&
+         #amountValidationResult != null && #amountValidationResult == 'VALID') ? 'ENRICHMENT_SUCCESS' : 'ENRICHMENT_FAILED'
+      result-field: "enrichmentSummary"
     field-mappings:
       - source-field: "enrichmentSummary"
         target-field: "enrichmentSummary"
-        expression: |
-          (#requiredFieldValidationResult == 'VALID' &&
-           #dataQualityScore == 'HIGH' &&
-           #amountValidationResult == 'VALID') ? 'ENRICHMENT_SUCCESS' : 'ENRICHMENT_FAILED'
          
   - id: "failure-recovery-strategy"
     name: "Failure Recovery Strategy"
     description: "Determines appropriate recovery strategy based on failure type"
-    type: "field-enrichment"
+    type: "calculation-enrichment"
     enabled: true
     condition: "#recoveryScenario == 'COMPREHENSIVE_FAILURE'"
 
+    calculation-config:
+      expression: |
+        (#customerId == null && #amount != null && #amount < 0) ? 'DATA_CORRECTION_REQUIRED' :
+        (#customerId == null) ? 'MISSING_REQUIRED_DATA' :
+        (#amount < 0) ? 'INVALID_BUSINESS_VALUE' : 'GRACEFUL_DEGRADATION'
+      result-field: "recoveryStrategy"
     field-mappings:
       - source-field: "recoveryStrategy"
         target-field: "recoveryStrategy"
-        expression: |
-          (#customerId == null && #amount != null && #amount < 0) ? 'DATA_CORRECTION_REQUIRED' :
-          (#customerId == null) ? 'MISSING_REQUIRED_DATA' :
-          (#amount < 0) ? 'INVALID_BUSINESS_VALUE' : 'GRACEFUL_DEGRADATION'
 
 # Validation rules that will trigger enrichment-related failures
 validations:

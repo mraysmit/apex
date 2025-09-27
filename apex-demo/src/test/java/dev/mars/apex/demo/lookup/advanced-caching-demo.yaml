@@ -26,7 +26,7 @@ metadata:
 data-sources:
   - name: "customer-database-advanced-cache"
     type: "database"
-    sourceType: "h2"
+    source-type: "h2"
     enabled: true
     description: "Customer database with advanced parameter-aware caching"
 

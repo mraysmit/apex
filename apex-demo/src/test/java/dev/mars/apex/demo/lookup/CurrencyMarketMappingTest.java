@@ -368,6 +368,13 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         // Load H2-specific YAML configuration for currency validation
         try {
             logger.debug("Loading H2-specific YAML configuration: CurrencyMarketMappingTest-h2.yaml");
+            var configResult = safeLoadYamlConfiguration("src/test/java/dev/mars/apex/demo/lookup/CurrencyMarketMappingTest-h2.yaml");
+            if (!configResult.isTriggered()) {
+                logger.error("CRITICAL ERROR: H2 configuration loading failed: {}", configResult.getFailureMessages());
+                logger.error("Cannot proceed with H2 database currency validation test");
+                logger.error("Test will be skipped due to configuration loading failure");
+                return;
+            }
             var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/CurrencyMarketMappingTest-h2.yaml");
             assertNotNull(config, "H2 YAML configuration should not be null");
             logger.debug("✓ H2 YAML configuration loaded successfully: {}", config.getMetadata().getName());
@@ -490,6 +497,8 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         logger.debug("H2 database currency validation test completed successfully");
             logger.info("✅ H2 database currency validation test completed successfully");
         } catch (Exception e) {
+            logger.error("CRITICAL ERROR: Failed to load H2 YAML configuration: {}", e.getMessage());
+            logger.error("H2 database currency validation test cannot proceed");
             fail("Failed to load H2 YAML configuration: " + e.getMessage());
         }
     }

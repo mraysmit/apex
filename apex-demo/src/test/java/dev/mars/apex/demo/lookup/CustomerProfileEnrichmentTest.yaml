@@ -26,7 +26,7 @@ metadata:
 data-sources:
   - name: "customer-database"
     type: "database"
-    sourceType: "h2"
+    source-type: "h2"
     connection:
       # H2 file-based database for true sharing between demo and APEX
       database: "./target/h2-demo/apex_demo_shared"
