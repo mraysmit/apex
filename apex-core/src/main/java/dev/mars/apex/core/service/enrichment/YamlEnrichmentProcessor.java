@@ -343,6 +343,19 @@ public class YamlEnrichmentProcessor {
             return targetObject;
             
         } catch (Exception e) {
+            // Phase 3A Enhancement: Check if calculation has a default-value for error recovery
+            if (calcConfig.getDefaultValue() != null) {
+                LOGGER.info("Using calculation default value for recovery: enrichment='" + enrichment.getId() +
+                    "', defaultValue='" + calcConfig.getDefaultValue() + "'");
+
+                // Set the default value in the result field
+                if (calcConfig.getResultField() != null) {
+                    setFieldValue(targetObject, calcConfig.getResultField(), calcConfig.getDefaultValue());
+                }
+
+                return targetObject;
+            }
+
             throw new EnrichmentException("Failed to process calculation enrichment", e);
         }
     }

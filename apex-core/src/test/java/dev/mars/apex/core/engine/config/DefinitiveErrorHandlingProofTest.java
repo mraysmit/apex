@@ -98,13 +98,13 @@ class DefinitiveErrorHandlingProofTest {
     @DisplayName("🎯 PROOF 2: Non-critical errors are logged and recovered gracefully")
     void testNonCriticalErrorsAreLoggedAndRecovered() {
         logger.info("📋 Testing non-critical error handling - should log error and recover");
-        
-        // Given: Rule with ERROR severity that will fail
+
+        // Given: Rule with WARNING severity that will fail (non-critical)
         Rule rule = new Rule(
-            "error-missing-property",
+            "warning-missing-property",
             "#data.nonExistentField != null",
             "Missing property test",
-            "ERROR"
+            "WARNING"
         );
         
         Map<String, Object> data = new HashMap<>();
@@ -267,7 +267,7 @@ class DefinitiveErrorHandlingProofTest {
         int nonCriticalErrorsRecovered = 0;
         
         // Test various error scenarios
-        String[] severities = {"CRITICAL", "ERROR", "WARNING"};
+        String[] severities = {"CRITICAL", "WARNING", "INFO"};
         String[] conditions = {
             "#data.missing.method()",
             "#data.nullField.toString()",

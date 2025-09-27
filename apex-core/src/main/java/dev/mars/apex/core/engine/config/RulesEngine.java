@@ -1,5 +1,6 @@
 package dev.mars.apex.core.engine.config;
 
+import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.Rule;
@@ -109,14 +110,30 @@ public class RulesEngine {
     public RulesEngine(RulesEngineConfiguration configuration, ExpressionParser parser,
                       ErrorRecoveryService errorRecoveryService, RulePerformanceMonitor performanceMonitor,
                       EnrichmentService enrichmentService) {
+        this(configuration, parser, errorRecoveryService, performanceMonitor, enrichmentService, new ErrorRecoveryConfig());
+    }
+
+    /**
+     * Create a new RulesEngine with the given configuration, expression parser, error recovery service, performance monitor, and custom error recovery config.
+     *
+     * @param configuration The configuration for this rules engine
+     * @param parser The expression parser to use
+     * @param errorRecoveryService The error recovery service to use for handling evaluation errors
+     * @param performanceMonitor The performance monitor to use for tracking rule evaluation metrics
+     * @param enrichmentService The enrichment service to use for processing enrichments (optional)
+     * @param errorRecoveryConfig The error recovery configuration to use
+     */
+    public RulesEngine(RulesEngineConfiguration configuration, ExpressionParser parser,
+                      ErrorRecoveryService errorRecoveryService, RulePerformanceMonitor performanceMonitor,
+                      EnrichmentService enrichmentService, ErrorRecoveryConfig errorRecoveryConfig) {
         this.configuration = configuration;
         this.parser = parser;
         this.errorRecoveryService = errorRecoveryService;
         this.performanceMonitor = performanceMonitor;
         this.enrichmentService = enrichmentService;
 
-        // Initialize the unified evaluator with the same components
-        this.unifiedEvaluator = new UnifiedRuleEvaluator(parser, errorRecoveryService, performanceMonitor);
+        // Initialize the unified evaluator with the provided error recovery configuration
+        this.unifiedEvaluator = new UnifiedRuleEvaluator(parser, errorRecoveryService, performanceMonitor, errorRecoveryConfig);
 
         // Initialize logging context
         LoggingContext.initializeContext();
@@ -126,6 +143,7 @@ public class RulesEngine {
         logger.debug("Using error recovery service: {}", errorRecoveryService.getClass().getSimpleName());
         logger.debug("Using performance monitor: {}", performanceMonitor.getClass().getSimpleName());
         logger.debug("Using enrichment service: {}", enrichmentService != null ? enrichmentService.getClass().getSimpleName() : "none");
+        logger.debug("Using error recovery config: enabled={}", errorRecoveryConfig.isEnabled());
     }
 
     /**

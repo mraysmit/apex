@@ -423,7 +423,7 @@ public class YamlRuleFactory {
 
         Rule createdRule = new Rule(ruleId, categories, name, condition, message, description,
                                    yamlRule.getPriority() != null ? yamlRule.getPriority() : 100,
-                                   severity, metadata);
+                                   severity, metadata, yamlRule.getDefaultValue());
 
         // Apply custom properties if available
         if (yamlRule.getCustomProperties() != null && !yamlRule.getCustomProperties().isEmpty()) {

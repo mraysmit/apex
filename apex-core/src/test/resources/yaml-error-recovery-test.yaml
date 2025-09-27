@@ -1,0 +1,70 @@
+# Test YAML configuration with optional error-recovery section
+# This demonstrates the new error-recovery configuration capabilities
+
+metadata:
+  id: "yaml-error-recovery-test"
+  name: "YAML Error Recovery Test Configuration"
+  version: "1.0"
+  description: "Test configuration demonstrating optional error-recovery section"
+  type: "test"
+
+# Optional error-recovery section - demonstrates new Phase 2 functionality
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+  metrics-enabled: true
+  default-strategy: "CONTINUE_WITH_DEFAULT"
+
+  # Severity-specific recovery policies
+  severity-policies:
+    ERROR:
+      recovery-enabled: false  # Backward compatible - no recovery for ERROR
+      strategy: "FAIL_FAST"
+
+    WARNING:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 1
+      retry-delay: 100
+
+    INFO:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+      retry-delay: 50
+
+# Simple rules to test error recovery behavior
+rules:
+  - id: "test-error-rule"
+    name: "test-error-rule"
+    condition: "#data.errorField != null"
+    severity: "ERROR"
+    description: "Error rule that should not recover (backward compatible)"
+
+  - id: "test-warning-rule"
+    name: "test-warning-rule"
+    condition: "#data.warningField != null"
+    severity: "WARNING"
+    description: "Warning rule that should recover from errors"
+
+  - id: "test-info-rule"
+    name: "test-info-rule"
+    condition: "#data.infoField != null"
+    severity: "INFO"
+    description: "Info rule that should recover from errors"
+
+# Simple enrichment to test error recovery in enrichment processing
+enrichments:
+  - id: "test-enrichment"
+    name: "Test Error Recovery Enrichment"
+    type: "calculation-enrichment"
+    description: "Test enrichment for error recovery"
+    condition: "#data != null"
+
+    calculation-config:
+      expression: "#data.value != null ? #data.value * 2 : 0"
+      result-field: "doubledValue"
+
+    field-mappings:
+      - source-field: "doubledValue"
+        target-field: "calculatedValue"

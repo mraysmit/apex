@@ -58,6 +58,9 @@ public class Rule implements RuleBase {
     private final int priority;
     private final RuleMetadata metadata;
 
+    // Phase 3A Enhancement: Default value for error recovery
+    private final Object defaultValue;
+
     /**
      * Create a new business rule with minimal information.
      * This constructor is provided for compatibility with the legacy Rule class.
@@ -92,6 +95,7 @@ public class Rule implements RuleBase {
         this.description = message; // Use message as description for backward compatibility
         this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.priority = 100; // Default priority
+        this.defaultValue = null; // No default value for backward compatibility
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
             .build();
@@ -137,6 +141,7 @@ public class Rule implements RuleBase {
         this.description = description;
         this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.priority = priority;
+        this.defaultValue = null; // No default value for backward compatibility
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
             .build();
@@ -207,6 +212,7 @@ public class Rule implements RuleBase {
         this.description = description;
         this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.priority = priority;
+        this.defaultValue = null; // No default value for backward compatibility
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
             .build();
@@ -251,6 +257,7 @@ public class Rule implements RuleBase {
         this.description = description;
         this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.priority = priority;
+        this.defaultValue = null; // No default value for backward compatibility
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
             .build();
@@ -299,6 +306,38 @@ public class Rule implements RuleBase {
         this.description = description;
         this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.priority = priority;
+        this.defaultValue = null; // No default value for backward compatibility
+        this.metadata = metadata != null ? metadata : RuleMetadata.builder().createdByUser("system").build();
+    }
+
+    /**
+     * Create a new business rule with full metadata support and default value for error recovery.
+     * This constructor supports Phase 3A enhancement for configurable error recovery.
+     *
+     * @param id The unique identifier of the rule
+     * @param categories The category objects of the rule
+     * @param name The name of the rule
+     * @param condition The SpEL condition that determines if the rule applies
+     * @param message The message to display when the rule applies
+     * @param description The description of what the rule does
+     * @param priority The priority of the rule (lower numbers = higher priority)
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @param metadata The extensible metadata for the rule
+     * @param defaultValue The default value to use for error recovery (null if no default)
+     */
+    public Rule(String id, Set<Category> categories, String name, String condition,
+                String message, String description, int priority, String severity,
+                RuleMetadata metadata, Object defaultValue) {
+        this.uuid = UUID.randomUUID();
+        this.id = id;
+        this.categories = new HashSet<>(categories);
+        this.name = name;
+        this.condition = condition;
+        this.message = message;
+        this.description = description;
+        this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
+        this.priority = priority;
+        this.defaultValue = defaultValue;
         this.metadata = metadata != null ? metadata : RuleMetadata.builder().createdByUser("system").build();
     }
 
@@ -402,6 +441,16 @@ public class Rule implements RuleBase {
      */
     public String getSeverity() {
         return severity;
+    }
+
+    /**
+     * Get the default value for error recovery.
+     * Phase 3A Enhancement: Returns the default value to use when rule evaluation fails.
+     *
+     * @return The default value for error recovery, or null if no default is specified
+     */
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 
     /**

@@ -1,0 +1,80 @@
+# Demo YAML Configuration - Default Value Enhancement
+# This demonstrates the new default-value functionality for rules and calculations
+
+metadata:
+  id: "demo-default-value"
+  name: "Default Value Enhancement Demo"
+  description: "Demonstrates default-value support in rules and calculations"
+  version: "1.0"
+
+rules:
+  # Rule with string default value
+  - id: "customer-validation"
+    name: "Customer Validation Rule"
+    condition: "#data.customer != null && #data.customer.name != null"
+    message: "Customer validation passed"
+    severity: "INFO"
+    default-value: "Customer validation skipped - using default"
+    
+  # Rule with boolean default value  
+  - id: "age-check"
+    name: "Age Verification Rule"
+    condition: "#data.customer.age >= 18"
+    message: "Customer is of legal age"
+    severity: "WARNING"
+    default-value: true
+    
+  # Rule with numeric default value
+  - id: "credit-score"
+    name: "Credit Score Rule"
+    condition: "#data.customer.creditScore >= 650"
+    message: "Credit score is acceptable"
+    severity: "ERROR"
+    default-value: 600
+
+enrichments:
+  # Calculation with default value
+  - id: "risk-calculation"
+    name: "Risk Score Calculation"
+    type: "calculation-enrichment"
+    condition: "#data.customer != null"
+    calculation-config:
+      expression: "#data.customer.creditScore * 0.7 + #data.customer.age * 0.3"
+      result-field: "riskScore"
+      default-value: 500.0
+    field-mappings:
+      - source-field: "riskScore"
+        target-field: "finalRiskScore"
+        default-value: 500.0
+
+  # Another calculation with string default
+  - id: "customer-tier"
+    name: "Customer Tier Assignment"
+    type: "calculation-enrichment"
+    condition: "#data.customer != null"
+    calculation-config:
+      expression: "#data.customer.creditScore > 750 ? 'PREMIUM' : 'STANDARD'"
+      result-field: "customerTier"
+      default-value: "UNKNOWN"
+    field-mappings:
+      - source-field: "customerTier"
+        target-field: "finalCustomerTier"
+        default-value: "UNKNOWN"
+
+# Optional error recovery configuration
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+  metrics-enabled: true
+  default-strategy: "CONTINUE_WITH_DEFAULT"
+  
+  severity-policies:
+    "ERROR":
+      recovery-enabled: false
+      strategy: "FAIL_FAST"
+    "WARNING":
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+    "INFO":
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"

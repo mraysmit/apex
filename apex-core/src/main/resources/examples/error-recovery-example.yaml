@@ -1,0 +1,132 @@
+# APEX Error Recovery Configuration Example
+# This demonstrates the new optional error-recovery section introduced in Phase 2
+
+metadata:
+  id: "error-recovery-example"
+  name: "Error Recovery Configuration Example"
+  version: "1.0"
+  description: "Demonstrates configurable error recovery by severity level"
+  type: "example"
+  author: "APEX Rules Engine"
+
+# Optional error-recovery section - NEW in Phase 2
+# When not present, the system uses backward-compatible defaults
+error-recovery:
+  # Global error recovery settings
+  enabled: true                    # Enable/disable error recovery globally
+  log-recovery-attempts: true      # Log recovery attempts for debugging
+  metrics-enabled: true            # Collect recovery metrics
+  default-strategy: "CONTINUE_WITH_DEFAULT"  # Default recovery strategy
+  
+  # Severity-specific recovery policies
+  # Each severity can have its own recovery behavior
+  severity-policies:
+    
+    # ERROR severity - Backward compatible (no recovery)
+    ERROR:
+      recovery-enabled: false      # Don't recover from ERROR severity failures
+      strategy: "FAIL_FAST"        # Fail immediately without recovery
+      
+    # WARNING severity - Recovery enabled
+    WARNING:
+      recovery-enabled: true       # Enable recovery for WARNING severity
+      strategy: "CONTINUE_WITH_DEFAULT"  # Use default values when recovery needed
+      max-retries: 1               # Retry once before giving up
+      retry-delay: 100             # Wait 100ms between retries
+      
+    # INFO severity - Recovery enabled with no retries
+    INFO:
+      recovery-enabled: true       # Enable recovery for INFO severity
+      strategy: "CONTINUE_WITH_DEFAULT"  # Use default values when recovery needed
+      max-retries: 0               # No retries, just use defaults
+      retry-delay: 50              # Minimal delay (not used with 0 retries)
+
+# Example rules demonstrating different severities
+rules:
+  - id: "mandatory-field-check"
+    name: "Mandatory Field Validation"
+    condition: "#data.customerId != null && #data.customerId != ''"
+    severity: "ERROR"              # Will NOT recover (backward compatible)
+    message: "Customer ID is mandatory"
+    description: "Critical validation that must not be bypassed"
+    
+  - id: "data-quality-check"
+    name: "Data Quality Validation"
+    condition: "#data.email != null && #data.email.contains('@')"
+    severity: "WARNING"            # Will recover with default behavior
+    message: "Email format appears invalid"
+    description: "Data quality check that can be recovered"
+    
+  - id: "enrichment-info"
+    name: "Enrichment Information"
+    condition: "#data.region != null"
+    severity: "INFO"               # Will recover with default behavior
+    message: "Region information available for enrichment"
+    description: "Informational rule for data enrichment"
+
+# Example enrichment demonstrating error recovery in processing
+enrichments:
+  - id: "customer-enrichment"
+    name: "Customer Data Enrichment"
+    type: "calculation-enrichment"
+    description: "Enrich customer data with calculated fields"
+    condition: "#data.customerId != null"
+    
+    calculation-config:
+      expression: "#data.customerId + '-' + (#data.region != null ? #data.region : 'UNKNOWN')"
+      result-field: "customerKey"
+    
+    field-mappings:
+      - source-field: "customerKey"
+        target-field: "enrichedCustomerKey"
+
+# Configuration examples for different environments
+
+# Development Environment Example:
+# error-recovery:
+#   enabled: true
+#   log-recovery-attempts: true    # Verbose logging for debugging
+#   metrics-enabled: true
+#   severity-policies:
+#     ERROR:
+#       recovery-enabled: false    # Strict error handling in development
+#     WARNING:
+#       recovery-enabled: true
+#       max-retries: 0             # No retries in development for faster feedback
+#     INFO:
+#       recovery-enabled: true
+
+# Production Environment Example:
+# error-recovery:
+#   enabled: true
+#   log-recovery-attempts: false   # Reduce log noise in production
+#   metrics-enabled: true          # Keep metrics for monitoring
+#   severity-policies:
+#     ERROR:
+#       recovery-enabled: false    # Maintain strict error handling
+#     WARNING:
+#       recovery-enabled: true
+#       strategy: "CONTINUE_WITH_DEFAULT"
+#       max-retries: 2             # More retries in production
+#       retry-delay: 200
+#     INFO:
+#       recovery-enabled: true
+#       strategy: "CONTINUE_WITH_DEFAULT"
+
+# Test Environment Example:
+# error-recovery:
+#   enabled: false                 # Disable all recovery for testing
+#   # When disabled, all errors will be thrown for test validation
+
+# Available Recovery Strategies:
+# - FAIL_FAST: Throw exception immediately (no recovery)
+# - CONTINUE_WITH_DEFAULT: Use default/null values and continue processing
+# - RETRY_WITH_SAFE_EXPRESSION: Retry with simplified expressions (future enhancement)
+# - SKIP_RULE: Skip the failing rule and continue (future enhancement)
+
+# Benefits of Configurable Error Recovery:
+# 1. Environment-specific behavior (strict in dev, resilient in prod)
+# 2. Backward compatibility (ERROR severity maintains existing behavior)
+# 3. Granular control (different policies per severity level)
+# 4. Operational flexibility (can be tuned without code changes)
+# 5. Better observability (logging and metrics for recovery attempts)

@@ -8,6 +8,9 @@ import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
+import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
+import dev.mars.apex.core.config.error.SeverityRecoveryPolicy;
+import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,21 +46,28 @@ class ErrorHandlingProofTestRunner {
     @BeforeEach
     void setUp() {
         logger.info("🚀 Starting definitive proof tests for rule evaluation error handling");
-        
-        // Create fully configured rules engine
+
+        // Create fully configured rules engine with custom error recovery config
         RulesEngineConfiguration configuration = new RulesEngineConfiguration();
         LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
         ExpressionEvaluatorService expressionEvaluator = new ExpressionEvaluatorService();
         EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
-        
+
+        // Create custom ErrorRecoveryConfig that disables recovery for all severities
+        // This ensures the test gets ERROR results instead of recovered NO_MATCH results
+        ErrorRecoveryConfig errorRecoveryConfig = new ErrorRecoveryConfig();
+        errorRecoveryConfig.setEnabled(false); // Disable all recovery
+
+        // Create RulesEngine with the custom error recovery config
         rulesEngine = new RulesEngine(
             configuration,
             new SpelExpressionParser(),
             new ErrorRecoveryService(),
             new RulePerformanceMonitor(),
-            enrichmentService
+            enrichmentService,
+            errorRecoveryConfig
         );
-        
+
         ruleEngineService = new RuleEngineService(expressionEvaluator);
         totalTests = 0;
         passedTests = 0;
@@ -94,7 +104,7 @@ class ErrorHandlingProofTestRunner {
         
         // Test missing property error
         assertStructuredError(() -> {
-            Rule rule = new Rule("test-rule", "#data.missing != null", "Test", "ERROR");
+            Rule rule = new Rule("test-rule", "#data.missing != null", "Test", "CRITICAL");
             return rulesEngine.executeRule(rule, createEmptyFacts());
         }, "PATH 1: executeRule() missing property");
 
@@ -110,7 +120,7 @@ class ErrorHandlingProofTestRunner {
         
         assertStructuredError(() -> {
             List<Rule> rules = Arrays.asList(
-                createFailingRule("list-rule", "#data.invalid.length() > 0", "ERROR")
+                createFailingRule("list-rule", "#data.invalid.length() > 0", "CRITICAL")
             );
             return rulesEngine.executeRulesList(rules, createEmptyFacts());
         }, "PATH 2: executeRulesList() failure");
@@ -181,13 +191,13 @@ class ErrorHandlingProofTestRunner {
         
         // Test null pointer access
         assertStructuredError(() -> {
-            Rule rule = new Rule("null-rule", "#data.nullField.toString()", "Null test", "ERROR");
+            Rule rule = new Rule("null-rule", "#data.nullField.toString()", "Null test", "CRITICAL");
             return rulesEngine.executeRule(rule, createNullFacts());
         }, "PATH 6: Null pointer handling");
 
         // Test method not found
         assertStructuredError(() -> {
-            Rule rule = new Rule("method-rule", "#data.value.nonExistentMethod()", "Method test", "ERROR");
+            Rule rule = new Rule("method-rule", "#data.value.nonExistentMethod()", "Method test", "CRITICAL");
             return rulesEngine.executeRule(rule, createValidFacts());
         }, "PATH 6: Method not found handling");
     }

@@ -96,7 +96,11 @@ public class YamlRule {
 
     @JsonProperty("custom-properties")
     private Map<String, Object> customProperties;
-    
+
+    // Phase 3A Enhancement: Default value for error recovery
+    @JsonProperty("default-value")
+    private Object defaultValue;
+
     // Default constructor
     public YamlRule() {
         this.enabled = true; // Default to enabled
@@ -265,7 +269,15 @@ public class YamlRule {
     public void setCustomProperties(Map<String, Object> customProperties) {
         this.customProperties = customProperties;
     }
-    
+
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(Object defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
     /**
      * Validation configuration for the rule.
      */

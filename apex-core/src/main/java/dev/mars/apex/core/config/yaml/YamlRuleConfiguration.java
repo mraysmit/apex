@@ -72,6 +72,9 @@ public class YamlRuleConfiguration {
     @JsonProperty("pipeline")
     private PipelineConfiguration pipeline;
 
+    @JsonProperty("error-recovery")
+    private YamlErrorRecoveryConfig errorRecovery;
+
     // Default constructor
     public YamlRuleConfiguration() {}
     
@@ -170,6 +173,14 @@ public class YamlRuleConfiguration {
 
     public void setPipeline(PipelineConfiguration pipeline) {
         this.pipeline = pipeline;
+    }
+
+    public YamlErrorRecoveryConfig getErrorRecovery() {
+        return errorRecovery;
+    }
+
+    public void setErrorRecovery(YamlErrorRecoveryConfig errorRecovery) {
+        this.errorRecovery = errorRecovery;
     }
     
     /**

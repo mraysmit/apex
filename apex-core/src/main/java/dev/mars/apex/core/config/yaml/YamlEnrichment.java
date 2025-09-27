@@ -389,7 +389,11 @@ public class YamlEnrichment {
         
         @JsonProperty("dependencies")
         private List<String> dependencies; // Fields this calculation depends on
-        
+
+        // Phase 3A Enhancement: Default value for error recovery
+        @JsonProperty("default-value")
+        private Object defaultValue;
+
         // Default constructor
         public CalculationConfig() {}
         
@@ -416,6 +420,14 @@ public class YamlEnrichment {
         
         public void setDependencies(List<String> dependencies) {
             this.dependencies = dependencies;
+        }
+
+        public Object getDefaultValue() {
+            return defaultValue;
+        }
+
+        public void setDefaultValue(Object defaultValue) {
+            this.defaultValue = defaultValue;
         }
     }
 

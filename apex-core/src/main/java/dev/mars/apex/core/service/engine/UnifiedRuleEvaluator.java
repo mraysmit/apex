@@ -1,5 +1,7 @@
 package dev.mars.apex.core.service.engine;
 
+import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
+import dev.mars.apex.core.config.error.SeverityRecoveryPolicy;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.engine.model.RuleGroup;
@@ -49,6 +51,7 @@ public class UnifiedRuleEvaluator {
     private final ExpressionParser parser;
     private final ErrorRecoveryService errorRecoveryService;
     private final RulePerformanceMonitor performanceMonitor;
+    private final ErrorRecoveryConfig errorRecoveryConfig;
     
     /**
      * Standard error message format for consistency across all evaluation paths.
@@ -62,21 +65,41 @@ public class UnifiedRuleEvaluator {
         this.parser = new SpelExpressionParser();
         this.errorRecoveryService = new ErrorRecoveryService();
         this.performanceMonitor = new RulePerformanceMonitor();
+        this.errorRecoveryConfig = new ErrorRecoveryConfig();
     }
     
     /**
      * Create a new UnifiedRuleEvaluator with custom components.
-     * 
+     *
      * @param parser The SpEL expression parser
      * @param errorRecoveryService The error recovery service
      * @param performanceMonitor The performance monitor
      */
-    public UnifiedRuleEvaluator(ExpressionParser parser, 
+    public UnifiedRuleEvaluator(ExpressionParser parser,
                                ErrorRecoveryService errorRecoveryService,
                                RulePerformanceMonitor performanceMonitor) {
         this.parser = parser != null ? parser : new SpelExpressionParser();
         this.errorRecoveryService = errorRecoveryService != null ? errorRecoveryService : new ErrorRecoveryService();
         this.performanceMonitor = performanceMonitor != null ? performanceMonitor : new RulePerformanceMonitor();
+        this.errorRecoveryConfig = new ErrorRecoveryConfig();
+    }
+
+    /**
+     * Create a new UnifiedRuleEvaluator with custom components including error recovery config.
+     *
+     * @param parser The SpEL expression parser
+     * @param errorRecoveryService The error recovery service
+     * @param performanceMonitor The performance monitor
+     * @param errorRecoveryConfig The error recovery configuration
+     */
+    public UnifiedRuleEvaluator(ExpressionParser parser,
+                               ErrorRecoveryService errorRecoveryService,
+                               RulePerformanceMonitor performanceMonitor,
+                               ErrorRecoveryConfig errorRecoveryConfig) {
+        this.parser = parser != null ? parser : new SpelExpressionParser();
+        this.errorRecoveryService = errorRecoveryService != null ? errorRecoveryService : new ErrorRecoveryService();
+        this.performanceMonitor = performanceMonitor != null ? performanceMonitor : new RulePerformanceMonitor();
+        this.errorRecoveryConfig = errorRecoveryConfig != null ? errorRecoveryConfig : new ErrorRecoveryConfig();
     }
     
     /**
@@ -179,10 +202,25 @@ public class UnifiedRuleEvaluator {
         // Create standardized error message
         String errorMessage = String.format(ERROR_MESSAGE_FORMAT, rule.getName(), exception.getMessage());
         String severity = rule.getSeverity() != null ? rule.getSeverity() : "ERROR";
-        
-        // Attempt error recovery based on severity (all non-CRITICAL errors)
-        if (!"CRITICAL".equalsIgnoreCase(severity)) {
-            rulesLogger.info("Attempting error recovery for rule '{}' with severity '{}'", rule.getName(), severity);
+
+        // Attempt error recovery based on configurable severity policies
+        if (errorRecoveryConfig.isRecoveryEnabledForSeverity(severity)) {
+            SeverityRecoveryPolicy policy = errorRecoveryConfig.getSeverityPolicy(severity);
+            if (errorRecoveryConfig.isLogRecoveryAttempts()) {
+                rulesLogger.info("Attempting error recovery for rule '{}' with severity '{}' using strategy '{}'",
+                    rule.getName(), severity, policy != null ? policy.getStrategy() : "default");
+            }
+
+            // Phase 3A Enhancement: Check if rule has a specific default-value
+            if (rule.getDefaultValue() != null) {
+                if (errorRecoveryConfig.isLogRecoveryAttempts()) {
+                    rulesLogger.info("Using rule-specific default value for recovery: rule='{}', defaultValue='{}'",
+                        rule.getName(), rule.getDefaultValue());
+                }
+                LoggingContext.clearContext();
+                return RuleResult.match(rule.getName(), String.valueOf(rule.getDefaultValue()), severity, metrics);
+            }
+
             // Use the existing error recovery service method signature
             ErrorRecoveryService.RecoveryResult recoveryResult = errorRecoveryService.attemptRecovery(rule.getName(), rule.getCondition(), null, exception);
             if (recoveryResult != null && recoveryResult.isSuccessful()) {
@@ -206,7 +244,16 @@ public class UnifiedRuleEvaluator {
         LoggingContext.clearContext();
         return RuleResult.error(rule.getName(), errorMessage, severity, metrics);
     }
-    
+
+    /**
+     * Get the current error recovery configuration.
+     *
+     * @return The error recovery configuration
+     */
+    public ErrorRecoveryConfig getErrorRecoveryConfig() {
+        return errorRecoveryConfig;
+    }
+
     /**
      * Create a standard evaluation context from facts map.
      * This method replicates the context creation logic from RulesEngine

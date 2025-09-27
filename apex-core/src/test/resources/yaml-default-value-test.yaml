@@ -1,0 +1,160 @@
+# Phase 3A Enhancement: Default-Value Support Test Configuration
+# This YAML demonstrates the new default-value functionality for rules and calculations
+
+metadata:
+  id: "default-value-demo"
+  name: "Default Value Demonstration"
+  version: "1.0.0"
+  description: "Demonstrates Phase 3A default-value support for error recovery"
+  type: "test-config"
+  author: "APEX Rules Engine"
+
+# Rules with default-value for error recovery
+rules:
+  # Rule with boolean default value
+  - id: "age-validation"
+    name: "Age Validation Rule"
+    condition: "#data.age != null && #data.age >= 18"
+    severity: "WARNING"
+    default-value: false
+    message: "Customer age validation failed"
+    description: "Validates customer is at least 18 years old"
+    
+  # Rule with string default value
+  - id: "email-format-check"
+    name: "Email Format Validation"
+    condition: "#data.email != null && #data.email.contains('@') && #data.email.contains('.')"
+    severity: "INFO"
+    default-value: "INVALID_EMAIL"
+    message: "Email format validation"
+    description: "Validates email has basic format requirements"
+    
+  # Rule with numeric default value
+  - id: "credit-score-check"
+    name: "Credit Score Validation"
+    condition: "#data.creditScore != null && #data.creditScore >= 600"
+    severity: "WARNING"
+    default-value: 0
+    message: "Credit score validation failed"
+    description: "Validates minimum credit score requirement"
+    
+  # Rule without default value (backward compatible)
+  - id: "mandatory-field-check"
+    name: "Mandatory Field Validation"
+    condition: "#data.customerId != null && #data.customerId != ''"
+    severity: "ERROR"
+    message: "Customer ID is mandatory"
+    description: "Critical validation that must not be bypassed"
+    # No default-value specified - will use standard error recovery
+
+# Enrichments with calculation default values
+enrichments:
+  # Calculation enrichment with numeric default
+  - id: "interest-calculation"
+    name: "Interest Calculation"
+    type: "calculation-enrichment"
+    description: "Calculate interest amount with safe default"
+    condition: "#data.principal != null && #data.interestRate != null"
+    
+    calculation-config:
+      expression: "#data.principal * #data.interestRate / 100"
+      result-field: "interestAmount"
+      default-value: 0.0
+      dependencies:
+        - "principal"
+        - "interestRate"
+    
+    field-mappings:
+      - source-field: "interestAmount"
+        target-field: "calculatedInterest"
+        default-value: 0.0
+        
+  # Calculation enrichment with string default
+  - id: "customer-classification"
+    name: "Customer Classification"
+    type: "calculation-enrichment"
+    description: "Classify customer with safe default"
+    condition: "#data.customerId != null"
+    
+    calculation-config:
+      expression: "#data.creditScore >= 750 ? 'PREMIUM' : (#data.creditScore >= 600 ? 'STANDARD' : 'BASIC')"
+      result-field: "customerTier"
+      default-value: "UNKNOWN"
+      dependencies:
+        - "creditScore"
+    
+    field-mappings:
+      - source-field: "customerTier"
+        target-field: "finalTier"
+        default-value: "UNCLASSIFIED"
+        
+  # Calculation enrichment without default (backward compatible)
+  - id: "simple-calculation"
+    name: "Simple Calculation"
+    type: "calculation-enrichment"
+    description: "Simple calculation without default value"
+    condition: "#data.value != null"
+    
+    calculation-config:
+      expression: "#data.value * 2"
+      result-field: "doubledValue"
+      # No default-value specified
+    
+    field-mappings:
+      - source-field: "doubledValue"
+        target-field: "result"
+
+# Optional error-recovery configuration to enable recovery for testing
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+  
+  severity-policies:
+    ERROR:
+      recovery-enabled: false  # No recovery for ERROR (backward compatible)
+      strategy: "FAIL_FAST"
+      
+    WARNING:
+      recovery-enabled: true   # Enable recovery for WARNING
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 1
+      retry-delay: 100
+      
+    INFO:
+      recovery-enabled: true   # Enable recovery for INFO
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+      retry-delay: 50
+
+# Test scenarios demonstrating default-value usage:
+#
+# 1. Age Validation Scenario:
+#    - Input: { "customerId": "C123", "email": "test@example.com" }
+#    - Missing "age" field causes rule evaluation to fail
+#    - Recovery uses default-value: false
+#    - Result: Rule returns false instead of throwing exception
+#
+# 2. Email Format Scenario:
+#    - Input: { "customerId": "C123", "age": 25, "email": null }
+#    - Null email causes rule evaluation to fail
+#    - Recovery uses default-value: "INVALID_EMAIL"
+#    - Result: Rule returns "INVALID_EMAIL" instead of throwing exception
+#
+# 3. Interest Calculation Scenario:
+#    - Input: { "principal": 1000, "interestRate": null }
+#    - Null interestRate causes calculation to fail
+#    - Recovery uses default-value: 0.0
+#    - Result: interestAmount is set to 0.0 instead of throwing exception
+#
+# 4. Customer Classification Scenario:
+#    - Input: { "customerId": "C123", "creditScore": "invalid" }
+#    - Invalid creditScore causes calculation to fail
+#    - Recovery uses default-value: "UNKNOWN"
+#    - Result: customerTier is set to "UNKNOWN" instead of throwing exception
+#
+# Benefits of Default-Value Support:
+# - Graceful degradation when data is missing or invalid
+# - Business-appropriate default values instead of null/empty
+# - Configurable per rule/calculation for fine-grained control
+# - Backward compatible - existing configurations work unchanged
+# - Simple syntax leveraging existing field-mapping patterns
