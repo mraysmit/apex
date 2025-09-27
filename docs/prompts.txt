@@ -515,3 +515,86 @@ rememeber the dependent  modules need to be installed to the local Maven reposit
 we are coding on a windows  machine
 
 **Remember: The system should be resilient to configuration errors and provide helpful feedback to users without breaking the application flow.**
+
+# **🚨 CRITICAL APEX YAML SYNTAX VALIDATION RULES**
+
+## **FUNDAMENTAL PROBLEM: LLMs HALLUCINATE INVALID YAML SYNTAX**
+
+**CORE ISSUE**: LLMs consistently add sections to APEX YAML files that seem logical but are NOT part of the official APEX specification. This creates files that appear correct but contain invalid syntax.
+
+### **❌ COMMON INVALID SECTIONS THAT LLMs ADD:**
+- `monitoring:` - Not a valid APEX top-level section
+- `test-scenarios:` - Not a valid APEX top-level section
+- `demo-info:` - Not a valid APEX top-level section
+- `performance:` - Not a valid APEX top-level section
+- `business-info:` - Not a valid APEX top-level section
+- `documentation:` - Not a valid APEX top-level section
+- `test-notes:` - Not a valid field in enrichments or rules
+- `type: "demo"` - Not a valid APEX document type
+
+### **✅ ONLY VALID APEX YAML TOP-LEVEL SECTIONS:**
+Based on official APEX documentation, these are the ONLY valid top-level sections:
+
+**For `rule-config` documents:**
+- `metadata:` (required)
+- `rules:` (at least one of rules/enrichments required)
+- `enrichments:` (at least one of rules/enrichments required)
+- `rule-groups:` (optional)
+- `error-recovery:` (optional)
+
+**For other document types:**
+- `metadata:` (always required)
+- Document-specific sections as defined in APEX_YAML_REFERENCE.md
+
+### **✅ ONLY VALID APEX DOCUMENT TYPES:**
+- `rule-config`
+- `enrichment`
+- `dataset`
+- `scenario`
+- `scenario-registry`
+- `bootstrap`
+- `rule-chain`
+- `external-data-config`
+- `pipeline-config`
+
+### **🛡️ MANDATORY VALIDATION PROCESS:**
+
+**BEFORE creating or modifying ANY APEX YAML file:**
+
+1. **Check APEX_YAML_REFERENCE.md** - Verify every section against official documentation
+2. **Use codebase-retrieval** - Search for "APEX YAML configuration schema" to get valid fields
+3. **Test against APEX compiler** - Run the test to ensure YAML loads successfully
+4. **Never assume** - If a section seems logical, verify it's actually valid in APEX
+
+### **🔧 CORRECTIVE ACTIONS:**
+
+**When you find yourself adding sections like:**
+- `monitoring:`, `test-scenarios:`, `demo-info:`, `performance:`, etc.
+
+**STOP IMMEDIATELY and:**
+1. Remove the invalid section
+2. Move any useful information to valid fields (like `description:` in metadata or rule groups)
+3. Test the corrected YAML against the APEX compiler
+4. Only proceed when the YAML is confirmed valid
+
+### **📋 VALIDATION CHECKLIST:**
+
+Before submitting any APEX YAML file:
+- [ ] All top-level sections are in the official APEX specification
+- [ ] Document type is one of the 9 valid types listed above
+- [ ] All field names within sections are valid APEX fields
+- [ ] No custom/invented sections that "seem logical"
+- [ ] File successfully loads through APEX compiler (test passes)
+
+### **🎯 KEY PRINCIPLE:**
+
+**"APEX YAML syntax is STRICTLY DEFINED - there is NO room for creative interpretation or logical extensions. Only use sections and fields that are explicitly documented in the APEX specification."**
+
+### **⚠️ WARNING SIGNS:**
+
+If you find yourself thinking:
+- "This section would be useful for documentation"
+- "This makes logical sense for a demo file"
+- "This would help organize the configuration"
+
+**STOP** - You are about to add invalid YAML syntax. Stick to the official specification only.

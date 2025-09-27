@@ -1,0 +1,35 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: TERMINATE POLICY TEST REGISTRY
+# ============================================================================
+#
+# PURPOSE:
+# This is a scenario registry file that demonstrates the "terminate" failure policy
+# in APEX. It serves as the entry point for loading scenario configurations that
+# test how APEX handles stage failures with termination behavior.
+#
+# TERMINATE FAILURE POLICY BEHAVIOR:
+# 1. Stage fails due to validation errors
+# 2. APEX applies "terminate" policy
+# 3. Processing stops immediately
+# 4. Subsequent stages are skipped
+# 5. ScenarioExecutionResult.isTerminated() returns true
+# 6. No further processing occurs
+#
+metadata:
+  id: "terminate-policy-test-registry"
+  name: "Terminate Policy Test Registry"
+  version: "1.0.0"
+  description: "Test scenario registry for terminate failure policy demonstration"
+  type: "scenario-registry"
+
+# SCENARIO REGISTRY SECTION:
+# This section maps scenario IDs to their configuration files.
+scenario-registry:
+  - scenario-id: "terminate-policy-test"
+    config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyTerminateTest-scenario.yaml"
+
+# ROUTING CONFIGURATION:
+# Defines how APEX determines which scenario to use for incoming data.
+routing:
+  strategy: "type-based"
+  default-scenario: "terminate-policy-test"

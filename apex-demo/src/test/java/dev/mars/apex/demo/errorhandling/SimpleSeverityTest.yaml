@@ -1,8 +1,36 @@
 # ============================================================================
-# APEX Severity and Failure Policy Configuration Examples
+# APEX SEVERITY DEMONSTRATION: RULE SEVERITY LEVELS AND FAILURE POLICY INTERACTIONS
 # ============================================================================
-# Demonstrates how rule severity levels (ERROR, WARNING, INFO) interact 
-# with stage-level failure policies (terminate, continue-with-warnings, flag-for-review)
+#
+# PURPOSE:
+# This configuration is used by SimpleSeverityTest.java to demonstrate how
+# different rule severity levels (ERROR, WARNING, INFO) interact with
+# stage-level failure policies in APEX.
+#
+# KEY CONCEPTS DEMONSTRATED:
+# 1. Rule Severity Levels:
+#    - ERROR: Critical failures that cause stage failure
+#    - WARNING: Issues that should be logged but don't fail the stage
+#    - INFO: Informational messages for audit trails
+#
+# 2. Stage Failure Policy Interaction:
+#    - ERROR rules trigger failure policies (terminate/continue-with-warnings/flag-for-review)
+#    - WARNING rules log warnings but don't trigger failure policies
+#    - INFO rules provide audit information without affecting processing
+#
+# 3. Rule Groups:
+#    - Critical validation group: All ERROR rules must pass
+#    - Warning checks group: Collects WARNING messages
+#    - Info audit group: Provides informational logging
+#
+# BUSINESS SCENARIOS:
+# - Critical validations: Must pass or processing fails
+# - Business warnings: Log issues but continue processing
+# - Audit information: Track processing for compliance
+#
+# USED BY:
+# SimpleSeverityTest.java - demonstrates severity level handling
+#
 # ============================================================================
 
 metadata:
@@ -63,6 +91,20 @@ rules:
     priority: 4
     enabled: true
 
+# Enrichments to create status field for testing
+enrichments:
+  - id: "severity-status-enrichment"
+    name: "Severity Status Enrichment"
+    description: "Creates status field based on amount validation"
+    type: "calculation-enrichment"
+    calculation-config:
+      # Simple validation that creates a status field
+      expression: "(#amount != null && #amount > 0) ? 'VALID' : 'INVALID'"
+      result-field: "validation-result"  # Internal field name
+    field-mappings:
+      - source-field: "validation-result"  # Map from internal field
+        target-field: "status"             # To expected output field
+
 # Rule groups demonstrating different behaviors
 rule-groups:
   - id: "critical-validation-group"
@@ -73,8 +115,8 @@ rule-groups:
       - "critical-amount-validation"
       - "mandatory-field-validation"
     stop-on-first-failure: true  # Stop at first ERROR
-    
-  - id: "warning-checks-group" 
+
+  - id: "warning-checks-group"
     name: "Warning Checks Group"
     description: "GROUP: Warning checks - continue even with warnings"
     operator: "OR"  # Any rule can match to trigger warnings
@@ -82,11 +124,11 @@ rule-groups:
       - "unusual-amount-warning"
       - "missing-optional-field-warning"
     stop-on-first-failure: false  # Continue processing all warnings
-    
+
   - id: "info-audit-group"
     name: "Information Audit Group"
     description: "GROUP: Informational rules for audit trail"
-    operator: "OR" 
+    operator: "OR"
     rules:
       - "processing-audit-info"
     stop-on-first-failure: false

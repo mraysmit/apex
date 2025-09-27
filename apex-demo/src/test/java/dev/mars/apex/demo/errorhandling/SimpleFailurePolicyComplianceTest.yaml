@@ -1,0 +1,33 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: COMPLIANCE POLICY TEST REGISTRY
+# ============================================================================
+#
+# PURPOSE:
+# This is a scenario registry file that demonstrates compliance rule execution
+# after previous stage failures. It tests how APEX handles compliance processing
+# when earlier stages (like validation) fail but compliance rules should still execute.
+#
+# COMPLIANCE FAILURE POLICY BEHAVIOR:
+# 1. Validation stage fails due to missing required fields
+# 2. APEX applies "continue-with-warnings" policy
+# 3. Processing continues to compliance stage
+# 4. Compliance rules execute despite validation failure
+# 5. Compliance results are captured and processed
+# 6. ScenarioExecutionResult shows both validation warnings and compliance results
+#
+metadata:
+  id: "compliance-policy-test-registry"
+  name: "Compliance Policy Test Registry"
+  version: "1.0.0"
+  description: "Test scenario registry for compliance rule execution after stage failures"
+  type: "scenario-registry"
+
+# SCENARIO REGISTRY SECTION:
+# This section maps scenario IDs to their configuration files.
+scenario-registry:
+  - scenario-id: "compliance-test"
+    config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyComplianceTest-scenario.yaml"
+
+# ============================================================================
+# END OF COMPLIANCE POLICY TEST REGISTRY
+# ============================================================================

@@ -317,7 +317,7 @@ public class YamlEnrichmentProcessor {
     
     /**
      * Process a calculation-based enrichment.
-     * 
+     *
      * @param enrichment The enrichment configuration
      * @param targetObject The target object
      * @return The enriched object
@@ -328,20 +328,31 @@ public class YamlEnrichmentProcessor {
             LOGGER.warning("Calculation enrichment '" + enrichment.getId() + "' has no calculation configuration");
             return targetObject;
         }
-        
+
         try {
             StandardEvaluationContext context = createEvaluationContext(targetObject);
             Expression calcExpr = getOrCompileExpression(calcConfig.getExpression());
             Object result = calcExpr.getValue(context);
-            
+
             // Set the result field
             if (calcConfig.getResultField() != null) {
                 setFieldValue(targetObject, calcConfig.getResultField(), result);
             }
-            
+
+            // Apply field mappings (if present) - this was missing!
+            if (enrichment.getFieldMappings() != null && !enrichment.getFieldMappings().isEmpty()) {
+                Object mappedResult = applyFieldMappings(enrichment.getFieldMappings(), targetObject, targetObject);
+                if (mappedResult == null) {
+                    LOGGER.warning("Calculation enrichment '" + enrichment.getId() + "' failed due to required field mapping failure");
+                    // Return original target object to continue processing other enrichments
+                    return targetObject;
+                }
+                targetObject = mappedResult;
+            }
+
             LOGGER.fine("Calculation enrichment completed. Result: " + result);
             return targetObject;
-            
+
         } catch (Exception e) {
             // Phase 3A Enhancement: Check if calculation has a default-value for error recovery
             if (calcConfig.getDefaultValue() != null) {
@@ -351,6 +362,14 @@ public class YamlEnrichmentProcessor {
                 // Set the default value in the result field
                 if (calcConfig.getResultField() != null) {
                     setFieldValue(targetObject, calcConfig.getResultField(), calcConfig.getDefaultValue());
+                }
+
+                // Apply field mappings even with default value
+                if (enrichment.getFieldMappings() != null && !enrichment.getFieldMappings().isEmpty()) {
+                    Object mappedResult = applyFieldMappings(enrichment.getFieldMappings(), targetObject, targetObject);
+                    if (mappedResult != null) {
+                        targetObject = mappedResult;
+                    }
                 }
 
                 return targetObject;

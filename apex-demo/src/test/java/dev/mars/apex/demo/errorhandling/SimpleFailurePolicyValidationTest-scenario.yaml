@@ -1,0 +1,52 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: VALIDATION SCENARIO CONFIGURATION
+# ============================================================================
+#
+# PURPOSE:
+# This scenario configuration demonstrates validation rule behavior under
+# different failure policies. It shows how validation failures are handled
+# gracefully with proper error reporting and SpEL exception management.
+#
+metadata:
+  id: "validation-test-scenario"
+  name: "Validation Test Scenario"
+  version: "1.0.0"
+  description: "Scenario for testing validation rule failures and SpEL exception handling"
+  type: "scenario"
+
+# SCENARIO CONFIGURATION:
+# This scenario focuses on validation stage behavior with different data inputs
+scenario:
+  scenario-id: "validation-test"
+  name: "Validation Rule Failure Test"
+  description: "Tests validation rule failures with missing required fields and SpEL exception handling"
+
+  data-types:
+    - "HashMap"
+    - "java.util.Map"
+
+  # STAGE DEFINITIONS:
+  # Stage 1: Validation (primary focus - tests rule failures and SpEL exceptions)
+  # Stage 2: Enrichment (should execute based on validation failure policy)
+  processing-stages:
+    - stage-name: "validation"
+      config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyValidationTest-validation.yaml"
+      execution-order: 1
+      failure-policy: "continue-with-warnings"
+      required: true
+      stage-metadata:
+        description: "Validation stage that tests rule failures and SpEL exception handling"
+        expected-behavior: "FAIL - missing required fields cause validation failures with graceful error handling"
+      
+    - stage-name: "enrichment"
+      config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyValidationTest-enrichment.yaml"
+      execution-order: 2
+      failure-policy: "continue-with-warnings"
+      required: false
+      stage-metadata:
+        description: "Enrichment stage that should execute despite validation failures"
+        expected-behavior: "SUCCESS - enrichment continues despite validation failures"
+
+# ============================================================================
+# END OF VALIDATION SCENARIO CONFIGURATION
+# ============================================================================

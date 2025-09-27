@@ -1,0 +1,65 @@
+# ========================================================================
+# PROPERTY NOT FOUND ERROR TEST - ENRICHMENT RULES
+# ========================================================================
+#
+# These enrichment rules are designed to trigger SpEL property not found
+# exceptions in the enrichment context, testing error handling across
+# different APEX components.
+#
+# EXPECTED BEHAVIOR:
+# - SpEL exceptions should be caught by enrichment processors
+# - Converted to appropriate error responses
+# - No stack traces should be logged
+# - Enrichment should fail gracefully without breaking the pipeline
+#
+# Author: APEX Team
+# Since: 1.0.0
+# ========================================================================
+
+# Configuration metadata
+metadata:
+  id: "property-enrichment-rules"
+  name: "Property Not Found Enrichment Rules"
+  description: "Enrichment rules that trigger SpEL property not found exceptions for testing error handling"
+  version: "1.0.0"
+
+# Enrichment definitions - each designed to cause property not found errors
+enrichments:
+  # ========================================================================
+  # SIMPLE PROPERTY ENRICHMENT ERROR
+  # ========================================================================
+  - id: "missing-field-enrichment"
+    name: "Missing Field Enrichment"
+    description: "Tries to enrich based on non-existent 'region' field"
+    condition: "#data.region != null"
+    target-field: "enriched_region_info"
+    value: "#data.region.toUpperCase() + '_PROCESSED'"
+    # TEST DATA: Will not contain 'region' field
+    # EXPECTED: SpEL exception during enrichment processing
+    # SHOULD BE: Handled gracefully without stack trace
+    
+  # ========================================================================
+  # CONDITIONAL ENRICHMENT WITH MISSING PROPERTY
+  # ========================================================================
+  - id: "conditional-missing-enrichment"
+    name: "Conditional Missing Property Enrichment"
+    description: "Conditional enrichment that references non-existent 'priority' field"
+    condition: "#data.priority != null && #data.priority > 5"
+    target-field: "high_priority_flag"
+    value: "true"
+    # TEST DATA: Will not contain 'priority' field
+    # EXPECTED: SpEL exception in condition evaluation
+    # SHOULD BE: Handled gracefully, enrichment skipped
+    
+  # ========================================================================
+  # COMPLEX EXPRESSION ENRICHMENT ERROR
+  # ========================================================================
+  - id: "complex-expression-enrichment"
+    name: "Complex Expression Enrichment Error"
+    description: "Complex enrichment expression with multiple missing properties"
+    condition: "#data.category != null"
+    target-field: "computed_score"
+    value: "(#data.baseScore * #data.multiplier) + #data.bonus"
+    # TEST DATA: Will not contain 'baseScore', 'multiplier', or 'bonus' fields
+    # EXPECTED: SpEL exception during value computation
+    # SHOULD BE: Handled gracefully without stack trace

@@ -1,0 +1,30 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: TERMINATE POLICY ENRICHMENT RULES
+# ============================================================================
+#
+# PURPOSE:
+# These enrichment rules should never execute due to the terminate policy.
+# When the validation stage fails with "terminate" policy, this stage
+# should be skipped entirely.
+#
+metadata:
+  id: "terminate-enrichment-rules"
+  name: "Terminate Test Enrichment Rules"
+  version: "1.0.0"
+  description: "Enrichment rules that should be skipped due to termination"
+  type: "enrichment-config"
+
+enrichments:
+  - id: "status-enrichment"
+    name: "Status Enrichment"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "'SHOULD_NOT_EXECUTE'"
+      result-field: "processing-status"
+
+  - id: "timestamp-enrichment"
+    name: "Timestamp Enrichment"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(java.time.Instant).now().toString()"
+      result-field: "processed-at"

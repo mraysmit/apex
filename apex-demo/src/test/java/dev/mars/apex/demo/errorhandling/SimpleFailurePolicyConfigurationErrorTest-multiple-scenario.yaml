@@ -1,0 +1,50 @@
+# ============================================================================
+# APEX CONFIGURATION ERROR HANDLING TEST SCENARIO - MULTIPLE ERRORS
+# ============================================================================
+
+metadata:
+  id: "config-error-multiple-scenario"
+  name: "Configuration Error Multiple Test Scenario"
+  version: "1.0.0"
+  description: "Test scenario with multiple configuration errors"
+  type: "scenario"
+
+scenario:
+  scenario-id: "config-error-multiple-test"
+  name: "Configuration Error Multiple Test Scenario"
+  description: "Tests that multiple configuration errors are all handled gracefully"
+
+  data-types:
+    - "HashMap"
+    - "java.util.Map"
+
+  processing-stages:
+    # Stage 1: Enrichment with configuration errors
+    - stage-name: "enrichment1"
+      config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyConfigurationErrorTest-enrichment.yaml"
+      execution-order: 1
+      failure-policy: "continue-with-warnings"
+      required: false
+      stage-metadata:
+        description: "First enrichment stage with configuration errors"
+        expected-behavior: "FAIL - but continue with warnings"
+
+    # Stage 2: Another enrichment with configuration errors
+    - stage-name: "enrichment2"
+      config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyConfigurationErrorTest-enrichment.yaml"
+      execution-order: 2
+      failure-policy: "continue-with-warnings"
+      required: false
+      stage-metadata:
+        description: "Second enrichment stage with same configuration errors"
+        expected-behavior: "FAIL - but continue with warnings"
+
+    # Stage 3: Validation with SpEL errors
+    - stage-name: "validation"
+      config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyConfigurationErrorTest-validation.yaml"
+      execution-order: 3
+      failure-policy: "continue-with-warnings"
+      required: false
+      stage-metadata:
+        description: "Validation stage with SpEL errors"
+        expected-behavior: "FAIL - but continue with warnings"

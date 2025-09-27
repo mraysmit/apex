@@ -1,0 +1,33 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: VALIDATION POLICY TEST REGISTRY
+# ============================================================================
+#
+# PURPOSE:
+# This is a scenario registry file that demonstrates validation rule behavior
+# under different failure policies. It tests how APEX handles validation rule
+# failures with missing required fields and SpEL exception handling.
+#
+# VALIDATION FAILURE POLICY BEHAVIOR:
+# 1. Validation rules check for required fields (amount, customerName, tradeId)
+# 2. Missing fields cause validation rules to fail
+# 3. SpEL exceptions for missing properties are handled gracefully
+# 4. Validation failures are reported through RuleResult without stack traces
+# 5. Processing continues or terminates based on failure policy configuration
+# 6. ScenarioExecutionResult captures validation results and failure details
+#
+metadata:
+  id: "validation-policy-test-registry"
+  name: "Validation Policy Test Registry"
+  version: "1.0.0"
+  description: "Test scenario registry for validation rule failure policy behavior"
+  type: "scenario-registry"
+
+# SCENARIO REGISTRY SECTION:
+# This section maps scenario IDs to their configuration files.
+scenario-registry:
+  - scenario-id: "validation-test"
+    config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyValidationTest-scenario.yaml"
+
+# ============================================================================
+# END OF VALIDATION POLICY TEST REGISTRY
+# ============================================================================

@@ -1,0 +1,90 @@
+# ============================================================================
+# APEX YAML Configuration File - CONTINUE_WITH_DEFAULT Recovery Strategy
+# ============================================================================
+# Used by: RecoveryStrategyComparisonDemo.java
+# Purpose: Demonstrate CONTINUE_WITH_DEFAULT recovery strategy behavior
+# Strategy: When rules fail, use default values and continue processing
+# ============================================================================
+
+metadata:
+  id: "recovery-strategy-continue-default"
+  name: "Continue With Default Recovery Strategy Demo"
+  version: "1.0.0"
+  description: "Demonstrates CONTINUE_WITH_DEFAULT recovery strategy with fallback values"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-09-27"
+  tags: ["apex-demo", "error-recovery", "continue-with-default", "resilience"]
+
+# CONTINUE_WITH_DEFAULT recovery configuration
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+  default-strategy: "CONTINUE_WITH_DEFAULT"
+  
+  # All severities use CONTINUE_WITH_DEFAULT strategy
+  severity-policies:
+    ERROR:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+      retry-delay: 0
+      
+    WARNING:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+      retry-delay: 0
+      
+    INFO:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+      retry-delay: 0
+
+# Rules that will fail with problematic data but provide defaults
+rules:
+  # Customer ID validation with default
+  - id: "customer-id-validation"
+    name: "Customer ID Validation"
+    condition: "#customerId != null && #customerId.length() > 0"
+    severity: "ERROR"
+    message: "Customer ID cannot be empty"
+    description: "Validates customer ID exists and is not empty"
+    default-value: "DEFAULT_CUSTOMER"
+    
+  # Amount validation with default
+  - id: "amount-positive-check"
+    name: "Amount Positive Check"
+    condition: "#amount != null && #amount > 0"
+    severity: "ERROR"
+    message: "Amount must be positive"
+    description: "Validates transaction amount is positive"
+    default-value: "1.0"
+    
+  # Risk score validation with default
+  - id: "risk-score-range-check"
+    name: "Risk Score Range Check"
+    condition: "#riskScore != null && #riskScore >= 0 && #riskScore <= 100"
+    severity: "WARNING"
+    message: "Risk score must be between 0 and 100"
+    description: "Validates risk score is within valid range"
+    default-value: "50"
+    
+  # Credit rating validation with default
+  - id: "credit-rating-format-check"
+    name: "Credit Rating Format Check"
+    condition: "#creditRating != null && #creditRating.matches('[A-D]')"
+    severity: "INFO"
+    message: "Credit rating must be A, B, C, or D"
+    description: "Validates credit rating format"
+    default-value: "C"
+    
+  # Region validation with default
+  - id: "region-validation"
+    name: "Region Validation"
+    condition: "#region != null && (#region == 'AMERICAS' || #region == 'EMEA' || #region == 'APAC')"
+    severity: "WARNING"
+    message: "Region must be AMERICAS, EMEA, or APAC"
+    description: "Validates region is a known value"
+    default-value: "AMERICAS"

@@ -1,0 +1,46 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: TERMINATE POLICY SCENARIO CONFIGURATION
+# ============================================================================
+#
+# PURPOSE:
+# This scenario configuration demonstrates the "terminate" failure policy behavior.
+# When a stage with "terminate" policy fails, processing stops immediately
+# and all subsequent stages are marked as SKIPPED.
+#
+metadata:
+  id: "terminate-test-scenario"
+  name: "Terminate Policy Test Scenario"
+  version: "1.0.0"
+  description: "Multi-stage scenario demonstrating terminate failure policy"
+  type: "scenario"
+
+scenario:
+  scenario-id: "terminate-policy-test"
+  name: "Terminate Policy Test Scenario"
+  description: "Multi-stage scenario demonstrating terminate failure policy"
+
+  data-types:
+    - "HashMap"
+    - "java.util.Map"
+
+  processing-stages:
+    # Stage 1: Validation (designed to fail and terminate)
+    - stage-name: "validation"
+      config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyTerminateTest-validation.yaml"
+      execution-order: 1
+      failure-policy: "terminate"
+      required: true
+      stage-metadata:
+        description: "Validation stage - will fail and terminate processing"
+        expected-behavior: "FAIL - missing required fields cause validation failure"
+
+    # Stage 2: Enrichment (should be skipped)
+    - stage-name: "enrichment"
+      config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyTerminateTest-enrichment.yaml"
+      execution-order: 2
+      failure-policy: "continue-with-warnings"
+      required: false
+      depends-on: ["validation"]
+      stage-metadata:
+        description: "Enrichment stage - should be SKIPPED due to termination"
+        expected-behavior: "SKIPPED - will not execute due to terminate policy"

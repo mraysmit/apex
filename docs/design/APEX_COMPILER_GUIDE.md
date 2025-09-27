@@ -2193,6 +2193,6 @@ if __name__ == "__main__":
 **End of Document**
 
 For additional support and examples, see:
-- [APEX Rules Engine User Guide](APEX_RULES_ENGINE_USER_GUIDE.md)
-- [APEX YAML Reference](APEX_YAML_REFERENCE.md)
+- [APEX Rules Engine User Guide](../APEX_RULES_ENGINE_USER_GUIDE.md)
+- [APEX YAML Reference](../APEX_YAML_REFERENCE.md)
 - [Bootstrap Demos Guide](APEX_BOOTSTRAP_DEMOS_GUIDE.md)

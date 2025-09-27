@@ -1,0 +1,38 @@
+# ============================================================================
+# APEX CONFIGURATION ERROR TEST: ENRICHMENT WITH MISSING FIELD-MAPPINGS
+# ============================================================================
+#
+# PURPOSE: This enrichment configuration is DELIBERATELY BROKEN to test
+# that configuration errors are handled gracefully according to prompts.txt:
+# - Should NOT throw YamlConfigurationException
+# - Should log warnings instead of throwing exceptions
+# - Should allow processing to continue with failure policies
+#
+
+metadata:
+  id: "config-error-enrichment-rules"
+  name: "Configuration Error Test Enrichment Rules"
+  version: "1.0.0"
+  description: "Enrichment rules with missing field-mappings to test configuration error handling"
+  type: "enrichment-config"
+
+enrichments:
+  # This enrichment is DELIBERATELY MISSING field-mappings
+  # to trigger the configuration error that was previously throwing exceptions
+  - id: "status-enrichment"
+    name: "Status Enrichment"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "'PROCESSED_WITH_ERRORS'"
+      result-field: "processing-status"
+    # ❌ MISSING: field-mappings section (this should cause a configuration error)
+    # This should be logged as a warning, NOT thrown as an exception
+
+  # This enrichment is also missing field-mappings
+  - id: "timestamp-enrichment"
+    name: "Timestamp Enrichment"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(java.time.Instant).now().toString()"
+      result-field: "processed-at"
+    # ❌ MISSING: field-mappings section (another configuration error)

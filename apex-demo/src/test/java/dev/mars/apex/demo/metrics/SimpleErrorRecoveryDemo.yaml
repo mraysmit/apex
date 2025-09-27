@@ -1,0 +1,112 @@
+# ============================================================================
+# APEX YAML Configuration File - Simple Error Recovery Demo
+# ============================================================================
+# Used by: SimpleErrorRecoveryDemo.java
+# Purpose: Demonstrate basic error recovery concepts with simple default value
+#          recovery when data is missing or rules fail
+# Features: Error recovery configuration, default value recovery, graceful error handling
+# ============================================================================
+
+metadata:
+  id: "simple-error-recovery-demo"
+  name: "Simple Error Recovery Demo"
+  version: "1.0.0"
+  description: "Introduction to APEX error recovery with simple default value strategies"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-09-27"
+  tags: ["apex-demo", "error-recovery", "beginner", "resilience"]
+
+# Basic error recovery configuration
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+  default-strategy: "CONTINUE_WITH_DEFAULT"
+  
+  # Simple recovery policies by severity
+  severity-policies:
+    ERROR:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+      retry-delay: 0
+      
+    WARNING:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+      retry-delay: 0
+      
+    INFO:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+      retry-delay: 0
+
+# Simple rules that may fail due to missing data
+rules:
+  # Rule that requires customer ID - basic validation
+  - id: "customer-id-required"
+    name: "Customer ID Required"
+    condition: "#customerId != null && #customerId.length() > 0"
+    severity: "ERROR"
+    message: "Customer ID is required"
+    description: "Basic rule that validates customer ID exists"
+    default-value: "UNKNOWN_CUSTOMER"
+    
+  # Rule that requires amount - financial validation
+  - id: "amount-validation"
+    name: "Amount Validation"
+    condition: "#amount != null && #amount > 0"
+    severity: "ERROR"
+    message: "Amount must be positive"
+    description: "Rule that validates transaction amount is positive"
+    default-value: "0.0"
+    
+  # Rule that uses risk score - may be missing
+  - id: "risk-score-check"
+    name: "Risk Score Check"
+    condition: "#riskScore != null && #riskScore >= 0 && #riskScore <= 100"
+    severity: "WARNING"
+    message: "Risk score should be between 0 and 100"
+    description: "Rule that validates risk score range, uses default if missing"
+    default-value: "50"
+    
+  # Rule that checks credit rating - optional field
+  - id: "credit-rating-validation"
+    name: "Credit Rating Validation"
+    condition: "#creditRating != null && #creditRating.matches('[A-D]')"
+    severity: "INFO"
+    message: "Credit rating should be A, B, C, or D"
+    description: "Rule that validates credit rating format, uses default if missing"
+    default-value: "C"
+
+# Simple enrichments that demonstrate recovery in data processing
+enrichments:
+  - id: "customer-summary"
+    name: "Customer Summary Enrichment"
+    type: "calculation-enrichment"
+    description: "Create customer summary with recovery for missing fields"
+    condition: "true"
+    
+    calculation-config:
+      expression: "(#customerId != null ? #customerId : 'UNKNOWN') + '-' + (#amount != null ? #amount.toString() : '0.0')"
+      result-field: "customerSummary"
+    
+    field-mappings:
+      - source-field: "customerSummary"
+        target-field: "enrichedSummary"
+        
+  - id: "risk-assessment"
+    name: "Risk Assessment Enrichment"
+    type: "calculation-enrichment"
+    description: "Calculate risk level with fallback for missing risk score"
+    condition: "true"
+    
+    calculation-config:
+      expression: "(#riskScore != null ? #riskScore : 50) > 75 ? 'HIGH' : ((#riskScore != null ? #riskScore : 50) > 25 ? 'MEDIUM' : 'LOW')"
+      result-field: "riskLevel"
+    
+    field-mappings:
+      - source-field: "riskLevel"
+        target-field: "calculatedRiskLevel"

@@ -1,0 +1,18 @@
+# ============================================================================
+# APEX CONFIGURATION ERROR HANDLING TEST REGISTRY - TERMINATE POLICY
+# ============================================================================
+
+metadata:
+  id: "config-error-terminate-registry"
+  name: "Configuration Error Terminate Test Registry"
+  version: "1.0.0"
+  description: "Test scenario registry for configuration error handling with terminate policy"
+  type: "scenario-registry"
+
+scenario-registry:
+  - scenario-id: "config-error-terminate-test"
+    config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyConfigurationErrorTest-terminate-scenario.yaml"
+
+routing:
+  strategy: "type-based"
+  default-scenario: "config-error-terminate-test"

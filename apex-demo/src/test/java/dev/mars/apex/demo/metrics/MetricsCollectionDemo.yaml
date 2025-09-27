@@ -1,0 +1,141 @@
+# ============================================================================
+# APEX YAML Configuration File - Comprehensive Metrics Collection Demo
+# ============================================================================
+# Used by: MetricsCollectionDemo.java
+# Purpose: Demonstrate comprehensive metrics collection and analysis capabilities
+# Features: Multiple rule types, performance monitoring, trend analysis
+# ============================================================================
+
+metadata:
+  id: "metrics-collection-demo"
+  name: "Comprehensive Metrics Collection Demo"
+  version: "1.0.0"
+  description: "Demonstrates comprehensive metrics collection and performance analysis in APEX"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-09-27"
+  tags: ["apex-demo", "metrics", "performance", "monitoring", "analysis"]
+
+# Error recovery for consistent metrics collection
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+  default-strategy: "CONTINUE_WITH_DEFAULT"
+  
+  severity-policies:
+    ERROR:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+      retry-delay: 0
+      
+    WARNING:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+      retry-delay: 0
+      
+    INFO:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+      retry-delay: 0
+
+# Comprehensive rule set for metrics collection
+rules:
+  # Fast validation rules
+  - id: "customer-id-check"
+    name: "Customer ID Check"
+    condition: "#customerId != null && #customerId.length() > 0"
+    severity: "ERROR"
+    message: "Customer ID is required"
+    description: "Fast validation rule for customer ID presence"
+    default-value: "DEFAULT_CUSTOMER"
+    
+  - id: "amount-validation"
+    name: "Amount Validation"
+    condition: "#amount != null && #amount > 0"
+    severity: "ERROR"
+    message: "Amount must be positive"
+    description: "Fast validation rule for positive amounts"
+    default-value: "1.0"
+    
+  # Medium complexity rules
+  - id: "risk-assessment"
+    name: "Risk Assessment"
+    condition: "#riskScore != null && #riskScore >= 0 && #riskScore <= 100 && (#riskScore < 80 || #amount < 10000)"
+    severity: "WARNING"
+    message: "Risk assessment validation"
+    description: "Medium complexity rule combining risk score and amount validation"
+    default-value: "50"
+    
+  - id: "credit-rating-check"
+    name: "Credit Rating Check"
+    condition: "#creditRating != null && #creditRating.matches('[A-D]') && (#creditRating != 'D' || #amount < 5000)"
+    severity: "WARNING"
+    message: "Credit rating validation with amount limit"
+    description: "Medium complexity rule for credit rating with business logic"
+    default-value: "C"
+    
+  # Complex business rules
+  - id: "regional-compliance"
+    name: "Regional Compliance"
+    condition: "#region != null && ((#region == 'AMERICAS' && #amount <= 50000) || (#region == 'EMEA' && #amount <= 25000) || (#region == 'APAC' && #amount <= 30000))"
+    severity: "ERROR"
+    message: "Regional compliance limits exceeded"
+    description: "Complex rule with regional business logic and amount limits"
+    default-value: "AMERICAS"
+    
+  - id: "transaction-type-validation"
+    name: "Transaction Type Validation"
+    condition: "#transactionType != null && (#transactionType == 'PURCHASE' || #transactionType == 'SALE' || #transactionType == 'TRANSFER') && (#transactionType != 'TRANSFER' || #amount >= 100)"
+    severity: "INFO"
+    message: "Transaction type validation with minimum transfer amount"
+    description: "Complex rule validating transaction types with business constraints"
+    default-value: "PURCHASE"
+    
+  # Performance test rules
+  - id: "data-completeness-score"
+    name: "Data Completeness Score"
+    condition: "(#customerId != null ? 1 : 0) + (#amount != null ? 1 : 0) + (#riskScore != null ? 1 : 0) + (#creditRating != null ? 1 : 0) + (#region != null ? 1 : 0) + (#transactionType != null ? 1 : 0) >= 4"
+    severity: "INFO"
+    message: "Data completeness score calculation"
+    description: "Performance test rule that calculates data completeness score"
+    default-value: "4"
+    
+  - id: "processing-timestamp"
+    name: "Processing Timestamp"
+    condition: "true"
+    severity: "INFO"
+    message: "Processing timestamp recorded"
+    description: "Always-passing rule for baseline performance measurement"
+
+# Enrichments for additional metrics collection
+enrichments:
+  - id: "performance-summary"
+    name: "Performance Summary Enrichment"
+    type: "calculation-enrichment"
+    description: "Create performance summary for metrics analysis"
+    condition: "true"
+    
+    calculation-config:
+      expression: "'Processed-' + (#customerId != null ? #customerId : 'UNKNOWN') + '-' + T(java.time.LocalDateTime).now().toString()"
+      result-field: "performanceSummary"
+    
+    field-mappings:
+      - source-field: "performanceSummary"
+        target-field: "metricsTimestamp"
+        
+  - id: "data-quality-score"
+    name: "Data Quality Score Enrichment"
+    type: "calculation-enrichment"
+    description: "Calculate data quality score for metrics analysis"
+    condition: "true"
+    
+    calculation-config:
+      expression: "((#customerId != null && #customerId.length() > 0 ? 20 : 0) + (#amount != null && #amount > 0 ? 20 : 0) + (#riskScore != null && #riskScore >= 0 && #riskScore <= 100 ? 20 : 0) + (#creditRating != null && #creditRating.matches('[A-D]') ? 20 : 0) + (#region != null && (#region == 'AMERICAS' || #region == 'EMEA' || #region == 'APAC') ? 20 : 0))"
+      result-field: "dataQualityScore"
+    
+    field-mappings:
+      - source-field: "dataQualityScore"
+        target-field: "calculatedQualityScore"

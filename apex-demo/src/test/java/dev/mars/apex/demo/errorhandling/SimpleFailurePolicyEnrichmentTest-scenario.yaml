@@ -1,0 +1,52 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: ENRICHMENT SCENARIO CONFIGURATION
+# ============================================================================
+#
+# PURPOSE:
+# This scenario configuration demonstrates enrichment stage behavior under
+# failure policies. It shows how enrichment processing continues even when
+# validation stages fail with "continue-with-warnings" policy.
+#
+metadata:
+  id: "enrichment-test-scenario"
+  name: "Enrichment Test Scenario"
+  version: "1.0.0"
+  description: "Scenario for testing enrichment stage behavior under failure policies"
+  type: "scenario"
+
+# SCENARIO CONFIGURATION:
+# This scenario has multiple stages where validation may fail but enrichment should execute
+scenario:
+  scenario-id: "enrichment-test"
+  name: "Enrichment After Validation Failure Test"
+  description: "Tests enrichment stage execution when validation stage fails"
+
+  data-types:
+    - "HashMap"
+    - "java.util.Map"
+
+  # STAGE DEFINITIONS:
+  # Stage 1: Validation (will fail due to missing fields)
+  # Stage 2: Enrichment (should execute despite validation failure)
+  processing-stages:
+    - stage-name: "validation"
+      config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyEnrichmentTest-validation.yaml"
+      execution-order: 1
+      failure-policy: "continue-with-warnings"
+      required: true
+      stage-metadata:
+        description: "Validation stage that may fail due to missing required fields"
+        expected-behavior: "FAIL - missing required fields cause validation failure"
+      
+    - stage-name: "enrichment"
+      config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyEnrichmentTest-enrichment.yaml"
+      execution-order: 2
+      failure-policy: "continue-with-warnings"
+      required: false
+      stage-metadata:
+        description: "Enrichment stage that should execute despite validation failures"
+        expected-behavior: "SUCCESS - enrichment calculations and field mappings work"
+
+# ============================================================================
+# END OF ENRICHMENT SCENARIO CONFIGURATION
+# ============================================================================

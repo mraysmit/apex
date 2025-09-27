@@ -1,0 +1,34 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: FLAG-FOR-REVIEW POLICY TEST REGISTRY
+# ============================================================================
+#
+# PURPOSE:
+# This is a scenario registry file that demonstrates flag-for-review failure policy
+# behavior. It tests how APEX handles scenarios where processing continues but the
+# scenario is flagged for manual review due to validation or other stage failures.
+#
+# FLAG-FOR-REVIEW FAILURE POLICY BEHAVIOR:
+# 1. Validation stage fails due to missing required fields
+# 2. APEX applies "flag-for-review" policy
+# 3. Processing continues to subsequent stages
+# 4. Scenario is flagged for manual review
+# 5. ScenarioExecutionResult.requiresReview() returns true
+# 6. Review flags are set with details about what needs review
+# 7. All stages execute despite failures in earlier stages
+#
+metadata:
+  id: "flag-for-review-policy-test-registry"
+  name: "Flag For Review Policy Test Registry"
+  version: "1.0.0"
+  description: "Test scenario registry for flag-for-review failure policy behavior"
+  type: "scenario-registry"
+
+# SCENARIO REGISTRY SECTION:
+# This section maps scenario IDs to their configuration files.
+scenario-registry:
+  - scenario-id: "flag-for-review-test"
+    config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyReviewTest-scenario.yaml"
+
+# ============================================================================
+# END OF FLAG-FOR-REVIEW POLICY TEST REGISTRY
+# ============================================================================

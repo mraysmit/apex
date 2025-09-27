@@ -1,0 +1,57 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: COMPLIANCE RULES
+# ============================================================================
+#
+# PURPOSE:
+# These compliance rules should execute even when validation stages fail.
+# They demonstrate how compliance processing continues with available data
+# and applies appropriate compliance checks based on transaction characteristics.
+#
+metadata:
+  id: "compliance-rules"
+  name: "Compliance Rules"
+  version: "1.0.0"
+  description: "Compliance rules that execute after validation failures"
+  type: "validation-config"
+
+# COMPLIANCE RULES:
+# These rules check compliance requirements based on available transaction data
+rules:
+  - id: "high-value-transaction-check"
+    name: "High Value Transaction Check"
+    description: "Flags high-value transactions for additional compliance review"
+    condition: "amount != null && amount > 100000.0"
+    severity: "WARNING"
+    message: "High-value transaction requires additional compliance review"
+
+  - id: "restricted-region-check"
+    name: "Restricted Region Check"
+    description: "Checks for transactions in restricted regions"
+    condition: "region != null && (region == 'RESTRICTED' || region == 'SANCTIONED')"
+    severity: "ERROR"
+    message: "Transaction involves restricted region - compliance review required"
+
+  - id: "suspicious-transaction-type-check"
+    name: "Suspicious Transaction Type Check"
+    description: "Flags suspicious transaction types for review"
+    condition: "transactionType != null && transactionType == 'SUSPICIOUS'"
+    severity: "ERROR"
+    message: "Suspicious transaction type detected - immediate compliance review required"
+
+  - id: "us-region-compliance-check"
+    name: "US Region Compliance Check"
+    description: "Applies US-specific compliance rules"
+    condition: "region != null && region == 'US' && amount != null && amount > 10000.0"
+    severity: "INFO"
+    message: "US transaction over $10,000 - additional reporting requirements apply"
+
+  - id: "eu-region-compliance-check"
+    name: "EU Region Compliance Check"
+    description: "Applies EU-specific compliance rules"
+    condition: "region != null && region == 'EU' && amount != null && amount > 15000.0"
+    severity: "INFO"
+    message: "EU transaction over €15,000 - GDPR and financial regulations apply"
+
+# ============================================================================
+# END OF COMPLIANCE RULES
+# ============================================================================

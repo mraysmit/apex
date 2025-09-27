@@ -1,0 +1,93 @@
+# ============================================================================
+# APEX YAML Configuration File - FAIL_FAST Recovery Strategy
+# ============================================================================
+# Used by: RecoveryStrategyComparisonDemo.java
+# Purpose: Demonstrate FAIL_FAST recovery strategy behavior
+# Strategy: When rules fail, stop processing immediately and report failure
+# ============================================================================
+
+metadata:
+  id: "recovery-strategy-fail-fast"
+  name: "Fail Fast Recovery Strategy Demo"
+  version: "1.0.0"
+  description: "Demonstrates FAIL_FAST recovery strategy that stops on first failure"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-09-27"
+  tags: ["apex-demo", "error-recovery", "fail-fast", "strict-validation"]
+
+# FAIL_FAST recovery configuration
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+  default-strategy: "FAIL_FAST"
+  
+  # All severities use FAIL_FAST strategy
+  severity-policies:
+    ERROR:
+      recovery-enabled: false
+      strategy: "FAIL_FAST"
+      max-retries: 0
+      retry-delay: 0
+      
+    WARNING:
+      recovery-enabled: false
+      strategy: "FAIL_FAST"
+      max-retries: 0
+      retry-delay: 0
+      
+    INFO:
+      recovery-enabled: false
+      strategy: "FAIL_FAST"
+      max-retries: 0
+      retry-delay: 0
+
+# Rules that will cause immediate failure with problematic data
+rules:
+  # Customer ID validation - critical rule
+  - id: "customer-id-validation"
+    name: "Customer ID Validation"
+    condition: "#customerId != null && #customerId.length() > 0"
+    severity: "ERROR"
+    message: "Customer ID cannot be empty - CRITICAL FAILURE"
+    description: "Critical validation: Customer ID must exist - fails fast if missing"
+    
+  # Amount validation - critical rule
+  - id: "amount-positive-check"
+    name: "Amount Positive Check"
+    condition: "#amount != null && #amount > 0"
+    severity: "ERROR"
+    message: "Amount must be positive - CRITICAL FAILURE"
+    description: "Critical validation: Amount must be positive - fails fast if invalid"
+    
+  # Risk score validation - important rule
+  - id: "risk-score-range-check"
+    name: "Risk Score Range Check"
+    condition: "#riskScore != null && #riskScore >= 0 && #riskScore <= 100"
+    severity: "WARNING"
+    message: "Risk score must be between 0 and 100 - VALIDATION FAILURE"
+    description: "Important validation: Risk score range - fails fast if out of range"
+    
+  # Credit rating validation - standard rule
+  - id: "credit-rating-format-check"
+    name: "Credit Rating Format Check"
+    condition: "#creditRating != null && #creditRating.matches('[A-D]')"
+    severity: "INFO"
+    message: "Credit rating must be A, B, C, or D - FORMAT FAILURE"
+    description: "Standard validation: Credit rating format - fails fast if invalid"
+    
+  # Region validation - business rule
+  - id: "region-validation"
+    name: "Region Validation"
+    condition: "#region != null && (#region == 'AMERICAS' || #region == 'EMEA' || #region == 'APAC')"
+    severity: "WARNING"
+    message: "Region must be AMERICAS, EMEA, or APAC - BUSINESS RULE FAILURE"
+    description: "Business rule: Valid region - fails fast if unknown region"
+    
+  # This rule would never be reached due to fail-fast behavior
+  - id: "unreachable-rule"
+    name: "Unreachable Rule"
+    condition: "true"
+    severity: "INFO"
+    message: "This rule should never execute due to fail-fast behavior"
+    description: "Demonstrates that fail-fast stops processing before reaching this rule"

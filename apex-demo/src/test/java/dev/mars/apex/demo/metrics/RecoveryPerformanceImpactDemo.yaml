@@ -13,7 +13,7 @@ metadata:
   name: "Recovery Performance Impact Demo"
   version: "1.0.0"
   description: "Phase 3B demo showing performance impact of recovery operations"
-  type: "demo"
+  type: "rule-config"
   author: "apex.demo.team@company.com"
   created-date: "2025-09-27"
   tags: ["apex-demo", "phase-3b", "recovery", "performance", "metrics"]
@@ -124,79 +124,12 @@ enrichments:
 rule-groups:
   - id: "performance-test-group"
     name: "Performance Test Rule Group"
-    description: "Group of rules for performance impact testing"
+    description: "Group of rules for performance impact testing. This group demonstrates Phase 3B recovery metrics and performance impact analysis with recovery metrics collection, performance comparison between recovery and non-recovery scenarios, different recovery strategies (default-value vs service-based), detailed timing and success rate analysis, and real-world performance characteristics demonstration."
     execution-strategy: "all"
-    
+
     rules:
       - rule-id: "fast-recovery-rule"
       - rule-id: "medium-recovery-rule"
       - rule-id: "success-rule"
       - rule-id: "complex-calculation-rule"
       - rule-id: "data-quality-rule"
-
-# Performance monitoring configuration
-monitoring:
-  enabled: true
-  performance-tracking: true
-  detailed-metrics: true
-  
-  # Metrics collection settings
-  metrics:
-    - "rule-execution-time"
-    - "recovery-attempts"
-    - "recovery-success-rate"
-    - "recovery-time"
-    - "memory-usage"
-    
-  # Performance thresholds for alerting
-  thresholds:
-    max-execution-time-ms: 100
-    max-recovery-time-ms: 50
-    min-success-rate-percent: 95
-
-# Test data scenarios embedded in configuration
-test-scenarios:
-  fast-recovery:
-    description: "Missing riskScore triggers fast default-value recovery"
-    data:
-      customerId: "CUST001"
-      amount: 1000.0
-      # riskScore: missing - will trigger recovery
-      
-  medium-recovery:
-    description: "Missing creditRating triggers service-based recovery"
-    data:
-      customerId: "CUST002"
-      amount: 5000.0
-      riskScore: 80
-      # creditRating: missing - will trigger recovery
-      
-  success-case:
-    description: "Complete data, no recovery needed"
-    data:
-      customerId: "CUST003"
-      amount: 2000.0
-      riskScore: 75
-      creditRating: "A"
-
-# Documentation for demo users
-demo-info:
-  purpose: "Demonstrate Phase 3B recovery metrics and performance impact analysis"
-  key-features:
-    - "Recovery metrics collection with metrics-enabled flag"
-    - "Performance comparison between recovery and non-recovery scenarios"
-    - "Different recovery strategies (default-value vs service-based)"
-    - "Detailed timing and success rate analysis"
-    - "Real-world performance characteristics demonstration"
-    
-  expected-results:
-    - "Fast default-value recovery: < 1ms overhead"
-    - "Medium service recovery: 1-5ms overhead"
-    - "Success cases: No recovery overhead"
-    - "Detailed metrics showing recovery timing and success rates"
-    
-  business-value:
-    - "Capacity planning and SLA management"
-    - "Recovery strategy optimization"
-    - "Performance impact assessment"
-    - "Operational monitoring insights"

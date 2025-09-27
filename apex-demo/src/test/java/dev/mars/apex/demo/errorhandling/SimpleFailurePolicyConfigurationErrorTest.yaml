@@ -1,0 +1,25 @@
+# ============================================================================
+# APEX CONFIGURATION ERROR HANDLING TEST REGISTRY
+# ============================================================================
+#
+# PURPOSE:
+# This test validates that APEX configuration errors are handled gracefully
+# according to prompts.txt principles:
+# - Configuration errors should NOT throw exceptions
+# - Errors should be logged as warnings
+# - Processing should continue with failure policies
+#
+metadata:
+  id: "config-error-test-registry"
+  name: "Configuration Error Test Registry"
+  version: "1.0.0"
+  description: "Test scenario registry for configuration error handling with continue-with-warnings policy"
+  type: "scenario-registry"
+
+scenario-registry:
+  - scenario-id: "config-error-continue-test"
+    config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyConfigurationErrorTest-scenario.yaml"
+
+routing:
+  strategy: "type-based"
+  default-scenario: "config-error-continue-test"

@@ -1,0 +1,55 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: FLAG-FOR-REVIEW ENRICHMENT RULES
+# ============================================================================
+#
+# PURPOSE:
+# These enrichment rules should execute even when validation stages fail and
+# flag scenarios for review. They demonstrate how enrichment processing continues
+# despite review flags being set by previous stages.
+#
+metadata:
+  id: "flag-for-review-enrichment-rules"
+  name: "Flag For Review Enrichment Rules"
+  version: "1.0.0"
+  description: "Enrichment rules that execute despite review flags from validation"
+  type: "enrichment-config"
+
+# ENRICHMENT RULES:
+# These rules perform basic enrichment operations that should work with available data
+enrichments:
+  - id: "review-status-enrichment"
+    name: "Review Status Enrichment"
+    type: "calculation-enrichment"
+    description: "Sets review status based on data availability"
+    calculation-config:
+      expression: "'FLAGGED_FOR_REVIEW'"
+      result-field: "reviewStatus"
+    field-mappings:
+      - source-field: "reviewStatus"
+        target-field: "processingStatus"
+    
+  - id: "processing-timestamp-enrichment"
+    name: "Processing Timestamp Enrichment"
+    type: "calculation-enrichment"
+    description: "Adds processing timestamp for audit trail"
+    calculation-config:
+      expression: "T(java.time.Instant).now().toString()"
+      result-field: "processedAt"
+    field-mappings:
+      - source-field: "processedAt"
+        target-field: "auditTimestamp"
+        
+  - id: "data-completeness-enrichment"
+    name: "Data Completeness Enrichment"
+    type: "calculation-enrichment"
+    description: "Calculates data completeness score"
+    calculation-config:
+      expression: "#root.size() > 2 ? 'PARTIAL' : 'MINIMAL'"
+      result-field: "dataCompleteness"
+    field-mappings:
+      - source-field: "dataCompleteness"
+        target-field: "completenessScore"
+
+# ============================================================================
+# END OF FLAG-FOR-REVIEW ENRICHMENT RULES
+# ============================================================================

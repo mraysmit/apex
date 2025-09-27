@@ -626,6 +626,8 @@ public class YamlConfigurationLoader {
         validateCategories(config);
         validateDataSources(config);
         validateRuleChains(config);
+
+        // Validate enrichments - strict validation for configuration errors
         validateEnrichments(config);
 
         // Step 2: Validate cross-component references
@@ -991,8 +993,6 @@ public class YamlConfigurationLoader {
      * Validate a single enrichment configuration.
      */
     private void validateEnrichment(YamlEnrichment enrichment) throws YamlConfigurationException {
-        String enrichmentId = enrichment.getId();
-
         // Validate basic enrichment structure
         validateEnrichmentBasicStructure(enrichment);
 
@@ -1003,13 +1003,7 @@ public class YamlConfigurationLoader {
         validateEnrichmentCondition(enrichment);
 
         // Validate severity if present
-        if (enrichment.getSeverity() != null) {
-            String severity = enrichment.getSeverity().trim().toUpperCase();
-            if (!SeverityConstants.VALID_SEVERITIES.contains(severity)) {
-                throw new YamlConfigurationException("Enrichment '" + enrichmentId + "' has invalid severity '" +
-                    enrichment.getSeverity() + "'. Must be one of: " + String.join(", ", SeverityConstants.VALID_SEVERITIES));
-            }
-        }
+        validateEnrichmentSeverity(enrichment);
 
         // Validate lookup configuration for lookup enrichments
         if ("lookup-enrichment".equals(enrichment.getType())) {
@@ -1017,9 +1011,9 @@ public class YamlConfigurationLoader {
         }
 
         // Validate field mappings
-        validateFieldMappings(enrichment.getFieldMappings(), enrichmentId);
+        validateFieldMappings(enrichment.getFieldMappings(), enrichment.getId());
 
-        LOGGER.fine("Validated enrichment: " + enrichmentId);
+        LOGGER.fine("Validated enrichment: " + enrichment.getId());
     }
 
     /**
@@ -1044,6 +1038,8 @@ public class YamlConfigurationLoader {
 
     /**
      * Validate enrichment type and type-specific requirements.
+     * Special handling: calculation-enrichment field-mappings validation is graceful,
+     * all other validations throw exceptions for strict configuration validation.
      */
     private void validateEnrichmentType(YamlEnrichment enrichment) throws YamlConfigurationException {
         String type = enrichment.getType();
@@ -1076,9 +1072,12 @@ public class YamlConfigurationLoader {
                 }
                 break;
             case "calculation-enrichment":
-                // Calculation enrichments should have field mappings with transformations
+                // SPECIAL CASE: Graceful handling for calculation-enrichment field-mappings
+                // This allows processing to continue with warnings instead of failing configuration loading
                 if (enrichment.getFieldMappings() == null || enrichment.getFieldMappings().isEmpty()) {
-                    throw new YamlConfigurationException("calculation-enrichment type requires 'field-mappings' for enrichment: " + enrichmentId);
+                    String errorMsg = "calculation-enrichment type requires 'field-mappings' for enrichment: " + enrichmentId;
+                    LOGGER.warning("Configuration validation warning: " + errorMsg);
+                    // Don't throw exception - this is handled gracefully during processing
                 }
                 break;
             case "conditional-mapping-enrichment":
@@ -1090,7 +1089,9 @@ public class YamlConfigurationLoader {
                     throw new YamlConfigurationException("conditional-mapping-enrichment type requires 'mapping-rules' for enrichment: " + enrichmentId);
                 }
                 // Validate mapping rules
-                validateMappingRules(enrichment.getMappingRules(), enrichmentId);
+                if (enrichment.getMappingRules() != null && !enrichment.getMappingRules().isEmpty()) {
+                    validateMappingRules(enrichment.getMappingRules(), enrichmentId);
+                }
                 break;
         }
     }
@@ -1110,6 +1111,19 @@ public class YamlConfigurationLoader {
 
             // Validate common condition patterns
             validateConditionPatterns(condition, enrichmentId);
+        }
+    }
+
+    /**
+     * Validate enrichment severity.
+     */
+    private void validateEnrichmentSeverity(YamlEnrichment enrichment) throws YamlConfigurationException {
+        if (enrichment.getSeverity() != null) {
+            String severity = enrichment.getSeverity().trim().toUpperCase();
+            if (!SeverityConstants.VALID_SEVERITIES.contains(severity)) {
+                throw new YamlConfigurationException("Enrichment '" + enrichment.getId() + "' has invalid severity '" +
+                    enrichment.getSeverity() + "'. Must be one of: " + String.join(", ", SeverityConstants.VALID_SEVERITIES));
+            }
         }
     }
 

@@ -1,0 +1,74 @@
+# ============================================================================
+# APEX YAML Configuration File - Basic Performance Metrics Demo
+# ============================================================================
+# Used by: BasicPerformanceMetricsDemo.java
+# Purpose: Demonstrate basic performance monitoring concepts with rules of
+#          varying complexity to show how rule complexity affects execution time
+# Features: Simple rules, complex rules, performance comparison
+# ============================================================================
+
+metadata:
+  id: "basic-performance-metrics-demo"
+  name: "Basic Performance Metrics Demo"
+  version: "1.0.0"
+  description: "Introduction to APEX performance monitoring with simple and complex rules for comparison"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-09-27"
+  tags: ["apex-demo", "performance", "metrics", "beginner"]
+
+# Simple rules for performance comparison
+rules:
+  # Very simple rule - just checks if amount exists
+  - id: "simple-amount-check"
+    name: "Simple Amount Check"
+    condition: "#amount != null"
+    severity: "INFO"
+    message: "Amount field is present"
+    description: "Simplest possible rule - just checks if amount field exists"
+    
+  # Simple validation rule - basic comparison
+  - id: "simple-validation"
+    name: "Simple Validation Rule"
+    condition: "#amount != null && #amount > 0"
+    severity: "INFO"
+    message: "Amount is positive"
+    description: "Simple rule that checks if amount is positive"
+    
+  # Medium complexity rule - multiple conditions
+  - id: "medium-complexity-rule"
+    name: "Medium Complexity Rule"
+    condition: "#customerId != null && #customerId.length() > 3 && #status == 'ACTIVE'"
+    severity: "INFO"
+    message: "Customer validation passed"
+    description: "Medium complexity rule with multiple string operations"
+    
+  # Complex rule - mathematical calculations and multiple conditions
+  - id: "complex-calculation-rule"
+    name: "Complex Calculation Rule"
+    condition: "#amount != null && #riskScore != null && (#amount * #riskScore / 100) < 10000"
+    severity: "WARNING"
+    message: "Risk-adjusted amount is within limits"
+    description: "Complex rule with mathematical calculations and multiple field dependencies"
+    
+  # Very complex rule - multiple nested conditions and string operations
+  - id: "very-complex-rule"
+    name: "Very Complex Rule"
+    condition: "#region != null && #productType != null && #region.equals('AMERICAS') && #productType.equals('DERIVATIVES') && #amount > 25000 && #riskScore > 80"
+    severity: "ERROR"
+    message: "High-risk Americas derivatives trade detected"
+    description: "Very complex rule with multiple string comparisons, mathematical operations, and nested conditions"
+
+# Rule group to organize performance testing rules
+rule-groups:
+  - id: "performance-test-group"
+    name: "Performance Test Rule Group"
+    description: "Group of rules with varying complexity levels for performance comparison testing"
+    execution-strategy: "all"
+    
+    rules:
+      - rule-id: "simple-amount-check"
+      - rule-id: "simple-validation"
+      - rule-id: "medium-complexity-rule"
+      - rule-id: "complex-calculation-rule"
+      - rule-id: "very-complex-rule"

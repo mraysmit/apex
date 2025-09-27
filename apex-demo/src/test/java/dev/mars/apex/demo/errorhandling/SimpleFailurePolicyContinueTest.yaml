@@ -1,0 +1,23 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: CONTINUE-WITH-WARNINGS POLICY TEST REGISTRY
+# ============================================================================
+#
+# PURPOSE:
+# This is a scenario registry file that demonstrates the "continue-with-warnings" failure policy
+# in APEX. It serves as the entry point for loading scenario configurations that
+# test how APEX handles stage failures with continue behavior.
+#
+metadata:
+  id: "continue-policy-test-registry"
+  name: "Continue Policy Test Registry"
+  version: "1.0.0"
+  description: "Test scenario registry for continue-with-warnings failure policy demonstration"
+  type: "scenario-registry"
+
+scenario-registry:
+  - scenario-id: "continue-with-warnings-test"
+    config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyContinueTest-scenario.yaml"
+
+routing:
+  strategy: "type-based"
+  default-scenario: "continue-with-warnings-test"

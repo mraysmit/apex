@@ -1,0 +1,50 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: VALIDATION RULES FOR TESTING
+# ============================================================================
+#
+# PURPOSE:
+# These validation rules are designed to test validation rule failure behavior
+# and SpEL exception handling. They check for required fields that may be missing
+# in test data, demonstrating how APEX handles validation failures gracefully.
+#
+metadata:
+  id: "validation-test-rules"
+  name: "Validation Test Rules"
+  version: "1.0.0"
+  description: "Validation rules for testing rule failures and SpEL exception handling"
+  type: "validation-config"
+
+# VALIDATION RULES:
+# These rules check for required fields and demonstrate graceful failure handling
+rules:
+  - id: "required-amount-validation"
+    name: "Required Amount Validation"
+    condition: "#data.amount != null && #data.amount > 0"
+    message: "Amount is required and must be greater than zero"
+    severity: "ERROR"
+    enabled: true
+    
+  - id: "required-customer-name-validation"
+    name: "Required Customer Name Validation"
+    condition: "#data.customerName != null && #data.customerName.length() > 0"
+    message: "Customer name is required for transaction processing"
+    severity: "ERROR"
+    enabled: true
+    
+  - id: "required-trade-id-validation"
+    name: "Required Trade ID Validation"
+    condition: "#data.tradeId != null && #data.tradeId.length() > 0"
+    message: "Trade ID is required for transaction identification"
+    severity: "ERROR"
+    enabled: true
+    
+  - id: "optional-description-validation"
+    name: "Optional Description Validation"
+    condition: "#data.description == null || #data.description.length() > 0"
+    message: "Description should not be empty if provided"
+    severity: "WARNING"
+    enabled: true
+
+# ============================================================================
+# END OF VALIDATION TEST RULES
+# ============================================================================

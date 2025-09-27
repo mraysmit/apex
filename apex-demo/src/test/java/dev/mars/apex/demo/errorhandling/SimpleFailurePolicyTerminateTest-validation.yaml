@@ -1,0 +1,30 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: TERMINATE POLICY VALIDATION RULES
+# ============================================================================
+#
+# PURPOSE:
+# These validation rules are designed to fail for terminate policy testing.
+# When these rules fail, the "terminate" failure policy will stop processing
+# immediately and skip all subsequent stages.
+#
+metadata:
+  id: "terminate-validation-rules"
+  name: "Terminate Test Validation Rules"
+  version: "1.0.0"
+  description: "Validation rules designed to fail for terminate policy testing"
+  type: "validation-config"
+
+rules:
+  - id: "required-amount-check"
+    name: "Required Amount Check"
+    condition: "#data.amount != null && #data.amount > 0"
+    message: "Amount is required and must be positive"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "required-customer-check"
+    name: "Required Customer Check"
+    condition: "#data.customerName != null && #data.customerName.length() > 0"
+    message: "Customer name is required"
+    severity: "ERROR"
+    enabled: true

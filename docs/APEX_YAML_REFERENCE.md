@@ -16,16 +16,17 @@
 5. [Rules Section](#5-rules-section)
 6. [Rule Groups Section](#6-rule-groups-section)
 7. [Enrichments Section](#7-enrichments-section)
-8. [Dataset Definitions](#8-dataset-definitions)
-9. [External Data-Source References](#9-external-data-source-references)
-10. [Pipeline Orchestration](#10-pipeline-orchestration)
-11. [Advanced Features](#11-advanced-features)
-12. [Best Practices](#12-best-practices)
-13. [Common Patterns](#13-common-patterns)
-14. [Examples & Use Cases](#14-examples--use-cases)
-15. [Troubleshooting](#15-troubleshooting)
-16. [Reference](#16-reference)
-17. [Migration & Compatibility](#17-migration--compatibility)
+8. [Scenario Configurations](#8-scenario-configurations)
+9. [Dataset Definitions](#9-dataset-definitions)
+10. [External Data-Source References](#10-external-data-source-references)
+11. [Pipeline Orchestration](#11-pipeline-orchestration)
+12. [Advanced Features](#12-advanced-features)
+13. [Best Practices](#13-best-practices)
+14. [Common Patterns](#14-common-patterns)
+15. [Examples & Use Cases](#15-examples--use-cases)
+16. [Troubleshooting](#16-troubleshooting)
+17. [Reference](#17-reference)
+18. [Migration & Compatibility](#18-migration--compatibility)
 
 ---
 
@@ -50,6 +51,7 @@ This section provides a definitive reference for all 72 supported APEX YAML keyw
 | **circuit-breaker** | DataSource | No | Map | Circuit breaker configuration for resilience |
 | **condition** | Rule/Enrichment | No | String | SpEL expression defining when rule/enrichment applies |
 | **conditional-mappings** | Enrichment | No | List | Conditional field mapping configurations |
+| **config-file** | Stage | Yes | String | Path to rule configuration file for stage |
 | **connection** | DataSource | Yes | Map | Database/external system connection configuration |
 | **connection-pool** | DataSource | No | Map | Connection pool settings for database sources |
 | **created** | Metadata | No | String | Creation timestamp (ISO 8601 format) |
@@ -60,15 +62,19 @@ This section provides a definitive reference for all 72 supported APEX YAML keyw
 | **data-sinks** | Document | No | List | Output destinations for processed data |
 | **data-source-refs** | Document | No | List | References to external data source configurations |
 | **data-sources** | Document | No | List | Inline data source definitions |
+| **data-types** | Scenario | No | List | Data types this scenario applies to |
 | **default-value** | FieldMapping | No | Any | Fallback value when source field is missing/null |
+| **depends-on** | Stage | No | List | List of stage dependencies |
 | **description** | Metadata | No | String | Human-readable description of the configuration |
 | **effective-date** | Rule | No | String | Date when rule becomes effective (ISO 8601) |
 | **enabled** | Rule/Enrichment | No | Boolean | Whether the rule/enrichment is active |
 | **encoding** | DataSource | No | String | Character encoding for file-based sources |
 | **endpoints** | DataSource | No | Map | REST API endpoint definitions |
 | **enrichments** | Document | No | List | Data enrichment configurations |
+| **execution-order** | Stage | Yes | Integer | Numeric execution order for stage |
 | **execution-settings** | Enrichment | No | Map | Execution behavior configuration for enrichments |
 | **expiration-date** | Rule | No | String | Date when rule expires (ISO 8601) |
+| **failure-policy** | Stage | No | String | Stage failure handling policy |
 | **field-mappings** | Enrichment | No | List | Field mapping configurations for enrichments |
 | **field-types** | ValidationConfig | No | Map | Expected data types for rule validation |
 | **file-format** | DataSource | No | Map | File format configuration (CSV, JSON, XML) |
@@ -91,6 +97,7 @@ This section provides a definitive reference for all 72 supported APEX YAML keyw
 | **pipeline** | Document | No | Map | Pipeline configuration for processing |
 | **polling-interval** | DataSource | No | Integer | Polling interval for file-based sources |
 | **priority** | Rule/Enrichment | No | Integer | Execution priority (lower numbers = higher priority) |
+| **processing-stages** | Scenario | No | List | Stage-based processing configuration |
 | **queries** | DataSource | No | Map | Named query definitions for database sources |
 | **required** | FieldMapping | No | Boolean | Whether field mapping is mandatory |
 | **required-fields** | ValidationConfig | No | List | List of required fields for rule validation |
@@ -104,10 +111,13 @@ This section provides a definitive reference for all 72 supported APEX YAML keyw
 | **rule-refs** | Document | No | List | References to external rule configurations |
 | **rules** | Document | No | List | Rule definitions |
 | **sasl-mechanism** | DataSource | No | String | SASL mechanism for Kafka authentication (connection-level) |
+| **scenario-id** | Scenario | Yes | String | Unique identifier for the scenario |
 | **security-protocol** | DataSource | No | String | Security protocol for Kafka connections (connection-level) |
 | **sequence** | RuleReference | No | Integer | Execution sequence for rule within group |
 | **severity** | Rule | No | String | Severity level (ERROR, WARNING, INFO) |
 | **source-field** | FieldMapping | Yes | String | Source field name in field mappings |
+| **stage-metadata** | Stage | No | Map | Additional metadata for stage |
+| **stage-name** | Stage | Yes | String | Unique identifier for processing stage |
 | **stop-on-first-failure** | RuleGroup | No | Boolean | Stop group execution on first rule failure |
 | **source-type** | DataSource | Yes | String | Type of data source (database, rest-api, file, etc.) |
 | **tags** | Metadata | No | List | Classification tags for the configuration |
@@ -334,7 +344,7 @@ APEX supports several document types, each with specific purposes and validation
 | `rule-config` | Business rules and validation logic | `id`, `author` | `rules`, `enrichments` |
 | `enrichment` | Data enrichment configurations | `id`, `author` | `enrichments` |
 | `dataset` | Reference data and lookup tables | `id`, `source` | `data` |
-| `scenario` | End-to-end processing scenarios | `id`, `business-domain`, `owner` | `scenario`, `data-types`, `rule-configurations` |
+| `scenario` | End-to-end processing scenarios | `id`, `business-domain`, `owner` | `scenario`, `data-types`, (`rule-configurations` OR `processing-stages`) |
 | `scenario-registry` | Scenario collection management | `id`, `created-by` | `scenarios` |
 | `bootstrap` | Demo and initialization configurations | `id`, `business-domain`, `created-by` | `bootstrap`, `data-sources` |
 | `rule-chain` | Sequential rule execution definitions | `id`, `author` | `rule-chains` |
@@ -1634,9 +1644,149 @@ calculations:
 
 ---
 
-## 7. Dataset Definitions
+## 7. Scenario Configurations
 
-### 7.1 Inline Datasets
+### 7.1 Overview
+
+Scenario configurations define end-to-end processing pipelines for specific data types. They enable systematic routing of different data types through appropriate validation, enrichment, and compliance processing stages.
+
+### 7.2 Basic Scenario Structure
+
+```yaml
+metadata:
+  id: "trade-processing-scenario"
+  name: "Trade Processing Scenario"
+  type: "scenario"
+  business-domain: "Trading"
+  owner: "trading-team@bank.com"
+
+scenario:
+  scenario-id: "trade-processing"
+  name: "Trade Processing Pipeline"
+  description: "Complete trade processing with validation and enrichment"
+
+  data-types:
+    - "Trade"
+    - "java.util.Map"
+
+  # Legacy approach (deprecated but supported)
+  rule-configurations:
+    - "config/trade-validation-rules.yaml"
+    - "config/trade-enrichment-rules.yaml"
+```
+
+### 7.3 Stage-Based Processing (Modern Approach)
+
+Stage-based processing provides explicit control over execution order, dependencies, and failure handling:
+
+```yaml
+scenario:
+  scenario-id: "otc-options-processing"
+  name: "OTC Options Processing"
+  description: "Multi-stage OTC options processing pipeline"
+
+  data-types:
+    - "OTCOption"
+    - "java.util.Map"
+
+  processing-stages:
+    - stage-name: "validation"
+      config-file: "config/otc-validation-rules.yaml"
+      execution-order: 1
+      failure-policy: "terminate"
+      required: true
+      stage-metadata:
+        description: "Critical data validation"
+        sla-ms: 500
+        critical: true
+
+    - stage-name: "market-data-enrichment"
+      config-file: "config/market-data-enrichment.yaml"
+      execution-order: 2
+      failure-policy: "continue-with-warnings"
+      depends-on: ["validation"]
+      stage-metadata:
+        description: "Market data enrichment"
+        sla-ms: 2000
+        data-sources: ["bloomberg", "reuters"]
+
+    - stage-name: "compliance-check"
+      config-file: "config/compliance-rules.yaml"
+      execution-order: 3
+      failure-policy: "flag-for-review"
+      depends-on: ["validation"]
+      stage-metadata:
+        description: "Regulatory compliance validation"
+        sla-ms: 1000
+        critical: true
+```
+
+### 7.4 Stage Configuration Properties
+
+| Property | Required | Type | Description |
+|----------|----------|------|-------------|
+| `stage-name` | Yes | String | Unique identifier for the stage |
+| `config-file` | Yes | String | Path to rule configuration file |
+| `execution-order` | Yes | Integer | Numeric execution order |
+| `failure-policy` | No | String | How to handle stage failures |
+| `required` | No | Boolean | Whether stage is mandatory |
+| `depends-on` | No | List | Stage dependencies |
+| `stage-metadata` | No | Map | Additional stage metadata |
+
+### 7.5 Failure Policies
+
+| Policy | Behavior | Use Case |
+|--------|----------|----------|
+| `terminate` | Stop processing immediately | Critical validations |
+| `continue-with-warnings` | Log warnings, continue processing | Optional enrichments |
+| `flag-for-review` | Mark for manual review, continue | Risk assessments |
+
+### 7.6 Stage Dependencies
+
+Stages can depend on other stages for sequential or conditional processing:
+
+```yaml
+processing-stages:
+  - stage-name: "validation"
+    execution-order: 1
+    failure-policy: "terminate"
+
+  - stage-name: "enrichment"
+    execution-order: 2
+    depends-on: ["validation"]  # Only runs if validation passes
+
+  - stage-name: "compliance"
+    execution-order: 3
+    depends-on: ["validation"]  # Parallel with enrichment
+```
+
+### 7.7 Multi-Environment Configuration
+
+Different environments can have different processing requirements:
+
+```yaml
+# Development Environment
+scenario:
+  scenario-id: "trade-processing-dev"
+  processing-stages:
+    - stage-name: "basic-validation"
+      config-file: "config/dev/lenient-validation.yaml"
+      failure-policy: "continue-with-warnings"  # Lenient for development
+
+# Production Environment
+scenario:
+  scenario-id: "trade-processing-prod"
+  processing-stages:
+    - stage-name: "strict-validation"
+      config-file: "config/prod/strict-validation.yaml"
+      failure-policy: "terminate"  # Strict for production
+```
+
+---
+
+## 8. Dataset Definitions
+
+### 8.1 Inline Datasets
 
 Inline datasets embed data directly in the configuration:
 
@@ -1711,9 +1861,9 @@ lookup-dataset:
 
 ---
 
-## 8. External Data-Source References
+## 9. External Data-Source References
 
-### 8.1 Overview
+### 9.1 Overview
 
 **External Data-Source References** are APEX 2.0's enterprise-grade solution for clean architecture and configuration management. This system enables **separation of concerns** by splitting configurations into:
 
@@ -2285,9 +2435,9 @@ data-sinks:
 
 ---
 
-## 9. Pipeline Orchestration
+## 10. Pipeline Orchestration
 
-### 9.1 Overview
+### 10.1 Overview
 
 **Pipeline Orchestration** is APEX's approach to YAML-driven data processing workflows. This system embodies the core APEX principle that **all processing logic should be contained in the YAML configuration file**, eliminating hardcoded orchestration in Java code.
 
@@ -2594,9 +2744,9 @@ for (PipelineStepResult stepResult : result.getStepResults()) {
 
 ---
 
-## 10. Advanced Features
+## 11. Advanced Features
 
-### 9.1 Conditional Logic
+### 11.1 Conditional Logic
 
 #### Ternary Operators
 
@@ -2710,9 +2860,9 @@ expression: "#value != null && #value.matches('[0-9]+') ? T(java.lang.Integer).p
 
 ---
 
-## 10. Best Practices
+## 12. Best Practices
 
-### 10.1 Performance Guidelines
+### 12.1 Performance Guidelines
 
 #### Condition Optimization
 
@@ -2846,9 +2996,9 @@ expression: "#text != null && #text.trim().length() > 0 ? #text.toUpperCase() : 
 
 ---
 
-## 11. Common Patterns
+## 13. Common Patterns
 
-### 11.1 Financial Services Patterns
+### 13.1 Financial Services Patterns
 
 #### Reference Data Enrichment Pattern
 
@@ -2978,9 +3128,9 @@ rules:
 
 ---
 
-## 12. Examples & Use Cases
+## 14. Examples & Use Cases
 
-### 12.1 Simple REST API Lookup Example
+### 14.1 Simple REST API Lookup Example
 
 This is a complete, working example based on the `SimpleRestApiYamlTest`:
 
@@ -3225,9 +3375,9 @@ enrichments:
 
 ---
 
-## 13. Troubleshooting
+## 15. Troubleshooting
 
-### 13.1 Common Errors
+### 15.1 Common Errors
 
 #### Syntax Errors
 
@@ -3328,9 +3478,9 @@ calculations:
 
 ---
 
-## 14. Reference
+## 16. Reference
 
-### 14.1 Syntax Quick Reference
+### 16.1 Syntax Quick Reference
 
 #### Operators Table
 
@@ -3429,7 +3579,7 @@ APEX adds these extensions to standard SpEL:
 
 ---
 
-## 15. Migration & Compatibility
+## 17. Migration & Compatibility
 
 ### Version Compatibility
 

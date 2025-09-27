@@ -1,0 +1,103 @@
+# ========================================================================
+# PROPERTY NOT FOUND ERROR TEST - VALIDATION RULES
+# ========================================================================
+#
+# These rules are designed to trigger SpEL property not found exceptions.
+# Each rule references properties that don't exist in the test data.
+#
+# EXPECTED BEHAVIOR:
+# - SpEL exceptions should be caught by UnifiedRuleEvaluator
+# - Converted to RuleResult.error() with ERROR severity
+# - No stack traces should be logged (only clean error messages)
+# - Processing should continue with other rules (due to continue-with-warnings policy)
+#
+# Author: APEX Team
+# Since: 1.0.0
+# ========================================================================
+
+# Configuration metadata
+metadata:
+  id: "property-not-found-rules"
+  name: "Property Not Found Validation Rules"
+  description: "Rules that trigger SpEL property not found exceptions for testing error handling"
+  version: "1.0.0"
+
+# Rule definitions - each designed to cause property not found errors
+rules:
+  # ========================================================================
+  # SIMPLE PROPERTY NOT FOUND
+  # ========================================================================
+  - id: "simple-missing-property"
+    name: "Simple Missing Property Check"
+    description: "Tests basic property not found error - references 'currency' field that doesn't exist"
+    condition: "#data.currency != null && #data.currency.length() == 3"
+    message: "Currency field is required and must be 3 characters"
+    severity: "ERROR"
+    # TEST DATA: Will not contain 'currency' field
+    # EXPECTED: SpEL exception "Property or field 'currency' cannot be found"
+    # SHOULD BECOME: RuleResult.error() with clean error message
+    
+  # ========================================================================
+  # NESTED PROPERTY NOT FOUND
+  # ========================================================================
+  - id: "nested-missing-property"
+    name: "Nested Missing Property Check"
+    description: "Tests nested property not found error - references 'customer.id' where customer doesn't exist"
+    condition: "#data.customer.id != null && #data.customer.id > 0"
+    message: "Customer ID is required and must be positive"
+    severity: "ERROR"
+    # TEST DATA: Will not contain 'customer' field
+    # EXPECTED: SpEL exception "Property or field 'customer' cannot be found"
+    # SHOULD BECOME: RuleResult.error() with clean error message
+    
+  # ========================================================================
+  # DEEP NESTED PROPERTY NOT FOUND
+  # ========================================================================
+  - id: "deep-nested-missing-property"
+    name: "Deep Nested Missing Property Check"
+    description: "Tests deep nested property not found error - references 'trade.instrument.details.isin'"
+    condition: "#data.trade.instrument.details.isin != null && #data.trade.instrument.details.isin.length() == 12"
+    message: "ISIN is required and must be 12 characters"
+    severity: "ERROR"
+    # TEST DATA: Will not contain 'trade' field
+    # EXPECTED: SpEL exception "Property or field 'trade' cannot be found"
+    # SHOULD BECOME: RuleResult.error() with clean error message
+    
+  # ========================================================================
+  # PROPERTY WITH METHOD CALL NOT FOUND
+  # ========================================================================
+  - id: "property-method-missing"
+    name: "Property Method Missing Check"
+    description: "Tests property not found when trying to call method - references 'description.toUpperCase()'"
+    condition: "#data.description.toUpperCase().contains('IMPORTANT')"
+    message: "Description must contain IMPORTANT"
+    severity: "ERROR"
+    # TEST DATA: Will not contain 'description' field
+    # EXPECTED: SpEL exception "Property or field 'description' cannot be found"
+    # SHOULD BECOME: RuleResult.error() with clean error message
+    
+  # ========================================================================
+  # ARRAY/LIST PROPERTY NOT FOUND
+  # ========================================================================
+  - id: "array-property-missing"
+    name: "Array Property Missing Check"
+    description: "Tests array property not found error - references 'tags[0]' where tags doesn't exist"
+    condition: "#data.tags != null && #data.tags.size() > 0 && #data.tags[0] != null"
+    message: "At least one tag is required"
+    severity: "ERROR"
+    # TEST DATA: Will not contain 'tags' field
+    # EXPECTED: SpEL exception "Property or field 'tags' cannot be found"
+    # SHOULD BECOME: RuleResult.error() with clean error message
+    
+  # ========================================================================
+  # MAP PROPERTY NOT FOUND
+  # ========================================================================
+  - id: "map-property-missing"
+    name: "Map Property Missing Check"
+    description: "Tests map property not found error - references 'attributes['key']' where attributes doesn't exist"
+    condition: "#data.attributes != null && #data.attributes['status'] == 'ACTIVE'"
+    message: "Status attribute must be ACTIVE"
+    severity: "ERROR"
+    # TEST DATA: Will not contain 'attributes' field
+    # EXPECTED: SpEL exception "Property or field 'attributes' cannot be found"
+    # SHOULD BECOME: RuleResult.error() with clean error message

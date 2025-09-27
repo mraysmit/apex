@@ -1,0 +1,93 @@
+# ============================================================================
+# APEX YAML Configuration File - SKIP_RULE Recovery Strategy
+# ============================================================================
+# Used by: RecoveryStrategyComparisonDemo.java
+# Purpose: Demonstrate SKIP_RULE recovery strategy behavior
+# Strategy: When rules fail, skip the failed rule and continue with others
+# ============================================================================
+
+metadata:
+  id: "recovery-strategy-skip-rule"
+  name: "Skip Rule Recovery Strategy Demo"
+  version: "1.0.0"
+  description: "Demonstrates SKIP_RULE recovery strategy that bypasses failed rules"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-09-27"
+  tags: ["apex-demo", "error-recovery", "skip-rule", "resilience"]
+
+# SKIP_RULE recovery configuration
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+  default-strategy: "SKIP_RULE"
+  
+  # All severities use SKIP_RULE strategy
+  severity-policies:
+    ERROR:
+      recovery-enabled: true
+      strategy: "SKIP_RULE"
+      max-retries: 0
+      retry-delay: 0
+      
+    WARNING:
+      recovery-enabled: true
+      strategy: "SKIP_RULE"
+      max-retries: 0
+      retry-delay: 0
+      
+    INFO:
+      recovery-enabled: true
+      strategy: "SKIP_RULE"
+      max-retries: 0
+      retry-delay: 0
+
+# Rules that will fail with problematic data but be skipped
+rules:
+  # Customer ID validation - will be skipped if fails
+  - id: "customer-id-validation"
+    name: "Customer ID Validation"
+    condition: "#customerId != null && #customerId.length() > 0"
+    severity: "ERROR"
+    message: "Customer ID cannot be empty"
+    description: "Validates customer ID exists and is not empty - skipped if fails"
+    
+  # Amount validation - will be skipped if fails
+  - id: "amount-positive-check"
+    name: "Amount Positive Check"
+    condition: "#amount != null && #amount > 0"
+    severity: "ERROR"
+    message: "Amount must be positive"
+    description: "Validates transaction amount is positive - skipped if fails"
+    
+  # Risk score validation - will be skipped if fails
+  - id: "risk-score-range-check"
+    name: "Risk Score Range Check"
+    condition: "#riskScore != null && #riskScore >= 0 && #riskScore <= 100"
+    severity: "WARNING"
+    message: "Risk score must be between 0 and 100"
+    description: "Validates risk score is within valid range - skipped if fails"
+    
+  # Credit rating validation - will be skipped if fails
+  - id: "credit-rating-format-check"
+    name: "Credit Rating Format Check"
+    condition: "#creditRating != null && #creditRating.matches('[A-D]')"
+    severity: "INFO"
+    message: "Credit rating must be A, B, C, or D"
+    description: "Validates credit rating format - skipped if fails"
+    
+  # Region validation - will be skipped if fails
+  - id: "region-validation"
+    name: "Region Validation"
+    condition: "#region != null && (#region == 'AMERICAS' || #region == 'EMEA' || #region == 'APAC')"
+    severity: "WARNING"
+    message: "Region must be AMERICAS, EMEA, or APAC"
+    description: "Validates region is a known value - skipped if fails"
+    
+  # Always-passing rule to show continued processing
+  - id: "processing-timestamp"
+    name: "Processing Timestamp"
+    condition: "true"
+    severity: "INFO"
+    message: "Processing timestamp recorded"
+    description: "Always passes to demonstrate continued processing after skipped rules"

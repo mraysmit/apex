@@ -1,0 +1,52 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: COMPLIANCE SCENARIO CONFIGURATION
+# ============================================================================
+#
+# PURPOSE:
+# This scenario configuration demonstrates compliance rule execution after
+# validation stage failures. It shows how compliance processing continues
+# even when earlier stages fail with "continue-with-warnings" policy.
+#
+metadata:
+  id: "compliance-test-scenario"
+  name: "Compliance Test Scenario"
+  version: "1.0.0"
+  description: "Scenario for testing compliance rule execution after validation failures"
+  type: "scenario-config"
+
+# SCENARIO CONFIGURATION:
+# This scenario has multiple stages where validation may fail but compliance should execute
+scenario:
+  scenario-id: "compliance-test"
+  name: "Compliance After Validation Failure Test"
+  description: "Tests compliance rule execution when validation stage fails"
+
+  data-types:
+    - "HashMap"
+    - "java.util.Map"
+
+  # STAGE DEFINITIONS:
+  # Stage 1: Validation (will fail due to missing fields)
+  # Stage 2: Compliance (should execute despite validation failure)
+  processing-stages:
+    - stage-name: "validation"
+      config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyComplianceTest-validation.yaml"
+      execution-order: 1
+      failure-policy: "continue-with-warnings"
+      required: true
+      stage-metadata:
+        description: "Validation stage that may fail due to missing required fields"
+        expected-behavior: "FAIL - missing required fields cause validation failure"
+
+    - stage-name: "compliance"
+      config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyComplianceTest-compliance.yaml"
+      execution-order: 2
+      failure-policy: "continue-with-warnings"
+      required: false
+      stage-metadata:
+        description: "Compliance stage that should execute despite validation failures"
+        expected-behavior: "SUCCESS - compliance rules execute with available data"
+
+# ============================================================================
+# END OF COMPLIANCE SCENARIO CONFIGURATION
+# ============================================================================

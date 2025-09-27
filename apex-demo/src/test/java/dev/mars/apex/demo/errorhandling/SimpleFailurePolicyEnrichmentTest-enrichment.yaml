@@ -1,0 +1,66 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: ENRICHMENT RULES
+# ============================================================================
+#
+# PURPOSE:
+# These enrichment rules should execute even when validation stages fail.
+# They demonstrate how enrichment processing continues with available data
+# and applies calculations and field mappings based on transaction data.
+#
+metadata:
+  id: "enrichment-rules"
+  name: "Enrichment Rules"
+  version: "1.0.0"
+  description: "Enrichment rules that execute after validation failures"
+  type: "enrichment-config"
+
+# ENRICHMENT RULES:
+# These rules perform calculations and field mappings on available transaction data
+enrichments:
+  - id: "amount-calculation-enrichment"
+    name: "Amount Calculation Enrichment"
+    type: "calculation-enrichment"
+    description: "Calculates total amount based on base amount and multiplier"
+    calculation-config:
+      expression: "#root['baseAmount'] != null && #root['multiplier'] != null ? #root['baseAmount'] * #root['multiplier'] : (#root['baseAmount'] != null ? #root['baseAmount'] : 0.0)"
+      result-field: "calculatedAmount"
+    field-mappings:
+      - source-field: "calculatedAmount"
+        target-field: "totalAmount"
+    
+  - id: "currency-enrichment"
+    name: "Currency Enrichment"
+    type: "calculation-enrichment"
+    description: "Sets default currency if not provided"
+    calculation-config:
+      expression: "#root['currency'] != null ? #root['currency'] : 'USD'"
+      result-field: "enrichedCurrency"
+    field-mappings:
+      - source-field: "enrichedCurrency"
+        target-field: "finalCurrency"
+        
+  - id: "processing-status-enrichment"
+    name: "Processing Status Enrichment"
+    type: "calculation-enrichment"
+    description: "Sets processing status based on data availability"
+    calculation-config:
+      expression: "#root['baseAmount'] != null ? 'ENRICHED' : 'PARTIAL'"
+      result-field: "processingStatus"
+    field-mappings:
+      - source-field: "processingStatus"
+        target-field: "status"
+        
+  - id: "timestamp-enrichment"
+    name: "Timestamp Enrichment"
+    type: "calculation-enrichment"
+    description: "Adds processing timestamp"
+    calculation-config:
+      expression: "new java.util.Date().toString()"
+      result-field: "processedAt"
+    field-mappings:
+      - source-field: "processedAt"
+        target-field: "processingTimestamp"
+
+# ============================================================================
+# END OF ENRICHMENT RULES
+# ============================================================================

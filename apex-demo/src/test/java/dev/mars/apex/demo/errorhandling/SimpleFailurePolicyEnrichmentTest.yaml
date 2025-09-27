@@ -1,0 +1,33 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: ENRICHMENT POLICY TEST REGISTRY
+# ============================================================================
+#
+# PURPOSE:
+# This is a scenario registry file that demonstrates enrichment stage behavior
+# under different failure policies. It tests how APEX handles enrichment processing
+# when previous stages fail and how enrichment stages handle missing or invalid data.
+#
+# ENRICHMENT FAILURE POLICY BEHAVIOR:
+# 1. Validation stage fails due to missing required fields
+# 2. APEX applies "continue-with-warnings" policy
+# 3. Processing continues to enrichment stage
+# 4. Enrichment stage executes calculations and field mappings
+# 5. Enrichment results are captured despite validation failures
+# 6. ScenarioExecutionResult shows both validation warnings and enrichment results
+#
+metadata:
+  id: "enrichment-policy-test-registry"
+  name: "Enrichment Policy Test Registry"
+  version: "1.0.0"
+  description: "Test scenario registry for enrichment stage behavior under failure policies"
+  type: "scenario-registry"
+
+# SCENARIO REGISTRY SECTION:
+# This section maps scenario IDs to their configuration files.
+scenario-registry:
+  - scenario-id: "enrichment-test"
+    config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyEnrichmentTest-scenario.yaml"
+
+# ============================================================================
+# END OF ENRICHMENT POLICY TEST REGISTRY
+# ============================================================================

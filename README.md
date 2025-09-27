@@ -2,6 +2,13 @@
 
 # APEX Rules Engine
 
+> What’s new (short): MPS-generated YAML validation support
+>
+> - You can author high-level models in JetBrains MPS and generate APEX-compatible YAML.
+> - Put generated files here: apex-demo/demo-data/mps-generated
+> - A test (MpsGeneratedYamlValidationTest) automatically loads every YAML in that folder with the standard YamlConfigurationLoader to ensure it’s engine-compatible.
+> - See the step-by-step guide: docs/MPS_INTEGRATION_GUIDE.md
+
 [![Java](https://img.shields.io/badge/Java-23-orange.svg)](https://openjdk.java.net/projects/jdk/23/)
 [![Maven](https://img.shields.io/badge/Maven-3.8+-blue.svg)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)

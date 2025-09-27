@@ -1,0 +1,43 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: ENRICHMENT TEST VALIDATION RULES
+# ============================================================================
+#
+# PURPOSE:
+# These validation rules are designed to fail for test data that lacks
+# certain required fields. This demonstrates how enrichment stages can
+# still execute even when validation fails.
+#
+metadata:
+  id: "enrichment-validation-rules"
+  name: "Enrichment Test Validation Rules"
+  version: "1.0.0"
+  description: "Validation rules that may fail to test enrichment execution"
+  type: "validation-config"
+
+# VALIDATION RULES:
+# These rules check for required fields that may be missing in test data
+rules:
+  - id: "required-trade-id-check"
+    name: "Required Trade ID Check"
+    description: "Validates that trade ID is present and valid"
+    condition: "tradeId != null && tradeId.toString().length() > 0"
+    severity: "ERROR"
+    message: "Trade ID is required for all transactions"
+    
+  - id: "required-counterparty-check"
+    name: "Required Counterparty Check"
+    description: "Validates that counterparty is present"
+    condition: "counterparty != null && counterparty.toString().length() > 0"
+    severity: "ERROR"
+    message: "Counterparty is required for transaction processing"
+    
+  - id: "trade-date-validation"
+    name: "Trade Date Validation"
+    description: "Validates that trade date is present and valid"
+    condition: "tradeDate != null"
+    severity: "WARNING"
+    message: "Trade date should be specified for proper processing"
+
+# ============================================================================
+# END OF ENRICHMENT VALIDATION RULES
+# ============================================================================

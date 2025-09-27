@@ -1,0 +1,18 @@
+# ============================================================================
+# APEX CONFIGURATION ERROR HANDLING TEST REGISTRY - MULTIPLE ERRORS
+# ============================================================================
+
+metadata:
+  id: "config-error-multiple-registry"
+  name: "Configuration Error Multiple Test Registry"
+  version: "1.0.0"
+  description: "Test scenario registry for multiple configuration error handling"
+  type: "scenario-registry"
+
+scenario-registry:
+  - scenario-id: "config-error-multiple-test"
+    config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyConfigurationErrorTest-multiple-scenario.yaml"
+
+routing:
+  strategy: "type-based"
+  default-scenario: "config-error-multiple-test"
