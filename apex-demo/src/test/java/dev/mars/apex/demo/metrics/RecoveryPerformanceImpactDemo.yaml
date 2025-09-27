@@ -1,0 +1,202 @@
+# ============================================================================
+# APEX YAML Configuration File - Phase 3B Recovery Performance Impact Demo
+# ============================================================================
+# Used by: RecoveryPerformanceImpactDemo.java
+# Purpose: Demonstrate performance characteristics of recovery operations and
+#          show how Phase 3B recovery metrics help analyze performance impact
+# Features: Recovery metrics collection, performance comparison, different
+#           recovery strategies (default-value, service-based)
+# ============================================================================
+
+metadata:
+  id: "recovery-performance-impact-demo"
+  name: "Recovery Performance Impact Demo"
+  version: "1.0.0"
+  description: "Phase 3B demo showing performance impact of recovery operations"
+  type: "demo"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-09-27"
+  tags: ["apex-demo", "phase-3b", "recovery", "performance", "metrics"]
+
+# Phase 3B: Error recovery configuration with metrics enabled
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+  metrics-enabled: true  # ← KEY: This enables Phase 3B recovery metrics collection
+  default-strategy: "CONTINUE_WITH_DEFAULT"
+  
+  # Severity-specific recovery policies for performance testing
+  severity-policies:
+    ERROR:
+      recovery-enabled: true   # Enable recovery for performance testing
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+      retry-delay: 0
+      
+    WARNING:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+      retry-delay: 0
+      
+    INFO:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+      retry-delay: 0
+
+# Performance test rules with different recovery characteristics
+rules:
+  # Fast recovery scenario: Uses Phase 3A default-value recovery
+  - id: "fast-recovery-rule"
+    name: "Fast Default-Value Recovery Rule"
+    condition: "#data.riskScore != null && #data.riskScore > 0"
+    severity: "ERROR"
+    message: "Risk score validation failed"
+    description: "Rule that fails when riskScore is missing, triggers fast default-value recovery"
+    default-value: "75"  # Phase 3A: Default value for fast recovery
+    
+  # Medium recovery scenario: Uses service-based recovery (simulated with complex expression)
+  - id: "medium-recovery-rule"
+    name: "Medium Service Recovery Rule"
+    condition: "#data.creditRating != null && #data.creditRating.matches('[A-C]')"
+    severity: "WARNING"
+    message: "Credit rating validation failed"
+    description: "Rule that fails when creditRating is missing, triggers service-based recovery"
+    default-value: "B"  # Fallback credit rating
+    
+  # Success scenario: No recovery needed
+  - id: "success-rule"
+    name: "Successful Rule (No Recovery)"
+    condition: "#data.customerId != null && #data.amount != null && #data.amount > 0"
+    severity: "INFO"
+    message: "Basic validation passed"
+    description: "Rule that succeeds with complete data, no recovery needed"
+
+# Additional rules for comprehensive performance testing
+  - id: "complex-calculation-rule"
+    name: "Complex Calculation Rule"
+    condition: "#data.amount != null && #data.riskScore != null ? (#data.amount * #data.riskScore / 100) < 50000 : false"
+    severity: "WARNING"
+    message: "Risk-adjusted amount exceeds threshold"
+    description: "Complex calculation that may fail and trigger recovery"
+    default-value: "true"  # Default to passing the risk check
+    
+  - id: "data-quality-rule"
+    name: "Data Quality Validation Rule"
+    condition: "#data.customerId != null && #data.customerId.length() >= 5"
+    severity: "INFO"
+    message: "Customer ID format validation"
+    description: "Data quality rule for customer ID format"
+    default-value: "VALID"
+
+# Enrichment rules to test recovery in enrichment processing
+enrichments:
+  - id: "risk-calculation-enrichment"
+    name: "Risk Calculation with Recovery"
+    type: "calculation-enrichment"
+    description: "Calculate risk metrics with recovery support"
+    condition: "#data.amount != null"
+    
+    calculation-config:
+      expression: "#data.riskScore != null ? (#data.amount * #data.riskScore / 100) : (#data.amount * 75 / 100)"
+      result-field: "calculatedRisk"
+    
+    field-mappings:
+      - source-field: "calculatedRisk"
+        target-field: "riskAmount"
+        
+  - id: "customer-enrichment"
+    name: "Customer Data Enrichment with Recovery"
+    type: "calculation-enrichment"
+    description: "Enrich customer data with recovery fallbacks"
+    condition: "#data.customerId != null"
+    
+    calculation-config:
+      expression: "#data.customerId + '-' + (#data.creditRating != null ? #data.creditRating : 'UNKNOWN')"
+      result-field: "customerKey"
+    
+    field-mappings:
+      - source-field: "customerKey"
+        target-field: "enrichedCustomerKey"
+
+# Rule groups for batch performance testing
+rule-groups:
+  - id: "performance-test-group"
+    name: "Performance Test Rule Group"
+    description: "Group of rules for performance impact testing"
+    execution-strategy: "all"
+    
+    rules:
+      - rule-id: "fast-recovery-rule"
+      - rule-id: "medium-recovery-rule"
+      - rule-id: "success-rule"
+      - rule-id: "complex-calculation-rule"
+      - rule-id: "data-quality-rule"
+
+# Performance monitoring configuration
+monitoring:
+  enabled: true
+  performance-tracking: true
+  detailed-metrics: true
+  
+  # Metrics collection settings
+  metrics:
+    - "rule-execution-time"
+    - "recovery-attempts"
+    - "recovery-success-rate"
+    - "recovery-time"
+    - "memory-usage"
+    
+  # Performance thresholds for alerting
+  thresholds:
+    max-execution-time-ms: 100
+    max-recovery-time-ms: 50
+    min-success-rate-percent: 95
+
+# Test data scenarios embedded in configuration
+test-scenarios:
+  fast-recovery:
+    description: "Missing riskScore triggers fast default-value recovery"
+    data:
+      customerId: "CUST001"
+      amount: 1000.0
+      # riskScore: missing - will trigger recovery
+      
+  medium-recovery:
+    description: "Missing creditRating triggers service-based recovery"
+    data:
+      customerId: "CUST002"
+      amount: 5000.0
+      riskScore: 80
+      # creditRating: missing - will trigger recovery
+      
+  success-case:
+    description: "Complete data, no recovery needed"
+    data:
+      customerId: "CUST003"
+      amount: 2000.0
+      riskScore: 75
+      creditRating: "A"
+
+# Documentation for demo users
+demo-info:
+  purpose: "Demonstrate Phase 3B recovery metrics and performance impact analysis"
+  key-features:
+    - "Recovery metrics collection with metrics-enabled flag"
+    - "Performance comparison between recovery and non-recovery scenarios"
+    - "Different recovery strategies (default-value vs service-based)"
+    - "Detailed timing and success rate analysis"
+    - "Real-world performance characteristics demonstration"
+    
+  expected-results:
+    - "Fast default-value recovery: < 1ms overhead"
+    - "Medium service recovery: 1-5ms overhead"
+    - "Success cases: No recovery overhead"
+    - "Detailed metrics showing recovery timing and success rates"
+    
+  business-value:
+    - "Capacity planning and SLA management"
+    - "Recovery strategy optimization"
+    - "Performance impact assessment"
+    - "Operational monitoring insights"

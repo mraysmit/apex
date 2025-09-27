@@ -58,6 +58,13 @@ public class PerformanceSnapshot implements Serializable {
     private final Instant lastEvaluation;
     private final Instant lastUpdated;
 
+    // Phase 3B: Recovery metrics fields
+    private final long recoveryAttempts;
+    private final long successfulRecoveries;
+    private final double recoverySuccessRate;
+    private final Duration totalRecoveryTime;
+    private final Duration averageRecoveryTime;
+
     /**
      * Create a new performance snapshot from a single metrics instance.
      * 
@@ -84,6 +91,14 @@ public class PerformanceSnapshot implements Serializable {
         this.firstEvaluation = metrics.getStartTime();
         this.lastEvaluation = metrics.getStartTime();
         this.lastUpdated = Instant.now();
+
+        // Phase 3B: Initialize recovery metrics from first metrics
+        this.recoveryAttempts = metrics.isRecoveryAttempted() ? 1 : 0;
+        this.successfulRecoveries = metrics.isRecoverySuccessful() ? 1 : 0;
+        this.recoverySuccessRate = metrics.isRecoveryAttempted() ?
+            (metrics.isRecoverySuccessful() ? 1.0 : 0.0) : 0.0;
+        this.totalRecoveryTime = metrics.getRecoveryTime() != null ? metrics.getRecoveryTime() : Duration.ZERO;
+        this.averageRecoveryTime = this.totalRecoveryTime;
     }
 
     /**
@@ -94,7 +109,9 @@ public class PerformanceSnapshot implements Serializable {
                                long totalMemoryUsed, long averageMemoryUsed, long minMemoryUsed, long maxMemoryUsed,
                                double averageComplexity, int minComplexity, int maxComplexity,
                                long successfulEvaluations, long failedEvaluations, double successRate,
-                               Instant firstEvaluation, Instant lastEvaluation, Instant lastUpdated) {
+                               Instant firstEvaluation, Instant lastEvaluation, Instant lastUpdated,
+                               long recoveryAttempts, long successfulRecoveries, double recoverySuccessRate,
+                               Duration totalRecoveryTime, Duration averageRecoveryTime) {
         this.ruleName = ruleName;
         this.evaluationCount = evaluationCount;
         this.totalEvaluationTime = totalEvaluationTime;
@@ -114,6 +131,13 @@ public class PerformanceSnapshot implements Serializable {
         this.firstEvaluation = firstEvaluation;
         this.lastEvaluation = lastEvaluation;
         this.lastUpdated = lastUpdated;
+
+        // Phase 3B: Initialize recovery metrics
+        this.recoveryAttempts = recoveryAttempts;
+        this.successfulRecoveries = successfulRecoveries;
+        this.recoverySuccessRate = recoverySuccessRate;
+        this.totalRecoveryTime = totalRecoveryTime;
+        this.averageRecoveryTime = averageRecoveryTime;
     }
 
     /**
@@ -150,15 +174,30 @@ public class PerformanceSnapshot implements Serializable {
         double newSuccessRate = (double) newSuccessful / newCount;
         
         // Update timestamps
-        Instant newLastEvaluation = metrics.getStartTime().isAfter(lastEvaluation) ? 
+        Instant newLastEvaluation = metrics.getStartTime().isAfter(lastEvaluation) ?
                                    metrics.getStartTime() : lastEvaluation;
-        
+
+        // Phase 3B: Update recovery statistics
+        long newRecoveryAttempts = recoveryAttempts + (metrics.isRecoveryAttempted() ? 1 : 0);
+        long newSuccessfulRecoveries = successfulRecoveries + (metrics.isRecoverySuccessful() ? 1 : 0);
+        double newRecoverySuccessRate = newRecoveryAttempts > 0 ?
+            (double) newSuccessfulRecoveries / newRecoveryAttempts : 0.0;
+
+        Duration newTotalRecoveryTime = totalRecoveryTime;
+        if (metrics.getRecoveryTime() != null) {
+            newTotalRecoveryTime = totalRecoveryTime.plus(metrics.getRecoveryTime());
+        }
+        Duration newAverageRecoveryTime = newRecoveryAttempts > 0 ?
+            Duration.ofNanos(newTotalRecoveryTime.toNanos() / newRecoveryAttempts) : Duration.ZERO;
+
         return new PerformanceSnapshot(
             ruleName, newCount, newTotalTime, newAverageTime, newMinTime, newMaxTime,
             newTotalMemory, newAverageMemory, newMinMemory, newMaxMemory,
             newAverageComplexity, newMinComplexity, newMaxComplexity,
             newSuccessful, newFailed, newSuccessRate,
-            firstEvaluation, newLastEvaluation, Instant.now()
+            firstEvaluation, newLastEvaluation, Instant.now(),
+            newRecoveryAttempts, newSuccessfulRecoveries, newRecoverySuccessRate,
+            newTotalRecoveryTime, newAverageRecoveryTime
         );
     }
 
@@ -182,6 +221,13 @@ public class PerformanceSnapshot implements Serializable {
     public Instant getFirstEvaluation() { return firstEvaluation; }
     public Instant getLastEvaluation() { return lastEvaluation; }
     public Instant getLastUpdated() { return lastUpdated; }
+
+    // Phase 3B: Recovery metrics getters
+    public long getRecoveryAttempts() { return recoveryAttempts; }
+    public long getSuccessfulRecoveries() { return successfulRecoveries; }
+    public double getRecoverySuccessRate() { return recoverySuccessRate; }
+    public Duration getTotalRecoveryTime() { return totalRecoveryTime; }
+    public Duration getAverageRecoveryTime() { return averageRecoveryTime; }
 
     /**
      * Get the average evaluation time in milliseconds.

@@ -17,8 +17,6 @@ package dev.mars.apex.demo.database;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlDataSource;
-import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
@@ -30,7 +28,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.DockerClientFactory;
-import dev.mars.apex.demo.test.TestContainerImages;
+import dev.mars.apex.demo.util.TestContainerImages;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

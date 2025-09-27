@@ -50,6 +50,13 @@ public class RulePerformanceMetrics implements Serializable {
     private final String evaluationPhase;
     private final Exception evaluationException;
 
+    // Phase 3B: Recovery metrics fields
+    private final boolean recoveryAttempted;
+    private final boolean recoverySuccessful;
+    private final String recoveryStrategy;
+    private final String recoveryReason;
+    private final Duration recoveryTime;
+
     /**
      * Private constructor for builder pattern.
      */
@@ -65,6 +72,13 @@ public class RulePerformanceMetrics implements Serializable {
         this.cacheHit = builder.cacheHit;
         this.evaluationPhase = builder.evaluationPhase;
         this.evaluationException = builder.evaluationException;
+
+        // Phase 3B: Initialize recovery metrics
+        this.recoveryAttempted = builder.recoveryAttempted;
+        this.recoverySuccessful = builder.recoverySuccessful;
+        this.recoveryStrategy = builder.recoveryStrategy;
+        this.recoveryReason = builder.recoveryReason;
+        this.recoveryTime = builder.recoveryTime;
     }
 
     /**
@@ -186,11 +200,67 @@ public class RulePerformanceMetrics implements Serializable {
 
     /**
      * Check if an exception occurred during evaluation.
-     * 
+     *
      * @return true if an exception occurred, false otherwise
      */
     public boolean hasException() {
         return evaluationException != null;
+    }
+
+    // Phase 3B: Recovery metrics getters
+
+    /**
+     * Check if error recovery was attempted for this rule evaluation.
+     *
+     * @return true if recovery was attempted, false otherwise
+     */
+    public boolean isRecoveryAttempted() {
+        return recoveryAttempted;
+    }
+
+    /**
+     * Check if error recovery was successful for this rule evaluation.
+     *
+     * @return true if recovery was successful, false otherwise
+     */
+    public boolean isRecoverySuccessful() {
+        return recoverySuccessful;
+    }
+
+    /**
+     * Get the recovery strategy that was used.
+     *
+     * @return The recovery strategy, or null if no recovery was attempted
+     */
+    public String getRecoveryStrategy() {
+        return recoveryStrategy;
+    }
+
+    /**
+     * Get the reason for recovery (typically the exception type).
+     *
+     * @return The recovery reason, or null if no recovery was attempted
+     */
+    public String getRecoveryReason() {
+        return recoveryReason;
+    }
+
+    /**
+     * Get the time spent on recovery operations.
+     *
+     * @return The recovery time, or null if no recovery was attempted
+     */
+    public Duration getRecoveryTime() {
+        return recoveryTime;
+    }
+
+    /**
+     * Get the recovery time in milliseconds.
+     *
+     * @return The recovery time in milliseconds, or 0 if no recovery was attempted
+     */
+    public long getRecoveryTimeMillis() {
+        return recoveryTime != null ? recoveryTime.toMillis() : 0L;
     }
 
     /**
@@ -209,6 +279,16 @@ public class RulePerformanceMetrics implements Serializable {
         }
         if (hasException()) {
             summary.append(", Error: ").append(evaluationException.getMessage());
+        }
+        // Phase 3B: Include recovery information in summary
+        if (recoveryAttempted) {
+            summary.append(", Recovery: ").append(recoverySuccessful ? "SUCCESS" : "FAILED");
+            if (recoveryStrategy != null) {
+                summary.append(" (").append(recoveryStrategy).append(")");
+            }
+            if (recoveryTime != null) {
+                summary.append(" [").append(getRecoveryTimeMillis()).append("ms]");
+            }
         }
         return summary.toString();
     }
@@ -265,6 +345,13 @@ public class RulePerformanceMetrics implements Serializable {
         private String evaluationPhase = "evaluation";
         private Exception evaluationException;
 
+        // Phase 3B: Recovery metrics builder fields
+        private boolean recoveryAttempted = false;
+        private boolean recoverySuccessful = false;
+        private String recoveryStrategy;
+        private String recoveryReason;
+        private Duration recoveryTime;
+
         public Builder(String ruleName) {
             this.ruleName = ruleName;
         }
@@ -316,6 +403,33 @@ public class RulePerformanceMetrics implements Serializable {
 
         public Builder evaluationException(Exception evaluationException) {
             this.evaluationException = evaluationException;
+            return this;
+        }
+
+        // Phase 3B: Recovery metrics builder methods
+
+        public Builder recoveryAttempted(boolean recoveryAttempted) {
+            this.recoveryAttempted = recoveryAttempted;
+            return this;
+        }
+
+        public Builder recoverySuccessful(boolean recoverySuccessful) {
+            this.recoverySuccessful = recoverySuccessful;
+            return this;
+        }
+
+        public Builder recoveryStrategy(String recoveryStrategy) {
+            this.recoveryStrategy = recoveryStrategy;
+            return this;
+        }
+
+        public Builder recoveryReason(String recoveryReason) {
+            this.recoveryReason = recoveryReason;
+            return this;
+        }
+
+        public Builder recoveryTime(Duration recoveryTime) {
+            this.recoveryTime = recoveryTime;
             return this;
         }
 

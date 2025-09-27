@@ -27,7 +27,7 @@ import dev.mars.apex.core.config.datasource.ConnectionConfig;
 import dev.mars.apex.core.config.datasource.ConnectionPoolConfig;
 import dev.mars.apex.core.service.data.external.DataSourceType;
 import dev.mars.apex.core.service.data.external.DataSourceException;
-import dev.mars.apex.demo.test.TestContainerImages;
+import dev.mars.apex.demo.util.TestContainerImages;
 
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
@@ -42,7 +42,6 @@ import org.testcontainers.DockerClientFactory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
-import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -2,7 +2,7 @@ package dev.mars.apex.demo.database;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.demo.DemoTestBase;
-import dev.mars.apex.demo.test.TestContainerImages;
+import dev.mars.apex.demo.util.TestContainerImages;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

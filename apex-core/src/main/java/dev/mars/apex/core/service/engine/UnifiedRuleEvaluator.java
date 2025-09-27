@@ -22,6 +22,8 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -195,16 +197,25 @@ public class UnifiedRuleEvaluator {
     private RuleResult handleEvaluationError(Rule rule, Exception exception, RulePerformanceMetrics.Builder metricsBuilder) {
         // Log the error using the rules engine logger
         rulesLogger.ruleEvaluationError(rule.getName(), exception);
-        
-        // Complete performance monitoring for failed evaluation
-        RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition(), exception);
-        
+
+        // Phase 3B: Initialize recovery tracking variables
+        boolean recoveryAttempted = false;
+        boolean recoverySuccessful = false;
+        String recoveryStrategy = null;
+        String recoveryReason = exception.getClass().getSimpleName();
+        Instant recoveryStartTime = null;
+        Duration recoveryTime = null;
+
         // Create standardized error message
         String errorMessage = String.format(ERROR_MESSAGE_FORMAT, rule.getName(), exception.getMessage());
         String severity = rule.getSeverity() != null ? rule.getSeverity() : "ERROR";
 
         // Attempt error recovery based on configurable severity policies
         if (errorRecoveryConfig.isRecoveryEnabledForSeverity(severity)) {
+            // Phase 3B: Start recovery timing
+            recoveryAttempted = true;
+            recoveryStartTime = Instant.now();
+
             SeverityRecoveryPolicy policy = errorRecoveryConfig.getSeverityPolicy(severity);
             if (errorRecoveryConfig.isLogRecoveryAttempts()) {
                 rulesLogger.info("Attempting error recovery for rule '{}' with severity '{}' using strategy '{}'",
@@ -213,10 +224,21 @@ public class UnifiedRuleEvaluator {
 
             // Phase 3A Enhancement: Check if rule has a specific default-value
             if (rule.getDefaultValue() != null) {
+                recoveryStrategy = "RULE_DEFAULT_VALUE";
                 if (errorRecoveryConfig.isLogRecoveryAttempts()) {
                     rulesLogger.info("Using rule-specific default value for recovery: rule='{}', defaultValue='{}'",
                         rule.getName(), rule.getDefaultValue());
                 }
+                recoverySuccessful = true;
+                // Phase 3B: Calculate recovery time
+                if (recoveryStartTime != null) {
+                    recoveryTime = Duration.between(recoveryStartTime, Instant.now());
+                }
+
+                // Complete performance monitoring with recovery metrics
+                RulePerformanceMetrics metrics = buildMetricsWithRecovery(metricsBuilder, rule, exception,
+                    recoveryAttempted, recoverySuccessful, recoveryStrategy, recoveryReason, recoveryTime);
+
                 LoggingContext.clearContext();
                 return RuleResult.match(rule.getName(), String.valueOf(rule.getDefaultValue()), severity, metrics);
             }
@@ -224,8 +246,27 @@ public class UnifiedRuleEvaluator {
             // Use the existing error recovery service method signature
             ErrorRecoveryService.RecoveryResult recoveryResult = errorRecoveryService.attemptRecovery(rule.getName(), rule.getCondition(), null, exception);
             if (recoveryResult != null && recoveryResult.isSuccessful()) {
+                recoverySuccessful = true;
+                recoveryStrategy = policy != null ? policy.getStrategy() : "DEFAULT_STRATEGY";
+                // Phase 3B: Calculate recovery time
+                if (recoveryStartTime != null) {
+                    recoveryTime = Duration.between(recoveryStartTime, Instant.now());
+                }
+
+                // Complete performance monitoring with recovery metrics
+                RulePerformanceMetrics metrics = buildMetricsWithRecovery(metricsBuilder, rule, exception,
+                    recoveryAttempted, recoverySuccessful, recoveryStrategy, recoveryReason, recoveryTime);
+
                 LoggingContext.clearContext();
                 return recoveryResult.getRuleResult();
+            } else {
+                // Recovery failed
+                recoverySuccessful = false;
+                recoveryStrategy = policy != null ? policy.getStrategy() : "DEFAULT_STRATEGY";
+                // Phase 3B: Calculate recovery time even for failed recovery
+                if (recoveryStartTime != null) {
+                    recoveryTime = Duration.between(recoveryStartTime, Instant.now());
+                }
             }
         }
         
@@ -241,8 +282,50 @@ public class UnifiedRuleEvaluator {
         // Always log full exception details at DEBUG level for troubleshooting
         rulesLogger.debug("Full exception details for rule '{}':", rule.getName(), exception);
 
+        // Complete performance monitoring with recovery metrics (even for failed recovery)
+        RulePerformanceMetrics finalMetrics = buildMetricsWithRecovery(metricsBuilder, rule, exception,
+            recoveryAttempted, recoverySuccessful, recoveryStrategy, recoveryReason, recoveryTime);
+
         LoggingContext.clearContext();
-        return RuleResult.error(rule.getName(), errorMessage, severity, metrics);
+        return RuleResult.error(rule.getName(), errorMessage, severity, finalMetrics);
+    }
+
+    /**
+     * Phase 3B: Build performance metrics with recovery information.
+     * Only includes recovery metrics if metrics are enabled in configuration.
+     */
+    private RulePerformanceMetrics buildMetricsWithRecovery(RulePerformanceMetrics.Builder metricsBuilder,
+                                                           Rule rule, Exception exception,
+                                                           boolean recoveryAttempted, boolean recoverySuccessful,
+                                                           String recoveryStrategy, String recoveryReason,
+                                                           Duration recoveryTime) {
+        // Complete the basic evaluation metrics first
+        RulePerformanceMetrics baseMetrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition(), exception);
+
+        // Phase 3B: Only add recovery metrics if metrics are enabled
+        if (errorRecoveryConfig.isMetricsEnabled()) {
+            // Create a new builder from the base metrics and add recovery information
+            return new RulePerformanceMetrics.Builder(baseMetrics.getRuleName())
+                .startTime(baseMetrics.getStartTime())
+                .endTime(baseMetrics.getEndTime())
+                .evaluationTime(baseMetrics.getEvaluationTime())
+                .memoryUsed(baseMetrics.getMemoryUsedBytes())
+                .memoryBefore(baseMetrics.getMemoryBeforeBytes())
+                .memoryAfter(baseMetrics.getMemoryAfterBytes())
+                .expressionComplexity(baseMetrics.getExpressionComplexity())
+                .cacheHit(baseMetrics.isCacheHit())
+                .evaluationPhase(baseMetrics.getEvaluationPhase())
+                .evaluationException(baseMetrics.getEvaluationException())
+                .recoveryAttempted(recoveryAttempted)
+                .recoverySuccessful(recoverySuccessful)
+                .recoveryStrategy(recoveryStrategy)
+                .recoveryReason(recoveryReason)
+                .recoveryTime(recoveryTime)
+                .build();
+        } else {
+            // Return base metrics without recovery information
+            return baseMetrics;
+        }
     }
 
     /**

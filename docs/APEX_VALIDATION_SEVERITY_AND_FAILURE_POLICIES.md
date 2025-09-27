@@ -306,4 +306,69 @@ for (StageExecutionResult stageResult : result.getStageResults()) {
 
 ---
 
+## 🚀 Recent Enhancements
+
+### ✅ Extended Default-Value Support - COMPLETED
+
+**Phase 3A Implementation** - Successfully extended the existing `default-value` functionality from field mappings to work in rule conditions and calculations.
+
+#### **Key Features**
+- **Rule-Level Defaults**: Rules can specify default values when evaluation fails
+- **Calculation Defaults**: Enrichment calculations can provide safe fallback values
+- **Type Support**: String, boolean, numeric, and decimal default values
+- **Backward Compatible**: Existing configurations continue to work unchanged
+
+#### **YAML Syntax Examples**
+
+**Rules with Default Values:**
+```yaml
+rules:
+  - id: "customer-validation"
+    name: "Customer Validation Rule"
+    condition: "#data.customer != null && #data.customer.name != null"
+    message: "Customer validation passed"
+    severity: "INFO"
+    default-value: "Customer validation skipped - using default"
+
+  - id: "age-check"
+    name: "Age Verification Rule"
+    condition: "#data.customer.age >= 18"
+    severity: "WARNING"
+    default-value: true
+```
+
+**Calculations with Default Values:**
+```yaml
+enrichments:
+  - id: "risk-calculation"
+    name: "Risk Score Calculation"
+    type: "calculation-enrichment"
+    condition: "#data.customer != null"
+    calculation-config:
+      expression: "#data.customer.creditScore * 0.7 + #data.customer.age * 0.3"
+      result-field: "riskScore"
+      default-value: 500.0
+```
+
+#### **Integration with Error Recovery**
+- Rule-specific defaults take precedence over global recovery strategies
+- Works seamlessly with existing severity-based error recovery
+- Enhanced `UnifiedRuleEvaluator` checks for rule defaults before standard recovery
+- Enhanced `YamlEnrichmentProcessor` uses calculation defaults for error recovery
+
+#### **Business Value**
+1. **Simple Configuration**: Business users specify appropriate defaults using familiar YAML syntax
+2. **Rule-Level Control**: Each rule can have its own default behavior when evaluation fails
+3. **Calculation Safety**: Calculations provide safe fallback values for complex expressions
+4. **Operational Resilience**: Systems continue operating with sensible defaults instead of failing
+
+#### **Test Coverage**
+- **23 comprehensive tests** covering all aspects of the enhancement
+- **Unit tests** for YAML configuration classes
+- **Integration tests** for end-to-end functionality
+- **Demonstration tests** showing practical usage
+- **Backward compatibility** verified
+
+---
+
 This architecture provides **fine-grained control** over validation processing, allowing businesses to implement sophisticated error handling workflows that match their operational requirements while maintaining system resilience and audit capabilities.

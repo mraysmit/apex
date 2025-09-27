@@ -342,7 +342,7 @@ mvn test -Dtest.file.streaming=true
 
 #### **Global Constants Classes:**
 - **apex-core**: `dev.mars.apex.core.test.TestContainerImages`
-- **apex-demo**: `dev.mars.apex.demo.test.TestContainerImages`
+- **apex-demo**: `dev.mars.apex.demo.util.TestContainerImages`
 
 #### **Version Definitions:**
 All Docker image versions are defined in the root `pom.xml`:

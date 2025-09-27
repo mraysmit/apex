@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.mars.apex.demo.test;
+package dev.mars.apex.demo.util;
 
 /**
  * Central constants for Docker image versions used in Testcontainers integration tests.
