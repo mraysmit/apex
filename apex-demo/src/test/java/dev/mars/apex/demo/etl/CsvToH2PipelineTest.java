@@ -60,7 +60,7 @@ public class CsvToH2PipelineTest extends DemoTestBase {
             // Create required directories and sample CSV file
             setupTestData();
             // Load YAML pipeline configuration from same directory as test
-            String yamlPath = "src/test/java/dev/mars/apex/demo/etl/csv-to-h2-pipeline.yaml";
+            String yamlPath = "src/test/java/dev/mars/apex/demo/etl/CsvToH2PipelineTest.yaml";
             YamlRuleConfiguration config = yamlLoader.loadFromFile(yamlPath);
             assertNotNull(config, "Pipeline configuration should not be null");
 

@@ -81,6 +81,11 @@ public class CustomerNameEnrichmentTest extends DemoTestBase {
         customerBaseUrl = customerServer.getBaseUrl();
         logger.info("Customer API server started at: {}", customerBaseUrl);
 
+        // Extract port from URL and set as system property for YAML placeholder resolution
+        String port = extractPortFromUrl(customerBaseUrl);
+        System.setProperty("PORT", port);
+        logger.info("Set PORT system property to: {}", port);
+
         logger.info("================================================================================");
     }
 
@@ -94,6 +99,16 @@ public class CustomerNameEnrichmentTest extends DemoTestBase {
             customerServer.stop();
             logger.info("Customer API server stopped");
         }
+
+        // Clean up system property
+        System.clearProperty("PORT");
+    }
+
+    // Helper method to extract port from URL
+    private static String extractPortFromUrl(String url) {
+        // Extract port from URL like "http://localhost:12345"
+        String[] parts = url.split(":");
+        return parts[2];
     }
 
     @Test

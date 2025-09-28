@@ -76,7 +76,7 @@ public class PipelineEtlTest extends DemoTestBase {
             createTestCsvData();
 
             // Load pipeline configuration THIRD
-            pipelineConfig = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/etl/pipeline-etl-test.yaml");
+            pipelineConfig = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/etl/PipelineEtlTest.yaml");
             assertNotNull(pipelineConfig, "Pipeline configuration should load successfully");
 
             // Initialize pipeline engine LAST (after directories and data exist)

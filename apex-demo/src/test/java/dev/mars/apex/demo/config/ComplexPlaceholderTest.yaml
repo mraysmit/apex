@@ -1,0 +1,39 @@
+metadata:
+  name: "Complex Placeholder Test"
+  version: "1.0.0"
+  description: "Test complex nested and multiple placeholders"
+
+data-sources:
+  - name: "complex-api"
+    type: "rest-api"
+    source-type: "rest-api"
+    enabled: true
+    description: "Complex placeholder scenarios"
+    
+    connection:
+      base-url: "${PROTOCOL:https}://${API_HOST}:${API_PORT}/api/${API_VERSION:v1}"
+      timeout: ${TIMEOUT:5000}
+      
+    endpoints:
+      users: "/users?page=${PAGE:1}&size=${SIZE:10}&sort=${SORT:id}"
+      orders: "/orders?status=${STATUS:active}&from=${FROM_DATE}&to=${TO_DATE}"
+      
+    authentication:
+      type: "${AUTH_TYPE:bearer}"
+      token: "${JWT_TOKEN}"
+      refresh-url: "${PROTOCOL:https}://${AUTH_HOST:${API_HOST}}:${AUTH_PORT:${API_PORT}}/auth/refresh"
+      
+enrichments:
+  - id: "complex-enrichment"
+    name: "Complex Enrichment"
+    type: "calculation-enrichment"
+    description: "Test complex placeholder in enrichment"
+    condition: "true"
+    
+    calculation-config:
+      expression: "'${SYSTEM_NAME:APEX}-' + #orderId + '-' + '${ENVIRONMENT:dev}'"
+      result-field: "systemOrderId"
+      
+    field-mappings:
+      - source-field: "systemOrderId"
+        target-field: "enrichedOrderId"

@@ -1,0 +1,31 @@
+metadata:
+  name: "Environment Placeholder Test"
+  version: "1.0.0"
+  description: "Test environment variable resolution"
+
+data-sources:
+  - name: "env-api"
+    type: "rest-api"
+    source-type: "rest-api"
+    enabled: true
+    description: "Test environment variable placeholders"
+    
+    connection:
+      base-url: "http://${HOSTNAME:localhost}:${SERVER_PORT:8080}"
+      timeout: ${REQUEST_TIMEOUT:5000}
+      
+    authentication:
+      username: "${USERNAME}"
+      password: "${PASSWORD}"
+      
+enrichments:
+  - id: "env-enrichment"
+    name: "Environment Enrichment"
+    type: "field-enrichment"
+    description: "Test environment in enrichment"
+    condition: "true"
+    
+    field-mappings:
+      - source-field: "environment"
+        target-field: "env"
+        default-value: "${ENVIRONMENT:development}"

@@ -1,11 +1,54 @@
 # ============================================================================
-# APEX YAML Configuration File
+# APEX ETL Pipeline Configuration - Advanced Customer Data Processing
 # ============================================================================
-# Used by: ORPHANED - No Java test currently uses this file
-# Purpose: ETL pipeline demonstration using APEX pipeline functionality for
-#          data extraction, transformation, and loading operations with
-#          customer data processing and file-based data sources
-# Status: Available for integration with ETL pipeline tests
+#
+# OVERVIEW:
+# This configuration demonstrates an advanced ETL pipeline with comprehensive
+# data processing capabilities. It showcases enterprise-grade features for
+# customer data management including data validation, enrichment, multiple
+# output formats, and sophisticated error handling strategies.
+#
+# BUSINESS SCENARIO:
+# Enterprise customer data processing system that handles high-volume customer
+# onboarding, data quality validation, multi-format output generation, and
+# comprehensive audit trails. Designed for production environments requiring
+# robust error handling, performance monitoring, and compliance tracking.
+#
+# TECHNICAL FEATURES DEMONSTRATED:
+# ✓ Advanced file-system data sources with multiple CSV processing options
+# ✓ Multi-target data sinks (H2 database + file-system outputs)
+# ✓ Complex pipeline orchestration with conditional steps and dependencies
+# ✓ Sophisticated error handling with retry logic and fallback strategies
+# ✓ Performance monitoring with execution timing and metrics collection
+# ✓ Data validation and enrichment capabilities
+# ✓ Multiple output formats (database, JSON, audit logs)
+# ✓ Configurable execution modes (sequential, parallel, conditional)
+#
+# PIPELINE ARCHITECTURE:
+# 1. Extract: Multi-source customer data ingestion with validation
+# 2. Transform: Data cleansing, validation, and enrichment processes
+# 3. Load: Multi-target data persistence (database + file outputs)
+# 4. Audit: Comprehensive audit trail generation with metrics
+# 5. Cleanup: Resource cleanup and performance reporting
+#
+# DATA FLOW:
+# CSV Input → Validation → Enrichment → Database Storage → Audit Logging
+#           ↓                        ↓
+#      Error Handling          JSON Export
+#
+# ENTERPRISE FEATURES:
+# • Configurable retry mechanisms with exponential backoff
+# • Circuit breaker patterns for external service calls
+# • Comprehensive logging and monitoring integration
+# • Data quality validation with configurable rules
+# • Performance metrics collection and reporting
+# • Error recovery and fallback processing strategies
+#
+# USED BY: PipelineEtlTest.java
+# STATUS: Active enterprise-grade test configuration
+# AUTHOR: APEX Demo Team
+# VERSION: 1.0.0
+# COMPLEXITY: Advanced (suitable for production environments)
 # ============================================================================
 
 metadata:

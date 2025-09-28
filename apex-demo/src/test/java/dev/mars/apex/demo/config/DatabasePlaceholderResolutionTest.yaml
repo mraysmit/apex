@@ -1,0 +1,25 @@
+metadata:
+  name: "Database Placeholder Resolution Test"
+  version: "1.0.0"
+  description: "Test database connection placeholders"
+
+data-sources:
+  - name: "test-database"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    description: "Test database with multiple placeholders"
+    
+    connection:
+      host: "${DB_HOST}"
+      port: ${DB_PORT}
+      database: "${DB_NAME}"
+      username: "${DB_USER}"
+      password: "${DB_PASSWORD}"
+      schema: "${DB_SCHEMA:public}"
+      max-pool-size: ${DB_POOL_SIZE:20}
+      connection-timeout: ${DB_TIMEOUT:30000}
+    
+    queries:
+      getUserById: "SELECT * FROM ${DB_SCHEMA:public}.users WHERE id = :id"
+      getOrdersByCustomer: "SELECT * FROM ${DB_SCHEMA:public}.orders WHERE customer_id = :customerId"

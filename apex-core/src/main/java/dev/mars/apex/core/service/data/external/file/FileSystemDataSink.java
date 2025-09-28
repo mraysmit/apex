@@ -29,6 +29,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
 /**
  * File system implementation of DataSink.
@@ -65,6 +67,9 @@ public class FileSystemDataSink implements DataSink {
     private static final List<String> SUPPORTED_OPERATIONS = Arrays.asList(
         "write", "append", "overwrite", "rotate", "archive"
     );
+
+    // Operation cache for configured operations
+    private final Map<String, String> operationCache = new ConcurrentHashMap<>();
     
     /**
      * Default constructor.
@@ -130,10 +135,15 @@ public class FileSystemDataSink implements DataSink {
             
             // Configure buffering
             configureBuffering();
-            
+
+            // Cache operations from configuration
+            LOGGER.info("About to cache operations for file system sink: {}", config.getName());
+            cacheOperations();
+            LOGGER.info("Finished caching operations for file system sink: {}", config.getName());
+
             this.initialized = true;
             this.connectionStatus = ConnectionStatus.connected("File system sink initialized successfully");
-            
+
             LOGGER.info("File system sink initialized successfully: {}", config.getName());
             
         } catch (Exception e) {
@@ -202,28 +212,31 @@ public class FileSystemDataSink implements DataSink {
         
         try {
             fileLock.writeLock().lock();
-            
-            if ("write".equals(operation) || "append".equals(operation)) {
+
+            // Resolve the operation name to actual file system operation
+            String resolvedOperation = resolveOperation(operation);
+
+            if ("write".equals(resolvedOperation) || "append".equals(resolvedOperation)) {
                 // Add to buffer for batch processing
                 writeBuffer.add(data);
-                
+
                 // Check if we should flush
                 if (shouldFlush()) {
                     flushBuffer();
                 }
-                
+
                 metrics.recordSuccessfulWrite(System.currentTimeMillis() - startTime, 1);
-                
-            } else if ("overwrite".equals(operation)) {
+
+            } else if ("overwrite".equals(resolvedOperation)) {
                 // Clear buffer and write immediately
                 writeBuffer.clear();
                 writeBuffer.add(data);
                 flushBuffer();
-                
+
                 metrics.recordSuccessfulWrite(System.currentTimeMillis() - startTime, 1);
-                
+
             } else {
-                throw DataSinkException.configurationError("Unsupported operation: " + operation);
+                throw DataSinkException.configurationError("Unsupported resolved operation: " + resolvedOperation);
             }
             
         } catch (Exception e) {
@@ -264,18 +277,21 @@ public class FileSystemDataSink implements DataSink {
         
         try {
             fileLock.writeLock().lock();
-            
-            if ("write".equals(operation) || "append".equals(operation)) {
+
+            // Resolve the operation name to actual file system operation
+            String resolvedOperation = resolveOperation(operation);
+
+            if ("write".equals(resolvedOperation) || "append".equals(resolvedOperation)) {
                 writeBuffer.addAll(data);
                 flushBuffer();
-                
-            } else if ("overwrite".equals(operation)) {
+
+            } else if ("overwrite".equals(resolvedOperation)) {
                 writeBuffer.clear();
                 writeBuffer.addAll(data);
                 flushBuffer();
-                
+
             } else {
-                throw DataSinkException.configurationError("Unsupported batch operation: " + operation);
+                throw DataSinkException.configurationError("Unsupported batch resolved operation: " + resolvedOperation);
             }
             
             metrics.recordSuccessfulBatch(System.currentTimeMillis() - startTime, data.size());
@@ -408,10 +424,63 @@ public class FileSystemDataSink implements DataSink {
         if (writeBuffer.isEmpty()) {
             return;
         }
-        
+
         // Simple implementation for testing
         writeBuffer.clear();
         lastFlushTime = System.currentTimeMillis();
+    }
+
+    /**
+     * Cache operations from configuration for operation resolution.
+     */
+    private void cacheOperations() {
+        LOGGER.info("Caching operations for file system sink: {}", getName());
+        LOGGER.info("Configuration: {}", configuration);
+        if (configuration != null) {
+            LOGGER.info("Configuration operations: {}", configuration.getOperations());
+            if (configuration.getOperations() != null) {
+                operationCache.putAll(configuration.getOperations());
+                LOGGER.info("Cached {} operations for file system sink: {}",
+                            operationCache.size(), getName());
+                LOGGER.info("Operation cache contents: {}", operationCache);
+            } else {
+                LOGGER.warn("No operations found in configuration for file system sink: {}", getName());
+            }
+        } else {
+            LOGGER.warn("No configuration found for file system sink: {}", getName());
+        }
+    }
+
+    /**
+     * Resolve operation name to actual file system operation.
+     * Maps configured operation names to supported file system operations.
+     */
+    private String resolveOperation(String operation) throws DataSinkException {
+        LOGGER.info("Resolving operation '{}' for file system sink: {}", operation, getName());
+        LOGGER.info("Operation cache: {}", operationCache);
+        LOGGER.info("Supported operations: {}", SUPPORTED_OPERATIONS);
+
+        // First check if it's a direct supported operation
+        if (SUPPORTED_OPERATIONS.contains(operation)) {
+            LOGGER.info("Operation '{}' is directly supported", operation);
+            return operation;
+        }
+
+        // Then check if it's a configured operation mapping
+        String resolvedOperation = operationCache.get(operation);
+        LOGGER.info("Operation '{}' resolved to: {}", operation, resolvedOperation);
+        if (resolvedOperation != null) {
+            // Validate that the resolved operation is supported
+            if (SUPPORTED_OPERATIONS.contains(resolvedOperation)) {
+                LOGGER.info("Resolved operation '{}' is supported", resolvedOperation);
+                return resolvedOperation;
+            } else {
+                throw DataSinkException.configurationError(
+                    "Configured operation '" + operation + "' maps to unsupported operation: " + resolvedOperation);
+            }
+        }
+
+        throw DataSinkException.configurationError("Unknown operation: " + operation);
     }
     
     private String rotateFile() {

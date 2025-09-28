@@ -1,0 +1,120 @@
+# ============================================================================
+# APEX ETL Pipeline Configuration - Simple Pipeline Validation Demo
+# ============================================================================
+#
+# OVERVIEW:
+# This configuration provides a minimal, focused demonstration of APEX's
+# core pipeline functionality. It serves as an educational example and
+# validation test for basic ETL operations, making it perfect for learning
+# APEX concepts and verifying system functionality.
+#
+# BUSINESS SCENARIO:
+# Basic data processing pipeline that demonstrates the fundamental ETL pattern:
+# reading data from a CSV file, processing it through APEX's pipeline engine,
+# and storing results in a database. Ideal for proof-of-concept implementations
+# and initial system validation.
+#
+# TECHNICAL FEATURES DEMONSTRATED:
+# ✓ Basic file-system data source configuration
+# ✓ Simple database data sink with H2 in-memory database
+# ✓ Single-step pipeline execution with extract operation
+# ✓ Automatic database schema creation and initialization
+# ✓ Basic error handling and pipeline execution monitoring
+# ✓ CSV data processing with column mapping
+# ✓ Sequential execution mode with proper resource cleanup
+#
+# PIPELINE ARCHITECTURE:
+# Simple linear flow: CSV File → Extract Step → Database Storage
+#
+# DATA STRUCTURE:
+# Input: CSV file with columns (id, name, value)
+# Output: Database table 'test' with columns (id, data, created_at)
+# Processing: Direct column mapping with automatic timestamp generation
+#
+# LEARNING OBJECTIVES:
+# • Understand basic APEX pipeline configuration structure
+# • Learn how to configure file-system and database connections
+# • See how pipeline steps are defined and executed
+# • Observe automatic schema creation and data type handling
+# • Experience basic error handling and logging capabilities
+#
+# IDEAL FOR:
+# • New developers learning APEX pipeline concepts
+# • System validation and smoke testing
+# • Configuration template for simple ETL scenarios
+# • Integration testing of core APEX functionality
+# • Debugging and troubleshooting pipeline issues
+#
+# USED BY: SimplePipelineTest.java
+# STATUS: Active foundational test configuration
+# AUTHOR: APEX Demo Team
+# VERSION: 1.0.0
+# COMPLEXITY: Beginner (ideal for learning and validation)
+# ============================================================================
+
+metadata:                                    # Configuration metadata and identification
+  id: "simple-pipeline-test"            # Unique identifier for this configuration
+  name: "Simple Pipeline Test"           # Human-readable name displayed in logs and UI
+  version: "1.0.0"                       # Version number for tracking configuration changes
+  description: "Simple pipeline for testing YAML parsing"  # Brief description of purpose
+  type: "pipeline-config"                # Configuration type: defines a data pipeline
+  author: "APEX Demo Team"               # Who created/maintains this configuration
+  tags: ["demo", "test", "pipeline"]     # Keywords for categorization and searching
+
+# Pipeline orchestration - defines the workflow and execution steps
+pipeline:
+  name: "simple-test-pipeline"        # Unique identifier for this pipeline instance
+  description: "Simple test pipeline" # Human-readable description for logging and monitoring
+
+  steps:                              # List of processing steps to execute in order
+    - name: "test-step"               # Unique name for this step (used in logs and error messages)
+      type: "extract"                 # Step type: "extract" reads data from a source
+      source: "test-source"           # References the data-source named "test-source" below
+      operation: "testOperation"      # Calls the "testOperation" defined in the data source
+      description: "Test step"        # Human-readable description for this processing step
+
+  # Pipeline execution configuration - controls how the pipeline runs and handles failures
+  execution:
+    mode: "sequential"              # Execute pipeline steps one after another in order (vs "parallel")
+    error-handling: "stop-on-error" # Stop entire pipeline if any step fails (vs "continue-on-error")
+    max-retries: 1                  # Retry failed steps up to 1 time before giving up (0 = no retries)
+    retry-delay-ms: 500             # Wait 500 milliseconds between retry attempts to avoid overwhelming resources
+
+# Input data sources - where the pipeline reads data from
+data-sources:
+  - name: "test-source"              # Unique identifier referenced by pipeline steps
+    type: "file-system"              # Data source type: reads files from local filesystem
+    enabled: true                    # Whether this data source is active (false = skip)
+    description: "Test data source"  # Human-readable description for documentation
+
+    connection:                      # Connection parameters for the file system
+      base-path: "./target/test"     # Directory path where data files are located
+      file-pattern: "test.csv"       # Filename pattern to match (supports wildcards)
+
+    operations:                      # Named queries/operations available on this data source
+      testOperation: "SELECT * FROM csv"  # SQL-like query to read all columns from CSV file
+
+# Output data sinks - where the pipeline writes processed data to
+data-sinks:
+  - name: "test-sink"                # Unique identifier for this data sink
+    type: "database"                 # Data sink type: writes to a database
+    source-type: "h2"                # Database engine: H2 in-memory database
+    enabled: true                    # Whether this data sink is active (false = skip)
+    description: "Test data sink"    # Human-readable description for documentation
+
+    connection:                      # Database connection parameters
+      database: "./target/test/db"   # Database file path (H2 creates file automatically)
+      username: "sa"                 # Database username (H2 default admin user)
+      password: ""                   # Database password (empty = no password required)
+
+    schema:                          # Database schema management settings
+      auto-create: true              # Automatically create tables if they don't exist
+      init-script: |                 # SQL script to run when initializing the database
+        CREATE TABLE IF NOT EXISTS test (
+          id INTEGER PRIMARY KEY,
+          data VARCHAR(255),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+    operations:                      # Named operations available on this data sink
+      testWrite: "INSERT INTO test (id, data) VALUES (:column_1, :column_2)"  # SQL insert with parameter binding

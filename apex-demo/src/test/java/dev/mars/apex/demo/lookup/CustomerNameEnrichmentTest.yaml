@@ -24,7 +24,7 @@ data-sources:
     tags: ["customer", "enrichment", "lookup"]
     
     connection:
-      base-url: "http://localhost:8080"
+      base-url: "http://localhost:${PORT}"
       timeout: 5000
       retry-attempts: 2
       retry-delay: 1000

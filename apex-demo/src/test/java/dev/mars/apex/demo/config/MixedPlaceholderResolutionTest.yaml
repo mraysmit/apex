@@ -1,0 +1,22 @@
+metadata:
+  name: "Mixed Placeholder Resolution Test"
+  version: "1.0.0"
+  description: "Test both ${} and $() placeholder syntax"
+
+data-sources:
+  - name: "mixed-api"
+    type: "rest-api"
+    source-type: "rest-api"
+    enabled: true
+    description: "Test mixed placeholder syntax"
+    
+    connection:
+      base-url: "https://${API_HOST}:$(API_PORT)/api/v${API_VERSION:1}"
+      timeout: ${TIMEOUT:5000}
+      api-key: "${API_KEY}"
+      secret: "$(API_SECRET)"
+      retry-attempts: $(RETRY_COUNT:3)
+      
+    endpoints:
+      health: "/health?env=${ENVIRONMENT:dev}"
+      users: "/users?limit=$(PAGE_SIZE:50)"
