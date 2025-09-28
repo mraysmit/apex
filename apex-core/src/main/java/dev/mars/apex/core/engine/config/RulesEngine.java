@@ -1,5 +1,6 @@
 package dev.mars.apex.core.engine.config;
 
+import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.Rule;
@@ -12,6 +13,7 @@ import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMetrics;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
+import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
 import dev.mars.apex.core.util.LoggingContext;
 import dev.mars.apex.core.util.RuleParameterExtractor;
 import dev.mars.apex.core.util.RulesEngineLogger;
@@ -63,6 +65,7 @@ public class RulesEngine {
     private final ErrorRecoveryService errorRecoveryService;
     private final RulePerformanceMonitor performanceMonitor;
     private final EnrichmentService enrichmentService;
+    private final UnifiedRuleEvaluator unifiedEvaluator;
 
 
     /**
@@ -107,11 +110,30 @@ public class RulesEngine {
     public RulesEngine(RulesEngineConfiguration configuration, ExpressionParser parser,
                       ErrorRecoveryService errorRecoveryService, RulePerformanceMonitor performanceMonitor,
                       EnrichmentService enrichmentService) {
+        this(configuration, parser, errorRecoveryService, performanceMonitor, enrichmentService, new ErrorRecoveryConfig());
+    }
+
+    /**
+     * Create a new RulesEngine with the given configuration, expression parser, error recovery service, performance monitor, and custom error recovery config.
+     *
+     * @param configuration The configuration for this rules engine
+     * @param parser The expression parser to use
+     * @param errorRecoveryService The error recovery service to use for handling evaluation errors
+     * @param performanceMonitor The performance monitor to use for tracking rule evaluation metrics
+     * @param enrichmentService The enrichment service to use for processing enrichments (optional)
+     * @param errorRecoveryConfig The error recovery configuration to use
+     */
+    public RulesEngine(RulesEngineConfiguration configuration, ExpressionParser parser,
+                      ErrorRecoveryService errorRecoveryService, RulePerformanceMonitor performanceMonitor,
+                      EnrichmentService enrichmentService, ErrorRecoveryConfig errorRecoveryConfig) {
         this.configuration = configuration;
         this.parser = parser;
         this.errorRecoveryService = errorRecoveryService;
         this.performanceMonitor = performanceMonitor;
         this.enrichmentService = enrichmentService;
+
+        // Initialize the unified evaluator with the provided error recovery configuration
+        this.unifiedEvaluator = new UnifiedRuleEvaluator(parser, errorRecoveryService, performanceMonitor, errorRecoveryConfig);
 
         // Initialize logging context
         LoggingContext.initializeContext();
@@ -121,6 +143,7 @@ public class RulesEngine {
         logger.debug("Using error recovery service: {}", errorRecoveryService.getClass().getSimpleName());
         logger.debug("Using performance monitor: {}", performanceMonitor.getClass().getSimpleName());
         logger.debug("Using enrichment service: {}", enrichmentService != null ? enrichmentService.getClass().getSimpleName() : "none");
+        logger.debug("Using error recovery config: enabled={}", errorRecoveryConfig.isEnabled());
     }
 
     /**
@@ -186,97 +209,8 @@ public class RulesEngine {
      * @return The result of the rule evaluation, indicating whether it matched or not
      */
     public RuleResult executeRule(Rule rule, Map<String, Object> facts) {
-        if (rule == null) {
-            logger.info("No rule provided for execution");
-            return RuleResult.noRules();
-        }
-
-        // Set up logging context for this rule evaluation
-        LoggingContext.setRuleName(rule.getName());
-        LoggingContext.setRulePhase("evaluation");
-
-        logger.ruleEvaluationStart(rule.getName());
-        logger.debug("Facts provided: {}", facts != null ? facts.keySet() : "none");
-
-        // Start performance monitoring early to capture all scenarios
-        RulePerformanceMetrics.Builder metricsBuilder = performanceMonitor.startEvaluation(rule.getName());
-
-        // Check for missing parameters
-        Set<String> missingParameters = RuleParameterExtractor.validateParameters(rule, facts);
-        if (!missingParameters.isEmpty()) {
-            TestAwareLogger.warn(logger, "Missing parameters for rule '{}': {}", rule.getName(), missingParameters);
-            RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition());
-            LoggingContext.clearRuleContext();
-            return RuleResult.error(rule.getName(), "Missing parameters: " + missingParameters, rule.getSeverity(), metrics);
-        }
-
-        StandardEvaluationContext context = createContext(facts);
-
-        // Evaluate the rule
-        try {
-            Expression exp = parser.parseExpression(rule.getCondition());
-            Boolean result = exp.getValue(context, Boolean.class);
-
-            // Complete performance monitoring for successful evaluation
-            RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition());
-
-            // Log the completion with performance metrics
-            logger.ruleEvaluationComplete(rule.getName(), result != null && result, metrics.getEvaluationTimeMillis());
-
-            if (result != null && result) {
-                logger.audit("RULE_MATCH", rule.getName(), "Rule matched successfully");
-                LoggingContext.clearRuleContext();
-
-                return RuleResult.match(rule.getName(), rule.getMessage(), rule.getSeverity(), metrics);
-            } else {
-                LoggingContext.clearRuleContext();
-                return RuleResult.noMatch(metrics);
-            }
-        } catch (Exception e) {
-            // Use modified logger that logs at INFO level to avoid Maven Surefire stack trace output
-            logger.ruleEvaluationError(rule.getName(), e);
-
-            // Create detailed exception with context and suggestions
-            RuleEvaluationException ruleException = new RuleEvaluationException(
-                rule.getName(),
-                rule.getCondition(),
-                e.getMessage(),
-                e
-            );
-
-            // Complete performance monitoring for failed evaluation
-            RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition(), e);
-
-            // Attempt error recovery
-            logger.errorRecoveryAttempt(rule.getName(), "default");
-            ErrorRecoveryService.RecoveryResult recoveryResult = errorRecoveryService.attemptRecovery(
-                rule.getName(),
-                rule.getCondition(),
-                context,
-                e
-            );
-
-            if (recoveryResult.isSuccessful()) {
-                logger.errorRecoverySuccess(rule.getName(), "default");
-                logger.audit("ERROR_RECOVERY", rule.getName(), "Error recovery successful: " + recoveryResult.getRecoveryMessage());
-
-                // Preserve performance metrics in the recovered result
-                RuleResult originalResult = recoveryResult.getRuleResult();
-                LoggingContext.clearRuleContext();
-                if (originalResult.hasPerformanceMetrics()) {
-                    return originalResult;
-                } else {
-                    // Create a new result with the same properties but include performance metrics
-                    return new RuleResult(originalResult.getRuleName(), originalResult.getMessage(),
-                                        originalResult.isTriggered(), originalResult.getResultType(), metrics);
-                }
-            } else {
-                logger.errorRecoveryFailed(rule.getName(), "default", new RuntimeException(recoveryResult.getRecoveryMessage()));
-                logger.audit("ERROR_RECOVERY_FAILED", rule.getName(), "Error recovery failed: " + recoveryResult.getRecoveryMessage());
-                LoggingContext.clearRuleContext();
-                return RuleResult.error(rule.getName(), ruleException.getDetailedMessage(), metrics);
-            }
-        }
+        // Delegate to the unified evaluator for consistent behavior
+        return unifiedEvaluator.evaluateRule(rule, facts);
     }
 
     /**
@@ -287,46 +221,8 @@ public class RulesEngine {
      * @return The result of the first rule that matches, or a default result if no rules match
      */
     public RuleResult executeRulesList(List<Rule> rules, Map<String, Object> facts) {
-        if (rules == null || rules.isEmpty()) {
-            logger.info("No rules provided for execution");
-            return RuleResult.noRules();
-        }
-
-        logger.info("Executing {} rules", rules.size());
-        logger.debug("Facts provided: {}", facts != null ? facts.keySet() : "none");
-
-        StandardEvaluationContext context = createContext(facts);
-
-        // Evaluate rules in priority order
-        for (Rule rule : rules) {
-            logger.debug("Evaluating rule: {}", rule.getName());
-            try {
-                Expression exp = parser.parseExpression(rule.getCondition());
-                Boolean result = exp.getValue(context, Boolean.class);
-                logger.debug("Rule '{}' evaluated to: {}", rule.getName(), result);
-
-                if (result != null && result) {
-                    logger.info("Rule matched: {}", rule.getName());
-                    return RuleResult.match(rule.getName(), rule.getMessage(), rule.getSeverity());
-                }
-            } catch (Exception e) {
-                // Use INFO level logging to avoid Maven Surefire stack trace output during tests
-                System.out.println("[DEBUG-TRACE] Caught exception in executeRulesList at line 311: " + e.getMessage());
-                
-                // Create proper RuleResult for evaluation errors - suppress stack traces for clean test output
-                String errorMessage = String.format("Error evaluating rule condition: %s", e.getMessage());
-                
-                // Use INFO level to avoid Maven Surefire stack trace output during tests
-                logger.info("[CLEAN-TEST-OUTPUT] Rule evaluation issue for '{}': {}", rule.getName(), e.getMessage());
-                logger.debug("Full exception details for rule '{}':", rule.getName(), e);
-                
-                // Return structured error result with rule details and severity
-                return RuleResult.error(rule.getName(), errorMessage, rule.getSeverity());
-            }
-        }
-
-        logger.info("No rules matched");
-        return RuleResult.noMatch();
+        // Delegate to the unified evaluator for consistent behavior
+        return unifiedEvaluator.evaluateRules(rules, facts);
     }
 
     /**
@@ -466,15 +362,27 @@ public class RulesEngine {
                 }
             } catch (Exception e) {
                 String ruleName = ruleObj.getName();
-                String errorMessage = String.format("Error evaluating rule/rule group condition: %s", e.getMessage());
-                logger.info("Rule/rule group evaluation issue for '{}': {}", ruleName, e.getMessage());
-                logger.debug("Full exception details for rule/rule group '{}':", ruleName, e);
-                
-                // Return structured error result with appropriate severity
+                String errorMessage = String.format("Rule evaluation failed: %s", e.getMessage());
+
+                // Get severity from rule configuration
                 String severity = "ERROR"; // Default severity for evaluation errors
                 if (ruleObj instanceof Rule) {
-                    severity = ((Rule) ruleObj).getSeverity();
+                    Rule rule = (Rule) ruleObj;
+                    severity = rule.getSeverity() != null ? rule.getSeverity() : "ERROR";
                 }
+
+                // Log error details at appropriate level based on severity
+                if ("CRITICAL".equalsIgnoreCase(severity)) {
+                    logger.error("CRITICAL rule evaluation error for '{}': {}", ruleName, e.getMessage());
+                } else if ("WARNING".equalsIgnoreCase(severity)) {
+                    logger.info("Rule evaluation warning for '{}': {}", ruleName, e.getMessage());
+                } else {
+                    logger.info("Rule evaluation error for '{}': {}", ruleName, e.getMessage());
+                }
+
+                // Always log full exception details at DEBUG level for troubleshooting
+                logger.debug("Full exception details for rule/rule group '{}':", ruleName, e);
+
                 return RuleResult.error(ruleName, errorMessage, severity);
             }
         }
