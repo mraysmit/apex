@@ -15,6 +15,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,13 +44,59 @@ class PipelineEtlExecutionTestExtractDatabase extends DemoTestBase {
 
         try {
             // Ensure database directory exists
-            Path dbDir = Paths.get("./target/test/etl/data/database");
+            Path dbDir = Paths.get("./target/test/etl/database");
             Files.createDirectories(dbDir);
+
+            // Setup H2 database with customers table and test data
+            setupCustomerDatabase();
+
         } catch (IOException e) {
             throw new RuntimeException("Failed to create database directory", e);
         }
 
         logger.info("✓ Database Extract Pipeline Test setup completed");
+    }
+
+    /**
+     * Setup H2 database with customers table and test data.
+     * Following the pattern from other ETL tests.
+     */
+    private void setupCustomerDatabase() {
+        logger.info("Setting up H2 database with customer test data...");
+
+        String jdbcUrl = "jdbc:h2:./target/test/etl/database/test_db;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+
+        try (Connection connection = DriverManager.getConnection(jdbcUrl, "sa", "")) {
+            Statement statement = connection.createStatement();
+
+            // Drop existing table
+            statement.execute("DROP TABLE IF EXISTS customers");
+
+            // Create customers table with columns expected by the query
+            statement.execute("""
+                CREATE TABLE customers (
+                    id INTEGER PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    email VARCHAR(255),
+                    status VARCHAR(50) DEFAULT 'ACTIVE',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                """);
+
+            // Insert test data
+            statement.execute("""
+                INSERT INTO customers (id, name, email, status) VALUES
+                (1, 'John Doe', 'john.doe@example.com', 'ACTIVE'),
+                (2, 'Jane Smith', 'jane.smith@example.com', 'ACTIVE'),
+                (3, 'Bob Johnson', 'bob.johnson@example.com', 'INACTIVE')
+                """);
+
+            logger.info("✓ H2 database setup completed successfully with 3 customer records");
+
+        } catch (Exception e) {
+            logger.error("Failed to setup H2 database: " + e.getMessage(), e);
+            throw new RuntimeException("Database setup failed", e);
+        }
     }
 
     @Test
@@ -71,8 +122,51 @@ class PipelineEtlExecutionTestExtractDatabase extends DemoTestBase {
         assertEquals("extract-customers", extractResult.getStepName());
         assertTrue(extractResult.isSuccess(), "Extract step should succeed");
 
-        logger.info("✓ Database extract pipeline test completed successfully");
-        logger.info("  - Extract step: {} (success: {})", extractResult.getStepName(), extractResult.isSuccess());
-        logger.info("  - Total execution time: {}ms", result.getDurationMs());
+        // Validate that data was actually extracted
+        assertNotNull(extractResult.getData(), "Extract step should return data");
+
+        // The DatabaseDataSource.getData() method returns a single Map<String, Object> for the first row
+        // This is different from the query() method which returns List<Map<String, Object>>
+        Object extractedData = extractResult.getData();
+
+        if (extractedData instanceof Map) {
+            // Single record returned by getData()
+            @SuppressWarnings("unchecked")
+            Map<String, Object> singleRecord = (Map<String, Object>) extractedData;
+
+            // Validate the structure of the record
+            assertTrue(singleRecord.containsKey("ID"), "Record should contain ID field");
+            assertTrue(singleRecord.containsKey("NAME"), "Record should contain NAME field");
+            assertTrue(singleRecord.containsKey("EMAIL"), "Record should contain EMAIL field");
+            assertTrue(singleRecord.containsKey("STATUS"), "Record should contain STATUS field");
+
+            logger.info("✓ Database extract pipeline test completed successfully");
+            logger.info("  - Extract step: {} (success: {})", extractResult.getStepName(), extractResult.isSuccess());
+            logger.info("  - Single record extracted: {}", singleRecord);
+            logger.info("  - Total execution time: {}ms", result.getDurationMs());
+
+        } else if (extractedData instanceof List) {
+            // Multiple records returned (if implementation changes)
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> recordList = (List<Map<String, Object>>) extractedData;
+            assertTrue(recordList.size() > 0, "Should extract at least one customer record");
+
+            // Validate the structure of the first record
+            Map<String, Object> firstRecord = recordList.get(0);
+            assertTrue(firstRecord.containsKey("ID"), "Record should contain ID field");
+            assertTrue(firstRecord.containsKey("NAME"), "Record should contain NAME field");
+            assertTrue(firstRecord.containsKey("EMAIL"), "Record should contain EMAIL field");
+            assertTrue(firstRecord.containsKey("STATUS"), "Record should contain STATUS field");
+
+            logger.info("✓ Database extract pipeline test completed successfully");
+            logger.info("  - Extract step: {} (success: {})", extractResult.getStepName(), extractResult.isSuccess());
+            logger.info("  - Records extracted: {}", recordList.size());
+            logger.info("  - First record: {}", firstRecord);
+            logger.info("  - Total execution time: {}ms", result.getDurationMs());
+
+        } else {
+            fail("Unexpected data type returned from extract step: " +
+                 (extractedData != null ? extractedData.getClass().getName() : "null"));
+        }
     }
 }

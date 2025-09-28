@@ -52,7 +52,7 @@ data-sources:
 
     # Connection configuration - defines how to connect to the data source
     connection:
-      base-path: "./target/test/etl/data/input"   # Directory path where input files are located
+      base-path: "./demo-data/csv"               # Directory path where input files are located
       file-pattern: "large-customers.csv"        # Large CSV file for batch processing testing
       encoding: "UTF-8"                           # Character encoding for reading files
 
@@ -79,7 +79,7 @@ data-sinks:
     description: "H2 database sink for batch load testing"
     
     connection:
-      database: "./target/test/etl/output/database/batch_db"
+      database: "./demo-data/database/batch_db"
       username: "sa"
       password: ""
       mode: "PostgreSQL"

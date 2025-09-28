@@ -1,0 +1,88 @@
+# ============================================================================
+# Simple CSV to JSON ETL Pipeline - 1000 Records Test
+# ============================================================================
+
+metadata:
+  id: "simple-csv-to-json-test"
+  name: "Simple CSV to JSON Pipeline"
+  version: "1.0.0"
+  description: "Simple ETL pipeline: CSV (1000 rows) → JSON"
+  type: "pipeline"
+  author: "apex-demo"
+  tags: ["simple", "csv", "json", "etl"]
+
+# Data source: CSV file with 1000 customer records
+data-sources:
+  - name: "csv-source"
+    type: "file-system"
+    source-type: "csv"
+    enabled: true
+    description: "CSV file with 1000 customer records"
+    
+    connection:
+      base-path: "./demo-data/csv"
+      file-pattern: "customers-1000.csv"
+      encoding: "UTF-8"
+    
+    file-format:
+      type: "csv"
+      has-header-row: true
+      column-mappings:
+        "id": "id"
+        "name": "name"
+        "email": "email"
+        "status": "status"
+    
+    queries:
+      getAllCustomers: "SELECT * FROM csv"
+
+# Data sink: JSON file output
+data-sinks:
+  - name: "json-sink"
+    type: "file-system"
+    source-type: "json"
+    enabled: true
+    description: "JSON file output"
+    
+    connection:
+      base-path: "./demo-data/json"
+      file-pattern: "customers-1000.json"
+      encoding: "UTF-8"
+    
+    operations:
+      writeCustomers: "write"
+    
+    output-format:
+      format: "json"
+      pretty-print: true
+      encoding: "UTF-8"
+    
+    batch:
+      enabled: true
+      batch-size: 100
+      flush-interval-ms: 1000
+
+# Pipeline: Extract CSV → Load JSON
+pipeline:
+  name: "simple-csv-to-json"
+  description: "Extract from CSV, load to JSON"
+  
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+    max-retries: 0
+    retry-delay-ms: 0
+  
+  steps:
+    - name: "extract-csv"
+      type: "extract"
+      source: "csv-source"
+      operation: "getAllCustomers"
+      description: "Extract from CSV"
+      
+    - name: "load-json"
+      type: "load"
+      sink: "json-sink"
+      operation: "writeCustomers"
+      description: "Load to JSON"
+      depends-on: ["extract-csv"]

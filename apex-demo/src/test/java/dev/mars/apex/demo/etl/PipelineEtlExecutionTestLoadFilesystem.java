@@ -39,7 +39,7 @@ class PipelineEtlExecutionTestLoadFilesystem extends DemoTestBase {
 
         try {
             // Ensure output directory exists
-            Path outputDir = Paths.get("./target/test/etl/output");
+            Path outputDir = Paths.get("./demo-data/json");
             Files.createDirectories(outputDir);
         } catch (IOException e) {
             throw new RuntimeException("Failed to create output directory", e);
@@ -77,7 +77,7 @@ class PipelineEtlExecutionTestLoadFilesystem extends DemoTestBase {
         assertTrue(loadResult.isSuccess(), "Load step should succeed");
 
         // Verify output file was created
-        Path outputFile = Paths.get("./target/test/etl/output/customers.json");
+        Path outputFile = Paths.get("./demo-data/json/customers.json");
         assertTrue(Files.exists(outputFile), "Output JSON file should be created");
         assertTrue(Files.size(outputFile) > 0, "Output file should not be empty");
 

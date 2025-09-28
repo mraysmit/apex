@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -38,15 +40,18 @@ class PipelineEtlExecutionTestLoadBatch extends DemoTestBase {
         yamlLoader = new YamlConfigurationLoader();
 
         try {
-            // Ensure output directory exists
-            Path outputDir = Paths.get("./target/test/etl/output");
-            Files.createDirectories(outputDir);
+            // Ensure database directory exists
+            Path dbDir = Paths.get("./demo-data/database");
+            Files.createDirectories(dbDir);
+
         } catch (IOException e) {
-            throw new RuntimeException("Failed to create output directory", e);
+            throw new RuntimeException("Failed to create database directory", e);
         }
 
         logger.info("✓ Batch Load Pipeline Test setup completed");
     }
+
+
 
     @Test
     @DisplayName("Should process data in batches")
@@ -77,7 +82,7 @@ class PipelineEtlExecutionTestLoadBatch extends DemoTestBase {
         assertTrue(loadResult.isSuccess(), "Load step should succeed");
 
         // Verify database was created (this pipeline loads to database, not file)
-        Path dbFile = Paths.get("./target/test/etl/output/database/batch_db.mv.db");
+        Path dbFile = Paths.get("./demo-data/database/batch_db.mv.db");
         assertTrue(Files.exists(dbFile), "Batch database file should be created");
 
         logger.info("✓ Batch load pipeline test completed successfully");

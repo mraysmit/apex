@@ -1,4 +1,4 @@
-customer_id,customer_name,email,phone,creditScore,loyaltyPoints
-1,John Doe,john.doe@example.com,+1-555-0101,750,1200
-2,Jane Smith,jane.smith@example.com,+1-555-0102,680,800
-3,Bob Johnson,bob.johnson@example.com,+1-555-0103,720,950
+id,name,email,status
+1,John Doe,john@example.com,ACTIVE
+2,Jane Smith,jane@example.com,ACTIVE
+3,Bob Johnson,bob@example.com,INACTIVE

@@ -96,7 +96,7 @@ public class FocusedEtlTest extends DemoTestBase {
         assertTrue(loadResult.isSuccess(), "Load step should succeed");
 
         // Verify output file was created
-        Path outputFile = Paths.get("./target/test/etl/output/customers.json");
+        Path outputFile = Paths.get("./demo-data/json/customers.json");
         assertTrue(Files.exists(outputFile), "Output JSON file should be created");
         assertTrue(Files.size(outputFile) > 0, "Output file should not be empty");
 
@@ -176,9 +176,9 @@ public class FocusedEtlTest extends DemoTestBase {
     // Helper methods
     private void createTestDirectories() {
         try {
-            Files.createDirectories(Paths.get("./target/test/etl/data/input"));
-            Files.createDirectories(Paths.get("./target/test/etl/output"));
-            Files.createDirectories(Paths.get("./target/test/etl/output/database"));
+            Files.createDirectories(Paths.get("./demo-data/csv"));
+            Files.createDirectories(Paths.get("./demo-data/json"));
+            Files.createDirectories(Paths.get("./demo-data/database"));
         } catch (IOException e) {
             throw new RuntimeException("Failed to create test directories", e);
         }
@@ -211,7 +211,7 @@ public class FocusedEtlTest extends DemoTestBase {
     }
 
     private void createCsvFile(String filename, String[][] data) {
-        Path csvFile = Paths.get("./target/test/etl/data/input/" + filename);
+        Path csvFile = Paths.get("./demo-data/csv/" + filename);
         try (PrintWriter writer = new PrintWriter(new FileWriter(csvFile.toFile()))) {
             for (String[] row : data) {
                 writer.println(String.join(",", row));
@@ -222,7 +222,7 @@ public class FocusedEtlTest extends DemoTestBase {
     }
 
     private void createEmptyTestFile() {
-        Path emptyFile = Paths.get("./target/test/etl/data/input/empty-customers.csv");
+        Path emptyFile = Paths.get("./demo-data/csv/empty-customers.csv");
         try (PrintWriter writer = new PrintWriter(new FileWriter(emptyFile.toFile()))) {
             writer.println("id,name,email,status"); // Header only
         } catch (IOException e) {

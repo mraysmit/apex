@@ -52,7 +52,7 @@ data-sources:
 
     # Connection configuration - defines how to connect to the data source
     connection:
-      base-path: "./target/test/etl/data/input"    # Directory path where input files are located
+      base-path: "./demo-data/csv"                # Directory path where input files are located
       file-pattern: "load-test-customers.csv"     # Specific file name pattern to match
       encoding: "UTF-8"                           # Character encoding for reading files
 
@@ -84,7 +84,7 @@ data-sinks:
 
     # Connection configuration - defines where to write output files
     connection:
-      base-path: "./target/test/etl/output"       # Directory path where output files will be created
+      base-path: "./demo-data/json"               # Directory path where output files will be created
       file-pattern: "customers.json"              # Output file name pattern
       encoding: "UTF-8"                           # Character encoding for writing files
 
