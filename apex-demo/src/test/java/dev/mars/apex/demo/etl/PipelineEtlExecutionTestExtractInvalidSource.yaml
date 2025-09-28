@@ -1,0 +1,59 @@
+# ============================================================================
+# APEX ETL Pipeline Configuration - Invalid Source Extract Step Test
+# ============================================================================
+#
+# OVERVIEW:
+# This configuration tests pipeline behavior when attempting to extract from
+# an invalid/non-existent data source. It validates proper error handling.
+#
+# BUSINESS SCENARIO:
+# Test data extraction failure scenario to validate PipelineExecutor's
+# executeExtractStep() method handles invalid data sources with proper errors.
+#
+# TECHNICAL FEATURES:
+# ✓ Invalid data source reference
+# ✓ Single extract step pipeline
+# ✓ Error handling validation
+# ✓ Sequential execution mode
+#
+# PIPELINE ARCHITECTURE:
+# Invalid Source → Extract Step → Pipeline Failure
+#
+# USED BY: PipelineEtlExecutionTest.java - ExtractStepTests
+# STATUS: Active test configuration
+# AUTHOR: APEX Demo Team
+# VERSION: 1.0.0
+# ============================================================================
+
+metadata:
+  id: "extract-invalid-source-pipeline-test"
+  name: "Invalid Source Extract Step Test Pipeline"
+  version: "1.0.0"
+  description: "Test pipeline for validating invalid source extract step error handling"
+  type: "pipeline-config"
+  author: "apex-test-suite@example.com"
+  created-date: "2025-09-28"
+  tags: ["apex-test", "pipeline", "extract", "error-handling", "invalid-source"]
+
+# Pipeline definition - single extract step with invalid source
+pipeline:
+  name: "invalid-source-extract-pipeline"
+  description: "Attempt to extract customer data from invalid source for testing"
+
+  # Execution configuration
+  execution:
+    mode: "sequential"                    # Execute steps one after another
+    error-handling: "stop-on-error"      # Stop pipeline if any step fails
+    max-retries: 0                        # No retries for test simplicity
+    retry-delay-ms: 0                     # No retry delay needed
+
+  # Pipeline steps - single extract step with invalid source reference
+  steps:
+    - name: "extract-from-invalid-source"
+      type: "extract"
+      source: "non-existent-data-source"  # This source is not defined in data-sources
+      operation: "getAllCustomers"
+      description: "Attempt to extract from non-existent data source"
+
+# Input data sources - intentionally empty to cause invalid source error
+data-sources: []

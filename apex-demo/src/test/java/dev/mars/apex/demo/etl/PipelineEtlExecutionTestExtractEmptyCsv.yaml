@@ -1,0 +1,71 @@
+# ============================================================================
+# APEX ETL Pipeline Configuration - Empty CSV Extract Step Test
+# ============================================================================
+#
+# OVERVIEW:
+# This configuration tests pipeline behavior when extracting from an empty
+# CSV data source. It validates graceful handling of empty datasets.
+#
+# BUSINESS SCENARIO:
+# Test data extraction from empty CSV file to validate PipelineExecutor's
+# executeExtractStep() method handles empty data sources gracefully.
+#
+# TECHNICAL FEATURES:
+# ✓ File-system data source with empty CSV file
+# ✓ Single extract step pipeline
+# ✓ Graceful empty data handling
+# ✓ Sequential execution mode
+#
+# PIPELINE ARCHITECTURE:
+# Empty CSV File → Extract Step → Pipeline Context (empty result)
+#
+# USED BY: PipelineEtlExecutionTest.java - ExtractStepTests
+# STATUS: Active test configuration
+# AUTHOR: APEX Demo Team
+# VERSION: 1.0.0
+# ============================================================================
+
+metadata:
+  id: "extract-empty-csv-pipeline-test"
+  name: "Empty CSV Extract Step Test Pipeline"
+  version: "1.0.0"
+  description: "Test pipeline for validating empty CSV extract step functionality"
+  type: "pipeline-config"
+  author: "apex-test-suite@example.com"
+  created-date: "2025-09-28"
+  tags: ["apex-test", "pipeline", "extract", "csv", "empty-data"]
+
+# Pipeline definition - single extract step
+pipeline:
+  name: "empty-csv-extract-pipeline"
+  description: "Extract customer data from empty CSV file for testing"
+
+  # Execution configuration
+  execution:
+    mode: "sequential"                    # Execute steps one after another
+    error-handling: "stop-on-error"      # Stop pipeline if any step fails
+    max-retries: 0                        # No retries for test simplicity
+    retry-delay-ms: 0                     # No retry delay needed
+
+  # Pipeline steps - single extract step
+  steps:
+    - name: "extract-empty-customers"
+      type: "extract"
+      source: "empty-csv-customer-source"
+      operation: "getAllCustomers"
+      description: "Extract all customer records from empty CSV file"
+
+# Input data sources
+data-sources:
+  - name: "empty-csv-customer-source"
+    type: "file-system"
+    enabled: true
+    description: "Empty CSV file containing no customer data for testing"
+
+    connection:
+      base-path: "./target/test/etl/data/input"
+      file-pattern: "empty-customers.csv"
+      encoding: "UTF-8"
+
+    operations:
+      getAllCustomers: "SELECT * FROM csv"

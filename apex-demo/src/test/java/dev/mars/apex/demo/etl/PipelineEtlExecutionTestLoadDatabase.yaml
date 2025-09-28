@@ -1,0 +1,147 @@
+# ============================================================================
+# APEX ETL Pipeline Configuration - Database Load Step Test
+# ============================================================================
+#
+# OVERVIEW:
+# This configuration demonstrates a complete ETL pipeline that extracts data
+# from a CSV file and loads it to an H2 database using the database data sink.
+# It validates the PipelineExecutor's executeLoadStep() functionality with SQL.
+#
+# BUSINESS SCENARIO:
+# Extract customer data from CSV format and persist it to a relational database
+# with automatic schema creation and timestamp tracking.
+#
+# TECHNICAL FEATURES:
+# ✓ CSV to H2 database ETL pipeline
+# ✓ Automatic database schema creation
+# ✓ SQL parameter binding and injection
+# ✓ Batch processing for database efficiency
+# ✓ Timestamp tracking for audit trails
+#
+# PIPELINE ARCHITECTURE:
+# CSV File → Extract Step → Load Step → H2 Database Table
+#
+# USED BY: PipelineEtlExecutionTest.java - LoadStepTests
+# STATUS: Active test configuration
+# AUTHOR: APEX Demo Team
+# VERSION: 1.0.0
+# ============================================================================
+
+# Pipeline metadata - identifies and describes this configuration
+metadata:
+  id: "load-database-pipeline-test"               # Unique identifier for this pipeline
+  name: "Load to Database Pipeline Test"          # Human-readable pipeline name
+  version: "1.0.0"                                # Configuration version for tracking
+  description: "Test pipeline for loading data to database sink"  # Purpose description
+  type: "pipeline"                                 # Configuration type indicator
+  author: "apex-etl-test-suite@example.com"      # Configuration author/maintainer
+  created-date: "2025-09-28"                     # Creation date for documentation
+  tags: ["apex-test", "etl", "load", "database"] # Tags for categorization and search
+
+# ============================================================================
+# DATA SOURCES CONFIGURATION
+# ============================================================================
+# Define input data sources that the pipeline will extract data from
+
+data-sources:
+  - name: "csv-load-db-test-source"               # Unique identifier for this data source
+    type: "file-system"                           # Data source type - reads from file system
+    source-type: "csv"                            # Specific format type - CSV files
+    enabled: true                                 # Enable this data source for processing
+    description: "CSV file source for database load testing"  # Human-readable description
+
+    # Connection configuration - defines how to connect to the data source
+    connection:
+      base-path: "./target/test/etl/data/input"   # Directory path where input files are located
+      file-pattern: "load-db-test-customers.csv" # Specific file name pattern to match
+      encoding: "UTF-8"                           # Character encoding for reading files
+
+    # File format configuration - defines how to parse the CSV file
+    file-format:
+      type: "csv"                                 # Confirms this is CSV format processing
+      has-header-row: true                        # First row contains column headers
+      column-mappings:                            # Maps CSV columns to internal field names
+        "id": "id"                                # CSV column 'id' maps to field 'id'
+        "name": "name"                            # CSV column 'name' maps to field 'name'
+        "email": "email"                          # CSV column 'email' maps to field 'email'
+        "status": "status"                        # CSV column 'status' maps to field 'status'
+
+    # Query operations - defines named queries that can be executed on this data source
+    queries:
+      getAllCustomers: "SELECT * FROM csv"       # Named query to extract all customer records
+
+# ============================================================================
+# DATA SINKS CONFIGURATION
+# ============================================================================
+# Define output data sinks where the pipeline will load processed data
+
+data-sinks:
+  - name: "h2-output-database-sink"               # Unique identifier for this data sink
+    type: "database"                              # Data sink type - writes to database
+    source-type: "h2"                             # Database type - H2 embedded database
+    enabled: true                                 # Enable this data sink for processing
+    description: "H2 database sink for load testing"  # Human-readable description
+
+    # Connection configuration - defines database connection parameters
+    connection:
+      database: "./target/test/etl/output/database/output_db"  # Database file path
+      username: "sa"                              # Database username (H2 default)
+      password: ""                                # Database password (empty for H2)
+      mode: "PostgreSQL"                          # H2 compatibility mode
+
+    # Operations configuration - defines SQL operations that can be performed
+    operations:
+      insertCustomer: |                           # Named operation for inserting customer records
+        INSERT INTO customer_output (id, name, email, status, processed_at)
+        VALUES (:id, :name, :email, :status, CURRENT_TIMESTAMP)
+
+    # Schema configuration - defines database table structure and initialization
+    schema:
+      auto-create: true                           # Automatically create table if it doesn't exist
+      table-name: "customer_output"               # Name of the target table
+      init-script: |                              # SQL script to create table structure
+        CREATE TABLE IF NOT EXISTS customer_output (
+          id INTEGER PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          email VARCHAR(255),
+          status VARCHAR(50),
+          processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+    # Batch processing configuration - defines how data is batched for database efficiency
+    batch:
+      enabled: true                               # Enable batch processing for better performance
+      batch-size: 50                              # Number of records to batch before committing
+
+# ============================================================================
+# PIPELINE DEFINITION
+# ============================================================================
+# Define the pipeline execution flow and step dependencies
+
+pipeline:
+  name: "load-database-pipeline"                 # Pipeline identifier used in execution
+  description: "Extract from CSV and load to H2 database"  # Pipeline purpose description
+
+  # Execution configuration - defines how the pipeline should be executed
+  execution:
+    mode: "sequential"                           # Execute steps one after another (not parallel)
+    error-handling: "stop-on-error"             # Stop entire pipeline if any step fails
+    max-retries: 0                               # No automatic retries for test simplicity
+    retry-delay-ms: 0                            # No delay between retries (not applicable)
+
+  # Pipeline steps - defines the sequence of operations to perform
+  steps:
+    # Step 1: Extract data from CSV file
+    - name: "extract-customers"                  # Unique step identifier
+      type: "extract"                            # Step type - data extraction operation
+      source: "csv-load-db-test-source"         # References data source defined above
+      operation: "getAllCustomers"              # Named operation to execute on the data source
+      description: "Extract customer data from CSV file"  # Step purpose description
+
+    # Step 2: Load data to H2 database (depends on extract step completion)
+    - name: "load-to-database"                  # Unique step identifier
+      type: "load"                               # Step type - data loading operation
+      sink: "h2-output-database-sink"           # References data sink defined above
+      operation: "insertCustomer"               # Named operation to execute on the data sink
+      description: "Load customer data to H2 database"  # Step purpose description
+      depends-on: ["extract-customers"]         # This step waits for extract-customers to complete

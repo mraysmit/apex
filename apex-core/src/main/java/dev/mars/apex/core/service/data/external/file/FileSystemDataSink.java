@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.time.LocalDateTime;
@@ -121,7 +122,8 @@ public class FileSystemDataSink implements DataSink {
         
         try {
             LOGGER.info("Initializing file system sink: {}", config.getName());
-            
+            LOGGER.info("*** MARK: FileSystemDataSink.initialize() called with config: {}", config);
+
             this.configuration = config;
             
             // Validate configuration
@@ -200,6 +202,8 @@ public class FileSystemDataSink implements DataSink {
     
     @Override
     public void write(String operation, Object data, Map<String, Object> parameters) throws DataSinkException {
+        LOGGER.info("*** MARK: FileSystemDataSink.write() called with operation='{}', data={}", operation, data != null ? data.getClass().getSimpleName() : "null");
+
         if (!initialized) {
             throw DataSinkException.configurationError("File system sink not initialized");
         }
@@ -219,9 +223,11 @@ public class FileSystemDataSink implements DataSink {
             if ("write".equals(resolvedOperation) || "append".equals(resolvedOperation)) {
                 // Add to buffer for batch processing
                 writeBuffer.add(data);
+                LOGGER.info("Added data to buffer. Buffer size: {}/{}", writeBuffer.size(), bufferSize);
 
                 // Check if we should flush
                 if (shouldFlush()) {
+                    LOGGER.info("Buffer size threshold reached, flushing buffer");
                     flushBuffer();
                 }
 
@@ -334,9 +340,12 @@ public class FileSystemDataSink implements DataSink {
     @Override
     public void flush() throws DataSinkException {
         if (!initialized || shutdown) {
+            LOGGER.info("Skipping flush - initialized: {}, shutdown: {}", initialized, shutdown);
             return;
         }
-        
+
+        LOGGER.info("Flushing file system sink. Buffer size: {}", writeBuffer.size());
+
         try {
             fileLock.writeLock().lock();
             flushBuffer();
@@ -403,9 +412,37 @@ public class FileSystemDataSink implements DataSink {
     }
     
     private void initializeFileSystem() throws DataSinkException {
-        // Basic initialization
-        this.outputDirectory = Paths.get("./target/test/output");
-        this.fileNamePattern = "output_{timestamp}.txt";
+        try {
+            // Get configuration from the actual data sink configuration
+            String basePath = configuration.getConnection().getBasePath();
+            String filePattern = configuration.getConnection().getFilePattern();
+
+            if (basePath == null || basePath.trim().isEmpty()) {
+                throw new DataSinkException(DataSinkException.ErrorType.CONFIGURATION_ERROR,
+                    "Base path is required for file system sink");
+            }
+
+            if (filePattern == null || filePattern.trim().isEmpty()) {
+                throw new DataSinkException(DataSinkException.ErrorType.CONFIGURATION_ERROR,
+                    "File pattern is required for file system sink");
+            }
+
+            this.outputDirectory = Paths.get(basePath);
+            this.fileNamePattern = filePattern;
+
+            // Create output directory if it doesn't exist
+            if (!Files.exists(outputDirectory)) {
+                Files.createDirectories(outputDirectory);
+                LOGGER.info("Created output directory: {}", outputDirectory.toAbsolutePath());
+            }
+
+            LOGGER.info("File system sink initialized - Directory: {}, Pattern: {}",
+                outputDirectory.toAbsolutePath(), fileNamePattern);
+
+        } catch (Exception e) {
+            throw new DataSinkException(DataSinkException.ErrorType.CONFIGURATION_ERROR,
+                "Failed to initialize file system: " + e.getMessage(), e);
+        }
     }
     
     private void setupOutputFormat() {
@@ -425,9 +462,84 @@ public class FileSystemDataSink implements DataSink {
             return;
         }
 
-        // Simple implementation for testing
-        writeBuffer.clear();
-        lastFlushTime = System.currentTimeMillis();
+        try {
+            // Determine the output file path
+            Path outputFile = outputDirectory.resolve(fileNamePattern);
+
+            // Convert buffer data to JSON format
+            String jsonContent = convertDataToJson(writeBuffer);
+
+            // Write to file
+            String encoding = configuration.getConnection().getEncoding();
+            if (encoding == null) {
+                encoding = "UTF-8";
+            }
+
+            Files.writeString(outputFile, jsonContent, Charset.forName(encoding));
+
+            LOGGER.info("Successfully wrote {} records to file: {}", writeBuffer.size(), outputFile.toAbsolutePath());
+
+            // Clear buffer after successful write
+            writeBuffer.clear();
+            lastFlushTime = System.currentTimeMillis();
+
+        } catch (Exception e) {
+            LOGGER.error("Failed to flush buffer to file: {}", e.getMessage(), e);
+            throw new IOException("Failed to write data to file: " + e.getMessage(), e);
+        }
+    }
+
+    private String convertDataToJson(List<Object> data) {
+        // Simple JSON conversion - convert list of maps to JSON array
+        StringBuilder json = new StringBuilder();
+        json.append("[\n");
+
+        for (int i = 0; i < data.size(); i++) {
+            Object item = data.get(i);
+            if (item instanceof Map) {
+                json.append("  ").append(mapToJson((Map<?, ?>) item));
+            } else {
+                json.append("  \"").append(item.toString()).append("\"");
+            }
+
+            if (i < data.size() - 1) {
+                json.append(",");
+            }
+            json.append("\n");
+        }
+
+        json.append("]");
+        return json.toString();
+    }
+
+    private String mapToJson(Map<?, ?> map) {
+        StringBuilder json = new StringBuilder();
+        json.append("{");
+
+        Object[] keys = map.keySet().toArray();
+        for (int i = 0; i < keys.length; i++) {
+            Object key = keys[i];
+            Object value = map.get(key);
+
+            json.append("\"").append(key.toString()).append("\": ");
+
+            if (value instanceof String) {
+                json.append("\"").append(value.toString().replace("\"", "\\\"")).append("\"");
+            } else if (value instanceof Number || value instanceof Boolean) {
+                json.append(value.toString());
+            } else if (value == null) {
+                json.append("null");
+            } else {
+                json.append("\"").append(value.toString().replace("\"", "\\\"")).append("\"");
+            }
+
+            if (i < keys.length - 1) {
+                json.append(", ");
+            }
+        }
+
+        json.append("}");
+        return json.toString();
     }
 
     /**

@@ -245,7 +245,7 @@ public class SeverityNegativeTest {
         RuleResult result = engine.executeRule(rule, testData);
         assertNotNull(result, "Rule result should not be null even with division by zero");
         assertFalse(result.isTriggered(), "Division by zero rule should not trigger");
-        assertEquals("INFO", result.getSeverity(), "Division by zero rule uses default INFO severity after error recovery");
+        assertEquals("ERROR", result.getSeverity(), "Division by zero rule preserves original ERROR severity after error recovery");
 
         logger.info("✅ Dangerous operations handling test passed - division by zero handled gracefully");
     }

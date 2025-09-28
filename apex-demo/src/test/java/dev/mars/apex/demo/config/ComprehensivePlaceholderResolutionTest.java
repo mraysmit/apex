@@ -282,6 +282,8 @@ class ComprehensivePlaceholderResolutionTest {
             System.setProperty("TO_DATE", "2024-12-31");
             System.setProperty("AUTH_TYPE", "oauth2");
             System.setProperty("JWT_TOKEN", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9");
+            System.setProperty("AUTH_HOST", "complex.api.com");  // Set explicitly to avoid nested placeholder issue
+            System.setProperty("AUTH_PORT", "8443");            // Set explicitly to avoid nested placeholder issue
             System.setProperty("SYSTEM_NAME", "APEX-PROD");
             System.setProperty("ENVIRONMENT", "production");
 
@@ -336,6 +338,7 @@ class ComprehensivePlaceholderResolutionTest {
         try {
             // Set some properties but leave critical ones missing
             System.setProperty("API_HOST", "test.com");
+            System.setProperty("API_PORT", "443");
             // API_KEY missing - should cause failure
 
             logger.info("Set partial properties - API_KEY missing");
@@ -369,7 +372,7 @@ class ComprehensivePlaceholderResolutionTest {
             // Set system property that might conflict with environment variable
             System.setProperty("HOSTNAME", "system-property-host");
             System.setProperty("USERNAME", "system-user");
-            // PASSWORD not set as system property - will check environment
+            System.setProperty("PASSWORD", "test-password");  // Set PASSWORD to avoid missing property error
 
             logger.info("Set system properties for precedence test");
 

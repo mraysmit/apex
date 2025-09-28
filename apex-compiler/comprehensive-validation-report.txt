@@ -24,8 +24,8 @@ SAMPLE INVALID FILES:
   • demo-default-value.yaml - ..\apex-core\src\test\resources\demo-default-value.yaml: Missing required metadata field: type
   • customer-rules.yaml - ..\apex-core\src\test\resources\rulegroups\customer-rules.yaml: Missing required metadata field: description
   • customer-validation-groups.yaml - ..\apex-core\src\test\resources\rulegroups\customer-validation-groups.yaml: Missing required metadata field: description
-  • yaml-default-value-test.yaml - ..\apex-core\src\test\resources\yaml-default-value-test.yaml: Invalid document type: test-config. Valid types: [dataset, enrichment, external-data-config, scenario-registry, rule-chain, scenario, rule-config, bootstrap, pipeline-config]
-  • yaml-error-recovery-test.yaml - ..\apex-core\src\test\resources\yaml-error-recovery-test.yaml: Invalid document type: test. Valid types: [dataset, enrichment, external-data-config, scenario-registry, rule-chain, scenario, rule-config, bootstrap, pipeline-config]
+  • yaml-default-value-test.yaml - ..\apex-core\src\test\resources\yaml-default-value-test.yaml: Invalid document type: test-config. Valid types: [rule-config, bootstrap, pipeline-config, dataset, enrichment, external-data-config, scenario-registry, rule-chain, scenario]
+  • yaml-error-recovery-test.yaml - ..\apex-core\src\test\resources\yaml-error-recovery-test.yaml: Invalid document type: test. Valid types: [rule-config, bootstrap, pipeline-config, dataset, enrichment, external-data-config, scenario-registry, rule-chain, scenario]
   • application.yml - ..\apex-rest-api\src\main\resources\application.yml: YAML syntax error: expected a single document in the stream
  in 'string', line 2, column 1:
     spring:

@@ -1,0 +1,74 @@
+# ============================================================================
+# APEX ETL Pipeline Configuration - Database Extract Step Test
+# ============================================================================
+#
+# OVERVIEW:
+# This configuration provides a minimal pipeline for testing database extract
+# functionality. It demonstrates H2 database data source configuration
+# and single-step pipeline execution for validation purposes.
+#
+# BUSINESS SCENARIO:
+# Simple data extraction from H2 database to validate PipelineExecutor's
+# executeExtractStep() method functionality with database data sources.
+#
+# TECHNICAL FEATURES:
+# ✓ H2 database data source configuration
+# ✓ Single extract step pipeline
+# ✓ SQL query operation definition
+# ✓ Sequential execution mode
+#
+# PIPELINE ARCHITECTURE:
+# H2 Database → Extract Step → Pipeline Context
+#
+# USED BY: PipelineEtlExecutionTest.java - ExtractStepTests
+# STATUS: Active test configuration
+# AUTHOR: APEX Demo Team
+# VERSION: 1.0.0
+# ============================================================================
+
+metadata:
+  id: "extract-database-pipeline-test"
+  name: "Database Extract Step Test Pipeline"
+  version: "1.0.0"
+  description: "Test pipeline for validating database extract step functionality"
+  type: "pipeline-config"
+  author: "apex-test-suite@example.com"
+  created-date: "2025-09-28"
+  tags: ["apex-test", "pipeline", "extract", "database", "h2"]
+
+# Pipeline definition - single extract step
+pipeline:
+  name: "database-extract-pipeline"
+  description: "Extract customer data from H2 database for testing"
+
+  # Execution configuration
+  execution:
+    mode: "sequential"                    # Execute steps one after another
+    error-handling: "stop-on-error"      # Stop pipeline if any step fails
+    max-retries: 0                        # No retries for test simplicity
+    retry-delay-ms: 0                     # No retry delay needed
+
+  # Pipeline steps - single extract step
+  steps:
+    - name: "extract-customers"
+      type: "extract"
+      source: "h2-customer-database"
+      operation: "getAllCustomers"
+      description: "Extract all customer records from H2 database"
+      parameters: {}
+
+# Input data sources
+data-sources:
+  - name: "h2-customer-database"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "H2 database containing customer data for testing"
+
+    connection:
+      database: "./target/test/etl/database/test_db"
+      username: "sa"
+      password: ""
+
+    queries:
+      getAllCustomers: "SELECT id, name, email, status, created_at FROM customers ORDER BY id"

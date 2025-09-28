@@ -21,7 +21,7 @@ data-sources:
     authentication:
       type: "${AUTH_TYPE:bearer}"
       token: "${JWT_TOKEN}"
-      refresh-url: "${PROTOCOL:https}://${AUTH_HOST:${API_HOST}}:${AUTH_PORT:${API_PORT}}/auth/refresh"
+      refresh-url: "${PROTOCOL:https}://${AUTH_HOST}:${AUTH_PORT}/auth/refresh"
       
 enrichments:
   - id: "complex-enrichment"

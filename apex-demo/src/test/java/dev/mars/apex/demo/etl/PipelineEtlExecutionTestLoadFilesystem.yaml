@@ -1,0 +1,139 @@
+# ============================================================================
+# APEX ETL Pipeline Configuration - File System Load Step Test
+# ============================================================================
+#
+# OVERVIEW:
+# This configuration demonstrates a complete ETL pipeline that extracts data
+# from a CSV file and loads it to a JSON file using the file system data sink.
+# It validates the PipelineExecutor's executeLoadStep() functionality.
+#
+# BUSINESS SCENARIO:
+# Extract customer data from CSV format and transform it to JSON format
+# for downstream processing or API consumption.
+#
+# TECHNICAL FEATURES:
+# ✓ CSV to JSON transformation pipeline
+# ✓ File system data source and sink
+# ✓ Buffered batch processing
+# ✓ Sequential step execution with dependencies
+# ✓ Error handling and retry configuration
+#
+# PIPELINE ARCHITECTURE:
+# CSV File → Extract Step → Load Step → JSON File
+#
+# USED BY: PipelineEtlExecutionTest.java - LoadStepTests
+# STATUS: Active test configuration
+# AUTHOR: APEX Demo Team
+# VERSION: 1.0.0
+# ============================================================================
+
+# Pipeline metadata - identifies and describes this configuration
+metadata:
+  id: "load-filesystem-pipeline-test"              # Unique identifier for this pipeline
+  name: "Load to File System Pipeline Test"        # Human-readable pipeline name
+  version: "1.0.0"                                 # Configuration version for tracking
+  description: "Test pipeline for loading data to file system sink"  # Purpose description
+  type: "pipeline"                                  # Configuration type indicator
+  author: "apex-etl-test-suite@example.com"       # Configuration author/maintainer
+  created-date: "2025-09-28"                      # Creation date for documentation
+  tags: ["apex-test", "etl", "load", "file-system"]  # Tags for categorization and search
+
+# ============================================================================
+# DATA SOURCES CONFIGURATION
+# ============================================================================
+# Define input data sources that the pipeline will extract data from
+
+data-sources:
+  - name: "csv-load-test-source"                   # Unique identifier for this data source
+    type: "file-system"                            # Data source type - reads from file system
+    source-type: "csv"                             # Specific format type - CSV files
+    enabled: true                                  # Enable this data source for processing
+    description: "CSV file source for load testing"  # Human-readable description
+
+    # Connection configuration - defines how to connect to the data source
+    connection:
+      base-path: "./target/test/etl/data/input"    # Directory path where input files are located
+      file-pattern: "load-test-customers.csv"     # Specific file name pattern to match
+      encoding: "UTF-8"                           # Character encoding for reading files
+
+    # File format configuration - defines how to parse the CSV file
+    file-format:
+      type: "csv"                                  # Confirms this is CSV format processing
+      has-header-row: true                         # First row contains column headers
+      column-mappings:                             # Maps CSV columns to internal field names
+        "id": "id"                                 # CSV column 'id' maps to field 'id'
+        "name": "name"                             # CSV column 'name' maps to field 'name'
+        "email": "email"                           # CSV column 'email' maps to field 'email'
+        "status": "status"                         # CSV column 'status' maps to field 'status'
+
+    # Query operations - defines named queries that can be executed on this data source
+    queries:
+      getAllCustomers: "SELECT * FROM csv"        # Named query to extract all customer records
+
+# ============================================================================
+# DATA SINKS CONFIGURATION
+# ============================================================================
+# Define output data sinks where the pipeline will load processed data
+
+data-sinks:
+  - name: "json-file-output-sink"                 # Unique identifier for this data sink
+    type: "file-system"                           # Data sink type - writes to file system
+    source-type: "json"                           # Output format type - JSON files
+    enabled: true                                 # Enable this data sink for processing
+    description: "JSON file sink for load testing"  # Human-readable description
+
+    # Connection configuration - defines where to write output files
+    connection:
+      base-path: "./target/test/etl/output"       # Directory path where output files will be created
+      file-pattern: "customers.json"              # Output file name pattern
+      encoding: "UTF-8"                           # Character encoding for writing files
+
+    # Operations configuration - defines named operations that can be performed
+    operations:
+      writeCustomers: "write"                     # Maps operation name to actual write action
+
+    # Output format configuration - defines how data should be formatted when written
+    output-format:
+      format: "json"                              # Output format specification
+      pretty-print: true                          # Format JSON with indentation for readability
+      encoding: "UTF-8"                           # Character encoding for output
+      include-timestamp: false                    # Don't add timestamp to output records
+
+    # Batch processing configuration - defines how data is buffered and written
+    batch:
+      enabled: true                               # Enable batch processing for efficiency
+      batch-size: 100                             # Maximum records to buffer before writing
+      flush-interval-ms: 1000                     # Maximum time to wait before flushing buffer
+
+# ============================================================================
+# PIPELINE DEFINITION
+# ============================================================================
+# Define the pipeline execution flow and step dependencies
+
+pipeline:
+  name: "load-filesystem-pipeline"                # Pipeline identifier used in execution
+  description: "Extract from CSV and load to JSON file"  # Pipeline purpose description
+
+  # Execution configuration - defines how the pipeline should be executed
+  execution:
+    mode: "sequential"                            # Execute steps one after another (not parallel)
+    error-handling: "stop-on-error"              # Stop entire pipeline if any step fails
+    max-retries: 0                                # No automatic retries for test simplicity
+    retry-delay-ms: 0                             # No delay between retries (not applicable)
+
+  # Pipeline steps - defines the sequence of operations to perform
+  steps:
+    # Step 1: Extract data from CSV file
+    - name: "extract-customers"                   # Unique step identifier
+      type: "extract"                             # Step type - data extraction operation
+      source: "csv-load-test-source"              # References data source defined above
+      operation: "getAllCustomers"               # Named operation to execute on the data source
+      description: "Extract customer data from CSV file"  # Step purpose description
+
+    # Step 2: Load data to JSON file (depends on extract step completion)
+    - name: "load-to-file"                       # Unique step identifier
+      type: "load"                                # Step type - data loading operation
+      sink: "json-file-output-sink"               # References data sink defined above
+      operation: "writeCustomers"                # Named operation to execute on the data sink
+      description: "Load customer data to JSON file"  # Step purpose description
+      depends-on: ["extract-customers"]          # This step waits for extract-customers to complete

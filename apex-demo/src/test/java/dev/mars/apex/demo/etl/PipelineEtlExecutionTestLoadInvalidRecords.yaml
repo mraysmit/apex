@@ -1,0 +1,135 @@
+# ============================================================================
+# APEX ETL Pipeline Configuration - Invalid Records Load Step Test
+# ============================================================================
+#
+# OVERVIEW:
+# This configuration demonstrates ETL pipeline behavior when processing
+# invalid or malformed data records. It validates the PipelineExecutor's
+# ability to handle data quality issues gracefully during load operations.
+#
+# BUSINESS SCENARIO:
+# Process customer data that contains invalid records (null values, constraint
+# violations) and ensure the pipeline continues processing valid records
+# while properly logging and handling invalid ones.
+#
+# TECHNICAL FEATURES:
+# ✓ Data validation and quality checking
+# ✓ Invalid record detection and handling
+# ✓ Graceful error recovery and continuation
+# ✓ Database constraint validation
+# ✓ Audit logging for data quality issues
+#
+# PIPELINE ARCHITECTURE:
+# CSV File (with invalid records) → Extract Step → Load Step → H2 Database
+# (Invalid records are skipped with proper logging)
+#
+# USED BY: PipelineEtlExecutionTest.java - LoadStepTests
+# STATUS: Active test configuration
+# AUTHOR: APEX Demo Team
+# VERSION: 1.0.0
+# ============================================================================
+
+# Pipeline metadata - identifies and describes this configuration
+metadata:
+  id: "load-invalid-records-pipeline-test"       # Unique identifier for this pipeline
+  name: "Invalid Records Load Pipeline Test"     # Human-readable pipeline name
+  version: "1.0.0"                               # Configuration version for tracking
+  description: "Test pipeline for handling invalid records during load"  # Purpose description
+  type: "pipeline"                                # Configuration type indicator
+  author: "apex-etl-test-suite@example.com"     # Configuration author/maintainer
+  created-date: "2025-09-28"                    # Creation date for documentation
+  tags: ["apex-test", "etl", "load", "validation"]  # Tags for categorization and search
+
+# Input data source - CSV file with invalid records
+data-sources:
+  - name: "csv-invalid-records-source"
+    type: "file-system"
+    source-type: "csv"
+    enabled: true
+    description: "CSV file source with invalid records for testing"
+    
+    connection:
+      base-path: "./target/test/etl/data/input"
+      file-pattern: "invalid-customers.csv"
+      encoding: "UTF-8"
+    
+    file-format:
+      type: "csv"
+      has-header-row: true
+      column-mappings:
+        "id": "id"
+        "name": "name"
+        "email": "email"
+        "status": "status"
+    
+    queries:
+      getAllCustomers: "SELECT * FROM csv"
+
+# Output data sink - H2 database with validation
+data-sinks:
+  - name: "h2-validation-output-sink"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "H2 database sink with validation for invalid records testing"
+    
+    connection:
+      database: "./target/test/etl/output/database/validation_db"
+      username: "sa"
+      password: ""
+      mode: "PostgreSQL"
+    
+    operations:
+      insertValidatedCustomer: |
+        INSERT INTO customer_validated (id, name, email, status, processed_at)
+        VALUES (:id, :name, :email, :status, CURRENT_TIMESTAMP)
+    
+    schema:
+      auto-create: true
+      table-name: "customer_validated"
+      init-script: |
+        CREATE TABLE IF NOT EXISTS customer_validated (
+          id INTEGER PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          email VARCHAR(255),
+          status VARCHAR(50),
+          processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+    
+    error-handling:
+      strategy: "log-and-continue"  # Skip invalid records and continue
+      max-retries: 0
+      retry-delay: 0
+    
+    batch:
+      enabled: true
+      batch-size: 5
+
+# Pipeline definition
+pipeline:
+  name: "load-invalid-records-pipeline"
+  description: "Extract data with invalid records and handle gracefully during load"
+
+  # Execution configuration
+  execution:
+    mode: "sequential"                    # Execute steps one after another
+    error-handling: "continue-on-error"  # Continue pipeline even if some steps fail
+    max-retries: 0                        # No retries for test simplicity
+    retry-delay-ms: 0                     # No retry delay needed
+
+  steps:
+    - name: "extract-mixed-data"
+      type: "extract"
+      source: "csv-invalid-records-source"
+      operation: "getAllCustomers"
+      description: "Extract data including invalid records"
+      
+    - name: "load-with-validation"
+      type: "load"
+      sink: "h2-validation-output-sink"
+      operation: "insertValidatedCustomer"
+      description: "Load data with validation and error handling"
+      depends-on: ["extract-mixed-data"]
+      parameters:
+        skip-invalid: true
+        validation-mode: "strict"

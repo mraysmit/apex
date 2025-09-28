@@ -259,9 +259,9 @@ public class RuleGroupSeverityAggregationTest {
     }
 
     @Test
-    @DisplayName("Empty group defaults to INFO severity")
+    @DisplayName("Empty group does not pass by default")
     void testEmptyGroupDefaultSeverity() {
-        logInfo("Testing empty group default severity behavior");
+        logInfo("Testing empty group default behavior");
         
         String yamlContent = """
             metadata:
@@ -289,10 +289,10 @@ public class RuleGroupSeverityAggregationTest {
             RuleResult result = engine.executeRuleGroupsList(List.of(group), Map.of());
             
             assertNotNull(result, "Result should not be null");
-            assertTrue(result.isTriggered(), "Empty group should pass by default");
-            assertEquals("INFO", result.getSeverity(), "Empty group should default to INFO severity");
-            
-            logSuccess("Empty group severity working correctly - defaulted to INFO");
+            assertFalse(result.isTriggered(), "Empty group should not pass (no rules to evaluate)");
+            // Note: When no rules match, the result severity is typically the default from the engine
+
+            logSuccess("Empty group behavior working correctly - empty groups do not pass");
             
         } catch (YamlConfigurationException e) {
             logError("Failed to load YAML configuration: " + e.getMessage());

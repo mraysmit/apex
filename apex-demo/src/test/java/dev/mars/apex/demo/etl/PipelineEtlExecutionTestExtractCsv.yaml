@@ -1,0 +1,72 @@
+# ============================================================================
+# APEX ETL Pipeline Configuration - CSV Extract Step Test
+# ============================================================================
+#
+# OVERVIEW:
+# This configuration provides a minimal pipeline for testing CSV extract
+# functionality. It demonstrates basic file-system data source configuration
+# and single-step pipeline execution for validation purposes.
+#
+# BUSINESS SCENARIO:
+# Simple data extraction from CSV file to validate PipelineExecutor's
+# executeExtractStep() method functionality with file-system data sources.
+#
+# TECHNICAL FEATURES:
+# ✓ File-system data source with CSV format
+# ✓ Single extract step pipeline
+# ✓ Basic error handling configuration
+# ✓ Sequential execution mode
+#
+# PIPELINE ARCHITECTURE:
+# CSV File → Extract Step → Pipeline Context
+#
+# USED BY: PipelineEtlExecutionTest.java - ExtractStepTests
+# STATUS: Active test configuration
+# AUTHOR: APEX Demo Team
+# VERSION: 1.0.0
+# ============================================================================
+
+metadata:
+  id: "extract-csv-pipeline-test"
+  name: "CSV Extract Step Test Pipeline"
+  version: "1.0.0"
+  description: "Test pipeline for validating CSV extract step functionality"
+  type: "pipeline-config"
+  author: "apex-test-suite@example.com"
+  created-date: "2025-09-28"
+  tags: ["apex-test", "pipeline", "extract", "csv"]
+
+# Pipeline definition - single extract step
+pipeline:
+  name: "csv-extract-pipeline"
+  description: "Extract customer data from CSV file for testing"
+
+  # Execution configuration
+  execution:
+    mode: "sequential"                    # Execute steps one after another
+    error-handling: "stop-on-error"      # Stop pipeline if any step fails
+    max-retries: 0                        # No retries for test simplicity
+    retry-delay-ms: 0                     # No retry delay needed
+
+  # Pipeline steps - single extract step
+  steps:
+    - name: "extract-customers"
+      type: "extract"
+      source: "csv-customer-source"
+      operation: "getAllCustomers"
+      description: "Extract all customer records from CSV file"
+
+# Input data sources
+data-sources:
+  - name: "csv-customer-source"
+    type: "file-system"
+    enabled: true
+    description: "CSV file containing customer data for testing"
+
+    connection:
+      base-path: "./target/test/etl/data/input"
+      file-pattern: "customers.csv"
+      encoding: "UTF-8"
+
+    operations:
+      getAllCustomers: "SELECT * FROM csv"

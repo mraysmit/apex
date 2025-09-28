@@ -1,0 +1,136 @@
+# ============================================================================
+# APEX ETL Pipeline Configuration - Batch Load Step Test
+# ============================================================================
+#
+# OVERVIEW:
+# This configuration demonstrates a high-volume ETL pipeline that processes
+# large datasets using batch loading techniques. It validates the
+# PipelineExecutor's ability to handle bulk data operations efficiently.
+#
+# BUSINESS SCENARIO:
+# Process large customer datasets (50+ records) with optimized batch loading
+# to minimize database transaction overhead and improve performance.
+#
+# TECHNICAL FEATURES:
+# ✓ High-volume CSV to H2 database ETL pipeline
+# ✓ Optimized batch processing configuration
+# ✓ Database connection pooling and transaction management
+# ✓ Performance monitoring and metrics collection
+# ✓ Memory-efficient streaming processing
+#
+# PIPELINE ARCHITECTURE:
+# Large CSV File → Extract Step → Batch Load Step → H2 Database Table
+#
+# USED BY: PipelineEtlExecutionTest.java - LoadStepTests
+# STATUS: Active test configuration
+# AUTHOR: APEX Demo Team
+# VERSION: 1.0.0
+# ============================================================================
+
+# Pipeline metadata - identifies and describes this configuration
+metadata:
+  id: "load-batch-pipeline-test"                 # Unique identifier for this pipeline
+  name: "Batch Load Pipeline Test"               # Human-readable pipeline name
+  version: "1.0.0"                               # Configuration version for tracking
+  description: "Test pipeline for batch loading operations"  # Purpose description
+  type: "pipeline"                                # Configuration type indicator
+  author: "apex-etl-test-suite@example.com"     # Configuration author/maintainer
+  created-date: "2025-09-28"                    # Creation date for documentation
+  tags: ["apex-test", "etl", "load", "batch"]   # Tags for categorization and search
+
+# ============================================================================
+# DATA SOURCES CONFIGURATION
+# ============================================================================
+# Define input data sources that the pipeline will extract data from
+
+data-sources:
+  - name: "csv-batch-test-source"                 # Unique identifier for this data source
+    type: "file-system"                           # Data source type - reads from file system
+    source-type: "csv"                            # Specific format type - CSV files
+    enabled: true                                 # Enable this data source for processing
+    description: "Large CSV file source for batch load testing"  # Human-readable description
+
+    # Connection configuration - defines how to connect to the data source
+    connection:
+      base-path: "./target/test/etl/data/input"   # Directory path where input files are located
+      file-pattern: "large-customers.csv"        # Large CSV file for batch processing testing
+      encoding: "UTF-8"                           # Character encoding for reading files
+
+    # File format configuration - defines how to parse the CSV file
+    file-format:
+      type: "csv"                                 # Confirms this is CSV format processing
+      has-header-row: true                        # First row contains column headers
+      column-mappings:                            # Maps CSV columns to internal field names
+        "id": "id"                                # CSV column 'id' maps to field 'id'
+        "name": "name"                            # CSV column 'name' maps to field 'name'
+        "email": "email"                          # CSV column 'email' maps to field 'email'
+        "status": "status"                        # CSV column 'status' maps to field 'status'
+
+    # Query operations - defines named queries that can be executed on this data source
+    queries:
+      getAllCustomers: "SELECT * FROM csv"       # Named query to extract all customer records
+
+# Output data sink - H2 database with batch configuration
+data-sinks:
+  - name: "h2-batch-output-sink"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "H2 database sink for batch load testing"
+    
+    connection:
+      database: "./target/test/etl/output/database/batch_db"
+      username: "sa"
+      password: ""
+      mode: "PostgreSQL"
+    
+    operations:
+      insertCustomerBatch: |
+        INSERT INTO customer_batch (id, name, email, status, processed_at)
+        VALUES (:id, :name, :email, :status, CURRENT_TIMESTAMP)
+    
+    schema:
+      auto-create: true
+      table-name: "customer_batch"
+      init-script: |
+        CREATE TABLE IF NOT EXISTS customer_batch (
+          id INTEGER PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          email VARCHAR(255),
+          status VARCHAR(50),
+          processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+    
+    batch:
+      enabled: true
+      batch-size: 10  # Small batch size for testing
+      timeout-ms: 5000
+
+# Pipeline definition
+pipeline:
+  name: "batch-load-pipeline"
+  description: "Extract large dataset and load with batch processing"
+
+  # Execution configuration
+  execution:
+    mode: "sequential"                    # Execute steps one after another
+    error-handling: "stop-on-error"      # Stop pipeline if any step fails
+    max-retries: 0                        # No retries for test simplicity
+    retry-delay-ms: 0                     # No retry delay needed
+
+  steps:
+    - name: "extract-large-dataset"
+      type: "extract"
+      source: "csv-batch-test-source"
+      operation: "getAllCustomers"
+      description: "Extract large customer dataset from CSV file"
+      
+    - name: "batch-load-customers"
+      type: "load"
+      sink: "h2-batch-output-sink"
+      operation: "insertCustomerBatch"
+      description: "Load customers using batch processing"
+      depends-on: ["extract-large-dataset"]
+      parameters:
+        batch-size: 10
+        batch-timeout: 5000

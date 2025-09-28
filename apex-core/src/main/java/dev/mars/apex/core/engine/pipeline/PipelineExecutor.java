@@ -300,9 +300,11 @@ public class PipelineExecutor {
         if (dataSource == null) {
             throw new DataPipelineException("Data source not found: " + step.getSource());
         }
-        
+
         try {
-            return dataSource.query(step.getOperation(), step.getParameters());
+            // Use getData() for named query resolution support
+            // ExternalDataSource extends DataSource, so we can use getData() for named query resolution
+            return dataSource.getData(step.getOperation());
         } catch (Exception e) {
             throw new DataPipelineException("Extract step failed: " + step.getName(), e);
         }
@@ -312,10 +314,12 @@ public class PipelineExecutor {
      * Execute a load step.
      */
     private void executeLoadStep(PipelineStep step, Object data) throws DataPipelineException {
+        LOGGER.info("Looking for data sink: '{}' in available sinks: {}", step.getSink(), dataSinks.keySet());
         DataSink dataSink = dataSinks.get(step.getSink());
         if (dataSink == null) {
             throw new DataPipelineException("Data sink not found: " + step.getSink());
         }
+        LOGGER.info("Found data sink: {} (type: {})", dataSink.getName(), dataSink.getClass().getSimpleName());
 
         if (data == null) {
             throw new DataPipelineException("No data available for load step: " + step.getName());
@@ -337,6 +341,8 @@ public class PipelineExecutor {
                 // Process each record with graceful error handling
                 for (Object record : dataList) {
                     try {
+                        LOGGER.info("About to call dataSink.write('{}', {}) on sink: {}",
+                            step.getOperation(), record.getClass().getSimpleName(), dataSink.getClass().getSimpleName());
                         dataSink.write(step.getOperation(), record);
                         successCount++;
                     } catch (DataSinkException e) {
