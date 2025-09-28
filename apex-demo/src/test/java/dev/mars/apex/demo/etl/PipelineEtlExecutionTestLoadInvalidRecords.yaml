@@ -49,7 +49,7 @@ data-sources:
     description: "CSV file source with invalid records for testing"
     
     connection:
-      base-path: "./target/test/etl/data/input"
+      base-path: "./demo-data/csv"
       file-pattern: "invalid-customers.csv"
       encoding: "UTF-8"
     

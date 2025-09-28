@@ -63,7 +63,7 @@ data-sources:
     description: "Empty CSV file containing no customer data for testing"
 
     connection:
-      base-path: "./target/test/etl/data/input"
+      base-path: "./demo-data/csv"
       file-pattern: "empty-customers.csv"
       encoding: "UTF-8"
 

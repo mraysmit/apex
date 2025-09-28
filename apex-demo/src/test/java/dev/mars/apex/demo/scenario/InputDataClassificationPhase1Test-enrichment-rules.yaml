@@ -1,0 +1,29 @@
+# APEX Enrichment Rules for Input Data Classification Phase 1 Tests
+# Simple enrichment rules for testing the classification system.
+
+metadata:
+  id: "classification-test-enrichment-rules"
+  name: "Classification Test Enrichment Rules"
+  description: "Basic enrichment rules for classification testing"
+  version: "1.0.0"
+  author: "Mark Andrew Ray-Smith Cityline Ltd"
+
+# Simple enrichment rules for testing
+rules:
+  - rule-id: "add-processing-timestamp"
+    rule-name: "Add Processing Timestamp"
+    description: "Adds processing timestamp to the data"
+    severity: "INFO"
+    condition: "true"
+    action: "addField"
+    field-name: "processingTimestamp"
+    field-value: "#{T(java.time.Instant).now().toString()}"
+    
+  - rule-id: "add-classification-marker"
+    rule-name: "Add Classification Marker"
+    description: "Adds marker indicating data was classified"
+    severity: "INFO"
+    condition: "true"
+    action: "addField"
+    field-name: "classificationProcessed"
+    field-value: "true"

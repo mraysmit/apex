@@ -1,0 +1,29 @@
+# APEX Scenario Registry for Input Data Classification Phase 1 Tests
+# This registry defines scenarios for testing the Phase 1.1 implementation
+# of the APEX Input Data Classification System.
+
+metadata:
+  id: "input-data-classification-phase1-registry"
+  name: "Input Data Classification Phase 1 Test Registry"
+  description: "Test scenarios for Phase 1.1 classification implementation"
+  version: "1.0.0"
+  author: "Mark Andrew Ray-Smith Cityline Ltd"
+  type: "scenario-registry"
+
+# Scenario registry for classification testing
+scenario-registry:
+  # Generic test scenario for classification testing
+  - scenario-id: "generic-test-scenario"
+    config-file: "src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test-scenario.yaml"
+    description: "Generic test scenario for classification testing"
+
+# Default routing configuration
+routing-config:
+  default-scenario: "generic-test-scenario"
+  
+  # Future: routing rules will be added here in Phase 1.3
+  # routing-rules:
+  #   - condition: "fileName.endsWith('.json')"
+  #     scenario-id: "json-processing-scenario"
+  #   - condition: "fileName.endsWith('.xml')"
+  #     scenario-id: "xml-processing-scenario"

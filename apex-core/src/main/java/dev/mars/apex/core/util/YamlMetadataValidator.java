@@ -75,6 +75,21 @@ public class YamlMetadataValidator {
         "external-data-config",
         "pipeline"
     );
+
+    // Valid failure policies for scenario stages
+    private static final Set<String> VALID_FAILURE_POLICIES = Set.of(
+        "terminate", "continue-with-warnings", "flag-for-review"
+    );
+
+    // Required fields for scenario stages
+    private static final Set<String> REQUIRED_STAGE_FIELDS = Set.of(
+        "stage-name", "config-file", "execution-order"
+    );
+
+    // Optional fields for scenario stages
+    private static final Set<String> OPTIONAL_STAGE_FIELDS = Set.of(
+        "failure-policy", "depends-on", "required", "stage-metadata"
+    );
     
     // Type-specific required fields
     private static final Map<String, Set<String>> TYPE_SPECIFIC_REQUIRED_FIELDS = Map.of(
@@ -261,6 +276,7 @@ public class YamlMetadataValidator {
     
     /**
      * Validates scenario file content.
+     * Supports both legacy rule-configurations and modern processing-stages.
      */
     @SuppressWarnings("unchecked")
     private void validateScenarioContent(Map<String, Object> yamlContent, YamlValidationResult result) {
@@ -269,19 +285,19 @@ public class YamlMetadataValidator {
             result.addError("Scenario files must have a 'scenario' section");
             return;
         }
-        
+
         if (!(scenarioObj instanceof Map)) {
             result.addError("'scenario' section must be a map/object");
             return;
         }
-        
+
         Map<String, Object> scenario = (Map<String, Object>) scenarioObj;
-        
+
         // Required scenario fields
         if (!scenario.containsKey("scenario-id")) {
             result.addError("Missing required field: scenario-id");
         }
-        
+
         if (!scenario.containsKey("data-types")) {
             result.addError("Missing required field: data-types");
         } else {
@@ -290,10 +306,24 @@ public class YamlMetadataValidator {
                 result.addError("data-types must be a non-empty list");
             }
         }
-        
-        if (!scenario.containsKey("rule-configurations")) {
-            result.addError("Missing required field: rule-configurations");
-        } else {
+
+        // Validate that either processing-stages OR rule-configurations is present
+        boolean hasProcessingStages = scenario.containsKey("processing-stages");
+        boolean hasRuleConfigurations = scenario.containsKey("rule-configurations");
+
+        if (!hasProcessingStages && !hasRuleConfigurations) {
+            result.addError("Scenario must have either 'processing-stages' or 'rule-configurations'");
+        } else if (hasProcessingStages && hasRuleConfigurations) {
+            result.addWarning("Scenario has both 'processing-stages' and 'rule-configurations'. 'processing-stages' will take precedence.");
+        }
+
+        // Validate processing stages if present (modern stage-based configuration)
+        if (hasProcessingStages) {
+            validateProcessingStages(scenario.get("processing-stages"), result);
+        }
+
+        // Validate rule configurations if present (legacy configuration)
+        if (hasRuleConfigurations && !hasProcessingStages) {
             Object ruleConfigs = scenario.get("rule-configurations");
             if (!(ruleConfigs instanceof List) || ((List<?>) ruleConfigs).isEmpty()) {
                 result.addError("rule-configurations must be a non-empty list");
@@ -373,6 +403,223 @@ public class YamlMetadataValidator {
         }
     }
     
+    /**
+     * Validates processing stages configuration.
+     *
+     * @param stagesObj the processing-stages object from YAML
+     * @param result the validation result to add errors/warnings to
+     */
+    @SuppressWarnings("unchecked")
+    private void validateProcessingStages(Object stagesObj, YamlValidationResult result) {
+        if (!(stagesObj instanceof List)) {
+            result.addError("processing-stages must be a list");
+            return;
+        }
+
+        List<?> stages = (List<?>) stagesObj;
+        if (stages.isEmpty()) {
+            result.addError("processing-stages cannot be empty");
+            return;
+        }
+
+        Set<String> stageNames = new HashSet<>();
+        Set<Integer> executionOrders = new HashSet<>();
+        Map<String, Set<String>> stageDependencies = new HashMap<>();
+
+        for (int i = 0; i < stages.size(); i++) {
+            Object stageObj = stages.get(i);
+            if (!(stageObj instanceof Map)) {
+                result.addError("Processing stage " + i + " must be a map/object");
+                continue;
+            }
+
+            Map<String, Object> stage = (Map<String, Object>) stageObj;
+
+            // Validate required fields
+            validateStageRequiredFields(stage, i, result);
+
+            // Validate unique stage names and execution orders
+            validateStageUniqueness(stage, i, stageNames, executionOrders, result);
+
+            // Validate failure policies
+            validateStageFailurePolicy(stage, i, result);
+
+            // Collect dependencies for circular dependency check
+            collectStageDependencies(stage, stageDependencies);
+        }
+
+        // Validate no circular dependencies
+        validateNoCircularDependencies(stageDependencies, result);
+
+        // Validate dependency references exist
+        validateDependencyReferences(stageDependencies, stageNames, result);
+    }
+
+    /**
+     * Validates required fields for a single stage.
+     */
+    private void validateStageRequiredFields(Map<String, Object> stage, int stageIndex, YamlValidationResult result) {
+        for (String requiredField : REQUIRED_STAGE_FIELDS) {
+            if (!stage.containsKey(requiredField) || stage.get(requiredField) == null) {
+                result.addError("Processing stage " + stageIndex + " missing required field: " + requiredField);
+            } else {
+                Object value = stage.get(requiredField);
+                if (!(value instanceof String) || ((String) value).trim().isEmpty()) {
+                    if (!requiredField.equals("execution-order")) { // execution-order should be integer
+                        result.addError("Processing stage " + stageIndex + " field '" + requiredField + "' must be a non-empty string");
+                    }
+                }
+            }
+        }
+
+        // Validate execution-order is a positive integer
+        Object executionOrder = stage.get("execution-order");
+        if (executionOrder != null) {
+            if (!(executionOrder instanceof Integer)) {
+                result.addError("Processing stage " + stageIndex + " execution-order must be an integer");
+            } else if ((Integer) executionOrder < 1) {
+                result.addError("Processing stage " + stageIndex + " execution-order must be a positive integer");
+            }
+        }
+    }
+
+    /**
+     * Validates stage uniqueness (names and execution orders).
+     */
+    private void validateStageUniqueness(Map<String, Object> stage, int stageIndex,
+                                       Set<String> stageNames, Set<Integer> executionOrders,
+                                       YamlValidationResult result) {
+        String stageName = (String) stage.get("stage-name");
+        if (stageName != null && !stageName.trim().isEmpty()) {
+            if (stageNames.contains(stageName)) {
+                result.addError("Duplicate stage name: " + stageName);
+            } else {
+                stageNames.add(stageName);
+            }
+        }
+
+        Object executionOrderObj = stage.get("execution-order");
+        if (executionOrderObj instanceof Integer) {
+            Integer executionOrder = (Integer) executionOrderObj;
+            if (executionOrders.contains(executionOrder)) {
+                result.addError("Duplicate execution order: " + executionOrder);
+            } else {
+                executionOrders.add(executionOrder);
+            }
+        }
+    }
+
+    /**
+     * Validates failure policy for a stage.
+     */
+    private void validateStageFailurePolicy(Map<String, Object> stage, int stageIndex, YamlValidationResult result) {
+        Object failurePolicyObj = stage.get("failure-policy");
+        if (failurePolicyObj != null) {
+            if (!(failurePolicyObj instanceof String)) {
+                result.addError("Processing stage " + stageIndex + " failure-policy must be a string");
+            } else {
+                String failurePolicy = (String) failurePolicyObj;
+                if (!VALID_FAILURE_POLICIES.contains(failurePolicy)) {
+                    result.addError("Processing stage " + stageIndex + " invalid failure-policy: " + failurePolicy +
+                                  ". Valid policies: " + VALID_FAILURE_POLICIES);
+                }
+            }
+        }
+    }
+
+    /**
+     * Collects stage dependencies for circular dependency validation.
+     */
+    @SuppressWarnings("unchecked")
+    private void collectStageDependencies(Map<String, Object> stage, Map<String, Set<String>> stageDependencies) {
+        String stageName = (String) stage.get("stage-name");
+        if (stageName == null || stageName.trim().isEmpty()) {
+            return; // Skip if stage name is invalid (error already reported)
+        }
+
+        Set<String> dependencies = new HashSet<>();
+        Object dependsOnObj = stage.get("depends-on");
+
+        if (dependsOnObj instanceof List) {
+            List<?> dependsOnList = (List<?>) dependsOnObj;
+            for (Object dep : dependsOnList) {
+                if (dep instanceof String) {
+                    String depName = ((String) dep).trim();
+                    if (!depName.isEmpty()) {
+                        dependencies.add(depName);
+
+                        // Check for self-dependency
+                        if (depName.equals(stageName)) {
+                            // This will be caught in circular dependency check, but we can add a specific error
+                        }
+                    }
+                }
+            }
+        }
+
+        stageDependencies.put(stageName, dependencies);
+    }
+
+    /**
+     * Validates that there are no circular dependencies between stages.
+     */
+    private void validateNoCircularDependencies(Map<String, Set<String>> stageDependencies, YamlValidationResult result) {
+        Set<String> visited = new HashSet<>();
+        Set<String> visiting = new HashSet<>();
+
+        for (String stage : stageDependencies.keySet()) {
+            if (!visited.contains(stage)) {
+                if (hasCycle(stage, stageDependencies, visiting, visited)) {
+                    result.addError("Circular dependency detected involving stage: " + stage);
+                    return; // Stop after finding first cycle to avoid duplicate errors
+                }
+            }
+        }
+    }
+
+    /**
+     * Validates that all dependency references point to existing stages.
+     */
+    private void validateDependencyReferences(Map<String, Set<String>> stageDependencies,
+                                            Set<String> stageNames, YamlValidationResult result) {
+        for (Map.Entry<String, Set<String>> entry : stageDependencies.entrySet()) {
+            String stageName = entry.getKey();
+            Set<String> dependencies = entry.getValue();
+
+            for (String dependency : dependencies) {
+                if (!stageNames.contains(dependency)) {
+                    result.addError("Stage '" + stageName + "' depends on non-existent stage: " + dependency);
+                }
+            }
+        }
+    }
+
+    /**
+     * Detects cycles in stage dependencies using depth-first search.
+     */
+    private boolean hasCycle(String stage, Map<String, Set<String>> dependencies,
+                           Set<String> visiting, Set<String> visited) {
+        if (visiting.contains(stage)) {
+            return true; // Cycle detected
+        }
+        if (visited.contains(stage)) {
+            return false; // Already processed
+        }
+
+        visiting.add(stage);
+        Set<String> deps = dependencies.get(stage);
+        if (deps != null) {
+            for (String dep : deps) {
+                if (hasCycle(dep, dependencies, visiting, visited)) {
+                    return true;
+                }
+            }
+        }
+        visiting.remove(stage);
+        visited.add(stage);
+        return false;
+    }
+
     /**
      * Gets the file type from the metadata.
      */

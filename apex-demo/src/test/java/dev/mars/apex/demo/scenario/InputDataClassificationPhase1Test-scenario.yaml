@@ -1,0 +1,44 @@
+# APEX Scenario Configuration for Input Data Classification Phase 1 Tests
+# This scenario provides basic processing for testing the classification system.
+
+metadata:
+  id: "generic-test-scenario"
+  name: "Generic Test Scenario for Classification"
+  description: "Basic scenario for testing input data classification functionality"
+  version: "1.0.0"
+  author: "Mark Andrew Ray-Smith Cityline Ltd"
+  type: "scenario"
+
+# Scenario configuration
+scenario:
+  scenario-id: "generic-test-scenario"
+  name: "Generic Test Scenario for Classification"
+  description: "Basic scenario for testing input data classification functionality"
+
+
+
+  # Stage-based processing configuration
+  processing-stages:
+    - stage-id: "validation"
+      stage-name: "Basic Validation"
+      stage-type: "validation"
+      description: "Basic validation for classification testing"
+      failure-policy: "continue-with-warnings"
+      dependencies: []
+      configuration:
+        rules-source: "src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test-validation-rules.yaml"
+
+    - stage-id: "processing"
+      stage-name: "Basic Processing"
+      stage-type: "enrichment"
+      description: "Basic processing for classification testing"
+      failure-policy: "continue-with-warnings"
+      dependencies: ["validation"]
+      configuration:
+        rules-source: "src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test-enrichment-rules.yaml"
+
+  # Processing configuration
+  processing-config:
+    max-retries: 3
+    retry-delay-ms: 100
+    timeout-ms: 5000

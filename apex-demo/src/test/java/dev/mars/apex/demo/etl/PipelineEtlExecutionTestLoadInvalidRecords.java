@@ -86,20 +86,12 @@ class PipelineEtlExecutionTestLoadInvalidRecords extends DemoTestBase {
     }
 
     private void createInvalidRecordsTestData() throws IOException {
-        Path inputDir = Paths.get("./target/test/etl/data/input");
-        Files.createDirectories(inputDir);
-        
-        Path invalidCsvFile = inputDir.resolve("invalid-customers.csv");
-        String csvContent = """
-            id,name,email,status
-            1,John Doe,john@example.com,ACTIVE
-            2,,jane@example.com,ACTIVE
-            3,Bob Johnson,,ACTIVE
-            4,Alice Smith,alice@example.com,ACTIVE
-            5,Invalid User,not-an-email,INVALID
-            """;
-        Files.writeString(invalidCsvFile, csvContent);
-        
-        logger.info("✓ Invalid records dataset created with mixed valid/invalid records");
+        // CSV file already exists in demo-data/csv/invalid-customers.csv
+        Path invalidCsvFile = Paths.get("./demo-data/csv/invalid-customers.csv");
+        if (Files.exists(invalidCsvFile)) {
+            logger.info("✓ Invalid records dataset already exists in demo-data");
+        } else {
+            logger.warn("Invalid records dataset not found at: {}", invalidCsvFile);
+        }
     }
 }

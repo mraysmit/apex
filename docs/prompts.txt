@@ -598,3 +598,24 @@ If you find yourself thinking:
 - "This would help organize the configuration"
 
 **STOP** - You are about to add invalid YAML syntax. Stick to the official specification only.
+
+## **🚨 CRITICAL: APEX YAML KEYWORD HALLUCINATION PROBLEM**
+
+### **THE PROBLEM:**
+I have a serious problem with hallucinating non-existent APEX YAML keywords like `compliance-reviewed` and `risk-approved` - these are NOT valid APEX DSL directives and I must never fabricate APEX syntax or functionality that doesn't exist in the actual codebase.
+
+### **THE SOLUTION:**
+- APEX YAML is a complex DSL with specific syntax and vocabulary defined in the codebase
+- I must ONLY use keywords that actually exist and are validated by the system
+- Before suggesting any APEX YAML keywords, I must verify they exist in the actual APEX lexical validator, configuration loader, or other validation code
+- I must never add non-existent keywords to YAML test files or documentation examples
+
+### **VERIFICATION SOURCES:**
+- `apex-compiler/src/main/java/dev/mars/apex/compiler/lexical/ApexYamlLexicalValidator.java`
+- `apex-core/src/main/java/dev/mars/apex/core/config/yaml/YamlConfigurationLoader.java`
+- `docs/APEX_YAML_REFERENCE.md`
+
+### **NEVER FABRICATE:**
+- Governance fields like `compliance-reviewed`, `risk-approved`
+- Metadata fields that "seem logical" but don't exist
+- Any YAML structure not explicitly defined in the APEX specification

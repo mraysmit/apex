@@ -1,0 +1,25 @@
+# APEX Validation Rules for Input Data Classification Phase 1 Tests
+# Simple validation rules for testing the classification system.
+
+metadata:
+  id: "classification-test-validation-rules"
+  name: "Classification Test Validation Rules"
+  description: "Basic validation rules for classification testing"
+  version: "1.0.0"
+  author: "Mark Andrew Ray-Smith Cityline Ltd"
+
+# Simple validation rules for testing
+rules:
+  - rule-id: "not-null-validation"
+    rule-name: "Data Not Null Validation"
+    description: "Validates that input data is not null"
+    severity: "CRITICAL"
+    condition: "data != null"
+    message: "Input data cannot be null"
+    
+  - rule-id: "basic-content-validation"
+    rule-name: "Basic Content Validation"
+    description: "Basic validation that data has some content"
+    severity: "WARNING"
+    condition: "data.toString().length() > 0"
+    message: "Input data should have content"

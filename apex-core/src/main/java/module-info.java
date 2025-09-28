@@ -32,10 +32,11 @@ module dev.mars.apex.core {
     requires transitive org.slf4j;
 
 
-    // YAML processing dependencies
+    // YAML and XML processing dependencies
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.dataformat.yaml;
+    requires com.fasterxml.jackson.dataformat.xml;
 
     // Enable automatic JDBC driver loading
     uses java.sql.Driver;
@@ -90,5 +91,9 @@ module dev.mars.apex.core {
 
     // Pipeline configuration exports
     exports dev.mars.apex.core.config.pipeline;
+
+    // Phase 1.2 exports - Input Data Classification System
+    exports dev.mars.apex.core.engine;
+    exports dev.mars.apex.core.service.classification;
 
 }

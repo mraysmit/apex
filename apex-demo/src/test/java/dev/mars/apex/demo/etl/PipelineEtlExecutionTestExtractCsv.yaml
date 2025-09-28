@@ -64,7 +64,7 @@ data-sources:
     description: "CSV file containing customer data for testing"
 
     connection:
-      base-path: "./target/test/etl/data/input"
+      base-path: "./demo-data/csv"
       file-pattern: "customers.csv"
       encoding: "UTF-8"
 

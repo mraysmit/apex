@@ -68,7 +68,7 @@ public class DataTypeScenarioService {
     private static final Logger logger = LoggerFactory.getLogger(DataTypeScenarioService.class);
     
     // Cache for loaded scenario configurations
-    private final Map<String, ScenarioConfiguration> scenarioCache = new ConcurrentHashMap<>();
+    protected final Map<String, ScenarioConfiguration> scenarioCache = new ConcurrentHashMap<>();
     
     // Mapping from data type to scenario IDs
     private final Map<String, List<String>> dataTypeToScenarios = new ConcurrentHashMap<>();
@@ -347,13 +347,17 @@ public class DataTypeScenarioService {
     void registerScenario(ScenarioConfiguration scenario) {
         String scenarioId = scenario.getScenarioId();
         scenarioCache.put(scenarioId, scenario);
-        
-        // Register data type mappings
-        for (String dataType : scenario.getDataTypes()) {
-            dataTypeToScenarios.computeIfAbsent(dataType, k -> new ArrayList<>()).add(scenarioId);
+
+        // Register data type mappings (only if data types are specified)
+        List<String> dataTypes = scenario.getDataTypes();
+        if (dataTypes != null && !dataTypes.isEmpty()) {
+            for (String dataType : dataTypes) {
+                dataTypeToScenarios.computeIfAbsent(dataType, k -> new ArrayList<>()).add(scenarioId);
+            }
+            logger.debug("Registered scenario '{}' for data types: {}", scenarioId, dataTypes);
+        } else {
+            logger.debug("Registered scenario '{}' with no data type associations", scenarioId);
         }
-        
-        logger.debug("Registered scenario '{}' for data types: {}", scenarioId, scenario.getDataTypes());
     }
     
     /**

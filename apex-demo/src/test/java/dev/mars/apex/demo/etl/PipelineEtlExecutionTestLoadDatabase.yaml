@@ -52,7 +52,7 @@ data-sources:
 
     # Connection configuration - defines how to connect to the data source
     connection:
-      base-path: "./target/test/etl/data/input"   # Directory path where input files are located
+      base-path: "./demo-data/csv"                # Directory path where input files are located
       file-pattern: "load-db-test-customers.csv" # Specific file name pattern to match
       encoding: "UTF-8"                           # Character encoding for reading files
 

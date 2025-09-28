@@ -143,10 +143,7 @@ scenario-registry:
     data-types: ["OtcOption", "dev.mars.apex.demo.model.OtcOption"]
     description: "Standard validation and enrichment pipeline for OTC Options"
     business-domain: "Derivatives Trading"
-    regulatory-scope: "Global Markets"
     owner: "derivatives.team@company.com"
-    compliance-reviewed: true
-    risk-approved: true
 
   - scenario-id: "commodity-swaps-standard"
     config-file: "scenarios/commodity-swaps-scenario.yaml"
@@ -155,8 +152,6 @@ scenario-registry:
     business-domain: "Derivatives Trading"
     regulatory-scope: "Global Markets"
     owner: "commodities.team@company.com"
-    compliance-reviewed: true
-    risk-approved: true
 ```
 
 ### Individual Scenario Files
