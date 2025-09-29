@@ -119,7 +119,7 @@ public class ErrorRecoveryConfig {
         warningPolicy.setMaxRetries(0);
         severityPolicies.put(SeverityConstants.WARNING, warningPolicy);
 
-        // INFO severity - recovery enabled
+        // INFO severity - Default backward compatible behavior
         SeverityRecoveryPolicy infoPolicy = new SeverityRecoveryPolicy();
         infoPolicy.setRecoveryEnabled(true);
         infoPolicy.setStrategy("CONTINUE_WITH_DEFAULT");

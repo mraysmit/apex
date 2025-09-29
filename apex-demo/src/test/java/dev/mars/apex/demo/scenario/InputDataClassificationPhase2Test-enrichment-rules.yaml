@@ -1,0 +1,312 @@
+# APEX Input Data Classification Phase 2 Test - Enrichment Rules
+#
+# PURPOSE:
+# This file contains advanced enrichment rules for Phase 2 testing, demonstrating
+# SpEL-based data enrichment, conditional logic, and context-aware processing.
+# It shows how to enhance financial data with derived values and classifications.
+#
+# PHASE 2 FEATURES DEMONSTRATED:
+# - SpEL-based conditional enrichment logic
+# - Context-aware data enhancement
+# - Complex financial calculations using SpEL
+# - Performance-optimized enrichment with caching
+# - Rich context variable utilization
+#
+# @author Mark Andrew Ray-Smith Cityline Ltd
+# @version 2.0.0
+# @since 2024-12-28
+
+metadata:
+  name: "Phase 2 Advanced Enrichment Rules"
+  version: "2.0.0"
+  description: "Advanced enrichment rules with SpEL integration for Phase 2 testing"
+  type: "enrichment-rules"
+  business-domain: "Financial Services - Data Enrichment"
+  owner: "apex-development-team@company.com"
+  created: "2024-12-28"
+  tags: ["phase2", "enrichment", "spel", "advanced", "financial"]
+
+# Phase 2 Error Recovery Configuration
+# Configure proper error handling for SpEL evaluation failures
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+  metrics-enabled: true
+  default-strategy: "FAIL_FAST"  # Don't mask SpEL errors as successful recoveries
+
+  # Severity-specific recovery policies
+  severity-policies:
+    # ERROR severity - No recovery, fail immediately
+    ERROR:
+      recovery-enabled: false
+      strategy: "FAIL_FAST"
+
+    # WARNING severity - No recovery, report as error
+    WARNING:
+      recovery-enabled: false
+      strategy: "FAIL_FAST"
+
+    # INFO severity - No recovery, report as error
+    INFO:
+      recovery-enabled: false
+      strategy: "FAIL_FAST"
+
+# Phase 2 Advanced Enrichment Configuration
+enrichment-config:
+  spel-enabled: true
+  context-enrichment: true
+  conditional-processing: true
+  performance-monitoring: true
+  caching-enabled: true
+
+# Advanced Enrichment Rules with SpEL
+rules:
+  
+  # Instrument Classification Enrichment
+  - id: "instrument-classification-enrichment"
+    name: "Instrument Classification Enhancement"
+    description: "Enriches instrument data with advanced classification using SpEL"
+    condition: "#root['instrument'] != null"
+    target-field: "instrument.enhancedClassification"
+    enrichment-expression: >
+      #root['instrument']['type'].toString().contains('SWAP') ? 'INTEREST_RATE_DERIVATIVE' :
+      #root['instrument']['type'].toString().contains('OPTION') ? 'EQUITY_DERIVATIVE' :
+      #root['instrument']['type'].toString().contains('BOND') ? 'FIXED_INCOME' :
+      #root['instrument']['type'].toString().contains('EQUITY') ? 'EQUITY_INSTRUMENT' :
+      'OTHER_INSTRUMENT'
+    spel-context: ["instrument"]
+    cache-result: true
+    
+  # Risk Category Enrichment
+  - id: "risk-category-enrichment"
+    name: "Risk Category Enhancement"
+    description: "Determines risk category based on multiple factors using SpEL"
+    condition: "#root.instrument != null || #root.riskMetrics != null"
+    target-field: "enrichedData.riskCategory"
+    enrichment-expression: >
+      (#root.riskMetrics?.var95 != null && #root.riskMetrics.var95 > 500000) ? 'HIGH_RISK' :
+      (#root.riskMetrics?.var95 != null && #root.riskMetrics.var95 > 100000) ? 'MEDIUM_RISK' :
+      (#root.instrument?.type != null && 
+       (#root.instrument.type.contains('DERIVATIVE') || 
+        #root.instrument.type.contains('SWAP') || 
+        #root.instrument.type.contains('OPTION'))) ? 'MEDIUM_RISK' :
+      'LOW_RISK'
+    spel-context: ["instrument", "riskMetrics"]
+    cache-result: true
+    
+  # Regulatory Classification Enrichment
+  - id: "regulatory-classification-enrichment"
+    name: "Regulatory Classification Enhancement"
+    description: "Determines regulatory requirements using complex SpEL logic"
+    condition: "#root.instrument != null && #root.counterparty != null"
+    target-field: "enrichedData.regulatoryRequirements"
+    enrichment-expression: >
+      {
+        'mifidII': (#root.instrument.type.contains('DERIVATIVE') && 
+                   #root.counterparty.jurisdiction == 'EU'),
+        'doddFrank': (#root.instrument.type.contains('SWAP') && 
+                     #root.counterparty.jurisdiction == 'US'),
+        'emir': (#root.instrument.regulatoryClassification == 'OTC_DERIVATIVE' && 
+                (#root.counterparty.jurisdiction == 'EU' || 
+                 #root.counterparty.jurisdiction == 'UK')),
+        'baselIII': (#root.riskMetrics?.creditExposure != null && 
+                    #root.riskMetrics.creditExposure > 1000000)
+      }
+    spel-context: ["instrument", "counterparty", "riskMetrics"]
+    cache-result: true
+    
+  # Market Data Enrichment
+  - id: "market-data-enrichment"
+    name: "Market Data Enhancement"
+    description: "Enriches with derived market indicators using SpEL calculations"
+    condition: "#root.marketData != null"
+    target-field: "enrichedData.marketIndicators"
+    enrichment-expression: >
+      {
+        'volatilityCategory': (#root.marketData.volatility > 0.3) ? 'HIGH' :
+                             (#root.marketData.volatility > 0.15) ? 'MEDIUM' : 'LOW',
+        'rateEnvironment': (#root.marketData.currentRate > 5.0) ? 'HIGH_RATES' :
+                          (#root.marketData.currentRate > 2.0) ? 'NORMAL_RATES' : 'LOW_RATES',
+        'marketStress': (#root.marketData.marketCondition == 'STRESSED' || 
+                        #root.marketData.marketCondition == 'CRISIS') ? true : false,
+        'riskAdjustedRate': #root.marketData.currentRate * 
+                           (1 + #root.marketData.volatility * 0.5)
+      }
+    spel-context: ["marketData"]
+    cache-result: true
+    
+  # Portfolio Analytics Enrichment
+  - id: "portfolio-analytics-enrichment"
+    name: "Portfolio Analytics Enhancement"
+    description: "Calculates portfolio analytics using SpEL aggregations"
+    condition: "#root.portfolio != null && #root.positions != null"
+    target-field: "enrichedData.portfolioAnalytics"
+    enrichment-expression: >
+      {
+        'positionCount': #root.positions.size(),
+        'averagePositionSize': #root.portfolio.totalValue / #root.positions.size(),
+        'largestPosition': #root.positions.stream()
+                          .mapToDouble(pos -> pos.marketValue)
+                          .max().orElse(0.0),
+        'concentrationRisk': (#root.positions.stream()
+                             .mapToDouble(pos -> pos.marketValue)
+                             .max().orElse(0.0) / #root.portfolio.totalValue) > 0.1,
+        'diversificationScore': #root.positions.size() > 10 ? 'HIGH' :
+                               #root.positions.size() > 5 ? 'MEDIUM' : 'LOW'
+      }
+    spel-context: ["portfolio", "positions"]
+    cache-result: true
+    
+  # Counterparty Risk Enrichment
+  - id: "counterparty-risk-enrichment"
+    name: "Counterparty Risk Enhancement"
+    description: "Assesses counterparty risk using SpEL-based scoring"
+    condition: "#root.counterparty != null"
+    target-field: "enrichedData.counterpartyRisk"
+    enrichment-expression: >
+      {
+        'creditRiskScore': (#root.counterparty.creditRating?.startsWith('AAA')) ? 1 :
+                          (#root.counterparty.creditRating?.startsWith('AA')) ? 2 :
+                          (#root.counterparty.creditRating?.startsWith('A')) ? 3 :
+                          (#root.counterparty.creditRating?.startsWith('BBB')) ? 4 :
+                          (#root.counterparty.creditRating?.startsWith('BB')) ? 5 : 6,
+        'jurisdictionRisk': (#root.counterparty.jurisdiction == 'US' || 
+                           #root.counterparty.jurisdiction == 'EU' ||
+                           #root.counterparty.jurisdiction == 'UK') ? 'LOW' : 'MEDIUM',
+        'leiValidation': (#root.counterparty.lei != null && 
+                         #root.counterparty.lei.matches('[A-Z0-9]{20}')) ? 'VALID' : 'INVALID',
+        'requiresEnhancedDueDiligence': (#root.counterparty.creditRating?.startsWith('B') ||
+                                       #root.counterparty.creditRating?.startsWith('C'))
+      }
+    spel-context: ["counterparty"]
+    cache-result: true
+    
+  # Trade Classification Enrichment
+  - id: "trade-classification-enrichment"
+    name: "Trade Classification Enhancement"
+    description: "Classifies trade characteristics using SpEL pattern matching"
+    condition: "#root.messageType != null && #root.messageType.contains('TRADE')"
+    target-field: "enrichedData.tradeClassification"
+    enrichment-expression: >
+      {
+        'tradeType': (#root.instrument?.type?.contains('SWAP')) ? 'SWAP_TRADE' :
+                    (#root.instrument?.type?.contains('OPTION')) ? 'OPTION_TRADE' :
+                    (#root.instrument?.type?.contains('BOND')) ? 'BOND_TRADE' :
+                    (#root.instrument?.type?.contains('EQUITY')) ? 'EQUITY_TRADE' : 'OTHER_TRADE',
+        'complexityLevel': (#root.instrument?.type?.contains('DERIVATIVE') ||
+                          #root.riskMetrics?.var95 > 100000) ? 'COMPLEX' : 'SIMPLE',
+        'processingPriority': (#root.instrument?.notional > 10000000 ||
+                             #root.riskMetrics?.creditExposure > 5000000) ? 'HIGH' : 'NORMAL',
+        'requiresApproval': (#root.instrument?.notional > 50000000 ||
+                           #root.enrichedData?.riskCategory == 'HIGH_RISK')
+      }
+    spel-context: ["messageType", "instrument", "riskMetrics", "enrichedData"]
+    cache-result: true
+    
+  # Performance Metrics Enrichment
+  - id: "performance-metrics-enrichment"
+    name: "Performance Metrics Enhancement"
+    description: "Calculates performance and efficiency metrics using SpEL"
+    condition: "#root.riskMetrics != null"
+    target-field: "enrichedData.performanceMetrics"
+    enrichment-expression: >
+      {
+        'riskAdjustedReturn': (#root.riskMetrics.sharpeRatio != null) ? 
+                             #root.riskMetrics.sharpeRatio * 100 : null,
+        'volatilityAdjustedVar': (#root.riskMetrics.var95 != null && 
+                                 #root.marketData?.volatility != null) ?
+                                #root.riskMetrics.var95 * (1 + #root.marketData.volatility) : 
+                                #root.riskMetrics.var95,
+        'leverageRatio': (#root.riskMetrics.creditExposure != null && 
+                         #root.portfolio?.totalValue != null) ?
+                        #root.riskMetrics.creditExposure / #root.portfolio.totalValue : null,
+        'efficiencyScore': (#root.riskMetrics.sharpeRatio != null && 
+                          #root.riskMetrics.maxDrawdown != null) ?
+                          #root.riskMetrics.sharpeRatio / #root.riskMetrics.maxDrawdown : null
+      }
+    spel-context: ["riskMetrics", "marketData", "portfolio"]
+    cache-result: true
+    
+  # Data Quality Enrichment
+  - id: "data-quality-enrichment"
+    name: "Data Quality Assessment"
+    description: "Assesses data quality and completeness using SpEL scoring"
+    condition: "true"
+    target-field: "enrichedData.dataQuality"
+    enrichment-expression: >
+      {
+        'completenessScore': ((#root.messageType != null ? 0.15 : 0) +
+                             (#root.instrument != null ? 0.25 : 0) +
+                             (#root.counterparty != null ? 0.20 : 0) +
+                             (#root.riskMetrics != null ? 0.20 : 0) +
+                             (#root.marketData != null ? 0.10 : 0) +
+                             (#root.portfolio != null ? 0.10 : 0)),
+        'validationScore': (#root.instrument?.type != null && 
+                          #root.instrument.notional != null && 
+                          #root.instrument.notional > 0) ? 0.8 : 0.4,
+        'enrichmentPotential': (#root.instrument != null && #root.counterparty != null && 
+                              #root.riskMetrics != null) ? 'HIGH' : 'MEDIUM',
+        'processingRecommendation': ((#root.messageType != null ? 0.15 : 0) +
+                                   (#root.instrument != null ? 0.25 : 0) +
+                                   (#root.counterparty != null ? 0.20 : 0) +
+                                   (#root.riskMetrics != null ? 0.20 : 0) +
+                                   (#root.marketData != null ? 0.10 : 0) +
+                                   (#root.portfolio != null ? 0.10 : 0)) > 0.7 ? 
+                                   'FULL_PROCESSING' : 'BASIC_PROCESSING'
+      }
+    spel-context: ["messageType", "instrument", "counterparty", "riskMetrics", "marketData", "portfolio"]
+    cache-result: true
+
+# Advanced Enrichment Configuration
+enrichment-performance:
+  caching:
+    enabled: true
+    cache-enrichment-results: true
+    cache-ttl-seconds: 600
+    
+  optimization:
+    parallel-enrichment: false
+    conditional-execution: true
+    expression-compilation-cache: true
+    
+  monitoring:
+    track-enrichment-time: true
+    track-spel-evaluation-time: true
+    track-cache-hit-ratio: true
+
+# Context Enhancement for Enrichment
+context-enhancement:
+  enabled: true
+  
+  derived-context:
+    - name: "isComplexInstrument"
+      expression: >
+        #instrument != null && 
+        (#instrument.type.contains('DERIVATIVE') || 
+         #instrument.type.contains('SWAP') || 
+         #instrument.type.contains('OPTION'))
+    
+    - name: "isHighValueTransaction"
+      expression: >
+        (#instrument?.notional != null && #instrument.notional > 10000000) ||
+        (#portfolio?.totalValue != null && #portfolio.totalValue > 50000000)
+    
+    - name: "requiresEnhancedProcessing"
+      expression: >
+        #isComplexInstrument || #isHighValueTransaction ||
+        (#riskMetrics?.var95 != null && #riskMetrics.var95 > 500000)
+
+# Error Handling for Enrichment
+error-handling:
+  spel-errors:
+    strategy: "skip-enrichment"
+    fallback-value: null
+    log-level: "WARN"
+    
+  enrichment-failures:
+    continue-on-failure: true
+    partial-enrichment: true
+    
+  performance-issues:
+    timeout-ms: 2000
+    fallback-to-basic-enrichment: true

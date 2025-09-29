@@ -1,0 +1,369 @@
+# APEX Input Data Classification Phase 2 Test - Business Rules
+#
+# PURPOSE:
+# This file contains advanced business classification rules for Phase 2 testing,
+# demonstrating sophisticated SpEL-based business logic, complex decision trees,
+# and context-aware classification algorithms.
+#
+# PHASE 2 FEATURES DEMONSTRATED:
+# - Complex SpEL expressions for business classification
+# - Multi-criteria decision making using SpEL
+# - Context-aware business rule evaluation
+# - Advanced confidence scoring algorithms
+# - Performance-optimized rule evaluation with caching
+#
+# @author Mark Andrew Ray-Smith Cityline Ltd
+# @version 2.0.0
+# @since 2024-12-28
+
+metadata:
+  name: "Phase 2 Advanced Business Classification Rules"
+  version: "2.0.0"
+  description: "Advanced business rules with SpEL integration for Phase 2 testing"
+  type: "business-rules"
+  business-domain: "Financial Services - Business Classification"
+  owner: "apex-development-team@company.com"
+  created: "2024-12-28"
+  tags: ["phase2", "business-rules", "spel", "advanced", "classification"]
+
+# Phase 2 Error Recovery Configuration
+# Configure proper error handling for SpEL evaluation failures
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+  metrics-enabled: true
+  default-strategy: "FAIL_FAST"  # Don't mask SpEL errors as successful recoveries
+
+  # Severity-specific recovery policies
+  severity-policies:
+    # ERROR severity - No recovery, fail immediately
+    ERROR:
+      recovery-enabled: false
+      strategy: "FAIL_FAST"
+
+    # WARNING severity - No recovery, report as error
+    WARNING:
+      recovery-enabled: false
+      strategy: "FAIL_FAST"
+
+    # INFO severity - No recovery, report as error
+    INFO:
+      recovery-enabled: false
+      strategy: "FAIL_FAST"
+
+# Phase 2 Advanced Business Rules Configuration
+business-rules-config:
+  spel-enabled: true
+  context-enrichment: true
+  multi-criteria-evaluation: true
+  confidence-scoring: "advanced"
+  performance-monitoring: true
+  caching-enabled: true
+
+# Advanced Business Classification Rules with SpEL
+rules:
+  
+  # Derivative Instrument Classification
+  - id: "derivative-instrument-classification"
+    name: "Derivative Instrument Business Classification"
+    description: "Classifies derivative instruments using complex SpEL logic"
+    priority: 1
+    condition: >
+      #root['instrument'] != null &&
+      (#root['instrument']['type'].toString().contains('SWAP') ||
+       #root['instrument']['type'].toString().contains('OPTION') ||
+       #root['instrument']['type'].toString().contains('FUTURE') ||
+       #root['instrument']['type'].toString().contains('FORWARD') ||
+       #root['instrument']['regulatoryClassification'] == 'OTC_DERIVATIVE')
+    classification: "DERIVATIVE_INSTRUMENT"
+    confidence-base: 0.90
+    confidence-adjustments:
+      - condition: "#root['instrument']['underlying'] != null"
+        adjustment: 0.05
+      - condition: "#root['instrument']['notional'] != null && #root['instrument']['notional'] > 0"
+        adjustment: 0.03
+      - condition: "#root['counterparty'] != null && #root['counterparty']['lei'] != null"
+        adjustment: 0.02
+    spel-context: ["instrument", "counterparty"]
+    cache-result: true
+    
+  # High Risk Investment Classification
+  - id: "high-risk-investment-classification"
+    name: "High Risk Investment Classification"
+    description: "Identifies high-risk investments using multi-factor SpEL analysis"
+    priority: 2
+    condition: >
+      (#root.riskMetrics?.var95 != null && #root.riskMetrics.var95 > 500000) ||
+      (#root.riskMetrics?.expectedShortfall != null && #root.riskMetrics.expectedShortfall > 750000) ||
+      (#root.instrument?.riskRating != null && 
+       (#root.instrument.riskRating.startsWith('B') || #root.instrument.riskRating.startsWith('C'))) ||
+      (#root.marketData?.volatility != null && #root.marketData.volatility > 0.25) ||
+      (#root.enrichedData?.riskCategory == 'HIGH_RISK')
+    classification: "HIGH_RISK_INVESTMENT"
+    confidence-base: 0.85
+    confidence-adjustments:
+      - condition: "#root.riskMetrics?.var95 > 1000000"
+        adjustment: 0.10
+      - condition: "#root.marketData?.marketCondition == 'STRESSED'"
+        adjustment: 0.05
+      - condition: "#root.instrument?.riskRating?.startsWith('C')"
+        adjustment: 0.08
+    spel-context: ["riskMetrics", "instrument", "marketData", "enrichedData"]
+    cache-result: true
+    
+  # Regulatory Reporting Required Classification
+  - id: "regulatory-reporting-classification"
+    name: "Regulatory Reporting Required Classification"
+    description: "Determines regulatory reporting requirements using SpEL decision tree"
+    priority: 3
+    condition: >
+      (#root.instrument?.regulatoryClassification == 'OTC_DERIVATIVE') ||
+      (#root.instrument?.notional != null && #root.instrument.notional > 1000000 &&
+       #root.counterparty?.jurisdiction != null &&
+       (#root.counterparty.jurisdiction == 'US' || 
+        #root.counterparty.jurisdiction == 'EU' ||
+        #root.counterparty.jurisdiction == 'UK')) ||
+      (#root.enrichedData?.regulatoryRequirements?.mifidII == true) ||
+      (#root.enrichedData?.regulatoryRequirements?.doddFrank == true) ||
+      (#root.enrichedData?.regulatoryRequirements?.emir == true)
+    classification: "REGULATORY_REPORTING_REQUIRED"
+    confidence-base: 0.88
+    confidence-adjustments:
+      - condition: "#root.counterparty?.lei != null && #root.counterparty.lei.matches('[A-Z0-9]{20}')"
+        adjustment: 0.07
+      - condition: "#root.instrument?.regulatoryClassification == 'OTC_DERIVATIVE'"
+        adjustment: 0.05
+      - condition: "#root.instrument?.notional > 10000000"
+        adjustment: 0.03
+    spel-context: ["instrument", "counterparty", "enrichedData"]
+    cache-result: true
+    
+  # Portfolio Management Classification
+  - id: "portfolio-management-classification"
+    name: "Portfolio Management Classification"
+    description: "Classifies portfolio management activities using SpEL aggregation"
+    priority: 4
+    condition: >
+      (#root.messageType?.contains('POSITION') || 
+       #root.messageType?.contains('PORTFOLIO')) ||
+      (#root.portfolio != null && #root.positions != null && #root.positions.size() > 0) ||
+      (#root.riskMetrics?.portfolioBeta != null) ||
+      (#root.enrichedData?.portfolioAnalytics != null)
+    classification: "PORTFOLIO_MANAGEMENT"
+    confidence-base: 0.82
+    confidence-adjustments:
+      - condition: "#root.positions != null && #root.positions.size() > 10"
+        adjustment: 0.08
+      - condition: "#root.portfolio?.totalValue > 10000000"
+        adjustment: 0.06
+      - condition: "#root.enrichedData?.portfolioAnalytics?.diversificationScore == 'HIGH'"
+        adjustment: 0.04
+    spel-context: ["messageType", "portfolio", "positions", "riskMetrics", "enrichedData"]
+    cache-result: true
+    
+  # Risk Assessment Classification
+  - id: "risk-assessment-classification"
+    name: "Risk Assessment Classification"
+    description: "Identifies risk assessment activities using comprehensive SpEL analysis"
+    priority: 5
+    condition: >
+      (#root.messageType?.contains('RISK')) ||
+      (#root.riskMetrics != null && 
+       (#root.riskMetrics.var95 != null || 
+        #root.riskMetrics.expectedShortfall != null ||
+        #root.riskMetrics.sharpeRatio != null ||
+        #root.riskMetrics.maxDrawdown != null)) ||
+      (#root.marketData?.volatility != null) ||
+      (#root.enrichedData?.performanceMetrics != null)
+    classification: "RISK_ASSESSMENT"
+    confidence-base: 0.80
+    confidence-adjustments:
+      - condition: "#root.riskMetrics?.var95 != null && #root.riskMetrics?.expectedShortfall != null"
+        adjustment: 0.10
+      - condition: "#root.marketData?.marketCondition != null"
+        adjustment: 0.05
+      - condition: "#root.enrichedData?.performanceMetrics?.efficiencyScore != null"
+        adjustment: 0.05
+    spel-context: ["messageType", "riskMetrics", "marketData", "enrichedData"]
+    cache-result: true
+    
+  # Trade Processing Classification
+  - id: "trade-processing-classification"
+    name: "Trade Processing Classification"
+    description: "Classifies trade processing activities using SpEL pattern matching"
+    priority: 6
+    condition: >
+      (#root.messageType?.contains('TRADE')) ||
+      (#root.messageType?.contains('CONFIRMATION')) ||
+      (#root.messageType?.contains('SETTLEMENT')) ||
+      (#root.instrument != null && #root.counterparty != null &&
+       #root.instrument.notional != null && #root.instrument.notional > 0) ||
+      (#root.enrichedData?.tradeClassification != null)
+    classification: "TRADE_PROCESSING"
+    confidence-base: 0.85
+    confidence-adjustments:
+      - condition: "#root.messageType?.contains('CONFIRMATION')"
+        adjustment: 0.08
+      - condition: "#root.counterparty?.lei != null"
+        adjustment: 0.05
+      - condition: "#root.enrichedData?.tradeClassification?.complexityLevel == 'COMPLEX'"
+        adjustment: 0.03
+    spel-context: ["messageType", "instrument", "counterparty", "enrichedData"]
+    cache-result: true
+    
+  # Credit Risk Classification
+  - id: "credit-risk-classification"
+    name: "Credit Risk Classification"
+    description: "Identifies credit risk scenarios using SpEL credit analysis"
+    priority: 7
+    condition: >
+      (#root.riskMetrics?.creditExposure != null && #root.riskMetrics.creditExposure > 0) ||
+      (#root.counterparty?.creditRating != null) ||
+      (#root.enrichedData?.counterpartyRisk?.creditRiskScore != null) ||
+      (#root.instrument?.type?.contains('BOND') && 
+       #root.instrument?.riskRating != null &&
+       !#root.instrument.riskRating.startsWith('AAA'))
+    classification: "CREDIT_RISK_ASSESSMENT"
+    confidence-base: 0.83
+    confidence-adjustments:
+      - condition: "#root.riskMetrics?.creditExposure > 5000000"
+        adjustment: 0.07
+      - condition: "#root.counterparty?.creditRating?.startsWith('B') || #root.counterparty?.creditRating?.startsWith('C')"
+        adjustment: 0.10
+      - condition: "#root.enrichedData?.counterpartyRisk?.requiresEnhancedDueDiligence == true"
+        adjustment: 0.05
+    spel-context: ["riskMetrics", "counterparty", "instrument", "enrichedData"]
+    cache-result: true
+    
+  # Market Risk Classification
+  - id: "market-risk-classification"
+    name: "Market Risk Classification"
+    description: "Identifies market risk scenarios using SpEL market analysis"
+    priority: 8
+    condition: >
+      (#root.marketData != null && 
+       (#root.marketData.volatility > 0.15 || 
+        #root.marketData.marketCondition == 'VOLATILE' ||
+        #root.marketData.marketCondition == 'STRESSED')) ||
+      (#root.riskMetrics?.var95 != null && #root.riskMetrics.var95 > 100000) ||
+      (#root.enrichedData?.marketIndicators?.volatilityCategory == 'HIGH') ||
+      (#root.enrichedData?.marketIndicators?.marketStress == true)
+    classification: "MARKET_RISK_ASSESSMENT"
+    confidence-base: 0.81
+    confidence-adjustments:
+      - condition: "#root.marketData?.marketCondition == 'CRISIS'"
+        adjustment: 0.12
+      - condition: "#root.marketData?.volatility > 0.3"
+        adjustment: 0.08
+      - condition: "#root.enrichedData?.marketIndicators?.marketStress == true"
+        adjustment: 0.06
+    spel-context: ["marketData", "riskMetrics", "enrichedData"]
+    cache-result: true
+    
+  # Compliance Monitoring Classification
+  - id: "compliance-monitoring-classification"
+    name: "Compliance Monitoring Classification"
+    description: "Identifies compliance monitoring requirements using SpEL compliance rules"
+    priority: 9
+    condition: >
+      (#root.enrichedData?.regulatoryRequirements != null &&
+       (#root.enrichedData.regulatoryRequirements.mifidII == true ||
+        #root.enrichedData.regulatoryRequirements.doddFrank == true ||
+        #root.enrichedData.regulatoryRequirements.emir == true ||
+        #root.enrichedData.regulatoryRequirements.baselIII == true)) ||
+      (#root.instrument?.notional > 50000000) ||
+      (#root.enrichedData?.tradeClassification?.requiresApproval == true) ||
+      (#root.enrichedData?.counterpartyRisk?.requiresEnhancedDueDiligence == true)
+    classification: "COMPLIANCE_MONITORING"
+    confidence-base: 0.86
+    confidence-adjustments:
+      - condition: "#root.instrument?.notional > 100000000"
+        adjustment: 0.08
+      - condition: "#root.enrichedData?.regulatoryRequirements?.mifidII == true && #root.enrichedData?.regulatoryRequirements?.emir == true"
+        adjustment: 0.06
+      - condition: "#root.enrichedData?.counterpartyRisk?.jurisdictionRisk == 'HIGH'"
+        adjustment: 0.04
+    spel-context: ["instrument", "enrichedData"]
+    cache-result: true
+    
+  # Data Quality Assessment Classification
+  - id: "data-quality-classification"
+    name: "Data Quality Assessment Classification"
+    description: "Assesses data quality and processing recommendations using SpEL scoring"
+    priority: 10
+    condition: "true"  # Always evaluate for data quality
+    classification: >
+      (#root.enrichedData?.dataQuality?.completenessScore >= 0.8) ? 'HIGH_QUALITY_DATA' :
+      (#root.enrichedData?.dataQuality?.completenessScore >= 0.6) ? 'MEDIUM_QUALITY_DATA' :
+      'LOW_QUALITY_DATA'
+    confidence-base: 0.75
+    confidence-adjustments:
+      - condition: "#root.enrichedData?.dataQuality?.validationScore > 0.7"
+        adjustment: 0.10
+      - condition: "#root.enrichedData?.dataQuality?.enrichmentPotential == 'HIGH'"
+        adjustment: 0.08
+      - condition: "#root.enrichedData?.dataQuality?.processingRecommendation == 'FULL_PROCESSING'"
+        adjustment: 0.07
+    spel-context: ["enrichedData"]
+    cache-result: true
+
+# Advanced Confidence Scoring Configuration
+confidence-scoring:
+  algorithm: "weighted-multi-factor-spel"
+  
+  base-factors:
+    - name: "rule-match-strength"
+      weight: 0.4
+      spel-evaluation: true
+    
+    - name: "context-completeness"
+      weight: 0.3
+      spel-calculation: >
+        (#root.instrument != null ? 0.25 : 0) +
+        (#root.counterparty != null ? 0.25 : 0) +
+        (#root.riskMetrics != null ? 0.25 : 0) +
+        (#root.marketData != null ? 0.25 : 0)
+    
+    - name: "data-quality"
+      weight: 0.2
+      spel-calculation: "#root.enrichedData?.dataQuality?.completenessScore ?: 0.5"
+    
+    - name: "enrichment-success"
+      weight: 0.1
+      spel-calculation: "#root.enrichedData != null ? 0.8 : 0.3"
+
+# Performance Configuration
+performance:
+  rule-evaluation:
+    parallel-evaluation: false
+    early-termination: true
+    max-evaluation-time-ms: 500
+    
+  caching:
+    enabled: true
+    cache-rule-results: true
+    cache-ttl-seconds: 300
+    cache-spel-expressions: true
+    
+  monitoring:
+    track-rule-evaluation-time: true
+    track-confidence-calculation-time: true
+    track-cache-performance: true
+
+# Error Handling
+error-handling:
+  rule-evaluation-errors:
+    strategy: "skip-rule"
+    fallback-classification: "UNCLASSIFIED"
+    fallback-confidence: 0.3
+    log-level: "WARN"
+    
+  spel-expression-errors:
+    strategy: "graceful-degradation"
+    retry-with-simplified-expression: true
+    max-retries: 2
+    
+  confidence-calculation-errors:
+    strategy: "use-base-confidence"
+    minimum-confidence: 0.1
+    log-level: "ERROR"

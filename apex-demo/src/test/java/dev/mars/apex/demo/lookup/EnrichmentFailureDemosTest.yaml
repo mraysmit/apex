@@ -7,6 +7,7 @@ metadata:
   name: "APEX Enrichment Failure Scenarios Demo"
   version: "1.0.0"
   description: "Demonstrates realistic enrichment failure handling with RuleResult integration"
+  type: "enrichment"
   business-domain: "Financial Transaction Processing - Enrichment Failure Management"
   author: "Mark Andrew Ray-Smith Cityline Ltd"
   created-date: "2025-09-22"
@@ -23,9 +24,9 @@ enrichments:
 
     calculation-config:
       expression: "(#customerId != null && #currencyCode != null) ? 'VALID' : 'MISSING_REQUIRED_FIELDS'"
-      result-field: "requiredFieldValidationResult"
+      result-field: "computedFieldPresenceCheck"
     field-mappings:
-      - source-field: "requiredFieldValidationResult"
+      - source-field: "computedFieldPresenceCheck"
         target-field: "requiredFieldValidationResult"
       
   - id: "customer-enrichment"
@@ -37,9 +38,9 @@ enrichments:
 
     calculation-config:
       expression: "#customerId == 'CUST001' ? 'John Smith' : (#customerId == 'CUST002' ? 'Jane Doe' : 'UNKNOWN_CUSTOMER')"
-      result-field: "customerName"
+      result-field: "resolvedCustomerName"
     field-mappings:
-      - source-field: "customerName"
+      - source-field: "resolvedCustomerName"
         target-field: "customerName"
       
   - id: "currency-validation"
@@ -51,9 +52,9 @@ enrichments:
 
     calculation-config:
       expression: "#currencyCode == 'USD' ? 'US Dollar' : (#currencyCode == 'EUR' ? 'Euro' : (#currencyCode == 'GBP' ? 'British Pound' : 'INVALID_CURRENCY'))"
-      result-field: "currencyName"
+      result-field: "resolvedCurrencyName"
     field-mappings:
-      - source-field: "currencyName"
+      - source-field: "resolvedCurrencyName"
         target-field: "currencyName"
       
   - id: "external-customer-lookup"
@@ -65,9 +66,9 @@ enrichments:
 
     calculation-config:
       expression: "#customerId == 'CUST999' ? 'CUSTOMER_NOT_FOUND' : 'EXTERNAL_LOOKUP_SUCCESS'"
-      result-field: "externalCustomerData"
+      result-field: "performedExternalLookup"
     field-mappings:
-      - source-field: "externalCustomerData"
+      - source-field: "performedExternalLookup"
         target-field: "externalCustomerData"
       
   - id: "data-quality-check"
@@ -82,9 +83,9 @@ enrichments:
         (#customerId != null && #customerId.toString().matches('CUST\\d{3}') &&
          #amount != null && #amount instanceof T(java.lang.Number) &&
          #currencyCode != null && #currencyCode.toString().matches('[A-Z]{3}')) ? 'HIGH' : 'LOW'
-      result-field: "dataQualityScore"
+      result-field: "assessedDataQuality"
     field-mappings:
-      - source-field: "dataQualityScore"
+      - source-field: "assessedDataQuality"
         target-field: "dataQualityScore"
          
   - id: "amount-validation"
@@ -97,9 +98,9 @@ enrichments:
     calculation-config:
       expression: |
         (#amount instanceof T(java.lang.Number) && #amount > 0 && #amount <= 1000000) ? 'VALID' : 'INVALID_AMOUNT'
-      result-field: "amountValidationResult"
+      result-field: "calculatedAmountStatus"
     field-mappings:
-      - source-field: "amountValidationResult"
+      - source-field: "calculatedAmountStatus"
         target-field: "amountValidationResult"
         
   - id: "enrichment-completeness-summary"
@@ -114,9 +115,9 @@ enrichments:
         (#requiredFieldValidationResult != null && #requiredFieldValidationResult == 'VALID' &&
          #dataQualityScore != null && #dataQualityScore == 'HIGH' &&
          #amountValidationResult != null && #amountValidationResult == 'VALID') ? 'ENRICHMENT_SUCCESS' : 'ENRICHMENT_FAILED'
-      result-field: "enrichmentSummary"
+      result-field: "computedEnrichmentSummary"
     field-mappings:
-      - source-field: "enrichmentSummary"
+      - source-field: "computedEnrichmentSummary"
         target-field: "enrichmentSummary"
          
   - id: "failure-recovery-strategy"
@@ -131,9 +132,9 @@ enrichments:
         (#customerId == null && #amount != null && #amount < 0) ? 'DATA_CORRECTION_REQUIRED' :
         (#customerId == null) ? 'MISSING_REQUIRED_DATA' :
         (#amount < 0) ? 'INVALID_BUSINESS_VALUE' : 'GRACEFUL_DEGRADATION'
-      result-field: "recoveryStrategy"
+      result-field: "determinedRecoveryStrategy"
     field-mappings:
-      - source-field: "recoveryStrategy"
+      - source-field: "determinedRecoveryStrategy"
         target-field: "recoveryStrategy"
 
 # Validation rules that will trigger enrichment-related failures
@@ -166,17 +167,17 @@ validations:
           
   - id: "customer-id-format"
     name: "Customer ID Format Validation"
-    description: "Customer ID must follow CUST### format"
+    description: "Customer ID must follow CUST{3-digit} format"
     type: "field-validation"
     enabled: true
     condition: "#customerId != null"
-    
+
     validation-config:
       field: "customerId"
       rules:
         - type: "regex"
           pattern: "^CUST\\d{3}$"
-          message: "Customer ID must be in format CUST### (e.g., CUST001)"
+          message: "Customer ID must be in format CUST{3-digit} (e.g., CUST001)"
           
   - id: "currency-code-format"
     name: "Currency Code Format Validation"

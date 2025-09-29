@@ -113,6 +113,7 @@ public class ScenarioStageExecutor {
         ScenarioExecutionResult result = new ScenarioExecutionResult(scenario.getScenarioId());
         
         logger.info("Executing {} stages for scenario '{}'", stages.size(), scenario.getScenarioId());
+        System.out.println("=== SYSTEM.OUT: executeStages called for scenario: " + scenario.getScenarioId());
 
         int currentStageIndex = 0;
         for (ScenarioStage stage : stages) {
@@ -224,14 +225,21 @@ public class ScenarioStageExecutor {
             
             // Load stage configuration
             YamlRuleConfiguration stageConfig = configLoader.loadFromFile(stage.getConfigFile());
-            
-            // Create rules engine for this stage with enrichment service support
+
+            // Extract error recovery configuration from YAML if present
+            dev.mars.apex.core.config.error.ErrorRecoveryConfig errorRecoveryConfig = null;
+
+            // Use default error recovery configuration
+            errorRecoveryConfig = new dev.mars.apex.core.config.error.ErrorRecoveryConfig();
+
+            // Create rules engine for this stage with enrichment service support and error recovery config
             RulesEngine stageEngine = new RulesEngine(
                 ruleFactory.createRulesEngineConfiguration(stageConfig),
                 new SpelExpressionParser(),
                 new ErrorRecoveryService(),
                 new RulePerformanceMonitor(),
-                enrichmentService
+                enrichmentService,
+                errorRecoveryConfig
             );
             
             // Create facts map with data and context

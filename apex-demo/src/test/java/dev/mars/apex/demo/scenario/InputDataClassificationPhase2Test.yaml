@@ -1,0 +1,212 @@
+# APEX Input Data Classification Phase 2 Test - Scenario Registry
+# 
+# PURPOSE:
+# This registry file defines the scenario configuration for Phase 2 advanced features testing.
+# It demonstrates the integration of SpEL-based classification rules, advanced caching,
+# and configuration hot-reload capabilities.
+#
+# PHASE 2 FEATURES DEMONSTRATED:
+# - Advanced SpEL expression evaluation for business classification
+# - High-performance caching with TTL and eviction policies  
+# - Rich context variables for complex rule evaluation
+# - Configuration hot-reload and zero-downtime updates
+# - Performance optimization and monitoring
+#
+# DEPENDENCIES:
+# - InputDataClassificationPhase2Test-scenario.yaml (scenario configuration)
+# - InputDataClassificationPhase2Test-validation-rules.yaml (validation rules)
+# - InputDataClassificationPhase2Test-enrichment-rules.yaml (enrichment rules)
+# - InputDataClassificationPhase2Test-business-rules.yaml (business classification rules)
+#
+# @author Mark Andrew Ray-Smith Cityline Ltd
+# @version 2.0.0
+# @since 2024-12-28
+
+metadata:
+  name: "APEX Input Data Classification Phase 2 Test Registry"
+  version: "2.0.0"
+  description: "Advanced features test registry for Phase 2 implementation"
+  type: "scenario-registry"
+  created: "2024-12-28"
+  author: "Mark Andrew Ray-Smith Cityline Ltd"
+  tags: ["phase2", "advanced", "spel", "caching", "hot-reload", "testing"]
+
+# Phase 2 Advanced Configuration
+phase2-config:
+  # SpEL Integration Configuration
+  spel-integration:
+    enabled: true
+    expression-caching: true
+    context-enrichment: true
+    error-handling: "graceful"
+    performance-monitoring: true
+  
+  # Advanced Caching Configuration
+  advanced-caching:
+    enabled: true
+    provider: "caffeine"
+    ttl-seconds: 300
+    max-size: 10000
+    eviction-policy: "LRU"
+    statistics-enabled: true
+    refresh-ahead: true
+    compression: false
+  
+  # Hot-Reload Configuration
+  hot-reload:
+    enabled: true
+    watch-paths: 
+      - "src/test/java/dev/mars/apex/demo/scenario/"
+    reload-interval-seconds: 5
+    zero-downtime: true
+    validation-on-reload: true
+
+# Scenario Registry
+scenario-registry:
+  - scenario-id: "phase2-advanced-test-scenario"
+    config-file: "src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase2Test-scenario.yaml"
+    description: "Advanced Phase 2 test scenario with SpEL integration and caching"
+    business-domain: "Financial Services Testing"
+    owner: "apex-development-team@company.com"
+    version: "2.0.0"
+    
+    # Phase 2 Advanced Features
+    features:
+      - "spel-classification"
+      - "advanced-caching"
+      - "context-enrichment"
+      - "performance-monitoring"
+      - "hot-reload"
+    
+    # Performance Requirements
+    performance:
+      max-classification-time-ms: 50
+      cache-hit-ratio-target: 0.85
+      concurrent-processing: true
+      thread-safety: true
+    
+    # Monitoring Configuration
+    monitoring:
+      metrics-enabled: true
+      audit-trail: true
+      performance-tracking: true
+      error-reporting: "detailed"
+    
+    # Business Context
+    business-context:
+      use-cases:
+        - "Complex financial instrument classification"
+        - "Real-time risk assessment processing"
+        - "High-volume trade processing"
+        - "Regulatory compliance validation"
+      
+      data-types:
+        - "Financial instruments (derivatives, bonds, equities)"
+        - "Risk assessment reports"
+        - "Trade confirmations and settlements"
+        - "Portfolio position reports"
+      
+      regulatory-requirements:
+        - "MiFID II transaction reporting"
+        - "Basel III risk calculations"
+        - "EMIR derivative reporting"
+        - "Dodd-Frank compliance"
+
+# Classification Rules Configuration
+classification-rules:
+  # SpEL-based Business Classification Rules
+  business-classification:
+    enabled: true
+    rule-engine: "spel"
+    context-variables:
+      - "messageType"
+      - "instrument"
+      - "counterparty"
+      - "marketData"
+      - "riskMetrics"
+      - "portfolio"
+      - "positions"
+      - "marketConditions"
+    
+    # Complex SpEL Expression Examples
+    spel-expressions:
+      derivative-classification: >
+        #root.instrument?.type != null && 
+        (#root.instrument.type.contains('SWAP') || 
+         #root.instrument.type.contains('OPTION') || 
+         #root.instrument.type.contains('FUTURE'))
+      
+      high-risk-assessment: >
+        #root.riskMetrics?.var95 != null && 
+        #root.riskMetrics.var95 > 100000 &&
+        #root.marketConditions?.volatilityIndex != null &&
+        #root.marketConditions.volatilityIndex > 20
+      
+      regulatory-reporting: >
+        #root.instrument?.regulatoryClassification != null &&
+        #root.instrument.regulatoryClassification == 'OTC_DERIVATIVE' &&
+        #root.counterparty?.jurisdiction != null
+  
+  # Content-based Classification Enhancement
+  content-classification:
+    enabled: true
+    spel-enhanced: true
+    confidence-scoring:
+      base-confidence: 0.7
+      spel-bonus: 0.2
+      context-bonus: 0.1
+    
+    # Enhanced Pattern Matching with SpEL
+    enhanced-patterns:
+      financial-message: >
+        #root.messageType != null && 
+        (#root.messageType.contains('TRADE') || 
+         #root.messageType.contains('SETTLEMENT') || 
+         #root.messageType.contains('POSITION'))
+      
+      risk-report: >
+        #root.riskMetrics != null && 
+        #root.portfolio != null &&
+        #root.riskMetrics.var95 != null
+      
+      regulatory-filing: >
+        #root.regulatoryClassification != null ||
+        (#root.counterparty?.lei != null && 
+         #root.instrument?.regulatoryClassification != null)
+
+# Error Handling Configuration
+error-handling:
+  spel-errors:
+    strategy: "graceful-degradation"
+    fallback-classification: "generic-financial-data"
+    log-level: "WARN"
+    retry-attempts: 2
+    
+  cache-errors:
+    strategy: "bypass-cache"
+    fallback-behavior: "direct-processing"
+    log-level: "ERROR"
+    
+  hot-reload-errors:
+    strategy: "keep-current-config"
+    validation-failures: "reject-reload"
+    log-level: "ERROR"
+
+# Testing Configuration
+testing:
+  concurrent-processing:
+    thread-count: 10
+    iterations-per-thread: 100
+    timeout-seconds: 30
+  
+  performance-benchmarks:
+    target-latency-ms: 50
+    target-throughput-per-second: 1000
+    cache-hit-ratio-target: 0.85
+  
+  data-sets:
+    simple-json: "Basic JSON financial messages"
+    complex-derivatives: "Complex derivative instruments with full context"
+    risk-assessments: "Portfolio risk assessment reports"
+    regulatory-filings: "Regulatory compliance data"
+    error-conditions: "Data designed to test error handling"

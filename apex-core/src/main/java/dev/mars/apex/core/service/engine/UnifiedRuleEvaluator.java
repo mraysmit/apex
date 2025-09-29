@@ -102,6 +102,8 @@ public class UnifiedRuleEvaluator {
         this.errorRecoveryService = errorRecoveryService != null ? errorRecoveryService : new ErrorRecoveryService();
         this.performanceMonitor = performanceMonitor != null ? performanceMonitor : new RulePerformanceMonitor();
         this.errorRecoveryConfig = errorRecoveryConfig != null ? errorRecoveryConfig : new ErrorRecoveryConfig();
+
+
     }
     
     /**
@@ -217,9 +219,12 @@ public class UnifiedRuleEvaluator {
             recoveryStartTime = Instant.now();
 
             SeverityRecoveryPolicy policy = errorRecoveryConfig.getSeverityPolicy(severity);
+
+            String actualStrategy = policy != null ? policy.getStrategy() : "default";
+
             if (errorRecoveryConfig.isLogRecoveryAttempts()) {
                 rulesLogger.info("Attempting error recovery for rule '{}' with severity '{}' using strategy '{}'",
-                    rule.getName(), severity, policy != null ? policy.getStrategy() : "default");
+                    rule.getName(), severity, actualStrategy);
             }
 
             // Phase 3A Enhancement: Check if rule has a specific default-value
@@ -243,11 +248,14 @@ public class UnifiedRuleEvaluator {
                 return RuleResult.match(rule.getName(), String.valueOf(rule.getDefaultValue()), severity, metrics);
             }
 
-            // Use the existing error recovery service method signature
-            ErrorRecoveryService.RecoveryResult recoveryResult = errorRecoveryService.attemptRecovery(rule.getName(), rule.getCondition(), null, exception);
+            // Use the error recovery service with the determined strategy
+            ErrorRecoveryService.ErrorRecoveryStrategy strategy = "FAIL_FAST".equals(actualStrategy) ?
+                ErrorRecoveryService.ErrorRecoveryStrategy.FAIL_FAST :
+                ErrorRecoveryService.ErrorRecoveryStrategy.CONTINUE_WITH_DEFAULT;
+            ErrorRecoveryService.RecoveryResult recoveryResult = errorRecoveryService.attemptRecovery(rule.getName(), rule.getCondition(), null, exception, strategy);
             if (recoveryResult != null && recoveryResult.isSuccessful()) {
                 recoverySuccessful = true;
-                recoveryStrategy = policy != null ? policy.getStrategy() : "DEFAULT_STRATEGY";
+                recoveryStrategy = actualStrategy;
                 // Phase 3B: Calculate recovery time
                 if (recoveryStartTime != null) {
                     recoveryTime = Duration.between(recoveryStartTime, Instant.now());
@@ -262,7 +270,7 @@ public class UnifiedRuleEvaluator {
             } else {
                 // Recovery failed
                 recoverySuccessful = false;
-                recoveryStrategy = policy != null ? policy.getStrategy() : "DEFAULT_STRATEGY";
+                recoveryStrategy = actualStrategy;
                 // Phase 3B: Calculate recovery time even for failed recovery
                 if (recoveryStartTime != null) {
                     recoveryTime = Duration.between(recoveryStartTime, Instant.now());

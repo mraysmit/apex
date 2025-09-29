@@ -223,7 +223,7 @@ public class YamlRuleFactory {
                                 "Rule " + name + " triggered";
                 String description = yamlRule.getDescription() != null ? yamlRule.getDescription() :
                                    message;
-                String severity = yamlRule.getSeverity() != null ? yamlRule.getSeverity() : SeverityConstants.INFO;
+                String severity = yamlRule.getSeverity() != null ? yamlRule.getSeverity() : SeverityConstants.DEFAULT_SEVERITY;
 
                 ruleSet.customRuleWithSeverity(name, condition, message, description, severity);
 
@@ -418,8 +418,8 @@ public class YamlRuleFactory {
         Set<Category> categories = new HashSet<>();
         categories.add(new Category(categoryName, yamlRule.getPriority() != null ? yamlRule.getPriority() : 100));
 
-        // Extract severity from YAML rule, default to INFO if not specified
-        String severity = yamlRule.getSeverity() != null ? yamlRule.getSeverity() : SeverityConstants.INFO;
+        // Extract severity from YAML rule, default to ERROR if not specified
+        String severity = yamlRule.getSeverity() != null ? yamlRule.getSeverity() : SeverityConstants.DEFAULT_SEVERITY;
 
         Rule createdRule = new Rule(ruleId, categories, name, condition, message, description,
                                    yamlRule.getPriority() != null ? yamlRule.getPriority() : 100,
@@ -468,8 +468,8 @@ public class YamlRuleFactory {
             String description = yamlRule.getDescription() != null ? yamlRule.getDescription() : "";
             int priority = yamlRule.getPriority() != null ? yamlRule.getPriority() : 100;
 
-            // Extract severity from YAML rule, default to INFO if not specified
-            String severity = yamlRule.getSeverity() != null ? yamlRule.getSeverity() : SeverityConstants.INFO;
+            // Extract severity from YAML rule, default to ERROR if not specified
+            String severity = yamlRule.getSeverity() != null ? yamlRule.getSeverity() : SeverityConstants.DEFAULT_SEVERITY;
 
             // Determine category
             Category category = null;

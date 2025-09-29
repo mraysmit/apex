@@ -1,0 +1,96 @@
+# ============================================================================
+# APEX Dynamic Array Index Test Configuration
+# ============================================================================
+# Minimal test to prove dynamic array indexing functionality in SpEL expressions
+# Tests four specific patterns of dynamic array access
+
+metadata:
+  id: "dynamic-array-index-test"
+  name: "Dynamic Array Index Test"
+  version: "1.0.0"
+  description: "Minimal test proving dynamic array indexing in APEX SpEL expressions"
+  type: "validation"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-09-29"
+  tags: ["apex-demo", "spel", "dynamic-arrays", "indexing"]
+
+# ============================================================================
+# DYNAMIC ARRAY INDEXING RULES
+# ============================================================================
+# Each rule tests a specific dynamic indexing pattern
+
+rules:
+  # Pattern 1: Using a variable index
+  # Tests: #trade.otcTrade.otcLeg[#legIndex].stbRuleName != null
+  - id: "variable-index-test"
+    name: "Variable Index Test"
+    description: "Tests dynamic array access using variable index (#legIndex = 2)"
+    condition: "#trade.otcTrade.otcLeg[#legIndex].stbRuleName != null"
+    message: "Variable index access successful: otcLeg[#legIndex].stbRuleName found"
+    severity: "INFO"
+    # TEST DATA: legIndex = 2, otcLeg[2].stbRuleName = "RULE_C"
+    # EXPECTED: Rule matches (true)
+
+  # Pattern 2: Dynamic index from another field  
+  # Tests: #trade.otcTrade.otcLeg[#trade.selectedLegIndex].stbRuleName != null
+  - id: "dynamic-field-index-test"
+    name: "Dynamic Field Index Test"
+    description: "Tests dynamic array access using field as index (#trade.selectedLegIndex = 1)"
+    condition: "#trade.otcTrade.otcLeg[#trade.selectedLegIndex].stbRuleName != null"
+    message: "Dynamic field index access successful: otcLeg[selectedLegIndex].stbRuleName found"
+    severity: "INFO"
+    # TEST DATA: selectedLegIndex = 1, otcLeg[1].stbRuleName = "RULE_B"
+    # EXPECTED: Rule matches (true)
+
+  # Pattern 3: Safe dynamic index access with bounds checking
+  # Tests: #trade?.otcTrade?.otcLeg?.size() > #legIndex && #trade.otcTrade.otcLeg[#legIndex]?.stbRuleName != null
+  - id: "safe-dynamic-index-test"
+    name: "Safe Dynamic Index Test"
+    description: "Tests safe dynamic array access with bounds checking"
+    condition: "#trade?.otcTrade?.otcLeg?.size() > #legIndex && #trade.otcTrade.otcLeg[#legIndex]?.stbRuleName != null"
+    message: "Safe dynamic index access successful: bounds checked and element found"
+    severity: "INFO"
+    # TEST DATA: legIndex = 2, otcLeg.size() = 3, otcLeg[2].stbRuleName = "RULE_C"
+    # EXPECTED: Rule matches (true) - bounds check passes (3 > 2) and element exists
+
+  # Pattern 4: Dynamic index with calculation
+  # Tests: #items[#currentIndex + 1]?.status != null
+  - id: "index-calculation-test"
+    name: "Index Calculation Test"
+    description: "Tests dynamic array access with index calculation (#currentIndex + 1)"
+    condition: "#items[#currentIndex + 1]?.status != null"
+    message: "Index calculation access successful: items[currentIndex + 1].status found"
+    severity: "INFO"
+    # TEST DATA: currentIndex = 0, items[1].status = "ACTIVE"
+    # EXPECTED: Rule matches (true) - calculation (0 + 1 = 1) resolves to items[1]
+
+# ============================================================================
+# TEST DATA STRUCTURE REFERENCE
+# ============================================================================
+# This configuration expects the following minimal data structure:
+#
+# {
+#   "trade": {
+#     "otcTrade": {
+#       "otcLeg": [
+#         { "stbRuleName": "RULE_A" },    // index 0
+#         { "stbRuleName": "RULE_B" },    // index 1  
+#         { "stbRuleName": "RULE_C" }     // index 2
+#       ]
+#     },
+#     "selectedLegIndex": 1
+#   },
+#   "items": [
+#     { "status": "PENDING" },           // index 0
+#     { "status": "ACTIVE" },            // index 1
+#     { "status": "COMPLETE" }           // index 2
+#   ],
+#   "legIndex": 2,
+#   "currentIndex": 0
+# }
+#
+# EXPECTED RESULTS:
+# - Rule 1: legIndex (2) → otcLeg[2].stbRuleName = "RULE_C" ✓
+# - Rule 2: selectedLegIndex (1) → otcLeg[1].stbRuleName = "RULE_B" ✓  
+# - Rule 3: size() > legIndex (3 > 2) && otcLeg[2].stbRuleName exists ✓
+# - Rule 4: currentIndex + 1 (0 + 1 = 1) → items[1].status = "ACTIVE" ✓
