@@ -1,0 +1,150 @@
+# Search-Based SpEL Demonstration Configuration
+# Demonstrates SpEL search patterns: .^[condition], .$[condition], .?[condition]
+# Use Case: Find array elements by business criteria rather than fixed indices
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ArraySearchBasedSpelTest.java
+# Purpose: Demonstrate search-based SpEL patterns for finding array elements
+#          by business criteria like legType, payReceive, instrumentType
+# Status: Minimal configuration for SpEL search pattern demonstration
+# ============================================================================
+
+metadata:
+  id: "search-based-spel-demo"
+  name: "Search-Based SpEL Demo"
+  version: "1.0.0"
+  description: "Demonstrates SpEL search patterns for finding array elements by criteria"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-01-29"
+  tags: ["apex-demo", "spel", "search", "array"]
+
+# Define enrichments that demonstrate search patterns
+enrichments:
+  # Pattern 1: Find First (.^[condition])
+  - id: "find-first-floating-leg"
+    name: "Find First Floating Leg"
+    description: "Find first leg where legType equals FLOATING"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#trade?.legs != null && #trade.legs.size() > 0"
+
+    calculation-config:
+      expression: "#trade.legs.^[legType == 'FLOATING']"
+      result-field: "foundFloatingLeg"
+
+    field-mappings:
+      - source-field: "foundFloatingLeg"
+        target-field: "floatingLegData"
+
+  # Pattern 2: Find Pay Leg
+  - id: "find-pay-leg"
+    name: "Find Pay Leg"
+    description: "Find first leg where payReceive equals PAY"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#trade?.legs != null && #trade.legs.size() > 0"
+
+    calculation-config:
+      expression: "#trade.legs.^[payReceive == 'PAY']"
+      result-field: "foundPayLeg"
+
+    field-mappings:
+      - source-field: "foundPayLeg"
+        target-field: "payLegData"
+
+  # Pattern 3: Find All USD Legs (.?[condition])
+  - id: "find-all-usd-legs"
+    name: "Find All USD Legs"
+    description: "Find all legs where currency equals USD"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#trade?.legs != null && #trade.legs.size() > 0"
+
+    calculation-config:
+      expression: "#trade.legs.?[currency == 'USD']"
+      result-field: "foundUsdLegs"
+
+    field-mappings:
+      - source-field: "foundUsdLegs"
+        target-field: "usdLegsData"
+
+  # Pattern 4: Count High Value Legs
+  - id: "count-high-value-legs"
+    name: "Count High Value Legs"
+    description: "Count legs with notional amount > 1000000"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#trade?.legs != null && #trade.legs.size() > 0"
+
+    calculation-config:
+      expression: "#trade.legs.?[notionalAmount > 1000000].size()"
+      result-field: "highValueLegCount"
+
+    field-mappings:
+      - source-field: "highValueLegCount"
+        target-field: "highValueCount"
+
+  # Pattern 5: Get Floating Leg Notional Amount
+  - id: "get-floating-leg-notional"
+    name: "Get Floating Leg Notional Amount"
+    description: "Find floating leg and extract its notional amount"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#trade?.legs != null && #trade.legs.size() > 0"
+
+    calculation-config:
+      expression: "#trade.legs.^[legType == 'FLOATING']?.notionalAmount"
+      result-field: "floatingLegNotional"
+
+    field-mappings:
+      - source-field: "floatingLegNotional"
+        target-field: "floatingNotionalAmount"
+
+  # Pattern 6: Get Pay Leg Currency
+  - id: "get-pay-leg-currency"
+    name: "Get Pay Leg Currency"
+    description: "Find pay leg and extract its currency"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#trade?.legs != null && #trade.legs.size() > 0"
+
+    calculation-config:
+      expression: "#trade.legs.^[payReceive == 'PAY']?.currency"
+      result-field: "payLegCurrency"
+
+    field-mappings:
+      - source-field: "payLegCurrency"
+        target-field: "payLegCurrencyCode"
+
+# Simple validations to verify search results
+validations:
+  - id: "validate-floating-leg-found"
+    name: "Validate Floating Leg Found"
+    description: "Ensure floating leg search returned valid data"
+    condition: "#floatingLegData != null"
+    message: "Floating leg found successfully"
+    severity: "INFO"
+
+  - id: "validate-pay-leg-found"
+    name: "Validate Pay Leg Found"
+    description: "Ensure pay leg search returned valid data"
+    condition: "#payLegData != null"
+    message: "Pay leg found successfully"
+    severity: "INFO"
+
+  - id: "validate-usd-legs-found"
+    name: "Validate USD Legs Found"
+    description: "Ensure USD legs search returned results"
+    condition: "#usdLegsData != null && #usdLegsData.size() > 0"
+    message: "USD legs found successfully"
+    severity: "INFO"
+
+  - id: "validate-high-value-count"
+    name: "Validate High Value Count"
+    description: "Ensure high value leg count is numeric"
+    condition: "#highValueCount != null && #highValueCount >= 0"
+    message: "High value leg count calculated successfully"
+    severity: "INFO"
