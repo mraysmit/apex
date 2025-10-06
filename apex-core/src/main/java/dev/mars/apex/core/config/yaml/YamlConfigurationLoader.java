@@ -53,7 +53,7 @@ public class YamlConfigurationLoader {
 
     private final ObjectMapper yamlMapper;
     private final DataSourceResolver dataSourceResolver;
-    
+
     /**
      * Constructor that initializes the YAML object mapper and data-source resolver.
      */
@@ -61,10 +61,10 @@ public class YamlConfigurationLoader {
         this.yamlMapper = createYamlMapper();
         this.dataSourceResolver = new DataSourceResolver();
     }
-    
+
     /**
      * Load configuration from a file path.
-     * 
+     *
      * @param filePath The path to the YAML configuration file
      * @return The loaded configuration
      * @throws YamlConfigurationException if loading fails
@@ -75,7 +75,7 @@ public class YamlConfigurationLoader {
             if (!Files.exists(path)) {
                 throw new YamlConfigurationException("Configuration file not found: " + filePath);
             }
-            
+
             LOGGER.info("Loading YAML configuration from file: " + filePath);
 
             // Read raw content and resolve properties before parsing
@@ -95,12 +95,12 @@ public class YamlConfigurationLoader {
                        (config.getMetadata() != null ? config.getMetadata().getName() : "unnamed"));
 
             return config;
-            
+
         } catch (IOException e) {
             throw new YamlConfigurationException("Failed to load configuration from file: " + filePath, e);
         }
     }
-    
+
     /**
      * Load configuration from a File object.
      *
@@ -138,10 +138,10 @@ public class YamlConfigurationLoader {
             throw new YamlConfigurationException("Failed to load configuration from file: " + file.getAbsolutePath(), e);
         }
     }
-    
+
     /**
      * Load configuration from an InputStream (useful for classpath resources).
-     * 
+     *
      * @param inputStream The input stream containing YAML configuration
      * @return The loaded configuration
      * @throws YamlConfigurationException if loading fails
@@ -167,15 +167,15 @@ public class YamlConfigurationLoader {
                        (config.getMetadata() != null ? config.getMetadata().getName() : "unnamed"));
 
             return config;
-            
+
         } catch (IOException e) {
             throw new YamlConfigurationException("Failed to load configuration from input stream", e);
         }
     }
-    
+
     /**
      * Load configuration from a classpath resource.
-     * 
+     *
      * @param resourcePath The classpath resource path
      * @return The loaded configuration
      * @throws YamlConfigurationException if loading fails
@@ -185,18 +185,18 @@ public class YamlConfigurationLoader {
             if (inputStream == null) {
                 throw new YamlConfigurationException("Configuration resource not found: " + resourcePath);
             }
-            
+
             LOGGER.info("Loading YAML configuration from classpath: " + resourcePath);
             return loadFromStream(inputStream);
-            
+
         } catch (IOException e) {
             throw new YamlConfigurationException("Failed to load configuration from classpath: " + resourcePath, e);
         }
     }
-    
+
     /**
      * Save configuration to a file.
-     * 
+     *
      * @param configuration The configuration to save
      * @param filePath The target file path
      * @throws YamlConfigurationException if saving fails
@@ -205,19 +205,19 @@ public class YamlConfigurationLoader {
         try {
             Path path = Paths.get(filePath);
             Files.createDirectories(path.getParent());
-            
+
             LOGGER.info("Saving YAML configuration to file: " + filePath);
             yamlMapper.writeValue(path.toFile(), configuration);
             LOGGER.info("Successfully saved configuration to: " + filePath);
-            
+
         } catch (IOException e) {
             throw new YamlConfigurationException("Failed to save configuration to file: " + filePath, e);
         }
     }
-    
+
     /**
      * Convert configuration to YAML string.
-     * 
+     *
      * @param configuration The configuration to convert
      * @return YAML string representation
      * @throws YamlConfigurationException if conversion fails
@@ -229,7 +229,7 @@ public class YamlConfigurationLoader {
             throw new YamlConfigurationException("Failed to convert configuration to YAML string", e);
         }
     }
-    
+
     /**
      * Load raw YAML content as a Map for dependency analysis.
      *
@@ -312,10 +312,10 @@ public class YamlConfigurationLoader {
             throw new YamlConfigurationException("Failed to parse YAML string", e);
         }
     }
-    
+
     /**
      * Create and configure the YAML ObjectMapper.
-     * 
+     *
      * @return Configured ObjectMapper for YAML processing
      */
     private ObjectMapper createYamlMapper() {
@@ -323,13 +323,13 @@ public class YamlConfigurationLoader {
                 .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
                 .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
                 .enable(YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR);
-        
+
         ObjectMapper mapper = new ObjectMapper(yamlFactory);
-        
+
         // Configure mapper for better handling of missing properties
         mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
-        
+
         return mapper;
     }
 
@@ -629,6 +629,8 @@ public class YamlConfigurationLoader {
 
         // Validate enrichments - strict validation for configuration errors
         validateEnrichments(config);
+        // Validate enrichment groups (structure and references)
+        validateEnrichmentGroups(config);
 
         // Step 2: Validate cross-component references
         validateCrossComponentReferences(config);
@@ -642,7 +644,7 @@ public class YamlConfigurationLoader {
 
         LOGGER.fine("Configuration validation completed successfully");
     }
-    
+
     /**
      * Validate all rules in the configuration.
      */
@@ -677,7 +679,7 @@ public class YamlConfigurationLoader {
             }
         }
     }
-    
+
     /**
      * Validate all rule groups in the configuration.
      */
@@ -700,7 +702,132 @@ public class YamlConfigurationLoader {
             throw new YamlConfigurationException("Rule group name is required for group: " + group.getId());
         }
     }
-    
+
+    /**
+     * Validate enrichment groups in the configuration.
+     */
+    private void validateEnrichmentGroups(YamlRuleConfiguration config) throws YamlConfigurationException {
+        if (config.getEnrichmentGroups() == null || config.getEnrichmentGroups().isEmpty()) {
+            LOGGER.fine("No enrichment groups to validate");
+            return;
+        }
+
+        // Build set of available enrichment IDs for reference checks
+        Set<String> enrichmentIds = new HashSet<>();
+        if (config.getEnrichments() != null) {
+            for (YamlEnrichment e : config.getEnrichments()) {
+                if (e != null && e.getId() != null) {
+                    enrichmentIds.add(e.getId());
+                }
+            }
+        }
+
+        // Build set of enrichment group IDs for group-reference validation
+        Set<String> groupIds = new HashSet<>();
+        for (YamlEnrichmentGroup g : config.getEnrichmentGroups()) {
+            if (g != null && g.getId() != null) {
+                groupIds.add(g.getId());
+            }
+        }
+
+        // Adjacency list and indegree map for cycle detection (Kahn's algorithm)
+        Map<String, List<String>> groupRefAdj = new HashMap<>();
+        Map<String, Integer> indegree = new HashMap<>();
+        for (String gid : groupIds) {
+            groupRefAdj.put(gid, new ArrayList<>());
+            indegree.put(gid, 0);
+        }
+
+        for (YamlEnrichmentGroup group : config.getEnrichmentGroups()) {
+            if (group == null) continue;
+
+            // Required fields
+            if (group.getId() == null || group.getId().trim().isEmpty()) {
+                throw new YamlConfigurationException("Enrichment group ID is required");
+            }
+            if (group.getName() == null || group.getName().trim().isEmpty()) {
+                throw new YamlConfigurationException("Enrichment group name is required for group: " + group.getId());
+            }
+
+            // Operator validation when present
+            if (group.getOperator() != null) {
+                String op = group.getOperator().trim().toUpperCase();
+                if (!"AND".equals(op) && !"OR".equals(op)) {
+                    throw new YamlConfigurationException("Enrichment group '" + group.getId() + "' has invalid operator '" + group.getOperator() + "'. Must be AND or OR");
+                }
+            }
+
+            // Sequence uniqueness for enrichment-references
+            if (group.getEnrichmentReferences() != null && !group.getEnrichmentReferences().isEmpty()) {
+                Set<Integer> sequences = new HashSet<>();
+                for (YamlEnrichmentGroup.EnrichmentReference ref : group.getEnrichmentReferences()) {
+                    if (ref == null || Boolean.FALSE.equals(ref.getEnabled())) continue;
+                    int seq = ref.getSequence() != null ? ref.getSequence() : 1;
+                    if (!sequences.add(seq)) {
+                        throw new YamlConfigurationException("Duplicate enrichment reference sequence " + seq + " in group: " + group.getId());
+                    }
+
+                    // Reference existence check
+                    if (ref.getEnrichmentId() == null || !enrichmentIds.contains(ref.getEnrichmentId())) {
+                        throw new YamlConfigurationException("Enrichment reference not found: " + ref.getEnrichmentId() + " in group: " + group.getId());
+                    }
+                }
+            }
+
+            // enrichment-ids existence check
+            if (group.getEnrichmentIds() != null) {
+                for (String id : group.getEnrichmentIds()) {
+                    if (id == null || !enrichmentIds.contains(id)) {
+                        throw new YamlConfigurationException("Enrichment id not found: " + id + " in group: " + group.getId());
+                    }
+                }
+            }
+
+            // enrichment-group-references: existence and self-reference checks, build graph
+            if (group.getEnrichmentGroupReferences() != null && !group.getEnrichmentGroupReferences().isEmpty()) {
+                for (String refGroupId : group.getEnrichmentGroupReferences()) {
+                    if (refGroupId == null || refGroupId.trim().isEmpty()) {
+                        throw new YamlConfigurationException("Enrichment group '" + group.getId() + "' has an empty enrichment-group-reference");
+                    }
+                    if (refGroupId.equals(group.getId())) {
+                        throw new YamlConfigurationException("Enrichment group '" + group.getId() + "' cannot reference itself");
+                    }
+                    if (!groupIds.contains(refGroupId)) {
+                        throw new YamlConfigurationException("Referenced enrichment group not found: " + refGroupId + " in group: " + group.getId());
+                    }
+                    // Build adjacency and indegree for cycle detection
+                    groupRefAdj.get(group.getId()).add(refGroupId);
+                    indegree.put(refGroupId, indegree.get(refGroupId) + 1);
+                }
+            }
+        }
+
+        // Cycle detection using Kahn's algorithm (topological sort)
+        int processed = 0;
+        ArrayDeque<String> queue = new ArrayDeque<>();
+        for (Map.Entry<String, Integer> e : indegree.entrySet()) {
+            if (e.getValue() == 0) {
+                queue.add(e.getKey());
+            }
+        }
+        while (!queue.isEmpty()) {
+            String node = queue.poll();
+            processed++;
+            for (String neighbor : groupRefAdj.getOrDefault(node, Collections.emptyList())) {
+                int newIn = indegree.get(neighbor) - 1;
+                indegree.put(neighbor, newIn);
+                if (newIn == 0) {
+                    queue.add(neighbor);
+                }
+            }
+        }
+        if (processed < groupIds.size()) {
+            throw new YamlConfigurationException("Cyclic enrichment-group-references detected");
+        }
+
+        LOGGER.fine("Enrichment group validation completed successfully");
+    }
+
     /**
      * Validate all categories in the configuration.
      */

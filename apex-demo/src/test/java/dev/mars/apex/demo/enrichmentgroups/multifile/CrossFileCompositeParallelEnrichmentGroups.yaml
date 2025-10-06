@@ -1,0 +1,17 @@
+# ============================================================================
+# Cross-file composite parallel enrichment groups (references base_and from another file)
+# ============================================================================
+metadata:
+  id: "cf-composite-parallel-enrichment-groups"
+  name: "Cross-file Composite Parallel Enrichment Groups"
+  version: "1.0.0"
+  type: "rule-config"
+
+enrichment-groups:
+  - id: cf_composite_par_and
+    name: Composite Parallel AND (e3 + base_and from other file)
+    operator: AND
+    parallel-execution: true
+    enrichment-ids: [ e3 ]
+    enrichment-group-references: [ base_and ]
+

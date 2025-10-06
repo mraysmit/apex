@@ -1,0 +1,16 @@
+# ============================================================================
+# Cross-file composite enrichment groups (references base_and from another file)
+# ============================================================================
+metadata:
+  id: "cf-composite-enrichment-groups"
+  name: "Cross-file Composite Enrichment Groups"
+  version: "1.0.0"
+  type: "rule-config"
+
+enrichment-groups:
+  - id: cf_composite
+    name: Composite (e3 + base_and from other file)
+    operator: AND
+    enrichment-ids: [ e3 ]
+    enrichment-group-references: [ base_and ]
+

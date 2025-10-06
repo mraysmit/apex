@@ -1,0 +1,27 @@
+# ============================================================================
+# Enrichments (separate file) for negative validation test
+# ============================================================================
+metadata:
+  id: "neg-missing-enrichment-enrichments"
+  name: "Negative: Missing Enrichment (Enrichments file)"
+  version: "1.0.0"
+  type: "rule-config"
+
+enrichments:
+  - id: e1
+    name: Copy A
+    type: field-enrichment
+    enabled: true
+    field-mappings:
+      - source-field: a
+        target-field: a_copy
+        required: true
+  - id: e2
+    name: Copy B
+    type: field-enrichment
+    enabled: true
+    field-mappings:
+      - source-field: b
+        target-field: b_copy
+        required: true
+

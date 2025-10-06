@@ -225,7 +225,6 @@ public class ApexDependencyAnalyzer {
     /**
      * Extract other reference patterns (can be extended)
      */
-    @SuppressWarnings("unchecked")
     private void extractOtherReferences(Map<String, Object> yamlData, List<String> dependencies) {
         // Add other reference patterns here as needed
         // For example: imports, includes, extends, etc.

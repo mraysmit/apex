@@ -1,0 +1,66 @@
+# ============================================================================
+# APEX YAML Configuration File - Enrichment Groups
+# ============================================================================
+# Mirrors the rule-groups combined config example, but for enrichments
+# Validated format per docs/APEX_YAML_REFERENCE.md and core implementation
+# ============================================================================
+
+metadata:
+  id: "enrichment-groups-combined-config"
+  name: "Enrichment Groups Combined Configuration"
+  version: "1.0.0"
+  type: "rule-config"
+  description: "Combined configuration for testing enrichment group processing"
+
+enrichments:
+  - id: e1
+    name: Copy A
+    type: field-enrichment
+    enabled: true
+    field-mappings:
+      - source-field: a
+        target-field: a_copy
+        required: true
+  - id: e2
+    name: Copy B
+    type: field-enrichment
+    enabled: true
+    field-mappings:
+      - source-field: b
+        target-field: b_copy
+        required: true
+  - id: e3
+    name: Copy C
+    type: field-enrichment
+    enabled: true
+    field-mappings:
+      - source-field: c
+        target-field: c_copy
+        required: true
+
+enrichment-groups:
+  - id: base_and
+    name: Base AND
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-ids: [ e1, e2 ]
+
+  - id: base_or
+    name: Base OR
+    operator: OR
+    stop-on-first-failure: true
+    enrichment-ids: [ e1, e2 ]
+
+  - id: composite
+    name: Composite (e3 + base_and)
+    operator: AND
+    enrichment-ids: [ e3 ]
+    enrichment-group-references: [ base_and ]
+
+  - id: composite_par_and
+    name: Composite Parallel AND (e3 + base_and)
+    operator: AND
+    parallel-execution: true
+    enrichment-ids: [ e3 ]
+    enrichment-group-references: [ base_and ]
+

@@ -1,0 +1,16 @@
+# ============================================================================
+# Cross-file cycle group B (references group A)
+# ============================================================================
+metadata:
+  id: "cf-cycle-b-enrichment-groups"
+  name: "Cross-file Cycle B Enrichment Groups"
+  version: "1.0.0"
+  type: "rule-config"
+
+enrichment-groups:
+  - id: gB
+    name: Group B (cycles to A)
+    operator: AND
+    enrichment-ids: [ e2 ]
+    enrichment-group-references: [ gA ]
+

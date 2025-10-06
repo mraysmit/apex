@@ -59,9 +59,12 @@ public class YamlRuleConfiguration {
     
     @JsonProperty("rule-groups")
     private List<YamlRuleGroup> ruleGroups;
-    
+
     @JsonProperty("enrichments")
     private List<YamlEnrichment> enrichments;
+
+    @JsonProperty("enrichment-groups")
+    private List<YamlEnrichmentGroup> enrichmentGroups;
 
     @JsonProperty("transformations")
     private List<YamlTransformation> transformations;
@@ -146,9 +149,17 @@ public class YamlRuleConfiguration {
     public List<YamlEnrichment> getEnrichments() {
         return enrichments;
     }
-    
+
     public void setEnrichments(List<YamlEnrichment> enrichments) {
         this.enrichments = enrichments;
+    }
+
+    public List<YamlEnrichmentGroup> getEnrichmentGroups() {
+        return enrichmentGroups;
+    }
+
+    public void setEnrichmentGroups(List<YamlEnrichmentGroup> enrichmentGroups) {
+        this.enrichmentGroups = enrichmentGroups;
     }
 
     public List<YamlTransformation> getTransformations() {

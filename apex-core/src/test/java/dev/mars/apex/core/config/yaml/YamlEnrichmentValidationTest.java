@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Comprehensive unit tests for YAML enrichment validation functionality.
  * Tests all enrichment validation patterns documented in lookups.md.
- * 
+ *
  * This test class validates the comprehensive enrichment validation system
  * without using Mockito, following project guidelines.
  */
@@ -364,4 +364,93 @@ class YamlEnrichmentValidationTest {
                     target-field: "customerName"
             """;
     }
+
+    @Test
+    @DisplayName("Should validate enrichment-group-references when groups exist")
+    void shouldValidateEnrichmentGroupReferencesWhenGroupsExist() {
+        String yaml = """
+            metadata:
+              name: "EG Validation"
+              version: "1.0.0"
+              type: "rule-config"
+
+            enrichment-groups:
+              - id: base
+                name: Base Group
+              - id: composite
+                name: Composite Group
+                enrichment-group-references: [ base ]
+            """;
+        assertDoesNotThrow(() -> {
+            InputStream is = new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8));
+            configurationLoader.loadFromStream(is);
+        });
+    }
+
+    @Test
+    @DisplayName("Should fail when enrichment-group-references points to missing group")
+    void shouldFailWhenEnrichmentGroupReferenceMissing() {
+        String yaml = """
+            metadata:
+              name: "EG Validation"
+              version: "1.0.0"
+              type: "rule-config"
+
+            enrichment-groups:
+              - id: composite
+                name: Composite Group
+                enrichment-group-references: [ missing ]
+            """;
+        YamlConfigurationException ex = assertThrows(YamlConfigurationException.class, () -> {
+            InputStream is = new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8));
+            configurationLoader.loadFromStream(is);
+        });
+        assertTrue(ex.getMessage().toLowerCase().contains("referenced enrichment group not found"));
+    }
+
+    @Test
+    @DisplayName("Should fail when enrichment group references itself")
+    void shouldFailOnSelfReferenceInEnrichmentGroup() {
+        String yaml = """
+            metadata:
+              name: "EG Validation"
+              version: "1.0.0"
+              type: "rule-config"
+
+            enrichment-groups:
+              - id: self
+                name: Self Group
+                enrichment-group-references: [ self ]
+            """;
+        YamlConfigurationException ex = assertThrows(YamlConfigurationException.class, () -> {
+            InputStream is = new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8));
+            configurationLoader.loadFromStream(is);
+        });
+        assertTrue(ex.getMessage().toLowerCase().contains("cannot reference itself"));
+    }
+
+    @Test
+    @DisplayName("Should fail on cyclic enrichment-group-references")
+    void shouldFailOnCyclicEnrichmentGroupReferences() {
+        String yaml = """
+            metadata:
+              name: "EG Validation"
+              version: "1.0.0"
+              type: "rule-config"
+
+            enrichment-groups:
+              - id: g1
+                name: G1
+                enrichment-group-references: [ g2 ]
+              - id: g2
+                name: G2
+                enrichment-group-references: [ g1 ]
+            """;
+        YamlConfigurationException ex = assertThrows(YamlConfigurationException.class, () -> {
+            InputStream is = new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8));
+            configurationLoader.loadFromStream(is);
+        });
+        assertTrue(ex.getMessage().toLowerCase().contains("cyclic enrichment-group-references"));
+    }
+
 }

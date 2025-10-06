@@ -1,0 +1,35 @@
+# ============================================================================
+# Enrichments (separate file)
+# ============================================================================
+metadata:
+  id: "multifile-enrichments"
+  name: "Multi-file Enrichments"
+  version: "1.0.0"
+  type: "rule-config"
+
+enrichments:
+  - id: e1
+    name: Copy A
+    type: field-enrichment
+    enabled: true
+    field-mappings:
+      - source-field: a
+        target-field: a_copy
+        required: true
+  - id: e2
+    name: Copy B
+    type: field-enrichment
+    enabled: true
+    field-mappings:
+      - source-field: b
+        target-field: b_copy
+        required: true
+  - id: e3
+    name: Copy C
+    type: field-enrichment
+    enabled: true
+    field-mappings:
+      - source-field: c
+        target-field: c_copy
+        required: true
+

@@ -79,11 +79,9 @@ public final class SeverityConstants {
     
     /**
      * Default severity level used when no severity is specified.
-     * Defaults to ERROR to ensure validation failures are properly reported.
-     * This ensures that missing required fields and other validation issues
-     * cause proper workflow failures instead of being silently recovered.
+     * Defaults to INFO to match established engine behavior and tests.
      */
-    public static final String DEFAULT_SEVERITY = ERROR;
+    public static final String DEFAULT_SEVERITY = INFO;
     
     /**
      * Priority mapping for severity levels used in aggregation logic.

@@ -105,6 +105,8 @@ This section provides a definitive reference for all 72 supported APEX YAML keyw
 | **rule-chains** | Document | No | List | Rule chain definitions |
 | **rule-group-references** | RuleGroup | No | List | References to other rule groups |
 | **rule-groups** | Document | No | List | Rule group definitions |
+| **enrichment-groups** | Document | No | List | Enrichment group definitions |
+
 | **rule-id** | RuleReference | Yes | String | ID of rule being referenced |
 | **rule-ids** | RuleGroup | No | List | List of rule IDs in the group |
 | **rule-references** | RuleGroup | No | List | Detailed rule references with metadata |
@@ -1596,6 +1598,8 @@ enrichments:
       - field: "commission"
         expression: "#tradeValue * 0.001"  # 0.1% commission
       - field: "netAmount"
+
+
         expression: "#tradeValue + #commission"
 
   - id: "risk-calculations"
@@ -1668,6 +1672,76 @@ scenario:
   data-types:
     - "Trade"
     - "java.util.Map"
+
+
+## Enrichment Groups Section
+
+Enrichment groups compose individual enrichments into reusable, ordered collections with AND/OR semantics, optional short-circuiting, and optional parallel execution. This mirrors Rule Groups, but operates on `enrichments` instead of `rules`.
+
+Example:
+
+```yaml
+# file: enrichments.yaml
+enrichments:
+  - id: e1
+    type: field-enrichment
+    field-mappings: [ { source-field: a, target-field: a_copy, required: true } ]
+  - id: e2
+    type: field-enrichment
+    field-mappings: [ { source-field: b, target-field: b_copy, required: true } ]
+  - id: e3
+    type: field-enrichment
+    field-mappings: [ { source-field: c, target-field: c_copy, required: true } ]
+
+# file: enrichment-groups.yaml
+enrichment-groups:
+  - id: base_and
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-ids: [ e1, e2 ]
+
+  - id: composite
+    operator: AND
+    enrichment-ids: [ e3 ]
+    enrichment-group-references: [ base_and ]
+
+  - id: composite_par_and
+    operator: AND
+    parallel-execution: true
+    enrichment-ids: [ e3 ]
+    enrichment-group-references: [ base_and ]
+```
+
+Properties (per group):
+
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| id | string | Yes | — | Group identifier |
+| operator | string (AND or OR) | Yes | — | Logical operator applied to member results |
+| stop-on-first-failure | boolean | No | true | Enable short-circuiting (stops on first failure for AND, first success for OR) |
+| parallel-execution | boolean | No | false | Evaluate all member enrichments concurrently; disables short-circuiting |
+| enrichment-ids | list<string> | Optional | — | Direct enrichments included in listed order |
+| enrichment-group-references | list<string> | Optional | — | Include enrichments from referenced groups appended in order |
+
+Execution semantics:
+- AND: all member enrichments must succeed for overall success; with stop-on-first-failure=true, short-circuiting on first failure.
+- OR: overall success if any member succeeds; with stop-on-first-failure=true, short-circuiting on first success.
+- parallel-execution=true:
+  - All member enrichments are evaluated concurrently.
+  - Short-circuiting is disabled; results are aggregated after completion.
+
+Reference processing and validation:
+- Group references are flattened after all groups are created (two-phase processing) to establish final execution order.
+- Validation ensures: referenced enrichment ids exist; referenced groups exist; no self-reference; cyclic `enrichment-group-references` are rejected.
+
+
+See also:
+- Rule Groups Section (conceptual parity, advanced execution semantics)
+- Enrichments Section (available enrichment types and their properties)
+
+Notes:
+- Sequence/ordering follows the Rule Group pattern: enrichment-ids are applied first in their listed order; referenced groups are appended in order of reference.
+- Multi-file configurations are supported: load yaml files without validation, merge sections, then call `processReferencesAndValidate`.
 
   # Legacy approach (deprecated but supported)
   rule-configurations:

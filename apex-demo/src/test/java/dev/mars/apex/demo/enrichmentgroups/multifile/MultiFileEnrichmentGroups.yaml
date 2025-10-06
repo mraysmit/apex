@@ -1,0 +1,28 @@
+# ============================================================================
+# Enrichment Groups (separate file)
+# ============================================================================
+metadata:
+  id: "multifile-enrichment-groups"
+  name: "Multi-file Enrichment Groups"
+  version: "1.0.0"
+  type: "rule-config"
+
+enrichment-groups:
+  - id: base_and
+    name: Base AND
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-ids: [ e1, e2 ]
+
+  - id: base_or
+    name: Base OR
+    operator: OR
+    stop-on-first-failure: true
+    enrichment-ids: [ e1, e2 ]
+
+  - id: composite
+    name: Composite (e3 + base_and)
+    operator: AND
+    enrichment-ids: [ e3 ]
+    enrichment-group-references: [ base_and ]
+

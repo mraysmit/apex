@@ -1,0 +1,16 @@
+# ============================================================================
+# Enrichment Groups (separate file) for negative validation test
+# ============================================================================
+metadata:
+  id: "neg-missing-enrichment-groups"
+  name: "Negative: Missing Enrichment (Groups file)"
+  version: "1.0.0"
+  type: "rule-config"
+
+enrichment-groups:
+  - id: base_and
+    name: Base AND (invalid)
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-ids: [ e1, e9 ]  # e9 does not exist in enrichments
+
