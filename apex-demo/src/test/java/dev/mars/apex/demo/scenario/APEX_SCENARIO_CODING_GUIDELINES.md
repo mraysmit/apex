@@ -277,17 +277,24 @@ scenario:
   scenario-id: "unique-id"
   name: "Scenario Name"
   description: "What this scenario does"
-  
+
+  # REQUIRED: Classification rule for automatic scenario selection
   classification-rule:
     condition: "#data['field'] == 'value'"
     description: "When to use this scenario"
-  
+
   processing-stages:
     - stage-name: "validation"
       config-file: "path/to/validation-rules.yaml"
       execution-order: 1
       failure-policy: "terminate"
 ```
+
+**Important Notes**:
+- `classification-rule` is **REQUIRED** for automatic scenario selection
+- Scenarios without `classification-rule` require manual selection
+- All incoming data is `Map<String, Object>` from XML conversion
+- Use SpEL expressions to match data content
 
 ### Valid YAML Structure for Scenario Registry
 
@@ -303,10 +310,19 @@ metadata:
 scenarios:
   - scenario-id: "scenario-1"
     config-file: "path/to/scenario-1.yaml"
-  
+
   - scenario-id: "scenario-2"
     config-file: "path/to/scenario-2.yaml"
+
+routing:
+  strategy: "classification-based"
+  default-scenario: "scenario-1"
 ```
+
+**Important Notes**:
+- `routing` section is optional but recommended
+- `default-scenario` provides fallback when no classification matches
+- `strategy` should be "classification-based" for automatic routing
 
 ---
 

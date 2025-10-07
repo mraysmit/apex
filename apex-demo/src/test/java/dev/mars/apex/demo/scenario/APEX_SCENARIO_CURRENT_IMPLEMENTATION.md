@@ -1,7 +1,7 @@
 # APEX Scenario System - Current Implementation
 
-**Version:** 2.1  
-**Date:** 2025-10-07  
+**Version:** 3.0
+**Date:** 2025-10-07
 **Status:** Current Production Implementation
 
 ## Table of Contents
@@ -19,12 +19,12 @@
 
 ## Overview
 
-The APEX rules engine features a **scenario-based configuration system** that provides enterprise-scale configuration management through a three-layer hierarchy. This system enables centralized discovery, type-safe routing, comprehensive dependency tracking, and stage-based processing for complex rule configurations.
+The APEX rules engine features a **scenario-based configuration system** that provides enterprise-scale configuration management through a three-layer hierarchy. This system enables centralized discovery, automatic scenario selection based on SpEL classification rules, comprehensive dependency tracking, and stage-based processing for complex rule configurations.
 
 ### Key Capabilities
 
 - **Stage-Based Processing**: Sequential execution with dependency management and failure policies
-- **Type-Safe Routing**: Automatic data routing based on Java object types
+- **SpEL-Based Classification**: Automatic scenario selection using business rules
 - **Error Recovery**: Comprehensive error handling with configurable recovery strategies
 - **Performance Monitoring**: Built-in SLA tracking and performance analysis
 - **Multi-Environment Support**: Development, testing, and production configurations
@@ -34,13 +34,13 @@ The APEX rules engine features a **scenario-based configuration system** that pr
 1. **100% Generic System**: No default rules in main resources; all rules are data-driven from external sources
 2. **Lightweight Scenarios**: Scenario files contain only routing logic, not business rules
 3. **Separation of Concerns**: Scenarios route data; rule files contain business logic
-4. **Backward Compatibility**: Supports both legacy and modern stage-based processing
+4. **SpEL-Based Selection**: Scenarios selected automatically based on data content using classification rules
 
 ## What is a Scenario?
 
 A **scenario** in APEX is a named configuration that:
 
-1. **Associates Java data types** with processing pipelines
+1. **Defines classification rules** using SpEL expressions to match incoming data
 2. **Defines processing stages** with execution order and dependencies
 3. **Specifies failure policies** for each stage
 4. **Provides metadata** for monitoring and compliance
@@ -50,7 +50,7 @@ A **scenario** in APEX is a named configuration that:
 **Business Need**: Process OTC Options through validation, market data enrichment, and compliance checks.
 
 **Scenario Configuration**:
-- Associates `OtcOption` Java class with processing pipeline
+- Classification rule: `#data['tradeType'] == 'OTCOption'` automatically selects this scenario
 - Defines 3 stages: validation → enrichment → compliance
 - Validation failure terminates processing
 - Enrichment failure continues with warnings
@@ -111,16 +111,17 @@ Main configuration class representing a complete data type processing scenario.
 - `scenarioId` - Unique identifier
 - `name` - Human-readable name
 - `description` - Purpose description
-- `dataTypes` - List of Java class names this scenario applies to
-- `processingStages` - List of stage configurations (modern)
-- `ruleConfigurations` - List of rule file paths (legacy)
+- `classificationRuleCondition` - SpEL expression for automatic scenario selection
+- `classificationRuleDescription` - Human-readable description of when scenario applies
+- `processingStages` - List of stage configurations
 - `metadata` - Additional metadata (business domain, owner, SLA, etc.)
 
 **Key Methods**:
 
 ```java
-// Data type matching
-public boolean appliesToDataType(String dataType);
+// Classification rule matching
+public boolean hasClassificationRule();
+public boolean matchesClassificationRule(Map<String, Object> data);
 
 // Stage configuration
 public boolean hasStageConfiguration();
@@ -131,22 +132,18 @@ public String getBusinessDomain();
 public String getRiskCategory();
 public Integer getProcessingSlaMs();
 public String getOwner();
-
-// Legacy support
-@Deprecated
-public List<String> getRuleConfigurations();
 ```
 
 ### 2. DataTypeScenarioService Class
 
 **Location**: `apex-core/src/main/java/dev/mars/apex/core/service/scenario/DataTypeScenarioService.java`
 
-Central service for managing data type scenarios and routing.
+Central service for managing scenarios and automatic routing based on classification rules.
 
 **Key Responsibilities**:
 - Loads scenario configurations from YAML registry files
-- Routes data records to appropriate processing pipelines based on Java type
-- Supports both legacy and stage-based processing modes
+- Routes data records to appropriate processing pipelines based on SpEL classification rules
+- Evaluates classification rules against Map<String, Object> data
 - Caches scenario configurations for performance
 
 **Key Methods**:
@@ -155,48 +152,38 @@ Central service for managing data type scenarios and routing.
 // Scenario loading
 public void loadScenarios(String registryPath) throws Exception;
 
-// Scenario discovery
-public ScenarioConfiguration getScenarioForData(Object data);
+// Scenario discovery and routing
+public ScenarioConfiguration getScenarioForMapData(Map<String, Object> data);
 public ScenarioConfiguration getScenario(String scenarioId);
 public Set<String> getAvailableScenarios();
-public Set<String> getSupportedDataTypes();
 
 // Processing
+public ScenarioExecutionResult processMapData(Map<String, Object> data);
 public ScenarioExecutionResult processDataWithStages(Object data, String scenarioId);
-public Object processData(Object data);
-public Object processDataWithScenario(Object data, ScenarioConfiguration scenario);
 ```
 
-**Data Type Matching Logic**:
+**Classification Matching Logic**:
 
 ```java
-private String determineDataType(Object data) {
-    if (data == null) return "null";
-
-    Class<?> dataClass = data.getClass();
-
-    // Try full class name first
-    String fullClassName = dataClass.getName();
-    if (dataTypeToScenarios.containsKey(fullClassName)) {
-        return fullClassName;
+public ScenarioConfiguration getScenarioForMapData(Map<String, Object> data) {
+    if (data == null) {
+        return null;
     }
 
-    // Try simple class name
-    String simpleClassName = dataClass.getSimpleName();
-    if (dataTypeToScenarios.containsKey(simpleClassName)) {
-        return simpleClassName;
-    }
-
-    // Check if data has a type field (for Map types)
-    if (data instanceof Map) {
-        Map<String, Object> dataMap = (Map<String, Object>) data;
-        Object typeField = dataMap.get("dataType");
-        if (typeField != null) {
-            return typeField.toString();
+    // Iterate through all scenarios and evaluate classification rules
+    for (ScenarioConfiguration scenario : scenarios.values()) {
+        if (scenario.hasClassificationRule()) {
+            if (scenario.matchesClassificationRule(data)) {
+                logger.info("Matched scenario '{}' via classification rule",
+                    scenario.getScenarioId());
+                return scenario;
+            }
         }
     }
 
-    return fullClassName; // Default to full class name
+    // No classification rule matched
+    logger.debug("No scenario matched via classification rules");
+    return null;
 }
 ```
 
@@ -281,77 +268,49 @@ Individual stage execution result.
 The registry file provides centralized discovery of all available scenarios:
 
 ```yaml
-scenario-registry:
+scenarios:
   - scenario-id: "otc-options-standard"
     config-file: "scenarios/otc-options-scenario.yaml"
-    data-types: ["OtcOption", "dev.mars.apex.demo.model.OtcOption"]
     description: "Standard validation and enrichment pipeline for OTC Options"
     business-domain: "Derivatives Trading"
     owner: "derivatives.team@company.com"
 
   - scenario-id: "commodity-swaps-standard"
     config-file: "scenarios/commodity-swaps-scenario.yaml"
-    data-types: ["CommoditySwap", "dev.mars.apex.demo.model.CommoditySwap"]
     description: "Multi-layered validation for commodity derivatives"
     business-domain: "Derivatives Trading"
     regulatory-scope: "Global Markets"
     owner: "commodities.team@company.com"
+
+routing:
+  strategy: "classification-based"
+  default-scenario: "otc-options-standard"
 ```
 
 **Registry Entry Fields**:
 - `scenario-id` - Unique identifier for the scenario
 - `config-file` - Path to scenario configuration file
-- `data-types` - List of Java class names (simple or fully qualified)
 - `description` - Human-readable description
 - `business-domain` - Business domain classification
 - `owner` - Team or individual responsible
 - Additional metadata fields as needed
 
+**Routing Configuration**:
+- `strategy` - Routing strategy (e.g., "classification-based")
+- `default-scenario` - Fallback scenario when no classification matches
+
 ### Individual Scenario Files
 
-#### Legacy Rule-Based Configuration
+#### Classification-Based Scenario Configuration
 
 **File**: `scenarios/otc-options-scenario.yaml`
 
 ```yaml
 metadata:
-  id: "otc-options-standard"
-  name: "OTC Options Processing Scenario"
-  version: "1.0.0"
-  description: "Associates OTC Options with existing rule configurations"
-  type: "scenario"
-  business-domain: "Derivatives Trading"
-  owner: "derivatives.team@company.com"
-  created: "2025-08-02"
-  tags: ["derivatives", "otc", "options", "validation"]
-
-scenario:
-  scenario-id: "otc-options-standard"
+  id: "otc-options-processing"
   name: "OTC Options Processing"
-  description: "Complete processing pipeline for OTC options"
-
-  # Data types this scenario applies to (matches registry)
-  data-types:
-    - "OtcOption"
-    - "dev.mars.apex.demo.model.OtcOption"
-
-  # Legacy approach: Simple list of rule configuration files
-  rule-configurations:
-    - "config/otc-options-validation-rules.yaml"
-    - "config/financial-enrichment-rules.yaml"
-    - "config/derivatives-compliance-rules.yaml"
-```
-
-#### Modern Stage-Based Configuration
-
-**File**: `scenarios/otc-options-stage-scenario.yaml`
-
-```yaml
-metadata:
-  id: "otc-options-stage-processing"
-  name: "OTC Options Stage-Based Processing"
   version: "2.0.0"
-  description: "Stage-based processing pipeline for OTC options with dependency management"
+  description: "Stage-based processing pipeline for OTC options with automatic classification"
   type: "scenario"
   business-domain: "Derivatives Trading"
   owner: "derivatives.team@company.com"
@@ -359,15 +318,16 @@ metadata:
   tags: ["derivatives", "otc", "options", "stages", "validation"]
 
 scenario:
-  scenario-id: "otc-options-stage-processing"
-  name: "OTC Options Stage Processing"
-  description: "Multi-stage processing pipeline with failure policies and dependencies"
+  scenario-id: "otc-options-processing"
+  name: "OTC Options Processing"
+  description: "Multi-stage processing pipeline with automatic classification"
 
-  data-types:
-    - "OtcOption"
-    - "dev.mars.apex.demo.model.OtcOption"
+  # Classification rule for automatic scenario selection
+  classification-rule:
+    condition: "#data['tradeType'] == 'OTCOption'"
+    description: "Matches OTC option trades"
 
-  # Modern approach: Explicit stage configuration with dependencies
+  # Stage configuration with dependencies
   processing-stages:
     - stage-name: "validation"
       config-file: "config/otc-options-validation-rules.yaml"
@@ -529,25 +489,25 @@ APEX supports three failure policies that determine how stages handle errors:
 
 ## Usage Examples
 
-### Basic Scenario Discovery
+### Automatic Scenario Selection
 
 ```java
 // Initialize scenario service
 DataTypeScenarioService scenarioService = new DataTypeScenarioService();
-scenarioService.loadScenarios("config/data-type-scenarios.yaml");
+scenarioService.loadScenarios("config/scenario-registry.yaml");
 
-// Route an OTC Option to its processing scenario
-OtcOption option = new OtcOption(...);
-ScenarioConfiguration scenario = scenarioService.getScenarioForData(option);
+// Create Map data from XML
+Map<String, Object> tradeData = new HashMap<>();
+tradeData.put("tradeType", "OTCOption");
+tradeData.put("region", "US");
+tradeData.put("notional", 75000000);
 
-// Check if scenario uses stage-based processing
-if (scenario.hasStageConfiguration()) {
-    // Modern stage-based processing
-    ScenarioExecutionResult result = scenarioService.processDataWithStages(
-        option, scenario.getScenarioId());
-} else {
-    // Legacy rule-based processing
-    List<String> ruleFiles = scenario.getRuleConfigurations();
+// Automatic scenario selection based on classification rules
+ScenarioExecutionResult result = scenarioService.processMapData(tradeData);
+
+// Check results
+if (result.isSuccessful()) {
+    logger.info("Successfully processed with scenario: {}", result.getScenarioId());
 }
 ```
 
@@ -718,15 +678,19 @@ result.getStageResults().forEach(stage -> {
 });
 ```
 
-**3. Data Type Not Matching**
+**3. Classification Rule Not Matching**
 
-Symptom: No scenario found for data type
+Symptom: No scenario found for data
 
-Solution: Include both simple and fully qualified class names
-```yaml
-data-types:
-  - "OtcOption"                           # Simple name
-  - "dev.mars.apex.demo.model.OtcOption"  # Fully qualified
+Solution: Verify classification rule condition matches data content
+```java
+// Check what data is being evaluated
+logger.debug("Data for classification: {}", data);
+
+// Verify classification rule in scenario YAML
+classification-rule:
+  condition: "#data['tradeType'] == 'OTCOption'"  # Ensure field names match
+  description: "Matches OTC option trades"
 ```
 
 ### Debugging Tips
@@ -748,17 +712,21 @@ if (!result.isValid()) {
 3. **Check Scenario Discovery**:
 ```java
 List<String> availableScenarios = scenarioService.getAvailableScenarios();
-Set<String> supportedTypes = scenarioService.getSupportedDataTypes();
+
+// Test classification rule directly
+ScenarioConfiguration scenario = scenarioService.getScenario("otc-options-processing");
+boolean matches = scenario.matchesClassificationRule(testData);
+logger.info("Classification rule matches: {}", matches);
 ```
 
 ## Current Limitations
 
 The current implementation has the following limitations that are addressed in the proposed enhancements:
 
-1. **Rigid Data Type Matching**: Requires pre-compiled Java classes; cannot handle dynamic data from external systems
+1. **Limited Classification Patterns**: Basic SpEL expressions; advanced patterns require enhancement
 2. **No File Format Detection**: Cannot automatically detect JSON, XML, CSV formats
-3. **Limited Content Analysis**: Cannot inspect message content to determine processing requirements
-4. **No Real-Time Classification**: Classification happens at development time, not runtime
+3. **Limited Content Analysis**: Cannot inspect complex nested message structures
+4. **No Classification Caching**: Each evaluation re-parses SpEL expressions
 5. **Manual Integration**: Requires custom code for each transport mechanism (message queues, REST APIs, file systems)
 
 These limitations are addressed in the **APEX_SCENARIO_PROPOSED_ENHANCEMENTS.md** document.
@@ -766,12 +734,12 @@ These limitations are addressed in the **APEX_SCENARIO_PROPOSED_ENHANCEMENTS.md*
 ## Summary
 
 The current APEX scenario system provides:
-- **Type-safe routing** based on Java class names
+- **Automatic scenario selection** based on SpEL classification rules
 - **Stage-based processing** with dependencies and failure policies
-- **Flexible configuration** supporting both legacy and modern approaches
+- **Flexible configuration** using YAML and SpEL expressions
 - **Performance monitoring** with SLA tracking
 - **Multi-environment support** for dev/test/prod
 
-The system is production-ready and handles compile-time, strongly-typed data effectively. For runtime data classification and dynamic routing, see the proposed enhancements.
+The system is production-ready and handles Map<String, Object> data with automatic scenario selection based on classification rules.
 
 

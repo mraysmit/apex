@@ -1,7 +1,7 @@
 # APEX Scenario System - Proposed Enhancements
 
-**Version:** 3.0  
-**Date:** 2025-10-07  
+**Version:** 4.0
+**Date:** 2025-10-07
 **Status:** Proposed (Not Yet Implemented)
 
 ## Table of Contents
@@ -18,15 +18,15 @@
 
 ## Executive Summary
 
-This document proposes enhancements to the APEX scenario system to enable **runtime data classification** and **dynamic routing** based on business rules.
+This document proposes enhancements to the APEX scenario system to enable **runtime data classification** and **dynamic routing** based on SpEL business rules.
 
 ### Current State
 
-The APEX scenario system uses **compile-time Java class-based data type matching**:
-- Scenarios are associated with Java class names
-- Data routing happens based on object type
-- Works well for pre-compiled, strongly-typed data
-- Requires code changes for new data sources
+The APEX scenario system requires manual scenario selection:
+- Scenarios must be explicitly specified by calling code
+- No automatic routing based on data content
+- Limited ability to route based on business rules
+- Requires code changes for new routing patterns
 
 ### Proposed Enhancement
 
@@ -41,7 +41,7 @@ Add **runtime classification-based routing** using SpEL business rules:
 1. **SpEL-Based Classification** - Evaluate Map data using Spring Expression Language
 2. **Embedded Classification Rules** - Classification rules embedded in scenario files (Option B)
 3. **Separate Classification Files** - Optional separate classification files for reusability (Option A)
-4. **Backward Compatibility** - Existing Java class-based routing continues to work
+4. **Automatic Scenario Selection** - Scenarios automatically selected based on data content
 5. **Progressive Complexity** - Start simple, add complexity as needed
 
 ### What We're NOT Building
@@ -147,17 +147,12 @@ Add **runtime classification-based routing** using SpEL business rules:
 
 The current implementation has the following limitations:
 
-### 1. Rigid Data Type Matching
-
-```yaml
-# Current approach - Java class-based
-data-types: ["OtcOption", "dev.mars.apex.demo.model.OtcOption"]
-```
+### 1. No Automatic Scenario Selection
 
 **Problems**:
-- Requires pre-compiled Java classes for every data type
-- All incoming data is already XML converted to Map<String, Object>
-- Cannot route based on Map data content
+- Scenarios must be manually selected by calling code
+- All incoming data is XML converted to Map<String, Object>
+- Cannot automatically route based on Map data content
 - Code changes required for new routing logic
 
 **Real-World Impact**:
@@ -170,7 +165,7 @@ data-types: ["OtcOption", "dev.mars.apex.demo.model.OtcOption"]
 
 **Problems**:
 - Cannot inspect Map data content to determine processing requirements
-- All Map data gets identical processing
+- All Map data requires manual scenario selection
 - No support for SpEL-based routing rules
 
 **Real-World Impact**:
@@ -181,7 +176,7 @@ data-types: ["OtcOption", "dev.mars.apex.demo.model.OtcOption"]
 ### 3. No Runtime Classification
 
 **Problems**:
-- Classification happens at development time (Java class matching), not runtime
+- No automatic classification based on data content
 - Cannot adapt to new routing patterns without code changes
 - No support for dynamic routing rules
 
@@ -197,7 +192,7 @@ A **simplified SpEL-based classification system** with:
 1. **SpEL Business Rules** - Evaluate Map data using Spring Expression Language
 2. **Embedded Classification** - Classification rules embedded in scenario files (Option B - simpler)
 3. **Separate Classification** - Optional separate classification files (Option A - for reusability)
-4. **Backward Compatible** - Existing Java class-based routing continues to work
+4. **Automatic Scenario Selection** - Scenarios automatically selected based on classification rules
 5. **Progressive Complexity** - Start simple, add complexity as needed
 
 ### Simple API Entry Point
@@ -261,8 +256,8 @@ processing-stages:
 
 **Validation**:
 - Scenario MUST have `classification-rule` section (Option B)
-- Without it, scenario cannot be selected (invalid configuration)
-- Exception: Scenarios with `data-types` (backward compatibility)
+- Without it, scenario cannot be automatically selected
+- Scenarios without classification rules require manual selection
 
 #### Option A: Separate Classification Rules File (Advanced - For Reusability)
 
@@ -353,11 +348,6 @@ scenarios:
 
   - scenario-id: "high-value-otc-processing"
     scenario-file: "config/scenarios/high-value-otc-scenario.yaml"
-
-  # Legacy compatibility - still supported
-  - scenario-id: "legacy-trade-validation"
-    data-types: ["TradeMessage", "dev.mars.apex.model.TradeMessage"]
-    scenario-file: "config/scenarios/legacy-scenario.yaml"
 ```
 
 ### Classification Flow Diagram (Option B - Embedded Rules)
@@ -387,7 +377,7 @@ graph TD
     style K fill:#f1f8e9
 ```
 
-**Note**: All scenarios loaded for classification-based routing MUST have `classification-rule` section. Scenarios with only `data-types` use class-based routing (backward compatibility).
+**Note**: All scenarios for automatic routing MUST have `classification-rule` section. Scenarios without classification rules require manual selection.
 
 ## Architecture
 
@@ -403,7 +393,6 @@ public class ScenarioConfiguration {
     // Existing fields
     private String scenarioId;
     private String name;
-    private List<String> dataTypes;
     private List<ScenarioStage> processingStages;
 
     // NEW: Classification rule support
@@ -424,17 +413,9 @@ public class ScenarioConfiguration {
         return result != null && result;
     }
 
-    // NEW: Validate scenario configuration
-    public void validate() {
-        boolean hasClassificationRule = classificationRuleCondition != null &&
-                                       !classificationRuleCondition.isEmpty();
-        boolean hasDataTypes = dataTypes != null && !dataTypes.isEmpty();
-
-        if (!hasClassificationRule && !hasDataTypes) {
-            throw new IllegalStateException(
-                "Scenario '" + scenarioId + "' must have either 'classification-rule' or 'data-types'. " +
-                "A scenario without classification cannot be selected.");
-        }
+    // NEW: Check if scenario has classification rule
+    public boolean hasClassificationRule() {
+        return classificationRuleCondition != null && !classificationRuleCondition.isEmpty();
     }
 }
 ```
@@ -461,13 +442,8 @@ public class DataTypeScenarioService {
 
     // NEW: Process Map data with classification-based routing
     public ScenarioExecutionResult processMapData(Map<String, Object> data) {
-        // Try classification-based routing first
+        // Try classification-based routing
         ScenarioConfiguration scenario = getScenarioForMapData(data);
-
-        // Fallback to class-based routing
-        if (scenario == null) {
-            scenario = getScenarioForData(data);  // Existing method
-        }
 
         if (scenario != null) {
             return processDataWithStages(data, scenario.getScenarioId());
@@ -698,9 +674,6 @@ scenario-registry:
       conditions:
         - "contentType == 'trade-message'"
 
-    # Legacy compatibility (EXISTING - still supported)
-    data-types: ["OtcOption", "dev.mars.apex.demo.model.OtcOption"]
-
     description: "Standard validation and enrichment pipeline for OTC Options"
     business-domain: "Derivatives Trading"
     owner: "derivatives.team@company.com"
@@ -718,7 +691,6 @@ scenario-registry:
         - "contentType == 'trade-message'"
         - "instrumentType == 'commodity-swap-instrument'"
 
-    data-types: ["CommoditySwap"]
     description: "Asian market commodity swap processing"
     business-domain: "Derivatives Trading"
     regulatory-scope: "APAC Markets"
@@ -946,24 +918,24 @@ public class FileSystemProcessor {
 
 ### Mitigation Strategies
 
-1. **Backward Compatibility**: Existing Java class-based routing continues to work
-2. **Phased Rollout**: Start with non-critical scenarios, gradually expand
-3. **Comprehensive Testing**: Unit, integration, performance, and load testing
-4. **Monitoring**: Real-time monitoring of classification accuracy and performance
-5. **Rollback Plan**: Ability to quickly revert to previous configuration
-6. **Training**: Documentation and training for operations team
+1. **Phased Rollout**: Start with non-critical scenarios, gradually expand
+2. **Comprehensive Testing**: Unit, integration, performance, and load testing
+3. **Monitoring**: Real-time monitoring of classification accuracy and performance
+4. **Rollback Plan**: Ability to quickly revert to previous configuration
+5. **Training**: Documentation and training for operations team
+6. **Default Scenario**: Support for default-scenario fallback when no classification matches
 
 ## Summary
 
-The proposed enhancements transform APEX from a compile-time rules engine into a runtime data processing platform capable of:
+The proposed enhancements transform APEX scenario selection from manual to automatic through:
 
-- **Dynamic data classification** from any source in any format
-- **Business rule-based routing** using SpEL expressions
+- **Dynamic data classification** using SpEL business rules
+- **Automatic scenario routing** based on Map data content
 - **Zero-downtime configuration updates** through hot-reload
 - **High-performance processing** with intelligent caching
 - **Complete audit trail** for regulatory compliance
 
-These enhancements enable real-world enterprise deployment while maintaining backward compatibility with existing scenarios.
+These enhancements enable real-world enterprise deployment with automatic scenario selection based on data content.
 
 **Next Steps**: See **APEX_SCENARIO_IMPLEMENTATION_PLAN.md** for detailed implementation roadmap.
 

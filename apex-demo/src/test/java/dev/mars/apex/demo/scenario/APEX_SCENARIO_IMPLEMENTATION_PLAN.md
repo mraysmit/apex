@@ -31,7 +31,7 @@ This document provides a **simplified, practical implementation plan** based on 
 **What We Actually Need**:
 1. **SpEL-based classification rules** - evaluate Map data to determine classification
 2. **Classification-based routing** - route to scenarios based on classification result
-3. **Backward compatibility** - existing Java class-based routing still works
+3. **Automatic scenario selection** - scenarios selected based on data content
 4. **Simple configuration** - reuse existing YAML patterns
 
 ### Key Principles
@@ -39,9 +39,9 @@ This document provides a **simplified, practical implementation plan** based on 
 - **Reuse Existing Patterns**: Classification rules work like current rules (SpEL + YAML)
 - **Minimal New Code**: Leverage existing RulesEngine infrastructure
 - **Incremental Delivery**: Each phase delivers working functionality
-- **Backward Compatibility**: Never break existing scenarios
 - **Simple Configuration**: Familiar YAML structure for users
 - **Progressive Complexity**: Start simple, add complexity gradually
+- **SpEL-Only Matching**: Scenarios use only SpEL classification rules, not Java class matching
 
 ### Progressive Learning Path
 
@@ -65,7 +65,7 @@ This plan follows a **gradual complexity approach** in all examples and tests:
 **Level 4: Advanced Features**
 - Regex matching (`region matches 'US|EMEA|APAC'`)
 - Complex business rules (instrument + region + value)
-- Backward compatibility with class-based routing
+- Default scenario fallback when no classification matches
 
 **Why This Matters**:
 - Easier to learn and understand
@@ -110,11 +110,11 @@ graph TD
    - Add `getScenarioForMapData(Map data)` method
    - Add `processMapData(Map data)` method
    - Evaluate classification rules in all scenarios
-   - Maintain backward compatibility with class-based routing
+   - Support default-scenario fallback
 
 3. **Scenario Registry** (Extended YAML)
    - Lists scenario files (classification rules are embedded in each scenario)
-   - Maintain backward compatibility with data-types
+   - Supports routing configuration with default-scenario
 
 ### Option A (Advanced - For Later)
 
@@ -200,7 +200,7 @@ processing-stages:
 - Evaluates `#data` which is a `Map<String, Object>`
 - If condition matches, this scenario is selected
 - No separate classification string needed
-- **Validation**: Scenario without classification-rule is INVALID (unless it has data-types for backward compatibility)
+- **Validation**: Scenario without classification-rule requires manual selection (cannot be auto-selected)
 
 **Example 2: Add Multiple Conditions** (`config/otc-option-us-scenario.yaml`):
 
@@ -443,21 +443,10 @@ public class ScenarioConfiguration {
     }
 
     /**
-     * NEW: Validate scenario configuration.
-     * A scenario MUST have either:
-     * - classification-rule (Option B), OR
-     * - data-types (backward compatibility), OR
-     * - be referenced by classification string in registry (Option A)
+     * NEW: Check if scenario has classification rule.
      */
-    public void validate() {
-        boolean hasClassificationRule = hasClassificationRule();
-        boolean hasDataTypes = dataTypes != null && !dataTypes.isEmpty();
-
-        if (!hasClassificationRule && !hasDataTypes) {
-            throw new IllegalStateException(
-                "Scenario '" + scenarioId + "' must have either 'classification-rule' or 'data-types'. " +
-                "A scenario without classification cannot be selected.");
-        }
+    public boolean hasClassificationRule() {
+        return classificationRuleCondition != null && !classificationRuleCondition.isEmpty();
     }
 
     // Getters and setters
@@ -496,8 +485,7 @@ if (classificationRule != null) {
 - [ ] Can parse `classification-rule` from scenario YAML
 - [ ] Can evaluate SpEL conditions against Map data
 - [ ] Returns true/false for match
-- [ ] Validation fails if scenario has neither classification-rule nor data-types
-- [ ] Backward compatible (scenarios with data-types still work)
+- [ ] Scenarios without classification-rule can still be manually selected
 - [ ] Unit test coverage > 90%
 
 #### 1.3 Enhanced DataTypeScenarioService (Option B Support)
@@ -507,10 +495,10 @@ if (classificationRule != null) {
 **Location**: `apex-core/src/main/java/dev/mars/apex/core/service/scenario/DataTypeScenarioService.java`
 
 **Tasks**:
-- [ ] Add `getScenarioForData(Map<String, Object> data)` method
+- [ ] Add `getScenarioForMapData(Map<String, Object> data)` method
 - [ ] Evaluate classification rules in all loaded scenarios
 - [ ] Return first matching scenario
-- [ ] Maintain backward compatibility with class-based routing
+- [ ] Support default-scenario fallback
 - [ ] Write unit tests
 
 **Implementation Approach**:
@@ -537,7 +525,6 @@ public class DataTypeScenarioService {
         // Iterate through all scenarios and evaluate embedded classification rules
         for (ScenarioConfiguration scenario : scenarios.values()) {
             // Only evaluate scenarios with classification rules (Option B)
-            // Scenarios with only data-types are skipped (they use class-based routing)
             if (scenario.hasClassificationRule()) {
                 if (scenario.matchesClassificationRule(data)) {
                     logger.info("Matched scenario '{}' via embedded classification rule",
@@ -560,9 +547,10 @@ public class DataTypeScenarioService {
         // Step 1: Try classification-based routing
         ScenarioConfiguration scenario = getScenarioForMapData(data);
 
-        // Step 2: Fallback to class-based routing if needed
-        if (scenario == null) {
-            scenario = getScenarioForData(data);  // Existing method
+        // Step 2: Fallback to default scenario if configured
+        if (scenario == null && routingConfig != null && routingConfig.getDefaultScenario() != null) {
+            scenario = scenarios.get(routingConfig.getDefaultScenario());
+            logger.debug("Using default scenario '{}'", routingConfig.getDefaultScenario());
         }
 
         // Step 3: Execute scenario
@@ -572,29 +560,13 @@ public class DataTypeScenarioService {
 
         throw new IllegalStateException("No scenario found for data");
     }
-
-    /**
-     * EXISTING: Get scenario for Object data (class-based routing).
-     * Maintained for backward compatibility.
-     */
-    public ScenarioConfiguration getScenarioForData(Object data) {
-        // Existing implementation unchanged
-        String dataType = determineDataType(data);
-        Set<String> scenarioIds = dataTypeToScenarios.get(dataType);
-        if (scenarioIds != null && !scenarioIds.isEmpty()) {
-            String scenarioId = scenarioIds.iterator().next();
-            return scenarios.get(scenarioId);
-        }
-        return null;
-    }
 }
 ```
 
 **Acceptance Criteria**:
 - [ ] Can find scenario by evaluating classification rules
 - [ ] Returns first matching scenario
-- [ ] Backward compatible with class-based routing
-- [ ] Classification-based routing takes precedence
+- [ ] Default scenario fallback works when no classification matches
 - [ ] Unit test coverage > 90%
 
 
@@ -651,36 +623,39 @@ scenarios:
     scenario-file: "config/scenarios/high-notional-otc-scenario.yaml"
 ```
 
-**Example 3: Add Backward Compatibility** (`config/mixed-scenario-registry.yaml`):
+**Example 3: Add Default Scenario Fallback** (`config/scenario-registry-with-default.yaml`):
 
-Mix classification-based scenarios with legacy class-based scenarios:
+Add default scenario for when no classification matches:
 
 ```yaml
 metadata:
-  id: "mixed-scenario-registry"
-  name: "Mixed Routing Registry"
+  id: "scenario-registry-with-default"
+  name: "Scenario Registry with Default Fallback"
   version: "2.0"
 
 scenarios:
-  # NEW: Scenarios with embedded classification rules
   - scenario-id: "otc-option-us-processing"
     name: "OTC Option US Processing"
     scenario-file: "config/scenarios/otc-option-us-scenario.yaml"
 
-  # EXISTING: Java class-based routing (backward compatible)
-  - scenario-id: "legacy-trade-validation"
-    name: "Legacy Trade Validation"
-    data-types:
-      - "TradeMessage"
-      - "dev.mars.apex.model.TradeMessage"
-    scenario-file: "config/scenarios/legacy-trade-scenario.yaml"
+  - scenario-id: "high-notional-otc-processing"
+    name: "High Notional OTC Processing"
+    scenario-file: "config/scenarios/high-notional-otc-scenario.yaml"
+
+  - scenario-id: "generic-trade-processing"
+    name: "Generic Trade Processing"
+    scenario-file: "config/scenarios/generic-trade-scenario.yaml"
+
+routing:
+  strategy: "classification-based"
+  default-scenario: "generic-trade-processing"
 ```
 
 **Key Points** (Option B):
 - Registry just lists scenario files
 - Classification rules are **embedded in each scenario file**
 - Simpler configuration (one file per scenario)
-- Maintain `data-types` for backward compatibility
+- Support default-scenario fallback when no classification matches
 
 #### 2.2 Option A Support (Advanced - Separate Classification Files)
 
@@ -739,9 +714,9 @@ public class DataTypeScenarioService {
             scenario = getScenarioForClassification(classification.getClassification());
         }
 
-        // Step 3: Fallback to class-based routing if needed
-        if (scenario == null) {
-            scenario = getScenarioForData(data);
+        // Step 3: Fallback to default scenario if configured
+        if (scenario == null && routingConfig != null && routingConfig.getDefaultScenario() != null) {
+            scenario = scenarios.get(routingConfig.getDefaultScenario());
         }
 
         // Step 4: Execute scenario
@@ -778,15 +753,11 @@ public class DataTypeScenarioService {
                 classificationToScenario.put(classification, scenarioId);
             }
 
-            // EXISTING: Map data types to scenario (backward compatibility)
+            // Load routing configuration if present
             @SuppressWarnings("unchecked")
-            List<String> dataTypes = (List<String>) scenarioEntry.get("data-types");
-            if (dataTypes != null) {
-                for (String dataType : dataTypes) {
-                    dataTypeToScenarios
-                        .computeIfAbsent(dataType, k -> new HashSet<>())
-                        .add(scenarioId);
-                }
+            Map<String, Object> routingData = (Map<String, Object>) registry.get("routing");
+            if (routingData != null) {
+                routingConfig = parseRoutingConfiguration(routingData);
             }
         }
     }
@@ -794,20 +765,19 @@ public class DataTypeScenarioService {
 ```
 
 **Acceptance Criteria**:
-- [ ] Can load scenarios with classification field
+- [ ] Can load scenarios with classification rules
 - [ ] Can route based on classification
-- [ ] Backward compatible with data-types routing
-- [ ] Classification routing takes precedence
-- [ ] Fallback to class-based routing works
+- [ ] Default scenario fallback works
+- [ ] Classification routing takes precedence over default
 - [ ] Unit test coverage > 90%
 
 ### Phase 2 Testing
 
 **Unit Tests**:
 - [ ] DataTypeScenarioService classification routing
-- [ ] Backward compatibility with existing scenarios
+- [ ] Default scenario fallback
 - [ ] Fallback behavior when classification doesn't match
-- [ ] Edge cases (null classification, no matching scenario)
+- [ ] Edge cases (null classification, no matching scenario, no default)
 
 **Integration Tests**:
 - [ ] End-to-end: classify Map data → route to scenario → execute stages
@@ -818,7 +788,7 @@ public class DataTypeScenarioService {
 
 - [ ] All unit tests passing (>90% coverage)
 - [ ] Classification-based routing works
-- [ ] Backward compatible with existing scenarios
+- [ ] Default scenario fallback works
 - [ ] Documentation complete
 
 ## Phase 3: Testing & Production Readiness
@@ -995,8 +965,8 @@ public void demo4_ComplexBusinessRules() throws Exception {
 
 **Test Scenarios**:
 1. Classification-based routing works
-2. Backward compatibility with class-based routing
-3. Fallback scenarios work
+2. Default scenario fallback works
+3. No matching scenario and no default handled gracefully
 4. Invalid/malformed data handled gracefully
 5. Performance acceptable (< 100ms per classification)
 
@@ -1046,8 +1016,8 @@ public void demo4_ComplexBusinessRules() throws Exception {
 1. **Functionality**:
    - [ ] Classification rules evaluate correctly using SpEL
    - [ ] Classification-based routing works
-   - [ ] Backward compatible with existing scenarios
-   - [ ] Fallback routing works
+   - [ ] Default scenario fallback works
+   - [ ] No matching scenario handled gracefully
 
 2. **Quality**:
    - [ ] Unit test coverage > 90%
@@ -1149,13 +1119,13 @@ public void demo4_ComplexBusinessRules() throws Exception {
 - [ ] Multi-line SpEL expressions work
 
 **Level 4: Validation and Edge Cases**
-- [ ] Scenario without classification-rule AND without data-types fails validation
-- [ ] Scenario with classification-rule passes validation
-- [ ] Scenario with data-types (no classification-rule) passes validation (backward compatibility)
+- [ ] Scenario with classification-rule can be auto-selected
+- [ ] Scenario without classification-rule requires manual selection
 - [ ] Null data handled gracefully
 - [ ] Invalid SpEL handled gracefully (returns false, logs warning)
 - [ ] Missing fields handled (null checks in conditions)
-- [ ] No matching scenario returns null
+- [ ] No matching scenario returns null (or default if configured)
+- [ ] Default scenario fallback works
 
 ### Phase 1 Success Criteria
 
@@ -1163,8 +1133,8 @@ public void demo4_ComplexBusinessRules() throws Exception {
 - [ ] Can parse embedded classification rules from scenario YAML
 - [ ] Can evaluate classification rules against Map data using SpEL
 - [ ] ScenarioConfiguration.matchesClassificationRule() works correctly
-- [ ] ScenarioConfiguration.validate() enforces classification-rule OR data-types requirement
+- [ ] ScenarioConfiguration.hasClassificationRule() works correctly
 - [ ] DataTypeScenarioService.getScenarioForMapData() works correctly
-- [ ] Validation fails for scenarios without classification-rule AND without data-types
+- [ ] Default scenario fallback works when no classification matches
 - [ ] Documentation with progressive examples complete
 
