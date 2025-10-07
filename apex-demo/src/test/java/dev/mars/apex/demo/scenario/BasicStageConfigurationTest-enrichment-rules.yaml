@@ -1,21 +1,35 @@
 # ============================================================================
-# APEX Trade Enrichment Rules for BasicStageConfigurationTest
+# APEX Enrichment Stage Configuration for BasicStageConfigurationTest
 # ============================================================================
-# Enrichment rules for basic trade data processing scenario
-# Used to demonstrate stage-based scenario execution
+# PURPOSE:
+# This file provides the configuration for the "enrichment" STAGE in the
+# BasicStageConfigurationTest scenario. It uses validation rules (type: rule-config)
+# to SIMULATE enrichment processing for testing purposes.
+#
+# WHY VALIDATION RULES INSTEAD OF ACTUAL ENRICHMENT?
+# - Keeps the test simple and focused on stage-based execution
+# - Avoids complexity of real enrichment (external services, databases, calculations)
+# - Demonstrates stage dependency management and failure policies
+# - Real enrichment would use type: "enrichment" with enrichments: section
+#
+# WHAT THIS FILE DEMONSTRATES:
+# - Stage 2 of a multi-stage scenario (depends on validation stage)
+# - failure-policy: "continue-with-warnings" (processing continues even if this fails)
+# - Stage execution order and dependency management
 # ============================================================================
 
 metadata:
-  id: "trade-enrichment-rules"
-  name: "Trade Enrichment Rules"
+  id: "trade-enrichment-stage-rules"
+  name: "Trade Enrichment Stage Rules"
   version: "1.0.0"
-  description: "Basic enrichment rules for trade data processing"
+  description: "Validation rules that simulate enrichment stage for testing stage-based processing"
   type: "rule-config"
   author: "APEX Demo"
 
-# Trade enrichment rules - using simple validation rules for demonstration
-# Note: This demonstrates stage-based processing. In a real implementation,
-# enrichment would be handled by a dedicated EnrichmentService.
+# IMPORTANT: These are validation rules (not actual enrichment) used to simulate
+# the enrichment stage. They always pass (condition: "true") to demonstrate
+# successful stage execution. In production, this would be replaced with actual
+# enrichment configuration using type: "enrichment" and enrichments: section.
 rules:
   - id: "processing-timestamp-check"
     name: "Processing Timestamp Check"

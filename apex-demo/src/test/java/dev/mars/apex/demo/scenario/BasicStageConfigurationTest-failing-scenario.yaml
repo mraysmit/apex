@@ -34,6 +34,7 @@ scenario:
         sla-ms: 1000
     
     # Stage 2: Enrichment (should be skipped due to validation failure)
+    # NOTE: Uses validation rules to simulate enrichment (see enrichment-rules.yaml for details)
     - stage-name: "enrichment"
       config-file: "src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-enrichment-rules.yaml"
       execution-order: 2
@@ -41,5 +42,5 @@ scenario:
       required: false
       depends-on: ["validation"]
       stage-metadata:
-        description: "Trade enrichment (should be skipped)"
+        description: "Trade enrichment - simulated using validation rules (should be skipped)"
         sla-ms: 2000

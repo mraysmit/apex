@@ -57,9 +57,14 @@ import static org.junit.jupiter.api.Assertions.*;
  * - BasicStageConfigurationTest.java (this file)
  * - BasicStageConfigurationTest.yaml (scenario registry)
  * - BasicStageConfigurationTest-scenario.yaml (main scenario definition)
- * - BasicStageConfigurationTest-validation-rules.yaml (positive validation rules)
- * - BasicStageConfigurationTest-enrichment-rules.yaml (enrichment configuration)
+ * - BasicStageConfigurationTest-validation-rules.yaml (Stage 1: validation rules)
+ * - BasicStageConfigurationTest-enrichment-rules.yaml (Stage 2: validation rules that simulate enrichment)
  * - BasicStageConfigurationTest-failing-*.yaml (negative test case configurations)
+ *
+ * NOTE ON ENRICHMENT STAGE:
+ * The "enrichment-rules.yaml" file uses validation rules (type: rule-config) to SIMULATE
+ * enrichment processing. This keeps the test simple and focused on stage-based execution.
+ * In production scenarios, actual enrichment would use type: "enrichment" with enrichments: section.
  *
  * TEST METHODS:
  * - testStageBasedScenarioExecution(): Tests successful multi-stage processing

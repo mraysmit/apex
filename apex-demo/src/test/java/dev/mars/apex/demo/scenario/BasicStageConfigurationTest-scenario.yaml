@@ -34,6 +34,9 @@ scenario:
         sla-ms: 1000
 
     # Stage 2: Enrichment (optional)
+    # NOTE: This stage uses validation rules to SIMULATE enrichment for testing.
+    # The config-file contains type: "rule-config" with rules: section (not actual enrichment).
+    # This simplifies testing while demonstrating stage-based execution and failure policies.
     - stage-name: "enrichment"
       config-file: "src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-enrichment-rules.yaml"
       execution-order: 2
@@ -41,7 +44,7 @@ scenario:
       required: false
       depends-on: ["validation"]
       stage-metadata:
-        description: "Trade data enrichment"
+        description: "Trade data enrichment (simulated using validation rules for testing)"
         sla-ms: 2000
 
 
