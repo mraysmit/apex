@@ -1,11 +1,11 @@
 ![APEX System Logo](APEX%20System%20logo.png)
 # APEX YAML Syntax Reference Guide
 
-**Version:** 2.1
-**Date:** 2025-08-30
+**Version:** 2.2
+**Date:** 2025-09-29
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
-> **🚨 CRITICAL SYNTAX UPDATE**: This document is currently being updated to reflect the correct APEX SpEL syntax. APEX processes HashMap data where fields are accessed using `#fieldName` syntax, NOT `#data.fieldName`. Many examples in this document still show the incorrect `#data.` prefix and are being corrected. Always use `#fieldName` for field access in APEX YAML configurations.
+> **✅ SYNTAX VERIFIED**: This document has been updated and verified to use the correct APEX SpEL syntax. APEX processes HashMap data where fields are accessed using `#fieldName` syntax, NOT `#data.fieldName`. All examples in this document use the correct `#fieldName` syntax for field access in APEX YAML configurations.
 
 ## Table of Contents
 
