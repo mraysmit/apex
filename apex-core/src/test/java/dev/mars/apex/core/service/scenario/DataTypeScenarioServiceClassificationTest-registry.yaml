@@ -1,0 +1,29 @@
+metadata:
+  id: "classification-routing-test-registry"
+  name: "Classification-Based Routing Test Registry"
+  version: "1.0.0"
+  description: "Test registry for classification-based routing with embedded classification rules"
+  type: "scenario-registry"
+  created-by: "test@example.com"
+
+scenarios:
+  # Level 3: High-notional scenario (most specific - check first)
+  - scenario-id: "high-notional-otc-scenario"
+    config-file: "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-high-notional-scenario.yaml"
+  
+  # Level 2: US-specific scenario (more specific than generic)
+  - scenario-id: "otc-option-us-scenario"
+    config-file: "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-us-otc-scenario.yaml"
+  
+  # Level 1: Generic OTC Option scenario
+  - scenario-id: "otc-option-scenario"
+    config-file: "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-otc-scenario.yaml"
+  
+  # Level 1: Commodity Swap scenario
+  - scenario-id: "commodity-swap-scenario"
+    config-file: "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-swap-scenario.yaml"
+
+routing:
+  strategy: "classification-based"
+  description: "Routes Map data to scenarios based on embedded classification rules"
+

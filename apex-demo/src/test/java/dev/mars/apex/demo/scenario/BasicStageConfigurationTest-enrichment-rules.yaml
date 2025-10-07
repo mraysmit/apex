@@ -10,7 +10,7 @@ metadata:
   name: "Trade Enrichment Rules"
   version: "1.0.0"
   description: "Basic enrichment rules for trade data processing"
-  type: "enrichment-config"
+  type: "rule-config"
   author: "APEX Demo"
 
 # Trade enrichment rules - using simple validation rules for demonstration

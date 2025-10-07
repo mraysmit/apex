@@ -197,11 +197,11 @@ class DataTypeScenarioServiceTest {
     @Test
     @DisplayName("Should handle null scenario ID")
     void testGetScenarioByNullId() {
-        System.out.println("TEST: Triggering intentional error - testing scenario retrieval with null ID");
+        System.out.println("TEST: Testing scenario retrieval with null ID");
 
-        assertThrows(NullPointerException.class, () -> {
-            scenarioService.getScenario(null);
-        }, "Null scenario ID should throw NullPointerException");
+        // Null scenario ID should return null (graceful handling)
+        ScenarioConfiguration result = scenarioService.getScenario(null);
+        assertNull(result, "Null scenario ID should return null");
     }
 
     // ========================================

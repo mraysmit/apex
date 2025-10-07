@@ -19,18 +19,25 @@ package dev.mars.apex.core.service.scenario;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.logging.Logger;
+
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * Configuration class representing a complete data type processing scenario.
- * 
+ *
  * A scenario defines the complete processing pipeline for a specific data type,
  * including validation rules, enrichment configurations, and associated datasets.
  * This enables systematic routing of different data types through appropriate
  * processing pipelines.
- * 
+ *
  * CONFIGURATION STRUCTURE:
  * - Scenario identification and metadata
- * - Data types this scenario applies to
+ * - Data types this scenario applies to (backward compatibility)
+ * - Classification rules for Map-based data routing (new)
  * - Processing pipeline configuration (legacy rule-configurations or new processing-stages)
  * - Rules and rule chains to execute
  * - Enrichment configurations
@@ -40,12 +47,20 @@ import java.util.stream.Collectors;
  * - Explicit processing stages with dependencies and failure policies
  * - Backward compatibility with legacy rule-configurations
  * - Enhanced monitoring and control over processing pipeline
- * 
+ *
+ * CLASSIFICATION-BASED ROUTING:
+ * - SpEL-based classification rules for Map<String, Object> data
+ * - Embedded classification rules in scenario files (Option B)
+ * - Validation ensures either classification-rule OR data-types exists
+ *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 public class ScenarioConfiguration {
-    
+
+    private static final Logger logger = Logger.getLogger(ScenarioConfiguration.class.getName());
+    private static final ExpressionParser parser = new SpelExpressionParser();
+
     private String scenarioId;
     private String name;
     private String description;
@@ -53,6 +68,10 @@ public class ScenarioConfiguration {
     private List<String> ruleConfigurations; // Legacy support
     private List<ScenarioStage> processingStages; // NEW: Stage-based configuration
     private Map<String, Object> metadata;
+
+    // NEW: Classification rule support for Map-based data routing
+    private String classificationRuleCondition;
+    private String classificationRuleDescription;
     
     // Constructors
     public ScenarioConfiguration() {
@@ -149,9 +168,45 @@ public class ScenarioConfiguration {
     public Map<String, Object> getMetadata() {
         return metadata;
     }
-    
+
     public void setMetadata(Map<String, Object> metadata) {
         this.metadata = metadata;
+    }
+
+    /**
+     * Gets the classification rule condition.
+     *
+     * @return the SpEL expression for classification or null if not set
+     */
+    public String getClassificationRuleCondition() {
+        return classificationRuleCondition;
+    }
+
+    /**
+     * Sets the classification rule condition.
+     *
+     * @param classificationRuleCondition the SpEL expression for classification
+     */
+    public void setClassificationRuleCondition(String classificationRuleCondition) {
+        this.classificationRuleCondition = classificationRuleCondition;
+    }
+
+    /**
+     * Gets the classification rule description.
+     *
+     * @return the description of the classification rule or null if not set
+     */
+    public String getClassificationRuleDescription() {
+        return classificationRuleDescription;
+    }
+
+    /**
+     * Sets the classification rule description.
+     *
+     * @param classificationRuleDescription the description of the classification rule
+     */
+    public void setClassificationRuleDescription(String classificationRuleDescription) {
+        this.classificationRuleDescription = classificationRuleDescription;
     }
 
     /**
@@ -274,13 +329,77 @@ public class ScenarioConfiguration {
     
     /**
      * Gets the owner from metadata.
-     * 
+     *
      * @return owner or null if not set
      */
     public String getOwner() {
         return metadata != null ? (String) metadata.get("owner") : null;
     }
-    
+
+    /**
+     * Checks if this scenario has a classification rule defined.
+     *
+     * @return true if classification rule condition is set and not empty
+     */
+    public boolean hasClassificationRule() {
+        return classificationRuleCondition != null && !classificationRuleCondition.trim().isEmpty();
+    }
+
+    /**
+     * Evaluates the classification rule against the provided data.
+     *
+     * Uses SpEL (Spring Expression Language) to evaluate the classification rule condition
+     * against a Map of data. The data is available in the expression as #data variable.
+     *
+     * @param data the data to evaluate against (Map<String, Object>)
+     * @return true if the classification rule matches, false otherwise
+     */
+    public boolean matchesClassificationRule(Map<String, Object> data) {
+        if (!hasClassificationRule()) {
+            return false;
+        }
+
+        if (data == null) {
+            logger.fine("Cannot evaluate classification rule against null data for scenario: " + scenarioId);
+            return false;
+        }
+
+        try {
+            Expression expression = parser.parseExpression(classificationRuleCondition);
+            StandardEvaluationContext context = new StandardEvaluationContext();
+            context.setVariable("data", data);
+
+            Boolean result = expression.getValue(context, Boolean.class);
+            return result != null && result;
+
+        } catch (Exception e) {
+            logger.warning("Failed to evaluate classification rule for scenario '" + scenarioId + "': " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Validates the scenario configuration.
+     *
+     * A scenario MUST have either:
+     * - classification-rule (for Map-based data routing), OR
+     * - data-types (for Java class-based routing - backward compatibility)
+     *
+     * A scenario without either is invalid because it can never be selected.
+     *
+     * @throws IllegalStateException if neither classification-rule nor data-types are present
+     */
+    public void validate() {
+        boolean hasClassificationRule = hasClassificationRule();
+        boolean hasDataTypes = dataTypes != null && !dataTypes.isEmpty();
+
+        if (!hasClassificationRule && !hasDataTypes) {
+            throw new IllegalStateException(
+                "Scenario '" + scenarioId + "' must have either 'classification-rule' or 'data-types'. " +
+                "A scenario without classification cannot be selected.");
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("ScenarioConfiguration{");

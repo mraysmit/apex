@@ -8,7 +8,7 @@ metadata:
   description: "Trade processing scenario with strict validation rules that will fail"
   type: "scenario"
   business-domain: "Trading"
-  author: "test@example.com"
+  owner: "test@example.com"
 
 scenario:
   scenario-id: "basic-trade-processing-failing"

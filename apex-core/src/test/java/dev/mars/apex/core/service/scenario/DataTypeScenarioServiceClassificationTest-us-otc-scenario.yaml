@@ -1,0 +1,44 @@
+metadata:
+  id: "otc-option-us-scenario"
+  name: "US OTC Option Processing Scenario"
+  version: "1.0.0"
+  description: "US-specific OTC option trade processing with AND condition classification"
+  type: "scenario"
+  business-domain: "Trading"
+  owner: "test@example.com"
+
+scenario:
+  scenario-id: "otc-option-us-scenario"
+  name: "US OTC Option Processing"
+  description: "Processes US OTC option trades with region-specific rules"
+  
+  # Embedded classification rule with AND condition (Option B)
+  classification-rule:
+    condition: "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'"
+    description: "Matches US OTC option trades (trade type AND region)"
+  
+  # Stage-based processing configuration
+  processing-stages:
+    
+    # Stage 1: US-specific validation
+    - stage-name: "validation"
+      config-file: "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-validation-rules.yaml"
+      execution-order: 1
+      failure-policy: "terminate"
+      required: true
+      depends-on: []
+      stage-metadata:
+        description: "US regulatory validation for OTC options"
+        sla-ms: 1000
+    
+    # Stage 2: Enrichment
+    - stage-name: "enrichment"
+      config-file: "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-enrichment-rules.yaml"
+      execution-order: 2
+      failure-policy: "continue-with-warnings"
+      required: false
+      depends-on: ["validation"]
+      stage-metadata:
+        description: "US market data enrichment"
+        sla-ms: 2000
+

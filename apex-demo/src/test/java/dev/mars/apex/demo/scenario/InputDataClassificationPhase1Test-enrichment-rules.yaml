@@ -6,6 +6,7 @@ metadata:
   name: "Classification Test Enrichment Rules"
   description: "Basic enrichment rules for classification testing"
   version: "1.0.0"
+  type: "rule-config"
   author: "Mark Andrew Ray-Smith Cityline Ltd"
 
 # Simple enrichment rules for testing

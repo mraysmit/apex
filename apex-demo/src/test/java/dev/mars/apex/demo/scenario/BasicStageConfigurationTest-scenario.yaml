@@ -8,7 +8,7 @@ metadata:
   description: "Simple two-stage trade processing example"
   type: "scenario"
   business-domain: "Trading"
-  author: "test@example.com"
+  owner: "test@example.com"
 
 scenario:
   scenario-id: "basic-trade-processing"

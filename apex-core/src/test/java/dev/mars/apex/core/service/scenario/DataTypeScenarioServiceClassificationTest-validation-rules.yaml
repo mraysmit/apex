@@ -1,0 +1,29 @@
+metadata:
+  id: "classification-test-validation-rules"
+  name: "Classification Test Validation Rules"
+  version: "1.0.0"
+  description: "Simple validation rules for classification routing tests"
+  type: "rule-config"
+  author: "test@example.com"
+
+rules:
+  # Basic trade ID validation
+  - id: "trade-id-required"
+    name: "Trade ID Required"
+    description: "Validates that trade ID is present"
+    condition: "#data['tradeId'] != null && #data['tradeId'].toString().length() > 0"
+    message: "Trade ID is required"
+    severity: "ERROR"
+    category: "VALIDATION"
+    enabled: true
+  
+  # Trade type validation
+  - id: "trade-type-required"
+    name: "Trade Type Required"
+    description: "Validates that trade type is present"
+    condition: "#data['tradeType'] != null && #data['tradeType'].toString().length() > 0"
+    message: "Trade type is required"
+    severity: "ERROR"
+    category: "VALIDATION"
+    enabled: true
+

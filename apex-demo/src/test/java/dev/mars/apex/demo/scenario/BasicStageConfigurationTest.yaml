@@ -7,10 +7,9 @@ metadata:
   version: "1.0.0"
   description: "Test scenario registry for stage-based processing"
   type: "scenario-registry"
-  business-domain: "Testing"
-  author: "test@example.com"
+  created-by: "test@example.com"
 
-scenario-registry:
+scenarios:
   - scenario-id: "basic-trade-processing"
     config-file: "src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-scenario.yaml"
 

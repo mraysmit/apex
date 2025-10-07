@@ -67,8 +67,9 @@ public class DataTypeScenarioService {
     
     private static final Logger logger = LoggerFactory.getLogger(DataTypeScenarioService.class);
     
-    // Cache for loaded scenario configurations
-    protected final Map<String, ScenarioConfiguration> scenarioCache = new ConcurrentHashMap<>();
+    // Cache for loaded scenario configurations (LinkedHashMap preserves insertion order for classification priority)
+    // Synchronized for thread-safety while maintaining insertion order
+    protected final Map<String, ScenarioConfiguration> scenarioCache = Collections.synchronizedMap(new LinkedHashMap<>());
     
     // Mapping from data type to scenario IDs
     private final Map<String, List<String>> dataTypeToScenarios = new ConcurrentHashMap<>();
@@ -128,9 +129,9 @@ public class DataTypeScenarioService {
             // Load the registry YAML configuration
             Map<String, Object> registryConfig = configLoader.loadAsMap(registryPath);
 
-            // Parse scenario registry section
+            // Parse scenario registry section (using 'scenarios' per APEX YAML spec)
             @SuppressWarnings("unchecked")
-            List<Map<String, Object>> scenarioRegistry = (List<Map<String, Object>>) registryConfig.get("scenario-registry");
+            List<Map<String, Object>> scenarioRegistry = (List<Map<String, Object>>) registryConfig.get("scenarios");
 
             if (scenarioRegistry != null) {
                 for (Map<String, Object> registryEntry : scenarioRegistry) {
@@ -423,6 +424,21 @@ public class DataTypeScenarioService {
             scenario.setDataTypes(dataTypes);
         }
 
+        // Parse classification rule (new Map-based data routing)
+        @SuppressWarnings("unchecked")
+        Map<String, Object> classificationRule = (Map<String, Object>) scenarioData.get("classification-rule");
+        if (classificationRule != null) {
+            String condition = (String) classificationRule.get("condition");
+            String description = (String) classificationRule.get("description");
+
+            if (condition != null) {
+                scenario.setClassificationRuleCondition(condition);
+            }
+            if (description != null) {
+                scenario.setClassificationRuleDescription(description);
+            }
+        }
+
         // Parse rule configurations (references to existing rule files)
         @SuppressWarnings("unchecked")
         List<String> ruleConfigurations = (List<String>) scenarioData.get("rule-configurations");
@@ -441,9 +457,16 @@ public class DataTypeScenarioService {
                     stages.add(stage);
                 }
             }
+            // Preserve classification rule fields when creating stage-based scenario
+            String classificationCondition = scenario.getClassificationRuleCondition();
+            String classificationDescription = scenario.getClassificationRuleDescription();
+            String description = scenario.getDescription();
+
             scenario = ScenarioConfiguration.withStages(scenario.getScenarioId(), scenario.getName(),
                                                        scenario.getDataTypes(), stages);
-            scenario.setDescription(scenario.getDescription());
+            scenario.setDescription(description);
+            scenario.setClassificationRuleCondition(classificationCondition);
+            scenario.setClassificationRuleDescription(classificationDescription);
         }
 
         return scenario;
@@ -551,6 +574,76 @@ public class DataTypeScenarioService {
             TestAwareLogger.error(logger, "Error in legacy processing for scenario '{}': {}", scenario.getScenarioId(), e.getMessage(), e);
             return RuleResult.error("Legacy processing error", e.getMessage(), "ERROR", null);
         }
+    }
+
+    /**
+     * Gets the appropriate scenario for Map-based data using classification rules.
+     *
+     * Evaluates classification rules embedded in scenario files (Option B).
+     * Returns the first scenario whose classification rule matches the data.
+     *
+     * @param data the Map data to classify
+     * @return matching scenario or null if no match found
+     */
+    public ScenarioConfiguration getScenarioForMapData(Map<String, Object> data) {
+        if (data == null) {
+            TestAwareLogger.warn(logger, "Cannot get scenario for null data");
+            return null;
+        }
+
+        logger.debug("Evaluating classification rules for Map data with {} fields", data.size());
+
+        // Evaluate all scenarios with classification rules
+        for (ScenarioConfiguration scenario : scenarioCache.values()) {
+            // Only evaluate scenarios with classification rules (Option B)
+            // Scenarios with only data-types use class-based routing
+            if (scenario.hasClassificationRule()) {
+                if (scenario.matchesClassificationRule(data)) {
+                    logger.info("Matched scenario '{}' via embedded classification rule",
+                               scenario.getScenarioId());
+                    return scenario;
+                }
+            }
+        }
+
+        logger.debug("No scenario matched for Map data");
+        return null;
+    }
+
+    /**
+     * Processes Map-based data through the matched scenario's processing stages.
+     *
+     * This is the main entry point for Map-based data processing:
+     * 1. Finds matching scenario using classification rules
+     * 2. Executes the scenario's processing stages
+     * 3. Returns the execution result
+     *
+     * @param data the Map data to process
+     * @return execution result or error if no scenario matches
+     */
+    public ScenarioExecutionResult processMapData(Map<String, Object> data) {
+        if (data == null) {
+            TestAwareLogger.warn(logger, "Cannot process null data");
+            ScenarioExecutionResult result = new ScenarioExecutionResult("unknown");
+            result.addWarning("Cannot process null data");
+            result.setTerminated(true);
+            return result;
+        }
+
+        // Find matching scenario
+        ScenarioConfiguration scenario = getScenarioForMapData(data);
+
+        if (scenario == null) {
+            TestAwareLogger.warn(logger, "No scenario found for Map data with fields: {}", data.keySet());
+            ScenarioExecutionResult result = new ScenarioExecutionResult("unknown");
+            result.addWarning("No scenario matched the provided data");
+            result.setTerminated(true);
+            return result;
+        }
+
+        // Execute the scenario's processing stages
+        logger.info("Processing Map data through scenario: {}", scenario.getScenarioId());
+        return stageExecutor.executeStages(scenario, data);
     }
 
 

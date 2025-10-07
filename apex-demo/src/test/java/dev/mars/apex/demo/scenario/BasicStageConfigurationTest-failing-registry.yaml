@@ -7,9 +7,9 @@ metadata:
   version: "1.0.0"
   description: "Registry for failing validation scenario test"
   type: "scenario-registry"
-  author: "APEX Demo"
+  created-by: "APEX Demo"
 
-scenario-registry:
+scenarios:
   - scenario-id: "basic-trade-processing-failing"
     config-file: "src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-failing-scenario.yaml"
 

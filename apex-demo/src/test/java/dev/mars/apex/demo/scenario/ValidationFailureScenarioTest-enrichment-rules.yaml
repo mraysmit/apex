@@ -10,7 +10,7 @@ metadata:
   name: "Basic Trade Enrichment for Validation Testing"
   version: "1.0.0"
   description: "Simple enrichment rules for validation failure scenario demonstration"
-  type: "enrichment-config"
+  type: "rule-config"
   author: "APEX Demo Team"
 
 rules:

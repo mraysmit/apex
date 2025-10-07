@@ -7,11 +7,11 @@ metadata:
   name: "Input Data Classification Phase 1 Test Registry"
   description: "Test scenarios for Phase 1.1 classification implementation"
   version: "1.0.0"
-  author: "Mark Andrew Ray-Smith Cityline Ltd"
   type: "scenario-registry"
+  created-by: "Mark Andrew Ray-Smith Cityline Ltd"
 
 # Scenario registry for classification testing
-scenario-registry:
+scenarios:
   # Generic test scenario for classification testing
   - scenario-id: "generic-test-scenario"
     config-file: "src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test-scenario.yaml"

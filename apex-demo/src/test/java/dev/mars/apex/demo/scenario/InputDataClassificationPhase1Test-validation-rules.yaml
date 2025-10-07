@@ -6,6 +6,7 @@ metadata:
   name: "Classification Test Validation Rules"
   description: "Basic validation rules for classification testing"
   version: "1.0.0"
+  type: "rule-config"
   author: "Mark Andrew Ray-Smith Cityline Ltd"
 
 # Simple validation rules for testing

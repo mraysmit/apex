@@ -13,10 +13,9 @@ metadata:
   version: "1.0.0"
   description: "Test scenario registry for negative validation testing"
   type: "scenario-registry"
-  business-domain: "Testing"
-  author: "test@example.com"
+  created-by: "test@example.com"
 
-scenario-registry:
+scenarios:
   - scenario-id: "validation-failure-scenario"
     config-file: "src/test/java/dev/mars/apex/demo/scenario/ValidationFailureScenarioTest-scenario.yaml"
 

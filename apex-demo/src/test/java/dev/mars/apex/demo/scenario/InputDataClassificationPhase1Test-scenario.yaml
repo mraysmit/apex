@@ -6,8 +6,9 @@ metadata:
   name: "Generic Test Scenario for Classification"
   description: "Basic scenario for testing input data classification functionality"
   version: "1.0.0"
-  author: "Mark Andrew Ray-Smith Cityline Ltd"
   type: "scenario"
+  business-domain: "Testing"
+  owner: "Mark Andrew Ray-Smith Cityline Ltd"
 
 # Scenario configuration
 scenario:

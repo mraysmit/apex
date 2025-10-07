@@ -4,9 +4,9 @@ metadata:
   version: "1.0.0"
   description: "Test registry for validating SpEL error message propagation"
   type: "scenario-registry"
-  author: "test@example.com"
+  created-by: "test@example.com"
 
-scenario-registry:
+scenarios:
   - scenario-id: "spel-error-test"
     config-file: "src/test/java/dev/mars/apex/core/service/scenario/ScenarioStageSpelErrorPropagationTest-scenario.yaml"
 

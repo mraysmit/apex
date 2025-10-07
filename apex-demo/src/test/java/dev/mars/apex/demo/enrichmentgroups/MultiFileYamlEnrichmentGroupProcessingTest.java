@@ -1,4 +1,4 @@
-package dev.mars.apex.demo.enrichmentgroups.multifile;
+package dev.mars.apex.demo.enrichmentgroups;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 

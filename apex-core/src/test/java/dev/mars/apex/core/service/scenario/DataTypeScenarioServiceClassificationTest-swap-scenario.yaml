@@ -1,0 +1,44 @@
+metadata:
+  id: "commodity-swap-scenario"
+  name: "Commodity Swap Processing Scenario"
+  version: "1.0.0"
+  description: "Commodity swap trade processing with embedded classification rule"
+  type: "scenario"
+  business-domain: "Trading"
+  owner: "test@example.com"
+
+scenario:
+  scenario-id: "commodity-swap-scenario"
+  name: "Commodity Swap Processing"
+  description: "Processes commodity swap trades"
+  
+  # Embedded classification rule (Option B)
+  classification-rule:
+    condition: "#data['tradeType'] == 'CommoditySwap'"
+    description: "Matches commodity swap trades"
+  
+  # Stage-based processing configuration
+  processing-stages:
+    
+    # Stage 1: Validation
+    - stage-name: "validation"
+      config-file: "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-validation-rules.yaml"
+      execution-order: 1
+      failure-policy: "terminate"
+      required: true
+      depends-on: []
+      stage-metadata:
+        description: "Commodity swap validation"
+        sla-ms: 1000
+    
+    # Stage 2: Enrichment
+    - stage-name: "enrichment"
+      config-file: "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-enrichment-rules.yaml"
+      execution-order: 2
+      failure-policy: "continue-with-warnings"
+      required: false
+      depends-on: ["validation"]
+      stage-metadata:
+        description: "Commodity market data enrichment"
+        sla-ms: 2000
+

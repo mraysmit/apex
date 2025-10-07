@@ -1,0 +1,44 @@
+metadata:
+  id: "high-notional-otc-scenario"
+  name: "High-Notional OTC Option Processing Scenario"
+  version: "1.0.0"
+  description: "High-value OTC option trade processing with numeric comparison classification"
+  type: "scenario"
+  business-domain: "Trading"
+  owner: "test@example.com"
+
+scenario:
+  scenario-id: "high-notional-otc-scenario"
+  name: "High-Notional OTC Option Processing"
+  description: "Processes high-value OTC option trades (> $100M)"
+  
+  # Embedded classification rule with numeric comparison (Option B)
+  classification-rule:
+    condition: "#data['tradeType'] == 'OTCOption' && #data['notional'] > 100000000"
+    description: "Matches high-notional OTC option trades (notional > $100M)"
+  
+  # Stage-based processing configuration
+  processing-stages:
+    
+    # Stage 1: High-value validation
+    - stage-name: "validation"
+      config-file: "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-validation-rules.yaml"
+      execution-order: 1
+      failure-policy: "terminate"
+      required: true
+      depends-on: []
+      stage-metadata:
+        description: "Enhanced validation for high-value trades"
+        sla-ms: 1000
+    
+    # Stage 2: Enrichment
+    - stage-name: "enrichment"
+      config-file: "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-enrichment-rules.yaml"
+      execution-order: 2
+      failure-policy: "continue-with-warnings"
+      required: false
+      depends-on: ["validation"]
+      stage-metadata:
+        description: "Risk assessment and senior approval workflow"
+        sla-ms: 2000
+

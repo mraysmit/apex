@@ -1,0 +1,35 @@
+metadata:
+  id: "classification-test-enrichment-rules"
+  name: "Classification Test Enrichment Rules"
+  version: "1.0.0"
+  description: "Simple enrichment rules for classification routing tests"
+  type: "rule-config"
+  author: "test@example.com"
+
+rules:
+  # Add processing timestamp
+  - id: "add-processing-timestamp"
+    name: "Add Processing Timestamp"
+    description: "Adds processing timestamp to the trade"
+    condition: "true"
+    actions:
+      - type: "set-field"
+        field: "processingTimestamp"
+        value: "T(java.time.Instant).now().toString()"
+    severity: "INFO"
+    category: "ENRICHMENT"
+    enabled: true
+  
+  # Add processing status
+  - id: "add-processing-status"
+    name: "Add Processing Status"
+    description: "Adds processing status to the trade"
+    condition: "true"
+    actions:
+      - type: "set-field"
+        field: "processingStatus"
+        value: "PROCESSED"
+    severity: "INFO"
+    category: "ENRICHMENT"
+    enabled: true
+

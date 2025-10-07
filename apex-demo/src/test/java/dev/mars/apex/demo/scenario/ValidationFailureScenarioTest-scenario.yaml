@@ -16,7 +16,7 @@ metadata:
   description: "Demonstrates how APEX handles validation rule failures and negative test cases"
   type: "scenario"
   business-domain: "Testing"
-  author: "test@example.com"
+  owner: "test@example.com"
 
 scenario:
   scenario-id: "validation-failure-scenario"
