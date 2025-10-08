@@ -1,0 +1,77 @@
+# ============================================================================
+# Duplicate Database Data Source Demo
+# ============================================================================
+# Purpose: Demonstrate dataset deduplication for database-based lookups
+# 
+# This configuration shows two enrichments using the SAME database query.
+# With unified caching, both enrichments should share the same 
+# DatasetLookupService instance, eliminating memory duplication.
+#
+# Expected behavior:
+# - First enrichment: Cache MISS → Creates DatasetLookupService
+# - Second enrichment: Cache HIT → Reuses same DatasetLookupService
+# - Memory savings: 50% (1 service instead of 2)
+# ============================================================================
+
+metadata:
+  id: "duplicate-database-datasource-demo"
+  name: "Duplicate Database Data Source Demo"
+  version: "1.0.0"
+  type: "enrichment"
+  description: "Demonstrates dataset deduplication for database lookups"
+
+# H2 database configuration
+data-sources:
+  - name: "currency-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "./target/h2-demo/duplicate_test"
+      username: "sa"
+      password: ""
+
+enrichments:
+  # First enrichment: Lookup currency name
+  - id: "currency-name-lookup"
+    name: "Currency Name Lookup"
+    type: "lookup-enrichment"
+    condition: "#currencyCode != null"
+    
+    lookup-config:
+      lookup-key: "#currencyCode"
+      lookup-dataset:
+        type: "database"
+        connection-name: "currency-database"
+        query: "SELECT code, name, symbol, region FROM currencies WHERE code = :code"
+        key-field: "code"
+        parameters:
+          - field: "code"
+            type: "string"
+    
+    field-mappings:
+      - source-field: "NAME"
+        target-field: "currencyName"
+
+  # Second enrichment: Lookup currency symbol (SAME QUERY!)
+  - id: "currency-symbol-lookup"
+    name: "Currency Symbol Lookup"
+    type: "lookup-enrichment"
+    condition: "#currencyCode != null"
+
+    lookup-config:
+      lookup-key: "#currencyCode"
+      lookup-dataset:
+        type: "database"
+        connection-name: "currency-database"
+        query: "SELECT code, name, symbol, region FROM currencies WHERE code = :code"
+        key-field: "code"
+        parameters:
+          - field: "code"
+            type: "string"
+
+    field-mappings:
+      - source-field: "SYMBOL"
+        target-field: "currencySymbol"
+      - source-field: "REGION"
+        target-field: "currencyRegion"
+

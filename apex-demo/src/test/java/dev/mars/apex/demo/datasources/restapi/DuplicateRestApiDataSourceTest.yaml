@@ -1,0 +1,78 @@
+# ============================================================================
+# Duplicate REST API Data Source Demo
+# ============================================================================
+# Purpose: Demonstrate dataset deduplication for REST API-based lookups
+# 
+# This configuration shows two enrichments using the SAME REST API endpoint.
+# With unified caching, both enrichments should share the same 
+# DatasetLookupService instance, eliminating memory duplication.
+#
+# Expected behavior:
+# - First enrichment: Cache MISS → Creates DatasetLookupService
+# - Second enrichment: Cache HIT → Reuses same DatasetLookupService
+# - Memory savings: 50% (1 service instead of 2)
+# ============================================================================
+
+metadata:
+  id: "duplicate-restapi-datasource-demo"
+  name: "Duplicate REST API Data Source Demo"
+  version: "1.0.0"
+  type: "enrichment"
+  description: "Demonstrates dataset deduplication for REST API lookups"
+
+# REST API data source configuration
+data-sources:
+  - name: "currency-api"
+    type: "rest-api"
+    enabled: true
+
+    connection:
+      base-url: "${REST_API_BASE_URL}"
+      timeout: 5000
+
+    endpoints:
+      get-currency: "/api/currency/{code}"
+
+enrichments:
+  # First enrichment: Lookup currency name from REST API
+  - id: "currency-name-lookup"
+    name: "Currency Name Lookup"
+    type: "lookup-enrichment"
+    condition: "#currencyCode != null"
+    
+    lookup-config:
+      lookup-key: "#currencyCode"
+      lookup-dataset:
+        type: "rest-api"
+        connection-name: "currency-api"
+        endpoint: "get-currency"
+        key-field: "code"
+        parameters:
+          - field: "code"
+            type: "string"
+    
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+
+  # Second enrichment: Lookup currency symbol (SAME ENDPOINT!)
+  - id: "currency-symbol-lookup"
+    name: "Currency Symbol Lookup"
+    type: "lookup-enrichment"
+    condition: "#currencyCode != null"
+    
+    lookup-config:
+      lookup-key: "#currencyCode"
+      lookup-dataset:
+        type: "rest-api"
+        connection-name: "currency-api"
+        endpoint: "get-currency"
+        key-field: "code"
+        parameters:
+          - field: "code"
+            type: "string"
+    
+    field-mappings:
+      - source-field: "symbol"
+        target-field: "currencySymbol"
+
