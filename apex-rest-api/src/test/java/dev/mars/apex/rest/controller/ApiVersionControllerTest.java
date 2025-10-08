@@ -54,10 +54,12 @@ public class ApiVersionControllerTest extends BaseIntegrationTest {
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertNotNull(response.getBody());
-            assertTrue(response.getBody().containsKey("currentVersion"));
-            assertTrue(response.getBody().containsKey("apiVersion"));
-            assertTrue(response.getBody().containsKey("status"));
-            assertTrue(response.getBody().containsKey("timestamp"));
+            Map<String, Object> body = response.getBody();
+            assertNotNull(body, "Response body should not be null");
+            assertTrue(body.containsKey("currentVersion"));
+            assertTrue(body.containsKey("apiVersion"));
+            assertTrue(body.containsKey("status"));
+            assertTrue(body.containsKey("timestamp"));
         }
 
         @Test
@@ -70,9 +72,10 @@ public class ApiVersionControllerTest extends BaseIntegrationTest {
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertNotNull(response.getBody());
-            assertEquals("1.0.0", response.getBody().get("apiVersion"));
-            assertTrue(response.getBody().containsKey("supportedVersions"));
-            assertTrue(response.getBody().containsKey("deprecatedVersions"));
+            Map<String, Object> body = response.getBody();
+            assertEquals("1.0.0", body.get("apiVersion"));
+            assertTrue(body.containsKey("supportedVersions"));
+            assertTrue(body.containsKey("deprecatedVersions"));
         }
 
         @Test
@@ -105,12 +108,14 @@ public class ApiVersionControllerTest extends BaseIntegrationTest {
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertNotNull(response.getBody());
-            assertTrue(response.getBody().containsKey("currentDeprecations"));
-            assertTrue(response.getBody().containsKey("plannedDeprecations"));
-            assertTrue(response.getBody().containsKey("policy"));
-            assertTrue(response.getBody().containsKey("migrationTimeline"));
-            assertTrue(response.getBody().containsKey("contact"));
-            assertTrue(response.getBody().containsKey("timestamp"));
+            assertNotNull(response.getBody(), "Response body should not be null");
+            Map<String, Object> body = response.getBody();
+            assertTrue(body.containsKey("currentDeprecations"));
+            assertTrue(body.containsKey("plannedDeprecations"));
+            assertTrue(body.containsKey("policy"));
+            assertTrue(body.containsKey("migrationTimeline"));
+            assertTrue(body.containsKey("contact"));
+            assertTrue(body.containsKey("timestamp"));
         }
     }
 

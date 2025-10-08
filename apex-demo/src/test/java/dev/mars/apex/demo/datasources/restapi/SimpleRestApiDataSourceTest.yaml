@@ -1,0 +1,45 @@
+metadata:
+  id: "simple-restapi-datasource-demo"
+  name: "Simple REST API Data Source Demo"
+  version: "1.0.0"
+  type: "enrichment"
+
+# Simple REST API data source example
+data-sources:
+  - name: "mock-api"
+    type: "rest-api"
+    enabled: true
+    description: "Mock REST API for demo purposes"
+    
+    connection:
+      base-url: "https://jsonplaceholder.typicode.com"
+      timeout: 5000
+      retry-attempts: 2
+    
+    queries:
+      getUserById: "/users/{userId}"
+
+enrichments:
+  - id: "user-api-lookup"
+    name: "Simple User API Lookup"
+    type: "lookup-enrichment"
+    description: "Demonstrates the simplest possible REST API data source"
+    condition: "#userId != null"
+    
+    lookup-config:
+      lookup-key: "#userId"
+      lookup-dataset:
+        type: "rest-api"
+        connection-name: "mock-api"
+        query: "getUserById"
+        parameters:
+          - field: "userId"
+            type: "string"
+    
+    field-mappings:
+      - source-field: "name"
+        target-field: "userName"
+      - source-field: "email"
+        target-field: "userEmail"
+      - source-field: "phone"
+        target-field: "userPhone"

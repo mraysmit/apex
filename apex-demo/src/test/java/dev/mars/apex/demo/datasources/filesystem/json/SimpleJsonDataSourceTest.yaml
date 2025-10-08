@@ -1,0 +1,31 @@
+metadata:
+  id: "simple-json-datasource-demo"
+  name: "Simple JSON Data Source Demo"
+  version: "1.0.0"
+  type: "enrichment"
+
+# Simple JSON file data source example
+enrichments:
+  - id: "product-lookup"
+    name: "Simple Product Lookup"
+    type: "lookup-enrichment"
+    description: "Demonstrates the simplest possible JSON file data source"
+    condition: "#productId != null"
+
+    lookup-config:
+      lookup-key: "#productId"
+      lookup-dataset:
+        type: "file-system"
+        key-field: "id"
+        file-path: "demo-data/json/products.json"
+        format-config:
+          type: "json"
+          root-path: "$"
+
+    field-mappings:
+      - source-field: "name"
+        target-field: "productName"
+      - source-field: "price"
+        target-field: "productPrice"
+      - source-field: "category"
+        target-field: "productCategory"

@@ -69,11 +69,10 @@ public class ApexYamlLexicalValidator {
     private static final Pattern SPEL_PATTERN = Pattern.compile("#[a-zA-Z][a-zA-Z0-9_.]*");
     private static final Pattern VERSION_PATTERN = Pattern.compile("\\d+\\.\\d+(\\.\\d+)?");
     
-    private final YamlConfigurationLoader configLoader;
     private final Yaml yamlParser;
     
     public ApexYamlLexicalValidator() {
-        this.configLoader = new YamlConfigurationLoader();
+        new YamlConfigurationLoader();
         this.yamlParser = new Yaml();
     }
     

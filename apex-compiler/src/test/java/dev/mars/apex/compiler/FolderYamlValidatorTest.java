@@ -3,7 +3,6 @@ package dev.mars.apex.compiler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
-import java.nio.file.Paths;
 
 /**
  * Test class for FolderYamlValidator to validate specific folders.

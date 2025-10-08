@@ -1,0 +1,35 @@
+metadata:
+  id: "simple-inline-datasource-demo"
+  name: "Simple Inline Data Source Demo"
+  version: "1.0.0"
+  type: "enrichment"
+
+# Simple inline data source example
+enrichments:
+  - id: "currency-lookup"
+    name: "Simple Currency Lookup"
+    type: "lookup-enrichment"
+    description: "Demonstrates the simplest possible inline data source"
+    condition: "#currencyCode != null"
+    
+    lookup-config:
+      lookup-key: "#currencyCode"
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        data:
+          - code: "USD"
+            name: "US Dollar"
+            symbol: "$"
+          - code: "EUR"
+            name: "Euro"
+            symbol: "€"
+          - code: "GBP"
+            name: "British Pound"
+            symbol: "£"
+    
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+      - source-field: "symbol"
+        target-field: "currencySymbol"

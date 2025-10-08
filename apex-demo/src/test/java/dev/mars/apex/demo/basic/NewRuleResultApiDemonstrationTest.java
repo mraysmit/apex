@@ -69,7 +69,6 @@ public class NewRuleResultApiDemonstrationTest {
         
         // Show backward compatibility
         System.out.println("\n--- BACKWARD COMPATIBILITY ---");
-        @SuppressWarnings("deprecation")
         String deprecatedRuleName = result.getRuleName();
         System.out.println("result.getRuleName() [DEPRECATED]: " + deprecatedRuleName);
         assertEquals("Success Group", deprecatedRuleName, "Backward compatibility preserved");
@@ -109,7 +108,6 @@ public class NewRuleResultApiDemonstrationTest {
         
         // Show backward compatibility
         System.out.println("\n--- BACKWARD COMPATIBILITY ---");
-        @SuppressWarnings("deprecation")
         String deprecatedRuleName = result.getRuleName();
         System.out.println("result.getRuleName() [DEPRECATED]: " + deprecatedRuleName);
         assertEquals("Failure Group", deprecatedRuleName, "Backward compatibility preserved");
@@ -131,7 +129,6 @@ public class NewRuleResultApiDemonstrationTest {
         
         System.out.println("\n--- OLD CONFUSING API ---");
         System.out.println("X PROBLEM: getRuleName() returns failed group name, not matched rule name");
-        @SuppressWarnings("deprecation")
         String oldApi = result.getRuleName();
         System.out.println("result.getRuleName(): " + oldApi + " (confusing - is this a matched rule or failed group?)");
         

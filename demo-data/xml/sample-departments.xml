@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<departments>
+    <department>
+        <id>D001</id>
+        <name>Engineering</name>
+        <manager>John Smith</manager>
+        <budget>500000</budget>
+    </department>
+    <department>
+        <id>D002</id>
+        <name>Marketing</name>
+        <manager>Sarah Jones</manager>
+        <budget>300000</budget>
+    </department>
+    <department>
+        <id>D003</id>
+        <name>Sales</name>
+        <manager>Mike Brown</manager>
+        <budget>400000</budget>
+    </department>
+</departments>

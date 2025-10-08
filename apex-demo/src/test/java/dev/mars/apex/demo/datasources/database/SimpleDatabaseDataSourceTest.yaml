@@ -1,0 +1,38 @@
+metadata:
+  id: "simple-database-datasource-demo"
+  name: "Simple Database Data Source Demo"
+  version: "1.0.0"
+  type: "enrichment"
+
+# Simple database data source example
+data-sources:
+  - name: "demo-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "./target/h2-demo/datasource_demo"
+      username: "sa"
+      password: ""
+
+enrichments:
+  - id: "customer-lookup"
+    name: "Simple Customer Lookup"
+    type: "lookup-enrichment"
+    description: "Demonstrates the simplest possible database data source"
+    condition: "#customerId != null"
+    
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        connection-name: "demo-database"
+        query: "SELECT name, email FROM customers WHERE id = :customerId"
+        parameters:
+          - field: "customerId"
+            type: "string"
+
+    field-mappings:
+      - source-field: "NAME"
+        target-field: "customerName"
+      - source-field: "EMAIL"
+        target-field: "customerEmail"

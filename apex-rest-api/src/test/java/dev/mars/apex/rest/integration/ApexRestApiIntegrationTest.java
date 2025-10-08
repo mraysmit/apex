@@ -315,8 +315,8 @@ class ApexRestApiIntegrationTest {
             // Then
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertNotNull(response.getBody());
-            assertTrue(response.getBody().containsKey("count"));
-            assertTrue(response.getBody().containsKey("definedRules"));
+            assertTrue(response.getBody() != null && response.getBody().containsKey("count"));
+            assertTrue(response.getBody() != null && response.getBody().containsKey("definedRules"));
 
             // Validate JSON structure using ObjectMapper
             try {
@@ -328,12 +328,19 @@ class ApexRestApiIntegrationTest {
                 // Verify we can deserialize back to Map
                 @SuppressWarnings("unchecked")
                 Map<String, Object> deserializedResponse = objectMapper.readValue(jsonResponse, Map.class);
-                assertEquals(response.getBody().get("count"), deserializedResponse.get("count"),
-                           "Deserialized count should match original");
+                Object originalCount = response.getBody() != null ? response.getBody().get("count") : null;
+                Object deserializedCount = deserializedResponse.get("count");
+                assertEquals(originalCount, deserializedCount, "Deserialized count should match original");
+                if (response.getBody() == null) {
+                    fail("Response body is null");
+                }
             } catch (Exception e) {
                 fail("JSON serialization/deserialization should work: " + e.getMessage());
             }
-            assertTrue(response.getBody().containsKey("timestamp"));
+            assertNotNull(response.getBody(), "Response body should not be null");
+            if (response.getBody() != null) {
+                assertTrue(response.getBody().containsKey("timestamp"));
+            }
         }
     }
 }

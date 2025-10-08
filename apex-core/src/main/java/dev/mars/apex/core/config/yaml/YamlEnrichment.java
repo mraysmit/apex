@@ -457,6 +457,10 @@ public class YamlEnrichment {
         @JsonProperty("cache-ttl-seconds")
         private Integer cacheTtlSeconds;
 
+        // File format configuration for file-system datasets
+        @JsonProperty("format-config")
+        private Map<String, Object> formatConfig;
+
         // Database-specific fields
         @JsonProperty("connection-name")
         private String connectionName; // Reference to data source in dataSources section
@@ -566,6 +570,14 @@ public class YamlEnrichment {
 
         public void setCacheTtlSeconds(Integer cacheTtlSeconds) {
             this.cacheTtlSeconds = cacheTtlSeconds;
+        }
+
+        public Map<String, Object> getFormatConfig() {
+            return formatConfig;
+        }
+
+        public void setFormatConfig(Map<String, Object> formatConfig) {
+            this.formatConfig = formatConfig;
         }
 
         // Database-specific getters and setters

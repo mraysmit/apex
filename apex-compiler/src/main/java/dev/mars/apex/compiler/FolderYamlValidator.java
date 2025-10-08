@@ -35,8 +35,6 @@ public class FolderYamlValidator {
 
     private final ApexYamlLexicalValidator validator;
     private final List<ValidationReport> reports;
-    private final boolean generateReport;
-
     public FolderYamlValidator() {
         this(false);
     }
@@ -44,7 +42,6 @@ public class FolderYamlValidator {
     public FolderYamlValidator(boolean generateReport) {
         this.validator = new ApexYamlLexicalValidator();
         this.reports = new ArrayList<>();
-        this.generateReport = generateReport;
     }
 
     public static void main(String[] args) {
@@ -304,10 +301,6 @@ public class FolderYamlValidator {
 
         public String getFileName() {
             return fileName;
-        }
-
-        public String getRelativePath() {
-            return relativePath;
         }
     }
 
