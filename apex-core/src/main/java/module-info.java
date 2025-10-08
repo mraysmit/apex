@@ -82,6 +82,9 @@ module dev.mars.apex.core {
     exports dev.mars.apex.core.service.data.external.cache;
     exports dev.mars.apex.core.service.data.external.file;
 
+    // Unified caching exports
+    exports dev.mars.apex.core.cache;
+
     // Data sink exports
     exports dev.mars.apex.core.config.datasink;
     exports dev.mars.apex.core.service.data.external.database;

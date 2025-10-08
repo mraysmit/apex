@@ -17,6 +17,7 @@ package dev.mars.apex.core.service.enrichment;
  */
 
 
+import dev.mars.apex.core.cache.ApexCacheManager;
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -50,6 +51,9 @@ class EnrichmentServiceTest {
 
     @BeforeEach
     void setUp() {
+        // Reset cache manager before each test to ensure clean state
+        ApexCacheManager.resetInstance();
+
         serviceRegistry = new LookupServiceRegistry();
         evaluatorService = new ExpressionEvaluatorService();
         enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
@@ -651,5 +655,184 @@ class EnrichmentServiceTest {
         public void setRegion(String region) {
             this.region = region;
         }
+    }
+
+    // ========================================
+    // Cache Statistics Tests
+    // ========================================
+
+    @Test
+    @DisplayName("Should track cache statistics for dataset cache")
+    void testDatasetCacheStatistics() {
+        // Create enrichment with inline dataset
+        YamlEnrichment enrichment = createInlineDatasetEnrichment();
+        TestDataObject targetObject = new TestDataObject("USD", 1000.0);
+
+        // Get cache manager
+        ApexCacheManager cacheManager = ApexCacheManager.getInstance();
+
+        // Process enrichment first time
+        enrichmentService.enrichObject(enrichment, targetObject);
+
+        // Verify dataset cache has entries
+        int datasetCacheSize = cacheManager.size(ApexCacheManager.DATASET_CACHE);
+        assertTrue(datasetCacheSize > 0, "Dataset cache should have entries after enrichment");
+
+        // Process same enrichment again
+        enrichmentService.enrichObject(enrichment, targetObject);
+
+        // Dataset cache size should remain the same (reusing cached dataset)
+        assertEquals(datasetCacheSize, cacheManager.size(ApexCacheManager.DATASET_CACHE),
+            "Dataset cache size should not increase when reusing datasets");
+    }
+
+    @Test
+    @DisplayName("Should track cache statistics for expression cache")
+    void testExpressionCacheStatistics() {
+        // Create enrichment with expressions
+        YamlEnrichment enrichment = createInlineDatasetEnrichment();
+        TestDataObject targetObject = new TestDataObject("USD", 1000.0);
+
+        // Get cache manager
+        ApexCacheManager cacheManager = ApexCacheManager.getInstance();
+
+        // Process enrichment multiple times
+        for (int i = 0; i < 3; i++) {
+            enrichmentService.enrichObject(enrichment, targetObject);
+        }
+
+        // Verify expression cache has entries
+        int expressionCacheSize = cacheManager.size(ApexCacheManager.EXPRESSION_CACHE);
+        assertTrue(expressionCacheSize > 0,
+            "Expression cache should have entries after processing enrichments");
+    }
+
+    @Test
+    @DisplayName("Should provide cache statistics via processor")
+    void testGetCacheStatistics() {
+        // Create enrichment with inline dataset
+        YamlEnrichment enrichment = createInlineDatasetEnrichment();
+        TestDataObject targetObject = new TestDataObject("USD", 1000.0);
+
+        // Process enrichment
+        enrichmentService.enrichObject(enrichment, targetObject);
+
+        // Get cache statistics from processor
+        Map<String, Object> stats = enrichmentService.getProcessor().getCacheStatistics();
+
+        // Verify statistics structure
+        assertNotNull(stats, "Cache statistics should not be null");
+        assertTrue(stats.containsKey("datasetCacheSize"), "Should have dataset cache size");
+        assertTrue(stats.containsKey("expressionCacheSize"), "Should have expression cache size");
+        assertTrue(stats.containsKey("lookupCacheSize"), "Should have lookup cache size");
+
+        // Verify statistics values are reasonable
+        assertTrue((Integer) stats.get("datasetCacheSize") >= 0,
+            "Dataset cache size should be non-negative");
+        assertTrue((Integer) stats.get("expressionCacheSize") >= 0,
+            "Expression cache size should be non-negative");
+    }
+
+    @Test
+    @DisplayName("Should clear all caches")
+    void testClearCache() {
+        // Create enrichment with inline dataset
+        YamlEnrichment enrichment = createInlineDatasetEnrichment();
+        TestDataObject targetObject = new TestDataObject("USD", 1000.0);
+
+        // Get cache manager
+        ApexCacheManager cacheManager = ApexCacheManager.getInstance();
+
+        // Process enrichment
+        enrichmentService.enrichObject(enrichment, targetObject);
+
+        // Verify caches have entries
+        assertTrue(cacheManager.size(ApexCacheManager.DATASET_CACHE) > 0,
+            "Dataset cache should have entries");
+
+        // Clear cache
+        enrichmentService.getProcessor().clearCache();
+
+        // Verify caches are cleared
+        assertEquals(0, cacheManager.size(ApexCacheManager.DATASET_CACHE),
+            "Dataset cache should be empty after clear");
+        assertEquals(0, cacheManager.size(ApexCacheManager.EXPRESSION_CACHE),
+            "Expression cache should be empty after clear");
+        assertEquals(0, cacheManager.size(ApexCacheManager.LOOKUP_RESULT_CACHE),
+            "Lookup result cache should be empty after clear");
+    }
+
+    @Test
+    @DisplayName("Should deduplicate identical inline datasets")
+    void testDatasetDeduplication() {
+        // Create two enrichments with identical inline datasets
+        YamlEnrichment enrichment1 = createInlineDatasetEnrichment();
+        YamlEnrichment enrichment2 = createInlineDatasetEnrichment();
+
+        TestDataObject targetObject = new TestDataObject("USD", 1000.0);
+
+        // Get cache manager
+        ApexCacheManager cacheManager = ApexCacheManager.getInstance();
+
+        // Process first enrichment
+        enrichmentService.enrichObject(enrichment1, targetObject);
+        int datasetCacheSizeAfterFirst = cacheManager.size(ApexCacheManager.DATASET_CACHE);
+
+        // Process second enrichment with identical dataset
+        enrichmentService.enrichObject(enrichment2, targetObject);
+        int datasetCacheSizeAfterSecond = cacheManager.size(ApexCacheManager.DATASET_CACHE);
+
+        // Should have same cache size (datasets deduplicated)
+        assertEquals(datasetCacheSizeAfterFirst, datasetCacheSizeAfterSecond,
+            "Identical datasets should be deduplicated - cache size should not increase");
+    }
+
+    // ========================================
+    // Helper Methods for Cache Tests
+    // ========================================
+
+    private YamlEnrichment createInlineDatasetEnrichment() {
+        YamlEnrichment enrichment = new YamlEnrichment();
+        enrichment.setId("test-inline-enrichment");
+        enrichment.setType("lookup-enrichment");  // Set the enrichment type
+        enrichment.setTargetField("currencyName");
+
+        // Create lookup config with inline dataset
+        YamlEnrichment.LookupConfig lookupConfig = new YamlEnrichment.LookupConfig();
+
+        YamlEnrichment.LookupDataset dataset = new YamlEnrichment.LookupDataset();
+        dataset.setType("inline");
+        dataset.setKeyField("code");
+
+        // Create inline data
+        List<Map<String, Object>> data = new ArrayList<>();
+        Map<String, Object> usd = new HashMap<>();
+        usd.put("code", "USD");
+        usd.put("name", "US Dollar");
+        usd.put("symbol", "$");
+        data.add(usd);
+
+        Map<String, Object> eur = new HashMap<>();
+        eur.put("code", "EUR");
+        eur.put("name", "Euro");
+        eur.put("symbol", "€");
+        data.add(eur);
+
+        dataset.setData(data);
+        lookupConfig.setLookupDataset(dataset);
+        lookupConfig.setLookupKey("currency");  // TestDataObject has 'currency' field, not 'currencyCode'
+
+        // Create field mapping to specify which field to extract from lookup result
+        YamlEnrichment.FieldMapping fieldMapping = new YamlEnrichment.FieldMapping();
+        fieldMapping.setSourceField("name");
+        fieldMapping.setTargetField("currencyName");
+
+        List<YamlEnrichment.FieldMapping> fieldMappings = new ArrayList<>();
+        fieldMappings.add(fieldMapping);
+        enrichment.setFieldMappings(fieldMappings);
+
+        enrichment.setLookupConfig(lookupConfig);
+
+        return enrichment;
     }
 }

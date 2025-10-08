@@ -1,11 +1,13 @@
 package dev.mars.apex.core.service.enrichment;
 
+import dev.mars.apex.core.cache.ApexCacheManager;
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.DatasetLookupService;
 import dev.mars.apex.core.service.lookup.DatasetLookupServiceFactory;
+import dev.mars.apex.core.service.lookup.DatasetSignature;
 import dev.mars.apex.core.service.lookup.LookupService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.engine.model.Rule;
@@ -13,6 +15,7 @@ import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.config.yaml.YamlRule;
 import dev.mars.apex.core.config.yaml.YamlRuleGroup;
+import dev.mars.apex.core.service.data.external.cache.CacheStatistics;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -23,7 +26,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,32 +61,30 @@ import java.util.logging.Logger;
 public class YamlEnrichmentProcessor {
     
     private static final Logger LOGGER = Logger.getLogger(YamlEnrichmentProcessor.class.getName());
-    
+
     private final LookupServiceRegistry serviceRegistry;
     @SuppressWarnings("unused") // Reserved for future expression evaluation enhancements
     private final ExpressionEvaluatorService evaluatorService;
     private final SpelExpressionParser parser;
 
-    // Cache for compiled expressions to improve performance
-    private final Map<String, Expression> expressionCache = new ConcurrentHashMap<>();
-
-    // Cache for lookup results (if caching is enabled)
-    private final Map<String, CachedLookupResult> lookupCache = new ConcurrentHashMap<>();
+    // Unified cache manager for all caching needs
+    private final ApexCacheManager cacheManager;
 
     // Current configuration context for database lookups
     private dev.mars.apex.core.config.yaml.YamlRuleConfiguration currentConfiguration;
 
     // Rule result tracking for conditional mapping support
-    private final Map<String, Map<String, Boolean>> ruleGroupResults = new ConcurrentHashMap<>();
-    private final Map<String, Boolean> individualRuleResults = new ConcurrentHashMap<>();
-    
+    private final Map<String, Map<String, Boolean>> ruleGroupResults = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<String, Boolean> individualRuleResults = new java.util.concurrent.ConcurrentHashMap<>();
+
     public YamlEnrichmentProcessor(LookupServiceRegistry serviceRegistry,
                                    ExpressionEvaluatorService evaluatorService) {
         this.serviceRegistry = serviceRegistry;
         this.evaluatorService = evaluatorService;
         this.parser = new SpelExpressionParser();
+        this.cacheManager = ApexCacheManager.getInstance();
 
-        LOGGER.info("YamlEnrichmentProcessor initialized with service registry and expression evaluator");
+        LOGGER.info("YamlEnrichmentProcessor initialized with unified cache manager");
     }
     
     /**
@@ -600,37 +600,37 @@ public class YamlEnrichmentProcessor {
 
     /**
      * Perform lookup operation with caching support.
-     * 
+     *
      * @param lookupService The lookup service
      * @param lookupKey The lookup key
      * @param lookupConfig The lookup configuration
      * @return The lookup result
      */
-    private Object performLookup(LookupService lookupService, Object lookupKey, 
+    private Object performLookup(LookupService lookupService, Object lookupKey,
                                 YamlEnrichment.LookupConfig lookupConfig) {
-        
+
         String cacheKey = lookupService.getName() + ":" + lookupKey.toString();
-        
+
         // Check cache if enabled
         if (lookupConfig.getCacheEnabled() != null && lookupConfig.getCacheEnabled()) {
-            CachedLookupResult cached = lookupCache.get(cacheKey);
-            if (cached != null && !cached.isExpired()) {
+            Object cached = cacheManager.get(ApexCacheManager.LOOKUP_RESULT_CACHE, cacheKey);
+            if (cached != null) {
                 LOGGER.finest("Cache hit for lookup key: " + lookupKey);
-                return cached.getResult();
+                return cached;
             }
         }
-        
+
         // Perform actual lookup
         Object result = lookupService.transform(lookupKey);
-        
+
         // Cache result if caching is enabled
         if (lookupConfig.getCacheEnabled() != null && lookupConfig.getCacheEnabled()) {
-            int ttlSeconds = lookupConfig.getCacheTtlSeconds() != null ? 
-                           lookupConfig.getCacheTtlSeconds() : 300;
-            lookupCache.put(cacheKey, new CachedLookupResult(result, ttlSeconds));
+            long ttlSeconds = lookupConfig.getCacheTtlSeconds() != null ?
+                           lookupConfig.getCacheTtlSeconds() : 300L;
+            cacheManager.put(ApexCacheManager.LOOKUP_RESULT_CACHE, cacheKey, result, ttlSeconds);
             LOGGER.finest("Cached lookup result for key: " + lookupKey);
         }
-        
+
         return result;
     }
 
@@ -888,15 +888,26 @@ public class YamlEnrichmentProcessor {
      * @return The compiled expression
      */
     private Expression getOrCompileExpression(String expressionString) {
-        return expressionCache.computeIfAbsent(expressionString, parser::parseExpression);
+        // Check cache first
+        Object cached = cacheManager.get(ApexCacheManager.EXPRESSION_CACHE, expressionString);
+        if (cached instanceof Expression) {
+            return (Expression) cached;
+        }
+
+        // Compile and cache
+        Expression expression = parser.parseExpression(expressionString);
+        cacheManager.put(ApexCacheManager.EXPRESSION_CACHE, expressionString, expression);
+        return expression;
     }
 
     /**
-     * Clear the lookup cache.
+     * Clear all caches.
      */
     public void clearCache() {
-        lookupCache.clear();
-        LOGGER.info("Lookup cache cleared");
+        cacheManager.clearScope(ApexCacheManager.LOOKUP_RESULT_CACHE);
+        cacheManager.clearScope(ApexCacheManager.EXPRESSION_CACHE);
+        cacheManager.clearScope(ApexCacheManager.DATASET_CACHE);
+        LOGGER.info("All caches cleared");
     }
 
     /**
@@ -906,19 +917,35 @@ public class YamlEnrichmentProcessor {
      */
     public Map<String, Object> getCacheStatistics() {
         Map<String, Object> stats = new HashMap<>();
-        stats.put("cacheSize", lookupCache.size());
-        stats.put("expressionCacheSize", expressionCache.size());
 
-        long expiredEntries = lookupCache.values().stream()
-            .mapToLong(entry -> entry.isExpired() ? 1 : 0)
-            .sum();
-        stats.put("expiredEntries", expiredEntries);
+        // Get statistics from ApexCacheManager
+        CacheStatistics lookupStats = cacheManager.getStatistics(ApexCacheManager.LOOKUP_RESULT_CACHE);
+        CacheStatistics expressionStats = cacheManager.getStatistics(ApexCacheManager.EXPRESSION_CACHE);
+        CacheStatistics datasetStats = cacheManager.getStatistics(ApexCacheManager.DATASET_CACHE);
+
+        // Lookup result cache stats
+        stats.put("lookupCacheSize", cacheManager.size(ApexCacheManager.LOOKUP_RESULT_CACHE));
+        stats.put("lookupCacheHits", lookupStats != null ? lookupStats.getHits() : 0);
+        stats.put("lookupCacheMisses", lookupStats != null ? lookupStats.getMisses() : 0);
+        stats.put("lookupCacheHitRate", lookupStats != null ? lookupStats.getHitRate() : 0.0);
+
+        // Expression cache stats
+        stats.put("expressionCacheSize", cacheManager.size(ApexCacheManager.EXPRESSION_CACHE));
+        stats.put("expressionCacheHits", expressionStats != null ? expressionStats.getHits() : 0);
+        stats.put("expressionCacheMisses", expressionStats != null ? expressionStats.getMisses() : 0);
+
+        // Dataset cache stats
+        stats.put("datasetCacheSize", cacheManager.size(ApexCacheManager.DATASET_CACHE));
+        stats.put("datasetCacheHits", datasetStats != null ? datasetStats.getHits() : 0);
+        stats.put("datasetCacheMisses", datasetStats != null ? datasetStats.getMisses() : 0);
 
         return stats;
     }
 
     /**
      * Resolve lookup service from either service registry or dataset configuration.
+     * Uses dataset caching to avoid creating duplicate DatasetLookupService instances
+     * for identical datasets.
      *
      * @param enrichmentId The enrichment ID for error messages
      * @param lookupConfig The lookup configuration
@@ -939,20 +966,34 @@ public class YamlEnrichmentProcessor {
             return service;
         }
 
-        // Priority 2: Dataset configuration (new approach)
+        // Priority 2: Dataset configuration with caching
         if (lookupConfig.getLookupDataset() != null) {
             YamlEnrichment.LookupDataset dataset = lookupConfig.getLookupDataset();
 
-            // Generate a unique service name for the dataset
-            String datasetServiceName = "dataset-" + enrichmentId + "-" + dataset.getType();
+            // Generate content-based signature for the dataset
+            DatasetSignature signature = DatasetSignature.from(dataset);
+            String cacheKey = signature.toString();
+
+            // Check cache first
+            Object cached = cacheManager.get(ApexCacheManager.DATASET_CACHE, cacheKey);
+            if (cached instanceof DatasetLookupService) {
+                LOGGER.info("✅ Dataset cache HIT for signature: " + signature.toShortString());
+                return (DatasetLookupService) cached;
+            }
+
+            // Create new dataset service
+            String datasetServiceName = "dataset-" + signature.toShortString();
 
             try {
                 DatasetLookupService datasetService = DatasetLookupServiceFactory
                     .createDatasetLookupService(datasetServiceName, dataset, this.currentConfiguration);
 
-                LOGGER.fine("Created dataset lookup service: " + datasetServiceName +
+                // Cache the dataset service
+                cacheManager.put(ApexCacheManager.DATASET_CACHE, cacheKey, datasetService);
+
+                LOGGER.info("❌ Dataset cache MISS - Created and cached dataset lookup service: " + datasetServiceName +
                            " (type: " + dataset.getType() + ", records: " +
-                           datasetService.getAllRecords().size() + ")");
+                           datasetService.getAllRecords().size() + ", signature: " + signature.toShortString() + ")");
 
                 return datasetService;
             } catch (Exception e) {
@@ -1097,27 +1138,6 @@ public class YamlEnrichmentProcessor {
             }
         }
         return null;
-    }
-
-    /**
-     * Cached lookup result with TTL support.
-     */
-    private static class CachedLookupResult {
-        private final Object result;
-        private final long expirationTime;
-
-        public CachedLookupResult(Object result, int ttlSeconds) {
-            this.result = result;
-            this.expirationTime = System.currentTimeMillis() + (ttlSeconds * 1000L);
-        }
-
-        public Object getResult() {
-            return result;
-        }
-
-        public boolean isExpired() {
-            return System.currentTimeMillis() > expirationTime;
-        }
     }
 
     /**

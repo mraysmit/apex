@@ -1,0 +1,82 @@
+metadata:
+  id: "duplicate-inline-datasource-demo"
+  name: "Duplicate Inline Data Source Demo"
+  version: "1.0.0"
+  type: "enrichment"
+
+# Demonstration of potential duplicate loading issue:
+# Two enrichments using the SAME inline dataset but different field mappings
+enrichments:
+  # First enrichment: Currency code -> Currency name
+  - id: "currency-name-lookup"
+    name: "Currency Name Lookup"
+    type: "lookup-enrichment"
+    description: "First enrichment using inline currency data"
+    condition: "#currencyCode != null"
+    
+    lookup-config:
+      lookup-key: "#currencyCode"
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        data:
+          - code: "USD"
+            name: "US Dollar"
+            symbol: "$"
+            region: "North America"
+          - code: "EUR"
+            name: "Euro"
+            symbol: "€"
+            region: "Europe"
+          - code: "GBP"
+            name: "British Pound"
+            symbol: "£"
+            region: "United Kingdom"
+          - code: "JPY"
+            name: "Japanese Yen"
+            symbol: "¥"
+            region: "Asia"
+    
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+        required: false
+
+  # Second enrichment: Currency code -> Currency symbol (SAME DATA!)
+  - id: "currency-symbol-lookup"
+    name: "Currency Symbol Lookup"
+    type: "lookup-enrichment"
+    description: "Second enrichment using the SAME inline currency data"
+    condition: "#currencyCode != null"
+    
+    lookup-config:
+      lookup-key: "#currencyCode"
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        # DUPLICATE: Same data as above enrichment!
+        data:
+          - code: "USD"
+            name: "US Dollar"
+            symbol: "$"
+            region: "North America"
+          - code: "EUR"
+            name: "Euro"
+            symbol: "€"
+            region: "Europe"
+          - code: "GBP"
+            name: "British Pound"
+            symbol: "£"
+            region: "United Kingdom"
+          - code: "JPY"
+            name: "Japanese Yen"
+            symbol: "¥"
+            region: "Asia"
+    
+    field-mappings:
+      - source-field: "symbol"
+        target-field: "currencySymbol"
+        required: false
+      - source-field: "region"
+        target-field: "currencyRegion"
+        required: false

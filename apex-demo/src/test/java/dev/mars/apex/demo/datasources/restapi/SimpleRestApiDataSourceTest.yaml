@@ -4,42 +4,51 @@ metadata:
   version: "1.0.0"
   type: "enrichment"
 
-# Simple REST API data source example
+# Simple REST API data source example using RestApiTestableServer
 data-sources:
-  - name: "mock-api"
+  - name: "test-api"
     type: "rest-api"
     enabled: true
-    description: "Mock REST API for demo purposes"
-    
+    description: "Test REST API server for demo purposes"
+
     connection:
-      base-url: "https://jsonplaceholder.typicode.com"
+      base-url: "http://localhost:8080"
       timeout: 5000
       retry-attempts: 2
-    
-    queries:
-      getUserById: "/users/{userId}"
+
+    endpoints:
+      customer-lookup: "/api/customers/{key}"
+    cache:
+      enabled: true          #  Enable caching
+      ttlSeconds: 600        #  10 minutes TTL
+      maxIdleSeconds: 300    #  5 minutes max idle time
+      maxSize: 1000          #  Max 1000 entries (LRU eviction)
+      keyPrefix: "test"      #  Cache key prefix
 
 enrichments:
-  - id: "user-api-lookup"
-    name: "Simple User API Lookup"
+  - id: "customer-api-lookup"
+    name: "Simple Customer API Lookup"
     type: "lookup-enrichment"
     description: "Demonstrates the simplest possible REST API data source"
-    condition: "#userId != null"
-    
+    condition: "#customerId != null"
+
     lookup-config:
-      lookup-key: "#userId"
+      lookup-key: "#customerId"
       lookup-dataset:
         type: "rest-api"
-        connection-name: "mock-api"
-        query: "getUserById"
-        parameters:
-          - field: "userId"
-            type: "string"
-    
+        data-source-ref: "test-api"
+        operation-ref: "customer-lookup"
+
     field-mappings:
-      - source-field: "name"
-        target-field: "userName"
-      - source-field: "email"
-        target-field: "userEmail"
-      - source-field: "phone"
-        target-field: "userPhone"
+      - source-field: "customerName"
+        target-field: "customerName"
+        required: false
+      - source-field: "customerType"
+        target-field: "customerType"
+        required: false
+      - source-field: "creditRating"
+        target-field: "creditRating"
+        required: false
+      - source-field: "registrationDate"
+        target-field: "registrationDate"
+        required: false
