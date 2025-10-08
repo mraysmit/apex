@@ -188,7 +188,7 @@ public class Phase1ClassificationUnitTest {
             assertTrue(result.isSuccessful(), "Detection should succeed for: " + fileName);
             assertEquals("json", result.getFormat(), "Should detect JSON format for: " + fileName);
             assertTrue(result.isConfident(), "Should have high confidence for: " + fileName);
-            assertEquals("extension-based", result.getDetectionMethod(), "Detection method should match");
+            assertEquals("EXTENSION", result.getDetectionMethod(), "Detection method should match");
             
             logger.info("JSON detection successful for {}: {}", fileName, result);
         }

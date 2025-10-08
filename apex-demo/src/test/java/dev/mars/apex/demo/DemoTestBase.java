@@ -19,6 +19,7 @@ package dev.mars.apex.demo;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
+import dev.mars.apex.core.config.yaml.YamlEnrichmentGroup;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -119,12 +120,12 @@ public abstract class DemoTestBase {
             if (config == null) {
                 List<String> failureMessages = new ArrayList<>();
                 failureMessages.add("YAML configuration loaded but is null: " + filePath);
-                return RuleResult.evaluationFailure(failureMessages, new HashMap<>(),
+                return RuleResult.evaluationFailure(failureMessages, new HashMap<String, Object>(),
                     "configuration-loading", "Configuration loading returned null");
             }
 
             logger.info("** YAML configuration loaded successfully: {}", filePath);
-            return RuleResult.evaluationSuccess(new HashMap<>(), "configuration-loading", "Configuration loaded successfully");
+            return RuleResult.evaluationSuccess(new HashMap<String, Object>(), "configuration-loading", "Configuration loaded successfully");
 
         } catch (YamlConfigurationException e) {
             logger.error("Configuration loading FAILED for file: {} - {}", filePath, e.getMessage());
@@ -132,7 +133,7 @@ public abstract class DemoTestBase {
             failureMessages.add("CRITICAL ERROR: Failed to load configuration from file: " + filePath);
             failureMessages.add("Error details: " + e.getMessage());
 
-            return RuleResult.evaluationFailure(failureMessages, new HashMap<>(),
+            return RuleResult.evaluationFailure(failureMessages, new HashMap<String, Object>(),
                 "configuration-loading", "CRITICAL: Configuration file loading failed: " + e.getMessage());
 
         } catch (Exception e) {
@@ -141,7 +142,7 @@ public abstract class DemoTestBase {
             failureMessages.add("Unexpected error loading configuration from file: " + filePath);
             failureMessages.add("Error: " + e.getMessage());
 
-            return RuleResult.evaluationFailure(failureMessages, new HashMap<>(),
+            return RuleResult.evaluationFailure(failureMessages, new HashMap<String, Object>(),
                 "configuration-loading", "Unexpected configuration loading error: " + e.getMessage());
         }
     }
@@ -171,8 +172,7 @@ public abstract class DemoTestBase {
     protected RulesEngine createRulesEngine() {
         try {
             logger.info("Creating RulesEngine with EnrichmentService...");
-            RulesEngine engine = new RulesEngine(rulesEngineConfiguration, new SpelExpressionParser(),
-                    new ErrorRecoveryService(), new RulePerformanceMonitor(), enrichmentService);
+            RulesEngine engine = new RulesEngine(rulesEngineConfiguration);
 
             assertNotNull(engine, "RulesEngine should not be null");
             logger.info("** RulesEngine created successfully");
