@@ -106,7 +106,8 @@ This section provides a definitive reference for all 72 supported APEX YAML keyw
 | **rule-group-references** | RuleGroup | No | List | References to other rule groups |
 | **rule-groups** | Document | No | List | Rule group definitions |
 | **enrichment-groups** | Document | No | List | Enrichment group definitions |
-
+| **#ruleResults** | ContextVariable | Auto | Map | Access to individual rule evaluation results (key: rule-id, value: boolean) |
+| **#ruleGroupResults** | ContextVariable | Auto | Map | Access to rule group evaluation results with passed/failed status |
 | **rule-id** | RuleReference | Yes | String | ID of rule being referenced |
 | **rule-ids** | RuleGroup | No | List | List of rule IDs in the group |
 | **rule-references** | RuleGroup | No | List | Detailed rule references with metadata |
@@ -593,6 +594,96 @@ condition: "#positions.size() > 0"
 # Collection operations
 condition: "#positions.?[quantity > 1000].size() > 0"  # Filter collection
 ```
+
+#### Context Variables
+
+APEX provides special context variables that are automatically available during rule and enrichment processing:
+
+##### Rule Result References
+
+Access individual rule evaluation results using the `#ruleResults` context variable:
+
+```yaml
+rules:
+  - id: "high-value-rule"
+    name: "High Value Transaction Rule"
+    condition: "#amount > 10000"
+    message: "Transaction amount exceeds $10,000"
+
+  - id: "premium-customer-rule"
+    name: "Premium Customer Rule"
+    condition: "#customerType == 'PREMIUM'"
+    message: "Customer has premium status"
+
+enrichments:
+  # Conditional enrichment based on individual rule result
+  - id: "high-value-processing"
+    type: "field-enrichment"
+    condition: "#ruleResults['high-value-rule'] == true"
+    field-mappings:
+      - target-field: "processingPriority"
+        transformation: "'HIGH'"
+
+  # Multiple rule results in complex conditions
+  - id: "priority-calculation"
+    type: "field-enrichment"
+    condition: "#ruleResults != null"
+    field-mappings:
+      - target-field: "processingPriority"
+        transformation: |
+          #ruleResults['premium-customer-rule'] == true && #ruleResults['high-value-rule'] == true ? 'IMMEDIATE' :
+          #ruleResults['high-value-rule'] == true ? 'HIGH' :
+          #ruleResults['premium-customer-rule'] == true ? 'ELEVATED' :
+          'STANDARD'
+```
+
+**Available Properties:**
+- `#ruleResults['rule-id']` - Boolean value (true/false) indicating if the rule passed
+- `#ruleResults.containsKey('rule-id')` - Check if a rule was evaluated
+- `#ruleResults.get('rule-id')` - Get rule result with null safety
+
+##### Rule Group Result References
+
+Access rule group evaluation results using the `#ruleGroupResults` context variable:
+
+```yaml
+rule-groups:
+  - id: "validation-group"
+    name: "Transaction Validation Group"
+    operator: "OR"
+    rule-ids:
+      - "high-value-rule"
+      - "premium-customer-rule"
+
+enrichments:
+  # Conditional enrichment based on rule group result
+  - id: "validation-status"
+    type: "field-enrichment"
+    condition: "#ruleGroupResults['validation-group']['passed'] == true"
+    field-mappings:
+      - target-field: "validationStatus"
+        transformation: "'VALIDATED'"
+
+  # Access failed rules from group
+  - id: "failure-handling"
+    type: "field-enrichment"
+    condition: "#ruleGroupResults['validation-group']['passed'] == false"
+    field-mappings:
+      - target-field: "failedValidations"
+        transformation: "#ruleGroupResults['validation-group']['failedRules']"
+```
+
+**Available Properties:**
+- `#ruleGroupResults['group-id']['passed']` - Boolean indicating if the group passed
+- `#ruleGroupResults['group-id']['failedRules']` - List of failed rule IDs
+- `#ruleGroupResults['group-id']['passedRules']` - List of passed rule IDs
+- `#ruleGroupResults.containsKey('group-id')` - Check if a group was evaluated
+
+**Use Cases:**
+- **Conditional Enrichments**: Apply enrichments only when specific rules pass
+- **Multi-Stage Processing**: Route data based on validation results
+- **Complex Decision Trees**: Build sophisticated logic using rule outcomes
+- **Fallback Logic**: Provide defaults when validation fails
 
 ### 3.2 Condition Syntax
 
@@ -1581,7 +1672,7 @@ lookup-config:
   lookup-key: "#instrumentId.substring(0, 2)"  # Derived key
 ```
 
-### 5.2 Calculation Enrichments
+### 6.2 Calculation Enrichments
 
 Calculation enrichments derive new fields using expressions:
 
@@ -1590,61 +1681,297 @@ enrichments:
   - id: "trade-value-calculation"
     type: "calculation-enrichment"
     condition: "#quantity != null && #price != null"
-    calculations:
-      - field: "tradeValue"
-        expression: "#quantity * #price"
-      - field: "tradeValueUSD"
-        expression: "#currency == 'USD' ? #tradeValue : #tradeValue * #exchangeRate"
-      - field: "commission"
-        expression: "#tradeValue * 0.001"  # 0.1% commission
-      - field: "netAmount"
+    calculation-config:
+      expression: "#quantity * #price"
+      result-field: "tradeValue"
+    field-mappings:
+      - source-field: "tradeValue"
+        target-field: "tradeValue"
 
-
-        expression: "#tradeValue + #commission"
-
-  - id: "risk-calculations"
+  - id: "risk-calculation"
     type: "calculation-enrichment"
     condition: "#tradeValue != null"
-    calculations:
-      - field: "var1Day"
-        expression: "#tradeValue * 0.025"  # 2.5% VaR
-      - field: "var10Day"
-        expression: "#var1Day * T(java.lang.Math).sqrt(10)"
-      - field: "riskLevel"
-        expression: "#var1Day > 1000000 ? 'HIGH' : (#var1Day > 100000 ? 'MEDIUM' : 'LOW')"
+    calculation-config:
+      expression: "#tradeValue * 0.025"  # 2.5% VaR
+      result-field: "var1Day"
+    field-mappings:
+      - source-field: "var1Day"
+        target-field: "var1Day"
 ```
 
-#### Calculation Properties
+#### Calculation Enrichment Properties
 
 | Property | Required | Description |
 |----------|----------|-------------|
-| `field` | Yes | Target field name for the calculated value |
+| `id` | Yes | Unique enrichment identifier |
+| `type` | Yes | Must be "calculation-enrichment" |
+| `condition` | No | When to apply this enrichment (SpEL expression) |
+| `calculation-config` | Yes | Calculation configuration |
+| `field-mappings` | Yes | How to map the calculated result |
+
+#### Calculation Config Properties
+
+| Property | Required | Description |
+|----------|----------|-------------|
 | `expression` | Yes | SpEL expression to calculate the value |
+| `result-field` | Yes | Field name where result will be stored |
 
 #### Complex Calculations
 
 ```yaml
-calculations:
-  # Conditional calculations with ternary operators
-  - field: "settlementPriority"
-    expression: "#tradeValue > 100000000 ? 'HIGH' : (#tradeValue > 10000000 ? 'MEDIUM' : 'NORMAL')"
+enrichments:
+  # Conditional calculation with ternary operators
+  - id: "settlement-priority"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "#tradeValue > 100000000 ? 'HIGH' : (#tradeValue > 10000000 ? 'MEDIUM' : 'NORMAL')"
+      result-field: "settlementPriority"
+    field-mappings:
+      - source-field: "settlementPriority"
+        target-field: "settlementPriority"
 
-  # Multi-step calculations referencing previous calculations
-  - field: "baseCommission"
-    expression: "#tradeValue * #commissionRate"
-  - field: "minimumCommission"
-    expression: "25.0"
-  - field: "finalCommission"
-    expression: "T(java.lang.Math).max(#baseCommission, #minimumCommission)"
+  # Date calculation
+  - id: "settlement-date"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "#tradeDate.plusDays(#settlementCycle)"
+      result-field: "settlementDate"
+    field-mappings:
+      - source-field: "settlementDate"
+        target-field: "settlementDate"
 
-  # Date calculations
-  - field: "settlementDate"
-    expression: "#tradeDate.plusDays(#settlementCycle)"
-
-  # String manipulations
-  - field: "tradeReference"
-    expression: "#counterpartyCode + '-' + #tradeId + '-' + T(java.time.LocalDate).now().format(T(java.time.format.DateTimeFormatter).ofPattern('yyyyMMdd'))"
+  # String manipulation
+  - id: "trade-reference"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "#counterpartyCode + '-' + #tradeId + '-' + T(java.time.LocalDate).now().format(T(java.time.format.DateTimeFormatter).ofPattern('yyyyMMdd'))"
+      result-field: "tradeReference"
+    field-mappings:
+      - source-field: "tradeReference"
+        target-field: "tradeReference"
 ```
+
+**Note:** For multiple related calculations, you can use multiple calculation enrichments or use `field-enrichment` with transformations for simpler cases.
+
+### 6.3 Field Enrichments
+
+Field enrichments transform, copy, or map fields using direct transformations or conditional logic. This is the most flexible enrichment type and is commonly used for field-level transformations, conditional enrichments based on rule results, and simple field mappings.
+
+#### Basic Field Enrichment
+
+```yaml
+enrichments:
+  - id: "status-mapping"
+    type: "field-enrichment"
+    condition: "#statusCode != null"
+    field-mappings:
+      - source-field: "statusCode"
+        target-field: "status"
+        transformation: |
+          #statusCode == 'A' ? 'ACTIVE' :
+          #statusCode == 'I' ? 'INACTIVE' :
+          #statusCode == 'P' ? 'PENDING' : 'UNKNOWN'
+
+      - target-field: "processedAt"
+        transformation: "T(java.time.LocalDateTime).now()"
+
+      - source-field: "amount"
+        target-field: "formattedAmount"
+        transformation: "T(java.lang.String).format('$%,.2f', #amount)"
+```
+
+#### Field Enrichment Properties
+
+| Property | Required | Description |
+|----------|----------|-------------|
+| `id` | Yes | Unique enrichment identifier |
+| `type` | Yes | Must be "field-enrichment" |
+| `condition` | No | When to apply this enrichment (SpEL expression) |
+| `field-mappings` | Yes* | List of field mapping configurations |
+| `conditional-mappings` | Yes* | List of conditional mapping configurations |
+
+*At least one of `field-mappings` or `conditional-mappings` is required.
+
+#### Field Mapping Properties
+
+| Property | Required | Description |
+|----------|----------|-------------|
+| `source-field` | No | Source field name (optional if using transformation only) |
+| `target-field` | Yes | Target field name where value will be stored |
+| `transformation` | No | SpEL expression to transform the value |
+| `required` | No | Whether this mapping is mandatory (default: false) |
+
+#### Field Enrichment with Rule Results
+
+Field enrichments can use rule evaluation results for conditional logic:
+
+```yaml
+rules:
+  - id: "high-value-rule"
+    condition: "#amount > 10000"
+  - id: "premium-customer-rule"
+    condition: "#customerType == 'PREMIUM'"
+
+enrichments:
+  - id: "conditional-processing"
+    type: "field-enrichment"
+    condition: "#ruleResults != null"
+    field-mappings:
+      # Apply different processing based on rule results
+      - target-field: "processingPriority"
+        transformation: |
+          #ruleResults['premium-customer-rule'] == true && #ruleResults['high-value-rule'] == true ? 'IMMEDIATE' :
+          #ruleResults['high-value-rule'] == true ? 'HIGH' :
+          #ruleResults['premium-customer-rule'] == true ? 'ELEVATED' : 'STANDARD'
+
+      # Conditional fee calculation
+      - target-field: "processingFee"
+        transformation: "#ruleResults['high-value-rule'] == true ? #amount * 0.05 : #amount * 0.02"
+
+      # Set flags based on rule results
+      - target-field: "requiresApproval"
+        transformation: "#ruleResults['high-value-rule'] == true"
+```
+
+#### Conditional Mappings
+
+Field enrichments support conditional mappings for complex branching logic:
+
+```yaml
+enrichments:
+  - id: "conditional-field-mapping"
+    type: "field-enrichment"
+    conditional-mappings:
+      - condition: "#status == 'A'"
+        field-mappings:
+          - target-field: "displayStatus"
+            transformation: "'Active'"
+          - target-field: "canTransact"
+            transformation: "true"
+
+      - condition: "#status == 'I'"
+        field-mappings:
+          - target-field: "displayStatus"
+            transformation: "'Inactive'"
+          - target-field: "canTransact"
+            transformation: "false"
+
+      - default: true
+        field-mappings:
+          - target-field: "displayStatus"
+            transformation: "'Unknown'"
+          - target-field: "canTransact"
+            transformation: "false"
+```
+
+#### When to Use Field Enrichment
+
+Use `field-enrichment` when you need to:
+- Transform or copy fields without external lookups
+- Apply conditional logic based on rule results
+- Map fields with complex SpEL transformations
+- Set calculated fields that don't require external data
+- Apply different mappings based on conditions
+
+**vs. lookup-enrichment**: Use lookup when you need to fetch data from external sources
+**vs. calculation-enrichment**: Use calculation when you have multiple related calculations
+**vs. conditional-mapping-enrichment**: Use conditional-mapping for priority-based rule matching
+
+### 6.4 Conditional Mapping Enrichments
+
+Conditional mapping enrichments provide priority-based conditional field mapping with first-match-wins logic. This enrichment type is useful for complex routing scenarios where multiple conditions need to be evaluated in priority order.
+
+#### Basic Conditional Mapping Enrichment
+
+```yaml
+enrichments:
+  - id: "priority-based-routing"
+    type: "conditional-mapping-enrichment"
+    target-field: "routingDestination"
+
+    mapping-rules:
+      # Rule 1: Highest priority
+      - id: "urgent-high-value"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#priority == 'URGENT'"
+            - condition: "#amount > 100000"
+        mapping:
+          type: "direct"
+          transformation: "'IMMEDIATE_PROCESSING_QUEUE'"
+
+      # Rule 2: Medium priority
+      - id: "high-value"
+        priority: 2
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#amount > 100000"
+        mapping:
+          type: "direct"
+          transformation: "'HIGH_VALUE_QUEUE'"
+
+      # Rule 3: Default (lowest priority)
+      - id: "standard"
+        priority: 999
+        mapping:
+          type: "direct"
+          transformation: "'STANDARD_QUEUE'"
+
+    execution-settings:
+      stop-on-first-match: true
+      log-matched-rule: true
+      validate-result: false
+```
+
+#### Conditional Mapping Properties
+
+| Property | Required | Description |
+|----------|----------|-------------|
+| `id` | Yes | Unique enrichment identifier |
+| `type` | Yes | Must be "conditional-mapping-enrichment" |
+| `target-field` | Yes | Field where the mapped value will be stored |
+| `mapping-rules` | Yes | List of priority-based mapping rules |
+| `execution-settings` | No | Execution configuration |
+
+#### Mapping Rule Properties
+
+| Property | Required | Description |
+|----------|----------|-------------|
+| `id` | Yes | Unique rule identifier |
+| `priority` | Yes | Priority order (lower numbers = higher priority) |
+| `conditions` | No | Conditions that must be met for this rule to match |
+| `mapping` | Yes | Mapping configuration |
+
+#### Mapping Configuration
+
+| Property | Required | Description |
+|----------|----------|-------------|
+| `type` | Yes | Mapping type: "direct", "lookup", or "transformation" |
+| `transformation` | Yes* | SpEL expression for direct mappings |
+| `source-field` | No | Source field for the mapping |
+
+#### Execution Settings
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `stop-on-first-match` | true | Stop processing after first matching rule |
+| `log-matched-rule` | false | Log which rule was matched |
+| `validate-result` | false | Validate the mapping result |
+
+#### When to Use Conditional Mapping Enrichment
+
+Use `conditional-mapping-enrichment` when you need to:
+- Evaluate multiple conditions in priority order
+- Apply first-match-wins logic
+- Route data based on complex priority rules
+- Have clear separation between condition evaluation and value mapping
+
+**vs. field-enrichment**: Use field-enrichment for simpler conditional logic with ternary operators
+**vs. lookup-enrichment**: Use lookup when mapping values come from external datasets
+**vs. calculation-enrichment**: Use calculation for mathematical derivations
 
 ---
 
@@ -2876,7 +3203,116 @@ calculations:
     expression: "#isActive && #expensiveResult > threshold"
 ```
 
-### 8.2 Function Usage
+#### Rule Result-Based Conditional Logic
+
+Use rule evaluation results to drive conditional enrichment logic:
+
+```yaml
+rules:
+  - id: "high-value-rule"
+    name: "High Value Transaction Rule"
+    condition: "#amount > 10000"
+    message: "Transaction amount exceeds $10,000"
+    severity: "INFO"
+
+  - id: "premium-customer-rule"
+    name: "Premium Customer Rule"
+    condition: "#customerType == 'PREMIUM'"
+    message: "Customer has premium status"
+    severity: "INFO"
+
+  - id: "urgent-processing-rule"
+    name: "Urgent Processing Rule"
+    condition: "#priority == 'URGENT' || #amount > 50000"
+    message: "Transaction requires urgent processing"
+    severity: "INFO"
+
+rule-groups:
+  - id: "validation-group"
+    name: "Transaction Validation Group"
+    operator: "OR"
+    stop-on-first-failure: false
+    rule-ids:
+      - "high-value-rule"
+      - "premium-customer-rule"
+
+enrichments:
+  # Simple rule result reference
+  - id: "high-value-enrichment"
+    type: "field-enrichment"
+    condition: "#ruleResults['high-value-rule'] == true"
+    field-mappings:
+      - target-field: "processingFee"
+        transformation: "#amount * 0.05"
+
+  # Multiple rule results in complex condition
+  - id: "priority-enrichment"
+    type: "field-enrichment"
+    condition: "#ruleResults != null"
+    field-mappings:
+      - target-field: "processingPriority"
+        transformation: |
+          #ruleResults['urgent-processing-rule'] == true ? 'IMMEDIATE' :
+          #ruleResults['high-value-rule'] == true ? 'HIGH' :
+          #ruleResults['premium-customer-rule'] == true ? 'ELEVATED' :
+          'STANDARD'
+
+  # Rule group result reference
+  - id: "validation-status-enrichment"
+    type: "field-enrichment"
+    condition: "#ruleGroupResults['validation-group']['passed'] == true"
+    field-mappings:
+      - target-field: "validationStatus"
+        transformation: "'VALIDATED'"
+      - target-field: "validatedBy"
+        transformation: "'APEX_VALIDATION_GROUP'"
+
+  # Fallback logic when validation fails
+  - id: "validation-failure-enrichment"
+    type: "field-enrichment"
+    condition: "#ruleGroupResults['validation-group']['passed'] == false"
+    field-mappings:
+      - target-field: "validationStatus"
+        transformation: "'FAILED'"
+      - target-field: "failedRules"
+        transformation: "#ruleGroupResults['validation-group']['failedRules']"
+```
+
+**Key Patterns:**
+
+1. **Single Rule Reference**: Check if a specific rule passed
+   ```yaml
+   condition: "#ruleResults['rule-id'] == true"
+   ```
+
+2. **Multiple Rule Logic**: Combine multiple rule results
+   ```yaml
+   condition: "#ruleResults['rule-1'] == true && #ruleResults['rule-2'] == true"
+   ```
+
+3. **Rule Group Status**: Check if entire group passed
+   ```yaml
+   condition: "#ruleGroupResults['group-id']['passed'] == true"
+   ```
+
+4. **Failed Rules Access**: Get list of failed rules from group
+   ```yaml
+   transformation: "#ruleGroupResults['group-id']['failedRules']"
+   ```
+
+5. **Null-Safe Access**: Check if rule was evaluated
+   ```yaml
+   condition: "#ruleResults.containsKey('rule-id') && #ruleResults['rule-id'] == true"
+   ```
+
+**Use Cases:**
+- **Conditional Enrichments**: Apply different enrichments based on validation results
+- **Multi-Stage Processing**: Route data through different processing paths
+- **Complex Decision Trees**: Build sophisticated business logic using rule outcomes
+- **Fallback Handling**: Provide default values when validation fails
+- **Audit Trails**: Track which rules triggered specific processing
+
+### 11.2 Function Usage
 
 #### Built-in Functions
 

@@ -826,6 +826,13 @@ Start here if you're migrating from external services to datasets:
 
 ## Documentation
 
+### Core Documentation
+- **[APEX Rules Engine User Guide](APEX_RULES_ENGINE_USER_GUIDE.md)** - Comprehensive user documentation
+- **[APEX YAML Reference](APEX_YAML_REFERENCE.md)** - Complete YAML configuration reference
+- **[APEX Technical Reference](APEX_TECHNICAL_REFERENCE.md)** - Technical details and architecture
+- **[APEX Conditional Processing Guide](APEX_CONDITIONAL_PROCESSING_GUIDE.md)** - Complete guide to conditional logic **🆕 NEW**
+- **[APEX SpEL Dynamic Arrays](APEX_SpEL_Dynamic_Arrays.md)** - Dynamic array access patterns
+
 ### External Data Source Documentation
 - **[External Data Sources Guide](docs/EXTERNAL_DATA_SOURCES_GUIDE.md)** - Comprehensive guide to data source integration
 - **[Database Configuration Guide](docs/external-data-sources/database-configuration.md)** - Complete database setup and configuration
@@ -840,9 +847,9 @@ Start here if you're migrating from external services to datasets:
 - **[YAML Configuration Examples](docs/YAML-Configuration-Examples.md)** - Templates and examples
 - **[YAML Configuration Guide](docs/YAML-Configuration-Guide.md)** - Complete YAML configuration reference
 
-### Core Documentation
-- **[Complete User Guide](docs/COMPLETE_USER_GUIDE.md)** - Comprehensive user documentation
-- **[Technical Implementation Guide](docs/TECHNICAL_IMPLEMENTATION_GUIDE.md)** - Technical details and architecture
+### Pipeline and Orchestration Documentation
+- **[Data Pipeline Orchestration Guide](APEX_DATA_PIPELINE_ORCHESTRATION_GUIDE.md)** - YAML-driven ETL workflows
+- **[Parameterized Query Technical Report](APEX_PARAMETERIZED_QUERY_TECHNICAL_REPORT.md)** - Advanced query patterns
 
 ## Quick Start
 

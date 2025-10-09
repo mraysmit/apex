@@ -1097,7 +1097,163 @@ System.out.println("Priority: " + enrichedData.get("customerPriority"));      //
 4. It adds `statusName: "Active"`, `statusDescription: "Active customer"`, and `customerPriority: "High"` to your data
 5. Your rules can now use these enriched fields
 
-#### 3.3 Combining Rules and Enrichments
+#### 3.3 Rule Result References in Conditional Enrichments
+
+APEX provides powerful context variables that allow enrichments to access the results of rule evaluations. This enables sophisticated conditional logic where enrichments are applied based on which rules passed or failed.
+
+**Available Context Variables:**
+
+1. **`#ruleResults`** - Access individual rule evaluation results
+2. **`#ruleGroupResults`** - Access rule group evaluation results
+
+**Basic Example - Conditional Enrichment Based on Rule Results:**
+
+```yaml
+metadata:
+  name: "Transaction Processing with Rule-Based Enrichment"
+  version: "1.0.0"
+  type: "rule-config"
+
+# Define rules that will be evaluated first
+rules:
+  - id: "high-value-rule"
+    name: "High Value Transaction Rule"
+    condition: "#amount > 10000"
+    message: "Transaction amount exceeds $10,000"
+    severity: "INFO"
+
+  - id: "premium-customer-rule"
+    name: "Premium Customer Rule"
+    condition: "#customerType == 'PREMIUM'"
+    message: "Customer has premium status"
+    severity: "INFO"
+
+# Enrichments that use rule results
+enrichments:
+  # Apply high-value processing fee only if high-value rule passed
+  - id: "high-value-fee"
+    type: "field-enrichment"
+    condition: "#ruleResults['high-value-rule'] == true"
+    field-mappings:
+      - target-field: "processingFee"
+        transformation: "#amount * 0.05"
+      - target-field: "processingPriority"
+        transformation: "'HIGH'"
+
+  # Apply premium customer discount only if premium rule passed
+  - id: "premium-discount"
+    type: "field-enrichment"
+    condition: "#ruleResults['premium-customer-rule'] == true"
+    field-mappings:
+      - target-field: "discountRate"
+        transformation: "0.10"
+      - target-field: "serviceLevel"
+        transformation: "'PREMIUM'"
+
+  # Complex priority calculation using multiple rule results
+  - id: "priority-calculation"
+    type: "field-enrichment"
+    condition: "#ruleResults != null"
+    field-mappings:
+      - target-field: "finalPriority"
+        transformation: |
+          #ruleResults['premium-customer-rule'] == true && #ruleResults['high-value-rule'] == true ? 'IMMEDIATE' :
+          #ruleResults['high-value-rule'] == true ? 'HIGH' :
+          #ruleResults['premium-customer-rule'] == true ? 'ELEVATED' :
+          'STANDARD'
+```
+
+**Using the configuration:**
+
+```java
+RulesEngineConfiguration config = YamlConfigurationLoader.load("transaction-processing.yaml");
+RulesEngine engine = new RulesEngine(config);
+
+// Test case 1: High-value premium customer
+Map<String, Object> data1 = Map.of(
+    "amount", 15000,
+    "customerType", "PREMIUM"
+);
+RuleResult result1 = engine.evaluate(data1);
+// Result: processingFee = 750, discountRate = 0.10, finalPriority = "IMMEDIATE"
+
+// Test case 2: High-value standard customer
+Map<String, Object> data2 = Map.of(
+    "amount", 15000,
+    "customerType", "STANDARD"
+);
+RuleResult result2 = engine.evaluate(data2);
+// Result: processingFee = 750, no discount, finalPriority = "HIGH"
+
+// Test case 3: Low-value premium customer
+Map<String, Object> data3 = Map.of(
+    "amount", 5000,
+    "customerType", "PREMIUM"
+);
+RuleResult result3 = engine.evaluate(data3);
+// Result: no fee, discountRate = 0.10, finalPriority = "ELEVATED"
+```
+
+**Advanced Example - Using Rule Group Results:**
+
+```yaml
+rules:
+  - id: "amount-check"
+    condition: "#amount > 0"
+  - id: "customer-check"
+    condition: "#customerId != null"
+  - id: "account-check"
+    condition: "#accountNumber != null"
+
+rule-groups:
+  - id: "validation-group"
+    name: "Basic Validation Group"
+    operator: "AND"
+    rule-ids:
+      - "amount-check"
+      - "customer-check"
+      - "account-check"
+
+enrichments:
+  # Apply when all validations pass
+  - id: "validation-success"
+    type: "field-enrichment"
+    condition: "#ruleGroupResults['validation-group']['passed'] == true"
+    field-mappings:
+      - target-field: "validationStatus"
+        transformation: "'VALIDATED'"
+      - target-field: "readyForProcessing"
+        transformation: "true"
+
+  # Handle validation failures
+  - id: "validation-failure"
+    type: "field-enrichment"
+    condition: "#ruleGroupResults['validation-group']['passed'] == false"
+    field-mappings:
+      - target-field: "validationStatus"
+        transformation: "'FAILED'"
+      - target-field: "failedChecks"
+        transformation: "#ruleGroupResults['validation-group']['failedRules']"
+      - target-field: "readyForProcessing"
+        transformation: "false"
+```
+
+**Key Patterns:**
+
+1. **Single Rule Check**: `#ruleResults['rule-id'] == true`
+2. **Multiple Rules**: `#ruleResults['rule-1'] == true && #ruleResults['rule-2'] == true`
+3. **Group Status**: `#ruleGroupResults['group-id']['passed'] == true`
+4. **Failed Rules**: `#ruleGroupResults['group-id']['failedRules']`
+5. **Null Safety**: `#ruleResults.containsKey('rule-id') && #ruleResults['rule-id'] == true`
+
+**Common Use Cases:**
+- Apply different processing fees based on transaction validation
+- Route data to different processing paths based on rule outcomes
+- Provide fallback values when validation fails
+- Build complex decision trees using rule results
+- Create audit trails showing which rules triggered specific actions
+
+#### 3.4 Combining Rules and Enrichments
 
 The real power of YAML configuration comes from combining rules and enrichments. Enrichments run first to add data, then rules evaluate using both the original and enriched data.
 

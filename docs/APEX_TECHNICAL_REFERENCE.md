@@ -2,11 +2,39 @@
 
 # APEX - Technical Reference Guide
 
-**Version:** 2.1
-**Date:** 2025-09-06
+**Version:** 2.2
+**Date:** 2025-10-09
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
+**Status:** Accuracy-Verified - Hallucinated properties removed
 
 Welcome to the APEX Technical Reference Guide! This comprehensive document provides detailed technical information for developers, architects, and system integrators working with APEX. This reference covers everything from basic concepts to advanced enterprise patterns, including scenario-based configuration management, **external data-source reference system**, enterprise YAML validation systems, **REST API integration**, **comprehensive testing frameworks**, and **H2 database optimization**.
+
+## Implementation Status Markers
+
+Throughout this document, you'll see the following markers indicating implementation status:
+
+- **✅ IMPLEMENTED** - Feature is fully implemented and tested
+- **⚠️ EXPERIMENTAL** - Feature is implemented but may change
+- **❌ NOT IMPLEMENTED** - Feature is planned but not yet available
+- **🔄 DEPRECATED** - Feature is deprecated and should not be used
+
+## Cache Configuration Hierarchy
+
+**Important:** APEX has two levels of cache configuration:
+
+1. **Lookup-Dataset Level** (Limited):
+   - `cache-enabled` - Enable/disable caching for this lookup
+   - `cache-ttl-seconds` - Time-to-live for cached entries
+
+2. **Data-Source Level** (Full Features):
+   - `enabled` - Enable/disable caching
+   - `ttlSeconds` - Time-to-live
+   - `maxSize` - Maximum cache entries
+   - `preload-enabled` - Preload cache on startup
+   - `refresh-ahead` - Refresh entries before expiration
+   - `statistics-enabled` - Enable cache statistics
+
+**Rule:** Advanced cache features (preload, max-size, refresh-ahead) are **only** available at the data-source level, not at the lookup-dataset level.
 
 ## Document Structure
 
@@ -4472,6 +4500,8 @@ rules:
 
 ### Advanced Enrichment Configuration
 
+**✅ IMPLEMENTED** - All features shown below are verified as implemented.
+
 ```yaml
 enrichments:
   - id: "comprehensive-currency-enrichment"
@@ -4483,9 +4513,8 @@ enrichments:
         type: "yaml-file"
         file-path: "datasets/currencies.yaml"
         key-field: "code"
-        cache-enabled: true
-        cache-ttl-seconds: 3600
-        preload-enabled: true
+        cache-enabled: true          # ✅ Lookup-dataset level cache
+        cache-ttl-seconds: 3600      # ✅ Lookup-dataset level cache TTL
         default-values:
           region: "Unknown"
           isActive: false
@@ -4569,7 +4598,11 @@ enrichments:
 
 ### Performance-Optimized Configuration
 
+**✅ IMPLEMENTED** - Lookup-dataset level caching
+**⚠️ NOTE:** Advanced cache features (preload, max-size, monitoring) are configured at the **data-source** level, not lookup-dataset level.
+
 ```yaml
+# Lookup-dataset level cache (IMPLEMENTED)
 enrichments:
   - id: "high-performance-lookup"
     type: "lookup-enrichment"
@@ -4578,14 +4611,20 @@ enrichments:
         type: "yaml-file"
         file-path: "datasets/large-dataset.yaml"
         key-field: "id"
-        # Performance optimizations
+        # ✅ Lookup-dataset level cache properties
         cache-enabled: true
         cache-ttl-seconds: 7200
-        preload-enabled: true
-        cache-max-size: 10000
-        # Monitoring
-        performance-monitoring: true
-        log-cache-stats: true
+
+# For advanced caching, configure at data-source level:
+data-sources:
+  - name: "large-dataset-source"
+    type: "file-system"
+    cache:
+      enabled: true
+      ttlSeconds: 7200
+      maxSize: 10000              # ✅ Data-source level
+      preload-enabled: true       # ✅ Data-source level
+      statistics-enabled: true    # ✅ Data-source level
 ```
 
 ## Integration Patterns
@@ -4837,21 +4876,29 @@ public class RulesEngineIntegrationTest {
 ### Caching Strategies
 
 ```yaml
-# Optimal caching configuration
+# ✅ IMPLEMENTED - Lookup-dataset level caching
 enrichments:
   - id: "cached-lookup"
     lookup-config:
       lookup-dataset:
-        cache-enabled: true
-        cache-ttl-seconds: 3600
-        cache-max-size: 1000
-        preload-enabled: true
-        cache-refresh-ahead: true
+        cache-enabled: true        # ✅ Lookup-dataset level
+        cache-ttl-seconds: 3600    # ✅ Lookup-dataset level
+
+# ✅ IMPLEMENTED - Data-source level advanced caching
+data-sources:
+  - name: "cached-source"
+    type: "file-system"
+    cache:
+      enabled: true
+      ttlSeconds: 3600
+      maxSize: 1000              # ✅ Data-source level only
+      preload-enabled: true      # ✅ Data-source level only
+      refresh-ahead: true        # ✅ Data-source level only (note: "refresh-ahead" not "cache-refresh-ahead")
 ```
 
-**Line-by-line explanation:**
-- **Line 2**: Start of enrichments collection for performance-optimized configuration
-- **Line 3**: Unique identifier for this cached lookup enrichment
+**Cache Configuration Hierarchy:**
+- **Lookup-dataset level**: `cache-enabled`, `cache-ttl-seconds` only
+- **Data-source level**: All advanced features (maxSize, preload-enabled, refresh-ahead, statistics-enabled)
 - **Line 4**: Start of lookup configuration section
 - **Line 5**: Start of dataset configuration with caching options
 - **Line 6**: Enable caching to store lookup results in memory
@@ -5113,9 +5160,9 @@ enrichments:
         type: "yaml-file"
         file-path: "datasets/production-instruments.yaml"
         key-field: "code"
-        cache-enabled: true
-        cache-ttl-seconds: 3600
-        preload-enabled: true
+        cache-enabled: true        # ✅ Lookup-dataset level
+        cache-ttl-seconds: 3600    # ✅ Lookup-dataset level
+        # Note: preload-enabled is a data-source level property, not lookup-dataset level
 ```
 
 ## Advanced Dataset Patterns
@@ -5150,26 +5197,25 @@ data:
 
 ### Time-Based Dataset Configuration
 
+**❌ NOT IMPLEMENTED** - This is a planned feature that does not currently exist in APEX.
+
+The properties `time-based` and `effective-date-field` are **not implemented**. For time-based lookups, you must implement the logic in your application code or use conditional enrichments with date comparisons.
+
+**Workaround Example:**
 ```yaml
 enrichments:
-  - id: "time-sensitive-enrichment"
-    type: "lookup-enrichment"
-    lookup-config:
-      lookup-dataset:
-        type: "inline"
-        key-field: "code"
-        time-based: true
-        effective-date-field: "effectiveDate"
-        data:
-          - code: "RATE001"
-            rate: 0.05
-            effectiveDate: "2024-01-01"
-          - code: "RATE001"
-            rate: 0.055
-            effectiveDate: "2024-07-01"
+  # Manual time-based logic using conditional enrichments
+  - id: "current-rate-enrichment"
+    type: "field-enrichment"
+    field-mappings:
+      - target-field: "currentRate"
+        transformation: |
+          #effectiveDate.isBefore(T(java.time.LocalDate).parse('2024-07-01')) ? 0.05 : 0.055
 ```
 
 ### Conditional Dataset Loading
+
+**✅ IMPLEMENTED** - Conditional enrichments are fully supported.
 
 ```yaml
 enrichments:
