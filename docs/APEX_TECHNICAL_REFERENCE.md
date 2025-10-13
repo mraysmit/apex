@@ -5,7 +5,6 @@
 **Version:** 2.2
 **Date:** 2025-10-09
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
-**Status:** Accuracy-Verified - Hallucinated properties removed
 
 Welcome to the APEX Technical Reference Guide! This comprehensive document provides detailed technical information for developers, architects, and system integrators working with APEX. This reference covers everything from basic concepts to advanced enterprise patterns, including scenario-based configuration management, **external data-source reference system**, enterprise YAML validation systems, **REST API integration**, **comprehensive testing frameworks**, and **H2 database optimization**.
 

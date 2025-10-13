@@ -17,6 +17,7 @@
 4. [Rule-Based Conditions](#4-rule-based-conditions)
 5. [Rule Result References](#5-rule-result-references)
 6. [Conditional Enrichments](#6-conditional-enrichments)
+   - 6.5 [SpEL in Field Mappings](#65-spel-in-field-mappings-new-in-v23)
 7. [Priority-Based Conditional Mapping](#7-priority-based-conditional-mapping)
 8. [Advanced Patterns](#8-advanced-patterns)
 9. [Performance Considerations](#9-performance-considerations)
@@ -506,6 +507,170 @@ enrichments:
       - target-field: "complianceDeadline"
         transformation: "T(java.time.LocalDateTime).now().plusHours(24)"
 ```
+
+---
+
+## 6.5 SpEL in Field Mappings (New in v2.3)
+
+### Overview
+
+Field mappings now support SpEL expressions in both `source-field` and `target-field`, creating consistency across all APEX features. This enhancement enables nested field access, safe navigation, array indexing, and complex expressions in field mappings.
+
+### Consistency Across APEX Features
+
+SpEL is now used consistently across ALL APEX features:
+
+| Feature | SpEL Support | Example |
+|---------|--------------|---------|
+| **Conditions** | ✅ Yes | `condition: '#data.currency != null'` |
+| **Transformations** | ✅ Yes | `transformation: '#data.currency'` |
+| **Lookup Keys** | ✅ Yes | `lookup-key: '#symbol'` |
+| **Calculations** | ✅ Yes | `expression: '#amount * 0.01'` |
+| **Field Mappings** | ✅ **NEW!** | `source-field: '#data.currency'` |
+
+### Basic SpEL Field Mapping
+
+```yaml
+enrichments:
+  - id: "nested-field-access"
+    type: "field-enrichment"
+    condition: "#data != null"
+    field-mappings:
+      # ✅ Access nested fields with SpEL (use # prefix)
+      - source-field: "#data.currency"
+        target-field: "buy_currency"
+
+      - source-field: "#data.trade.counterparty"
+        target-field: "counterparty_name"
+```
+
+### Safe Navigation
+
+Prevent null pointer exceptions with safe navigation operator (`?.`):
+
+```yaml
+field-mappings:
+  # Safe navigation - returns null if any level is null
+  - source-field: "#data?.trade?.amount"
+    target-field: "trade_amount"
+
+  - source-field: "#data?.pricing?.bid"
+    target-field: "bid_price"
+```
+
+### Array and Collection Access
+
+```yaml
+field-mappings:
+  # Array indexing
+  - source-field: "#legs[0].currency"
+    target-field: "first_leg_currency"
+
+  # Find first matching element
+  - source-field: "#legs.^[legType == 'FLOATING']?.notionalAmount"
+    target-field: "floating_leg_notional"
+
+  # Get all currencies from legs
+  - source-field: "#legs.![currency]"
+    target-field: "all_currencies"
+```
+
+### Complex Expressions
+
+```yaml
+field-mappings:
+  # Conditional expression
+  - source-field: "#status == 'ACTIVE' ? #activePrice : #inactivePrice"
+    target-field: "current_price"
+
+  # Method calls
+  - source-field: "#currency.toUpperCase()"
+    target-field: "currency_code"
+
+  # Calculations
+  - source-field: "#quantity * #price"
+    target-field: "trade_value"
+```
+
+### Combining SpEL with Transformations
+
+```yaml
+field-mappings:
+  # SpEL source-field + transformation
+  - source-field: "#data.amount"
+    target-field: "adjusted_amount"
+    transformation: "#value * 1.1"  # Apply 10% markup
+
+  # SpEL source-field + conditional transformation
+  - source-field: "#data.trade.notional"
+    target-field: "fee"
+    transformation: "#value > 1000000 ? #value * 0.001 : #value * 0.002"
+```
+
+### Conditional Enrichments with SpEL Field Mappings
+
+Combine conditional enrichments with SpEL field mappings for powerful data processing:
+
+```yaml
+rules:
+  - id: "high-value-rule"
+    condition: "#amount > 10000"
+
+enrichments:
+  # Apply different field mappings based on rule results
+  - id: "conditional-nested-mapping"
+    type: "field-enrichment"
+    condition: "#ruleResults['high-value-rule'] == true"
+    field-mappings:
+      # Extract nested fields only for high-value transactions
+      - source-field: "#data.trade.counterparty.lei"
+        target-field: "counterparty_lei"
+
+      - source-field: "#data.trade.legs.![notionalAmount].sum()"
+        target-field: "total_notional"
+
+      - source-field: "#data.pricing?.bid"
+        target-field: "bid_price"
+```
+
+### Backward Compatibility
+
+```yaml
+field-mappings:
+  # Old style (no # prefix) - still works
+  - source-field: "currency"
+    target-field: "currency_code"
+
+  # New style (with # prefix) - SpEL expression
+  - source-field: "#data.currency"
+    target-field: "currency_code"
+
+  # Both can be used in the same enrichment
+  - source-field: "status"              # Simple field
+    target-field: "trade_status"
+  - source-field: "#data.nested.field"  # SpEL expression
+    target-field: "nested_value"
+```
+
+### When to Use SpEL in Field Mappings
+
+**Use SpEL in field mappings when:**
+- Accessing nested fields in complex data structures
+- Working with lookup results that have nested data
+- Processing arrays or collections
+- Applying conditional logic to field selection
+- Calling methods on field values
+- Combining multiple fields into one
+
+**Use simple field names when:**
+- Accessing top-level fields
+- Maximum performance is critical
+- Field structure is flat and simple
+
+### See Also
+
+- **[APEX SpEL Guide](APEX_SPEL_GUIDE.md)** - Comprehensive SpEL documentation
+- **[APEX YAML Reference](APEX_YAML_REFERENCE.md)** - Complete YAML configuration reference
 
 ---
 

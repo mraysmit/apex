@@ -1644,6 +1644,84 @@ enrichments:
         target-field: "counterparty.entityType"
 ```
 
+#### SpEL in Field Mappings (New in v2.3)
+
+**Field mappings now support SpEL expressions** for accessing nested fields and complex data structures. Use the `#` prefix to indicate a SpEL expression:
+
+```yaml
+enrichments:
+  - id: "instrument-lookup"
+    type: "lookup-enrichment"
+    condition: "#symbol != null"
+    lookup-config:
+      lookup-key: "#symbol"
+      lookup-dataset:
+        type: "inline"
+        key-field: "symbol"
+        data:
+          - symbol: "AAPL"
+            data:
+              instrument:
+                name: "Apple Inc."
+                type: "EQUITY"
+              pricing:
+                bid: 150.25
+                ask: 150.30
+    field-mappings:
+      # ✅ NEW: Access nested fields in lookup result with SpEL
+      - source-field: "#data.instrument.name"
+        target-field: "instrument_name"
+      - source-field: "#data.instrument.type"
+        target-field: "instrument_type"
+      - source-field: "#data.pricing.bid"
+        target-field: "bid_price"
+```
+
+**SpEL Features in Field Mappings:**
+
+```yaml
+field-mappings:
+  # Nested field access
+  - source-field: "#data.trade.counterparty"
+    target-field: "counterparty_name"
+
+  # Safe navigation (prevents null pointer exceptions)
+  - source-field: "#data?.pricing?.bid"
+    target-field: "bid_price"
+
+  # Array indexing
+  - source-field: "#legs[0].currency"
+    target-field: "first_leg_currency"
+
+  # Method calls
+  - source-field: "#currency.toUpperCase()"
+    target-field: "currency_code"
+
+  # Complex expressions
+  - source-field: "#status == 'ACTIVE' ? #activePrice : #inactivePrice"
+    target-field: "current_price"
+
+  # Combination with transformations
+  - source-field: "#data.amount"
+    target-field: "adjusted_amount"
+    transformation: "#value * 1.1"
+```
+
+**Backward Compatibility:**
+
+```yaml
+field-mappings:
+  # Old style (no # prefix) - still works
+  - source-field: "lei"
+    target-field: "counterparty_lei"
+
+  # New style (with # prefix) - SpEL expression
+  - source-field: "#data.lei"
+    target-field: "counterparty_lei"
+```
+
+**See Also:** [APEX SpEL Guide](APEX_SPEL_GUIDE.md) for comprehensive SpEL documentation and examples.
+
 #### Lookup Enrichment Properties
 
 | Property | Required | Description |
@@ -1779,6 +1857,66 @@ enrichments:
         target-field: "formattedAmount"
         transformation: "T(java.lang.String).format('$%,.2f', #amount)"
 ```
+
+#### SpEL in Field Mappings (New in v2.3)
+
+**Field mappings now support SpEL expressions in `source-field`** for accessing nested fields and complex data structures:
+
+```yaml
+enrichments:
+  - id: "nested-field-mapping"
+    type: "field-enrichment"
+    condition: "#data != null"
+    field-mappings:
+      # ✅ NEW: Access nested fields with SpEL (use # prefix)
+      - source-field: "#data.currency"
+        target-field: "buy_currency"
+
+      - source-field: "#data.trade.counterparty"
+        target-field: "counterparty_name"
+
+      # Safe navigation prevents null pointer exceptions
+      - source-field: "#data?.trade?.amount"
+        target-field: "trade_amount"
+
+      # Array indexing
+      - source-field: "#legs[0].currency"
+        target-field: "first_leg_currency"
+
+      # Method calls
+      - source-field: "#currency.toUpperCase()"
+        target-field: "currency_code"
+
+      # Complex expressions
+      - source-field: "#status == 'ACTIVE' ? #activePrice : #inactivePrice"
+        target-field: "current_price"
+
+      # Combine SpEL source-field with transformation
+      - source-field: "#data.amount"
+        target-field: "adjusted_amount"
+        transformation: "#value * 1.1"  # Apply 10% markup
+```
+
+**Backward Compatibility:**
+
+```yaml
+field-mappings:
+  # Old style (no # prefix) - still works
+  - source-field: "currency"
+    target-field: "currency_code"
+
+  # New style (with # prefix) - SpEL expression
+  - source-field: "#data.currency"
+    target-field: "currency_code"
+
+  # Both can be used in the same enrichment
+  - source-field: "status"              # Simple field
+    target-field: "trade_status"
+  - source-field: "#data.nested.field"  # SpEL expression
+    target-field: "nested_value"
+```
+
+**See Also:** [APEX SpEL Guide](APEX_SPEL_GUIDE.md) for comprehensive SpEL documentation and examples.
 
 #### Field Enrichment Properties
 

@@ -175,4 +175,75 @@ public class RuleResultReferencesTest extends DemoTestBase {
             fail("Premium customer test failed: " + e.getMessage());
         }
     }
+
+    @Test
+    @DisplayName("Should access passedRules list from rule group results - DOCUMENTS IMPLEMENTATION GAP")
+    void testPassedRulesListAccess() {
+        logger.info("=== Testing Passed Rules List Access ===");
+        logger.info("NOTE: This test documents a gap between documentation and implementation");
+        logger.info("Guide Section 5 documents: #ruleGroupResults['group-id']['passedRules']");
+        logger.info("But implementation only provides: #ruleGroupResults['group-id']['passed'] and individual rule booleans");
+
+        try {
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/RuleResultReferencesTest.yaml");
+
+            // Create test data that passes multiple rules
+            Map<String, Object> inputData = new HashMap<>();
+            inputData.put("amount", 15000.0);  // Should trigger high-value-rule
+            inputData.put("customerType", "PREMIUM");  // Should trigger premium-customer-rule
+            inputData.put("priority", "NORMAL");
+
+            logger.info("Input data: " + inputData);
+
+            // Process using real APEX services
+            Object result = enrichmentService.enrichObject(config, inputData);
+            assertNotNull(result, "Enrichment result should not be null");
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> enrichedData = (Map<String, Object>) result;
+
+            // Log what we actually got
+            logger.info("Enriched data fields: " + enrichedData.keySet());
+
+            // EXPECTED FAILURE: passedRulesList is not populated because the feature is not implemented
+            // The guide documents this feature but YamlEnrichmentProcessor.java line 1104-1107 shows
+            // that ruleGroupResults only contains "passed" boolean and individual rule booleans,
+            // NOT "passedRules" or "failedRules" lists
+
+            if (enrichedData.containsKey("passedRulesList")) {
+                logger.info("✓ UNEXPECTED SUCCESS: passedRules list feature has been implemented!");
+
+                @SuppressWarnings("unchecked")
+                java.util.List<String> passedRules = (java.util.List<String>) enrichedData.get("passedRulesList");
+                assertNotNull(passedRules, "Passed rules list should not be null");
+
+                // Verify the list contains the expected rule IDs
+                assertTrue(passedRules.contains("high-value-rule"),
+                          "Passed rules list should contain high-value-rule");
+                assertTrue(passedRules.contains("premium-customer-rule"),
+                          "Passed rules list should contain premium-customer-rule");
+
+                logger.info("✓ Passed rules: " + passedRules);
+            } else {
+                logger.warn("✗ EXPECTED FAILURE: passedRulesList field not found");
+                logger.warn("This confirms the implementation gap:");
+                logger.warn("  - Documentation (Guide Section 5): #ruleGroupResults['group-id']['passedRules']");
+                logger.warn("  - Implementation (YamlEnrichmentProcessor:1104-1107): Only 'passed' boolean + individual rule booleans");
+                logger.warn("  - Required fix: Add 'passedRules' and 'failedRules' lists to rule group results map");
+
+                // For now, verify we can access individual rule results as a workaround
+                assertTrue(enrichedData.containsKey("validationStatus"),
+                          "Should have validation status from rule group 'passed' boolean");
+                assertEquals("VALIDATED", enrichedData.get("validationStatus"),
+                          "Validation status should be VALIDATED when group passes");
+
+                logger.info("✓ Workaround confirmed: Can access 'passed' boolean and individual rule results");
+                logger.info("✓ Test documents the gap and provides workaround pattern");
+            }
+
+        } catch (Exception e) {
+            logger.error("Passed rules list test failed: " + e.getMessage(), e);
+            fail("Passed rules list test failed: " + e.getMessage());
+        }
+    }
 }

@@ -130,7 +130,7 @@ enrichments:
           #ruleResults.containsKey('high-value-rule') && #ruleResults['high-value-rule'] == true ?
             'REVIEW_REQUIRED' :
           #status != null ? #status : 'PENDING'
-          
+
       # Notification level based on rule combinations
       - source-field: "customerType"
         target-field: "notificationLevel"
@@ -139,3 +139,15 @@ enrichments:
           #ruleResults.get('urgent-processing-rule') == true ? 'HIGH' :
           #ruleResults.get('premium-customer-rule') == true ? 'MEDIUM' :
           'LOW'
+
+  # 5. Passed rules list access
+  - id: "passed-rules-list-access"
+    name: "Passed Rules List Access"
+    type: "field-enrichment"
+    description: "Demonstrate accessing the list of passed rules from rule group results"
+    condition: "true"
+    field-mappings:
+      # Access the passedRules list from rule group results
+      - source-field: "customerType"
+        target-field: "passedRulesList"
+        transformation: "#ruleGroupResults != null && #ruleGroupResults.containsKey('validation-group') ? #ruleGroupResults['validation-group']['passedRules'] : null"

@@ -1,0 +1,104 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: AdvancedConditionalPatternsTest.java (4 test methods)
+# Purpose: Demonstrate advanced conditional processing patterns (Guide Section 8)
+#          Multi-stage processing, cascading conditions, priority-based routing
+# Status: MINIMAL YAML - Just enough to demonstrate each pattern
+# ============================================================================
+
+metadata:
+  id: "advanced-conditional-patterns"
+  name: "Advanced Conditional Patterns Demo"
+  version: "1.0.0"
+  description: "Minimal YAML demonstrating advanced conditional processing patterns"
+  type: "scenario"
+  author: "APEX Enhancement Team"
+  created: "2025-10-13"
+  tags: ["advanced-patterns", "multi-stage", "cascading", "routing"]
+
+# Stage 1: Define business rules
+rules:
+  - id: "high-risk-customer"
+    name: "High Risk Customer Rule"
+    condition: "#creditScore < 600"
+    message: "Customer has low credit score"
+    
+  - id: "high-value-transaction"
+    name: "High Value Transaction Rule"
+    condition: "#amount > 100000"
+    message: "Transaction exceeds $100,000"
+
+# Stage 2: Group rules for risk assessment
+rule-groups:
+  - id: "risk-assessment"
+    name: "Risk Assessment Group"
+    description: "Identifies transactions requiring special handling"
+    operator: "OR"
+    rule-ids:
+      - "high-risk-customer"
+      - "high-value-transaction"
+
+# Stage 3: Apply conditional enrichments based on rule results
+enrichments:
+  # Risk-based enrichment - only runs if risk assessment passed
+  - id: "risk-enrichment"
+    name: "Risk-Based Enrichment"
+    type: "field-enrichment"
+    description: "Adds risk flags when risk assessment triggers"
+    condition: "#ruleGroupResults['risk-assessment']['passed'] == true"
+    field-mappings:
+      - source-field: "creditScore"
+        target-field: "requiresManualReview"
+        transformation: "true"
+
+  # Priority-based routing using conditional-mapping-enrichment
+  - id: "routing-decision"
+    name: "Priority-Based Routing"
+    type: "conditional-mapping-enrichment"
+    description: "Routes to appropriate queue based on risk and value"
+    target-field: "processingQueue"
+    mapping-rules:
+      # Priority 1: Both high-risk AND high-value
+      - id: "high-risk-high-value"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#ruleResults['high-risk-customer'] == true"
+            - condition: "#ruleResults['high-value-transaction'] == true"
+        mapping:
+          type: "direct"
+          transformation: "'EXECUTIVE_REVIEW_QUEUE'"
+
+      # Priority 2: High-risk only
+      - id: "high-risk"
+        priority: 2
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#ruleResults['high-risk-customer'] == true"
+        mapping:
+          type: "direct"
+          transformation: "'COMPLIANCE_REVIEW_QUEUE'"
+
+      # Priority 3: High-value only
+      - id: "high-value"
+        priority: 3
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#ruleResults['high-value-transaction'] == true"
+        mapping:
+          type: "direct"
+          transformation: "'SENIOR_APPROVAL_QUEUE'"
+
+      # Priority 999: Default/standard processing
+      - id: "standard"
+        priority: 999
+        mapping:
+          type: "direct"
+          transformation: "'AUTO_PROCESSING_QUEUE'"
+    execution-settings:
+      stop-on-first-match: true
+

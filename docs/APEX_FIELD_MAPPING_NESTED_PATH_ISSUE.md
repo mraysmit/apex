@@ -810,13 +810,18 @@ private void setFieldValue(Object object, String fieldName, Object value) {
 
 ## Documentation Updates Required
 
-- [ ] `docs/APEX_YAML_REFERENCE.md` - Add SpEL examples to field-mappings section
-- [ ] `docs/APEX_CONDITIONAL_PROCESSING_GUIDE.md` - Add section on SpEL in field mappings
-- [ ] `docs/APEX_RULES_ENGINE_USER_GUIDE.md` - Add "SpEL in Field Mappings" section
+- [x] `docs/APEX_YAML_REFERENCE.md` - Add SpEL examples to field-mappings section
+- [x] `docs/APEX_CONDITIONAL_PROCESSING_GUIDE.md` - Add section on SpEL in field mappings
+- [x] `docs/APEX_RULES_ENGINE_USER_GUIDE.md` - Add "SpEL in Field Mappings" section
+- [x] `docs/APEX_SPEL_GUIDE.md` - Created comprehensive SpEL guide (consolidated from multiple docs)
+
+## Demo Tests
+
+- [x] `apex-demo/src/test/java/dev/mars/apex/demo/basic/NestedFieldNavigationTest.java` - Ultra-simple demo showing nested field access with SpEL
 
 ---
 
-**Status:** Ready for Implementation
+**Status:** COMPLETED (2025-10-13)
 **Assigned To:** TBD
 **Approved By:** User (2025-10-09)
 

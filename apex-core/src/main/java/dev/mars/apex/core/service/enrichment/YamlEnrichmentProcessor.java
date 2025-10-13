@@ -753,6 +753,22 @@ public class YamlEnrichmentProcessor {
             return null;
         }
 
+        // NEW: If fieldName starts with #, treat it as a SpEL expression
+        if (fieldName.startsWith("#")) {
+            try {
+                LOGGER.finest("Evaluating SpEL expression for field: " + fieldName);
+                StandardEvaluationContext context = createEvaluationContext(object);
+                Expression expr = getOrCompileExpression(fieldName);
+                Object value = expr.getValue(context);
+                LOGGER.finest("SpEL expression '" + fieldName + "' evaluated to: " + value);
+                return value;
+            } catch (Exception e) {
+                LOGGER.warning("Failed to evaluate SpEL expression '" + fieldName + "': " + e.getMessage());
+                return null;
+            }
+        }
+
+        // EXISTING: Simple field lookup for non-SpEL field names
         LOGGER.finest("Getting field '" + fieldName + "' from object of type: " + object.getClass().getSimpleName());
 
         // Handle Map objects
@@ -799,6 +815,22 @@ public class YamlEnrichmentProcessor {
             return;
         }
 
+        // NEW: If fieldName starts with #, treat it as a SpEL expression for setting
+        if (fieldName.startsWith("#")) {
+            try {
+                LOGGER.finest("Setting value via SpEL expression: " + fieldName);
+                StandardEvaluationContext context = createEvaluationContext(object);
+                Expression expr = getOrCompileExpression(fieldName);
+                expr.setValue(context, value);
+                LOGGER.finest("Successfully set field via SpEL '" + fieldName + "' to: " + value);
+                return;
+            } catch (Exception e) {
+                LOGGER.warning("Failed to set field via SpEL expression '" + fieldName + "': " + e.getMessage());
+                return;
+            }
+        }
+
+        // EXISTING: Simple field setting for non-SpEL field names
         LOGGER.finest("Setting field '" + fieldName + "' to value: " + value +
                      " on object of type: " + object.getClass().getSimpleName());
 
