@@ -191,7 +191,7 @@ public class DuplicateInlineDataSourceTest extends DemoTestBase {
             logger.info("📊 Dataset Cache Statistics:");
             logger.info("   - Cache Hits: {}", stats.getHits());
             logger.info("   - Cache Misses: {}", stats.getMisses());
-            logger.info("   - Hit Rate: {}%", String.format("%.2f", stats.getHitRate()));
+            logger.info(String.format("   - Hit Rate: %.2f%%", stats.getHitRate()));
             logger.info("   - Total Requests: {}", stats.getRequestCount());
             logger.info("=================================================================");
 

@@ -448,8 +448,8 @@ public class SIRepairResult {
         summary.append("- Status: ").append(repairStatus).append("\n");
         summary.append("- Fields Repaired: ").append(fieldsRepaired).append("\n");
         summary.append("- Rules Matched: ").append(rulesMatched).append("/").append(rulesEvaluated).append("\n");
-        summary.append("- Weighted Score: ").append(String.format("%.2f", weightedScore)).append("\n");
-        summary.append("- Confidence Score: ").append(String.format("%.2f", totalConfidenceScore)).append("\n");
+        summary.append("- Weighted Score: ").append(String.format("%.2f%%", weightedScore)).append("\n");
+        summary.append("- Confidence Score: ").append(String.format("%.2f%%", totalConfidenceScore)).append("\n");
         summary.append("- Processing Time: ").append(processingTimeMs).append("ms\n");
 
         if (repairSuccessful) {

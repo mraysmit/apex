@@ -149,7 +149,7 @@ public class RecoveryStrategyComparisonDemo extends DemoTestBase {
      */
     private void analyzeStrategyResult(String strategyName, RuleResult result, double executionMs) {
         logger.info("Results for {} strategy:", strategyName);
-        logger.info("  - Execution time: {}ms", String.format("%.2f", executionMs));
+        logger.info("  - Execution time: {}ms", String.format("%.2f%%", executionMs));
         logger.info("  - Success: {}", result.isSuccess());
         logger.info("  - Has failures: {}", result.hasFailures());
         logger.info("  - Enriched data fields: {}", result.getEnrichedData().size());

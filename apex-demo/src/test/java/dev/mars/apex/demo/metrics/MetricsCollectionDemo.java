@@ -143,7 +143,7 @@ public class MetricsCollectionDemo extends DemoTestBase {
         metrics.inputDataSize = testData.size();
         
         logger.info("Metrics for {}: {}ms, Success: {}, Enriched: {}, Failures: {}", 
-            scenario, String.format("%.2f", executionMs), metrics.success, 
+            scenario, String.format("%.2f%%", executionMs), metrics.success,
             metrics.enrichedFieldCount, metrics.failureCount);
             
         return metrics;
@@ -186,7 +186,7 @@ public class MetricsCollectionDemo extends DemoTestBase {
         for (MetricsData metrics : scenarioMetrics) {
             logger.info("  {} - Execution: {}ms, Success Rate: {}, Enrichment Rate: {}", 
                 metrics.scenario, 
-                String.format("%.2f", metrics.executionTimeMs),
+                String.format("%.2f%%", metrics.executionTimeMs),
                 metrics.success ? "100%" : "0%",
                 String.format("%.1f%%", (metrics.enrichedFieldCount * 100.0) / metrics.inputDataSize));
         }
@@ -197,10 +197,10 @@ public class MetricsCollectionDemo extends DemoTestBase {
         double minTime = trendMetrics.stream().mapToDouble(m -> m.executionTimeMs).min().orElse(0.0);
         double maxTime = trendMetrics.stream().mapToDouble(m -> m.executionTimeMs).max().orElse(0.0);
         
-        logger.info("  Average execution time: {}ms", String.format("%.2f", avgTime));
-        logger.info("  Minimum execution time: {}ms", String.format("%.2f", minTime));
-        logger.info("  Maximum execution time: {}ms", String.format("%.2f", maxTime));
-        logger.info("  Performance variance: {}ms", String.format("%.2f", maxTime - minTime));
+        logger.info("  Average execution time: {}ms", String.format("%.2f%%", avgTime));
+        logger.info("  Minimum execution time: {}ms", String.format("%.2f%%", minTime));
+        logger.info("  Maximum execution time: {}ms", String.format("%.2f%%", maxTime));
+        logger.info("  Performance variance: {}ms", String.format("%.2f%%", maxTime - minTime));
         
         // Success rate analysis
         long successCount = scenarioMetrics.stream().mapToLong(m -> m.success ? 1 : 0).sum();
@@ -219,11 +219,11 @@ public class MetricsCollectionDemo extends DemoTestBase {
         logger.info("\n--- Performance Optimization Recommendations ---");
         
         if (avgTime > 50.0) {
-            logger.info("⚠ High average execution time detected ({}ms)", String.format("%.2f", avgTime));
+            logger.info("⚠ High average execution time detected ({}ms)", String.format("%.2f%%", avgTime));
             logger.info("  • Consider optimizing rule conditions for faster evaluation");
             logger.info("  • Review complex expressions that may be causing delays");
         } else {
-            logger.info("✓ Execution time is within acceptable range ({}ms)", String.format("%.2f", avgTime));
+            logger.info("✓ Execution time is within acceptable range ({}ms)", String.format("%.2f%%", avgTime));
         }
         
         if (successRate < 80.0) {
@@ -246,7 +246,7 @@ public class MetricsCollectionDemo extends DemoTestBase {
             double qualityImpact = lowQuality.executionTimeMs - highQuality.executionTimeMs;
             if (qualityImpact > 10.0) {
                 logger.info("⚠ Data quality significantly impacts performance ({}ms difference)", 
-                    String.format("%.2f", qualityImpact));
+                    String.format("%.2f%%", qualityImpact));
                 logger.info("  • Implement data quality checks upstream");
                 logger.info("  • Consider caching validated data");
             }

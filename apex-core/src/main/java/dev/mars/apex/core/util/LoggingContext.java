@@ -108,7 +108,7 @@ public class LoggingContext {
      * @param evaluationTimeMs The evaluation time in milliseconds
      */
     public static void setEvaluationTime(double evaluationTimeMs) {
-        String timeStr = String.format("%.2f", evaluationTimeMs);
+        String timeStr = String.format("%.2f%%", evaluationTimeMs);
         MDC.put(EVALUATION_TIME, timeStr);
         contextData.get().put(EVALUATION_TIME, timeStr);
     }

@@ -202,14 +202,14 @@ public class RecoveryPerformanceImpactDemo extends DemoTestBase {
         double baselineAvg = baseline.executionTimes.stream().mapToLong(Long::longValue).average().orElse(0.0) / 1_000_000.0; // Convert to ms
         double recoveryAvg = recovery.executionTimes.stream().mapToLong(Long::longValue).average().orElse(0.0) / 1_000_000.0;
         
-        logger.info("    Baseline (no recovery): {}ms average", String.format("%.2f", baselineAvg));
-        logger.info("    With recovery enabled:  {}ms average", String.format("%.2f", recoveryAvg));
+        logger.info("    Baseline (no recovery): {}ms average", String.format("%.2f%%", baselineAvg));
+        logger.info("    With recovery enabled:  {}ms average", String.format("%.2f%%", recoveryAvg));
 
         if (recoveryAvg > baselineAvg) {
             double overhead = recoveryAvg - baselineAvg;
             double overheadPercent = (overhead / baselineAvg) * 100;
             logger.info("    Recovery overhead:      +{}ms ({}%)",
-                String.format("%.2f", overhead), String.format("%.1f", overheadPercent));
+                String.format("%.2f%%", overhead), String.format("%.1f%%", overheadPercent));
         } else {
             logger.info("    Recovery overhead:      Negligible");
         }
@@ -225,7 +225,7 @@ public class RecoveryPerformanceImpactDemo extends DemoTestBase {
                 RulePerformanceMetrics sampleMetrics = recovery.allMetrics.get(0);
                 if (sampleMetrics.isRecoveryAttempted() && sampleMetrics.getRecoveryTime() != null) {
                     logger.info("    Recovery time:          {}ms",
-                        String.format("%.2f", sampleMetrics.getRecoveryTime().toNanos() / 1_000_000.0));
+                        String.format("%.2f%%", sampleMetrics.getRecoveryTime().toNanos() / 1_000_000.0));
                     logger.info("    Recovery strategy:      {}", sampleMetrics.getRecoveryStrategy());
                 }
             }

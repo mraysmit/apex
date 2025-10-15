@@ -18,8 +18,12 @@ APEX's scenario-based processing system provides a sophisticated architecture fo
 - **YAML Validation System**: Enterprise-grade validation with comprehensive error reporting
 - **External Data Source Integration**: Connect to databases, REST APIs, file systems, and caches
 - **YAML Dataset Enrichment**: Embed reference data directly in configuration files
-- **Pipeline Orchestration**: YAML-driven data processing workflows with ETL capabilities **🆕 NEW**
-- **Data Sink Architecture**: Comprehensive output capabilities with database and file sinks **🆕 NEW**
+- **Pipeline Orchestration**: YAML-driven data processing workflows with ETL capabilities
+- **Data Sink Architecture**: Comprehensive output capabilities with database and file sinks 
+
+
+
+
 - **Progressive API Design**: Three-layer API from simple to advanced use cases
 - **Enterprise Features**: Connection pooling, health monitoring, caching, failover
 - **High Performance**: Optimized for production workloads with comprehensive monitoring

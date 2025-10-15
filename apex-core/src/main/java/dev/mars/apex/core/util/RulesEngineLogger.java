@@ -95,7 +95,7 @@ public class RulesEngineLogger {
         if (logger.isInfoEnabled()) {
             LoggingContext.setEvaluationTime(evaluationTimeMs);
             logger.info(RULE_EVALUATION, "Rule '{}' evaluated to {} in {}ms",
-                       ruleName, result, String.format("%.2f", evaluationTimeMs));
+                       ruleName, result, String.format("%.2f%%", evaluationTimeMs));
         }
     }
 
@@ -148,10 +148,10 @@ public class RulesEngineLogger {
 
             if (memoryUsed != null) {
                 logger.debug(PERFORMANCE, "Rule '{}' performance: {}ms, {}KB memory",
-                           ruleName, String.format("%.2f", evaluationTimeMs), memoryUsed / 1024);
+                           ruleName, String.format("%.2f%%", evaluationTimeMs), memoryUsed / 1024);
             } else {
                 logger.debug(PERFORMANCE, "Rule '{}' performance: {}ms",
-                           ruleName, String.format("%.2f", evaluationTimeMs));
+                           ruleName, String.format("%.2f%%", evaluationTimeMs));
             }
         }
     }
@@ -168,7 +168,7 @@ public class RulesEngineLogger {
             LoggingContext.setRuleName(ruleName);
             LoggingContext.setEvaluationTime(evaluationTimeMs);
             logger.warn(PERFORMANCE, "Slow rule detected: '{}' took {}ms (threshold: {}ms)",
-                       ruleName, String.format("%.2f", evaluationTimeMs), String.format("%.2f", threshold));
+                       ruleName, String.format("%.2f%%", evaluationTimeMs), String.format("%.2f%%", threshold));
         }
     }
 

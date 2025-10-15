@@ -153,12 +153,12 @@ public class BasicPerformanceMetricsDemo extends DemoTestBase {
         logger.info("\n--- Performance Analysis Results ---");
         logger.info("Simple rules execution:");
         logger.info("  - Execution successful: {}", simpleResult.isSuccess());
-        logger.info("  - Execution time: {}ms", String.format("%.2f", simpleMs));
+        logger.info("  - Execution time: {}ms", String.format("%.2f%%", simpleMs));
         logger.info("  - Has failures: {}", simpleResult.hasFailures());
 
         logger.info("\nComplex rules execution:");
         logger.info("  - Execution successful: {}", complexResult.isSuccess());
-        logger.info("  - Execution time: {}ms", String.format("%.2f", complexMs));
+        logger.info("  - Execution time: {}ms", String.format("%.2f%%", complexMs));
         logger.info("  - Has failures: {}", complexResult.hasFailures());
         
         if (complexMs > simpleMs) {
