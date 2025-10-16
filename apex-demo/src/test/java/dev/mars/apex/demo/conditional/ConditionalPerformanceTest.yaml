@@ -1,0 +1,113 @@
+metadata:
+  id: "conditional-performance-test"
+  name: "Conditional Performance Test Configuration"
+  description: "Demonstrates condition ordering and performance optimization patterns"
+  version: "1.0"
+
+rules:
+  # Cheap conditions (fast evaluation)
+  - id: "cheap-amount-check"
+    name: "Cheap Amount Check"
+    description: "Simple amount threshold check (cheap operation)"
+    condition: "#amount > 10000"
+    
+  - id: "cheap-customer-check"
+    name: "Cheap Customer Check"
+    description: "Simple customer type check (cheap operation)"
+    condition: "#customerType == 'PREMIUM'"
+    
+  # Expensive conditions (slow evaluation - simulated with complex logic)
+  - id: "expensive-priority-check"
+    name: "Expensive Priority Check"
+    description: "Complex priority evaluation (expensive operation)"
+    condition: "#priority == 'URGENT' || #priority == 'HIGH'"
+    
+  - id: "high-value-check"
+    name: "High Value Check"
+    description: "High-value transaction check"
+    condition: "#amount > 50000"
+    
+  - id: "premium-customer-check"
+    name: "Premium Customer Check"
+    description: "Premium customer verification"
+    condition: "#customerType == 'PREMIUM'"
+
+# Rule groups demonstrating different optimization patterns
+rule-groups:
+  # Optimized: cheap condition first (fails fast)
+  - id: "optimized-and-group"
+    name: "Optimized AND Group"
+    operator: "AND"
+    stop-on-first-failure: true
+    rule-ids:
+      - "cheap-amount-check"
+      - "expensive-priority-check"
+
+  # Unoptimized: expensive condition first (slower)
+  - id: "unoptimized-and-group"
+    name: "Unoptimized AND Group"
+    operator: "AND"
+    stop-on-first-failure: true
+    rule-ids:
+      - "expensive-priority-check"
+      - "cheap-amount-check"
+
+  # OR group: first-match-wins
+  - id: "or-group-first-match"
+    name: "OR Group First Match"
+    operator: "OR"
+    stop-on-first-failure: false
+    rule-ids:
+      - "high-value-check"
+      - "premium-customer-check"
+      - "expensive-priority-check"
+
+enrichments:
+  # Condition ordering test enrichments
+  - id: "optimized-path-enrichment"
+    type: "field-enrichment"
+    condition: "#ruleGroupResults['optimized-and-group']['passed']"
+    field-mappings:
+      - source-field: "amount"
+        target-field: "optimizationLevel"
+        transformation: "'OPTIMIZED'"
+
+  - id: "unoptimized-path-enrichment"
+    type: "field-enrichment"
+    condition: "#ruleGroupResults['unoptimized-and-group']['passed']"
+    field-mappings:
+      - source-field: "amount"
+        target-field: "optimizationLevel"
+        transformation: "'UNOPTIMIZED'"
+
+  - id: "default-optimization-enrichment"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "amount"
+        target-field: "optimizationLevel"
+        transformation: "#ruleGroupResults['optimized-and-group']['passed'] ? 'OPTIMIZED' : 'UNOPTIMIZED'"
+
+  # AND operator stop-on-first-failure test
+  - id: "and-group-result-enrichment"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "amount"
+        target-field: "andGroupResult"
+        transformation: "#ruleGroupResults['optimized-and-group']['passed'] ? 'PASSED' : 'FAILED_EARLY'"
+
+  # OR operator first-match-wins test
+  - id: "or-group-result-enrichment"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "amount"
+        target-field: "orGroupResult"
+        transformation: "#ruleGroupResults['or-group-first-match']['passed'] ? 'MATCHED_FIRST' : 'NO_MATCH'"
+
+  # Caching test enrichment
+  - id: "caching-level-enrichment"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "amount"
+        target-field: "cachingLevel"
+        transformation: "#ruleGroupResults['optimized-and-group']['passed'] ? 'CACHED' : 'EVALUATED'"
+

@@ -74,7 +74,7 @@ public class YamlEnrichmentProcessor {
     private dev.mars.apex.core.config.yaml.YamlRuleConfiguration currentConfiguration;
 
     // Rule result tracking for conditional mapping support
-    private final Map<String, Map<String, Boolean>> ruleGroupResults = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<String, Map<String, Object>> ruleGroupResults = new java.util.concurrent.ConcurrentHashMap<>();
     private final Map<String, Boolean> individualRuleResults = new java.util.concurrent.ConcurrentHashMap<>();
 
     public YamlEnrichmentProcessor(LookupServiceRegistry serviceRegistry,
@@ -1133,17 +1133,33 @@ public class YamlEnrichmentProcessor {
                         boolean groupResult = ruleGroup.evaluate(context);
 
                         // Store rule group results
-                        Map<String, Boolean> groupRuleResults = new HashMap<>();
+                        Map<String, Object> groupRuleResults = new HashMap<>();
                         groupRuleResults.put("passed", groupResult);
                         groupRuleResults.putAll(ruleGroup.getRuleResults());
+
+                        // Add passedRules and failedRules lists
+                        List<String> passedRules = new ArrayList<>();
+                        List<String> failedRules = new ArrayList<>();
+                        for (Map.Entry<String, Boolean> entry : ruleGroup.getRuleResults().entrySet()) {
+                            if (entry.getValue()) {
+                                passedRules.add(entry.getKey());
+                            } else {
+                                failedRules.add(entry.getKey());
+                            }
+                        }
+                        groupRuleResults.put("passedRules", passedRules);
+                        groupRuleResults.put("failedRules", failedRules);
+
                         ruleGroupResults.put(yamlRuleGroup.getId(), groupRuleResults);
 
                         LOGGER.fine("Rule group '" + yamlRuleGroup.getId() + "' evaluated to: " + groupResult);
 
                     } catch (Exception e) {
                         LOGGER.log(Level.WARNING, "Error evaluating rule group '" + yamlRuleGroup.getId() + "': " + e.getMessage(), e);
-                        Map<String, Boolean> failedResult = new HashMap<>();
+                        Map<String, Object> failedResult = new HashMap<>();
                         failedResult.put("passed", false);
+                        failedResult.put("passedRules", new ArrayList<String>());
+                        failedResult.put("failedRules", new ArrayList<String>());
                         ruleGroupResults.put(yamlRuleGroup.getId(), failedResult);
                     }
                 }

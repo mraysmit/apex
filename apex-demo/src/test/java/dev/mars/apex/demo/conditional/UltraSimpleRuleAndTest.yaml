@@ -1,0 +1,53 @@
+# ============================================================================
+# ULTRA SIMPLE RULE AND TEST
+# ============================================================================
+# Purpose: Prove 3 rules in sequence with AND logic
+#          All rules must pass for the group to pass
+#          Stop-on-first-failure demonstrates AND behavior
+# ============================================================================
+
+metadata:
+  name: "Ultra Simple Rule AND Test"
+  version: "1.0.0"
+  description: "3 rules in sequence with AND logic, all must pass"
+  type: "scenario"
+
+# 3 rules in sequence
+rules:
+  - id: "rule-1"
+    name: "First Rule"
+    condition: "#input == 'ABC' || #input == 'AB' || #input == 'A'"
+    message: "First rule matched"
+    
+  - id: "rule-2" 
+    name: "Second Rule"
+    condition: "#input == 'ABC' || #input == 'AB' || #input == 'B'"
+    message: "Second rule matched"
+    
+  - id: "rule-3"
+    name: "Third Rule" 
+    condition: "#input == 'ABC' || #input == 'C'"
+    message: "Third rule matched"
+
+# Rule group with AND logic
+rule-groups:
+  - id: "simple-and-group"
+    name: "Simple AND Group"
+    operator: "AND"
+    stop-on-first-failure: true
+    rule-ids:
+      - "rule-1"
+      - "rule-2" 
+      - "rule-3"
+
+# Enrichments that use rule group results
+enrichments:
+  - id: "and-result-enrichment"
+    name: "AND Result Enrichment"
+    type: "field-enrichment"
+    target-object-type: "java.util.HashMap"
+    field-mappings:
+      - source-field: "input"
+        target-field: "output"
+        transformation: "#ruleGroupResults['simple-and-group']['passed'] ? 'ALL_PASSED' : 'FAILED'"
+
