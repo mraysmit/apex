@@ -17,8 +17,13 @@
     <logger name="dev.mars.apex.core.util.YamlDependencyAnalyzer" level="INFO"/>
     <logger name="dev.mars.apex.core.util.YamlMetadataValidator" level="INFO"/>
 
-    <!-- Enhanced logging for scenario tests -->
+    <!-- Enhanced logging for scenario tests - enable console output -->
     <logger name="dev.mars.apex.core.service.scenario" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <!-- Specifically enable ScenarioEndToEndIntegrationTest logging -->
+    <logger name="dev.mars.apex.core.service.scenario.ScenarioEndToEndIntegrationTest" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
 
