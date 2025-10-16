@@ -17,11 +17,10 @@ package dev.mars.apex.core.service.scenario;
  */
 
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,8 +28,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+
 
 /**
  * Comprehensive unit tests for DataTypeScenarioService.
@@ -51,14 +49,12 @@ class DataTypeScenarioServiceTest {
     @TempDir
     Path tempDir;
 
-    @Mock
-    private YamlConfigurationLoader mockConfigLoader;
+
 
     private DataTypeScenarioService scenarioService;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         scenarioService = new DataTypeScenarioService();
     }
 

@@ -19,8 +19,7 @@ package dev.mars.apex.core.service.data.external.database;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -32,8 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+
 
 /**
  * Integration test that compares the old inline parameter processing implementation
@@ -43,18 +41,19 @@ import static org.mockito.Mockito.*;
  */
 class ParameterProcessingComparisonTest {
 
-    @Mock
-    private Connection mockConnection;
-    
-    @Mock
-    private PreparedStatement mockStatement1;
-    
-    @Mock
-    private PreparedStatement mockStatement2;
+    private Connection connection;
 
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+    void setUp() throws SQLException {
+        String url = "jdbc:h2:mem:param_compare_" + System.nanoTime() + ";MODE=PostgreSQL;DB_CLOSE_DELAY=-1";
+        connection = java.sql.DriverManager.getConnection(url, "sa", "");
+    }
+
+    @org.junit.jupiter.api.AfterEach
+    void tearDown() throws SQLException {
+        if (connection != null && !connection.isClosed()) {
+            connection.close();
+        }
     }
 
     /**
@@ -120,190 +119,175 @@ class ParameterProcessingComparisonTest {
     @Test
     @DisplayName("Should produce identical results for simple parameters")
     void testSimpleParametersComparison() throws SQLException {
-        // Arrange
-        when(mockConnection.prepareStatement(anyString()))
-            .thenReturn(mockStatement1)
-            .thenReturn(mockStatement2);
-        
+        try (java.sql.Statement st = connection.createStatement()) {
+            st.execute("DROP TABLE IF EXISTS users");
+            st.execute("CREATE TABLE users (id BIGINT, name VARCHAR(100))");
+            st.execute("INSERT INTO users (id, name) VALUES (123, 'John Doe')");
+        }
+
         String sql = "SELECT * FROM users WHERE id = :userId AND name = :userName";
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("userId", 123L);
         parameters.put("userName", "John Doe");
 
-        // Act
-        PreparedStatement result1 = prepareStatementOriginal(mockConnection, sql, parameters);
-        PreparedStatement result2 = JdbcParameterUtils.prepareStatement(mockConnection, sql, parameters);
+        PreparedStatement ps1 = prepareStatementOriginal(connection, sql, parameters);
+        PreparedStatement ps2 = JdbcParameterUtils.prepareStatement(connection, sql, parameters);
 
-        // Assert - Both should call prepareStatement with identical processed SQL
-        verify(mockConnection, times(2)).prepareStatement("SELECT * FROM users WHERE id = ? AND name = ?");
-        
-        // Both should set identical parameters
-        verify(mockStatement1).setObject(1, 123L);
-        verify(mockStatement1).setObject(2, "John Doe");
-        verify(mockStatement2).setObject(1, 123L);
-        verify(mockStatement2).setObject(2, "John Doe");
+        try (java.sql.ResultSet rs1 = ps1.executeQuery();
+             java.sql.ResultSet rs2 = ps2.executeQuery()) {
+            assertTrue(rs1.next());
+            assertTrue(rs2.next());
+            assertEquals(rs1.getLong("id"), rs2.getLong("id"));
+            assertEquals(rs1.getString("name"), rs2.getString("name"));
+        }
     }
 
     @Test
     @DisplayName("Should produce identical results for complex INSERT statement")
     void testComplexInsertComparison() throws SQLException {
-        // Arrange
-        when(mockConnection.prepareStatement(anyString()))
-            .thenReturn(mockStatement1)
-            .thenReturn(mockStatement2);
-        
+        try (java.sql.Statement st = connection.createStatement()) {
+            st.execute("DROP TABLE IF EXISTS customers");
+            st.execute("CREATE TABLE customers (customer_id BIGINT, customer_name VARCHAR(100), email VARCHAR(150), status VARCHAR(20), created_at TIMESTAMP)");
+            st.execute("DELETE FROM customers");
+        }
+
         String sql = "INSERT INTO customers (customer_id, customer_name, email, status, created_at) " +
-                    "VALUES (:id, :customerName, :email, :status, CURRENT_TIMESTAMP)";
-        
+                     "VALUES (:id, :customerName, :email, :status, CURRENT_TIMESTAMP)";
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("id", 1L);
         parameters.put("customerName", "John Smith");
         parameters.put("email", "john.smith@email.com");
         parameters.put("status", "ACTIVE");
-        parameters.put("registrationDate", LocalDate.of(2024, 1, 15)); // Extra unused parameter
+        parameters.put("registrationDate", LocalDate.of(2024, 1, 15));
 
-        // Act
-        PreparedStatement result1 = prepareStatementOriginal(mockConnection, sql, parameters);
-        PreparedStatement result2 = JdbcParameterUtils.prepareStatement(mockConnection, sql, parameters);
+        // Execute original
+        PreparedStatement ps1 = prepareStatementOriginal(connection, sql, parameters);
+        int u1 = ps1.executeUpdate();
+        assertEquals(1, u1);
+        // Verify row
+        try (java.sql.ResultSet rs = connection.createStatement().executeQuery("SELECT customer_name, email, status FROM customers WHERE customer_id = 1")) {
+            assertTrue(rs.next());
+            assertEquals("John Smith", rs.getString("customer_name"));
+            assertEquals("john.smith@email.com", rs.getString("email"));
+            assertEquals("ACTIVE", rs.getString("status"));
+        }
+        // Clean table
+        connection.createStatement().execute("DELETE FROM customers");
 
-        // Assert - Both should call prepareStatement with identical processed SQL
-        String expectedSql = "INSERT INTO customers (customer_id, customer_name, email, status, created_at) " +
-                           "VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)";
-        verify(mockConnection, times(2)).prepareStatement(expectedSql);
-        
-        // Both should set identical parameters in identical order
-        verify(mockStatement1).setObject(1, 1L);
-        verify(mockStatement1).setObject(2, "John Smith");
-        verify(mockStatement1).setObject(3, "john.smith@email.com");
-        verify(mockStatement1).setObject(4, "ACTIVE");
-        
-        verify(mockStatement2).setObject(1, 1L);
-        verify(mockStatement2).setObject(2, "John Smith");
-        verify(mockStatement2).setObject(3, "john.smith@email.com");
-        verify(mockStatement2).setObject(4, "ACTIVE");
+        // Execute new
+        PreparedStatement ps2 = JdbcParameterUtils.prepareStatement(connection, sql, parameters);
+        int u2 = ps2.executeUpdate();
+        assertEquals(1, u2);
+        try (java.sql.ResultSet rs = connection.createStatement().executeQuery("SELECT customer_name, email, status FROM customers WHERE customer_id = 1")) {
+            assertTrue(rs.next());
+            assertEquals("John Smith", rs.getString("customer_name"));
+            assertEquals("john.smith@email.com", rs.getString("email"));
+            assertEquals("ACTIVE", rs.getString("status"));
+        }
     }
 
     @Test
     @DisplayName("Should produce identical results for repeated parameters")
     void testRepeatedParametersComparison() throws SQLException {
-        // Arrange
-        when(mockConnection.prepareStatement(anyString()))
-            .thenReturn(mockStatement1)
-            .thenReturn(mockStatement2);
-        
-        String sql = "SELECT * FROM logs WHERE user_id = :userId OR created_by = :userId";
+        try (java.sql.Statement st = connection.createStatement()) {
+            st.execute("DROP TABLE IF EXISTS logs");
+            st.execute("CREATE TABLE logs (user_id BIGINT, created_by BIGINT)");
+            st.execute("INSERT INTO logs (user_id, created_by) VALUES (123, 456)");
+            st.execute("INSERT INTO logs (user_id, created_by) VALUES (999, 123)");
+        }
+        String sql = "SELECT COUNT(*) c FROM logs WHERE user_id = :userId OR created_by = :userId";
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("userId", 123L);
-
-        // Act
-        PreparedStatement result1 = prepareStatementOriginal(mockConnection, sql, parameters);
-        PreparedStatement result2 = JdbcParameterUtils.prepareStatement(mockConnection, sql, parameters);
-
-        // Assert
-        verify(mockConnection, times(2)).prepareStatement("SELECT * FROM logs WHERE user_id = ? OR created_by = ?");
-        
-        // Both should set the same parameter value twice
-        verify(mockStatement1).setObject(1, 123L);
-        verify(mockStatement1).setObject(2, 123L);
-        verify(mockStatement2).setObject(1, 123L);
-        verify(mockStatement2).setObject(2, 123L);
+        PreparedStatement ps1 = prepareStatementOriginal(connection, sql, parameters);
+        PreparedStatement ps2 = JdbcParameterUtils.prepareStatement(connection, sql, parameters);
+        try (java.sql.ResultSet rs1 = ps1.executeQuery();
+             java.sql.ResultSet rs2 = ps2.executeQuery()) {
+            assertTrue(rs1.next());
+            assertTrue(rs2.next());
+            assertEquals(rs1.getLong("c"), rs2.getLong("c"));
+        }
     }
 
     @Test
     @DisplayName("Should produce identical results for null parameters")
     void testNullParametersComparison() throws SQLException {
-        // Arrange
-        when(mockConnection.prepareStatement(anyString()))
-            .thenReturn(mockStatement1)
-            .thenReturn(mockStatement2);
-        
+        try (java.sql.Statement st = connection.createStatement()) {
+            st.execute("DROP TABLE IF EXISTS users");
+            st.execute("CREATE TABLE users (id BIGINT, name VARCHAR(100), email VARCHAR(100))");
+            st.execute("INSERT INTO users (id, name, email) VALUES (1, 'Old', 'old@example.com')");
+        }
         String sql = "UPDATE users SET name = :name, email = :email WHERE id = :id";
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("name", null);
         parameters.put("email", "test@example.com");
         parameters.put("id", 1L);
-
-        // Act
-        PreparedStatement result1 = prepareStatementOriginal(mockConnection, sql, parameters);
-        PreparedStatement result2 = JdbcParameterUtils.prepareStatement(mockConnection, sql, parameters);
-
-        // Assert
-        verify(mockConnection, times(2)).prepareStatement("UPDATE users SET name = ?, email = ? WHERE id = ?");
-        
-        // Both should handle null values identically
-        verify(mockStatement1).setObject(1, null);
-        verify(mockStatement1).setObject(2, "test@example.com");
-        verify(mockStatement1).setObject(3, 1L);
-        
-        verify(mockStatement2).setObject(1, null);
-        verify(mockStatement2).setObject(2, "test@example.com");
-        verify(mockStatement2).setObject(3, 1L);
+        PreparedStatement ps1 = prepareStatementOriginal(connection, sql, parameters);
+        PreparedStatement ps2 = JdbcParameterUtils.prepareStatement(connection, sql, parameters);
+        assertEquals(1, ps1.executeUpdate());
+        // Reset row
+        connection.createStatement().execute("UPDATE users SET name='Old', email='old@example.com' WHERE id=1");
+        assertEquals(1, ps2.executeUpdate());
+        try (java.sql.ResultSet rs = connection.createStatement().executeQuery("SELECT name, email FROM users WHERE id=1")) {
+            assertTrue(rs.next());
+            assertNull(rs.getString("name"));
+            assertEquals("test@example.com", rs.getString("email"));
+        }
     }
 
     @Test
     @DisplayName("Should produce identical results for SQL with no parameters")
     void testNoParametersComparison() throws SQLException {
-        // Arrange
-        when(mockConnection.prepareStatement(anyString()))
-            .thenReturn(mockStatement1)
-            .thenReturn(mockStatement2);
-        
-        String sql = "SELECT COUNT(*) FROM users";
+        try (java.sql.Statement st = connection.createStatement()) {
+            st.execute("DROP TABLE IF EXISTS users");
+            st.execute("CREATE TABLE users (id INT)");
+            st.execute("INSERT INTO users (id) VALUES (1)");
+            st.execute("INSERT INTO users (id) VALUES (2)");
+        }
+        String sql = "SELECT COUNT(*) c FROM users";
         Map<String, Object> parameters = new HashMap<>();
-
-        // Act
-        PreparedStatement result1 = prepareStatementOriginal(mockConnection, sql, parameters);
-        PreparedStatement result2 = JdbcParameterUtils.prepareStatement(mockConnection, sql, parameters);
-
-        // Assert
-        verify(mockConnection, times(2)).prepareStatement("SELECT COUNT(*) FROM users");
-        
-        // Neither should set any parameters
-        verifyNoMoreInteractions(mockStatement1);
-        verifyNoMoreInteractions(mockStatement2);
+        PreparedStatement ps1 = prepareStatementOriginal(connection, sql, parameters);
+        PreparedStatement ps2 = JdbcParameterUtils.prepareStatement(connection, sql, parameters);
+        try (java.sql.ResultSet rs1 = ps1.executeQuery();
+             java.sql.ResultSet rs2 = ps2.executeQuery()) {
+            assertTrue(rs1.next());
+            assertTrue(rs2.next());
+            assertEquals(rs1.getLong("c"), rs2.getLong("c"));
+        }
     }
 
     @Test
     @DisplayName("Should handle edge cases identically")
     void testEdgeCasesComparison() throws SQLException {
-        // Arrange
-        when(mockConnection.prepareStatement(anyString()))
-            .thenReturn(mockStatement1)
-            .thenReturn(mockStatement2);
-        
-        String sql = "SELECT * FROM table WHERE field_1 = :param_1 AND field2 = :param2";
+        try (java.sql.Statement st = connection.createStatement()) {
+            st.execute("DROP TABLE IF EXISTS table1");
+            st.execute("CREATE TABLE table1 (field_1 VARCHAR(50), field2 VARCHAR(50))");
+            st.execute("INSERT INTO table1 (field_1, field2) VALUES ('value1', 'value2')");
+        }
+        String sql = "SELECT * FROM table1 WHERE field_1 = :param_1 AND field2 = :param2";
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("param_1", "value1");
         parameters.put("param2", "value2");
-
-        // Act
-        PreparedStatement result1 = prepareStatementOriginal(mockConnection, sql, parameters);
-        PreparedStatement result2 = JdbcParameterUtils.prepareStatement(mockConnection, sql, parameters);
-
-        // Assert
-        verify(mockConnection, times(2)).prepareStatement("SELECT * FROM table WHERE field_1 = ? AND field2 = ?");
-        
-        verify(mockStatement1).setObject(1, "value1");
-        verify(mockStatement1).setObject(2, "value2");
-        verify(mockStatement2).setObject(1, "value1");
-        verify(mockStatement2).setObject(2, "value2");
+        PreparedStatement ps1 = prepareStatementOriginal(connection, sql, parameters);
+        PreparedStatement ps2 = JdbcParameterUtils.prepareStatement(connection, sql, parameters);
+        try (java.sql.ResultSet rs1 = ps1.executeQuery();
+             java.sql.ResultSet rs2 = ps2.executeQuery()) {
+            assertTrue(rs1.next());
+            assertTrue(rs2.next());
+            assertEquals(rs1.getString("field_1"), rs2.getString("field_1"));
+            assertEquals(rs1.getString("field2"), rs2.getString("field2"));
+        }
     }
 
     @Test
     @DisplayName("Should handle null SQL identically")
     void testNullSqlComparison() {
-        // Arrange
         Map<String, Object> parameters = new HashMap<>();
-
-        // Act & Assert - Both should throw identical exceptions
         SQLException exception1 = assertThrows(SQLException.class, () -> {
-            prepareStatementOriginal(mockConnection, null, parameters);
+            prepareStatementOriginal(connection, null, parameters);
         });
-        
         SQLException exception2 = assertThrows(SQLException.class, () -> {
-            JdbcParameterUtils.prepareStatement(mockConnection, null, parameters);
+            JdbcParameterUtils.prepareStatement(connection, null, parameters);
         });
-        
         assertEquals("SQL cannot be null", exception1.getMessage());
         assertEquals("SQL cannot be null", exception2.getMessage());
     }

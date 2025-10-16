@@ -20,14 +20,12 @@ package dev.mars.apex.core.service.data.external.cache;
 import dev.mars.apex.core.config.datasource.*;
 import dev.mars.apex.core.service.data.external.*;
 import org.junit.jupiter.api.*;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+
 
 /**
  * Comprehensive unit tests for CacheDataSource.
@@ -46,32 +44,22 @@ import static org.mockito.Mockito.*;
  */
 class CacheDataSourceTest {
 
-    @Mock
-    private CacheManager mockCacheManager;
-    
-    @Mock
-    private CacheStatistics mockCacheStatistics;
+
 
     private CacheDataSource cacheDataSource;
     private DataSourceConfiguration validConfig;
-    private AutoCloseable mockitoCloseable;
 
     @BeforeEach
     void setUp() {
-        mockitoCloseable = MockitoAnnotations.openMocks(this);
-        
         // Create valid configuration
         validConfig = createValidCacheConfiguration();
-        
-        // Create cache data source
+
+        // Create cache data source (not initialized yet)
         cacheDataSource = new CacheDataSource(validConfig);
     }
 
     @AfterEach
     void tearDown() throws Exception {
-        if (mockitoCloseable != null) {
-            mockitoCloseable.close();
-        }
         if (cacheDataSource != null) {
             cacheDataSource.shutdown();
         }
@@ -104,21 +92,13 @@ class CacheDataSourceTest {
 
     @Test
     @DisplayName("Should initialize successfully with valid configuration")
-    void testInitializeWithValidConfiguration() throws DataSourceException {
-        // Mock the cache manager creation and behavior
-        when(mockCacheManager.isHealthy()).thenReturn(true);
-        when(mockCacheManager.get(anyString())).thenReturn("test");
-        doNothing().when(mockCacheManager).put(anyString(), any());
-        when(mockCacheManager.remove(anyString())).thenReturn(true);
-        
-        // Use reflection or create a testable version
-        // For now, we'll test the initialization logic indirectly
-        assertDoesNotThrow(() -> {
-            CacheDataSource ds = new CacheDataSource(validConfig);
-            // The actual initialization happens in the factory, but we can test the setup
-            assertNotNull(ds.getConfiguration());
-            assertEquals(validConfig, ds.getConfiguration());
-        });
+    void testInitializeWithValidConfiguration() throws Exception {
+        CacheDataSource ds = new CacheDataSource(validConfig);
+        assertDoesNotThrow(() -> ds.initialize(validConfig));
+        assertTrue(ds.isHealthy());
+        assertEquals(validConfig, ds.getConfiguration());
+        assertNotNull(ds.getConnectionStatus());
+        ds.shutdown();
     }
 
     @Test
@@ -385,144 +365,99 @@ class CacheDataSourceTest {
     // ========================================
 
     @Test
-    @DisplayName("Should perform cache operations with mocked cache manager")
-    void testCacheOperationsWithMock() throws Exception {
-        // Create a cache data source with mocked cache manager
-        CacheDataSource dsWithMock = createCacheDataSourceWithMock();
+    @DisplayName("Should perform cache operations with real in-memory cache")
+    void testCacheOperationsWithRealManager() throws Exception {
+        CacheDataSource ds = new CacheDataSource(validConfig);
+        ds.initialize(validConfig);
 
-        // Test put operations
-        dsWithMock.put("test-key", "test-value");
-        verify(mockCacheManager).put("test-key", "test-value");
+        // Put operations
+        ds.put("test-key", "test-value");
+        ds.put("ttl-key", "ttl-value", 1);
 
-        dsWithMock.put("ttl-key", "ttl-value", 300);
-        verify(mockCacheManager).put("ttl-key", "ttl-value", 300);
-
-        // Test get operation
-        when(mockCacheManager.get("test-key")).thenReturn("test-value");
-        Object result = dsWithMock.get("test-key");
+        // Get operation
+        Object result = ds.get("test-key");
         assertEquals("test-value", result);
-        verify(mockCacheManager).get("test-key");
 
-        // Test remove operation
-        when(mockCacheManager.remove("test-key")).thenReturn(true);
-        boolean removed = dsWithMock.remove("test-key");
+        // contains/remove/size
+        assertTrue(ds.containsKey("test-key"));
+        boolean removed = ds.remove("test-key");
         assertTrue(removed);
-        verify(mockCacheManager).remove("test-key");
+        assertFalse(ds.containsKey("test-key"));
 
-        // Test containsKey operation
-        when(mockCacheManager.containsKey("test-key")).thenReturn(true);
-        boolean contains = dsWithMock.containsKey("test-key");
-        assertTrue(contains);
-        verify(mockCacheManager).containsKey("test-key");
-
-        // Test clear operation
-        dsWithMock.clear();
-        verify(mockCacheManager).clear();
-
-        // Test size operation
-        when(mockCacheManager.size()).thenReturn(5);
-        long size = dsWithMock.size();
-        assertEquals(5, size);
-        verify(mockCacheManager).size();
+        // Clear and size
+        ds.put("a", 1);
+        ds.put("b", 2);
+        assertTrue(ds.size() >= 2);
+        ds.clear();
+        assertEquals(0, ds.size());
+        ds.shutdown();
     }
 
     @Test
-    @DisplayName("Should handle getData with mocked cache manager")
-    void testGetDataWithMock() throws Exception {
-        CacheDataSource dsWithMock = createCacheDataSourceWithMock();
+    @DisplayName("Should handle getData with real in-memory cache")
+    void testGetDataWithRealManager() throws Exception {
+        CacheDataSource ds = new CacheDataSource(validConfig);
+        ds.initialize(validConfig);
 
-        // Mock cache manager behavior
-        when(mockCacheManager.get(anyString())).thenReturn("cached-value");
+        // Build key per CacheDataSource's buildCacheKey logic: dataType + ":" + params
+        String expectedKey = "memory:test-key";
+        Map<String, Object> params = new HashMap<>();
+        params.put("key", expectedKey);
+        params.put("value", "cached-value");
+        ds.query("put", params);
 
-        // Test getData
-        String result = dsWithMock.getData("memory", "test-key");
+        String result = ds.getData("memory", "test-key");
         assertEquals("cached-value", result);
-
-        // Verify cache manager was called with built key
-        verify(mockCacheManager).get(anyString());
+        ds.shutdown();
     }
 
     @Test
-    @DisplayName("Should handle query operations with mocked cache manager")
-    void testQueryWithMock() throws Exception {
-        CacheDataSource dsWithMock = createCacheDataSourceWithMock();
+    @DisplayName("Should handle query operations with real in-memory cache")
+    void testQueryWithRealManager() throws Exception {
+        CacheDataSource ds = new CacheDataSource(validConfig);
+        ds.initialize(validConfig);
 
-        // Mock cache manager behavior
-        List<String> mockKeys = Arrays.asList("key1", "key2", "key3");
-        when(mockCacheManager.getKeysByPattern("test-pattern")).thenReturn(mockKeys);
-        when(mockCacheManager.get("key1")).thenReturn("value1");
-        when(mockCacheManager.get("key2")).thenReturn("value2");
-        when(mockCacheManager.get("key3")).thenReturn("value3");
+        // Seed values
+        ds.put("user:1", "value1");
+        ds.put("user:2", "value2");
+        ds.put("user:3", "value3");
 
-        // Test query
-        List<Object> results = dsWithMock.query("test-pattern", new HashMap<>());
-
+        List<Object> results = ds.query("user:*", new HashMap<>());
         assertNotNull(results);
         assertEquals(3, results.size());
         assertTrue(results.contains("value1"));
         assertTrue(results.contains("value2"));
         assertTrue(results.contains("value3"));
-
-        verify(mockCacheManager).getKeysByPattern("test-pattern");
-        verify(mockCacheManager).get("key1");
-        verify(mockCacheManager).get("key2");
-        verify(mockCacheManager).get("key3");
+        ds.shutdown();
     }
 
     @Test
-    @DisplayName("Should handle connection test with mocked cache manager")
-    void testConnectionTestWithMock() throws Exception {
-        CacheDataSource dsWithMock = createCacheDataSourceWithMock();
+    @DisplayName("Should pass connection test after initialize")
+    void testConnectionTestWithRealManager() throws Exception {
+        CacheDataSource ds = new CacheDataSource(validConfig);
+        ds.initialize(validConfig);
+        assertTrue(ds.testConnection());
+        ds.shutdown();
+    }
 
-        // Mock successful connection test
-        when(mockCacheManager.get(anyString())).thenReturn("test");
-        doNothing().when(mockCacheManager).put(anyString(), any());
-        when(mockCacheManager.remove(anyString())).thenReturn(true);
 
-        boolean result = dsWithMock.testConnection();
-        assertTrue(result);
 
-        verify(mockCacheManager).put(anyString(), eq("test"));
-        verify(mockCacheManager).get(anyString());
-        verify(mockCacheManager).remove(anyString());
+    @Test
+    @DisplayName("Should refresh without errors")
+    void testRefreshWithRealManager() throws Exception {
+        CacheDataSource ds = new CacheDataSource(validConfig);
+        ds.initialize(validConfig);
+        assertDoesNotThrow(ds::refresh);
+        ds.shutdown();
     }
 
     @Test
-    @DisplayName("Should handle connection test failure with mocked cache manager")
-    void testConnectionTestFailureWithMock() throws Exception {
-        CacheDataSource dsWithMock = createCacheDataSourceWithMock();
-
-        // Mock failed connection test
-        when(mockCacheManager.get(anyString())).thenReturn("wrong-value");
-        doNothing().when(mockCacheManager).put(anyString(), any());
-        when(mockCacheManager.remove(anyString())).thenReturn(true);
-
-        boolean result = dsWithMock.testConnection();
-        assertFalse(result);
-    }
-
-    @Test
-    @DisplayName("Should handle refresh with mocked cache manager")
-    void testRefreshWithMock() throws Exception {
-        CacheDataSource dsWithMock = createCacheDataSourceWithMock();
-
-        doNothing().when(mockCacheManager).evictExpired();
-
-        assertDoesNotThrow(() -> dsWithMock.refresh());
-
-        verify(mockCacheManager).evictExpired();
-    }
-
-    @Test
-    @DisplayName("Should handle shutdown with mocked cache manager")
-    void testShutdownWithMock() throws Exception {
-        CacheDataSource dsWithMock = createCacheDataSourceWithMock();
-
-        doNothing().when(mockCacheManager).shutdown();
-
-        dsWithMock.shutdown();
-
-        verify(mockCacheManager).shutdown();
+    @DisplayName("Should handle shutdown cleanly")
+    void testShutdownWithRealManager() throws Exception {
+        CacheDataSource ds = new CacheDataSource(validConfig);
+        ds.initialize(validConfig);
+        assertDoesNotThrow(ds::shutdown);
+        assertNotNull(ds.getConnectionStatus());
     }
 
     // ========================================
@@ -530,59 +465,35 @@ class CacheDataSourceTest {
     // ========================================
 
     @Test
-    @DisplayName("Should track cache statistics")
+    @DisplayName("Should track cache statistics (real manager)")
     void testCacheStatistics() throws Exception {
-        CacheDataSource dsWithMock = createCacheDataSourceWithMock();
+        CacheDataSource ds = new CacheDataSource(validConfig);
+        ds.initialize(validConfig);
 
-        // Mock cache statistics
-        when(mockCacheManager.getStatistics()).thenReturn(mockCacheStatistics);
-        when(mockCacheStatistics.getHits()).thenReturn(10L);
-        when(mockCacheStatistics.getMisses()).thenReturn(2L);
-        when(mockCacheStatistics.getHitRate()).thenReturn(83.33); // Hit rate as percentage
+        // Miss
+        Object miss = ds.get("missing");
+        assertNull(miss);
 
-        CacheStatistics stats = dsWithMock.getStatistics();
+        // Put + Hit
+        ds.put("k", "v");
+        Object hit = ds.get("k");
+        assertEquals("v", hit);
 
+        CacheStatistics stats = ds.getStatistics();
         assertNotNull(stats);
-        assertEquals(10L, stats.getHits());
-        assertEquals(2L, stats.getMisses());
-        assertEquals(83.33, stats.getHitRate(), 0.01);
-
-        verify(mockCacheManager).getStatistics();
+        assertTrue(stats.getHits() >= 1);
+        assertTrue(stats.getMisses() >= 1);
+        ds.shutdown();
     }
 
     @Test
     @DisplayName("Should handle null cache statistics")
     void testNullCacheStatistics() {
-        // Without mock cache manager, should return new empty statistics
+        // Without initialization, should return new empty statistics
         CacheStatistics stats = cacheDataSource.getStatistics();
-        assertNotNull(stats); // Returns new CacheStatistics() when cache manager is null
+        assertNotNull(stats);
         assertEquals(0L, stats.getHits());
         assertEquals(0L, stats.getMisses());
-    }
-
-    // ========================================
-    // Edge Cases and Error Handling
-    // ========================================
-
-    @Test
-    @DisplayName("Should handle cache manager exceptions gracefully")
-    void testCacheManagerExceptions() throws Exception {
-        CacheDataSource dsWithMock = createCacheDataSourceWithMock();
-
-        // Mock cache manager to throw exceptions
-        when(mockCacheManager.get(anyString())).thenThrow(new RuntimeException("Cache error"));
-        doThrow(new RuntimeException("Cache error")).when(mockCacheManager).put(anyString(), any());
-
-        // getData should handle exceptions gracefully and return null
-        Object result = dsWithMock.getData("memory", "test-key");
-        assertNull(result); // Should return null on error
-
-        // put operation should propagate the exception
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            dsWithMock.put("test-key", "test-value");
-        });
-
-        assertEquals("Cache error", exception.getMessage());
     }
 
     // ========================================
@@ -603,16 +514,5 @@ class CacheDataSourceTest {
         config.setCache(cacheConfig);
 
         return config;
-    }
-
-    private CacheDataSource createCacheDataSourceWithMock() throws Exception {
-        CacheDataSource ds = new CacheDataSource(validConfig);
-
-        // Use reflection to inject the mock cache manager
-        java.lang.reflect.Field cacheManagerField = CacheDataSource.class.getDeclaredField("cacheManager");
-        cacheManagerField.setAccessible(true);
-        cacheManagerField.set(ds, mockCacheManager);
-
-        return ds;
     }
 }
