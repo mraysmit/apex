@@ -140,21 +140,51 @@ public class UnifiedRuleEvaluator {
             // Parse and evaluate the SpEL expression
             Expression exp = parser.parseExpression(rule.getCondition());
             Boolean result = exp.getValue(context, Boolean.class);
-            
+
             // Complete performance monitoring for successful evaluation
             RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition());
 
             // Log the completion with performance metrics
             rulesLogger.info("Rule evaluation completed: {} -> {}", rule.getName(), result != null && result);
             LoggingContext.clearContext();
-            
-            // Return appropriate result
+
+            // Phase 4: Evaluate codes and apply field mappings
+            Map<String, Object> enrichedData = new java.util.HashMap<>();
+            String evaluatedSuccessCode = null;
+            String evaluatedErrorCode = null;
+
             if (result != null && result) {
+                // Rule matched - evaluate success code
+                evaluatedSuccessCode = evaluateCode(rule.getSuccessCode(), context);
                 rulesLogger.info("Rule matched: {}", rule.getName());
-                return RuleResult.match(rule.getName(), rule.getMessage(), rule.getSeverity(), metrics);
+
+                // Apply field mappings if configured
+                if (rule.getMapToField() != null) {
+                    applyFieldMappings(rule.getMapToField(), context, enrichedData, evaluatedSuccessCode, null);
+                }
+
+                // Return result with codes and mappings
+                RuleResult matchResult = new RuleResult(rule.getName(), rule.getMessage(), rule.getSeverity(),
+                                                       true, RuleResult.ResultType.MATCH, metrics, enrichedData,
+                                                       new java.util.ArrayList<>(), true, evaluatedSuccessCode, null, rule.getMapToField());
+                return matchResult;
             } else {
+                // Rule did not match - evaluate error code
+                evaluatedErrorCode = evaluateCode(rule.getErrorCode(), context);
                 rulesLogger.debug("Rule did not match: {}", rule.getName());
-                return RuleResult.noMatch();
+
+                // Apply field mappings if configured
+                if (rule.getMapToField() != null) {
+                    applyFieldMappings(rule.getMapToField(), context, enrichedData, null, evaluatedErrorCode);
+                }
+
+                // Return result with codes and mappings
+                // Note: success=true because the rule evaluation itself was successful (no errors),
+                // even though the rule condition did not match
+                RuleResult noMatchResult = new RuleResult(rule.getName(), rule.getMessage(), rule.getSeverity(),
+                                                         false, RuleResult.ResultType.NO_MATCH, metrics, enrichedData,
+                                                         new java.util.ArrayList<>(), true, null, evaluatedErrorCode, rule.getMapToField());
+                return noMatchResult;
             }
             
         } catch (Exception e) {
@@ -418,5 +448,116 @@ public class UnifiedRuleEvaluator {
         StandardEvaluationContext context = createEvaluationContext(facts);
 
         return evaluateRules(rules, context);
+    }
+
+    /**
+     * Evaluate a code expression (either constant or SpEL).
+     * Phase 4 Enhancement: Supports both constant strings and SpEL expressions for codes.
+     *
+     * @param codeExpression The code expression to evaluate (e.g., "SUCCESS_CODE" or "#amount > 100 ? 'HIGH' : 'LOW'")
+     * @param context The evaluation context for SpEL expressions
+     * @return The evaluated code string, or null if evaluation fails
+     */
+    private String evaluateCode(String codeExpression, EvaluationContext context) {
+        if (codeExpression == null || codeExpression.trim().isEmpty()) {
+            return null;
+        }
+
+        try {
+            // Check if it's a SpEL expression (starts with #)
+            if (codeExpression.trim().startsWith("#")) {
+                Expression exp = parser.parseExpression(codeExpression);
+                Object result = exp.getValue(context);
+                return result != null ? result.toString() : null;
+            } else {
+                // It's a constant string
+                return codeExpression;
+            }
+        } catch (Exception e) {
+            rulesLogger.warn("Error evaluating code expression '{}': {}", codeExpression, e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Apply field mappings to the enriched data.
+     * Phase 4 Enhancement: Supports generic field mapping using SpEL expressions.
+     *
+     * @param mapToField The field mapping configuration (String or List<String>)
+     * @param context The evaluation context for SpEL expressions
+     * @param enrichedData The enriched data map to update with mapped values
+     * @param successCode The evaluated success code (available as #success-code in expressions)
+     * @param errorCode The evaluated error code (available as #error-code in expressions)
+     */
+    private void applyFieldMappings(Object mapToField, EvaluationContext context, Map<String, Object> enrichedData,
+                                   String successCode, String errorCode) {
+        if (mapToField == null) {
+            return;
+        }
+
+        try {
+            // Create a context that includes the codes
+            StandardEvaluationContext mappingContext = (StandardEvaluationContext) context;
+            if (successCode != null) {
+                // Use underscore instead of hyphen for SpEL compatibility
+                mappingContext.setVariable("success_code", successCode);
+            }
+            if (errorCode != null) {
+                // Use underscore instead of hyphen for SpEL compatibility
+                mappingContext.setVariable("error_code", errorCode);
+            }
+
+            // Handle both single mapping (String) and multiple mappings (List<String>)
+            java.util.List<String> mappings = new java.util.ArrayList<>();
+            if (mapToField instanceof String) {
+                mappings.add((String) mapToField);
+            } else if (mapToField instanceof java.util.List) {
+                java.util.List<?> list = (java.util.List<?>) mapToField;
+                for (Object item : list) {
+                    if (item instanceof String) {
+                        mappings.add((String) item);
+                    }
+                }
+            }
+
+            // Apply each mapping
+            for (String mapping : mappings) {
+                applyFieldMapping(mapping, mappingContext, enrichedData);
+            }
+        } catch (Exception e) {
+            rulesLogger.warn("Error applying field mappings: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Apply a single field mapping expression.
+     * Parses expressions like "fieldName = #success-code" or "status = #amount > 100 ? 'HIGH' : 'LOW'"
+     *
+     * @param mapping The mapping expression
+     * @param context The evaluation context
+     * @param enrichedData The enriched data map to update
+     */
+    private void applyFieldMapping(String mapping, StandardEvaluationContext context, Map<String, Object> enrichedData) {
+        try {
+            // Parse the mapping: "fieldName = expression"
+            String[] parts = mapping.split("=", 2);
+            if (parts.length != 2) {
+                rulesLogger.warn("Invalid field mapping format: {}. Expected 'fieldName = expression'", mapping);
+                return;
+            }
+
+            String fieldName = parts[0].trim();
+            String expression = parts[1].trim();
+
+            // Evaluate the expression
+            Expression exp = parser.parseExpression(expression);
+            Object value = exp.getValue(context);
+
+            // Store the mapped value in enriched data
+            enrichedData.put(fieldName, value);
+            rulesLogger.debug("Applied field mapping: {} = {}", fieldName, value);
+        } catch (Exception e) {
+            rulesLogger.warn("Error applying field mapping '{}': {}", mapping, e.getMessage());
+        }
     }
 }

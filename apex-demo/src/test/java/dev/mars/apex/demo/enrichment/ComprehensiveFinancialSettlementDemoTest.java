@@ -137,10 +137,10 @@ class ComprehensiveFinancialSettlementDemoTest extends DemoTestBase {
     @Test
     void testCrossBorderSettlementProcessingFunctionality() {
         logger.info("=== Testing Cross-Border Settlement Processing Functionality ===");
-        
+
         try {
             // Load YAML configuration using real APEX services
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/enrichment/test-configs/comprehensivefinancialsettlementdemo-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/enrichment/comprehensivefinancialsettlementdemo-test.yaml");
             assertNotNull(config, "YAML configuration should be loaded successfully");
             
             // Create test data for cross-border settlement processing
@@ -211,10 +211,10 @@ class ComprehensiveFinancialSettlementDemoTest extends DemoTestBase {
     @Test
     void testHighValueTransactionProcessingFunctionality() {
         logger.info("=== Testing High-Value Transaction Processing Functionality ===");
-        
+
         try {
             // Load YAML configuration using real APEX services
-            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/enrichment/test-configs/comprehensivefinancialsettlementdemo-test.yaml");
+            YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/enrichment/comprehensivefinancialsettlementdemo-test.yaml");
             assertNotNull(config, "YAML configuration should be loaded successfully");
             
             // Create test data for high-value transaction processing

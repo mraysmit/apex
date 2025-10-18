@@ -14,7 +14,7 @@ metadata:
   description: "Test scenario registry for continue-with-warnings failure policy demonstration"
   type: "scenario-registry"
 
-scenario-registry:
+scenarios:
   - scenario-id: "continue-with-warnings-test"
     config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyContinueTest-scenario.yaml"
 

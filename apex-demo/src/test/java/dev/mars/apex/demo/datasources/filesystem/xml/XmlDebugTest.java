@@ -106,7 +106,7 @@ public class XmlDebugTest extends DemoTestBase {
             if (enrichedData.containsKey("productName")) {
                 logger.info("✓ SimpleXmlDataSourceTest configuration WORKS!");
                 assertEquals("US Treasury Bond", enrichedData.get("productName"));
-                assertEquals("1200.0", enrichedData.get("productPrice"));
+                assertEquals(1200.0, enrichedData.get("productPrice"));
                 assertEquals("FixedIncome", enrichedData.get("productCategory"));
             } else {
                 logger.error("✗ SimpleXmlDataSourceTest configuration FAILED");

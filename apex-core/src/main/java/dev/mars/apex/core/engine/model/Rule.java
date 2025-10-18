@@ -61,6 +61,11 @@ public class Rule implements RuleBase {
     // Phase 3A Enhancement: Default value for error recovery
     private final Object defaultValue;
 
+    // Phase 4: Error and Success Code Support
+    private final String successCode;
+    private final String errorCode;
+    private final Object mapToField;  // String or List<String>
+
     /**
      * Create a new business rule with minimal information.
      * This constructor is provided for compatibility with the legacy Rule class.
@@ -96,6 +101,9 @@ public class Rule implements RuleBase {
         this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.priority = 100; // Default priority
         this.defaultValue = null; // No default value for backward compatibility
+        this.successCode = null;
+        this.errorCode = null;
+        this.mapToField = null;
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
             .build();
@@ -142,6 +150,9 @@ public class Rule implements RuleBase {
         this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.priority = priority;
         this.defaultValue = null; // No default value for backward compatibility
+        this.successCode = null;
+        this.errorCode = null;
+        this.mapToField = null;
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
             .build();
@@ -213,6 +224,9 @@ public class Rule implements RuleBase {
         this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.priority = priority;
         this.defaultValue = null; // No default value for backward compatibility
+        this.successCode = null;
+        this.errorCode = null;
+        this.mapToField = null;
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
             .build();
@@ -258,6 +272,9 @@ public class Rule implements RuleBase {
         this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.priority = priority;
         this.defaultValue = null; // No default value for backward compatibility
+        this.successCode = null;
+        this.errorCode = null;
+        this.mapToField = null;
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
             .build();
@@ -307,6 +324,9 @@ public class Rule implements RuleBase {
         this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.priority = priority;
         this.defaultValue = null; // No default value for backward compatibility
+        this.successCode = null;
+        this.errorCode = null;
+        this.mapToField = null;
         this.metadata = metadata != null ? metadata : RuleMetadata.builder().createdByUser("system").build();
     }
 
@@ -338,6 +358,46 @@ public class Rule implements RuleBase {
         this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
         this.priority = priority;
         this.defaultValue = defaultValue;
+        this.successCode = null;
+        this.errorCode = null;
+        this.mapToField = null;
+        this.metadata = metadata != null ? metadata : RuleMetadata.builder().createdByUser("system").build();
+    }
+
+    /**
+     * Create a new business rule with full metadata support, default value, and error/success codes.
+     * This constructor supports Phase 4 enhancement for error and success codes.
+     *
+     * @param id The unique identifier of the rule
+     * @param categories The category objects of the rule
+     * @param name The name of the rule
+     * @param condition The SpEL condition that determines if the rule applies
+     * @param message The message to display when the rule applies
+     * @param description The description of what the rule does
+     * @param priority The priority of the rule (lower numbers = higher priority)
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @param metadata The extensible metadata for the rule
+     * @param defaultValue The default value to use for error recovery (null if no default)
+     * @param successCode The code to use when rule succeeds (null if no code)
+     * @param errorCode The code to use when rule fails (null if no code)
+     * @param mapToField Field mapping expressions for enriching data (null if no mapping)
+     */
+    public Rule(String id, Set<Category> categories, String name, String condition,
+                String message, String description, int priority, String severity,
+                RuleMetadata metadata, Object defaultValue, String successCode, String errorCode, Object mapToField) {
+        this.uuid = UUID.randomUUID();
+        this.id = id;
+        this.categories = new HashSet<>(categories);
+        this.name = name;
+        this.condition = condition;
+        this.message = message;
+        this.description = description;
+        this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
+        this.priority = priority;
+        this.defaultValue = defaultValue;
+        this.successCode = successCode;
+        this.errorCode = errorCode;
+        this.mapToField = mapToField;
         this.metadata = metadata != null ? metadata : RuleMetadata.builder().createdByUser("system").build();
     }
 
@@ -451,6 +511,36 @@ public class Rule implements RuleBase {
      */
     public Object getDefaultValue() {
         return defaultValue;
+    }
+
+    /**
+     * Get the success code for this rule.
+     * Phase 4 Enhancement: Returns the code to use when rule condition evaluates to true.
+     *
+     * @return The success code (constant or SpEL expression), or null if no code is specified
+     */
+    public String getSuccessCode() {
+        return successCode;
+    }
+
+    /**
+     * Get the error code for this rule.
+     * Phase 4 Enhancement: Returns the code to use when rule condition evaluates to false.
+     *
+     * @return The error code (constant or SpEL expression), or null if no code is specified
+     */
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    /**
+     * Get the field mapping expressions for this rule.
+     * Phase 4 Enhancement: Returns field mapping expressions to enrich the dataset.
+     *
+     * @return The field mapping expressions (String or List<String>), or null if no mapping is specified
+     */
+    public Object getMapToField() {
+        return mapToField;
     }
 
     /**

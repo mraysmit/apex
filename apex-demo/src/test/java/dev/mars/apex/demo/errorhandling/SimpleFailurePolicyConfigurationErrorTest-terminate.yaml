@@ -9,7 +9,7 @@ metadata:
   description: "Test scenario registry for configuration error handling with terminate policy"
   type: "scenario-registry"
 
-scenario-registry:
+scenarios:
   - scenario-id: "config-error-terminate-test"
     config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyConfigurationErrorTest-terminate-scenario.yaml"
 

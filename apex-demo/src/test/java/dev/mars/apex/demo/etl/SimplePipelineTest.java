@@ -23,6 +23,7 @@ import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.junit.jupiter.api.AfterEach;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -73,6 +74,20 @@ public class SimplePipelineTest extends DemoTestBase {
     public void setUp() {
         super.setUp();
         logger.info("=== Setting up Simple Pipeline Test ===");
+    }
+
+    @AfterEach
+    public void tearDown() {
+        // Close pipeline engine if it was created
+        if (pipelineEngine != null) {
+            try {
+                pipelineEngine.shutdown();
+                logger.info("Pipeline engine shut down successfully");
+            } catch (Exception e) {
+                logger.warn("Error shutting down pipeline engine", e);
+            }
+        }
+        super.tearDown();
     }
 
     @Test

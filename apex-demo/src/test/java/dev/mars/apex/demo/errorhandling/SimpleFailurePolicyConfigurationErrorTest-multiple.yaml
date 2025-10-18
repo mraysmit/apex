@@ -9,7 +9,7 @@ metadata:
   description: "Test scenario registry for multiple configuration error handling"
   type: "scenario-registry"
 
-scenario-registry:
+scenarios:
   - scenario-id: "config-error-multiple-test"
     config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyConfigurationErrorTest-multiple-scenario.yaml"
 

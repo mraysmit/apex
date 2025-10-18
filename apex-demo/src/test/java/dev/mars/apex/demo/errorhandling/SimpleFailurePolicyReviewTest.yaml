@@ -25,7 +25,7 @@ metadata:
 
 # SCENARIO REGISTRY SECTION:
 # This section maps scenario IDs to their configuration files.
-scenario-registry:
+scenarios:
   - scenario-id: "flag-for-review-test"
     config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyReviewTest-scenario.yaml"
 

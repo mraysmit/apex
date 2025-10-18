@@ -31,6 +31,9 @@ public class DynamicArrayIndexTest extends DemoTestBase {
 
     @BeforeEach
     public void setUp() {
+        // Call parent setUp to initialize APEX services
+        super.setUp();
+
         logger.info("=== Setting up DynamicArrayIndexTest ===");
 
         // Initialize UnifiedRuleEvaluator for direct rule testing

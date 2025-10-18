@@ -24,7 +24,7 @@ metadata:
 
 # SCENARIO REGISTRY SECTION:
 # This section maps scenario IDs to their configuration files.
-scenario-registry:
+scenarios:
   - scenario-id: "enrichment-test"
     config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyEnrichmentTest-scenario.yaml"
 
