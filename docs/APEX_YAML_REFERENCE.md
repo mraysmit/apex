@@ -268,7 +268,7 @@ metadata:
 | `author` | No | Document author | "john.doe@bank.com" |
 | `created-by` | No | Creator identifier | "settlement-team@bank.com" |
 | `created-date` | No | Creation date (ISO format) | "2024-12-24" |
-| `business-domain` | No | Business domain for scenarios/bootstrap | "Financial Services" |
+| `business-domain` | No | Business domain for scenarios | "Financial Services" |
 | `source` | No | Data source system (for dataset types) | "Reference Data Service" |
 | `tags` | No | Categorization tags | ["finance", "settlement"] |
 
@@ -349,7 +349,6 @@ APEX supports several document types, each with specific purposes and validation
 | `dataset` | Reference data and lookup tables | `id`, `source` | `data` |
 | `scenario` | End-to-end processing scenarios | `id`, `business-domain`, `owner` | `scenario`, `data-types`, (`rule-configurations` OR `processing-stages`) |
 | `scenario-registry` | Scenario collection management | `id`, `created-by` | `scenarios` |
-| `bootstrap` | Demo and initialization configurations | `id`, `business-domain`, `created-by` | `bootstrap`, `data-sources` |
 | `rule-chain` | Sequential rule execution definitions | `id`, `author` | `rule-chains` |
 | `external-data-config` | External data source configurations | `id`, `author` | `dataSources`, `configuration` |
 | `pipeline` | ETL and data processing pipeline orchestration | `id`, `author` | `pipeline`, `data-sources`, `data-sinks` |

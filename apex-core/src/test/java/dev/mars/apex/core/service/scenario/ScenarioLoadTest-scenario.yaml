@@ -1,0 +1,27 @@
+metadata:
+  id: "load-test-scenario"
+  name: "Load Test Scenario"
+  version: "1.0.0"
+  description: "Scenario for testing load processing"
+  type: "scenario"
+  author: "APEX Test Suite"
+
+scenario:
+  scenario-id: "load-test-scenario"
+  name: "Load Test Scenario"
+  description: "Tests scenario execution under load"
+  
+  classification-rule:
+    condition: "#data['type'] == 'OTC'"
+    description: "Classify OTC trades"
+  
+  processing-stages:
+    - stage-name: "processing"
+      config-file: "src/test/java/dev/mars/apex/core/service/scenario/ScenarioLoadTest-rules.yaml"
+      execution-order: 1
+      failure-policy: "continue-with-warnings"
+      required: true
+      stage-metadata:
+        description: "Process trade data"
+        sla-ms: 5000
+

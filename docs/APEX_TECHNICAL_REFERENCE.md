@@ -112,8 +112,6 @@ graph TD
     subgraph "Configuration Layer"
         ConfigFiles["Configuration Files<br/>config/*.yaml<br/>• Reusable rule sets<br/>• Business logic<br/>• Validation chains"]
 
-        BootstrapFiles["Bootstrap Files<br/>bootstrap/*.yaml<br/>• Complete demos<br/>• Self-contained scenarios<br/>• Inline datasets"]
-
         EnrichmentFiles["Enrichment Files<br/>enrichments/*.yaml<br/>• Data enrichment logic<br/>• External lookups<br/>• Calculation rules"]
     end
 
@@ -138,7 +136,6 @@ graph TD
 
     Registry -->|"loads & validates"| ScenarioFiles
     ScenarioFiles -->|"references"| ConfigFiles
-    ScenarioFiles -->|"references"| BootstrapFiles
     ConfigFiles -.->|"may reference"| EnrichmentFiles
     ConfigFiles -->|"🆕 data-source-refs"| DataSourceResolver
     ConfigFiles -->|"🆕 pipeline"| PipelineExecutor
@@ -148,7 +145,6 @@ graph TD
     PipelineConfig -->|"references"| DataSourceResolver
     DataSourceResolver -->|"resolves"| ExternalConfigs
     DataSourceResolver -->|"caches"| ConfigCache
-    BootstrapFiles -->|"contains"| InlineData
     ConfigFiles -->|"references"| ExternalYAML
     ExternalConfigs -->|"connects to"| DatabaseSources
     ExternalConfigs -->|"connects to"| APISources
@@ -237,7 +233,6 @@ public class YamlMetadataValidator {
 
     // Type-specific validation
     private void validateScenarioContent(Map<String, Object> yamlContent, YamlValidationResult result);
-    private void validateBootstrapContent(Map<String, Object> yamlContent, YamlValidationResult result);
     private void validateRuleConfigContent(Map<String, Object> yamlContent, YamlValidationResult result);
 }
 ```
@@ -253,7 +248,6 @@ public class YamlMetadataValidator {
 **Content Validation:**
 - Scenario files: `scenario-id`, `data-types`, `rule-configurations`
 - Registry files: Valid registry entries with required fields
-- Bootstrap files: Expected content sections
 - Rule config files: Rules, enrichments, or rule-chains sections
 
 **Dependency Validation:**
@@ -454,7 +448,6 @@ APEX supports the following standardized file types:
 |------|---------|----------------|-------------------|
 | `scenario` | Data type routing | `business-domain`, `owner` | `scenario` section with `data-types` and `rule-configurations` |
 | `scenario-registry` | Central registry | `created-by` | `scenario-registry` list with valid entries |
-| `bootstrap` | Complete demos | `business-domain`, `created-by` | `rule-chains` or `categories` sections |
 | `rule-config` | Reusable rules | `author` | `rules`, `enrichments`, or `rule-chains` sections |
 | `dataset` | Reference data | `source` | `data`, `countries`, or `dataset` sections |
 | `enrichment` | Data enrichment | `author` | Enrichment-specific content |

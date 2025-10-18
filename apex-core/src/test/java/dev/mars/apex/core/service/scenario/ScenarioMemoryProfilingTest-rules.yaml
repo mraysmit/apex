@@ -1,0 +1,54 @@
+metadata:
+  id: "memory-profiling-test-rules"
+  name: "Memory Profiling Test Rules"
+  version: "1.0.0"
+  description: "Rules for testing memory usage during scenario execution"
+  type: "rule-config"
+  author: "APEX Test Suite"
+
+rules:
+  - id: "otc-type-check"
+    name: "OTC Type Check"
+    condition: "#data['type'] == 'OTC'"
+    message: "Trade is OTC type"
+    severity: "INFO"
+    enabled: true
+
+  - id: "record-id-check"
+    name: "Record ID Check"
+    condition: "#data.containsKey('id')"
+    message: "Record has ID"
+    severity: "INFO"
+    enabled: true
+
+enrichments:
+  - id: "add-metadata"
+    name: "Add Metadata"
+    type: "field-enrichment"
+    condition: "true"
+    field-mappings:
+      - source-field: "type"
+        target-field: "metadata_type"
+
+  - id: "calculate-hash"
+    name: "Calculate Hash"
+    type: "calculation-enrichment"
+    condition: "true"
+    calculation-config:
+      expression: "#data.containsKey('id') ? T(java.lang.String).valueOf(#data['id']).hashCode() : 0"
+      result-field: "recordHash"
+    field-mappings:
+      - source-field: "recordHash"
+        target-field: "recordHash"
+
+  - id: "add-timestamp"
+    name: "Add Timestamp"
+    type: "calculation-enrichment"
+    condition: "true"
+    calculation-config:
+      expression: "T(java.lang.System).currentTimeMillis()"
+      result-field: "processedAt"
+    field-mappings:
+      - source-field: "processedAt"
+        target-field: "processedAt"
+

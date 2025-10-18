@@ -6,6 +6,8 @@ metadata:
   name: "Default Value Enhancement Demo"
   description: "Demonstrates default-value support in rules and calculations"
   version: "1.0"
+  type: "rule-config"
+  author: "APEX Rules Engine"
 
 rules:
   # Rule with string default value

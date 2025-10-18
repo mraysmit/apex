@@ -1,6 +1,10 @@
 metadata:
+  id: "customer-validation-groups"
   name: "Customer Validation Groups"
   version: "1.0.0"
+  description: "Customer validation rule groups"
+  type: "rule-config"
+  author: "APEX Rules Engine"
 
 # Reference external rule files
 rule-refs:

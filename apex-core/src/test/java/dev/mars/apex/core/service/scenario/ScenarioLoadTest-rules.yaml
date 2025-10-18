@@ -1,0 +1,43 @@
+metadata:
+  id: "load-test-rules"
+  name: "Load Test Rules"
+  version: "1.0.0"
+  description: "Rules for testing scenario load processing"
+  type: "rule-config"
+  author: "APEX Test Suite"
+
+rules:
+  - id: "otc-classification"
+    name: "OTC Trade Classification"
+    condition: "#data['type'] == 'OTC'"
+    message: "Trade classified as OTC"
+    severity: "INFO"
+    enabled: true
+
+  - id: "trade-id-validation"
+    name: "Trade ID Validation"
+    condition: "#data.containsKey('id')"
+    message: "Trade ID present"
+    severity: "INFO"
+    enabled: true
+
+enrichments:
+  - id: "enrich-trade-type"
+    name: "Enrich Trade Type"
+    type: "field-enrichment"
+    condition: "true"
+    field-mappings:
+      - source-field: "type"
+        target-field: "enrichedType"
+
+  - id: "calculate-processing-fee"
+    name: "Calculate Processing Fee"
+    type: "calculation-enrichment"
+    condition: "true"
+    calculation-config:
+      expression: "#data.containsKey('id') ? (#data['id'] % 2 == 0 ? 10.0 : 15.0) : 0.0"
+      result-field: "processingFee"
+    field-mappings:
+      - source-field: "processingFee"
+        target-field: "processingFee"
+

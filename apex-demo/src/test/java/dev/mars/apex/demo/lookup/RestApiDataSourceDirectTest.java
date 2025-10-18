@@ -1,4 +1,4 @@
-package dev.mars.apex.core.service.data.external.rest;
+package dev.mars.apex.demo.lookup;
 
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import dev.mars.apex.core.config.datasource.ConnectionConfig;
@@ -6,7 +6,6 @@ import dev.mars.apex.core.service.data.external.DataSourceException;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
 import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -16,9 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Direct test of RestApiDataSource to isolate the issue.
- * Disabled: Requires external network connectivity to httpbin.org - flaky test
  */
-@Disabled("Requires external network connectivity - flaky test")
 public class RestApiDataSourceDirectTest {
 
     private ExternalDataSource dataSource;
@@ -143,3 +140,4 @@ public class RestApiDataSourceDirectTest {
         System.out.println("✓ Simple JSON response test passed!");
     }
 }
+

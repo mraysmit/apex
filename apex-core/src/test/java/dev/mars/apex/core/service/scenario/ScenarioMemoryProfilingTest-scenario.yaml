@@ -1,0 +1,27 @@
+metadata:
+  id: "memory-profiling-test-scenario"
+  name: "Memory Profiling Test Scenario"
+  version: "1.0.0"
+  description: "Scenario for testing memory usage"
+  type: "scenario"
+  author: "APEX Test Suite"
+
+scenario:
+  scenario-id: "memory-profiling-test-scenario"
+  name: "Memory Profiling Test Scenario"
+  description: "Tests memory usage during repeated scenario execution"
+  
+  classification-rule:
+    condition: "#data['type'] == 'OTC'"
+    description: "Classify OTC trades"
+  
+  processing-stages:
+    - stage-name: "enrichment"
+      config-file: "src/test/java/dev/mars/apex/core/service/scenario/ScenarioMemoryProfilingTest-rules.yaml"
+      execution-order: 1
+      failure-policy: "continue-with-warnings"
+      required: true
+      stage-metadata:
+        description: "Enrich trade data"
+        sla-ms: 5000
+

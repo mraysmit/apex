@@ -6,7 +6,7 @@ metadata:
   name: "Default Value Demonstration"
   version: "1.0.0"
   description: "Demonstrates Phase 3A default-value support for error recovery"
-  type: "test-config"
+  type: "rule-config"
   author: "APEX Rules Engine"
 
 # Rules with default-value for error recovery

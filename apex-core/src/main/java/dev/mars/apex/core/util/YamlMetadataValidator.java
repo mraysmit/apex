@@ -41,7 +41,6 @@ import java.util.*;
  * SUPPORTED FILE TYPES:
  * - scenario: Scenario configuration files
  * - scenario-registry: Central scenario registry
- * - bootstrap: Complete demo configurations
  * - rule-config: Reusable rule configurations
  * - dataset: Data reference files
  * - enrichment: Data enrichment configurations
@@ -67,7 +66,6 @@ public class YamlMetadataValidator {
     private static final Set<String> VALID_FILE_TYPES = Set.of(
         "scenario",
         "scenario-registry",
-        "bootstrap",
         "rule-config",
         "dataset",
         "enrichment",
@@ -95,7 +93,6 @@ public class YamlMetadataValidator {
     private static final Map<String, Set<String>> TYPE_SPECIFIC_REQUIRED_FIELDS = Map.of(
         "scenario", Set.of("business-domain", "owner"),
         "scenario-registry", Set.of("created-by"),
-        "bootstrap", Set.of("business-domain", "created-by"),
         "rule-config", Set.of("author"),
         "dataset", Set.of("source"),
         "enrichment", Set.of("author"),
@@ -259,9 +256,6 @@ public class YamlMetadataValidator {
             case "scenario-registry":
                 validateScenarioRegistryContent(yamlContent, result);
                 break;
-            case "bootstrap":
-                validateBootstrapContent(yamlContent, result);
-                break;
             case "rule-config":
                 validateRuleConfigContent(yamlContent, result);
                 break;
@@ -368,16 +362,6 @@ public class YamlMetadataValidator {
                     result.addError("Registry entry " + i + " missing required field: " + field);
                 }
             }
-        }
-    }
-    
-    /**
-     * Validates bootstrap file content.
-     */
-    private void validateBootstrapContent(Map<String, Object> yamlContent, YamlValidationResult result) {
-        // Bootstrap files should have rule-chains or categories
-        if (!yamlContent.containsKey("rule-chains") && !yamlContent.containsKey("categories")) {
-            result.addWarning("Bootstrap files typically contain 'rule-chains' or 'categories' sections");
         }
     }
     

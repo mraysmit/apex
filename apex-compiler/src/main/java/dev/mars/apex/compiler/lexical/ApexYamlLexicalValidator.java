@@ -37,7 +37,7 @@ public class ApexYamlLexicalValidator {
     
     private static final Set<String> VALID_DOCUMENT_TYPES = Set.of(
         "rule-config", "enrichment", "dataset", "scenario",
-        "scenario-registry", "bootstrap", "rule-chain", "external-data-config",
+        "scenario-registry", "rule-chain", "external-data-config",
         "pipeline-config"
     );
     
@@ -47,7 +47,6 @@ public class ApexYamlLexicalValidator {
         "dataset", Set.of("source"),
         "scenario", Set.of("business-domain", "owner"),
         "scenario-registry", Set.of("created-by"),
-        "bootstrap", Set.of("business-domain", "created-by"),
         "rule-chain", Set.of("author"),
         "external-data-config", Set.of("author"),
         "pipeline-config", Set.of("author")

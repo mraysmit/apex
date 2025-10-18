@@ -1,11 +1,11 @@
-package dev.mars.apex.core.service.lookup;
+package dev.mars.apex.demo.lookup;
 
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import dev.mars.apex.core.config.datasource.ConnectionConfig;
 import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
+import dev.mars.apex.core.service.lookup.RestApiLookupService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -16,9 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Direct test of RestApiLookupService to isolate the issue.
- * Disabled: Requires external network connectivity to httpbin.org - flaky test
  */
-@Disabled("Requires external network connectivity - flaky test")
 class RestApiLookupServiceDirectTest {
 
     private RestApiLookupService lookupService;
@@ -101,3 +99,4 @@ class RestApiLookupServiceDirectTest {
         System.out.println("✓ Direct transform test passed!");
     }
 }
+
