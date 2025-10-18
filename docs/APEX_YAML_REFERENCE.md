@@ -14,6 +14,9 @@
 3. [Document Structure & Metadata](#3-document-structure--metadata)
 4. [Core Syntax Elements](#4-core-syntax-elements)
 5. [Rules Section](#5-rules-section)
+   - 5.1 [Validation Rules](#41-validation-rules)
+   - 5.2 [Business Rules](#42-business-rules)
+   - 5.3 [Rule Categories](#43-rule-categories)
 6. [Rule Groups Section](#6-rule-groups-section)
 7. [Enrichments Section](#7-enrichments-section)
 8. [Scenario Configurations](#8-scenario-configurations)
@@ -997,6 +1000,344 @@ rules:
     message: "Position exceeds 25% concentration limit"
     severity: "ERROR"
     priority: 1
+```
+
+### 4.3 Rule Categories
+
+Rule categories provide organizational structure and enterprise governance for rules. Categories enable metadata inheritance, business domain tracking, and lifecycle management of rules across your APEX deployment.
+
+#### 4.3.1 Category Overview
+
+Categories serve multiple purposes:
+
+1. **Organizational Structure** - Group related rules by business function (validation, enrichment, compliance)
+2. **Metadata Inheritance** - Rules inherit enterprise metadata from their category
+3. **Governance & Audit** - Track business ownership, domain, and creation information
+4. **Lifecycle Management** - Control rule effectiveness with dates and status
+5. **Execution Control** - Configure category-level execution behavior (priority, parallel execution)
+
+#### 4.3.2 Defining Categories
+
+Categories are defined at the document level in a `categories` section:
+
+```yaml
+metadata:
+  id: "trade-processing-rules"
+  name: "Trade Processing Rules"
+  version: "1.0.0"
+  type: "rule-config"
+  author: "trading-team@bank.com"
+
+# Define categories at document level
+categories:
+  - name: "validation"
+    description: "Data validation and integrity checks"
+    priority: 10
+    business-domain: "Trade Processing"
+    business-owner: "validation-team@bank.com"
+    created-by: "john.doe@bank.com"
+    enabled: true
+
+  - name: "enrichment"
+    description: "Trade data enrichment and classification"
+    priority: 20
+    business-domain: "Trade Processing"
+    business-owner: "enrichment-team@bank.com"
+    created-by: "jane.smith@bank.com"
+    enabled: true
+
+  - name: "compliance"
+    description: "Regulatory compliance checks"
+    priority: 30
+    business-domain: "Compliance"
+    business-owner: "compliance-team@bank.com"
+    created-by: "compliance-admin@bank.com"
+    enabled: true
+
+# Rules reference categories
+rules:
+  - id: "trade-id-required"
+    name: "Trade ID Required"
+    category: "validation"  # Reference the category
+    condition: "#tradeId != null && #tradeId.trim().length() > 0"
+    message: "Trade ID is required"
+    severity: "ERROR"
+
+  - id: "market-classification"
+    name: "Market Classification"
+    category: "enrichment"  # Different category
+    condition: "#instrumentType != null"
+    message: "Market classification determined"
+    severity: "INFO"
+
+  - id: "emir-reporting-check"
+    name: "EMIR Reporting Required"
+    category: "compliance"  # Compliance category
+    condition: "#counterparty.jurisdiction == 'EU'"
+    message: "EMIR reporting required"
+    severity: "WARNING"
+```
+
+#### 4.3.3 Category Properties
+
+| Property | Required | Type | Description | Example |
+|----------|----------|------|-------------|---------|
+| `name` | Yes | String | Unique category identifier | "validation" |
+| `description` | No | String | Human-readable description | "Data validation checks" |
+| `priority` | No | Integer | Execution priority (lower = higher) | 10 |
+| `enabled` | No | Boolean | Whether category is active | true |
+| `business-domain` | No | String | Business domain classification | "Trade Processing" |
+| `business-owner` | No | String | Owner responsible for category | "team@bank.com" |
+| `created-by` | No | String | Creator identifier | "user@bank.com" |
+| `effective-date` | No | String | Date when category becomes effective (ISO 8601) | "2025-01-01" |
+| `expiration-date` | No | String | Date when category expires (ISO 8601) | "2025-12-31" |
+| `stop-on-first-failure` | No | Boolean | Stop processing on first failure | false |
+| `parallel-execution` | No | Boolean | Execute rules in parallel | false |
+
+#### 4.3.4 Metadata Inheritance
+
+Rules inherit metadata from their category when not explicitly specified on the rule:
+
+```yaml
+categories:
+  - name: "validation"
+    business-domain: "Trade Processing"
+    business-owner: "validation-team@bank.com"
+    created-by: "admin@bank.com"
+
+rules:
+  # Rule 1: Inherits all category metadata
+  - id: "rule-1"
+    name: "Rule 1"
+    category: "validation"
+    condition: "true"
+    message: "Rule 1"
+    severity: "ERROR"
+    # Inherits: business-domain, business-owner, created-by from category
+
+  # Rule 2: Overrides category metadata
+  - id: "rule-2"
+    name: "Rule 2"
+    category: "validation"
+    condition: "true"
+    message: "Rule 2"
+    severity: "ERROR"
+    business-owner: "special-team@bank.com"  # Override category owner
+    created-by: "special-user@bank.com"      # Override category creator
+    # Inherits: business-domain from category
+```
+
+**Inheritance Priority**: Rule-level metadata > Category-level metadata > System defaults
+
+#### 4.3.5 Practical Examples
+
+**Example 1: Multi-Domain Organization**
+
+```yaml
+categories:
+  - name: "front-office-validation"
+    description: "Front office trade validation"
+    business-domain: "Front Office"
+    business-owner: "front-office-head@bank.com"
+    priority: 10
+
+  - name: "middle-office-enrichment"
+    description: "Middle office enrichment"
+    business-domain: "Middle Office"
+    business-owner: "middle-office-head@bank.com"
+    priority: 20
+
+  - name: "back-office-compliance"
+    description: "Back office compliance"
+    business-domain: "Back Office"
+    business-owner: "back-office-head@bank.com"
+    priority: 30
+
+rules:
+  - id: "trade-format-check"
+    name: "Trade Format Validation"
+    category: "front-office-validation"
+    condition: "#tradeId != null"
+    message: "Trade format valid"
+    severity: "ERROR"
+
+  - id: "counterparty-enrichment"
+    name: "Counterparty Data Enrichment"
+    category: "middle-office-enrichment"
+    condition: "#counterpartyId != null"
+    message: "Counterparty enriched"
+    severity: "INFO"
+
+  - id: "regulatory-check"
+    name: "Regulatory Compliance Check"
+    category: "back-office-compliance"
+    condition: "#jurisdiction != null"
+    message: "Regulatory check passed"
+    severity: "WARNING"
+```
+
+**Example 2: Lifecycle Management**
+
+```yaml
+categories:
+  - name: "active-rules"
+    description: "Currently active validation rules"
+    enabled: true
+    effective-date: "2025-01-01"
+    expiration-date: "2025-12-31"
+    business-owner: "rules-team@bank.com"
+
+  - name: "deprecated-rules"
+    description: "Legacy rules being phased out"
+    enabled: false
+    effective-date: "2024-01-01"
+    expiration-date: "2024-12-31"
+    business-owner: "legacy-team@bank.com"
+
+rules:
+  - id: "new-validation"
+    name: "New Validation Rule"
+    category: "active-rules"
+    condition: "true"
+    message: "New validation"
+    severity: "ERROR"
+
+  - id: "old-validation"
+    name: "Old Validation Rule"
+    category: "deprecated-rules"
+    condition: "true"
+    message: "Old validation"
+    severity: "ERROR"
+```
+
+**Example 3: Execution Control**
+
+```yaml
+categories:
+  - name: "critical-validation"
+    description: "Critical validations - stop on first failure"
+    stop-on-first-failure: true
+    parallel-execution: false
+    priority: 1
+    business-owner: "critical-team@bank.com"
+
+  - name: "optional-enrichment"
+    description: "Optional enrichments - continue on failure"
+    stop-on-first-failure: false
+    parallel-execution: true
+    priority: 100
+    business-owner: "enrichment-team@bank.com"
+
+rules:
+  - id: "mandatory-check"
+    name: "Mandatory Field Check"
+    category: "critical-validation"
+    condition: "#requiredField != null"
+    message: "Mandatory field present"
+    severity: "ERROR"
+
+  - id: "optional-check"
+    name: "Optional Enhancement"
+    category: "optional-enrichment"
+    condition: "true"
+    message: "Optional enhancement applied"
+    severity: "INFO"
+```
+
+#### 4.3.6 Best Practices
+
+**1. Organize by Business Function**
+
+```yaml
+categories:
+  - name: "input-validation"
+    description: "Validate incoming data"
+    business-domain: "Data Quality"
+
+  - name: "business-rules"
+    description: "Apply business logic"
+    business-domain: "Business Logic"
+
+  - name: "compliance-checks"
+    description: "Regulatory compliance"
+    business-domain: "Compliance"
+```
+
+**2. Use Consistent Naming**
+
+```yaml
+categories:
+  - name: "trade-validation"      # ✅ Descriptive, kebab-case
+  - name: "TradeValidation"       # ❌ Avoid PascalCase
+  - name: "trade_validation"      # ❌ Avoid snake_case
+  - name: "validation"            # ✅ Simple, clear
+```
+
+**3. Assign Clear Ownership**
+
+```yaml
+categories:
+  - name: "validation"
+    business-owner: "validation-team@bank.com"
+    created-by: "john.doe@bank.com"
+    # Clear accountability for rule maintenance
+```
+
+**4. Use Lifecycle Dates**
+
+```yaml
+categories:
+  - name: "new-rules"
+    effective-date: "2025-01-01"
+    expiration-date: "2025-12-31"
+    # Track when rules are active
+```
+
+**5. Document Purpose**
+
+```yaml
+categories:
+  - name: "validation"
+    description: "Validates trade data integrity and required fields"
+    # Clear documentation of category purpose
+```
+
+#### 4.3.7 Category vs Rule-Level Properties
+
+When both category and rule specify the same property, the rule-level value takes precedence:
+
+```yaml
+categories:
+  - name: "validation"
+    priority: 50
+    business-owner: "category-owner@bank.com"
+
+rules:
+  # Uses category priority (50)
+  - id: "rule-1"
+    name: "Rule 1"
+    category: "validation"
+    condition: "true"
+    message: "Rule 1"
+    severity: "ERROR"
+
+  # Overrides category priority with rule priority (10)
+  - id: "rule-2"
+    name: "Rule 2"
+    category: "validation"
+    priority: 10  # Override category priority
+    condition: "true"
+    message: "Rule 2"
+    severity: "ERROR"
+
+  # Overrides category owner
+  - id: "rule-3"
+    name: "Rule 3"
+    category: "validation"
+    business-owner: "rule-owner@bank.com"  # Override category owner
+    condition: "true"
+    message: "Rule 3"
+    severity: "ERROR"
 ```
 
 ---

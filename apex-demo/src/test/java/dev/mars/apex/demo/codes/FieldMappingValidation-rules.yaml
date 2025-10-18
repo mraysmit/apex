@@ -1,0 +1,55 @@
+metadata:
+  id: "field-mapping-validation-rules"
+  name: "Field Mapping Validation Rules"
+  version: "1.0.0"
+  description: "Rules for testing field mapping functionality with success and error codes"
+  type: "rule-config"
+  author: "APEX Demo"
+
+rules:
+  - id: "single-field-mapping-success"
+    name: "Single Field Mapping with Success Code"
+    condition: "#amount > 100"
+    message: "Amount is greater than 100"
+    severity: "INFO"
+    enabled: true
+    success-code: "AMOUNT_VALID"
+    map-to-field: "validationStatus = #success_code"
+
+  - id: "single-field-mapping-error"
+    name: "Single Field Mapping with Error Code"
+    condition: "#amount > 100"
+    message: "Amount is greater than 100"
+    severity: "INFO"
+    enabled: true
+    error-code: "AMOUNT_INVALID"
+    map-to-field: "validationStatus = #error_code"
+
+  - id: "multiple-field-mappings"
+    name: "Multiple Field Mappings"
+    condition: "#amount > 100"
+    message: "Amount is greater than 100"
+    severity: "INFO"
+    enabled: true
+    success-code: "AMOUNT_VALID"
+    map-to-field:
+      - "validationStatus = #success_code"
+      - "severity = 'INFO'"
+
+  - id: "complex-spel-mapping"
+    name: "Field Mapping with Complex SpEL Expression"
+    condition: "#amount > 100"
+    message: "Amount is greater than 100"
+    severity: "INFO"
+    enabled: true
+    success-code: "AMOUNT_VALID"
+    map-to-field: "riskLevel = #amount > 1000 ? 'HIGH' : 'NORMAL'"
+
+  - id: "backward-compatibility-no-mappings"
+    name: "Backward Compatibility - No Field Mappings"
+    condition: "#amount > 100"
+    message: "Amount is greater than 100"
+    severity: "INFO"
+    enabled: true
+    success-code: "AMOUNT_VALID"
+

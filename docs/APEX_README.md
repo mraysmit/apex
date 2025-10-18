@@ -849,7 +849,7 @@ Start here if you're migrating from external services to datasets:
 
 ### Pipeline and Orchestration Documentation
 - **[Data Pipeline Orchestration Guide](APEX_DATA_PIPELINE_ORCHESTRATION_GUIDE.md)** - YAML-driven ETL workflows
-- **[Parameterized Query Technical Report](design/APEX_PARAMETERIZED_QUERY_TECHNICAL_REPORT.md)** - Advanced query patterns
+- **[Parameterized Query Technical Report](design/APEX_PARAMETERIZED_QUERY_GUIDE.md)** - Advanced query patterns
 
 ## Quick Start
 
