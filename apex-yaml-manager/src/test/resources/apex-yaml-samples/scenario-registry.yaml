@@ -1,0 +1,42 @@
+metadata:
+  id: scenario-registry
+  name: Scenario Registry
+  description: Central registry of all APEX scenarios and configurations with full file-based dependencies
+  version: 3.0.0
+  type: scenario-registry
+  author: apex.demo@company.com
+  created-date: 2025-01-15
+
+# File-based dependencies - the registry itself references scenario files
+rule-configurations:
+  - 06-trade-processing-scenario.yaml
+
+scenarios:
+  - id: trade-processing
+    name: Trade Processing Scenario
+    description: End-to-end trade processing with validation and enrichment
+    config-file: 06-trade-processing-scenario.yaml
+    business-domain: Trading
+    owner: trading.team@company.com
+
+  - id: trade-validation
+    name: Trade Validation Scenario
+    description: Validates incoming trade data with full dependency chain
+    config-file: 02-validation-groups.yaml
+    business-domain: Trading
+    owner: trading.team@company.com
+
+  - id: enrichment-processing
+    name: Enrichment Processing Scenario
+    description: Enriches trade data with inline datasets and lookups
+    config-file: 04-enrichment-groups.yaml
+    business-domain: Trading
+    owner: trading.team@company.com
+
+  - id: database-enrichment
+    name: Database Enrichment Scenario
+    description: Enriches trades with database lookups
+    config-file: 05-database-lookups.yaml
+    business-domain: Trading
+    owner: trading.team@company.com
+

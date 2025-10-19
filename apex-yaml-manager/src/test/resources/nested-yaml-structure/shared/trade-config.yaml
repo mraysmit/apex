@@ -1,0 +1,14 @@
+metadata:
+  id: trade-config
+  name: Trade Configuration
+  description: Shared configuration for trade processing
+  version: 1.0.0
+
+config:
+  max-trade-amount: 1000000
+  settlement-days: 2
+  currency-pairs:
+    - EUR/USD
+    - GBP/USD
+    - USD/JPY
+

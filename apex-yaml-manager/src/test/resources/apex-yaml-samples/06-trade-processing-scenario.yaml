@@ -1,0 +1,55 @@
+metadata:
+  id: trade-processing-scenario
+  name: Trade Processing Scenario
+  description: End-to-end trade processing with validation and enrichment
+  version: 1.0.0
+  type: scenario
+  author: apex.demo@company.com
+  created-date: 2025-01-15
+  business-domain: Trading
+  owner: trading.team@company.com
+  tags: [scenario, trade-processing, end-to-end]
+
+# File-based dependencies - these are actual file references that the dependency analyzer will follow
+rule-configurations:
+  - 02-validation-groups.yaml
+
+enrichment-refs:
+  - 03-enrichment-rules.yaml
+  - 05-database-lookups.yaml
+
+scenario:
+  scenario-id: trade-processing
+  description: Complete trade processing workflow
+
+  classification-rule:
+    condition: "#tradeType != null && (#tradeType == 'SPOT' || #tradeType == 'FORWARD')"
+    description: Route FX trades to processing
+
+  processing-stages:
+    - stage-name: validation
+      description: Validate incoming trade data
+      config-file: 02-validation-groups.yaml
+      execution-order: 1
+      failure-policy: terminate
+
+    - stage-name: enrichment
+      description: Enrich trade with reference data
+      config-file: 03-enrichment-rules.yaml
+      execution-order: 2
+      failure-policy: continue
+
+    - stage-name: database-lookup
+      description: Lookup additional trade details
+      config-file: 05-database-lookups.yaml
+      execution-order: 3
+      failure-policy: continue
+
+  data-types:
+    - HashMap
+    - Map
+
+  error-handling:
+    strategy: log-and-continue
+    severity-threshold: WARNING
+

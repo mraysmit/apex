@@ -1,0 +1,28 @@
+metadata:
+  id: compliance-rules
+  name: Compliance Rules
+  description: Rules for compliance checks
+  version: 1.0.0
+
+rule-groups:
+  - id: regulatory-compliance
+    name: Regulatory Compliance
+    description: Checks regulatory compliance
+    rules:
+      - regulatory-rule-1
+      - regulatory-rule-2
+
+  - id: internal-compliance
+    name: Internal Compliance
+    description: Checks internal compliance policies
+    rules:
+      - internal-rule-1
+      - internal-rule-2
+
+enrichment-refs:
+  - compliance-enrichment
+
+# This creates a circular reference: compliance-rules -> risk-rules -> compliance-rules
+rule-configurations:
+  - risk-rules
+

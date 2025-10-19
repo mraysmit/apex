@@ -1,0 +1,11 @@
+metadata:
+  id: compliance-config
+  name: Compliance Configuration
+  description: Shared configuration for compliance checks
+  version: 1.0.0
+
+config:
+  sanctions-list-source: ofac
+  kyc-verification-required: true
+  reporting-frequency: daily
+

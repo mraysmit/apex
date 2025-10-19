@@ -38,6 +38,7 @@
         <module>apex-demo</module>
         <module>apex-rest-api</module>
         <module>apex-playground</module>
+        <module>apex-yaml-manager</module>
     </modules>
 
     <dependencyManagement>

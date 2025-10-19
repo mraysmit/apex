@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APEX YAML Dependency Tree Viewer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        /* Main Container */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 60px);
+            overflow: hidden;
+        }
+
+        /* Left Panel - Tree View */
+        .left-panel {
+            width: 30%;
+            background-color: #f0f0f0;
+            border-right: 2px solid #333;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            background-color: #e8e8e8;
+            padding: 10px;
+            border-bottom: 1px solid #999;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .toolbar button {
+            padding: 6px 12px;
+            font-size: 12px;
+            border: 1px solid #999;
+            background-color: white;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .toolbar button:hover {
+            background-color: #f0f0f0;
+            border-color: #666;
+        }
+
+        .toolbar input {
+            padding: 6px 10px;
+            font-size: 12px;
+            border: 1px solid #999;
+            border-radius: 4px;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        /* Tree View Area */
+        .tree-view {
+            flex: 1;
+            background-color: #f9f9f9;
+            overflow-y: auto;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .tree-node {
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 3px;
+            transition: background-color 0.2s;
+        }
+
+        .tree-node:hover {
+            background-color: #e8e8e8;
+        }
+
+        .tree-node.selected {
+            background-color: #0d6efd;
+            color: white;
+        }
+
+        .tree-node-indent-1 { margin-left: 20px; }
+        .tree-node-indent-2 { margin-left: 40px; }
+        .tree-node-indent-3 { margin-left: 60px; }
+        .tree-node-indent-4 { margin-left: 80px; }
+
+        /* Draggable Divider */
+        .divider {
+            width: 4px;
+            background-color: #999;
+            cursor: col-resize;
+            transition: background-color 0.2s;
+            user-select: none;
+        }
+
+        .divider:hover {
+            background-color: #666;
+        }
+
+        /* Right Panel - Node Details */
+        .right-panel {
+            flex: 1;
+            background-color: white;
+            border-left: 2px solid #333;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Node Header */
+        .node-header {
+            background-color: #e3f2fd;
+            border-bottom: 2px solid #1976d2;
+            padding: 16px;
+            flex-shrink: 0;
+        }
+
+        .node-header h2 {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1976d2;
+            margin: 0 0 8px 0;
+        }
+
+        .node-header p {
+            font-size: 13px;
+            color: #666;
+            margin: 0;
+        }
+
+        /* Node Details Content */
+        .node-details {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .detail-section {
+            margin-bottom: 20px;
+        }
+
+        .detail-section h3 {
+            font-size: 12px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .detail-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .detail-section li {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 4px;
+            padding-left: 20px;
+        }
+
+        .detail-section li:before {
+            content: "• ";
+            color: #0066cc;
+            font-weight: bold;
+            margin-left: -15px;
+        }
+
+        .detail-section a {
+            color: #0066cc;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .detail-section a:hover {
+            text-decoration: underline;
+        }
+
+        .file-path {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            background-color: #f9f9f9;
+            padding: 8px;
+            border-radius: 3px;
+            word-break: break-all;
+        }
+
+        .health-score {
+            font-size: 13px;
+            font-weight: bold;
+            padding: 8px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .health-score.excellent {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .health-score.good {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .health-score.fair {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .health-score.poor {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #999;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        /* Modal Dialog */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            pointer-events: auto;
+        }
+
+        .modal-dialog {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            pointer-events: auto;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .folder-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .folder-input-group input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #999;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .folder-input-group button {
+            padding: 10px 20px;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .folder-input-group button:hover {
+            background-color: #0052a3;
+        }
+
+        .file-list {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .file-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .file-item.selected {
+            background-color: #e3f2fd;
+        }
+
+        .file-item input[type="checkbox"] {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .file-item-name {
+            flex: 1;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .file-item-size {
+            color: #999;
+            font-size: 11px;
+            margin-left: 10px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #0066cc;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .modal-button {
+            padding: 10px 20px;
+            border: 1px solid #999;
+            background-color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .modal-button:hover {
+            background-color: #f0f0f0;
+            border-color: #666;
+        }
+
+        .modal-button.primary {
+            background-color: #0066cc;
+            color: white;
+            border-color: #0066cc;
+        }
+
+        .modal-button.primary:hover {
+            background-color: #0052a3;
+            border-color: #0052a3;
+        }
+
+        .modal-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>🔗 APEX YAML Dependency Tree Viewer</h1>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <button id="loadFolderBtn" title="Load Folder">📂 Load Folder</button>
+                <input type="text" id="searchInput" placeholder="🔍 Search nodes...">
+                <button id="expandAllBtn" title="Expand All">📁 Expand All</button>
+                <button id="collapseAllBtn" title="Collapse All">📁 Collapse All</button>
+                <button id="expandLevel1Btn" title="Level 1">L1</button>
+                <button id="expandLevel2Btn" title="Level 2">L2</button>
+                <button id="expandLevel3Btn" title="Level 3">L3</button>
+                <button id="refreshBtn" title="Refresh">🔄 Refresh</button>
+                <button id="filterBtn" title="Filter">⚙️ Filter</button>
+            </div>
+
+            <!-- Tree View -->
+            <div class="tree-view" id="treeView">
+                <div class="empty-state">
+                    <p>Loading dependency tree...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Draggable Divider -->
+        <div class="divider" id="divider"></div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <!-- Node Header -->
+            <div class="node-header">
+                <h2 id="nodeName">Select a node to view details</h2>
+                <p id="nodeType"></p>
+            </div>
+
+            <!-- Node Details -->
+            <div class="node-details" id="nodeDetails">
+                <div class="empty-state">
+                    <p>Click a node in the tree to view its details</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Folder Selector Modal -->
+    <div class="modal-overlay" id="folderModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2>📂 Load YAML Folder</h2>
+                <button class="modal-close" id="modalCloseBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="folder-input-group">
+                    <input type="text" id="folderPathInput" placeholder="Enter folder path or click Browse...">
+                    <button id="browseFolderBtn" title="Browse for folder">📁 Browse</button>
+                    <button id="scanFolderBtn">Scan</button>
+                </div>
+                <!-- Hidden file input for folder selection -->
+                <input type="file" id="folderInput" webkitdirectory directory style="display: none;">
+                <div id="fileListContainer" style="display: none;">
+                    <p style="margin-bottom: 10px; font-size: 13px; color: #666;">
+                        Found <span id="fileCount">0</span> YAML files:
+                    </p>
+                    <div class="file-list" id="fileList"></div>
+                </div>
+                <div id="scanStatus" style="display: none; margin-top: 10px; padding: 10px; background-color: #f5f5f5; border-radius: 4px; font-size: 13px;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button" id="modalCancelBtn">Cancel</button>
+                <button class="modal-button primary" id="loadSelectedBtn" disabled>Load Selected</button>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/dependency-tree-viewer.js}"></script>
+</body>
+</html>
+

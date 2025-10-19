@@ -1,0 +1,49 @@
+metadata:
+  id: validation-groups
+  name: Validation Groups
+  description: Rule groups that combine base validation rules with reuse patterns
+  version: 1.0.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-01-15
+  tags: [validation, rule-groups, reuse]
+
+# File-based dependencies - references the base rules file
+rule-configurations:
+  - 01-base-validation-rules.yaml
+
+rule-groups:
+  - id: mandatory-trade-validation
+    name: Mandatory Trade Validation
+    description: Essential validation rules for all trades
+    operator: AND
+    stop-on-first-failure: true
+    priority: 10
+    rule-ids:
+      - trade-amount-validation
+      - counterparty-validation
+      - trade-type-validation
+
+  - id: settlement-validation
+    name: Settlement Validation
+    description: Settlement-specific validation rules
+    operator: AND
+    stop-on-first-failure: false
+    priority: 20
+    rule-ids:
+      - settlement-date-validation
+      - currency-validation
+
+  - id: comprehensive-trade-validation
+    name: Comprehensive Trade Validation
+    description: Complete validation combining mandatory and settlement checks
+    operator: AND
+    stop-on-first-failure: false
+    priority: 5
+    rule-ids:
+      - trade-amount-validation
+      - counterparty-validation
+      - trade-type-validation
+      - settlement-date-validation
+      - currency-validation
+

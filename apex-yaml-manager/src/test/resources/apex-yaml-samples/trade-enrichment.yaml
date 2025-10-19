@@ -1,0 +1,24 @@
+metadata:
+  id: trade-enrichment
+  name: Trade Enrichment
+  description: Enriches trade data with additional information
+  version: 1.0.0
+
+enrichments:
+  - id: counterparty-enrichment
+    name: Counterparty Enrichment
+    description: Enriches trade with counterparty information
+    source-config: counterparty-lookup.yaml
+    lookup-config: counterparty-dataset.yaml
+
+  - id: market-enrichment
+    name: Market Enrichment
+    description: Enriches trade with market information
+    source-config: market-lookup.yaml
+    lookup-config: market-dataset.yaml
+
+  - id: risk-enrichment-ref
+    name: Risk Enrichment Reference
+    description: References risk enrichment
+    include: risk-enrichment.yaml
+

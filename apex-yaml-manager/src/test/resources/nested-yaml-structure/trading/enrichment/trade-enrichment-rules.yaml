@@ -1,0 +1,20 @@
+metadata:
+  id: trade-enrichment-rules
+  name: Trade Enrichment Rules
+  description: Enriches trade data with market and counterparty information
+  version: 1.0.0
+
+enrichments:
+  - id: market-data-enrichment
+    name: Market Data Enrichment
+    description: Adds current market prices and rates
+  - id: counterparty-enrichment
+    name: Counterparty Enrichment
+    description: Adds counterparty credit ratings and limits
+  - id: settlement-enrichment
+    name: Settlement Enrichment
+    description: Adds settlement instructions and routing
+
+config-files:
+  - ../shared/enrichment-config.yaml
+

@@ -833,6 +833,8 @@ Start here if you're migrating from external services to datasets:
 - **[APEX Conditional Processing Guide](APEX_CONDITIONAL_PROCESSING_GUIDE.md)** - Complete guide to conditional logic **🆕 NEW**
 - **[APEX SpEL Dynamic Arrays](APEX_SpEL_Dynamic_Arrays.md)** - Dynamic array access patterns
 
+- **[YAML Manager UI Screenshots](../apex-yaml-manager/docs/yaml-manager-screenshots.md)** - Indexed gallery of UI screenshots (01–36) demonstrating the dependency tree viewer
+
 ### External Data Source Documentation
 - **[External Data Sources Guide](docs/EXTERNAL_DATA_SOURCES_GUIDE.md)** - Comprehensive guide to data source integration
 - **[Database Configuration Guide](docs/external-data-sources/database-configuration.md)** - Complete database setup and configuration

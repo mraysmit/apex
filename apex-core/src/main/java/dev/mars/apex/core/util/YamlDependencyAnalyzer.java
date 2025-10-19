@@ -59,9 +59,10 @@ public class YamlDependencyAnalyzer {
     // Keys that typically contain file references
     private static final Set<String> FILE_REFERENCE_KEYS = Set.of(
         "rule-configurations",
-        "rule-chains", 
+        "rule-chains",
         "enrichment-refs",
         "config-files",
+        "config-file",
         "include",
         "import",
         "source-config",
