@@ -223,8 +223,14 @@ public class ScenarioStageExecutor {
                 return StageExecutionResult.configurationError(stage.getStageName(), errorMessage);
             }
             
-            // Load stage configuration
-            YamlRuleConfiguration stageConfig = configLoader.loadFromFile(stage.getConfigFile());
+            // Load stage configuration with file-system first, then classpath fallback
+            YamlRuleConfiguration stageConfig;
+            try {
+                stageConfig = configLoader.loadFromFile(stage.getConfigFile());
+            } catch (dev.mars.apex.core.config.yaml.YamlConfigurationException e) {
+                // Fallback: treat path as classpath resource (tests/resources)
+                stageConfig = configLoader.loadFromClasspath(stage.getConfigFile());
+            }
 
             // Extract error recovery configuration from YAML if present
             dev.mars.apex.core.config.error.ErrorRecoveryConfig errorRecoveryConfig = null;

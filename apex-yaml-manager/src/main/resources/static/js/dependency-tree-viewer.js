@@ -13,10 +13,33 @@ let maxRenderDepth = Infinity;
 let expansionState = {};
 let useD3 = false; // Feature flag: use D3 HTML-based renderer when true (default OFF for stability)
 
+// Base URLs derived from server-provided config when available
+const API_BASE = (window.yamlManagerConfig && window.yamlManagerConfig.apiBaseUrl) ? window.yamlManagerConfig.apiBaseUrl : '/yaml-manager/api';
+const UI_BASE = API_BASE.replace(/\/api$/, '');
+
+// Parent index for quick ancestor expansion during search
+let parentByPath = {};
+
+function buildParentIndex(nodes, parentPath = null) {
+    if (!nodes) return;
+    const arr = Array.isArray(nodes) ? nodes : [nodes];
+    arr.forEach(n => {
+        if (n && n.path) {
+            if (parentPath !== null) parentByPath[n.path] = parentPath;
+            if (n.children && n.children.length) {
+                buildParentIndex(n.children, n.path);
+            }
+        }
+    });
+}
 
 document.addEventListener('DOMContentLoaded', function() {
+    try { window.__lastStep = 'dom-ready'; } catch (e) { /* ignore */ }
+
+
     initializeResizer();
     setupEventListeners();
+    initLoadedFolderBadge();
     loadDependencyTree();
 });
 
@@ -80,6 +103,49 @@ function setupEventListeners() {
         if (e.key === 'Enter') scanFolder();
     });
 
+    // If navigated with #load, open folder modal automatically
+    try {
+        if (window.location && window.location.hash === '#load') {
+            openFolderModal();
+            // Clean up the hash so refresh doesn't re-open unintentionally
+            if (history && history.replaceState) {
+                history.replaceState(null, '', window.location.pathname);
+            }
+        }
+    } catch (e) { /* no-op */ }
+
+
+
+    // Loaded folder indicator helpers (persist across pages)
+    function dirName(path) {
+        if (!path) return '';
+        const s = String(path).replace(/\\\\/g, '/');
+        const idx = s.lastIndexOf('/');
+        return idx > 0 ? s.substring(0, idx) : s;
+    }
+
+    function setLoadedFolder(path) {
+        if (!path) return;
+        try { localStorage.setItem('apexYamlFolderPath', path); } catch (e) { /* ignore */ }
+        const badge = document.getElementById('loadedFolderBadge');
+        if (badge) {
+            badge.textContent = 'Folder: ' + path;
+            badge.style.display = 'inline-flex';
+        }
+    }
+
+    function initLoadedFolderBadge() {
+        let p = null;
+        try { p = localStorage.getItem('apexYamlFolderPath'); } catch (e) { p = null; }
+        if (p) {
+            const badge = document.getElementById('loadedFolderBadge');
+            if (badge) {
+                badge.textContent = 'Folder: ' + p;
+                badge.style.display = 'inline-flex';
+            }
+        }
+    }
+
     // Feature flag toggle for D3 renderer
     const d3Toggle = document.getElementById('useD3Toggle');
     if (d3Toggle) {
@@ -107,7 +173,7 @@ async function loadDependencyTree(rootFile = null) {
             return;
         }
 
-        const response = await fetch('/yaml-manager/api/dependencies/tree?rootFile=' + encodeURIComponent(rootFile));
+        const response = await fetch(`${API_BASE}/dependencies/tree?rootFile=${encodeURIComponent(rootFile)}`);
         const data = await response.json();
 
         if (data.status === 'success') {
@@ -119,6 +185,10 @@ async function loadDependencyTree(rootFile = null) {
             }
             // The API returns the tree in the 'tree' field
             treeData = data.tree ? [data.tree] : [];
+            // Rebuild parent index for ancestor expansion
+            parentByPath = {};
+            buildParentIndex(treeData);
+
             // Expose for Selenium and console
             window.treeData = treeData;
             // Reset expansion state on load
@@ -336,7 +406,7 @@ function selectNode(node, element) {
  */
 async function fetchNodeDetails(filePath) {
     try {
-        const response = await fetch(`/yaml-manager/api/dependencies/${encodeURIComponent(filePath)}/details`);
+        const response = await fetch(`${API_BASE}/dependencies/${encodeURIComponent(filePath)}/details`);
         const data = await response.json();
 
         if (data.status === 'success') {
@@ -489,8 +559,8 @@ function displayNodeDetails(details) {
         <div class="detail-section">
             <h3>🚀 Actions:</h3>
             <div class="cta cta-row" style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
-                <a href="/ui/catalog?path=${encodedPath}" class="btn-cta" title="Open this YAML in the Catalog browser">Open in Catalog</a>
-                <a href="/ui/validation?path=${encodedPath}" class="btn-cta" title="Run validation checks for this YAML">Run Validation</a>
+                <a href="${UI_BASE}/ui/catalog?path=${encodedPath}" class="btn-cta" title="Open this YAML in the Catalog browser">Open in Catalog</a>
+                <a href="${UI_BASE}/ui/validation?path=${encodedPath}" class="btn-cta" title="Run validation checks for this YAML">Run Validation</a>
                 <button type="button" onclick="runImpactAnalysis('${details.path}')" class="btn-cta" title="Analyze impact for downstream dependents">Impact Analysis</button>
             </div>
             <div id="impactAnalysisPanel" class="mt-2"></div>
@@ -612,15 +682,66 @@ window.loadDependencyTree = loadDependencyTree;
  * Filter tree by search term
  */
 function filterTree(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const nodes = document.querySelectorAll('.tree-node');
+    const term = (e.target.value || '').trim().toLowerCase();
+    if (!treeData) return;
 
-    nodes.forEach(node => {
-        const text = node.textContent.toLowerCase();
-        if (searchTerm === '' || text.includes(searchTerm)) {
-            node.style.display = 'block';
+    // Empty search: show everything and re-render with current expansion state
+    if (term === '') {
+        const nodes = document.querySelectorAll('.tree-node');
+        nodes.forEach(n => {
+            n.style.display = 'block';
+            n.classList.remove('search-match');
+        });
+        const nodesArr = Array.isArray(treeData) ? treeData : [treeData];
+        renderTree(nodesArr);
+        return;
+    }
+
+    // Ensure parent index is available
+    if (!parentByPath || Object.keys(parentByPath).length === 0) {
+        buildParentIndex(treeData);
+    }
+
+    const matchSet = new Set();
+    const visibleSet = new Set();
+    const roots = Array.isArray(treeData) ? treeData : [treeData];
+
+    function walk(node) {
+        const name = (node.name || '').toLowerCase();
+        const path = (node.path || '').toLowerCase();
+        const isMatch = name.includes(term) || path.includes(term);
+        if (isMatch) {
+            matchSet.add(node.path);
+            // Expand ancestors so the match path is visible
+            let p = node.path;
+            while (p && parentByPath[p]) {
+                const parent = parentByPath[p];
+                visibleSet.add(parent);
+                expansionState[parent] = true;
+                p = parent;
+            }
+            // Include the node itself
+            visibleSet.add(node.path);
+            expansionState[node.path] = true;
+        }
+        if (node.children && node.children.length) {
+            node.children.forEach(walk);
+        }
+    }
+    roots.forEach(walk);
+
+    // Re-render to apply updated expansion state (works for manual and D3 renderers)
+    renderTree(roots);
+
+    // Show only matches and their ancestors; highlight matches
+    document.querySelectorAll('.tree-node').forEach(el => {
+        const p = el.getAttribute('data-path');
+        if (visibleSet.has(p) || matchSet.has(p)) {
+            el.style.display = 'block';
+            el.classList.toggle('search-match', matchSet.has(p));
         } else {
-            node.style.display = 'none';
+            el.style.display = 'none';
+            el.classList.remove('search-match');
         }
     });
 }
@@ -706,7 +827,7 @@ async function scanFolder() {
     document.getElementById('loadSelectedBtn').disabled = true;
 
     try {
-        const response = await fetch('/yaml-manager/api/dependencies/scan-folder?folderPath=' + encodeURIComponent(folderPath), {
+        const response = await fetch(`${API_BASE}/dependencies/scan-folder?folderPath=${encodeURIComponent(folderPath)}`, {
             method: 'POST'
         });
         const data = await response.json();
@@ -786,26 +907,53 @@ function updateLoadButton() {
 /**
  * Load selected files and generate dependency tree
  */
-async function loadSelectedFiles() {
+async function loadSelectedFiles() { try { window.__lastStep = 'loadSelected-start'; } catch (e) {}
     const checkboxes = document.querySelectorAll('#fileList input[type="checkbox"]:checked');
     const selectedFiles = Array.from(checkboxes).map(cb => {
         const fileItem = cb.closest('.file-item');
         return fileItem.dataset.path;
     });
 
+    try { window.__lastStep = 'after-selection count=' + selectedFiles.length; } catch (e) {}
+
     if (selectedFiles.length === 0) {
         showScanStatus('Please select at least one file', 'error');
         return;
     }
 
-    closeFolderModal();
+    // Capture modal path BEFORE closing modal (since closeFolderModal clears the input)
+    const modalPath = (document.getElementById('folderPathInput') || {}).value;
+
+    try { window.__lastStep = 'before-closeModal'; } catch (e) {}
+
+    // Be resilient: closing the modal is purely cosmetic for the flow
+    try {
+        closeFolderModal();
+    } catch (e) {
+        console.error('closeFolderModal failed (non-fatal):', e);
+        try { window.__lastStep = 'closeModal-error'; } catch (ee) {}
+    }
 
     // Load the first selected file as root
     const rootFile = selectedFiles[0];
 
+    // Load the first selected file as root
+    const rootFile = selectedFiles[0];
+
+    // Persist and show selected folder in header
+    try { window.__lastStep = 'before-assumedFolder'; } catch (e) {}
+    const assumedFolder = modalPath && modalPath.trim() ? modalPath.trim() : dirName(rootFile);
+    try { window.__lastStep = 'before-setLoadedFolder'; } catch (e) {}
+    setLoadedFolder(assumedFolder);
+    try { window.__lastStep = 'after-setLoadedFolder'; } catch (e) {}
+
     try {
+        try { window.__lastStep = 'deciding-dialog-vs-server'; } catch (e) {}
+
         // Check if files were selected from dialog (browser-based) or from server (path-based)
         if (selectedFilesFromDialog.length > 0) {
+            try { window.__lastStep = 'branch-dialog'; } catch (e) {}
+
             // Files from dialog - load directly from browser
             const fileInput = document.getElementById('folderInput');
             const files = fileInput.files;
@@ -825,22 +973,12 @@ async function loadSelectedFiles() {
                 }
             }
         } else {
-            // Files from server path - use API
-            const response = await fetch('/yaml-manager/api/dependencies/tree?rootFile=' + encodeURIComponent(rootFile));
-            const data = await response.json();
+            try { window.__lastStep = 'branch-server'; } catch (e) {}
+            try { window.__lastStep = 'before-loadDependencyTree'; } catch (e) {}
 
-            if (data.status === 'success') {
-                const vr = validateTreePayload(data);
-                if (!vr.ok) {
-                    showValidationErrors(vr.errors);
-                    return;
-                }
-                treeData = data.tree ? [data.tree] : [];
-                renderTree(treeData);
-            } else {
-                document.getElementById('treeView').innerHTML =
-                    '<div class="empty-state"><p>Error loading tree: ' + data.message + '</p></div>';
-            }
+            // Files from server path - reuse main loader for consistency
+            await loadDependencyTree(rootFile);
+            try { window.__lastStep = 'after-loadDependencyTree'; } catch (e) {}
         }
     } catch (error) {
         console.error('Error loading tree:', error);

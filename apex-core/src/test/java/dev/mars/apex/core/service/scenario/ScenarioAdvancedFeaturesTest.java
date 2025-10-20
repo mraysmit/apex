@@ -385,7 +385,8 @@ class ScenarioAdvancedFeaturesTest {
             logger.info("TEST: Flag-for-review failure policy");
 
             // Given: Stage with flag-for-review policy
-            ScenarioStage stage = new ScenarioStage("test-stage", "config/test.yaml", 1);
+            // Use a deliberately missing file to trigger failure and test flag-for-review policy
+            ScenarioStage stage = new ScenarioStage("test-stage", "config/__missing_for_review__.yaml", 1);
             stage.setFailurePolicy(ScenarioStage.FAILURE_POLICY_FLAG_FOR_REVIEW);
 
             scenario.addProcessingStage(stage);
@@ -427,7 +428,8 @@ class ScenarioAdvancedFeaturesTest {
             logger.info("TEST: Context sharing between dependent stages");
 
             // Given: Two stages with dependency
-            ScenarioStage stage1 = new ScenarioStage("stage-1", "config/stage1.yaml", 1);
+            // Use a deliberately missing file for stage-1 to force dependency failure and validate skip logic
+            ScenarioStage stage1 = new ScenarioStage("stage-1", "config/__missing_stage1__.yaml", 1);
             ScenarioStage stage2 = new ScenarioStage("stage-2", "config/stage2.yaml", 2);
             stage2.addDependency("stage-1");
 

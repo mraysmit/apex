@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${title}">Validation</title>
-    
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+
     <!-- Custom CSS -->
     <link rel="stylesheet" th:href="@{/css/yaml-manager.css}">
 </head>
@@ -18,7 +18,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/ui">
+            <a class="navbar-brand" th:href="@{/ui}">
                 <i class="fas fa-cogs"></i> APEX YAML Manager
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -26,22 +26,24 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/ui/tree-viewer}" onclick="this.href=this.href+'#load'">Load Folder</a></li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/ui">Dashboard</a>
+                        <a class="nav-link" th:href="@{/ui/tree-viewer}">Dependency Tree Viewer</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/ui/dependencies">Dependencies</a>
+                        <a class="nav-link" th:href="@{/ui/catalog}">Catalogue Browser</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/ui/catalog">Catalog</a>
+                        <a class="nav-link" th:href="@{/ui/catalog}">Catalogue Browser</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="/ui/validation">Validation</a>
+                        <a class="nav-link active" th:href="@{/ui/validation}">Validation</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/ui/health">Health</a>
+                        <a class="nav-link" th:href="@{/ui/health}">Health Checks</a>
                     </li>
                 </ul>
+                <span id="loadedFolderBadge" class="navbar-text ms-3 badge bg-light text-dark" style="display:none;">Folder:</span>
             </div>
         </div>
     </nav>
@@ -94,12 +96,12 @@
                     <div class="card-body">
                         <div class="mb-3">
                             <label for="filePath" class="form-label">Enter YAML file path:</label>
-                            <input type="text" class="form-control" id="filePath" 
+                            <input type="text" class="form-control" id="filePath"
                                    placeholder="/path/to/config.yaml">
                         </div>
                         <div class="mb-3">
                             <label for="baseDir" class="form-label">Base Directory (optional):</label>
-                            <input type="text" class="form-control" id="baseDir" 
+                            <input type="text" class="form-control" id="baseDir"
                                    placeholder="/base/directory">
                         </div>
                         <div id="validationStatus" class="results-panel">
@@ -144,16 +146,25 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- Custom JavaScript -->
     <script th:src="@{/js/yaml-manager.js}"></script>
     <script th:src="@{/js/validation.js}"></script>
-    
+
     <script th:inline="javascript">
         window.yamlManagerConfig = {
             apiBaseUrl: /*[[${apiBaseUrl}]]*/ '/yaml-manager/api',
             version: /*[[${version}]]*/ '1.0.0'
         };
+    </script>
+    <script>
+    (function(){
+      try {
+        var p = localStorage.getItem('apexYamlFolderPath');
+        var el = document.getElementById('loadedFolderBadge');
+        if (el && p) { el.textContent = 'Folder: ' + p; el.style.display='inline-block'; }
+      } catch(e){}
+    })();
     </script>
 </body>
 </html>

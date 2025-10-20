@@ -43,7 +43,8 @@ public class YamlManagerUIController {
         model.addAttribute("title", "APEX YAML Manager");
         model.addAttribute("version", "1.0.0");
         model.addAttribute("apiBaseUrl", "/yaml-manager/api");
-        return "yaml-manager";
+        // Default landing view is the Tree Viewer (per product decision)
+        return "dependency-tree-viewer";
     }
 
     /**

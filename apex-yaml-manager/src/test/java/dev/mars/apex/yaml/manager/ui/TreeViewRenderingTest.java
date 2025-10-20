@@ -85,7 +85,7 @@ class TreeViewRenderingTest {
         JavascriptExecutor js = (JavascriptExecutor) driver;
         
         // Call the loadDependencyTree function with a test file
-        String testFile = "C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/scenario-registry.yaml";
+        String testFile = new java.io.File("src/test/resources/apex-yaml-samples/scenario-registry.yaml").getAbsolutePath();
         js.executeScript("loadDependencyTree(arguments[0]);", testFile);
 
         // Wait for tree nodes to appear
@@ -105,7 +105,7 @@ class TreeViewRenderingTest {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("treeView")));
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
-        String testFile = "C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/scenario-registry.yaml";
+        String testFile = new java.io.File("src/test/resources/apex-yaml-samples/scenario-registry.yaml").getAbsolutePath();
         js.executeScript("loadDependencyTree(arguments[0]);", testFile);
 
         wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.className("tree-node")));
@@ -124,7 +124,7 @@ class TreeViewRenderingTest {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("treeView")));
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
-        String testFile = "C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/scenario-registry.yaml";
+        String testFile = new java.io.File("src/test/resources/apex-yaml-samples/scenario-registry.yaml").getAbsolutePath();
         js.executeScript("loadDependencyTree(arguments[0]);", testFile);
 
         wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.className("tree-node")));
@@ -145,7 +145,7 @@ class TreeViewRenderingTest {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("treeView")));
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
-        String testFile = "C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/scenario-registry.yaml";
+        String testFile = new java.io.File("src/test/resources/apex-yaml-samples/scenario-registry.yaml").getAbsolutePath();
         js.executeScript("loadDependencyTree(arguments[0]);", testFile);
 
         wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.className("tree-node")));
@@ -169,7 +169,7 @@ class TreeViewRenderingTest {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("treeView")));
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
-        String testFile = "C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/scenario-registry.yaml";
+        String testFile = new java.io.File("src/test/resources/apex-yaml-samples/scenario-registry.yaml").getAbsolutePath();
         js.executeScript("loadDependencyTree(arguments[0]);", testFile);
 
         wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.className("tree-node")));
@@ -197,7 +197,7 @@ class TreeViewRenderingTest {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("treeView")));
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
-        String testFile = "C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/scenario-registry.yaml";
+        String testFile = new java.io.File("src/test/resources/apex-yaml-samples/scenario-registry.yaml").getAbsolutePath();
         js.executeScript("loadDependencyTree(arguments[0]);", testFile);
 
         wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.className("tree-node")));
@@ -209,17 +209,15 @@ class TreeViewRenderingTest {
         // Click the node
         firstNode.click();
 
-        // Wait for node name to be displayed in header
+        // Wait for node name to be displayed in header and assert content
         WebElement nodeNameHeader = wait.until(
             ExpectedConditions.presenceOfElementLocated(By.id("nodeName"))
         );
-
+        wait.until(d -> nodeNameHeader.getText() != null && nodeNameHeader.getText().startsWith("Selected:"));
         String headerText = nodeNameHeader.getText();
-        System.out.println("DEBUG: nodeName header text: '" + headerText + "'");
-        System.out.println("DEBUG: Expected to contain 'Selected:' but got: " + headerText);
-
-        // This test documents the current behavior
-        System.out.println("⚠ ISSUE: Node name not displayed in header. Header shows: " + headerText);
+        String expectedName = new java.io.File(testFile).getName();
+        assertTrue(headerText.startsWith("Selected:"), "Header should start with 'Selected:'; got: " + headerText);
+        assertTrue(headerText.contains(expectedName), "Header should include file name '" + expectedName + "'; got: " + headerText);
     }
 
     @Test
@@ -229,7 +227,7 @@ class TreeViewRenderingTest {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("treeView")));
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
-        String testFile = "C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/scenario-registry.yaml";
+        String testFile = new java.io.File("src/test/resources/apex-yaml-samples/scenario-registry.yaml").getAbsolutePath();
         js.executeScript("loadDependencyTree(arguments[0]);", testFile);
 
         wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.className("tree-node")));
@@ -240,14 +238,14 @@ class TreeViewRenderingTest {
         // Click the node
         firstNode.click();
 
-        // Wait for node type to be displayed
+        // Wait for node type to be displayed and assert content
         WebElement nodeTypeHeader = wait.until(
             ExpectedConditions.presenceOfElementLocated(By.id("nodeType"))
         );
-
+        wait.until(d -> nodeTypeHeader.getText() != null && nodeTypeHeader.getText().startsWith("Type:"));
         String typeText = nodeTypeHeader.getText();
-        System.out.println("DEBUG: nodeType header text: '" + typeText + "'");
-        System.out.println("⚠ ISSUE: Node type not displayed. Header shows: " + typeText);
+        assertTrue(typeText.startsWith("Type:"), "Type header should start with 'Type:'; got: " + typeText);
+        assertTrue(typeText.length() > 5, "Type header should have a value after 'Type:'; got: " + typeText);
     }
 
     @Test
@@ -257,7 +255,7 @@ class TreeViewRenderingTest {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("treeView")));
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
-        String testFile = "C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/scenario-registry.yaml";
+        String testFile = new java.io.File("src/test/resources/apex-yaml-samples/scenario-registry.yaml").getAbsolutePath();
         js.executeScript("loadDependencyTree(arguments[0]);", testFile);
 
         wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.className("tree-node")));
@@ -268,14 +266,13 @@ class TreeViewRenderingTest {
         // Click the node
         firstNode.click();
 
-        // Wait for details panel
+        // Wait for details panel and assert File Path section
         WebElement detailsPanel = wait.until(
             ExpectedConditions.presenceOfElementLocated(By.id("nodeDetails"))
         );
-
         String detailsText = detailsPanel.getText();
-        System.out.println("DEBUG: Details panel text: '" + detailsText + "'");
-        System.out.println("⚠ ISSUE: File path not displayed. Details panel shows: " + detailsText);
+        assertTrue(detailsText.contains("File Path:"), "Details panel should include 'File Path:' section; got: " + detailsText);
+
     }
 
     @Test
@@ -285,7 +282,7 @@ class TreeViewRenderingTest {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("treeView")));
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
-        String testFile = "C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/scenario-registry.yaml";
+        String testFile = new java.io.File("src/test/resources/apex-yaml-samples/scenario-registry.yaml").getAbsolutePath();
         js.executeScript("loadDependencyTree(arguments[0]);", testFile);
 
         wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.className("tree-node")));
@@ -296,14 +293,13 @@ class TreeViewRenderingTest {
         // Click the node
         firstNode.click();
 
-        // Wait for details panel
+        // Wait for details panel and assert Metadata section
         WebElement detailsPanel = wait.until(
             ExpectedConditions.presenceOfElementLocated(By.id("nodeDetails"))
         );
-
         String detailsText = detailsPanel.getText();
-        System.out.println("DEBUG: Details panel text: '" + detailsText + "'");
-        System.out.println("⚠ ISSUE: Metadata not displayed. Details panel shows: " + detailsText);
+        assertTrue(detailsText.contains("Metadata:"), "Details panel should include 'Metadata:' section; got: " + detailsText);
+        assertTrue(detailsText.contains("Author:"), "Details metadata should include 'Author:'; got: " + detailsText);
     }
 
     @Test
@@ -313,7 +309,7 @@ class TreeViewRenderingTest {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("treeView")));
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
-        String testFile = "C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/scenario-registry.yaml";
+        String testFile = new java.io.File("src/test/resources/apex-yaml-samples/scenario-registry.yaml").getAbsolutePath();
         js.executeScript("loadDependencyTree(arguments[0]);", testFile);
 
         wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.className("tree-node")));
@@ -324,14 +320,12 @@ class TreeViewRenderingTest {
         // Click the node
         firstNode.click();
 
-        // Wait for details panel
+        // Wait for details panel and assert Health Score section
         WebElement detailsPanel = wait.until(
             ExpectedConditions.presenceOfElementLocated(By.id("nodeDetails"))
         );
-
         String detailsText = detailsPanel.getText();
-        System.out.println("DEBUG: Details panel text: '" + detailsText + "'");
-        System.out.println("⚠ ISSUE: Health score not displayed. Details panel shows: " + detailsText);
+        assertTrue(detailsText.contains("Health Score"), "Details panel should include 'Health Score' section; got: " + detailsText);
     }
 
     @Test
@@ -341,7 +335,7 @@ class TreeViewRenderingTest {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("treeView")));
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
-        String testFile = "C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/scenario-registry.yaml";
+        String testFile = new java.io.File("src/test/resources/apex-yaml-samples/scenario-registry.yaml").getAbsolutePath();
 
         // Execute and check for errors
         Object result = js.executeScript("try { loadDependencyTree(arguments[0]); return 'success'; } catch(e) { return 'error: ' + e.message; }", testFile);

@@ -7,6 +7,9 @@ metadata:
   description: "First stage for dependency testing"
   version: "1.0"
 
+  type: "rule-config"
+  author: "Test Suite"
+
 rules:
   # Initial validation
   - id: "initial-validation"

@@ -39,6 +39,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -313,6 +315,69 @@ class DependencyAnalysisControllerTest {
 
     }
 
+
+    // ========================================
+    // POST /api/dependencies/scan-folder Tests
+    // ========================================
+
+    @Test
+    @DisplayName("scan-folder: returns YAML file list for non-empty folder")
+    void testScanFolder_withYamlFiles_returnsList(@TempDir Path tempDir) throws IOException {
+        // Arrange: create two YAML files and one non-yaml file
+        File f1 = createTestYamlFile(tempDir, "a.yaml");
+        File f2 = createTestYamlFile(tempDir, "b.yml");
+        File txt = tempDir.resolve("note.txt").toFile();
+        try (FileWriter w = new FileWriter(txt)) { w.write("ignore me"); }
+
+        // Act
+        ResponseEntity<Map> response = restTemplate.postForEntity(
+                baseUrl + "/scan-folder?folderPath=" + tempDir.toFile().getAbsolutePath(),
+                null,
+                Map.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        Map body = response.getBody();
+        assertNotNull(body);
+        assertEquals("success", body.get("status"));
+        assertEquals(2, ((Number) body.get("totalFiles")).intValue(), "should count only YAML files");
+    }
+
+    @Test
+    @DisplayName("scan-folder: returns empty result for folder with no YAML files")
+    void testScanFolder_emptyFolder_returnsEmpty(@TempDir Path tempDir) {
+        // Act
+        ResponseEntity<Map> response = restTemplate.postForEntity(
+                baseUrl + "/scan-folder?folderPath=" + tempDir.toFile().getAbsolutePath(),
+                null,
+                Map.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        Map body = response.getBody();
+        assertNotNull(body);
+        assertEquals("success", body.get("status"));
+        assertEquals(0, ((Number) body.get("totalFiles")).intValue());
+    }
+
+    @Test
+    @DisplayName("scan-folder: returns 400 for invalid path")
+    void testScanFolder_invalidPath_returnsBadRequest() {
+        // Act
+        ResponseEntity<Map> response = restTemplate.postForEntity(
+                baseUrl + "/scan-folder?folderPath=C:/definitely/not/a/real/path/xyz",
+                null,
+                Map.class
+        );
+
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Map body = response.getBody();
+        assertNotNull(body);
+        assertEquals("error", body.get("status"));
+    }
 
 
     // ========================================

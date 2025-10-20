@@ -2,30 +2,50 @@
 <svg width="1400" height="900" xmlns="http://www.w3.org/2000/svg">
   <!-- Background -->
   <rect width="1400" height="900" fill="#f5f5f5"/>
-  
+
   <!-- Header Bar -->
   <rect width="1400" height="60" fill="#2c3e50"/>
   <text x="20" y="40" font-size="24" font-weight="bold" fill="white" font-family="Arial">
     🔗 APEX YAML Dependency Tree Viewer
   </text>
-  
+  <!-- Header Nav Buttons (global operations incl. Load Folder) -->
+  <g id="header-nav" font-family="Arial">
+    <!-- Layout from right edge inward with 10px gaps, within 1400px width -->
+    <rect x="1240" y="15" width="140" height="30" rx="6" ry="6" fill="none" stroke="white" stroke-width="1.5"/>
+    <text x="1310" y="35" font-size="12" fill="white" text-anchor="middle">Health Checks</text>
+
+    <rect x="1110" y="15" width="120" height="30" rx="6" ry="6" fill="none" stroke="white" stroke-width="1.5"/>
+    <text x="1170" y="35" font-size="12" fill="white" text-anchor="middle">Validation</text>
+
+    <rect x="900" y="15" width="200" height="30" rx="6" ry="6" fill="none" stroke="white" stroke-width="1.5"/>
+    <text x="1000" y="35" font-size="12" fill="white" text-anchor="middle">Catalogue Browser</text>
+
+    <rect x="670" y="15" width="220" height="30" rx="6" ry="6" fill="none" stroke="white" stroke-width="1.5"/>
+    <text x="780" y="35" font-size="12" fill="white" text-anchor="middle">Dependency Tree Viewer</text>
+
+    <rect x="520" y="15" width="140" height="30" rx="6" ry="6" fill="#f39c12" stroke="white" stroke-width="1.5"/>
+    <text x="590" y="35" font-size="12" fill="white" text-anchor="middle">📂 Load Folder</text>
+  </g>
+
+
   <!-- Main Container -->
   <g id="main-container">
     <!-- Left Panel Background -->
     <rect x="0" y="60" width="420" height="840" fill="#f0f0f0" stroke="#333" stroke-width="2"/>
-    
+
     <!-- Toolbar Background -->
     <rect x="0" y="60" width="420" height="50" fill="#e8e8e8" stroke="#999" stroke-width="1"/>
-    
+
     <!-- Toolbar Buttons -->
-    <text x="10" y="85" font-size="12" font-weight="bold" fill="#333" font-family="Arial">🔍 Search</text>
-    <text x="90" y="85" font-size="12" font-weight="bold" fill="#333" font-family="Arial">📁 Expand All</text>
-    <text x="200" y="85" font-size="12" font-weight="bold" fill="#333" font-family="Arial">📁 Collapse All</text>
-    <text x="320" y="85" font-size="12" font-weight="bold" fill="#333" font-family="Arial">🔄 Refresh</text>
-    
+    <text x="10" y="85" font-size="12" font-weight="bold" fill="#333" font-family="Arial">📂 Load Folder</text>
+    <text x="130" y="85" font-size="12" font-weight="bold" fill="#333" font-family="Arial">🔍 Search</text>
+    <text x="220" y="85" font-size="12" font-weight="bold" fill="#333" font-family="Arial">📁 Expand All</text>
+    <text x="330" y="85" font-size="12" font-weight="bold" fill="#333" font-family="Arial">📁 Collapse All</text>
+    <text x="350" y="85" font-size="12" font-weight="bold" fill="#333" font-family="Arial">🔄 Refresh</text>
+
     <!-- Tree View Area Background -->
     <rect x="0" y="110" width="420" height="790" fill="#f9f9f9" stroke="#ccc" stroke-width="1"/>
-    
+
     <!-- Tree View Content -->
     <text x="15" y="135" font-size="13" font-family="monospace" fill="#333">📦 root.yaml</text>
     <text x="30" y="160" font-size="13" font-family="monospace" fill="#333">├── 📄 config-a.yaml</text>
@@ -45,16 +65,16 @@
     <text x="30" y="510" font-size="13" font-family="monospace" fill="#333">└── 📄 shared-enrichment.yaml</text>
     <text x="50" y="535" font-size="13" font-family="monospace" fill="#333">    ├── 📄 dataset-3.yaml</text>
     <text x="50" y="560" font-size="13" font-family="monospace" fill="#333">    └── 📄 external-data-2.yaml</text>
-    
+
     <!-- Draggable Divider -->
     <rect x="420" y="60" width="4" height="840" fill="#999" stroke="#666" stroke-width="1" cursor="col-resize"/>
     <text x="410" y="450" font-size="14" fill="#666" font-family="Arial" text-anchor="end">⋮⋮⋮</text>
     <text x="410" y="470" font-size="12" fill="#666" font-family="Arial" text-anchor="end">DRAG</text>
     <text x="410" y="490" font-size="14" fill="#666" font-family="Arial" text-anchor="end">⋮⋮⋮</text>
-    
+
     <!-- Right Panel Background -->
     <rect x="424" y="60" width="976" height="840" fill="#ffffff" stroke="#333" stroke-width="2"/>
-    
+
     <!-- Node Header -->
     <rect x="424" y="60" width="976" height="60" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
     <text x="440" y="85" font-size="16" font-weight="bold" fill="#1976d2" font-family="Arial">
@@ -63,7 +83,7 @@
     <text x="440" y="110" font-size="13" fill="#666" font-family="Arial">
       Type: Rule Configuration
     </text>
-    
+
     <!-- Node Details Content -->
     <g id="details-content">
       <!-- File Path -->
@@ -73,7 +93,7 @@
       <text x="460" y="165" font-size="11" fill="#666" font-family="monospace">
         /path/to/rules-1.yaml
       </text>
-      
+
       <!-- Dependencies Direct -->
       <text x="440" y="195" font-size="12" font-weight="bold" fill="#333" font-family="Arial">
         📤 Dependencies (Direct):
@@ -84,7 +104,7 @@
       <text x="460" y="235" font-size="11" fill="#0066cc" font-family="Arial" cursor="pointer">
         • enrichment-1.yaml
       </text>
-      
+
       <!-- All Dependencies -->
       <text x="440" y="265" font-size="12" font-weight="bold" fill="#333" font-family="Arial">
         📤 All Dependencies (Transitive):
@@ -98,7 +118,7 @@
       <text x="460" y="325" font-size="11" fill="#0066cc" font-family="Arial" cursor="pointer">
         • external-data-1.yaml
       </text>
-      
+
       <!-- Dependents -->
       <text x="440" y="355" font-size="12" font-weight="bold" fill="#333" font-family="Arial">
         📥 Dependents (Files that use this):
@@ -109,7 +129,7 @@
       <text x="460" y="395" font-size="11" fill="#0066cc" font-family="Arial" cursor="pointer">
         • scenario-1.yaml
       </text>
-      
+
       <!-- Health Score -->
       <text x="440" y="425" font-size="12" font-weight="bold" fill="#333" font-family="Arial">
         💚 Health Score:
@@ -117,7 +137,7 @@
       <text x="460" y="445" font-size="11" fill="#198754" font-family="Arial">
         85/100 - GOOD
       </text>
-      
+
       <!-- Metadata -->
       <text x="440" y="475" font-size="12" font-weight="bold" fill="#333" font-family="Arial">
         📋 Metadata:
@@ -134,7 +154,7 @@
       <text x="460" y="555" font-size="11" fill="#666" font-family="Arial">
         Version: 1.2.3
       </text>
-      
+
       <!-- Circular Dependencies -->
       <text x="440" y="585" font-size="12" font-weight="bold" fill="#333" font-family="Arial">
         ⚠️ Circular Dependencies:
@@ -144,7 +164,7 @@
       </text>
     </g>
   </g>
-  
+
   <!-- Legend/Notes -->
   <text x="20" y="880" font-size="10" fill="#999" font-family="Arial">
     Left Panel: Resizable (30% default) | Right Panel: Resizable (70% default) | Divider: Draggable

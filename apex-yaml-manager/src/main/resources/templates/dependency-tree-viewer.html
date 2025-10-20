@@ -475,6 +475,14 @@
     <!-- Header -->
     <div class="header">
         <h1>🔗 APEX YAML Dependency Tree Viewer</h1>
+        <div class="ms-auto d-flex gap-2">
+            <button class="btn btn-warning btn-sm" type="button" onclick="openFolderModal()"><i class="fas fa-folder-open"></i> Load Folder</button>
+            <a class="btn btn-outline-light btn-sm active" th:href="@{/ui/tree-viewer}"><i class="fas fa-sitemap"></i> Dependency Tree Viewer</a>
+            <a class="btn btn-outline-light btn-sm" th:href="@{/ui/catalog}"><i class="fas fa-book"></i> Catalogue Browser</a>
+            <a class="btn btn-outline-light btn-sm" th:href="@{/ui/validation}"><i class="fas fa-check-circle"></i> Validation</a>
+            <a class="btn btn-outline-light btn-sm" th:href="@{/ui/health}"><i class="fas fa-heartbeat"></i> Health Checks</a>
+            <span id="loadedFolderBadge" class="badge bg-light text-dark align-self-center" style="display:none;">Folder:</span>
+        </div>
     </div>
 
     <!-- Main Container -->

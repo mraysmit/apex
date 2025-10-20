@@ -6,6 +6,9 @@ metadata:
   name: "Test Stage Configuration"
   description: "Minimal configuration for scenario testing"
   version: "1.0"
+  type: "rule-config"
+  author: "Test Suite"
+
 
 rules:
   # Simple validation rule
@@ -14,7 +17,7 @@ rules:
     condition: "#data['type'] != null"
     message: "Type field is present"
     severity: "INFO"
-    
+
   # OTC type check
   - id: "otc-check"
     name: "OTC Type Check"

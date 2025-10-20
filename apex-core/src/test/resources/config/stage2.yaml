@@ -7,6 +7,9 @@ metadata:
   description: "Second stage that depends on stage 1"
   version: "1.0"
 
+  type: "rule-config"
+  author: "Test Suite"
+
 rules:
   # Secondary processing
   - id: "secondary-processing"
