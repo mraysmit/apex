@@ -1,0 +1,21 @@
+﻿metadata:
+  id: 
+  type: pipeline-config
+  version: "1.0"
+  description: "Repo processing pipeline"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+pipeline:
+  id: 
+  description: "Repo processing pipeline"
+  stages:
+    - name: "validation"
+      type: "rule-execution"
+    - name: "enrichment"
+      type: "data-enrichment"
+    - name: "output"
+      type: "data-output"
+
+dependencies:
+  - "068-repo-validation.yaml"
+  - "162-repo-enrichment.yaml"

@@ -81,12 +81,19 @@ class TreeViewRenderingTest {
         driver.get(baseUrl + "/yaml-manager/ui/tree-viewer");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("treeView")));
 
-        // Use JavaScript to call the API and render the tree
+        // Wait for the JavaScript to load and function to be available
         JavascriptExecutor js = (JavascriptExecutor) driver;
-        
+        wait.until(driver -> {
+            try {
+                return (Boolean) js.executeScript("return typeof window.loadDependencyTree === 'function';");
+            } catch (Exception e) {
+                return false;
+            }
+        });
+
         // Call the loadDependencyTree function with a test file
         String testFile = new java.io.File("src/test/resources/apex-yaml-samples/scenario-registry.yaml").getAbsolutePath();
-        js.executeScript("loadDependencyTree(arguments[0]);", testFile);
+        js.executeScript("window.loadDependencyTree(arguments[0]);", testFile);
 
         // Wait for tree nodes to appear
         wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.className("tree-node")));

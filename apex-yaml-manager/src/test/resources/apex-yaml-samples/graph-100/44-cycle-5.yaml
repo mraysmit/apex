@@ -1,0 +1,18 @@
+metadata:
+  id: graph100-cycle-5
+  name: Graph100 Cycle 5
+  description: Fifth file creating cycle back to cycle-3
+  version: 0.3.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+rules:
+  - id: cycle-rule-5
+    name: Cycle Rule 5
+    condition: "true"
+    message: "C5 cycle test"
+    severity: INFO
+
+rule-configurations:
+  - "42-cycle-3.yaml"  # Creates cycle back to 42

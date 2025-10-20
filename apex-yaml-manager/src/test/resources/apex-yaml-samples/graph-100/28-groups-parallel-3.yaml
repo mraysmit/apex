@@ -1,0 +1,18 @@
+metadata:
+  id: graph100-groups-parallel-3
+  name: Graph100 Groups Parallel 3
+  description: Third parallel processing group
+  version: 0.3.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+rule-groups:
+  - id: parallel-group-3
+    name: Parallel Group 3
+    description: Third parallel processing branch
+    rule-ids: ["parallel-rule-5", "parallel-rule-6"]
+
+rule-configurations:
+  - "38-rules-parallel-1.yaml"  # Shared dependency
+  - "66-enrich-parallel-3.yaml"

@@ -1,0 +1,77 @@
+metadata:
+  id: master-scenario-registry
+  type: scenario-registry
+  version: "2.0"
+  description: "Master scenario registry for 200-file dependency testing"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+
+# File-based dependencies
+rule-configurations:
+  - 010-equity-trading.yaml
+  - 011-fixed-income.yaml
+  - 012-derivatives.yaml
+  - 013-fx-trading.yaml
+  - 014-commodities.yaml
+  - 015-crypto-trading.yaml
+  - 016-repo-trading.yaml
+  - 017-securities-lending.yaml
+  - 018-prime-brokerage.yaml
+  - 019-clearing-settlement.yaml
+  - 020-americas-trading.yaml
+  - 021-emea-trading.yaml
+  - 022-apac-trading.yaml
+  - 023-latam-trading.yaml
+  - 024-mena-trading.yaml
+  - 030-mifid-compliance.yaml
+  - 031-dodd-frank.yaml
+  - 032-basel-compliance.yaml
+  - 033-emir-compliance.yaml
+  - 034-cftc-compliance.yaml
+
+scenarios:
+  # Core Business Scenarios
+  - scenario-file: "010-equity-trading.yaml"
+    description: "Equity trading scenario with complex validation chains"
+  - scenario-file: "011-fixed-income.yaml"
+    description: "Fixed income trading with settlement workflows"
+  - scenario-file: "012-derivatives.yaml"
+    description: "Derivatives trading with risk calculations"
+  - scenario-file: "013-fx-trading.yaml"
+    description: "Foreign exchange trading scenario"
+  - scenario-file: "014-commodities.yaml"
+    description: "Commodities trading with physical settlement"
+  - scenario-file: "015-crypto-trading.yaml"
+    description: "Cryptocurrency trading scenario"
+  - scenario-file: "016-repo-trading.yaml"
+    description: "Repurchase agreement trading"
+  - scenario-file: "017-securities-lending.yaml"
+    description: "Securities lending scenario"
+  - scenario-file: "018-prime-brokerage.yaml"
+    description: "Prime brokerage services"
+  - scenario-file: "019-clearing-settlement.yaml"
+    description: "Central clearing and settlement"
+  
+  # Regional Scenarios
+  - scenario-file: "020-americas-trading.yaml"
+    description: "Americas region trading scenario"
+  - scenario-file: "021-emea-trading.yaml"
+    description: "EMEA region trading scenario"
+  - scenario-file: "022-apac-trading.yaml"
+    description: "APAC region trading scenario"
+  - scenario-file: "023-latam-trading.yaml"
+    description: "Latin America trading scenario"
+  - scenario-file: "024-mena-trading.yaml"
+    description: "Middle East and North Africa trading"
+  
+  # Regulatory Scenarios
+  - scenario-file: "030-mifid-compliance.yaml"
+    description: "MiFID II compliance scenario"
+  - scenario-file: "031-dodd-frank.yaml"
+    description: "Dodd-Frank compliance scenario"
+  - scenario-file: "032-basel-compliance.yaml"
+    description: "Basel III compliance scenario"
+  - scenario-file: "033-emir-compliance.yaml"
+    description: "EMIR compliance scenario"
+  - scenario-file: "034-cftc-compliance.yaml"
+    description: "CFTC compliance scenario"

@@ -1,0 +1,41 @@
+﻿metadata:
+  id: market-data-enrichment
+  type: enrichment
+  version: "1.0"
+  description: "Market data enrichment for equity trades"
+  created-date: "2025-10-20"
+  author: "market.data@company.com"
+
+# File-based dependencies following APEX patterns
+dependencies:
+  - "250-market-data-config.yaml"
+  - "251-reference-data-config.yaml"
+
+enrichments:
+  - id: real-time-price-enrichment
+    name: "Real-time Price Enrichment"
+    type: lookup-enrichment
+    description: "Enrich trade with real-time market price"
+    condition: "#symbol != null"
+    lookup-config:
+      lookup-key: "#symbol"
+      lookup-dataset:
+        type: external
+        data-source-ref: market-data-feed
+    field-mappings:
+      - source-field: currentPrice
+        target-field: marketPrice
+      - source-field: lastUpdate
+        target-field: priceTimestamp
+
+  - id: volume-enrichment
+    name: "Volume Enrichment"
+    type: calculation-enrichment
+    description: "Calculate volume-based metrics"
+    condition: "#quantity != null && #price != null"
+    calculation-config:
+      expression: "#quantity * #price"
+      result-field: notionalValue
+    field-mappings:
+      - source-field: notionalValue
+        target-field: tradeValue

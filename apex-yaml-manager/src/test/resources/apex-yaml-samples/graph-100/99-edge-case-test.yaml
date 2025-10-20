@@ -1,0 +1,21 @@
+metadata:
+  id: graph100-edge-case-test
+  name: Graph100 Edge Case Test
+  description: Edge case testing with unusual dependency patterns
+  version: 0.3.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+rules:
+  - id: edge-case-rule
+    name: Edge Case Rule
+    condition: "true"
+    message: "Edge case testing"
+    severity: INFO
+
+rule-configurations:
+  - "99-missing.yaml"           # Missing file (should cause error)
+  - "98-invalid.yaml"           # Invalid file
+  - "49-cycle-10.yaml"          # Self-referencing cycle
+  - "45-cycle-6.yaml"           # Independent cycle pair

@@ -1,0 +1,32 @@
+metadata:
+  id: graph100-dataset-fee-schedules
+  name: Graph100 Dataset Fee Schedules
+  description: Trading fee schedule reference data
+  version: 0.3.0
+  type: dataset
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+  source: "Fee Management System"
+
+data:
+  - id: "TRADING_FEES"
+    name: "Trading Fee Schedules"
+    values:
+      - instrument_type: "EQUITY"
+        market: "NYSE"
+        fee_type: "COMMISSION"
+        rate: 0.001
+        minimum: 1.00
+        currency: "USD"
+      - instrument_type: "EQUITY"
+        market: "LSE"
+        fee_type: "COMMISSION"
+        rate: 0.0015
+        minimum: 0.50
+        currency: "GBP"
+      - instrument_type: "BOND"
+        market: "US"
+        fee_type: "COMMISSION"
+        rate: 0.0005
+        minimum: 5.00
+        currency: "USD"

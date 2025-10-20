@@ -1,0 +1,13 @@
+﻿metadata:
+  id: repo-scenario
+  type: scenario
+  version: "1.0"
+  description: "Repurchase agreement trading"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+
+
+dependencies:
+  - "068-repo-validation.yaml"
+  - "069-repo-settlement.yaml"
+  - "162-repo-enrichment.yaml"

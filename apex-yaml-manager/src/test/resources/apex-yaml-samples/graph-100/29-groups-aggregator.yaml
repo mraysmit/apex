@@ -1,0 +1,20 @@
+metadata:
+  id: graph100-groups-aggregator
+  name: Graph100 Groups Aggregator
+  description: Aggregator group for fan-in pattern
+  version: 0.3.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+rule-groups:
+  - id: aggregator-group
+    name: Aggregator Group
+    description: Aggregates results from multiple parallel branches
+    rule-ids: ["aggregator-rule-1", "aggregator-rule-2"]
+
+rule-configurations:
+  - "37-rules-e.yaml"
+  - "38-rules-parallel-1.yaml"
+  - "39-rules-parallel-2.yaml"
+  - "67-enrich-aggregator.yaml"

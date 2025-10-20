@@ -1,0 +1,36 @@
+﻿metadata:
+  id: credit-rating-enrichment
+  type: enrichment
+  version: "1.0"
+  description: "Credit rating enrichment"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+
+# File-based dependencies following APEX patterns
+dependencies:
+  - "253-rating-data-config.yaml"
+enrichments:
+  - id: credit-rating-enrichment-enrichment-1
+    name: "Primary Enrichment"
+    type: lookup-enrichment
+    description: "Primary enrichment for Credit rating enrichment"
+    condition: "#symbol != null"
+    lookup-config:
+      lookup-key: "#symbol"
+      lookup-dataset:
+        type: external
+        data-source-ref: primary-data-source
+    field-mappings:
+      - source-field: enrichedValue1
+        target-field: enriched.field1
+  - id: credit-rating-enrichment-enrichment-2
+    name: "Secondary Enrichment"
+    type: calculation-enrichment
+    description: "Secondary enrichment for Credit rating enrichment"
+    condition: "#value != null"
+    calculation-config:
+      expression: "#value * 1.1"
+      result-field: calculatedValue
+    field-mappings:
+      - source-field: calculatedValue
+        target-field: enriched.field2

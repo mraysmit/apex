@@ -1,0 +1,29 @@
+metadata:
+  id: graph100-dataset-counterparties
+  name: Graph100 Dataset Counterparties
+  description: Counterparty reference data
+  version: 0.3.0
+  type: dataset
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+  source: "Legal Entity Database"
+
+data:
+  - id: "INSTITUTIONAL_COUNTERPARTIES"
+    name: "Institutional Counterparties"
+    values:
+      - id: "CP001"
+        name: "Goldman Sachs International"
+        lei: "W22LROWP2IHZNBB6K528"
+        jurisdiction: "UK"
+        rating: "A+"
+      - id: "CP002"
+        name: "JPMorgan Chase Bank"
+        lei: "7H6GLXDRUGQFU57RNE97"
+        jurisdiction: "US"
+        rating: "AA-"
+      - id: "CP003"
+        name: "Deutsche Bank AG"
+        lei: "7LTWFZYICNSX8D621K86"
+        jurisdiction: "DE"
+        rating: "A-"

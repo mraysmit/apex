@@ -1,0 +1,18 @@
+metadata:
+  id: graph100-cycle-7
+  name: Graph100 Cycle 7
+  description: Second part of independent cycle pair
+  version: 0.3.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+rules:
+  - id: cycle-rule-7
+    name: Cycle Rule 7
+    condition: "true"
+    message: "C7 independent cycle"
+    severity: INFO
+
+rule-configurations:
+  - "45-cycle-6.yaml"  # Creates cycle back to 45

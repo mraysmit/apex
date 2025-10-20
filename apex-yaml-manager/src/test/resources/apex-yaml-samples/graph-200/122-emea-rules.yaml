@@ -1,0 +1,36 @@
+﻿metadata:
+  id: emea-rules
+  type: rule-config
+  version: "1.0"
+  description: "EMEA specific rules"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+rule-groups:
+  - id: emea-rules-group
+    description: "EMEA specific rules group"
+    rule-ids:
+      - "emea-rules-rule-1"
+      - "emea-rules-rule-2"
+      - "emea-rules-rule-3"
+      - "emea-rules-rule-4"
+
+rules:
+  - id: emea-rules-rule-1
+    description: "Rule 1 for EMEA specific rules"
+    condition: "trade.field1 != null && trade.field1 > 0"
+    severity: "ERROR"
+  - id: emea-rules-rule-2
+    description: "Rule 2 for EMEA specific rules"
+    condition: "trade.field2 != null && trade.field2 > 0"
+    severity: "ERROR"
+  - id: emea-rules-rule-3
+    description: "Rule 3 for EMEA specific rules"
+    condition: "trade.field3 != null && trade.field3 > 0"
+    severity: "ERROR"
+  - id: emea-rules-rule-4
+    description: "Rule 4 for EMEA specific rules"
+    condition: "trade.field4 != null && trade.field4 > 0"
+    severity: "ERROR"
+
+dependencies:
+  - "121-regional-rules.yaml"

@@ -1,0 +1,20 @@
+﻿metadata:
+  id: rating-data-config
+  type: external-data-config
+  version: "1.0"
+  description: "Credit rating data configuration"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+data-sources:
+  - name: rating-data-config-datasource
+    type: "postgresql"
+    connection-string: "jdbc:postgresql://localhost:5432/apex_db"
+    username: "apex_user"
+    password: "apex_password"
+    pool-size: 10
+    timeout-ms: 5000
+  - name: rating-data-config-cache
+    type: "redis"
+    connection-string: "redis://localhost:6379"
+    ttl: 3600
+    max-connections: 20

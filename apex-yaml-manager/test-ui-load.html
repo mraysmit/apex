@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test UI Load - APEX Dependency Tree</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .success { border-color: #28a745; background-color: #d4edda; }
+        .error { border-color: #dc3545; background-color: #f8d7da; }
+        .info { border-color: #17a2b8; background-color: #d1ecf1; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .status {
+            font-weight: bold;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 APEX Dependency Tree UI Load Test</h1>
+        
+        <div class="test-section info">
+            <h3>📋 Test Overview</h3>
+            <p>This page tests whether the APEX YAML Manager UI can successfully load and display our large dependency tree dataset (graph-200) with 52 files and 3 levels of depth.</p>
+        </div>
+
+        <div class="test-section" id="apiTest">
+            <h3>🔌 Step 1: Test API Endpoint</h3>
+            <p>Testing the REST API endpoint directly...</p>
+            <button onclick="testAPI()">Test API</button>
+            <div id="apiResult"></div>
+        </div>
+
+        <div class="test-section" id="uiTest">
+            <h3>🖥️ Step 2: Test UI Loading</h3>
+            <p>Testing the UI dependency tree viewer...</p>
+            <button onclick="testUI()">Open Tree Viewer</button>
+            <button onclick="testUIWithData()">Load Tree Data</button>
+            <div id="uiResult"></div>
+        </div>
+
+        <div class="test-section" id="results">
+            <h3>📊 Test Results</h3>
+            <div id="testResults">
+                <p>Click the test buttons above to run the tests.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/yaml-manager/api';
+        const ROOT_FILE = 'C:\\Users\\mraysmit\\dev\\idea-projects\\apex-rules-engine\\apex-yaml-manager\\src\\test\\resources\\apex-yaml-samples\\graph-200\\000-master-registry.yaml';
+        
+        async function testAPI() {
+            const apiTest = document.getElementById('apiTest');
+            const apiResult = document.getElementById('apiResult');
+            
+            try {
+                apiResult.innerHTML = '<div class="status">🔄 Testing API endpoint...</div>';
+                
+                const response = await fetch(`${API_BASE}/dependencies/tree?rootFile=${encodeURIComponent(ROOT_FILE)}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    apiTest.className = 'test-section success';
+                    apiResult.innerHTML = `
+                        <div class="status">✅ API Test PASSED</div>
+                        <pre>Status: ${data.status}
+Total Files: ${data.totalFiles}
+Max Depth: ${data.maxDepth}
+Root File: ${data.rootFile}
+Tree Children: ${data.tree.childCount}</pre>
+                    `;
+                    updateResults('api', true, `API returned ${data.totalFiles} files with depth ${data.maxDepth}`);
+                } else {
+                    throw new Error(`API returned status: ${data.status}`);
+                }
+            } catch (error) {
+                apiTest.className = 'test-section error';
+                apiResult.innerHTML = `
+                    <div class="status">❌ API Test FAILED</div>
+                    <pre>Error: ${error.message}</pre>
+                `;
+                updateResults('api', false, error.message);
+            }
+        }
+        
+        function testUI() {
+            const uiTest = document.getElementById('uiTest');
+            const uiResult = document.getElementById('uiResult');
+            
+            try {
+                // Open the tree viewer in a new window
+                const treeViewerUrl = '/yaml-manager/ui/tree-viewer';
+                const newWindow = window.open(treeViewerUrl, '_blank', 'width=1200,height=800');
+                
+                if (newWindow) {
+                    uiTest.className = 'test-section success';
+                    uiResult.innerHTML = `
+                        <div class="status">✅ UI Window Opened</div>
+                        <p>Tree viewer opened in new window. Use the "Load Tree Data" button to test loading data.</p>
+                    `;
+                    updateResults('ui-open', true, 'Tree viewer window opened successfully');
+                } else {
+                    throw new Error('Failed to open tree viewer window (popup blocked?)');
+                }
+            } catch (error) {
+                uiTest.className = 'test-section error';
+                uiResult.innerHTML = `
+                    <div class="status">❌ UI Test FAILED</div>
+                    <pre>Error: ${error.message}</pre>
+                `;
+                updateResults('ui-open', false, error.message);
+            }
+        }
+        
+        function testUIWithData() {
+            const uiResult = document.getElementById('uiResult');
+            
+            // Provide instructions for manual testing
+            uiResult.innerHTML += `
+                <div class="status">📋 Manual UI Test Instructions</div>
+                <ol>
+                    <li>Open the tree viewer: <a href="/yaml-manager/ui/tree-viewer" target="_blank">Tree Viewer</a></li>
+                    <li>Open browser console (F12)</li>
+                    <li>Run this command:</li>
+                </ol>
+                <pre>window.loadDependencyTree('${ROOT_FILE}')</pre>
+                <p><strong>Expected Result:</strong> Tree should load with 52 files, 3 levels deep, showing scenarios → rule-configs → base rules</p>
+            `;
+            
+            updateResults('ui-manual', true, 'Manual test instructions provided');
+        }
+        
+        let testResults = {};
+        
+        function updateResults(testName, passed, message) {
+            testResults[testName] = { passed, message };
+            
+            const resultsDiv = document.getElementById('testResults');
+            let html = '<h4>Test Summary:</h4><ul>';
+            
+            for (const [test, result] of Object.entries(testResults)) {
+                const icon = result.passed ? '✅' : '❌';
+                html += `<li>${icon} <strong>${test}:</strong> ${result.message}</li>`;
+            }
+            
+            html += '</ul>';
+            resultsDiv.innerHTML = html;
+        }
+        
+        // Auto-run API test on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(testAPI, 1000);
+        });
+    </script>
+</body>
+</html>

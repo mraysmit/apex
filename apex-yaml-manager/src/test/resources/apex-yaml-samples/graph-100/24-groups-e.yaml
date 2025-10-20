@@ -1,0 +1,18 @@
+metadata:
+  id: graph100-groups-e
+  name: Graph100 Groups E
+  description: Rule groups E with fan-out pattern
+  version: 0.3.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+rule-groups:
+  - id: validation-group-e
+    name: Validation Group E
+    description: Extended validation rules for scenario E
+    rule-ids: ["e-rule-1", "e-rule-2", "e-rule-3"]
+
+rule-configurations:
+  - "37-rules-e.yaml"
+  - "63-enrich-validation.yaml"

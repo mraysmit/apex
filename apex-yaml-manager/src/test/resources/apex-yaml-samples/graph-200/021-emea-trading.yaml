@@ -1,0 +1,13 @@
+﻿metadata:
+  id: emea-scenario
+  type: scenario
+  version: "1.0"
+  description: "EMEA region trading"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+
+
+dependencies:
+  - "078-emea-validation.yaml"
+  - "079-emea-settlement.yaml"
+  - "167-emea-enrichment.yaml"

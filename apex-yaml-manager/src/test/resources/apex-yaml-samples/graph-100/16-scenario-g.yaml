@@ -1,0 +1,19 @@
+metadata:
+  id: graph100-scenario-g
+  name: Graph100 Scenario G
+  description: Scenario G with cross-category dependencies
+  version: 0.3.0
+  type: scenario
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+scenario:
+  id: scenario-g
+  name: Cross-Category Processing
+  description: Demonstrates dependencies across different file categories
+  data-types: ["trade", "compliance", "audit"]
+
+rule-configurations:
+  - "24-groups-e.yaml"
+  - "80-dataset-compliance.yaml"
+  - "90-pipeline-audit.yaml"

@@ -263,9 +263,63 @@ class FolderScannerUITest {
             ExpectedConditions.visibilityOfElementLocated(By.id("scanStatus"))
         );
         
-        assertTrue(scanStatus.getText().contains("Please enter") || 
+        assertTrue(scanStatus.getText().contains("Please enter") ||
                   scanStatus.getText().contains("required"),
             "Error message should be displayed for empty path");
+    }
+
+    @Test
+    @Order(8)
+    void test_browse_folder_button() {
+        driver.get(baseUrl + "/yaml-manager/ui/tree-viewer");
+
+        WebElement loadFolderBtn = wait.until(
+            ExpectedConditions.elementToBeClickable(By.id("loadFolderBtn"))
+        );
+        loadFolderBtn.click();
+
+        // Find browse button
+        WebElement browseBtn = wait.until(
+            ExpectedConditions.elementToBeClickable(By.id("browseFolderBtn"))
+        );
+
+        // Click browse button
+        browseBtn.click();
+
+        // Verify button is clickable and functional
+        assertTrue(browseBtn.isEnabled(), "Browse button should be enabled");
+
+        // Note: File dialog interaction is browser-dependent and hard to test
+        // This test verifies the button is present and clickable
+    }
+
+    @Test
+    @Order(9)
+    void test_modal_close_button() {
+        driver.get(baseUrl + "/yaml-manager/ui/tree-viewer");
+
+        WebElement loadFolderBtn = wait.until(
+            ExpectedConditions.elementToBeClickable(By.id("loadFolderBtn"))
+        );
+        loadFolderBtn.click();
+
+        // Verify modal is open
+        WebElement modal = wait.until(
+            ExpectedConditions.visibilityOfElementLocated(By.id("folderModal"))
+        );
+
+        // Find and click close button (X)
+        WebElement closeBtn = wait.until(
+            ExpectedConditions.elementToBeClickable(By.id("modalCloseBtn"))
+        );
+        closeBtn.click();
+
+        // Wait for modal to close
+        wait.until(ExpectedConditions.invisibilityOf(modal));
+
+        // Verify modal is closed
+        assertFalse(modal.getAttribute("class").contains("active"),
+            "Modal should be closed after clicking X button");
     }
 }
 

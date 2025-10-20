@@ -1,0 +1,29 @@
+metadata:
+  id: graph100-dataset-instruments
+  name: Graph100 Dataset Instruments
+  description: Financial instrument reference data
+  version: 0.3.0
+  type: dataset
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+  source: "Financial Data Provider"
+
+data:
+  - id: "EQUITY_INSTRUMENTS"
+    name: "Equity Instruments"
+    values:
+      - symbol: "AAPL"
+        name: "Apple Inc."
+        exchange: "NASDAQ"
+        currency: "USD"
+        sector: "Technology"
+      - symbol: "MSFT"
+        name: "Microsoft Corporation"
+        exchange: "NASDAQ"
+        currency: "USD"
+        sector: "Technology"
+      - symbol: "GOOGL"
+        name: "Alphabet Inc."
+        exchange: "NASDAQ"
+        currency: "USD"
+        sector: "Technology"

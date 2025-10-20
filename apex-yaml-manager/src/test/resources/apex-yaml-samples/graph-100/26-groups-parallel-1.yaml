@@ -1,0 +1,18 @@
+metadata:
+  id: graph100-groups-parallel-1
+  name: Graph100 Groups Parallel 1
+  description: First parallel processing group
+  version: 0.3.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+rule-groups:
+  - id: parallel-group-1
+    name: Parallel Group 1
+    description: First parallel processing branch
+    rule-ids: ["parallel-rule-1", "parallel-rule-2"]
+
+rule-configurations:
+  - "38-rules-parallel-1.yaml"
+  - "64-enrich-parallel-1.yaml"

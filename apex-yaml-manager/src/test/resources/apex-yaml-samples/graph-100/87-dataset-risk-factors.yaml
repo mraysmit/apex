@@ -1,0 +1,30 @@
+metadata:
+  id: graph100-dataset-risk-factors
+  name: Graph100 Dataset Risk Factors
+  description: Risk factor reference data for calculations
+  version: 0.3.0
+  type: dataset
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+  source: "Risk Management System"
+
+data:
+  - id: "MARKET_RISK_FACTORS"
+    name: "Market Risk Factors"
+    values:
+      - factor: "EQUITY_VOLATILITY"
+        asset_class: "EQUITY"
+        multiplier: 1.5
+        description: "Equity volatility risk factor"
+      - factor: "INTEREST_RATE_DELTA"
+        asset_class: "BOND"
+        multiplier: 0.8
+        description: "Interest rate sensitivity"
+      - factor: "FX_VOLATILITY"
+        asset_class: "FX"
+        multiplier: 1.2
+        description: "Foreign exchange volatility"
+      - factor: "CREDIT_SPREAD"
+        asset_class: "BOND"
+        multiplier: 2.0
+        description: "Credit spread risk"
