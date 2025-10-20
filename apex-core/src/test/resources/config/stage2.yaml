@@ -1,0 +1,23 @@
+# Stage 2 Configuration - Processing Stage
+# Depends on Stage 1 completion
+
+metadata:
+  id: "stage-2-config"
+  name: "Stage 2 - Processing"
+  description: "Second stage that depends on stage 1"
+  version: "1.0"
+
+rules:
+  # Secondary processing
+  - id: "secondary-processing"
+    name: "Secondary Processing"
+    condition: "#data['type'] == 'OTC'"
+    message: "Secondary processing completed"
+    severity: "INFO"
+
+enrichments: []
+
+error-recovery:
+  enabled: true
+  default-strategy: "CONTINUE_WITH_DEFAULT"
+

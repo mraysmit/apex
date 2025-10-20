@@ -1,0 +1,23 @@
+# Stage 1 Configuration - Validation Stage
+# Used for testing stage dependencies
+
+metadata:
+  id: "stage-1-config"
+  name: "Stage 1 - Validation"
+  description: "First stage for dependency testing"
+  version: "1.0"
+
+rules:
+  # Initial validation
+  - id: "initial-validation"
+    name: "Initial Data Validation"
+    condition: "#data['type'] != null && #data['id'] != null"
+    message: "Initial validation passed"
+    severity: "INFO"
+
+enrichments: []
+
+error-recovery:
+  enabled: true
+  default-strategy: "CONTINUE_WITH_DEFAULT"
+

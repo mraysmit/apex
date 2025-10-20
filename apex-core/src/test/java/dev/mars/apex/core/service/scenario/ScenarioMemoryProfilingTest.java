@@ -64,171 +64,243 @@ class ScenarioMemoryProfilingTest {
         @Test
         @DisplayName("Should use reasonable memory for 100 scenario executions")
         void testMemoryUsageFor100Executions() {
-            logger.info("TEST: Memory usage for 100 executions");
-            
-            // Given: Scenario with classification rule
-            scenario.setClassificationRuleCondition("#data['type'] == 'OTC'");
-            
-            ScenarioStage stage = new ScenarioStage("test-stage", "config/test.yaml", 1);
-            scenario.addProcessingStage(stage);
-            
-            // When: Track memory before and after 100 executions
-            Runtime runtime = Runtime.getRuntime();
-            System.gc(); // Force garbage collection before measurement
-            
-            long memBefore = runtime.totalMemory() - runtime.freeMemory();
-            
-            for (int i = 0; i < 100; i++) {
-                Map<String, Object> testData = new HashMap<>();
-                testData.put("type", "OTC");
-                testData.put("id", i);
-                
-                executor.executeStages(scenario, testData);
+            logger.info("========== TEST START: Memory usage for 100 executions ==========");
+
+            try {
+                // Given: Scenario with classification rule
+                logger.info("Setting up scenario for memory usage test");
+                scenario.setClassificationRuleCondition("#data['type'] == 'OTC'");
+
+                String configPath = new java.io.File("src/test/resources/config/test.yaml").getAbsolutePath();
+                logger.info("Config path: {}", configPath);
+                ScenarioStage stage = new ScenarioStage("test-stage", configPath, 1);
+                scenario.addProcessingStage(stage);
+                logger.info("Scenario setup complete");
+
+                // When: Track memory before and after 100 executions
+                logger.info("Starting memory profiling: forcing garbage collection...");
+                Runtime runtime = Runtime.getRuntime();
+                System.gc(); // Force garbage collection before measurement
+
+                long memBefore = runtime.totalMemory() - runtime.freeMemory();
+                logger.info("Memory before execution: {}MB", String.format("%.2f", memBefore / 1_000_000.0));
+
+                logger.info("Executing 100 scenarios...");
+                for (int i = 0; i < 100; i++) {
+                    Map<String, Object> testData = new HashMap<>();
+                    testData.put("type", "OTC");
+                    testData.put("id", i);
+
+                    executor.executeStages(scenario, testData);
+
+                    if ((i + 1) % 25 == 0) {
+                        logger.debug("Progress: {}/100 executions completed", i + 1);
+                    }
+                }
+
+                logger.info("All executions completed. Forcing garbage collection...");
+                System.gc(); // Force garbage collection after execution
+                long memAfter = runtime.totalMemory() - runtime.freeMemory();
+                long memIncrease = memAfter - memBefore;
+
+                logger.info("Memory after execution: {}MB", String.format("%.2f", memAfter / 1_000_000.0));
+                logger.info("Memory increase: {}MB", String.format("%.2f", memIncrease / 1_000_000.0));
+
+                // Then: Verify memory increase is reasonable (< 100MB)
+                assertTrue(memIncrease < 100_000_000,
+                    "Memory increase should be < 100MB, was: " + (memIncrease / 1_000_000) + "MB");
+
+                logger.info("✓ Memory usage reasonable: {}MB increase for 100 executions",
+                    String.format("%.2f", memIncrease / 1_000_000.0));
+                logger.info("========== TEST PASSED: Memory usage for 100 executions ==========");
+            } catch (Exception e) {
+                logger.error("========== TEST FAILED: Memory usage for 100 executions ==========", e);
+                throw e;
             }
-            
-            System.gc(); // Force garbage collection after execution
-            long memAfter = runtime.totalMemory() - runtime.freeMemory();
-            long memIncrease = memAfter - memBefore;
-            
-            // Then: Verify memory increase is reasonable (< 100MB)
-            assertTrue(memIncrease < 100_000_000,
-                "Memory increase should be < 100MB, was: " + (memIncrease / 1_000_000) + "MB");
-            
-            logger.info("✓ Memory usage reasonable: {}MB increase for 100 executions",
-                String.format("%.2f", memIncrease / 1_000_000.0));
         }
         
         @Test
         @DisplayName("Should not leak memory during repeated executions")
         void testMemoryLeakDetection() {
-            logger.info("TEST: Memory leak detection");
-            
-            // Given: Scenario with classification rule
-            scenario.setClassificationRuleCondition("#data['type'] == 'OTC'");
-            
-            ScenarioStage stage = new ScenarioStage("test-stage", "config/test.yaml", 1);
-            scenario.addProcessingStage(stage);
-            
-            // When: Execute multiple times and track memory growth
-            Runtime runtime = Runtime.getRuntime();
-            
-            long[] memorySnapshots = new long[5];
-            int executionsPerSnapshot = 20;
-            
-            for (int snapshot = 0; snapshot < 5; snapshot++) {
-                System.gc();
-                memorySnapshots[snapshot] = runtime.totalMemory() - runtime.freeMemory();
-                
-                for (int i = 0; i < executionsPerSnapshot; i++) {
-                    Map<String, Object> testData = new HashMap<>();
-                    testData.put("type", "OTC");
-                    testData.put("id", snapshot * executionsPerSnapshot + i);
-                    
-                    executor.executeStages(scenario, testData);
+            logger.info("========== TEST START: Memory leak detection ==========");
+
+            try {
+                // Given: Scenario with classification rule
+                logger.info("Setting up scenario for memory leak detection test");
+                scenario.setClassificationRuleCondition("#data['type'] == 'OTC'");
+
+                String configPath = new java.io.File("src/test/resources/config/test.yaml").getAbsolutePath();
+                logger.info("Config path: {}", configPath);
+                ScenarioStage stage = new ScenarioStage("test-stage", configPath, 1);
+                scenario.addProcessingStage(stage);
+                logger.info("Scenario setup complete");
+
+                // When: Execute multiple times and track memory growth
+                logger.info("Starting memory leak detection with 5 snapshots of 20 executions each...");
+                Runtime runtime = Runtime.getRuntime();
+
+                long[] memorySnapshots = new long[5];
+                int executionsPerSnapshot = 20;
+
+                for (int snapshot = 0; snapshot < 5; snapshot++) {
+                    System.gc();
+                    memorySnapshots[snapshot] = runtime.totalMemory() - runtime.freeMemory();
+                    logger.info("Snapshot {}: {}MB", snapshot, String.format("%.2f", memorySnapshots[snapshot] / 1_000_000.0));
+
+                    for (int i = 0; i < executionsPerSnapshot; i++) {
+                        Map<String, Object> testData = new HashMap<>();
+                        testData.put("type", "OTC");
+                        testData.put("id", snapshot * executionsPerSnapshot + i);
+
+                        executor.executeStages(scenario, testData);
+                    }
+                    logger.debug("Snapshot {} completed {} executions", snapshot, executionsPerSnapshot);
                 }
+
+                // Then: Verify memory growth is not linear (indicates no leak)
+                long firstIncrease = memorySnapshots[1] - memorySnapshots[0];
+                long lastIncrease = memorySnapshots[4] - memorySnapshots[3];
+
+                logger.info("Memory growth analysis: first increase={}MB, last increase={}MB",
+                    String.format("%.2f", firstIncrease / 1_000_000.0),
+                    String.format("%.2f", lastIncrease / 1_000_000.0));
+
+                // Last increase should not be significantly larger than first
+                // (allowing for some variance)
+                assertTrue(lastIncrease < firstIncrease * 2,
+                    "Memory growth should stabilize, not increase linearly. " +
+                    "First: " + (firstIncrease / 1_000_000) + "MB, Last: " + (lastIncrease / 1_000_000) + "MB");
+
+                logger.info("✓ No memory leak detected: growth stabilized after initial allocations");
+                logger.info("========== TEST PASSED: Memory leak detection ==========");
+            } catch (Exception e) {
+                logger.error("========== TEST FAILED: Memory leak detection ==========", e);
+                throw e;
             }
-            
-            // Then: Verify memory growth is not linear (indicates no leak)
-            long firstIncrease = memorySnapshots[1] - memorySnapshots[0];
-            long lastIncrease = memorySnapshots[4] - memorySnapshots[3];
-            
-            // Last increase should not be significantly larger than first
-            // (allowing for some variance)
-            assertTrue(lastIncrease < firstIncrease * 2,
-                "Memory growth should stabilize, not increase linearly. " +
-                "First: " + (firstIncrease / 1_000_000) + "MB, Last: " + (lastIncrease / 1_000_000) + "MB");
-            
-            logger.info("✓ No memory leak detected: growth stabilized after initial allocations");
         }
         
         @Test
         @DisplayName("Should handle large dataset processing without OOM")
         void testLargeDatasetHandling() {
-            logger.info("TEST: Large dataset handling");
-            
-            // Given: Scenario with classification rule
-            scenario.setClassificationRuleCondition("#data['type'] == 'OTC'");
-            
-            ScenarioStage stage = new ScenarioStage("test-stage", "config/test.yaml", 1);
-            scenario.addProcessingStage(stage);
-            
-            // When: Execute with large dataset
-            Map<String, Object> largeData = new HashMap<>();
-            largeData.put("type", "OTC");
-            
-            // Add 10,000 fields to simulate large dataset
-            for (int i = 0; i < 10000; i++) {
-                largeData.put("field_" + i, "value_" + i);
-            }
-            
-            Runtime runtime = Runtime.getRuntime();
-            long memBefore = runtime.totalMemory() - runtime.freeMemory();
-            
-            // Then: Verify large dataset is processed without OOM
+            logger.info("========== TEST START: Large dataset handling ==========");
+
             try {
+                // Given: Scenario with classification rule
+                logger.info("Setting up scenario for large dataset handling test");
+                scenario.setClassificationRuleCondition("#data['type'] == 'OTC'");
+
+                String configPath = new java.io.File("src/test/resources/config/test.yaml").getAbsolutePath();
+                logger.info("Config path: {}", configPath);
+                ScenarioStage stage = new ScenarioStage("test-stage", configPath, 1);
+                scenario.addProcessingStage(stage);
+                logger.info("Scenario setup complete");
+
+                // When: Execute with large dataset
+                logger.info("Creating large dataset with 10,000 fields...");
+                Map<String, Object> largeData = new HashMap<>();
+                largeData.put("type", "OTC");
+
+                // Add 10,000 fields to simulate large dataset
+                for (int i = 0; i < 10000; i++) {
+                    largeData.put("field_" + i, "value_" + i);
+                }
+                logger.info("Large dataset created with 10,000 fields");
+
+                Runtime runtime = Runtime.getRuntime();
+                long memBefore = runtime.totalMemory() - runtime.freeMemory();
+                logger.info("Memory before execution: {}MB", String.format("%.2f", memBefore / 1_000_000.0));
+
+                // Then: Verify large dataset is processed without OOM
+                logger.info("Executing scenario with large dataset...");
                 ScenarioExecutionResult result = executor.executeStages(scenario, largeData);
                 assertNotNull(result, "Should process large dataset successfully");
-                
+                logger.info("Large dataset execution completed successfully");
+
                 long memAfter = runtime.totalMemory() - runtime.freeMemory();
                 long memUsed = memAfter - memBefore;
-                
+
+                logger.info("Memory after execution: {}MB", String.format("%.2f", memAfter / 1_000_000.0));
                 logger.info("✓ Large dataset processed: {}MB used for 10,000 fields",
                     String.format("%.2f", memUsed / 1_000_000.0));
-                
+                logger.info("========== TEST PASSED: Large dataset handling ==========");
+
             } catch (OutOfMemoryError e) {
+                logger.error("========== TEST FAILED: Large dataset handling - OutOfMemoryError ==========", e);
                 fail("Large dataset processing caused OutOfMemoryError: " + e.getMessage());
+            } catch (Exception e) {
+                logger.error("========== TEST FAILED: Large dataset handling ==========", e);
+                throw e;
             }
         }
         
         @Test
         @DisplayName("Should maintain stable memory after garbage collection")
         void testMemoryStabilityAfterGc() {
-            logger.info("TEST: Memory stability after garbage collection");
-            
-            // Given: Scenario with classification rule
-            scenario.setClassificationRuleCondition("#data['type'] == 'OTC'");
-            
-            ScenarioStage stage = new ScenarioStage("test-stage", "config/test.yaml", 1);
-            scenario.addProcessingStage(stage);
-            
-            // When: Execute, collect garbage, and measure memory
-            Runtime runtime = Runtime.getRuntime();
-            
-            // Execute 50 scenarios
-            for (int i = 0; i < 50; i++) {
-                Map<String, Object> testData = new HashMap<>();
-                testData.put("type", "OTC");
-                testData.put("id", i);
-                
-                executor.executeStages(scenario, testData);
+            logger.info("========== TEST START: Memory stability after garbage collection ==========");
+
+            try {
+                // Given: Scenario with classification rule
+                logger.info("Setting up scenario for memory stability test");
+                scenario.setClassificationRuleCondition("#data['type'] == 'OTC'");
+
+                String configPath = new java.io.File("src/test/resources/config/test.yaml").getAbsolutePath();
+                logger.info("Config path: {}", configPath);
+                ScenarioStage stage = new ScenarioStage("test-stage", configPath, 1);
+                scenario.addProcessingStage(stage);
+                logger.info("Scenario setup complete");
+
+                // When: Execute, collect garbage, and measure memory
+                Runtime runtime = Runtime.getRuntime();
+
+                // Execute 50 scenarios
+                logger.info("Executing first batch of 50 scenarios...");
+                for (int i = 0; i < 50; i++) {
+                    Map<String, Object> testData = new HashMap<>();
+                    testData.put("type", "OTC");
+                    testData.put("id", i);
+
+                    executor.executeStages(scenario, testData);
+                }
+                logger.info("First batch completed");
+
+                // Force garbage collection
+                logger.info("Forcing garbage collection after first batch...");
+                System.gc();
+                long memAfterGc1 = runtime.totalMemory() - runtime.freeMemory();
+                logger.info("Memory after first GC: {}MB", String.format("%.2f", memAfterGc1 / 1_000_000.0));
+
+                // Execute more scenarios
+                logger.info("Executing second batch of 50 scenarios...");
+                for (int i = 50; i < 100; i++) {
+                    Map<String, Object> testData = new HashMap<>();
+                    testData.put("type", "OTC");
+                    testData.put("id", i);
+
+                    executor.executeStages(scenario, testData);
+                }
+                logger.info("Second batch completed");
+
+                // Force garbage collection again
+                logger.info("Forcing garbage collection after second batch...");
+                System.gc();
+                long memAfterGc2 = runtime.totalMemory() - runtime.freeMemory();
+                logger.info("Memory after second GC: {}MB", String.format("%.2f", memAfterGc2 / 1_000_000.0));
+
+                // Then: Verify memory is stable after GC
+                long memDifference = Math.abs(memAfterGc2 - memAfterGc1);
+                logger.info("Memory difference between GC collections: {}MB", String.format("%.2f", memDifference / 1_000_000.0));
+
+                // Allow up to 10MB difference (reasonable variance)
+                assertTrue(memDifference < 10_000_000,
+                    "Memory should be stable after GC. Difference: " + (memDifference / 1_000_000) + "MB");
+
+                logger.info("✓ Memory stable after GC: {}MB difference between collections",
+                    String.format("%.2f", memDifference / 1_000_000.0));
+                logger.info("========== TEST PASSED: Memory stability after garbage collection ==========");
+            } catch (Exception e) {
+                logger.error("========== TEST FAILED: Memory stability after garbage collection ==========", e);
+                throw e;
             }
-            
-            // Force garbage collection
-            System.gc();
-            long memAfterGc1 = runtime.totalMemory() - runtime.freeMemory();
-            
-            // Execute more scenarios
-            for (int i = 50; i < 100; i++) {
-                Map<String, Object> testData = new HashMap<>();
-                testData.put("type", "OTC");
-                testData.put("id", i);
-                
-                executor.executeStages(scenario, testData);
-            }
-            
-            // Force garbage collection again
-            System.gc();
-            long memAfterGc2 = runtime.totalMemory() - runtime.freeMemory();
-            
-            // Then: Verify memory is stable after GC
-            long memDifference = Math.abs(memAfterGc2 - memAfterGc1);
-            
-            // Allow up to 10MB difference (reasonable variance)
-            assertTrue(memDifference < 10_000_000,
-                "Memory should be stable after GC. Difference: " + (memDifference / 1_000_000) + "MB");
-            
-            logger.info("✓ Memory stable after GC: {}MB difference between collections",
-                String.format("%.2f", memDifference / 1_000_000.0));
         }
     }
 }
