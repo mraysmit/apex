@@ -1,0 +1,16 @@
+metadata:
+  id: graph100-chain-7
+  name: Graph100 Chain 7
+  description: Chain depth 7 terminus
+  version: 0.2.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+rules:
+  - id: final-check-1
+    name: Final Check 1
+    condition: "true"
+    message: "Final check ok"
+    severity: INFO
+

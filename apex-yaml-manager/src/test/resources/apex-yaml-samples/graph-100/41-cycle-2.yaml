@@ -1,0 +1,12 @@
+metadata:
+  id: graph100-cycle-2
+  name: Graph100 Cycle 2
+  description: Second file in a 2-node cycle back to first
+  version: 0.2.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+rule-configurations:
+  - 40-cycle-1.yaml
+

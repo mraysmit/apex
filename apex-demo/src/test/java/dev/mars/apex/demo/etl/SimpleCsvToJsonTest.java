@@ -6,6 +6,7 @@ import dev.mars.apex.core.engine.pipeline.DataPipelineEngine;
 import dev.mars.apex.core.engine.pipeline.YamlPipelineExecutionResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -50,6 +51,20 @@ class SimpleCsvToJsonTest extends DemoTestBase {
         }
 
         logger.info("✓ Simple CSV to JSON Test setup completed");
+    }
+
+    @AfterEach
+    public void tearDown() {
+        // Close pipeline engine if it was created
+        if (pipelineEngine != null) {
+            try {
+                pipelineEngine.shutdown();
+                logger.info("Pipeline engine shut down successfully");
+            } catch (Exception e) {
+                logger.warn("Error shutting down pipeline engine", e);
+            }
+        }
+        super.tearDown();
     }
 
     @Test

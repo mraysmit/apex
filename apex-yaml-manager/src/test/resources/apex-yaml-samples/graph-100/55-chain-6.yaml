@@ -1,0 +1,12 @@
+metadata:
+  id: graph100-chain-6
+  name: Graph100 Chain 6
+  description: Chain depth 6
+  version: 0.2.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+rule-configurations:
+  - 56-chain-7.yaml
+

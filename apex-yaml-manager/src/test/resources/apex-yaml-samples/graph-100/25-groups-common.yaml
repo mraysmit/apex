@@ -1,0 +1,23 @@
+metadata:
+  id: graph100-groups-common
+  name: Graph100 Groups Common
+  description: Common checks referenced by multiple groups
+  version: 0.2.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+rule-configurations:
+  - 35-rules-common.yaml
+
+rule-groups:
+  - id: common-checks
+    name: Common Checks
+    operator: AND
+    stop-on-first-failure: false
+    priority: 5
+    rule-ids:
+      - common-1
+      - common-2
+      - common-3
+

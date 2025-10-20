@@ -1,6 +1,10 @@
 metadata:
+  id: "customer-rules"
   name: "Customer Rules"
   version: "1.0.0"
+  description: "Customer validation rules"
+  type: "rule-config"
+  author: "APEX Rules Engine"
 
 rules:
   - id: "age-check"

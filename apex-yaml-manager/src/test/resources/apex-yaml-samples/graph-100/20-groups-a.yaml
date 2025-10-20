@@ -1,0 +1,30 @@
+metadata:
+  id: graph100-groups-a
+  name: Graph100 Groups A
+  description: Rule groups A referencing rules A
+  version: 0.1.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+# File dependencies (expanded)
+rule-configurations:
+  - 30-rules-a.yaml
+  - 25-groups-common.yaml
+  - 34-rules-e.yaml
+  - 50-chain-1.yaml
+
+enrichment-refs:
+  - 60-enrich-a.yaml
+  - 62-enrich-common.yaml
+
+rule-groups:
+  - id: a-basic
+    name: A Basic Group
+    operator: AND
+    stop-on-first-failure: true
+    priority: 10
+    rule-ids:
+      - a-rule-1
+      - a-rule-2
+

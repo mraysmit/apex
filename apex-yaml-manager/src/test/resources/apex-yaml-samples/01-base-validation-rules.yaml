@@ -1,0 +1,46 @@
+metadata:
+  id: base-validation-rules
+  name: Base Validation Rules
+  description: Foundational validation rules for trade processing
+  version: 1.0.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-01-15
+  tags: [validation, base-rules, reusable]
+
+rules:
+  - id: trade-amount-validation
+    name: Trade Amount Validation
+    condition: "#tradeAmount != null && #tradeAmount > 0"
+    message: "Trade amount must be positive"
+    severity: ERROR
+    priority: 1
+
+  - id: counterparty-validation
+    name: Counterparty Validation
+    condition: "#counterparty != null && #counterparty.trim().length() > 0"
+    message: "Valid counterparty required"
+    severity: ERROR
+    priority: 2
+
+  - id: settlement-date-validation
+    name: Settlement Date Validation
+    condition: "#settlementDate != null && #settlementDate.after(new java.util.Date())"
+    message: "Settlement date must be in the future"
+    severity: WARNING
+    priority: 3
+
+  - id: currency-validation
+    name: Currency Code Validation
+    condition: "#currency != null && (#currency == 'USD' || #currency == 'EUR' || #currency == 'GBP')"
+    message: "Currency must be USD, EUR, or GBP"
+    severity: ERROR
+    priority: 2
+
+  - id: trade-type-validation
+    name: Trade Type Validation
+    condition: "#tradeType != null && (#tradeType == 'SPOT' || #tradeType == 'FORWARD' || #tradeType == 'SWAP')"
+    message: "Valid trade type required"
+    severity: ERROR
+    priority: 1
+

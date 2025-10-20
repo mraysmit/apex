@@ -1,0 +1,28 @@
+metadata:
+  id: risk-rules
+  name: Risk Rules
+  description: Rules for risk assessment
+  version: 1.0.0
+
+rule-groups:
+  - id: market-risk
+    name: Market Risk Assessment
+    description: Assesses market risk
+    rules:
+      - market-risk-rule-1
+      - market-risk-rule-2
+
+  - id: counterparty-risk
+    name: Counterparty Risk Assessment
+    description: Assesses counterparty risk
+    rules:
+      - counterparty-risk-rule-1
+      - counterparty-risk-rule-2
+
+enrichment-refs:
+  - risk-enrichment
+
+# This creates a circular reference: risk-rules -> compliance-rules -> risk-rules
+rule-configurations:
+  - compliance-rules
+

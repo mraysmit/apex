@@ -46,7 +46,7 @@ public class ApiVersionController {
     /**
      * Get current API version information.
      */
-    @GetMapping("/version")
+    @GetMapping(value = "/version", produces = {org.springframework.http.MediaType.APPLICATION_JSON_VALUE, "application/vnd.apex.v1+json"})
     @Operation(
         summary = "Get API version information",
         description = "Returns information about the current API version, supported versions, and deprecation status."
@@ -78,7 +78,7 @@ public class ApiVersionController {
     /**
      * Get version compatibility matrix.
      */
-    @GetMapping("/version/compatibility")
+    @GetMapping(value = "/version/compatibility", produces = {org.springframework.http.MediaType.APPLICATION_JSON_VALUE, "application/vnd.apex.v1+json"})
     @Operation(
         summary = "Get version compatibility information",
         description = "Returns compatibility information between different API versions and client requirements."
@@ -124,7 +124,7 @@ public class ApiVersionController {
     /**
      * Get deprecation information.
      */
-    @GetMapping("/version/deprecation")
+    @GetMapping(value = "/version/deprecation", produces = {org.springframework.http.MediaType.APPLICATION_JSON_VALUE, "application/vnd.apex.v1+json"})
     @Operation(
         summary = "Get deprecation information",
         description = "Returns information about deprecated API versions and migration timelines."
@@ -163,7 +163,7 @@ public class ApiVersionController {
     /**
      * Health check with version information.
      */
-    @GetMapping("/version/health")
+    @GetMapping(value = "/version/health", produces = {org.springframework.http.MediaType.APPLICATION_JSON_VALUE, "application/vnd.apex.v1+json"})
     @Operation(
         summary = "Version-aware health check",
         description = "Returns health status with version-specific information."

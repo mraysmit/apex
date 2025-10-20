@@ -1,0 +1,31 @@
+metadata:
+  id: graph100-scenario-a
+  name: Graph100 Scenario A
+  description: Scenario A referencing groups A
+  version: 0.1.0
+  type: scenario
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+rule-configurations:
+  - 20-groups-a.yaml
+  - 40-cycle-1.yaml
+
+config-files:
+  - 70-config-db.yaml
+
+scenario:
+  scenario-id: scenario-a
+  description: Seed scenario A
+
+  classification-rule:
+    condition: "#type == 'A'"
+    description: Route type A
+
+  processing-stages:
+    - stage-name: validation
+      description: Validate using groups A
+      config-file: 20-groups-a.yaml
+      execution-order: 1
+      failure-policy: terminate
+

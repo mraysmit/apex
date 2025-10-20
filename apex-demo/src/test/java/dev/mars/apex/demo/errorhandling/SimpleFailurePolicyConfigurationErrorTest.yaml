@@ -16,7 +16,7 @@ metadata:
   description: "Test scenario registry for configuration error handling with continue-with-warnings policy"
   type: "scenario-registry"
 
-scenario-registry:
+scenarios:
   - scenario-id: "config-error-continue-test"
     config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyConfigurationErrorTest-scenario.yaml"
 

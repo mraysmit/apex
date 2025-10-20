@@ -1,0 +1,30 @@
+metadata:
+  id: graph100-scenario-b
+  name: Graph100 Scenario B
+  description: Scenario B referencing groups B
+  version: 0.1.0
+  type: scenario
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+rule-configurations:
+  - 21-groups-b.yaml
+
+config-files:
+  - 71-config-cache.yaml
+
+scenario:
+  scenario-id: scenario-b
+  description: Seed scenario B
+
+  classification-rule:
+    condition: "#type == 'B'"
+    description: Route type B
+
+  processing-stages:
+    - stage-name: validation
+      description: Validate using groups B
+      config-file: 21-groups-b.yaml
+      execution-order: 1
+      failure-policy: terminate
+

@@ -1,0 +1,27 @@
+metadata:
+  id: "concurrent-access-test-scenario"
+  name: "Concurrent Access Test Scenario"
+  version: "1.0.0"
+  description: "Scenario for testing concurrent execution"
+  type: "scenario"
+  author: "APEX Test Suite"
+
+scenario:
+  scenario-id: "concurrent-test-scenario"
+  name: "Concurrent Test Scenario"
+  description: "Tests concurrent scenario execution with multiple threads"
+  
+  classification-rule:
+    condition: "#data['type'] == 'OTC'"
+    description: "Classify OTC trades"
+  
+  processing-stages:
+    - stage-name: "validation"
+      config-file: "src/test/java/dev/mars/apex/core/service/scenario/ScenarioConcurrentAccessTest-rules.yaml"
+      execution-order: 1
+      failure-policy: "continue-with-warnings"
+      required: true
+      stage-metadata:
+        description: "Validate and enrich trade data"
+        sla-ms: 5000
+

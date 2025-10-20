@@ -1,0 +1,26 @@
+metadata:
+  id: graph100-groups-c
+  name: Graph100 Groups C
+  description: Rule groups C referencing rules C and common
+  version: 0.2.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+rule-configurations:
+  - 32-rules-c.yaml
+  - 25-groups-common.yaml
+
+enrichment-refs:
+  - 62-enrich-common.yaml
+
+rule-groups:
+  - id: c-basic
+    name: C Basic Group
+    operator: AND
+    stop-on-first-failure: true
+    priority: 15
+    rule-ids:
+      - c-rule-1
+      - c-rule-2
+

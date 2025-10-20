@@ -1,0 +1,19 @@
+metadata:
+  id: compliance-enrichment
+  name: Compliance Enrichment
+  description: Enriches trade with compliance information
+  version: 1.0.0
+
+enrichments:
+  - id: regulatory-status-enrichment
+    name: Regulatory Status Enrichment
+    description: Enriches with regulatory status
+    source-config: regulatory-lookup.yaml
+    lookup-config: regulatory-dataset.yaml
+
+  - id: sanctions-enrichment
+    name: Sanctions Enrichment
+    description: Checks against sanctions lists
+    source-config: sanctions-lookup.yaml
+    lookup-config: sanctions-dataset.yaml
+

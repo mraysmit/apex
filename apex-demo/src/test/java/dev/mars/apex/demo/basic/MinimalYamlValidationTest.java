@@ -22,6 +22,7 @@ import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

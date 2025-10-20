@@ -25,6 +25,7 @@ import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -164,7 +165,7 @@ public class SeverityNegativeTest {
         RuleResult result = engine.executeRule(rule, testData);
         assertNotNull(result, "Rule result should not be null");
         assertFalse(result.isTriggered(), "Never triggers rule should not trigger");
-        assertEquals("INFO", result.getSeverity(), "Never triggers rule gets default INFO severity when not triggered");
+        assertEquals("ERROR", result.getSeverity(), "Never triggers rule preserves its ERROR severity when not triggered");
         
         logger.info("✅ Never triggering rule test passed - rule correctly did not trigger");
     }

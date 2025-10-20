@@ -1,0 +1,16 @@
+metadata:
+  id: graph100-rules-f
+  name: Graph100 Rules F
+  description: Additional rules F
+  version: 0.1.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+rules:
+  - id: f-rule-1
+    name: F Rule 1
+    condition: "true"
+    message: "F1 ok"
+    severity: INFO
+

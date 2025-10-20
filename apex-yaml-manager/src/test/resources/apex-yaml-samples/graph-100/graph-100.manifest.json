@@ -1,0 +1,12 @@
+{
+  "name": "graph-100",
+  "status": "increment-2",
+  "expected": {
+    "minFiles": 30,
+    "minDepth": 7,
+    "hasCycles": true,
+    "hasMissingReferences": true
+  },
+  "notes": "Increment 2: added enrichments (60/61/62), configs (70/71), extra rules (34/36), wired into scenarios/groups; retains 2-node cycle, 7-deep chain, and one missing reference."
+}
+

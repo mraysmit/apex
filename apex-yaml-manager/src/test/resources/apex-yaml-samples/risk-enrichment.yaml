@@ -1,0 +1,19 @@
+metadata:
+  id: risk-enrichment
+  name: Risk Enrichment
+  description: Enriches trade with risk information
+  version: 1.0.0
+
+enrichments:
+  - id: market-data-enrichment
+    name: Market Data Enrichment
+    description: Enriches with market data
+    source-config: market-data-lookup.yaml
+    lookup-config: market-data-dataset.yaml
+
+  - id: volatility-enrichment
+    name: Volatility Enrichment
+    description: Enriches with volatility data
+    source-config: volatility-lookup.yaml
+    lookup-config: volatility-dataset.yaml
+

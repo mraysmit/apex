@@ -1,0 +1,20 @@
+metadata:
+  id: graph100-enrich-common
+  name: Graph100 Enrichment Common
+  description: Common enrichment referenced by multiple groups
+  version: 0.1.0
+  type: enrichment
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+enrichment:
+  id: enrich-common
+  steps:
+    - id: set-common
+      description: set common field
+      when: "true"
+      action: set
+      params:
+        field: enrichedCommon
+        value: "COMMON"
+

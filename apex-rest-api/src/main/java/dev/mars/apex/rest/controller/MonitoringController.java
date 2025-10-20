@@ -56,7 +56,7 @@ public class MonitoringController {
     /**
      * Health check endpoint.
      */
-    @GetMapping("/health")
+    @GetMapping(value = "/health", produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
     @Operation(
         summary = "Health check",
         description = "Returns the health status of the Rules Engine API service."
@@ -116,7 +116,7 @@ public class MonitoringController {
     /**
      * System statistics endpoint.
      */
-    @GetMapping("/stats")
+    @GetMapping(value = "/stats", produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
     @Operation(
         summary = "Get system statistics",
         description = "Returns detailed system statistics including memory usage, performance metrics, and rule engine information."
@@ -160,7 +160,7 @@ public class MonitoringController {
     /**
      * Performance metrics endpoint.
      */
-    @GetMapping("/performance")
+    @GetMapping(value = "/performance", produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
     @Operation(
         summary = "Get performance metrics",
         description = "Returns performance metrics for the Rules Engine including evaluation times and throughput."
@@ -205,7 +205,7 @@ public class MonitoringController {
     /**
      * Ready check endpoint for Kubernetes readiness probes.
      */
-    @GetMapping("/ready")
+    @GetMapping(value = "/ready", produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
     @Operation(
         summary = "Readiness check",
         description = "Returns whether the service is ready to accept requests."

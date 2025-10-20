@@ -1,0 +1,45 @@
+metadata:
+  id: graph100-registry
+  name: Graph-100 Scenario Registry (Seed)
+  description: Registry for graph-100 dataset (initial seed)
+  version: 0.1.0
+  type: scenario-registry
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+# File-based dependencies (expanded)
+rule-configurations:
+  - 10-scenario-a.yaml
+  - 11-scenario-b.yaml
+  - 12-scenario-c.yaml
+  - 13-scenario-d.yaml
+
+scenarios:
+  - id: scenario-a
+    name: Scenario A
+    description: Seed scenario A referencing groups A
+    config-file: 10-scenario-a.yaml
+    business-domain: Demo
+    owner: owners+a@company.com
+
+  - id: scenario-b
+    name: Scenario B
+    description: Seed scenario B referencing groups B
+    config-file: 11-scenario-b.yaml
+    business-domain: Demo
+    owner: owners+b@company.com
+
+  - id: scenario-c
+    name: Scenario C
+    description: Expanded scenario C referencing groups C
+    config-file: 12-scenario-c.yaml
+    business-domain: Demo
+    owner: owners+c@company.com
+
+  - id: scenario-d
+    name: Scenario D
+    description: Expanded scenario D referencing groups D
+    config-file: 13-scenario-d.yaml
+    business-domain: Demo
+    owner: owners+d@company.com
+

@@ -1,0 +1,73 @@
+metadata:
+  id: enrichment-service-requirement-test
+  name: Enrichment Service Requirement Test
+  version: 1.0.0
+  type: configuration
+  description: Test configuration with enrichments to verify EnrichmentService requirement
+  tags:
+    - enrichment
+    - service-requirement
+    - fatal-error
+
+enrichments:
+  - id: customer-lookup
+    name: Customer Lookup Enrichment
+    type: lookup-enrichment
+    condition: "#data.customerId != null"
+    lookup-config:
+      lookup-key: "#data.customerId"
+      lookup-dataset:
+        type: inline
+        key-field: customerId
+        data:
+          - customerId: "CUST001"
+            customer_name: "Acme Corporation"
+          - customerId: "CUST002"
+            customer_name: "Global Industries"
+          - customerId: "CUST003"
+            customer_name: "Tech Solutions Inc"
+    field-mappings:
+      - source-field: "customer_name"
+        target-field: "customer_name"
+        required: true
+
+  - id: transaction-category
+    name: Transaction Category Enrichment
+    type: lookup-enrichment
+    condition: "#data.transactionId != null"
+    lookup-config:
+      lookup-key: "#data.transactionId"
+      lookup-dataset:
+        type: inline
+        key-field: transactionId
+        data:
+          - transactionId: "TXN001"
+            transaction_category: "Payment"
+          - transactionId: "TXN002"
+            transaction_category: "Refund"
+          - transactionId: "TXN003"
+            transaction_category: "Transfer"
+    field-mappings:
+      - source-field: "transaction_category"
+        target-field: "transaction_category"
+        required: true
+
+rules:
+  - id: validate-customer-name
+    name: Validate Customer Name
+    condition: "#data.customer_name != null && #data.customer_name != ''"
+    message: "Customer name must be enriched"
+    severity: error
+
+  - id: validate-transaction-category
+    name: Validate Transaction Category
+    condition: "#data.transaction_category != null && #data.transaction_category != ''"
+    message: "Transaction category must be enriched"
+    severity: error
+
+  - id: validate-amount
+    name: Validate Amount
+    condition: "#data.amount > 0"
+    message: "Amount must be positive"
+    severity: warning
+

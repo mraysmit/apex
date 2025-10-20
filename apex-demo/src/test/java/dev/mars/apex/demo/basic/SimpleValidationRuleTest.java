@@ -22,6 +22,7 @@ import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -88,7 +89,7 @@ class SimpleValidationRuleTest {
             // Validate result
             assertFalse(result.isTriggered(), "Rule should not trigger for invalid age");
             assertTrue(result.isSuccess(), "Rule execution should still be successful");
-            assertEquals("no-match", result.getRuleName(), "Rule name should be no-match for non-triggered rule");
+            assertEquals("Age Validation", result.getRuleName(), "Rule name should be preserved for non-triggered rule");
         } catch (Exception e) {
             fail("Test should not throw exception: " + e.getMessage());
         }

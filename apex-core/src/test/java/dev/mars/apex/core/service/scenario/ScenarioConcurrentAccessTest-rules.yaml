@@ -1,0 +1,36 @@
+metadata:
+  id: "concurrent-access-test-rules"
+  name: "Concurrent Access Test Rules"
+  version: "1.0.0"
+  description: "Rules for testing concurrent scenario execution"
+  type: "rule-config"
+  author: "APEX Test Suite"
+
+rules:
+  - id: "otc-classification-rule"
+    name: "OTC Trade Classification"
+    condition: "#data['type'] == 'OTC'"
+    message: "Trade classified as OTC"
+    severity: "INFO"
+    enabled: true
+
+enrichments:
+  - id: "add-processed-type"
+    name: "Add Processed Type"
+    type: "field-enrichment"
+    condition: "true"
+    field-mappings:
+      - source-field: "type"
+        target-field: "processedType"
+
+  - id: "calculate-risk-score"
+    name: "Calculate Risk Score"
+    type: "calculation-enrichment"
+    condition: "true"
+    calculation-config:
+      expression: "#data.containsKey('notional') && #data['notional'] > 5000000 ? 'HIGH' : (#data.containsKey('notional') && #data['notional'] > 1000000 ? 'MEDIUM' : 'LOW')"
+      result-field: "riskScore"
+    field-mappings:
+      - source-field: "riskScore"
+        target-field: "riskScore"
+

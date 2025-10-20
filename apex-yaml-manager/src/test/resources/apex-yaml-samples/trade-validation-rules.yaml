@@ -1,0 +1,28 @@
+metadata:
+  id: trade-validation-rules
+  name: Trade Validation Rules
+  description: Rules for validating trade data
+  version: 1.0.0
+
+rule-groups:
+  - id: basic-validation
+    name: Basic Trade Validation
+    description: Validates basic trade fields
+    rules:
+      - trade-amount-rule
+      - trade-date-rule
+      - trade-counterparty-rule
+
+  - id: enriched-validation
+    name: Enriched Trade Validation
+    description: Validates enriched trade data
+    rules:
+      - enriched-amount-rule
+      - enriched-counterparty-rule
+
+enrichment-refs:
+  - trade-enrichment
+
+config-files:
+  - trade-validation-config.yaml
+

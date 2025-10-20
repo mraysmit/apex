@@ -88,10 +88,20 @@ public class YamlEnrichment {
     
     @JsonProperty("tags")
     private List<String> tags;
-    
+
     @JsonProperty("metadata")
     private Map<String, Object> metadata;
-    
+
+    // Phase 4: Error and Success Code Support
+    @JsonProperty("success-code")
+    private String successCode;
+
+    @JsonProperty("error-code")
+    private String errorCode;
+
+    @JsonProperty("map-to-field")
+    private Object mapToField;  // String or List<String>
+
     // Default constructor
     public YamlEnrichment() {
         this.enabled = true;
@@ -215,9 +225,33 @@ public class YamlEnrichment {
     public Map<String, Object> getMetadata() {
         return metadata;
     }
-    
+
     public void setMetadata(Map<String, Object> metadata) {
         this.metadata = metadata;
+    }
+
+    public String getSuccessCode() {
+        return successCode;
+    }
+
+    public void setSuccessCode(String successCode) {
+        this.successCode = successCode;
+    }
+
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    public Object getMapToField() {
+        return mapToField;
+    }
+
+    public void setMapToField(Object mapToField) {
+        this.mapToField = mapToField;
     }
 
     public String getTargetField() {

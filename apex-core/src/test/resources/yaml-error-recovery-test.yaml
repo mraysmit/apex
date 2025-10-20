@@ -6,7 +6,8 @@ metadata:
   name: "YAML Error Recovery Test Configuration"
   version: "1.0"
   description: "Test configuration demonstrating optional error-recovery section"
-  type: "test"
+  type: "rule-config"
+  author: "APEX Rules Engine"
 
 # Optional error-recovery section - demonstrates new Phase 2 functionality
 error-recovery:

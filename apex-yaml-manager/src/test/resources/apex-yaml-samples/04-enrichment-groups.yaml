@@ -1,0 +1,37 @@
+metadata:
+  id: enrichment-groups
+  name: Enrichment Groups
+  description: Grouped enrichment configurations with reuse patterns
+  version: 1.0.0
+  type: enrichment
+  author: apex.demo@company.com
+  created-date: 2025-01-15
+  tags: [enrichment, groups, reuse]
+
+# File-based dependencies - references the enrichment rules file
+enrichment-refs:
+  - 03-enrichment-rules.yaml
+
+enrichment-groups:
+  - id: basic-trade-enrichment
+    name: Basic Trade Enrichment
+    description: Essential enrichment for all trades
+    enrichment-ids:
+      - currency-enrichment
+      - trade-classification
+
+  - id: comprehensive-enrichment
+    name: Comprehensive Trade Enrichment
+    description: Complete enrichment including counterparty metadata
+    enrichment-ids:
+      - currency-enrichment
+      - trade-classification
+      - counterparty-enrichment
+
+  - id: settlement-enrichment
+    name: Settlement Enrichment
+    description: Enrichment specific to settlement processing
+    enrichment-ids:
+      - currency-enrichment
+      - counterparty-enrichment
+

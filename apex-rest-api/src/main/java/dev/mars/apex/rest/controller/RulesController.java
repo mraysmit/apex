@@ -73,7 +73,7 @@ public class RulesController {
      * Simple rule check endpoint.
      * Evaluates a single rule condition against provided data.
      */
-    @PostMapping("/check")
+    @PostMapping(value = "/check", produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
     @Operation(
         summary = "Check a rule condition",
         description = "Evaluates a single SpEL rule condition against the provided data and returns a boolean result."
@@ -134,7 +134,7 @@ public class RulesController {
      * Comprehensive validation endpoint.
      * Validates data against multiple rules and returns detailed results.
      */
-    @PostMapping("/validate")
+    @PostMapping(value = "/validate", produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
     @Operation(
         summary = "Validate data against multiple rules",
         description = "Validates the provided data against multiple validation rules and returns detailed results including all errors and warnings."
@@ -193,7 +193,7 @@ public class RulesController {
     /**
      * Define a named rule for reuse.
      */
-    @PostMapping("/define/{ruleName}")
+    @PostMapping(value = "/define/{ruleName}", produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
     @Operation(
         summary = "Define a named rule",
         description = "Defines a named rule that can be reused in subsequent evaluations."
@@ -239,7 +239,7 @@ public class RulesController {
     /**
      * Test a previously defined named rule.
      */
-    @PostMapping("/test/{ruleName}")
+    @PostMapping(value = "/test/{ruleName}", produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
     @Operation(
         summary = "Test a named rule",
         description = "Tests a previously defined named rule against the provided data."
@@ -276,7 +276,7 @@ public class RulesController {
     /**
      * Get list of all defined rules.
      */
-    @GetMapping("/defined")
+    @GetMapping(value = "/defined", produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
     @Operation(
         summary = "Get all defined rules",
         description = "Returns a list of all currently defined named rules."
@@ -295,7 +295,7 @@ public class RulesController {
     /**
      * Get available rule functions.
      */
-    @GetMapping("/functions")
+    @GetMapping(value = "/functions", produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
     @Operation(
         summary = "Get available rule functions",
         description = "Returns a list of all available functions that can be used in rule expressions."
@@ -329,7 +329,7 @@ public class RulesController {
     /**
      * Execute a rule directly with provided facts.
      */
-    @PostMapping("/execute")
+    @PostMapping(value = "/execute", produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
     @Operation(
         summary = "Execute rule directly",
         description = "Executes a rule directly using the rule engine with provided facts."
@@ -417,7 +417,7 @@ public class RulesController {
     /**
      * Execute multiple rules in batch.
      */
-    @PostMapping("/batch")
+    @PostMapping(value = "/batch", produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
     @Operation(
         summary = "Execute multiple rules in batch",
         description = "Executes multiple rules against the same set of facts."

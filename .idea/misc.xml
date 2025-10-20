@@ -9,6 +9,7 @@
         <option value="$PROJECT_DIR$/rules-engine-demo/pom.xml" />
         <option value="$PROJECT_DIR$/rules-engine-demo-basic/pom.xml" />
         <option value="$PROJECT_DIR$/rules-engine-rest-api/pom.xml" />
+        <option value="$PROJECT_DIR$/apex-yaml-manager/pom.xml" />
       </list>
     </option>
   </component>

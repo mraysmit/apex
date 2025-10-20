@@ -55,6 +55,11 @@ public class RuleResult implements Serializable {
     private final List<String> failureMessages;
     private final boolean success;
 
+    // Phase 4: Error and Success Code Support
+    private final String successCode;
+    private final String errorCode;
+    private final Object mapToField;  // String or List<String>
+
     /**
      * Enum representing the type of result.
      */
@@ -104,6 +109,9 @@ public class RuleResult implements Serializable {
         this.enrichedData = new HashMap<>();
         this.failureMessages = new ArrayList<>();
         this.success = (resultType == ResultType.MATCH || resultType == ResultType.NO_MATCH);
+        this.successCode = null;
+        this.errorCode = null;
+        this.mapToField = null;
     }
 
     /**
@@ -143,6 +151,9 @@ public class RuleResult implements Serializable {
         this.enrichedData = new HashMap<>();
         this.failureMessages = new ArrayList<>();
         this.success = (resultType == ResultType.MATCH || resultType == ResultType.NO_MATCH);
+        this.successCode = null;
+        this.errorCode = null;
+        this.mapToField = null;
     }
 
     /**
@@ -219,6 +230,47 @@ public class RuleResult implements Serializable {
         this.enrichedData = enrichedData != null ? new HashMap<>(enrichedData) : new HashMap<>();
         this.failureMessages = failureMessages != null ? new ArrayList<>(failureMessages) : new ArrayList<>();
         this.success = success;
+        this.successCode = null;
+        this.errorCode = null;
+        this.mapToField = null;
+    }
+
+    /**
+     * Create a new rule result with error and success codes support.
+     * Phase 4 Enhancement: Supports error/success codes and field mappings.
+     *
+     * @param ruleName The name of the rule that was evaluated
+     * @param message The message associated with the rule
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @param triggered Whether the rule was triggered (true) or not (false)
+     * @param resultType The type of result
+     * @param performanceMetrics The performance metrics for this rule evaluation
+     * @param enrichedData The enriched data map containing all enrichment results
+     * @param failureMessages List of failure messages from enrichments and rules
+     * @param success Overall success status of the evaluation
+     * @param successCode The code evaluated when rule succeeded (null if no code)
+     * @param errorCode The code evaluated when rule failed (null if no code)
+     * @param mapToField Field mapping expressions (null if no mapping)
+     */
+    public RuleResult(String ruleName, String message, String severity, boolean triggered, ResultType resultType,
+                     RulePerformanceMetrics performanceMetrics, Map<String, Object> enrichedData,
+                     List<String> failureMessages, boolean success, String successCode, String errorCode, Object mapToField) {
+        this.id = UUID.randomUUID();
+        this.ruleName = ruleName;
+        this.message = message;
+        this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
+        this.triggered = triggered;
+        this.timestamp = Instant.now();
+        this.resultType = resultType;
+        this.performanceMetrics = performanceMetrics;
+
+        // Initialize new fields with provided values
+        this.enrichedData = enrichedData != null ? new HashMap<>(enrichedData) : new HashMap<>();
+        this.failureMessages = failureMessages != null ? new ArrayList<>(failureMessages) : new ArrayList<>();
+        this.success = success;
+        this.successCode = successCode;
+        this.errorCode = errorCode;
+        this.mapToField = mapToField;
     }
 
     /**
@@ -357,6 +409,38 @@ public class RuleResult implements Serializable {
         return new RuleResult(ruleName, errorMessage, severity, false, ResultType.ERROR, performanceMetrics);
     }
 
+    // Phase 4: Factory methods for error and success codes
+
+    /**
+     * Create a new rule result for a rule that was triggered with success code.
+     * Phase 4 Enhancement: Supports success codes for rule matches.
+     *
+     * @param ruleName The name of the rule that was triggered
+     * @param message The message associated with the rule
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @param successCode The code evaluated when rule succeeded
+     * @return A new RuleResult instance
+     */
+    public static RuleResult matchWithCode(String ruleName, String message, String severity, String successCode) {
+        RuleResult result = new RuleResult(ruleName, message, severity, true, ResultType.MATCH);
+        // Since RuleResult is immutable, we need to use the constructor that accepts codes
+        return new RuleResult(ruleName, message, severity, true, ResultType.MATCH, null, new HashMap<>(), new ArrayList<>(), true, successCode, null, null);
+    }
+
+    /**
+     * Create a new rule result for when no rule was matched with error code.
+     * Phase 4 Enhancement: Supports error codes for rule non-matches.
+     *
+     * @param ruleName The name of the rule that was not matched
+     * @param message The message associated with the rule
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @param errorCode The code evaluated when rule failed
+     * @return A new RuleResult instance
+     */
+    public static RuleResult noMatchWithCode(String ruleName, String message, String severity, String errorCode) {
+        return new RuleResult(ruleName, message, severity, false, ResultType.NO_MATCH, null, new HashMap<>(), new ArrayList<>(), true, null, errorCode, null);
+    }
+
     // New factory methods for enrichment results
 
     /**
@@ -470,6 +554,9 @@ public class RuleResult implements Serializable {
         this.enrichedData = new HashMap<>();
         this.failureMessages = new ArrayList<>();
         this.success = (this.resultType == ResultType.MATCH || this.resultType == ResultType.NO_MATCH);
+        this.successCode = null;
+        this.errorCode = null;
+        this.mapToField = null;
     }
 
     /**
@@ -551,6 +638,36 @@ public class RuleResult implements Serializable {
      */
     public boolean hasPerformanceMetrics() {
         return performanceMetrics != null;
+    }
+
+    /**
+     * Get the success code for this rule result.
+     * Phase 4 Enhancement: Returns the code evaluated when rule condition was true.
+     *
+     * @return The success code, or null if no code was specified or rule did not match
+     */
+    public String getSuccessCode() {
+        return successCode;
+    }
+
+    /**
+     * Get the error code for this rule result.
+     * Phase 4 Enhancement: Returns the code evaluated when rule condition was false.
+     *
+     * @return The error code, or null if no code was specified or rule matched
+     */
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    /**
+     * Get the field mapping expressions for this rule result.
+     * Phase 4 Enhancement: Returns field mapping expressions that were applied.
+     *
+     * @return The field mapping expressions (String or List<String>), or null if no mapping was specified
+     */
+    public Object getMapToField() {
+        return mapToField;
     }
 
     // New API methods for comprehensive evaluation results

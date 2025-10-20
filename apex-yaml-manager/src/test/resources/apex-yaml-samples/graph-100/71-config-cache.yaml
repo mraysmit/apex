@@ -1,0 +1,14 @@
+metadata:
+  id: graph100-config-cache
+  name: Graph100 External Data Config - Cache
+  description: Cache configuration for demo
+  version: 0.1.0
+  type: external-data-config
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+config:
+  cache:
+    default-ttl-ms: 600000
+    max-entries: 10000
+

@@ -1,0 +1,84 @@
+metadata:
+  id: database-lookups
+  name: Database Lookups
+  description: Database connection configurations and lookup mappings
+  version: 1.0.0
+  type: enrichment
+  author: apex.demo@company.com
+  created-date: 2025-01-15
+  tags: [lookup, database, connections]
+
+data-sources:
+  - name: trade-database
+    type: database
+    source-type: postgresql
+    description: PostgreSQL database for trade reference data
+    connection:
+      host: localhost
+      port: 5432
+      database: apex_trades
+      username: apex_user
+      password: ${DB_PASSWORD:password}
+      pool-size: 10
+      timeout: 30000
+
+  - name: counterparty-database
+    type: database
+    source-type: postgresql
+    description: PostgreSQL database for counterparty information
+    connection:
+      host: localhost
+      port: 5432
+      database: apex_counterparties
+      username: apex_user
+      password: ${DB_PASSWORD:password}
+      pool-size: 5
+      timeout: 30000
+
+enrichments:
+  - id: trade-reference-lookup
+    name: Trade Reference Lookup
+    type: lookup-enrichment
+    description: Lookup trade reference data from PostgreSQL
+    condition: "#tradeId != null"
+    lookup-config:
+      lookup-key: "#tradeId"
+      lookup-dataset:
+        type: database
+        data-source-ref: trade-database
+        query: "SELECT trade_status, booking_date, trader_id FROM trades WHERE trade_id = :tradeId"
+        parameters:
+          - field: tradeId
+            type: string
+    field-mappings:
+      - source-field: TRADE_STATUS
+        target-field: tradeStatus
+      - source-field: BOOKING_DATE
+        target-field: bookingDate
+      - source-field: TRADER_ID
+        target-field: traderId
+
+  - id: counterparty-lookup
+    name: Counterparty Lookup
+    type: lookup-enrichment
+    description: Lookup counterparty details from PostgreSQL
+    condition: "#counterpartyId != null"
+    lookup-config:
+      lookup-key: "#counterpartyId"
+      lookup-dataset:
+        type: database
+        data-source-ref: counterparty-database
+        query: "SELECT cp_name, cp_type, credit_rating, lei FROM counterparties WHERE cp_id = :counterpartyId"
+        parameters:
+          - field: counterpartyId
+            type: string
+    field-mappings:
+      - source-field: CP_NAME
+        target-field: counterpartyName
+      - source-field: CP_TYPE
+        target-field: counterpartyType
+      - source-field: CREDIT_RATING
+        target-field: creditRating
+      - source-field: LEI
+        target-field: lei
+

@@ -16,6 +16,8 @@
 
 package dev.mars.apex.demo;
 
+import java.io.File;
+
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
@@ -26,8 +28,14 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import dev.mars.apex.core.service.error.ErrorRecoveryService;
+import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
+import dev.mars.apex.core.cache.ApexCacheManager;
+import dev.mars.apex.core.service.data.external.database.JdbcTemplateFactory;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +68,15 @@ public abstract class DemoTestBase {
     public void setUp() {
         logger.info("Setting up APEX services for testing...");
 
+        // Clear cache and reset statistics to ensure test isolation
+        // This prevents cache state from previous tests from affecting current test
+        ApexCacheManager cacheManager = ApexCacheManager.getInstance();
+        cacheManager.clearAll();
+
+        // Reset statistics for all cache scopes to ensure clean state
+        cacheManager.getAllStatistics().values().forEach(stats -> stats.reset());
+        logger.info("Cache cleared and statistics reset for test isolation");
+
         // Initialize real APEX services
         this.yamlLoader = new YamlConfigurationLoader();
         this.serviceRegistry = new LookupServiceRegistry();
@@ -69,6 +86,54 @@ public abstract class DemoTestBase {
         this.rulesEngineConfiguration = new RulesEngineConfiguration();
 
         logger.info("APEX services initialized successfully");
+    }
+
+    @AfterEach
+    public void tearDown() {
+        logger.info("Cleaning up APEX services after test...");
+
+        // Clear JDBC DataSource cache to ensure database connections are properly closed
+        try {
+            JdbcTemplateFactory.clearCache();
+            logger.info("JDBC DataSource cache cleared for test isolation");
+        } catch (Exception e) {
+            logger.warn("Error clearing JDBC DataSource cache", e);
+        }
+
+        // Shutdown H2 database to release locks and close connections
+        try {
+            // Execute H2 SHUTDOWN command to properly close the database
+            java.sql.Connection conn = java.sql.DriverManager.getConnection(
+                "jdbc:h2:./target/test/db;DB_CLOSE_DELAY=-1;MODE=PostgreSQL", "sa", "");
+            java.sql.Statement stmt = conn.createStatement();
+            stmt.execute("SHUTDOWN");
+            stmt.close();
+            conn.close();
+            logger.info("H2 database shutdown completed for test isolation");
+        } catch (Exception e) {
+            logger.debug("H2 database shutdown (expected if not connected): {}", e.getMessage());
+        }
+
+        // Clean up H2 database files to prevent persistence between tests
+        try {
+            File dbFile = new File("./target/test/db.mv.db");
+            File dbTraceFile = new File("./target/test/db.trace.db");
+            if (dbFile.exists() && dbFile.delete()) {
+                logger.info("H2 database file cleaned up for test isolation");
+            }
+            if (dbTraceFile.exists() && dbTraceFile.delete()) {
+                logger.info("H2 trace file cleaned up for test isolation");
+            }
+        } catch (Exception e) {
+            logger.warn("Error cleaning up H2 database files", e);
+        }
+
+        // Reset the cache manager singleton to ensure complete isolation between tests
+        // This is more thorough than just clearing cache entries and statistics
+        ApexCacheManager cacheManager = ApexCacheManager.getInstance();
+        cacheManager.shutdown();
+        ApexCacheManager.resetInstance();
+        logger.info("Cache manager singleton reset for test isolation");
     }
 
     /**
@@ -168,7 +233,14 @@ public abstract class DemoTestBase {
     protected RulesEngine createRulesEngine() {
         try {
             logger.info("Creating RulesEngine with EnrichmentService...");
-            RulesEngine engine = new RulesEngine(rulesEngineConfiguration);
+            // Use full constructor to pass EnrichmentService for enrichment processing
+            RulesEngine engine = new RulesEngine(
+                rulesEngineConfiguration,
+                new SpelExpressionParser(),
+                new ErrorRecoveryService(),
+                new RulePerformanceMonitor(),
+                enrichmentService
+            );
 
             assertNotNull(engine, "RulesEngine should not be null");
             logger.info("** RulesEngine created successfully");

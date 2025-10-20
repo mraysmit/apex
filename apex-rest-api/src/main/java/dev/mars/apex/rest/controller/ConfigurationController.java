@@ -69,7 +69,7 @@ public class ConfigurationController {
     /**
      * Get current configuration information.
      */
-    @GetMapping("/info")
+    @GetMapping(value = "/info", produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
     @Operation(
         summary = "Get configuration information",
         description = "Returns information about the currently loaded configuration including metadata and statistics."
@@ -120,7 +120,7 @@ public class ConfigurationController {
     /**
      * Load configuration from YAML content.
      */
-    @PostMapping("/load")
+    @PostMapping(value = "/load", produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
     @Operation(
         summary = "Load YAML configuration",
         description = "Loads a new YAML configuration from the provided content. This replaces any existing configuration."
@@ -197,7 +197,7 @@ public class ConfigurationController {
     /**
      * Load configuration from uploaded file.
      */
-    @PostMapping("/upload")
+    @PostMapping(value = "/upload", produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
     @Operation(
         summary = "Upload YAML configuration file",
         description = "Uploads and loads a YAML configuration file. This replaces any existing configuration."
@@ -262,7 +262,7 @@ public class ConfigurationController {
     /**
      * Validate YAML configuration without loading it.
      */
-    @PostMapping("/validate")
+    @PostMapping(value = "/validate", produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
     @Operation(
         summary = "Validate YAML configuration",
         description = "Validates the provided YAML configuration without loading it into the system."

@@ -1,0 +1,12 @@
+metadata:
+  id: graph100-chain-1
+  name: Graph100 Chain 1
+  description: Start of a deeper chain
+  version: 0.2.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+rule-configurations:
+  - 51-chain-2.yaml
+

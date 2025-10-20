@@ -1,0 +1,11 @@
+metadata:
+  id: enrichment-config
+  name: Enrichment Configuration
+  description: Shared configuration for data enrichment
+  version: 1.0.0
+
+config:
+  market-data-source: bloomberg
+  counterparty-source: internal-database
+  cache-ttl-seconds: 3600
+

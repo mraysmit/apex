@@ -1,0 +1,66 @@
+metadata:
+  id: enrichment-rules
+  name: Enrichment Rules
+  description: Data enrichment configurations with inline datasets and lookups
+  version: 1.0.0
+  type: enrichment
+  author: apex.demo@company.com
+  created-date: 2025-01-15
+  tags: [enrichment, inline-data, reuse]
+
+data-sources:
+  - name: currency-rates
+    type: inline-dataset
+    description: Currency exchange rates lookup table
+    data:
+      - code: USD
+        rate: 1.0
+        region: Americas
+      - code: EUR
+        rate: 1.08
+        region: Europe
+      - code: GBP
+        rate: 1.27
+        region: Europe
+
+enrichments:
+  - id: currency-enrichment
+    name: Currency Enrichment
+    type: lookup-enrichment
+    description: Enrich trade with currency rate information
+    condition: "#currency != null"
+    lookup-config:
+      lookup-key: "#currency"
+      lookup-dataset:
+        type: inline
+        data-source-ref: currency-rates
+    field-mappings:
+      - source-field: rate
+        target-field: exchangeRate
+      - source-field: region
+        target-field: currencyRegion
+
+  - id: trade-classification
+    name: Trade Classification
+    type: calculation-enrichment
+    description: Classify trade based on amount and type
+    condition: "#tradeAmount != null && #tradeType != null"
+    calculation-config:
+      expression: "#tradeAmount > 1000000 ? 'HIGH_VALUE' : 'STANDARD'"
+      result-field: tradeClass
+    field-mappings:
+      - source-field: tradeClass
+        target-field: tradeClassification
+
+  - id: counterparty-enrichment
+    name: Counterparty Enrichment
+    type: calculation-enrichment
+    description: Add counterparty metadata
+    condition: "#counterparty != null"
+    calculation-config:
+      expression: "'Counterparty: ' + #counterparty + ' - Status: ACTIVE'"
+      result-field: counterpartyInfo
+    field-mappings:
+      - source-field: counterpartyInfo
+        target-field: counterpartyMetadata
+

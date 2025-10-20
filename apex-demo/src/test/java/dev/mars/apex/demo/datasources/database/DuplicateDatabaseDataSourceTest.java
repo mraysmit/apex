@@ -97,10 +97,11 @@ public class DuplicateDatabaseDataSourceTest extends DemoTestBase {
         try {
             // Get cache manager instance
             ApexCacheManager cacheManager = ApexCacheManager.getInstance();
-            
-            // Clear cache to start fresh
+
+            // Clear cache and reset statistics to start fresh
             cacheManager.clearAll();
-            logger.info("📊 Cache cleared - starting fresh");
+            cacheManager.getAllStatistics().values().forEach(stats -> stats.reset());
+            logger.info("📊 Cache cleared and statistics reset - starting fresh");
 
             // Load configuration with 2 enrichments using SAME database query
             var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/datasources/database/DuplicateDatabaseDataSourceTest.yaml");

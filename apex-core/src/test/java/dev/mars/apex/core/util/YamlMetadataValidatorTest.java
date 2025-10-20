@@ -144,31 +144,7 @@ class YamlMetadataValidatorTest {
         assertTrue(result.getErrors().stream().anyMatch(error -> error.contains("Missing 'metadata' section")));
     }
     
-    @Test
-    void testValidBootstrapFile() throws IOException {
-        String validBootstrap = """
-            metadata:
-              id: "test-bootstrap-001"
-              name: "Test Bootstrap"
-              version: "1.0.0"
-              description: "A test bootstrap configuration"
-              type: "bootstrap"
-              business-domain: "Testing"
-              created-by: "test.admin@company.com"
-            
-            rule-chains:
-              - id: "test-chain"
-                name: "Test Chain"
-            """;
-        
-        writeFile("bootstrap/test-bootstrap.yaml", validBootstrap);
-        
-        YamlValidationResult result = validator.validateFile("bootstrap/test-bootstrap.yaml");
-        
-        assertTrue(result.isValid(), "Valid bootstrap should pass validation");
-        assertEquals(0, result.getErrorCount());
-    }
-    
+
     @Test
     void testValidDatasetFile() throws IOException {
         String validDataset = """

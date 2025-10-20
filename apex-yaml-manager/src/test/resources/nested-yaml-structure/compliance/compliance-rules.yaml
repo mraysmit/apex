@@ -1,0 +1,29 @@
+metadata:
+  id: compliance-rules
+  name: Compliance Rules
+  description: Compliance checks for regulatory requirements
+  version: 1.0.0
+
+rule-groups:
+  - id: regulatory-compliance
+    name: Regulatory Compliance
+    rules:
+      - mifid-compliance-rule
+      - dodd-frank-compliance-rule
+  - id: aml-compliance
+    name: AML Compliance
+    rules:
+      - sanctions-screening-rule
+      - kyc-verification-rule
+  - id: reporting-compliance
+    name: Reporting Compliance
+    rules:
+      - trade-reporting-rule
+      - position-reporting-rule
+
+enrichment-refs:
+  - ../trading/enrichment/trade-enrichment-rules.yaml
+
+config-files:
+  - ../shared/compliance-config.yaml
+

@@ -40,13 +40,15 @@ import static org.junit.jupiter.api.Assertions.*;
 class ComprehensiveYamlValidationTest {
     
     @Test
-    @Disabled("YAML metadata validation temporarily disabled - 157 files need metadata fixes after refactoring")
     void testAllYamlFilesHaveTypeAttribute() throws IOException {
-        // Use the actual project structure
-        YamlMetadataValidator validator = new YamlMetadataValidator("../apex-demo/src/main/resources");
-        
+        // Use the actual project structure - YAML files are in apex-core test resources
+        // Try multiple possible paths to handle different execution contexts
+        String basePath = findYamlBasePath();
+
+        YamlMetadataValidator validator = new YamlMetadataValidator(basePath);
+
         // Discover ALL YAML files in the project
-        List<String> allYamlFiles = discoverAllYamlFiles("../apex-demo/src/main/resources");
+        List<String> allYamlFiles = discoverAllYamlFiles(basePath);
         
         System.out.println("=== COMPREHENSIVE YAML VALIDATION TEST ===");
         System.out.println("Discovered " + allYamlFiles.size() + " YAML files:");
@@ -118,14 +120,39 @@ class ComprehensiveYamlValidationTest {
     }
     
     /**
+     * Finds the correct base path for YAML files by trying multiple possible locations.
+     */
+    private String findYamlBasePath() {
+        String[] possiblePaths = {
+            "apex-core/src/test/resources",
+            "./apex-core/src/test/resources",
+            "src/test/resources"
+        };
+
+        for (String path : possiblePaths) {
+            Path p = Paths.get(path);
+            if (Files.exists(p)) {
+                System.out.println("Found YAML base path: " + p.toAbsolutePath());
+                return path;
+            }
+        }
+
+        // Default to the first option if none exist
+        System.out.println("Warning: Could not find YAML base path, using default: " + possiblePaths[0]);
+        return possiblePaths[0];
+    }
+
+    /**
      * Discovers all YAML files in the specified directory recursively.
      */
     private List<String> discoverAllYamlFiles(String baseDir) throws IOException {
         List<String> yamlFiles = new ArrayList<>();
-        
+
         Path basePath = Paths.get(baseDir);
         if (!Files.exists(basePath)) {
             System.err.println("Base directory does not exist: " + baseDir);
+            System.err.println("Current working directory: " + System.getProperty("user.dir"));
+            System.err.println("Absolute path would be: " + basePath.toAbsolutePath());
             return yamlFiles;
         }
         
