@@ -346,29 +346,52 @@ class RuleReferencePerformanceTest {
         Path referencedConfigFile = tempDir.resolve("referenced-config.yaml");
         Files.writeString(referencedConfigFile, referencedConfigYaml);
         
-        // Measure inline loading time
-        long startTime = System.currentTimeMillis();
-        YamlRuleConfiguration inlineConfig = configLoader.loadFromFile(inlineConfigFile.toString());
-        RulesEngineConfiguration inlineEngineConfig = ruleFactory.createRulesEngineConfiguration(inlineConfig);
-        RulesEngine inlineEngine = new RulesEngine(inlineEngineConfig);
-        long inlineLoadTime = System.currentTimeMillis() - startTime;
-        
-        // Measure referenced loading time
-        startTime = System.currentTimeMillis();
-        YamlRuleConfiguration referencedConfig = configLoader.loadFromFile(referencedConfigFile.toString());
-        RulesEngineConfiguration referencedEngineConfig = ruleFactory.createRulesEngineConfiguration(referencedConfig);
-        RulesEngine referencedEngine = new RulesEngine(referencedEngineConfig);
-        long referencedLoadTime = System.currentTimeMillis() - startTime;
-        
-        System.out.printf("Inline loading time: %d ms%n", inlineLoadTime);
-        System.out.printf("Referenced loading time: %d ms%n", referencedLoadTime);
+        // Warm-up to reduce JIT and IO jitter
+        for (int i = 0; i < 2; i++) {
+            YamlRuleConfiguration warmInline = configLoader.loadFromFile(inlineConfigFile.toString());
+            RulesEngineConfiguration warmInlineCfg = ruleFactory.createRulesEngineConfiguration(warmInline);
+            new RulesEngine(warmInlineCfg);
+            YamlRuleConfiguration warmRef = configLoader.loadFromFile(referencedConfigFile.toString());
+            RulesEngineConfiguration warmRefCfg = ruleFactory.createRulesEngineConfiguration(warmRef);
+            new RulesEngine(warmRefCfg);
+        }
+
+        // Measure median over multiple iterations for stability
+        final int iterations = 7;
+        long[] inlineTimes = new long[iterations];
+        long[] referencedTimes = new long[iterations];
+        for (int i = 0; i < iterations; i++) {
+            long t0 = System.nanoTime();
+            YamlRuleConfiguration inlineConfigIter = configLoader.loadFromFile(inlineConfigFile.toString());
+            RulesEngineConfiguration inlineEngineConfigIter = ruleFactory.createRulesEngineConfiguration(inlineConfigIter);
+            new RulesEngine(inlineEngineConfigIter);
+            long t1 = System.nanoTime();
+            inlineTimes[i] = t1 - t0;
+
+            long s0 = System.nanoTime();
+            YamlRuleConfiguration referencedConfigIter = configLoader.loadFromFile(referencedConfigFile.toString());
+            RulesEngineConfiguration referencedEngineConfigIter = ruleFactory.createRulesEngineConfiguration(referencedConfigIter);
+            new RulesEngine(referencedEngineConfigIter);
+            long s1 = System.nanoTime();
+            referencedTimes[i] = s1 - s0;
+        }
+
+        java.util.Arrays.sort(inlineTimes);
+        java.util.Arrays.sort(referencedTimes);
+        long inlineMedianMs = java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(inlineTimes[iterations / 2]);
+        long referencedMedianMs = java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(referencedTimes[iterations / 2]);
+
+        System.out.printf("Inline loading median: %d ms%n", inlineMedianMs);
+        System.out.printf("Referenced loading median: %d ms%n", referencedMedianMs);
 
         // Referenced loading should not be significantly slower (allow 5x overhead for system variance)
-        assertTrue(referencedLoadTime < inlineLoadTime * 5,
-                  String.format("Referenced loading (%d ms) should not be more than 5x slower than inline (%d ms)",
-                               referencedLoadTime, inlineLoadTime));
-        
-        // Both configurations should work correctly
+        assertTrue(referencedMedianMs < inlineMedianMs * 5,
+                String.format("Referenced loading median (%d ms) should not be more than 5x slower than inline median (%d ms)",
+                        referencedMedianMs, inlineMedianMs));
+
+        // Both configurations should work correctly (fresh load for correctness assertions)
+        YamlRuleConfiguration inlineConfig = configLoader.loadFromFile(inlineConfigFile.toString());
+        YamlRuleConfiguration referencedConfig = configLoader.loadFromFile(referencedConfigFile.toString());
         assertEquals(20, inlineConfig.getRules().size(), "Inline config should have 20 rules");
         assertEquals(3, referencedConfig.getRules().size(), "Referenced config should have 3 rules");
     }

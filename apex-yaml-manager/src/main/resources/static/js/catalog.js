@@ -21,10 +21,10 @@ async function loadCatalog() {
 
     try {
         const response = await apiCall('/catalog/all');
-        
+
         if (response.status === 'success') {
             allConfigurations = response.data || [];
-            
+
             // Populate category filter
             const categories = new Set();
             allConfigurations.forEach(config => {
@@ -32,7 +32,7 @@ async function loadCatalog() {
                     config.categories.forEach(cat => categories.add(cat));
                 }
             });
-            
+
             const categorySelect = document.getElementById('categoryFilter');
             const currentValue = categorySelect.value;
             categorySelect.innerHTML = '<option value="">All Categories</option>';
@@ -43,8 +43,22 @@ async function loadCatalog() {
                 categorySelect.appendChild(option);
             });
             categorySelect.value = currentValue;
-            
+
             displayCatalog(allConfigurations);
+
+            // Prefill search from ?path= by using filename as search term
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const p = params.get('path');
+                if (p) {
+                    const fileName = p.split(/[\\\/]/).pop();
+                    const searchInput = document.getElementById('searchInput');
+                    if (searchInput) {
+                        searchInput.value = fileName;
+                        filterCatalog();
+                    }
+                }
+            } catch (e) { /* no-op */ }
         } else {
             tableDiv.innerHTML = `<div class="alert alert-danger">Error: ${response.message}</div>`;
         }

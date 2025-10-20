@@ -1,0 +1,27 @@
+metadata:
+  id: graph100-scenario-d
+  name: Graph100 Scenario D
+  description: Scenario D referencing groups D
+  version: 0.2.0
+  type: scenario
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+rule-configurations:
+  - 23-groups-d.yaml
+
+scenario:
+  scenario-id: scenario-d
+  description: Expanded scenario D
+
+  classification-rule:
+    condition: "#type == 'D'"
+    description: Route type D
+
+  processing-stages:
+    - stage-name: validation
+      description: Validate using groups D
+      config-file: 23-groups-d.yaml
+      execution-order: 1
+      failure-policy: terminate
+

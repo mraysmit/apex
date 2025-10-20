@@ -1,3 +1,5 @@
+
+
 # APEX UI Implementation Comparison: apex-playground vs apex-yaml-manager
 
 ## Purpose
@@ -165,6 +167,133 @@ This document compares the user interface implementations in the modules apex-pl
 6) Search: highlight matches and expand ancestor chains to reveal them; optional fit-to-match button.
 7) Styling: color by `type`; badge circular nodes; show counts (e.g., contentSummary) as small pills next to labels; add “Fit to screen” and “Reset zoom”.
 8) Progressive enhancement: keep the manual list as a fallback behind a feature flag; default to D3 once stable.
+
+
+## Functional Tree Rendering and Data Validation — Task Plan
+
+This section focuses strictly on functionality: accurate rendering of a 100‑file interrelated YAML folder, validation of raw REST API data prior to UI rendering, and adequate test data to verify behavior. No look‑and‑feel changes are included here.
+
+### Phase A — Investigation and scoping
+- Read docs/APEX_YAML_REFERENCE.md to refresh APEX YAML structure and dependency semantics (rules, rule-groups, references/includes)
+- Audit current dependency tree build path:
+  - Server: how the tree and contentSummary are constructed (and where cycles/impact are computed)
+  - UI: how the tree endpoint is consumed; how scan-folder and rootFile selection flow into the tree
+- Inventory existing sample YAML data and identify gaps vs. a 100-file interrelated dataset
+- Deliverable: gap report + precise validator/data-generation specs
+
+#### Phase A — Investigation: Findings and concrete next steps
+
+Findings (current state)
+
+#### Phase B — Implementation updates (completed in this iteration)
+- Server: added POST /api/dependencies/validate-tree that builds graph+tree and returns a structured validation report (status, issues by severity, stats)
+- Client: added validateTreePayload() pre-render validator in dependency-tree-viewer.js; blocks rendering and surfaces errors if payload structure is invalid
+- Dataset: created seed graph-100 dataset under src/test/resources/apex-yaml-samples/graph-100 with registry → scenarios → groups → rules (6+ files to start); manifest and README included
+- Tests:
+  - Graph100DatasetTest exercises scan-folder, tree, and validate-tree on the seed registry (passes)
+  - DependencyAnalysisControllerTest compiles and passes after fix
+
+Notes
+- UI Selenium tests currently fail due to stricter pre-render validation blocking rendering when API responses are invalid or empty. Next step: align the HTML page flow to provide a default rootFile (scenario-registry) or update tests to call loadDependencyTree with a sample as they already do. Will address in the next pass while keeping validation in place.
+
+- Server endpoints: /api/dependencies/analyze, /tree, /metrics, /impact, /circular-dependencies, /scan-folder exist and rely on a cached currentGraph; /tree returns D3‑compatible nested TreeNode.
+- Tree model: TreeNode carries path, children, dependencies/dependents/allDependencies, circular flags, healthScore, and contentSummary.
+- Content summary: YamlContentAnalyzer attaches YamlContentSummary but needs better alignment with APEX DSL (see gaps below).
+- Sample data: apex-yaml-manager/src/test/resources/apex-yaml-samples (~13 files) is good quality but not large enough for 100‑file validation.
+
+Gaps/Risks identified
+- No server‑side raw data validator to check the built graph/tree (missing refs, duplicates, cycles, orphaned, invalid metadata.type).
+- No client pre‑render validator in dependency-tree-viewer.js; bad data could render incorrectly.
+- YamlContentAnalyzer should:
+  - Use metadata.type to set fileType.
+  - Count rule groups and rule references per APEX keywords (rule-ids, rule-references) instead of a generic rules key.
+  - Count references via rule-configurations, enrichment-refs, config-files, rule-group-references.
+- Dataset coverage: need a 100‑file interrelated folder with fan‑in/fan‑out, deep chains, shared libs, a small intentional cycle, and a missing reference case.
+
+Next steps (to be implemented in Phases B–D)
+1) Tree data validation
+   - Server: add POST /api/dependencies/validate-tree?rootFile=... to validate structure and graph integrity; return {status, issues:{CRITICAL/HIGH/MEDIUM/LOW}, stats}.
+   - Client: add a lightweight pre‑render validator to gate rendering and surface errors clearly.
+   - Align YamlContentAnalyzer with APEX keywords and metadata.type.
+2) 100‑file interrelated dataset (graph-100)
+   - Location: apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100
+   - Provide manifest (graph-100.manifest.json) with expected totals, maxDepth, cycles, and a README with usage.
+3) Automated tests
+   - Spring Boot tests to build the tree, call validate‑tree, and assert against the manifest; include positive and negative cases (cycle and missing reference).
+
+Acceptance alignment
+- Focus on functionality: accurate rendering of a 100‑file interrelated folder and robust validation prior to UI rendering; no look‑and‑feel work in scope here.
+
+
+### Phase B — Raw data validation before rendering
+1) Define validation rules for REST API tree data
+- Schema contract per node (D3 hierarchy): required name, path, children[]; optional contentSummary, version, circularDependencies, metadata
+- Constraints:
+  - Unique node paths
+  - Parent/child path hygiene (no invalid references outside base when disallowed)
+  - No infinite recursion; cycles represented via explicit circularDependencies
+  - Kebab-case enforcement for APEX YAML keywords; reject/flag unknown DSL keys
+  - If contentSummary present, counts must match server-computed truth
+- Output: JSON Schema (or equivalent) capturing these rules
+
+2) Implement server-side validation endpoint(s)
+- GET /yaml-manager/api/dependencies/validate?rootFile=... → returns { status, violations, warnings, stats }
+- Option A: tree endpoint can append validation summary; Option B: keep separate endpoint and call explicitly from UI
+
+3) Client-side pre-render validation
+- Add lightweight validator in dependency-tree-viewer.js to verify structure/uniqueness/sanity
+- If violations exist: show a banner and block rendering or degrade gracefully; log details for diagnosis
+
+### Phase C — High-quality interrelated test dataset (100 files)
+4) Dataset design and creation
+- Location proposal: apex-yaml-manager/src/test/resources/test-yaml/graph-100
+- Features:
+  - 100 YAML files across nested folders
+  - Inter-file references: rule-groups referencing rules across files/folders
+  - Include a small number of intentional cycles to test detection
+  - Include missing references and malformed entries for negative tests
+  - All keywords kebab-case; keep a few invalid examples for negative validation
+
+5) Utilities and fixtures
+- Prefer static fixtures for determinism; optional generator script for future expansions
+- Add a manifest with expected graph properties (total nodes, leaves, cycles, max depth, contentSummary roll-ups)
+
+### Phase D — Automated verification and tests
+6) Unit tests (server-side)
+- Graph build correctness vs. manifest (node count, max depth, cycles)
+- Validation endpoint: expected violations/warnings for negative files
+- contentSummary correctness vs. recomputed truth
+
+7) Integration tests (API)
+- /dependencies/tree and /dependencies/validate over the 100-file dataset
+- Assert structure, normalization, deduplication, and cycle reporting
+
+8) UI smoke checks (functionality only)
+- Scan folder → tree loads with 100-file dataset
+- Pre-render validator surfaces errors for intentionally invalid files
+- Selecting nodes shows details and contentSummary when present
+
+### Phase E — Performance and resilience
+9) Performance sanity
+- Measure fetch + validate + render timings for the 100-file dataset
+- Add guardrails (debounce scanning; safe recursion limits; defensive checks)
+
+10) Observability and diagnostics
+- Log markers for validation failures and cycle detection
+- Validation response includes quick triage stats (counts, cycles, depth)
+
+### Phase F — Documentation
+11) Update docs:
+- Summarize functional validation approach and dataset coverage here and/or in a dedicated doc
+
+12) Developer usage:
+- How to run the validation endpoint against the dataset and interpret outputs
+
+### Acceptance criteria
+- A 100-file interrelated folder renders accurately; cycles detected and reported
+- Server-side validation exists and is used to verify raw data correctness prior to UI rendering
+- Client-side pre-render validation enforces structure and surfaces issues clearly
+- Automated positive and negative tests pass consistently
 
 ## UI/API Contract Mismatches (Concrete)
 These should be addressed for the YAML Manager UI to function as intended.

@@ -1,0 +1,27 @@
+metadata:
+  id: graph100-scenario-c
+  name: Graph100 Scenario C
+  description: Scenario C referencing groups C
+  version: 0.2.0
+  type: scenario
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+rule-configurations:
+  - 22-groups-c.yaml
+
+scenario:
+  scenario-id: scenario-c
+  description: Expanded scenario C
+
+  classification-rule:
+    condition: "#type == 'C'"
+    description: Route type C
+
+  processing-stages:
+    - stage-name: validation
+      description: Validate using groups C
+      config-file: 22-groups-c.yaml
+      execution-order: 1
+      failure-policy: terminate
+

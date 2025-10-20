@@ -198,11 +198,11 @@ textarea.editor:focus {
     .card {
         margin-bottom: 1rem;
     }
-    
+
     textarea.editor {
         min-height: 200px;
     }
-    
+
     .results-panel {
         max-height: 300px;
     }
@@ -241,3 +241,32 @@ textarea.editor:focus {
     background: #555;
 }
 
+
+
+/* Phase 2: Shared styles for content summary badges and CTAs */
+.badge-kv {
+    display: inline-block;
+    background: #eef2ff;
+    color: #222a3a;
+    border: 1px solid #cfd7ff;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    margin-right: 6px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+}
+
+.cta-row .btn-cta {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f7f7f7;
+    color: #222;
+    text-decoration: none;
+}
+
+.cta-row .btn-cta:hover {
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}

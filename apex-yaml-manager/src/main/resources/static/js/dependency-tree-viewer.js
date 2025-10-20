@@ -11,6 +11,8 @@ let selectedFilesFromDialog = [];
 let maxRenderDepth = Infinity;
 // Per-node expansion state: path -> boolean (true=expanded, false=collapsed)
 let expansionState = {};
+let useD3 = false; // Feature flag: use D3 HTML-based renderer when true (default OFF for stability)
+
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeResizer();
@@ -77,6 +79,20 @@ function setupEventListeners() {
     document.getElementById('folderPathInput').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') scanFolder();
     });
+
+    // Feature flag toggle for D3 renderer
+    const d3Toggle = document.getElementById('useD3Toggle');
+    if (d3Toggle) {
+        // Sync UI with default flag
+        d3Toggle.checked = !!useD3;
+        d3Toggle.addEventListener('change', (e) => {
+            useD3 = e.target.checked;
+            if (treeData) {
+                const nodes = Array.isArray(treeData) ? treeData : [treeData];
+                renderTree(nodes);
+            }
+        });
+    }
 }
 
 /**
@@ -95,6 +111,12 @@ async function loadDependencyTree(rootFile = null) {
         const data = await response.json();
 
         if (data.status === 'success') {
+            // Client-side pre-render validation
+            const vr = validateTreePayload(data);
+            if (!vr.ok) {
+                showValidationErrors(vr.errors);
+                return;
+            }
             // The API returns the tree in the 'tree' field
             treeData = data.tree ? [data.tree] : [];
             // Expose for Selenium and console
@@ -115,10 +137,57 @@ async function loadDependencyTree(rootFile = null) {
 }
 
 /**
+ * Client-side pre-render validator for the /tree payload
+ */
+function validateTreePayload(payload) {
+    const errors = [];
+    const stats = { nodeCount: 0, uniquePaths: 0, duplicatePaths: 0, maxDepthObserved: 0 };
+
+    if (!payload || payload.status !== 'success') {
+        errors.push('Invalid response status');
+        return { ok: false, errors, stats };
+    }
+    const root = payload.tree;
+    if (!root) {
+        errors.push('Missing tree');
+        return { ok: false, errors, stats };
+    }
+
+    const seen = new Set();
+    const dups = new Set();
+    const stack = [root];
+    while (stack.length) {
+        const n = stack.pop();
+        stats.nodeCount++;
+        if (!n || typeof n !== 'object') { errors.push('Encountered non-object node'); continue; }
+        if (!n.path || typeof n.path !== 'string') errors.push('Node missing path');
+        if (!n.name || typeof n.name !== 'string') errors.push(`Node missing name for path=${n.path || 'unknown'}`);
+        if (n.depth != null && typeof n.depth === 'number') stats.maxDepthObserved = Math.max(stats.maxDepthObserved, n.depth);
+        if (n.path) {
+            if (seen.has(n.path)) dups.add(n.path); else seen.add(n.path);
+        }
+        if (n.children != null && !Array.isArray(n.children)) errors.push(`Children must be an array for path=${n.path || 'unknown'}`);
+        if (Array.isArray(n.children)) n.children.forEach(c => stack.push(c));
+    }
+    stats.uniquePaths = seen.size; stats.duplicatePaths = dups.size;
+    return { ok: errors.length === 0, errors, stats };
+}
+
+function showValidationErrors(errors) {
+    const treeView = document.getElementById('treeView');
+    const list = errors.map(e => `<li>${e}</li>`).join('');
+    treeView.innerHTML = `<div class="empty-state"><p>Validation failed before rendering</p><ul style="text-align:left; font-size:12px; color:#b00;">${list}</ul></div>`;
+}
+
+
+/**
  * Render the tree structure
  */
 function renderTree(nodes, parentElement = null, depth = 0) {
     if (!parentElement) {
+        if (useD3) {
+            return renderTreeD3(nodes);
+        }
         parentElement = document.getElementById('treeView');
         parentElement.innerHTML = '';
     }
@@ -155,6 +224,78 @@ function renderTree(nodes, parentElement = null, depth = 0) {
         }
 
         nodeElement.appendChild(labelSpan);
+
+/**
+ * D3-based HTML renderer: renders visible nodes as div.tree-node with indents
+ */
+function renderTreeD3(nodes) {
+    const container = d3.select('#treeView');
+    container.html('');
+    if (!nodes || nodes.length === 0) return;
+
+    // Build flat list of visible nodes with depth and isLast sibling flag
+    const flat = [];
+    function traverse(node, depth = 0, isLast = true) {
+        flat.push({ node, depth, isLast });
+        const hasChildren = node.children && node.children.length > 0;
+        const isExpanded = expansionState[node.path] !== false; // default expanded
+        if (hasChildren && isExpanded && (depth + 1) < maxRenderDepth) {
+            node.children.forEach((child, idx) => {
+                traverse(child, depth + 1, idx === node.children.length - 1);
+            });
+        }
+    }
+    nodes.forEach((n, idx) => traverse(n, 0, idx === nodes.length - 1));
+
+    const rows = container.selectAll('div.tree-node')
+        .data(flat, d => d.node.path);
+
+    const rowsEnter = rows.enter().append('div')
+        .attr('class', 'tree-node')
+        .attr('data-path', d => d.node.path)
+        .attr('data-depth', d => d.depth);
+
+    // Update + enter
+    rowsEnter.merge(rows)
+        .style('margin-left', d => `${d.depth * 20}px`)
+        .each(function(d) {
+            const el = d3.select(this);
+            el.classed('selected', selectedNode && selectedNode.path === d.node.path);
+            el.html(''); // clear
+
+            const hasChildren = d.node.children && d.node.children.length > 0;
+            const isExpanded = expansionState[d.node.path] !== false;
+            const toggle = hasChildren ? (isExpanded ? '▾' : '▸') : ' ';
+            const prefix = d.isLast ? '└── ' : '├── ';
+
+            if (hasChildren) {
+                el.append('span')
+                  .text(toggle + ' ')
+                  .style('margin-right', '6px')
+                  .style('cursor', 'pointer')
+                  .on('click', function(e) {
+                      e.stopPropagation();
+                      toggleNode(d.node.path);
+                  });
+            } else {
+                el.append('span').text('   ');
+            }
+
+            el.append('span')
+              .text(`${prefix}${hasChildren ? '📦' : '📄'} ${d.node.name}`);
+
+            el.on('click', function(e) {
+                e.stopPropagation();
+                selectedNode = d.node;
+                d3.selectAll('.tree-node').classed('selected', false);
+                d3.select(this).classed('selected', true);
+                fetchNodeDetails(d.node.path);
+            });
+        });
+
+    rows.exit().remove();
+}
+
 
         nodeElement.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -287,6 +428,27 @@ function displayNodeDetails(details) {
         `;
     }
 
+    // Content Summary badges (Phase 2)
+    if (details.contentSummary) {
+        const cs = details.contentSummary;
+        const badge = (label, count) => count && count > 0 ? `<span class="badge-kv">${label}: ${count}</span>` : '';
+        const extras = cs.contentCounts ? Object.entries(cs.contentCounts)
+            .map(([k,v]) => badge(k, v)).join('') : '';
+        html += `
+            <div class="detail-section">
+                <h3>🧾 Summary:</h3>
+                <div class="badges" style="margin-top:6px;">
+                    ${badge('Rules', cs.ruleCount)}
+                    ${badge('Rule Groups', cs.ruleGroupCount)}
+                    ${badge('Enrichments', cs.enrichmentCount)}
+                    ${badge('Configs', cs.configFileCount)}
+                    ${badge('References', cs.referenceCount)}
+                    ${extras}
+                </div>
+            </div>
+        `;
+    }
+
     // Metadata
     html += `
         <div class="detail-section">
@@ -321,7 +483,51 @@ function displayNodeDetails(details) {
         `;
     }
 
+    // CTAs (Phase 2)
+    const encodedPath = encodeURIComponent(details.path);
+    html += `
+        <div class="detail-section">
+            <h3>🚀 Actions:</h3>
+            <div class="cta cta-row" style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
+                <a href="/ui/catalog?path=${encodedPath}" class="btn-cta" title="Open this YAML in the Catalog browser">Open in Catalog</a>
+                <a href="/ui/validation?path=${encodedPath}" class="btn-cta" title="Run validation checks for this YAML">Run Validation</a>
+                <button type="button" onclick="runImpactAnalysis('${details.path}')" class="btn-cta" title="Analyze impact for downstream dependents">Impact Analysis</button>
+            </div>
+            <div id="impactAnalysisPanel" class="mt-2"></div>
+        </div>
+    `;
+
     document.getElementById('nodeDetails').innerHTML = html;
+
+/**
+ * Run impact analysis for the selected file and render a brief summary.
+ */
+async function runImpactAnalysis(filePath) {
+    const panel = document.getElementById('impactAnalysisPanel');
+    if (panel) panel.innerHTML = '<span class="text-muted small"><i class="fas fa-spinner fa-spin"></i> Running impact analysis...</span>';
+    try {
+        const res = await fetch(`/yaml-manager/api/dependencies/${encodeURIComponent(filePath)}/impact`);
+        const data = await res.json();
+        const panel = document.getElementById('impactAnalysisPanel');
+        if (data.status === 'success') {
+            panel.innerHTML = `
+                <div class="impact-summary small">
+                    <div><strong>Risk:</strong> ${data.riskLevel} | <strong>Impact Score:</strong> ${data.impactScore} | <strong>Radius:</strong> ${data.impactRadius}</div>
+                    <div><strong>Direct dependents:</strong> ${data.directDependents?.length || 0} | <strong>Transitive dependents:</strong> ${data.transitiveDependents?.length || 0}</div>
+                    <div class="mt-1"><strong>Recommendation:</strong> ${data.recommendation || '—'}</div>
+                </div>`;
+        } else {
+            panel.innerHTML = `<div style="color:#b00; font-size:12px;">Error: ${data.message || 'Failed to run impact analysis'}</div>`;
+        }
+    } catch (e) {
+        console.error('Impact analysis error:', e);
+        const panel = document.getElementById('impactAnalysisPanel');
+        if (panel) panel.innerHTML = `<div style="color:#b00; font-size:12px;">Error: ${e.message}</div>`;
+    }
+}
+
+window.runImpactAnalysis = runImpactAnalysis;
+
 }
 
 /**
@@ -397,6 +603,10 @@ function expandToLevel(level) {
 // Expose for Selenium and console usage
 window.expandToLevel = expandToLevel;
 
+
+
+// Expose loadDependencyTree for Selenium and console usage
+window.loadDependencyTree = loadDependencyTree;
 
 /**
  * Filter tree by search term
@@ -620,6 +830,11 @@ async function loadSelectedFiles() {
             const data = await response.json();
 
             if (data.status === 'success') {
+                const vr = validateTreePayload(data);
+                if (!vr.ok) {
+                    showValidationErrors(vr.errors);
+                    return;
+                }
                 treeData = data.tree ? [data.tree] : [];
                 renderTree(treeData);
             } else {

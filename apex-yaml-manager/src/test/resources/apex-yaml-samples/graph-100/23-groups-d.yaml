@@ -1,0 +1,22 @@
+metadata:
+  id: graph100-groups-d
+  name: Graph100 Groups D
+  description: Rule groups D referencing rules D and common
+  version: 0.2.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+rule-configurations:
+  - 33-rules-d.yaml
+  - 25-groups-common.yaml
+
+rule-groups:
+  - id: d-basic
+    name: D Basic Group
+    operator: AND
+    stop-on-first-failure: true
+    priority: 20
+    rule-ids:
+      - d-rule-1
+

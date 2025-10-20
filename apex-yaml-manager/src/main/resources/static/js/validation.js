@@ -4,6 +4,15 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
+    // Prefill from query parameter ?path=
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const p = params.get('path');
+        if (p) {
+            const fileInput = document.getElementById('filePath');
+            if (fileInput) fileInput.value = p;
+        }
+    } catch (e) { /* no-op */ }
 });
 
 function setupEventListeners() {

@@ -1,0 +1,21 @@
+metadata:
+  id: graph100-rules-c
+  name: Graph100 Rules C
+  description: Simple rules C
+  version: 0.2.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+rules:
+  - id: c-rule-1
+    name: C Rule 1
+    condition: "true"
+    message: "C1 ok"
+    severity: INFO
+  - id: c-rule-2
+    name: C Rule 2
+    condition: "true"
+    message: "C2 ok"
+    severity: INFO
+

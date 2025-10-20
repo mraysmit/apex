@@ -1,0 +1,26 @@
+metadata:
+  id: graph100-rules-common
+  name: Graph100 Rules Common
+  description: Shared rules used by multiple groups
+  version: 0.2.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+rules:
+  - id: common-1
+    name: Common Rule 1
+    condition: "true"
+    message: "Common1 ok"
+    severity: INFO
+  - id: common-2
+    name: Common Rule 2
+    condition: "true"
+    message: "Common2 ok"
+    severity: INFO
+  - id: common-3
+    name: Common Rule 3
+    condition: "true"
+    message: "Common3 ok"
+    severity: INFO
+

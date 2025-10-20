@@ -1,0 +1,31 @@
+metadata:
+  id: graph100-groups-b
+  name: Graph100 Groups B
+  description: Rule groups B referencing rules B
+  version: 0.1.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+# File dependencies (expanded)
+rule-configurations:
+  - 31-rules-b.yaml
+  - 25-groups-common.yaml
+  - 36-rules-f.yaml
+  - 98-invalid.yaml
+  - 99-missing.yaml
+
+enrichment-refs:
+  - 61-enrich-b.yaml
+  - 62-enrich-common.yaml
+
+rule-groups:
+  - id: b-basic
+    name: B Basic Group
+    operator: AND
+    stop-on-first-failure: true
+    priority: 10
+    rule-ids:
+      - b-rule-1
+      - b-rule-2
+

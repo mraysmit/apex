@@ -1,0 +1,16 @@
+metadata:
+  id: invalid-98
+  name: Invalid 98 File
+  description: Deliberately malformed YAML to test invalid detection
+  version: 0.0.1
+  type: rule-config
+  author: test@apex
+
+# Begin malformed section (unterminated string)
+rules:
+  - id: invalid-rule
+    name: "unterminated
+    severity: HIGH
+    condition: "true"
+    message: "This file is intentionally invalid"
+

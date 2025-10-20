@@ -1,0 +1,16 @@
+metadata:
+  id: graph100-rules-d
+  name: Graph100 Rules D
+  description: Simple rules D
+  version: 0.2.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+rules:
+  - id: d-rule-1
+    name: D Rule 1
+    condition: "true"
+    message: "D1 ok"
+    severity: INFO
+

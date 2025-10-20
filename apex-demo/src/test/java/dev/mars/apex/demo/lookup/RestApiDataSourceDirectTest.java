@@ -19,10 +19,56 @@ import static org.junit.jupiter.api.Assertions.*;
 public class RestApiDataSourceDirectTest {
 
     private ExternalDataSource dataSource;
+    private com.sun.net.httpserver.HttpServer server;
+    private int port;
 
     @BeforeEach
     void setUp() throws DataSourceException {
         System.out.println("=== Setting up RestApiDataSource direct test ===");
+
+        // Start a lightweight local HTTP server to avoid flaky external dependencies
+        try {
+            server = com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0);
+            port = server.getAddress().getPort();
+
+            // /get endpoint echoes query param as JSON
+            server.createContext("/get", exchange -> {
+                String query = exchange.getRequestURI().getQuery();
+                String paramValue = "";
+                if (query != null) {
+                    for (String kv : query.split("&")) {
+                        String[] parts = kv.split("=", 2);
+                        if (parts.length == 2 && parts[0].equals("param")) {
+                            paramValue = java.net.URLDecoder.decode(parts[1], java.nio.charset.StandardCharsets.UTF_8);
+                            break;
+                        }
+                    }
+                }
+                String body = "{\"args\": {\"param\": \"" + paramValue + "\"}}";
+                byte[] bytes = body.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().add("Content-Type", "application/json");
+                exchange.sendResponseHeaders(200, bytes.length);
+                try (java.io.OutputStream os = exchange.getResponseBody()) {
+                    os.write(bytes);
+                }
+            });
+
+            // /json endpoint returns a static JSON document
+            server.createContext("/json", exchange -> {
+                String body = "{\"slideshow\": {\"title\": \"Sample Slide Show\"}}";
+                byte[] bytes = body.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().add("Content-Type", "application/json");
+                exchange.sendResponseHeaders(200, bytes.length);
+                try (java.io.OutputStream os = exchange.getResponseBody()) {
+                    os.write(bytes);
+                }
+            });
+
+            server.start();
+            System.out.println("Local test HTTP server started on port " + port);
+        } catch (java.io.IOException e) {
+            throw new RuntimeException("Failed to start local HTTP server for tests", e);
+        }
 
         // Create configuration
         DataSourceConfiguration config = new DataSourceConfiguration();
@@ -33,13 +79,14 @@ public class RestApiDataSourceDirectTest {
 
         // Set connection details
         ConnectionConfig connection = new ConnectionConfig();
-        connection.setBaseUrl("https://httpbin.org");
+        connection.setBaseUrl("http://127.0.0.1:" + port);
         connection.setTimeout(10000);
         config.setConnection(connection);
 
         // Set endpoints
         Map<String, String> endpoints = new HashMap<>();
         endpoints.put("test-get", "/get?param={param}");
+        endpoints.put("json-test", "/json");
         config.setEndpoints(endpoints);
 
         // Create data source using factory
@@ -48,6 +95,15 @@ public class RestApiDataSourceDirectTest {
 
         System.out.println("RestApiDataSource initialized successfully");
     }
+
+    @org.junit.jupiter.api.AfterEach
+    void tearDown() {
+        if (server != null) {
+            server.stop(0);
+            System.out.println("Local test HTTP server stopped");
+        }
+    }
+
 
     @Test
     void testDirectQueryForObject() throws DataSourceException {
@@ -94,8 +150,7 @@ public class RestApiDataSourceDirectTest {
     void testSimpleJsonResponse() throws DataSourceException {
         System.out.println("=== Testing simple JSON response ===");
 
-        // Test with a simple endpoint that returns known JSON
-        // httpbin.org/json returns a simple JSON object
+        // Test with a simple endpoint that returns known JSON via local test server
 
         // Update configuration for JSON endpoint
         DataSourceConfiguration config = new DataSourceConfiguration();
@@ -105,7 +160,7 @@ public class RestApiDataSourceDirectTest {
         config.setEnabled(true);
 
         ConnectionConfig connection = new ConnectionConfig();
-        connection.setBaseUrl("https://httpbin.org");
+        connection.setBaseUrl("http://127.0.0.1:" + port);
         connection.setTimeout(10000);
         config.setConnection(connection);
 

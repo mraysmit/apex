@@ -1,0 +1,19 @@
+metadata:
+  id: graph100-cycle-1
+  name: Graph100 Cycle 1
+  description: First file in a 2-node cycle
+  version: 0.2.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+rule-configurations:
+  - 41-cycle-2.yaml
+
+rules:
+  - id: c1-info
+    name: Cycle 1 Info
+    condition: "true"
+    message: "cycle-1 reached"
+    severity: INFO
+

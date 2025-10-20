@@ -1,0 +1,19 @@
+metadata:
+  id: graph100-config-db
+  name: Graph100 External Data Config - DB
+  description: Database configuration for demo
+  version: 0.1.0
+  type: external-data-config
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+config:
+  connections:
+    - id: demo-db
+      type: postgres
+      host: localhost
+      port: 5432
+      database: demo
+      user: demo
+      password: demo
+

@@ -1,0 +1,21 @@
+metadata:
+  id: graph100-rules-b
+  name: Graph100 Rules B
+  description: Simple rules B
+  version: 0.1.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+rules:
+  - id: b-rule-1
+    name: B Rule 1
+    condition: "true"
+    message: "B1 ok"
+    severity: INFO
+  - id: b-rule-2
+    name: B Rule 2
+    condition: "true"
+    message: "B2 ok"
+    severity: INFO
+

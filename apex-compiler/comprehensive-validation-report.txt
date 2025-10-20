@@ -2,30 +2,32 @@ COMPREHENSIVE APEX YAML VALIDATION REPORT
 =========================================
 
 OVERALL STATISTICS:
-  Total YAML files: 16
-  Fully valid files: 1
-  Structurally valid: 1
+  Total YAML files: 19
+  Fully valid files: 8
+  Structurally valid: 8
   Dependency issues only: 0
-  Invalid files: 15
+  Invalid files: 11
 
 SUCCESS RATES:
-  Overall success rate: 6.3%
-  Structural success rate: 6.3%
+  Overall success rate: 42.1%
+  Structural success rate: 42.1%
 
 ERROR BREAKDOWN:
-  Missing Required Fields: 15 occurrences
-  Other Issues: 2 occurrences
-  Document Type Issues: 2 occurrences
+  Missing Required Fields: 8 occurrences
+  Other Issues: 3 occurrences
 
 SAMPLE VALID FILES:
+  • demo-default-value.yaml
+  • customer-rules.yaml
+  • scenario-concurrent-access-test-rules.yaml
+  • scenario-load-test-rules.yaml
+  • scenario-memory-profiling-test-rules.yaml
   • test-config-with-properties.yaml
+  • yaml-default-value-test.yaml
+  • yaml-error-recovery-test.yaml
 
 SAMPLE INVALID FILES:
-  • demo-default-value.yaml - ..\apex-core\src\test\resources\demo-default-value.yaml: Missing required metadata field: type
-  • customer-rules.yaml - ..\apex-core\src\test\resources\rulegroups\customer-rules.yaml: Missing required metadata field: id
-  • customer-validation-groups.yaml - ..\apex-core\src\test\resources\rulegroups\customer-validation-groups.yaml: Missing required metadata field: id
-  • yaml-default-value-test.yaml - ..\apex-core\src\test\resources\yaml-default-value-test.yaml: Invalid document type: test-config. Valid types: [rule-chain, scenario, rule-config, bootstrap, pipeline-config, dataset, enrichment, external-data-config, scenario-registry]
-  • yaml-error-recovery-test.yaml - ..\apex-core\src\test\resources\yaml-error-recovery-test.yaml: Invalid document type: test. Valid types: [rule-chain, scenario, rule-config, bootstrap, pipeline-config, dataset, enrichment, external-data-config, scenario-registry]
+  • customer-validation-groups.yaml - ..\apex-core\src\test\resources\rulegroups\customer-validation-groups.yaml: Document type 'rule-config' requires at least one of: [enrichments, rules]
   • application.yml - ..\apex-rest-api\src\main\resources\application.yml: YAML syntax error: expected a single document in the stream
  in 'string', line 2, column 1:
     spring:
@@ -47,8 +49,12 @@ but found another document
     ---
     ^
 
+  • application-test.yml - ..\apex-rest-api\target\test-classes\application-test.yml: Missing required 'metadata' section
+  • default-rules.yaml - ..\apex-rest-api\target\test-classes\rules\default-rules.yaml: Missing required metadata field: id
+  • test-rules.yaml - ..\apex-rest-api\target\test-classes\rules\test-rules.yaml: Missing required metadata field: id
+  • application.yml - ..\apex-playground\src\main\resources\application.yml: Missing required 'metadata' section
 
 BULK FIX IMPACT ASSESSMENT:
   Previous estimated rate: 21.3%
-  Current actual rate: 6.3%
-  Improvement: +-15.1 percentage points
+  Current actual rate: 42.1%
+  Improvement: +20.8 percentage points

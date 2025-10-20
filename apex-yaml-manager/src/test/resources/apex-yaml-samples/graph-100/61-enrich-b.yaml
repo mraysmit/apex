@@ -1,0 +1,20 @@
+metadata:
+  id: graph100-enrich-b
+  name: Graph100 Enrichment B
+  description: Simple enrichment B
+  version: 0.1.0
+  type: enrichment
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+enrichment:
+  id: enrich-b
+  steps:
+    - id: set-b
+      description: set field B
+      when: "true"
+      action: set
+      params:
+        field: enrichedB
+        value: "B"
+

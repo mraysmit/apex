@@ -179,7 +179,7 @@ public class InputDataClassificationPhase1Test extends DemoTestBase {
     @DisplayName("Should demonstrate classification caching performance")
     void testClassificationCaching() {
         logger.info("=== Testing classification caching performance ===");
-        
+
         String jsonData = """
             {
                 "messageType": "POSITION",
@@ -191,43 +191,55 @@ public class InputDataClassificationPhase1Test extends DemoTestBase {
                 ]
             }
             """;
-        
+
         ApexProcessingContext context = ApexProcessingContext.builder()
             .source("test")
             .fileName("position.json")
             .fileSize((long) jsonData.length())
             .build();
-        
-        // First call - should be cache miss
-        long startTime1 = System.currentTimeMillis();
+
+        // Warm-up a different key to stabilize JIT and thread scheduling without priming this specific cache entry
+        try {
+            ApexProcessingContext warmupCtx = ApexProcessingContext.builder()
+                .source("test")
+                .fileName("warmup.json")
+                .fileSize((long) jsonData.length())
+                .build();
+            apexEngine.classifyAndProcessData(jsonData, warmupCtx);
+        } catch (Exception ignore) {
+            // best-effort warm-up only
+        }
+
+        // First call - should be cache miss for this key
+        long startTime1 = System.nanoTime();
         ApexProcessingResult result1 = apexEngine.classifyAndProcessData(jsonData, context);
-        long time1 = System.currentTimeMillis() - startTime1;
-        
-        // Second call - should be cache hit
-        long startTime2 = System.currentTimeMillis();
+        long time1 = java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime1);
+
+        // Second call - should be cache hit for this key
+        long startTime2 = System.nanoTime();
         ApexProcessingResult result2 = apexEngine.classifyAndProcessData(jsonData, context);
-        long time2 = System.currentTimeMillis() - startTime2;
-        
+        long time2 = java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime2);
+
         // Validate both results are successful
         assertTrue(result1.isSuccess(), "First call should succeed");
         assertTrue(result2.isSuccess(), "Second call should succeed");
-        
+
         // Results should be equivalent
-        assertEquals(result1.getClassification().getFileFormat(), 
-                    result2.getClassification().getFileFormat(), 
+        assertEquals(result1.getClassification().getFileFormat(),
+                    result2.getClassification().getFileFormat(),
                     "Cached result should match original");
-        assertEquals(result1.getClassification().getContentType(), 
-                    result2.getClassification().getContentType(), 
+        assertEquals(result1.getClassification().getContentType(),
+                    result2.getClassification().getContentType(),
                     "Cached content type should match original");
-        
+
         // Second call should be faster (cache hit)
         assertTrue(time2 <= time1, "Cached call should be faster or equal");
-        
+
         // Check cache statistics
         Object cacheStats = scenarioService.getClassificationCacheStatistics();
         assertNotNull(cacheStats, "Cache statistics should be available");
-        
-        logger.info("Caching performance: first={}ms, second={}ms, cache stats available: {}", 
+
+        logger.info("Caching performance: first={}ms, second={}ms, cache stats available: {}",
                    time1, time2, cacheStats != null);
     }
 

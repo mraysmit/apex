@@ -1,0 +1,16 @@
+metadata:
+  id: graph100-rules-e
+  name: Graph100 Rules E
+  description: Additional rules E
+  version: 0.1.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-19
+
+rules:
+  - id: e-rule-1
+    name: E Rule 1
+    condition: "true"
+    message: "E1 ok"
+    severity: INFO
+

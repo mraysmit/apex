@@ -22,6 +22,7 @@ import dev.mars.apex.yaml.manager.model.EnhancedYamlDependencyGraph;
 import dev.mars.apex.yaml.manager.model.ImpactAnalysisResult;
 import dev.mars.apex.yaml.manager.model.TreeNode;
 import dev.mars.apex.yaml.manager.service.DependencyAnalysisService;
+import dev.mars.apex.yaml.manager.service.TreeValidationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -55,11 +56,14 @@ public class DependencyAnalysisController {
     private static final Logger logger = LoggerFactory.getLogger(DependencyAnalysisController.class);
 
     private final DependencyAnalysisService dependencyService;
+    private final TreeValidationService treeValidationService;
     private EnhancedYamlDependencyGraph currentGraph;
 
     @Autowired
-    public DependencyAnalysisController(DependencyAnalysisService dependencyService) {
+    public DependencyAnalysisController(DependencyAnalysisService dependencyService,
+                                        TreeValidationService treeValidationService) {
         this.dependencyService = dependencyService;
+        this.treeValidationService = treeValidationService;
     }
 
     /**
@@ -646,6 +650,45 @@ public class DependencyAnalysisController {
         }
     }
 
+
+    /**
+     * Validate the dependency tree and graph prior to UI rendering.
+     */
+    @PostMapping("/validate-tree")
+    @Operation(summary = "Validate dependency tree", description = "Validate structure and graph integrity for a given root file before rendering the tree")
+    @ApiResponse(responseCode = "200", description = "Validation completed")
+    @ApiResponse(responseCode = "400", description = "Invalid request or analysis failed")
+    public ResponseEntity<Map<String, Object>> validateTree(@RequestParam String rootFile) {
+        try {
+            if (rootFile == null || rootFile.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "status", "error",
+                        "message", "rootFile parameter is required"
+                ));
+            }
+
+            // Build fresh graph + tree for the provided root
+            this.currentGraph = dependencyService.analyzeDependencies(rootFile);
+            String treeRoot = this.currentGraph.getRootFile();
+            TreeNode tree = dependencyService.generateDependencyTree(this.currentGraph, treeRoot);
+
+            Map<String, Object> validation = treeValidationService.validate(this.currentGraph, tree);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("rootFile", treeRoot);
+            response.put("validation", validation);
+            response.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Failed to validate dependency tree", e);
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", "error",
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
     /**
      * Get detailed information for a specific node in the dependency tree.
      */
@@ -689,6 +732,8 @@ public class DependencyAnalysisController {
             data.put("created", node.getCreated() != null ? node.getCreated() : "Unknown");
             data.put("lastModified", node.getLastModified() != null ? node.getLastModified() : "Unknown");
             data.put("version", node.getVersion() != null ? node.getVersion() : "1.0");
+            // Include content summary so UI can display badges
+            data.put("contentSummary", node.getContentSummary());
             data.put("circularDependencies", node.getCircularDependencies() != null ? node.getCircularDependencies() : List.of());
 
             response.put("data", data);
