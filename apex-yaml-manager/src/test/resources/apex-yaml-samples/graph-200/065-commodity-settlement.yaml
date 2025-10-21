@@ -1,0 +1,31 @@
+﻿metadata:
+  id: commodity-settlement
+  type: rule-config
+  version: "1.0"
+  description: "Commodity settlement rules"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+rule-groups:
+  - id: commodity-settlement-group
+    description: "Commodity settlement rules group"
+    rule-ids:
+      - "commodity-settlement-rule-1"
+      - "commodity-settlement-rule-2"
+      - "commodity-settlement-rule-3"
+
+rules:
+  - id: commodity-settlement-rule-1
+    description: "Rule 1 for Commodity settlement rules"
+    condition: "trade.field1 != null && trade.field1 > 0"
+    severity: "ERROR"
+  - id: commodity-settlement-rule-2
+    description: "Rule 2 for Commodity settlement rules"
+    condition: "trade.field2 != null && trade.field2 > 0"
+    severity: "ERROR"
+  - id: commodity-settlement-rule-3
+    description: "Rule 3 for Commodity settlement rules"
+    condition: "trade.field3 != null && trade.field3 > 0"
+    severity: "ERROR"
+
+dependencies:
+  - "116-physical-settlement-rules.yaml"

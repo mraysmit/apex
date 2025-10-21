@@ -1,0 +1,21 @@
+﻿metadata:
+  id: 
+  type: pipeline-config
+  version: "1.0"
+  description: "FX processing pipeline"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+pipeline:
+  id: 
+  description: "FX processing pipeline"
+  stages:
+    - name: "validation"
+      type: "rule-execution"
+    - name: "enrichment"
+      type: "data-enrichment"
+    - name: "output"
+      type: "data-output"
+
+dependencies:
+  - "062-fx-validation.yaml"
+  - "159-fx-rate-enrichment.yaml"

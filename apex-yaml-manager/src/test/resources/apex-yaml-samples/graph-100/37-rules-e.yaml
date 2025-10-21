@@ -1,0 +1,25 @@
+metadata:
+  id: graph100-rules-e
+  name: Graph100 Rules E Extended
+  description: Extended rules E for complex scenarios
+  version: 0.3.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+rules:
+  - id: e-rule-1
+    name: E Rule 1
+    condition: "#tradeType == 'EQUITY'"
+    message: "E1 equity validation"
+    severity: INFO
+  - id: e-rule-2
+    name: E Rule 2
+    condition: "#amount > 1000000"
+    message: "E2 large trade validation"
+    severity: WARNING
+  - id: e-rule-3
+    name: E Rule 3
+    condition: "#currency != null"
+    message: "E3 currency validation"
+    severity: ERROR

@@ -1,0 +1,13 @@
+﻿metadata:
+  id: mena-scenario
+  type: scenario
+  version: "1.0"
+  description: "MENA region trading"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+
+
+dependencies:
+  - "084-mena-validation.yaml"
+  - "085-mena-settlement.yaml"
+  - "170-mena-enrichment.yaml"

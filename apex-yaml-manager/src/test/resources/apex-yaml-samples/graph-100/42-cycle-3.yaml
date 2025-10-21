@@ -1,0 +1,18 @@
+metadata:
+  id: graph100-cycle-3
+  name: Graph100 Cycle 3
+  description: Third file in a 3-node cycle
+  version: 0.3.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+rules:
+  - id: cycle-rule-3
+    name: Cycle Rule 3
+    condition: "true"
+    message: "C3 cycle test"
+    severity: INFO
+
+rule-configurations:
+  - "43-cycle-4.yaml"

@@ -1,0 +1,31 @@
+metadata:
+  id: graph100-config-file-system
+  name: Graph100 External Data Config - File System
+  description: File system data source configuration
+  version: 0.3.0
+  type: external-data-config
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+dataSources:
+  file-system-source:
+    type: "file-system"
+    enabled: true
+    description: "File-based data source"
+
+    connection:
+      base-path: "./data/input"
+      file-pattern: "trades_*.csv"
+      encoding: "UTF-8"
+      watch-directory: true
+
+    file-format:
+      type: "csv"
+      delimiter: ","
+      header-row: true
+      quote-character: "\""
+
+    processing:
+      batch-size: 1000
+      parallel-processing: true
+      error-handling: "skip-and-log"

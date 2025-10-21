@@ -1,0 +1,18 @@
+metadata:
+  id: graph100-cycle-10
+  name: Graph100 Cycle 10
+  description: Self-referencing cycle
+  version: 0.3.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+rules:
+  - id: cycle-rule-10
+    name: Cycle Rule 10
+    condition: "true"
+    message: "C10 self-reference"
+    severity: INFO
+
+rule-configurations:
+  - "49-cycle-10.yaml"  # Self-reference

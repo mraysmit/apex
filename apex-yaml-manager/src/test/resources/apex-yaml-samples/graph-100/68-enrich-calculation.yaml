@@ -1,0 +1,26 @@
+metadata:
+  id: graph100-enrich-calculation
+  name: Graph100 Enrichment Calculation
+  description: Mathematical calculation enrichment
+  version: 0.3.0
+  type: enrichment
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+enrichment:
+  id: enrich-calculation
+  steps:
+    - id: calculate-notional
+      description: calculate trade notional value
+      when: "true"
+      action: set
+      params:
+        field: notionalValue
+        value: "#quantity * #price"
+    - id: calculate-commission
+      description: calculate commission
+      when: "true"
+      action: set
+      params:
+        field: commission
+        value: "#notionalValue * 0.001"

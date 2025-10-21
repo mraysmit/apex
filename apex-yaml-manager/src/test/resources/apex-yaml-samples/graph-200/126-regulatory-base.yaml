@@ -1,0 +1,36 @@
+﻿metadata:
+  id: regulatory-base
+  type: rule-config
+  version: "1.0"
+  description: "Base regulatory framework"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+rule-groups:
+  - id: regulatory-base-group
+    description: "Base regulatory framework group"
+    rule-ids:
+      - "regulatory-base-rule-1"
+      - "regulatory-base-rule-2"
+      - "regulatory-base-rule-3"
+      - "regulatory-base-rule-4"
+
+rules:
+  - id: regulatory-base-rule-1
+    description: "Rule 1 for Base regulatory framework"
+    condition: "trade.field1 != null && trade.field1 > 0"
+    severity: "ERROR"
+  - id: regulatory-base-rule-2
+    description: "Rule 2 for Base regulatory framework"
+    condition: "trade.field2 != null && trade.field2 > 0"
+    severity: "ERROR"
+  - id: regulatory-base-rule-3
+    description: "Rule 3 for Base regulatory framework"
+    condition: "trade.field3 != null && trade.field3 > 0"
+    severity: "ERROR"
+  - id: regulatory-base-rule-4
+    description: "Rule 4 for Base regulatory framework"
+    condition: "trade.field4 != null && trade.field4 > 0"
+    severity: "ERROR"
+
+dependencies:
+  - "110-reference-data-rules.yaml"

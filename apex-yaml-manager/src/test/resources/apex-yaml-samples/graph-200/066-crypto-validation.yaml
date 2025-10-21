@@ -1,0 +1,31 @@
+﻿metadata:
+  id: crypto-validation
+  type: rule-config
+  version: "1.0"
+  description: "Crypto validation rules"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+rule-groups:
+  - id: crypto-validation-group
+    description: "Crypto validation rules group"
+    rule-ids:
+      - "crypto-validation-rule-1"
+      - "crypto-validation-rule-2"
+      - "crypto-validation-rule-3"
+
+rules:
+  - id: crypto-validation-rule-1
+    description: "Rule 1 for Crypto validation rules"
+    condition: "trade.field1 != null && trade.field1 > 0"
+    severity: "ERROR"
+  - id: crypto-validation-rule-2
+    description: "Rule 2 for Crypto validation rules"
+    condition: "trade.field2 != null && trade.field2 > 0"
+    severity: "ERROR"
+  - id: crypto-validation-rule-3
+    description: "Rule 3 for Crypto validation rules"
+    condition: "trade.field3 != null && trade.field3 > 0"
+    severity: "ERROR"
+
+dependencies:
+  - "100-common-validation-rules.yaml"

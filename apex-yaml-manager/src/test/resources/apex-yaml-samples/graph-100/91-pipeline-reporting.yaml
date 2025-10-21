@@ -1,0 +1,41 @@
+metadata:
+  id: graph100-pipeline-reporting
+  name: Graph100 Pipeline Reporting
+  description: Regulatory reporting pipeline
+  version: 0.3.0
+  type: pipeline
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+pipeline:
+  id: reporting-pipeline
+  name: Regulatory Reporting
+  description: Generates regulatory reports from trade data
+
+  stages:
+    - name: "extract-trade-data"
+      type: "extract"
+      description: "Extract trade data for reporting"
+      execution-order: 1
+      config-file: "72-config-market-data.yaml"
+
+    - name: "apply-compliance-rules"
+      type: "validate"
+      description: "Apply compliance validation rules"
+      execution-order: 2
+      depends-on: ["extract-trade-data"]
+      config-file: "80-dataset-compliance.yaml"
+
+    - name: "generate-reports"
+      type: "transform"
+      description: "Generate regulatory reports"
+      execution-order: 3
+      depends-on: ["apply-compliance-rules"]
+
+data-sources:
+  - name: "trade-source"
+    source: "72-config-market-data.yaml"
+    enabled: true
+  - name: "compliance-data"
+    source: "80-dataset-compliance.yaml"
+    enabled: true

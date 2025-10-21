@@ -1,0 +1,31 @@
+﻿metadata:
+  id: prime-settlement
+  type: rule-config
+  version: "1.0"
+  description: "Prime brokerage settlement"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+rule-groups:
+  - id: prime-settlement-group
+    description: "Prime brokerage settlement group"
+    rule-ids:
+      - "prime-settlement-rule-1"
+      - "prime-settlement-rule-2"
+      - "prime-settlement-rule-3"
+
+rules:
+  - id: prime-settlement-rule-1
+    description: "Rule 1 for Prime brokerage settlement"
+    condition: "trade.field1 != null && trade.field1 > 0"
+    severity: "ERROR"
+  - id: prime-settlement-rule-2
+    description: "Rule 2 for Prime brokerage settlement"
+    condition: "trade.field2 != null && trade.field2 > 0"
+    severity: "ERROR"
+  - id: prime-settlement-rule-3
+    description: "Rule 3 for Prime brokerage settlement"
+    condition: "trade.field3 != null && trade.field3 > 0"
+    severity: "ERROR"
+
+dependencies:
+  - "119-prime-services-rules.yaml"

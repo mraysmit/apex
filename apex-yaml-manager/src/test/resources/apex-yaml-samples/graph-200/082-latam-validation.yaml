@@ -1,0 +1,32 @@
+﻿metadata:
+  id: latam-validation
+  type: rule-config
+  version: "1.0"
+  description: "LATAM validation rules"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+rule-groups:
+  - id: latam-validation-group
+    description: "LATAM validation rules group"
+    rule-ids:
+      - "latam-validation-rule-1"
+      - "latam-validation-rule-2"
+      - "latam-validation-rule-3"
+
+rules:
+  - id: latam-validation-rule-1
+    description: "Rule 1 for LATAM validation rules"
+    condition: "trade.field1 != null && trade.field1 > 0"
+    severity: "ERROR"
+  - id: latam-validation-rule-2
+    description: "Rule 2 for LATAM validation rules"
+    condition: "trade.field2 != null && trade.field2 > 0"
+    severity: "ERROR"
+  - id: latam-validation-rule-3
+    description: "Rule 3 for LATAM validation rules"
+    condition: "trade.field3 != null && trade.field3 > 0"
+    severity: "ERROR"
+
+dependencies:
+  - "100-common-validation-rules.yaml"
+  - "124-latam-rules.yaml"

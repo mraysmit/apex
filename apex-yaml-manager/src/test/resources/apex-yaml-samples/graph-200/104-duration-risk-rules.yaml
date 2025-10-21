@@ -1,0 +1,31 @@
+﻿metadata:
+  id: duration-risk
+  type: rule-config
+  version: "1.0"
+  description: "Duration risk assessment rules"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+rule-groups:
+  - id: duration-risk-group-1
+    name: "Primary Rule Group"
+    description: "Primary rule group for Duration risk assessment rules"
+    operator: AND
+    stop-on-first-failure: true
+    priority: 10
+    rule-ids:
+      - "duration-risk-rule-1"
+      - "duration-risk-rule-2"
+
+rules:
+  - id: duration-risk-rule-1
+    name: "Primary Validation"
+    description: "Primary validation rule for Duration risk assessment rules"
+    condition: "trade.field1 != null && trade.field1.length() > 0"
+    message: "Field1 validation failed"
+    severity: "ERROR"
+  - id: duration-risk-rule-2
+    name: "Secondary Validation"
+    description: "Secondary validation rule for Duration risk assessment rules"
+    condition: "trade.field2 != null && trade.field2 > 0"
+    message: "Field2 validation failed"
+    severity: "WARNING"

@@ -1,0 +1,18 @@
+metadata:
+  id: graph100-scenario-h
+  name: Graph100 Scenario H
+  description: Scenario H with deep dependency chains
+  version: 0.3.0
+  type: scenario
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+scenario:
+  id: scenario-h
+  name: Deep Chain Processing
+  description: Demonstrates deep dependency chains with multiple levels
+  data-types: ["trade", "settlement", "clearing"]
+
+rule-configurations:
+  - "57-chain-8.yaml"
+  - "74-config-clearing.yaml"

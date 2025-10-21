@@ -1,0 +1,13 @@
+﻿metadata:
+  id: 
+  type: external-data-config
+  version: "1.0"
+  description: "External configuration 289"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+data-sources:
+  - id: -source
+    type: "database"
+    connection-string: "jdbc:postgresql://localhost:5432/apex_test"
+    query: "SELECT * FROM _data WHERE id = ?"
+    cache-ttl: 300

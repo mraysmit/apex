@@ -1,0 +1,13 @@
+﻿metadata:
+  id: latam-scenario
+  type: scenario
+  version: "1.0"
+  description: "Latin America trading"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+
+
+dependencies:
+  - "082-latam-validation.yaml"
+  - "083-latam-settlement.yaml"
+  - "169-latam-enrichment.yaml"

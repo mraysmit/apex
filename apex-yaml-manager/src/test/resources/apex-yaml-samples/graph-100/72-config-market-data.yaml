@@ -1,0 +1,28 @@
+metadata:
+  id: graph100-config-market-data
+  name: Graph100 External Data Config - Market Data
+  description: Market data configuration for trading scenarios
+  version: 0.3.0
+  type: external-data-config
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+dataSources:
+  market-data-source:
+    type: "rest-api"
+    enabled: true
+    description: "Market data REST API"
+
+    connection:
+      base-url: "https://api.marketdata.com/v1"
+      timeout: 10000
+      retry-attempts: 3
+
+    endpoints:
+      getCurrentPrice: "/prices/{symbol}"
+      getHistoricalPrices: "/prices/{symbol}/history"
+
+    authentication:
+      type: "api-key"
+      keyHeader: "X-API-Key"
+      keyValue: "${MARKET_DATA_API_KEY}"

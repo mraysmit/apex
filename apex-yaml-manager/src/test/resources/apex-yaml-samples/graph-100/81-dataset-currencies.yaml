@@ -1,0 +1,29 @@
+metadata:
+  id: graph100-dataset-currencies
+  name: Graph100 Dataset Currencies
+  description: Currency reference data for trading
+  version: 0.3.0
+  type: dataset
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+  source: "ISO 4217 Standard"
+
+data:
+  - id: "MAJOR_CURRENCIES"
+    name: "Major Trading Currencies"
+    values:
+      - code: "USD"
+        name: "US Dollar"
+        decimals: 2
+      - code: "EUR"
+        name: "Euro"
+        decimals: 2
+      - code: "GBP"
+        name: "British Pound"
+        decimals: 2
+      - code: "JPY"
+        name: "Japanese Yen"
+        decimals: 0
+      - code: "CHF"
+        name: "Swiss Franc"
+        decimals: 2

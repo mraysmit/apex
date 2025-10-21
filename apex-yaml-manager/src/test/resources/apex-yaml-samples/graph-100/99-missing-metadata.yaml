@@ -1,0 +1,7 @@
+# This file intentionally has no metadata section to test error handling
+rules:
+  - id: missing-metadata-rule
+    name: Missing Metadata Rule
+    condition: "true"
+    message: "This rule has no metadata"
+    severity: ERROR

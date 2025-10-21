@@ -1,0 +1,18 @@
+metadata:
+  id: graph100-circular-self-ref
+  name: Graph100 Circular Self Reference
+  description: File that references itself to test circular dependency detection
+  version: 0.3.0
+  type: rule-config
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+rules:
+  - id: self-ref-rule
+    name: Self Reference Rule
+    condition: "true"
+    message: "Self-referencing rule"
+    severity: WARNING
+
+rule-configurations:
+  - "99-circular-self-ref.yaml"  # Self-reference
