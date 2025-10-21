@@ -1103,8 +1103,9 @@ async function loadSelectedFiles() {
         try { window.__lastStep = 'closeModal-error'; } catch (ee) {}
     }
 
-    // Load the first selected file as root
+    // Load the first selected file as root (use full path)
     const rootFile = selectedFiles[0];
+    console.log('Loading dependency tree for root file:', rootFile);
 
     // Persist and show selected folder in header
     try { window.__lastStep = 'before-assumedFolder'; } catch (e) {}
