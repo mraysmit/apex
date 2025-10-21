@@ -162,10 +162,19 @@ function setupEventListeners() {
     if (lvl2Btn) lvl2Btn.addEventListener('click', () => expandToLevel(2));
     if (lvl3Btn) lvl3Btn.addEventListener('click', () => expandToLevel(3));
 
-    // Folder path input with Enter key support
+    // Folder path input with Enter key support and styling reset
     safeAddEventListener('folderPathInput', 'keypress', function(e) {
         if (e.key === 'Enter') scanFolder();
     }, 'folder path input');
+
+    // Reset styling when user types manually
+    safeAddEventListener('folderPathInput', 'input', function(e) {
+        const input = e.target;
+        if (input.style.fontStyle === 'italic') {
+            input.style.fontStyle = 'normal';
+            input.style.color = '';
+        }
+    }, 'folder path input styling reset');
 
     // If navigated with #load, open folder modal automatically
     try {
@@ -933,11 +942,15 @@ function handleFolderSelection(event) {
         const firstFile = files[0];
         const filePath = firstFile.webkitRelativePath || firstFile.name;
 
-        // Extract the folder path (remove the filename)
-        const folderPath = filePath.substring(0, filePath.lastIndexOf('/'));
+        // Extract the folder name from the relative path
+        let folderDisplayName = 'Selected Folder';
+        if (filePath.includes('/')) {
+            // Get the root folder name from the relative path
+            const pathParts = filePath.split('/');
+            folderDisplayName = pathParts[0]; // First part is the root folder name
+        }
 
-        // Get the full path from the file system
-        // For web, we'll use the relative path and scan all selected files
+        // Filter and process YAML files
         const yamlFiles = Array.from(files)
             .filter(f => f.name.endsWith('.yaml') || f.name.endsWith('.yml'))
             .map(f => ({
@@ -950,12 +963,17 @@ function handleFolderSelection(event) {
             // Store the files for later use
             selectedFilesFromDialog = yamlFiles;
 
-            // Display the folder path
-            document.getElementById('folderPathInput').value = folderPath || 'Selected Folder';
+            // Display a meaningful folder indication
+            const folderPathInput = document.getElementById('folderPathInput');
+            if (folderPathInput) {
+                folderPathInput.value = `📁 ${folderDisplayName} (${yamlFiles.length} YAML files selected)`;
+                folderPathInput.style.fontStyle = 'italic';
+                folderPathInput.style.color = '#28a745';
+            }
 
             // Display the YAML files found
             displayScannedFiles(yamlFiles);
-            showScanStatus(`Found ${yamlFiles.length} YAML file(s)`, 'success');
+            showScanStatus(`Found ${yamlFiles.length} YAML file(s) in folder "${folderDisplayName}"`, 'success');
         } else {
             showScanStatus('No YAML files found in selected folder', 'error');
         }
