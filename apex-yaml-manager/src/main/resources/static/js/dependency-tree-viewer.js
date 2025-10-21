@@ -260,23 +260,31 @@ async function loadDependencyTree(rootFile = null) {
         }
 
         // Use safe fetch utility
+        console.log('Calling tree API with URL:', `${API_BASE}/dependencies/tree?rootFile=${encodeURIComponent(rootFile)}`);
         const result = await safeFetch(`${API_BASE}/dependencies/tree?rootFile=${encodeURIComponent(rootFile)}`);
 
+        console.log('Tree API result:', result);
         if (!result.success) {
+            console.error('Tree API failed:', result.error);
             throw new Error(result.error);
         }
 
         const data = result.data;
+        console.log('Tree API data:', data);
 
         if (data.status === 'success') {
+            console.log('Tree API returned success, validating payload...');
             // Client-side pre-render validation
             const vr = validateTreePayload(data);
+            console.log('Validation result:', vr);
             if (!vr.ok) {
+                console.error('Tree payload validation failed:', vr.errors);
                 showValidationErrors(vr.errors);
                 return;
             }
             // The API returns the tree in the 'tree' field
             treeData = data.tree ? [data.tree] : [];
+            console.log('Setting treeData:', treeData);
             // Rebuild parent index for ancestor expansion
             parentByPath = {};
             buildParentIndex(treeData);
@@ -286,6 +294,7 @@ async function loadDependencyTree(rootFile = null) {
             // Reset expansion state on load
             expansionState = {};
             maxRenderDepth = Infinity;
+            console.log('About to render tree with', treeData.length, 'root nodes');
             renderTree(treeData);
         } else {
             document.getElementById('treeView').innerHTML =
