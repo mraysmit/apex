@@ -544,12 +544,12 @@
             </div>
             <div class="modal-body">
                 <div class="folder-input-group">
-                    <input type="text" id="folderPathInput" placeholder="Enter folder path or click Browse...">
-                    <button id="browseFolderBtn" title="Browse for folder">📁 Browse</button>
+                    <input type="text" id="folderPathInput" placeholder="Enter folder path (e.g., C:\path\to\yaml\files)">
                     <button id="scanFolderBtn">Scan</button>
+                    <button id="browseFolderBtn" title="Browse for folder (may show browser security prompt)" style="font-size: 11px; padding: 4px 8px; margin-left: 5px; background-color: #f8f9fa; border: 1px solid #dee2e6; color: #6c757d;">📁 Browse</button>
                 </div>
                 <!-- Hidden file input for folder selection -->
-                <input type="file" id="folderInput" webkitdirectory directory style="display: none;">
+                <input type="file" id="folderInput" webkitdirectory style="display: none;">
                 <div id="fileListContainer" style="display: none;">
                     <p style="margin-bottom: 10px; font-size: 13px; color: #666;">
                         Found <span id="fileCount">0</span> YAML files:
