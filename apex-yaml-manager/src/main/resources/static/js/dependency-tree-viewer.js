@@ -936,24 +936,30 @@ async function browseFolder() {
     try {
         // Check if the File System Access API is supported
         if ('showDirectoryPicker' in window) {
-            // Modern browsers - use File System Access API (no upload prompts!)
+            // Use File System Access API to browse and scan files directly
             const directoryHandle = await window.showDirectoryPicker();
 
-            // Get the folder path (this is the folder name, not full path)
-            // Note: For security reasons, browsers don't expose full system paths
-            const folderName = directoryHandle.name;
+            showScanStatus('Scanning selected folder...', 'loading');
 
-            // Show a helpful message since we can't get the full path
-            const folderPathInput = document.getElementById('folderPathInput');
-            folderPathInput.value = `Selected: ${folderName} (Please enter full path manually)`;
-            folderPathInput.focus();
-            folderPathInput.select();
+            // Scan the directory handle directly for YAML files
+            const yamlFiles = [];
+            await scanDirectoryHandle(directoryHandle, yamlFiles);
 
-            showScanStatus(`Selected folder: ${folderName}. Please enter the full path manually.`, 'info');
+            if (yamlFiles.length > 0) {
+                // Display the files directly without needing the full path
+                displayScannedFiles(yamlFiles);
+                showScanStatus(`Found ${yamlFiles.length} YAML file(s) in selected folder`, 'success');
+
+                // Clear the path input since we're using direct file access
+                const folderPathInput = document.getElementById('folderPathInput');
+                folderPathInput.value = `Selected: ${directoryHandle.name} (${yamlFiles.length} YAML files found)`;
+            } else {
+                showScanStatus('No YAML files found in selected folder', 'error');
+            }
 
         } else {
             // Fallback for older browsers
-            showScanStatus('Folder browsing not supported in this browser. Please enter the path manually.', 'info');
+            showScanStatus('Modern folder browsing not supported. Please enter the folder path manually.', 'info');
             document.getElementById('folderPathInput').focus();
         }
     } catch (error) {
@@ -964,6 +970,35 @@ async function browseFolder() {
             console.error('Error browsing folder:', error);
             showScanStatus('Error browsing folder. Please enter the path manually.', 'error');
         }
+    }
+}
+
+/**
+ * Recursively scan a directory handle for YAML files
+ */
+async function scanDirectoryHandle(directoryHandle, yamlFiles, basePath = '') {
+    try {
+        for await (const entry of directoryHandle.values()) {
+            const entryPath = basePath ? `${basePath}/${entry.name}` : entry.name;
+
+            if (entry.kind === 'file' && /\.ya?ml$/i.test(entry.name)) {
+                // Get file handle and basic info
+                const fileHandle = entry;
+                const file = await fileHandle.getFile();
+
+                yamlFiles.push({
+                    name: entry.name,
+                    path: entryPath,
+                    size: file.size,
+                    fileHandle: fileHandle // Store handle for later access
+                });
+            } else if (entry.kind === 'directory') {
+                // Recursively scan subdirectories
+                await scanDirectoryHandle(entry, yamlFiles, entryPath);
+            }
+        }
+    } catch (error) {
+        console.error('Error scanning directory:', error);
     }
 }
 
@@ -1050,9 +1085,15 @@ function displayScannedFiles(files) {
         fileItem.dataset.index = index;
         fileItem.dataset.path = file.path;
 
+        // Store file handle if available (for File System Access API)
+        if (file.fileHandle) {
+            fileItem._fileHandle = file.fileHandle;
+        }
+
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
-        checkbox.checked = false;
+        // Select the first file by default for better UX
+        checkbox.checked = index === 0;
         checkbox.addEventListener('change', updateLoadButton);
 
         const nameSpan = document.createElement('span');
@@ -1110,28 +1151,24 @@ async function loadSelectedFiles() {
         return;
     }
 
-    const selectedFiles = Array.from(checkboxes).map(cb => {
+    // Get selected file items (could be paths or file handles)
+    const selectedFileItems = Array.from(checkboxes).map(cb => {
         const fileItem = cb.closest('.file-item');
         if (!fileItem || !fileItem.dataset.path) {
             console.warn('Invalid file item found:', fileItem);
             return null;
         }
-        return fileItem.dataset.path;
-    }).filter(path => path !== null); // Remove any null entries
+        return {
+            path: fileItem.dataset.path,
+            fileHandle: fileItem._fileHandle || null
+        };
+    }).filter(item => item !== null);
 
-    try { window.__lastStep = 'after-selection count=' + selectedFiles.length; } catch (e) {}
+    try { window.__lastStep = 'after-selection count=' + selectedFileItems.length; } catch (e) {}
 
-    // Validate that we have valid file paths
-    if (selectedFiles.length === 0) {
+    // Validate that we have valid file items
+    if (selectedFileItems.length === 0) {
         showScanStatus('Please select at least one valid file', 'error');
-        return;
-    }
-
-    // Validate file paths are strings
-    const invalidPaths = selectedFiles.filter(path => typeof path !== 'string' || path.trim() === '');
-    if (invalidPaths.length > 0) {
-        console.error('Invalid file paths found:', invalidPaths);
-        showScanStatus('Error: Invalid file paths detected', 'error');
         return;
     }
 
@@ -1148,115 +1185,96 @@ async function loadSelectedFiles() {
         try { window.__lastStep = 'closeModal-error'; } catch (ee) {}
     }
 
-    // Load the first selected file as root (use full path)
-    const rootFile = selectedFiles[0];
-    console.log('Loading dependency tree for root file:', rootFile);
+    // Process the first selected file as root
+    const firstSelectedItem = selectedFileItems[0];
+    console.log('Loading dependency tree for root file:', firstSelectedItem.path);
 
-    // Persist and show selected folder in header
-    try { window.__lastStep = 'before-assumedFolder'; } catch (e) {}
-    const assumedFolder = modalPath && modalPath.trim() ? modalPath.trim() : dirName(rootFile);
-    try { window.__lastStep = 'before-setLoadedFolder'; } catch (e) {}
-    try {
-        setLoadedFolder(assumedFolder);
-        try { window.__lastStep = 'after-setLoadedFolder'; } catch (e) {}
-    } catch (error) {
-        console.error('DEBUG: setLoadedFolder failed:', error);
-        try { window.__lastStep = 'setLoadedFolder-error: ' + error.message; } catch (e) {}
+    // Check if we're using File System Access API or traditional paths
+    if (firstSelectedItem.fileHandle) {
+        // File System Access API - read file content and send to server
+        try {
+            const file = await firstSelectedItem.fileHandle.getFile();
+            const content = await file.text();
+
+            // Send file content to server for analysis
+            await loadDependencyTreeFromContent(firstSelectedItem.path, content);
+
+        } catch (error) {
+            console.error('Error reading file via File System Access API:', error);
+            showScanStatus('Error reading selected file', 'error');
+            return;
+        }
+    } else {
+        // Traditional file path - use existing server-side analysis
+        await loadDependencyTree(firstSelectedItem.path);
     }
 
+    // Update UI to show loaded folder
     try {
-        try { window.__lastStep = 'deciding-dialog-vs-server'; } catch (e) {}
+        const folderName = firstSelectedItem.fileHandle ?
+            'Selected folder' :
+            (modalPath && modalPath.trim() ? modalPath.trim() : dirName(firstSelectedItem.path));
+        setLoadedFolder(folderName);
+    } catch (error) {
+        console.error('setLoadedFolder failed:', error);
+    }
 
-        // Browser-based file selection removed - using server-side scanning only
-        const isFromBrowserDialog = false;
+}
 
-        if (isFromBrowserDialog) {
-            try { window.__lastStep = 'branch-dialog'; } catch (e) {}
+/**
+ * Load dependency tree from file content (for File System Access API)
+ */
+async function loadDependencyTreeFromContent(fileName, content) {
+    try {
+        // Send file content to server for dependency analysis
+        const response = await fetch(`${API_BASE}/dependencies/analyze-content`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                fileName: fileName,
+                content: content,
+                folderPath: 'browser-selected'
+            })
+        });
 
-            // Files from dialog - load directly from browser
-            const fileInput = document.getElementById('folderInput');
-            const files = fileInput.files;
+        if (response.ok) {
+            const data = await response.json();
 
-            if (files && files.length > 0) {
-                // Find the root file in the selected files
-                const rootFileObj = Array.from(files).find(f =>
-                    (f.webkitRelativePath || f.name) === rootFile
-                );
+            if (data.status === 'success') {
+                // Now get the tree structure using the /tree endpoint
+                const treeResponse = await fetch(`${API_BASE}/dependencies/tree?rootFile=${encodeURIComponent(fileName)}`);
+                if (treeResponse.ok) {
+                    const treeData = await treeResponse.json();
 
-                if (rootFileObj) {
-                    // For browser-selected files, we need to send the content to the server for analysis
-                    const content = await rootFileObj.text();
-                    const fileName = rootFileObj.webkitRelativePath || rootFileObj.name;
-
-                    // Send file content to server for dependency analysis
-                    try {
-                        const response = await fetch(`${API_BASE}/dependencies/analyze-content`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                fileName: fileName,
-                                content: content,
-                                folderPath: assumedFolder
-                            })
-                        });
-
-                        if (response.ok) {
-                            const data = await response.json();
-
-                            if (data.status === 'success') {
-                                // Now get the tree structure using the /tree endpoint
-                                const treeResponse = await fetch(`${API_BASE}/dependencies/tree?rootFile=${encodeURIComponent(fileName)}`);
-                                if (treeResponse.ok) {
-                                    const treeData = await treeResponse.json();
-
-                                    if (treeData.status === 'success') {
-                                        // Use the existing tree rendering logic
-                                        const vr = validateTreePayload(treeData);
-                                        if (!vr.ok) {
-                                            showValidationErrors(vr.errors);
-                                            return;
-                                        }
-
-                                        window.treeData = treeData.tree ? [treeData.tree] : [];
-                                        parentByPath = {};
-                                        buildParentIndex(window.treeData);
-                                        expansionState = {};
-                                        maxRenderDepth = Infinity;
-                                        renderTree(window.treeData);
-                                    } else {
-                                        throw new Error('Failed to get tree structure: ' + (treeData.message || 'Unknown error'));
-                                    }
-                                } else {
-                                    throw new Error('Failed to fetch tree structure');
-                                }
-                            } else {
-                                throw new Error('Failed to analyze file content: ' + (data.message || 'Unknown error'));
-                            }
+                    if (treeData.status === 'success') {
+                        // Use the existing tree rendering logic
+                        if (treeData.tree) {
+                            window.treeData = [treeData.tree];
+                            parentByPath = {};
+                            buildParentIndex(window.treeData);
+                            expansionState = {};
+                            maxRenderDepth = Infinity;
+                            renderTree(window.treeData);
                         } else {
-                            throw new Error('Failed to analyze file content');
+                            showScanStatus('No dependency tree data received', 'error');
                         }
-                    } catch (error) {
-                        console.error('Error analyzing file content:', error);
-                        // Fallback: try to load using the file path
-                        await loadDependencyTree(fileName);
+                    } else {
+                        showScanStatus('Error generating dependency tree: ' + (treeData.message || 'Unknown error'), 'error');
                     }
+                } else {
+                    showScanStatus('Error fetching dependency tree', 'error');
                 }
+            } else {
+                showScanStatus('Error analyzing file: ' + (data.message || 'Unknown error'), 'error');
             }
         } else {
-            try { window.__lastStep = 'branch-server'; } catch (e) {}
-            try { window.__lastStep = 'before-loadDependencyTree'; } catch (e) {}
-
-            // Files from server path - use the full absolute path
-            // rootFile should be the full path returned by the server scan
-            await loadDependencyTree(rootFile);
-            try { window.__lastStep = 'after-loadDependencyTree'; } catch (e) {}
+            showScanStatus('Error sending file to server', 'error');
         }
     } catch (error) {
-        console.error('Error loading tree:', error);
-        document.getElementById('treeView').innerHTML =
-            '<div class="empty-state"><p>Error loading dependency tree</p></div>';
+        console.error('Error in loadDependencyTreeFromContent:', error);
+        showScanStatus('Error processing file: ' + error.message, 'error');
     }
 }
 
