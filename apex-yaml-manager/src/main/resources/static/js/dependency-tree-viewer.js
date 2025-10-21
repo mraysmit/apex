@@ -20,6 +20,49 @@ const UI_BASE = API_BASE.replace(/\/api$/, '');
 // Parent index for quick ancestor expansion during search
 let parentByPath = {};
 
+/**
+ * Utility function for safe DOM element access with error handling
+ */
+function safeGetElement(elementId, required = true) {
+    const element = document.getElementById(elementId);
+    if (!element && required) {
+        console.error(`Required DOM element not found: ${elementId}`);
+    }
+    return element;
+}
+
+/**
+ * Utility function for safe fetch with comprehensive error handling
+ */
+async function safeFetch(url, options = {}) {
+    try {
+        // Validate URL
+        if (!url || typeof url !== 'string') {
+            throw new Error('Invalid URL provided to fetch');
+        }
+
+        const response = await fetch(url, options);
+
+        // Check if response is ok
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        // Validate response has content
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Response is not valid JSON');
+        }
+
+        const data = await response.json();
+        return { success: true, data };
+
+    } catch (error) {
+        console.error('Fetch error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
 function buildParentIndex(nodes, parentPath = null) {
     if (!nodes) return;
     const arr = Array.isArray(nodes) ? nodes : [nodes];
@@ -52,6 +95,12 @@ function initializeResizer() {
     const leftPanel = document.querySelector('.left-panel');
     const rightPanel = document.querySelector('.right-panel');
 
+    // Validate required elements exist
+    if (!divider || !mainContainer || !leftPanel || !rightPanel) {
+        console.warn('Resizer initialization failed: missing required DOM elements');
+        return;
+    }
+
     divider.addEventListener('mousedown', function(e) {
         isResizing = true;
         document.body.style.cursor = 'col-resize';
@@ -82,26 +131,41 @@ function initializeResizer() {
  * Setup event listeners for toolbar buttons
  */
 function setupEventListeners() {
-    document.getElementById('expandAllBtn').addEventListener('click', expandAll);
-    document.getElementById('collapseAllBtn').addEventListener('click', collapseAll);
+    // Helper function to safely add event listeners
+    function safeAddEventListener(elementId, event, handler, description) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.addEventListener(event, handler);
+        } else {
+            console.warn(`Element not found for ${description}: ${elementId}`);
+        }
+    }
+
+    // Setup all event listeners with validation
+    safeAddEventListener('expandAllBtn', 'click', () => expandAll(), 'expand all button');
+    safeAddEventListener('collapseAllBtn', 'click', () => collapseAll(), 'collapse all button');
+    safeAddEventListener('refreshBtn', 'click', () => loadDependencyTree(), 'refresh button');
+    safeAddEventListener('searchInput', 'input', filterTree, 'search input');
+    safeAddEventListener('loadFolderBtn', 'click', () => openFolderModal(), 'load folder button');
+    safeAddEventListener('modalCloseBtn', 'click', () => closeFolderModal(), 'modal close button');
+    safeAddEventListener('modalCancelBtn', 'click', () => closeFolderModal(), 'modal cancel button');
+    safeAddEventListener('scanFolderBtn', 'click', () => scanFolder(), 'scan folder button');
+    safeAddEventListener('loadSelectedBtn', 'click', () => loadSelectedFiles(), 'load selected button');
+    safeAddEventListener('browseFolderBtn', 'click', () => browseFolderDialog(), 'browse folder button');
+    safeAddEventListener('folderInput', 'change', handleFolderSelection, 'folder input');
+
+    // Level expansion buttons (optional elements)
     const lvl1Btn = document.getElementById('expandLevel1Btn');
     const lvl2Btn = document.getElementById('expandLevel2Btn');
     const lvl3Btn = document.getElementById('expandLevel3Btn');
     if (lvl1Btn) lvl1Btn.addEventListener('click', () => expandToLevel(1));
     if (lvl2Btn) lvl2Btn.addEventListener('click', () => expandToLevel(2));
     if (lvl3Btn) lvl3Btn.addEventListener('click', () => expandToLevel(3));
-    document.getElementById('refreshBtn').addEventListener('click', loadDependencyTree);
-    document.getElementById('searchInput').addEventListener('input', filterTree);
-    document.getElementById('loadFolderBtn').addEventListener('click', openFolderModal);
-    document.getElementById('modalCloseBtn').addEventListener('click', closeFolderModal);
-    document.getElementById('modalCancelBtn').addEventListener('click', closeFolderModal);
-    document.getElementById('scanFolderBtn').addEventListener('click', scanFolder);
-    document.getElementById('loadSelectedBtn').addEventListener('click', loadSelectedFiles);
-    document.getElementById('browseFolderBtn').addEventListener('click', browseFolderDialog);
-    document.getElementById('folderInput').addEventListener('change', handleFolderSelection);
-    document.getElementById('folderPathInput').addEventListener('keypress', function(e) {
+
+    // Folder path input with Enter key support
+    safeAddEventListener('folderPathInput', 'keypress', function(e) {
         if (e.key === 'Enter') scanFolder();
-    });
+    }, 'folder path input');
 
     // If navigated with #load, open folder modal automatically
     try {
@@ -166,15 +230,35 @@ function setupEventListeners() {
  */
 async function loadDependencyTree(rootFile = null) {
     try {
+        // Validate treeView element exists
+        const treeView = safeGetElement('treeView');
+        if (!treeView) {
+            return;
+        }
+
         // If no rootFile provided, show empty state
         if (!rootFile) {
-            document.getElementById('treeView').innerHTML =
+            treeView.innerHTML =
                 '<div class="empty-state"><p>📂 Click "Load Folder" to select YAML files and view the dependency tree</p></div>';
             return;
         }
 
-        const response = await fetch(`${API_BASE}/dependencies/tree?rootFile=${encodeURIComponent(rootFile)}`);
-        const data = await response.json();
+        // Validate rootFile parameter
+        if (typeof rootFile !== 'string' || rootFile.trim() === '') {
+            console.error('Invalid rootFile parameter:', rootFile);
+            treeView.innerHTML =
+                '<div class="empty-state"><p>Error: Invalid file path provided</p></div>';
+            return;
+        }
+
+        // Use safe fetch utility
+        const result = await safeFetch(`${API_BASE}/dependencies/tree?rootFile=${encodeURIComponent(rootFile)}`);
+
+        if (!result.success) {
+            throw new Error(result.error);
+        }
+
+        const data = result.data;
 
         if (data.status === 'success') {
             // Client-side pre-render validation
@@ -406,11 +490,27 @@ function selectNode(node, element) {
  */
 async function fetchNodeDetails(filePath) {
     try {
+        // Validate input parameter
+        if (!filePath || typeof filePath !== 'string') {
+            console.error('Invalid filePath parameter:', filePath);
+            displayNodeDetails(null);
+            return;
+        }
+
         const response = await fetch(`${API_BASE}/dependencies/${encodeURIComponent(filePath)}/details`);
+
+        // Validate response
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
         const data = await response.json();
 
         if (data.status === 'success') {
             displayNodeDetails(data.data);
+        } else {
+            console.error('Server error fetching node details:', data.message || 'Unknown error');
+            displayNodeDetails(null);
         }
     } catch (error) {
         console.error('Error fetching node details:', error);
@@ -422,17 +522,37 @@ async function fetchNodeDetails(filePath) {
  * Display node details in right panel
  */
 function displayNodeDetails(details) {
+    // Validate required DOM elements exist
+    const nodeName = document.getElementById('nodeName');
+    const nodeType = document.getElementById('nodeType');
+    const nodeDetails = document.getElementById('nodeDetails');
+
+    if (!nodeName || !nodeType || !nodeDetails) {
+        console.error('Required DOM elements for node details not found');
+        return;
+    }
+
     if (!details) {
-        document.getElementById('nodeName').textContent = 'Error loading details';
-        document.getElementById('nodeType').textContent = '';
-        document.getElementById('nodeDetails').innerHTML =
+        nodeName.textContent = 'Error loading details';
+        nodeType.textContent = '';
+        nodeDetails.innerHTML =
             '<div class="empty-state"><p>Could not load node details</p></div>';
         return;
     }
 
-    // Update header
-    document.getElementById('nodeName').textContent = `Selected: ${details.name}`;
-    document.getElementById('nodeType').textContent = `Type: ${details.type || 'Unknown'}`;
+    // Validate details object structure
+    if (typeof details !== 'object') {
+        console.error('Invalid details object:', details);
+        nodeName.textContent = 'Error: Invalid data format';
+        nodeType.textContent = '';
+        nodeDetails.innerHTML =
+            '<div class="empty-state"><p>Invalid node details format</p></div>';
+        return;
+    }
+
+    // Update header with safe property access
+    nodeName.textContent = `Selected: ${details.name || 'Unknown'}`;
+    nodeType.textContent = `Type: ${details.type || 'Unknown'}`;
 
     // Build details HTML
     let html = '';
@@ -614,10 +734,21 @@ function getHealthGrade(score) {
  * Navigate to a node by path
  */
 function navigateTo(path) {
-    const nodeElement = document.querySelector(`[data-path="${path}"]`);
+    // Validate input parameter
+    if (!path || typeof path !== 'string') {
+        console.error('Invalid path parameter for navigation:', path);
+        return;
+    }
+
+    // Escape path for CSS selector to handle special characters
+    const escapedPath = CSS.escape(path);
+    const nodeElement = document.querySelector(`[data-path="${escapedPath}"]`);
+
     if (nodeElement) {
         nodeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         nodeElement.click();
+    } else {
+        console.warn('Node not found for navigation:', path);
     }
 }
 
@@ -750,8 +881,21 @@ function filterTree(e) {
  * Open folder selector modal
  */
 function openFolderModal() {
-    document.getElementById('folderModal').classList.add('active');
-    document.getElementById('folderPathInput').focus();
+    const folderModal = document.getElementById('folderModal');
+    const folderPathInput = document.getElementById('folderPathInput');
+
+    if (!folderModal) {
+        console.error('Folder modal element not found');
+        return;
+    }
+
+    folderModal.classList.add('active');
+
+    if (folderPathInput) {
+        folderPathInput.focus();
+    } else {
+        console.warn('Folder path input element not found');
+    }
 }
 
 /**
@@ -770,7 +914,13 @@ function closeFolderModal() {
  * Open file system dialog to browse for folder
  */
 function browseFolderDialog() {
-    document.getElementById('folderInput').click();
+    const folderInput = document.getElementById('folderInput');
+    if (folderInput) {
+        folderInput.click();
+    } else {
+        console.error('Folder input element not found');
+        showScanStatus('Error: File selection not available', 'error');
+    }
 }
 
 /**
@@ -816,29 +966,59 @@ function handleFolderSelection(event) {
  * Scan folder for YAML files
  */
 async function scanFolder() {
-    const folderPath = document.getElementById('folderPathInput').value.trim();
+    const folderPathInput = document.getElementById('folderPathInput');
+    const loadSelectedBtn = document.getElementById('loadSelectedBtn');
 
+    // Validate required DOM elements
+    if (!folderPathInput) {
+        console.error('Folder path input element not found');
+        showScanStatus('Error: UI element not found', 'error');
+        return;
+    }
+
+    const folderPath = folderPathInput.value.trim();
+
+    // Validate folder path input
     if (!folderPath) {
         showScanStatus('Please enter a folder path', 'error');
         return;
     }
 
+    // Basic path validation
+    if (folderPath.length < 2) {
+        showScanStatus('Please enter a valid folder path', 'error');
+        return;
+    }
+
     showScanStatus('Scanning folder...', 'loading');
-    document.getElementById('loadSelectedBtn').disabled = true;
+    if (loadSelectedBtn) {
+        loadSelectedBtn.disabled = true;
+    }
 
     try {
         const response = await fetch(`${API_BASE}/dependencies/scan-folder?folderPath=${encodeURIComponent(folderPath)}`, {
             method: 'POST'
         });
+
+        // Validate response
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
         const data = await response.json();
 
         if (data.status === 'success') {
+            // Validate response data structure
+            if (!Array.isArray(data.yamlFiles)) {
+                throw new Error('Invalid response: yamlFiles should be an array');
+            }
             displayScannedFiles(data.yamlFiles);
-            showScanStatus(`Found ${data.totalFiles} YAML file(s)`, 'success');
+            showScanStatus(`Found ${data.totalFiles || data.yamlFiles.length} YAML file(s)`, 'success');
         } else {
-            showScanStatus('Error: ' + data.message, 'error');
+            showScanStatus('Error: ' + (data.message || 'Unknown server error'), 'error');
         }
     } catch (error) {
+        console.error('Folder scan error:', error);
         showScanStatus('Error scanning folder: ' + error.message, 'error');
     }
 }
@@ -867,7 +1047,7 @@ function displayScannedFiles(files) {
 
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
-        checkbox.checked = true;
+        checkbox.checked = false;
         checkbox.addEventListener('change', updateLoadButton);
 
         const nameSpan = document.createElement('span');
@@ -900,24 +1080,53 @@ function displayScannedFiles(files) {
  */
 function updateLoadButton() {
     const checkboxes = document.querySelectorAll('#fileList input[type="checkbox"]');
+    const loadSelectedBtn = document.getElementById('loadSelectedBtn');
+
+    if (!loadSelectedBtn) {
+        console.warn('Load selected button element not found');
+        return;
+    }
+
     const selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
-    document.getElementById('loadSelectedBtn').disabled = selectedCount === 0;
+    loadSelectedBtn.disabled = selectedCount === 0;
 }
 
 /**
  * Load selected files and generate dependency tree
  */
-async function loadSelectedFiles() { try { window.__lastStep = 'loadSelected-start'; } catch (e) {}
+async function loadSelectedFiles() {
+    try { window.__lastStep = 'loadSelected-start'; } catch (e) {}
+
     const checkboxes = document.querySelectorAll('#fileList input[type="checkbox"]:checked');
+
+    // Validate that we found checkboxes
+    if (!checkboxes || checkboxes.length === 0) {
+        showScanStatus('No files selected', 'error');
+        return;
+    }
+
     const selectedFiles = Array.from(checkboxes).map(cb => {
         const fileItem = cb.closest('.file-item');
+        if (!fileItem || !fileItem.dataset.path) {
+            console.warn('Invalid file item found:', fileItem);
+            return null;
+        }
         return fileItem.dataset.path;
-    });
+    }).filter(path => path !== null); // Remove any null entries
 
     try { window.__lastStep = 'after-selection count=' + selectedFiles.length; } catch (e) {}
 
+    // Validate that we have valid file paths
     if (selectedFiles.length === 0) {
-        showScanStatus('Please select at least one file', 'error');
+        showScanStatus('Please select at least one valid file', 'error');
+        return;
+    }
+
+    // Validate file paths are strings
+    const invalidPaths = selectedFiles.filter(path => typeof path !== 'string' || path.trim() === '');
+    if (invalidPaths.length > 0) {
+        console.error('Invalid file paths found:', invalidPaths);
+        showScanStatus('Error: Invalid file paths detected', 'error');
         return;
     }
 
@@ -941,14 +1150,22 @@ async function loadSelectedFiles() { try { window.__lastStep = 'loadSelected-sta
     try { window.__lastStep = 'before-assumedFolder'; } catch (e) {}
     const assumedFolder = modalPath && modalPath.trim() ? modalPath.trim() : dirName(rootFile);
     try { window.__lastStep = 'before-setLoadedFolder'; } catch (e) {}
-    setLoadedFolder(assumedFolder);
-    try { window.__lastStep = 'after-setLoadedFolder'; } catch (e) {}
+    try {
+        setLoadedFolder(assumedFolder);
+        try { window.__lastStep = 'after-setLoadedFolder'; } catch (e) {}
+    } catch (error) {
+        console.error('DEBUG: setLoadedFolder failed:', error);
+        try { window.__lastStep = 'setLoadedFolder-error: ' + error.message; } catch (e) {}
+    }
 
     try {
         try { window.__lastStep = 'deciding-dialog-vs-server'; } catch (e) {}
 
         // Check if files were selected from dialog (browser-based) or from server (path-based)
-        if (selectedFilesFromDialog.length > 0) {
+        // For server-based scanning, selectedFilesFromDialog will be empty
+        const isFromBrowserDialog = selectedFilesFromDialog.length > 0;
+
+        if (isFromBrowserDialog) {
             try { window.__lastStep = 'branch-dialog'; } catch (e) {}
 
             // Files from dialog - load directly from browser
@@ -962,18 +1179,72 @@ async function loadSelectedFiles() { try { window.__lastStep = 'loadSelected-sta
                 );
 
                 if (rootFileObj) {
+                    // For browser-selected files, we need to send the content to the server for analysis
                     const content = await rootFileObj.text();
-                    // For now, just show a message that the file was loaded
-                    // In a real implementation, you would parse the YAML and build the tree
-                    document.getElementById('treeView').innerHTML =
-                        '<div class="empty-state"><p>Loaded: ' + rootFileObj.name + '</p><p>File size: ' + formatFileSize(rootFileObj.size) + '</p></div>';
+                    const fileName = rootFileObj.webkitRelativePath || rootFileObj.name;
+
+                    // Send file content to server for dependency analysis
+                    try {
+                        const response = await fetch(`${API_BASE}/dependencies/analyze-content`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                fileName: fileName,
+                                content: content,
+                                folderPath: assumedFolder
+                            })
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+
+                            if (data.status === 'success') {
+                                // Now get the tree structure using the /tree endpoint
+                                const treeResponse = await fetch(`${API_BASE}/dependencies/tree?rootFile=${encodeURIComponent(fileName)}`);
+                                if (treeResponse.ok) {
+                                    const treeData = await treeResponse.json();
+
+                                    if (treeData.status === 'success') {
+                                        // Use the existing tree rendering logic
+                                        const vr = validateTreePayload(treeData);
+                                        if (!vr.ok) {
+                                            showValidationErrors(vr.errors);
+                                            return;
+                                        }
+
+                                        window.treeData = treeData.tree ? [treeData.tree] : [];
+                                        parentByPath = {};
+                                        buildParentIndex(window.treeData);
+                                        expansionState = {};
+                                        maxRenderDepth = Infinity;
+                                        renderTree(window.treeData);
+                                    } else {
+                                        throw new Error('Failed to get tree structure: ' + (treeData.message || 'Unknown error'));
+                                    }
+                                } else {
+                                    throw new Error('Failed to fetch tree structure');
+                                }
+                            } else {
+                                throw new Error('Failed to analyze file content: ' + (data.message || 'Unknown error'));
+                            }
+                        } else {
+                            throw new Error('Failed to analyze file content');
+                        }
+                    } catch (error) {
+                        console.error('Error analyzing file content:', error);
+                        // Fallback: try to load using the file path
+                        await loadDependencyTree(fileName);
+                    }
                 }
             }
         } else {
             try { window.__lastStep = 'branch-server'; } catch (e) {}
             try { window.__lastStep = 'before-loadDependencyTree'; } catch (e) {}
 
-            // Files from server path - reuse main loader for consistency
+            // Files from server path - use the full absolute path
+            // rootFile should be the full path returned by the server scan
             await loadDependencyTree(rootFile);
             try { window.__lastStep = 'after-loadDependencyTree'; } catch (e) {}
         }
@@ -1005,10 +1276,4 @@ function formatFileSize(bytes) {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 }
-
-// Expose functions to global scope for testing
-window.loadDependencyTree = loadDependencyTree;
-window.selectNode = selectNode;
-window.expandNode = expandNode;
-window.collapseNode = collapseNode;
 
