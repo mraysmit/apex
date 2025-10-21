@@ -29,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 import java.time.Duration;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -270,7 +271,7 @@ class FolderScannerUITest {
 
     @Test
     @Order(8)
-    void test_browse_folder_button() {
+    void test_browse_folder_button_and_file_selection() {
         driver.get(baseUrl + "/yaml-manager/ui/tree-viewer");
 
         WebElement loadFolderBtn = wait.until(
@@ -283,14 +284,37 @@ class FolderScannerUITest {
             ExpectedConditions.elementToBeClickable(By.id("browseFolderBtn"))
         );
 
-        // Click browse button
+        // Click browse button to trigger file input
         browseBtn.click();
 
-        // Verify button is clickable and functional
-        assertTrue(browseBtn.isEnabled(), "Browse button should be enabled");
+        // Find the hidden file input that gets triggered
+        WebElement fileInput = wait.until(
+            ExpectedConditions.presenceOfElementLocated(By.id("folderInput"))
+        );
 
-        // Note: File dialog interaction is browser-dependent and hard to test
-        // This test verifies the button is present and clickable
+        // Use sendKeys to simulate file selection
+        // Point to our test YAML files directory
+        String testFilesPath = System.getProperty("user.dir") +
+            "\\src\\test\\resources\\apex-yaml-samples\\graph-200\\000-master-registry.yaml";
+
+        fileInput.sendKeys(testFilesPath);
+
+        // Wait for file processing to complete
+        try { Thread.sleep(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+
+        // Verify folder path input is populated
+        WebElement folderPathInput = driver.findElement(By.id("folderPathInput"));
+        String folderPath = folderPathInput.getAttribute("value");
+
+        assertFalse(folderPath.isEmpty(), "Folder path should be populated after file selection");
+
+        // Verify file list is populated
+        List<WebElement> fileItems = driver.findElements(By.className("file-item"));
+        assertTrue(fileItems.size() > 0, "File list should contain items after folder selection");
+
+        // Verify Load Selected button becomes enabled
+        WebElement loadSelectedBtn = driver.findElement(By.id("loadSelectedBtn"));
+        assertTrue(loadSelectedBtn.isEnabled(), "Load Selected button should be enabled after file selection");
     }
 
     @Test
