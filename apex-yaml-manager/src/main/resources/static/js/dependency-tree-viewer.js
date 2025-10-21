@@ -149,9 +149,9 @@ function setupEventListeners() {
     safeAddEventListener('loadFolderBtn', 'click', () => openFolderModal(), 'load folder button');
     safeAddEventListener('modalCloseBtn', 'click', () => closeFolderModal(), 'modal close button');
     safeAddEventListener('modalCancelBtn', 'click', () => closeFolderModal(), 'modal cancel button');
+    safeAddEventListener('browseFolderBtn', 'click', () => browseFolder(), 'browse folder button');
     safeAddEventListener('scanFolderBtn', 'click', () => scanFolder(), 'scan folder button');
     safeAddEventListener('loadSelectedBtn', 'click', () => loadSelectedFiles(), 'load selected button');
-    // Removed browser folder dialog to avoid "upload files" security prompts
 
     // Level expansion buttons (optional elements)
     const lvl1Btn = document.getElementById('expandLevel1Btn');
@@ -929,7 +929,43 @@ function closeFolderModal() {
 
 // Browser folder dialog removed to eliminate "upload files" security prompts
 
-// Browser folder selection removed - now using server-side folder scanning only
+/**
+ * Browse for folder using modern File System Access API (no upload prompts)
+ */
+async function browseFolder() {
+    try {
+        // Check if the File System Access API is supported
+        if ('showDirectoryPicker' in window) {
+            // Modern browsers - use File System Access API (no upload prompts!)
+            const directoryHandle = await window.showDirectoryPicker();
+
+            // Get the folder path (this is the folder name, not full path)
+            // Note: For security reasons, browsers don't expose full system paths
+            const folderName = directoryHandle.name;
+
+            // Show a helpful message since we can't get the full path
+            const folderPathInput = document.getElementById('folderPathInput');
+            folderPathInput.value = `Selected: ${folderName} (Please enter full path manually)`;
+            folderPathInput.focus();
+            folderPathInput.select();
+
+            showScanStatus(`Selected folder: ${folderName}. Please enter the full path manually.`, 'info');
+
+        } else {
+            // Fallback for older browsers
+            showScanStatus('Folder browsing not supported in this browser. Please enter the path manually.', 'info');
+            document.getElementById('folderPathInput').focus();
+        }
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            // User cancelled the dialog
+            showScanStatus('Folder selection cancelled', 'info');
+        } else {
+            console.error('Error browsing folder:', error);
+            showScanStatus('Error browsing folder. Please enter the path manually.', 'error');
+        }
+    }
+}
 
 /**
  * Scan folder for YAML files
