@@ -33,6 +33,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -99,6 +101,59 @@ public class DependencyAnalysisController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Failed to analyze dependencies", e);
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", "error",
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    /**
+     * Analyze dependencies from file content (for browser-uploaded files).
+     */
+    @PostMapping("/analyze-content")
+    @Operation(
+        summary = "Analyze YAML dependencies from content",
+        description = "Analyze dependencies from file content provided by browser file selection"
+    )
+    @ApiResponse(responseCode = "200", description = "Analysis completed successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid file content")
+    public ResponseEntity<Map<String, Object>> analyzeContentDependencies(
+            @RequestBody Map<String, String> request) {
+
+        String fileName = request.get("fileName");
+        String content = request.get("content");
+        String folderPath = request.get("folderPath");
+
+        logger.info("Analyzing dependencies from content for file: {}", fileName);
+
+        try {
+            // Create a temporary file with the content
+            Path tempFile = Files.createTempFile("yaml-analysis-", ".yaml");
+            Files.write(tempFile, content.getBytes());
+
+            try {
+                // Analyze using the temporary file
+                EnhancedYamlDependencyGraph graph = dependencyService.analyzeDependencies(tempFile.toString());
+                this.currentGraph = graph;
+
+                DependencyMetrics metrics = dependencyService.calculateMetrics(graph);
+
+                Map<String, Object> response = new HashMap<>();
+                response.put("status", "success");
+                response.put("rootFile", fileName);
+                response.put("totalFiles", graph.getTotalFiles());
+                response.put("maxDepth", graph.getMaxDepth());
+                response.put("metrics", metrics);
+                response.put("timestamp", System.currentTimeMillis());
+
+                return ResponseEntity.ok(response);
+            } finally {
+                // Clean up temporary file
+                Files.deleteIfExists(tempFile);
+            }
+        } catch (Exception e) {
+            logger.error("Failed to analyze dependencies from content", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", e.getMessage()
