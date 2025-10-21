@@ -57,6 +57,8 @@ public class DependencyAnalysisService {
     @Autowired(required = false)
     private YamlContentAnalyzer contentAnalyzer;
 
+    private String currentBasePath;
+
     public DependencyAnalysisService() {
         this.yamlAnalyzer = new YamlDependencyAnalyzer();
         logger.info("DependencyAnalysisService initialized");
@@ -66,7 +68,8 @@ public class DependencyAnalysisService {
      * Analyze dependencies starting from a root YAML file.
      */
     public EnhancedYamlDependencyGraph analyzeDependencies(String rootFilePath) {
-        logger.info("Analyzing dependencies for: {}", rootFilePath);
+        logger.info("=== STARTING DEPENDENCY ANALYSIS ===");
+        logger.info("Root file path: {}", rootFilePath);
 
         try {
             // Determine base path and root argument for analyzer
@@ -75,36 +78,53 @@ public class DependencyAnalysisService {
             YamlDependencyAnalyzer analyzerToUse = this.yamlAnalyzer;
             String analyzerRootArg = rootFilePath;
 
+            logger.info("Path analysis: isAbsolute={}, parent={}, fileName={}",
+                isAbsolute, rootPath.getParent(), rootPath.getFileName());
+
             if (isAbsolute) {
-                String basePath = rootPath.getParent().toString();
-                analyzerToUse = new YamlDependencyAnalyzer(basePath);
+                this.currentBasePath = rootPath.getParent().toString();
+                analyzerToUse = new YamlDependencyAnalyzer(this.currentBasePath);
                 analyzerRootArg = rootPath.getFileName().toString();
-                logger.debug("Using dynamic basePath for analysis: {} with root {}", basePath, analyzerRootArg);
+                logger.info("Using dynamic basePath for analysis: {} with root {}", this.currentBasePath, analyzerRootArg);
+            } else {
+                this.currentBasePath = null; // Use relative paths as-is
+                logger.info("Using relative path analysis");
             }
 
             // Use core analyzer to build basic graph
+            logger.info("Building basic dependency graph...");
             YamlDependencyGraph basicGraph = analyzerToUse.analyzeYamlDependencies(analyzerRootArg);
+            logger.info("Basic graph created with {} nodes and {} dependencies",
+                basicGraph.getAllNodes().size(), basicGraph.getAllDependencies().size());
 
             // Enhance with bidirectional edges
             // Use the analyzer's root key for graph root so keys match edge maps
             EnhancedYamlDependencyGraph enhancedGraph = new EnhancedYamlDependencyGraph(analyzerRootArg);
+            logger.info("Enhanced graph initialized with root: {}", analyzerRootArg);
 
             // Copy nodes from basic graph
+            logger.info("Copying {} nodes to enhanced graph...", basicGraph.getAllNodes().size());
             for (YamlNode node : basicGraph.getAllNodes()) {
                 enhancedGraph.addNode(node);
+                logger.debug("Added node: {}", node.getFilePath());
             }
 
             // Copy dependencies and build bidirectional edges
+            logger.info("Copying {} dependencies and building bidirectional edges...", basicGraph.getAllDependencies().size());
             for (var dependency : basicGraph.getAllDependencies()) {
                 enhancedGraph.addDependency(dependency);
                 enhancedGraph.addBidirectionalEdge(dependency.getSourceFile(), dependency.getTargetFile());
+                logger.debug("Added dependency: {} -> {}", dependency.getSourceFile(), dependency.getTargetFile());
             }
 
             // Preserve computed maxDepth from the basic graph
             enhancedGraph.updateMaxDepth(basicGraph.getMaxDepth());
 
-            logger.info("Dependency analysis complete: {} files, max depth: {}",
-                    enhancedGraph.getTotalFiles(), enhancedGraph.getMaxDepth());
+            logger.info("=== DEPENDENCY ANALYSIS COMPLETE ===");
+            logger.info("Total files: {}", enhancedGraph.getTotalFiles());
+            logger.info("Max depth: {}", enhancedGraph.getMaxDepth());
+            logger.info("Forward edges: {}", enhancedGraph.getForwardEdges().size());
+            logger.info("Backward edges: {}", enhancedGraph.getBackwardEdges().size());
 
             return enhancedGraph;
         } catch (Exception e) {
@@ -293,11 +313,23 @@ public class DependencyAnalysisService {
      * Generate dependency tree for a file using nested children format (D3 Hierarchy standard).
      */
     public TreeNode generateDependencyTree(EnhancedYamlDependencyGraph graph, String filePath) {
-        logger.debug("Generating dependency tree for: {}", filePath);
+        logger.info("=== GENERATING DEPENDENCY TREE ===");
+        logger.info("Root file: {}", filePath);
+        logger.info("Graph contains {} nodes", graph.getAllNodes().size());
+        logger.info("Graph forward edges: {}", graph.getForwardEdges().size());
+
         Set<String> visited = new HashSet<>();
         TreeNode root = buildDependencyTreeNode(graph, filePath, 0, visited);
         if (root != null) {
             root.calculateHeight();
+            logger.info("=== TREE GENERATION COMPLETE ===");
+            logger.info("Root node: {}", root.getName());
+            logger.info("Max depth: {}", root.getMaxDepth());
+            logger.info("Total descendants: {}", root.getDescendantCount());
+            logger.info("Child count: {}", root.getChildCount());
+            logTreeStructure(root, 0);
+        } else {
+            logger.warn("Failed to generate tree - root node is null");
         }
         return root;
     }
@@ -307,11 +339,14 @@ public class DependencyAnalysisService {
      */
     private TreeNode buildDependencyTreeNode(EnhancedYamlDependencyGraph graph, String filePath,
                                              int depth, Set<String> visited) {
+        logger.debug("Building tree node: {} at depth {}", filePath, depth);
+
         TreeNode node = new TreeNode(filePath, depth);
         // Ensure path/name are available to UI and details endpoint lookups
         node.setPath(filePath);
 
         if (visited.contains(filePath)) {
+            logger.warn("CIRCULAR DEPENDENCY detected: {} (visited: {})", filePath, visited);
             node.setCircular(true);
             node.setCircularReference("Circular reference detected");
             return node;
@@ -322,7 +357,17 @@ public class DependencyAnalysisService {
         // Analyze YAML content if analyzer is available
         if (contentAnalyzer != null) {
             try {
-                YamlContentSummary summary = contentAnalyzer.analyzYamlContent(filePath);
+                // Resolve full path for content analysis
+                String fullPath = resolveFullPath(filePath);
+                logger.debug("Analyzing content for: {} -> {}", filePath, fullPath);
+                YamlContentSummary summary = contentAnalyzer.analyzYamlContent(fullPath);
+                if (summary != null) {
+                    logger.debug("Content summary for {}: type={}, rules={}, enrichments={}, groups={}",
+                        filePath, summary.getFileType(), summary.getRuleCount(),
+                        summary.getEnrichmentCount(), summary.getRuleGroupCount());
+                } else {
+                    logger.warn("No content summary available for: {}", filePath);
+                }
                 node.setContentSummary(summary);
             } catch (Exception e) {
                 logger.debug("Could not analyze YAML content for {}: {}", filePath, e.getMessage());
@@ -332,16 +377,50 @@ public class DependencyAnalysisService {
         // Get forward edges (dependencies) for this file
         Map<String, Set<String>> forwardEdges = graph.getForwardEdges();
         Set<String> dependencies = forwardEdges.getOrDefault(filePath, new HashSet<>());
+        logger.debug("Dependencies for {}: {} (count: {})", filePath, dependencies, dependencies.size());
 
         for (String dependency : dependencies) {
+            logger.debug("Processing dependency: {} -> {}", filePath, dependency);
             Set<String> childVisited = new HashSet<>(visited);
             TreeNode childNode = buildDependencyTreeNode(graph, dependency, depth + 1, childVisited);
             if (childNode != null) {
                 node.addChild(childNode);
+                logger.debug("Added child node: {} to parent: {}", dependency, filePath);
+            } else {
+                logger.warn("Failed to create child node for dependency: {}", dependency);
             }
         }
 
+        logger.debug("Completed node: {} with {} children", filePath, node.getChildCount());
         return node;
+    }
+
+    /**
+     * Log the tree structure for debugging purposes.
+     */
+    private void logTreeStructure(TreeNode node, int indentLevel) {
+        String indent = "  ".repeat(indentLevel);
+        String nodeInfo = String.format("%s%s (depth=%d, children=%d)",
+            indent, node.getName(), node.getDepth(), node.getChildCount());
+
+        if (node.getContentSummary() != null) {
+            YamlContentSummary summary = node.getContentSummary();
+            nodeInfo += String.format(" [type=%s, rules=%d, enrichments=%d]",
+                summary.getFileType(), summary.getRuleCount(), summary.getEnrichmentCount());
+        }
+
+        if (node.isCircular()) {
+            nodeInfo += " [CIRCULAR]";
+        }
+
+        logger.info(nodeInfo);
+
+        // Recursively log children
+        if (node.getChildren() != null) {
+            for (TreeNode child : node.getChildren()) {
+                logTreeStructure(child, indentLevel + 1);
+            }
+        }
     }
 
     /**
@@ -389,6 +468,20 @@ public class DependencyAnalysisService {
         }
 
         return node;
+    }
+
+    /**
+     * Resolve full path for content analysis.
+     */
+    private String resolveFullPath(String filePath) {
+        if (currentBasePath != null) {
+            // If we have a base path, resolve relative to it
+            java.nio.file.Path fullPath = java.nio.file.Paths.get(currentBasePath, filePath);
+            return fullPath.toString();
+        } else {
+            // Use the path as-is (could be relative or absolute)
+            return filePath;
+        }
     }
 }
 

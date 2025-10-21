@@ -1,0 +1,20 @@
+metadata:
+  id: graph100-scenario-j
+  name: Graph100 Scenario J
+  description: Scenario J with mixed dependency patterns
+  version: 0.3.0
+  type: scenario
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+scenario:
+  id: scenario-j
+  name: Mixed Pattern Processing
+  description: Demonstrates combination of fan-in, fan-out, and chains
+  data-types: ["trade", "settlement", "reporting"]
+
+rule-configurations:
+  - "26-groups-parallel-1.yaml"
+  - "29-groups-aggregator.yaml"
+  - "58-chain-9.yaml"
+  - "91-pipeline-reporting.yaml"

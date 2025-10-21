@@ -1,0 +1,26 @@
+metadata:
+  id: graph100-enrich-timestamp
+  name: Graph100 Enrichment Timestamp
+  description: Timestamp enrichment for audit trail
+  version: 0.3.0
+  type: enrichment
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+enrichment:
+  id: enrich-timestamp
+  steps:
+    - id: set-processing-timestamp
+      description: set processing timestamp
+      when: "true"
+      action: set
+      params:
+        field: processedAt
+        value: "T(java.time.Instant).now().toString()"
+    - id: set-processing-date
+      description: set processing date
+      when: "true"
+      action: set
+      params:
+        field: processedDate
+        value: "T(java.time.LocalDate).now().toString()"

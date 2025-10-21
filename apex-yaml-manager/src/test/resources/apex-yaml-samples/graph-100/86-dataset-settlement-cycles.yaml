@@ -1,0 +1,30 @@
+metadata:
+  id: graph100-dataset-settlement-cycles
+  name: Graph100 Dataset Settlement Cycles
+  description: Settlement cycle reference data by instrument type
+  version: 0.3.0
+  type: dataset
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+  source: "Settlement Authority"
+
+data:
+  - id: "SETTLEMENT_CYCLES"
+    name: "Standard Settlement Cycles"
+    values:
+      - instrument_type: "EQUITY"
+        market: "US"
+        cycle_days: 2
+        description: "T+2 settlement"
+      - instrument_type: "EQUITY"
+        market: "EU"
+        cycle_days: 2
+        description: "T+2 settlement"
+      - instrument_type: "BOND"
+        market: "US"
+        cycle_days: 1
+        description: "T+1 settlement"
+      - instrument_type: "FX"
+        market: "GLOBAL"
+        cycle_days: 2
+        description: "T+2 settlement"

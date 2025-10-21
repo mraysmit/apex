@@ -1,0 +1,26 @@
+metadata:
+  id: graph100-dataset-business-rules
+  name: Graph100 Dataset Business Rules
+  description: Business rule configuration data
+  version: 0.3.0
+  type: dataset
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+  source: "Business Rules Engine"
+
+data:
+  - id: "VALIDATION_THRESHOLDS"
+    name: "Validation Thresholds"
+    values:
+      - rule_type: "LARGE_TRADE"
+        threshold: 10000000
+        currency: "USD"
+        action: "REQUIRE_APPROVAL"
+      - rule_type: "HIGH_RISK_COUNTERPARTY"
+        threshold: 5000000
+        currency: "USD"
+        action: "ENHANCED_DUE_DILIGENCE"
+      - rule_type: "CROSS_BORDER"
+        threshold: 1000000
+        currency: "USD"
+        action: "REGULATORY_REPORTING"

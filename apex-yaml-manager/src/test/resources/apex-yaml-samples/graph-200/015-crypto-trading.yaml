@@ -1,0 +1,13 @@
+﻿metadata:
+  id: crypto-scenario
+  type: scenario
+  version: "1.0"
+  description: "Cryptocurrency trading scenario"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+
+
+dependencies:
+  - "066-crypto-validation.yaml"
+  - "067-crypto-settlement.yaml"
+  - "161-crypto-enrichment.yaml"

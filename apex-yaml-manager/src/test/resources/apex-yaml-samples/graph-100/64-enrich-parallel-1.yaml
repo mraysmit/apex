@@ -1,0 +1,19 @@
+metadata:
+  id: graph100-enrich-parallel-1
+  name: Graph100 Enrichment Parallel 1
+  description: First parallel enrichment branch
+  version: 0.3.0
+  type: enrichment
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+enrichment:
+  id: enrich-parallel-1
+  steps:
+    - id: set-branch-1
+      description: mark as processed by branch 1
+      when: "true"
+      action: set
+      params:
+        field: processedByBranch1
+        value: "true"

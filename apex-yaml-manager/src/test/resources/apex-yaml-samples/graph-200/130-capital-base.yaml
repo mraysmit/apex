@@ -1,0 +1,36 @@
+﻿metadata:
+  id: capital-base
+  type: rule-config
+  version: "1.0"
+  description: "Capital calculation base"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+rule-groups:
+  - id: capital-base-group
+    description: "Capital calculation base group"
+    rule-ids:
+      - "capital-base-rule-1"
+      - "capital-base-rule-2"
+      - "capital-base-rule-3"
+      - "capital-base-rule-4"
+
+rules:
+  - id: capital-base-rule-1
+    description: "Rule 1 for Capital calculation base"
+    condition: "trade.field1 != null && trade.field1 > 0"
+    severity: "ERROR"
+  - id: capital-base-rule-2
+    description: "Rule 2 for Capital calculation base"
+    condition: "trade.field2 != null && trade.field2 > 0"
+    severity: "ERROR"
+  - id: capital-base-rule-3
+    description: "Rule 3 for Capital calculation base"
+    condition: "trade.field3 != null && trade.field3 > 0"
+    severity: "ERROR"
+  - id: capital-base-rule-4
+    description: "Rule 4 for Capital calculation base"
+    condition: "trade.field4 != null && trade.field4 > 0"
+    severity: "ERROR"
+
+dependencies:
+  - "114-risk-rules.yaml"

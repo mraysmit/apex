@@ -1,0 +1,13 @@
+﻿metadata:
+  id: basel-scenario
+  type: scenario
+  version: "1.0"
+  description: "Basel III compliance"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+
+
+dependencies:
+  - "090-basel-validation.yaml"
+  - "091-basel-reporting.yaml"
+  - "173-basel-enrichment.yaml"

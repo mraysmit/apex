@@ -1,0 +1,36 @@
+﻿metadata:
+  id: reporting-base
+  type: rule-config
+  version: "1.0"
+  description: "Base reporting framework"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+rule-groups:
+  - id: reporting-base-group
+    description: "Base reporting framework group"
+    rule-ids:
+      - "reporting-base-rule-1"
+      - "reporting-base-rule-2"
+      - "reporting-base-rule-3"
+      - "reporting-base-rule-4"
+
+rules:
+  - id: reporting-base-rule-1
+    description: "Rule 1 for Base reporting framework"
+    condition: "trade.field1 != null && trade.field1 > 0"
+    severity: "ERROR"
+  - id: reporting-base-rule-2
+    description: "Rule 2 for Base reporting framework"
+    condition: "trade.field2 != null && trade.field2 > 0"
+    severity: "ERROR"
+  - id: reporting-base-rule-3
+    description: "Rule 3 for Base reporting framework"
+    condition: "trade.field3 != null && trade.field3 > 0"
+    severity: "ERROR"
+  - id: reporting-base-rule-4
+    description: "Rule 4 for Base reporting framework"
+    condition: "trade.field4 != null && trade.field4 > 0"
+    severity: "ERROR"
+
+dependencies:
+  - "126-regulatory-base.yaml"

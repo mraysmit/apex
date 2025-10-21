@@ -1,0 +1,23 @@
+metadata:
+  id: graph100-performance-test
+  name: Graph100 Performance Test
+  description: Performance testing scenario with complex dependencies
+  version: 0.3.0
+  type: scenario
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+scenario:
+  id: performance-test
+  name: Performance Testing Scenario
+  description: Tests system performance with complex dependency graph
+  data-types: ["trade", "market-data", "risk", "settlement", "compliance"]
+
+rule-configurations:
+  - "26-groups-parallel-1.yaml"
+  - "27-groups-parallel-2.yaml"
+  - "28-groups-parallel-3.yaml"
+  - "29-groups-aggregator.yaml"
+  - "92-pipeline-settlement.yaml"
+  - "93-pipeline-risk-calculation.yaml"
+  - "94-pipeline-fee-calculation.yaml"

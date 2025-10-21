@@ -40,6 +40,9 @@ public class YamlContentAnalyzer {
      * Analyze a YAML file and generate a content summary.
      */
     public YamlContentSummary analyzYamlContent(String filePath) {
+        logger.debug("=== ANALYZING YAML CONTENT ===");
+        logger.debug("File path: {}", filePath);
+
         YamlContentSummary summary = new YamlContentSummary(filePath);
 
         try {
@@ -49,25 +52,36 @@ public class YamlContentAnalyzer {
                 return summary;
             }
 
+            logger.debug("File exists, size: {} bytes", file.length());
+
             try (FileInputStream fis = new FileInputStream(file)) {
                 Map<String, Object> data = yaml.load(fis);
                 if (data == null) {
+                    logger.warn("YAML data is null for file: {}", filePath);
                     return summary;
                 }
 
+                logger.debug("YAML loaded successfully, top-level keys: {}", data.keySet());
+
                 // Extract metadata
                 extractMetadata(summary, data);
+                logger.debug("Metadata extracted: id={}, type={}", summary.getId(), summary.getFileType());
 
                 // Analyze content
                 analyzeContent(summary, data);
+                logger.debug("Content analyzed: rules={}, enrichments={}, groups={}",
+                    summary.getRuleCount(), summary.getEnrichmentCount(), summary.getRuleGroupCount());
 
                 // Determine file type
                 determineFileType(summary, data);
+                logger.debug("Final file type determined: {}", summary.getFileType());
             }
         } catch (IOException e) {
             logger.error("Error reading YAML file: {}", filePath, e);
         }
 
+        logger.debug("=== CONTENT ANALYSIS COMPLETE ===");
+        logger.debug("Summary: {}", summary);
         return summary;
     }
 
@@ -90,27 +104,43 @@ public class YamlContentAnalyzer {
      * Analyze content and count items.
      */
     private void analyzeContent(YamlContentSummary summary, Map<String, Object> data) {
-        // Count rule groups
+        // Count direct rules (rules section)
+        if (data.containsKey("rules")) {
+            List<Map<String, Object>> rules = (List<Map<String, Object>>) data.get("rules");
+            if (rules != null) {
+                summary.setRuleCount(rules.size());
+            }
+        }
+
+        // Count rule groups and rules within them
         if (data.containsKey("rule-groups")) {
             List<Map<String, Object>> ruleGroups = (List<Map<String, Object>>) data.get("rule-groups");
             if (ruleGroups != null) {
                 summary.setRuleGroupCount(ruleGroups.size());
-                
-                // Count rules within groups
-                int totalRules = 0;
-                for (Map<String, Object> group : ruleGroups) {
-                    if (group.containsKey("rules")) {
-                        List<String> rules = (List<String>) group.get("rules");
-                        if (rules != null) {
-                            totalRules += rules.size();
+
+                // Count rules within groups (if no direct rules counted)
+                if (summary.getRuleCount() == 0) {
+                    int totalRules = 0;
+                    for (Map<String, Object> group : ruleGroups) {
+                        // Support both "rules" and "rule-ids" patterns
+                        if (group.containsKey("rules")) {
+                            List<String> rules = (List<String>) group.get("rules");
+                            if (rules != null) {
+                                totalRules += rules.size();
+                            }
+                        } else if (group.containsKey("rule-ids")) {
+                            List<String> ruleIds = (List<String>) group.get("rule-ids");
+                            if (ruleIds != null) {
+                                totalRules += ruleIds.size();
+                            }
                         }
                     }
+                    summary.setRuleCount(totalRules);
                 }
-                summary.setRuleCount(totalRules);
             }
         }
 
-        // Count enrichments
+        // Count enrichments (plural - list)
         if (data.containsKey("enrichments")) {
             List<Map<String, Object>> enrichments = (List<Map<String, Object>>) data.get("enrichments");
             if (enrichments != null) {
@@ -118,13 +148,36 @@ public class YamlContentAnalyzer {
             }
         }
 
-        // Count config files
+        // Count enrichment (singular - single object with steps)
+        if (data.containsKey("enrichment")) {
+            Map<String, Object> enrichment = (Map<String, Object>) data.get("enrichment");
+            if (enrichment != null) {
+                summary.setEnrichmentCount(1);
+                // Count steps within enrichment
+                if (enrichment.containsKey("steps")) {
+                    List<Map<String, Object>> steps = (List<Map<String, Object>>) enrichment.get("steps");
+                    if (steps != null) {
+                        summary.addContentCount("enrichment-steps", steps.size());
+                    }
+                }
+            }
+        }
+
+        // Count config files (rule-configurations, config-files)
+        int configCount = 0;
+        if (data.containsKey("rule-configurations")) {
+            List<String> configFiles = (List<String>) data.get("rule-configurations");
+            if (configFiles != null) {
+                configCount += configFiles.size();
+            }
+        }
         if (data.containsKey("config-files")) {
             List<String> configFiles = (List<String>) data.get("config-files");
             if (configFiles != null) {
-                summary.setConfigFileCount(configFiles.size());
+                configCount += configFiles.size();
             }
         }
+        summary.setConfigFileCount(configCount);
 
         // Count references
         int refCount = 0;
@@ -147,13 +200,31 @@ public class YamlContentAnalyzer {
      * Determine the type of YAML file based on content.
      */
     private void determineFileType(YamlContentSummary summary, Map<String, Object> data) {
+        // Check metadata type first (most reliable)
+        if (data.containsKey("metadata")) {
+            Map<String, Object> metadata = (Map<String, Object>) data.get("metadata");
+            if (metadata != null && metadata.containsKey("type")) {
+                String metadataType = (String) metadata.get("type");
+                if (metadataType != null) {
+                    summary.setFileType(metadataType);
+                    return;
+                }
+            }
+        }
+
+        // Fallback to content-based detection
+        // Prioritize rule-groups over direct rules for backward compatibility
         if (data.containsKey("rule-groups")) {
             summary.setFileType("rules");
+        } else if (data.containsKey("rules")) {
+            summary.setFileType("rule-config");
         } else if (data.containsKey("enrichments")) {
             summary.setFileType("enrichments");
+        } else if (data.containsKey("enrichment")) {
+            summary.setFileType("enrichment");
         } else if (data.containsKey("scenarios")) {
-            summary.setFileType("scenario");
-        } else if (data.containsKey("config")) {
+            summary.setFileType("scenario-registry");
+        } else if (data.containsKey("config") || data.containsKey("data-sources")) {
             summary.setFileType("config");
         } else {
             summary.setFileType("unknown");

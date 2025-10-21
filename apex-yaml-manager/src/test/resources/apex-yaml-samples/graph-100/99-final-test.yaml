@@ -1,0 +1,20 @@
+metadata:
+  id: graph100-final-test
+  name: Graph100 Final Test
+  description: Final comprehensive test scenario - the 100th file
+  version: 1.0.0
+  type: scenario
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+scenario:
+  id: final-test
+  name: Comprehensive Final Test
+  description: The 100th file - comprehensive test of entire graph-100 dataset
+  data-types: ["all"]
+
+rule-configurations:
+  - "00-scenario-registry.yaml"  # Back to the root
+  - "99-load-test.yaml"          # Maximum load test
+  - "99-fan-out-stress.yaml"     # Fan-out stress test
+  - "99-cross-category-complex.yaml"  # Cross-category complexity

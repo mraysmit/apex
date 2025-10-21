@@ -1,0 +1,52 @@
+metadata:
+  id: graph100-pipeline-reconciliation
+  name: Graph100 Pipeline Reconciliation
+  description: Trade reconciliation pipeline
+  version: 0.3.0
+  type: pipeline
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+pipeline:
+  id: reconciliation-pipeline
+  name: Trade Reconciliation
+  description: Reconciles trades between internal and external systems
+
+  stages:
+    - name: "extract-internal-trades"
+      type: "extract"
+      description: "Extract trades from internal system"
+      execution-order: 1
+      config-file: "75-config-risk.yaml"
+
+    - name: "extract-external-trades"
+      type: "extract"
+      description: "Extract trades from external system"
+      execution-order: 2
+      config-file: "74-config-clearing.yaml"
+
+    - name: "match-trades"
+      type: "transform"
+      description: "Match trades between systems"
+      execution-order: 3
+      depends-on: ["extract-internal-trades", "extract-external-trades"]
+
+    - name: "identify-breaks"
+      type: "validate"
+      description: "Identify reconciliation breaks"
+      execution-order: 4
+      depends-on: ["match-trades"]
+
+    - name: "generate-break-report"
+      type: "load"
+      description: "Generate reconciliation break report"
+      execution-order: 5
+      depends-on: ["identify-breaks"]
+
+data-sources:
+  - name: "internal-system"
+    source: "75-config-risk.yaml"
+    enabled: true
+  - name: "external-system"
+    source: "74-config-clearing.yaml"
+    enabled: true

@@ -1,0 +1,31 @@
+﻿metadata:
+  id: basel-reporting
+  type: rule-config
+  version: "1.0"
+  description: "Basel reporting rules"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+rule-groups:
+  - id: basel-reporting-group
+    description: "Basel reporting rules group"
+    rule-ids:
+      - "basel-reporting-rule-1"
+      - "basel-reporting-rule-2"
+      - "basel-reporting-rule-3"
+
+rules:
+  - id: basel-reporting-rule-1
+    description: "Rule 1 for Basel reporting rules"
+    condition: "trade.field1 != null && trade.field1 > 0"
+    severity: "ERROR"
+  - id: basel-reporting-rule-2
+    description: "Rule 2 for Basel reporting rules"
+    condition: "trade.field2 != null && trade.field2 > 0"
+    severity: "ERROR"
+  - id: basel-reporting-rule-3
+    description: "Rule 3 for Basel reporting rules"
+    condition: "trade.field3 != null && trade.field3 > 0"
+    severity: "ERROR"
+
+dependencies:
+  - "127-reporting-base.yaml"

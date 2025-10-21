@@ -1,0 +1,57 @@
+metadata:
+  id: common-validation-rules
+  type: rule-config
+  version: "1.0"
+  description: "Common validation rules used across all asset classes"
+  created-date: "2025-10-20"
+
+rule-groups:
+  - id: basic-trade-validation
+    description: "Basic trade validation rules"
+    rule-ids:
+      - "trade-id-check"
+      - "timestamp-check"
+      - "counterparty-check"
+  
+  - id: amount-validation
+    description: "Trade amount validation"
+    rule-ids:
+      - "notional-amount-check"
+      - "currency-check"
+      - "settlement-amount-check"
+
+rules:
+  - id: trade-id-check
+    description: "Validate trade ID format"
+    condition: "trade.tradeId != null && trade.tradeId.length() >= 8"
+    severity: "ERROR"
+    
+  - id: timestamp-check
+    description: "Validate trade timestamp"
+    condition: "trade.timestamp != null && trade.timestamp <= now()"
+    severity: "ERROR"
+    
+  - id: counterparty-check
+    description: "Validate counterparty exists"
+    condition: "referenceData.counterpartyExists(trade.counterpartyId)"
+    severity: "ERROR"
+    
+  - id: notional-amount-check
+    description: "Validate notional amount"
+    condition: "trade.notionalAmount > 0"
+    severity: "ERROR"
+    
+  - id: currency-check
+    description: "Validate currency code"
+    condition: "referenceData.isValidCurrency(trade.currency)"
+    severity: "ERROR"
+    
+  - id: settlement-amount-check
+    description: "Validate settlement amount"
+    condition: "trade.settlementAmount != null && trade.settlementAmount > 0"
+    severity: "WARNING"
+
+dependencies:
+  - "110-reference-data-rules.yaml"
+  - "111-timestamp-rules.yaml"
+  - "112-currency-rules.yaml"

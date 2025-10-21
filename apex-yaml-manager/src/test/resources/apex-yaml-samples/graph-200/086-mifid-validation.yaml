@@ -1,0 +1,31 @@
+﻿metadata:
+  id: mifid-validation
+  type: rule-config
+  version: "1.0"
+  description: "MiFID validation rules"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+rule-groups:
+  - id: mifid-validation-group
+    description: "MiFID validation rules group"
+    rule-ids:
+      - "mifid-validation-rule-1"
+      - "mifid-validation-rule-2"
+      - "mifid-validation-rule-3"
+
+rules:
+  - id: mifid-validation-rule-1
+    description: "Rule 1 for MiFID validation rules"
+    condition: "trade.field1 != null && trade.field1 > 0"
+    severity: "ERROR"
+  - id: mifid-validation-rule-2
+    description: "Rule 2 for MiFID validation rules"
+    condition: "trade.field2 != null && trade.field2 > 0"
+    severity: "ERROR"
+  - id: mifid-validation-rule-3
+    description: "Rule 3 for MiFID validation rules"
+    condition: "trade.field3 != null && trade.field3 > 0"
+    severity: "ERROR"
+
+dependencies:
+  - "126-regulatory-base.yaml"

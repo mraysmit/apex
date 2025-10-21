@@ -1,0 +1,47 @@
+metadata:
+  id: graph100-pipeline-monitoring
+  name: Graph100 Pipeline Monitoring
+  description: System monitoring and alerting pipeline
+  version: 0.3.0
+  type: pipeline
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+pipeline:
+  id: monitoring-pipeline
+  name: System Monitoring and Alerting
+  description: Monitors system health and sends alerts
+
+  stages:
+    - name: "collect-metrics"
+      type: "extract"
+      description: "Collect system performance metrics"
+      execution-order: 1
+      config-file: "79-config-monitoring.yaml"
+
+    - name: "analyze-metrics"
+      type: "transform"
+      description: "Analyze metrics for anomalies"
+      execution-order: 2
+      depends-on: ["collect-metrics"]
+
+    - name: "generate-alerts"
+      type: "transform"
+      description: "Generate alerts for threshold breaches"
+      execution-order: 3
+      depends-on: ["analyze-metrics"]
+
+    - name: "send-notifications"
+      type: "load"
+      description: "Send notifications via messaging system"
+      execution-order: 4
+      depends-on: ["generate-alerts"]
+      config-file: "77-config-messaging.yaml"
+
+data-sources:
+  - name: "monitoring-data"
+    source: "79-config-monitoring.yaml"
+    enabled: true
+  - name: "messaging-system"
+    source: "77-config-messaging.yaml"
+    enabled: true

@@ -1,0 +1,36 @@
+﻿metadata:
+  id: fixed-income-validation
+  type: rule-config
+  version: "1.0"
+  description: "Fixed income validation rules"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+
+# File-based dependencies following APEX patterns
+rule-configurations:
+  - "100-common-validation-rules.yaml"
+  - "103-bond-validation-rules.yaml"
+rule-groups:
+  - id: fixed-income-validation-group-1
+    name: "Primary Rule Group"
+    description: "Primary rule group for Fixed income validation rules"
+    operator: AND
+    stop-on-first-failure: true
+    priority: 10
+    rule-ids:
+      - "fixed-income-validation-rule-1"
+      - "fixed-income-validation-rule-2"
+
+rules:
+  - id: fixed-income-validation-rule-1
+    name: "Primary Validation"
+    description: "Primary validation rule for Fixed income validation rules"
+    condition: "trade.field1 != null && trade.field1.length() > 0"
+    message: "Field1 validation failed"
+    severity: "ERROR"
+  - id: fixed-income-validation-rule-2
+    name: "Secondary Validation"
+    description: "Secondary validation rule for Fixed income validation rules"
+    condition: "trade.field2 != null && trade.field2 > 0"
+    message: "Field2 validation failed"
+    severity: "WARNING"

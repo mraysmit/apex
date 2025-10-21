@@ -1,0 +1,37 @@
+metadata:
+  id: graph100-pipeline-audit
+  name: Graph100 Pipeline Audit
+  description: Audit trail pipeline for compliance
+  version: 0.3.0
+  type: pipeline
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+pipeline:
+  id: audit-pipeline
+  name: Audit Trail Processing
+  description: Processes and stores audit trail data
+
+  stages:
+    - name: "extract-audit-data"
+      type: "extract"
+      description: "Extract audit events from source systems"
+      execution-order: 1
+      config-file: "75-config-risk.yaml"
+
+    - name: "transform-audit-data"
+      type: "transform"
+      description: "Transform audit data for storage"
+      execution-order: 2
+      depends-on: ["extract-audit-data"]
+
+    - name: "load-audit-data"
+      type: "load"
+      description: "Load audit data to compliance database"
+      execution-order: 3
+      depends-on: ["transform-audit-data"]
+
+data-sources:
+  - name: "audit-source"
+    source: "75-config-risk.yaml"
+    enabled: true

@@ -1,0 +1,42 @@
+metadata:
+  id: graph100-pipeline-settlement
+  name: Graph100 Pipeline Settlement
+  description: Trade settlement processing pipeline
+  version: 0.3.0
+  type: pipeline
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+
+pipeline:
+  id: settlement-pipeline
+  name: Trade Settlement Processing
+  description: Processes trade settlements end-to-end
+
+  stages:
+    - name: "validate-settlement-eligibility"
+      type: "validate"
+      description: "Validate trade is eligible for settlement"
+      execution-order: 1
+      config-file: "86-dataset-settlement-cycles.yaml"
+
+    - name: "calculate-settlement-date"
+      type: "transform"
+      description: "Calculate settlement date based on cycles"
+      execution-order: 2
+      depends-on: ["validate-settlement-eligibility"]
+      config-file: "85-dataset-holidays.yaml"
+
+    - name: "initiate-settlement"
+      type: "load"
+      description: "Initiate settlement with external system"
+      execution-order: 3
+      depends-on: ["calculate-settlement-date"]
+      config-file: "76-config-settlement.yaml"
+
+data-sources:
+  - name: "settlement-cycles"
+    source: "86-dataset-settlement-cycles.yaml"
+    enabled: true
+  - name: "holiday-calendar"
+    source: "85-dataset-holidays.yaml"
+    enabled: true

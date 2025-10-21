@@ -1,0 +1,32 @@
+metadata:
+  id: graph100-dataset-compliance
+  name: Graph100 Dataset Compliance
+  description: Compliance reference data for regulatory checks
+  version: 0.3.0
+  type: dataset
+  author: apex.demo@company.com
+  created-date: 2025-10-20
+  source: "Regulatory Authority"
+
+data:
+  - id: "EMIR_APPLICABLE_JURISDICTIONS"
+    name: "EMIR Applicable Jurisdictions"
+    values:
+      - "EU"
+      - "UK"
+      - "CH"
+  - id: "MIFID_INSTRUMENTS"
+    name: "MiFID Applicable Instruments"
+    values:
+      - "EQUITY"
+      - "BOND"
+      - "DERIVATIVE"
+  - id: "REPORTING_THRESHOLDS"
+    name: "Regulatory Reporting Thresholds"
+    values:
+      - currency: "EUR"
+        threshold: 1000000
+      - currency: "USD"
+        threshold: 1000000
+      - currency: "GBP"
+        threshold: 850000

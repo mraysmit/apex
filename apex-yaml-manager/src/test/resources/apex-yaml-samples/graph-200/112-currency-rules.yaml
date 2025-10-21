@@ -1,0 +1,33 @@
+﻿metadata:
+  id: currency-rules
+  type: rule-config
+  version: "1.0"
+  description: "Currency validation rules"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+rule-groups:
+  - id: currency-rules-group
+    description: "Currency validation rules group"
+    rule-ids:
+      - "currency-rules-rule-1"
+      - "currency-rules-rule-2"
+      - "currency-rules-rule-3"
+      - "currency-rules-rule-4"
+
+rules:
+  - id: currency-rules-rule-1
+    description: "Rule 1 for Currency validation rules"
+    condition: "trade.field1 != null && trade.field1 > 0"
+    severity: "ERROR"
+  - id: currency-rules-rule-2
+    description: "Rule 2 for Currency validation rules"
+    condition: "trade.field2 != null && trade.field2 > 0"
+    severity: "ERROR"
+  - id: currency-rules-rule-3
+    description: "Rule 3 for Currency validation rules"
+    condition: "trade.field3 != null && trade.field3 > 0"
+    severity: "ERROR"
+  - id: currency-rules-rule-4
+    description: "Rule 4 for Currency validation rules"
+    condition: "trade.field4 != null && trade.field4 > 0"
+    severity: "ERROR"

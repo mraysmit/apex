@@ -126,5 +126,110 @@ class ToolbarAndSearchUITest {
         int restored = visibleNodeCount();
         assertTrue(restored >= allNodes.size(), "Clearing search should restore visibility");
     }
+
+    @Test
+    @Order(3)
+    void test_expand_level1_button() {
+        loadTreeViaJs();
+
+        // Collapse all first
+        WebElement collapseAllBtn = wait.until(ExpectedConditions.elementToBeClickable(By.id("collapseAllBtn")));
+        collapseAllBtn.click();
+        int collapsedCount = visibleNodeCount();
+
+        // Click Level 1 button
+        WebElement level1Btn = wait.until(ExpectedConditions.elementToBeClickable(By.id("expandLevel1Btn")));
+        level1Btn.click();
+
+        // Wait for expansion
+        wait.until(driver -> visibleNodeCount() > collapsedCount);
+        int level1Count = visibleNodeCount();
+
+        assertTrue(level1Count > collapsedCount, "Level 1 expansion should show more nodes");
+    }
+
+    @Test
+    @Order(4)
+    void test_expand_level3_button() {
+        loadTreeViaJs();
+
+        // Start with level 2
+        WebElement level2Btn = wait.until(ExpectedConditions.elementToBeClickable(By.id("expandLevel2Btn")));
+        level2Btn.click();
+        wait.until(driver -> visibleNodeCount() > 1);
+        int level2Count = visibleNodeCount();
+
+        // Click Level 3 button
+        WebElement level3Btn = wait.until(ExpectedConditions.elementToBeClickable(By.id("expandLevel3Btn")));
+        level3Btn.click();
+
+        // Wait for expansion
+        wait.until(driver -> visibleNodeCount() >= level2Count);
+        int level3Count = visibleNodeCount();
+
+        assertTrue(level3Count >= level2Count, "Level 3 expansion should show same or more nodes");
+    }
+
+    @Test
+    @Order(5)
+    void test_refresh_button() {
+        loadTreeViaJs();
+
+        int initialCount = visibleNodeCount();
+        assertTrue(initialCount > 0, "Should have nodes before refresh");
+
+        // Click refresh button
+        WebElement refreshBtn = wait.until(ExpectedConditions.elementToBeClickable(By.id("refreshBtn")));
+        refreshBtn.click();
+
+        // Wait for refresh to complete
+        wait.until(driver -> {
+            List<WebElement> nodes = driver.findElements(By.className("tree-node"));
+            return nodes.size() > 0;
+        });
+
+        int refreshedCount = visibleNodeCount();
+        assertTrue(refreshedCount > 0, "Should have nodes after refresh");
+    }
+
+    @Test
+    @Order(6)
+    void test_filter_button() {
+        loadTreeViaJs();
+
+        // Click filter button
+        WebElement filterBtn = wait.until(ExpectedConditions.elementToBeClickable(By.id("filterBtn")));
+        filterBtn.click();
+
+        // Filter button should be clickable (basic functionality test)
+        assertTrue(filterBtn.isEnabled(), "Filter button should be enabled");
+
+        // Note: Actual filter functionality would depend on implementation
+        // This test verifies the button is present and clickable
+    }
+
+    @Test
+    @Order(7)
+    void test_d3_toggle_checkbox() {
+        loadTreeViaJs();
+
+        // Find D3 toggle checkbox
+        WebElement d3Toggle = wait.until(ExpectedConditions.elementToBeClickable(By.id("useD3Toggle")));
+
+        // Check initial state
+        boolean initialState = d3Toggle.isSelected();
+
+        // Click to toggle
+        d3Toggle.click();
+
+        // Verify state changed
+        boolean newState = d3Toggle.isSelected();
+        assertNotEquals(initialState, newState, "D3 toggle should change state when clicked");
+
+        // Toggle back
+        d3Toggle.click();
+        boolean finalState = d3Toggle.isSelected();
+        assertEquals(initialState, finalState, "D3 toggle should return to original state");
+    }
 }
 

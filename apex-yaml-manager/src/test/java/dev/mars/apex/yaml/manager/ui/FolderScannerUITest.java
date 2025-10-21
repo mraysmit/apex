@@ -29,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 import java.time.Duration;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -263,9 +264,86 @@ class FolderScannerUITest {
             ExpectedConditions.visibilityOfElementLocated(By.id("scanStatus"))
         );
         
-        assertTrue(scanStatus.getText().contains("Please enter") || 
+        assertTrue(scanStatus.getText().contains("Please enter") ||
                   scanStatus.getText().contains("required"),
             "Error message should be displayed for empty path");
+    }
+
+    @Test
+    @Order(8)
+    void test_browse_folder_button_and_file_selection() {
+        driver.get(baseUrl + "/yaml-manager/ui/tree-viewer");
+
+        WebElement loadFolderBtn = wait.until(
+            ExpectedConditions.elementToBeClickable(By.id("loadFolderBtn"))
+        );
+        loadFolderBtn.click();
+
+        // Find browse button
+        WebElement browseBtn = wait.until(
+            ExpectedConditions.elementToBeClickable(By.id("browseFolderBtn"))
+        );
+
+        // Click browse button to trigger file input
+        browseBtn.click();
+
+        // Find the hidden file input that gets triggered
+        WebElement fileInput = wait.until(
+            ExpectedConditions.presenceOfElementLocated(By.id("folderInput"))
+        );
+
+        // Use sendKeys to simulate file selection
+        // Point to our test YAML files directory
+        String testFilesPath = System.getProperty("user.dir") +
+            "\\src\\test\\resources\\apex-yaml-samples\\graph-200\\000-master-registry.yaml";
+
+        fileInput.sendKeys(testFilesPath);
+
+        // Wait for file processing to complete
+        try { Thread.sleep(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+
+        // Verify folder path input is populated
+        WebElement folderPathInput = driver.findElement(By.id("folderPathInput"));
+        String folderPath = folderPathInput.getAttribute("value");
+
+        assertFalse(folderPath.isEmpty(), "Folder path should be populated after file selection");
+
+        // Verify file list is populated
+        List<WebElement> fileItems = driver.findElements(By.className("file-item"));
+        assertTrue(fileItems.size() > 0, "File list should contain items after folder selection");
+
+        // Verify Load Selected button becomes enabled
+        WebElement loadSelectedBtn = driver.findElement(By.id("loadSelectedBtn"));
+        assertTrue(loadSelectedBtn.isEnabled(), "Load Selected button should be enabled after file selection");
+    }
+
+    @Test
+    @Order(9)
+    void test_modal_close_button() {
+        driver.get(baseUrl + "/yaml-manager/ui/tree-viewer");
+
+        WebElement loadFolderBtn = wait.until(
+            ExpectedConditions.elementToBeClickable(By.id("loadFolderBtn"))
+        );
+        loadFolderBtn.click();
+
+        // Verify modal is open
+        WebElement modal = wait.until(
+            ExpectedConditions.visibilityOfElementLocated(By.id("folderModal"))
+        );
+
+        // Find and click close button (X)
+        WebElement closeBtn = wait.until(
+            ExpectedConditions.elementToBeClickable(By.id("modalCloseBtn"))
+        );
+        closeBtn.click();
+
+        // Wait for modal to close
+        wait.until(ExpectedConditions.invisibilityOf(modal));
+
+        // Verify modal is closed
+        assertFalse(modal.getAttribute("class").contains("active"),
+            "Modal should be closed after clicking X button");
     }
 }
 

@@ -937,9 +937,6 @@ async function loadSelectedFiles() { try { window.__lastStep = 'loadSelected-sta
     // Load the first selected file as root
     const rootFile = selectedFiles[0];
 
-    // Load the first selected file as root
-    const rootFile = selectedFiles[0];
-
     // Persist and show selected folder in header
     try { window.__lastStep = 'before-assumedFolder'; } catch (e) {}
     const assumedFolder = modalPath && modalPath.trim() ? modalPath.trim() : dirName(rootFile);
@@ -1008,4 +1005,10 @@ function formatFileSize(bytes) {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 }
+
+// Expose functions to global scope for testing
+window.loadDependencyTree = loadDependencyTree;
+window.selectNode = selectNode;
+window.expandNode = expandNode;
+window.collapseNode = collapseNode;
 

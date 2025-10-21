@@ -1,0 +1,13 @@
+﻿metadata:
+  id: americas-scenario
+  type: scenario
+  version: "1.0"
+  description: "Americas region trading"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+
+
+dependencies:
+  - "076-americas-validation.yaml"
+  - "077-americas-settlement.yaml"
+  - "166-americas-enrichment.yaml"

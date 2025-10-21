@@ -1,0 +1,13 @@
+﻿metadata:
+  id: fx-trading-scenario
+  type: scenario
+  version: "1.0"
+  description: "Foreign exchange trading scenario"
+  created-date: "2025-10-20"
+  author: "APEX Test Generator"
+
+
+dependencies:
+  - "062-fx-validation.yaml"
+  - "063-fx-settlement.yaml"
+  - "159-fx-rate-enrichment.yaml"
