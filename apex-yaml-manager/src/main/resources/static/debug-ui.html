@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug APEX YAML Manager UI</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        button { padding: 10px 15px; margin: 5px; }
+        .result { margin: 10px 0; padding: 10px; background: #f5f5f5; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e9; color: #2e7d32; }
+        pre { white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔧 APEX YAML Manager UI Debug</h1>
+    
+    <div class="test-section">
+        <h2>1. Test Scan Folder API</h2>
+        <input type="text" id="folderPath" placeholder="Enter folder path" style="width: 500px;" 
+               value="C:/Users/markr/dev/java/corejava/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100">
+        <button onclick="testScanFolder()">Test Scan Folder</button>
+        <div id="scanResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Test Tree API</h2>
+        <input type="text" id="rootFilePath" placeholder="Enter full file path" style="width: 500px;"
+               value="C:\Users\markr\dev\java\corejava\apex-rules-engine\apex-yaml-manager\src\test\resources\apex-yaml-samples\graph-100\00-scenario-registry.yaml">
+        <button onclick="testTreeAPI()">Test Tree API</button>
+        <div id="treeResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Test Full Workflow</h2>
+        <button onclick="testFullWorkflow()">Test: Scan → Select First File → Load Tree</button>
+        <div id="workflowResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8082/yaml-manager/api';
+
+        async function testScanFolder() {
+            const folderPath = document.getElementById('folderPath').value;
+            const resultDiv = document.getElementById('scanResult');
+            
+            try {
+                resultDiv.innerHTML = '⏳ Testing scan folder...';
+                
+                const response = await fetch(`${API_BASE}/dependencies/scan-folder?folderPath=${encodeURIComponent(folderPath)}`, {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    <h3>✅ Scan Folder Success</h3>
+                    <p><strong>Total Files:</strong> ${data.totalFiles}</p>
+                    <p><strong>First File:</strong> ${data.yamlFiles[0]?.name}</p>
+                    <p><strong>First File Path:</strong> ${data.yamlFiles[0]?.path}</p>
+                    <details>
+                        <summary>Full Response</summary>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </details>
+                `;
+                
+                // Auto-populate the tree test with the first file
+                if (data.yamlFiles && data.yamlFiles.length > 0) {
+                    document.getElementById('rootFilePath').value = data.yamlFiles[0].path;
+                }
+                
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<h3>❌ Scan Folder Error</h3><p>${error.message}</p>`;
+            }
+        }
+
+        async function testTreeAPI() {
+            const rootFilePath = document.getElementById('rootFilePath').value;
+            const resultDiv = document.getElementById('treeResult');
+            
+            try {
+                resultDiv.innerHTML = '⏳ Testing tree API...';
+                
+                const response = await fetch(`${API_BASE}/dependencies/tree?rootFile=${encodeURIComponent(rootFilePath)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    <h3>✅ Tree API Success</h3>
+                    <p><strong>Status:</strong> ${data.status}</p>
+                    <p><strong>Total Files:</strong> ${data.totalFiles}</p>
+                    <p><strong>Max Depth:</strong> ${data.maxDepth}</p>
+                    <p><strong>Root File:</strong> ${data.rootFile}</p>
+                    <p><strong>Tree Children:</strong> ${data.tree?.childCount || 0}</p>
+                    <details>
+                        <summary>Full Tree Response</summary>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </details>
+                `;
+                
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<h3>❌ Tree API Error</h3><p>${error.message}</p>`;
+            }
+        }
+
+        async function testFullWorkflow() {
+            const resultDiv = document.getElementById('workflowResult');
+            const folderPath = document.getElementById('folderPath').value;
+            
+            try {
+                resultDiv.innerHTML = '⏳ Testing full workflow...<br>';
+                
+                // Step 1: Scan folder
+                resultDiv.innerHTML += '1. Scanning folder...<br>';
+                const scanResponse = await fetch(`${API_BASE}/dependencies/scan-folder?folderPath=${encodeURIComponent(folderPath)}`, {
+                    method: 'POST'
+                });
+                
+                if (!scanResponse.ok) {
+                    throw new Error(`Scan failed: HTTP ${scanResponse.status}`);
+                }
+                
+                const scanData = await scanResponse.json();
+                resultDiv.innerHTML += `✅ Found ${scanData.totalFiles} files<br>`;
+                
+                // Step 2: Get first file
+                if (!scanData.yamlFiles || scanData.yamlFiles.length === 0) {
+                    throw new Error('No YAML files found');
+                }
+                
+                const firstFile = scanData.yamlFiles[0];
+                resultDiv.innerHTML += `2. Selected first file: ${firstFile.name}<br>`;
+                resultDiv.innerHTML += `   Full path: ${firstFile.path}<br>`;
+                
+                // Step 3: Load tree
+                resultDiv.innerHTML += '3. Loading dependency tree...<br>';
+                const treeResponse = await fetch(`${API_BASE}/dependencies/tree?rootFile=${encodeURIComponent(firstFile.path)}`);
+                
+                if (!treeResponse.ok) {
+                    throw new Error(`Tree failed: HTTP ${treeResponse.status}`);
+                }
+                
+                const treeData = await treeResponse.json();
+                
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML += `
+                    <h3>✅ Full Workflow Success!</h3>
+                    <p><strong>Scan:</strong> ${scanData.totalFiles} files found</p>
+                    <p><strong>Tree:</strong> ${treeData.totalFiles} files in dependency graph</p>
+                    <p><strong>Max Depth:</strong> ${treeData.maxDepth}</p>
+                    <p><strong>Root Children:</strong> ${treeData.tree?.childCount || 0}</p>
+                    <p><strong>This proves the backend APIs work perfectly!</strong></p>
+                `;
+                
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML += `<h3>❌ Workflow Error</h3><p>${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

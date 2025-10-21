@@ -45,7 +45,6 @@ enrichments:
   - id: "and-result-enrichment"
     name: "AND Result Enrichment"
     type: "field-enrichment"
-    target-object-type: "java.util.HashMap"
     field-mappings:
       - source-field: "input"
         target-field: "output"
