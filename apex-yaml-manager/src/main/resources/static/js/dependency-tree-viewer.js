@@ -6,7 +6,7 @@ let treeData = null;
 let selectedNode = null;
 let isResizing = false;
 let leftPanelWidth = 30;
-let selectedFilesFromDialog = [];
+// Removed selectedFilesFromDialog - now using server-side scanning only
 // Controls how many levels are rendered; Infinity means fully expanded
 let maxRenderDepth = Infinity;
 // Per-node expansion state: path -> boolean (true=expanded, false=collapsed)
@@ -151,8 +151,7 @@ function setupEventListeners() {
     safeAddEventListener('modalCancelBtn', 'click', () => closeFolderModal(), 'modal cancel button');
     safeAddEventListener('scanFolderBtn', 'click', () => scanFolder(), 'scan folder button');
     safeAddEventListener('loadSelectedBtn', 'click', () => loadSelectedFiles(), 'load selected button');
-    safeAddEventListener('browseFolderBtn', 'click', () => browseFolderDialog(), 'browse folder button');
-    safeAddEventListener('folderInput', 'change', handleFolderSelection, 'folder input');
+    // Removed browser folder dialog to avoid "upload files" security prompts
 
     // Level expansion buttons (optional elements)
     const lvl1Btn = document.getElementById('expandLevel1Btn');
@@ -919,66 +918,9 @@ function closeFolderModal() {
     document.getElementById('loadSelectedBtn').disabled = true;
 }
 
-/**
- * Open file system dialog to browse for folder
- */
-function browseFolderDialog() {
-    const folderInput = document.getElementById('folderInput');
-    if (folderInput) {
-        folderInput.click();
-    } else {
-        console.error('Folder input element not found');
-        showScanStatus('Error: File selection not available', 'error');
-    }
-}
+// Browser folder dialog removed to eliminate "upload files" security prompts
 
-/**
- * Handle folder selection from file dialog
- */
-function handleFolderSelection(event) {
-    const files = event.target.files;
-    if (files && files.length > 0) {
-        // Get the folder path from the first file
-        const firstFile = files[0];
-        const filePath = firstFile.webkitRelativePath || firstFile.name;
-
-        // Extract the folder name from the relative path
-        let folderDisplayName = 'Selected Folder';
-        if (filePath.includes('/')) {
-            // Get the root folder name from the relative path
-            const pathParts = filePath.split('/');
-            folderDisplayName = pathParts[0]; // First part is the root folder name
-        }
-
-        // Filter and process YAML files
-        const yamlFiles = Array.from(files)
-            .filter(f => f.name.endsWith('.yaml') || f.name.endsWith('.yml'))
-            .map(f => ({
-                name: f.name,
-                path: f.webkitRelativePath || f.name,
-                size: f.size
-            }));
-
-        if (yamlFiles.length > 0) {
-            // Store the files for later use
-            selectedFilesFromDialog = yamlFiles;
-
-            // Display a meaningful folder indication
-            const folderPathInput = document.getElementById('folderPathInput');
-            if (folderPathInput) {
-                folderPathInput.value = `📁 ${folderDisplayName} (${yamlFiles.length} YAML files selected)`;
-                folderPathInput.style.fontStyle = 'italic';
-                folderPathInput.style.color = '#28a745';
-            }
-
-            // Display the YAML files found
-            displayScannedFiles(yamlFiles);
-            showScanStatus(`Found ${yamlFiles.length} YAML file(s) in folder "${folderDisplayName}"`, 'success');
-        } else {
-            showScanStatus('No YAML files found in selected folder', 'error');
-        }
-    }
-}
+// Browser folder selection removed - now using server-side folder scanning only
 
 /**
  * Scan folder for YAML files
@@ -1179,9 +1121,8 @@ async function loadSelectedFiles() {
     try {
         try { window.__lastStep = 'deciding-dialog-vs-server'; } catch (e) {}
 
-        // Check if files were selected from dialog (browser-based) or from server (path-based)
-        // For server-based scanning, selectedFilesFromDialog will be empty
-        const isFromBrowserDialog = selectedFilesFromDialog.length > 0;
+        // Browser-based file selection removed - using server-side scanning only
+        const isFromBrowserDialog = false;
 
         if (isFromBrowserDialog) {
             try { window.__lastStep = 'branch-dialog'; } catch (e) {}
