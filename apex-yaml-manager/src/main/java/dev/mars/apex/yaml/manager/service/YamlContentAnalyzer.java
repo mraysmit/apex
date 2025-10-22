@@ -54,6 +54,11 @@ public class YamlContentAnalyzer {
 
             logger.debug("File exists, size: {} bytes", file.length());
 
+            // Read raw content first
+            String rawContent = java.nio.file.Files.readString(file.toPath(), java.nio.charset.StandardCharsets.UTF_8);
+            summary.setRawContent(rawContent);
+            logger.debug("Raw content read, length: {} characters", rawContent.length());
+
             try (FileInputStream fis = new FileInputStream(file)) {
                 Map<String, Object> data = yaml.load(fis);
                 if (data == null) {

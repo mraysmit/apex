@@ -23,10 +23,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -427,7 +432,78 @@ public class DependencyAnalysisService {
         
         validation.put("issues", issues);
         validation.put("summary", issues.isEmpty() ? "No issues found" : issues.size() + " issues detected");
-        
+
         return validation;
+    }
+
+    /**
+     * Get the raw content of a YAML file.
+     */
+    public Map<String, Object> getFileContent(String filePath) {
+        logger.debug("Getting file content for: {}", filePath);
+
+        Map<String, Object> result = new HashMap<>();
+
+        try {
+            // Handle both absolute and relative file paths
+            Path resolvedPath;
+            Path inputPath = Paths.get(filePath);
+
+            if (inputPath.isAbsolute()) {
+                // If the input is already an absolute path, use it directly
+                resolvedPath = inputPath;
+            } else if (this.currentBasePath != null) {
+                // If it's a relative path and we have a base path, resolve relative to base
+                resolvedPath = Paths.get(this.currentBasePath, filePath);
+            } else {
+                // If it's a relative path but no base path, use as-is
+                resolvedPath = inputPath;
+            }
+
+            // Check if file exists
+            if (!Files.exists(resolvedPath)) {
+                throw new RuntimeException("File does not exist: " + resolvedPath);
+            }
+
+            // Read file content
+            String content = Files.readString(resolvedPath, StandardCharsets.UTF_8);
+
+            // Get file metadata
+            BasicFileAttributes attrs = Files.readAttributes(resolvedPath, BasicFileAttributes.class);
+
+            result.put("filePath", filePath);
+            result.put("absolutePath", resolvedPath.toString());
+            result.put("content", content);
+            result.put("exists", true);
+            result.put("size", attrs.size());
+            result.put("lastModified", attrs.lastModifiedTime().toInstant().toEpochMilli());
+            result.put("isReadable", Files.isReadable(resolvedPath));
+
+            // Try to validate YAML syntax
+            boolean isValidYaml = false;
+            String yamlError = null;
+            try {
+                ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+                yamlMapper.readTree(content);
+                isValidYaml = true;
+            } catch (Exception e) {
+                yamlError = e.getMessage();
+            }
+
+            result.put("isValidYaml", isValidYaml);
+            if (yamlError != null) {
+                result.put("yamlError", yamlError);
+            }
+
+            logger.debug("Successfully read file content: {} bytes", content.length());
+
+        } catch (Exception e) {
+            logger.error("Failed to read file content for: " + filePath, e);
+            result.put("filePath", filePath);
+            result.put("exists", false);
+            result.put("error", e.getMessage());
+        }
+
+        return result;
     }
 }

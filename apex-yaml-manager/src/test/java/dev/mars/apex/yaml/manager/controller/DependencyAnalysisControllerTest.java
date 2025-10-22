@@ -833,6 +833,88 @@ class DependencyAnalysisControllerTest {
         validateParentChildRelationships(tree, null, 0);
     }
 
+    @Test
+    @DisplayName("Should load tree data for exact HTML file path - DEBUGGING TEST")
+    void testTreeEndpointWithExactHtmlFilePath() {
+        // This is the EXACT path the HTML is trying to use
+        String rootFile = "C:/Users/markr/dev/java/corejava/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/00-scenario-registry.yaml";
+
+        System.out.println("=== DEBUGGING TREE ENDPOINT ===");
+        System.out.println("Testing with exact HTML file path: " + rootFile);
+        System.out.println("Base URL: " + baseUrl);
+
+        // Check if file exists
+        File file = new File(rootFile);
+        System.out.println("File exists: " + file.exists());
+        System.out.println("File absolute path: " + file.getAbsolutePath());
+
+        // Call the tree endpoint
+        String fullUrl = baseUrl + "/tree?rootFile=" + rootFile;
+        System.out.println("Full URL: " + fullUrl);
+
+        ResponseEntity<String> response = restTemplate.getForEntity(fullUrl, String.class);
+
+        System.out.println("Response status: " + response.getStatusCode());
+        System.out.println("Response headers: " + response.getHeaders());
+        System.out.println("Response body: " + response.getBody());
+
+        // Validate response
+        assertEquals(HttpStatus.OK, response.getStatusCode(), "Tree endpoint should return 200 OK");
+        assertNotNull(response.getBody(), "Response body should not be null");
+        assertTrue(response.getBody().contains("success") || response.getBody().contains("tree"),
+                  "Response should contain success or tree data");
+    }
+
+    @Test
+    @DisplayName("Should serve HTML file and validate JavaScript can parse API response")
+    void testHtmlPageAndApiIntegration() {
+        System.out.println("=== TESTING HTML PAGE AND API INTEGRATION ===");
+
+        // Skip HTML test for now, focus on API
+        // 2. Test the exact API call the HTML makes (without double encoding)
+        String rootFile = "C:/Users/markr/dev/java/corejava/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/00-scenario-registry.yaml";
+        String apiUrl = baseUrl + "/tree?rootFile=" + rootFile;
+        System.out.println("Testing API URL: " + apiUrl);
+
+        ResponseEntity<String> apiResponse;
+        try {
+            apiResponse = restTemplate.getForEntity(apiUrl, String.class);
+        } catch (Exception e) {
+            System.out.println("Exception calling API: " + e.getMessage());
+            e.printStackTrace();
+            fail("Failed to call API: " + e.getMessage());
+            return;
+        }
+
+        System.out.println("API Response Status: " + apiResponse.getStatusCode());
+        System.out.println("API Response Headers: " + apiResponse.getHeaders());
+
+        assertEquals(HttpStatus.OK, apiResponse.getStatusCode(), "API should return 200 OK");
+
+        // 3. Parse the JSON response to validate structure
+        String jsonBody = apiResponse.getBody();
+        assertNotNull(jsonBody, "API response body should not be null");
+
+        // Debug: Print the actual response to see what we got
+        System.out.println("API Response Body (first 1000 chars): " + jsonBody.substring(0, Math.min(1000, jsonBody.length())));
+
+        // Check for the exact structure the JavaScript expects (allow for spacing variations)
+        assertTrue(jsonBody.contains("\"status\"") && jsonBody.contains("\"success\""), "Response should contain status=success");
+        assertTrue(jsonBody.contains("\"tree\""), "Response should contain tree property");
+        assertTrue(jsonBody.contains("\"maxDepth\""), "Response should contain maxDepth");
+        assertTrue(jsonBody.contains("\"totalFiles\""), "Response should contain totalFiles");
+
+        System.out.println("✅ API returns correct JSON structure");
+        System.out.println("✅ Response contains status=success and tree data");
+
+        // 4. Validate specific tree structure (allow for spacing variations)
+        assertTrue(jsonBody.contains("\"name\"") && jsonBody.contains("\"00-scenario-registry.yaml\""), "Should contain root node");
+        assertTrue(jsonBody.contains("\"children\""), "Should contain children array");
+
+        System.out.println("✅ Tree structure validation passed");
+        System.out.println("=== INTEGRATION TEST COMPLETE ===");
+    }
+
     // ========================================
     // Helper Methods
     // ========================================

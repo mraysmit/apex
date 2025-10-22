@@ -251,4 +251,50 @@ public class DependencyController {
                 .body(ApiResponse.error("SCAN_FAILED", "Failed to scan folder: " + e.getMessage()));
         }
     }
+
+    /**
+     * Get the raw content of a YAML file.
+     */
+    @GetMapping("/content")
+    @Operation(
+        summary = "Get file content",
+        description = "Get the raw content of a YAML file for display in the UI"
+    )
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "File content retrieved successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid file path"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "File not found"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Failed to read file content")
+    })
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getFileContent(
+            @Parameter(description = "File path to get content for", required = true)
+            @RequestParam @NotBlank String filePath) {
+
+        logger.info("Getting file content for: {}", filePath);
+
+        try {
+            Map<String, Object> content = dependencyAnalysisService.getFileContent(filePath);
+
+            logger.debug("Successfully retrieved file content for: {}", filePath);
+
+            return ResponseEntity.ok(ApiResponse.success(content));
+
+        } catch (IllegalArgumentException e) {
+            logger.warn("Invalid file path for content retrieval: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                .body(ApiResponse.error("INVALID_FILE_PATH", "Invalid file path: " + e.getMessage()));
+
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("not found") || e.getMessage().contains("does not exist")) {
+                logger.warn("File not found: {}", filePath);
+                return ResponseEntity.notFound().build();
+            }
+            throw e;
+
+        } catch (Exception e) {
+            logger.error("Failed to get file content for: " + filePath, e);
+            return ResponseEntity.internalServerError()
+                .body(ApiResponse.error("FILE_CONTENT_FAILED", "Failed to get file content: " + e.getMessage()));
+        }
+    }
 }

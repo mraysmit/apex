@@ -5,20 +5,243 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>D3.js YAML Dependency Tree Viewer</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-regex.min.js"></script>
     <style>
         body {
             margin: 0;
-            padding: 20px;
+            padding: 0;
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
+            overflow: hidden;
         }
-        
+
+        .main-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .tree-panel {
+            width: 60%;
+            background-color: white;
+            overflow: hidden;
+        }
+
+        .resizer {
+            width: 6px;
+            background-color: #ddd;
+            cursor: col-resize;
+            position: relative;
+            transition: background-color 0.2s ease;
+            user-select: none;
+        }
+
+        .resizer:hover {
+            background-color: #bbb;
+        }
+
+        .resizer:active {
+            background-color: #999;
+        }
+
+        .resizer::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 2px;
+            height: 30px;
+            background-color: #666;
+            border-radius: 1px;
+            opacity: 0.6;
+        }
+
+        .content-panel {
+            flex: 1;
+            background-color: #fafafa;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content-header {
+            padding: 15px;
+            background-color: #2c3e50;
+            color: white;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .content-header h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .content-header .file-path {
+            font-size: 12px;
+            color: #bdc3c7;
+            margin-top: 5px;
+            word-break: break-all;
+        }
+
+        .file-metadata {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f7fafc;
+            border-radius: 4px;
+            border-left: 4px solid #4299e1;
+        }
+
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .metadata-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .metadata-label {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 12px;
+        }
+
+        .metadata-value {
+            color: #2d3748;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .status-valid { background-color: #48bb78; }
+        .status-invalid { background-color: #f56565; }
+        .status-warning { background-color: #ed8936; }
+
+        .content-body {
+            flex: 1;
+            overflow: auto;
+            padding: 0;
+        }
+
+        .yaml-content {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            padding: 15px;
+            margin: 0;
+            height: 100%;
+            box-sizing: border-box;
+            overflow: auto;
+            background: #2d3748 !important;
+        }
+
+        /* Override Prism theme for better contrast */
+        .yaml-content code[class*="language-"],
+        .yaml-content pre[class*="language-"] {
+            background: #2d3748 !important;
+            color: #e2e8f0 !important;
+        }
+
+        /* APEX Keyword Colorization */
+        /* Metadata keywords - Blue */
+        .token.apex-metadata {
+            color: #64B5F6 !important;
+            font-weight: bold;
+        }
+
+        /* Rules section keywords - Green */
+        .token.apex-rules {
+            color: #81C784 !important;
+            font-weight: bold;
+        }
+
+        /* Enrichment keywords - Purple */
+        .token.apex-enrichment {
+            color: #BA68C8 !important;
+            font-weight: bold;
+        }
+
+        /* Rule Groups keywords - Orange */
+        .token.apex-rulegroup {
+            color: #FFB74D !important;
+            font-weight: bold;
+        }
+
+        /* Data Source keywords - Cyan */
+        .token.apex-datasource {
+            color: #4DD0E1 !important;
+            font-weight: bold;
+        }
+
+        /* Scenario keywords - Pink */
+        .token.apex-scenario {
+            color: #F48FB1 !important;
+            font-weight: bold;
+        }
+
+        /* Pipeline keywords - Lime */
+        .token.apex-pipeline {
+            color: #AED581 !important;
+            font-weight: bold;
+        }
+
+        /* Common keywords - Light Yellow */
+        .token.apex-common {
+            color: #FFE082 !important;
+            font-weight: bold;
+        }
+
+        /* SpEL expressions - Red */
+        .token.apex-spel {
+            color: #EF5350 !important;
+        }
+
+        .file-info {
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-bottom: 1px solid #ddd;
+            font-size: 12px;
+        }
+
+        .file-info .info-item {
+            margin-bottom: 5px;
+        }
+
+        .file-info .label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .file-info .value {
+            color: #7f8c8d;
+        }
+
+        .placeholder-content {
+            padding: 20px;
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
         #tree-container {
             width: 100%;
-            height: 90vh;
+            height: 100%;
             background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
             overflow: hidden;
         }
         
@@ -79,19 +302,64 @@
     </style>
 </head>
 <body>
-    <h1>D3.js YAML Dependency Tree Viewer</h1>
-    
-    <div id="tree-container">
-        <div id="loading">Loading tree data...</div>
-        <div id="error" style="display: none;"></div>
+    <div class="main-container">
+        <!-- Left Panel: Tree Viewer -->
+        <div class="tree-panel">
+            <div id="tree-container">
+                <div id="loading">Loading tree data...</div>
+                <div id="error" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Resizable Divider -->
+        <div class="resizer" id="resizer"></div>
+
+        <!-- Right Panel: File Content -->
+        <div class="content-panel">
+            <div class="content-header">
+                <h3>File Content</h3>
+                <div class="file-path" id="current-file-path">Click on a node to view its content</div>
+
+                <!-- File Metadata Section -->
+                <div class="file-metadata" id="file-metadata" style="display: none;">
+                    <div class="metadata-grid" id="metadata-grid">
+                        <!-- Metadata items will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="file-info" id="file-info" style="display: none;">
+                <div class="info-item">
+                    <span class="label">Size:</span>
+                    <span class="value" id="file-size">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Valid YAML:</span>
+                    <span class="value" id="file-valid">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Last Modified:</span>
+                    <span class="value" id="file-modified">-</span>
+                </div>
+            </div>
+
+            <div class="content-body">
+                <div class="placeholder-content" id="placeholder-content">
+                    Click on any node in the tree to view its YAML content here.
+                </div>
+                <div class="yaml-content" id="yaml-content" style="display: none;">
+                    <pre><code class="language-yaml" id="yaml-code"></code></pre>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
         // Global variables
         let svg, g, tree, root, i = 0;
         const duration = 750;
-        const width = window.innerWidth - 40;
-        const height = window.innerHeight * 0.9 - 60;
+        const width = window.innerWidth - 400 - 20; // Account for right panel (400px) and margins
+        const height = window.innerHeight;
         
         // Initialize the tree viewer
         function initializeTree() {
@@ -132,7 +400,7 @@
             // Need to use absolute path for proper dependency resolution
             const rootFile = "C:/Users/markr/dev/java/corejava/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/00-scenario-registry.yaml";
             // Updated to use centralized apex-rest-api (port 8080) instead of apex-yaml-manager (port 8082)
-            const apiUrl = `http://localhost:8080/api/dependencies/tree?rootFile=${encodeURIComponent(rootFile)}`;
+            const apiUrl = `http://localhost:8082/yaml-manager/api/dependencies/tree?rootFile=${encodeURIComponent(rootFile)}`;
 
             fetch(apiUrl)
                 .then(response => {
@@ -143,13 +411,13 @@
                 })
                 .then(data => {
                     console.log('Loaded tree data:', data);
-                    // Handle both old format (apex-yaml-manager) and new format (apex-rest-api)
-                    if (data.success && data.data && data.data.tree) {
-                        // New apex-rest-api format
-                        processTreeData(data.data.tree);
-                    } else if (data.status === 'success' && data.tree) {
-                        // Old apex-yaml-manager format (fallback)
+                    // Handle both formats: apex-yaml-manager returns status=success, apex-rest-api returns success=true
+                    if (data.status === 'success' && data.tree) {
+                        // Current apex-yaml-manager format
                         processTreeData(data.tree);
+                    } else if (data.success && data.data && data.data.tree) {
+                        // Future apex-rest-api format (if needed)
+                        processTreeData(data.data.tree);
                     } else {
                         throw new Error('Invalid API response: ' + (data.message || data.error || 'No tree data'));
                     }
@@ -324,8 +592,12 @@
             return path;
         }
         
-        // Handle node click (expand/collapse)
+        // Handle node click (expand/collapse and load content)
         function click(event, d) {
+            // Load file content in right panel
+            loadFileContent(d.data.path, d.data);
+
+            // Handle expand/collapse
             if (d.children) {
                 d._children = d.children;
                 d.children = null;
@@ -335,19 +607,437 @@
             }
             update(d);
         }
-        
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', initializeTree);
-        
+
+        // Load file content for the right panel
+        function loadFileContent(filePath, nodeData) {
+            console.log('Loading content for:', filePath, nodeData);
+
+            // Update header
+            document.getElementById('current-file-path').textContent = filePath;
+
+            // Build the full file path
+            const baseDirectory = "C:/Users/markr/dev/java/corejava/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/";
+            const fullPath = baseDirectory + filePath;
+
+            // Use tree node data directly (no additional API calls needed)
+            displayNodeData(filePath, fullPath, nodeData);
+        }
+
+        // Display information using tree node data
+        function displayNodeData(filePath, fullPath, nodeData) {
+            // Hide placeholder and show content
+            document.getElementById('placeholder-content').style.display = 'none';
+            document.getElementById('yaml-content').style.display = 'block';
+            document.getElementById('file-info').style.display = 'block';
+
+            // Show actual YAML file content if available, otherwise show metadata
+            const contentSummary = nodeData.contentSummary || {};
+            let displayContent;
+
+            if (contentSummary.rawContent) {
+                // Show the actual YAML file content
+                displayContent = contentSummary.rawContent;
+
+                // Add circular dependency warning if applicable (for real content)
+                if (nodeData.circularReference) {
+                    displayContent += `\n\n# ⚠️ CIRCULAR DEPENDENCY WARNING
+# ${nodeData.circularReference}`;
+                }
+            } else {
+                // Fallback to basic file information if raw content not available
+                displayContent = `# APEX YAML File Information
+# File: ${filePath}
+# Full Path: ${fullPath}
+
+# File Metadata
+file-type: ${contentSummary.fileType || 'unknown'}
+apex-id: ${contentSummary.id || 'N/A'}
+name: "${contentSummary.name || 'N/A'}"
+description: "${contentSummary.description || 'N/A'}"
+version: ${contentSummary.version || 'N/A'}
+
+# Content Statistics
+rule-count: ${contentSummary.ruleCount || 0}
+rule-group-count: ${contentSummary.ruleGroupCount || 0}
+enrichment-count: ${contentSummary.enrichmentCount || 0}
+
+# Tree Information
+depth: ${nodeData.depth || 0}
+height: ${nodeData.height || 0}
+child-count: ${nodeData.childCount || 0}
+circular-dependency: ${nodeData.circular ? 'true' : 'false'}`;
+
+                // Add circular dependency warning if applicable (for metadata view)
+                if (nodeData.circularReference) {
+                    displayContent += `\n\n# ⚠️ CIRCULAR DEPENDENCY WARNING
+# ${nodeData.circularReference}`;
+                }
+
+                // Add content details if available (for metadata view)
+                if (contentSummary.contentCounts) {
+                    displayContent += `\n\n# Content Details`;
+                    Object.entries(contentSummary.contentCounts).forEach(([key, value]) => {
+                        displayContent += `\n${key}: ${value}`;
+                    });
+                }
+
+                // Only add the metadata note when showing metadata view
+                displayContent += `\n\n# Note: This is metadata view. To edit actual file content, open:\n# ${fullPath}`;
+            }
+
+            document.getElementById('yaml-code').textContent = displayContent;
+
+            // Apply syntax highlighting
+            Prism.highlightElement(document.getElementById('yaml-code'));
+
+            // Apply APEX keyword colorization
+            setTimeout(() => {
+                colorizeApexKeywords(document.getElementById('yaml-code'));
+            }, 50);
+
+            // Update file info using tree node data
+            document.getElementById('file-size').textContent = 'See metadata below';
+            document.getElementById('file-valid').textContent = contentSummary.fileType ? 'Yes' : 'Unknown';
+            document.getElementById('file-modified').textContent = 'See metadata below';
+
+            // Load and display metadata using tree node data
+            loadFileMetadata(fullPath, {}, nodeData);
+        }
+
+        // Helper function to format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Helper function to format date
+        function formatDate(timestamp) {
+            return new Date(timestamp).toLocaleString();
+        }
+
+        // Load and display file metadata
+        function loadFileMetadata(fullPath, fileData, nodeData) {
+            // Show metadata section
+            document.getElementById('file-metadata').style.display = 'block';
+
+            const contentSummary = nodeData.contentSummary || {};
+
+            // Basic file information
+            const metadata = [
+                { label: 'File Path', value: fullPath },
+                { label: 'File Size', value: fileData.size ? formatFileSize(fileData.size) : 'Unknown' },
+                { label: 'Last Modified', value: fileData.lastModified ? formatDate(fileData.lastModified) : 'Unknown' },
+                { label: 'YAML Valid', value: fileData.isValidYaml !== undefined ? (fileData.isValidYaml ? '✓ Valid' : '✗ Invalid') : 'Unknown',
+                  status: fileData.isValidYaml !== undefined ? (fileData.isValidYaml ? 'valid' : 'invalid') : 'warning' },
+                { label: 'Readable', value: fileData.isReadable !== undefined ? (fileData.isReadable ? '✓ Yes' : '✗ No') : 'Unknown',
+                  status: fileData.isReadable !== undefined ? (fileData.isReadable ? 'valid' : 'invalid') : 'warning' }
+            ];
+
+            // Add APEX-specific metadata from contentSummary
+            if (contentSummary.fileType) {
+                metadata.push({ label: 'File Type', value: contentSummary.fileType });
+            }
+            if (contentSummary.id) {
+                metadata.push({ label: 'APEX ID', value: contentSummary.id });
+            }
+            if (contentSummary.name) {
+                metadata.push({ label: 'Display Name', value: contentSummary.name });
+            }
+            if (contentSummary.version) {
+                metadata.push({ label: 'Version', value: contentSummary.version });
+            }
+            if (contentSummary.description) {
+                metadata.push({ label: 'Description', value: contentSummary.description });
+            }
+
+            // Add content counts
+            if (contentSummary.ruleCount !== undefined) {
+                metadata.push({ label: 'Rules', value: contentSummary.ruleCount.toString() });
+            }
+            if (contentSummary.ruleGroupCount !== undefined) {
+                metadata.push({ label: 'Rule Groups', value: contentSummary.ruleGroupCount.toString() });
+            }
+            if (contentSummary.enrichmentCount !== undefined) {
+                metadata.push({ label: 'Enrichments', value: contentSummary.enrichmentCount.toString() });
+            }
+            if (contentSummary.configFileCount !== undefined) {
+                metadata.push({ label: 'Config Files', value: contentSummary.configFileCount.toString() });
+            }
+            if (contentSummary.referenceCount !== undefined) {
+                metadata.push({ label: 'References', value: contentSummary.referenceCount.toString() });
+            }
+
+            // Add tree-specific metadata
+            if (nodeData.depth !== undefined) {
+                metadata.push({ label: 'Tree Depth', value: nodeData.depth.toString() });
+            }
+            if (nodeData.height !== undefined) {
+                metadata.push({ label: 'Tree Height', value: nodeData.height.toString() });
+            }
+            if (nodeData.childCount !== undefined) {
+                metadata.push({ label: 'Direct Children', value: nodeData.childCount.toString() });
+            }
+            if (nodeData.descendantCount !== undefined) {
+                metadata.push({ label: 'Total Descendants', value: nodeData.descendantCount.toString() });
+            }
+            if (nodeData.circular !== undefined) {
+                metadata.push({
+                    label: 'Circular Reference',
+                    value: nodeData.circular ? '⚠️ Yes' : '✓ No',
+                    status: nodeData.circular ? 'warning' : 'valid'
+                });
+            }
+            if (nodeData.circularReference) {
+                metadata.push({
+                    label: 'Circular Issue',
+                    value: nodeData.circularReference,
+                    status: 'invalid'
+                });
+            }
+
+            // Render metadata immediately with available data
+            renderMetadata(metadata);
+        }
+
+        // Render metadata in the grid
+        function renderMetadata(metadata) {
+            const grid = document.getElementById('metadata-grid');
+            grid.innerHTML = '';
+
+            metadata.forEach(item => {
+                const metadataItem = document.createElement('div');
+                metadataItem.className = 'metadata-item';
+
+                const label = document.createElement('span');
+                label.className = 'metadata-label';
+                label.textContent = item.label + ':';
+
+                const value = document.createElement('span');
+                value.className = 'metadata-value';
+
+                if (item.status) {
+                    const indicator = document.createElement('span');
+                    indicator.className = `status-indicator status-${item.status}`;
+                    value.appendChild(indicator);
+                }
+
+                const textNode = document.createTextNode(item.value);
+                value.appendChild(textNode);
+
+                metadataItem.appendChild(label);
+                metadataItem.appendChild(value);
+                grid.appendChild(metadataItem);
+            });
+        }
+
+        // APEX Keyword Colorization Function
+        function applyApexKeywordColorization(codeElement) {
+            // Define APEX keywords by category based on actual YAML files
+            const apexKeywords = {
+                // Metadata keywords - Blue
+                'metadata': 'apex-metadata',
+                'id': 'apex-metadata',
+                'name': 'apex-metadata',
+                'version': 'apex-metadata',
+                'description': 'apex-metadata',
+                'type': 'apex-metadata',
+                'author': 'apex-metadata',
+                'created-date': 'apex-metadata',
+                'created-by': 'apex-metadata',
+                'last-modified': 'apex-metadata',
+                'tags': 'apex-metadata',
+                'categories': 'apex-metadata',
+
+                // Rules keywords - Green
+                'rules': 'apex-rules',
+                'condition': 'apex-rules',
+                'message': 'apex-rules',
+                'severity': 'apex-rules',
+                'enabled': 'apex-rules',
+                'priority': 'apex-rules',
+                'business-domain': 'apex-rules',
+                'business-owner': 'apex-rules',
+                'category': 'apex-rules',
+                'effective-date': 'apex-rules',
+                'expiration-date': 'apex-rules',
+                'custom-properties': 'apex-rules',
+                'validation': 'apex-rules',
+
+                // Enrichment keywords - Purple
+                'enrichment': 'apex-enrichment',
+                'enrichments': 'apex-enrichment',
+                'enrichment-refs': 'apex-enrichment',
+                'enrichment-groups': 'apex-enrichment',
+                'steps': 'apex-enrichment',
+                'when': 'apex-enrichment',
+                'action': 'apex-enrichment',
+                'params': 'apex-enrichment',
+                'field': 'apex-enrichment',
+                'value': 'apex-enrichment',
+                'lookup-config': 'apex-enrichment',
+                'calculation-config': 'apex-enrichment',
+                'field-mappings': 'apex-enrichment',
+                'conditional-mappings': 'apex-enrichment',
+                'mapping-rules': 'apex-enrichment',
+                'target-field': 'apex-enrichment',
+                'source-field': 'apex-enrichment',
+                'transformation': 'apex-enrichment',
+                'target-type': 'apex-enrichment',
+                'execution-settings': 'apex-enrichment',
+
+                // Rule Groups keywords - Orange
+                'rule-groups': 'apex-rulegroup',
+                'rule-ids': 'apex-rulegroup',
+                'rule-references': 'apex-rulegroup',
+                'rule-id': 'apex-rulegroup',
+                'operator': 'apex-rulegroup',
+                'parallel-execution': 'apex-rulegroup',
+                'stop-on-first-failure': 'apex-rulegroup',
+                'debug-mode': 'apex-rulegroup',
+                'rule-group-references': 'apex-rulegroup',
+                'sequence': 'apex-rulegroup',
+                'override-priority': 'apex-rulegroup',
+
+                // Scenario keywords - Pink
+                'scenarios': 'apex-scenario',
+                'scenario': 'apex-scenario',
+                'scenario-id': 'apex-scenario',
+                'config-file': 'apex-scenario',
+                'owner': 'apex-scenario',
+                'rule-configurations': 'apex-scenario',
+                'data-types': 'apex-scenario',
+                'processing-stages': 'apex-scenario',
+                'stage-name': 'apex-scenario',
+                'execution-order': 'apex-scenario',
+                'depends-on': 'apex-scenario',
+                'failure-policy': 'apex-scenario',
+                'stage-metadata': 'apex-scenario'
+            };
+
+            // Simple approach: find text nodes and wrap APEX keywords
+            const walker = document.createTreeWalker(
+                codeElement,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+
+            const textNodes = [];
+            let node;
+            while (node = walker.nextNode()) {
+                textNodes.push(node);
+            }
+
+            textNodes.forEach(textNode => {
+                let text = textNode.textContent;
+                let modified = false;
+
+                // Check each line for YAML key patterns
+                const lines = text.split('\n');
+                const newLines = lines.map(line => {
+                    // Match YAML key pattern: optional whitespace + keyword + optional whitespace + colon
+                    const match = line.match(/^(\s*)([a-zA-Z][a-zA-Z0-9_-]*)(\s*:)/);
+                    if (match) {
+                        const [, indent, keyword, colon] = match;
+                        if (apexKeywords[keyword]) {
+                            modified = true;
+                            return line.replace(keyword, `<span class="token ${apexKeywords[keyword]}">${keyword}</span>`);
+                        }
+                    }
+                    return line;
+                });
+
+                if (modified) {
+                    const newHTML = newLines.join('\n');
+                    const wrapper = document.createElement('span');
+                    wrapper.innerHTML = newHTML;
+                    textNode.parentNode.replaceChild(wrapper, textNode);
+                }
+            });
+
+            // Highlight SpEL expressions separately
+            setTimeout(() => {
+                const allText = codeElement.innerHTML;
+                const spelHighlighted = allText.replace(/("[^"]*#[^"]*"|'[^']*#[^']*')/g, '<span class="token apex-spel">$1</span>');
+                if (spelHighlighted !== allText) {
+                    codeElement.innerHTML = spelHighlighted;
+                }
+            }, 10);
+        }
+
         // Handle window resize
         window.addEventListener('resize', function() {
             if (svg) {
-                const newWidth = window.innerWidth - 40;
-                const newHeight = window.innerHeight * 0.9 - 60;
+                const treePanel = document.querySelector('.tree-panel');
+                const newWidth = treePanel.offsetWidth - 20;
+                const newHeight = window.innerHeight;
                 svg.attr("width", newWidth).attr("height", newHeight);
                 tree.size([newHeight - 100, newWidth - 200]);
                 if (root) update(root);
             }
+        });
+
+        // Resizable divider functionality
+        function initializeResizer() {
+            const resizer = document.getElementById('resizer');
+            const treePanel = document.querySelector('.tree-panel');
+            const contentPanel = document.querySelector('.content-panel');
+            const container = document.querySelector('.main-container');
+
+            let isResizing = false;
+
+            resizer.addEventListener('mousedown', function(e) {
+                isResizing = true;
+                document.body.style.cursor = 'col-resize';
+                document.body.style.userSelect = 'none';
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isResizing) return;
+
+                const containerRect = container.getBoundingClientRect();
+                const mouseX = e.clientX - containerRect.left;
+                const containerWidth = containerRect.width;
+
+                // Calculate new widths as percentages
+                const minWidth = 200; // Minimum width for tree panel
+                const maxWidth = containerWidth - 300; // Leave at least 300px for content panel
+
+                let newTreeWidth = Math.max(minWidth, Math.min(maxWidth, mouseX));
+                let treeWidthPercent = (newTreeWidth / containerWidth) * 100;
+
+                // Ensure reasonable bounds
+                treeWidthPercent = Math.max(20, Math.min(80, treeWidthPercent));
+
+                treePanel.style.width = treeWidthPercent + '%';
+
+                // Update tree dimensions if it exists
+                if (svg) {
+                    const newWidth = treePanel.offsetWidth - 20;
+                    const newHeight = window.innerHeight;
+                    svg.attr("width", newWidth).attr("height", newHeight);
+                    tree.size([newHeight - 100, newWidth - 200]);
+                    if (root) update(root);
+                }
+            });
+
+            document.addEventListener('mouseup', function() {
+                if (isResizing) {
+                    isResizing = false;
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                }
+            });
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTree();
+            initializeResizer();
         });
     </script>
 </body>

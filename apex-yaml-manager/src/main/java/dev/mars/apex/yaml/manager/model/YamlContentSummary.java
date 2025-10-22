@@ -38,6 +38,7 @@ public class YamlContentSummary {
     private int configFileCount;
     private int referenceCount;
     private Map<String, Integer> contentCounts;
+    private String rawContent; // The actual YAML file content
 
     public YamlContentSummary() {
         this.contentCounts = new HashMap<>();
@@ -147,6 +148,14 @@ public class YamlContentSummary {
 
     public void addContentCount(String key, int count) {
         this.contentCounts.put(key, count);
+    }
+
+    public String getRawContent() {
+        return rawContent;
+    }
+
+    public void setRawContent(String rawContent) {
+        this.rawContent = rawContent;
     }
 
     @Override

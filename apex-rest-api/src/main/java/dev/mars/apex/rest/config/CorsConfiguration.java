@@ -22,38 +22,34 @@ public class CorsConfiguration implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins(
-                    "http://localhost:8082",  // apex-yaml-manager UI
-                    "http://localhost:3000",  // Common React dev server port
-                    "http://localhost:4200",  // Common Angular dev server port
-                    "http://localhost:5173",  // Common Vite dev server port
-                    "http://localhost:8080"   // Same origin (for testing)
+                .allowedOriginPatterns(
+                    "http://localhost:*",     // Any localhost port
+                    "file://*",               // File protocol for local HTML files
+                    "null"                    // For file:// origins that appear as null
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD")
                 .allowedHeaders("*")
-                .allowCredentials(true)
+                .allowCredentials(false)  // Must be false when using allowedOriginPatterns with "*"
                 .maxAge(3600); // Cache preflight response for 1 hour
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        org.springframework.web.cors.CorsConfiguration configuration = 
+        org.springframework.web.cors.CorsConfiguration configuration =
             new org.springframework.web.cors.CorsConfiguration();
-        
-        configuration.addAllowedOrigin("http://localhost:8082");  // apex-yaml-manager UI
-        configuration.addAllowedOrigin("http://localhost:3000");  // React dev server
-        configuration.addAllowedOrigin("http://localhost:4200");  // Angular dev server
-        configuration.addAllowedOrigin("http://localhost:5173");  // Vite dev server
-        configuration.addAllowedOrigin("http://localhost:8080");  // Same origin
-        
+
+        configuration.addAllowedOriginPattern("http://localhost:*");  // Any localhost port
+        configuration.addAllowedOriginPattern("file://*");            // File protocol for local HTML files
+        configuration.addAllowedOrigin("null");                       // For file:// origins that appear as null
+
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(false);  // Must be false when using patterns with "*"
         configuration.setMaxAge(3600L);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", configuration);
-        
+
         return source;
     }
 }

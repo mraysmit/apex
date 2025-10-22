@@ -682,7 +682,10 @@ public class DependencyAnalysisController {
                 ));
             }
 
-            this.currentGraph = dependencyService.analyzeDependencies(rootFile);
+            // URL decode the file path in case it was encoded by the browser
+            String decodedRootFile = java.net.URLDecoder.decode(rootFile, java.nio.charset.StandardCharsets.UTF_8);
+
+            this.currentGraph = dependencyService.analyzeDependencies(decodedRootFile);
             // IMPORTANT: Build the tree starting from the graph's root key, not the raw request path
             String treeRoot = this.currentGraph.getRootFile();
             TreeNode tree = dependencyService.generateDependencyTree(this.currentGraph, treeRoot);
@@ -722,8 +725,11 @@ public class DependencyAnalysisController {
                 ));
             }
 
+            // URL decode the file path in case it was encoded by the browser
+            String decodedRootFile = java.net.URLDecoder.decode(rootFile, java.nio.charset.StandardCharsets.UTF_8);
+
             // Build fresh graph + tree for the provided root
-            this.currentGraph = dependencyService.analyzeDependencies(rootFile);
+            this.currentGraph = dependencyService.analyzeDependencies(decodedRootFile);
             String treeRoot = this.currentGraph.getRootFile();
             TreeNode tree = dependencyService.generateDependencyTree(this.currentGraph, treeRoot);
 

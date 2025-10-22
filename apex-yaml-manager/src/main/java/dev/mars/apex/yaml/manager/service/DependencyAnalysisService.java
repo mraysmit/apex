@@ -345,6 +345,18 @@ public class DependencyAnalysisService {
         // Ensure path/name are available to UI and details endpoint lookups
         node.setPath(filePath);
 
+        // Get YAML content information from apex-core YamlNode (do this BEFORE circular dependency check)
+        YamlNode yamlNode = graph.getNode(filePath);
+        if (yamlNode != null) {
+            logger.debug("Using apex-core YamlNode data for: {}", filePath);
+            YamlContentSummary summary = createSummaryFromYamlNode(yamlNode);
+            logger.debug("Content summary from YamlNode for {}: type={}, exists={}, valid={}",
+                filePath, summary.getFileType(), yamlNode.exists(), yamlNode.isYamlValid());
+            node.setContentSummary(summary);
+        } else {
+            logger.warn("No YamlNode available from apex-core for: {}", filePath);
+        }
+
         if (visited.contains(filePath)) {
             logger.warn("CIRCULAR DEPENDENCY detected: {} (visited: {})", filePath, visited);
             node.setCircular(true);
@@ -353,26 +365,6 @@ public class DependencyAnalysisService {
         }
 
         visited.add(filePath);
-
-        // Analyze YAML content if analyzer is available
-        if (contentAnalyzer != null) {
-            try {
-                // Resolve full path for content analysis
-                String fullPath = resolveFullPath(filePath);
-                logger.debug("Analyzing content for: {} -> {}", filePath, fullPath);
-                YamlContentSummary summary = contentAnalyzer.analyzYamlContent(fullPath);
-                if (summary != null) {
-                    logger.debug("Content summary for {}: type={}, rules={}, enrichments={}, groups={}",
-                        filePath, summary.getFileType(), summary.getRuleCount(),
-                        summary.getEnrichmentCount(), summary.getRuleGroupCount());
-                } else {
-                    logger.warn("No content summary available for: {}", filePath);
-                }
-                node.setContentSummary(summary);
-            } catch (Exception e) {
-                logger.debug("Could not analyze YAML content for {}: {}", filePath, e.getMessage());
-            }
-        }
 
         // Get forward edges (dependencies) for this file
         Map<String, Set<String>> forwardEdges = graph.getForwardEdges();
@@ -468,6 +460,63 @@ public class DependencyAnalysisService {
         }
 
         return node;
+    }
+
+    /**
+     * Create YamlContentSummary from apex-core YamlNode data.
+     * TODO: This is a temporary adapter - apex-core should be enhanced to read YAML metadata properly.
+     */
+    private YamlContentSummary createSummaryFromYamlNode(YamlNode yamlNode) {
+        YamlContentSummary summary = new YamlContentSummary(yamlNode.getFilePath());
+
+        // Try to get more accurate file type by reading YAML metadata if file exists and is valid
+        String fileType = "unknown";
+        if (yamlNode.exists() && yamlNode.isYamlValid()) {
+            try {
+                // Temporarily use contentAnalyzer to get accurate metadata until apex-core is enhanced
+                if (contentAnalyzer != null) {
+                    String fullPath = resolveFullPath(yamlNode.getFilePath());
+                    YamlContentSummary tempSummary = contentAnalyzer.analyzYamlContent(fullPath);
+                    if (tempSummary != null && tempSummary.getFileType() != null) {
+                        fileType = tempSummary.getFileType();
+                        // Also copy other metadata
+                        summary.setId(tempSummary.getId());
+                        summary.setName(tempSummary.getName());
+                        summary.setDescription(tempSummary.getDescription());
+                        summary.setVersion(tempSummary.getVersion());
+                        summary.setRuleCount(tempSummary.getRuleCount());
+                        summary.setRuleGroupCount(tempSummary.getRuleGroupCount());
+                        summary.setEnrichmentCount(tempSummary.getEnrichmentCount());
+                        summary.setConfigFileCount(tempSummary.getConfigFileCount());
+                        summary.setReferenceCount(tempSummary.getReferenceCount());
+                        summary.setRawContent(tempSummary.getRawContent());
+                        summary.setContentCounts(tempSummary.getContentCounts());
+                    }
+                }
+            } catch (Exception e) {
+                logger.debug("Could not read YAML metadata for {}: {}", yamlNode.getFilePath(), e.getMessage());
+                // Fall back to apex-core file type
+                if (yamlNode.getFileType() != null) {
+                    fileType = yamlNode.getFileType().toString().toLowerCase();
+                }
+            }
+        } else {
+            // File doesn't exist or invalid YAML - use apex-core file type
+            if (yamlNode.getFileType() != null) {
+                fileType = yamlNode.getFileType().toString().toLowerCase();
+            }
+        }
+
+        summary.setFileType(fileType);
+
+        // Add metadata about file existence and validity as content counts
+        summary.addContentCount("file-exists", yamlNode.exists() ? 1 : 0);
+        summary.addContentCount("yaml-valid", yamlNode.isYamlValid() ? 1 : 0);
+
+        logger.debug("Created summary from YamlNode: path={}, type={}, exists={}, valid={}",
+            yamlNode.getFilePath(), summary.getFileType(), yamlNode.exists(), yamlNode.isYamlValid());
+
+        return summary;
     }
 
     /**
