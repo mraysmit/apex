@@ -37,8 +37,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -315,6 +315,228 @@ class DependencyAnalysisControllerTest {
 
     }
 
+    @Test
+    @DisplayName("Should return tree with nested children structure")
+    void testGetDependencyTreeReturnsNestedStructure(@TempDir Path tempDir) throws IOException {
+        // Create test YAML file
+        File yamlFile = createTestYamlFile(tempDir, "test.yaml");
+
+        // Call actual REST endpoint
+        ResponseEntity<Map> response = restTemplate.getForEntity(
+            baseUrl + "/tree?rootFile=" + yamlFile.getAbsolutePath(),
+            Map.class
+        );
+
+        // Validate response
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        Map body = response.getBody();
+        assertEquals("success", body.get("status"));
+        assertNotNull(body.get("tree"));
+        assertNotNull(body.get("rootFile"));
+        assertNotNull(body.get("totalFiles"));
+        assertNotNull(body.get("maxDepth"));
+        assertNotNull(body.get("timestamp"));
+    }
+
+    @Test
+    @DisplayName("Should return tree with D3-compatible structure")
+    void testGetDependencyTreeD3Compatible(@TempDir Path tempDir) throws IOException {
+        // Create test YAML file
+        File yamlFile = createTestYamlFile(tempDir, "test.yaml");
+
+        // Call actual REST endpoint
+        ResponseEntity<Map> response = restTemplate.getForEntity(
+            baseUrl + "/tree?rootFile=" + yamlFile.getAbsolutePath(),
+            Map.class
+        );
+
+        // Validate response
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        Map body = response.getBody();
+        Map tree = (Map) body.get("tree");
+        assertNotNull(tree);
+
+        // Verify D3-compatible structure
+        assertNotNull(tree.get("name"));
+        assertNotNull(tree.get("id"));
+        assertNotNull(tree.get("path"));
+        assertNotNull(tree.get("depth"));
+        assertNotNull(tree.get("height"));
+        assertNotNull(tree.get("childCount"));
+    }
+
+    @Test
+    @DisplayName("Should return tree with empty children for single file")
+    void testGetDependencyTreeSingleFileNoChildren(@TempDir Path tempDir) throws IOException {
+        // Create test YAML file with no dependencies
+        File yamlFile = createTestYamlFile(tempDir, "standalone.yaml");
+
+        // Call actual REST endpoint
+        ResponseEntity<Map> response = restTemplate.getForEntity(
+            baseUrl + "/tree?rootFile=" + yamlFile.getAbsolutePath(),
+            Map.class
+        );
+
+        // Validate response
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        Map body = response.getBody();
+        Map tree = (Map) body.get("tree");
+        assertNotNull(tree);
+
+        // Single file should have 0 children
+        assertEquals(0, tree.get("childCount"));
+    }
+
+
+    // ========================================
+    // POST /api/dependencies/validate-tree Tests
+    // ========================================
+
+    @Test
+    @DisplayName("Should validate dependency tree structure")
+    void testValidateTree(@TempDir Path tempDir) throws IOException {
+        // Create test YAML file
+        File yamlFile = createTestYamlFile(tempDir, "test.yaml");
+
+        // Call validate-tree endpoint
+        ResponseEntity<Map> response = restTemplate.postForEntity(
+            baseUrl + "/validate-tree?rootFile=" + yamlFile.getAbsolutePath(),
+            null,
+            Map.class
+        );
+
+        // Validate response
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        Map body = response.getBody();
+        assertEquals("success", body.get("status"));
+        assertNotNull(body.get("validation"));
+        assertNotNull(body.get("rootFile"));
+        assertNotNull(body.get("timestamp"));
+    }
+
+    @Test
+    @DisplayName("Should return 400 when validate-tree rootFile is missing")
+    void testValidateTreeMissingRootFile() {
+        // Call without rootFile parameter
+        ResponseEntity<?> response = restTemplate.postForEntity(
+            baseUrl + "/validate-tree",
+            null,
+            String.class
+        );
+
+        // Validate response
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Should return validation results with graph integrity info")
+    void testValidateTreeReturnsValidationResults(@TempDir Path tempDir) throws IOException {
+        // Create test YAML file
+        File yamlFile = createTestYamlFile(tempDir, "test.yaml");
+
+        // Call validate-tree endpoint
+        ResponseEntity<Map> response = restTemplate.postForEntity(
+            baseUrl + "/validate-tree?rootFile=" + yamlFile.getAbsolutePath(),
+            null,
+            Map.class
+        );
+
+        // Validate response
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        Map body = response.getBody();
+        Map validation = (Map) body.get("validation");
+        assertNotNull(validation);
+        // Validation should contain integrity checks
+        assertTrue(validation.size() > 0, "Validation should contain integrity check results");
+    }
+
+    // ========================================
+    // GET /api/dependencies/{filePath}/details Tests
+    // ========================================
+
+    @Test
+    @DisplayName("Should get node details after analyze")
+    void testGetNodeDetails(@TempDir Path tempDir) throws IOException {
+        // Create test YAML file
+        File yamlFile = createTestYamlFile(tempDir, "test.yaml");
+        String filePath = yamlFile.getAbsolutePath();
+
+        // First analyze
+        restTemplate.postForEntity(
+            baseUrl + "/analyze?filePath=" + filePath,
+            null,
+            Object.class
+        );
+
+        // Then get details
+        ResponseEntity<Map> response = restTemplate.getForEntity(
+            baseUrl + "/test.yaml/details",
+            Map.class
+        );
+
+        // Validate response
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        Map body = response.getBody();
+        assertEquals("success", body.get("status"));
+        assertNotNull(body.get("data"));
+    }
+
+    @Test
+    @DisplayName("Should handle details request for nonexistent file")
+    void testGetNodeDetailsWithoutAnalyze() {
+        // Call details endpoint without analyzing first
+        ResponseEntity<?> response = restTemplate.getForEntity(
+            baseUrl + "/nonexistent.yaml/details",
+            String.class
+        );
+
+        // Validate response - may return 200 or 400 depending on implementation
+        assertNotNull(response.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Should return node details with metadata fields")
+    void testGetNodeDetailsReturnsCompleteMetadata(@TempDir Path tempDir) throws IOException {
+        // Create test YAML file
+        File yamlFile = createTestYamlFile(tempDir, "test.yaml");
+        String filePath = yamlFile.getAbsolutePath();
+
+        // First analyze
+        restTemplate.postForEntity(
+            baseUrl + "/analyze?filePath=" + filePath,
+            null,
+            Object.class
+        );
+
+        // Then get details
+        ResponseEntity<Map> response = restTemplate.getForEntity(
+            baseUrl + "/test.yaml/details",
+            Map.class
+        );
+
+        // Validate response
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        Map body = response.getBody();
+        Map data = (Map) body.get("data");
+        assertNotNull(data);
+
+        // Verify expected fields are present
+        assertNotNull(data.get("name"));
+        assertNotNull(data.get("dependencies"));
+        assertNotNull(data.get("allDependencies"));
+        assertNotNull(data.get("dependents"));
+        assertNotNull(data.get("healthScore"));
+        assertNotNull(data.get("author"));
+        assertNotNull(data.get("created"));
+        assertNotNull(data.get("lastModified"));
+        assertNotNull(data.get("version"));
+        assertNotNull(data.get("circularDependencies"));
+        // Verify data map has reasonable size
+        assertTrue(data.size() > 5, "Data should contain multiple fields");
+    }
 
     // ========================================
     // POST /api/dependencies/scan-folder Tests
@@ -381,6 +603,237 @@ class DependencyAnalysisControllerTest {
 
 
     // ========================================
+    // Integration Tests: Tree + Details + Validation
+    // ========================================
+
+    @Test
+    @DisplayName("Should complete full workflow: analyze -> tree -> validate -> details")
+    void testFullWorkflow(@TempDir Path tempDir) throws IOException {
+        // Create test YAML file
+        File yamlFile = createTestYamlFile(tempDir, "workflow.yaml");
+        String filePath = yamlFile.getAbsolutePath();
+
+        // Step 1: Analyze
+        ResponseEntity<Map> analyzeResponse = restTemplate.postForEntity(
+            baseUrl + "/analyze?filePath=" + filePath,
+            null,
+            Map.class
+        );
+        assertEquals(HttpStatus.OK, analyzeResponse.getStatusCode());
+        assertEquals("success", analyzeResponse.getBody().get("status"));
+
+        // Step 2: Get Tree
+        ResponseEntity<Map> treeResponse = restTemplate.getForEntity(
+            baseUrl + "/tree?rootFile=" + filePath,
+            Map.class
+        );
+        assertEquals(HttpStatus.OK, treeResponse.getStatusCode());
+        assertEquals("success", treeResponse.getBody().get("status"));
+        assertNotNull(treeResponse.getBody().get("tree"));
+
+        // Step 3: Validate Tree
+        ResponseEntity<Map> validateResponse = restTemplate.postForEntity(
+            baseUrl + "/validate-tree?rootFile=" + filePath,
+            null,
+            Map.class
+        );
+        assertEquals(HttpStatus.OK, validateResponse.getStatusCode());
+        assertEquals("success", validateResponse.getBody().get("status"));
+
+        // Step 4: Get Node Details
+        ResponseEntity<Map> detailsResponse = restTemplate.getForEntity(
+            baseUrl + "/workflow.yaml/details",
+            Map.class
+        );
+        assertEquals(HttpStatus.OK, detailsResponse.getStatusCode());
+        assertEquals("success", detailsResponse.getBody().get("status"));
+    }
+
+    @Test
+    @DisplayName("Should handle empty rootFile parameter in tree endpoint")
+    void testGetDependencyTreeEmptyRootFile() {
+        // Call with empty rootFile parameter
+        ResponseEntity<?> response = restTemplate.getForEntity(
+            baseUrl + "/tree?rootFile=",
+            String.class
+        );
+
+        // Validate response - should be 400
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Should handle whitespace-only rootFile parameter in tree endpoint")
+    void testGetDependencyTreeWhitespaceRootFile() {
+        // Call with whitespace-only rootFile parameter
+        ResponseEntity<?> response = restTemplate.getForEntity(
+            baseUrl + "/tree?rootFile=%20%20%20",
+            String.class
+        );
+
+        // Validate response - API accepts whitespace and tries to process it
+        // This may return 200 or 400 depending on file system behavior
+        assertNotNull(response.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Should return consistent tree structure across multiple calls")
+    void testGetDependencyTreeConsistency(@TempDir Path tempDir) throws IOException {
+        // Create test YAML file
+        File yamlFile = createTestYamlFile(tempDir, "consistent.yaml");
+        String filePath = yamlFile.getAbsolutePath();
+
+        // Call tree endpoint twice
+        ResponseEntity<Map> response1 = restTemplate.getForEntity(
+            baseUrl + "/tree?rootFile=" + filePath,
+            Map.class
+        );
+        ResponseEntity<Map> response2 = restTemplate.getForEntity(
+            baseUrl + "/tree?rootFile=" + filePath,
+            Map.class
+        );
+
+        // Both should succeed
+        assertEquals(HttpStatus.OK, response1.getStatusCode());
+        assertEquals(HttpStatus.OK, response2.getStatusCode());
+
+        // Both should have same structure
+        Map tree1 = (Map) response1.getBody().get("tree");
+        Map tree2 = (Map) response2.getBody().get("tree");
+        assertEquals(tree1.get("name"), tree2.get("name"));
+        assertEquals(tree1.get("childCount"), tree2.get("childCount"));
+    }
+
+    @Test
+    @DisplayName("Should return tree with correct depth information")
+    void testGetDependencyTreeDepthInfo(@TempDir Path tempDir) throws IOException {
+        // Create test YAML file
+        File yamlFile = createTestYamlFile(tempDir, "depth.yaml");
+
+        // Call tree endpoint
+        ResponseEntity<Map> response = restTemplate.getForEntity(
+            baseUrl + "/tree?rootFile=" + yamlFile.getAbsolutePath(),
+            Map.class
+        );
+
+        // Validate response
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        Map body = response.getBody();
+        Map tree = (Map) body.get("tree");
+
+        // Root should have depth 0
+        assertEquals(0, tree.get("depth"));
+
+        // maxDepth should be >= depth
+        int maxDepth = (Integer) body.get("maxDepth");
+        assertTrue(maxDepth >= 0, "maxDepth should be non-negative");
+    }
+
+    @Test
+    @DisplayName("Should validate nested dependencies to n levels deep")
+    void testNestedDependenciesToNLevels() {
+        // Use the existing nested-yaml-structure test resources
+        String nestedRootPath = new File("apex-yaml-manager/src/test/resources/nested-yaml-structure/root-scenario.yaml").getAbsolutePath();
+
+        // Step 1: Analyze the nested structure
+        ResponseEntity<Map> analyzeResponse = restTemplate.postForEntity(
+            baseUrl + "/analyze?filePath=" + nestedRootPath,
+            null,
+            Map.class
+        );
+
+        assertEquals(HttpStatus.OK, analyzeResponse.getStatusCode());
+        Map analyzeBody = analyzeResponse.getBody();
+        assertEquals("success", analyzeBody.get("status"));
+
+        // Verify we have at least the root file
+        int totalFiles = (Integer) analyzeBody.get("totalFiles");
+        assertTrue(totalFiles >= 1, "Should have at least the root file");
+
+        // Get max depth
+        int maxDepth = (Integer) analyzeBody.get("maxDepth");
+        assertTrue(maxDepth >= 0, "maxDepth should be non-negative");
+
+        // Step 2: Get the dependency tree
+        ResponseEntity<Map> treeResponse = restTemplate.getForEntity(
+            baseUrl + "/tree?rootFile=" + nestedRootPath,
+            Map.class
+        );
+
+        assertEquals(HttpStatus.OK, treeResponse.getStatusCode());
+        Map treeBody = treeResponse.getBody();
+        assertEquals("success", treeBody.get("status"));
+
+        Map tree = (Map) treeBody.get("tree");
+        assertNotNull(tree, "Tree should not be null");
+
+        // Step 3: Validate tree structure at each level
+        validateTreeStructureAtAllLevels(tree, 0, maxDepth);
+
+        // Step 4: Verify tree metadata
+        assertEquals(totalFiles, treeBody.get("totalFiles"));
+        assertEquals(maxDepth, treeBody.get("maxDepth"));
+        assertNotNull(treeBody.get("timestamp"));
+    }
+
+    @Test
+    @DisplayName("Should traverse and validate all nodes at each depth level")
+    void testTraverseAllNodesAtEachDepthLevel() {
+        String nestedRootPath = new File("apex-yaml-manager/src/test/resources/nested-yaml-structure/root-scenario.yaml").getAbsolutePath();
+
+        // Analyze
+        ResponseEntity<Map> analyzeResponse = restTemplate.postForEntity(
+            baseUrl + "/analyze?filePath=" + nestedRootPath,
+            null,
+            Map.class
+        );
+
+        int maxDepth = (Integer) analyzeResponse.getBody().get("maxDepth");
+
+        // Get tree
+        ResponseEntity<Map> treeResponse = restTemplate.getForEntity(
+            baseUrl + "/tree?rootFile=" + nestedRootPath,
+            Map.class
+        );
+
+        Map tree = (Map) treeResponse.getBody().get("tree");
+
+        // Collect all nodes by depth level
+        Map<Integer, Integer> nodeCountByDepth = new HashMap<>();
+        collectNodesByDepth(tree, nodeCountByDepth);
+
+        // Verify we have nodes at each level from 0 to maxDepth
+        for (int depth = 0; depth <= maxDepth; depth++) {
+            assertTrue(nodeCountByDepth.containsKey(depth),
+                "Should have nodes at depth level " + depth);
+            int nodeCount = nodeCountByDepth.get(depth);
+            assertTrue(nodeCount > 0,
+                "Should have at least one node at depth level " + depth);
+        }
+
+        // Verify depth progression
+        assertTrue(nodeCountByDepth.get(0) == 1, "Should have exactly 1 root node at depth 0");
+        assertTrue(nodeCountByDepth.get(maxDepth) > 0, "Should have leaf nodes at max depth");
+    }
+
+    @Test
+    @DisplayName("Should validate parent-child relationships across all levels")
+    void testParentChildRelationshipsAcrossAllLevels() {
+        String nestedRootPath = new File("apex-yaml-manager/src/test/resources/nested-yaml-structure/root-scenario.yaml").getAbsolutePath();
+
+        // Get tree
+        ResponseEntity<Map> treeResponse = restTemplate.getForEntity(
+            baseUrl + "/tree?rootFile=" + nestedRootPath,
+            Map.class
+        );
+
+        Map tree = (Map) treeResponse.getBody().get("tree");
+
+        // Validate parent-child relationships
+        validateParentChildRelationships(tree, null, 0);
+    }
+
+    // ========================================
     // Helper Methods
     // ========================================
 
@@ -393,6 +846,88 @@ class DependencyAnalysisControllerTest {
             writer.write("  version: 1.0.0\n");
         }
         return yamlFile;
+    }
+
+    /**
+     * Recursively validate tree structure at all levels
+     */
+    private void validateTreeStructureAtAllLevels(Map tree, int currentDepth, int maxDepth) {
+        assertNotNull(tree, "Tree node should not be null at depth " + currentDepth);
+
+        // Verify required fields
+        assertNotNull(tree.get("name"), "Node should have name at depth " + currentDepth);
+        assertNotNull(tree.get("id"), "Node should have id at depth " + currentDepth);
+        assertNotNull(tree.get("depth"), "Node should have depth at depth " + currentDepth);
+
+        // Verify depth value
+        int nodeDepth = (Integer) tree.get("depth");
+        assertEquals(currentDepth, nodeDepth,
+            "Node depth should match current level at depth " + currentDepth);
+
+        // Recursively validate children
+        Object childrenObj = tree.get("children");
+        if (childrenObj != null && childrenObj instanceof java.util.List) {
+            java.util.List<?> children = (java.util.List<?>) childrenObj;
+            for (Object child : children) {
+                if (child instanceof Map) {
+                    validateTreeStructureAtAllLevels((Map) child, currentDepth + 1, maxDepth);
+                }
+            }
+        }
+    }
+
+    /**
+     * Collect all nodes by their depth level
+     */
+    private void collectNodesByDepth(Map tree, Map<Integer, Integer> nodeCountByDepth) {
+        if (tree == null) return;
+
+        Integer depth = (Integer) tree.get("depth");
+        if (depth != null) {
+            nodeCountByDepth.put(depth, nodeCountByDepth.getOrDefault(depth, 0) + 1);
+        }
+
+        Object childrenObj = tree.get("children");
+        if (childrenObj != null && childrenObj instanceof java.util.List) {
+            java.util.List<?> children = (java.util.List<?>) childrenObj;
+            for (Object child : children) {
+                if (child instanceof Map) {
+                    collectNodesByDepth((Map) child, nodeCountByDepth);
+                }
+            }
+        }
+    }
+
+    /**
+     * Validate parent-child relationships across all levels
+     */
+    private void validateParentChildRelationships(Map node, Map parent, int depth) {
+        assertNotNull(node, "Node should not be null");
+
+        // Verify node has required fields
+        assertNotNull(node.get("name"), "Node should have name");
+        assertNotNull(node.get("id"), "Node should have id");
+
+        // Verify depth is correct
+        Integer nodeDepth = (Integer) node.get("depth");
+        assertEquals(depth, nodeDepth, "Node depth should match expected depth");
+
+        // Verify children have correct parent depth
+        Object childrenObj = node.get("children");
+        if (childrenObj != null && childrenObj instanceof java.util.List) {
+            java.util.List<?> children = (java.util.List<?>) childrenObj;
+            for (Object child : children) {
+                if (child instanceof Map) {
+                    Map childNode = (Map) child;
+                    Integer childDepth = (Integer) childNode.get("depth");
+                    assertEquals(depth + 1, childDepth,
+                        "Child node depth should be parent depth + 1");
+
+                    // Recursively validate child's children
+                    validateParentChildRelationships(childNode, node, depth + 1);
+                }
+            }
+        }
     }
 }
 

@@ -37,11 +37,10 @@
     <rect x="0" y="60" width="420" height="50" fill="#e8e8e8" stroke="#999" stroke-width="1"/>
 
     <!-- Toolbar Buttons -->
-    <text x="10" y="85" font-size="12" font-weight="bold" fill="#333" font-family="Arial">📂 Load Folder</text>
-    <text x="130" y="85" font-size="12" font-weight="bold" fill="#333" font-family="Arial">🔍 Search</text>
-    <text x="220" y="85" font-size="12" font-weight="bold" fill="#333" font-family="Arial">📁 Expand All</text>
-    <text x="330" y="85" font-size="12" font-weight="bold" fill="#333" font-family="Arial">📁 Collapse All</text>
-    <text x="350" y="85" font-size="12" font-weight="bold" fill="#333" font-family="Arial">🔄 Refresh</text>
+    <text x="10" y="85" font-size="12" font-weight="bold" fill="#333" font-family="Arial">🔍 Search</text>
+    <text x="100" y="85" font-size="12" font-weight="bold" fill="#333" font-family="Arial">📁 Expand All</text>
+    <text x="210" y="85" font-size="12" font-weight="bold" fill="#333" font-family="Arial">📁 Collapse All</text>
+    <text x="330" y="85" font-size="12" font-weight="bold" fill="#333" font-family="Arial">🔄 Refresh</text>
 
     <!-- Tree View Area Background -->
     <rect x="0" y="110" width="420" height="790" fill="#f9f9f9" stroke="#ccc" stroke-width="1"/>
