@@ -1,0 +1,63 @@
+# ============================================================================
+# APEX Rule Categories Basic Example
+# ============================================================================
+# Demonstrates basic category definition with metadata inheritance
+# Shows how rules inherit business metadata from their assigned categories
+# ============================================================================
+
+metadata:
+  id: "basic-category-demo"
+  name: "Basic Rule Categories Demo"
+  version: "1.0.0"
+  description: "Demonstrates basic rule categories with metadata inheritance"
+  type: "rule-config"
+  author: "APEX Demo"
+
+# Category definitions with business metadata
+categories:
+  - name: "customer-validation"
+    description: "Customer data validation rules"
+    priority: 10
+    enabled: true
+    business-domain: "Customer Management"
+    business-owner: "Customer Operations Team"
+    created-by: "John Smith"
+    effective-date: "2025-01-01"
+    expiration-date: "2025-12-31"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  - name: "financial-assessment"
+    description: "Financial assessment and risk evaluation rules"
+    priority: 50
+    enabled: true
+    business-domain: "Risk Management"
+    business-owner: "Risk Assessment Team"
+    created-by: "Jane Doe"
+    effective-date: "2025-01-01"
+    expiration-date: "2025-12-31"
+    stop-on-first-failure: true
+    parallel-execution: false
+
+# Rules assigned to categories
+rules:
+  - id: "age-validation"
+    name: "Customer Age Validation"
+    category: "customer-validation"
+    condition: "#age >= 18"
+    message: "Customer must be at least 18 years old"
+    enabled: true
+
+  - id: "income-check"
+    name: "Minimum Income Requirement"
+    category: "financial-assessment"
+    condition: "#income >= 30000"
+    message: "Minimum annual income of $30,000 required"
+    enabled: true
+
+  - id: "credit-score-validation"
+    name: "Credit Score Assessment"
+    category: "financial-assessment"
+    condition: "#creditScore >= 650"
+    message: "Credit score must be at least 650"
+    enabled: true

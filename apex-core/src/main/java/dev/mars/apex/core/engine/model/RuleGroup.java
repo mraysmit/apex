@@ -50,6 +50,14 @@ public class RuleGroup implements RuleBase {
     private final boolean debugMode;
     private String message;
 
+    // Enterprise metadata fields
+    private String createdBy;
+    private String businessDomain;
+    private String businessOwner;
+    private String sourceSystem;
+    private String effectiveDate;
+    private String expirationDate;
+
     // Rule result tracking for conditional mapping support
     private final Map<String, Boolean> ruleResults = new HashMap<>();
     private boolean groupResult = false;
@@ -901,5 +909,60 @@ public class RuleGroup implements RuleBase {
      */
     public boolean getGroupResult() {
         return groupResult;
+    }
+
+    // Enterprise metadata getters and setters
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public RuleGroup setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+        return this;
+    }
+
+    public String getBusinessDomain() {
+        return businessDomain;
+    }
+
+    public RuleGroup setBusinessDomain(String businessDomain) {
+        this.businessDomain = businessDomain;
+        return this;
+    }
+
+    public String getBusinessOwner() {
+        return businessOwner;
+    }
+
+    public RuleGroup setBusinessOwner(String businessOwner) {
+        this.businessOwner = businessOwner;
+        return this;
+    }
+
+    public String getSourceSystem() {
+        return sourceSystem;
+    }
+
+    public RuleGroup setSourceSystem(String sourceSystem) {
+        this.sourceSystem = sourceSystem;
+        return this;
+    }
+
+    public String getEffectiveDate() {
+        return effectiveDate;
+    }
+
+    public RuleGroup setEffectiveDate(String effectiveDate) {
+        this.effectiveDate = effectiveDate;
+        return this;
+    }
+
+    public String getExpirationDate() {
+        return expirationDate;
+    }
+
+    public RuleGroup setExpirationDate(String expirationDate) {
+        this.expirationDate = expirationDate;
+        return this;
     }
 }

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APEX YAML Colorization Test</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .yaml-content {
+            background: #2d3748 !important;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .yaml-content code[class*="language-"],
+        .yaml-content pre[class*="language-"] {
+            background: #2d3748 !important;
+            color: #e2e8f0 !important;
+        }
+
+        /* APEX Keyword Colorization */
+        .token.apex-metadata {
+            color: #64B5F6 !important;
+            font-weight: bold;
+        }
+
+        .token.apex-rules {
+            color: #81C784 !important;
+            font-weight: bold;
+        }
+
+        .token.apex-enrichment {
+            color: #BA68C8 !important;
+            font-weight: bold;
+        }
+
+        .token.apex-rulegroup {
+            color: #FFB74D !important;
+            font-weight: bold;
+        }
+
+        .token.apex-scenario {
+            color: #F48FB1 !important;
+            font-weight: bold;
+        }
+
+        .token.apex-spel {
+            color: #EF5350 !important;
+        }
+        
+        h2 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>APEX YAML Colorization Test</h1>
+    
+    <h2>Test 1: Rules Configuration</h2>
+    <div class="yaml-content">
+        <pre><code class="language-yaml" id="test1">metadata:
+  id: customer-validation
+  name: Customer Validation Rules
+  version: 1.0.0
+  type: rule-config
+  author: john.doe@example.com
+
+rules:
+  - id: age-check
+    name: Age Validation
+    condition: "#age >= 18"
+    message: Customer must be at least 18 years old
+    severity: ERROR
+    priority: 1</code></pre>
+    </div>
+
+    <h2>Test 2: Enrichment Configuration</h2>
+    <div class="yaml-content">
+        <pre><code class="language-yaml" id="test2">metadata:
+  id: customer-enrichment
+  name: Customer Data Enrichment
+  type: enrichment
+  author: jane.smith@example.com
+
+enrichment:
+  id: enrich-customer
+  steps:
+    - id: set-status
+      when: "#customerId != null"
+      action: set
+      params:
+        field: status
+        value: "ACTIVE"</code></pre>
+    </div>
+
+    <h2>Test 3: Rule Groups</h2>
+    <div class="yaml-content">
+        <pre><code class="language-yaml" id="test3">metadata:
+  id: validation-groups
+  name: Validation Rule Groups
+  type: rule-config
+
+rule-groups:
+  - id: customer-validation-group
+    name: Customer Validation Group
+    rule-ids:
+      - age-check
+      - email-validation
+    operator: AND
+    stop-on-first-failure: true
+    priority: 10</code></pre>
+    </div>
+
+    <h2>Test 4: Scenario Configuration</h2>
+    <div class="yaml-content">
+        <pre><code class="language-yaml" id="test4">metadata:
+  id: scenario-registry
+  name: Scenario Registry
+  type: scenario-registry
+
+scenarios:
+  - id: customer-onboarding
+    name: Customer Onboarding
+    config-file: onboarding.yaml
+    business-domain: Customer
+    owner: business@example.com
+
+rule-configurations:
+  - validation-rules.yaml
+  - enrichment-rules.yaml</code></pre>
+    </div>
+
+    <script>
+        // APEX Keyword Colorization Function
+        function applyApexKeywordColorization(codeElement) {
+            const apexKeywords = {
+                'metadata': 'apex-metadata',
+                'id': 'apex-metadata',
+                'name': 'apex-metadata', 
+                'version': 'apex-metadata',
+                'description': 'apex-metadata',
+                'type': 'apex-metadata',
+                'author': 'apex-metadata',
+                'created-date': 'apex-metadata',
+                
+                'rules': 'apex-rules',
+                'condition': 'apex-rules',
+                'message': 'apex-rules',
+                'severity': 'apex-rules',
+                'priority': 'apex-rules',
+                
+                'enrichment': 'apex-enrichment',
+                'enrichments': 'apex-enrichment',
+                'steps': 'apex-enrichment',
+                'when': 'apex-enrichment',
+                'action': 'apex-enrichment',
+                'params': 'apex-enrichment',
+                'field': 'apex-enrichment',
+                'value': 'apex-enrichment',
+                
+                'rule-groups': 'apex-rulegroup',
+                'rule-ids': 'apex-rulegroup',
+                'operator': 'apex-rulegroup',
+                'stop-on-first-failure': 'apex-rulegroup',
+                
+                'scenarios': 'apex-scenario',
+                'scenario': 'apex-scenario',
+                'config-file': 'apex-scenario',
+                'business-domain': 'apex-scenario',
+                'owner': 'apex-scenario',
+                'rule-configurations': 'apex-scenario'
+            };
+
+            // Simple approach: find text nodes and wrap APEX keywords
+            const walker = document.createTreeWalker(
+                codeElement,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+
+            const textNodes = [];
+            let node;
+            while (node = walker.nextNode()) {
+                textNodes.push(node);
+            }
+
+            textNodes.forEach(textNode => {
+                let text = textNode.textContent;
+                let modified = false;
+                
+                // Check each line for YAML key patterns
+                const lines = text.split('\n');
+                const newLines = lines.map(line => {
+                    // Match YAML key pattern: optional whitespace + keyword + optional whitespace + colon
+                    const match = line.match(/^(\s*)([a-zA-Z][a-zA-Z0-9_-]*)(\s*:)/);
+                    if (match) {
+                        const [, indent, keyword, colon] = match;
+                        if (apexKeywords[keyword]) {
+                            modified = true;
+                            return line.replace(keyword, `<span class="token ${apexKeywords[keyword]}">${keyword}</span>`);
+                        }
+                    }
+                    return line;
+                });
+
+                if (modified) {
+                    const newHTML = newLines.join('\n');
+                    const wrapper = document.createElement('span');
+                    wrapper.innerHTML = newHTML;
+                    textNode.parentNode.replaceChild(wrapper, textNode);
+                }
+            });
+
+            // Highlight SpEL expressions separately
+            setTimeout(() => {
+                const allText = codeElement.innerHTML;
+                const spelHighlighted = allText.replace(/("[^"]*#[^"]*"|'[^']*#[^']*')/g, '<span class="token apex-spel">$1</span>');
+                if (spelHighlighted !== allText) {
+                    codeElement.innerHTML = spelHighlighted;
+                }
+            }, 10);
+        }
+
+        // Apply highlighting to all test cases
+        document.addEventListener('DOMContentLoaded', function() {
+            // First apply Prism.js highlighting
+            Prism.highlightAll();
+            
+            // Then apply APEX colorization
+            setTimeout(() => {
+                ['test1', 'test2', 'test3', 'test4'].forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        applyApexKeywordColorization(element);
+                    }
+                });
+            }, 100);
+        });
+    </script>
+</body>
+</html>

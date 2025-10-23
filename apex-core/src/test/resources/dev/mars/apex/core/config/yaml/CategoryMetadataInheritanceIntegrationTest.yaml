@@ -1,0 +1,99 @@
+# ============================================================================
+# APEX Rule Categories Metadata Inheritance Integration Test
+# ============================================================================
+# Comprehensive test for metadata inheritance from categories to rules
+# Tests all inheritance patterns and edge cases
+# ============================================================================
+
+metadata:
+  id: "category-metadata-inheritance-integration-test"
+  name: "Category Metadata Inheritance Integration Test"
+  version: "1.0.0"
+  description: "Integration test for complete metadata inheritance workflow"
+  type: "rule-config"
+  author: "APEX Integration Test"
+
+# Categories with comprehensive metadata for inheritance testing
+categories:
+  - name: "compliance-rules"
+    description: "Regulatory compliance validation rules"
+    priority: 5
+    enabled: true
+    business-domain: "Compliance"
+    business-owner: "Compliance Officer"
+    created-by: "John Compliance"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: true
+    parallel-execution: false
+
+  - name: "operations-rules"
+    description: "Operational business rules"
+    priority: 20
+    enabled: true
+    business-domain: "Operations"
+    business-owner: "Operations Manager"
+    created-by: "Sarah Operations"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-06-30T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  - name: "risk-assessment"
+    description: "Risk evaluation and scoring rules"
+    priority: 15
+    enabled: true
+    business-domain: "Risk Management"
+    business-owner: "Risk Manager"
+    created-by: "Mike Risk"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+# Rules demonstrating different metadata inheritance patterns
+rules:
+  # Rule that inherits ALL metadata from category
+  - id: "inherited-metadata-rule"
+    name: "Rule with Complete Inherited Metadata"
+    category: "compliance-rules"
+    condition: "#amount <= 10000"
+    message: "Transaction amount within compliance limits"
+    enabled: true
+    priority: 5
+    # No business metadata specified - should inherit everything from category
+
+  # Rule that overrides SOME category metadata
+  - id: "override-metadata-rule"
+    name: "Rule with Partial Metadata Override"
+    category: "operations-rules"
+    condition: "#riskLevel == 'LOW'"
+    message: "Low risk transaction approved"
+    enabled: true
+    priority: 20
+    created-by: "Jane Override"  # Overrides category's created-by
+    # business-domain and business-owner should inherit from category
+
+  # Rule that overrides ALL category metadata
+  - id: "complete-override-rule"
+    name: "Rule with Complete Metadata Override"
+    category: "risk-assessment"
+    condition: "#complianceStatus == 'APPROVED'"
+    message: "Compliance status verified"
+    enabled: true
+    priority: 15
+    business-domain: "Custom Domain"
+    business-owner: "Custom Owner"
+    created-by: "Custom Creator"
+    effective-date: "2025-02-01T00:00:00Z"
+    expiration-date: "2025-11-30T23:59:59Z"
+
+  # Rule demonstrating category priority inheritance
+  - id: "multi-category-rule"
+    name: "Rule with Multiple Category Features"
+    category: "compliance-rules"  # High priority category (5)
+    condition: "#amount > 50000"
+    message: "High value transaction requires additional approval"
+    enabled: true
+    priority: 5
+    # Should inherit all metadata from compliance-rules category

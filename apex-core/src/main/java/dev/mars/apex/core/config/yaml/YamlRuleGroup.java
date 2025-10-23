@@ -86,7 +86,26 @@ public class YamlRuleGroup {
     
     @JsonProperty("execution-config")
     private ExecutionConfig executionConfig;
-    
+
+    // Enterprise metadata fields for category inheritance
+    @JsonProperty("created-by")
+    private String createdBy;
+
+    @JsonProperty("business-domain")
+    private String businessDomain;
+
+    @JsonProperty("business-owner")
+    private String businessOwner;
+
+    @JsonProperty("source-system")
+    private String sourceSystem;
+
+    @JsonProperty("effective-date")
+    private String effectiveDate;
+
+    @JsonProperty("expiration-date")
+    private String expirationDate;
+
     // Default constructor
     public YamlRuleGroup() {
         this.enabled = true; // Default to enabled
@@ -231,7 +250,56 @@ public class YamlRuleGroup {
     public void setExecutionConfig(ExecutionConfig executionConfig) {
         this.executionConfig = executionConfig;
     }
-    
+
+    // Enterprise metadata getters and setters
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getBusinessDomain() {
+        return businessDomain;
+    }
+
+    public void setBusinessDomain(String businessDomain) {
+        this.businessDomain = businessDomain;
+    }
+
+    public String getBusinessOwner() {
+        return businessOwner;
+    }
+
+    public void setBusinessOwner(String businessOwner) {
+        this.businessOwner = businessOwner;
+    }
+
+    public String getSourceSystem() {
+        return sourceSystem;
+    }
+
+    public void setSourceSystem(String sourceSystem) {
+        this.sourceSystem = sourceSystem;
+    }
+
+    public String getEffectiveDate() {
+        return effectiveDate;
+    }
+
+    public void setEffectiveDate(String effectiveDate) {
+        this.effectiveDate = effectiveDate;
+    }
+
+    public String getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(String expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
     /**
      * Reference to a rule within a rule group.
      */

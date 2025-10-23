@@ -9,6 +9,8 @@ import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.metadata.RuleMetadata;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -182,7 +184,7 @@ public class YamlRuleFactory {
             YamlRule firstRule = yamlRules.get(0);
 
             // Apply enterprise metadata if available
-            if (firstRule.getCreatedBy() != null) {
+            if (firstRule.getCreatedBy() != null && !firstRule.getCreatedBy().trim().isEmpty()) {
                 ruleSet.withCreatedBy(firstRule.getCreatedBy());
             }
             if (firstRule.getBusinessDomain() != null) {
@@ -198,7 +200,7 @@ public class YamlRuleFactory {
             // Parse and apply dates
             if (firstRule.getEffectiveDate() != null) {
                 try {
-                    ruleSet.withEffectiveDate(Instant.parse(firstRule.getEffectiveDate()));
+                    ruleSet.withEffectiveDate(parseDate(firstRule.getEffectiveDate()));
                 } catch (DateTimeParseException e) {
                     LOGGER.warning("Invalid effective date format for rule " + firstRule.getId() +
                                   ": " + firstRule.getEffectiveDate());
@@ -206,7 +208,7 @@ public class YamlRuleFactory {
             }
             if (firstRule.getExpirationDate() != null) {
                 try {
-                    ruleSet.withExpirationDate(Instant.parse(firstRule.getExpirationDate()));
+                    ruleSet.withExpirationDate(parseDate(firstRule.getExpirationDate()));
                 } catch (DateTimeParseException e) {
                     LOGGER.warning("Invalid expiration date format for rule " + firstRule.getId() +
                                   ": " + firstRule.getExpirationDate());
@@ -317,7 +319,7 @@ public class YamlRuleFactory {
         if (createdBy == null && yamlCategory != null) {
             createdBy = yamlCategory.getCreatedBy();
         }
-        if (createdBy != null) {
+        if (createdBy != null && !createdBy.trim().isEmpty()) {
             tempRuleSet.withCreatedBy(createdBy);
         }
 
@@ -344,7 +346,7 @@ public class YamlRuleFactory {
         // Parse and apply dates
         if (yamlRule.getEffectiveDate() != null) {
             try {
-                tempRuleSet.withEffectiveDate(Instant.parse(yamlRule.getEffectiveDate()));
+                tempRuleSet.withEffectiveDate(parseDate(yamlRule.getEffectiveDate()));
             } catch (DateTimeParseException e) {
                 LOGGER.warning("Invalid effective date format for rule " + yamlRule.getId() +
                               ": " + yamlRule.getEffectiveDate());
@@ -352,7 +354,7 @@ public class YamlRuleFactory {
         }
         if (yamlRule.getExpirationDate() != null) {
             try {
-                tempRuleSet.withExpirationDate(Instant.parse(yamlRule.getExpirationDate()));
+                tempRuleSet.withExpirationDate(parseDate(yamlRule.getExpirationDate()));
             } catch (DateTimeParseException e) {
                 LOGGER.warning("Invalid expiration date format for rule " + yamlRule.getId() +
                               ": " + yamlRule.getExpirationDate());
@@ -393,7 +395,7 @@ public class YamlRuleFactory {
         }
         if (effectiveDate != null) {
             try {
-                initialMetadataBuilder.effectiveDate(Instant.parse(effectiveDate));
+                initialMetadataBuilder.effectiveDate(parseDate(effectiveDate));
             } catch (Exception e) {
                 LOGGER.warning("Invalid effective date format for rule " + yamlRule.getId() + ": " + effectiveDate);
             }
@@ -406,7 +408,7 @@ public class YamlRuleFactory {
         }
         if (expirationDate != null) {
             try {
-                initialMetadataBuilder.expirationDate(Instant.parse(expirationDate));
+                initialMetadataBuilder.expirationDate(parseDate(expirationDate));
             } catch (Exception e) {
                 LOGGER.warning("Invalid expiration date format for rule " + yamlRule.getId() + ": " + expirationDate);
             }
@@ -519,6 +521,12 @@ public class YamlRuleFactory {
         String categoryName = yamlGroup.getCategory() != null ? yamlGroup.getCategory() : "default";
         getOrCreateCategory(categoryName, priority); // Ensure category exists in cache
 
+        // Look up category metadata from cache for inheritance
+        YamlCategory yamlCategory = findYamlCategoryByName(categoryName);
+        LOGGER.fine("Found category '" + categoryName + "' for rule group '" + yamlGroup.getId() +
+                   "'. YamlCategory found: " + (yamlCategory != null) +
+                   (yamlCategory != null ? ", businessOwner: " + yamlCategory.getBusinessOwner() : ""));
+
         // Determine operator from YAML configuration
         boolean isAndOperator = true; // Default to AND logic for rule groups
         if (yamlGroup.getOperator() != null) {
@@ -532,6 +540,58 @@ public class YamlRuleFactory {
 
         RuleGroup group = new RuleGroup(id, categoryName, name, description, priority,
                                        isAndOperator, stopOnFirstFailure, parallelExecution, debugMode);
+
+        // Apply enterprise metadata with category inheritance
+        // Rule group metadata takes precedence, but inherit from category if not specified
+        String createdBy = yamlGroup.getCreatedBy();
+        if (createdBy == null && yamlCategory != null) {
+            createdBy = yamlCategory.getCreatedBy();
+        }
+        if (createdBy != null) {
+            group.setCreatedBy(createdBy);
+        }
+
+        String businessDomain = yamlGroup.getBusinessDomain();
+        if (businessDomain == null && yamlCategory != null) {
+            businessDomain = yamlCategory.getBusinessDomain();
+        }
+        if (businessDomain != null) {
+            group.setBusinessDomain(businessDomain);
+        }
+
+        String businessOwner = yamlGroup.getBusinessOwner();
+        if (businessOwner == null && yamlCategory != null) {
+            businessOwner = yamlCategory.getBusinessOwner();
+        }
+        if (businessOwner != null) {
+            group.setBusinessOwner(businessOwner);
+        }
+
+        String sourceSystem = yamlGroup.getSourceSystem();
+        if (sourceSystem != null) {
+            group.setSourceSystem(sourceSystem);
+        }
+
+        String effectiveDate = yamlGroup.getEffectiveDate();
+        if (effectiveDate == null && yamlCategory != null) {
+            effectiveDate = yamlCategory.getEffectiveDate();
+        }
+        if (effectiveDate != null) {
+            group.setEffectiveDate(effectiveDate);
+        }
+
+        String expirationDate = yamlGroup.getExpirationDate();
+        if (expirationDate == null && yamlCategory != null) {
+            expirationDate = yamlCategory.getExpirationDate();
+        }
+        if (expirationDate != null) {
+            group.setExpirationDate(expirationDate);
+        }
+
+        LOGGER.fine("Applied metadata inheritance to rule group '" + id + "': " +
+                   "createdBy=" + group.getCreatedBy() + ", " +
+                   "businessDomain=" + group.getBusinessDomain() + ", " +
+                   "businessOwner=" + group.getBusinessOwner());
 
         // Add rules to the group
         LOGGER.info("About to add rules to group: " + yamlGroup.getId());
@@ -673,15 +733,30 @@ public class YamlRuleFactory {
     @SuppressWarnings("unused") // Public API method for independent rule creation
     public List<Rule> createRules(YamlRuleConfiguration yamlConfig) {
         List<Rule> rules = new ArrayList<>();
-        
-        if (yamlConfig.getRules() != null) {
-            for (YamlRule yamlRule : yamlConfig.getRules()) {
-                if (yamlRule.getEnabled() == null || yamlRule.getEnabled()) {
-                    rules.add(createRule(yamlRule));
+
+        // Process categories first to populate cache for metadata inheritance
+        if (yamlConfig.getCategories() != null) {
+            for (YamlCategory yamlCategory : yamlConfig.getCategories()) {
+                if (yamlCategory.getEnabled() == null || yamlCategory.getEnabled()) {
+                    Category category = createCategory(yamlCategory);
+                    categoryCache.put(category.getName(), category);
+                    // Also cache the YAML category for metadata inheritance
+                    yamlCategoryCache.put(yamlCategory.getName(), yamlCategory);
+                    LOGGER.fine("Cached category '" + yamlCategory.getName() +
+                               "' with businessOwner: " + yamlCategory.getBusinessOwner() +
+                               ", businessDomain: " + yamlCategory.getBusinessDomain());
                 }
             }
         }
-        
+
+        if (yamlConfig.getRules() != null) {
+            for (YamlRule yamlRule : yamlConfig.getRules()) {
+                if (yamlRule.getEnabled() == null || yamlRule.getEnabled()) {
+                    rules.add(createRuleWithMetadata(yamlRule));
+                }
+            }
+        }
+
         return rules;
     }
     
@@ -768,6 +843,29 @@ public class YamlRuleFactory {
     }
 
     /**
+     * Parse a date string that can be either ISO-8601 instant format or simple date format.
+     *
+     * @param dateString The date string to parse
+     * @return Instant representation of the date
+     * @throws DateTimeParseException if the date cannot be parsed
+     */
+    private Instant parseDate(String dateString) throws DateTimeParseException {
+        try {
+            // First try to parse as ISO-8601 instant (e.g., "2024-01-01T00:00:00Z")
+            return Instant.parse(dateString);
+        } catch (DateTimeParseException e) {
+            try {
+                // If that fails, try to parse as simple date and convert to instant at start of day UTC
+                LocalDate localDate = LocalDate.parse(dateString);
+                return localDate.atStartOfDay(ZoneOffset.UTC).toInstant();
+            } catch (DateTimeParseException e2) {
+                // If both fail, throw the original exception
+                throw e;
+            }
+        }
+    }
+
+    /**
      * Clear the category cache.
      */
     public void clearCache() {
@@ -827,5 +925,130 @@ public class YamlRuleFactory {
         );
 
         return newRule;
+    }
+
+    /**
+     * Create an enrichment with metadata inheritance from categories.
+     * This method applies the same category inheritance pattern used for rules.
+     *
+     * @param yamlEnrichment The YAML enrichment configuration
+     * @return An Enrichment object with inherited metadata
+     */
+    public dev.mars.apex.core.engine.model.Enrichment createEnrichmentWithMetadata(dev.mars.apex.core.config.yaml.YamlEnrichment yamlEnrichment) {
+        if (yamlEnrichment == null) {
+            throw new IllegalArgumentException("YamlEnrichment cannot be null");
+        }
+
+        String id = yamlEnrichment.getId() != null ? yamlEnrichment.getId() : generateFallbackEnrichmentId();
+        String name = yamlEnrichment.getName() != null ? yamlEnrichment.getName() : id;
+        String description = yamlEnrichment.getDescription() != null ? yamlEnrichment.getDescription() : "";
+        String type = yamlEnrichment.getType() != null ? yamlEnrichment.getType() : "field-enrichment";
+        int priority = yamlEnrichment.getPriority() != null ? yamlEnrichment.getPriority() : 100;
+
+        // Determine category
+        String categoryName = yamlEnrichment.getCategory() != null ? yamlEnrichment.getCategory() : "default";
+
+        // Look up category metadata from cache for inheritance
+        YamlCategory yamlCategory = findYamlCategoryByName(categoryName);
+        LOGGER.fine("Found category '" + categoryName + "' for enrichment '" + yamlEnrichment.getId() +
+                   "'. YamlCategory found: " + (yamlCategory != null) +
+                   (yamlCategory != null ? ", businessOwner: " + yamlCategory.getBusinessOwner() : ""));
+
+        // Create enrichment with category
+        dev.mars.apex.core.engine.model.Enrichment enrichment = new dev.mars.apex.core.engine.model.Enrichment(id, categoryName, name, description, type, priority);
+
+        // Apply enterprise metadata with category inheritance
+        // Enrichment metadata takes precedence, but inherit from category if not specified
+        String createdBy = yamlEnrichment.getCreatedBy();
+        if (createdBy == null && yamlCategory != null) {
+            createdBy = yamlCategory.getCreatedBy();
+        }
+        if (createdBy != null) {
+            enrichment.setCreatedBy(createdBy);
+        }
+
+        String businessDomain = yamlEnrichment.getBusinessDomain();
+        if (businessDomain == null && yamlCategory != null) {
+            businessDomain = yamlCategory.getBusinessDomain();
+        }
+        if (businessDomain != null) {
+            enrichment.setBusinessDomain(businessDomain);
+        }
+
+        String businessOwner = yamlEnrichment.getBusinessOwner();
+        if (businessOwner == null && yamlCategory != null) {
+            businessOwner = yamlCategory.getBusinessOwner();
+        }
+        if (businessOwner != null) {
+            enrichment.setBusinessOwner(businessOwner);
+        }
+
+        String sourceSystem = yamlEnrichment.getSourceSystem();
+        if (sourceSystem != null) {
+            enrichment.setSourceSystem(sourceSystem);
+        }
+
+        String effectiveDate = yamlEnrichment.getEffectiveDate();
+        if (effectiveDate == null && yamlCategory != null) {
+            effectiveDate = yamlCategory.getEffectiveDate();
+        }
+        if (effectiveDate != null) {
+            enrichment.setEffectiveDate(effectiveDate);
+        }
+
+        String expirationDate = yamlEnrichment.getExpirationDate();
+        if (expirationDate == null && yamlCategory != null) {
+            expirationDate = yamlCategory.getExpirationDate();
+        }
+        if (expirationDate != null) {
+            enrichment.setExpirationDate(expirationDate);
+        }
+
+        LOGGER.fine("Applied metadata inheritance to enrichment '" + id + "': " +
+                   "createdBy=" + enrichment.getCreatedBy() + ", " +
+                   "businessDomain=" + enrichment.getBusinessDomain() + ", " +
+                   "businessOwner=" + enrichment.getBusinessOwner());
+
+        return enrichment;
+    }
+
+    /**
+     * Create a list of enrichments from YAML configuration with metadata inheritance.
+     *
+     * @param yamlConfig The YAML configuration
+     * @return List of Enrichment objects with inherited metadata
+     */
+    public List<dev.mars.apex.core.engine.model.Enrichment> createEnrichments(YamlRuleConfiguration yamlConfig) {
+        List<dev.mars.apex.core.engine.model.Enrichment> enrichments = new ArrayList<>();
+
+        // Process categories first to populate cache for metadata inheritance
+        if (yamlConfig.getCategories() != null) {
+            for (YamlCategory yamlCategory : yamlConfig.getCategories()) {
+                if (yamlCategory.getEnabled() == null || yamlCategory.getEnabled()) {
+                    Category category = createCategory(yamlCategory);
+                    categoryCache.put(yamlCategory.getName(), category);
+                    yamlCategoryCache.put(yamlCategory.getName(), yamlCategory);
+                }
+            }
+        }
+
+        if (yamlConfig.getEnrichments() != null) {
+            for (dev.mars.apex.core.config.yaml.YamlEnrichment yamlEnrichment : yamlConfig.getEnrichments()) {
+                if (yamlEnrichment.getEnabled() == null || yamlEnrichment.getEnabled()) {
+                    enrichments.add(createEnrichmentWithMetadata(yamlEnrichment));
+                }
+            }
+        }
+
+        return enrichments;
+    }
+
+    /**
+     * Generate a fallback enrichment ID when none is specified in YAML.
+     *
+     * @return A generated enrichment ID
+     */
+    private String generateFallbackEnrichmentId() {
+        return "E" + UUID.randomUUID().toString().substring(0, 8);
     }
 }

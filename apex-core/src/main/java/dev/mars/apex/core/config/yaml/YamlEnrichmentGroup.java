@@ -20,6 +20,12 @@ public class YamlEnrichmentGroup {
     @JsonProperty("description")
     private String description;
 
+    @JsonProperty("category")
+    private String category;
+
+    @JsonProperty("categories")
+    private List<String> categories;
+
     @JsonProperty("priority")
     private Integer priority;
 
@@ -61,6 +67,25 @@ public class YamlEnrichmentGroup {
     @JsonProperty("metadata")
     private Map<String, Object> metadata;
 
+    // Enterprise metadata fields for category inheritance
+    @JsonProperty("created-by")
+    private String createdBy;
+
+    @JsonProperty("business-domain")
+    private String businessDomain;
+
+    @JsonProperty("business-owner")
+    private String businessOwner;
+
+    @JsonProperty("source-system")
+    private String sourceSystem;
+
+    @JsonProperty("effective-date")
+    private String effectiveDate;
+
+    @JsonProperty("expiration-date")
+    private String expirationDate;
+
     public String getId() { return id; }
     public String getName() { return name; }
     public String getDescription() { return description; }
@@ -92,6 +117,30 @@ public class YamlEnrichmentGroup {
     public void setDependsOn(List<String> dependsOn) { this.dependsOn = dependsOn; }
     public void setTags(List<String> tags) { this.tags = tags; }
     public void setMetadata(Map<String, Object> metadata) { this.metadata = metadata; }
+
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
+
+    public List<String> getCategories() { return categories; }
+    public void setCategories(List<String> categories) { this.categories = categories; }
+
+    public String getCreatedBy() { return createdBy; }
+    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+
+    public String getBusinessDomain() { return businessDomain; }
+    public void setBusinessDomain(String businessDomain) { this.businessDomain = businessDomain; }
+
+    public String getBusinessOwner() { return businessOwner; }
+    public void setBusinessOwner(String businessOwner) { this.businessOwner = businessOwner; }
+
+    public String getSourceSystem() { return sourceSystem; }
+    public void setSourceSystem(String sourceSystem) { this.sourceSystem = sourceSystem; }
+
+    public String getEffectiveDate() { return effectiveDate; }
+    public void setEffectiveDate(String effectiveDate) { this.effectiveDate = effectiveDate; }
+
+    public String getExpirationDate() { return expirationDate; }
+    public void setExpirationDate(String expirationDate) { this.expirationDate = expirationDate; }
 
     /**
      * Reference to an enrichment with sequence and overrides.
