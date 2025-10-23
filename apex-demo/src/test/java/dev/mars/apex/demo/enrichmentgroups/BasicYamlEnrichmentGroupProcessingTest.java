@@ -126,6 +126,38 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
     }
 
     @Test
+    @DisplayName("OR group with all false conditions should fail")
+    void testOrGroupAllFalse() {
+        YamlRuleConfiguration config;
+        try { config = mergeYamlConfigsForEnrichment(CONFIG_PATH); }
+        catch (YamlConfigurationException e) { fail("YAML load failed: " + e.getMessage()); return; }
+        var groups = EnrichmentGroupFactory.buildEnrichmentGroups(config);
+        var gOr = groups.stream().filter(g -> g.getId().equals("base_or")).findFirst().orElse(null);
+        assertNotNull(gOr, "base_or group should exist");
+        Map<String,Object> data = new HashMap<>(); // No data - both enrichments should fail
+        EnrichmentGroupResult r = enrichmentService.processEnrichmentGroup(gOr, data, config);
+        assertFalse(r.isSuccess(), "OR should fail when all enrichments fail");
+        assertEquals(2, r.getEnrichmentResults().size(), "OR should evaluate all enrichments when all fail");
+    }
+
+    @Test
+    @DisplayName("OR group with all true conditions should pass")
+    void testOrGroupAllTrue() {
+        YamlRuleConfiguration config;
+        try { config = mergeYamlConfigsForEnrichment(CONFIG_PATH); }
+        catch (YamlConfigurationException e) { fail("YAML load failed: " + e.getMessage()); return; }
+        var groups = EnrichmentGroupFactory.buildEnrichmentGroups(config);
+        var gOr = groups.stream().filter(g -> g.getId().equals("base_or")).findFirst().orElse(null);
+        assertNotNull(gOr, "base_or group should exist");
+        Map<String,Object> data = new HashMap<>(); data.put("a","A"); data.put("b","B");
+        EnrichmentGroupResult r = enrichmentService.processEnrichmentGroup(gOr, data, config);
+        assertTrue(r.isSuccess(), "OR should pass when any enrichment succeeds");
+        assertEquals(1, r.getEnrichmentResults().size(), "OR should short-circuit on first success");
+        assertEquals("A", data.get("a_copy"));
+        assertNull(data.get("b_copy"), "OR short-circuit should not produce b_copy");
+    }
+
+    @Test
     @DisplayName("Composite (non-parallel) AND: succeeds when all present")
     void testCompositeNonParallel() {
         YamlRuleConfiguration config;

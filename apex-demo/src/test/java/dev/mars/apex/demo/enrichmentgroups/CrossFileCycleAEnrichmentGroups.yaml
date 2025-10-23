@@ -6,6 +6,10 @@ metadata:
   name: "Cross-file Cycle A Enrichment Groups"
   version: "1.0.0"
   type: "rule-config"
+  description: "Cycle A enrichment groups for cross-file circular dependency testing"
+  author: "APEX Demo Team"
+  created-date: "2025-01-15"
+  tags: ["demo", "enrichment-groups", "cross-file", "cycle-a"]
 
 enrichment-groups:
   - id: gA

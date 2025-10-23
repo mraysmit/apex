@@ -6,6 +6,10 @@ metadata:
   name: "Cross-file Composite Parallel Enrichment Groups"
   version: "1.0.0"
   type: "rule-config"
+  description: "Composite parallel enrichment groups for cross-file testing"
+  author: "APEX Demo Team"
+  created-date: "2025-01-15"
+  tags: ["demo", "enrichment-groups", "cross-file", "composite", "parallel"]
 
 enrichment-groups:
   - id: cf_composite_par_and

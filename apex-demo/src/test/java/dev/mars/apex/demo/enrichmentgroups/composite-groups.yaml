@@ -1,0 +1,92 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: ORPHANED - No Java test currently uses this file
+# Purpose: Hierarchical composite groups configuration demonstrating complex
+#          enrichment group compositions, composite enrichment structures, and advanced
+#          enrichment group relationships for sophisticated data enrichment management
+# Status: Available for integration with hierarchical composite enrichment group tests
+# ============================================================================
+
+metadata:
+  id: "composite-enrichment-groups"
+  name: "Composite Enrichment Groups"
+  version: "1.0.0"
+  description: "Composite enrichment groups that reference other enrichment groups to create hierarchical data enrichment"
+  type: "rule-config"
+  author: "APEX Demo Team"
+  created-date: "2025-01-15"
+  tags: ["demo", "hierarchical", "composite-groups", "enrichment"]
+
+enrichment-groups:
+  # Complete onboarding enrichment - references multiple base groups
+  - id: "complete-onboarding"
+    name: "Complete Customer Onboarding Enrichment"
+    description: "Comprehensive data enrichment for new customer onboarding"
+    operator: "AND"
+    stop-on-first-failure: false  # Process all aspects for complete data enrichment
+    priority: 1
+    enrichment-group-references:
+      - "customer-basic-enrichment"
+      - "financial-enrichment"
+      - "compliance-enrichment"
+
+  # Express onboarding for premium customers
+  - id: "premium-onboarding"
+    name: "Premium Customer Onboarding Enrichment"
+    description: "Streamlined data enrichment for premium customers"
+    operator: "AND"
+    stop-on-first-failure: true
+    priority: 5
+    enrichment-group-references:
+      - "customer-basic-enrichment"
+      - "premium-customer-enrichment"  # More comprehensive financial enrichment
+      - "compliance-enrichment"
+
+  # Existing customer update enrichment
+  - id: "customer-update-enrichment"
+    name: "Customer Update Enrichment"
+    description: "Data enrichment for updating existing customer information"
+    operator: "AND"
+    stop-on-first-failure: true
+    priority: 10
+    enrichment-group-references:
+      - "existing-customer-enrichment"
+      - "compliance-enrichment"
+
+  # Mixed enrichment - combines enrichment groups and individual enrichments
+  - id: "mixed-enrichment"
+    name: "Mixed Enrichment Example"
+    description: "Example combining enrichment group references with individual enrichment references"
+    operator: "AND"
+    stop-on-first-failure: false
+    priority: 15
+    enrichment-group-references:
+      - "customer-basic-enrichment"
+      - "compliance-enrichment"
+    enrichment-ids:
+      - "debt-to-income-calculation"  # Additional individual enrichment
+
+  # Tiered enrichment - different levels based on customer type
+  - id: "tiered-enrichment"
+    name: "Tiered Customer Enrichment"
+    description: "Different enrichment tiers based on customer classification"
+    operator: "OR"  # Any tier can succeed
+    stop-on-first-failure: true
+    priority: 8
+    enrichment-group-references:
+      - "premium-onboarding"      # For premium customers
+      - "complete-onboarding"     # For standard customers
+      - "customer-update-enrichment"  # For existing customers
+
+  # Compliance-focused enrichment
+  - id: "compliance-focused"
+    name: "Compliance-Focused Enrichment"
+    description: "Prioritizes compliance data enrichment over financial criteria"
+    operator: "AND"
+    stop-on-first-failure: true
+    priority: 3
+    enrichment-group-references:
+      - "compliance-enrichment"
+      - "customer-basic-enrichment"
+    # Note: Deliberately excludes financial enrichment for certain scenarios

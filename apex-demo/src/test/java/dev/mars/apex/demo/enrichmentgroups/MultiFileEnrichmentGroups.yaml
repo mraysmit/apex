@@ -6,6 +6,10 @@ metadata:
   name: "Multi-file Enrichment Groups"
   version: "1.0.0"
   type: "rule-config"
+  description: "Multi-file enrichment groups configuration"
+  author: "APEX Demo Team"
+  created-date: "2025-01-15"
+  tags: ["demo", "enrichment-groups", "multi-file"]
 
 enrichment-groups:
   - id: base_and

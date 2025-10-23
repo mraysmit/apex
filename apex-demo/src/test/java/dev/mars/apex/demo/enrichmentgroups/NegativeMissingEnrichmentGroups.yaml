@@ -6,6 +6,10 @@ metadata:
   name: "Negative: Missing Enrichment (Groups file)"
   version: "1.0.0"
   type: "rule-config"
+  description: "Negative test case for missing enrichment group validation"
+  author: "APEX Demo Team"
+  created-date: "2025-01-15"
+  tags: ["demo", "enrichment-groups", "negative-test", "validation"]
 
 enrichment-groups:
   - id: base_and
