@@ -1,0 +1,55 @@
+# ============================================================================
+# APEX YAML Configuration File - Simple Inline Rule Group Test
+# ============================================================================
+# Purpose: Demonstrates inline rule-group-id references within same file
+# Features: 2 simple rules + 1 rule-group using rule-group-references by ID
+# ============================================================================
+
+metadata:
+  id: "simple-inline-rule-group-test"
+  name: "Simple Inline Rule Group Test"
+  version: "1.0.0"
+  description: "Simple test with 2 rules and inline rule-group references"
+  type: "rule-config"
+  author: "APEX Demo Team"
+  created-date: "2025-01-15"
+  tags: ["demo", "rule-groups", "inline-references", "simple"]
+
+rules:
+  # Rule 1: Always passes
+  - id: "simple-rule-1"
+    name: "Simple Rule 1 (Always Pass)"
+    description: "A rule that always evaluates to true"
+    condition: "true"
+    message: "Simple Rule 1 passed successfully"
+    severity: "INFO"
+    priority: 1
+
+  # Rule 2: Always fails  
+  - id: "simple-rule-2"
+    name: "Simple Rule 2 (Always Fail)"
+    description: "A rule that always evaluates to false"
+    condition: "false"
+    message: "Simple Rule 2 failed as expected"
+    severity: "WARNING"
+    priority: 2
+
+rule-groups:
+  # Base rule group with the 2 rules
+  - id: "base-validation"
+    name: "Base Validation Group"
+    description: "Contains the 2 basic validation rules"
+    operator: "AND"
+    stop-on-first-failure: false
+    rule-ids:
+      - "simple-rule-1"
+      - "simple-rule-2"
+
+  # Composite rule group that references the base group by ID (inline reference)
+  - id: "composite-validation"
+    name: "Composite Validation Group"
+    description: "References base-validation group using inline rule-group-id"
+    operator: "OR"
+    stop-on-first-failure: false
+    rule-group-references:
+      - "base-validation"  # ✓ Inline rule-group-id reference within same file

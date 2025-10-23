@@ -1,0 +1,269 @@
+# ============================================================================
+# APEX Financial Services Enterprise Category Examples
+# ============================================================================
+# This file demonstrates real-world enterprise category usage in a financial
+# services context, showing how categories enable enterprise governance,
+# compliance tracking, and business domain organization.
+# ============================================================================
+
+metadata:
+  id: "financial-services-categories"
+  name: "Financial Services Enterprise Categories"
+  version: "2.0.0"
+  description: "Real-world financial services category examples with enterprise governance"
+  type: "enterprise-demo"
+  author: "Financial Services Architecture Team"
+  created-date: "2025-01-01"
+
+# ============================================================================
+# REGULATORY COMPLIANCE CATEGORIES
+# ============================================================================
+
+categories:
+  # Basel III Capital Requirements
+  - name: "basel-iii-capital"
+    description: "Basel III capital adequacy and liquidity requirements"
+    priority: 1
+    enabled: true
+    business-domain: "Regulatory Compliance"
+    business-owner: "Chief Risk Officer"
+    created-by: "Basel III Implementation Team"
+    source-system: "Capital Management System"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2027-12-31T23:59:59Z"
+    stop-on-first-failure: true
+    parallel-execution: false
+
+  # Dodd-Frank Compliance
+  - name: "dodd-frank-compliance"
+    description: "Dodd-Frank Act compliance requirements"
+    priority: 2
+    enabled: true
+    business-domain: "Regulatory Compliance"
+    business-owner: "Chief Compliance Officer"
+    created-by: "Dodd-Frank Compliance Team"
+    source-system: "Regulatory Reporting System"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: true
+    parallel-execution: false
+
+  # MiFID II Requirements
+  - name: "mifid-ii-compliance"
+    description: "Markets in Financial Instruments Directive II compliance"
+    priority: 3
+    enabled: true
+    business-domain: "Regulatory Compliance"
+    business-owner: "Head of European Operations"
+    created-by: "MiFID II Implementation Team"
+    source-system: "European Compliance System"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: true
+    parallel-execution: false
+
+# ============================================================================
+# RISK MANAGEMENT CATEGORIES
+# ============================================================================
+
+  # Value at Risk (VaR) Calculations
+  - name: "var-calculations"
+    description: "Value at Risk calculation and monitoring"
+    priority: 10
+    enabled: true
+    business-domain: "Market Risk Management"
+    business-owner: "Head of Market Risk"
+    created-by: "Quantitative Risk Team"
+    source-system: "Risk Management Platform"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  # Stress Testing
+  - name: "stress-testing"
+    description: "Regulatory and internal stress testing scenarios"
+    priority: 5
+    enabled: true
+    business-domain: "Enterprise Risk Management"
+    business-owner: "Chief Risk Officer"
+    created-by: "Stress Testing Team"
+    source-system: "Stress Testing Platform"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  # Credit Risk Assessment
+  - name: "credit-risk-assessment"
+    description: "Credit risk evaluation and portfolio management"
+    priority: 8
+    enabled: true
+    business-domain: "Credit Risk Management"
+    business-owner: "Head of Credit Risk"
+    created-by: "Credit Risk Analytics Team"
+    source-system: "Credit Risk System"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+# ============================================================================
+# TRADING OPERATIONS CATEGORIES
+# ============================================================================
+
+  # Pre-Trade Risk Controls
+  - name: "pre-trade-controls"
+    description: "Pre-trade risk controls and limit monitoring"
+    priority: 4
+    enabled: true
+    business-domain: "Trading Operations"
+    business-owner: "Head of Trading"
+    created-by: "Trading Risk Team"
+    source-system: "Trading Risk Platform"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: true
+    parallel-execution: false
+
+  # Post-Trade Processing
+  - name: "post-trade-processing"
+    description: "Post-trade processing and settlement validation"
+    priority: 15
+    enabled: true
+    business-domain: "Operations"
+    business-owner: "Head of Operations"
+    created-by: "Post-Trade Operations Team"
+    source-system: "Settlement System"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  # Market Data Validation
+  - name: "market-data-validation"
+    description: "Market data quality and validation controls"
+    priority: 12
+    enabled: true
+    business-domain: "Market Data Management"
+    business-owner: "Head of Market Data"
+    created-by: "Market Data Team"
+    source-system: "Market Data Platform"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+# ============================================================================
+# CLIENT MANAGEMENT CATEGORIES
+# ============================================================================
+
+  # Client Onboarding
+  - name: "client-onboarding"
+    description: "Client onboarding and KYC processes"
+    priority: 6
+    enabled: true
+    business-domain: "Client Management"
+    business-owner: "Head of Client Services"
+    created-by: "Client Onboarding Team"
+    source-system: "Client Management System"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  # Suitability Assessment
+  - name: "suitability-assessment"
+    description: "Investment suitability and appropriateness assessment"
+    priority: 7
+    enabled: true
+    business-domain: "Wealth Management"
+    business-owner: "Head of Wealth Management"
+    created-by: "Suitability Assessment Team"
+    source-system: "Wealth Management Platform"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+# ============================================================================
+# FINANCIAL REPORTING CATEGORIES
+# ============================================================================
+
+  # Regulatory Reporting
+  - name: "regulatory-reporting"
+    description: "Regulatory reporting and disclosure requirements"
+    priority: 9
+    enabled: true
+    business-domain: "Financial Reporting"
+    business-owner: "Chief Financial Officer"
+    created-by: "Regulatory Reporting Team"
+    source-system: "Regulatory Reporting Platform"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  # Management Reporting
+  - name: "management-reporting"
+    description: "Internal management reporting and analytics"
+    priority: 20
+    enabled: true
+    business-domain: "Management Information"
+    business-owner: "Head of Management Information"
+    created-by: "Management Reporting Team"
+    source-system: "Business Intelligence Platform"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+# ============================================================================
+# TECHNOLOGY AND DATA CATEGORIES
+# ============================================================================
+
+  # Data Quality Management
+  - name: "data-quality-management"
+    description: "Enterprise data quality standards and controls"
+    priority: 25
+    enabled: true
+    business-domain: "Data Management"
+    business-owner: "Chief Data Officer"
+    created-by: "Data Quality Team"
+    source-system: "Data Quality Platform"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  # Cybersecurity Controls
+  - name: "cybersecurity-controls"
+    description: "Cybersecurity and information security controls"
+    priority: 11
+    enabled: true
+    business-domain: "Information Security"
+    business-owner: "Chief Information Security Officer"
+    created-by: "Cybersecurity Team"
+    source-system: "Security Management Platform"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: true
+    parallel-execution: false
+
+# ============================================================================
+# BUSINESS CONTINUITY CATEGORIES
+# ============================================================================
+
+  # Business Continuity Planning
+  - name: "business-continuity"
+    description: "Business continuity and disaster recovery controls"
+    priority: 13
+    enabled: true
+    business-domain: "Business Continuity"
+    business-owner: "Chief Operating Officer"
+    created-by: "Business Continuity Team"
+    source-system: "Business Continuity Platform"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true

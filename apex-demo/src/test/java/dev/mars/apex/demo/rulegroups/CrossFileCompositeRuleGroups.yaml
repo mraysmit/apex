@@ -1,0 +1,23 @@
+# ============================================================================
+# Cross-file composite rule groups (references base_validation from another file)
+# ============================================================================
+metadata:
+  id: "cf-composite-rule-groups"
+  name: "Cross-file Composite Rule Groups"
+  version: "1.0.0"
+  type: "rule-config"
+
+rules:
+  - id: "income-validation"
+    name: "Income Validation"
+    description: "Validates customer income"
+    condition: "#income != null && #income > 0"
+    message: "Valid income is required"
+    severity: "ERROR"
+
+rule-groups:
+  - id: cf_composite
+    name: Composite (income + base_validation from other file)
+    operator: AND
+    rule-ids: [ income-validation ]
+    rule-group-references: [ base_validation ]

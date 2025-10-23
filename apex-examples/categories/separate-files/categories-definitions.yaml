@@ -1,0 +1,182 @@
+# ============================================================================
+# APEX Category Definitions - Separate File Example
+# ============================================================================
+# This file contains only category definitions that can be referenced by
+# multiple rule and enrichment configuration files.
+# 
+# Benefits of separate category files:
+# - Centralized governance and metadata management
+# - Reusability across multiple configuration files
+# - Clear separation of concerns
+# - Easier maintenance and updates
+# ============================================================================
+
+metadata:
+  id: "enterprise-categories"
+  name: "Enterprise Category Definitions"
+  version: "1.2.0"
+  description: "Centralized category definitions for enterprise governance"
+  type: "category-definitions"
+  author: "Enterprise Architecture Team"
+  created-date: "2025-01-01"
+
+# ============================================================================
+# COMPLIANCE CATEGORIES
+# ============================================================================
+
+categories:
+  # Regulatory Compliance Categories
+  - name: "kyc-compliance"
+    description: "Know Your Customer compliance rules"
+    priority: 5
+    enabled: true
+    business-domain: "Regulatory Compliance"
+    business-owner: "Chief Compliance Officer"
+    created-by: "Compliance Team"
+    source-system: "Compliance Management System"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: true
+    parallel-execution: false
+
+  - name: "aml-screening"
+    description: "Anti-Money Laundering screening rules"
+    priority: 3
+    enabled: true
+    business-domain: "Regulatory Compliance"
+    business-owner: "AML Officer"
+    created-by: "AML Team"
+    source-system: "AML Screening System"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: true
+    parallel-execution: false
+
+  - name: "sanctions-screening"
+    description: "Sanctions list screening and validation"
+    priority: 1
+    enabled: true
+    business-domain: "Regulatory Compliance"
+    business-owner: "Sanctions Officer"
+    created-by: "Sanctions Team"
+    source-system: "Sanctions Screening System"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: true
+    parallel-execution: false
+
+# ============================================================================
+# RISK MANAGEMENT CATEGORIES
+# ============================================================================
+
+  - name: "credit-risk"
+    description: "Credit risk assessment and validation rules"
+    priority: 10
+    enabled: true
+    business-domain: "Risk Management"
+    business-owner: "Chief Risk Officer"
+    created-by: "Credit Risk Team"
+    source-system: "Credit Risk Management System"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  - name: "market-risk"
+    description: "Market risk evaluation and limits"
+    priority: 15
+    enabled: true
+    business-domain: "Risk Management"
+    business-owner: "Market Risk Manager"
+    created-by: "Market Risk Team"
+    source-system: "Market Risk System"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  - name: "operational-risk"
+    description: "Operational risk controls and validations"
+    priority: 20
+    enabled: true
+    business-domain: "Risk Management"
+    business-owner: "Operational Risk Manager"
+    created-by: "Operational Risk Team"
+    source-system: "Operational Risk System"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+# ============================================================================
+# BUSINESS OPERATIONS CATEGORIES
+# ============================================================================
+
+  - name: "trade-validation"
+    description: "Trade booking and validation rules"
+    priority: 25
+    enabled: true
+    business-domain: "Trading Operations"
+    business-owner: "Head of Trading Operations"
+    created-by: "Trading Operations Team"
+    source-system: "Trading Management System"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  - name: "settlement-processing"
+    description: "Settlement processing and validation rules"
+    priority: 30
+    enabled: true
+    business-domain: "Settlement Operations"
+    business-owner: "Head of Settlement Operations"
+    created-by: "Settlement Operations Team"
+    source-system: "Settlement Management System"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  - name: "customer-onboarding"
+    description: "Customer onboarding process rules"
+    priority: 35
+    enabled: true
+    business-domain: "Customer Operations"
+    business-owner: "Head of Customer Operations"
+    created-by: "Customer Operations Team"
+    source-system: "Customer Management System"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+# ============================================================================
+# DATA QUALITY CATEGORIES
+# ============================================================================
+
+  - name: "data-validation"
+    description: "Data quality and validation rules"
+    priority: 40
+    enabled: true
+    business-domain: "Data Management"
+    business-owner: "Chief Data Officer"
+    created-by: "Data Quality Team"
+    source-system: "Data Quality Management System"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  - name: "data-enrichment"
+    description: "Data enrichment and enhancement rules"
+    priority: 45
+    enabled: true
+    business-domain: "Data Management"
+    business-owner: "Data Enrichment Manager"
+    created-by: "Data Enrichment Team"
+    source-system: "Data Enrichment System"
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true

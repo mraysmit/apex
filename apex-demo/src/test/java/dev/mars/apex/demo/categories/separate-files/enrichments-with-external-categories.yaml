@@ -1,0 +1,232 @@
+# ============================================================================
+# APEX Enrichments Configuration - Using External Categories
+# ============================================================================
+# This file demonstrates enrichments that reference categories defined in a 
+# separate file (enterprise-categories.yaml). This shows how enrichments
+# can inherit enterprise metadata from centralized category definitions.
+# ============================================================================
+
+metadata:
+  id: "enrichments-with-external-categories"
+  name: "Enrichments Using External Categories"
+  version: "1.0.0"
+  description: "Enrichments that reference categories from external files"
+  type: "enrichment-config"
+  author: "Data Enrichment Team"
+  created-date: "2025-01-01"
+
+# ============================================================================
+# DATA ENRICHMENT - Using External Categories
+# ============================================================================
+
+enrichments:
+  # Customer Data Enrichment
+  - id: "customer-risk-scoring"
+    name: "Customer Risk Score Enrichment"
+    category: "data-enrichment"  # References external category
+    type: "calculation-enrichment"
+    enabled: true
+    calculation-config:
+      expression: "(#creditScore * 0.4) + (#incomeLevel * 0.3) + (#accountHistory * 0.3)"
+      result-field: "riskScore"
+    field-mappings:
+      - source-field: "riskScore"
+        target-field: "customerRiskScore"
+    # Inherits all metadata from data-enrichment category:
+    # - business-domain: "Data Management"
+    # - business-owner: "Data Enrichment Manager"
+    # - created-by: "Data Enrichment Team"
+    # - effective-date: "2025-01-01T00:00:00Z"
+    # - expiration-date: "2025-12-31T23:59:59Z"
+
+  - id: "customer-segment-classification"
+    name: "Customer Segment Classification"
+    category: "data-enrichment"  # References external category
+    type: "field-enrichment"
+    enabled: true
+    field-mappings:
+      - source-field: "totalAssets"
+        target-field: "customerSegment"
+        transformation: "T(java.lang.Math).max(#totalAssets / 1000000, 1)"
+    # Override specific metadata while inheriting others
+    created-by: "Customer Segmentation Team"
+
+  - id: "geographic-enrichment"
+    name: "Geographic Data Enrichment"
+    category: "data-enrichment"  # References external category
+    type: "lookup-enrichment"
+    enabled: true
+    lookup-config:
+      lookup-key: "countryCode"
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        data:
+          - code: "US"
+            countryName: "United States"
+            region: "North America"
+            timezone: "EST"
+          - code: "UK"
+            countryName: "United Kingdom"
+            region: "Europe"
+            timezone: "GMT"
+
+# ============================================================================
+# COMPLIANCE DATA ENRICHMENT - Using External Categories
+# ============================================================================
+
+  # KYC Data Enrichment
+  - id: "kyc-status-enrichment"
+    name: "KYC Status Data Enrichment"
+    category: "kyc-compliance"  # References external category
+    type: "field-enrichment"
+    enabled: true
+    field-mappings:
+      - source-field: "identityVerified"
+        target-field: "kycStatus"
+        transformation: "#identityVerified ? 'VERIFIED' : 'PENDING'"
+      - source-field: "documentsComplete"
+        target-field: "kycCompleteness"
+        transformation: "#documentsComplete ? 'COMPLETE' : 'INCOMPLETE'"
+    # Inherits compliance category metadata
+
+  - id: "kyc-risk-assessment"
+    name: "KYC Risk Assessment Enrichment"
+    category: "kyc-compliance"  # References external category
+    type: "calculation-enrichment"
+    enabled: true
+    calculation-config:
+      expression: "#pepStatus == 'HIGH_RISK' ? 100 : (#sanctionsRisk * 0.6 + #geographicRisk * 0.4)"
+      result-field: "kycRiskScore"
+
+  # AML Data Enrichment
+  - id: "transaction-pattern-analysis"
+    name: "Transaction Pattern Analysis"
+    category: "aml-screening"  # References external category
+    type: "calculation-enrichment"
+    enabled: true
+    calculation-config:
+      expression: "#transactionFrequency > 10 && #averageAmount > 50000 ? 'HIGH_RISK' : 'NORMAL'"
+      result-field: "transactionRiskPattern"
+
+  - id: "aml-alert-scoring"
+    name: "AML Alert Score Calculation"
+    category: "aml-screening"  # References external category
+    type: "calculation-enrichment"
+    enabled: true
+    calculation-config:
+      expression: "(#suspiciousActivityScore * 0.5) + (#customerRiskScore * 0.3) + (#transactionRiskScore * 0.2)"
+      result-field: "amlAlertScore"
+    # Override business owner for specialized AML scoring
+    business-owner: "Senior AML Analyst"
+
+# ============================================================================
+# RISK MANAGEMENT ENRICHMENT - Using External Categories
+# ============================================================================
+
+  # Credit Risk Enrichment
+  - id: "credit-utilization-calculation"
+    name: "Credit Utilization Ratio Calculation"
+    category: "credit-risk"  # References external category
+    type: "calculation-enrichment"
+    enabled: true
+    calculation-config:
+      expression: "#currentBalance / #creditLimit"
+      result-field: "creditUtilizationRatio"
+
+  - id: "credit-score-adjustment"
+    name: "Credit Score Risk Adjustment"
+    category: "credit-risk"  # References external category
+    type: "calculation-enrichment"
+    enabled: true
+    calculation-config:
+      expression: "#baseScore - (#delinquencies * 50) - (#bankruptcies * 200)"
+      result-field: "adjustedCreditScore"
+
+  # Market Risk Enrichment
+  - id: "portfolio-var-calculation"
+    name: "Portfolio Value at Risk Calculation"
+    category: "market-risk"  # References external category
+    type: "calculation-enrichment"
+    enabled: true
+    calculation-config:
+      expression: "#portfolioValue * #volatility * 2.33"  # 99% confidence level
+      result-field: "portfolioVaR"
+
+  - id: "position-delta-calculation"
+    name: "Position Delta Calculation"
+    category: "market-risk"  # References external category
+    type: "calculation-enrichment"
+    enabled: true
+    calculation-config:
+      expression: "#positionSize * #delta * #underlyingPrice"
+      result-field: "positionDelta"
+
+# ============================================================================
+# OPERATIONAL DATA ENRICHMENT - Using External Categories
+# ============================================================================
+
+  # Trade Processing Enrichment
+  - id: "trade-settlement-enrichment"
+    name: "Trade Settlement Data Enrichment"
+    category: "trade-validation"  # References external category
+    type: "lookup-enrichment"
+    enabled: true
+    lookup-config:
+      lookup-key: "instrumentType"
+      lookup-dataset:
+        type: "inline"
+        key-field: "type"
+        data:
+          - type: "EQUITY"
+            settlementCycle: "T+2"
+            clearingHouse: "DTCC"
+            marginRequirement: 0.25
+          - type: "BOND"
+            settlementCycle: "T+1"
+            clearingHouse: "FICC"
+            marginRequirement: 0.10
+
+  - id: "trade-fee-calculation"
+    name: "Trade Fee Calculation"
+    category: "trade-validation"  # References external category
+    type: "calculation-enrichment"
+    enabled: true
+    calculation-config:
+      expression: "#notionalAmount * #feeRate + #fixedFee"
+      result-field: "totalTradeFee"
+
+  # Settlement Processing Enrichment
+  - id: "settlement-status-enrichment"
+    name: "Settlement Status Enrichment"
+    category: "settlement-processing"  # References external category
+    type: "field-enrichment"
+    enabled: true
+    field-mappings:
+      - source-field: "settlementDate"
+        target-field: "settlementStatus"
+        transformation: "#settlementDate <= T(java.time.LocalDate).now() ? 'DUE' : 'PENDING'"
+
+# ============================================================================
+# DATA QUALITY ENRICHMENT - Using External Categories
+# ============================================================================
+
+  # Data Validation Enrichment
+  - id: "data-completeness-scoring"
+    name: "Data Completeness Score Calculation"
+    category: "data-validation"  # References external category
+    type: "calculation-enrichment"
+    enabled: true
+    calculation-config:
+      expression: "(#requiredFieldsComplete / #totalRequiredFields) * 100"
+      result-field: "dataCompletenessScore"
+
+  - id: "data-quality-classification"
+    name: "Data Quality Classification"
+    category: "data-validation"  # References external category
+    type: "field-enrichment"
+    enabled: true
+    field-mappings:
+      - source-field: "dataCompletenessScore"
+        target-field: "dataQualityGrade"
+        transformation: "#dataCompletenessScore >= 95 ? 'A' : (#dataCompletenessScore >= 85 ? 'B' : 'C')"

@@ -121,16 +121,20 @@ public class YamlRuleFactory {
             }
         }
 
-        // Process rule groups (legacy support)
+        // Process rule groups using two-phase approach (like enrichment groups)
         if (yamlConfig.getRuleGroups() != null) {
-            LOGGER.info("Processing " + yamlConfig.getRuleGroups().size() + " rule groups");
+            LOGGER.info("Processing " + yamlConfig.getRuleGroups().size() + " rule groups using two-phase approach");
+
+            // Phase 1: Create all rule groups and register them (no cross-references yet)
+            Map<String, RuleGroup> ruleGroupsById = new HashMap<>();
             for (YamlRuleGroup yamlGroup : yamlConfig.getRuleGroups()) {
-                LOGGER.info("Processing rule group: " + yamlGroup.getId() + ", enabled: " + yamlGroup.getEnabled());
+                LOGGER.info("Phase 1 - Creating rule group: " + yamlGroup.getId() + ", enabled: " + yamlGroup.getEnabled());
                 if (yamlGroup.getEnabled() == null || yamlGroup.getEnabled()) {
                     try {
                         LOGGER.info("Creating rule group: " + yamlGroup.getId());
-                        RuleGroup group = createRuleGroup(yamlGroup, config);
+                        RuleGroup group = createRuleGroupWithoutReferences(yamlGroup, config);
                         config.registerRuleGroup(group);
+                        ruleGroupsById.put(group.getId(), group);
                         LOGGER.info("Successfully registered rule group: " + yamlGroup.getId());
                     } catch (YamlConfigurationException e) {
                         // Re-throw configuration exceptions to fail fast
@@ -145,9 +149,9 @@ public class YamlRuleFactory {
                 }
             }
 
-            // Second phase: Process rule group references now that all rule groups are created
-            LOGGER.info("Processing rule group references in second phase");
-            processRuleGroupReferences(yamlConfig, config);
+            // Phase 2: Process rule group references now that all rule groups are created and registered
+            LOGGER.info("Phase 2 - Processing rule group references with global registry");
+            processRuleGroupReferencesWithGlobalRegistry(yamlConfig, config, ruleGroupsById);
         }
 
         LOGGER.info("Successfully created RulesEngineConfiguration with " +
@@ -495,6 +499,107 @@ public class YamlRuleFactory {
     }
     
     /**
+     * Create a RuleGroup from YAML rule group configuration without processing rule-group-references.
+     * This is used in Phase 1 of the two-phase rule group creation process.
+     *
+     * @param yamlGroup The YAML rule group configuration
+     * @param config The rules engine configuration (to lookup existing rules)
+     * @return A RuleGroup object
+     */
+    public RuleGroup createRuleGroupWithoutReferences(YamlRuleGroup yamlGroup, RulesEngineConfiguration config) throws YamlConfigurationException {
+        String id = yamlGroup.getId();
+        String name = yamlGroup.getName() != null ? yamlGroup.getName() : id;
+        String description = yamlGroup.getDescription();
+        int priority = yamlGroup.getPriority() != null ? yamlGroup.getPriority() : 100;
+        boolean stopOnFirstFailure = yamlGroup.getStopOnFirstFailure() != null ? yamlGroup.getStopOnFirstFailure() : false;
+        boolean parallelExecution = yamlGroup.getParallelExecution() != null ? yamlGroup.getParallelExecution() : false;
+        boolean debugMode = yamlGroup.getDebugMode() != null ? yamlGroup.getDebugMode() : Boolean.parseBoolean(System.getProperty("apex.rulegroup.debug", "false"));
+
+        LOGGER.fine("Creating rule group: " + id + " (" + name + ") with stopOnFirstFailure=" + stopOnFirstFailure +
+                   ", parallelExecution=" + parallelExecution + ", debugMode=" + debugMode);
+
+        // Determine category
+        String categoryName = yamlGroup.getCategory() != null ? yamlGroup.getCategory() : "default";
+        getOrCreateCategory(categoryName, priority); // Ensure category exists in cache
+
+        // Look up category metadata from cache for inheritance
+        YamlCategory yamlCategory = findYamlCategoryByName(categoryName);
+        LOGGER.fine("Found category '" + categoryName + "' for rule group '" + yamlGroup.getId() +
+                   "'. YamlCategory found: " + (yamlCategory != null) +
+                   (yamlCategory != null ? ", businessOwner: " + yamlCategory.getBusinessOwner() : ""));
+
+        // Determine operator from YAML configuration
+        boolean isAndOperator = true; // Default to AND logic for rule groups
+        if (yamlGroup.getOperator() != null) {
+            String operator = yamlGroup.getOperator().toUpperCase();
+            if ("OR".equals(operator)) {
+                isAndOperator = false;
+            } else if (!"AND".equals(operator)) {
+                LOGGER.warning("Invalid operator '" + yamlGroup.getOperator() + "' for rule group '" + id + "'. Using AND as default.");
+            }
+        }
+
+        RuleGroup group = new RuleGroup(id, categoryName, name, description, priority,
+                                       isAndOperator, stopOnFirstFailure, parallelExecution, debugMode);
+
+        // Apply enterprise metadata with category inheritance
+        // Rule group metadata takes precedence, but inherit from category if not specified
+        String createdBy = yamlGroup.getCreatedBy();
+        if (createdBy == null && yamlCategory != null) {
+            createdBy = yamlCategory.getCreatedBy();
+        }
+        if (createdBy != null) {
+            group.setCreatedBy(createdBy);
+        }
+
+        String businessDomain = yamlGroup.getBusinessDomain();
+        if (businessDomain == null && yamlCategory != null) {
+            businessDomain = yamlCategory.getBusinessDomain();
+        }
+        if (businessDomain != null) {
+            group.setBusinessDomain(businessDomain);
+        }
+
+        String businessOwner = yamlGroup.getBusinessOwner();
+        if (businessOwner == null && yamlCategory != null) {
+            businessOwner = yamlCategory.getBusinessOwner();
+        }
+        if (businessOwner != null) {
+            group.setBusinessOwner(businessOwner);
+        }
+
+        // Handle effective date inheritance
+        String effectiveDate = yamlGroup.getEffectiveDate();
+        if (effectiveDate == null && yamlCategory != null) {
+            effectiveDate = yamlCategory.getEffectiveDate();
+        }
+        if (effectiveDate != null) {
+            group.setEffectiveDate(effectiveDate);
+        }
+
+        // Handle expiration date inheritance
+        String expirationDate = yamlGroup.getExpirationDate();
+        if (expirationDate == null && yamlCategory != null) {
+            expirationDate = yamlCategory.getExpirationDate();
+        }
+        if (expirationDate != null) {
+            group.setExpirationDate(expirationDate);
+        }
+
+        LOGGER.fine("Applied metadata inheritance to rule group '" + id + "': " +
+                   "createdBy=" + group.getCreatedBy() + ", " +
+                   "businessDomain=" + group.getBusinessDomain() + ", " +
+                   "businessOwner=" + group.getBusinessOwner());
+
+        // Add rules to the group (but NOT rule-group-references - that's Phase 2)
+        LOGGER.info("About to add rules to group: " + yamlGroup.getId());
+        addRulesToGroupWithoutGroupReferences(yamlGroup, group, config);
+        LOGGER.info("Finished adding rules to group: " + yamlGroup.getId());
+
+        return group;
+    }
+
+    /**
      * Create a RuleGroup from YAML rule group configuration.
      *
      * @param yamlGroup The YAML rule group configuration
@@ -600,7 +705,61 @@ public class YamlRuleFactory {
 
         return group;
     }
-    
+
+    /**
+     * Add rules to a rule group based on the YAML configuration, excluding rule-group-references.
+     * This is used in Phase 1 of the two-phase rule group creation process.
+     */
+    private void addRulesToGroupWithoutGroupReferences(YamlRuleGroup yamlGroup, RuleGroup group, RulesEngineConfiguration config) throws YamlConfigurationException {
+        // Add rules by ID (simple list)
+        if (yamlGroup.getRuleIds() != null) {
+            LOGGER.info("Processing " + yamlGroup.getRuleIds().size() + " rule IDs for group: " + yamlGroup.getId());
+            int sequence = 1;
+            for (String ruleId : yamlGroup.getRuleIds()) {
+                LOGGER.info("Processing rule ID: " + ruleId);
+                Rule rule = config.getRuleById(ruleId);
+                if (rule != null) {
+                    group.addRule(rule, sequence++);
+                    LOGGER.fine("Added rule " + ruleId + " to group " + group.getId() + " with sequence " + sequence);
+                } else {
+                    LOGGER.warning("Rule not found for ID: " + ruleId + " in group: " + group.getId());
+                }
+            }
+        }
+
+        // Add rules by reference (with more detailed configuration)
+        if (yamlGroup.getRuleReferences() != null) {
+            LOGGER.info("Processing " + yamlGroup.getRuleReferences().size() + " rule references for group: " + yamlGroup.getId());
+            for (YamlRuleGroup.RuleReference ref : yamlGroup.getRuleReferences()) {
+                LOGGER.info("Processing rule reference: " + ref.getRuleId() + ", enabled: " + ref.getEnabled() + ", override-priority: " + ref.getOverridePriority());
+                if (ref.getEnabled() == null || ref.getEnabled()) {
+                    Rule originalRule = config.getRuleById(ref.getRuleId());
+                    if (originalRule != null) {
+                        int sequence = ref.getSequence() != null ? ref.getSequence() : 1;
+
+                        // Handle priority override
+                        Rule ruleToAdd = originalRule;
+                        if (ref.getOverridePriority() != null) {
+                            validatePriorityOverride(ref.getOverridePriority(), ref.getRuleId());
+                            ruleToAdd = createRuleWithOverriddenPriority(originalRule, ref.getOverridePriority(), yamlGroup.getId());
+                            LOGGER.fine("Applied priority override " + ref.getOverridePriority() + " to rule " + ref.getRuleId() + " in group " + yamlGroup.getId());
+                        }
+
+                        group.addRule(ruleToAdd, sequence);
+                        LOGGER.fine("Added rule " + ref.getRuleId() + " to group " + group.getId() + " with sequence " + sequence);
+                    } else {
+                        LOGGER.warning("Rule not found for ID: " + ref.getRuleId() + " in group: " + group.getId());
+                    }
+                } else {
+                    LOGGER.info("Skipping disabled rule: " + ref.getRuleId());
+                }
+            }
+        }
+
+        // Note: Rule group references are NOT processed here - that's Phase 2
+        LOGGER.info("Phase 1 complete for group: " + yamlGroup.getId() + " (rule-group-references will be processed in Phase 2)");
+    }
+
     /**
      * Add rules to a rule group based on YAML configuration.
      */
@@ -649,6 +808,66 @@ public class YamlRuleFactory {
 
         // Note: Rule group references are processed in a separate phase after all rule groups are created
         // This is handled by processRuleGroupReferences() method
+    }
+
+    /**
+     * Process rule group references using a global registry (like enrichment groups).
+     * This enables cross-file rule-group references by using a combined registry of all rule groups.
+     */
+    private void processRuleGroupReferencesWithGlobalRegistry(YamlRuleConfiguration yamlConfig, RulesEngineConfiguration config, Map<String, RuleGroup> globalRuleGroupsById) throws YamlConfigurationException {
+        if (yamlConfig.getRuleGroups() == null) {
+            return;
+        }
+
+        LOGGER.info("Processing rule group references with global registry containing " + globalRuleGroupsById.size() + " groups");
+
+        for (YamlRuleGroup yamlGroup : yamlConfig.getRuleGroups()) {
+            if ((yamlGroup.getEnabled() == null || yamlGroup.getEnabled()) && yamlGroup.getRuleGroupReferences() != null) {
+                LOGGER.info("Processing rule group references for group: " + yamlGroup.getId());
+
+                RuleGroup targetGroup = globalRuleGroupsById.get(yamlGroup.getId());
+                if (targetGroup == null) {
+                    LOGGER.warning("Target rule group not found in global registry: " + yamlGroup.getId());
+                    continue;
+                }
+
+                addRuleGroupReferencesToGroupWithGlobalRegistry(yamlGroup, targetGroup, globalRuleGroupsById);
+            }
+        }
+    }
+
+    /**
+     * Add rules from referenced rule groups using global registry (enables cross-file references).
+     * This is the key method that enables cross-file rule-group references.
+     */
+    private void addRuleGroupReferencesToGroupWithGlobalRegistry(YamlRuleGroup yamlGroup, RuleGroup targetGroup, Map<String, RuleGroup> globalRuleGroupsById) throws YamlConfigurationException {
+        if (yamlGroup.getRuleGroupReferences() == null) {
+            return;
+        }
+
+        LOGGER.info("Processing " + yamlGroup.getRuleGroupReferences().size() + " rule group references for group: " + yamlGroup.getId());
+
+        // Calculate starting sequence number (after existing rules)
+        int nextSequence = targetGroup.getRules().size() + 1;
+
+        for (String referencedGroupId : yamlGroup.getRuleGroupReferences()) {
+            LOGGER.info("Processing rule group reference: " + referencedGroupId);
+
+            // Use global registry instead of config.getRuleGroupById() - this enables cross-file references!
+            RuleGroup referencedGroup = globalRuleGroupsById.get(referencedGroupId);
+            if (referencedGroup != null) {
+                // Add all rules from the referenced group to the target group
+                for (Rule rule : referencedGroup.getRules()) {
+                    targetGroup.addRule(rule, nextSequence++);
+                    LOGGER.fine("Added rule " + rule.getId() + " from group " + referencedGroupId + " to group " + targetGroup.getId());
+                }
+                LOGGER.info("Successfully added " + referencedGroup.getRules().size() + " rules from group " + referencedGroupId + " to group " + targetGroup.getId());
+            } else {
+                String errorMsg = "Referenced rule group not found in global registry: " + referencedGroupId + " in group: " + yamlGroup.getId();
+                LOGGER.severe(errorMsg);
+                throw new YamlConfigurationException(errorMsg);
+            }
+        }
     }
 
     /**

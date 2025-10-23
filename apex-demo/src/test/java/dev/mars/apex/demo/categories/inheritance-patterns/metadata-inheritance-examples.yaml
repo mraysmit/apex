@@ -1,0 +1,256 @@
+# ============================================================================
+# APEX Category Metadata Inheritance Examples
+# ============================================================================
+# This file demonstrates various metadata inheritance patterns:
+# 1. Complete inheritance from categories
+# 2. Partial overrides at rule/enrichment level
+# 3. Priority and execution behavior inheritance
+# 4. Lifecycle management patterns
+# ============================================================================
+
+metadata:
+  id: "metadata-inheritance-examples"
+  name: "Metadata Inheritance Pattern Examples"
+  version: "1.0.0"
+  description: "Comprehensive examples of metadata inheritance and override patterns"
+  type: "inheritance-demo"
+  author: "APEX Architecture Team"
+  created-date: "2025-01-01"
+
+# ============================================================================
+# CATEGORY DEFINITIONS WITH RICH METADATA
+# ============================================================================
+
+categories:
+  # High-priority compliance category
+  - name: "regulatory-compliance"
+    description: "Critical regulatory compliance rules"
+    priority: 1
+    enabled: true
+    business-domain: "Regulatory Compliance"
+    business-owner: "Chief Compliance Officer"
+    created-by: "Regulatory Team"
+
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: true
+    parallel-execution: false
+
+  # Medium-priority operational category
+  - name: "business-operations"
+    description: "Standard business operational rules"
+    priority: 20
+    enabled: true
+    business-domain: "Business Operations"
+    business-owner: "Operations Manager"
+    created-by: "Operations Team"
+
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-06-30T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  # Low-priority data quality category
+  - name: "data-quality"
+    description: "Data quality and validation rules"
+    priority: 50
+    enabled: true
+    business-domain: "Data Management"
+    business-owner: "Data Quality Manager"
+    created-by: "Data Quality Team"
+
+    effective-date: "2025-01-01T00:00:00Z"
+    expiration-date: "2025-12-31T23:59:59Z"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+# ============================================================================
+# INHERITANCE PATTERN 1: COMPLETE INHERITANCE
+# ============================================================================
+# Rules that inherit ALL metadata from their assigned category
+
+rules:
+  - id: "complete-inheritance-rule"
+    name: "Rule with Complete Metadata Inheritance"
+    category: "regulatory-compliance"
+    condition: "#amount <= 10000"
+    message: "Transaction amount within regulatory limits"
+    severity: "ERROR"
+    enabled: true
+    # NO business metadata specified - inherits ALL from category:
+    # - business-domain: "Regulatory Compliance"
+    # - business-owner: "Chief Compliance Officer"
+    # - created-by: "Regulatory Team"
+
+    # - effective-date: "2025-01-01T00:00:00Z"
+    # - expiration-date: "2025-12-31T23:59:59Z"
+    # - priority: 1 (highest)
+    # - stop-on-first-failure: true
+    # - parallel-execution: false
+
+  - id: "operations-inheritance-rule"
+    name: "Operations Rule with Full Inheritance"
+    category: "business-operations"
+    condition: "#status == 'APPROVED'"
+    message: "Operation requires approved status"
+    severity: "WARNING"
+    enabled: true
+    # Inherits ALL metadata from business-operations category
+
+# ============================================================================
+# INHERITANCE PATTERN 2: PARTIAL OVERRIDES
+# ============================================================================
+# Rules that override specific metadata fields while inheriting others
+
+  - id: "partial-override-rule"
+    name: "Rule with Partial Metadata Override"
+    category: "regulatory-compliance"
+    condition: "#riskLevel != 'HIGH'"
+    message: "High risk transactions require additional approval"
+    severity: "ERROR"
+    enabled: true
+    # Override specific fields
+    created-by: "Senior Risk Analyst"  # Overrides category's "Regulatory Team"
+
+    # Inherits remaining metadata:
+    # - business-domain: "Regulatory Compliance"
+    # - business-owner: "Chief Compliance Officer"
+    # - effective-date: "2025-01-01T00:00:00Z"
+    # - expiration-date: "2025-12-31T23:59:59Z"
+
+  - id: "lifecycle-override-rule"
+    name: "Rule with Lifecycle Override"
+    category: "business-operations"
+    condition: "#customerType == 'PREMIUM'"
+    message: "Premium customer validation"
+    severity: "INFO"
+    enabled: true
+    # Override lifecycle dates
+    effective-date: "2025-02-01T00:00:00Z"  # Later start than category
+    expiration-date: "2025-12-31T23:59:59Z"  # Extended beyond category
+    # Inherits other metadata from business-operations category
+
+# ============================================================================
+# INHERITANCE PATTERN 3: COMPLETE OVERRIDES
+# ============================================================================
+# Rules that override ALL business metadata while still using category
+
+  - id: "complete-override-rule"
+    name: "Rule with Complete Metadata Override"
+    category: "data-quality"  # Still uses category for grouping/priority
+    condition: "#dataCompleteness >= 0.95"
+    message: "Data completeness meets quality standards"
+    severity: "INFO"
+    enabled: true
+    # Override ALL business metadata
+    business-domain: "Custom Data Domain"
+    business-owner: "Custom Data Owner"
+    created-by: "Custom Data Team"
+
+    effective-date: "2025-03-01T00:00:00Z"
+    expiration-date: "2025-09-30T23:59:59Z"
+    # Still inherits execution behavior (priority: 50, parallel: true)
+
+# ============================================================================
+# INHERITANCE PATTERN 4: ENRICHMENT INHERITANCE
+# ============================================================================
+# Enrichments demonstrating the same inheritance patterns
+
+enrichments:
+  # Complete inheritance enrichment
+  - id: "complete-inheritance-enrichment"
+    name: "Enrichment with Complete Inheritance"
+    category: "regulatory-compliance"
+    type: "calculation-enrichment"
+    enabled: true
+    calculation-config:
+      expression: "#baseAmount * #complianceMultiplier"
+      result-field: "adjustedAmount"
+    # Inherits ALL metadata from regulatory-compliance category
+
+  # Partial override enrichment
+  - id: "partial-override-enrichment"
+    name: "Enrichment with Partial Override"
+    category: "business-operations"
+    type: "field-enrichment"
+    enabled: true
+    field-mappings:
+      - source: "rawStatus"
+        target: "processedStatus"
+        transformation: "#rawStatus.toUpperCase()"
+    # Override specific metadata
+    business-owner: "Senior Operations Analyst"
+    created-by: "Operations Enhancement Team"
+    # Inherits remaining metadata from business-operations category
+
+  # Data quality enrichment with lifecycle override
+  - id: "data-quality-enrichment"
+    name: "Data Quality Score Enrichment"
+    category: "data-quality"
+    type: "calculation-enrichment"
+    enabled: true
+    calculation-config:
+      expression: "(#completeness * 0.4) + (#accuracy * 0.4) + (#timeliness * 0.2)"
+      result-field: "qualityScore"
+    # Override lifecycle for pilot program
+    effective-date: "2025-01-15T00:00:00Z"
+    expiration-date: "2025-03-15T23:59:59Z"
+    created-by: "Data Quality Pilot Team"
+
+# ============================================================================
+# INHERITANCE PATTERN 5: RULE GROUPS WITH CATEGORY INHERITANCE
+# ============================================================================
+
+rule-groups:
+  # Rule group inheriting from high-priority category
+  - id: "compliance-rule-group"
+    name: "Regulatory Compliance Rule Group"
+    category: "regulatory-compliance"
+    description: "Critical compliance validations"
+    enabled: true
+    rules:
+      - "complete-inheritance-rule"
+      - "partial-override-rule"
+    # Inherits ALL metadata from regulatory-compliance category
+    # Group execution follows category settings (sequential, stop-on-failure)
+
+  # Rule group with metadata override
+  - id: "operations-rule-group"
+    name: "Business Operations Rule Group"
+    category: "business-operations"
+    description: "Standard business operation validations"
+    enabled: true
+    rules:
+      - "operations-inheritance-rule"
+      - "lifecycle-override-rule"
+    # Override group-specific metadata
+    business-owner: "Senior Operations Manager"
+    # Inherits other metadata from business-operations category
+
+# ============================================================================
+# INHERITANCE PATTERN 6: ENRICHMENT GROUPS WITH CATEGORY INHERITANCE
+# ============================================================================
+
+enrichment-groups:
+  # Enrichment group with complete inheritance
+  - id: "compliance-enrichment-group"
+    name: "Compliance Data Enrichment Group"
+    category: "regulatory-compliance"
+    description: "Regulatory compliance data enrichments"
+    enabled: true
+    enrichments:
+      - "complete-inheritance-enrichment"
+    # Inherits ALL metadata from regulatory-compliance category
+
+  # Enrichment group with partial override
+  - id: "operations-enrichment-group"
+    name: "Operations Data Enrichment Group"
+    category: "business-operations"
+    description: "Business operations data enrichments"
+    enabled: true
+    enrichments:
+      - "partial-override-enrichment"
+    # Override specific metadata
+    created-by: "Operations Data Team"
+
+    # Inherits remaining metadata from business-operations category

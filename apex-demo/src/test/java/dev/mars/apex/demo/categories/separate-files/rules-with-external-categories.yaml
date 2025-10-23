@@ -1,0 +1,183 @@
+# ============================================================================
+# APEX Rules Configuration - Using External Categories
+# ============================================================================
+# This file demonstrates rules that reference categories defined in a separate
+# file (enterprise-categories.yaml). This pattern enables:
+# - Modular configuration management
+# - Centralized category governance
+# - Reusable category definitions across multiple files
+# - Clear separation between category definitions and rule implementations
+# ============================================================================
+
+metadata:
+  id: "rules-with-external-categories"
+  name: "Rules Using External Categories"
+  version: "1.0.0"
+  description: "Rules that reference categories from external files"
+  type: "rule-config"
+  author: "Business Rules Team"
+  created-date: "2025-01-01"
+
+# ============================================================================
+# IMPORT EXTERNAL CATEGORIES
+# ============================================================================
+# Note: In a real implementation, categories would be loaded from the external
+# file. For this demo, we assume the categories from enterprise-categories.yaml
+# are available in the system.
+
+# ============================================================================
+# COMPLIANCE RULES - Using External Categories
+# ============================================================================
+
+rules:
+  # KYC Compliance Rules
+  - id: "customer-identity-verification"
+    name: "Customer Identity Verification"
+    category: "kyc-compliance"  # References external category
+    condition: "#customerData.identityVerified == true"
+    message: "Customer identity must be verified before account opening"
+    severity: "ERROR"
+    enabled: true
+    # Inherits all metadata from kyc-compliance category:
+    # - business-domain: "Regulatory Compliance"
+    # - business-owner: "Chief Compliance Officer"
+    # - created-by: "Compliance Team"
+    # - effective-date: "2025-01-01T00:00:00Z"
+    # - expiration-date: "2025-12-31T23:59:59Z"
+
+  - id: "customer-address-validation"
+    name: "Customer Address Validation"
+    category: "kyc-compliance"  # References external category
+    condition: "#customerData.address != null && #customerData.address.length() > 10"
+    message: "Valid customer address is required"
+    severity: "ERROR"
+    enabled: true
+    # Override specific metadata while inheriting others
+    created-by: "Address Validation Team"  # Overrides category's created-by
+
+  # AML Screening Rules
+  - id: "pep-screening"
+    name: "Politically Exposed Person Screening"
+    category: "aml-screening"  # References external category
+    condition: "#customerData.pepStatus != 'HIGH_RISK'"
+    message: "High-risk PEP customers require additional approval"
+    severity: "WARNING"
+    enabled: true
+    # Inherits all metadata from aml-screening category
+
+  - id: "transaction-monitoring"
+    name: "Suspicious Transaction Monitoring"
+    category: "aml-screening"  # References external category
+    condition: "#transaction.amount <= #customerData.dailyLimit"
+    message: "Transaction exceeds customer daily limit"
+    severity: "ERROR"
+    enabled: true
+
+  # Sanctions Screening Rules
+  - id: "ofac-sanctions-check"
+    name: "OFAC Sanctions List Check"
+    category: "sanctions-screening"  # References external category
+    condition: "#customerData.sanctionsStatus != 'BLOCKED'"
+    message: "Customer appears on sanctions list"
+    severity: "ERROR"
+    enabled: true
+
+# ============================================================================
+# RISK MANAGEMENT RULES - Using External Categories
+# ============================================================================
+
+  # Credit Risk Rules
+  - id: "credit-limit-validation"
+    name: "Credit Limit Validation"
+    category: "credit-risk"  # References external category
+    condition: "#transaction.amount <= #customerData.creditLimit"
+    message: "Transaction exceeds approved credit limit"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "debt-to-income-ratio"
+    name: "Debt-to-Income Ratio Check"
+    category: "credit-risk"  # References external category
+    condition: "#customerData.debtToIncomeRatio <= 0.43"
+    message: "Debt-to-income ratio exceeds acceptable threshold"
+    severity: "WARNING"
+    enabled: true
+    # Override business owner for this specific rule
+    business-owner: "Senior Credit Risk Analyst"
+
+  # Market Risk Rules
+  - id: "position-limit-check"
+    name: "Position Limit Validation"
+    category: "market-risk"  # References external category
+    condition: "#position.notionalAmount <= #limits.maxPositionSize"
+    message: "Position exceeds maximum allowed size"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "concentration-risk-check"
+    name: "Concentration Risk Assessment"
+    category: "market-risk"  # References external category
+    condition: "#portfolio.concentrationRatio <= 0.25"
+    message: "Portfolio concentration exceeds risk tolerance"
+    severity: "WARNING"
+    enabled: true
+
+# ============================================================================
+# OPERATIONAL RULES - Using External Categories
+# ============================================================================
+
+  # Trade Validation Rules
+  - id: "trade-settlement-date"
+    name: "Trade Settlement Date Validation"
+    category: "trade-validation"  # References external category
+    condition: "#trade.settlementDate >= #trade.tradeDate"
+    message: "Settlement date cannot be before trade date"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "trade-counterparty-validation"
+    name: "Trade Counterparty Validation"
+    category: "trade-validation"  # References external category
+    condition: "#trade.counterparty != null && #trade.counterparty.approved == true"
+    message: "Trade counterparty must be approved"
+    severity: "ERROR"
+    enabled: true
+
+  # Settlement Processing Rules
+  - id: "settlement-instructions-complete"
+    name: "Settlement Instructions Completeness"
+    category: "settlement-processing"  # References external category
+    condition: "#settlement.instructions != null && #settlement.instructions.size() > 0"
+    message: "Settlement instructions are required"
+    severity: "ERROR"
+    enabled: true
+
+  # Customer Onboarding Rules
+  - id: "required-documents-check"
+    name: "Required Documents Verification"
+    category: "customer-onboarding"  # References external category
+    condition: "#documents.passport != null && #documents.proofOfAddress != null"
+    message: "Required onboarding documents are missing"
+    severity: "ERROR"
+    enabled: true
+
+# ============================================================================
+# DATA QUALITY RULES - Using External Categories
+# ============================================================================
+
+  # Data Validation Rules
+  - id: "email-format-validation"
+    name: "Email Format Validation"
+    category: "data-validation"  # References external category
+    condition: "#customerData.email matches '^[A-Za-z0-9+_.-]+@(.+)$'"
+    message: "Invalid email format"
+    severity: "WARNING"
+    enabled: true
+
+  - id: "phone-number-validation"
+    name: "Phone Number Validation"
+    category: "data-validation"  # References external category
+    condition: "#customerData.phoneNumber != null && #customerData.phoneNumber.length() >= 10"
+    message: "Valid phone number is required"
+    severity: "WARNING"
+    enabled: true
