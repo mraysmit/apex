@@ -17,15 +17,13 @@ package dev.mars.apex.yaml.manager.ui;
  */
 
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * UI Controller for APEX YAML Manager web interface.
  *
- * Serves the main UI pages and provides configuration to the frontend.
- * Follows the apex-playground pattern with 4-panel interface.
+ * Redirects to the standalone D3.js tree viewer.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-10-18
@@ -36,70 +34,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class YamlManagerUIController {
 
     /**
-     * Serve the main YAML Manager UI page.
+     * Redirect to the standalone D3.js tree viewer.
      */
     @GetMapping
-    public String index(Model model) {
-        model.addAttribute("title", "APEX YAML Manager");
-        model.addAttribute("version", "1.0.0");
-        model.addAttribute("apiBaseUrl", "/yaml-manager/api");
-        // Default landing view is the Tree Viewer (per product decision)
-        return "dependency-tree-viewer";
+    public String index() {
+        return "redirect:/d3-tree-viewer.html";
     }
 
-    /**
-     * Serve the dependency analysis page.
-     */
-    @GetMapping("/dependencies")
-    public String dependencies(Model model) {
-        model.addAttribute("title", "Dependency Analysis - APEX YAML Manager");
-        model.addAttribute("version", "1.0.0");
-        model.addAttribute("apiBaseUrl", "/yaml-manager/api");
-        return "dependencies";
-    }
-
-    /**
-     * Serve the catalog browser page.
-     */
-    @GetMapping("/catalog")
-    public String catalog(Model model) {
-        model.addAttribute("title", "Catalog Browser - APEX YAML Manager");
-        model.addAttribute("version", "1.0.0");
-        model.addAttribute("apiBaseUrl", "/yaml-manager/api");
-        return "catalog";
-    }
-
-    /**
-     * Serve the validation page.
-     */
-    @GetMapping("/validation")
-    public String validation(Model model) {
-        model.addAttribute("title", "Validation - APEX YAML Manager");
-        model.addAttribute("version", "1.0.0");
-        model.addAttribute("apiBaseUrl", "/yaml-manager/api");
-        return "validation";
-    }
-
-    /**
-     * Serve the health check page.
-     */
-    @GetMapping("/health")
-    public String health(Model model) {
-        model.addAttribute("title", "Health Checks - APEX YAML Manager");
-        model.addAttribute("version", "1.0.0");
-        model.addAttribute("apiBaseUrl", "/yaml-manager/api");
-        return "health";
-    }
-
-    /**
-     * Serve the dependency tree viewer page.
-     */
-    @GetMapping("/tree-viewer")
-    public String treeViewer(Model model) {
-        model.addAttribute("title", "Dependency Tree Viewer - APEX YAML Manager");
-        model.addAttribute("version", "1.0.0");
-        model.addAttribute("apiBaseUrl", "/yaml-manager/api");
-        return "dependency-tree-viewer";
-    }
 }
 

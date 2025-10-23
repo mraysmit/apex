@@ -103,9 +103,16 @@
 
         .metadata-item {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             padding: 4px 0;
             border-bottom: 1px solid #e2e8f0;
+            gap: 8px;
+        }
+
+        .metadata-item.full-width {
+            flex-direction: column;
+            align-items: flex-start;
+            grid-column: 1 / -1;
         }
 
         .metadata-label {
@@ -114,10 +121,21 @@
             font-size: 12px;
         }
 
+        .metadata-item.full-width .metadata-label {
+            margin-bottom: 4px;
+        }
+
         .metadata-value {
             color: #2d3748;
             font-size: 12px;
             font-family: 'Courier New', monospace;
+            text-align: left;
+        }
+
+        .metadata-item.full-width .metadata-value {
+            width: 100%;
+            word-break: break-all;
+            text-align: left;
         }
 
         .status-indicator {
@@ -231,6 +249,8 @@
             color: #7f8c8d;
         }
 
+
+
         .placeholder-content {
             padding: 20px;
             text-align: center;
@@ -318,7 +338,6 @@
         <div class="content-panel">
             <div class="content-header">
                 <h3>File Content</h3>
-                <div class="file-path" id="current-file-path">Click on a node to view its content</div>
 
                 <!-- File Metadata Section -->
                 <div class="file-metadata" id="file-metadata" style="display: none;">
@@ -328,20 +347,6 @@
                 </div>
             </div>
 
-            <div class="file-info" id="file-info" style="display: none;">
-                <div class="info-item">
-                    <span class="label">Size:</span>
-                    <span class="value" id="file-size">-</span>
-                </div>
-                <div class="info-item">
-                    <span class="label">Valid YAML:</span>
-                    <span class="value" id="file-valid">-</span>
-                </div>
-                <div class="info-item">
-                    <span class="label">Last Modified:</span>
-                    <span class="value" id="file-modified">-</span>
-                </div>
-            </div>
 
             <div class="content-body">
                 <div class="placeholder-content" id="placeholder-content">
@@ -398,7 +403,7 @@
         function loadTreeData() {
             // Use the graph-100 dataset which has 100+ files with deep dependencies
             // Need to use absolute path for proper dependency resolution
-            const rootFile = "C:/Users/markr/dev/java/corejava/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/00-scenario-registry.yaml";
+            const rootFile = "C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/00-scenario-registry.yaml";
             // Updated to use centralized apex-rest-api (port 8080) instead of apex-yaml-manager (port 8082)
             const apiUrl = `http://localhost:8082/yaml-manager/api/dependencies/tree?rootFile=${encodeURIComponent(rootFile)}`;
 
@@ -612,11 +617,8 @@
         function loadFileContent(filePath, nodeData) {
             console.log('Loading content for:', filePath, nodeData);
 
-            // Update header
-            document.getElementById('current-file-path').textContent = filePath;
-
             // Build the full file path
-            const baseDirectory = "C:/Users/markr/dev/java/corejava/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/";
+            const baseDirectory = "C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/";
             const fullPath = baseDirectory + filePath;
 
             // Use tree node data directly (no additional API calls needed)
@@ -628,61 +630,15 @@
             // Hide placeholder and show content
             document.getElementById('placeholder-content').style.display = 'none';
             document.getElementById('yaml-content').style.display = 'block';
-            document.getElementById('file-info').style.display = 'block';
 
-            // Show actual YAML file content if available, otherwise show metadata
+            // Show actual YAML file content
             const contentSummary = nodeData.contentSummary || {};
-            let displayContent;
+            let displayContent = contentSummary.rawContent || `# Error: No content available for ${filePath}`;
 
-            if (contentSummary.rawContent) {
-                // Show the actual YAML file content
-                displayContent = contentSummary.rawContent;
-
-                // Add circular dependency warning if applicable (for real content)
-                if (nodeData.circularReference) {
-                    displayContent += `\n\n# ⚠️ CIRCULAR DEPENDENCY WARNING
+            // Add circular dependency warning if applicable
+            if (nodeData.circularReference) {
+                displayContent += `\n\n# ⚠️ CIRCULAR DEPENDENCY WARNING
 # ${nodeData.circularReference}`;
-                }
-            } else {
-                // Fallback to basic file information if raw content not available
-                displayContent = `# APEX YAML File Information
-# File: ${filePath}
-# Full Path: ${fullPath}
-
-# File Metadata
-file-type: ${contentSummary.fileType || 'unknown'}
-apex-id: ${contentSummary.id || 'N/A'}
-name: "${contentSummary.name || 'N/A'}"
-description: "${contentSummary.description || 'N/A'}"
-version: ${contentSummary.version || 'N/A'}
-
-# Content Statistics
-rule-count: ${contentSummary.ruleCount || 0}
-rule-group-count: ${contentSummary.ruleGroupCount || 0}
-enrichment-count: ${contentSummary.enrichmentCount || 0}
-
-# Tree Information
-depth: ${nodeData.depth || 0}
-height: ${nodeData.height || 0}
-child-count: ${nodeData.childCount || 0}
-circular-dependency: ${nodeData.circular ? 'true' : 'false'}`;
-
-                // Add circular dependency warning if applicable (for metadata view)
-                if (nodeData.circularReference) {
-                    displayContent += `\n\n# ⚠️ CIRCULAR DEPENDENCY WARNING
-# ${nodeData.circularReference}`;
-                }
-
-                // Add content details if available (for metadata view)
-                if (contentSummary.contentCounts) {
-                    displayContent += `\n\n# Content Details`;
-                    Object.entries(contentSummary.contentCounts).forEach(([key, value]) => {
-                        displayContent += `\n${key}: ${value}`;
-                    });
-                }
-
-                // Only add the metadata note when showing metadata view
-                displayContent += `\n\n# Note: This is metadata view. To edit actual file content, open:\n# ${fullPath}`;
             }
 
             document.getElementById('yaml-code').textContent = displayContent;
@@ -695,23 +651,13 @@ circular-dependency: ${nodeData.circular ? 'true' : 'false'}`;
                 colorizeApexKeywords(document.getElementById('yaml-code'));
             }, 50);
 
-            // Update file info using tree node data
-            document.getElementById('file-size').textContent = 'See metadata below';
-            document.getElementById('file-valid').textContent = contentSummary.fileType ? 'Yes' : 'Unknown';
-            document.getElementById('file-modified').textContent = 'See metadata below';
+
 
             // Load and display metadata using tree node data
             loadFileMetadata(fullPath, {}, nodeData);
         }
 
-        // Helper function to format file size
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
+
 
         // Helper function to format date
         function formatDate(timestamp) {
@@ -725,33 +671,46 @@ circular-dependency: ${nodeData.circular ? 'true' : 'false'}`;
 
             const contentSummary = nodeData.contentSummary || {};
 
-            // Basic file information
+            // Start with ordered priority fields at the top
             const metadata = [
-                { label: 'File Path', value: fullPath },
-                { label: 'File Size', value: fileData.size ? formatFileSize(fileData.size) : 'Unknown' },
-                { label: 'Last Modified', value: fileData.lastModified ? formatDate(fileData.lastModified) : 'Unknown' },
+                { label: 'File Path', value: fullPath }
+            ];
+
+            // Add APEX ID if available (full-width)
+            if (contentSummary.id) {
+                metadata.push({ label: 'APEX ID', value: contentSummary.id });
+            }
+
+            // Add Display Name if available (full-width)
+            if (contentSummary.name) {
+                metadata.push({ label: 'Display Name', value: contentSummary.name });
+            }
+
+            // Add File Type (regular width)
+            if (contentSummary.fileType) {
+                metadata.push({ label: 'File Type', value: contentSummary.fileType });
+            }
+
+            // Add Version right after File Type (regular width)
+            if (contentSummary.version) {
+                metadata.push({ label: 'Version', value: contentSummary.version });
+            }
+
+            // Add Last Modified on the same line as File Type and Version (regular width)
+            metadata.push({ label: 'Last Modified', value: fileData.lastModified ? formatDate(fileData.lastModified) : 'Unknown' });
+
+            // Add Description (full-width)
+            if (contentSummary.description) {
+                metadata.push({ label: 'Description', value: contentSummary.description });
+            }
+
+            // Add remaining file system information
+            metadata.push(
                 { label: 'YAML Valid', value: fileData.isValidYaml !== undefined ? (fileData.isValidYaml ? '✓ Valid' : '✗ Invalid') : 'Unknown',
                   status: fileData.isValidYaml !== undefined ? (fileData.isValidYaml ? 'valid' : 'invalid') : 'warning' },
                 { label: 'Readable', value: fileData.isReadable !== undefined ? (fileData.isReadable ? '✓ Yes' : '✗ No') : 'Unknown',
                   status: fileData.isReadable !== undefined ? (fileData.isReadable ? 'valid' : 'invalid') : 'warning' }
-            ];
-
-            // Add APEX-specific metadata from contentSummary
-            if (contentSummary.fileType) {
-                metadata.push({ label: 'File Type', value: contentSummary.fileType });
-            }
-            if (contentSummary.id) {
-                metadata.push({ label: 'APEX ID', value: contentSummary.id });
-            }
-            if (contentSummary.name) {
-                metadata.push({ label: 'Display Name', value: contentSummary.name });
-            }
-            if (contentSummary.version) {
-                metadata.push({ label: 'Version', value: contentSummary.version });
-            }
-            if (contentSummary.description) {
-                metadata.push({ label: 'Description', value: contentSummary.description });
-            }
+            );
 
             // Add content counts
             if (contentSummary.ruleCount !== undefined) {
@@ -807,9 +766,17 @@ circular-dependency: ${nodeData.circular ? 'true' : 'false'}`;
             const grid = document.getElementById('metadata-grid');
             grid.innerHTML = '';
 
+            // Fields that should occupy full width
+            const fullWidthFields = ['File Path', 'Description', 'APEX ID', 'Display Name'];
+
             metadata.forEach(item => {
                 const metadataItem = document.createElement('div');
                 metadataItem.className = 'metadata-item';
+
+                // Add full-width class for long text fields
+                if (fullWidthFields.includes(item.label)) {
+                    metadataItem.classList.add('full-width');
+                }
 
                 const label = document.createElement('span');
                 label.className = 'metadata-label';

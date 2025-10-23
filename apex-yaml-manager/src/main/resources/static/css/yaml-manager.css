@@ -1,4 +1,4 @@
-/* APEX YAML Manager Custom Styles */
+/* APEX YAML Manager - D3 Tree Viewer Styles */
 
 :root {
     --primary-color: #0d6efd;
@@ -10,81 +10,13 @@
     --light-color: #f8f9fa;
 }
 
-/* Body and general styles */
+/* General styles for D3 tree viewer */
 body {
     background-color: #f5f5f5;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-/* Navigation */
-.navbar {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-brand {
-    font-weight: 600;
-    font-size: 1.3rem;
-}
-
-/* Cards */
-.card {
-    border: none;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s, box-shadow 0.2s;
-    margin-bottom: 1rem;
-}
-
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.card-header {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    font-weight: 600;
-}
-
-/* Panels */
-.panel {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Editors */
-.editor-container {
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-    overflow: hidden;
-    background: white;
-}
-
-.editor-header {
-    background-color: #f8f9fa;
-    padding: 10px 15px;
-    border-bottom: 1px solid #dee2e6;
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
-textarea.editor {
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    font-size: 13px;
-    line-height: 1.5;
-    border: none;
-    resize: none;
-    padding: 15px;
-    min-height: 300px;
-}
-
-textarea.editor:focus {
-    outline: none;
-    box-shadow: inset 0 0 0 2px var(--primary-color);
-}
-
-/* Results panels */
+/* Results panels for file content display */
 .results-panel {
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     font-size: 12px;
@@ -103,7 +35,7 @@ textarea.editor:focus {
     word-wrap: break-word;
 }
 
-/* Status badges */
+/* Status badges for tree nodes */
 .status-badge {
     display: inline-block;
     padding: 4px 12px;
@@ -132,7 +64,7 @@ textarea.editor:focus {
     color: #084298;
 }
 
-/* Buttons */
+/* Buttons for tree viewer controls */
 .btn {
     border-radius: 4px;
     font-weight: 500;
@@ -144,23 +76,7 @@ textarea.editor:focus {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Tables */
-.table {
-    background: white;
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.table thead {
-    background-color: #f8f9fa;
-    font-weight: 600;
-}
-
-.table tbody tr:hover {
-    background-color: #f8f9fa;
-}
-
-/* Modals */
+/* Modals for file details */
 .modal-content {
     border-radius: 8px;
     border: none;
@@ -172,13 +88,13 @@ textarea.editor:focus {
     border-bottom: 1px solid #dee2e6;
 }
 
-/* Alerts */
+/* Alerts for error messages */
 .alert {
     border-radius: 4px;
     border: none;
 }
 
-/* Loading spinner */
+/* Loading spinner for tree operations */
 .spinner {
     display: inline-block;
     width: 20px;
@@ -193,16 +109,8 @@ textarea.editor:focus {
     to { transform: rotate(360deg); }
 }
 
-/* Responsive adjustments */
+/* Responsive adjustments for mobile */
 @media (max-width: 768px) {
-    .card {
-        margin-bottom: 1rem;
-    }
-
-    textarea.editor {
-        min-height: 200px;
-    }
-
     .results-panel {
         max-height: 300px;
     }
@@ -222,7 +130,7 @@ textarea.editor:focus {
     background-color: rgba(13, 110, 253, 0.1);
 }
 
-/* Scrollbar styling */
+/* Scrollbar styling for tree panels */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -241,9 +149,7 @@ textarea.editor:focus {
     background: #555;
 }
 
-
-
-/* Phase 2: Shared styles for content summary badges and CTAs */
+/* Content summary badges for file metadata */
 .badge-kv {
     display: inline-block;
     background: #eef2ff;
@@ -257,6 +163,7 @@ textarea.editor:focus {
     white-space: nowrap;
 }
 
+/* CTA buttons for tree actions */
 .cta-row .btn-cta {
     padding: 6px 10px;
     border: 1px solid #ccc;
