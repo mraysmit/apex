@@ -31,7 +31,7 @@ class ProjectYamlValidationTest {
         yamlFiles = findAllYamlFiles();
         reports = new ArrayList<>();
         
-        System.out.println("🔍 Found " + yamlFiles.size() + " YAML files to validate");
+        System.out.println("* Found " + yamlFiles.size() + " YAML files to validate");
     }
 
     @Test
@@ -39,7 +39,7 @@ class ProjectYamlValidationTest {
         int validFiles = 0;
         int invalidFiles = 0;
         
-        System.out.println("\n📊 APEX YAML Validation Report");
+        System.out.println("\n* APEX YAML Validation Report");
         System.out.println("=" + "=".repeat(50));
         
         for (Path yamlFile : yamlFiles) {
@@ -52,7 +52,7 @@ class ProjectYamlValidationTest {
                 
                 if (result.isValid()) {
                     validFiles++;
-                    System.out.println("✅ " + relativePath);
+                    System.out.println("OK " + relativePath);
                 } else {
                     invalidFiles++;
                     System.out.println("X " + relativePath);
@@ -61,7 +61,7 @@ class ProjectYamlValidationTest {
                     
                     if (!result.getWarnings().isEmpty()) {
                         result.getWarnings().forEach(warning -> 
-                            System.out.println("   ⚠️  " + warning));
+                            System.out.println("   WARN " + warning));
                     }
                 }
                 
@@ -69,13 +69,13 @@ class ProjectYamlValidationTest {
                 invalidFiles++;
                 ValidationReport report = new ValidationReport(relativePath, e);
                 reports.add(report);
-                System.out.println("💥 " + relativePath + " - " + e.getMessage());
+                System.out.println("ERROR " + relativePath + " - " + e.getMessage());
             }
         }
         
         // Summary
         System.out.println("\n" + "=".repeat(50));
-        System.out.println("📊 VALIDATION SUMMARY");
+        System.out.println("* VALIDATION SUMMARY");
         System.out.println("=".repeat(50));
         System.out.println("Total files:   " + yamlFiles.size());
         System.out.println("Valid files:   " + validFiles);
@@ -88,15 +88,15 @@ class ProjectYamlValidationTest {
         
         // For now, we'll make this informational rather than failing
         // Once we fix the issues, we can make this assertion stricter
-        System.out.println("\n💡 This test is currently informational.");
-        System.out.println("💡 Use the validation results to fix YAML files.");
+        System.out.println("\n* This test is currently informational.");
+        System.out.println("* Use the validation results to fix YAML files.");
         
         // Uncomment this line once we fix the major issues:
         // assertThat(invalidFiles).isEqualTo(0);
     }
 
     private void printDetailedAnalysis() {
-        System.out.println("\n📋 DETAILED ANALYSIS");
+        System.out.println("\n* DETAILED ANALYSIS");
         System.out.println("-".repeat(30));
         
         // Group by error types
@@ -115,7 +115,7 @@ class ProjectYamlValidationTest {
         errorCounts.entrySet().stream()
             .sorted((a, b) -> b.getValue().compareTo(a.getValue()))
             .forEach(entry -> 
-                System.out.println("  • " + entry.getKey() + ": " + entry.getValue() + " files"));
+                System.out.println("  -> " + entry.getKey() + ": " + entry.getValue() + " files"));
     }
 
     private String extractErrorType(String error) {
@@ -183,6 +183,7 @@ class ProjectYamlValidationTest {
             return List.of();
         }
 
+        @SuppressWarnings("unused")
         public String getFilePath() {
             return filePath;
         }
@@ -193,7 +194,7 @@ class ProjectYamlValidationTest {
      */
     @Test
     void identifyFilesNeedingCommonFixes() {
-        System.out.println("\n🔧 FILES NEEDING COMMON FIXES");
+        System.out.println("\n* FILES NEEDING COMMON FIXES");
         System.out.println("=".repeat(40));
 
         List<String> needsIdField = new ArrayList<>();
@@ -225,19 +226,19 @@ class ProjectYamlValidationTest {
         }
 
         System.out.println("Files missing 'id' field (" + needsIdField.size() + "):");
-        needsIdField.stream().limit(10).forEach(file -> System.out.println("  • " + file));
+        needsIdField.stream().limit(10).forEach(file -> System.out.println("  -> " + file));
         if (needsIdField.size() > 10) {
             System.out.println("  ... and " + (needsIdField.size() - 10) + " more");
         }
 
         System.out.println("\nFiles missing 'type' field (" + needsTypeField.size() + "):");
-        needsTypeField.stream().limit(10).forEach(file -> System.out.println("  • " + file));
+        needsTypeField.stream().limit(10).forEach(file -> System.out.println("  -> " + file));
         if (needsTypeField.size() > 10) {
             System.out.println("  ... and " + (needsTypeField.size() - 10) + " more");
         }
 
         System.out.println("\nFiles missing 'author' field (" + needsAuthorField.size() + "):");
-        needsAuthorField.stream().limit(10).forEach(file -> System.out.println("  • " + file));
+        needsAuthorField.stream().limit(10).forEach(file -> System.out.println("  -> " + file));
         if (needsAuthorField.size() > 10) {
             System.out.println("  ... and " + (needsAuthorField.size() - 10) + " more");
         }
@@ -248,7 +249,7 @@ class ProjectYamlValidationTest {
      */
     @Test
     void validateFixedCriticalFiles() {
-        System.out.println("\n✅ VALIDATING MANUALLY FIXED CRITICAL FILES");
+        System.out.println("\n* VALIDATING MANUALLY FIXED CRITICAL FILES");
         System.out.println("=".repeat(50));
 
         // List of files we manually fixed (first batch)
@@ -268,7 +269,7 @@ class ProjectYamlValidationTest {
             Path yamlFile = Paths.get("..").resolve(filePath);
 
             if (!Files.exists(yamlFile)) {
-                System.out.println("⚠️  File not found: " + filePath);
+                System.out.println("  File not found: " + filePath);
                 continue;
             }
 
@@ -277,19 +278,19 @@ class ProjectYamlValidationTest {
 
                 if (result.isValid()) {
                     validCount++;
-                    System.out.println("✅ " + filePath);
+                    System.out.println("OK " + filePath);
                 } else {
                     System.out.println("X " + filePath);
                     result.getErrors().forEach(error ->
-                        System.out.println("   • " + error));
+                        System.out.println("   -> " + error));
                 }
 
             } catch (Exception e) {
-                System.out.println("💥 " + filePath + " - " + e.getMessage());
+                System.out.println("ERROR " + filePath + " - " + e.getMessage());
             }
         }
 
-        System.out.println("\n📊 Fixed Files Summary:");
+        System.out.println("\n* Fixed Files Summary:");
         System.out.println("   Total fixed files: " + totalCount);
         System.out.println("   Valid files: " + validCount);
         System.out.println("   Success rate: " + String.format("%.1f%%",
@@ -297,7 +298,7 @@ class ProjectYamlValidationTest {
 
         // Assert that all manually fixed files are now valid
         assertThat(validCount).isEqualTo(totalCount);
-        System.out.println("✅ All manually fixed critical files are now valid!");
+        System.out.println("OK All manually fixed critical files are now valid!");
     }
 
     /**
@@ -305,7 +306,7 @@ class ProjectYamlValidationTest {
      */
     @Test
     void validateAdditionalFixedFiles() {
-        System.out.println("\n✅ VALIDATING ADDITIONAL FIXED FILES (ID FORMAT FIXES - BATCH 2)");
+        System.out.println("\n* VALIDATING ADDITIONAL FIXED FILES (ID FORMAT FIXES - BATCH 2)");
         System.out.println("=".repeat(70));
 
         // List of files we fixed for ID format issues (second batch)
@@ -329,7 +330,7 @@ class ProjectYamlValidationTest {
             Path yamlFile = Paths.get("..").resolve(filePath);
 
             if (!Files.exists(yamlFile)) {
-                System.out.println("⚠️  File not found: " + filePath);
+                System.out.println("WARN File not found: " + filePath);
                 continue;
             }
 
@@ -338,19 +339,19 @@ class ProjectYamlValidationTest {
 
                 if (result.isValid()) {
                     validCount++;
-                    System.out.println("✅ " + filePath);
+                    System.out.println("OK " + filePath);
                 } else {
                     System.out.println("X " + filePath);
                     result.getErrors().forEach(error ->
-                        System.out.println("   • " + error));
+                        System.out.println("   -> " + error));
                 }
 
             } catch (Exception e) {
-                System.out.println("💥 " + filePath + " - " + e.getMessage());
+                System.out.println("ERROR " + filePath + " - " + e.getMessage());
             }
         }
 
-        System.out.println("\n📊 Additional Fixed Files Summary:");
+        System.out.println("\n* Additional Fixed Files Summary:");
         System.out.println("   Total fixed files: " + totalCount);
         System.out.println("   Valid files: " + validCount);
         System.out.println("   Success rate: " + String.format("%.1f%%",
@@ -360,9 +361,9 @@ class ProjectYamlValidationTest {
         // Temporarily commented out to see which files still have issues
         // assertThat(validCount).isEqualTo(totalCount);
         if (validCount == totalCount) {
-            System.out.println("✅ All additional fixed files are now valid!");
+            System.out.println("OK All additional fixed files are now valid!");
         } else {
-            System.out.println("⚠️  " + (totalCount - validCount) + " files still need additional fixes");
+            System.out.println("WARN " + (totalCount - validCount) + " files still need additional fixes");
         }
     }
 
@@ -371,7 +372,7 @@ class ProjectYamlValidationTest {
      */
     @Test
     void validateBatch2WorkingFiles() {
-        System.out.println("\n✅ VALIDATING BATCH 2 WORKING FILES");
+        System.out.println("\n* VALIDATING BATCH 2 WORKING FILES");
         System.out.println("=".repeat(50));
 
         // List of files from batch 2 that should be working
@@ -388,7 +389,7 @@ class ProjectYamlValidationTest {
             Path yamlFile = Paths.get("..").resolve(filePath);
 
             if (!Files.exists(yamlFile)) {
-                System.out.println("⚠️  File not found: " + filePath);
+                System.out.println("WARN File not found: " + filePath);
                 continue;
             }
 
@@ -397,19 +398,19 @@ class ProjectYamlValidationTest {
 
                 if (result.isValid()) {
                     validCount++;
-                    System.out.println("✅ " + filePath);
+                    System.out.println("OK " + filePath);
                 } else {
                     System.out.println("X " + filePath);
                     result.getErrors().forEach(error ->
-                        System.out.println("   • " + error));
+                        System.out.println("   -> " + error));
                 }
 
             } catch (Exception e) {
-                System.out.println("💥 " + filePath + " - " + e.getMessage());
+                System.out.println("ERROR " + filePath + " - " + e.getMessage());
             }
         }
 
-        System.out.println("\n📊 Batch 2 Working Files Summary:");
+        System.out.println("\n* Batch 2 Working Files Summary:");
         System.out.println("   Total files: " + totalCount);
         System.out.println("   Valid files: " + validCount);
         if (totalCount > 0) {
@@ -422,9 +423,9 @@ class ProjectYamlValidationTest {
         // Assert that the working files are valid (or that there are no files to validate)
         if (totalCount > 0) {
             assertThat(validCount).isEqualTo(totalCount);
-            System.out.println("✅ All batch 2 working files are valid!");
+            System.out.println("OK All batch 2 working files are valid!");
         } else {
-            System.out.println("ℹ️  No batch 2 working files to validate (files don't exist in current structure)");
+            System.out.println("INFO No batch 2 working files to validate (files don't exist in current structure)");
         }
     }
 
@@ -433,7 +434,7 @@ class ProjectYamlValidationTest {
      */
     @Test
     void validateBatch3FixedFiles() {
-        System.out.println("\n✅ VALIDATING BATCH 3 FIXED FILES");
+        System.out.println("\n* VALIDATING BATCH 3 FIXED FILES");
         System.out.println("=".repeat(50));
 
         // List of files from batch 3 that we fixed
@@ -455,7 +456,7 @@ class ProjectYamlValidationTest {
             Path yamlFile = Paths.get("..").resolve(filePath);
 
             if (!Files.exists(yamlFile)) {
-                System.out.println("⚠️  File not found: " + filePath);
+                System.out.println("WARN File not found: " + filePath);
                 continue;
             }
 
@@ -464,19 +465,19 @@ class ProjectYamlValidationTest {
 
                 if (result.isValid()) {
                     validCount++;
-                    System.out.println("✅ " + filePath);
+                    System.out.println("OK " + filePath);
                 } else {
                     System.out.println("X " + filePath);
                     result.getErrors().forEach(error ->
-                        System.out.println("   • " + error));
+                        System.out.println("   -> " + error));
                 }
 
             } catch (Exception e) {
-                System.out.println("💥 " + filePath + " - " + e.getMessage());
+                System.out.println("ERROR " + filePath + " - " + e.getMessage());
             }
         }
 
-        System.out.println("\n📊 Batch 3 Fixed Files Summary:");
+        System.out.println("\n* Batch 3 Fixed Files Summary:");
         System.out.println("   Total files: " + totalCount);
         System.out.println("   Valid files: " + validCount);
         System.out.println("   Success rate: " + String.format("%.1f%%",
@@ -486,10 +487,10 @@ class ProjectYamlValidationTest {
         // Temporarily commented out to see which files still have issues
         // assertThat(validCount).isEqualTo(totalCount);
         if (validCount == totalCount) {
-            System.out.println("✅ All batch 3 fixed files are valid!");
+            System.out.println("OK All batch 3 fixed files are valid!");
         } else {
-            System.out.println("⚠️  " + (totalCount - validCount) + " files still need additional fixes");
-            System.out.println("✅ " + validCount + " files are working correctly");
+            System.out.println("WARN " + (totalCount - validCount) + " files still need additional fixes");
+            System.out.println("OK " + validCount + " files are working correctly");
         }
     }
 
@@ -498,7 +499,7 @@ class ProjectYamlValidationTest {
      */
     @Test
     void validateBatch4FixedFiles() {
-        System.out.println("\n✅ VALIDATING BATCH 4 FIXED FILES");
+        System.out.println("\n* VALIDATING BATCH 4 FIXED FILES");
         System.out.println("=".repeat(50));
 
         // List of files from batch 4 that we fixed
@@ -520,7 +521,7 @@ class ProjectYamlValidationTest {
             Path yamlFile = Paths.get("..").resolve(filePath);
 
             if (!Files.exists(yamlFile)) {
-                System.out.println("⚠️  File not found: " + filePath);
+                System.out.println("WARN File not found: " + filePath);
                 continue;
             }
 
@@ -529,19 +530,19 @@ class ProjectYamlValidationTest {
 
                 if (result.isValid()) {
                     validCount++;
-                    System.out.println("✅ " + filePath);
+                    System.out.println("OK " + filePath);
                 } else {
                     System.out.println("X " + filePath);
                     result.getErrors().forEach(error ->
-                        System.out.println("   • " + error));
+                        System.out.println("   -> " + error));
                 }
 
             } catch (Exception e) {
-                System.out.println("💥 " + filePath + " - " + e.getMessage());
+                System.out.println("ERROR " + filePath + " - " + e.getMessage());
             }
         }
 
-        System.out.println("\n📊 Batch 4 Fixed Files Summary:");
+        System.out.println("\n* Batch 4 Fixed Files Summary:");
         System.out.println("   Total files: " + totalCount);
         System.out.println("   Valid files: " + validCount);
         System.out.println("   Success rate: " + String.format("%.1f%%",
@@ -551,10 +552,10 @@ class ProjectYamlValidationTest {
         // Temporarily commented out to see which files still have issues
         // assertThat(validCount).isEqualTo(totalCount);
         if (validCount == totalCount) {
-            System.out.println("✅ All batch 4 fixed files are valid!");
+            System.out.println("OK All batch 4 fixed files are valid!");
         } else {
-            System.out.println("⚠️  " + (totalCount - validCount) + " files still need additional fixes");
-            System.out.println("✅ " + validCount + " files are working correctly");
+            System.out.println("WARN " + (totalCount - validCount) + " files still need additional fixes");
+            System.out.println("OK " + validCount + " files are working correctly");
         }
     }
 
@@ -563,7 +564,7 @@ class ProjectYamlValidationTest {
      */
     @Test
     void investigateRemaining14Files() {
-        System.out.println("\n🔍 INVESTIGATING REMAINING 14 FILES");
+        System.out.println("\n* INVESTIGATING REMAINING 14 FILES");
         System.out.println("=".repeat(60));
 
         // Files from Batch 2 that still need work
@@ -588,10 +589,10 @@ class ProjectYamlValidationTest {
             "apex-demo/src/main/resources/evaluation/advanced-features/rule-engine-config.yaml"
         );
 
-        System.out.println("📋 BATCH 2 REMAINING FILES (7 files):");
+        System.out.println("* BATCH 2 REMAINING FILES (7 files):");
         investigateFileList(batch2RemainingFiles);
 
-        System.out.println("\n📋 BATCH 3 REMAINING FILES (7 files):");
+        System.out.println("\n* BATCH 3 REMAINING FILES (7 files):");
         investigateFileList(batch3RemainingFiles);
     }
 
@@ -604,7 +605,7 @@ class ProjectYamlValidationTest {
             Path yamlFile = Paths.get("..").resolve(filePath);
 
             if (!Files.exists(yamlFile)) {
-                System.out.println("⚠️  File not found: " + filePath);
+                System.out.println("WARN File not found: " + filePath);
                 continue;
             }
 
@@ -613,19 +614,19 @@ class ProjectYamlValidationTest {
 
                 if (result.isValid()) {
                     validCount++;
-                    System.out.println("✅ " + filePath);
+                    System.out.println("OK " + filePath);
                 } else {
                     System.out.println("X " + filePath);
                     result.getErrors().forEach(error ->
-                        System.out.println("   • " + error));
+                        System.out.println("   -> " + error));
                 }
 
             } catch (Exception e) {
-                System.out.println("💥 " + filePath + " - " + e.getMessage());
+                System.out.println("ERROR " + filePath + " - " + e.getMessage());
             }
         }
 
-        System.out.println("📊 Summary: " + validCount + "/" + totalCount + " valid (" +
+        System.out.println("* Summary: " + validCount + "/" + totalCount + " valid (" +
             String.format("%.1f%%", (validCount * 100.0) / totalCount) + ")");
     }
 
@@ -634,7 +635,7 @@ class ProjectYamlValidationTest {
      */
     @Test
     void validateBatch5FixedFiles() {
-        System.out.println("\n✅ VALIDATING BATCH 5 FIXED FILES");
+        System.out.println("\n* VALIDATING BATCH 5 FIXED FILES");
         System.out.println("=".repeat(50));
 
         // List of files from batch 5 that we fixed
@@ -656,7 +657,7 @@ class ProjectYamlValidationTest {
             Path yamlFile = Paths.get("..").resolve(filePath);
 
             if (!Files.exists(yamlFile)) {
-                System.out.println("⚠️  File not found: " + filePath);
+                System.out.println("WARN File not found: " + filePath);
                 continue;
             }
 
@@ -665,19 +666,19 @@ class ProjectYamlValidationTest {
 
                 if (result.isValid()) {
                     validCount++;
-                    System.out.println("✅ " + filePath);
+                    System.out.println("OK " + filePath);
                 } else {
                     System.out.println("X " + filePath);
                     result.getErrors().forEach(error ->
-                        System.out.println("   • " + error));
+                        System.out.println("   -> " + error));
                 }
 
             } catch (Exception e) {
-                System.out.println("💥 " + filePath + " - " + e.getMessage());
+                System.out.println("ERROR " + filePath + " - " + e.getMessage());
             }
         }
 
-        System.out.println("\n📊 Batch 5 Fixed Files Summary:");
+        System.out.println("\n* Batch 5 Fixed Files Summary:");
         System.out.println("   Total files: " + totalCount);
         System.out.println("   Valid files: " + validCount);
         System.out.println("   Success rate: " + String.format("%.1f%%",
@@ -687,10 +688,10 @@ class ProjectYamlValidationTest {
         // Temporarily commented out to see specific issues
         // assertThat(validCount).isEqualTo(totalCount);
         if (validCount == totalCount) {
-            System.out.println("✅ All batch 5 fixed files are valid!");
+            System.out.println("OK All batch 5 fixed files are valid!");
         } else {
-            System.out.println("⚠️  " + (totalCount - validCount) + " files still need additional fixes");
-            System.out.println("✅ " + validCount + " files are working correctly");
+            System.out.println("WARN " + (totalCount - validCount) + " files still need additional fixes");
+            System.out.println("OK " + validCount + " files are working correctly");
         }
     }
 
@@ -699,7 +700,7 @@ class ProjectYamlValidationTest {
      */
     @Test
     void retestRemaining14Files() {
-        System.out.println("\n🔄 RE-TESTING REMAINING 14 FILES AFTER DEPENDENCY FIXES");
+        System.out.println("\n* RE-TESTING REMAINING 14 FILES AFTER DEPENDENCY FIXES");
         System.out.println("=".repeat(70));
 
         // All 14 files that previously needed additional work
@@ -732,7 +733,7 @@ class ProjectYamlValidationTest {
             Path yamlFile = Paths.get("..").resolve(filePath);
 
             if (!Files.exists(yamlFile)) {
-                System.out.println("⚠️  File not found: " + filePath);
+                System.out.println("WARN File not found: " + filePath);
                 stillInvalidFiles.add(filePath + " (not found)");
                 continue;
             }
@@ -743,22 +744,22 @@ class ProjectYamlValidationTest {
                 if (result.isValid()) {
                     validCount++;
                     nowValidFiles.add(filePath);
-                    System.out.println("✅ " + filePath);
+                    System.out.println("OK " + filePath);
                 } else {
                     stillInvalidFiles.add(filePath);
                     System.out.println("X " + filePath);
                     result.getErrors().forEach(error ->
-                        System.out.println("   • " + error));
+                        System.out.println("   -> " + error));
                 }
 
             } catch (Exception e) {
                 stillInvalidFiles.add(filePath + " (exception: " + e.getMessage() + ")");
-                System.out.println("💥 " + filePath + " - " + e.getMessage());
+                System.out.println("ERROR " + filePath + " - " + e.getMessage());
             }
         }
 
         System.out.println("\n" + "=".repeat(70));
-        System.out.println("📊 RE-TEST RESULTS SUMMARY:");
+        System.out.println("* RE-TEST RESULTS SUMMARY:");
         System.out.println("   Total files re-tested: " + totalCount);
         System.out.println("   Now valid: " + validCount + " files");
         System.out.println("   Still invalid: " + stillInvalidFiles.size() + " files");
@@ -766,17 +767,17 @@ class ProjectYamlValidationTest {
             (validCount * 100.0) / totalCount));
 
         if (!nowValidFiles.isEmpty()) {
-            System.out.println("\n🎉 FILES NOW VALID AFTER DEPENDENCY FIXES:");
-            nowValidFiles.forEach(file -> System.out.println("   ✅ " + file));
+            System.out.println("\n* FILES NOW VALID AFTER DEPENDENCY FIXES:");
+            nowValidFiles.forEach(file -> System.out.println("   OK " + file));
         }
 
         if (!stillInvalidFiles.isEmpty()) {
-            System.out.println("\n⚠️  FILES STILL NEEDING WORK:");
+            System.out.println("\n* FILES STILL NEEDING WORK:");
             stillInvalidFiles.forEach(file -> System.out.println("   X " + file));
         }
 
         // Don't assert - just report results
-        System.out.println("\n🔍 DEPENDENCY FIX IMPACT: " + validCount + " out of 14 files now validate successfully!");
+        System.out.println("\n* DEPENDENCY FIX IMPACT: " + validCount + " out of 14 files now validate successfully!");
     }
 
     /**
@@ -784,7 +785,7 @@ class ProjectYamlValidationTest {
      */
     @Test
     void validateDependencyFixes() {
-        System.out.println("\n✅ VALIDATING DEPENDENCY FILES FIXED");
+        System.out.println("\n* VALIDATING DEPENDENCY FILES FIXED");
         System.out.println("=".repeat(50));
 
         // All dependency files we just fixed
@@ -805,7 +806,7 @@ class ProjectYamlValidationTest {
             Path yamlFile = Paths.get("..").resolve(filePath);
 
             if (!Files.exists(yamlFile)) {
-                System.out.println("⚠️  File not found: " + filePath);
+                System.out.println("WARN File not found: " + filePath);
                 continue;
             }
 
@@ -814,19 +815,19 @@ class ProjectYamlValidationTest {
 
                 if (result.isValid()) {
                     validCount++;
-                    System.out.println("✅ " + filePath);
+                    System.out.println("OK " + filePath);
                 } else {
                     System.out.println("X " + filePath);
                     result.getErrors().forEach(error ->
-                        System.out.println("   • " + error));
+                        System.out.println("   -> " + error));
                 }
 
             } catch (Exception e) {
-                System.out.println("💥 " + filePath + " - " + e.getMessage());
+                System.out.println("ERROR " + filePath + " - " + e.getMessage());
             }
         }
 
-        System.out.println("\n📊 Dependency Files Summary:");
+        System.out.println("\n* Dependency Files Summary:");
         System.out.println("   Total dependency files: " + totalCount);
         System.out.println("   Valid files: " + validCount);
         System.out.println("   Success rate: " + String.format("%.1f%%",
@@ -834,9 +835,9 @@ class ProjectYamlValidationTest {
 
         // Report results without assertion for investigation
         if (validCount == totalCount) {
-            System.out.println("✅ All dependency files are now valid!");
+            System.out.println("OK All dependency files are now valid!");
         } else {
-            System.out.println("⚠️  " + (totalCount - validCount) + " dependency files still need work");
+            System.out.println("WARN " + (totalCount - validCount) + " dependency files still need work");
         }
     }
 
@@ -845,7 +846,7 @@ class ProjectYamlValidationTest {
      */
     @Test
     void testDependencyChainAnalysis() {
-        System.out.println("\n🔗 TESTING DEPENDENCY CHAIN ANALYSIS");
+        System.out.println("\n* TESTING DEPENDENCY CHAIN ANALYSIS");
         System.out.println("=".repeat(50));
 
         // Test with a file that has dependencies
@@ -853,7 +854,7 @@ class ProjectYamlValidationTest {
         Path yamlFile = Paths.get("..").resolve(testFile);
 
         if (!Files.exists(yamlFile)) {
-            System.out.println("⚠️  Test file not found: " + testFile);
+            System.out.println("WARN Test file not found: " + testFile);
             return;
         }
 
@@ -865,7 +866,7 @@ class ProjectYamlValidationTest {
             dev.mars.apex.compiler.dependency.ApexDependencyAnalyzer.DependencyValidationResult result =
                 analyzer.validateWithDependencies(yamlFile);
 
-            System.out.println("📊 DEPENDENCY ANALYSIS RESULTS:");
+            System.out.println("* DEPENDENCY ANALYSIS RESULTS:");
             System.out.println("   File: " + testFile);
             System.out.println("   Valid: " + result.isValid());
             System.out.println("   Dependencies found: " + result.getDependencies().size());
@@ -873,29 +874,29 @@ class ProjectYamlValidationTest {
             System.out.println("   Root causes: " + result.getRootCauses().size());
 
             if (!result.getDependencies().isEmpty()) {
-                System.out.println("\n🔗 DEPENDENCY GRAPH:");
+                System.out.println("\n* DEPENDENCY GRAPH:");
                 result.getDependencies().forEach((file, deps) -> {
                     System.out.println("   " + file);
-                    deps.forEach(dep -> System.out.println("     └─ " + dep));
+                    deps.forEach(dep -> System.out.println("     -> " + dep));
                 });
             }
 
             if (!result.getRootCauses().isEmpty()) {
-                System.out.println("\n🎯 ROOT CAUSES:");
+                System.out.println("\n* ROOT CAUSES:");
                 result.getRootCauses().forEach(cause ->
-                    System.out.println("   • " + cause));
+                    System.out.println("   -> " + cause));
             }
 
-            System.out.println("\n📋 FILE VALIDATION RESULTS:");
+            System.out.println("\n* FILE VALIDATION RESULTS:");
             result.getFileResults().forEach((file, fileResult) -> {
-                String status = fileResult.isValid() ? "✅" : "X";
+                String status = fileResult.isValid() ? "OK" : "X";
                 System.out.println("   " + status + " " + file);
             });
 
-            System.out.println("\n🎉 DEPENDENCY CHAIN ANALYSIS COMPLETED!");
+            System.out.println("\n* DEPENDENCY CHAIN ANALYSIS COMPLETED!");
 
         } catch (Exception e) {
-            System.out.println("💥 Dependency analysis failed: " + e.getMessage());
+            System.out.println("ERROR Dependency analysis failed: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -905,7 +906,7 @@ class ProjectYamlValidationTest {
      */
     @Test
     void runAllYamlFilesThroughEnhancedCompiler() {
-        System.out.println("\n🚀 RUNNING ALL YAML FILES THROUGH ENHANCED COMPILER");
+        System.out.println("\n* RUNNING ALL YAML FILES THROUGH ENHANCED COMPILER");
         System.out.println("=".repeat(70));
 
         // Get all YAML files from apex-demo
@@ -916,11 +917,11 @@ class ProjectYamlValidationTest {
                                path.toString().toLowerCase().endsWith(".yml"))
                 .forEach(allYamlFiles::add);
         } catch (IOException e) {
-            System.out.println("💥 Failed to scan YAML files: " + e.getMessage());
+            System.out.println("ERROR Failed to scan YAML files: " + e.getMessage());
             return;
         }
 
-        System.out.println("📁 Found " + allYamlFiles.size() + " YAML files to analyze");
+        System.out.println("* Found " + allYamlFiles.size() + " YAML files to analyze");
 
         // Use the enhanced dependency analyzer
         dev.mars.apex.compiler.dependency.ApexDependencyAnalyzer analyzer =
@@ -933,7 +934,7 @@ class ProjectYamlValidationTest {
         List<String> allRootCauses = new ArrayList<>();
         Map<String, Integer> errorPatterns = new HashMap<>();
 
-        System.out.println("\n🔍 ANALYZING FILES WITH DEPENDENCY CHAINS:");
+        System.out.println("\n* ANALYZING FILES WITH DEPENDENCY CHAINS:");
         System.out.println("-".repeat(70));
 
         for (Path yamlFile : allYamlFiles) {
@@ -946,7 +947,7 @@ class ProjectYamlValidationTest {
 
                 if (result.isValid()) {
                     validFiles++;
-                    System.out.println("✅ " + relativePath);
+                    System.out.println("OK " + relativePath);
                 } else {
                     System.out.println("X " + relativePath);
 
@@ -979,26 +980,26 @@ class ProjectYamlValidationTest {
 
                 // Show dependency info for files with dependencies
                 if (!result.getDependencies().isEmpty()) {
-                    System.out.println("    🔗 Dependencies: " +
+                    System.out.println("    -> Dependencies: " +
                         result.getDependencies().values().stream()
                             .mapToInt(List::size).sum());
                 }
 
                 if (!result.getRootCauses().isEmpty()) {
-                    System.out.println("    🎯 Root causes: " + result.getRootCauses().size());
+                    System.out.println("    -> Root causes: " + result.getRootCauses().size());
                 }
 
             } catch (Exception e) {
-                System.out.println("💥 " + relativePath + " - Analysis failed: " + e.getMessage());
+                System.out.println("ERROR " + relativePath + " - Analysis failed: " + e.getMessage());
             }
         }
 
         // Comprehensive summary
         System.out.println("\n" + "=".repeat(70));
-        System.out.println("📊 COMPREHENSIVE ANALYSIS RESULTS");
+        System.out.println("* COMPREHENSIVE ANALYSIS RESULTS");
         System.out.println("=".repeat(70));
 
-        System.out.println("📁 OVERALL STATISTICS:");
+        System.out.println("* OVERALL STATISTICS:");
         System.out.println("   Total files analyzed: " + totalFiles);
         System.out.println("   Valid files: " + validFiles);
         System.out.println("   Invalid files: " + (totalFiles - validFiles));
