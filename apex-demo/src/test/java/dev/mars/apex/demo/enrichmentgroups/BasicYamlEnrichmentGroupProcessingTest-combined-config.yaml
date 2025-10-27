@@ -11,6 +11,9 @@ metadata:
   version: "1.0.0"
   type: "rule-config"
   description: "Combined configuration for testing enrichment group processing"
+  author: "APEX Demo Team"
+  created-date: "2025-01-15"
+  tags: ["demo", "enrichment-groups", "combined-config"]
 
 enrichments:
   - id: e1

@@ -6,6 +6,10 @@ metadata:
   name: "Cross-file Base Enrichment Groups"
   version: "1.0.0"
   type: "rule-config"
+  description: "Base enrichment groups for cross-file testing"
+  author: "APEX Demo Team"
+  created-date: "2025-01-15"
+  tags: ["demo", "enrichment-groups", "cross-file", "base"]
 
 enrichment-groups:
   - id: base_and

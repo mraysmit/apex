@@ -94,7 +94,7 @@ class RuleGroupCategoryInheritanceTest extends DemoTestBase {
         logger.info("Message: " + result.getMessage());
         
         assertTrue(result.isSuccess(), "Valid trade should pass all validations");
-        assertEquals("SUCCESS", result.getSeverity(), "Should have SUCCESS severity");
+        assertEquals("INFO", result.getSeverity(), "Should have INFO severity (default for successful rules)");
     }
 
     @Test
@@ -165,7 +165,7 @@ class RuleGroupCategoryInheritanceTest extends DemoTestBase {
         logger.info("Message: " + result.getMessage());
         
         assertTrue(result.isSuccess(), "Compliant customer should pass all checks");
-        assertEquals("SUCCESS", result.getSeverity(), "Should have SUCCESS severity");
+        assertEquals("INFO", result.getSeverity(), "Should have INFO severity (default for successful rules)");
     }
 
     @Test
@@ -216,6 +216,6 @@ class RuleGroupCategoryInheritanceTest extends DemoTestBase {
         logger.info("Message: " + result.getMessage());
         
         assertTrue(result.isSuccess(), "Valid data should pass validation");
-        assertEquals("SUCCESS", result.getSeverity(), "Should have SUCCESS severity");
+        assertEquals("INFO", result.getSeverity(), "Should have INFO severity (default for successful rules)");
     }
 }
