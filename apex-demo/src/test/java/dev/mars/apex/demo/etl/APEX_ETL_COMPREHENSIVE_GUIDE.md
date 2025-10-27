@@ -13,14 +13,18 @@ The APEX Rules Engine provides a powerful ETL (Extract, Transform, Load) pipelin
 3. [Error Handling Configuration](#error-handling-configuration)
 4. [Operation Resolution System](#operation-resolution-system)
 5. [Step Types and Dependencies](#step-types-and-dependencies)
-6. [Practical Examples](#practical-examples)
+6. [Test Data and Domain Model](#test-data-and-domain-model)
+   - [OTC Options Trade Domain Model](#otc-options-trade-domain-model)
+   - [Test Data Files](#test-data-files)
+   - [Financial Terminology](#financial-terminology)
+7. [Practical Examples](#practical-examples)
    - [JSON Data Extraction](#json-data-extraction)
    - [XML Data Extraction](#xml-data-extraction)
    - [Advanced Database Extraction](#advanced-database-extraction)
-7. [Practical Demo: CSV to H2 Database Pipeline](#practical-demo-csv-to-h2-database-pipeline)
-8. [Best Practices](#best-practices)
-9. [Troubleshooting](#troubleshooting)
-10. [Example Configurations](#example-configurations)
+8. [Practical Demo: CSV to H2 Database Pipeline](#practical-demo-csv-to-h2-database-pipeline)
+9. [Best Practices](#best-practices)
+10. [Troubleshooting](#troubleshooting)
+11. [Example Configurations](#example-configurations)
 
 ## Pipeline Configuration Structure
 
@@ -486,6 +490,321 @@ steps:
   - name: "audit-logging"
     type: "audit"
     depends-on: ["load-data"]             # Waits for load-data to complete
+```
+
+## Test Data and Domain Model
+
+The APEX ETL demo uses realistic **OTC (Over-The-Counter) options trade processing** data to demonstrate middle office trade processing workflows. This section describes the domain model, test data structure, and financial terminology used throughout the examples.
+
+### OTC Options Trade Domain Model
+
+The ETL examples use a comprehensive financial domain model representing OTC derivatives trading:
+
+#### Trade Entity
+
+Core trade information:
+
+| Field | Type | Description | Example |
+|-------|------|-------------|---------|
+| `tradeId` | String | Unique trade identifier | "OTC-2025-001" |
+| `tradeDate` | Date | Trade execution date | "2025-10-15" |
+| `expiryDate` | Date | Option expiry date | "2025-12-28" |
+| `optionType` | String | Call or Put option | "Call", "Put" |
+| `status` | String | Trade lifecycle status | "ACTIVE", "CONFIRMED", "PENDING_CONFIRMATION", "SETTLED", "EXPIRED" |
+| `notionalAmount` | Number | Total trade value (USD) | 75000000 |
+| `strikePrice` | Number | Exercise price | 3.50 |
+| `premium` | Number | Option premium paid | 450000 |
+| `settlementType` | String | Settlement method | "Cash", "Physical" |
+| `currency` | String | Currency code | "USD", "EUR" |
+
+#### Counterparties
+
+Trading parties involved in the transaction:
+
+| Field | Type | Description | Example |
+|-------|------|-------------|---------|
+| `buyerParty` | String | Buyer identifier | "GOLDMAN_SACHS" |
+| `sellerParty` | String | Seller identifier | "JP_MORGAN" |
+| `legalName` | String | Full legal entity name | "Goldman Sachs International" |
+| `lei` | String | Legal Entity Identifier (20-char) | "W22LROWP2IHZNBB6K528" |
+
+#### Underlying Asset
+
+The commodity or asset underlying the option:
+
+| Field | Type | Description | Example |
+|-------|------|-------------|---------|
+| `commodity` | String | Asset name | "Natural Gas", "Brent Crude Oil", "Gold" |
+| `unit` | String | Unit of measurement | "MMBtu", "Barrel", "Troy Ounce" |
+| `ticker` | String | Market ticker symbol | "NG", "BZ", "GC" |
+| `quantity` | Number | Quantity of underlying | 10000 |
+
+#### Risk Metrics (Greeks)
+
+Option risk sensitivities used for risk management:
+
+| Field | Type | Description | Typical Range |
+|-------|------|-------------|---------------|
+| `delta` | Number | Price sensitivity to underlying | -1.0 to 1.0 |
+| `gamma` | Number | Rate of change of delta | 0.0 to 0.5 |
+| `vega` | Number | Sensitivity to volatility | 0 to 500000 |
+| `theta` | Number | Time decay (daily P&L) | -10000 to 0 |
+
+### Test Data Files
+
+The ETL demo includes comprehensive test data files demonstrating various data formats:
+
+#### JSON Test Data: otc-options.json
+
+**Location**: `apex-demo/demo-data/json/otc-options.json`
+**Records**: 6 OTC option trades
+**Format**: JSON array with nested objects
+
+**Commodities Covered**:
+- Natural Gas (NG) - Energy
+- Brent Crude Oil (BZ) - Energy
+- Gold (GC) - Precious Metals
+- Silver (SI) - Precious Metals
+- Copper (HG) - Industrial Metals
+- Wheat (ZW) - Agriculture
+
+**Data Structure Features**:
+- ✅ Nested objects (`underlyingAsset`)
+- ✅ Arrays (`tags` for categorization)
+- ✅ Multiple data types (strings, numbers, dates)
+- ✅ Various trade statuses (ACTIVE, EXPIRED)
+- ✅ Both Call and Put options
+- ✅ Cash and Physical settlement types
+
+**Sample Record**:
+```json
+{
+  "tradeId": "OTC-2025-001",
+  "tradeDate": "2025-10-15",
+  "buyerParty": "GOLDMAN_SACHS",
+  "sellerParty": "JP_MORGAN",
+  "optionType": "Call",
+  "status": "ACTIVE",
+  "notionalAmount": 75000000,
+  "underlyingAsset": {
+    "commodity": "Natural Gas",
+    "unit": "MMBtu",
+    "ticker": "NG"
+  },
+  "strikePrice": 3.50,
+  "currency": "USD",
+  "expiryDate": "2025-12-28",
+  "settlementType": "Cash",
+  "premium": 450000,
+  "tags": ["energy", "commodity", "otc-derivative"]
+}
+```
+
+#### XML Test Data: otc-trades.xml
+
+**Location**: `apex-demo/demo-data/xml/otc-trades.xml`
+**Records**: 4 OTC trades
+**Format**: XML with attributes and nested elements (FpML-style)
+
+**Data Structure Features**:
+- ✅ XML attributes (`id`, `status`, `currency`)
+- ✅ Multi-level nesting (counterparties → buyer/seller → lei)
+- ✅ Complex hierarchies (optionDetails → underlyingAsset)
+- ✅ Risk metrics (delta, gamma, vega, theta)
+- ✅ LEI codes for regulatory compliance
+- ✅ Various trade statuses (CONFIRMED, PENDING_CONFIRMATION, SETTLED)
+
+**Sample Record**:
+```xml
+<trade id="OTC-2025-001" status="CONFIRMED">
+    <tradeDate>2025-10-15</tradeDate>
+    <counterparties>
+        <buyer>
+            <partyId>GOLDMAN_SACHS</partyId>
+            <legalName>Goldman Sachs International</legalName>
+            <lei>W22LROWP2IHZNBB6K528</lei>
+        </buyer>
+        <seller>
+            <partyId>JP_MORGAN</partyId>
+            <legalName>J.P. Morgan Securities LLC</legalName>
+            <lei>8I5DZWZKVSZI1NUHU748</lei>
+        </seller>
+    </counterparties>
+    <optionDetails>
+        <optionType>Call</optionType>
+        <underlyingAsset>
+            <commodity>Natural Gas</commodity>
+            <unit>MMBtu</unit>
+            <ticker>NG</ticker>
+        </underlyingAsset>
+        <strikePrice currency="USD">3.50</strikePrice>
+        <notionalQuantity>10000</notionalQuantity>
+    </optionDetails>
+    <riskMetrics>
+        <delta>0.65</delta>
+        <gamma>0.12</gamma>
+        <vega>125000</vega>
+        <theta>-5000</theta>
+    </riskMetrics>
+</trade>
+```
+
+### Financial Terminology
+
+Understanding these terms is essential for working with the OTC options examples:
+
+#### Trading Terms
+
+- **OTC (Over-The-Counter)**: Trades executed directly between two parties, not on a centralized exchange. Allows for customized contract terms.
+- **Call Option**: Gives the buyer the right (but not obligation) to buy the underlying asset at the strike price before expiry.
+- **Put Option**: Gives the buyer the right (but not obligation) to sell the underlying asset at the strike price before expiry.
+- **Strike Price**: The predetermined price at which the option can be exercised.
+- **Premium**: The upfront payment made by the option buyer to the seller for the right to exercise.
+- **Notional Amount**: The total value of the trade, calculated as quantity × price.
+- **Expiry Date**: The date when the option expires and can no longer be exercised.
+
+#### Settlement Terms
+
+- **Cash Settlement**: Financial settlement where the difference between strike and market price is paid in cash.
+- **Physical Settlement**: Actual delivery of the underlying commodity occurs upon exercise.
+
+#### Regulatory Terms
+
+- **LEI (Legal Entity Identifier)**: A 20-character alphanumeric code that uniquely identifies legal entities participating in financial transactions. Required for regulatory reporting (EMIR, Dodd-Frank).
+- **Counterparty**: The other party in a financial transaction (buyer or seller).
+
+#### Risk Management Terms (Greeks)
+
+- **Delta (Δ)**: Measures how much the option price changes for a $1 change in the underlying asset price. Range: -1 to +1 (Call options: 0 to 1, Put options: -1 to 0).
+- **Gamma (Γ)**: Measures the rate of change of delta. Higher gamma means delta changes more rapidly.
+- **Vega (ν)**: Measures sensitivity to volatility. Shows how much the option price changes for a 1% change in implied volatility.
+- **Theta (Θ)**: Measures time decay. Shows how much value the option loses each day as it approaches expiry (usually negative).
+
+#### Middle Office Functions
+
+The test data supports these middle office workflows:
+
+1. **Trade Capture**: Extracting trade data from various sources (JSON feeds, XML confirmations)
+2. **Confirmation Matching**: Validating counterparty details and trade terms against confirmations
+3. **Risk Management**: Processing risk metrics (Greeks) for portfolio risk analysis
+4. **Settlement Processing**: Handling cash vs physical settlement workflows
+5. **Regulatory Reporting**: Extracting LEI codes and trade details for compliance reporting
+6. **Lifecycle Management**: Tracking trades through statuses (PENDING → CONFIRMED → SETTLED)
+
+### ETL Patterns Demonstrated
+
+The test data and examples demonstrate comprehensive ETL patterns applicable to financial data processing:
+
+#### Data Extraction Patterns
+
+**1. JSON with JSONPath Filtering**
+- Extract all trades: `$[*]`
+- Filter by status: `$[?(@.status == 'ACTIVE')]`
+- Filter by option type: `$[?(@.optionType == 'Call')]`
+- Filter by notional amount: `$[?(@.notionalAmount > 50000000)]`
+- Extract specific fields: `$[*].underlyingAsset`
+
+**2. XML with Attributes and Elements**
+- Extract trade IDs from attributes: `@id`
+- Extract trade status from attributes: `@status`
+- Navigate nested structures: `counterparties → buyer → lei`
+- Access deeply nested data: `optionDetails → underlyingAsset → commodity`
+- Extract risk metrics: `riskMetrics → delta/gamma/vega/theta`
+
+**3. Database Queries with Complex JOINs**
+- Counterparty exposure analysis with LEFT JOIN
+- Trade details with INNER JOIN on multiple tables
+- Aggregations with GROUP BY (COUNT, SUM, AVG, MAX)
+- Conditional aggregation with CASE statements
+- Risk aggregation across positions
+
+**4. Nested Data Access**
+- JSON nested objects: `trade.underlyingAsset.commodity`
+- XML multi-level nesting: `trade.counterparties.buyer.lei`
+- Array processing: `trade.tags[*]`
+- Type preservation: Numbers, strings, dates, booleans
+
+#### Data Transformation Patterns
+
+**1. Enrichment**
+- Calculate net delta: `SUM(delta * quantity)`
+- Calculate total exposure: `SUM(notional_amount)`
+- Derive buy-side vs sell-side notional
+- Add calculated risk metrics
+
+**2. Filtering and Selection**
+- Filter by trade status (ACTIVE, CONFIRMED, SETTLED)
+- Filter by commodity type (Energy, Precious Metals, Agriculture)
+- Filter by settlement method (Cash, Physical)
+- Filter by option type (Call, Put)
+- Filter by notional threshold
+
+**3. Aggregation**
+- Counterparty exposure summaries
+- Commodity risk aggregation
+- Trade volume analysis
+- Average trade size calculations
+- Risk metrics rollup (total vega, net delta)
+
+**4. Normalization**
+- Convert between JSON and XML representations
+- Standardize date formats
+- Normalize party identifiers
+- Map status codes
+
+#### Data Loading Patterns
+
+**1. Batch Operations**
+- Bulk insert of trade records
+- Batch size configuration (50 records per batch)
+- Transaction-per-batch mode
+- Performance metrics collection
+
+**2. Upsert Operations**
+- MERGE INTO for database sinks
+- Update existing trades or insert new ones
+- Key-based conflict resolution
+- Timestamp tracking (created_at, updated_at)
+
+**3. Error Handling**
+- Dead letter queues for failed records
+- Retry mechanisms with exponential backoff
+- Circuit breaker for connection failures
+- Error logging and audit trails
+
+**4. Audit and Compliance**
+- Audit log for all data movements
+- Track processing timestamps
+- Maintain data lineage
+- Support regulatory reporting requirements
+
+#### Real-World Use Cases
+
+The patterns support these financial industry scenarios:
+
+**Trade Lifecycle Management**:
+```
+JSON Feed → Extract → Validate → Enrich → Load to Database → Audit
+```
+
+**Confirmation Matching**:
+```
+XML Confirmation → Extract → Match with Internal Trade → Update Status → Notify
+```
+
+**Risk Aggregation**:
+```
+Database Extract → Calculate Net Delta → Aggregate by Commodity → Load to Risk System
+```
+
+**Regulatory Reporting**:
+```
+Extract Trades with LEI → Filter by Date Range → Transform to Regulatory Format → Submit
+```
+
+**Counterparty Exposure**:
+```
+Database Query (JOINs) → Aggregate Notional → Calculate Limits → Alert on Breach
 ```
 
 ## Practical Examples
