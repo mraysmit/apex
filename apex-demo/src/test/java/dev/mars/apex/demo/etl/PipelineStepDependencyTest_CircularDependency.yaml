@@ -1,0 +1,78 @@
+# ============================================================================
+# Pipeline Step Dependency Test - Circular Dependency Detection
+# ============================================================================
+# Tests that circular dependencies are detected and rejected
+# Circular dependency: step-a → step-b → step-c → step-a
+# Expected: Pipeline initialization or execution should fail with circular dependency error
+# ============================================================================
+
+metadata:
+  id: "circular-dependency-test"
+  name: "Circular Dependency Test"
+  version: "1.0.0"
+  description: "Test pipeline for validating circular dependency detection"
+  type: "pipeline-config"
+  author: "APEX Demo Team"
+  tags: ["test", "dependency", "circular"]
+
+pipeline:
+  name: "circular-dependency-pipeline"
+  description: "Pipeline with circular dependency for validation"
+
+  steps:
+    # Step A: Depends on step-c (creates circular dependency)
+    - name: "step-a"
+      type: "extract"
+      source: "test-source"
+      operation: "getAllData"
+      description: "Extract step depending on step-c"
+      depends-on: ["step-c"]
+
+    # Step B: Depends on step-a
+    - name: "step-b"
+      type: "extract"
+      source: "test-source"
+      operation: "getAllData"
+      description: "Extract step depending on step-a"
+      depends-on: ["step-a"]
+
+    # Step C: Depends on step-b (completes the circle)
+    - name: "step-c"
+      type: "load"
+      sink: "test-sink"
+      operation: "write"
+      description: "Load step depending on step-b"
+      depends-on: ["step-b"]
+
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+    max-retries: 0
+    retry-delay-ms: 0
+
+data-sources:
+  - name: "test-source"
+    type: "file-system"
+    enabled: true
+    description: "Test data source"
+    
+    connection:
+      base-path: "./demo-data/dependency-test/csv"
+      file-pattern: "test-data.csv"
+    
+    operations:
+      getAllData: "SELECT * FROM csv"
+
+data-sinks:
+  - name: "test-sink"
+    type: "file-system"
+    enabled: true
+    description: "Test data sink"
+    
+    connection:
+      base-path: "./demo-data/dependency-test/output"
+      file-pattern: "output.json"
+    
+    operations:
+      write: "write"
+

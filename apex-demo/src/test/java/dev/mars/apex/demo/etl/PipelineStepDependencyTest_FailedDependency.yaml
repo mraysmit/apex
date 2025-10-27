@@ -1,0 +1,69 @@
+# ============================================================================
+# Pipeline Step Dependency Test - Failed Dependency Validation
+# ============================================================================
+# Tests that dependent steps don't execute when a dependency fails
+# step-a will fail (missing file), step-b depends on step-a
+# Expected: step-a fails, step-b should not execute, pipeline fails
+# ============================================================================
+
+metadata:
+  id: "failed-dependency-test"
+  name: "Failed Dependency Test"
+  version: "1.0.0"
+  description: "Test pipeline for validating failure propagation through dependencies"
+  type: "pipeline-config"
+  author: "APEX Demo Team"
+  tags: ["test", "dependency", "failure"]
+
+pipeline:
+  name: "failed-dependency-pipeline"
+  description: "Pipeline where dependency step fails"
+
+  steps:
+    # Step A: Will fail due to missing file
+    - name: "step-a-failing"
+      type: "extract"
+      source: "missing-source"
+      operation: "getAllData"
+      description: "Extract step that will fail"
+
+    # Step B: Depends on step-a - should not execute
+    - name: "step-b-dependent"
+      type: "load"
+      sink: "test-sink"
+      operation: "write"
+      description: "Load step depending on failing step"
+      depends-on: ["step-a-failing"]
+
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+    max-retries: 0
+    retry-delay-ms: 0
+
+data-sources:
+  - name: "missing-source"
+    type: "file-system"
+    enabled: true
+    description: "Data source pointing to non-existent file"
+    
+    connection:
+      base-path: "./demo-data/dependency-test/csv"
+      file-pattern: "non-existent-file.csv"
+    
+    operations:
+      getAllData: "SELECT * FROM csv"
+
+data-sinks:
+  - name: "test-sink"
+    type: "file-system"
+    enabled: true
+    description: "Test data sink"
+    
+    connection:
+      base-path: "./demo-data/dependency-test/output"
+      file-pattern: "output.json"
+    
+    operations:
+      write: "write"
+

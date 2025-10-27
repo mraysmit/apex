@@ -1,0 +1,86 @@
+# ============================================================================
+# APEX ETL Pipeline Configuration - JSON Extract Step Test
+# ============================================================================
+#
+# OVERVIEW:
+# This configuration provides a minimal pipeline for testing JSON extract
+# functionality. It demonstrates file-system data source configuration
+# with JSON format and single-step pipeline execution for validation.
+#
+# BUSINESS SCENARIO:
+# Extract OTC (Over-The-Counter) options trade data from JSON file for
+# middle office trade processing, risk analysis, and regulatory reporting.
+#
+# TECHNICAL FEATURES:
+# ✓ File-system data source with JSON format
+# ✓ Single extract step pipeline
+# ✓ JSONPath query support
+# ✓ Nested object handling (underlyingAsset)
+# ✓ Sequential execution mode
+#
+# PIPELINE ARCHITECTURE:
+# ┌─────────────────────────────────────────────────────────────┐
+# │              JSON OTC Options Extract Pipeline              │
+# ├─────────────────────────────────────────────────────────────┤
+# │                                                             │
+# │  Step 1: Extract OTC Options                               │
+# │  ├─ Source: json-otc-options-source                        │
+# │  ├─ Operation: getAllTrades                                │
+# │  └─ Output: List of OTC option trade objects               │
+# │                                                             │
+# └─────────────────────────────────────────────────────────────┘
+#
+# ============================================================================
+
+metadata:
+  id: "json-otc-extract-test-pipeline"
+  name: "JSON OTC Options Extract Test Pipeline"
+  type: "pipeline-config"
+  version: "1.0.0"
+  description: "Test pipeline for JSON OTC options trade data extraction"
+  author: "APEX Test Suite"
+  created-date: "2025-10-27"
+
+# Pipeline definition
+pipeline:
+  name: "json-otc-extract-pipeline"
+  description: "Extract OTC options trade data from JSON file"
+
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+    max-retries: 0
+    retry-delay-ms: 0
+
+  # Pipeline steps - single extract step
+  steps:
+    - name: "extract-otc-options"
+      type: "extract"
+      source: "json-otc-options-source"
+      operation: "getAllTrades"
+      description: "Extract all OTC option trade records from JSON file"
+
+# Input data sources
+data-sources:
+  - name: "json-otc-options-source"
+    type: "file-system"
+    enabled: true
+    description: "JSON file containing OTC options trade data"
+
+    connection:
+      base-path: "./demo-data/json"
+      file-pattern: "otc-options.json"
+      encoding: "UTF-8"
+
+    file-format:
+      type: "json"
+      root-path: "$"
+      flatten-arrays: false
+
+    operations:
+      getAllTrades: "$[*]"
+      getActiveTrades: "$[?(@.status == 'ACTIVE')]"
+      getCallOptions: "$[?(@.optionType == 'Call')]"
+      getPutOptions: "$[?(@.optionType == 'Put')]"
+      getHighValueTrades: "$[?(@.notionalAmount > 50000000)]"
+

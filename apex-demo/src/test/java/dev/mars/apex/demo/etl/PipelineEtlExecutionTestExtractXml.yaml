@@ -1,0 +1,86 @@
+# ============================================================================
+# APEX ETL Pipeline Configuration - XML Extract Step Test
+# ============================================================================
+#
+# OVERVIEW:
+# This configuration provides a minimal pipeline for testing XML extract
+# functionality. It demonstrates file-system data source configuration
+# with XML format and single-step pipeline execution for validation.
+#
+# BUSINESS SCENARIO:
+# Extract OTC (Over-The-Counter) options trade data from XML file for
+# middle office trade processing, confirmation matching, and settlement.
+#
+# TECHNICAL FEATURES:
+# ✓ File-system data source with XML format
+# ✓ Single extract step pipeline
+# ✓ XML element parsing
+# ✓ Nested element handling (counterparties, optionDetails, riskMetrics)
+# ✓ Attribute extraction (trade id, status)
+# ✓ Sequential execution mode
+#
+# PIPELINE ARCHITECTURE:
+# ┌─────────────────────────────────────────────────────────────┐
+# │              XML OTC Trades Extract Pipeline                │
+# ├─────────────────────────────────────────────────────────────┤
+# │                                                             │
+# │  Step 1: Extract OTC Trades                                │
+# │  ├─ Source: xml-otc-trades-source                          │
+# │  ├─ Operation: getAllTrades                                │
+# │  └─ Output: List of OTC trade objects                      │
+# │                                                             │
+# └─────────────────────────────────────────────────────────────┘
+#
+# ============================================================================
+
+metadata:
+  id: "xml-otc-extract-test-pipeline"
+  name: "XML OTC Trades Extract Test Pipeline"
+  type: "pipeline-config"
+  version: "1.0.0"
+  description: "Test pipeline for XML OTC trade data extraction"
+  author: "APEX Test Suite"
+  created-date: "2025-10-27"
+
+# Pipeline definition
+pipeline:
+  name: "xml-otc-extract-pipeline"
+  description: "Extract OTC trade data from XML file"
+
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+    max-retries: 0
+    retry-delay-ms: 0
+
+  # Pipeline steps - single extract step
+  steps:
+    - name: "extract-otc-trades"
+      type: "extract"
+      source: "xml-otc-trades-source"
+      operation: "getAllTrades"
+      description: "Extract all OTC trade records from XML file"
+
+# Input data sources
+data-sources:
+  - name: "xml-otc-trades-source"
+    type: "file-system"
+    enabled: true
+    description: "XML file containing OTC trade data"
+
+    connection:
+      base-path: "./demo-data/xml"
+      file-pattern: "otc-trades.xml"
+      encoding: "UTF-8"
+
+    file-format:
+      type: "xml"
+      record-element: "trade"
+      include-attributes: true
+
+    operations:
+      getAllTrades: "SELECT * FROM xml"
+      getConfirmedTrades: "SELECT * FROM xml WHERE status='CONFIRMED'"
+      getPendingTrades: "SELECT * FROM xml WHERE status='PENDING_CONFIRMATION'"
+      getSettledTrades: "SELECT * FROM xml WHERE status='SETTLED'"
+

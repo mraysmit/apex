@@ -1,0 +1,88 @@
+# ============================================================================
+# Pipeline Transform Step Test - Data Aggregation
+# ============================================================================
+# Tests that data can be aggregated during transformation
+# Aggregation: Group by category, calculate sum and average of values
+# ============================================================================
+
+metadata:
+  id: "aggregate-data-test"
+  name: "Aggregate Data Test"
+  version: "1.0.0"
+  description: "Test pipeline for validating data aggregation during transformation"
+  type: "pipeline-config"
+  author: "APEX Demo Team"
+  tags: ["test", "transform", "aggregate"]
+
+pipeline:
+  name: "aggregate-pipeline"
+  description: "Pipeline with data aggregation transformation"
+
+  steps:
+    # Step 1: Extract data
+    - name: "extract-data"
+      type: "extract"
+      source: "transform-source"
+      operation: "getAllData"
+      description: "Extract data for aggregation"
+
+    # Step 2: Aggregate data
+    - name: "aggregate-data"
+      type: "transform"
+      description: "Aggregate data by category"
+      depends-on: ["extract-data"]
+      transformations:
+        - name: "group-by-category"
+          type: "aggregation"
+          group-by: "category"
+          aggregations:
+            - field: "value"
+              function: "sum"
+              output-field: "total_value"
+            - field: "value"
+              function: "avg"
+              output-field: "average_value"
+            - field: "id"
+              function: "count"
+              output-field: "record_count"
+
+    # Step 3: Load aggregated data
+    - name: "load-aggregated-data"
+      type: "load"
+      sink: "transform-sink"
+      operation: "write"
+      description: "Load aggregated data"
+      depends-on: ["aggregate-data"]
+
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+    max-retries: 0
+    retry-delay-ms: 0
+
+data-sources:
+  - name: "transform-source"
+    type: "file-system"
+    enabled: true
+    description: "Source data for aggregation"
+    
+    connection:
+      base-path: "./demo-data/transform-test/csv"
+      file-pattern: "transform-data.csv"
+    
+    operations:
+      getAllData: "SELECT * FROM csv"
+
+data-sinks:
+  - name: "transform-sink"
+    type: "file-system"
+    enabled: true
+    description: "Sink for aggregated data"
+    
+    connection:
+      base-path: "./demo-data/transform-test/output"
+      file-pattern: "aggregated-output.json"
+    
+    operations:
+      write: "write"
+

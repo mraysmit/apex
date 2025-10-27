@@ -45,7 +45,10 @@ public class PipelineStep {
     
     @JsonProperty("retry")
     private RetryConfiguration retry;
-    
+
+    @JsonProperty("transformations")
+    private List<Map<String, Object>> transformations; // transformation configurations for transform steps
+
     // Constructors
     public PipelineStep() {}
     
@@ -138,11 +141,19 @@ public class PipelineStep {
     public RetryConfiguration getRetry() {
         return retry;
     }
-    
+
     public void setRetry(RetryConfiguration retry) {
         this.retry = retry;
     }
-    
+
+    public List<Map<String, Object>> getTransformations() {
+        return transformations;
+    }
+
+    public void setTransformations(List<Map<String, Object>> transformations) {
+        this.transformations = transformations;
+    }
+
     /**
      * Step-level retry configuration.
      */

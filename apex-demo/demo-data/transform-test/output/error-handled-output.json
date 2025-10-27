@@ -1,0 +1,6 @@
+[
+  {"column_1": "id", "column_2": "name", "column_3": "value", "column_4": "status"},
+  {"column_1": 1, "column_2": "Valid Item", "column_3": 100, "column_4": "ACTIVE"},
+  {"column_1": 2, "column_2": "Invalid Value", "column_3": "INVALID", "column_4": "ACTIVE"},
+  {"column_1": 3, "column_2": "Another Valid", "column_3": 200, "column_4": "ACTIVE"}
+]

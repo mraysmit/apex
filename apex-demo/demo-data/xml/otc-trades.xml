@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<otcTrades>
+    <trade id="OTC-2025-001" status="CONFIRMED">
+        <tradeDate>2025-10-15</tradeDate>
+        <counterparties>
+            <buyer>
+                <partyId>GOLDMAN_SACHS</partyId>
+                <legalName>Goldman Sachs International</legalName>
+                <lei>W22LROWP2IHZNBB6K528</lei>
+            </buyer>
+            <seller>
+                <partyId>JP_MORGAN</partyId>
+                <legalName>J.P. Morgan Securities LLC</legalName>
+                <lei>8I5DZWZKVSZI1NUHU748</lei>
+            </seller>
+        </counterparties>
+        <optionDetails>
+            <optionType>Call</optionType>
+            <underlyingAsset>
+                <commodity>Natural Gas</commodity>
+                <unit>MMBtu</unit>
+                <ticker>NG</ticker>
+            </underlyingAsset>
+            <strikePrice currency="USD">3.50</strikePrice>
+            <notionalQuantity>10000</notionalQuantity>
+            <notionalAmount currency="USD">75000000</notionalAmount>
+        </optionDetails>
+        <expiryDate>2025-12-28</expiryDate>
+        <settlementType>Cash</settlementType>
+        <premium currency="USD">450000</premium>
+        <riskMetrics>
+            <delta>0.65</delta>
+            <gamma>0.12</gamma>
+            <vega>125000</vega>
+            <theta>-5000</theta>
+        </riskMetrics>
+    </trade>
+    <trade id="OTC-2025-002" status="CONFIRMED">
+        <tradeDate>2025-10-16</tradeDate>
+        <counterparties>
+            <buyer>
+                <partyId>MORGAN_STANLEY</partyId>
+                <legalName>Morgan Stanley &amp; Co. LLC</legalName>
+                <lei>IGJSJL3JD5P30I6NJZ34</lei>
+            </buyer>
+            <seller>
+                <partyId>CITI</partyId>
+                <legalName>Citigroup Global Markets Inc.</legalName>
+                <lei>MBNUM2BPBDO7JBLYG310</lei>
+            </seller>
+        </counterparties>
+        <optionDetails>
+            <optionType>Put</optionType>
+            <underlyingAsset>
+                <commodity>Brent Crude Oil</commodity>
+                <unit>Barrel</unit>
+                <ticker>BZ</ticker>
+            </underlyingAsset>
+            <strikePrice currency="USD">75.00</strikePrice>
+            <notionalQuantity>1000</notionalQuantity>
+            <notionalAmount currency="USD">50000000</notionalAmount>
+        </optionDetails>
+        <expiryDate>2026-03-15</expiryDate>
+        <settlementType>Physical</settlementType>
+        <premium currency="USD">1250000</premium>
+        <riskMetrics>
+            <delta>-0.45</delta>
+            <gamma>0.08</gamma>
+            <vega>95000</vega>
+            <theta>-3500</theta>
+        </riskMetrics>
+    </trade>
+    <trade id="OTC-2025-003" status="PENDING_CONFIRMATION">
+        <tradeDate>2025-10-17</tradeDate>
+        <counterparties>
+            <buyer>
+                <partyId>BARCLAYS</partyId>
+                <legalName>Barclays Bank PLC</legalName>
+                <lei>G5GSEF7VJP5I7OUK5573</lei>
+            </buyer>
+            <seller>
+                <partyId>DEUTSCHE_BANK</partyId>
+                <legalName>Deutsche Bank AG</legalName>
+                <lei>7LTWFZYICNSX8D621K86</lei>
+            </seller>
+        </counterparties>
+        <optionDetails>
+            <optionType>Call</optionType>
+            <underlyingAsset>
+                <commodity>Gold</commodity>
+                <unit>Troy Ounce</unit>
+                <ticker>GC</ticker>
+            </underlyingAsset>
+            <strikePrice currency="USD">2100.00</strikePrice>
+            <notionalQuantity>100</notionalQuantity>
+            <notionalAmount currency="USD">25000000</notionalAmount>
+        </optionDetails>
+        <expiryDate>2025-11-30</expiryDate>
+        <settlementType>Cash</settlementType>
+        <premium currency="USD">875000</premium>
+        <riskMetrics>
+            <delta>0.72</delta>
+            <gamma>0.15</gamma>
+            <vega>145000</vega>
+            <theta>-6200</theta>
+        </riskMetrics>
+    </trade>
+    <trade id="OTC-2025-004" status="SETTLED">
+        <tradeDate>2025-09-20</tradeDate>
+        <counterparties>
+            <buyer>
+                <partyId>UBS</partyId>
+                <legalName>UBS AG</legalName>
+                <lei>BFM8T61CT2L1QCEMIK50</lei>
+            </buyer>
+            <seller>
+                <partyId>CREDIT_SUISSE</partyId>
+                <legalName>Credit Suisse AG</legalName>
+                <lei>549300506SI9CRFV9Z86</lei>
+            </seller>
+        </counterparties>
+        <optionDetails>
+            <optionType>Put</optionType>
+            <underlyingAsset>
+                <commodity>Silver</commodity>
+                <unit>Troy Ounce</unit>
+                <ticker>SI</ticker>
+            </underlyingAsset>
+            <strikePrice currency="USD">28.00</strikePrice>
+            <notionalQuantity>5000</notionalQuantity>
+            <notionalAmount currency="USD">15000000</notionalAmount>
+        </optionDetails>
+        <expiryDate>2025-10-15</expiryDate>
+        <settlementType>Physical</settlementType>
+        <premium currency="USD">325000</premium>
+        <riskMetrics>
+            <delta>-0.38</delta>
+            <gamma>0.09</gamma>
+            <vega>78000</vega>
+            <theta>-2800</theta>
+        </riskMetrics>
+    </trade>
+</otcTrades>
+

@@ -1,0 +1,122 @@
+[
+  {
+    "tradeId": "OTC-2025-001",
+    "tradeDate": "2025-10-15",
+    "buyerParty": "GOLDMAN_SACHS",
+    "sellerParty": "JP_MORGAN",
+    "optionType": "Call",
+    "status": "ACTIVE",
+    "notionalAmount": 75000000,
+    "underlyingAsset": {
+      "commodity": "Natural Gas",
+      "unit": "MMBtu",
+      "ticker": "NG"
+    },
+    "strikePrice": 3.50,
+    "currency": "USD",
+    "expiryDate": "2025-12-28",
+    "settlementType": "Cash",
+    "premium": 450000,
+    "tags": ["energy", "commodity", "otc-derivative"]
+  },
+  {
+    "tradeId": "OTC-2025-002",
+    "tradeDate": "2025-10-16",
+    "buyerParty": "MORGAN_STANLEY",
+    "sellerParty": "CITI",
+    "optionType": "Put",
+    "status": "ACTIVE",
+    "notionalAmount": 50000000,
+    "underlyingAsset": {
+      "commodity": "Brent Crude Oil",
+      "unit": "Barrel",
+      "ticker": "BZ"
+    },
+    "strikePrice": 75.00,
+    "currency": "USD",
+    "expiryDate": "2026-03-15",
+    "settlementType": "Physical",
+    "premium": 1250000,
+    "tags": ["energy", "commodity", "otc-derivative"]
+  },
+  {
+    "tradeId": "OTC-2025-003",
+    "tradeDate": "2025-10-17",
+    "buyerParty": "BARCLAYS",
+    "sellerParty": "DEUTSCHE_BANK",
+    "optionType": "Call",
+    "status": "ACTIVE",
+    "notionalAmount": 25000000,
+    "underlyingAsset": {
+      "commodity": "Gold",
+      "unit": "Troy Ounce",
+      "ticker": "GC"
+    },
+    "strikePrice": 2100.00,
+    "currency": "USD",
+    "expiryDate": "2025-11-30",
+    "settlementType": "Cash",
+    "premium": 875000,
+    "tags": ["precious-metals", "commodity", "otc-derivative"]
+  },
+  {
+    "tradeId": "OTC-2025-004",
+    "tradeDate": "2025-10-18",
+    "buyerParty": "UBS",
+    "sellerParty": "CREDIT_SUISSE",
+    "optionType": "Put",
+    "status": "ACTIVE",
+    "notionalAmount": 15000000,
+    "underlyingAsset": {
+      "commodity": "Silver",
+      "unit": "Troy Ounce",
+      "ticker": "SI"
+    },
+    "strikePrice": 28.00,
+    "currency": "USD",
+    "expiryDate": "2025-10-15",
+    "settlementType": "Physical",
+    "premium": 325000,
+    "tags": ["precious-metals", "commodity", "otc-derivative"]
+  },
+  {
+    "tradeId": "OTC-2025-005",
+    "tradeDate": "2025-10-19",
+    "buyerParty": "JP_MORGAN",
+    "sellerParty": "GOLDMAN_SACHS",
+    "optionType": "Call",
+    "status": "EXPIRED",
+    "notionalAmount": 30000000,
+    "underlyingAsset": {
+      "commodity": "Copper",
+      "unit": "Pound",
+      "ticker": "HG"
+    },
+    "strikePrice": 4.25,
+    "currency": "USD",
+    "expiryDate": "2025-09-20",
+    "settlementType": "Cash",
+    "premium": 550000,
+    "tags": ["industrial-metals", "commodity", "otc-derivative"]
+  },
+  {
+    "tradeId": "OTC-2025-006",
+    "tradeDate": "2025-10-20",
+    "buyerParty": "CITI",
+    "sellerParty": "BARCLAYS",
+    "optionType": "Put",
+    "status": "ACTIVE",
+    "notionalAmount": 20000000,
+    "underlyingAsset": {
+      "commodity": "Wheat",
+      "unit": "Bushel",
+      "ticker": "ZW"
+    },
+    "strikePrice": 6.50,
+    "currency": "USD",
+    "expiryDate": "2025-12-30",
+    "settlementType": "Physical",
+    "premium": 425000,
+    "tags": ["agriculture", "commodity", "otc-derivative"]
+  }
+]

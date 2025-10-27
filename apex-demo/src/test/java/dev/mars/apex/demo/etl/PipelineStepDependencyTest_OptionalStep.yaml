@@ -1,0 +1,90 @@
+# ============================================================================
+# Pipeline Step Dependency Test - Optional Step Validation
+# ============================================================================
+# Tests that optional step failures don't stop the pipeline
+# optional-step will fail but is marked as optional
+# Expected: optional-step fails, but final-step still executes, pipeline succeeds
+# ============================================================================
+
+metadata:
+  id: "optional-step-test"
+  name: "Optional Step Test"
+  version: "1.0.0"
+  description: "Test pipeline for validating optional step failure handling"
+  type: "pipeline-config"
+  author: "APEX Demo Team"
+  tags: ["test", "dependency", "optional"]
+
+pipeline:
+  name: "optional-step-pipeline"
+  description: "Pipeline with optional failing step"
+
+  steps:
+    # Step 1: Extract data successfully
+    - name: "extract-step"
+      type: "extract"
+      source: "test-source"
+      operation: "getAllData"
+      description: "Extract step that succeeds"
+
+    # Step 2: Optional step that will fail
+    - name: "optional-step"
+      type: "extract"
+      source: "missing-source"
+      operation: "getAllData"
+      description: "Optional step that will fail"
+      depends-on: ["extract-step"]
+      optional: true
+
+    # Step 3: Final step that should execute despite optional step failure
+    - name: "final-step"
+      type: "load"
+      sink: "test-sink"
+      operation: "write"
+      description: "Final load step"
+      depends-on: ["extract-step"]
+
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+    max-retries: 0
+    retry-delay-ms: 0
+
+data-sources:
+  - name: "test-source"
+    type: "file-system"
+    enabled: true
+    description: "Valid test data source"
+    
+    connection:
+      base-path: "./demo-data/dependency-test/csv"
+      file-pattern: "test-data.csv"
+    
+    operations:
+      getAllData: "SELECT * FROM csv"
+
+  - name: "missing-source"
+    type: "file-system"
+    enabled: true
+    description: "Data source pointing to non-existent file"
+    
+    connection:
+      base-path: "./demo-data/dependency-test/csv"
+      file-pattern: "non-existent-file.csv"
+    
+    operations:
+      getAllData: "SELECT * FROM csv"
+
+data-sinks:
+  - name: "test-sink"
+    type: "file-system"
+    enabled: true
+    description: "Test data sink"
+    
+    connection:
+      base-path: "./demo-data/dependency-test/output"
+      file-pattern: "output.json"
+    
+    operations:
+      write: "write"
+

@@ -1,0 +1,4 @@
+id,name,value,status
+1,Valid Item,100,ACTIVE
+2,Invalid Value,INVALID,ACTIVE
+3,Another Valid,200,ACTIVE

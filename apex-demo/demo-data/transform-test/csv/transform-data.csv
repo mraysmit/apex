@@ -1,0 +1,6 @@
+id,name,value,status,category
+1,Item A,100,ACTIVE,electronics
+2,Item B,200,INACTIVE,books
+3,Item C,150,ACTIVE,electronics
+4,Item D,300,ACTIVE,clothing
+5,Item E,50,INACTIVE,books

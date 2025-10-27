@@ -267,12 +267,16 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
 
             long executionTime = System.currentTimeMillis() - startTime;
 
-            // Note: Current implementation fails immediately with NullPointerException
-            // rather than triggering retry mechanism. This is expected behavior for this type of failure.
-            assertTrue(executionTime < 100,
-                "Execution should fail quickly without retries for NullPointerException, actual: " + executionTime + "ms");
+            // With 3 retries and 100ms delay, expect at least 300ms (3 retries * 100ms delay)
+            // Allow some overhead for execution time
+            assertTrue(executionTime >= 250,
+                "Should retry with delays, expected >= 250ms, actual: " + executionTime + "ms");
+            assertTrue(executionTime < 600,
+                "Should not take too long, expected < 600ms, actual: " + executionTime + "ms");
 
             assertNotNull(exception, "Should eventually fail after retries");
+            assertTrue(exception.getMessage().contains("failed"),
+                "Exception should indicate failure");
 
             LOGGER.info("✓ Retry behavior verified: {}ms execution time, error: {}",
                 executionTime, exception.getMessage());
@@ -303,10 +307,14 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
 
             long executionTime = System.currentTimeMillis() - startTime;
 
-            // Note: Current pipeline fails immediately with NullPointerException,
-            // so retry mechanism is not triggered. This test verifies the pipeline fails quickly.
-            assertTrue(executionTime < 500,
-                "Pipeline should fail quickly without retries due to immediate NullPointerException, actual: " + executionTime + "ms");
+            // With 2 retries and 1000ms delay, expect at least 2000ms (2 retries * 1000ms delay)
+            // Allow some overhead for execution time
+            assertTrue(executionTime >= 1800,
+                "Should retry with 1000ms delays, expected >= 1800ms, actual: " + executionTime + "ms");
+            assertTrue(executionTime < 3000,
+                "Should not take too long, expected < 3000ms, actual: " + executionTime + "ms");
+
+            assertNotNull(exception, "Should eventually fail after retries");
 
             LOGGER.info("✓ Retry delay behavior verified: {}ms execution time", executionTime);
         }
@@ -430,6 +438,7 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
 
     /**
      * Creates a pipeline configuration with a failing step for error handling tests.
+     * The step references a data source that doesn't exist, which will cause a failure.
      */
     private String createFailingPipelineConfig(String mode, String errorHandling, int maxRetries, long retryDelayMs) {
         return String.format("""
@@ -438,31 +447,31 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
               name: "Failing Test Pipeline"
               type: "pipeline-config"
               version: "1.0.0"
-            
+
             pipeline:
               name: "failing-test"
               description: "Test pipeline error handling"
-              
+
               execution:
                 mode: "%s"
                 error-handling: "%s"
                 max-retries: %d
                 retry-delay-ms: %d
-              
+
               steps:
                 - name: "failing-step"
                   type: "extract"
-                  source: "non-existent-source"
+                  source: "truly-non-existent-source-that-does-not-exist"
                   operation: "getAllRecords"
-                  description: "This step will fail"
-            
+                  description: "This step will fail because the data source doesn't exist"
+
             data-sources:
-              - name: "non-existent-source"
+              - name: "some-other-source"
                 type: "file-system"
                 enabled: true
                 connection:
                   base-path: "./target/demo/etl/execution-tests"
-                  file-pattern: "non-existent-*.csv"
+                  file-pattern: "*.csv"
                 operations:
                   getAllRecords: "SELECT * FROM csv"
             """, mode, errorHandling, maxRetries, retryDelayMs);

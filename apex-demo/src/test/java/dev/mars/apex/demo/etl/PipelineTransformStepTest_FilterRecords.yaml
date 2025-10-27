@@ -1,0 +1,86 @@
+# ============================================================================
+# Pipeline Transform Step Test - Record Filtering
+# ============================================================================
+# Tests that records can be filtered based on conditions during transformation
+# Filter: Only keep records where status = 'ACTIVE' and value > 100
+# ============================================================================
+
+metadata:
+  id: "filter-records-test"
+  name: "Filter Records Test"
+  version: "1.0.0"
+  description: "Test pipeline for validating record filtering during transformation"
+  type: "pipeline-config"
+  author: "APEX Demo Team"
+  tags: ["test", "transform", "filter"]
+
+pipeline:
+  name: "filter-pipeline"
+  description: "Pipeline with record filtering transformation"
+
+  steps:
+    # Step 1: Extract all data
+    - name: "extract-data"
+      type: "extract"
+      source: "transform-source"
+      operation: "getAllData"
+      description: "Extract all data"
+
+    # Step 2: Filter records based on conditions
+    - name: "filter-data"
+      type: "transform"
+      description: "Filter records based on business rules"
+      depends-on: ["extract-data"]
+      transformations:
+        - name: "filter-active-records"
+          type: "filter"
+          field: "status"
+          condition: "equals"
+          value: "ACTIVE"
+        
+        - name: "filter-high-value"
+          type: "filter"
+          field: "value"
+          condition: "greater-than"
+          value: 100
+
+    # Step 3: Load filtered data
+    - name: "load-filtered-data"
+      type: "load"
+      sink: "transform-sink"
+      operation: "write"
+      description: "Load filtered data"
+      depends-on: ["filter-data"]
+
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+    max-retries: 0
+    retry-delay-ms: 0
+
+data-sources:
+  - name: "transform-source"
+    type: "file-system"
+    enabled: true
+    description: "Source data for filtering"
+    
+    connection:
+      base-path: "./demo-data/transform-test/csv"
+      file-pattern: "transform-data.csv"
+    
+    operations:
+      getAllData: "SELECT * FROM csv"
+
+data-sinks:
+  - name: "transform-sink"
+    type: "file-system"
+    enabled: true
+    description: "Sink for filtered data"
+    
+    connection:
+      base-path: "./demo-data/transform-test/output"
+      file-pattern: "filtered-output.json"
+    
+    operations:
+      write: "write"
+
