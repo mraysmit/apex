@@ -87,6 +87,9 @@ public class YamlConfigurationLoader {
             // Process external rule references
             processRuleReferences(config);
 
+            // Process external enrichment references
+            processEnrichmentReferences(config);
+
             // Process external data-source references
             processDataSourceReferences(config);
 
@@ -125,6 +128,9 @@ public class YamlConfigurationLoader {
             // Process external rule references
             processRuleReferences(config);
 
+            // Process external enrichment references
+            processEnrichmentReferences(config);
+
             // Process external data-source references
             processDataSourceReferences(config);
 
@@ -158,6 +164,9 @@ public class YamlConfigurationLoader {
 
             // Process external rule references
             processRuleReferences(config);
+
+            // Process external enrichment references
+            processEnrichmentReferences(config);
 
             // Process external data-source references
             processDataSourceReferences(config);
@@ -437,6 +446,67 @@ public class YamlConfigurationLoader {
     }
 
     /**
+     * Process external enrichment file references.
+     *
+     * This method loads external enrichment files referenced in the enrichment-refs
+     * section and merges them with any existing inline enrichments and enrichment groups.
+     *
+     * @param config The configuration to process
+     * @throws YamlConfigurationException if reference resolution fails
+     */
+    private void processEnrichmentReferences(YamlRuleConfiguration config) throws YamlConfigurationException {
+        if (config.getEnrichmentRefs() == null || config.getEnrichmentRefs().isEmpty()) {
+            LOGGER.fine("No external enrichment references to process");
+            return;
+        }
+
+        LOGGER.info("Processing " + config.getEnrichmentRefs().size() + " external enrichment references");
+
+        // Process each enrichment reference
+        for (YamlEnrichmentRef ref : config.getEnrichmentRefs()) {
+            if (!ref.isEnabled()) {
+                LOGGER.info("Skipping disabled enrichment reference: " + ref.getName());
+                continue;
+            }
+
+            try {
+                LOGGER.info("Resolving external enrichment reference: " + ref.getName() + " from " + ref.getSource());
+
+                // Load the referenced enrichment file
+                YamlRuleConfiguration referencedConfig = loadRuleFile(ref.getSource());
+
+                // Merge enrichments from referenced file
+                if (referencedConfig.getEnrichments() != null) {
+                    // Initialize enrichments list if it doesn't exist and we have enrichments to add
+                    if (config.getEnrichments() == null) {
+                        config.setEnrichments(new ArrayList<>());
+                    }
+                    config.getEnrichments().addAll(referencedConfig.getEnrichments());
+                    LOGGER.info("Merged " + referencedConfig.getEnrichments().size() + " enrichments from: " + ref.getName());
+                }
+
+                // Merge enrichment groups from referenced file
+                if (referencedConfig.getEnrichmentGroups() != null) {
+                    // Initialize enrichment groups list if it doesn't exist and we have groups to add
+                    if (config.getEnrichmentGroups() == null) {
+                        config.setEnrichmentGroups(new ArrayList<>());
+                    }
+                    config.getEnrichmentGroups().addAll(referencedConfig.getEnrichmentGroups());
+                    LOGGER.info("Merged " + referencedConfig.getEnrichmentGroups().size() + " enrichment groups from: " + ref.getName());
+                }
+
+                LOGGER.info("Successfully resolved and merged enrichments from: " + ref.getName());
+
+            } catch (Exception e) {
+                throw new YamlConfigurationException(
+                    "Failed to resolve enrichment reference '" + ref.getName() + "' from '" + ref.getSource() + "'", e);
+            }
+        }
+
+        LOGGER.info("Successfully processed all external enrichment references");
+    }
+
+    /**
      * Load a rule file from either file system or classpath.
      *
      * This method loads rule files without processing their own rule-refs or data-source-refs
@@ -561,6 +631,9 @@ public class YamlConfigurationLoader {
     public void processReferencesAndValidate(YamlRuleConfiguration config) throws YamlConfigurationException {
         // Process external rule references
         processRuleReferences(config);
+
+        // Process external enrichment references
+        processEnrichmentReferences(config);
 
         // Process external data-source references
         processDataSourceReferences(config);

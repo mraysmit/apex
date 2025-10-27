@@ -1,0 +1,61 @@
+# ============================================================================
+# Leif Multi-file Enrichment Groups - Uses enrichment-refs to load external enrichments
+# ============================================================================
+metadata:
+  id: "leif-multifile-enrichment-groups"
+  name: "Leif Multi-file Enrichment Groups"
+  version: "1.0.0"
+  type: "rule-config"
+
+# NEW FEATURE: enrichment-refs to load enrichments and enrichment groups from external files
+enrichment-refs:
+  - name: "rule-builder-enrichments"
+    source: "src/test/java/dev/mars/apex/demo/enrichmentgroups/LeifMultiFileEnrichments.yaml"
+    enabled: true
+    description: "Rule builder enrichment definitions"
+
+enrichments:
+  - id: r3
+    name: Set Field Z
+    type: field-enrichment
+    enabled: true
+    field-mappings:
+      - source-field: input_z
+        target-field: output_z
+        required: true
+
+  - id: r4
+    name: Set Field W
+    type: field-enrichment
+    enabled: true
+    field-mappings:
+      - source-field: input_w
+        target-field: output_w
+        required: true
+
+enrichment-groups:
+  - id: g1
+    name: Local Group
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-ids: [ r3, r4 ]
+
+  - id: g2_rule_builder
+    name: Call Rule Builder Group
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-group-references: [ rule_builder_group ]
+
+  - id: g3
+    name: Combined Group
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-ids: [ r3 ]
+    enrichment-group-references: [ rule_builder_group ]
+
+  - id: g4_rule_builder
+    name: Another Rule Builder Reference
+    operator: OR
+    stop-on-first-failure: true
+    enrichment-group-references: [ rule_builder_group ]
+

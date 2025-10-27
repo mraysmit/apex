@@ -48,6 +48,9 @@ public class YamlRuleConfiguration {
     @JsonProperty("rule-refs")
     private List<YamlRuleRef> ruleRefs;
 
+    @JsonProperty("enrichment-refs")
+    private List<YamlEnrichmentRef> enrichmentRefs;
+
     @JsonProperty("data-sinks")
     private List<YamlDataSink> dataSinks;
 
@@ -112,6 +115,14 @@ public class YamlRuleConfiguration {
 
     public void setRuleRefs(List<YamlRuleRef> ruleRefs) {
         this.ruleRefs = ruleRefs;
+    }
+
+    public List<YamlEnrichmentRef> getEnrichmentRefs() {
+        return enrichmentRefs;
+    }
+
+    public void setEnrichmentRefs(List<YamlEnrichmentRef> enrichmentRefs) {
+        this.enrichmentRefs = enrichmentRefs;
     }
 
     public List<YamlDataSink> getDataSinks() {
