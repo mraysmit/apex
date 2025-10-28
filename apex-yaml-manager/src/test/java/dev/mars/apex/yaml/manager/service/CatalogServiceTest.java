@@ -85,19 +85,19 @@ public class CatalogServiceTest {
     }
 
     @Test
-    public void testFindByCategory() {
+    public void testFindByBusinessDomain() {
         YamlConfigMetadata metadata1 = createMetadata("rule-1", "rule-config", "Rule 1");
-        metadata1.addCategory("validation");
+        metadata1.setBusinessDomain("Trade Validation");
         YamlConfigMetadata metadata2 = createMetadata("rule-2", "rule-config", "Rule 2");
-        metadata2.addCategory("enrichment");
+        metadata2.setBusinessDomain("Data Enrichment");
 
         catalogService.addConfiguration(metadata1);
         catalogService.addConfiguration(metadata2);
 
-        List<YamlConfigMetadata> validationRules = catalogService.findByCategory("validation");
+        List<YamlConfigMetadata> validationRules = catalogService.findByMetadataAttribute("business-domain", "Trade Validation");
         assertEquals(1, validationRules.size());
 
-        List<YamlConfigMetadata> enrichmentRules = catalogService.findByCategory("enrichment");
+        List<YamlConfigMetadata> enrichmentRules = catalogService.findByMetadataAttribute("business-domain", "Data Enrichment");
         assertEquals(1, enrichmentRules.size());
     }
 

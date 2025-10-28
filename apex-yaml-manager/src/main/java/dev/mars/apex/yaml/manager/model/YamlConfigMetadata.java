@@ -43,10 +43,11 @@ public class YamlConfigMetadata {
     private String description;
     private String author;
     private String version;
+    private String businessDomain;
+    private String owner;
     private LocalDateTime created;
     private LocalDateTime lastModified;
     private Set<String> tags;
-    private Set<String> categories;
     private Set<String> dependencies; // Files this config depends on
     private Set<String> dependents; // Files that depend on this config
     private Set<String> referencedIds; // Rule IDs, enrichment IDs referenced
@@ -60,7 +61,6 @@ public class YamlConfigMetadata {
 
     public YamlConfigMetadata() {
         this.tags = new HashSet<>();
-        this.categories = new HashSet<>();
         this.dependencies = new HashSet<>();
         this.dependents = new HashSet<>();
         this.referencedIds = new HashSet<>();
@@ -154,12 +154,20 @@ public class YamlConfigMetadata {
         this.tags = tags;
     }
 
-    public Set<String> getCategories() {
-        return categories;
+    public String getBusinessDomain() {
+        return businessDomain;
     }
 
-    public void setCategories(Set<String> categories) {
-        this.categories = categories;
+    public void setBusinessDomain(String businessDomain) {
+        this.businessDomain = businessDomain;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
     public Set<String> getDependencies() {
@@ -262,9 +270,7 @@ public class YamlConfigMetadata {
         this.tags.add(tag);
     }
 
-    public void addCategory(String category) {
-        this.categories.add(category);
-    }
+
 
     public void addDependency(String dependency) {
         this.dependencies.add(dependency);

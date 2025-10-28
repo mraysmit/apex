@@ -6,6 +6,9 @@ metadata:
   type: pipeline
   author: apex.demo@company.com
   created-date: 2025-10-20
+  business-domain: Risk Management
+  owner: risk.team@company.com
+  tags: [pipeline, risk, calculation]
 
 pipeline:
   id: risk-calculation-pipeline

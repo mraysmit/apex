@@ -6,6 +6,9 @@ metadata:
   type: scenario
   author: apex.demo@company.com
   created-date: 2025-10-20
+  business-domain: Trade Processing
+  owner: trading.team@company.com
+  tags: [scenario, workflow, orchestration]
 
 scenario:
   id: scenario-h

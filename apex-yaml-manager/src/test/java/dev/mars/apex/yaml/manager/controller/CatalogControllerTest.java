@@ -148,15 +148,15 @@ public class CatalogControllerTest {
     }
 
     @Test
-    @DisplayName("Should search configurations by category")
-    public void testSearchByCategory(@TempDir Path tempDir) throws IOException {
+    @DisplayName("Should search configurations by business domain")
+    public void testSearchByBusinessDomain(@TempDir Path tempDir) throws IOException {
         // Create and add test configuration
         YamlConfigMetadata metadata = createMetadata("rule-1", "rule-config", "Rule 1");
         catalogService.addConfiguration(metadata);
 
         // Call actual REST endpoint
         ResponseEntity<?> response = restTemplate.getForEntity(
-            baseUrl + "/search/category/validation",
+            baseUrl + "/search/attribute/business-domain/Trade Validation",
             Object.class
         );
 
@@ -296,7 +296,8 @@ public class CatalogControllerTest {
         metadata.setDescription("Test configuration for " + name);
         metadata.setAuthor("alice");
         metadata.setVersion("1.0.0");
-        metadata.addCategory("validation");
+        metadata.setBusinessDomain("Trade Validation");
+        metadata.setOwner("trading.team@company.com");
         metadata.addTag("compliance");
         return metadata;
     }

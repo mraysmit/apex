@@ -36,9 +36,10 @@ public class YamlCatalog {
 
     private Map<String, YamlConfigMetadata> configurations;
     private Map<String, Set<String>> tagIndex;
-    private Map<String, Set<String>> categoryIndex;
     private Map<String, Set<String>> typeIndex;
     private Map<String, Set<String>> authorIndex;
+    private Map<String, Set<String>> businessDomainIndex;
+    private Map<String, Set<String>> ownerIndex;
     private LocalDateTime lastUpdated;
     private int totalConfigurations;
     private int orphanedCount;
@@ -48,9 +49,10 @@ public class YamlCatalog {
     public YamlCatalog() {
         this.configurations = new HashMap<>();
         this.tagIndex = new HashMap<>();
-        this.categoryIndex = new HashMap<>();
         this.typeIndex = new HashMap<>();
         this.authorIndex = new HashMap<>();
+        this.businessDomainIndex = new HashMap<>();
+        this.ownerIndex = new HashMap<>();
         this.lastUpdated = LocalDateTime.now();
     }
 
@@ -86,11 +88,6 @@ public class YamlCatalog {
             tagIndex.computeIfAbsent(tag, k -> new HashSet<>()).add(metadata.getId());
         }
 
-        // Index by categories
-        for (String category : metadata.getCategories()) {
-            categoryIndex.computeIfAbsent(category, k -> new HashSet<>()).add(metadata.getId());
-        }
-
         // Index by type
         typeIndex.computeIfAbsent(metadata.getType(), k -> new HashSet<>()).add(metadata.getId());
 
@@ -98,20 +95,22 @@ public class YamlCatalog {
         if (metadata.getAuthor() != null) {
             authorIndex.computeIfAbsent(metadata.getAuthor(), k -> new HashSet<>()).add(metadata.getId());
         }
+
+        // Index by business domain
+        if (metadata.getBusinessDomain() != null) {
+            businessDomainIndex.computeIfAbsent(metadata.getBusinessDomain(), k -> new HashSet<>()).add(metadata.getId());
+        }
+
+        // Index by owner
+        if (metadata.getOwner() != null) {
+            ownerIndex.computeIfAbsent(metadata.getOwner(), k -> new HashSet<>()).add(metadata.getId());
+        }
     }
 
     private void deindexConfiguration(YamlConfigMetadata metadata) {
         // Remove from tag index
         for (String tag : metadata.getTags()) {
             Set<String> ids = tagIndex.get(tag);
-            if (ids != null) {
-                ids.remove(metadata.getId());
-            }
-        }
-
-        // Remove from category index
-        for (String category : metadata.getCategories()) {
-            Set<String> ids = categoryIndex.get(category);
             if (ids != null) {
                 ids.remove(metadata.getId());
             }
@@ -130,40 +129,66 @@ public class YamlCatalog {
                 authorIds.remove(metadata.getId());
             }
         }
+
+        // Remove from business domain index
+        if (metadata.getBusinessDomain() != null) {
+            Set<String> domainIds = businessDomainIndex.get(metadata.getBusinessDomain());
+            if (domainIds != null) {
+                domainIds.remove(metadata.getId());
+            }
+        }
+
+        // Remove from owner index
+        if (metadata.getOwner() != null) {
+            Set<String> ownerIds = ownerIndex.get(metadata.getOwner());
+            if (ownerIds != null) {
+                ownerIds.remove(metadata.getId());
+            }
+        }
     }
 
     // Query operations
 
-    public List<YamlConfigMetadata> findByTag(String tag) {
-        Set<String> ids = tagIndex.getOrDefault(tag, new HashSet<>());
+    /**
+     * Find configurations by metadata attribute value.
+     * Supports: tag, type, author, business-domain, owner
+     */
+    public List<YamlConfigMetadata> findByMetadataAttribute(String attributeName, String value) {
+        if (attributeName == null || attributeName.trim().isEmpty() || value == null) {
+            return new ArrayList<>();
+        }
+
+        String attr = attributeName.toLowerCase().trim();
+        Map<String, Set<String>> index = switch (attr) {
+            case "tag", "tags" -> tagIndex;
+            case "type", "types" -> typeIndex;
+            case "author", "authors" -> authorIndex;
+            case "business-domain", "businessdomain", "domain" -> businessDomainIndex;
+            case "owner", "owners" -> ownerIndex;
+            default -> null;
+        };
+
+        if (index == null) {
+            return new ArrayList<>();
+        }
+
+        Set<String> ids = index.getOrDefault(value, new HashSet<>());
         return ids.stream()
                 .map(configurations::get)
                 .filter(Objects::nonNull)
                 .toList();
     }
 
-    public List<YamlConfigMetadata> findByCategory(String category) {
-        Set<String> ids = categoryIndex.getOrDefault(category, new HashSet<>());
-        return ids.stream()
-                .map(configurations::get)
-                .filter(Objects::nonNull)
-                .toList();
+    public List<YamlConfigMetadata> findByTag(String tag) {
+        return findByMetadataAttribute("tag", tag);
     }
 
     public List<YamlConfigMetadata> findByType(String type) {
-        Set<String> ids = typeIndex.getOrDefault(type, new HashSet<>());
-        return ids.stream()
-                .map(configurations::get)
-                .filter(Objects::nonNull)
-                .toList();
+        return findByMetadataAttribute("type", type);
     }
 
     public List<YamlConfigMetadata> findByAuthor(String author) {
-        Set<String> ids = authorIndex.getOrDefault(author, new HashSet<>());
-        return ids.stream()
-                .map(configurations::get)
-                .filter(Objects::nonNull)
-                .toList();
+        return findByMetadataAttribute("author", author);
     }
 
     public List<YamlConfigMetadata> findUnused() {
@@ -182,6 +207,92 @@ public class YamlCatalog {
         return configurations.values().stream()
                 .filter(m -> m.getHealthScore() >= minScore && m.getHealthScore() <= maxScore)
                 .toList();
+    }
+
+    /**
+     * Search configurations across all metadata fields.
+     * Searches in: id, name, description, type, author, tags, categories, path, dependencies.
+     *
+     * @param query The search query (case-insensitive)
+     * @return List of configurations matching the query
+     */
+    public List<YamlConfigMetadata> search(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        String lowerQuery = query.toLowerCase().trim();
+
+        return configurations.values().stream()
+                .filter(m -> matchesQuery(m, lowerQuery))
+                .toList();
+    }
+
+    private boolean matchesQuery(YamlConfigMetadata metadata, String lowerQuery) {
+        // Search in ID
+        if (metadata.getId() != null && metadata.getId().toLowerCase().contains(lowerQuery)) {
+            return true;
+        }
+
+        // Search in name
+        if (metadata.getName() != null && metadata.getName().toLowerCase().contains(lowerQuery)) {
+            return true;
+        }
+
+        // Search in description
+        if (metadata.getDescription() != null && metadata.getDescription().toLowerCase().contains(lowerQuery)) {
+            return true;
+        }
+
+        // Search in type
+        if (metadata.getType() != null && metadata.getType().toLowerCase().contains(lowerQuery)) {
+            return true;
+        }
+
+        // Search in author
+        if (metadata.getAuthor() != null && metadata.getAuthor().toLowerCase().contains(lowerQuery)) {
+            return true;
+        }
+
+        // Search in version
+        if (metadata.getVersion() != null && metadata.getVersion().toLowerCase().contains(lowerQuery)) {
+            return true;
+        }
+
+        // Search in path
+        if (metadata.getPath() != null && metadata.getPath().toLowerCase().contains(lowerQuery)) {
+            return true;
+        }
+
+        // Search in tags
+        if (metadata.getTags() != null && metadata.getTags().stream()
+                .anyMatch(tag -> tag.toLowerCase().contains(lowerQuery))) {
+            return true;
+        }
+
+        // Search in business domain
+        if (metadata.getBusinessDomain() != null && metadata.getBusinessDomain().toLowerCase().contains(lowerQuery)) {
+            return true;
+        }
+
+        // Search in owner
+        if (metadata.getOwner() != null && metadata.getOwner().toLowerCase().contains(lowerQuery)) {
+            return true;
+        }
+
+        // Search in dependencies
+        if (metadata.getDependencies() != null && metadata.getDependencies().stream()
+                .anyMatch(dep -> dep.toLowerCase().contains(lowerQuery))) {
+            return true;
+        }
+
+        // Search in referenced IDs
+        if (metadata.getReferencedIds() != null && metadata.getReferencedIds().stream()
+                .anyMatch(ref -> ref.toLowerCase().contains(lowerQuery))) {
+            return true;
+        }
+
+        return false;
     }
 
     // Statistics
@@ -227,16 +338,92 @@ public class YamlCatalog {
         return new HashSet<>(tagIndex.keySet());
     }
 
-    public Set<String> getAllCategories() {
-        return new HashSet<>(categoryIndex.keySet());
-    }
-
     public Set<String> getAllTypes() {
         return new HashSet<>(typeIndex.keySet());
     }
 
     public Set<String> getAllAuthors() {
         return new HashSet<>(authorIndex.keySet());
+    }
+
+    public Set<String> getAllBusinessDomains() {
+        return new HashSet<>(businessDomainIndex.keySet());
+    }
+
+    public Set<String> getAllOwners() {
+        return new HashSet<>(ownerIndex.keySet());
+    }
+
+    /**
+     * Get all distinct values for a specific metadata attribute.
+     *
+     * Supported attributes:
+     * - "tags" - All distinct tags
+     * - "types" - All distinct types
+     * - "authors" - All distinct authors
+     * - "business-domain" - All distinct business domains
+     * - "owner" - All distinct owners
+     * - "versions" - All distinct versions
+     * - "ids" - All distinct IDs
+     * - "names" - All distinct names
+     * - "descriptions" - All distinct descriptions
+     * - "paths" - All distinct paths
+     *
+     * @param attributeName The name of the metadata attribute
+     * @return Set of distinct values for the attribute, or empty set if attribute not found
+     */
+    public Set<String> getDistinctValues(String attributeName) {
+        if (attributeName == null || attributeName.trim().isEmpty()) {
+            return new HashSet<>();
+        }
+
+        String attr = attributeName.toLowerCase().trim();
+
+        return switch (attr) {
+            case "tags", "tag" -> getAllTags();
+            case "types", "type" -> getAllTypes();
+            case "authors", "author" -> getAllAuthors();
+            case "business-domain", "businessdomain", "domain" -> getAllBusinessDomains();
+            case "owner", "owners" -> getAllOwners();
+            case "versions", "version" -> getDistinctVersions();
+            case "ids", "id" -> getDistinctIds();
+            case "names", "name" -> getDistinctNames();
+            case "descriptions", "description" -> getDistinctDescriptions();
+            case "paths", "path" -> getDistinctPaths();
+            default -> new HashSet<>();
+        };
+    }
+
+    private Set<String> getDistinctVersions() {
+        return configurations.values().stream()
+                .map(YamlConfigMetadata::getVersion)
+                .filter(Objects::nonNull)
+                .collect(java.util.stream.Collectors.toSet());
+    }
+
+    private Set<String> getDistinctIds() {
+        return new HashSet<>(configurations.keySet());
+    }
+
+    private Set<String> getDistinctNames() {
+        return configurations.values().stream()
+                .map(YamlConfigMetadata::getName)
+                .filter(Objects::nonNull)
+                .collect(java.util.stream.Collectors.toSet());
+    }
+
+    private Set<String> getDistinctDescriptions() {
+        return configurations.values().stream()
+                .map(YamlConfigMetadata::getDescription)
+                .filter(Objects::nonNull)
+                .collect(java.util.stream.Collectors.toSet());
+    }
+
+    private Set<String> getDistinctPaths() {
+        return configurations.values().stream()
+                .map(YamlConfigMetadata::getPath)
+                .filter(Objects::nonNull)
+                .collect(java.util.stream.Collectors.toSet());
     }
 }
 

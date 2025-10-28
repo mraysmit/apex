@@ -6,6 +6,9 @@ metadata:
   type: enrichment
   author: apex.demo@company.com
   created-date: 2025-10-19
+  business-domain: Data Enrichment
+  owner: data.team@company.com
+  tags: [enrichment, data-enhancement, transformation]
 
 enrichment:
   id: enrich-a

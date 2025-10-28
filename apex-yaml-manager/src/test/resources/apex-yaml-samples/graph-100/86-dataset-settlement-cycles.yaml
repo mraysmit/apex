@@ -6,6 +6,9 @@ metadata:
   type: dataset
   author: apex.demo@company.com
   created-date: 2025-10-20
+  business-domain: Post-Trade
+  owner: settlement.team@company.com
+  tags: [dataset, settlement, cycles]
   source: "Settlement Authority"
 
 data:

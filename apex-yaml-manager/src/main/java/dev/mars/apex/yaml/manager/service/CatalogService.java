@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Service for managing YAML configuration catalog.
@@ -81,35 +82,33 @@ public class CatalogService {
     }
 
     /**
-     * Find configurations by tag.
+     * Find configurations by metadata attribute value.
+     * Supports: tag, type, author, business-domain, owner
      */
-    public List<YamlConfigMetadata> findByTag(String tag) {
-        logger.debug("Finding configurations by tag: {}", tag);
-        return catalog.findByTag(tag);
+    public List<YamlConfigMetadata> findByMetadataAttribute(String attributeName, String value) {
+        logger.debug("Finding configurations by {}: {}", attributeName, value);
+        return catalog.findByMetadataAttribute(attributeName, value);
     }
 
     /**
-     * Find configurations by category.
+     * Find configurations by tag.
      */
-    public List<YamlConfigMetadata> findByCategory(String category) {
-        logger.debug("Finding configurations by category: {}", category);
-        return catalog.findByCategory(category);
+    public List<YamlConfigMetadata> findByTag(String tag) {
+        return findByMetadataAttribute("tag", tag);
     }
 
     /**
      * Find configurations by type.
      */
     public List<YamlConfigMetadata> findByType(String type) {
-        logger.debug("Finding configurations by type: {}", type);
-        return catalog.findByType(type);
+        return findByMetadataAttribute("type", type);
     }
 
     /**
      * Find configurations by author.
      */
     public List<YamlConfigMetadata> findByAuthor(String author) {
-        logger.debug("Finding configurations by author: {}", author);
-        return catalog.findByAuthor(author);
+        return findByMetadataAttribute("author", author);
     }
 
     /**
@@ -134,6 +133,18 @@ public class CatalogService {
     public List<YamlConfigMetadata> findByHealthScore(int minScore, int maxScore) {
         logger.debug("Finding configurations by health score: {} - {}", minScore, maxScore);
         return catalog.findByHealthScore(minScore, maxScore);
+    }
+
+    /**
+     * Search configurations across all metadata fields.
+     * Searches in: id, name, description, type, author, tags, categories, path, dependencies.
+     *
+     * @param query The search query (case-insensitive)
+     * @return List of configurations matching the query
+     */
+    public List<YamlConfigMetadata> search(String query) {
+        logger.debug("Searching configurations with query: {}", query);
+        return catalog.search(query);
     }
 
     /**
@@ -169,6 +180,63 @@ public class CatalogService {
      */
     public double getAverageHealthScore() {
         return catalog.getAverageHealthScore();
+    }
+
+    /**
+     * Get all distinct tags from the catalog.
+     */
+    public Set<String> getAllTags() {
+        return catalog.getAllTags();
+    }
+
+    /**
+     * Get all distinct types from the catalog.
+     */
+    public Set<String> getAllTypes() {
+        return catalog.getAllTypes();
+    }
+
+    /**
+     * Get all distinct authors from the catalog.
+     */
+    public Set<String> getAllAuthors() {
+        return catalog.getAllAuthors();
+    }
+
+    /**
+     * Get all distinct business domains from the catalog.
+     */
+    public Set<String> getAllBusinessDomains() {
+        return catalog.getAllBusinessDomains();
+    }
+
+    /**
+     * Get all distinct owners from the catalog.
+     */
+    public Set<String> getAllOwners() {
+        return catalog.getAllOwners();
+    }
+
+    /**
+     * Get all distinct values for a specific metadata attribute.
+     *
+     * Supported attributes:
+     * - "tags" - All distinct tags
+     * - "categories" - All distinct categories
+     * - "types" - All distinct types
+     * - "authors" - All distinct authors
+     * - "versions" - All distinct versions
+     * - "ids" - All distinct IDs
+     * - "names" - All distinct names
+     * - "descriptions" - All distinct descriptions
+     * - "paths" - All distinct paths
+     *
+     * @param attributeName The name of the metadata attribute
+     * @return Set of distinct values for the attribute, or empty set if attribute not found
+     */
+    public Set<String> getDistinctValues(String attributeName) {
+        logger.debug("Getting distinct values for attribute: {}", attributeName);
+        return catalog.getDistinctValues(attributeName);
     }
 }
 

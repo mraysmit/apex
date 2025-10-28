@@ -6,6 +6,9 @@ metadata:
   type: rule-config
   author: apex.demo@company.com
   created-date: 2025-10-19
+  business-domain: Trade Processing
+  owner: trading.team@company.com
+  tags: [chain, sequential, dependency-chain]
 
 rule-configurations:
   - 54-chain-5.yaml

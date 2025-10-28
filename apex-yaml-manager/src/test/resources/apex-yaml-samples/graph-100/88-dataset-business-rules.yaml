@@ -6,6 +6,9 @@ metadata:
   type: dataset
   author: apex.demo@company.com
   created-date: 2025-10-20
+  business-domain: Trade Processing
+  owner: trading.team@company.com
+  tags: [dataset, business-rules, configuration]
   source: "Business Rules Engine"
 
 data:

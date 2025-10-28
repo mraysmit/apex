@@ -6,6 +6,9 @@ metadata:
   type: external-data-config
   author: apex.demo@company.com
   created-date: 2025-10-20
+  business-domain: Post-Trade
+  owner: clearing.team@company.com
+  tags: [config, clearing, settlement]
 
 dataSources:
   clearing-system:

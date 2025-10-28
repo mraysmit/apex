@@ -6,6 +6,9 @@ metadata:
   type: rule-config
   author: apex.demo@company.com
   created-date: 2025-10-20
+  business-domain: Testing
+  owner: qa.team@company.com
+  tags: [test, circular-dependency, edge-case]
 
 rules:
   - id: cycle-rule-10

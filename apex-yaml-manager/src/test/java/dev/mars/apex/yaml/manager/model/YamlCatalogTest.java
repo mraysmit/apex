@@ -71,19 +71,19 @@ public class YamlCatalogTest {
     }
 
     @Test
-    public void testFindByCategory() {
+    public void testFindByBusinessDomain() {
         YamlConfigMetadata metadata1 = createMetadata("rule-1", "rule-config", "Rule 1");
-        metadata1.addCategory("validation");
+        metadata1.setBusinessDomain("Trade Validation");
         YamlConfigMetadata metadata2 = createMetadata("rule-2", "rule-config", "Rule 2");
-        metadata2.addCategory("enrichment");
+        metadata2.setBusinessDomain("Data Enrichment");
 
         catalog.addConfiguration(metadata1);
         catalog.addConfiguration(metadata2);
 
-        List<YamlConfigMetadata> validationRules = catalog.findByCategory("validation");
+        List<YamlConfigMetadata> validationRules = catalog.findByMetadataAttribute("business-domain", "Trade Validation");
         assertEquals(1, validationRules.size());
 
-        List<YamlConfigMetadata> enrichmentRules = catalog.findByCategory("enrichment");
+        List<YamlConfigMetadata> enrichmentRules = catalog.findByMetadataAttribute("business-domain", "Data Enrichment");
         assertEquals(1, enrichmentRules.size());
     }
 
@@ -208,19 +208,19 @@ public class YamlCatalogTest {
     }
 
     @Test
-    public void testGetAllCategories() {
+    public void testGetAllBusinessDomains() {
         YamlConfigMetadata metadata1 = createMetadata("rule-1", "rule-config", "Rule 1");
-        metadata1.addCategory("validation");
+        metadata1.setBusinessDomain("Trade Validation");
 
         YamlConfigMetadata metadata2 = createMetadata("rule-2", "rule-config", "Rule 2");
-        metadata2.addCategory("enrichment");
+        metadata2.setBusinessDomain("Data Enrichment");
 
         catalog.addConfiguration(metadata1);
         catalog.addConfiguration(metadata2);
 
-        assertEquals(2, catalog.getAllCategories().size());
-        assertTrue(catalog.getAllCategories().contains("validation"));
-        assertTrue(catalog.getAllCategories().contains("enrichment"));
+        assertEquals(2, catalog.getAllBusinessDomains().size());
+        assertTrue(catalog.getAllBusinessDomains().contains("Trade Validation"));
+        assertTrue(catalog.getAllBusinessDomains().contains("Data Enrichment"));
     }
 
     @Test

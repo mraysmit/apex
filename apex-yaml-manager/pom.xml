@@ -196,6 +196,9 @@
                         <!-- Exclude screenshot tests - require browser drivers and can be resource intensive -->
                         <exclude>**/ui/**/*ScreenshotTest.java</exclude>
                     </excludes>
+                    <!-- Redirect test output to console -->
+                    <redirectTestOutputToFile>false</redirectTestOutputToFile>
+                    <useFile>false</useFile>
                 </configuration>
             </plugin>
         </plugins>

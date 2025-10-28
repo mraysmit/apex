@@ -6,6 +6,9 @@ metadata:
   type: external-data-config
   author: apex.demo@company.com
   created-date: 2025-10-19
+  business-domain: Infrastructure
+  owner: platform.team@company.com
+  tags: [config, database, external-data]
 
 config:
   connections:

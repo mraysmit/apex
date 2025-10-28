@@ -6,6 +6,9 @@ metadata:
   type: external-data-config
   author: apex.demo@company.com
   created-date: 2025-10-20
+  business-domain: Market Data
+  owner: market-data.team@company.com
+  tags: [config, market-data, pricing]
 
 dataSources:
   market-data-source:

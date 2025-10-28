@@ -6,6 +6,9 @@ metadata:
   type: rule-config
   author: apex.demo@company.com
   created-date: 2025-10-19
+  business-domain: Trade Validation
+  owner: validation.team@company.com
+  tags: [rules, common, reusable, shared]
 
 rules:
   - id: common-1

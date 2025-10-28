@@ -42,12 +42,18 @@ The APEX YAML Manager provides comprehensive tools for managing the complexity o
 - Safe refactoring with validation
 - Performance optimization suggestions
 
-### Layer 5: UI and Visualization
-- Interactive dependency graph visualization
-- Catalog browser with search
-- Health dashboard with real-time metrics
-- Impact analysis visualization
-- REST API for programmatic access
+### Layer 5: UI and Visualization ✅ COMPLETE
+- ✅ Interactive D3.js dependency tree visualization
+- ✅ Node expansion/collapse with click interaction
+- ✅ Pan and zoom controls with toolbar
+- ✅ YAML content viewer with syntax highlighting
+- ✅ File metadata display panel
+- ✅ APEX keyword colorization
+- ✅ Resizable split-panel layout
+- ✅ REST API for programmatic access
+- Catalog browser with search (planned)
+- Health dashboard with real-time metrics (planned)
+- Impact analysis visualization (planned)
 
 ## Getting Started
 
@@ -83,8 +89,9 @@ Once the server is running, access the following URLs:
 - Swagger UI: `http://localhost:8082/yaml-manager/swagger-ui.html`
 - OpenAPI JSON: `http://localhost:8082/yaml-manager/api-docs`
 
-**Health Check:**
-- `http://localhost:8082/yaml-manager/api/health`
+**Health Endpoints:**
+- System Health: `http://localhost:8082/yaml-manager/api/health`
+- System Status: `http://localhost:8082/yaml-manager/api/health/status`
 
 ### Dependency Tree Viewer Configuration
 
@@ -109,20 +116,19 @@ Replace with the absolute path to your desired root YAML file. The tree viewer w
 
 ## API Endpoints
 
-### Health
-- `GET /api/health` - Health check
-- `GET /api/health/status` - System status
+### Health ✅ COMPLETE
+- `GET /api/health` - Health check (returns status, service name, version, timestamp)
+- `GET /api/health/status` - System status (returns detailed status with capabilities)
 
-### Dependency Analysis (planned)
-- `POST /api/dependencies/analyze` - Analyze dependencies
-- `GET /api/dependencies/{file}/impact` - Impact analysis
-- `GET /api/dependencies/metrics` - Dependency metrics
+### Dependency Analysis ✅ COMPLETE
+- `POST /api/dependencies/analyze` - Analyze dependencies for a YAML file
+- `GET /api/dependencies/tree` - Get dependency tree structure
+- `GET /api/dependencies/content` - Get file content and metadata
 
-### Catalog (Coming Soon)
-- `GET /api/catalog/configurations` - List all configurations
-- `GET /api/catalog/search` - Search configurations
-- `GET /api/catalog/unused` - Find unused configurations
-- `GET /api/catalog/critical` - Find critical configurations
+### Catalog ✅ COMPLETE
+- `GET /api/catalog/scan` - Scan directory and build catalog
+- `GET /api/catalog/metadata` - Get metadata for specific file
+- `GET /api/catalog/summary` - Get catalog summary statistics
 
 ### Health Checks ✅ COMPLETE
 - `POST /api/health-checks/check` - Perform health check
@@ -137,9 +143,12 @@ Replace with the absolute path to your desired root YAML file. The tree viewer w
 - `POST /api/validation/all` - Perform all validations
 - `GET /api/validation/is-valid` - Check if file is valid
 
-### Refactoring (planned)
+### Refactoring (Planned)
 - `POST /api/refactoring/analyze` - Analyze refactoring options
-- `POST /api/refactoring/execute` - Execute refactoring
+- `POST /api/refactoring/simplify` - Simplify dependencies
+- `POST /api/refactoring/consolidate` - Consolidate configurations
+- `POST /api/refactoring/split` - Split large configurations
+- `POST /api/refactoring/execute` - Execute refactoring with validation
 
 ## Architecture
 
@@ -197,26 +206,40 @@ apex-yaml-manager/
 ├── src/main/java/dev/mars/apex/yaml/manager/
 │   ├── YamlManagerApplication.java
 │   ├── controller/
-│   │   ├── HealthController.java
-│   │   ├── CatalogController.java (coming soon)
-│   │   ├── DependencyAnalysisController.java (coming soon)
-│   │   ├── HealthCheckController.java (coming soon)
-│   │   └── RefactoringController.java (coming soon)
+│   │   ├── HealthController.java ✅
+│   │   ├── CatalogController.java ✅
+│   │   ├── DependencyAnalysisController.java ✅
+│   │   ├── HealthCheckController.java ✅
+│   │   ├── ValidationController.java ✅
+│   │   └── RefactoringController.java (planned)
 │   ├── service/
-│   │   ├── CatalogService.java
-│   │   ├── DependencyAnalysisService.java (coming soon)
-│   │   ├── HealthCheckService.java (coming soon)
-│   │   └── RefactoringService.java (coming soon)
+│   │   ├── CatalogService.java ✅
+│   │   ├── DependencyAnalysisService.java ✅
+│   │   ├── YamlContentAnalyzer.java ✅
+│   │   ├── HealthCheckService.java ✅
+│   │   ├── ValidationService.java ✅
+│   │   └── RefactoringService.java (planned)
 │   ├── model/
-│   │   ├── DependencyMetrics.java
-│   │   ├── ImpactAnalysisResult.java
-│   │   ├── YamlConfigMetadata.java
-│   │   ├── YamlCatalog.java
-│   │   ├── HealthReport.java
-│   │   └── HealthIssue.java
-│   └── util/ (coming soon)
+│   │   ├── DependencyMetrics.java ✅
+│   │   ├── ImpactAnalysisResult.java ✅
+│   │   ├── YamlConfigMetadata.java ✅
+│   │   ├── YamlCatalog.java ✅
+│   │   ├── YamlContentSummary.java ✅
+│   │   ├── HealthReport.java ✅
+│   │   ├── HealthScore.java ✅
+│   │   ├── HealthIssue.java ✅
+│   │   ├── ValidationResult.java ✅
+│   │   └── ValidationIssue.java ✅
+│   └── util/
+│       └── YamlUtils.java ✅
 ├── src/main/resources/
-│   └── application.properties
+│   ├── application.properties
+│   └── static/
+│       ├── d3-tree-viewer.html ✅
+│       ├── css/
+│       │   └── d3-tree-viewer.css ✅
+│       └── js/
+│           └── d3-tree-viewer.js ✅
 └── pom.xml
 ```
 
@@ -237,10 +260,15 @@ mvn test
 - ✅ Phase 1: Enhanced Dependency Analysis (COMPLETE)
 - ✅ Phase 2: Catalog and Discovery System (COMPLETE)
 - ✅ Phase 3: Validation and Health Checks (COMPLETE)
-- Phase 4: UI and Visualization (NEXT - Phases Reordered)
-- Phase 5: Refactoring and Optimization Tools (Planned)
-
-**Note**: Phases 4 and 5 have been reordered. UI development is prioritized as the architecture is solid and all features are fully exposed via REST API (40+ endpoints). See ARCHITECTURE_ASSESSMENT.md for details.
+- ✅ Phase 4: UI and Visualization - Core Features (COMPLETE)
+  - ✅ D3.js dependency tree viewer
+  - ✅ Interactive node expansion/collapse
+  - ✅ YAML content display with syntax highlighting
+  - ✅ File metadata panel
+  - ✅ Pan/zoom controls
+  - Advanced catalog browser (planned)
+  - Health dashboard (planned)
+- Phase 5: Refactoring and Optimization Tools (NEXT)
 
 ## License
 

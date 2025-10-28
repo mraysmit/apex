@@ -6,6 +6,9 @@ metadata:
   type: scenario-registry
   author: apex.demo@company.com
   created-date: 2025-10-19
+  business-domain: Trade Processing
+  owner: platform.team@company.com
+  tags: [registry, master, orchestration]
 
 # File-based dependencies (expanded)
 rule-configurations:

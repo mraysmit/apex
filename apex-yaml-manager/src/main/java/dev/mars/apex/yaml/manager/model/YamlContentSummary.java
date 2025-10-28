@@ -17,7 +17,9 @@ package dev.mars.apex.yaml.manager.model;
  */
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,8 +34,13 @@ public class YamlContentSummary {
     private String name;
     private String description;
     private String version;
+    private String author;
+    private String businessDomain;
+    private String owner;
     private String createdDate;
     private String lastModifiedDate;
+    private List<String> tags;
+    private List<String> dependencies; // Files this config depends on
     private int ruleCount;
     private int ruleGroupCount;
     private int enrichmentCount;
@@ -44,6 +51,8 @@ public class YamlContentSummary {
 
     public YamlContentSummary() {
         this.contentCounts = new HashMap<>();
+        this.tags = new ArrayList<>();
+        this.dependencies = new ArrayList<>();
     }
 
     public YamlContentSummary(String filePath) {
@@ -100,6 +109,14 @@ public class YamlContentSummary {
         this.version = version;
     }
 
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
     public String getCreatedDate() {
         return createdDate;
     }
@@ -114,6 +131,38 @@ public class YamlContentSummary {
 
     public void setLastModifiedDate(String lastModifiedDate) {
         this.lastModifiedDate = lastModifiedDate;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
+
+    public String getBusinessDomain() {
+        return businessDomain;
+    }
+
+    public void setBusinessDomain(String businessDomain) {
+        this.businessDomain = businessDomain;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public List<String> getDependencies() {
+        return dependencies;
+    }
+
+    public void setDependencies(List<String> dependencies) {
+        this.dependencies = dependencies;
     }
 
     public int getRuleCount() {

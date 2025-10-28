@@ -6,6 +6,9 @@ metadata:
   type: rule-config
   author: apex.demo@company.com
   created-date: 2025-10-20
+  business-domain: Trade Validation
+  owner: validation.team@company.com
+  tags: [rule-group, aggregator, consolidation]
 
 rule-groups:
   - id: aggregator-group

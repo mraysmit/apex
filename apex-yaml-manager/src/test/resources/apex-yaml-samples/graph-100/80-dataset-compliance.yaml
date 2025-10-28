@@ -6,6 +6,9 @@ metadata:
   type: dataset
   author: apex.demo@company.com
   created-date: 2025-10-20
+  business-domain: Compliance
+  owner: compliance.team@company.com
+  tags: [dataset, compliance, regulatory]
   source: "Regulatory Authority"
 
 data:

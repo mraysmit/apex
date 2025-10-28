@@ -25,6 +25,7 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -93,6 +94,7 @@ public class YamlContentAnalyzer {
     /**
      * Extract metadata from YAML.
      */
+    @SuppressWarnings("unchecked")
     private void extractMetadata(YamlContentSummary summary, Map<String, Object> data) {
         if (data.containsKey("metadata")) {
             Map<String, Object> metadata = (Map<String, Object>) data.get("metadata");
@@ -101,6 +103,7 @@ public class YamlContentAnalyzer {
                 summary.setName((String) metadata.get("name"));
                 summary.setDescription((String) metadata.get("description"));
                 summary.setVersion((String) metadata.get("version"));
+                summary.setAuthor((String) metadata.get("author"));
 
                 // Extract date fields
                 Object createdDate = metadata.get("created-date");
@@ -112,6 +115,30 @@ public class YamlContentAnalyzer {
                 if (lastModifiedDate != null) {
                     summary.setLastModifiedDate(lastModifiedDate.toString());
                 }
+
+                // Extract tags (can be a list or comma-separated string)
+                Object tagsObj = metadata.get("tags");
+                if (tagsObj instanceof List) {
+                    summary.setTags((List<String>) tagsObj);
+                } else if (tagsObj instanceof String) {
+                    // Handle comma-separated tags
+                    String[] tagArray = ((String) tagsObj).split(",");
+                    List<String> tagList = new ArrayList<>();
+                    for (String tag : tagArray) {
+                        tagList.add(tag.trim());
+                    }
+                    summary.setTags(tagList);
+                }
+
+                // Extract business-domain
+                if (metadata.containsKey("business-domain")) {
+                    summary.setBusinessDomain((String) metadata.get("business-domain"));
+                }
+
+                // Extract owner
+                if (metadata.containsKey("owner")) {
+                    summary.setOwner((String) metadata.get("owner"));
+                }
             }
         }
     }
@@ -119,7 +146,72 @@ public class YamlContentAnalyzer {
     /**
      * Analyze content and count items.
      */
+    @SuppressWarnings("unchecked")
     private void analyzeContent(YamlContentSummary summary, Map<String, Object> data) {
+        // Extract dependencies from various sources
+        List<String> dependencies = new ArrayList<>();
+
+        // rule-configurations
+        if (data.containsKey("rule-configurations")) {
+            Object ruleConfigs = data.get("rule-configurations");
+            if (ruleConfigs instanceof List) {
+                dependencies.addAll((List<String>) ruleConfigs);
+            }
+        }
+
+        // config-files
+        if (data.containsKey("config-files")) {
+            Object configFiles = data.get("config-files");
+            if (configFiles instanceof List) {
+                dependencies.addAll((List<String>) configFiles);
+            }
+        }
+
+        // enrichment-refs
+        if (data.containsKey("enrichment-refs")) {
+            Object enrichmentRefs = data.get("enrichment-refs");
+            if (enrichmentRefs instanceof List) {
+                dependencies.addAll((List<String>) enrichmentRefs);
+            }
+        }
+
+        // rule-refs
+        if (data.containsKey("rule-refs")) {
+            Object ruleRefs = data.get("rule-refs");
+            if (ruleRefs instanceof List) {
+                dependencies.addAll((List<String>) ruleRefs);
+            }
+        }
+
+        // dataset-refs
+        if (data.containsKey("dataset-refs")) {
+            Object datasetRefs = data.get("dataset-refs");
+            if (datasetRefs instanceof List) {
+                dependencies.addAll((List<String>) datasetRefs);
+            }
+        }
+
+        // Extract dependencies from processing stages (scenario files)
+        if (data.containsKey("scenario")) {
+            Map<String, Object> scenario = (Map<String, Object>) data.get("scenario");
+            if (scenario != null && scenario.containsKey("processing-stages")) {
+                List<Map<String, Object>> stages = (List<Map<String, Object>>) scenario.get("processing-stages");
+                if (stages != null) {
+                    for (Map<String, Object> stage : stages) {
+                        if (stage.containsKey("config-file")) {
+                            String configFile = (String) stage.get("config-file");
+                            if (configFile != null && !dependencies.contains(configFile)) {
+                                dependencies.add(configFile);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!dependencies.isEmpty()) {
+            summary.setDependencies(dependencies);
+        }
         // Count direct rules (rules section)
         if (data.containsKey("rules")) {
             List<Map<String, Object>> rules = (List<Map<String, Object>>) data.get("rules");

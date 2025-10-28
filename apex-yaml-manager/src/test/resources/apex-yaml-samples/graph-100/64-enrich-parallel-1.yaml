@@ -6,6 +6,9 @@ metadata:
   type: enrichment
   author: apex.demo@company.com
   created-date: 2025-10-20
+  business-domain: Data Enrichment
+  owner: data.team@company.com
+  tags: [enrichment, parallel, performance, concurrent]
 
 enrichment:
   id: enrich-parallel-1
