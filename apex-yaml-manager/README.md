@@ -64,17 +64,27 @@ mvn clean install
 
 ### Running
 
+Start the server:
 ```bash
-mvn spring-boot:run
+mvn spring-boot:run -pl apex-yaml-manager
 ```
 
-The YAML Manager will start on `http://localhost:8082/yaml-manager`
+Stop the server:
+- Press `Ctrl+C` in the terminal where the server is running
 
-### API Documentation
+### URLs
 
-Swagger/OpenAPI documentation is available at:
-- `http://localhost:8082/yaml-manager/swagger-ui.html`
-- `http://localhost:8082/yaml-manager/api-docs`
+Once the server is running, access the following URLs:
+
+**Web UI:**
+- Dependency Tree Visualization: `http://localhost:8082/yaml-manager/d3-tree-viewer.html`
+
+**API Documentation:**
+- Swagger UI: `http://localhost:8082/yaml-manager/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8082/yaml-manager/api-docs`
+
+**Health Check:**
+- `http://localhost:8082/yaml-manager/api/health`
 
 ## API Endpoints
 
@@ -106,7 +116,7 @@ Swagger/OpenAPI documentation is available at:
 - `POST /api/validation/all` - Perform all validations
 - `GET /api/validation/is-valid` - Check if file is valid
 
-### Refactoring (Coming Soon)
+### Refactoring (planned)
 - `POST /api/refactoring/analyze` - Analyze refactoring options
 - `POST /api/refactoring/execute` - Execute refactoring
 
@@ -126,7 +136,7 @@ Swagger/OpenAPI documentation is available at:
 - `YamlContentAnalyzer` - YAML content extraction ✅
 - `ValidationService` - Validation rules engine ✅
 - `HealthCheckService` - Health checks ✅
-- `RefactoringService` - Refactoring tools (coming soon)
+- `RefactoringService` - Refactoring tools (planned)
 
 ### Controller Classes
 - `HealthController` - Health and status endpoints ✅
@@ -134,7 +144,7 @@ Swagger/OpenAPI documentation is available at:
 - `DependencyAnalysisController` - Dependency analysis endpoints ✅
 - `HealthCheckController` - Health check endpoints ✅
 - `ValidationController` - Validation endpoints ✅
-- `RefactoringController` - Refactoring endpoints (coming soon)
+- `RefactoringController` - Refactoring endpoints (planned)
 
 ## Configuration
 

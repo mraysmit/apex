@@ -292,9 +292,3 @@ rule-groups:
 - **Browser Compatibility:** 100% (all modern browsers)
 
 ---
-
-## Related Documentation
-
-- [APEX YAML Reference](../../docs/APEX_YAML_REFERENCE.md)
-- [D3.js Tree Viewer Requirements](./YAML_DEPENDENCY_TREE_VISUALIZATION_REQUIREMENTS.md)
-- [APEX YAML Manager Review](./APEX_YAML_MANAGER_REVIEW.md)
