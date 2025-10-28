@@ -101,6 +101,17 @@ public class YamlContentAnalyzer {
                 summary.setName((String) metadata.get("name"));
                 summary.setDescription((String) metadata.get("description"));
                 summary.setVersion((String) metadata.get("version"));
+
+                // Extract date fields
+                Object createdDate = metadata.get("created-date");
+                if (createdDate != null) {
+                    summary.setCreatedDate(createdDate.toString());
+                }
+
+                Object lastModifiedDate = metadata.get("last-modified-date");
+                if (lastModifiedDate != null) {
+                    summary.setLastModifiedDate(lastModifiedDate.toString());
+                }
             }
         }
     }

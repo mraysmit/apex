@@ -32,6 +32,8 @@ public class YamlContentSummary {
     private String name;
     private String description;
     private String version;
+    private String createdDate;
+    private String lastModifiedDate;
     private int ruleCount;
     private int ruleGroupCount;
     private int enrichmentCount;
@@ -96,6 +98,22 @@ public class YamlContentSummary {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public String getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(String createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public String getLastModifiedDate() {
+        return lastModifiedDate;
+    }
+
+    public void setLastModifiedDate(String lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
     }
 
     public int getRuleCount() {

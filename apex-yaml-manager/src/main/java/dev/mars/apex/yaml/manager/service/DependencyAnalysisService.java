@@ -353,6 +353,17 @@ public class DependencyAnalysisService {
             logger.debug("Content summary from YamlNode for {}: type={}, exists={}, valid={}",
                 filePath, summary.getFileType(), yamlNode.exists(), yamlNode.isYamlValid());
             node.setContentSummary(summary);
+
+            // Populate TreeNode date fields: use last-modified-date if available, otherwise fall back to created-date
+            if (summary.getLastModifiedDate() != null) {
+                node.setLastModified(summary.getLastModifiedDate());
+            } else if (summary.getCreatedDate() != null) {
+                node.setLastModified(summary.getCreatedDate());
+            }
+
+            if (summary.getCreatedDate() != null) {
+                node.setCreated(summary.getCreatedDate());
+            }
         } else {
             logger.warn("No YamlNode available from apex-core for: {}", filePath);
         }
@@ -484,6 +495,8 @@ public class DependencyAnalysisService {
                         summary.setName(tempSummary.getName());
                         summary.setDescription(tempSummary.getDescription());
                         summary.setVersion(tempSummary.getVersion());
+                        summary.setCreatedDate(tempSummary.getCreatedDate());
+                        summary.setLastModifiedDate(tempSummary.getLastModifiedDate());
                         summary.setRuleCount(tempSummary.getRuleCount());
                         summary.setRuleGroupCount(tempSummary.getRuleGroupCount());
                         summary.setEnrichmentCount(tempSummary.getEnrichmentCount());

@@ -711,7 +711,9 @@
             }
 
             // Add Last Modified on the same line as File Type and Version (regular width)
-            metadata.push({ label: 'Last Modified', value: fileData.lastModified ? formatDate(fileData.lastModified) : 'Unknown' });
+            // Use lastModified from nodeData (which defaults to created-date if last-modified-date is not available)
+            const lastModified = nodeData.lastModified || fileData.lastModified;
+            metadata.push({ label: 'Last Modified', value: lastModified || 'Unknown' });
 
             // Add Description (full-width)
             if (contentSummary.description) {
