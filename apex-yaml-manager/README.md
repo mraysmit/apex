@@ -86,13 +86,34 @@ Once the server is running, access the following URLs:
 **Health Check:**
 - `http://localhost:8082/yaml-manager/api/health`
 
+### Dependency Tree Viewer Configuration
+
+The D3 tree viewer is configured to load a default demo dataset on startup:
+
+**Default Dataset:**
+- **Location**: `apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/`
+- **Root File**: `00-scenario-registry.yaml`
+- **Description**: Test dataset with 100+ YAML files and deep dependency chains
+
+**To Change the Default Dataset:**
+
+Edit `apex-yaml-manager/src/main/resources/static/js/d3-tree-viewer.js` (line 49):
+
+```javascript
+const rootFile = "C:/Users/markr/dev/java/corejava/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/00-scenario-registry.yaml";
+```
+
+Replace with the absolute path to your desired root YAML file. The tree viewer will automatically load all dependencies from that root file.
+
+**Note**: The file path must be absolute and accessible to the Spring Boot application.
+
 ## API Endpoints
 
 ### Health
 - `GET /api/health` - Health check
 - `GET /api/health/status` - System status
 
-### Dependency Analysis (Coming Soon)
+### Dependency Analysis (planned)
 - `POST /api/dependencies/analyze` - Analyze dependencies
 - `GET /api/dependencies/{file}/impact` - Impact analysis
 - `GET /api/dependencies/metrics` - Dependency metrics

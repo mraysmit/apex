@@ -1,0 +1,729 @@
+// Global variables
+let svg, g, tree, root, i = 0, zoom;
+const duration = 750;
+const width = window.innerWidth - 400 - 20; // Account for right panel (400px) and margins
+const headerHeight = 47; // Height of the tree header (15px padding top + 16px font + 1px line-height + 15px padding bottom)
+const height = window.innerHeight - headerHeight;
+const initialTreeTransform = d3.zoomIdentity.translate(200, 0);
+
+// Initialize the tree viewer
+function initializeTree() {
+    // Show loading message initially
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('loading').textContent = 'Loading tree data...';
+    
+    // Create SVG container
+    svg = d3.select("#tree-container")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+    
+    // Create main group for zoom/pan
+    g = svg.append("g");
+
+    // Set up zoom behavior (store globally for toolbar access)
+    zoom = d3.zoom()
+        .scaleExtent([0.1, 3])
+        .on("zoom", function(event) {
+            g.attr("transform", event.transform);
+        });
+
+    svg.call(zoom);
+
+    // Set initial zoom with left margin to account for root node label
+    svg.call(zoom.transform, initialTreeTransform);
+    
+    // Create tree layout
+    tree = d3.tree().size([height - 100, width - 200]);
+    
+    // Load data from REST API (with small delay for testing)
+    setTimeout(() => {
+        loadTreeData();
+    }, 100);
+}
+
+// Load tree data from REST API
+function loadTreeData() {
+    // Use the graph-100 dataset which has 100+ files with deep dependencies
+    // Need to use absolute path for proper dependency resolution
+    const rootFile = "C:/Users/markr/dev/java/corejava/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/00-scenario-registry.yaml";
+    // Updated to use centralized apex-rest-api (port 8080) instead of apex-yaml-manager (port 8082)
+    const apiUrl = `http://localhost:8082/yaml-manager/api/dependencies/tree?rootFile=${encodeURIComponent(rootFile)}`;
+
+    fetch(apiUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Loaded tree data:', data);
+            // Handle both formats: apex-yaml-manager returns status=success, apex-rest-api returns success=true
+            if (data.status === 'success' && data.tree) {
+                // Current apex-yaml-manager format
+                processTreeData(data.tree);
+            } else if (data.success && data.data && data.data.tree) {
+                // Future apex-rest-api format (if needed)
+                processTreeData(data.data.tree);
+            } else {
+                throw new Error('Invalid API response: ' + (data.message || data.error || 'No tree data'));
+            }
+        })
+        .catch(error => {
+            console.error('Error loading tree data:', error);
+            showError(`Failed to load tree data: ${error.message}`);
+            // Hide loading message on error
+            d3.select("#loading").style("display", "none");
+        });
+}
+
+// Process and render tree data
+function processTreeData(treeData) {
+    try {
+        // Validate data
+        if (!treeData) {
+            throw new Error("No data provided");
+        }
+
+        // Validate tree structure (must have name property)
+        if (!treeData.name) {
+            throw new Error("Invalid tree structure: missing 'name' property");
+        }
+
+        // Convert to D3 hierarchy
+        root = d3.hierarchy(treeData);
+        console.log('D3 hierarchy created. Root:', root.data.name);
+        console.log('Root has children:', root.children ? root.children.length : 0);
+
+        // Set initial positions
+        root.x0 = height / 2;
+        root.y0 = 0;
+
+        // Collapse all children initially except first level
+        if (root.children) {
+            console.log('Collapsing', root.children.length, 'root children');
+            root.children.forEach(collapse);
+            console.log('After collapse, root children:', root.children.length);
+            console.log('First child has _children:', root.children[0]._children ? root.children[0]._children.length : 0);
+        }
+        
+        // Render the tree
+        update(root);
+
+        // Hide loading message and show success
+        d3.select("#loading").style("display", "none");
+        d3.select("#error").style("display", "none");
+
+    } catch (error) {
+        console.error('Error processing tree data:', error);
+        showError(`Failed to process tree data: ${error.message}`);
+        throw error; // Re-throw for testing purposes
+    }
+}
+
+// Collapse a node and its children
+function collapse(d) {
+    if (d.children) {
+        d._children = d.children;
+        d._children.forEach(collapse);
+        d.children = null;
+    }
+}
+
+// Show error message
+function showError(message) {
+    document.getElementById('error').innerHTML = message;
+    document.getElementById('error').style.display = 'block';
+}
+
+// Update tree visualization
+function update(source) {
+    // Compute the new tree layout
+    const treeData = tree(root);
+    const nodes = treeData.descendants();
+    const links = treeData.descendants().slice(1);
+    
+    // Normalize for fixed-depth
+    nodes.forEach(d => d.y = d.depth * 180);
+    
+    // Update nodes
+    const node = g.selectAll('g.node')
+        .data(nodes, d => d.id || (d.id = ++i));
+    
+    // Enter new nodes
+    const nodeEnter = node.enter().append('g')
+        .attr('class', 'node')
+        .attr('transform', d => `translate(${source.y0},${source.x0})`)
+        .on('click', click);
+    
+    // Add circles for nodes
+    nodeEnter.append('circle')
+        .attr('r', 1e-6)
+        .style('fill', d => d._children ? '#ff6b6b' : '#69b3a2');
+    
+    // Add labels for nodes
+    nodeEnter.append('text')
+        .attr('dy', '.35em')
+        .attr('x', d => d.children || d._children ? -13 : 13)
+        .attr('text-anchor', d => d.children || d._children ? 'end' : 'start')
+        .text(d => d.data.name || 'Unknown')
+        .style('fill-opacity', 1e-6);
+    
+    // Update existing nodes
+    const nodeUpdate = nodeEnter.merge(node);
+    
+    nodeUpdate.transition()
+        .duration(duration)
+        .attr('transform', d => `translate(${d.y},${d.x})`);
+    
+    nodeUpdate.select('circle')
+        .attr('r', 6)
+        .style('fill', d => d._children ? '#ff6b6b' : '#69b3a2')
+        .attr('cursor', 'pointer');
+    
+    nodeUpdate.select('text')
+        .style('fill-opacity', 1);
+    
+    // Remove exiting nodes
+    const nodeExit = node.exit().transition()
+        .duration(duration)
+        .attr('transform', d => `translate(${source.y},${source.x})`)
+        .remove();
+    
+    nodeExit.select('circle')
+        .attr('r', 1e-6);
+    
+    nodeExit.select('text')
+        .style('fill-opacity', 1e-6);
+    
+    // Update links
+    const link = g.selectAll('path.link')
+        .data(links, d => d.id);
+    
+    // Enter new links
+    const linkEnter = link.enter().insert('path', 'g')
+        .attr('class', 'link')
+        .attr('d', d => {
+            const o = {x: source.x0, y: source.y0};
+            return diagonal(o, o);
+        });
+    
+    // Update existing links
+    const linkUpdate = linkEnter.merge(link);
+    
+    linkUpdate.transition()
+        .duration(duration)
+        .attr('d', d => diagonal(d, d.parent));
+    
+    // Remove exiting links
+    link.exit().transition()
+        .duration(duration)
+        .attr('d', d => {
+            const o = {x: source.x, y: source.y};
+            return diagonal(o, o);
+        })
+        .remove();
+    
+    // Store old positions for transition
+    nodes.forEach(d => {
+        d.x0 = d.x;
+        d.y0 = d.y;
+    });
+}
+
+// Create diagonal path between nodes
+function diagonal(s, d) {
+    const path = `M ${s.y} ${s.x}
+                 C ${(s.y + d.y) / 2} ${s.x},
+                   ${(s.y + d.y) / 2} ${d.x},
+                   ${d.y} ${d.x}`;
+    return path;
+}
+
+// Handle node click (expand/collapse and load content)
+function click(event, d) {
+    console.log('Node clicked:', d.data.name);
+    console.log('Has children:', d.children ? d.children.length : 0);
+    console.log('Has _children:', d._children ? d._children.length : 0);
+
+    // Load file content in right panel
+    loadFileContent(d.data.path, d.data);
+
+    // Handle expand/collapse
+    if (d.children) {
+        console.log('Collapsing node:', d.data.name);
+        d._children = d.children;
+        d.children = null;
+    } else if (d._children) {
+        console.log('Expanding node:', d.data.name);
+        d.children = d._children;
+        d._children = null;
+    } else {
+        console.log('Node has no children to expand:', d.data.name);
+    }
+    update(d);
+}
+
+// Load file content for the right panel
+function loadFileContent(filePath, nodeData) {
+    console.log('Loading content for:', filePath, nodeData);
+
+    // Build the full file path
+    const baseDirectory = "C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/";
+    const fullPath = baseDirectory + filePath;
+
+    // Use tree node data directly (no additional API calls needed)
+    displayNodeData(filePath, fullPath, nodeData);
+}
+
+// Display information using tree node data
+function displayNodeData(filePath, fullPath, nodeData) {
+    // Hide placeholder and show content
+    document.getElementById('placeholder-content').style.display = 'none';
+    document.getElementById('yaml-content').style.display = 'block';
+
+    // Show actual YAML file content
+    const contentSummary = nodeData.contentSummary || {};
+    let displayContent = contentSummary.rawContent || `# Error: No content available for ${filePath}`;
+
+    // Add circular dependency warning if applicable
+    if (nodeData.circularReference) {
+        displayContent += `\n\n# ⚠️ CIRCULAR DEPENDENCY WARNING
+# ${nodeData.circularReference}`;
+    }
+
+    document.getElementById('yaml-code').textContent = displayContent;
+
+    // Apply syntax highlighting
+    Prism.highlightElement(document.getElementById('yaml-code'));
+
+    // Apply APEX keyword colorization
+    // TODO: Implement colorizeApexKeywords function
+    // setTimeout(() => {
+    //     colorizeApexKeywords(document.getElementById('yaml-code'));
+    // }, 50);
+
+
+
+    // Load and display metadata using tree node data
+    loadFileMetadata(fullPath, {}, nodeData);
+}
+
+
+
+// Helper function to format date
+function formatDate(timestamp) {
+    return new Date(timestamp).toLocaleString();
+}
+
+// Load and display file metadata
+function loadFileMetadata(fullPath, fileData, nodeData) {
+    // Show metadata section
+    document.getElementById('file-metadata').style.display = 'block';
+
+    const contentSummary = nodeData.contentSummary || {};
+
+    // Start with ordered priority fields at the top
+    const metadata = [
+        { label: 'File Path', value: fullPath }
+    ];
+
+    // Add APEX ID if available (full-width)
+    if (contentSummary.id) {
+        metadata.push({ label: 'APEX ID', value: contentSummary.id });
+    }
+
+    // Add Display Name if available (full-width)
+    if (contentSummary.name) {
+        metadata.push({ label: 'Display Name', value: contentSummary.name });
+    }
+
+    // Add File Type (regular width)
+    if (contentSummary.fileType) {
+        metadata.push({ label: 'File Type', value: contentSummary.fileType });
+    }
+
+    // Add Version right after File Type (regular width)
+    if (contentSummary.version) {
+        metadata.push({ label: 'Version', value: contentSummary.version });
+    }
+
+    // Add Last Modified on the same line as File Type and Version (regular width)
+    // Use lastModified from nodeData (which defaults to created-date if last-modified-date is not available)
+    const lastModified = nodeData.lastModified || fileData.lastModified;
+    metadata.push({ label: 'Last Modified', value: lastModified || 'Unknown' });
+
+    // Add Description (full-width)
+    if (contentSummary.description) {
+        metadata.push({ label: 'Description', value: contentSummary.description });
+    }
+
+    // Add remaining file system information
+    // Get YAML validity and file existence from contentSummary.contentCounts
+    const contentCounts = contentSummary.contentCounts || {};
+    const yamlValid = contentCounts['yaml-valid'];
+    const fileExists = contentCounts['file-exists'];
+
+    metadata.push(
+        { label: 'YAML Valid', value: yamlValid !== undefined ? (yamlValid === 1 ? '✓ Valid' : '✗ Invalid') : 'Unknown',
+          status: yamlValid !== undefined ? (yamlValid === 1 ? 'valid' : 'invalid') : 'warning' },
+        { label: 'Readable', value: fileExists !== undefined ? (fileExists === 1 ? '✓ Yes' : '✗ No') : 'Unknown',
+          status: fileExists !== undefined ? (fileExists === 1 ? 'valid' : 'invalid') : 'warning' }
+    );
+
+    // Add content counts
+    if (contentSummary.ruleCount !== undefined) {
+        metadata.push({ label: 'Rules', value: contentSummary.ruleCount.toString() });
+    }
+    if (contentSummary.ruleGroupCount !== undefined) {
+        metadata.push({ label: 'Rule Groups', value: contentSummary.ruleGroupCount.toString() });
+    }
+    if (contentSummary.enrichmentCount !== undefined) {
+        metadata.push({ label: 'Enrichments', value: contentSummary.enrichmentCount.toString() });
+    }
+    if (contentSummary.configFileCount !== undefined) {
+        metadata.push({ label: 'Config Files', value: contentSummary.configFileCount.toString() });
+    }
+    if (contentSummary.referenceCount !== undefined) {
+        metadata.push({ label: 'References', value: contentSummary.referenceCount.toString() });
+    }
+
+    // Add tree-specific metadata
+    if (nodeData.depth !== undefined) {
+        metadata.push({ label: 'Tree Depth', value: nodeData.depth.toString() });
+    }
+    if (nodeData.height !== undefined) {
+        metadata.push({ label: 'Tree Height', value: nodeData.height.toString() });
+    }
+    if (nodeData.childCount !== undefined) {
+        metadata.push({ label: 'Direct Children', value: nodeData.childCount.toString() });
+    }
+    if (nodeData.descendantCount !== undefined) {
+        metadata.push({ label: 'Total Descendants', value: nodeData.descendantCount.toString() });
+    }
+    if (nodeData.circular !== undefined) {
+        metadata.push({
+            label: 'Circular Reference',
+            value: nodeData.circular ? '⚠️ Yes' : '✓ No',
+            status: nodeData.circular ? 'warning' : 'valid'
+        });
+    }
+    if (nodeData.circularReference) {
+        metadata.push({
+            label: 'Circular Issue',
+            value: nodeData.circularReference,
+            status: 'invalid'
+        });
+    }
+
+    // Render metadata immediately with available data
+    renderMetadata(metadata);
+}
+
+// Render metadata in the grid
+function renderMetadata(metadata) {
+    const grid = document.getElementById('metadata-grid');
+    grid.innerHTML = '';
+
+    // Fields that should occupy full width
+    const fullWidthFields = ['File Path', 'Description', 'APEX ID', 'Display Name'];
+
+    metadata.forEach(item => {
+        const metadataItem = document.createElement('div');
+        metadataItem.className = 'metadata-item';
+
+        // Add full-width class for long text fields
+        if (fullWidthFields.includes(item.label)) {
+            metadataItem.classList.add('full-width');
+        }
+
+        const label = document.createElement('span');
+        label.className = 'metadata-label';
+        label.textContent = item.label + ':';
+
+        const value = document.createElement('span');
+        value.className = 'metadata-value';
+
+        if (item.status) {
+            const indicator = document.createElement('span');
+            indicator.className = `status-indicator status-${item.status}`;
+            value.appendChild(indicator);
+        }
+
+        const textNode = document.createTextNode(item.value);
+        value.appendChild(textNode);
+
+        metadataItem.appendChild(label);
+        metadataItem.appendChild(value);
+        grid.appendChild(metadataItem);
+    });
+}
+
+// APEX Keyword Colorization Function
+function applyApexKeywordColorization(codeElement) {
+    // Define APEX keywords by category based on actual YAML files
+    const apexKeywords = {
+        // Metadata keywords - Blue
+        'metadata': 'apex-metadata',
+        'id': 'apex-metadata',
+        'name': 'apex-metadata',
+        'version': 'apex-metadata',
+        'description': 'apex-metadata',
+        'type': 'apex-metadata',
+        'author': 'apex-metadata',
+        'created-date': 'apex-metadata',
+        'created-by': 'apex-metadata',
+        'last-modified': 'apex-metadata',
+        'tags': 'apex-metadata',
+        'categories': 'apex-metadata',
+
+        // Rules keywords - Green
+        'rules': 'apex-rules',
+        'condition': 'apex-rules',
+        'message': 'apex-rules',
+        'severity': 'apex-rules',
+        'enabled': 'apex-rules',
+        'priority': 'apex-rules',
+        'business-domain': 'apex-rules',
+        'business-owner': 'apex-rules',
+        'category': 'apex-rules',
+        'effective-date': 'apex-rules',
+        'expiration-date': 'apex-rules',
+        'custom-properties': 'apex-rules',
+        'validation': 'apex-rules',
+
+        // Enrichment keywords - Purple
+        'enrichment': 'apex-enrichment',
+        'enrichments': 'apex-enrichment',
+        'enrichment-refs': 'apex-enrichment',
+        'enrichment-groups': 'apex-enrichment',
+        'steps': 'apex-enrichment',
+        'when': 'apex-enrichment',
+        'action': 'apex-enrichment',
+        'params': 'apex-enrichment',
+        'field': 'apex-enrichment',
+        'value': 'apex-enrichment',
+        'lookup-config': 'apex-enrichment',
+        'calculation-config': 'apex-enrichment',
+        'field-mappings': 'apex-enrichment',
+        'conditional-mappings': 'apex-enrichment',
+        'mapping-rules': 'apex-enrichment',
+        'target-field': 'apex-enrichment',
+        'source-field': 'apex-enrichment',
+        'transformation': 'apex-enrichment',
+        'target-type': 'apex-enrichment',
+        'execution-settings': 'apex-enrichment',
+
+        // Rule Groups keywords - Orange
+        'rule-groups': 'apex-rulegroup',
+        'rule-ids': 'apex-rulegroup',
+        'rule-references': 'apex-rulegroup',
+        'rule-id': 'apex-rulegroup',
+        'operator': 'apex-rulegroup',
+        'parallel-execution': 'apex-rulegroup',
+        'stop-on-first-failure': 'apex-rulegroup',
+        'debug-mode': 'apex-rulegroup',
+        'rule-group-references': 'apex-rulegroup',
+        'sequence': 'apex-rulegroup',
+        'override-priority': 'apex-rulegroup',
+
+        // Scenario keywords - Pink
+        'scenarios': 'apex-scenario',
+        'scenario': 'apex-scenario',
+        'scenario-id': 'apex-scenario',
+        'config-file': 'apex-scenario',
+        'owner': 'apex-scenario',
+        'rule-configurations': 'apex-scenario',
+        'data-types': 'apex-scenario',
+        'processing-stages': 'apex-scenario',
+        'stage-name': 'apex-scenario',
+        'execution-order': 'apex-scenario',
+        'depends-on': 'apex-scenario',
+        'failure-policy': 'apex-scenario',
+        'stage-metadata': 'apex-scenario'
+    };
+
+    // Simple approach: find text nodes and wrap APEX keywords
+    const walker = document.createTreeWalker(
+        codeElement,
+        NodeFilter.SHOW_TEXT,
+        null,
+        false
+    );
+
+    const textNodes = [];
+    let node;
+    while (node = walker.nextNode()) {
+        textNodes.push(node);
+    }
+
+    textNodes.forEach(textNode => {
+        let text = textNode.textContent;
+        let modified = false;
+
+        // Check each line for YAML key patterns
+        const lines = text.split('\n');
+        const newLines = lines.map(line => {
+            // Match YAML key pattern: optional whitespace + keyword + optional whitespace + colon
+            const match = line.match(/^(\s*)([a-zA-Z][a-zA-Z0-9_-]*)(\s*:)/);
+            if (match) {
+                const [, indent, keyword, colon] = match;
+                if (apexKeywords[keyword]) {
+                    modified = true;
+                    return line.replace(keyword, `<span class="token ${apexKeywords[keyword]}">${keyword}</span>`);
+                }
+            }
+            return line;
+        });
+
+        if (modified) {
+            const newHTML = newLines.join('\n');
+            const wrapper = document.createElement('span');
+            wrapper.innerHTML = newHTML;
+            textNode.parentNode.replaceChild(wrapper, textNode);
+        }
+    });
+
+    // Highlight SpEL expressions separately
+    setTimeout(() => {
+        const allText = codeElement.innerHTML;
+        const spelHighlighted = allText.replace(/("[^"]*#[^"]*"|'[^']*#[^']*')/g, '<span class="token apex-spel">$1</span>');
+        if (spelHighlighted !== allText) {
+            codeElement.innerHTML = spelHighlighted;
+        }
+    }, 10);
+}
+
+// Handle window resize
+window.addEventListener('resize', function() {
+    if (svg) {
+        const treePanel = document.querySelector('.tree-panel');
+        const newWidth = treePanel.offsetWidth - 20;
+        const newHeight = window.innerHeight;
+        svg.attr("width", newWidth).attr("height", newHeight);
+        tree.size([newHeight - 100, newWidth - 200]);
+        if (root) update(root);
+    }
+});
+
+// Resizable divider functionality
+function initializeResizer() {
+    const resizer = document.getElementById('resizer');
+    const treePanel = document.querySelector('.tree-panel');
+    const contentPanel = document.querySelector('.content-panel');
+    const container = document.querySelector('.main-container');
+
+    let isResizing = false;
+
+    resizer.addEventListener('mousedown', function(e) {
+        isResizing = true;
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function(e) {
+        if (!isResizing) return;
+
+        const containerRect = container.getBoundingClientRect();
+        const mouseX = e.clientX - containerRect.left;
+        const containerWidth = containerRect.width;
+
+        // Calculate new widths as percentages
+        const minWidth = 200; // Minimum width for tree panel
+        const maxWidth = containerWidth - 300; // Leave at least 300px for content panel
+
+        let newTreeWidth = Math.max(minWidth, Math.min(maxWidth, mouseX));
+        let treeWidthPercent = (newTreeWidth / containerWidth) * 100;
+
+        // Ensure reasonable bounds
+        treeWidthPercent = Math.max(20, Math.min(80, treeWidthPercent));
+
+        treePanel.style.width = treeWidthPercent + '%';
+
+        // Update tree dimensions if it exists
+        if (svg) {
+            const newWidth = treePanel.offsetWidth - 20;
+            const newHeight = window.innerHeight;
+            svg.attr("width", newWidth).attr("height", newHeight);
+            tree.size([newHeight - 100, newWidth - 200]);
+            if (root) update(root);
+        }
+    });
+
+    document.addEventListener('mouseup', function() {
+        if (isResizing) {
+            isResizing = false;
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        }
+    });
+}
+
+// Initialize toolbar buttons
+function initializeToolbar() {
+    // Zoom controls
+    document.getElementById('zoom-in-btn').addEventListener('click', function() {
+        svg.transition().call(zoom.scaleBy, 1.3);
+    });
+
+    document.getElementById('zoom-out-btn').addEventListener('click', function() {
+        svg.transition().call(zoom.scaleBy, 0.7);
+    });
+
+    document.getElementById('reset-zoom-btn').addEventListener('click', function() {
+        svg.transition().call(zoom.transform, initialTreeTransform);
+    });
+
+    // Expand/Collapse all
+    document.getElementById('expand-all-btn').addEventListener('click', function() {
+        if (root) {
+            expandAll(root);
+            update(root);
+        }
+    });
+
+    document.getElementById('collapse-all-btn').addEventListener('click', function() {
+        if (root) {
+            collapseAll(root);
+            update(root);
+        }
+    });
+}
+
+// Expand all nodes
+function expandAll(d) {
+    if (d._children) {
+        d.children = d._children;
+        d._children = null;
+    }
+    if (d.children) {
+        d.children.forEach(expandAll);
+    }
+}
+
+// Collapse all nodes
+function collapseAll(d) {
+    if (d.children) {
+        d._children = d.children;
+        d.children = null;
+        d._children.forEach(collapseAll);
+    }
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initializeTree();
+    initializeResizer();
+    initializeToolbar();
+
+    // Debug: Log actual header heights
+    setTimeout(() => {
+        const treeHeader = document.querySelector('.tree-header');
+        const contentHeader = document.querySelector('.content-header');
+        console.log('Tree header height:', treeHeader.offsetHeight + 'px');
+        console.log('Content header height:', contentHeader.offsetHeight + 'px');
+    }, 100);
+});
+
