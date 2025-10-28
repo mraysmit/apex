@@ -721,11 +721,16 @@
             }
 
             // Add remaining file system information
+            // Get YAML validity and file existence from contentSummary.contentCounts
+            const contentCounts = contentSummary.contentCounts || {};
+            const yamlValid = contentCounts['yaml-valid'];
+            const fileExists = contentCounts['file-exists'];
+
             metadata.push(
-                { label: 'YAML Valid', value: fileData.isValidYaml !== undefined ? (fileData.isValidYaml ? '✓ Valid' : '✗ Invalid') : 'Unknown',
-                  status: fileData.isValidYaml !== undefined ? (fileData.isValidYaml ? 'valid' : 'invalid') : 'warning' },
-                { label: 'Readable', value: fileData.isReadable !== undefined ? (fileData.isReadable ? '✓ Yes' : '✗ No') : 'Unknown',
-                  status: fileData.isReadable !== undefined ? (fileData.isReadable ? 'valid' : 'invalid') : 'warning' }
+                { label: 'YAML Valid', value: yamlValid !== undefined ? (yamlValid === 1 ? '✓ Valid' : '✗ Invalid') : 'Unknown',
+                  status: yamlValid !== undefined ? (yamlValid === 1 ? 'valid' : 'invalid') : 'warning' },
+                { label: 'Readable', value: fileExists !== undefined ? (fileExists === 1 ? '✓ Yes' : '✗ No') : 'Unknown',
+                  status: fileExists !== undefined ? (fileExists === 1 ? 'valid' : 'invalid') : 'warning' }
             );
 
             // Add content counts
