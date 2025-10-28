@@ -403,7 +403,7 @@
         function loadTreeData() {
             // Use the graph-100 dataset which has 100+ files with deep dependencies
             // Need to use absolute path for proper dependency resolution
-            const rootFile = "C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/00-scenario-registry.yaml";
+            const rootFile = "C:/Users/markr/dev/java/corejava/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/00-scenario-registry.yaml";
             // Updated to use centralized apex-rest-api (port 8080) instead of apex-yaml-manager (port 8082)
             const apiUrl = `http://localhost:8082/yaml-manager/api/dependencies/tree?rootFile=${encodeURIComponent(rootFile)}`;
 
@@ -450,14 +450,19 @@
 
                 // Convert to D3 hierarchy
                 root = d3.hierarchy(treeData);
-                
+                console.log('D3 hierarchy created. Root:', root.data.name);
+                console.log('Root has children:', root.children ? root.children.length : 0);
+
                 // Set initial positions
                 root.x0 = height / 2;
                 root.y0 = 0;
-                
+
                 // Collapse all children initially except first level
                 if (root.children) {
+                    console.log('Collapsing', root.children.length, 'root children');
                     root.children.forEach(collapse);
+                    console.log('After collapse, root children:', root.children.length);
+                    console.log('First child has _children:', root.children[0]._children ? root.children[0]._children.length : 0);
                 }
                 
                 // Render the tree
@@ -599,16 +604,24 @@
         
         // Handle node click (expand/collapse and load content)
         function click(event, d) {
+            console.log('Node clicked:', d.data.name);
+            console.log('Has children:', d.children ? d.children.length : 0);
+            console.log('Has _children:', d._children ? d._children.length : 0);
+
             // Load file content in right panel
             loadFileContent(d.data.path, d.data);
 
             // Handle expand/collapse
             if (d.children) {
+                console.log('Collapsing node:', d.data.name);
                 d._children = d.children;
                 d.children = null;
-            } else {
+            } else if (d._children) {
+                console.log('Expanding node:', d.data.name);
                 d.children = d._children;
                 d._children = null;
+            } else {
+                console.log('Node has no children to expand:', d.data.name);
             }
             update(d);
         }
