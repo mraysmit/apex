@@ -17,7 +17,7 @@ package dev.mars.apex.rest.controller;
  */
 
 
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.SequentialEnrichmentService;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 
@@ -56,7 +56,7 @@ public class EnrichmentController {
     private static final Logger logger = LoggerFactory.getLogger(EnrichmentController.class);
 
     @Autowired
-    private EnrichmentService enrichmentService;
+    private SequentialEnrichmentService enrichmentService;
 
     @Autowired
     private YamlConfigurationLoader yamlConfigurationLoader;

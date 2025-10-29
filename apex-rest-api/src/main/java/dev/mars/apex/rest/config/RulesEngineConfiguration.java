@@ -3,15 +3,19 @@ package dev.mars.apex.rest.config;
 import dev.mars.apex.core.api.RulesService;
 import dev.mars.apex.core.api.SimpleRulesEngine;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.yaml.YamlRuleFactory;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.service.data.DataServiceManager;
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.SequentialEnrichmentService;
 import dev.mars.apex.core.service.engine.TemplateProcessorService;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.expression.ExpressionEvaluationService;
 import dev.mars.apex.core.service.transform.GenericTransformerService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.data.DataSource;
+import dev.mars.apex.core.config.yaml.SequentialYamlRulesEngineService;
+import dev.mars.apex.core.service.integration.SequentialProcessingIntegrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.time.Instant;
@@ -201,6 +205,56 @@ public class RulesEngineConfiguration {
             ExpressionEvaluatorService expressionEvaluatorService) {
         logger.info("Creating EnrichmentService bean");
         return new EnrichmentService(lookupServiceRegistry, expressionEvaluatorService);
+    }
+
+    /**
+     * YamlRuleFactory bean for creating rules engine configurations.
+     */
+    @Bean
+    public YamlRuleFactory yamlRuleFactory() {
+        logger.info("Creating YamlRuleFactory bean");
+        return new YamlRuleFactory();
+    }
+
+    /**
+     * SequentialEnrichmentService bean for enhanced data enrichment with sequential processing support.
+     * This service automatically detects processing mode and routes to appropriate processor.
+     */
+    @Bean
+    @Primary
+    public SequentialEnrichmentService sequentialEnrichmentService(
+            EnrichmentService enrichmentService,
+            YamlConfigurationLoader yamlConfigurationLoader,
+            YamlRuleFactory yamlRuleFactory) {
+        logger.info("Creating SequentialEnrichmentService bean - APEX design flaw fix active");
+        return new SequentialEnrichmentService(enrichmentService, yamlConfigurationLoader, yamlRuleFactory);
+    }
+
+    /**
+     * SequentialYamlRulesEngineService bean for enhanced rules engine with sequential processing support.
+     * This service automatically detects processing mode and routes to appropriate processor.
+     */
+    @Bean
+    @Primary
+    public SequentialYamlRulesEngineService sequentialYamlRulesEngineService(
+            YamlConfigurationLoader yamlConfigurationLoader,
+            YamlRuleFactory yamlRuleFactory,
+            EnrichmentService enrichmentService) {
+        logger.info("Creating SequentialYamlRulesEngineService bean - APEX design flaw fix active");
+        return new SequentialYamlRulesEngineService(yamlConfigurationLoader, yamlRuleFactory, enrichmentService);
+    }
+
+    /**
+     * SequentialProcessingIntegrationService bean for unified sequential processing integration.
+     * This service provides the core integration between legacy and sequential processing modes.
+     */
+    @Bean
+    public SequentialProcessingIntegrationService sequentialProcessingIntegrationService(
+            YamlConfigurationLoader yamlConfigurationLoader,
+            YamlRuleFactory yamlRuleFactory,
+            EnrichmentService enrichmentService) {
+        logger.info("Creating SequentialProcessingIntegrationService bean - APEX design flaw fix active");
+        return new SequentialProcessingIntegrationService(yamlConfigurationLoader, yamlRuleFactory, enrichmentService);
     }
 
     /**

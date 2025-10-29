@@ -37,6 +37,7 @@ module dev.mars.apex.core {
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.dataformat.yaml;
     requires com.fasterxml.jackson.dataformat.xml;
+    requires org.yaml.snakeyaml;
 
     // Enable automatic JDBC driver loading
     uses java.sql.Driver;

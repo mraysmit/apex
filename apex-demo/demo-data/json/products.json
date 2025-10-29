@@ -1,0 +1,42 @@
+[
+  {
+    "id": "PROD001",
+    "name": "US Treasury Bond",
+    "price": 1200.0,
+    "category": "FixedIncome",
+    "available": true,
+    "description": "10-year US Treasury Bond with 3.5% yield"
+  },
+  {
+    "id": "PROD002", 
+    "name": "Apple Stock",
+    "price": 150.0,
+    "category": "Equity",
+    "available": true,
+    "description": "Apple Inc. common stock"
+  },
+  {
+    "id": "PROD003",
+    "name": "Bitcoin ETF",
+    "price": 450.0,
+    "category": "ETF",
+    "available": true,
+    "description": "Bitcoin Exchange Traded Fund"
+  },
+  {
+    "id": "PROD004",
+    "name": "Gold Futures",
+    "price": 2000.0,
+    "category": "Commodity",
+    "available": true,
+    "description": "Gold futures contract"
+  },
+  {
+    "id": "PROD005",
+    "name": "Corporate Bond",
+    "price": 980.0,
+    "category": "FixedIncome", 
+    "available": true,
+    "description": "AAA-rated corporate bond"
+  }
+]

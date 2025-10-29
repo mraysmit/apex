@@ -2,6 +2,7 @@ package dev.mars.apex.rest.controller;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.service.integration.SequentialProcessingIntegrationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -58,6 +59,9 @@ public class ConfigurationController {
 
     @Autowired
     private YamlConfigurationLoader yamlConfigurationLoader;
+
+    @Autowired
+    private SequentialProcessingIntegrationService sequentialProcessingIntegrationService;
 
     @Autowired
     private TestAwareLogger testAwareLogger;
