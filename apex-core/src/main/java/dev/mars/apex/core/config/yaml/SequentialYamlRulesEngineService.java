@@ -76,7 +76,10 @@ public class SequentialYamlRulesEngineService {
             return integrationService.createRulesEngineFromFile(file);
         } catch (Exception e) {
             LOGGER.warning("Sequential processing failed, falling back to standard processing: " + e.getMessage());
-            return standardService.createRulesEngineFromFile(file);
+            // Use the non-deprecated pattern for fallback
+            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            YamlRuleConfiguration config = loader.loadFromFile(file);
+            return standardService.createRulesEngineFromYamlConfig(config);
         }
     }
     

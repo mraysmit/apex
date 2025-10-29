@@ -65,8 +65,12 @@ public class YamlRulesEngineService {
      * @param filePath The path to the YAML configuration file
      * @return A configured RulesEngine with full enterprise metadata support
      * @throws YamlConfigurationException if configuration loading or processing fails
+     * @deprecated since 2.0, for removal in 3.0. This method is redundant - use {@link #createRulesEngineFromYamlConfig(YamlRuleConfiguration)}
+     *             with {@link YamlConfigurationLoader#loadFromFile(String)} instead. The "generic architecture" is now the standard approach.
      */
+    @Deprecated(since = "2.0", forRemoval = true)
     public RulesEngine createRulesEngineWithGenericArchitecture(String filePath) throws YamlConfigurationException {
+        LOGGER.warning("DEPRECATED: createRulesEngineWithGenericArchitecture() is deprecated. Use createRulesEngineFromYamlConfig() with YamlConfigurationLoader.loadFromFile() instead.");
         LOGGER.info("Creating rules engine with generic architecture from YAML file: " + filePath);
 
         YamlRuleConfiguration yamlConfig = configLoader.loadFromFile(filePath);
@@ -113,19 +117,23 @@ public class YamlRulesEngineService {
     
     /**
      * Create a rules engine from a YAML configuration file.
-     * 
+     *
      * @param file The YAML configuration file
      * @return A configured RulesEngine
      * @throws YamlConfigurationException if configuration loading or processing fails
+     * @deprecated since 2.0, for removal in 3.0. This method is a redundant wrapper - use {@link #createRulesEngineFromYamlConfig(YamlRuleConfiguration)}
+     *             with {@link YamlConfigurationLoader#loadFromFile(File)} instead for better separation of concerns.
      */
+    @Deprecated(since = "2.0", forRemoval = true)
     public RulesEngine createRulesEngineFromFile(File file) throws YamlConfigurationException {
+        LOGGER.warning("DEPRECATED: createRulesEngineFromFile(File) is deprecated. Use createRulesEngineFromYamlConfig() with YamlConfigurationLoader.loadFromFile() instead.");
         LOGGER.info("Creating rules engine from YAML file: " + file.getAbsolutePath());
-        
+
         YamlRuleConfiguration yamlConfig = configLoader.loadFromFile(file);
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
-        
+
         RulesEngine engine = new RulesEngine(config);
-        
+
         LOGGER.info("Successfully created rules engine from file: " + file.getAbsolutePath());
         return engine;
     }

@@ -1,6 +1,8 @@
 package dev.mars.apex.core.integration;
 
 import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.engine.model.RuleGroup;
@@ -173,7 +175,9 @@ class MultiFileRuleReferenceIntegrationTest {
         Files.writeString(mainConfigFile, formattedMainConfig);
         
         // Create rules engine from main config file (which references external rules)
-        RulesEngine engine = rulesEngineService.createRulesEngineFromFile(mainConfigFile.toString());
+        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        YamlRuleConfiguration config = loader.loadFromFile(mainConfigFile.toString());
+        RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
         
         // Verify engine was created successfully
         assertNotNull(engine, "Rules engine should be created");
