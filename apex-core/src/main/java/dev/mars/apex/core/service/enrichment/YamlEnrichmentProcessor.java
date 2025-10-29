@@ -147,9 +147,11 @@ public class YamlEnrichmentProcessor {
                     LOGGER.fine("Skipping enrichment (condition not met): " + enrichment.getId());
                 }
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to process enrichment '" + enrichment.getId() + 
-                          "': " + e.getMessage(), e);
-                // Continue processing other enrichments
+                // CRITICAL: Enrichment processing failure is a serious configuration error
+                LOGGER.log(Level.SEVERE, "CRITICAL: Failed to process enrichment '" + enrichment.getId() +
+                          "' - Error: " + e.getMessage(), e);
+                // Continue processing other enrichments for now (backward compatibility)
+                // TODO: Consider fail-fast behavior for critical enrichments
             }
         }
         
@@ -245,9 +247,13 @@ public class YamlEnrichmentProcessor {
 
                 return result != null && result;
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Error evaluating enrichment condition '" +
-                          enrichment.getCondition() + "' for enrichment " + enrichment.getId() +
-                          ": " + e.getMessage(), e);
+                // CRITICAL: Enrichment condition evaluation failure is a serious configuration error
+                LOGGER.log(Level.SEVERE, "CRITICAL: Enrichment condition evaluation failed for '" +
+                          enrichment.getId() + "' - condition: '" + enrichment.getCondition() +
+                          "' - Error: " + e.getMessage(), e);
+
+                // For now, return false to maintain backward compatibility
+                // TODO: Consider throwing EnrichmentConfigurationException for critical enrichments
                 return false;
             }
         }
@@ -547,7 +553,9 @@ public class YamlEnrichmentProcessor {
                     return true; // Short-circuit on first true condition
                 }
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to evaluate OR condition: " + rule.getCondition() + " - " + e.getMessage(), e);
+                // ERROR: OR condition evaluation failure indicates configuration problem
+                LOGGER.log(Level.SEVERE, "ERROR: Failed to evaluate OR condition: '" + rule.getCondition() +
+                          "' - Error: " + e.getMessage(), e);
             }
         }
         return false; // No conditions were true
@@ -564,7 +572,9 @@ public class YamlEnrichmentProcessor {
                     return false; // Short-circuit on first false condition
                 }
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to evaluate AND condition: " + rule.getCondition() + " - " + e.getMessage(), e);
+                // ERROR: AND condition evaluation failure indicates configuration problem
+                LOGGER.log(Level.SEVERE, "ERROR: Failed to evaluate AND condition: '" + rule.getCondition() +
+                          "' - Error: " + e.getMessage(), e);
                 return false; // Treat evaluation errors as false for AND logic
             }
         }
@@ -593,7 +603,9 @@ public class YamlEnrichmentProcessor {
                 return false;
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Failed to evaluate condition: " + rule.getCondition() + " - " + e.getMessage(), e);
+            // ERROR: Condition evaluation failure indicates configuration problem
+            LOGGER.log(Level.SEVERE, "ERROR: Failed to evaluate condition: '" + rule.getCondition() +
+                      "' - Error: " + e.getMessage(), e);
             return false;
         }
     }
@@ -1089,7 +1101,9 @@ public class YamlEnrichmentProcessor {
                         LOGGER.fine("Rule '" + yamlRule.getId() + "' evaluated to: " + result);
 
                     } catch (Exception e) {
-                        LOGGER.log(Level.WARNING, "Error evaluating rule '" + yamlRule.getId() + "': " + e.getMessage(), e);
+                        // CRITICAL: Rule evaluation failure is a serious configuration error
+                        LOGGER.log(Level.SEVERE, "CRITICAL: Rule evaluation failed for '" + yamlRule.getId() +
+                                  "' - condition: '" + yamlRule.getCondition() + "' - Error: " + e.getMessage(), e);
                         individualRuleResults.put(yamlRule.getId(), false);
                     }
                 }
@@ -1155,7 +1169,9 @@ public class YamlEnrichmentProcessor {
                         LOGGER.fine("Rule group '" + yamlRuleGroup.getId() + "' evaluated to: " + groupResult);
 
                     } catch (Exception e) {
-                        LOGGER.log(Level.WARNING, "Error evaluating rule group '" + yamlRuleGroup.getId() + "': " + e.getMessage(), e);
+                        // CRITICAL: Rule group evaluation failure is a serious configuration error
+                        LOGGER.log(Level.SEVERE, "CRITICAL: Rule group evaluation failed for '" + yamlRuleGroup.getId() +
+                                  "' - Error: " + e.getMessage(), e);
                         Map<String, Object> failedResult = new HashMap<>();
                         failedResult.put("passed", false);
                         failedResult.put("passedRules", new ArrayList<String>());
@@ -1166,7 +1182,8 @@ public class YamlEnrichmentProcessor {
             }
 
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error processing rules and rule groups: " + e.getMessage(), e);
+            // CRITICAL: General rules/rule groups processing failure is a serious system error
+            LOGGER.log(Level.SEVERE, "CRITICAL: Error processing rules and rule groups - System Error: " + e.getMessage(), e);
         }
     }
 

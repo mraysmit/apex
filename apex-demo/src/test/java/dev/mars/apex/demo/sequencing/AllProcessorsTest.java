@@ -1,0 +1,232 @@
+package dev.mars.apex.demo.sequencing;
+
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
+import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import dev.mars.apex.core.service.error.ErrorRecoveryService;
+import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
+import dev.mars.apex.core.api.SimpleRulesEngine;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * COMPREHENSIVE TEST: Tests ALL APEX processors with the SAME YAML file
+ * to prove the design flaw that different processors produce different results.
+ */
+@DisplayName("🚨 ALL PROCESSORS: Same YAML → Different Results")
+class AllProcessorsTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AllProcessorsTest.class);
+
+    private YamlConfigurationLoader yamlLoader;
+    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor yamlEnrichmentProcessor;
+    private RulesEngineConfiguration rulesEngineConfiguration;
+    private SimpleRulesEngine simpleRulesEngine;
+
+    @BeforeEach
+    void setUp() {
+        LOGGER.info("🔧 Initializing ALL APEX processors for comprehensive testing");
+        
+        yamlLoader = new YamlConfigurationLoader();
+        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
+        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
+        
+        enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+        yamlEnrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
+        rulesEngineConfiguration = new RulesEngineConfiguration();
+        simpleRulesEngine = new SimpleRulesEngine();
+        
+        LOGGER.info("✅ All processors initialized");
+    }
+
+    @Test
+    @DisplayName("🚨 PROCESSOR 1: YamlEnrichmentProcessor (Rules → Enrichments)")
+    void testYamlEnrichmentProcessor() {
+        LOGGER.info("=== TESTING: YamlEnrichmentProcessor ===");
+        LOGGER.info("📋 Processing Order: Rules FIRST → Enrichments SECOND (hardcoded)");
+        
+        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/AllProcessorsTest.yaml";
+        YamlRuleConfiguration config;
+        try {
+            config = yamlLoader.loadFromFile(yamlPath);
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+            return;
+        }
+        
+        Map<String, Object> testData = new HashMap<>();
+        testData.put("amount", 50000.0);
+        
+        LOGGER.info("💰 Input: amount = {}", testData.get("amount"));
+        LOGGER.info("🎯 Expected (if YAML order respected): riskScore=0.5, riskCategory=MEDIUM_RISK");
+        
+        try {
+            Object result = yamlEnrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            
+            @SuppressWarnings("unchecked")
+            Map<String, Object> enrichedData = (Map<String, Object>) result;
+            
+            LOGGER.info("📊 YamlEnrichmentProcessor Result: {}", enrichedData);
+            
+            // Check what was actually calculated
+            if (enrichedData.containsKey("riskScore")) {
+                LOGGER.info("✅ riskScore calculated: {}", enrichedData.get("riskScore"));
+            } else {
+                LOGGER.error("❌ riskScore NOT calculated");
+            }
+            
+            if (enrichedData.containsKey("riskCategory")) {
+                LOGGER.info("✅ riskCategory set: {}", enrichedData.get("riskCategory"));
+            } else {
+                LOGGER.error("❌ riskCategory NOT set");
+            }
+            
+            assertNotNull(result, "YamlEnrichmentProcessor should return result");
+            
+        } catch (Exception e) {
+            LOGGER.error("💥 YamlEnrichmentProcessor failed: {}", e.getMessage());
+            fail("YamlEnrichmentProcessor should not fail: " + e.getMessage());
+        }
+    }
+
+    @Test
+    @DisplayName("🚨 PROCESSOR 2: RulesEngine.evaluate() (Enrichments → Rules → Rule Groups)")
+    void testRulesEngineEvaluate() {
+        LOGGER.info("=== TESTING: RulesEngine.evaluate() ===");
+        LOGGER.info("📋 Processing Order: Enrichments FIRST → Rules SECOND → Rule Groups THIRD (hardcoded)");
+        
+        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/AllProcessorsTest.yaml";
+        YamlRuleConfiguration config;
+        try {
+            config = yamlLoader.loadFromFile(yamlPath);
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+            return;
+        }
+
+        Map<String, Object> testData = new HashMap<>();
+        testData.put("amount", 50000.0);
+        
+        LOGGER.info("💰 Input: amount = {}", testData.get("amount"));
+        LOGGER.info("🎯 Expected (if YAML order respected): riskScore=0.5, riskCategory=MEDIUM_RISK");
+        
+        try {
+            RulesEngine engine = new RulesEngine(
+                rulesEngineConfiguration,
+                new SpelExpressionParser(),
+                new ErrorRecoveryService(),
+                new RulePerformanceMonitor(),
+                enrichmentService
+            );
+            
+            RuleResult result = engine.evaluate(config, testData);
+            Map<String, Object> enrichedData = result.getEnrichedData();
+            
+            LOGGER.info("📊 RulesEngine.evaluate() Result: {}", enrichedData);
+            LOGGER.info("🎯 Rule Evaluation Success: {}", result.isSuccess());
+            
+            // Check what was actually calculated
+            if (enrichedData.containsKey("riskScore")) {
+                LOGGER.info("✅ riskScore calculated: {}", enrichedData.get("riskScore"));
+            } else {
+                LOGGER.error("❌ riskScore NOT calculated");
+            }
+            
+            if (enrichedData.containsKey("riskCategory")) {
+                LOGGER.info("✅ riskCategory set: {}", enrichedData.get("riskCategory"));
+            } else {
+                LOGGER.error("❌ riskCategory NOT set");
+            }
+            
+            assertNotNull(result, "RulesEngine should return result");
+            
+        } catch (Exception e) {
+            LOGGER.error("💥 RulesEngine.evaluate() failed: {}", e.getMessage());
+            fail("RulesEngine.evaluate() should not fail: " + e.getMessage());
+        }
+    }
+
+    @Test
+    @DisplayName("🚨 PROCESSOR 3: EnrichmentService.enrichObject() (Delegates to YamlEnrichmentProcessor)")
+    void testEnrichmentService() {
+        LOGGER.info("=== TESTING: EnrichmentService.enrichObject() ===");
+        LOGGER.info("📋 Processing Order: Delegates to YamlEnrichmentProcessor (Rules → Enrichments)");
+        
+        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/AllProcessorsTest.yaml";
+        YamlRuleConfiguration config;
+        try {
+            config = yamlLoader.loadFromFile(yamlPath);
+        } catch (Exception e) {
+            fail("Failed to load YAML configuration: " + e.getMessage());
+            return;
+        }
+
+        Map<String, Object> testData = new HashMap<>();
+        testData.put("amount", 50000.0);
+        
+        LOGGER.info("💰 Input: amount = {}", testData.get("amount"));
+        
+        try {
+            Object result = enrichmentService.enrichObject(config, testData);
+            
+            @SuppressWarnings("unchecked")
+            Map<String, Object> enrichedData = (Map<String, Object>) result;
+            
+            LOGGER.info("📊 EnrichmentService Result: {}", enrichedData);
+            
+            assertNotNull(result, "EnrichmentService should return result");
+            
+        } catch (Exception e) {
+            LOGGER.error("💥 EnrichmentService failed: {}", e.getMessage());
+            fail("EnrichmentService should not fail: " + e.getMessage());
+        }
+    }
+
+    @Test
+    @DisplayName("🚨 PROCESSOR 4: SimpleRulesEngine (Rules Only - No Enrichments)")
+    void testSimpleRulesEngine() {
+        LOGGER.info("=== TESTING: SimpleRulesEngine ===");
+        LOGGER.info("📋 Processing Order: Rules ONLY (no enrichment support)");
+        
+        Map<String, Object> testData = new HashMap<>();
+        testData.put("amount", 50000.0);
+        // Pre-populate fields that enrichments would normally calculate
+        testData.put("riskScore", 0.5);
+        testData.put("riskCategory", "MEDIUM_RISK");
+        
+        LOGGER.info("💰 Input (pre-enriched): {}", testData);
+        
+        try {
+            // Test individual rule conditions
+            boolean riskScoreValid = simpleRulesEngine.evaluate("#riskScore != null && #riskScore >= 0", testData);
+            boolean riskCategoryValid = simpleRulesEngine.evaluate("#riskCategory != null && (#riskCategory == 'HIGH_RISK' || #riskCategory == 'MEDIUM_RISK' || #riskCategory == 'LOW_RISK')", testData);
+            
+            LOGGER.info("📊 SimpleRulesEngine Results:");
+            LOGGER.info("   Risk Score Valid: {}", riskScoreValid);
+            LOGGER.info("   Risk Category Valid: {}", riskCategoryValid);
+            
+            assertTrue(riskScoreValid, "Risk score validation should pass");
+            assertTrue(riskCategoryValid, "Risk category validation should pass");
+            
+        } catch (Exception e) {
+            LOGGER.error("💥 SimpleRulesEngine failed: {}", e.getMessage());
+            fail("SimpleRulesEngine should not fail: " + e.getMessage());
+        }
+    }
+}

@@ -1,0 +1,79 @@
+name: "Production Monitoring Logging Test"
+description: "Test configuration to demonstrate how SEVERE logging enables effective production monitoring and incident response"
+
+# These enrichments simulate real production scenarios where configuration problems
+# would need to be detected quickly by monitoring systems
+enrichments:
+  - id: "order-validation-enrichment"
+    type: "calculation-enrichment"
+    # Production scenario: Order validation with invalid rule reference
+    condition: "#ruleResults != null && #ruleResults.get('validate-order').status == 'APPROVED'"
+    target-field: "orderStatus"
+    field-mappings:
+      - source-field: "orderId"
+        target-field: "orderStatus"
+        calculation: "'Order Status: ' + #orderId"
+    
+  - id: "customer-tier-enrichment"
+    type: "calculation-enrichment"
+    # Production scenario: Customer tier calculation with invalid method call
+    condition: "#customerId != null && #customerId.isPremiumCustomer()"
+    target-field: "customerTier"
+    field-mappings:
+      - source-field: "customerId"
+        target-field: "customerTier"
+        calculation: "#orderAmount > 10000 ? 'PREMIUM' : 'STANDARD'"
+        
+  - id: "regional-pricing-enrichment"
+    type: "calculation-enrichment"
+    # Production scenario: Regional pricing with invalid property access
+    condition: "#region != null && #region.hasPremiumPricing"
+    target-field: "pricingTier"
+    field-mappings:
+      - source-field: "region"
+        target-field: "pricingTier"
+        calculation: "'Pricing: ' + #region"
+
+  - id: "inventory-check-enrichment"
+    type: "calculation-enrichment"
+    # Production scenario: Inventory check with invalid service call
+    condition: "#inventoryService.checkAvailability(#productId) > 0"
+    target-field: "inventoryStatus"
+    field-mappings:
+      - source-field: "productId"
+        target-field: "inventoryStatus"
+        calculation: "#inventory > 0 ? 'AVAILABLE' : 'OUT_OF_STOCK'"
+
+  - id: "fraud-detection-enrichment"
+    type: "calculation-enrichment"
+    # Production scenario: Fraud detection with complex invalid condition
+    condition: "#fraudService.calculateRiskScore(#userId, #amount, #sessionId).score < 0.3"
+    target-field: "fraudRisk"
+    field-mappings:
+      - source-field: "amount"
+        target-field: "fraudRisk"
+        calculation: "#amount > 5000 ? 'HIGH_RISK' : 'LOW_RISK'"
+
+  - id: "payment-processing-enrichment"
+    type: "calculation-enrichment"
+    # Production scenario: Payment processing with invalid validation
+    condition: "#paymentMethod.isValid() && #paymentMethod.hasValidFunds(#amount)"
+    target-field: "paymentStatus"
+    field-mappings:
+      - source-field: "amount"
+        target-field: "paymentStatus"
+        calculation: "'Payment: ' + #amount"
+
+# Add some basic rules for context (these should work)
+rules:
+  - id: "validate-order"
+    name: "validate-order"
+    condition: "#orderId != null && #orderId.length() > 0"
+    
+  - id: "validate-customer"
+    name: "validate-customer"
+    condition: "#customerId != null && #customerId.length() > 0"
+    
+  - id: "validate-amount"
+    name: "validate-amount"
+    condition: "#orderAmount != null && #orderAmount > 0"

@@ -1,0 +1,38 @@
+name: "Logging Severity Fix Test"
+description: "Test configuration to verify that business logic failures are now logged at SEVERE level instead of WARNING"
+
+# These enrichments have intentionally invalid conditions to trigger logging severity fixes
+enrichments:
+  - id: "expensive-customer-lookup"
+    type: "calculation-enrichment"
+    # INVALID CONDITION: References non-existent field structure
+    # This should now log as SEVERE instead of WARNING
+    condition: "#ruleResults != null && #ruleResults.get('validate-customer-id').passed"
+    target-field: "customerDetails"
+    field-mappings:
+      - source-field: "customerId"
+        target-field: "customerDetails"
+        calculation: "'Customer: ' + #customerId"
+
+  - id: "calculate-fees"
+    type: "calculation-enrichment"
+    # INVALID CONDITION: References non-existent field structure
+    # This should now log as SEVERE instead of WARNING
+    condition: "#ruleResults != null && #ruleResults.get('validate-amount').passed"
+    target-field: "calculatedFees"
+    field-mappings:
+      - source-field: "amount"
+        target-field: "calculatedFees"
+        calculation: "#amount * 0.05"
+
+# Add rules to create the ruleResults context that the enrichments reference
+rules:
+  - id: "validate-customer-id"
+    name: "validate-customer-id"
+    condition: "#customerId != null && #customerId.length() > 0"
+
+  - id: "validate-amount"
+    name: "validate-amount"
+    condition: "#amount != null && #amount > 0"
+
+

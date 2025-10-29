@@ -1,0 +1,52 @@
+name: "Critical Enrichment Condition Logging Test"
+description: "Test configuration to verify that enrichment condition evaluation failures are logged at SEVERE level with clear visibility for users"
+
+# These enrichments have intentionally invalid conditions to trigger SEVERE logging
+# This demonstrates the logging severity fix in action
+enrichments:
+  - id: "customer-profile-lookup"
+    type: "calculation-enrichment"
+    # INVALID CONDITION: References non-existent field structure
+    # This should log as SEVERE with "CRITICAL:" prefix
+    condition: "#ruleResults != null && #ruleResults.get('validate-customer').passed"
+    target-field: "customerProfile"
+    field-mappings:
+      - source-field: "customerId"
+        target-field: "customerProfile"
+        calculation: "'Customer Profile: ' + #customerId"
+    
+  - id: "risk-assessment"
+    type: "calculation-enrichment"
+    # INVALID CONDITION: References non-existent method
+    # This should log as SEVERE with "CRITICAL:" prefix
+    condition: "#amount != null && #amount.isValid()"
+    target-field: "riskLevel"
+    field-mappings:
+      - source-field: "amount"
+        target-field: "riskLevel"
+        calculation: "#amount > 10000 ? 'HIGH' : 'LOW'"
+        
+  - id: "currency-conversion"
+    type: "calculation-enrichment"
+    # INVALID CONDITION: References non-existent property
+    # This should log as SEVERE with "CRITICAL:" prefix
+    condition: "#currency != null && #currency.isSupported"
+    target-field: "convertedAmount"
+    field-mappings:
+      - source-field: "amount"
+        target-field: "convertedAmount"
+        calculation: "#amount * 1.1"
+
+# Add rules to create some context (these should work fine)
+rules:
+  - id: "validate-customer"
+    name: "validate-customer"
+    condition: "#customerId != null && #customerId.length() > 0"
+    
+  - id: "validate-amount"
+    name: "validate-amount"
+    condition: "#amount != null && #amount > 0"
+    
+  - id: "validate-currency"
+    name: "validate-currency"
+    condition: "#currency != null && #currency.length() == 3"

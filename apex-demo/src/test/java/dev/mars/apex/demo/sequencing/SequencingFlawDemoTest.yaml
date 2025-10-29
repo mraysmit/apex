@@ -1,0 +1,48 @@
+# ============================================================================
+# DESIGN FLAW DEMONSTRATION: Enrich-Then-Validate Pattern
+# ============================================================================
+# Developer Intent: Calculate risk score FIRST, then validate it
+# Expected Flow: enrichments -> rules
+# APEX Reality: Processes rules FIRST, enrichments SECOND
+# Result: Rule fails because #riskScore doesn't exist yet
+# ============================================================================
+
+metadata:
+  id: "enrich-then-validate-demo"
+  name: "Enrich Then Validate Demo"
+  version: "1.0.0"
+  description: "Demonstrates broken enrich-then-validate pattern"
+  type: "rule-config"
+  author: "APEX Design Flaw Demo"
+
+# DEVELOPER INTENT: Process enrichments FIRST
+enrichments:
+  - id: "calculate-risk-score"
+    name: "Calculate Risk Score"
+    type: "calculation-enrichment"
+    description: "Calculate risk score based on transaction amount"
+    condition: "#amount != null"
+    calculation-config:
+      expression: "#amount > 50000 ? 0.9 : (#amount > 10000 ? 0.5 : 0.1)"
+      result-field: "riskScore"
+    field-mappings:
+      - source-field: "riskScore"
+        target-field: "riskScore"
+
+# DEVELOPER INTENT: Process rules SECOND (after enrichment)
+rules:
+  - id: "validate-risk-threshold"
+    name: "Validate Risk Threshold"
+    description: "Validate that risk score is within acceptable limits"
+    condition: "#riskScore != null && #riskScore < 0.8"
+    message: "Risk score {{#riskScore}} is acceptable"
+    severity: "INFO"
+    enabled: true
+
+  - id: "high-risk-alert"
+    name: "High Risk Alert"
+    description: "Alert when risk score exceeds threshold"
+    condition: "#riskScore != null && #riskScore >= 0.8"
+    message: "HIGH RISK: Risk score {{#riskScore}} exceeds threshold"
+    severity: "ERROR"
+    enabled: true
