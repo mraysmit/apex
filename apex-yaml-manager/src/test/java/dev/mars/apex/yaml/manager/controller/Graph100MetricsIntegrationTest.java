@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -48,21 +50,28 @@ class Graph100MetricsIntegrationTest {
         assertTrue(registry.exists(), "registry file must exist");
 
         // Load graph via validate-tree (sets currentGraph on controller)
-        ResponseEntity<Map> validation = restTemplate.postForEntity(
+        ResponseEntity<Map<String, Object>> validation = restTemplate.exchange(
                 baseUrl + "/validate-tree?rootFile=" + registry.getAbsolutePath(),
+                HttpMethod.POST,
                 null,
-                Map.class
+                new ParameterizedTypeReference<Map<String, Object>>() {}
         );
         assertEquals(HttpStatus.OK, validation.getStatusCode());
         assertEquals("success", validation.getBody().get("status"));
 
         // Metrics
-        ResponseEntity<Map> metricsResp = restTemplate.getForEntity(baseUrl + "/metrics", Map.class);
+        ResponseEntity<Map<String, Object>> metricsResp = restTemplate.exchange(
+                baseUrl + "/metrics",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+        );
         assertEquals(HttpStatus.OK, metricsResp.getStatusCode());
-        Map metricsWrapper = metricsResp.getBody();
+        Map<String, Object> metricsWrapper = metricsResp.getBody();
         assertNotNull(metricsWrapper);
         assertEquals("success", metricsWrapper.get("status"));
-        Map metrics = (Map) metricsWrapper.get("metrics");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> metrics = (Map<String, Object>) metricsWrapper.get("metrics");
         assertNotNull(metrics);
         Number totalFiles = (Number) metrics.get("totalFiles");
         Number maxDepth = (Number) metrics.get("maxDepth");
@@ -72,21 +81,31 @@ class Graph100MetricsIntegrationTest {
         assertTrue(maxDepth.intValue() >= 7, "expected depth >= 7 due to chain files");
 
         // Cycles
-        ResponseEntity<Map> cyclesResp = restTemplate.getForEntity(baseUrl + "/circular-dependencies", Map.class);
+        ResponseEntity<Map<String, Object>> cyclesResp = restTemplate.exchange(
+                baseUrl + "/circular-dependencies",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+        );
         assertEquals(HttpStatus.OK, cyclesResp.getStatusCode());
-        Map cyclesBody = cyclesResp.getBody();
+        Map<String, Object> cyclesBody = cyclesResp.getBody();
         assertNotNull(cyclesBody);
         assertEquals("success", cyclesBody.get("status"));
         Number count = (Number) cyclesBody.get("count");
         assertNotNull(count);
         assertTrue(count.intValue() >= 1, "expected at least one cycle");
-        List cycles = (List) cyclesBody.get("circularDependencies");
+        List<?> cycles = (List<?>) cyclesBody.get("circularDependencies");
         assertNotNull(cycles);
 
         // Report text basic check (not asserting missing files here because report omits them)
-        ResponseEntity<Map> reportResp = restTemplate.getForEntity(baseUrl + "/report", Map.class);
+        ResponseEntity<Map<String, Object>> reportResp = restTemplate.exchange(
+                baseUrl + "/report",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+        );
         assertEquals(HttpStatus.OK, reportResp.getStatusCode());
-        Map reportBody = reportResp.getBody();
+        Map<String, Object> reportBody = reportResp.getBody();
         assertNotNull(reportBody);
         assertEquals("success", reportBody.get("status"));
         String report = (String) reportBody.get("report");

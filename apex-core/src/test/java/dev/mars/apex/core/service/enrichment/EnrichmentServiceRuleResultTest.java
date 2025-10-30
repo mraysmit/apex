@@ -35,9 +35,11 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 
 /**
- * Comprehensive test suite for EnrichmentService RuleResult integration (Phase 4).
- * Tests the new enrichObjectWithResult() methods that provide programmatic access
+ * Comprehensive test suite for YamlEnrichmentProcessor RuleResult integration (Phase 4).
+ * Tests the processEnrichmentsWithResult() methods that provide programmatic access
  * to enrichment success/failure status and detailed error information.
+ *
+ * Updated to test YamlEnrichmentProcessor directly instead of deprecated EnrichmentService.
  *
  * This class is part of the APEX A powerful expression processor for Java applications.
  *
@@ -49,20 +51,20 @@ class EnrichmentServiceRuleResultTest {
 
     private static final Logger logger = LoggerFactory.getLogger(EnrichmentServiceRuleResultTest.class);
 
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
     private LookupServiceRegistry serviceRegistry;
     private ExpressionEvaluatorService evaluatorService;
 
     @BeforeEach
     void setUp() {
-        logger.info("Setting up EnrichmentService for RuleResult testing...");
-        
+        logger.info("Setting up YamlEnrichmentProcessor for RuleResult testing...");
+
         // Initialize services
         serviceRegistry = new LookupServiceRegistry();
         evaluatorService = new ExpressionEvaluatorService();
-        enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
-        
-        logger.info("EnrichmentService initialized successfully");
+        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
+
+        logger.info("YamlEnrichmentProcessor initialized successfully");
     }
 
     @Test
@@ -74,25 +76,25 @@ class EnrichmentServiceRuleResultTest {
         inputData.put("id", 1);
         inputData.put("name", "Test");
         
-        // Test with null YAML config
-        RuleResult result1 = enrichmentService.enrichObjectWithResult((YamlRuleConfiguration) null, inputData);
-        
+        // Test with null enrichments list
+        RuleResult result1 = enrichmentProcessor.processEnrichmentsWithResult(null, inputData);
+
         assertNotNull(result1);
         assertTrue(result1.isSuccess(), "Should succeed when no enrichments to process");
         assertFalse(result1.hasFailures(), "Should have no failures");
         assertTrue(result1.getFailureMessages().isEmpty(), "Should have no failure messages");
         assertNotNull(result1.getEnrichedData(), "Should have enriched data");
-        
+
         // Test with empty enrichments list
         List<YamlEnrichment> emptyList = new ArrayList<>();
-        RuleResult result2 = enrichmentService.enrichObjectWithResult(emptyList, inputData);
-        
+        RuleResult result2 = enrichmentProcessor.processEnrichmentsWithResult(emptyList, inputData);
+
         assertNotNull(result2);
         assertTrue(result2.isSuccess(), "Should succeed when empty enrichments list");
         assertFalse(result2.hasFailures(), "Should have no failures");
-        
+
         // Test with null enrichment
-        RuleResult result3 = enrichmentService.enrichObjectWithResult((YamlEnrichment) null, inputData);
+        RuleResult result3 = enrichmentProcessor.processEnrichmentWithResult(null, inputData);
         
         assertNotNull(result3);
         assertTrue(result3.isSuccess(), "Should succeed when null enrichment");
@@ -112,9 +114,9 @@ class EnrichmentServiceRuleResultTest {
         
         // Create inline dataset enrichment (no required fields)
         YamlEnrichment enrichment = createInlineDatasetEnrichment("test-enrichment", false);
-        
-        RuleResult result = enrichmentService.enrichObjectWithResult(enrichment, inputData);
-        
+
+        RuleResult result = enrichmentProcessor.processEnrichmentWithResult(enrichment, inputData);
+
         assertNotNull(result);
         assertTrue(result.isSuccess(), "Should succeed for successful enrichment");
         assertFalse(result.hasFailures(), "Should have no failures");
@@ -135,8 +137,8 @@ class EnrichmentServiceRuleResultTest {
         
         // Create enrichment with required field mapping
         YamlEnrichment enrichment = createInlineDatasetEnrichment("test-enrichment", true);
-        
-        RuleResult result = enrichmentService.enrichObjectWithResult(enrichment, inputData);
+
+        RuleResult result = enrichmentProcessor.processEnrichmentWithResult(enrichment, inputData);
         
         assertNotNull(result);
         assertFalse(result.isSuccess(), "Should fail when required field mapping fails");
@@ -166,16 +168,16 @@ class EnrichmentServiceRuleResultTest {
         Map<String, Object> inputData1 = new HashMap<>();
         inputData1.put("id", 1); // Has name and category, missing description
         
-        RuleResult result1 = enrichmentService.enrichObjectWithResult(enrichment, inputData1);
-        
+        RuleResult result1 = enrichmentProcessor.processEnrichmentWithResult(enrichment, inputData1);
+
         assertTrue(result1.isSuccess(), "Should succeed when only optional field is missing");
         assertFalse(result1.hasFailures(), "Should have no failures when only optional field is missing");
-        
+
         // Test case 2: Missing required field (should fail)
         Map<String, Object> inputData2 = new HashMap<>();
         inputData2.put("id", 2); // Has description and category, missing name (required)
-        
-        RuleResult result2 = enrichmentService.enrichObjectWithResult(enrichment, inputData2);
+
+        RuleResult result2 = enrichmentProcessor.processEnrichmentWithResult(enrichment, inputData2);
         
         assertFalse(result2.isSuccess(), "Should fail when required field is missing");
         assertTrue(result2.hasFailures(), "Should have failures when required field is missing");
@@ -191,11 +193,11 @@ class EnrichmentServiceRuleResultTest {
         
         // Create YAML configuration with multiple enrichments
         YamlRuleConfiguration yamlConfig = createYamlConfigurationWithEnrichments();
-        
+
         Map<String, Object> inputData = new HashMap<>();
         inputData.put("id", 1);
-        
-        RuleResult result = enrichmentService.enrichObjectWithResult(yamlConfig, inputData);
+
+        RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(yamlConfig.getEnrichments(), inputData, yamlConfig);
         
         assertNotNull(result);
         assertTrue(result.isSuccess(), "Should succeed for valid YAML configuration");
@@ -214,7 +216,7 @@ class EnrichmentServiceRuleResultTest {
         inputData.put("id", 999); // Will cause failure
         
         YamlEnrichment enrichment = createInlineDatasetEnrichment("test-enrichment", true);
-        RuleResult result = enrichmentService.enrichObjectWithResult(enrichment, inputData);
+        RuleResult result = enrichmentProcessor.processEnrichmentWithResult(enrichment, inputData);
         
         // Get the returned collections
         Map<String, Object> enrichedData = result.getEnrichedData();
@@ -361,7 +363,7 @@ class EnrichmentServiceRuleResultTest {
         Map<String, Object> inputData = new HashMap<>();
         inputData.put("id", 1);
 
-        RuleResult result = enrichmentService.enrichObjectWithResult(enrichments, inputData);
+        RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(enrichments, inputData);
 
         assertNotNull(result);
         assertTrue(result.isSuccess(), "Should succeed for valid enrichment");
@@ -384,7 +386,7 @@ class EnrichmentServiceRuleResultTest {
         Map<String, Object> inputData = new HashMap<>();
         inputData.put("id", 1);
 
-        RuleResult result = enrichmentService.enrichObjectWithResult(enrichments, inputData);
+        RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(enrichments, inputData);
 
         assertNotNull(result);
         assertTrue(result.isSuccess(), "Should succeed for valid enrichment");
@@ -415,7 +417,7 @@ class EnrichmentServiceRuleResultTest {
         Map<String, Object> inputData = new HashMap<>();
         inputData.put("id", 1);
 
-        RuleResult result = enrichmentService.enrichObjectWithResult(enrichments, inputData);
+        RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(enrichments, inputData);
 
         assertNotNull(result);
         assertTrue(result.isSuccess(), "Should succeed for valid enrichments");

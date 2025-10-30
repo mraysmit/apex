@@ -3,7 +3,7 @@ package dev.mars.apex.demo.sequencing;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 // Removed unused imports: SequentialYamlRulesEngineService, YamlRuleFactory
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 // Removed unused imports: RulesEngine, RuleResult
@@ -34,7 +34,7 @@ public class UseCase1EnrichmentFirstTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(UseCase1EnrichmentFirstTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
     void setUp() {
@@ -43,12 +43,10 @@ public class UseCase1EnrichmentFirstTest {
         // Initialize APEX services for sequential processing following established patterns
         yamlLoader = new YamlConfigurationLoader();
 
-        // Create required dependencies for EnrichmentService
+        // Create required dependencies for YamlEnrichmentProcessor
         LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
         ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-        EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
-
-        this.enrichmentService = enrichmentService;
+        this.enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
 
         LOGGER.info("✅ Sequential processing services initialized");
     }
@@ -71,7 +69,7 @@ public class UseCase1EnrichmentFirstTest {
                    testData.get("customerId"), testData.get("amount"));
         
         // Process with enrichment service (demonstrates sequential processing)
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
         assertNotNull(result, "Enrichment result should not be null");
 
         @SuppressWarnings("unchecked")
@@ -118,7 +116,7 @@ public class UseCase1EnrichmentFirstTest {
         testData.put("amount", 150000.0);
         
         // Test with enrichment service (demonstrates sequential processing)
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
         assertNotNull(result, "Enrichment result should not be null");
 
         @SuppressWarnings("unchecked")
@@ -137,3 +135,4 @@ public class UseCase1EnrichmentFirstTest {
         LOGGER.info("✅ USE CASE 1 VALIDATED: Sequential processing enables enrichment-first patterns");
     }
 }
+

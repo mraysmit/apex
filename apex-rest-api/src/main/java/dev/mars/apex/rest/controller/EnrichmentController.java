@@ -17,9 +17,11 @@ package dev.mars.apex.rest.controller;
  */
 
 
-import dev.mars.apex.core.service.enrichment.SequentialEnrichmentService;
+import dev.mars.apex.core.config.yaml.RulesEngineService;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -56,7 +58,7 @@ public class EnrichmentController {
     private static final Logger logger = LoggerFactory.getLogger(EnrichmentController.class);
 
     @Autowired
-    private SequentialEnrichmentService enrichmentService;
+    private RulesEngineService rulesEngineService;
 
     @Autowired
     private YamlConfigurationLoader yamlConfigurationLoader;
@@ -148,8 +150,22 @@ public class EnrichmentController {
                 new ByteArrayInputStream(request.getYamlConfiguration().getBytes())
             );
 
-            // Enrich the object
-            Object enrichedObject = enrichmentService.enrichObject(yamlConfig, request.getTargetObject());
+            // Create RulesEngine and evaluate (universal YAML processing)
+            @SuppressWarnings("deprecation")
+            RulesEngine rulesEngine = rulesEngineService.createRulesEngineFromConfig(yamlConfig);
+
+            // Convert target object to Map for RulesEngine.evaluate()
+            Map<String, Object> inputData = new HashMap<>();
+            if (request.getTargetObject() instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> targetMap = (Map<String, Object>) request.getTargetObject();
+                inputData.putAll(targetMap);
+            } else {
+                inputData.put("data", request.getTargetObject());
+            }
+
+            RuleResult result = rulesEngine.evaluate(yamlConfig, inputData);
+            Object enrichedObject = result.getEnrichedData().isEmpty() ? request.getTargetObject() : result.getEnrichedData();
 
             // Prepare response
             Map<String, Object> response = new HashMap<>();
@@ -218,10 +234,25 @@ public class EnrichmentController {
                 new ByteArrayInputStream(request.getYamlConfiguration().getBytes())
             );
 
-            // Enrich all objects
+            // Create RulesEngine for universal YAML processing
+            @SuppressWarnings("deprecation")
+            RulesEngine rulesEngine = rulesEngineService.createRulesEngineFromConfig(yamlConfig);
+
+            // Process all objects
             List<Object> enrichedObjects = new ArrayList<>();
             for (Object targetObject : request.getTargetObjects()) {
-                Object enrichedObject = enrichmentService.enrichObject(yamlConfig, targetObject);
+                // Convert target object to Map for RulesEngine.evaluate()
+                Map<String, Object> inputData = new HashMap<>();
+                if (targetObject instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> targetMap = (Map<String, Object>) targetObject;
+                    inputData.putAll(targetMap);
+                } else {
+                    inputData.put("data", targetObject);
+                }
+
+                RuleResult result = rulesEngine.evaluate(yamlConfig, inputData);
+                Object enrichedObject = result.getEnrichedData().isEmpty() ? targetObject : result.getEnrichedData();
                 enrichedObjects.add(enrichedObject);
             }
 
@@ -291,7 +322,22 @@ public class EnrichmentController {
                 new ByteArrayInputStream(yamlConfig.getBytes())
             );
 
-            Object enrichedObject = enrichmentService.enrichObject(config, targetObject);
+            // Create RulesEngine and evaluate (universal YAML processing)
+            @SuppressWarnings("deprecation")
+            RulesEngine rulesEngine = rulesEngineService.createRulesEngineFromConfig(config);
+
+            // Convert target object to Map for RulesEngine.evaluate()
+            Map<String, Object> inputData = new HashMap<>();
+            if (targetObject instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> targetMap = (Map<String, Object>) targetObject;
+                inputData.putAll(targetMap);
+            } else {
+                inputData.put("data", targetObject);
+            }
+
+            RuleResult result = rulesEngine.evaluate(config, inputData);
+            Object enrichedObject = result.getEnrichedData().isEmpty() ? targetObject : result.getEnrichedData();
 
             // Prepare response
             Map<String, Object> response = new HashMap<>();

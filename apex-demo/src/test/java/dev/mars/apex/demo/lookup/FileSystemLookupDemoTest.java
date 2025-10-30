@@ -74,7 +74,7 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
             logger.info("  Product ID: {}", testData.get("productId"));
 
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
             // Validate enrichment results
             assertNotNull(result, "JSON file lookup result should not be null");
@@ -130,7 +130,7 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
             logger.info("  Product ID: {}", testData.get("productId"));
 
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
             // Validate enrichment results
             assertNotNull(result, "JSON file lookup result should not be null");
@@ -186,7 +186,7 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
                 Map<String, Object> testData = new HashMap<>();
                 testData.put("productId", productIds[i]);
 
-                Object result = enrichmentService.enrichObject(jsonConfig, testData);
+                Object result = enrichmentProcessor.processEnrichments(jsonConfig.getEnrichments(), testData, jsonConfig);
                 assertNotNull(result, "Result should not be null for " + productIds[i]);
 
                 @SuppressWarnings("unchecked")
@@ -229,7 +229,7 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
             logger.info("  Product ID: {}", testData.get("productId"));
 
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
             // Validate enrichment results - should handle gracefully
             assertNotNull(result, "Result should not be null even for non-existent product");
@@ -263,21 +263,21 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
             Map<String, Object> testData1 = new HashMap<>();
             testData1.put("productId", null);
 
-            Object result1 = enrichmentService.enrichObject(config, testData1);
+            Object result1 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData1, config);
             assertNotNull(result1, "Result should not be null for null productId");
 
             // Test with empty productId (should not trigger enrichment)
             Map<String, Object> testData2 = new HashMap<>();
             testData2.put("productId", "");
 
-            Object result2 = enrichmentService.enrichObject(config, testData2);
+            Object result2 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData2, config);
             assertNotNull(result2, "Result should not be null for empty productId");
 
             // Test with valid productId (should trigger enrichment)
             Map<String, Object> testData3 = new HashMap<>();
             testData3.put("productId", "PROD001");
 
-            Object result3 = enrichmentService.enrichObject(config, testData3);
+            Object result3 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData3, config);
             assertNotNull(result3, "Result should not be null for valid productId");
 
             @SuppressWarnings("unchecked")
@@ -292,3 +292,6 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
         }
     }
 }
+
+
+

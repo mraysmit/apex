@@ -52,7 +52,7 @@ public class UnifiedCsvDataSourceTest extends DemoTestBase {
         testData.put("employeeId", "E123");
 
         // Process with APEX
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
         // Cast result to Map for assertions
         @SuppressWarnings("unchecked")
@@ -83,7 +83,7 @@ public class UnifiedCsvDataSourceTest extends DemoTestBase {
         testData.put("employeeId", "E456");
 
         // Process with APEX
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
         // Cast result to Map for assertions
         @SuppressWarnings("unchecked")
@@ -115,7 +115,7 @@ public class UnifiedCsvDataSourceTest extends DemoTestBase {
         testData.put("employeeId", "E789");
 
         // Process with APEX
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
         // Cast result to Map for assertions
         @SuppressWarnings("unchecked")
@@ -132,3 +132,6 @@ public class UnifiedCsvDataSourceTest extends DemoTestBase {
         logger.info("✓ Missing customer ID handled correctly with unified approach");
     }
 }
+
+
+

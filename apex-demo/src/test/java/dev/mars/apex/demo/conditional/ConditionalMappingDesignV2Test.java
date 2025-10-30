@@ -17,7 +17,7 @@ package dev.mars.apex.demo.conditional;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
@@ -52,7 +52,7 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
 
             // Load configuration and process
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingDesignV2Test.yaml");
-            Object enrichmentResult = enrichmentService.enrichObject(config, testData);
+            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> result = (Map<String, Object>) enrichmentResult;
 
@@ -86,7 +86,7 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
 
             // Load configuration and process
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingDesignV2Test.yaml");
-            Object enrichmentResult = enrichmentService.enrichObject(config, testData);
+            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> result = (Map<String, Object>) enrichmentResult;
 
@@ -120,7 +120,7 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
 
             // Load configuration and process
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingDesignV2Test.yaml");
-            Object enrichmentResult = enrichmentService.enrichObject(config, testData);
+            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> result = (Map<String, Object>) enrichmentResult;
 
@@ -154,7 +154,7 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
 
             // Load configuration and process
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingDesignV2Test.yaml");
-            Object enrichmentResult = enrichmentService.enrichObject(config, testData);
+            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> result = (Map<String, Object>) enrichmentResult;
 
@@ -188,7 +188,7 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
 
             // Load configuration and process
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingDesignV2Test.yaml");
-            Object enrichmentResult = enrichmentService.enrichObject(config, testData);
+            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> result = (Map<String, Object>) enrichmentResult;
 
@@ -239,3 +239,4 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
         }
     }
 }
+

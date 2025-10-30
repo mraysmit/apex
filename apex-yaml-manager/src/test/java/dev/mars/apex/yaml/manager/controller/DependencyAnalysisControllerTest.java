@@ -317,12 +317,13 @@ class DependencyAnalysisControllerTest {
 
     @Test
     @DisplayName("Should return tree with nested children structure")
+    @SuppressWarnings("unchecked")
     void testGetDependencyTreeReturnsNestedStructure(@TempDir Path tempDir) throws IOException {
         // Create test YAML file
         File yamlFile = createTestYamlFile(tempDir, "test.yaml");
 
         // Call actual REST endpoint
-        ResponseEntity<Map> response = restTemplate.getForEntity(
+        ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.getForEntity(
             baseUrl + "/tree?rootFile=" + yamlFile.getAbsolutePath(),
             Map.class
         );
@@ -330,7 +331,7 @@ class DependencyAnalysisControllerTest {
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        Map body = response.getBody();
+        Map<String, Object> body = response.getBody();
         assertEquals("success", body.get("status"));
         assertNotNull(body.get("tree"));
         assertNotNull(body.get("rootFile"));
@@ -341,20 +342,21 @@ class DependencyAnalysisControllerTest {
 
     @Test
     @DisplayName("Should return tree with D3-compatible structure")
+    @SuppressWarnings("unchecked")
     void testGetDependencyTreeD3Compatible(@TempDir Path tempDir) throws IOException {
         // Create test YAML file
         File yamlFile = createTestYamlFile(tempDir, "test.yaml");
 
         // Call actual REST endpoint
-        ResponseEntity<Map> response = restTemplate.getForEntity(
+        ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.getForEntity(
             baseUrl + "/tree?rootFile=" + yamlFile.getAbsolutePath(),
             Map.class
         );
 
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        Map body = response.getBody();
-        Map tree = (Map) body.get("tree");
+        Map<String, Object> body = response.getBody();
+        Map<String, Object> tree = (Map<String, Object>) body.get("tree");
         assertNotNull(tree);
 
         // Verify D3-compatible structure
@@ -368,20 +370,21 @@ class DependencyAnalysisControllerTest {
 
     @Test
     @DisplayName("Should return tree with empty children for single file")
+    @SuppressWarnings("unchecked")
     void testGetDependencyTreeSingleFileNoChildren(@TempDir Path tempDir) throws IOException {
         // Create test YAML file with no dependencies
         File yamlFile = createTestYamlFile(tempDir, "standalone.yaml");
 
         // Call actual REST endpoint
-        ResponseEntity<Map> response = restTemplate.getForEntity(
+        ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.getForEntity(
             baseUrl + "/tree?rootFile=" + yamlFile.getAbsolutePath(),
             Map.class
         );
 
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        Map body = response.getBody();
-        Map tree = (Map) body.get("tree");
+        Map<String, Object> body = response.getBody();
+        Map<String, Object> tree = (Map<String, Object>) body.get("tree");
         assertNotNull(tree);
 
         // Single file should have 0 children
@@ -395,12 +398,13 @@ class DependencyAnalysisControllerTest {
 
     @Test
     @DisplayName("Should validate dependency tree structure")
+    @SuppressWarnings("unchecked")
     void testValidateTree(@TempDir Path tempDir) throws IOException {
         // Create test YAML file
         File yamlFile = createTestYamlFile(tempDir, "test.yaml");
 
         // Call validate-tree endpoint
-        ResponseEntity<Map> response = restTemplate.postForEntity(
+        ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.postForEntity(
             baseUrl + "/validate-tree?rootFile=" + yamlFile.getAbsolutePath(),
             null,
             Map.class
@@ -409,7 +413,7 @@ class DependencyAnalysisControllerTest {
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        Map body = response.getBody();
+        Map<String, Object> body = response.getBody();
         assertEquals("success", body.get("status"));
         assertNotNull(body.get("validation"));
         assertNotNull(body.get("rootFile"));
@@ -432,12 +436,13 @@ class DependencyAnalysisControllerTest {
 
     @Test
     @DisplayName("Should return validation results with graph integrity info")
+    @SuppressWarnings("unchecked")
     void testValidateTreeReturnsValidationResults(@TempDir Path tempDir) throws IOException {
         // Create test YAML file
         File yamlFile = createTestYamlFile(tempDir, "test.yaml");
 
         // Call validate-tree endpoint
-        ResponseEntity<Map> response = restTemplate.postForEntity(
+        ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.postForEntity(
             baseUrl + "/validate-tree?rootFile=" + yamlFile.getAbsolutePath(),
             null,
             Map.class
@@ -445,8 +450,8 @@ class DependencyAnalysisControllerTest {
 
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        Map body = response.getBody();
-        Map validation = (Map) body.get("validation");
+        Map<String, Object> body = response.getBody();
+        Map<String, Object> validation = (Map<String, Object>) body.get("validation");
         assertNotNull(validation);
         // Validation should contain integrity checks
         assertTrue(validation.size() > 0, "Validation should contain integrity check results");
@@ -458,6 +463,7 @@ class DependencyAnalysisControllerTest {
 
     @Test
     @DisplayName("Should get node details after analyze")
+    @SuppressWarnings("unchecked")
     void testGetNodeDetails(@TempDir Path tempDir) throws IOException {
         // Create test YAML file
         File yamlFile = createTestYamlFile(tempDir, "test.yaml");
@@ -471,7 +477,7 @@ class DependencyAnalysisControllerTest {
         );
 
         // Then get details
-        ResponseEntity<Map> response = restTemplate.getForEntity(
+        ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.getForEntity(
             baseUrl + "/test.yaml/details",
             Map.class
         );
@@ -479,7 +485,7 @@ class DependencyAnalysisControllerTest {
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        Map body = response.getBody();
+        Map<String, Object> body = response.getBody();
         assertEquals("success", body.get("status"));
         assertNotNull(body.get("data"));
     }
@@ -499,6 +505,7 @@ class DependencyAnalysisControllerTest {
 
     @Test
     @DisplayName("Should return node details with metadata fields")
+    @SuppressWarnings("unchecked")
     void testGetNodeDetailsReturnsCompleteMetadata(@TempDir Path tempDir) throws IOException {
         // Create test YAML file
         File yamlFile = createTestYamlFile(tempDir, "test.yaml");
@@ -512,15 +519,15 @@ class DependencyAnalysisControllerTest {
         );
 
         // Then get details
-        ResponseEntity<Map> response = restTemplate.getForEntity(
+        ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.getForEntity(
             baseUrl + "/test.yaml/details",
             Map.class
         );
 
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        Map body = response.getBody();
-        Map data = (Map) body.get("data");
+        Map<String, Object> body = response.getBody();
+        Map<String, Object> data = (Map<String, Object>) body.get("data");
         assertNotNull(data);
 
         // Verify expected fields are present
@@ -544,6 +551,7 @@ class DependencyAnalysisControllerTest {
 
     @Test
     @DisplayName("scan-folder: returns YAML file list for non-empty folder")
+    @SuppressWarnings("unchecked")
     void testScanFolder_withYamlFiles_returnsList(@TempDir Path tempDir) throws IOException {
         // Arrange: create two YAML files and one non-yaml file
         File f1 = createTestYamlFile(tempDir, "a.yaml");
@@ -552,7 +560,7 @@ class DependencyAnalysisControllerTest {
         try (FileWriter w = new FileWriter(txt)) { w.write("ignore me"); }
 
         // Act
-        ResponseEntity<Map> response = restTemplate.postForEntity(
+        ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.postForEntity(
                 baseUrl + "/scan-folder?folderPath=" + tempDir.toFile().getAbsolutePath(),
                 null,
                 Map.class
@@ -560,7 +568,7 @@ class DependencyAnalysisControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        Map body = response.getBody();
+        Map<String, Object> body = response.getBody();
         assertNotNull(body);
         assertEquals("success", body.get("status"));
         assertEquals(2, ((Number) body.get("totalFiles")).intValue(), "should count only YAML files");
@@ -568,9 +576,10 @@ class DependencyAnalysisControllerTest {
 
     @Test
     @DisplayName("scan-folder: returns empty result for folder with no YAML files")
+    @SuppressWarnings("unchecked")
     void testScanFolder_emptyFolder_returnsEmpty(@TempDir Path tempDir) {
         // Act
-        ResponseEntity<Map> response = restTemplate.postForEntity(
+        ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.postForEntity(
                 baseUrl + "/scan-folder?folderPath=" + tempDir.toFile().getAbsolutePath(),
                 null,
                 Map.class
@@ -578,7 +587,7 @@ class DependencyAnalysisControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        Map body = response.getBody();
+        Map<String, Object> body = response.getBody();
         assertNotNull(body);
         assertEquals("success", body.get("status"));
         assertEquals(0, ((Number) body.get("totalFiles")).intValue());
@@ -586,9 +595,10 @@ class DependencyAnalysisControllerTest {
 
     @Test
     @DisplayName("scan-folder: returns 400 for invalid path")
+    @SuppressWarnings("unchecked")
     void testScanFolder_invalidPath_returnsBadRequest() {
         // Act
-        ResponseEntity<Map> response = restTemplate.postForEntity(
+        ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.postForEntity(
                 baseUrl + "/scan-folder?folderPath=C:/definitely/not/a/real/path/xyz",
                 null,
                 Map.class
@@ -596,7 +606,7 @@ class DependencyAnalysisControllerTest {
 
         // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        Map body = response.getBody();
+        Map<String, Object> body = response.getBody();
         assertNotNull(body);
         assertEquals("error", body.get("status"));
     }
@@ -608,13 +618,14 @@ class DependencyAnalysisControllerTest {
 
     @Test
     @DisplayName("Should complete full workflow: analyze -> tree -> validate -> details")
+    @SuppressWarnings("unchecked")
     void testFullWorkflow(@TempDir Path tempDir) throws IOException {
         // Create test YAML file
         File yamlFile = createTestYamlFile(tempDir, "workflow.yaml");
         String filePath = yamlFile.getAbsolutePath();
 
         // Step 1: Analyze
-        ResponseEntity<Map> analyzeResponse = restTemplate.postForEntity(
+        ResponseEntity<Map<String, Object>> analyzeResponse = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.postForEntity(
             baseUrl + "/analyze?filePath=" + filePath,
             null,
             Map.class
@@ -623,7 +634,7 @@ class DependencyAnalysisControllerTest {
         assertEquals("success", analyzeResponse.getBody().get("status"));
 
         // Step 2: Get Tree
-        ResponseEntity<Map> treeResponse = restTemplate.getForEntity(
+        ResponseEntity<Map<String, Object>> treeResponse = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.getForEntity(
             baseUrl + "/tree?rootFile=" + filePath,
             Map.class
         );
@@ -632,7 +643,7 @@ class DependencyAnalysisControllerTest {
         assertNotNull(treeResponse.getBody().get("tree"));
 
         // Step 3: Validate Tree
-        ResponseEntity<Map> validateResponse = restTemplate.postForEntity(
+        ResponseEntity<Map<String, Object>> validateResponse = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.postForEntity(
             baseUrl + "/validate-tree?rootFile=" + filePath,
             null,
             Map.class
@@ -641,7 +652,7 @@ class DependencyAnalysisControllerTest {
         assertEquals("success", validateResponse.getBody().get("status"));
 
         // Step 4: Get Node Details
-        ResponseEntity<Map> detailsResponse = restTemplate.getForEntity(
+        ResponseEntity<Map<String, Object>> detailsResponse = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.getForEntity(
             baseUrl + "/workflow.yaml/details",
             Map.class
         );
@@ -678,17 +689,18 @@ class DependencyAnalysisControllerTest {
 
     @Test
     @DisplayName("Should return consistent tree structure across multiple calls")
+    @SuppressWarnings("unchecked")
     void testGetDependencyTreeConsistency(@TempDir Path tempDir) throws IOException {
         // Create test YAML file
         File yamlFile = createTestYamlFile(tempDir, "consistent.yaml");
         String filePath = yamlFile.getAbsolutePath();
 
         // Call tree endpoint twice
-        ResponseEntity<Map> response1 = restTemplate.getForEntity(
+        ResponseEntity<Map<String, Object>> response1 = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.getForEntity(
             baseUrl + "/tree?rootFile=" + filePath,
             Map.class
         );
-        ResponseEntity<Map> response2 = restTemplate.getForEntity(
+        ResponseEntity<Map<String, Object>> response2 = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.getForEntity(
             baseUrl + "/tree?rootFile=" + filePath,
             Map.class
         );
@@ -698,28 +710,29 @@ class DependencyAnalysisControllerTest {
         assertEquals(HttpStatus.OK, response2.getStatusCode());
 
         // Both should have same structure
-        Map tree1 = (Map) response1.getBody().get("tree");
-        Map tree2 = (Map) response2.getBody().get("tree");
+        Map<String, Object> tree1 = (Map<String, Object>) response1.getBody().get("tree");
+        Map<String, Object> tree2 = (Map<String, Object>) response2.getBody().get("tree");
         assertEquals(tree1.get("name"), tree2.get("name"));
         assertEquals(tree1.get("childCount"), tree2.get("childCount"));
     }
 
     @Test
     @DisplayName("Should return tree with correct depth information")
+    @SuppressWarnings("unchecked")
     void testGetDependencyTreeDepthInfo(@TempDir Path tempDir) throws IOException {
         // Create test YAML file
         File yamlFile = createTestYamlFile(tempDir, "depth.yaml");
 
         // Call tree endpoint
-        ResponseEntity<Map> response = restTemplate.getForEntity(
+        ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.getForEntity(
             baseUrl + "/tree?rootFile=" + yamlFile.getAbsolutePath(),
             Map.class
         );
 
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        Map body = response.getBody();
-        Map tree = (Map) body.get("tree");
+        Map<String, Object> body = response.getBody();
+        Map<String, Object> tree = (Map<String, Object>) body.get("tree");
 
         // Root should have depth 0
         assertEquals(0, tree.get("depth"));
@@ -731,19 +744,20 @@ class DependencyAnalysisControllerTest {
 
     @Test
     @DisplayName("Should validate nested dependencies to n levels deep")
+    @SuppressWarnings("unchecked")
     void testNestedDependenciesToNLevels() {
         // Use the existing nested-yaml-structure test resources
         String nestedRootPath = new File("apex-yaml-manager/src/test/resources/nested-yaml-structure/root-scenario.yaml").getAbsolutePath();
 
         // Step 1: Analyze the nested structure
-        ResponseEntity<Map> analyzeResponse = restTemplate.postForEntity(
+        ResponseEntity<Map<String, Object>> analyzeResponse = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.postForEntity(
             baseUrl + "/analyze?filePath=" + nestedRootPath,
             null,
             Map.class
         );
 
         assertEquals(HttpStatus.OK, analyzeResponse.getStatusCode());
-        Map analyzeBody = analyzeResponse.getBody();
+        Map<String, Object> analyzeBody = analyzeResponse.getBody();
         assertEquals("success", analyzeBody.get("status"));
 
         // Verify we have at least the root file
@@ -755,16 +769,16 @@ class DependencyAnalysisControllerTest {
         assertTrue(maxDepth >= 0, "maxDepth should be non-negative");
 
         // Step 2: Get the dependency tree
-        ResponseEntity<Map> treeResponse = restTemplate.getForEntity(
+        ResponseEntity<Map<String, Object>> treeResponse = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.getForEntity(
             baseUrl + "/tree?rootFile=" + nestedRootPath,
             Map.class
         );
 
         assertEquals(HttpStatus.OK, treeResponse.getStatusCode());
-        Map treeBody = treeResponse.getBody();
+        Map<String, Object> treeBody = treeResponse.getBody();
         assertEquals("success", treeBody.get("status"));
 
-        Map tree = (Map) treeBody.get("tree");
+        Map<String, Object> tree = (Map<String, Object>) treeBody.get("tree");
         assertNotNull(tree, "Tree should not be null");
 
         // Step 3: Validate tree structure at each level

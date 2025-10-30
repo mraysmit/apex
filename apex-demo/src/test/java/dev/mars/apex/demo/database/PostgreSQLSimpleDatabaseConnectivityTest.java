@@ -83,7 +83,7 @@ public class PostgreSQLSimpleDatabaseConnectivityTest extends DemoTestBase {
             Map<String, Object> testData = new HashMap<>();
             testData.put("id", "1");
 
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Result should not be null");
 
             @SuppressWarnings("unchecked")
@@ -134,3 +134,6 @@ public class PostgreSQLSimpleDatabaseConnectivityTest extends DemoTestBase {
         }
     }
 }
+
+
+

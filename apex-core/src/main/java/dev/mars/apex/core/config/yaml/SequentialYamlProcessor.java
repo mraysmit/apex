@@ -3,8 +3,6 @@ package dev.mars.apex.core.config.yaml;
 import dev.mars.apex.core.config.yaml.OrderedYamlConfiguration.ProcessingMode;
 
 import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.logging.Logger;
 
 /**
@@ -34,14 +32,12 @@ public class SequentialYamlProcessor {
     private static final Logger LOGGER = Logger.getLogger(SequentialYamlProcessor.class.getName());
 
     private final OrderedYamlParser orderedParser;
-    private final DeferredDependencyResolver dependencyResolver;
-
     /**
      * Create sequential processor.
      */
     public SequentialYamlProcessor() {
         this.orderedParser = new OrderedYamlParser();
-        this.dependencyResolver = new DeferredDependencyResolver();
+        new DeferredDependencyResolver();
 
         LOGGER.info("SequentialYamlProcessor initialized - ready to fix APEX's fundamental design flaw");
     }

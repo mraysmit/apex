@@ -88,7 +88,7 @@ public class ConditionalBooleanTest extends DemoTestBase {
             logger.debug("Input test data: {}", testData);
 
             // Execute APEX enrichment processing - ALL logic in YAML
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
             // Validate enrichment results
             assertNotNull(result, "Boolean expression result should not be null");
@@ -128,7 +128,7 @@ public class ConditionalBooleanTest extends DemoTestBase {
             testData.put("isLocked", false);
 
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
 
@@ -163,7 +163,7 @@ public class ConditionalBooleanTest extends DemoTestBase {
             testData.put("isLocked", false);
 
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
 
@@ -198,7 +198,7 @@ public class ConditionalBooleanTest extends DemoTestBase {
             testData.put("isLocked", false);
 
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
 
@@ -233,7 +233,7 @@ public class ConditionalBooleanTest extends DemoTestBase {
             testData.put("isLocked", false);
 
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
 
@@ -274,7 +274,7 @@ public class ConditionalBooleanTest extends DemoTestBase {
             logger.debug("Complete workflow test data: {}", testData);
 
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
 
@@ -308,3 +308,6 @@ public class ConditionalBooleanTest extends DemoTestBase {
         }
     }
 }
+
+
+

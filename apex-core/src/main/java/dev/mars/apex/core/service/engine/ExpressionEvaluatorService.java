@@ -11,8 +11,6 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -47,7 +45,6 @@ import java.util.logging.Logger;
  * for consistent SpEL evaluation behavior across the APEX system.
  */
 public class ExpressionEvaluatorService {
-    private static final Logger LOGGER = Logger.getLogger(ExpressionEvaluatorService.class.getName());
     private static final RulesEngineLogger rulesLogger = new RulesEngineLogger(ExpressionEvaluatorService.class);
     private final ExpressionParser parser;
 

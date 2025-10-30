@@ -1,70 +1,80 @@
 package dev.mars.apex.core.config.yaml;
 
 import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
-import dev.mars.apex.core.service.integration.SequentialProcessingIntegrationService;
+import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 
 import java.io.File;
 import java.io.InputStream;
 import java.util.logging.Logger;
 
 /**
- * Enhanced YamlRulesEngineService with sequential processing support.
- * 
- * This service extends the original YamlRulesEngineService to support both
- * STANDARD (backward compatible) and SEQUENTIAL processing modes.
- * 
+ * Universal YAML Rules Engine Service - the single recommended entry point for APEX.
+ *
+ * This service provides content-agnostic YAML processing that handles whatever
+ * sections exist in the YAML (enrichments, rules, rule-groups, transformations, etc.)
+ * without requiring developers to inspect YAML structure.
+ *
  * Key Features:
+ * - Content-agnostic processing - handles any YAML sections
  * - Automatic processing mode detection from YAML metadata
- * - Seamless backward compatibility with existing code
- * - Support for sequential processing that respects YAML document order
- * - Integration with all existing APEX services and entry points
- * 
+ * - Sequential processing support that respects YAML document order
+ * - Universal entry point - no need for content-specific services
+ *
  * Processing Mode Selection:
  * - STANDARD: Uses hardcoded processing order (default, backward compatible)
  * - SEQUENTIAL: Processes sections in YAML document order (THE FIX)
- * 
+ *
  * Mode is determined by metadata.processing-mode field in YAML:
  * ```yaml
  * metadata:
  *   processing-mode: "sequential"  # or "standard"
  * ```
- * 
+ *
  * @author APEX Sequential Processing Implementation
  * @since Phase 4 - Integration
  */
-public class SequentialYamlRulesEngineService {
-    
-    private static final Logger LOGGER = Logger.getLogger(SequentialYamlRulesEngineService.class.getName());
-    
-    private final SequentialProcessingIntegrationService integrationService;
+public class RulesEngineService {
+
+    private static final Logger LOGGER = Logger.getLogger(RulesEngineService.class.getName());
+
+    private final YamlConfigurationLoader configLoader;
+    private final YamlRuleFactory ruleFactory;
     private final YamlRulesEngineService standardService;
-    
-    public SequentialYamlRulesEngineService(
-            YamlConfigurationLoader configLoader,
-            YamlRuleFactory ruleFactory,
-            EnrichmentService enrichmentService) {
-        
-        // Create integration service
-        this.integrationService = new SequentialProcessingIntegrationService(
-            configLoader, ruleFactory, enrichmentService
-        );
-        
-        // Keep standard service for fallback
+
+    /**
+     * Default constructor that creates all necessary services.
+     */
+    public RulesEngineService() {
+        this.configLoader = new YamlConfigurationLoader();
+        this.ruleFactory = new YamlRuleFactory();
         this.standardService = new YamlRulesEngineService(configLoader, ruleFactory);
-        
-        LOGGER.info("SequentialYamlRulesEngineService initialized - APEX design flaw fix active");
+
+        LOGGER.info("RulesEngineService initialized - Universal YAML processing active");
+    }
+
+    /**
+     * Constructor with custom services.
+     */
+    public RulesEngineService(
+            YamlConfigurationLoader configLoader,
+            YamlRuleFactory ruleFactory) {
+
+        this.configLoader = configLoader != null ? configLoader : new YamlConfigurationLoader();
+        this.ruleFactory = ruleFactory != null ? ruleFactory : new YamlRuleFactory();
+        this.standardService = new YamlRulesEngineService(this.configLoader, this.ruleFactory);
+
+        LOGGER.info("RulesEngineService initialized with custom services - Universal YAML processing active");
     }
     
     // ========== ENHANCED RULES ENGINE CREATION METHODS ==========
     
     /**
      * Create a rules engine from a YAML configuration file with sequential processing support.
-     * 
+     *
      * Automatically detects processing mode from metadata.processing-mode:
      * - "sequential": Uses document order processing (THE FIX)
      * - "standard" or null: Uses hardcoded order (backward compatible)
-     * 
+     *
      * @param file The YAML configuration file
      * @return A configured RulesEngine
      * @throws YamlConfigurationException if configuration loading or processing fails
@@ -72,53 +82,61 @@ public class SequentialYamlRulesEngineService {
     public RulesEngine createRulesEngineFromFile(File file) throws YamlConfigurationException {
         LOGGER.info("Creating rules engine from file with sequential processing support: " + file.getAbsolutePath());
         
-        try {
-            return integrationService.createRulesEngineFromFile(file);
-        } catch (Exception e) {
-            LOGGER.warning("Sequential processing failed, falling back to standard processing: " + e.getMessage());
-            // Use the non-deprecated pattern for fallback
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
-            YamlRuleConfiguration config = loader.loadFromFile(file);
-            return standardService.createRulesEngineFromYamlConfig(config);
-        }
+        // Load YAML configuration
+        YamlRuleConfiguration yamlConfig = configLoader.loadFromFile(file);
+
+        return createRulesEngineFromConfig(yamlConfig);
     }
     
     /**
-     * Create a rules engine from an input stream with sequential processing support.
-     * 
+     * Create a rules engine from an input stream.
+     *
      * @param inputStream The input stream containing YAML configuration
-     * @return A configured RulesEngine
-     * @throws YamlConfigurationException if configuration loading or processing fails
+     * @return RulesEngine configured for universal YAML processing
+     * @throws YamlConfigurationException If the stream cannot be loaded or parsed
      */
     public RulesEngine createRulesEngineFromStream(InputStream inputStream) throws YamlConfigurationException {
-        LOGGER.info("Creating rules engine from stream with sequential processing support");
-        
-        try {
-            return integrationService.createRulesEngineFromStream(inputStream);
-        } catch (Exception e) {
-            LOGGER.warning("Sequential processing failed, falling back to standard processing: " + e.getMessage());
-            return standardService.createRulesEngineFromStream(inputStream);
-        }
+        LOGGER.info("Creating universal rules engine from stream");
+
+        // Load YAML configuration
+        YamlRuleConfiguration yamlConfig = configLoader.loadFromStream(inputStream);
+
+        return createRulesEngineFromConfig(yamlConfig);
     }
-    
+
     /**
      * Create a rules engine from a YAML string with sequential processing support.
-     * 
+     *
      * @param yamlString The YAML configuration as a string
      * @return A configured RulesEngine
      * @throws YamlConfigurationException if configuration parsing or processing fails
      */
     public RulesEngine createRulesEngineFromString(String yamlString) throws YamlConfigurationException {
         LOGGER.info("Creating rules engine from string with sequential processing support");
-        
-        try {
-            return integrationService.createRulesEngineFromString(yamlString);
-        } catch (Exception e) {
-            LOGGER.warning("Sequential processing failed, falling back to standard processing: " + e.getMessage());
-            return standardService.createRulesEngineFromString(yamlString);
-        }
+
+        // Load YAML configuration
+        YamlRuleConfiguration yamlConfig = configLoader.fromYamlString(yamlString);
+
+        return createRulesEngineFromConfig(yamlConfig);
     }
-    
+
+    /**
+     * Create a rules engine from a YAML configuration object.
+     *
+     * @param yamlConfig The YAML configuration object
+     * @return RulesEngine configured for universal YAML processing
+     * @throws YamlConfigurationException If the configuration cannot be processed
+     */
+    public RulesEngine createRulesEngineFromConfig(YamlRuleConfiguration yamlConfig) throws YamlConfigurationException {
+        LOGGER.info("Creating universal rules engine from configuration");
+
+        // Create RulesEngine configuration
+        RulesEngineConfiguration rulesConfig = ruleFactory.createRulesEngineConfiguration(yamlConfig);
+
+        // Create RulesEngine with full capabilities
+        return new RulesEngine(rulesConfig);
+    }
+
     /**
      * Create a rules engine from a YAML configuration using the generic architecture with sequential support.
      *
@@ -128,7 +146,7 @@ public class SequentialYamlRulesEngineService {
      */
     public RulesEngine createRulesEngineFromYamlConfig(YamlRuleConfiguration yamlConfig) throws YamlConfigurationException {
         LOGGER.info("Creating rules engine from YAML config with sequential processing support");
-        
+
         // Check if sequential processing is requested
         if (isSequentialMode(yamlConfig)) {
             LOGGER.info("Sequential processing mode detected in YAML configuration");
@@ -139,13 +157,13 @@ public class SequentialYamlRulesEngineService {
             return standardService.createRulesEngineFromYamlConfig(yamlConfig);
         }
     }
-    
+
     /**
      * Create a rules engine from multiple YAML files with sequential processing support.
-     * 
+     *
      * Note: Sequential processing is applied to each individual file, then configurations
      * are merged using standard merging logic.
-     * 
+     *
      * @param filePaths Array of YAML file paths to merge
      * @return A configured RulesEngine with merged configurations
      * @throws YamlConfigurationException if any file fails to load or merge
@@ -163,41 +181,7 @@ public class SequentialYamlRulesEngineService {
         }
     }
     
-    // ========== ENRICHMENT PROCESSING METHODS ==========
-    
-    /**
-     * Enrich object using YAML configuration with sequential processing support.
-     * 
-     * @param yamlConfig YAML configuration
-     * @param targetObject Object to enrich
-     * @return Enriched object
-     */
-    public Object enrichObject(YamlRuleConfiguration yamlConfig, Object targetObject) {
-        LOGGER.info("Enriching object with sequential processing support");
-        
-        try {
-            return integrationService.enrichObject(yamlConfig, targetObject);
-        } catch (Exception e) {
-            LOGGER.warning("Sequential enrichment failed, using standard processing: " + e.getMessage());
-            // Fallback to standard service would require EnrichmentService access
-            // For now, just rethrow the exception
-            throw new RuntimeException("Enrichment processing failed", e);
-        }
-    }
-    
-    /**
-     * Enrich object using YAML string with sequential processing support.
-     * 
-     * @param yamlContent YAML configuration string
-     * @param targetObject Object to enrich
-     * @return Enriched object
-     * @throws YamlConfigurationException if processing fails
-     */
-    public Object enrichObjectFromYaml(String yamlContent, Object targetObject) throws YamlConfigurationException {
-        LOGGER.info("Enriching object from YAML string with sequential processing support");
-        
-        return integrationService.enrichObjectFromYaml(yamlContent, targetObject);
-    }
+
     
     // ========== UTILITY METHODS ==========
     
@@ -223,11 +207,20 @@ public class SequentialYamlRulesEngineService {
     }
     
     /**
-     * Get the integration service for advanced use cases.
-     * 
-     * @return SequentialProcessingIntegrationService
+     * Get the YAML configuration loader used by this service.
+     *
+     * @return The YamlConfigurationLoader instance
      */
-    public SequentialProcessingIntegrationService getIntegrationService() {
-        return integrationService;
+    public YamlConfigurationLoader getConfigLoader() {
+        return configLoader;
+    }
+
+    /**
+     * Get the YAML rule factory used by this service.
+     *
+     * @return The YamlRuleFactory instance
+     */
+    public YamlRuleFactory getRuleFactory() {
+        return ruleFactory;
     }
 }

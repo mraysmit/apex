@@ -70,7 +70,7 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
             logger.info("  Currency Code: {}", testData.get("currencyCode"));
 
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
             // Validate enrichment results
             assertNotNull(result, "USD currency lookup result should not be null");
@@ -132,7 +132,7 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
             logger.info("  Currency Code: {}", testData.get("currencyCode"));
 
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
             // Validate enrichment results
             assertNotNull(result, "EUR currency lookup result should not be null");
@@ -197,7 +197,7 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
                 testData.put("currencyCode", currencyCodes[i]);
 
                 // Execute APEX enrichment processing
-                Object result = enrichmentService.enrichObject(config, testData);
+                Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
                 // Validate enrichment results
                 assertNotNull(result, "Currency lookup result should not be null for " + currencyCodes[i]);
@@ -247,7 +247,7 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
             logger.info("  Currency Code: {}", testData.get("currencyCode"));
 
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
             // Validate enrichment results - should still return the object but without enriched fields
             assertNotNull(result, "Non-existent currency lookup result should not be null");
@@ -288,25 +288,25 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
             // Test 1: Null currency code (should not trigger enrichment)
             Map<String, Object> testData1 = new HashMap<>();
             testData1.put("currencyCode", null);
-            Object result1 = enrichmentService.enrichObject(config, testData1);
+            Object result1 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData1, config);
             assertNotNull(result1, "Result should not be null even with null currency code");
 
             // Test 2: Empty currency code (should not trigger enrichment)
             Map<String, Object> testData2 = new HashMap<>();
             testData2.put("currencyCode", "");
-            Object result2 = enrichmentService.enrichObject(config, testData2);
+            Object result2 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData2, config);
             assertNotNull(result2, "Result should not be null even with empty currency code");
 
             // Test 3: Invalid length currency code (should not trigger enrichment)
             Map<String, Object> testData3 = new HashMap<>();
             testData3.put("currencyCode", "US");
-            Object result3 = enrichmentService.enrichObject(config, testData3);
+            Object result3 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData3, config);
             assertNotNull(result3, "Result should not be null even with invalid length currency code");
 
             // Test 4: Valid currency code (should trigger enrichment)
             Map<String, Object> testData4 = new HashMap<>();
             testData4.put("currencyCode", "USD");
-            Object result4 = enrichmentService.enrichObject(config, testData4);
+            Object result4 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData4, config);
             assertNotNull(result4, "Result should not be null with valid currency code");
 
             @SuppressWarnings("unchecked")
@@ -331,8 +331,12 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
 
         // Validate that all APEX services are properly initialized
         assertNotNull(yamlLoader, "YAML loader should be initialized");
-        assertNotNull(enrichmentService, "Enrichment service should be initialized");
+        assertNotNull(enrichmentProcessor, "Enrichment service should be initialized");
 
         logger.info("✅ All APEX services properly initialized");
     }
 }
+
+
+
+

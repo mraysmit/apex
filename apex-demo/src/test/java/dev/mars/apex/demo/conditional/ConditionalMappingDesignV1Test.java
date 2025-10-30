@@ -149,7 +149,7 @@ public class ConditionalMappingDesignV1Test extends DemoTestBase {
             logger.debug("Direct mapping test data: {}", testData);
             
             // Process enrichments
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Enrichment result should not be null");
             
             @SuppressWarnings("unchecked")
@@ -192,7 +192,7 @@ public class ConditionalMappingDesignV1Test extends DemoTestBase {
             logger.debug("Y flag mapping test data: {}", testData);
             
             // Process enrichments
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Enrichment result should not be null");
             
             @SuppressWarnings("unchecked")
@@ -235,7 +235,7 @@ public class ConditionalMappingDesignV1Test extends DemoTestBase {
             logger.debug("Translation mapping test data: {}", testData);
             
             // Process enrichments
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Enrichment result should not be null");
             
             @SuppressWarnings("unchecked")
@@ -283,7 +283,7 @@ public class ConditionalMappingDesignV1Test extends DemoTestBase {
             logger.debug("Default mapping test data: {}", testData);
             
             // Process enrichments
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Enrichment result should not be null");
             
             @SuppressWarnings("unchecked")
@@ -315,8 +315,12 @@ public class ConditionalMappingDesignV1Test extends DemoTestBase {
         
         // Verify all APEX services are properly initialized
         assertNotNull(yamlLoader, "YAML loader should be initialized");
-        assertNotNull(enrichmentService, "Enrichment service should be initialized");
+        assertNotNull(enrichmentProcessor, "Enrichment service should be initialized");
         
         logger.info("✓ All APEX services properly initialized for conditional mapping design v1");
     }
 }
+
+
+
+

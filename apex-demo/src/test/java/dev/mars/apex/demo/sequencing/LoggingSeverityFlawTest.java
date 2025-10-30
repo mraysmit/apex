@@ -5,7 +5,7 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +33,7 @@ class LoggingSeverityFlawTest {
 
     private YamlEnrichmentProcessor processor;
     private YamlConfigurationLoader yamlLoader;
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
     private RulesEngine rulesEngine;
 
     @BeforeEach
@@ -46,7 +46,7 @@ class LoggingSeverityFlawTest {
         ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
 
         processor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
-        enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
 
         RulesEngineConfiguration config = new RulesEngineConfiguration();
         rulesEngine = new RulesEngine(config);
@@ -195,3 +195,4 @@ class LoggingSeverityFlawTest {
         assertTrue(true, "Logging severity flaw documented");
     }
 }
+

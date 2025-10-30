@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 
  * This test follows prompts.txt guidelines:
  * - Simple and focused on the requirement
- * - Tests actual APEX functionality using enrichmentService.enrichObject()
+ * - Tests actual APEX functionality using enrichmentProcessor.processEnrichments()
  * - Validates functional results with specific assertions
  * - Extends DemoTestBase for consistent test setup
  *
@@ -63,7 +63,7 @@ public class SimpleSeverityTest extends DemoTestBase {
         Map<String, Object> lowAmount = new HashMap<>();
         lowAmount.put("amount", 50.0);
 
-        Object result = enrichmentService.enrichObject(config, lowAmount);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), lowAmount, config);
         assertNotNull(result, "Result should not be null");
         
         @SuppressWarnings("unchecked")
@@ -76,7 +76,7 @@ public class SimpleSeverityTest extends DemoTestBase {
         Map<String, Object> highAmount = new HashMap<>();
         highAmount.put("amount", 1000.0);
 
-        Object highResult = enrichmentService.enrichObject(config, highAmount);
+        Object highResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), highAmount, config);
         assertNotNull(highResult, "Result should not be null for high amount");
         
         @SuppressWarnings("unchecked")
@@ -87,3 +87,6 @@ public class SimpleSeverityTest extends DemoTestBase {
         logger.info("✅ Simple severity test completed");
     }
 }
+
+
+

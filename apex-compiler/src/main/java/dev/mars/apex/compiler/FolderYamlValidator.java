@@ -268,20 +268,17 @@ public class FolderYamlValidator {
      */
     private static class ValidationReport {
         private final String fileName;
-        private final String relativePath;
         private final ApexYamlLexicalValidator.ValidationResult result;
         private final Exception exception;
 
         public ValidationReport(String fileName, String relativePath, ApexYamlLexicalValidator.ValidationResult result) {
             this.fileName = fileName;
-            this.relativePath = relativePath;
             this.result = result;
             this.exception = null;
         }
 
         public ValidationReport(String fileName, String relativePath, Exception exception) {
             this.fileName = fileName;
-            this.relativePath = relativePath;
             this.result = null;
             this.exception = exception;
         }

@@ -21,7 +21,7 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,20 +37,22 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Comprehensive integration test for APEX Severity Validation System.
- * 
+ *
  * This test validates the complete end-to-end severity processing pipeline:
  * - YAML configuration loading with severity validation
  * - Rule processing with severity information
  * - Enrichment processing with severity aggregation
  * - RuleResult creation with proper severity handling
  * - Complete workflow integration
- * 
+ *
  * Tests all phases of the APEX Severity Validation Implementation Plan:
  * - Phase 1: SeverityConstants creation
  * - Phase 2: Existing severity code refactoring
  * - Phase 3: Enrichment severity validation
  * - Phase 4: Enrichment processing with severity
  * - Phase 5: Integration testing (this test)
+ *
+ * Updated to use YamlEnrichmentProcessor directly instead of deprecated EnrichmentService.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-09-24
@@ -63,20 +65,20 @@ public class SeverityIntegrationTest {
 
     // Real APEX services for integration testing
     private YamlConfigurationLoader yamlLoader;
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
     private LookupServiceRegistry serviceRegistry;
     private ExpressionEvaluatorService expressionEvaluator;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up APEX services for severity integration testing...");
-        
+
         // Initialize real APEX services
         this.yamlLoader = new YamlConfigurationLoader();
         this.serviceRegistry = new LookupServiceRegistry();
         this.expressionEvaluator = new ExpressionEvaluatorService();
-        this.enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
-        
+        this.enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, expressionEvaluator);
+
         logger.info("APEX services initialized successfully");
     }
 
@@ -143,9 +145,9 @@ public class SeverityIntegrationTest {
         Map<String, Object> testData = new HashMap<>();
         testData.put("testField", "test");
         testData.put("key", "test");
-        
+
         // Process enrichments and verify result
-        RuleResult result = enrichmentService.enrichObjectWithResult(config.getEnrichments(), testData);
+        RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(config.getEnrichments(), testData);
         
         assertNotNull(result, "RuleResult should not be null");
         assertTrue(result.isSuccess(), "Processing should succeed");
@@ -236,9 +238,9 @@ public class SeverityIntegrationTest {
         Map<String, Object> testData = new HashMap<>();
         testData.put("testField", "test");
         testData.put("key", "test");
-        
+
         // Process enrichments and verify result
-        RuleResult result = enrichmentService.enrichObjectWithResult(config.getEnrichments(), testData);
+        RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(config.getEnrichments(), testData);
         
         assertNotNull(result, "RuleResult should not be null");
         assertTrue(result.isSuccess(), "Processing should succeed");
@@ -338,9 +340,9 @@ public class SeverityIntegrationTest {
         Map<String, Object> testData = new HashMap<>();
         testData.put("testField", "test");
         testData.put("key", "test");
-        
+
         // Process enrichments and verify result
-        RuleResult result = enrichmentService.enrichObjectWithResult(config.getEnrichments(), testData);
+        RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(config.getEnrichments(), testData);
         
         assertNotNull(result, "RuleResult should not be null");
         assertTrue(result.isSuccess(), "Processing should succeed");

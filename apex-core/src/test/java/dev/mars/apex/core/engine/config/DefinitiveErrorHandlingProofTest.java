@@ -2,17 +2,11 @@ package dev.mars.apex.core.engine.config;
 
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.error.ErrorRecoveryService;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,39 +16,31 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * DEFINITIVE PROOF that rule evaluation errors are properly handled and returned
  * as structured RuleResult objects instead of being lost in stack traces.
- * 
+ *
  * This test demonstrates that:
  * 1. CRITICAL errors return ERROR RuleResult (no recovery)
  * 2. Non-critical errors are logged properly and handled gracefully
  * 3. Error recovery works for non-critical errors
  * 4. All error paths return structured results
- * 
+ *
+ * Updated to use standard RulesEngine entry point without deprecated EnrichmentService.
+ *
  * @author GitHub Copilot
  * @since 2025-09-26
  */
 @DisplayName("🎯 DEFINITIVE PROOF: Error Handling Works Correctly")
 class DefinitiveErrorHandlingProofTest {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(DefinitiveErrorHandlingProofTest.class);
-    
+
     private RulesEngine rulesEngine;
-    
+
     @BeforeEach
     void setUp() {
         logger.info("🚀 Setting up definitive error handling proof test");
-        
+
         RulesEngineConfiguration configuration = new RulesEngineConfiguration();
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService expressionEvaluator = new ExpressionEvaluatorService();
-        EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
-        
-        rulesEngine = new RulesEngine(
-            configuration,
-            new SpelExpressionParser(),
-            new ErrorRecoveryService(),
-            new RulePerformanceMonitor(),
-            enrichmentService
-        );
+        rulesEngine = new RulesEngine(configuration);
     }
     
     @Test

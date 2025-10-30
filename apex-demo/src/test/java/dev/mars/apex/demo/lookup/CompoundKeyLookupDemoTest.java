@@ -64,7 +64,7 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
             testData.put("region", "US-EAST");
 
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
             // Validate enrichment results using proper casting pattern
             assertNotNull(result, "Compound key lookup enrichment result should not be null");
@@ -109,7 +109,7 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
                 testData.put("region", region);
 
                 // Execute APEX enrichment processing
-                Object result = enrichmentService.enrichObject(config, testData);
+                Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
                 // Validate enrichment results
                 assertNotNull(result, "Compound key lookup result should not be null for " + customerId + "-" + region);
@@ -146,7 +146,7 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
             testData.put("region", "XX-UNKNOWN");
 
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
             // Validate enrichment results - should handle gracefully
             assertNotNull(result, "Result should not be null even for non-existent compound key");
@@ -209,3 +209,6 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
         }
     }
 }
+
+
+

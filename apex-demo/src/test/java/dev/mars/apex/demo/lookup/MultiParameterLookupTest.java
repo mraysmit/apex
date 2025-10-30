@@ -18,7 +18,7 @@ package dev.mars.apex.demo.lookup;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
@@ -65,7 +65,7 @@ public class MultiParameterLookupTest {
     private static final Logger logger = LoggerFactory.getLogger(MultiParameterLookupTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
     private LookupServiceRegistry lookupRegistry;
     private ExpressionEvaluatorService expressionEvaluator;
 
@@ -74,7 +74,7 @@ public class MultiParameterLookupTest {
         this.yamlLoader = new YamlConfigurationLoader();
         this.lookupRegistry = new LookupServiceRegistry();
         this.expressionEvaluator = new ExpressionEvaluatorService();
-        this.enrichmentService = new EnrichmentService(lookupRegistry, expressionEvaluator);
+        this.enrichmentProcessor = new YamlEnrichmentProcessor(lookupRegistry, expressionEvaluator);
     }
 
     @Test
@@ -249,7 +249,7 @@ public class MultiParameterLookupTest {
             Map<String, Object> enrichedResult = new HashMap<>(inputData);
             
             // Apply enrichment using APEX services
-            enrichmentService.enrichObject(config, enrichedResult);
+            enrichmentProcessor.processEnrichments(config.getEnrichments(), enrichedResult);
 
             // Display results
             logger.info("\nEnrichment Results:");
@@ -276,3 +276,4 @@ public class MultiParameterLookupTest {
         }
     }
 }
+

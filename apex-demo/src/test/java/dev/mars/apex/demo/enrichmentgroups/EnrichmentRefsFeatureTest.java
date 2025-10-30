@@ -114,7 +114,7 @@ public class EnrichmentRefsFeatureTest extends DemoTestBase {
         data.put("input_x", "X_VALUE");
         data.put("input_y", "Y_VALUE");
         
-        EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(g2, data, config);
+        EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(g2, data, config);
         assertTrue(result.isSuccess(), "g2_rule_builder should succeed when all required fields present");
         assertEquals(2, result.getEnrichmentResults().size(), 
             "Should execute 2 enrichments from referenced rule_builder_group");
@@ -145,7 +145,7 @@ public class EnrichmentRefsFeatureTest extends DemoTestBase {
         data.put("input_y", "Y_VALUE");
         data.put("input_z", "Z_VALUE");
         
-        EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(g3, data, config);
+        EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(g3, data, config);
         assertTrue(result.isSuccess(), "g3 should succeed when all required fields present");
         assertEquals(3, result.getEnrichmentResults().size(),
             "Should execute 3 enrichments (r3 + rule_builder_group's r1 and r2)");
@@ -175,7 +175,7 @@ public class EnrichmentRefsFeatureTest extends DemoTestBase {
         Map<String, Object> data = new HashMap<>();
         data.put("input_x", "X_VALUE");
         
-        EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(g4, data, config);
+        EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(g4, data, config);
         assertTrue(result.isSuccess(), "OR group should succeed when first enrichment succeeds");
         assertEquals(1, result.getEnrichmentResults().size(),
             "OR group should short-circuit after first success");
@@ -205,7 +205,7 @@ public class EnrichmentRefsFeatureTest extends DemoTestBase {
         data.put("input_z", "Z_VALUE");
         data.put("input_w", "W_VALUE");
         
-        EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(g1, data, config);
+        EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(g1, data, config);
         assertTrue(result.isSuccess(), "g1 should succeed when all required fields present");
         assertEquals(2, result.getEnrichmentResults().size(),
             "Should execute 2 local enrichments");
@@ -229,4 +229,5 @@ public class EnrichmentRefsFeatureTest extends DemoTestBase {
             "Should use main file's metadata");
     }
 }
+
 

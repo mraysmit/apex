@@ -97,13 +97,13 @@ public class SimpleRestApiDataSourceTest extends DemoTestBase {
             logger.info("DEBUG: Data source: {} (type: {})", ds.getName(), ds.getType())
         );
 
-        logger.info("DEBUG: About to call enrichmentService.enrichObject...");
+        logger.info("DEBUG: About to call enrichmentProcessor.enrichObject...");
 
         // Process with APEX
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
         assertNotNull(result, "Enrichment result should not be null");
 
-        logger.info("DEBUG: enrichmentService.enrichObject completed");
+        logger.info("DEBUG: enrichmentProcessor.enrichObject completed");
 
         @SuppressWarnings("unchecked")
         Map<String, Object> enrichedData = (Map<String, Object>) result;
@@ -145,7 +145,7 @@ public class SimpleRestApiDataSourceTest extends DemoTestBase {
         testData.put("requestId", "REQ123");
 
         // Process with APEX
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
         assertNotNull(result, "Enrichment result should not be null");
 
         @SuppressWarnings("unchecked")
@@ -178,7 +178,7 @@ public class SimpleRestApiDataSourceTest extends DemoTestBase {
         testData.put("requestId", "REQ123");
 
         // Process with APEX
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
         assertNotNull(result, "Enrichment result should not be null");
 
         @SuppressWarnings("unchecked")
@@ -194,3 +194,6 @@ public class SimpleRestApiDataSourceTest extends DemoTestBase {
         logger.info("✓ Unknown customer ID handled correctly");
     }
 }
+
+
+

@@ -23,7 +23,7 @@ import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
@@ -80,7 +80,7 @@ public class CalculationMathematicalTest {
 
     private YamlConfigurationLoader yamlLoader;
     private YamlRulesEngineService rulesEngineService;
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
     private YamlRuleConfiguration config;
 
     @BeforeEach
@@ -92,7 +92,7 @@ public class CalculationMathematicalTest {
         // Create enrichment service with required dependencies
         LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
         ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-        enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
         
         try {
             // Load mathematical operations configuration
@@ -117,9 +117,8 @@ public class CalculationMathematicalTest {
         RulesEngine baseEngine = rulesEngineService.createRulesEngineFromYamlConfig(config);
         RulesEngineConfiguration rulesConfig = baseEngine.getConfiguration();
 
-        // Create RulesEngine with EnrichmentService
-        RulesEngine engine = new RulesEngine(rulesConfig, new SpelExpressionParser(),
-                                           new ErrorRecoveryService(), new RulePerformanceMonitor(), enrichmentService);
+        // Create RulesEngine
+        RulesEngine engine = new RulesEngine(rulesConfig);
 
         assertNotNull(engine, "RulesEngine should be created");
         logger.info("✅ RulesEngine created with EnrichmentService for mathematical operations");
@@ -307,3 +306,4 @@ public class CalculationMathematicalTest {
         }
     }
 }
+

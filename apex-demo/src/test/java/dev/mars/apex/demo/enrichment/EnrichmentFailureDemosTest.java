@@ -86,7 +86,7 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
                 incompleteData.get("transactionId"), incompleteData.get("amount"));
 
             // Use real APEX EnrichmentService to process enrichment failure scenario
-            Object result = enrichmentService.enrichObject(config, incompleteData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), incompleteData, config);
             assertNotNull(result, "Enrichment result should not be null");
 
             // Validate enrichment results - analyze the enriched data
@@ -140,7 +140,7 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
                 lookupData.get("customerId"), lookupData.get("lookupType"));
 
             // Use real APEX EnrichmentService to process external lookup scenario
-            Object result = enrichmentService.enrichObject(config, lookupData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), lookupData, config);
             assertNotNull(result, "External lookup result should not be null");
 
             // Validate enrichment results - analyze the enriched data
@@ -194,7 +194,7 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
                 corruptedData.get("currencyCode"), corruptedData.get("transactionDate"));
 
             // Use real APEX EnrichmentService to process data quality scenario
-            Object result = enrichmentService.enrichObject(config, corruptedData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), corruptedData, config);
             assertNotNull(result, "Data quality result should not be null");
 
             // Validate enrichment results - analyze the enriched data
@@ -249,7 +249,7 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
             logger.info("Processing comprehensive failure recovery scenario...");
 
             // Use real APEX EnrichmentService to process recovery scenario
-            Object result = enrichmentService.enrichObject(config, problematicData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), problematicData, config);
             assertNotNull(result, "Recovery scenario result should not be null");
 
             // Validate enrichment results - analyze the enriched data
@@ -291,3 +291,6 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
         }
     }
 }
+
+
+

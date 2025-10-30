@@ -20,12 +20,12 @@ import java.io.File;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
+import dev.mars.apex.core.config.yaml.RulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
@@ -58,10 +58,10 @@ public abstract class DemoTestBase {
 
     // Real APEX services for testing
     protected YamlConfigurationLoader yamlLoader;
-    protected EnrichmentService enrichmentService;
+    protected YamlEnrichmentProcessor enrichmentProcessor;
     protected LookupServiceRegistry serviceRegistry;
     protected ExpressionEvaluatorService expressionEvaluator;
-    protected YamlRulesEngineService rulesEngineService;
+    protected RulesEngineService rulesEngineService;
     protected RulesEngineConfiguration rulesEngineConfiguration;
 
     @BeforeEach
@@ -81,8 +81,8 @@ public abstract class DemoTestBase {
         this.yamlLoader = new YamlConfigurationLoader();
         this.serviceRegistry = new LookupServiceRegistry();
         this.expressionEvaluator = new ExpressionEvaluatorService();
-        this.enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
-        this.rulesEngineService = new YamlRulesEngineService();
+        this.enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, expressionEvaluator);
+        this.rulesEngineService = new RulesEngineService();
         this.rulesEngineConfiguration = new RulesEngineConfiguration();
 
         logger.info("APEX services initialized successfully");
@@ -144,7 +144,7 @@ public abstract class DemoTestBase {
         assertNotNull(yamlLoader, "YamlConfigurationLoader should be initialized");
         assertNotNull(serviceRegistry, "LookupServiceRegistry should be initialized");
         assertNotNull(expressionEvaluator, "ExpressionEvaluatorService should be initialized");
-        assertNotNull(enrichmentService, "EnrichmentService should be initialized");
+        assertNotNull(enrichmentProcessor, "YamlEnrichmentProcessor should be initialized");
 
         logger.info("** All APEX services properly initialized");
     }
@@ -214,7 +214,7 @@ public abstract class DemoTestBase {
     protected Object testEnrichment(YamlRuleConfiguration config, Map<String, Object> testData) {
         try {
             logger.info("Testing enrichment with config and test data...");
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
 
             assertNotNull(result, "Enrichment result should not be null");
             logger.info("** Enrichment processing successful");
@@ -232,15 +232,9 @@ public abstract class DemoTestBase {
      */
     protected RulesEngine createRulesEngine() {
         try {
-            logger.info("Creating RulesEngine with EnrichmentService...");
-            // Use full constructor to pass EnrichmentService for enrichment processing
-            RulesEngine engine = new RulesEngine(
-                rulesEngineConfiguration,
-                new SpelExpressionParser(),
-                new ErrorRecoveryService(),
-                new RulePerformanceMonitor(),
-                enrichmentService
-            );
+            logger.info("Creating RulesEngine...");
+            // Create RulesEngine
+            RulesEngine engine = new RulesEngine(rulesEngineConfiguration);
 
             assertNotNull(engine, "RulesEngine should not be null");
             logger.info("** RulesEngine created successfully");
@@ -380,3 +374,4 @@ public abstract class DemoTestBase {
                 });
     }
 }
+

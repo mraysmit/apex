@@ -82,7 +82,7 @@ public class NestedFieldLookupDemoTest extends DemoTestBase {
         Map<String, Object> testData = createNestedTradeData("US", "150.75", "1000");
 
         // Execute APEX enrichment processing - should trigger all 4 enrichments
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
         // Validate that enrichment processing completed successfully
         assertNotNull(result, "Nested field lookup enrichment result should not be null");
@@ -171,7 +171,7 @@ public class NestedFieldLookupDemoTest extends DemoTestBase {
             Map<String, Object> testData = createNestedTradeData(countryCode, "100.50", "500");
 
             // Execute APEX enrichment processing with nested field navigation
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Nested field navigation result should not be null for country: " + countryCode);
 
             @SuppressWarnings("unchecked")
@@ -247,7 +247,7 @@ public class NestedFieldLookupDemoTest extends DemoTestBase {
             Map<String, Object> testData = createNestedTradeData(countryCode, price, quantity);
 
             // Execute APEX enrichment processing with nested field calculations
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Nested pricing calculation result should not be null");
 
             @SuppressWarnings("unchecked")
@@ -304,7 +304,7 @@ public class NestedFieldLookupDemoTest extends DemoTestBase {
         Map<String, Object> testData = createNestedTradeData("US", "125.50", "800");
 
         // Execute complete APEX enrichment workflow - all 4 enrichments should process
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
         assertNotNull(result, "Complete nested field workflow result should not be null");
 
         @SuppressWarnings("unchecked")
@@ -413,3 +413,6 @@ public class NestedFieldLookupDemoTest extends DemoTestBase {
         return testData;
     }
 }
+
+
+

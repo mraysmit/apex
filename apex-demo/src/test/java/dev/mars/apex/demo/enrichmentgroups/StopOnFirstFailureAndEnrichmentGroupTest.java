@@ -106,7 +106,7 @@ public class StopOnFirstFailureAndEnrichmentGroupTest extends DemoTestBase {
         testData.put("a", "A");
         testData.put("b", "B");
         testData.put("c", "C");
-        EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(group, testData, config);
+        EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(group, testData, config);
 
         // Validate results
         assertNotNull(result, "Result should not be null");
@@ -178,7 +178,7 @@ public class StopOnFirstFailureAndEnrichmentGroupTest extends DemoTestBase {
         Map<String, Object> testData = new HashMap<>();
         testData.put("b", "B");  // Provide b and c, but not a
         testData.put("c", "C");
-        EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(group, testData, config);
+        EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(group, testData, config);
 
         // Validate results - AND group with first enrichment failing should fail
         assertNotNull(result, "Result should not be null");
@@ -252,7 +252,7 @@ public class StopOnFirstFailureAndEnrichmentGroupTest extends DemoTestBase {
         Map<String, Object> testData = new HashMap<>();
         testData.put("a", "A");  // Provide a and c, but not b
         testData.put("c", "C");
-        EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(group, testData, config);
+        EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(group, testData, config);
 
         // Validate results - AND group with middle enrichment failing should fail
         assertNotNull(result, "Result should not be null");
@@ -334,7 +334,7 @@ public class StopOnFirstFailureAndEnrichmentGroupTest extends DemoTestBase {
         Map<String, Object> testData = new HashMap<>();
         testData.put("a", "A");  // Provide a and c, but not b and d
         testData.put("c", "C");
-        EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(group, testData, config);
+        EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(group, testData, config);
 
         // Validate results - AND group should fail but all enrichments executed
         assertNotNull(result, "Result should not be null");
@@ -361,3 +361,4 @@ public class StopOnFirstFailureAndEnrichmentGroupTest extends DemoTestBase {
         }
     }
 }
+

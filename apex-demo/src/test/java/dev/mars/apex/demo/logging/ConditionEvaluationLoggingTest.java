@@ -19,7 +19,7 @@ package dev.mars.apex.demo.logging;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.data.external.DataSourceResolver;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
@@ -61,7 +61,7 @@ class ConditionEvaluationLoggingTest {
     
     private YamlConfigurationLoader yamlLoader;
     private YamlEnrichmentProcessor processor;
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
     void setUp() {
@@ -74,7 +74,7 @@ class ConditionEvaluationLoggingTest {
         // Initialize YAML loader and processors
         yamlLoader = new YamlConfigurationLoader();
         processor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
-        enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
 
         logger.info("✅ All services initialized for condition evaluation logging test");
     }
@@ -206,3 +206,4 @@ class ConditionEvaluationLoggingTest {
         logger.info("✅ CONDITION EVALUATION LOGGING: DOCUMENTED");
     }
 }
+

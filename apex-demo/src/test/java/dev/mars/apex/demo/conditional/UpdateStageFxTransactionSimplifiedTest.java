@@ -25,7 +25,7 @@ import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 
@@ -73,7 +73,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
 
     private YamlConfigurationLoader yamlLoader;
     private YamlRulesEngineService rulesEngineService;
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
     void setUp() {
@@ -84,7 +84,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
         // Create enrichment service following the pattern from RulesEngineEvaluateTest
         LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
         ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-        this.enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+        this.enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
 
         logger.info("✅ APEX services initialized successfully");
     }
@@ -158,7 +158,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
             
             logger.info("Testing SWIFT Y flag conversion with data: {}", testData);
             
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
             
@@ -172,7 +172,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
             
             // Test N flag conversion
             testData.put("IS_NDF", "N");
-            result = enrichmentService.enrichObject(config, testData);
+            result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedDataN = (Map<String, Object>) result;
             
@@ -204,7 +204,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
             
             logger.info("Testing REUTERS system with data: {}", testData);
             
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
             
@@ -218,7 +218,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
             
             // Test FALSE value
             testData.put("IS_NDF", "FALSE");
-            result = enrichmentService.enrichObject(config, testData);
+            result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedDataFalse = (Map<String, Object>) result;
             
@@ -250,7 +250,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
             
             logger.info("Testing complex NDF code with data: {}", testData);
             
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
             
@@ -287,7 +287,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
             
             logger.info("Testing unsupported system with data: {}", testData);
             
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
             
@@ -324,7 +324,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
             testData.put("BUY_CURRENCY", "JPY");  // Rank 4
             testData.put("SELL_CURRENCY", "CHF");  // Rank 5
             
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
             
@@ -370,9 +370,8 @@ public class UpdateStageFxTransactionSimplifiedTest {
         RulesEngine baseEngine = rulesEngineService.createRulesEngineFromYamlConfig(config);
         RulesEngineConfiguration rulesConfig = baseEngine.getConfiguration();
 
-        // Create RulesEngine with EnrichmentService
-        RulesEngine engine = new RulesEngine(rulesConfig, new SpelExpressionParser(),
-                                           new ErrorRecoveryService(), new RulePerformanceMonitor(), enrichmentService);
+        // Create RulesEngine
+        RulesEngine engine = new RulesEngine(rulesConfig);
 
         assertNotNull(engine, "RulesEngine should be created");
         logger.info("✅ RulesEngine created with EnrichmentService");
@@ -473,3 +472,4 @@ public class UpdateStageFxTransactionSimplifiedTest {
         logger.info("result.getTimestamp(): {}", result.getTimestamp());
     }
 }
+

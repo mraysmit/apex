@@ -4,7 +4,7 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
 import dev.mars.apex.core.service.data.external.DataSourceResolver;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
@@ -32,7 +32,7 @@ public class LoggingSeverityFixTest {
     
     private YamlConfigurationLoader yamlLoader;
     private YamlEnrichmentProcessor processor;
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
     private RulesEngine rulesEngine;
     
     @BeforeEach
@@ -47,7 +47,7 @@ public class LoggingSeverityFixTest {
         // Initialize YAML loader and processors
         yamlLoader = new YamlConfigurationLoader();
         processor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
-        enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
 
         RulesEngineConfiguration config = new RulesEngineConfiguration();
         rulesEngine = new RulesEngine(config);
@@ -158,3 +158,4 @@ public class LoggingSeverityFixTest {
         logger.info("✅ LOGGING SEVERITY FIX: COMPLETE");
     }
 }
+

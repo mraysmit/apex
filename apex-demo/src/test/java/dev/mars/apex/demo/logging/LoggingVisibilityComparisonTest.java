@@ -19,7 +19,7 @@ package dev.mars.apex.demo.logging;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
@@ -62,7 +62,7 @@ class LoggingVisibilityComparisonTest {
     
     private YamlConfigurationLoader yamlLoader;
     private YamlEnrichmentProcessor processor;
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
     void setUp() {
@@ -75,7 +75,7 @@ class LoggingVisibilityComparisonTest {
         // Initialize YAML loader and processors
         yamlLoader = new YamlConfigurationLoader();
         processor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
-        enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
 
         logger.info("✅ All services initialized for logging visibility comparison test");
     }
@@ -227,3 +227,4 @@ class LoggingVisibilityComparisonTest {
         logger.info("✅ LOGGING TRANSFORMATION: COMPLETE AND DOCUMENTED");
     }
 }
+

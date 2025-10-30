@@ -108,7 +108,7 @@ public class SimpleInlineEnrichmentGroupTest extends DemoTestBase {
             // Execute the base enrichment group
             Map<String, Object> testContext = new HashMap<>();
             testContext.put("input", "test");  // Provide 'input' but not 'missing_field'
-            EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(baseGroup, testContext, config);
+            EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(baseGroup, testContext, config);
 
             // Verify results
             assertNotNull(result, "Result should not be null");
@@ -181,7 +181,7 @@ public class SimpleInlineEnrichmentGroupTest extends DemoTestBase {
             // Execute the composite enrichment group
             Map<String, Object> testContext = new HashMap<>();
             testContext.put("input", "test");  // Provide 'input' but not 'missing_field'
-            EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(compositeGroup, testContext, config);
+            EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(compositeGroup, testContext, config);
 
             // Verify results
             assertNotNull(result, "Result should not be null");
@@ -333,11 +333,11 @@ public class SimpleInlineEnrichmentGroupTest extends DemoTestBase {
             // Test that we can execute both groups independently
             Map<String, Object> testContext1 = new HashMap<>();
             testContext1.put("input", "test");  // Provide 'input' but not 'missing_field'
-            EnrichmentGroupResult baseResult = enrichmentService.processEnrichmentGroup(baseGroup, testContext1, config);
+            EnrichmentGroupResult baseResult = enrichmentProcessor.processEnrichmentGroup(baseGroup, testContext1, config);
 
             Map<String, Object> testContext2 = new HashMap<>();
             testContext2.put("input", "test");  // Provide 'input' but not 'missing_field'
-            EnrichmentGroupResult compositeResult = enrichmentService.processEnrichmentGroup(compositeGroup, testContext2, config);
+            EnrichmentGroupResult compositeResult = enrichmentProcessor.processEnrichmentGroup(compositeGroup, testContext2, config);
 
             assertNotNull(baseResult, "Base result should not be null");
             assertNotNull(compositeResult, "Composite result should not be null");
@@ -355,3 +355,4 @@ public class SimpleInlineEnrichmentGroupTest extends DemoTestBase {
         }
     }
 }
+

@@ -22,7 +22,7 @@ import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.junit.jupiter.api.*;
@@ -54,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ApexNegativeCasesTest {
 
     private RulesEngine rulesEngine;
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
     private LookupServiceRegistry serviceRegistry;
     private ExpressionEvaluatorService evaluatorService;
 
@@ -63,11 +63,11 @@ class ApexNegativeCasesTest {
         // Set up test infrastructure
         serviceRegistry = new LookupServiceRegistry();
         evaluatorService = new ExpressionEvaluatorService(new SpelExpressionParser());
-        
+
         RulesEngineConfiguration configuration = new RulesEngineConfiguration();
         rulesEngine = new RulesEngine(configuration);
-        
-        enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+
+        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
     }
 
     // ========================================
@@ -263,7 +263,7 @@ class ApexNegativeCasesTest {
         System.out.println("  - Amount: " + incompleteData.getAmount());
 
         // Attempt enrichment with missing required data
-        RuleResult result = enrichmentService.enrichObjectWithResult(config, incompleteData);
+        RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(config.getEnrichments(), incompleteData);
 
         // Validate enrichment failure detection
         assertNotNull(result, "RuleResult should not be null");
@@ -289,7 +289,7 @@ class ApexNegativeCasesTest {
 
         // Test successful enrichment for comparison
         TestDataObject completeData = new TestDataObject("USD", 1000.0);
-        RuleResult successResult = enrichmentService.enrichObjectWithResult(config, completeData);
+        RuleResult successResult = enrichmentProcessor.processEnrichmentsWithResult(config.getEnrichments(), completeData);
 
         System.out.println("Comparison with complete data:");
         System.out.println("  - Success: " + successResult.isSuccess());
@@ -318,7 +318,7 @@ class ApexNegativeCasesTest {
             System.out.println("  - " + key + ": " + (value != null ? value : "null")));
 
         // Attempt enrichment
-        RuleResult result = enrichmentService.enrichObjectWithResult(config, mixedData);
+        RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(config.getEnrichments(), mixedData);
 
         // Analyze partial enrichment results
         assertNotNull(result, "RuleResult should not be null");

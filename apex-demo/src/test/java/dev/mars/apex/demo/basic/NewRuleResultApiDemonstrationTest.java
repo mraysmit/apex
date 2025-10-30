@@ -34,8 +34,7 @@ public class NewRuleResultApiDemonstrationTest {
     @BeforeEach
     void setUp() {
         RulesEngineConfiguration config = new RulesEngineConfiguration();
-        rulesEngine = new RulesEngine(config, new SpelExpressionParser(),
-                                    new ErrorRecoveryService(), new RulePerformanceMonitor(), null);
+        rulesEngine = new RulesEngine(config);
     }
 
     @Test

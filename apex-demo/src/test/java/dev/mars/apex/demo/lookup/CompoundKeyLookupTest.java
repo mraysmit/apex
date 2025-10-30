@@ -73,7 +73,7 @@ public class CompoundKeyLookupTest extends DemoTestBase {
         testData.put("approach", "real-apex-services");
         
         // Execute APEX enrichment processing - ALL logic in YAML
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
         
         // Validate enrichment results
         assertNotNull(result, "Compound key lookup result should not be null");
@@ -149,7 +149,7 @@ public class CompoundKeyLookupTest extends DemoTestBase {
             testData.put("approach", "real-apex-services");
             
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             
             // Validate enrichment results
             assertNotNull(result, "Compound key lookup result should not be null for " + customerId + "-" + region);
@@ -191,7 +191,7 @@ public class CompoundKeyLookupTest extends DemoTestBase {
         testData.put("approach", "real-apex-services");
 
         // Execute APEX enrichment processing
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
         // Validate enrichment results for LATAM customer
         assertNotNull(result, "Compound key lookup result should not be null for CUST006-LATAM");
@@ -241,7 +241,7 @@ public class CompoundKeyLookupTest extends DemoTestBase {
         testDataNullCustomer.put("region", "NA");
         testDataNullCustomer.put("approach", "real-apex-services");
         
-        Object resultNullCustomer = enrichmentService.enrichObject(config, testDataNullCustomer);
+        Object resultNullCustomer = enrichmentProcessor.processEnrichments(config.getEnrichments(), testDataNullCustomer, config);
         assertNotNull(resultNullCustomer, "Result should not be null even with null customer ID");
         @SuppressWarnings("unchecked")
         Map<String, Object> enrichedDataNullCustomer = (Map<String, Object>) resultNullCustomer;
@@ -253,7 +253,7 @@ public class CompoundKeyLookupTest extends DemoTestBase {
         testDataNullRegion.put("region", null);
         testDataNullRegion.put("approach", "real-apex-services");
         
-        Object resultNullRegion = enrichmentService.enrichObject(config, testDataNullRegion);
+        Object resultNullRegion = enrichmentProcessor.processEnrichments(config.getEnrichments(), testDataNullRegion, config);
         assertNotNull(resultNullRegion, "Result should not be null even with null region");
         @SuppressWarnings("unchecked")
         Map<String, Object> enrichedDataNullRegion = (Map<String, Object>) resultNullRegion;
@@ -263,7 +263,7 @@ public class CompoundKeyLookupTest extends DemoTestBase {
         Map<String, Object> testDataMissing = new HashMap<>();
         testDataMissing.put("approach", "real-apex-services");
         
-        Object resultMissing = enrichmentService.enrichObject(config, testDataMissing);
+        Object resultMissing = enrichmentProcessor.processEnrichments(config.getEnrichments(), testDataMissing, config);
         assertNotNull(resultMissing, "Result should not be null even with missing fields");
         @SuppressWarnings("unchecked")
         Map<String, Object> enrichedDataMissing = (Map<String, Object>) resultMissing;
@@ -275,3 +275,6 @@ public class CompoundKeyLookupTest extends DemoTestBase {
         }
     }
 }
+
+
+

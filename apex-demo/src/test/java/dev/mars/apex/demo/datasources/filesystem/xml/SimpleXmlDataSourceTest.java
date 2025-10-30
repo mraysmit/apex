@@ -71,7 +71,7 @@ public class SimpleXmlDataSourceTest extends DemoTestBase {
             testData.put("employeeId", "E123");
 
             // Process with APEX
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Enrichment result should not be null");
             
             @SuppressWarnings("unchecked")
@@ -105,7 +105,7 @@ public class SimpleXmlDataSourceTest extends DemoTestBase {
             testData.put("employeeId", "E123");
 
             // Process with APEX
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Enrichment result should not be null");
             
             @SuppressWarnings("unchecked")
@@ -139,7 +139,7 @@ public class SimpleXmlDataSourceTest extends DemoTestBase {
             testData.put("employeeId", "E123");
 
             // Process with APEX
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Enrichment result should not be null");
             
             @SuppressWarnings("unchecked")
@@ -158,3 +158,6 @@ public class SimpleXmlDataSourceTest extends DemoTestBase {
         }
     }
 }
+
+
+

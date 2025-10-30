@@ -22,12 +22,6 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.config.yaml.YamlRuleFactory;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.error.ErrorRecoveryService;
-import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import dev.mars.apex.core.util.TestAwareLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,34 +83,16 @@ public class DataTypeScenarioService {
     // Rule factory for creating engines
     private final YamlRuleFactory ruleFactory;
 
-    // Enrichment service for processing enrichments
-    private final EnrichmentService enrichmentService;
-
     public DataTypeScenarioService() {
         this.configLoader = new YamlConfigurationLoader();
         this.ruleFactory = new YamlRuleFactory();
-        this.enrichmentService = createDefaultEnrichmentService();
-        this.stageExecutor = new ScenarioStageExecutor(configLoader, ruleFactory, enrichmentService);
+        this.stageExecutor = new ScenarioStageExecutor(configLoader, ruleFactory);
     }
 
     public DataTypeScenarioService(YamlConfigurationLoader configLoader, YamlRuleFactory ruleFactory) {
         this.configLoader = configLoader != null ? configLoader : new YamlConfigurationLoader();
         this.ruleFactory = ruleFactory != null ? ruleFactory : new YamlRuleFactory();
-        this.enrichmentService = createDefaultEnrichmentService();
-        this.stageExecutor = new ScenarioStageExecutor(this.configLoader, this.ruleFactory, this.enrichmentService);
-    }
-
-    public DataTypeScenarioService(YamlConfigurationLoader configLoader, YamlRuleFactory ruleFactory, EnrichmentService enrichmentService) {
-        this.configLoader = configLoader != null ? configLoader : new YamlConfigurationLoader();
-        this.ruleFactory = ruleFactory != null ? ruleFactory : new YamlRuleFactory();
-        this.enrichmentService = enrichmentService != null ? enrichmentService : createDefaultEnrichmentService();
-        this.stageExecutor = new ScenarioStageExecutor(this.configLoader, this.ruleFactory, this.enrichmentService);
-    }
-
-    private EnrichmentService createDefaultEnrichmentService() {
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService expressionEvaluator = new ExpressionEvaluatorService();
-        return new EnrichmentService(serviceRegistry, expressionEvaluator);
+        this.stageExecutor = new ScenarioStageExecutor(this.configLoader, this.ruleFactory);
     }
     
     /**
@@ -563,14 +539,7 @@ public class DataTypeScenarioService {
             }
 
             // Create rules engine and execute
-            // Create EnrichmentService for safe RulesEngine creation
-            LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-            ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-            EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
-
-            RulesEngine engine = new RulesEngine(ruleFactory.createRulesEngineConfiguration(mergedConfig),
-                                               new SpelExpressionParser(), new ErrorRecoveryService(),
-                                               new RulePerformanceMonitor(), enrichmentService);
+            RulesEngine engine = new RulesEngine(ruleFactory.createRulesEngineConfiguration(mergedConfig));
 
             // Create facts map
             Map<String, Object> facts = new HashMap<>();

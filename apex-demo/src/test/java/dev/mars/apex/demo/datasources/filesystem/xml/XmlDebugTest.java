@@ -46,7 +46,7 @@ public class XmlDebugTest extends DemoTestBase {
             logger.info("Input test data: {}", testData);
 
             // Process with APEX
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Enrichment result should not be null");
             
             @SuppressWarnings("unchecked")
@@ -94,7 +94,7 @@ public class XmlDebugTest extends DemoTestBase {
             logger.info("Input test data: {}", testData);
 
             // Process with APEX
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Enrichment result should not be null");
 
             @SuppressWarnings("unchecked")
@@ -215,3 +215,6 @@ public class XmlDebugTest extends DemoTestBase {
         }
     }
 }
+
+
+

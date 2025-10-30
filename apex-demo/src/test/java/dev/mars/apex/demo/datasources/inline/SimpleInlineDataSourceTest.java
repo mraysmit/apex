@@ -69,7 +69,7 @@ public class SimpleInlineDataSourceTest extends DemoTestBase {
             testData.put("amount", 1000.0);
 
             // Process with APEX
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Enrichment result should not be null");
 
             @SuppressWarnings("unchecked")
@@ -102,7 +102,7 @@ public class SimpleInlineDataSourceTest extends DemoTestBase {
             testData.put("amount", 1000.0);
 
             // Process with APEX
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Enrichment result should not be null");
 
             @SuppressWarnings("unchecked")
@@ -135,7 +135,7 @@ public class SimpleInlineDataSourceTest extends DemoTestBase {
             testData.put("amount", 1000.0);
 
             // Process with APEX
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Enrichment result should not be null");
 
             @SuppressWarnings("unchecked")
@@ -153,3 +153,6 @@ public class SimpleInlineDataSourceTest extends DemoTestBase {
         }
     }
 }
+
+
+

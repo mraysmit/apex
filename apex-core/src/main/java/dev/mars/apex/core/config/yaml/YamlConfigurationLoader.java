@@ -1051,7 +1051,6 @@ public class YamlConfigurationLoader {
     /**
      * Validate pattern-specific rule chain configuration.
      */
-    @SuppressWarnings("unchecked")
     private void validateRuleChainPattern(YamlRuleChain ruleChain) throws YamlConfigurationException {
         String pattern = ruleChain.getPattern();
         String chainId = ruleChain.getId();
@@ -1979,8 +1978,6 @@ public class YamlConfigurationLoader {
     private void validateCrossComponentReferences(YamlRuleConfiguration config) throws YamlConfigurationException {
         // Build reference maps for validation
         Set<String> ruleIds = buildRuleIdSet(config);
-        Set<String> dataSourceNames = buildDataSourceNameSet(config);
-
         // Validate rule group references
         validateRuleGroupReferences(config, ruleIds);
 
@@ -2004,8 +2001,6 @@ public class YamlConfigurationLoader {
 
         // Build reference maps for validation
         Set<String> dataSourceNames = buildDataSourceNameSet(config);
-        Set<String> ruleIds = buildRuleIdSet(config);
-
         for (YamlEnrichment enrichment : config.getEnrichments()) {
             String enrichmentId = enrichment.getId();
 
@@ -2135,7 +2130,6 @@ public class YamlConfigurationLoader {
     /**
      * Validate rule references in rule chains.
      */
-    @SuppressWarnings("unchecked")
     private void validateRuleChainReferences(YamlRuleConfiguration config, Set<String> ruleIds) throws YamlConfigurationException {
         if (config.getRuleChains() != null) {
             for (YamlRuleChain ruleChain : config.getRuleChains()) {
@@ -2182,7 +2176,6 @@ public class YamlConfigurationLoader {
     /**
      * Validate for circular dependencies in rule chains.
      */
-    @SuppressWarnings("unchecked")
     private void validateCircularDependencies(YamlRuleConfiguration config) throws YamlConfigurationException {
         if (config.getRuleChains() != null) {
             for (YamlRuleChain ruleChain : config.getRuleChains()) {

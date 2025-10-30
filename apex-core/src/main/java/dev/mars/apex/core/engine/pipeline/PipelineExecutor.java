@@ -6,13 +6,11 @@ import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import dev.mars.apex.core.service.data.external.DataSink;
 import dev.mars.apex.core.service.data.external.DataSinkException;
 import dev.mars.apex.core.service.data.external.manager.ExternalDataSourceManager;
-import dev.mars.apex.core.service.data.external.factory.DataSinkFactory;
 import dev.mars.apex.core.util.TestAwareLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 

@@ -170,7 +170,7 @@ public class UpdateStageFxTransactionTest extends DemoTestBase {
             logger.debug("Input FX transaction data: {}", testData);
             
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             
             // Validate enrichment results
             assertNotNull(result, "Currency rank enrichment result should not be null");
@@ -217,7 +217,7 @@ public class UpdateStageFxTransactionTest extends DemoTestBase {
             logger.debug("NDF Rule 1 test data: {}", testData);
             
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             
             // Validate results
             assertNotNull(result, "NDF Rule 1 result should not be null");
@@ -263,7 +263,7 @@ public class UpdateStageFxTransactionTest extends DemoTestBase {
             logger.debug("NDF Rule 2 test data: {}", testData);
             
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             
             // Validate results
             assertNotNull(result, "NDF Rule 2 result should not be null");
@@ -321,7 +321,7 @@ public class UpdateStageFxTransactionTest extends DemoTestBase {
             logger.debug("Complete workflow test data: {}", testData);
             
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             
             // Validate comprehensive results
             assertNotNull(result, "Complete workflow result should not be null");
@@ -379,8 +379,12 @@ public class UpdateStageFxTransactionTest extends DemoTestBase {
 
         // Additional FX-specific validations
         assertNotNull(yamlLoader, "YAML configuration loader should be initialized for FX processing");
-        assertNotNull(enrichmentService, "Enrichment service should be initialized for FX processing");
+        assertNotNull(enrichmentProcessor, "Enrichment service should be initialized for FX processing");
 
         logger.info("✅ All APEX services properly initialized for FX transaction processing");
     }
 }
+
+
+
+

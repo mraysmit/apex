@@ -246,7 +246,7 @@ public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
             logger.info("  Max Amount: {}", testData.get("maxAmount"));
             
             // Execute APEX enrichment with real PostgreSQL multi-parameter lookup
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             
             long responseTime = System.currentTimeMillis() - startTime;
             logger.info("Response Time: {}ms", responseTime);
@@ -334,7 +334,7 @@ public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
             logger.info("  Trade Amount: {}", testData.get("tradeAmount"));
 
             // Execute enrichment
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
@@ -414,7 +414,7 @@ public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
             logger.info("  Trade Amount: NULL (optional)");
 
             // Execute enrichment
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
@@ -482,3 +482,6 @@ public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
         }
     }
 }
+
+
+

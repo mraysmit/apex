@@ -59,7 +59,7 @@ public class ConditionalPerformanceTest extends DemoTestBase {
             testData1.put("priority", "NORMAL");
 
             long start1 = System.nanoTime();
-            Object result1 = enrichmentService.enrichObject(config, testData1);
+            Object result1 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData1, config);
             long time1 = System.nanoTime() - start1;
             double ms1 = time1 / 1_000_000.0;
 
@@ -76,7 +76,7 @@ public class ConditionalPerformanceTest extends DemoTestBase {
             testData2.put("priority", "NORMAL");
 
             long start2 = System.nanoTime();
-            Object result2 = enrichmentService.enrichObject(config, testData2);
+            Object result2 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData2, config);
             long time2 = System.nanoTime() - start2;
             double ms2 = time2 / 1_000_000.0;
 
@@ -116,7 +116,7 @@ public class ConditionalPerformanceTest extends DemoTestBase {
             testData.put("priority", "NORMAL");
 
             long start = System.nanoTime();
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             long elapsed = System.nanoTime() - start;
             double ms = elapsed / 1_000_000.0;
 
@@ -153,7 +153,7 @@ public class ConditionalPerformanceTest extends DemoTestBase {
             testData.put("priority", "NORMAL");
 
             long start = System.nanoTime();
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             long elapsed = System.nanoTime() - start;
             double ms = elapsed / 1_000_000.0;
 
@@ -190,7 +190,7 @@ public class ConditionalPerformanceTest extends DemoTestBase {
             // First evaluation (cache miss)
             logger.info("\n--- First Evaluation (Cache Miss) ---");
             long start1 = System.nanoTime();
-            Object result1 = enrichmentService.enrichObject(config, testData);
+            Object result1 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             long time1 = System.nanoTime() - start1;
             double ms1 = time1 / 1_000_000.0;
 
@@ -201,7 +201,7 @@ public class ConditionalPerformanceTest extends DemoTestBase {
             // Second evaluation with same data (cache hit)
             logger.info("\n--- Second Evaluation (Cache Hit) ---");
             long start2 = System.nanoTime();
-            Object result2 = enrichmentService.enrichObject(config, testData);
+            Object result2 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             long time2 = System.nanoTime() - start2;
             double ms2 = time2 / 1_000_000.0;
 
@@ -224,4 +224,7 @@ public class ConditionalPerformanceTest extends DemoTestBase {
         }
     }
 }
+
+
+
 

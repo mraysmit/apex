@@ -8,16 +8,14 @@ import dev.mars.apex.core.engine.model.RuleBase;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleGroupEvaluationResult;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.exception.RuleEvaluationException;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
-import dev.mars.apex.core.service.monitoring.RulePerformanceMetrics;
+import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
 import dev.mars.apex.core.util.LoggingContext;
-import dev.mars.apex.core.util.RuleParameterExtractor;
 import dev.mars.apex.core.util.RulesEngineLogger;
-import dev.mars.apex.core.util.TestAwareLogger;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -54,9 +52,24 @@ import java.util.*;
  * This class implements a business rules engine using SpEL.
  * It provides a flexible, configurable rules system that can be easily extended
  * and modified without changing the core code.
- * 
+ *
  * This class is responsible only for rule evaluation, not configuration.
  * Configuration is handled by the RulesEngineConfiguration class.
+ *
+ * <p><b>Recommended Usage:</b></p>
+ * For production code, use {@link dev.mars.apex.core.config.yaml.RulesEngineService} to create
+ * RulesEngine instances. This provides simplified, content-agnostic YAML processing that handles
+ * all YAML content types (enrichments, rules, rule-groups, transformations, etc.) automatically.
+ *
+ * <p>Example:</p>
+ * <pre>
+ * // ✅ RECOMMENDED (production code):
+ * RulesEngineService service = new RulesEngineService();
+ * RulesEngine engine = service.createRulesEngineFromFile(yamlFile);
+ *
+ * // ✅ ACCEPTABLE (tests and simple cases):
+ * RulesEngine engine = new RulesEngine(config, parser, errorService, monitor, enrichmentService);
+ * </pre>
  */
 public class RulesEngine {
     private static final RulesEngineLogger logger = new RulesEngineLogger(RulesEngine.class);
@@ -64,47 +77,27 @@ public class RulesEngine {
     private final RulesEngineConfiguration configuration;
     private final ErrorRecoveryService errorRecoveryService;
     private final RulePerformanceMonitor performanceMonitor;
-    private final EnrichmentService enrichmentService;
+    private final YamlEnrichmentProcessor enrichmentProcessor;
     private final UnifiedRuleEvaluator unifiedEvaluator;
 
-
     /**
-     * Create a new RulesEngine with the given configuration, expression parser, error recovery service, and performance monitor.
-     * This is the primary constructor that supports all APEX features including enrichment processing.
+     * Create a new RulesEngine with the specified configuration.
+     * This is the only constructor for RulesEngine.
+     *
+     * <p>For production code with YAML configurations, use
+     * {@link dev.mars.apex.core.config.yaml.RulesEngineService} instead.</p>
      *
      * @param configuration The configuration for this rules engine
-     * @param parser The expression parser to use
-     * @param errorRecoveryService The error recovery service to use for handling evaluation errors
-     * @param performanceMonitor The performance monitor to use for tracking rule evaluation metrics
-     * @param enrichmentService The enrichment service to use for processing enrichments (required for YAML with enrichments)
      */
-    public RulesEngine(RulesEngineConfiguration configuration, ExpressionParser parser,
-                      ErrorRecoveryService errorRecoveryService, RulePerformanceMonitor performanceMonitor,
-                      EnrichmentService enrichmentService) {
-        this(configuration, parser, errorRecoveryService, performanceMonitor, enrichmentService, new ErrorRecoveryConfig());
-    }
-
-    /**
-     * Create a new RulesEngine with the given configuration, expression parser, error recovery service, performance monitor, and custom error recovery config.
-     *
-     * @param configuration The configuration for this rules engine
-     * @param parser The expression parser to use
-     * @param errorRecoveryService The error recovery service to use for handling evaluation errors
-     * @param performanceMonitor The performance monitor to use for tracking rule evaluation metrics
-     * @param enrichmentService The enrichment service to use for processing enrichments (optional)
-     * @param errorRecoveryConfig The error recovery configuration to use
-     */
-    public RulesEngine(RulesEngineConfiguration configuration, ExpressionParser parser,
-                      ErrorRecoveryService errorRecoveryService, RulePerformanceMonitor performanceMonitor,
-                      EnrichmentService enrichmentService, ErrorRecoveryConfig errorRecoveryConfig) {
+    public RulesEngine(RulesEngineConfiguration configuration) {
         this.configuration = configuration;
-        this.parser = parser;
-        this.errorRecoveryService = errorRecoveryService;
-        this.performanceMonitor = performanceMonitor;
-        this.enrichmentService = enrichmentService;
+        this.parser = new SpelExpressionParser();
+        this.errorRecoveryService = new ErrorRecoveryService();
+        this.performanceMonitor = new RulePerformanceMonitor();
+        this.enrichmentProcessor = new YamlEnrichmentProcessor(new LookupServiceRegistry(), new ExpressionEvaluatorService());
 
-        // Initialize the unified evaluator with the provided error recovery configuration
-        this.unifiedEvaluator = new UnifiedRuleEvaluator(parser, errorRecoveryService, performanceMonitor, errorRecoveryConfig);
+        // Initialize the unified evaluator with default error recovery configuration
+        this.unifiedEvaluator = new UnifiedRuleEvaluator(parser, errorRecoveryService, performanceMonitor, new ErrorRecoveryConfig());
 
         // Initialize logging context
         LoggingContext.initializeContext();
@@ -113,8 +106,7 @@ public class RulesEngine {
         logger.debug("Using parser: {}", parser.getClass().getSimpleName());
         logger.debug("Using error recovery service: {}", errorRecoveryService.getClass().getSimpleName());
         logger.debug("Using performance monitor: {}", performanceMonitor.getClass().getSimpleName());
-        logger.debug("Using enrichment service: {}", enrichmentService != null ? enrichmentService.getClass().getSimpleName() : "none");
-        logger.debug("Using error recovery config: enabled={}", errorRecoveryConfig.isEnabled());
+        logger.debug("Using enrichment processor: {}", enrichmentProcessor != null ? enrichmentProcessor.getClass().getSimpleName() : "none");
     }
 
     /**
@@ -447,15 +439,16 @@ public class RulesEngine {
         boolean overallSuccess = true;
 
         try {
-            // Phase 1: Process enrichments if available and EnrichmentService is configured
-            if (enrichmentService != null && yamlConfig.getEnrichments() != null && !yamlConfig.getEnrichments().isEmpty()) {
+            // Phase 1: Process enrichments if available and YamlEnrichmentProcessor is configured
+            if (enrichmentProcessor != null && yamlConfig.getEnrichments() != null && !yamlConfig.getEnrichments().isEmpty()) {
                 logger.info("Processing {} enrichments", yamlConfig.getEnrichments().size());
 
                 try {
                     // Store original data size to detect enrichment failures
                     int originalDataSize = enrichedData.size();
 
-                    Object enrichmentResult = enrichmentService.enrichObject(yamlConfig, enrichedData);
+                    Object enrichmentResult = enrichmentProcessor.processEnrichments(
+                        yamlConfig.getEnrichments(), enrichedData, yamlConfig);
 
                     if (enrichmentResult instanceof Map) {
                         @SuppressWarnings("unchecked")
@@ -484,9 +477,9 @@ public class RulesEngine {
                     failureMessages.add("Enrichment processing failed: " + e.getMessage());
                 }
             } else if (yamlConfig.getEnrichments() != null && !yamlConfig.getEnrichments().isEmpty()) {
-                logger.warn("Enrichments defined in configuration but no EnrichmentService available");
+                logger.warn("Enrichments defined in configuration but no YamlEnrichmentProcessor available");
                 overallSuccess = false;
-                failureMessages.add("Enrichments defined but no EnrichmentService configured");
+                failureMessages.add("Enrichments defined but no YamlEnrichmentProcessor configured");
             }
 
             // Phase 2: Process individual rules if available

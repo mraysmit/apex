@@ -104,7 +104,7 @@ public class StopOnFirstFailureOrEnrichmentGroupTest extends DemoTestBase {
         // Execute enrichment group - all required fields missing, so group should fail (all enrichments executed)
         Map<String, Object> testData = new HashMap<>();
         // Don't provide any data - all enrichments should fail due to missing required fields
-        EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(group, testData, config);
+        EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(group, testData, config);
 
         // Validate results
         assertNotNull(result, "Result should not be null");
@@ -175,7 +175,7 @@ public class StopOnFirstFailureOrEnrichmentGroupTest extends DemoTestBase {
         // Execute enrichment group - first required field present, should stop immediately
         Map<String, Object> testData = new HashMap<>();
         testData.put("a", "A");  // Provide only field 'a', not b or c
-        EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(group, testData, config);
+        EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(group, testData, config);
 
         // Validate results - OR group with first enrichment succeeding should pass
         assertNotNull(result, "Result should not be null");
@@ -246,7 +246,7 @@ public class StopOnFirstFailureOrEnrichmentGroupTest extends DemoTestBase {
         // Execute enrichment group - middle enrichment succeeds, should stop at enrichment 2
         Map<String, Object> testData = new HashMap<>();
         testData.put("b", "B");  // Provide only field 'b', not a or c
-        EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(group, testData, config);
+        EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(group, testData, config);
 
         // Validate results - OR group with middle enrichment succeeding should pass
         assertNotNull(result, "Result should not be null");
@@ -326,7 +326,7 @@ public class StopOnFirstFailureOrEnrichmentGroupTest extends DemoTestBase {
         Map<String, Object> testData = new HashMap<>();
         testData.put("b", "B");  // Provide fields 'b' and 'd', not a or c
         testData.put("d", "D");
-        EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(group, testData, config);
+        EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(group, testData, config);
 
         // Validate results - OR group should pass (has successful enrichments) and all enrichments executed
         assertNotNull(result, "Result should not be null");
@@ -414,7 +414,7 @@ public class StopOnFirstFailureOrEnrichmentGroupTest extends DemoTestBase {
         // Execute enrichment group - 5 enrichments (F,F,T,F,F), should stop at enrichment 3
         Map<String, Object> testData = new HashMap<>();
         testData.put("c", "C");  // Provide only field 'c', not a, b, d, or e
-        EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(group, testData, config);
+        EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(group, testData, config);
 
         // Validate results - OR group should pass at enrichment 3, enrichments 4 and 5 not executed
         assertNotNull(result, "Result should not be null");
@@ -440,3 +440,4 @@ public class StopOnFirstFailureOrEnrichmentGroupTest extends DemoTestBase {
         }
     }
 }
+

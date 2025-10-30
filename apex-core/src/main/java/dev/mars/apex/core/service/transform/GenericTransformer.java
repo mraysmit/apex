@@ -5,12 +5,6 @@ import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.TransformerRule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.common.NamedService;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.error.ErrorRecoveryService;
-import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -68,13 +62,7 @@ public class GenericTransformer<T> implements NamedService {
         if (rulesEngine != null) {
             this.rulesEngine = rulesEngine;
         } else {
-            // Create EnrichmentService for safe RulesEngine creation
-            LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-            ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-            EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
-
-            this.rulesEngine = new RulesEngine(new RulesEngineConfiguration(), new SpelExpressionParser(),
-                                             new ErrorRecoveryService(), new RulePerformanceMonitor(), enrichmentService);
+            this.rulesEngine = new RulesEngine(new RulesEngineConfiguration());
         }
         this.transformerRules = transformerRules != null ? new ArrayList<>(transformerRules) : new ArrayList<>();
     }

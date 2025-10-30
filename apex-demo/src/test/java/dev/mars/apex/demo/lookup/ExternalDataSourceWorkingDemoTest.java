@@ -18,7 +18,7 @@ package dev.mars.apex.demo.lookup;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
@@ -60,7 +60,7 @@ public class ExternalDataSourceWorkingDemoTest {
     private static final Logger logger = LoggerFactory.getLogger(ExternalDataSourceWorkingDemoTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
     void setUp() {
@@ -72,7 +72,7 @@ public class ExternalDataSourceWorkingDemoTest {
         // Create enrichment service with proper dependencies
         LookupServiceRegistry lookupServiceRegistry = new LookupServiceRegistry();
         ExpressionEvaluatorService expressionEvaluator = new ExpressionEvaluatorService();
-        enrichmentService = new EnrichmentService(lookupServiceRegistry, expressionEvaluator);
+        enrichmentProcessor = new YamlEnrichmentProcessor(lookupServiceRegistry, expressionEvaluator);
 
         logger.info("✓ APEX services initialized successfully");
     }
@@ -152,7 +152,7 @@ public class ExternalDataSourceWorkingDemoTest {
             testData.put("approach", "real-apex-services");
 
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
             // Validate enrichment results using proper casting pattern
             assertNotNull(result, "External data source working enrichment result should not be null");
@@ -217,8 +217,8 @@ public class ExternalDataSourceWorkingDemoTest {
             testData.put("approach", "real-apex-services");
             
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
-            
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+
             // Validate enrichment results
             assertNotNull(result, "Database initialization result should not be null for " + initializationType);
             @SuppressWarnings("unchecked")
@@ -259,8 +259,8 @@ public class ExternalDataSourceWorkingDemoTest {
             testData.put("approach", "real-apex-services");
             
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
-            
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+
             // Validate enrichment results
             assertNotNull(result, "Data verification result should not be null for " + verificationType);
             @SuppressWarnings("unchecked")
@@ -301,8 +301,8 @@ public class ExternalDataSourceWorkingDemoTest {
             testData.put("approach", "real-apex-services");
             
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
-            
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+
             // Validate enrichment results
             assertNotNull(result, "External reference enrichment result should not be null for " + enrichmentType);
             @SuppressWarnings("unchecked")
@@ -321,3 +321,4 @@ public class ExternalDataSourceWorkingDemoTest {
         }
     }
 }
+

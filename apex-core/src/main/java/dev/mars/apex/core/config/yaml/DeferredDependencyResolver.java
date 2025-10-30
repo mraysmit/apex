@@ -34,8 +34,6 @@ public class DeferredDependencyResolver {
     
     // Patterns for detecting references in YAML content
     private static final Pattern FIELD_REFERENCE_PATTERN = Pattern.compile("#([a-zA-Z_][a-zA-Z0-9_.]*)");
-    private static final Pattern ID_REFERENCE_PATTERN = Pattern.compile("\"([a-zA-Z_][a-zA-Z0-9_-]*)\"");
-    
     // Dependency tracking
     private final Map<String, Set<String>> dependencies;
     private final Map<String, Set<String>> reverseDependencies;

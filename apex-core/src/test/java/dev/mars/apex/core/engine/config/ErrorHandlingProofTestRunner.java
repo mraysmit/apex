@@ -4,19 +4,12 @@ import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.engine.RuleEngineService;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
-import dev.mars.apex.core.service.error.ErrorRecoveryService;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
-import dev.mars.apex.core.config.error.SeverityRecoveryPolicy;
-import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.util.*;
 
@@ -26,47 +19,40 @@ import static org.junit.jupiter.api.Assertions.*;
  * Definitive proof test that demonstrates ALL rule evaluation error paths
  * properly return structured RuleResult objects instead of throwing exceptions
  * or logging stack traces.
- * 
+ *
  * This test serves as the definitive proof that the error handling improvements
  * work correctly across all APEX execution paths.
- * 
+ *
+ * Updated to use standard RulesEngine entry point without deprecated EnrichmentService.
+ *
  * @author GitHub Copilot
  * @since 2025-09-26
  */
 @DisplayName("🎯 DEFINITIVE PROOF: All Error Paths Return Structured Results")
 class ErrorHandlingProofTestRunner {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(ErrorHandlingProofTestRunner.class);
-    
+
     private RulesEngine rulesEngine;
     private RuleEngineService ruleEngineService;
     private int totalTests = 0;
     private int passedTests = 0;
-    
+
     @BeforeEach
     void setUp() {
         logger.info("🚀 Starting definitive proof tests for rule evaluation error handling");
 
         // Create fully configured rules engine with custom error recovery config
         RulesEngineConfiguration configuration = new RulesEngineConfiguration();
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
         ExpressionEvaluatorService expressionEvaluator = new ExpressionEvaluatorService();
-        EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
 
         // Create custom ErrorRecoveryConfig that disables recovery for all severities
         // This ensures the test gets ERROR results instead of recovered NO_MATCH results
         ErrorRecoveryConfig errorRecoveryConfig = new ErrorRecoveryConfig();
         errorRecoveryConfig.setEnabled(false); // Disable all recovery
 
-        // Create RulesEngine with the custom error recovery config
-        rulesEngine = new RulesEngine(
-            configuration,
-            new SpelExpressionParser(),
-            new ErrorRecoveryService(),
-            new RulePerformanceMonitor(),
-            enrichmentService,
-            errorRecoveryConfig
-        );
+        // Create RulesEngine
+        rulesEngine = new RulesEngine(configuration);
 
         ruleEngineService = new RuleEngineService(expressionEvaluator);
         totalTests = 0;

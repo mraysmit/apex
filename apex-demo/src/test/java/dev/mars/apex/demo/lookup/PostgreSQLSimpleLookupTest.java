@@ -166,7 +166,7 @@ public class PostgreSQLSimpleLookupTest extends DemoTestBase {
             logger.info("  Customer ID: {}", testData.get("customerId"));
             
             // Execute APEX enrichment with real PostgreSQL
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             
             long responseTime = System.currentTimeMillis() - startTime;
             logger.info("Response Time: {}ms", responseTime);
@@ -226,7 +226,7 @@ public class PostgreSQLSimpleLookupTest extends DemoTestBase {
             testData.put("customerId", "CUST000001");
             
             // Execute enrichment
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
@@ -298,3 +298,6 @@ public class PostgreSQLSimpleLookupTest extends DemoTestBase {
         }
     }
 }
+
+
+

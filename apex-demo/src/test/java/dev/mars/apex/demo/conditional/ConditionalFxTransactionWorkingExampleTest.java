@@ -75,7 +75,7 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
             logger.info("Testing SWIFT standard NDF mapping with data: {}", data);
 
             // When: Process through APEX enrichments
-            Object enrichedResult = enrichmentService.enrichObject(config, data);
+            Object enrichedResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), data, config);
             assertNotNull(enrichedResult, "Enriched result should not be null");
 
             // Cast to Map for validation
@@ -147,7 +147,7 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
             logger.info("Testing SWIFT Y/N flag conversion with data: {}", data);
 
             // When: Process through APEX enrichments
-            Object enrichedResult = enrichmentService.enrichObject(config, data);
+            Object enrichedResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), data, config);
             assertNotNull(enrichedResult, "Enriched result should not be null");
 
             @SuppressWarnings("unchecked")
@@ -192,7 +192,7 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
             logger.info("Testing REUTERS system-specific mapping with data: {}", data);
 
             // When: Process through APEX enrichments
-            Object enrichedResult = enrichmentService.enrichObject(config, data);
+            Object enrichedResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), data, config);
             assertNotNull(enrichedResult, "Enriched result should not be null");
 
             @SuppressWarnings("unchecked")
@@ -237,7 +237,7 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
             logger.info("Testing high-value transaction processing with amount: {}", data.get("NOTIONAL_AMOUNT"));
 
             // When: Process through APEX enrichments
-            Object enrichedResult = enrichmentService.enrichObject(config, data);
+            Object enrichedResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), data, config);
             assertNotNull(enrichedResult, "Enriched result should not be null");
 
             @SuppressWarnings("unchecked")
@@ -288,7 +288,7 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
             logger.info("Testing comprehensive audit trail with complex data: {}", data);
 
             // When: Process through APEX enrichments
-            Object enrichedResult = enrichmentService.enrichObject(config, data);
+            Object enrichedResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), data, config);
             assertNotNull(enrichedResult, "Enriched result should not be null");
 
             @SuppressWarnings("unchecked")
@@ -320,3 +320,6 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
         }
     }
 }
+
+
+

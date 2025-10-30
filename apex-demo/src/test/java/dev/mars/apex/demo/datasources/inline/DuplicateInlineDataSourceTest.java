@@ -93,7 +93,7 @@ public class DuplicateInlineDataSourceTest extends DemoTestBase {
             logger.info(" Processing enrichments...");
 
             // Process with APEX - this should trigger both enrichments
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Enrichment result should not be null");
 
             @SuppressWarnings("unchecked")
@@ -136,7 +136,7 @@ public class DuplicateInlineDataSourceTest extends DemoTestBase {
             Map<String, Object> testData = new HashMap<>();
             testData.put("currencyCode", "EUR");
 
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
 
@@ -179,7 +179,7 @@ public class DuplicateInlineDataSourceTest extends DemoTestBase {
             logger.info("📋 Processing enrichments with 2 identical datasets...");
 
             // Process enrichments - this should create 1 dataset service and reuse it
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Enrichment result should not be null");
 
             // Get cache statistics
@@ -227,3 +227,6 @@ public class DuplicateInlineDataSourceTest extends DemoTestBase {
         }
     }
 }
+
+
+

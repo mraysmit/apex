@@ -30,16 +30,18 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Comprehensive unit tests for EnrichmentService.
- * 
+ * Comprehensive unit tests for YamlEnrichmentProcessor (formerly EnrichmentService).
+ *
  * Tests cover:
- * - Service initialization and dependencies
+ * - Processor initialization and dependencies
  * - YAML-based enrichment processing
  * - Object enrichment with different configurations
- * - Integration with YamlEnrichmentProcessor
  * - Error handling and edge cases
  * - Multiple enrichment scenarios
- * 
+ * - Caching functionality
+ *
+ * Updated to test YamlEnrichmentProcessor directly instead of deprecated EnrichmentService.
+ *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
@@ -47,7 +49,7 @@ class EnrichmentServiceTest {
 
     private LookupServiceRegistry serviceRegistry;
     private ExpressionEvaluatorService evaluatorService;
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
     void setUp() {
@@ -56,7 +58,7 @@ class EnrichmentServiceTest {
 
         serviceRegistry = new LookupServiceRegistry();
         evaluatorService = new ExpressionEvaluatorService();
-        enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
     }
 
     // ========================================
@@ -64,21 +66,19 @@ class EnrichmentServiceTest {
     // ========================================
 
     @Test
-    @DisplayName("Should create EnrichmentService with valid dependencies")
+    @DisplayName("Should create YamlEnrichmentProcessor with valid dependencies")
     void testConstructor() {
-        EnrichmentService service = new EnrichmentService(serviceRegistry, evaluatorService);
-        
-        assertNotNull(service, "Service should be created successfully");
-        assertSame(serviceRegistry, service.getServiceRegistry(), "Service registry should be set correctly");
-        assertNotNull(service.getProcessor(), "Processor should be initialized");
+        YamlEnrichmentProcessor processor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
+
+        assertNotNull(processor, "Processor should be created successfully");
     }
 
     @Test
     @DisplayName("Should handle null service registry gracefully")
     void testConstructorWithNullRegistry() {
         assertDoesNotThrow(() -> {
-            EnrichmentService service = new EnrichmentService(null, evaluatorService);
-            assertNotNull(service);
+            YamlEnrichmentProcessor processor = new YamlEnrichmentProcessor(null, evaluatorService);
+            assertNotNull(processor);
         });
     }
 
@@ -86,8 +86,8 @@ class EnrichmentServiceTest {
     @DisplayName("Should handle null evaluator service gracefully")
     void testConstructorWithNullEvaluator() {
         assertDoesNotThrow(() -> {
-            EnrichmentService service = new EnrichmentService(serviceRegistry, null);
-            assertNotNull(service);
+            YamlEnrichmentProcessor processor = new YamlEnrichmentProcessor(serviceRegistry, null);
+            assertNotNull(processor);
         });
     }
 
@@ -101,7 +101,7 @@ class EnrichmentServiceTest {
         YamlRuleConfiguration yamlConfig = createTestYamlConfiguration();
         TestDataObject targetObject = new TestDataObject("USD", 1000.0);
         
-        Object enrichedObject = enrichmentService.enrichObject(yamlConfig, targetObject);
+        Object enrichedObject = enrichmentProcessor.processEnrichments(yamlConfig.getEnrichments(), targetObject);
         
         assertNotNull(enrichedObject, "Enriched object should not be null");
         // The exact enrichment behavior depends on the YAML configuration and processor implementation
@@ -112,7 +112,7 @@ class EnrichmentServiceTest {
     void testEnrichObjectWithNullYamlConfig() {
         TestDataObject targetObject = new TestDataObject("USD", 1000.0);
         
-        Object result = enrichmentService.enrichObject((YamlRuleConfiguration) null, targetObject);
+        Object result = enrichmentProcessor.processEnrichments(null, targetObject);
         
         assertSame(targetObject, result, "Null YAML config should return original object");
     }
@@ -123,7 +123,7 @@ class EnrichmentServiceTest {
         YamlRuleConfiguration emptyConfig = new YamlRuleConfiguration();
         TestDataObject targetObject = new TestDataObject("USD", 1000.0);
         
-        Object result = enrichmentService.enrichObject(emptyConfig, targetObject);
+        Object result = enrichmentProcessor.processEnrichments(emptyConfig.getEnrichments(), targetObject);
         
         assertSame(targetObject, result, "Empty YAML config should return original object");
     }
@@ -138,7 +138,7 @@ class EnrichmentServiceTest {
         List<YamlEnrichment> enrichments = createTestEnrichmentList();
         TestDataObject targetObject = new TestDataObject("EUR", 500.0);
         
-        Object enrichedObject = enrichmentService.enrichObject(enrichments, targetObject);
+        Object enrichedObject = enrichmentProcessor.processEnrichments(enrichments, targetObject);
         
         assertNotNull(enrichedObject, "Enriched object should not be null");
     }
@@ -149,7 +149,7 @@ class EnrichmentServiceTest {
         List<YamlEnrichment> emptyList = new ArrayList<>();
         TestDataObject targetObject = new TestDataObject("GBP", 750.0);
         
-        Object result = enrichmentService.enrichObject(emptyList, targetObject);
+        Object result = enrichmentProcessor.processEnrichments(emptyList, targetObject);
         
         assertNotNull(result, "Result should not be null");
     }
@@ -159,7 +159,7 @@ class EnrichmentServiceTest {
     void testEnrichObjectWithNullList() {
         TestDataObject targetObject = new TestDataObject("JPY", 100000.0);
         
-        Object result = enrichmentService.enrichObject((List<YamlEnrichment>) null, targetObject);
+        Object result = enrichmentProcessor.processEnrichments(null, targetObject);
         
         assertNotNull(result, "Result should not be null");
     }
@@ -174,7 +174,7 @@ class EnrichmentServiceTest {
         YamlEnrichment enrichment = createTestEnrichment();
         TestDataObject targetObject = new TestDataObject("CAD", 800.0);
         
-        Object enrichedObject = enrichmentService.enrichObject(enrichment, targetObject);
+        Object enrichedObject = enrichmentProcessor.processEnrichment(enrichment, targetObject);
         
         assertNotNull(enrichedObject, "Enriched object should not be null");
     }
@@ -187,7 +187,7 @@ class EnrichmentServiceTest {
         TestDataObject targetObject = new TestDataObject("AUD", 900.0);
 
         assertThrows(NullPointerException.class, () -> {
-            enrichmentService.enrichObject((YamlEnrichment) null, targetObject);
+            enrichmentProcessor.processEnrichment(null, targetObject);
         }, "Null enrichment should throw NullPointerException");
     }
 
@@ -203,7 +203,7 @@ class EnrichmentServiceTest {
         YamlEnrichment enrichment = createTestEnrichment();
 
         assertThrows(NullPointerException.class, () -> {
-            enrichmentService.enrichObject(enrichment, null);
+            enrichmentProcessor.processEnrichment(enrichment, null);
         }, "Null target object should throw NullPointerException");
     }
 
@@ -217,12 +217,12 @@ class EnrichmentServiceTest {
         mapObject.put("currency", "USD");
         mapObject.put("amount", 1000.0);
         
-        Object enrichedMap = enrichmentService.enrichObject(enrichment, mapObject);
+        Object enrichedMap = enrichmentProcessor.processEnrichment(enrichment, mapObject);
         assertNotNull(enrichedMap, "Map enrichment should work");
         
         // Test with String
         String stringObject = "test";
-        Object enrichedString = enrichmentService.enrichObject(enrichment, stringObject);
+        Object enrichedString = enrichmentProcessor.processEnrichment(enrichment, stringObject);
         assertNotNull(enrichedString, "String enrichment should work");
     }
 
@@ -239,7 +239,7 @@ class EnrichmentServiceTest {
         YamlEnrichment enrichment = createTestEnrichment();
         TestDataObject targetObject = new TestDataObject("CHF", 1200.0);
         
-        Object result = enrichmentService.enrichObject(enrichment, targetObject);
+        Object result = enrichmentProcessor.processEnrichment(enrichment, targetObject);
         
         assertNotNull(result, "Enrichment with service registry should work");
     }
@@ -250,7 +250,7 @@ class EnrichmentServiceTest {
         List<YamlEnrichment> enrichments = createMultipleTestEnrichments();
         TestDataObject targetObject = new TestDataObject("SEK", 600.0);
         
-        Object result = enrichmentService.enrichObject(enrichments, targetObject);
+        Object result = enrichmentProcessor.processEnrichments(enrichments, targetObject);
         
         assertNotNull(result, "Multiple enrichments should be processed");
     }
@@ -266,7 +266,7 @@ class EnrichmentServiceTest {
         TestDataObject targetObject = new TestDataObject("USD", 1000.0);
 
         // Test with RuleResult for comprehensive validation
-        RuleResult result = enrichmentService.enrichObjectWithResult(yamlConfig, targetObject);
+        RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(yamlConfig.getEnrichments(), targetObject);
 
         assertNotNull(result, "RuleResult should not be null");
         assertTrue(result.isSuccess(), "Enrichment should succeed");
@@ -284,7 +284,7 @@ class EnrichmentServiceTest {
     void testEnrichObjectWithNullYamlConfig_WithRuleResult() {
         TestDataObject targetObject = new TestDataObject("USD", 1000.0);
 
-        RuleResult result = enrichmentService.enrichObjectWithResult((YamlRuleConfiguration) null, targetObject);
+        RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(null, targetObject);
 
         assertNotNull(result, "RuleResult should not be null");
         assertTrue(result.isSuccess(), "Null YAML config should succeed (returns original object)");
@@ -298,7 +298,7 @@ class EnrichmentServiceTest {
         List<YamlEnrichment> enrichments = createTestEnrichmentList();
         TestDataObject targetObject = new TestDataObject("EUR", 500.0);
 
-        RuleResult result = enrichmentService.enrichObjectWithResult(enrichments, targetObject);
+        RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(enrichments, targetObject);
 
         assertNotNull(result, "RuleResult should not be null");
         assertTrue(result.isSuccess(), "List enrichment should succeed");
@@ -316,7 +316,7 @@ class EnrichmentServiceTest {
         List<YamlEnrichment> emptyList = new ArrayList<>();
         TestDataObject targetObject = new TestDataObject("GBP", 750.0);
 
-        RuleResult result = enrichmentService.enrichObjectWithResult(emptyList, targetObject);
+        RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(emptyList, targetObject);
 
         assertNotNull(result, "RuleResult should not be null");
         assertTrue(result.isSuccess(), "Empty list should succeed");
@@ -329,7 +329,7 @@ class EnrichmentServiceTest {
     void testEnrichObjectWithNullList_WithRuleResult() {
         TestDataObject targetObject = new TestDataObject("JPY", 100000.0);
 
-        RuleResult result = enrichmentService.enrichObjectWithResult((List<YamlEnrichment>) null, targetObject);
+        RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(null, targetObject);
 
         assertNotNull(result, "RuleResult should not be null");
         assertTrue(result.isSuccess(), "Null list should succeed");
@@ -343,7 +343,7 @@ class EnrichmentServiceTest {
         YamlEnrichment enrichment = createTestEnrichment();
         TestDataObject targetObject = new TestDataObject("CAD", 800.0);
 
-        RuleResult result = enrichmentService.enrichObjectWithResult(enrichment, targetObject);
+        RuleResult result = enrichmentProcessor.processEnrichmentWithResult(enrichment, targetObject);
 
         assertNotNull(result, "RuleResult should not be null");
         assertTrue(result.isSuccess(), "Single enrichment should succeed");
@@ -356,7 +356,7 @@ class EnrichmentServiceTest {
         enrichedData.put("testModification", "testValue");
 
         // Get result again to verify internal state wasn't modified
-        RuleResult secondResult = enrichmentService.enrichObjectWithResult(enrichment, targetObject);
+        RuleResult secondResult = enrichmentProcessor.processEnrichmentWithResult(enrichment, targetObject);
         assertEquals(originalSize, secondResult.getEnrichedData().size(),
                     "Internal state should not be affected by external modifications");
     }
@@ -371,14 +371,14 @@ class EnrichmentServiceTest {
         mapObject.put("currency", "USD");
         mapObject.put("amount", 1000.0);
 
-        RuleResult mapResult = enrichmentService.enrichObjectWithResult(enrichment, mapObject);
+        RuleResult mapResult = enrichmentProcessor.processEnrichmentWithResult(enrichment, mapObject);
         assertNotNull(mapResult, "Map RuleResult should not be null");
         assertTrue(mapResult.isSuccess(), "Map enrichment should succeed");
         assertNotNull(mapResult.getEnrichedData(), "Map should have enriched data");
 
         // Test with String
         String stringObject = "test";
-        RuleResult stringResult = enrichmentService.enrichObjectWithResult(enrichment, stringObject);
+        RuleResult stringResult = enrichmentProcessor.processEnrichmentWithResult(enrichment, stringObject);
         assertNotNull(stringResult, "String RuleResult should not be null");
         assertTrue(stringResult.isSuccess(), "String enrichment should succeed");
         assertNotNull(stringResult.getEnrichedData(), "String should have enriched data");
@@ -393,7 +393,7 @@ class EnrichmentServiceTest {
         YamlEnrichment enrichment = createTestEnrichment();
         TestDataObject targetObject = new TestDataObject("CHF", 1200.0);
 
-        RuleResult result = enrichmentService.enrichObjectWithResult(enrichment, targetObject);
+        RuleResult result = enrichmentProcessor.processEnrichmentWithResult(enrichment, targetObject);
 
         assertNotNull(result, "RuleResult should not be null");
         assertTrue(result.isSuccess(), "Service registry enrichment should succeed");
@@ -407,7 +407,7 @@ class EnrichmentServiceTest {
         List<YamlEnrichment> enrichments = createMultipleTestEnrichments();
         TestDataObject targetObject = new TestDataObject("SEK", 600.0);
 
-        RuleResult result = enrichmentService.enrichObjectWithResult(enrichments, targetObject);
+        RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(enrichments, targetObject);
 
         assertNotNull(result, "RuleResult should not be null");
         assertTrue(result.isSuccess(), "Multiple enrichments should succeed");
@@ -426,7 +426,7 @@ class EnrichmentServiceTest {
         YamlRuleConfiguration yamlConfig = createTestYamlConfigurationWithRequiredFields();
         TestDataObject targetObject = new TestDataObject("USD", 1000.0);
 
-        RuleResult result = enrichmentService.enrichObjectWithResult(yamlConfig, targetObject);
+        RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(yamlConfig.getEnrichments(), targetObject);
 
         assertNotNull(result, "RuleResult should not be null");
 
@@ -463,7 +463,7 @@ class EnrichmentServiceTest {
         TestDataObject targetObject = new TestDataObject("NOK", 700.0);
 
         assertDoesNotThrow(() -> {
-            Object result = enrichmentService.enrichObject(invalidEnrichment, targetObject);
+            Object result = enrichmentProcessor.processEnrichment(invalidEnrichment, targetObject);
             assertNotNull(result, "Should handle errors gracefully");
         });
     }
@@ -477,7 +477,7 @@ class EnrichmentServiceTest {
         TestDataObject targetObject = new TestDataObject("NOK", 700.0);
 
         assertDoesNotThrow(() -> {
-            RuleResult result = enrichmentService.enrichObjectWithResult(invalidEnrichment, targetObject);
+            RuleResult result = enrichmentProcessor.processEnrichmentWithResult(invalidEnrichment, targetObject);
             assertNotNull(result, "RuleResult should not be null even on errors");
 
             // With RuleResult, we can detect and analyze errors
@@ -672,14 +672,14 @@ class EnrichmentServiceTest {
         ApexCacheManager cacheManager = ApexCacheManager.getInstance();
 
         // Process enrichment first time
-        enrichmentService.enrichObject(enrichment, targetObject);
+        enrichmentProcessor.processEnrichment(enrichment, targetObject);
 
         // Verify dataset cache has entries
         int datasetCacheSize = cacheManager.size(ApexCacheManager.DATASET_CACHE);
         assertTrue(datasetCacheSize > 0, "Dataset cache should have entries after enrichment");
 
         // Process same enrichment again
-        enrichmentService.enrichObject(enrichment, targetObject);
+        enrichmentProcessor.processEnrichment(enrichment, targetObject);
 
         // Dataset cache size should remain the same (reusing cached dataset)
         assertEquals(datasetCacheSize, cacheManager.size(ApexCacheManager.DATASET_CACHE),
@@ -698,7 +698,7 @@ class EnrichmentServiceTest {
 
         // Process enrichment multiple times
         for (int i = 0; i < 3; i++) {
-            enrichmentService.enrichObject(enrichment, targetObject);
+            enrichmentProcessor.processEnrichment(enrichment, targetObject);
         }
 
         // Verify expression cache has entries
@@ -715,10 +715,10 @@ class EnrichmentServiceTest {
         TestDataObject targetObject = new TestDataObject("USD", 1000.0);
 
         // Process enrichment
-        enrichmentService.enrichObject(enrichment, targetObject);
+        enrichmentProcessor.processEnrichment(enrichment, targetObject);
 
         // Get cache statistics from processor
-        Map<String, Object> stats = enrichmentService.getProcessor().getCacheStatistics();
+        Map<String, Object> stats = enrichmentProcessor.getCacheStatistics();
 
         // Verify statistics structure
         assertNotNull(stats, "Cache statistics should not be null");
@@ -744,14 +744,14 @@ class EnrichmentServiceTest {
         ApexCacheManager cacheManager = ApexCacheManager.getInstance();
 
         // Process enrichment
-        enrichmentService.enrichObject(enrichment, targetObject);
+        enrichmentProcessor.processEnrichment(enrichment, targetObject);
 
         // Verify caches have entries
         assertTrue(cacheManager.size(ApexCacheManager.DATASET_CACHE) > 0,
             "Dataset cache should have entries");
 
         // Clear cache
-        enrichmentService.getProcessor().clearCache();
+        enrichmentProcessor.clearCache();
 
         // Verify caches are cleared
         assertEquals(0, cacheManager.size(ApexCacheManager.DATASET_CACHE),
@@ -775,11 +775,11 @@ class EnrichmentServiceTest {
         ApexCacheManager cacheManager = ApexCacheManager.getInstance();
 
         // Process first enrichment
-        enrichmentService.enrichObject(enrichment1, targetObject);
+        enrichmentProcessor.processEnrichment(enrichment1, targetObject);
         int datasetCacheSizeAfterFirst = cacheManager.size(ApexCacheManager.DATASET_CACHE);
 
         // Process second enrichment with identical dataset
-        enrichmentService.enrichObject(enrichment2, targetObject);
+        enrichmentProcessor.processEnrichment(enrichment2, targetObject);
         int datasetCacheSizeAfterSecond = cacheManager.size(ApexCacheManager.DATASET_CACHE);
 
         // Should have same cache size (datasets deduplicated)
@@ -836,3 +836,5 @@ class EnrichmentServiceTest {
         return enrichment;
     }
 }
+
+

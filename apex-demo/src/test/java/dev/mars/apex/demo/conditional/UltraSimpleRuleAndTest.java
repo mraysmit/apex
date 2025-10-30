@@ -35,7 +35,7 @@ public class UltraSimpleRuleAndTest extends DemoTestBase {
             testData.put("input", "ABC");
 
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/UltraSimpleRuleAndTest.yaml");
-            Object enrichmentResult = enrichmentService.enrichObject(config, testData);
+            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> result = (Map<String, Object>) enrichmentResult;
 
@@ -57,7 +57,7 @@ public class UltraSimpleRuleAndTest extends DemoTestBase {
             testData.put("input", "X");
 
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/UltraSimpleRuleAndTest.yaml");
-            Object enrichmentResult = enrichmentService.enrichObject(config, testData);
+            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> result = (Map<String, Object>) enrichmentResult;
 
@@ -79,7 +79,7 @@ public class UltraSimpleRuleAndTest extends DemoTestBase {
             testData.put("input", "A");
 
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/UltraSimpleRuleAndTest.yaml");
-            Object enrichmentResult = enrichmentService.enrichObject(config, testData);
+            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> result = (Map<String, Object>) enrichmentResult;
 
@@ -101,7 +101,7 @@ public class UltraSimpleRuleAndTest extends DemoTestBase {
             testData.put("input", "AB");
 
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/UltraSimpleRuleAndTest.yaml");
-            Object enrichmentResult = enrichmentService.enrichObject(config, testData);
+            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> result = (Map<String, Object>) enrichmentResult;
 
@@ -113,4 +113,7 @@ public class UltraSimpleRuleAndTest extends DemoTestBase {
         }
     }
 }
+
+
+
 

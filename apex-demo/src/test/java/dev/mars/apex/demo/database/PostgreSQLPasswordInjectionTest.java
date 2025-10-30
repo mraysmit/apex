@@ -17,7 +17,7 @@ package dev.mars.apex.demo.database;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 
@@ -101,7 +101,7 @@ class PostgreSQLPasswordInjectionTest {
             .withPassword("testpass");
 
     private YamlConfigurationLoader loader;
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
     private LookupServiceRegistry serviceRegistry;
     private ExpressionEvaluatorService expressionEvaluator;
 
@@ -112,7 +112,7 @@ class PostgreSQLPasswordInjectionTest {
         loader = new YamlConfigurationLoader();
         serviceRegistry = new LookupServiceRegistry();
         expressionEvaluator = new ExpressionEvaluatorService();
-        enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
+        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, expressionEvaluator);
 
         // Extract database connection details from running PostgreSQL container
         String jdbcUrl = postgres.getJdbcUrl();
@@ -198,7 +198,7 @@ class PostgreSQLPasswordInjectionTest {
         logger.info("  Input data: {}", inputData);
         logger.info("  Testing that PostgreSQL credentials are properly injected");
 
-        Object result = enrichmentService.enrichObject(config, inputData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), inputData);
         @SuppressWarnings("unchecked")
         Map<String, Object> enrichedData = (Map<String, Object>) result;
 
@@ -260,3 +260,4 @@ class PostgreSQLPasswordInjectionTest {
         }
     }
 }
+

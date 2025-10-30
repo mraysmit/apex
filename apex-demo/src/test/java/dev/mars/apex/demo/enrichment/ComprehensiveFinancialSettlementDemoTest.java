@@ -86,7 +86,7 @@ class ComprehensiveFinancialSettlementDemoTest extends DemoTestBase {
             logger.info("Input data: " + settlementData);
             
             // Use real APEX EnrichmentService to process multi-asset settlement
-            Object result = enrichmentService.enrichObject(config, settlementData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), settlementData, config);
             assertNotNull(result, "Multi-asset settlement processing result should not be null");
             
             // Validate the enriched result
@@ -161,7 +161,7 @@ class ComprehensiveFinancialSettlementDemoTest extends DemoTestBase {
             logger.info("Input data: " + crossBorderData);
             
             // Use real APEX EnrichmentService to process cross-border settlement
-            Object result = enrichmentService.enrichObject(config, crossBorderData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), crossBorderData, config);
             assertNotNull(result, "Cross-border settlement processing result should not be null");
             
             // Validate the enriched result
@@ -234,7 +234,7 @@ class ComprehensiveFinancialSettlementDemoTest extends DemoTestBase {
             logger.info("Input data: " + highValueData);
             
             // Use real APEX EnrichmentService to process high-value transactions
-            Object result = enrichmentService.enrichObject(config, highValueData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), highValueData, config);
             assertNotNull(result, "High-value transaction processing result should not be null");
             
             // Validate the enriched result
@@ -276,3 +276,6 @@ class ComprehensiveFinancialSettlementDemoTest extends DemoTestBase {
         }
     }
 }
+
+
+

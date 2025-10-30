@@ -3,16 +3,10 @@ package dev.mars.apex.core.engine.config;
 import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.error.ErrorRecoveryService;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,32 +15,23 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Debug test to understand why ErrorHandlingProofTestRunner is failing.
+ * Updated to use standard RulesEngine entry point without deprecated EnrichmentService.
  */
 class ErrorRecoveryDebugTest {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(ErrorRecoveryDebugTest.class);
-    
+
     private RulesEngine rulesEngine;
     private ErrorRecoveryConfig errorRecoveryConfig;
-    
+
     @BeforeEach
     void setUp() {
         logger.info("Setting up debug test");
-        
+
         // Create configuration and rules engine
         RulesEngineConfiguration configuration = new RulesEngineConfiguration();
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService expressionEvaluator = new ExpressionEvaluatorService();
-        EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
-        
-        rulesEngine = new RulesEngine(
-            configuration,
-            new SpelExpressionParser(),
-            new ErrorRecoveryService(),
-            new RulePerformanceMonitor(),
-            enrichmentService
-        );
-        
+        rulesEngine = new RulesEngine(configuration);
+
         // Create error recovery config to check defaults
         errorRecoveryConfig = new ErrorRecoveryConfig();
     }

@@ -49,7 +49,7 @@ public class MultiFileYamlEnrichmentGroupProcessingTest extends DemoTestBase {
         EnrichmentGroup gAnd = groups.stream().filter(g -> g.getId().equals("base_and")).findFirst().orElse(null);
         assertNotNull(gAnd);
         Map<String,Object> data = new HashMap<>(); data.put("a","A"); data.put("b","B");
-        EnrichmentGroupResult r = enrichmentService.processEnrichmentGroup(gAnd, data, config);
+        EnrichmentGroupResult r = enrichmentProcessor.processEnrichmentGroup(gAnd, data, config);
         assertTrue(r.isSuccess());
         assertEquals(2, r.getEnrichmentResults().size());
         assertEquals("A", data.get("a_copy"));
@@ -66,7 +66,7 @@ public class MultiFileYamlEnrichmentGroupProcessingTest extends DemoTestBase {
         EnrichmentGroup gOr = groups.stream().filter(g -> g.getId().equals("base_or")).findFirst().orElse(null);
         assertNotNull(gOr);
         Map<String,Object> data = new HashMap<>(); data.put("a","A");
-        EnrichmentGroupResult r = enrichmentService.processEnrichmentGroup(gOr, data, config);
+        EnrichmentGroupResult r = enrichmentProcessor.processEnrichmentGroup(gOr, data, config);
         assertTrue(r.isSuccess());
         assertEquals(1, r.getEnrichmentResults().size());
         assertEquals("A", data.get("a_copy"));
@@ -83,7 +83,7 @@ public class MultiFileYamlEnrichmentGroupProcessingTest extends DemoTestBase {
         EnrichmentGroup gComposite = groups.stream().filter(g -> g.getId().equals("composite")).findFirst().orElse(null);
         assertNotNull(gComposite);
         Map<String,Object> data = new HashMap<>(); data.put("a","A"); data.put("b","B"); data.put("c","C");
-        EnrichmentGroupResult r = enrichmentService.processEnrichmentGroup(gComposite, data, config);
+        EnrichmentGroupResult r = enrichmentProcessor.processEnrichmentGroup(gComposite, data, config);
         assertTrue(r.isSuccess());
         assertEquals(3, r.getEnrichmentResults().size());
         assertEquals("A", data.get("a_copy"));
@@ -118,7 +118,7 @@ public class MultiFileYamlEnrichmentGroupProcessingTest extends DemoTestBase {
             assertNotNull(gComposite, "cf_composite group should exist after cross-file merge");
 
             Map<String,Object> data = new HashMap<>(); data.put("a","A"); data.put("b","B"); data.put("c","C");
-            EnrichmentGroupResult r = enrichmentService.processEnrichmentGroup(gComposite, data, merged);
+            EnrichmentGroupResult r = enrichmentProcessor.processEnrichmentGroup(gComposite, data, merged);
             assertTrue(r.isSuccess(), "Composite should succeed when e3 and base_and succeed");
             assertEquals(3, r.getEnrichmentResults().size(), "Composite should include e3 + base_and's two enrichments");
             assertEquals("A", data.get("a_copy"));
@@ -146,13 +146,13 @@ public class MultiFileYamlEnrichmentGroupProcessingTest extends DemoTestBase {
 
             // Missing 'c' -> e3 fails; AND overall fails, but all still run (no short-circuit in parallel)
             Map<String,Object> missingC = new HashMap<>(); missingC.put("a","A"); missingC.put("b","B");
-            EnrichmentGroupResult rFail = enrichmentService.processEnrichmentGroup(gCompositePar, missingC, merged);
+            EnrichmentGroupResult rFail = enrichmentProcessor.processEnrichmentGroup(gCompositePar, missingC, merged);
             assertFalse(rFail.isSuccess(), "Parallel AND should fail when any required enrichment fails");
             assertEquals(3, rFail.getEnrichmentResults().size(), "Parallel execution should evaluate all enrichments in composite");
 
             // All present -> success and all run
             Map<String,Object> all = new HashMap<>(); all.put("a","A"); all.put("b","B"); all.put("c","C");
-            EnrichmentGroupResult rOk = enrichmentService.processEnrichmentGroup(gCompositePar, all, merged);
+            EnrichmentGroupResult rOk = enrichmentProcessor.processEnrichmentGroup(gCompositePar, all, merged);
             assertTrue(rOk.isSuccess(), "Parallel AND should succeed when all required enrichments succeed");
             assertEquals(3, rOk.getEnrichmentResults().size(), "Parallel execution should evaluate all enrichments in composite");
             assertEquals("A", all.get("a_copy"));
@@ -179,3 +179,4 @@ public class MultiFileYamlEnrichmentGroupProcessingTest extends DemoTestBase {
     }
 
 }
+

@@ -77,7 +77,7 @@ public class RestApiSimpleYamlTest extends DemoTestBase {
             logger.info("DEBUG: Data source: {} (type: {})", ds.getName(), ds.getType())
         );
 
-        logger.info("DEBUG: About to call enrichmentService.enrichObject...");
+        logger.info("DEBUG: About to call enrichmentProcessor.enrichObject...");
 
         // Debug source dataset
         logger.info("DEBUG: Source dataset (before enrichment): {}", testData);
@@ -87,9 +87,9 @@ public class RestApiSimpleYamlTest extends DemoTestBase {
         );
 
         // Process with APEX
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
-        logger.info("DEBUG: enrichmentService.enrichObject completed");
+        logger.info("DEBUG: enrichmentProcessor.enrichObject completed");
 
         // Debug enriched dataset
         logger.info("DEBUG: Source dataset (after enrichment): {}", testData);
@@ -136,7 +136,7 @@ public class RestApiSimpleYamlTest extends DemoTestBase {
         testData.put("currencyCode", "EUR");
 
         // Process with APEX
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
         // Cast result to Map for assertions
         @SuppressWarnings("unchecked")
@@ -148,3 +148,6 @@ public class RestApiSimpleYamlTest extends DemoTestBase {
         logger.info(" Simple REST API lookup with EUR completed successfully");
     }
 }
+
+
+

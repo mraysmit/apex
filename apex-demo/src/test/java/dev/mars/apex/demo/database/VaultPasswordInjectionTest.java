@@ -17,7 +17,7 @@ package dev.mars.apex.demo.database;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.data.external.ExternalDataSource;
@@ -105,7 +105,7 @@ class VaultPasswordInjectionTest {
             .withPassword("vaultsecret");
 
     private YamlConfigurationLoader loader;
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
     private LookupServiceRegistry serviceRegistry;
     private ExpressionEvaluatorService expressionEvaluator;
     private DataSourceFactory factory;
@@ -118,7 +118,7 @@ class VaultPasswordInjectionTest {
         loader = new YamlConfigurationLoader();
         serviceRegistry = new LookupServiceRegistry();
         expressionEvaluator = new ExpressionEvaluatorService();
-        enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
+        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, expressionEvaluator);
         factory = DataSourceFactory.getInstance();
 
         // Get Vault connection details
@@ -238,7 +238,7 @@ class VaultPasswordInjectionTest {
         logger.info("  Input data: {}", inputData);
         logger.info("  Testing that Vault-retrieved credentials are properly injected");
         
-        Object result = enrichmentService.enrichObject(config, inputData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), inputData);
         @SuppressWarnings("unchecked")
         Map<String, Object> enrichedData = (Map<String, Object>) result;
         
@@ -408,3 +408,4 @@ class VaultPasswordInjectionTest {
         return json.substring(start, end);
     }
 }
+

@@ -90,7 +90,7 @@ public class ConditionalMappingsPhase2Test extends DemoTestBase {
             logger.info("Testing OR condition mapping with data: " + data);
 
             // Process using real APEX services
-            Object result = enrichmentService.enrichObject(config, data);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), data, config);
             assertNotNull(result, "Enrichment result should not be null");
 
             @SuppressWarnings("unchecked")
@@ -127,7 +127,7 @@ public class ConditionalMappingsPhase2Test extends DemoTestBase {
             logger.info("Testing second OR condition mapping with data: " + data);
 
             // Process using real APEX services
-            Object result = enrichmentService.enrichObject(config, data);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), data, config);
             assertNotNull(result, "Enrichment result should not be null");
 
             @SuppressWarnings("unchecked")
@@ -164,7 +164,7 @@ public class ConditionalMappingsPhase2Test extends DemoTestBase {
             logger.info("Testing AND condition mapping with data: " + data);
 
             // Process using real APEX services
-            Object result = enrichmentService.enrichObject(config, data);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), data, config);
             assertNotNull(result, "Enrichment result should not be null");
 
             @SuppressWarnings("unchecked")
@@ -184,3 +184,6 @@ public class ConditionalMappingsPhase2Test extends DemoTestBase {
         }
     }
 }
+
+
+

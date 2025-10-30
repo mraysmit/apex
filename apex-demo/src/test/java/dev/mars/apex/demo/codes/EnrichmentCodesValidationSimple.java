@@ -50,7 +50,7 @@ public class EnrichmentCodesValidationSimple extends DemoTestBase {
         logger.info("BEFORE ENRICHMENT:");
         logger.info("  Dataset: {}", testData);
 
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
         assertNotNull(result, "Enrichment result should not be null");
         logger.info("Enrichment processing completed");
 
@@ -88,7 +88,7 @@ public class EnrichmentCodesValidationSimple extends DemoTestBase {
         logger.info("BEFORE ENRICHMENT:");
         logger.info("  Dataset: {}", testData);
 
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
         assertNotNull(result, "Enrichment result should not be null");
         logger.info("Enrichment processing completed");
 
@@ -107,4 +107,7 @@ public class EnrichmentCodesValidationSimple extends DemoTestBase {
         logger.info("  - error-code: AMOUNT_INVALID");
     }
 }
+
+
+
 

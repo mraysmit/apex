@@ -64,8 +64,6 @@ public class ApexYamlLexicalValidator {
         "pipeline-config", Set.of("pipeline", "data-sources", "data-sinks") // At least one required
     );
     
-    // SpEL Expression Pattern (basic validation)
-    private static final Pattern SPEL_PATTERN = Pattern.compile("#[a-zA-Z][a-zA-Z0-9_.]*");
     private static final Pattern VERSION_PATTERN = Pattern.compile("\\d+\\.\\d+(\\.\\d+)?");
     
     private final Yaml yamlParser;

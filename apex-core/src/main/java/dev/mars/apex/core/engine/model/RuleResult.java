@@ -422,7 +422,6 @@ public class RuleResult implements Serializable {
      * @return A new RuleResult instance
      */
     public static RuleResult matchWithCode(String ruleName, String message, String severity, String successCode) {
-        RuleResult result = new RuleResult(ruleName, message, severity, true, ResultType.MATCH);
         // Since RuleResult is immutable, we need to use the constructor that accepts codes
         return new RuleResult(ruleName, message, severity, true, ResultType.MATCH, null, new HashMap<>(), new ArrayList<>(), true, successCode, null, null);
     }

@@ -5,7 +5,7 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
@@ -34,7 +34,7 @@ class AllProcessorsTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(AllProcessorsTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
     private YamlEnrichmentProcessor yamlEnrichmentProcessor;
     private RulesEngineConfiguration rulesEngineConfiguration;
     private SimpleRulesEngine simpleRulesEngine;
@@ -47,7 +47,7 @@ class AllProcessorsTest {
         LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
         ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
         
-        enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
         yamlEnrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
         rulesEngineConfiguration = new RulesEngineConfiguration();
         simpleRulesEngine = new SimpleRulesEngine();
@@ -125,15 +125,9 @@ class AllProcessorsTest {
         
         LOGGER.info("💰 Input: amount = {}", testData.get("amount"));
         LOGGER.info("🎯 Expected (if YAML order respected): riskScore=0.5, riskCategory=MEDIUM_RISK");
-        
+
         try {
-            RulesEngine engine = new RulesEngine(
-                rulesEngineConfiguration,
-                new SpelExpressionParser(),
-                new ErrorRecoveryService(),
-                new RulePerformanceMonitor(),
-                enrichmentService
-            );
+            RulesEngine engine = new RulesEngine(rulesEngineConfiguration);
             
             RuleResult result = engine.evaluate(config, testData);
             Map<String, Object> enrichedData = result.getEnrichedData();
@@ -163,9 +157,9 @@ class AllProcessorsTest {
     }
 
     @Test
-    @DisplayName("🚨 PROCESSOR 3: EnrichmentService.enrichObject() (Delegates to YamlEnrichmentProcessor)")
+    @DisplayName("🚨 PROCESSOR 3: enrichmentProcessor.processEnrichments() (Delegates to YamlEnrichmentProcessor)")
     void testEnrichmentService() {
-        LOGGER.info("=== TESTING: EnrichmentService.enrichObject() ===");
+        LOGGER.info("=== TESTING: enrichmentProcessor.processEnrichments() ===");
         LOGGER.info("📋 Processing Order: Delegates to YamlEnrichmentProcessor (Rules → Enrichments)");
         
         String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/AllProcessorsTest.yaml";
@@ -183,7 +177,7 @@ class AllProcessorsTest {
         LOGGER.info("💰 Input: amount = {}", testData.get("amount"));
         
         try {
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
             
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
@@ -230,3 +224,6 @@ class AllProcessorsTest {
         }
     }
 }
+
+
+

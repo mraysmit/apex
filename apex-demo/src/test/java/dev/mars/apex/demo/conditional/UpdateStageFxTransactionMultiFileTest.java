@@ -5,7 +5,7 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +40,7 @@ public class UpdateStageFxTransactionMultiFileTest {
 
     private YamlConfigurationLoader yamlLoader;
     private YamlRulesEngineService rulesEngineService;
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
     void setUp() {
@@ -53,7 +53,7 @@ public class UpdateStageFxTransactionMultiFileTest {
         // Initialize enrichment service with correct constructor
         LookupServiceRegistry lookupServiceRegistry = new LookupServiceRegistry();
         ExpressionEvaluatorService expressionEvaluatorService = new ExpressionEvaluatorService();
-        enrichmentService = new EnrichmentService(lookupServiceRegistry, expressionEvaluatorService);
+        enrichmentProcessor = new YamlEnrichmentProcessor(lookupServiceRegistry, expressionEvaluatorService);
 
         logger.info("✅ APEX services initialized successfully");
     }
@@ -76,7 +76,7 @@ public class UpdateStageFxTransactionMultiFileTest {
             logger.info("Testing multi-file architecture with data: {}", testData);
 
             // Execute using enrichment service
-            Object enrichmentResult = enrichmentService.enrichObject(config, testData);
+            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
             assertNotNull(enrichmentResult, "Enrichment result should not be null");
 
             @SuppressWarnings("unchecked")
@@ -132,3 +132,4 @@ public class UpdateStageFxTransactionMultiFileTest {
         logger.info("✅ Multi-file YAML configuration processed successfully");
     }
 }
+

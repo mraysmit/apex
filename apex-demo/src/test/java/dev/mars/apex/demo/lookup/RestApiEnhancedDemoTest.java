@@ -127,7 +127,7 @@ public class RestApiEnhancedDemoTest extends DemoTestBase {
         logger.info("Input data: {}", testData);
 
         // Process with APEX
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
         // Assertions
         @SuppressWarnings("unchecked")
@@ -164,7 +164,7 @@ public class RestApiEnhancedDemoTest extends DemoTestBase {
         logger.info("Input data: {}", testData);
 
         // Process with APEX
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
         // Assertions
         @SuppressWarnings("unchecked")
@@ -201,7 +201,7 @@ public class RestApiEnhancedDemoTest extends DemoTestBase {
         logger.info("Input data: {}", testData);
 
         // Process with APEX
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
         // Assertions
         @SuppressWarnings("unchecked")
@@ -238,7 +238,7 @@ public class RestApiEnhancedDemoTest extends DemoTestBase {
         logger.info("Input data: {}", testData);
 
         // Process with APEX
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
         // Assertions
         @SuppressWarnings("unchecked")
@@ -276,7 +276,7 @@ public class RestApiEnhancedDemoTest extends DemoTestBase {
         logger.info("Input data: {}", testData);
 
         // Process with APEX
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
         // Assertions
         @SuppressWarnings("unchecked")
@@ -480,3 +480,6 @@ public class RestApiEnhancedDemoTest extends DemoTestBase {
         return tempYamlPath;
     }
 }
+
+
+

@@ -20,7 +20,7 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlRuleFactory;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,7 +51,7 @@ class ScenarioMemoryProfilingTest {
     private static final Logger logger = LoggerFactory.getLogger(ScenarioMemoryProfilingTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
     private YamlRuleConfiguration config;
 
     @BeforeEach
@@ -62,7 +62,7 @@ class ScenarioMemoryProfilingTest {
         yamlLoader = new YamlConfigurationLoader();
         LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
         ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService(new SpelExpressionParser());
-        enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
 
         // Load real YAML configuration with rules and enrichments
         try {
@@ -98,7 +98,7 @@ class ScenarioMemoryProfilingTest {
                 testData.put("notional", 1000000.0 + (i * 10000));
 
                 try {
-                    RuleResult result = enrichmentService.enrichObjectWithResult(config.getEnrichments(), testData);
+                    RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(config.getEnrichments(), testData);
                     if (result != null && result.isSuccess()) {
                         successCount++;
                     }
@@ -130,7 +130,7 @@ class ScenarioMemoryProfilingTest {
                 testData.put("notional", 2000000.0 + (i * 5000));
 
                 try {
-                    RuleResult result = enrichmentService.enrichObjectWithResult(config.getEnrichments(), testData);
+                    RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(config.getEnrichments(), testData);
                     if (result != null && result.isSuccess()) {
                         successCount++;
                     }
@@ -163,7 +163,7 @@ class ScenarioMemoryProfilingTest {
 
             // Then: Verify large dataset is processed without OOM
             try {
-                RuleResult result = enrichmentService.enrichObjectWithResult(config.getEnrichments(), largeData);
+                RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(config.getEnrichments(), largeData);
                 assertNotNull(result, "Should process large dataset successfully");
                 assertTrue(result.isSuccess(), "Large dataset enrichment should succeed");
 
@@ -191,7 +191,7 @@ class ScenarioMemoryProfilingTest {
                 testData.put("notional", 1000000.0 + (i * 10000));
 
                 try {
-                    RuleResult result = enrichmentService.enrichObjectWithResult(config.getEnrichments(), testData);
+                    RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(config.getEnrichments(), testData);
                     if (result != null && result.isSuccess()) {
                         successCount1++;
                     }
@@ -208,7 +208,7 @@ class ScenarioMemoryProfilingTest {
                 testData.put("notional", 2000000.0 + (i * 10000));
 
                 try {
-                    RuleResult result = enrichmentService.enrichObjectWithResult(config.getEnrichments(), testData);
+                    RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(config.getEnrichments(), testData);
                     if (result != null && result.isSuccess()) {
                         successCount2++;
                     }

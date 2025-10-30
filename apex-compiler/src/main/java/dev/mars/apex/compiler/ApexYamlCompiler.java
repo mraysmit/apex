@@ -1,7 +1,6 @@
 package dev.mars.apex.compiler;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.compiler.dependency.ApexDependencyAnalyzer;
 
 import java.nio.file.Path;
@@ -25,10 +24,8 @@ import java.nio.file.Paths;
  */
 public class ApexYamlCompiler {
     
-    private final YamlConfigurationLoader configLoader;
-    
     public ApexYamlCompiler() {
-        this.configLoader = new YamlConfigurationLoader();
+        new YamlConfigurationLoader();
     }
     
     /**
@@ -39,8 +36,7 @@ public class ApexYamlCompiler {
      */
     public CompilationResult compile(String yamlContent) {
         try {
-            // Parse YAML using apex-core infrastructure
-            YamlRuleConfiguration config = configLoader.fromYamlString(yamlContent);
+            
             
             // Perform static analysis
             // TODO: Implement lexical analysis, parsing, semantic analysis, code generation

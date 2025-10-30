@@ -126,7 +126,7 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
         testData.put("approach", "real-apex-services");
         
         // Execute APEX enrichment processing
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
         
         // Validate enrichment results using proper casting pattern
         assertNotNull(result, "H2 custom parameters enrichment result should not be null");
@@ -181,7 +181,7 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
             testData.put("approach", "real-apex-services");
             
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             
             // Validate enrichment results
             assertNotNull(result, "Custom database initialization result should not be null for " + initializationType);
@@ -224,7 +224,7 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
             testData.put("approach", "real-apex-services");
             
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             
             // Validate enrichment results
             assertNotNull(result, "Parameter merging result should not be null for " + mergingType);
@@ -267,7 +267,7 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
             testData.put("approach", "real-apex-services");
             
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             
             // Validate enrichment results
             assertNotNull(result, "Compatibility mode testing result should not be null for " + compatibilityType);
@@ -287,3 +287,6 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
         }
     }
 }
+
+
+

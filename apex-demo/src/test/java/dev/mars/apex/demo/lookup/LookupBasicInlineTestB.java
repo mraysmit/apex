@@ -87,7 +87,7 @@ public class LookupBasicInlineTestB extends DemoTestBase {
             logger.debug("Currency lookup test data: {}", testData);
 
             // Execute APEX enrichment processing - ALL logic in YAML
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
             // Validate enrichment results
             assertNotNull(result, "Currency lookup enrichment result should not be null");
@@ -134,7 +134,7 @@ public class LookupBasicInlineTestB extends DemoTestBase {
             logger.debug("Instrument lookup test data: {}", testData);
 
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
 
@@ -178,7 +178,7 @@ public class LookupBasicInlineTestB extends DemoTestBase {
             logger.debug("Counterparty lookup test data: {}", testData);
 
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
 
@@ -235,7 +235,7 @@ public class LookupBasicInlineTestB extends DemoTestBase {
                 logger.debug("Multiple currency test data for {}: {}", currency, testData);
 
                 // Execute APEX enrichment processing
-                Object result = enrichmentService.enrichObject(config, testData);
+                Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
                 @SuppressWarnings("unchecked")
                 Map<String, Object> enrichedData = (Map<String, Object>) result;
 
@@ -280,7 +280,7 @@ public class LookupBasicInlineTestB extends DemoTestBase {
             logger.debug("Complete workflow test data: {}", testData);
 
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
 
@@ -323,3 +323,6 @@ public class LookupBasicInlineTestB extends DemoTestBase {
         }
     }
 }
+
+
+

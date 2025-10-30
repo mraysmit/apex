@@ -21,13 +21,7 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.config.yaml.YamlRuleFactory;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.error.ErrorRecoveryService;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.apex.core.util.TestAwareLogger;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,39 +52,18 @@ import java.util.*;
 public class ScenarioStageExecutor {
     
     private static final Logger logger = LoggerFactory.getLogger(ScenarioStageExecutor.class);
-    
+
     private final YamlConfigurationLoader configLoader;
     private final YamlRuleFactory ruleFactory;
-    private final EnrichmentService enrichmentService;
 
     public ScenarioStageExecutor() {
         this.configLoader = new YamlConfigurationLoader();
         this.ruleFactory = new YamlRuleFactory();
-        // Create enrichment service with default dependencies
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService expressionEvaluator = new ExpressionEvaluatorService();
-        this.enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
     }
 
     public ScenarioStageExecutor(YamlConfigurationLoader configLoader, YamlRuleFactory ruleFactory) {
         this.configLoader = configLoader != null ? configLoader : new YamlConfigurationLoader();
         this.ruleFactory = ruleFactory != null ? ruleFactory : new YamlRuleFactory();
-        // Create enrichment service with default dependencies
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService expressionEvaluator = new ExpressionEvaluatorService();
-        this.enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
-    }
-
-    public ScenarioStageExecutor(YamlConfigurationLoader configLoader, YamlRuleFactory ruleFactory, EnrichmentService enrichmentService) {
-        this.configLoader = configLoader != null ? configLoader : new YamlConfigurationLoader();
-        this.ruleFactory = ruleFactory != null ? ruleFactory : new YamlRuleFactory();
-        this.enrichmentService = enrichmentService != null ? enrichmentService : createDefaultEnrichmentService();
-    }
-
-    private EnrichmentService createDefaultEnrichmentService() {
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService expressionEvaluator = new ExpressionEvaluatorService();
-        return new EnrichmentService(serviceRegistry, expressionEvaluator);
     }
     
     /**
@@ -232,20 +205,9 @@ public class ScenarioStageExecutor {
                 stageConfig = configLoader.loadFromClasspath(stage.getConfigFile());
             }
 
-            // Extract error recovery configuration from YAML if present
-            dev.mars.apex.core.config.error.ErrorRecoveryConfig errorRecoveryConfig = null;
-
-            // Use default error recovery configuration
-            errorRecoveryConfig = new dev.mars.apex.core.config.error.ErrorRecoveryConfig();
-
-            // Create rules engine for this stage with enrichment service support and error recovery config
+            // Create rules engine for this stage
             RulesEngine stageEngine = new RulesEngine(
-                ruleFactory.createRulesEngineConfiguration(stageConfig),
-                new SpelExpressionParser(),
-                new ErrorRecoveryService(),
-                new RulePerformanceMonitor(),
-                enrichmentService,
-                errorRecoveryConfig
+                ruleFactory.createRulesEngineConfiguration(stageConfig)
             );
             
             // Create facts map with data and context

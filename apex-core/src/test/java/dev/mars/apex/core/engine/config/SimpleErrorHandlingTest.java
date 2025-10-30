@@ -2,43 +2,28 @@ package dev.mars.apex.core.engine.config;
 
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.error.ErrorRecoveryService;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Simple test to understand the actual behavior of rule evaluation errors.
+ * Updated to use standard RulesEngine entry point without deprecated EnrichmentService.
  */
 class SimpleErrorHandlingTest {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(SimpleErrorHandlingTest.class);
-    
+
     private RulesEngine rulesEngine;
-    
+
     @BeforeEach
     void setUp() {
         RulesEngineConfiguration configuration = new RulesEngineConfiguration();
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService expressionEvaluator = new ExpressionEvaluatorService();
-        EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
-        
-        rulesEngine = new RulesEngine(
-            configuration,
-            new SpelExpressionParser(),
-            new ErrorRecoveryService(),
-            new RulePerformanceMonitor(),
-            enrichmentService
-        );
+        rulesEngine = new RulesEngine(configuration);
     }
     
     @Test

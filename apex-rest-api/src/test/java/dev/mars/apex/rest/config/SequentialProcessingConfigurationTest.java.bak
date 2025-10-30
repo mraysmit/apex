@@ -1,7 +1,7 @@
 package dev.mars.apex.rest.config;
 
 import dev.mars.apex.core.service.enrichment.SequentialEnrichmentService;
-import dev.mars.apex.core.config.yaml.SequentialYamlRulesEngineService;
+import dev.mars.apex.core.config.yaml.RulesEngineService;
 import dev.mars.apex.core.service.integration.SequentialProcessingIntegrationService;
 import dev.mars.apex.rest.ApexRestApiApplication;
 import org.junit.jupiter.api.Test;
@@ -44,7 +44,7 @@ public class SequentialProcessingConfigurationTest {
     private SequentialEnrichmentService sequentialEnrichmentService;
 
     @Autowired
-    private SequentialYamlRulesEngineService sequentialYamlRulesEngineService;
+    private RulesEngineService rulesEngineService;
 
     @Autowired
     private SequentialProcessingIntegrationService sequentialProcessingIntegrationService;
@@ -57,10 +57,10 @@ public class SequentialProcessingConfigurationTest {
     }
 
     @Test
-    @DisplayName("SequentialYamlRulesEngineService should be configured as Spring bean")
-    public void testSequentialYamlRulesEngineServiceConfiguration() {
-        assertNotNull(sequentialYamlRulesEngineService, 
-            "SequentialYamlRulesEngineService should be available as Spring bean");
+    @DisplayName("RulesEngineService should be configured as Spring bean")
+    public void testRulesEngineServiceConfiguration() {
+        assertNotNull(rulesEngineService,
+            "RulesEngineService should be available as Spring bean");
     }
 
     @Test
@@ -75,12 +75,12 @@ public class SequentialProcessingConfigurationTest {
     public void testSequentialProcessingServicesInitialization() {
         // Test that services are not just present but properly initialized
         assertNotNull(sequentialEnrichmentService, "SequentialEnrichmentService should be initialized");
-        assertNotNull(sequentialYamlRulesEngineService, "SequentialYamlRulesEngineService should be initialized");
+        assertNotNull(rulesEngineService, "RulesEngineService should be initialized");
         assertNotNull(sequentialProcessingIntegrationService, "SequentialProcessingIntegrationService should be initialized");
 
         // Verify services are properly configured by checking they have different class names
-        assert !sequentialEnrichmentService.getClass().equals(sequentialYamlRulesEngineService.getClass());
+        assert !sequentialEnrichmentService.getClass().equals(rulesEngineService.getClass());
         assert !sequentialEnrichmentService.getClass().equals(sequentialProcessingIntegrationService.getClass());
-        assert !sequentialYamlRulesEngineService.getClass().equals(sequentialProcessingIntegrationService.getClass());
+        assert !rulesEngineService.getClass().equals(sequentialProcessingIntegrationService.getClass());
     }
 }

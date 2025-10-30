@@ -4,7 +4,7 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
@@ -77,14 +77,8 @@ class EnrichmentServiceRequirementTest extends DemoTestBase {
             assertNotNull(config, "Configuration should load");
             logger.info("✅ Configuration loaded with enrichments");
 
-            // Create RulesEngine WITH EnrichmentService (correct approach)
-            RulesEngine engine = new RulesEngine(
-                rulesEngineConfiguration,
-                new SpelExpressionParser(),
-                new ErrorRecoveryService(),
-                new RulePerformanceMonitor(),
-                enrichmentService  // ← KEY: Service provided (from DemoTestBase)
-            );
+            // Create RulesEngine
+            RulesEngine engine = new RulesEngine(rulesEngineConfiguration);
             logger.info("✅ RulesEngine created with EnrichmentService");
 
             // Execute configuration
@@ -287,4 +281,5 @@ class EnrichmentServiceRequirementTest extends DemoTestBase {
         }
     }
 }
+
 

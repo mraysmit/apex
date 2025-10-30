@@ -17,10 +17,10 @@ package dev.mars.apex.demo.lookup;
 
 import dev.mars.apex.demo.DemoTestBase;
 
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
+import dev.mars.apex.core.config.yaml.RulesEngineService;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlDataSourceLoader;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.engine.config.RulesEngine;
@@ -67,10 +67,10 @@ public class RestApiIntegrationTest extends DemoTestBase {
     private RestApiTestableServer testServer;
     private String baseUrl;
     private int serverPort;
-    private YamlRulesEngineService rulesEngineService;
+    private RulesEngineService rulesEngineService;
     private YamlConfigurationLoader yamlLoader;
     private YamlDataSourceLoader dataSourceLoader;
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
     void setupRestApiServer() throws IOException {
@@ -81,10 +81,10 @@ public class RestApiIntegrationTest extends DemoTestBase {
         dataSourceLoader = new YamlDataSourceLoader();
         LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
         ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-        enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
 
-        // Initialize YamlRulesEngineService
-        rulesEngineService = new YamlRulesEngineService();
+        // Initialize RulesEngineService
+        rulesEngineService = new RulesEngineService();
 
         // Create and start the reusable test server
         testServer = new RestApiTestableServer();
@@ -207,7 +207,7 @@ public class RestApiIntegrationTest extends DemoTestBase {
         enrichmentData.put("orderAmount", 2500.00);
         
         // Process through APEX - enrichment only
-        Object result = enrichmentService.enrichObject(config, enrichmentData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), enrichmentData, config);
         assertNotNull(result, "APEX processing should return enriched result");
         
         @SuppressWarnings("unchecked")
@@ -241,7 +241,7 @@ public class RestApiIntegrationTest extends DemoTestBase {
         unknownCustomerData.put("customerName", "");
         unknownCustomerData.put("orderAmount", 1000.00);
 
-        Object unknownResult = enrichmentService.enrichObject(config, unknownCustomerData);
+        Object unknownResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), unknownCustomerData, config);
         @SuppressWarnings("unchecked")
         Map<String, Object> unknownEnriched = (Map<String, Object>) unknownResult;
 
@@ -259,7 +259,7 @@ public class RestApiIntegrationTest extends DemoTestBase {
         existingNameData.put("customerName", "Existing Customer Name");  // Not blank - should not be enriched
         existingNameData.put("orderAmount", 750.00);
 
-        Object existingResult = enrichmentService.enrichObject(config, existingNameData);
+        Object existingResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), existingNameData, config);
         @SuppressWarnings("unchecked")
         Map<String, Object> existingEnriched = (Map<String, Object>) existingResult;
 
@@ -295,3 +295,4 @@ public class RestApiIntegrationTest extends DemoTestBase {
         return tempPath.toString();
     }
 }
+

@@ -112,7 +112,7 @@ public class EnrichmentGroupSeverityAggregationTest extends DemoTestBase {
             
             Map<String, Object> testData = new HashMap<>();
             testData.put("input", "test");  // Provide 'input' but not 'missing_field'
-            EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(group, testData, config);
+            EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(group, testData, config);
 
             assertNotNull(result, "Result should not be null");
             assertFalse(result.isSuccess(), "AND group should fail when one enrichment fails");
@@ -183,7 +183,7 @@ public class EnrichmentGroupSeverityAggregationTest extends DemoTestBase {
             
             Map<String, Object> testData = new HashMap<>();
             testData.put("input", "test");
-            EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(group, testData, config);
+            EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(group, testData, config);
             
             assertNotNull(result, "Result should not be null");
             assertTrue(result.isSuccess(), "AND group should pass when all enrichments pass");
@@ -262,7 +262,7 @@ public class EnrichmentGroupSeverityAggregationTest extends DemoTestBase {
             
             Map<String, Object> testData = new HashMap<>();
             testData.put("input", "test");  // Provide 'input' but not 'missing_field'
-            EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(group, testData, config);
+            EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(group, testData, config);
 
             assertNotNull(result, "Result should not be null");
             assertTrue(result.isSuccess(), "OR group should pass when any enrichment passes");
@@ -311,7 +311,7 @@ public class EnrichmentGroupSeverityAggregationTest extends DemoTestBase {
             
             Map<String, Object> testData = new HashMap<>();
             testData.put("input", "test");
-            EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(group, testData, config);
+            EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(group, testData, config);
             
             assertNotNull(result, "Result should not be null");
             assertTrue(result.isSuccess(), "Empty group should pass by default (no enrichments to fail)");
@@ -325,3 +325,4 @@ public class EnrichmentGroupSeverityAggregationTest extends DemoTestBase {
         }
     }
 }
+

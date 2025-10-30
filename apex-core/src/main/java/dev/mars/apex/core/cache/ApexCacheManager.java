@@ -77,19 +77,15 @@ public class ApexCacheManager {
     // Cache managers for each scope
     private final Map<String, CacheManager> cacheManagers;
     
-    // Configuration
-    private final CacheConfig globalConfig;
-    
     /**
      * Private constructor - use getInstance() instead.
      */
     private ApexCacheManager(CacheConfig globalConfig) {
-        this.globalConfig = globalConfig != null ? globalConfig : createDefaultConfig();
         this.cacheManagers = new ConcurrentHashMap<>();
-        
+
         // Initialize all cache scopes
         initializeCaches();
-        
+
         LOGGER.info("ApexCacheManager initialized with {} cache scopes", cacheManagers.size());
     }
     
@@ -219,17 +215,7 @@ public class ApexCacheManager {
         config.setCache(cacheConfig);
         return new InMemoryCacheManager(config);
     }
-    
-    /**
-     * Create default global configuration.
-     */
-    private CacheConfig createDefaultConfig() {
-        CacheConfig config = new CacheConfig();
-        config.setEnabled(true);
-        config.setStatisticsEnabled(true);
-        return config;
-    }
-    
+
     // ========================================
     // Public API - Scoped Cache Operations
     // ========================================

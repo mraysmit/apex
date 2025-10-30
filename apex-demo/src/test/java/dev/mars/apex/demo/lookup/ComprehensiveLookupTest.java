@@ -114,7 +114,7 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             testData.put("customerId", "CUST001");
             testData.put("lookupType", "CUSTOMER_PROFILE");
 
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Simple field lookup should complete successfully");
 
             @SuppressWarnings("unchecked")
@@ -152,7 +152,7 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             testData.put("productId", "PROD001");
             testData.put("lookupType", "CUSTOMER_PRODUCT");
 
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Compound key lookup should complete successfully");
 
             @SuppressWarnings("unchecked")
@@ -189,7 +189,7 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             testData.put("tradeId", "TRD001");
             testData.put("lookupDepth", "DEEP");
 
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Nested field lookup should complete successfully");
 
             @SuppressWarnings("unchecked")
@@ -228,7 +228,7 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             testData.put("currency", "USD");
             testData.put("lookupScope", "COMPREHENSIVE");
 
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Multi-parameter lookup should complete successfully");
 
             @SuppressWarnings("unchecked")
@@ -265,7 +265,7 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             testData.put("fileType", "JSON");
             testData.put("lookupKey", "REFERENCE_DATA");
 
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "File-based lookup should complete successfully");
 
             @SuppressWarnings("unchecked")
@@ -303,7 +303,7 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             testData.put("connectionMode", "POOLED");
             testData.put("lookupQuery", "SELECT_BY_ID");
 
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "External data source lookup should complete successfully");
 
             @SuppressWarnings("unchecked")
@@ -319,3 +319,6 @@ public class ComprehensiveLookupTest extends DemoTestBase {
         }
     }
 }
+
+
+

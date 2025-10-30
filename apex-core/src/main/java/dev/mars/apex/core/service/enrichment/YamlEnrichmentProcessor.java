@@ -13,6 +13,8 @@ import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.engine.model.EnrichmentGroup;
+import dev.mars.apex.core.engine.model.EnrichmentGroupResult;
 import dev.mars.apex.core.config.yaml.YamlRule;
 import dev.mars.apex.core.config.yaml.YamlRuleGroup;
 import dev.mars.apex.core.service.data.external.cache.CacheStatistics;
@@ -26,6 +28,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -1496,5 +1502,132 @@ public class YamlEnrichmentProcessor {
 
         LOGGER.fine("Aggregated enrichment severity: " + highestSeverity + " from " + enrichments.size() + " enrichments");
         return highestSeverity;
+    }
+
+    /**
+     * Process a single enrichment group with AND/OR semantics and optional short-circuiting.
+     * When parallel-execution is true, evaluate all enrichments concurrently (no short-circuit).
+     *
+     * @param group The enrichment group to process
+     * @param targetObject The object to enrich
+     * @param yamlConfig The full YAML configuration (optional, needed for database lookups)
+     * @return EnrichmentGroupResult with detailed execution information
+     */
+    public EnrichmentGroupResult processEnrichmentGroup(EnrichmentGroup group, Object targetObject, YamlRuleConfiguration yamlConfig) {
+        if (group == null) {
+            return EnrichmentGroupResult.of("<null>", true, "No group", List.of(), 0L);
+        }
+        long start = System.currentTimeMillis();
+        boolean andOp = group.isAndOperator();
+        boolean shortCircuit = group.isStopOnFirstFailure() && !group.isDebugMode();
+
+        List<YamlEnrichment> ordered = group.getEnrichmentsInOrder();
+        List<RuleResult> results = new ArrayList<>();
+
+        if (group.isParallelExecution() && ordered.size() > 1) {
+            // Parallel branch: disable short-circuit and execute all enrichments
+            shortCircuit = false;
+
+            List<Callable<RuleResult>> tasks = new ArrayList<>();
+            for (YamlEnrichment enrichment : ordered) {
+                tasks.add(() -> {
+                    try {
+                        return processEnrichmentWithResult(enrichment, targetObject);
+                    } catch (Exception e) {
+                        List<String> msgs = new ArrayList<>();
+                        msgs.add("Parallel enrichment exception: " + e.getMessage());
+                        Map<String, Object> data = convertToMap(targetObject);
+                        return RuleResult.enrichmentFailure(msgs, data, SeverityConstants.ERROR);
+                    }
+                });
+            }
+
+            ExecutorService executor = Executors.newFixedThreadPool(
+                Math.min(tasks.size(), Runtime.getRuntime().availableProcessors())
+            );
+            try {
+                List<Future<RuleResult>> futures = executor.invokeAll(tasks);
+                for (Future<RuleResult> f : futures) {
+                    try {
+                        results.add(f.get());
+                    } catch (Exception e) {
+                        List<String> msgs = new ArrayList<>();
+                        msgs.add("Error getting parallel enrichment result: " + e.getMessage());
+                        Map<String, Object> data = convertToMap(targetObject);
+                        results.add(RuleResult.enrichmentFailure(msgs, data, SeverityConstants.ERROR));
+                    }
+                }
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                List<String> msgs = new ArrayList<>();
+                msgs.add("Parallel execution interrupted: " + ie.getMessage());
+                Map<String, Object> data = convertToMap(targetObject);
+                results.add(RuleResult.enrichmentFailure(msgs, data, SeverityConstants.ERROR));
+            } finally {
+                executor.shutdownNow();
+            }
+
+            // Aggregate overall based on AND/OR semantics (no short-circuit)
+            boolean overall = andOp;
+            if (!andOp) overall = false;
+            for (RuleResult r : results) {
+                boolean ok = r != null && r.isSuccess();
+                if (andOp) {
+                    if (!ok) {
+                        overall = false;
+                    }
+                } else { // OR
+                    if (ok) {
+                        overall = true;
+                    }
+                }
+            }
+
+            long elapsed = System.currentTimeMillis() - start;
+            String message = overall ? "Enrichment group succeeded" : "Enrichment group failed";
+            return EnrichmentGroupResult.of(group.getId(), overall, message, results, elapsed);
+        }
+
+        // Sequential branch (with possible short-circuiting)
+        boolean overall = andOp; // AND starts true, OR starts false
+        if (!andOp) overall = false;
+        for (YamlEnrichment enrichment : ordered) {
+            RuleResult r = processEnrichmentWithResult(enrichment, targetObject);
+            results.add(r);
+            boolean ok = r.isSuccess();
+
+            if (andOp) {
+                if (!ok) {
+                    overall = false;
+                    if (shortCircuit) break;
+                }
+            } else { // OR
+                if (ok) {
+                    overall = true;
+                    if (shortCircuit) break;
+                }
+            }
+        }
+
+        long elapsed = System.currentTimeMillis() - start;
+        String message = overall ? "Enrichment group succeeded" : "Enrichment group failed";
+        return EnrichmentGroupResult.of(group.getId(), overall, message, results, elapsed);
+    }
+
+    /**
+     * Process multiple enrichment groups and return results per group.
+     *
+     * @param groups The list of enrichment groups to process
+     * @param targetObject The object to enrich
+     * @param yamlConfig The full YAML configuration (optional, needed for database lookups)
+     * @return List of EnrichmentGroupResult, one per group
+     */
+    public List<EnrichmentGroupResult> processEnrichmentGroups(List<EnrichmentGroup> groups, Object targetObject, YamlRuleConfiguration yamlConfig) {
+        List<EnrichmentGroupResult> out = new ArrayList<>();
+        if (groups == null || groups.isEmpty()) return out;
+        for (EnrichmentGroup g : groups) {
+            out.add(processEnrichmentGroup(g, targetObject, yamlConfig));
+        }
+        return out;
     }
 }

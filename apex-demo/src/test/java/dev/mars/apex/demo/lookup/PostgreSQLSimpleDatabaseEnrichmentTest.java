@@ -186,7 +186,7 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
             logger.info("  Customer ID: {}", testData.get("customerId"));
 
             // Execute APEX enrichment processing
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
             // Validate enrichment results
             assertNotNull(result, "Customer profile enrichment result should not be null");
@@ -248,7 +248,7 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
                 Map<String, Object> testData = new HashMap<>();
                 testData.put("customerId", customerIds[i]);
 
-                Object result = enrichmentService.enrichObject(config, testData);
+                Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
                 assertNotNull(result, "Result should not be null for " + customerIds[i]);
 
                 @SuppressWarnings("unchecked")
@@ -288,7 +288,7 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
 
             logger.info("Testing with non-existent customer ID: NONEXISTENT");
 
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             assertNotNull(result, "Result should not be null even for non-existent customer");
 
             @SuppressWarnings("unchecked")
@@ -327,21 +327,21 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
             Map<String, Object> testData1 = new HashMap<>();
             testData1.put("customerId", null);
 
-            Object result1 = enrichmentService.enrichObject(config, testData1);
+            Object result1 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData1, config);
             assertNotNull(result1, "Result should not be null");
 
             // Test with empty customerId (should not trigger enrichment)
             Map<String, Object> testData2 = new HashMap<>();
             testData2.put("customerId", "");
 
-            Object result2 = enrichmentService.enrichObject(config, testData2);
+            Object result2 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData2, config);
             assertNotNull(result2, "Result should not be null");
 
             // Test with valid customerId (should trigger enrichment)
             Map<String, Object> testData3 = new HashMap<>();
             testData3.put("customerId", "CUST001");
 
-            Object result3 = enrichmentService.enrichObject(config, testData3);
+            Object result3 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData3, config);
             assertNotNull(result3, "Result should not be null");
 
             @SuppressWarnings("unchecked")
@@ -361,3 +361,6 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
         }
     }
 }
+
+
+

@@ -4,8 +4,6 @@ import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
 import dev.mars.apex.core.config.error.SeverityRecoveryPolicy;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.engine.model.RuleGroup;
-import dev.mars.apex.core.engine.model.RuleBase;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMetrics;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
@@ -14,8 +12,6 @@ import dev.mars.apex.core.util.TestAwareLogger;
 import dev.mars.apex.core.util.RuleParameterExtractor;
 import dev.mars.apex.core.util.LoggingContext;
 import dev.mars.apex.core.engine.config.MapPropertyAccessor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -47,7 +43,6 @@ import java.util.Set;
  */
 public class UnifiedRuleEvaluator {
 
-    private static final Logger logger = LoggerFactory.getLogger(UnifiedRuleEvaluator.class);
     private static final RulesEngineLogger rulesLogger = new RulesEngineLogger(UnifiedRuleEvaluator.class);
 
     private final ExpressionParser parser;

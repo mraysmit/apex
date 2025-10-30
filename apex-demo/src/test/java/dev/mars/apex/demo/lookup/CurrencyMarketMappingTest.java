@@ -110,7 +110,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
 
         // Execute APEX enrichment processing - ALL logic in YAML
         logger.debug("Executing APEX enrichment processing...");
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
         logger.debug("✓ APEX enrichment processing completed");
 
         // Validate enrichment results
@@ -193,7 +193,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
 
             // Execute APEX enrichment processing
             logger.debug("Executing APEX enrichment for {}...", currency);
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             logger.debug("✓ APEX enrichment completed for {}", currency);
 
             // Validate enrichment results
@@ -254,7 +254,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
 
             // Execute APEX enrichment processing
             logger.debug("Executing APEX enrichment for invalid currency {}...", invalidCurrency);
-            Object result = enrichmentService.enrichObject(config, testData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             logger.debug("✓ APEX enrichment completed for invalid currency {}", invalidCurrency);
 
             // Validate enrichment results - should not enrich with invalid currency
@@ -304,7 +304,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         logger.debug("Expected: Enrichment condition should fail, no lookup should be attempted");
 
         logger.debug("Executing APEX enrichment with null currency...");
-        Object resultNull = enrichmentService.enrichObject(config, testDataNull);
+        Object resultNull = enrichmentProcessor.processEnrichments(config.getEnrichments(), testDataNull, config);
         logger.debug("✓ APEX enrichment completed with null currency");
 
         assertNotNull(resultNull, "Result should not be null even with null currency");
@@ -331,7 +331,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         logger.debug("Expected: Enrichment condition should fail (length = 0), no lookup should be attempted");
 
         logger.debug("Executing APEX enrichment with empty currency...");
-        Object resultEmpty = enrichmentService.enrichObject(config, testDataEmpty);
+        Object resultEmpty = enrichmentProcessor.processEnrichments(config.getEnrichments(), testDataEmpty, config);
         logger.debug("✓ APEX enrichment completed with empty currency");
 
         assertNotNull(resultEmpty, "Result should not be null even with empty currency");
@@ -389,7 +389,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         logger.debug("Expected: USD should be found in H2 database with name 'US Dollar' and active=true");
 
         logger.debug("Executing APEX enrichment with H2 database lookup for USD...");
-        Object resultValid = enrichmentService.enrichObject(config, testDataValid);
+        Object resultValid = enrichmentProcessor.processEnrichments(config.getEnrichments(), testDataValid, config);
         logger.debug("✓ APEX enrichment completed for USD database lookup");
 
         assertNotNull(resultValid, "Result should not be null for valid currency");
@@ -420,7 +420,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         logger.debug("Expected: EUR should be found in H2 database with name 'Euro'");
 
         logger.debug("Executing APEX enrichment with H2 database lookup for EUR...");
-        Object resultEUR = enrichmentService.enrichObject(config, testDataEUR);
+        Object resultEUR = enrichmentProcessor.processEnrichments(config.getEnrichments(), testDataEUR, config);
         logger.debug("✓ APEX enrichment completed for EUR database lookup");
 
         @SuppressWarnings("unchecked")
@@ -445,7 +445,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         logger.debug("Expected: XYZ should NOT be found in H2 database (no matching record)");
 
         logger.debug("Executing APEX enrichment with H2 database lookup for XYZ...");
-        Object resultInvalid = enrichmentService.enrichObject(config, testDataInvalid);
+        Object resultInvalid = enrichmentProcessor.processEnrichments(config.getEnrichments(), testDataInvalid, config);
         logger.debug("✓ APEX enrichment completed for XYZ database lookup");
 
         assertNotNull(resultInvalid, "Result should not be null even for invalid currency");
@@ -476,7 +476,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         logger.debug("Expected: Enrichment condition should fail, no database lookup should be attempted");
 
         logger.debug("Executing APEX enrichment with null currency (H2 database)...");
-        Object resultNull = enrichmentService.enrichObject(config, testDataNull);
+        Object resultNull = enrichmentProcessor.processEnrichments(config.getEnrichments(), testDataNull, config);
         logger.debug("✓ APEX enrichment completed with null currency (H2 database)");
 
         @SuppressWarnings("unchecked")
@@ -572,3 +572,6 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         }
     }
 }
+
+
+

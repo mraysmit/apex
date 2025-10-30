@@ -4,7 +4,7 @@ import dev.mars.apex.core.api.RulesService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.config.yaml.SequentialYamlRulesEngineService;
+import dev.mars.apex.core.config.yaml.RulesEngineService;
 import dev.mars.apex.rest.dto.*;
 import dev.mars.apex.rest.service.RuleEvaluationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -71,7 +71,7 @@ public class RulesController {
     private RulesEngine rulesEngine;
 
     @Autowired
-    private SequentialYamlRulesEngineService sequentialYamlRulesEngineService;
+    private RulesEngineService rulesEngineService;
     
     /**
      * Simple rule check endpoint.

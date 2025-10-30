@@ -226,8 +226,6 @@ public class ApexEngine {
             logger.error("Fallback processing also failed", fallbackError);
         }
         
-        // No fallback available
-        long executionTime = System.currentTimeMillis() - startTime;
         return ApexProcessingResult.failed(classification, 
             "Classification failed and no fallback scenario available: " + classification.getErrorMessage());
     }

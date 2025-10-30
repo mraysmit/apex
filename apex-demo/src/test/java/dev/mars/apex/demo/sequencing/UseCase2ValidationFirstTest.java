@@ -2,7 +2,7 @@ package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ class UseCase2ValidationFirstTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(UseCase2ValidationFirstTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
     void setUp() {
@@ -45,12 +45,10 @@ class UseCase2ValidationFirstTest {
         // Initialize APEX services for sequential processing
         yamlLoader = new YamlConfigurationLoader();
 
-        // Create required dependencies for EnrichmentService
+        // Create required dependencies for YamlEnrichmentProcessor
         LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
         ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-        EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
-
-        this.enrichmentService = enrichmentService;
+        this.enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
 
         LOGGER.info("✅ Sequential processing services initialized");
     }
@@ -73,7 +71,7 @@ class UseCase2ValidationFirstTest {
         LOGGER.info("📊 Valid Input Data: {}", validData);
 
         // Process with enrichment service (demonstrates sequential processing)
-        Object result = enrichmentService.enrichObject(config, validData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), validData);
         assertNotNull(result, "Enrichment result should not be null");
 
         @SuppressWarnings("unchecked")
@@ -102,3 +100,4 @@ class UseCase2ValidationFirstTest {
         LOGGER.info("   4. Risk calculated: {}", enrichedData.get("riskScore"));
     }
 }
+

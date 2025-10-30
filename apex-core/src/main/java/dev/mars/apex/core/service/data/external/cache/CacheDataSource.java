@@ -443,7 +443,6 @@ public class CacheDataSource implements ExternalDataSource {
     /**
      * Handle cache put operation.
      */
-    @SuppressWarnings("unchecked")
     private <T> List<T> handlePutOperation(Map<String, Object> parameters) {
         String key = (String) parameters.get("key");
         Object value = parameters.get("value");

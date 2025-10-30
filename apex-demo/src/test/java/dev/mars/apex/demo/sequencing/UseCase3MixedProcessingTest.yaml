@@ -30,6 +30,20 @@ metadata:
 
 # PHASE 2: Basic enrichment (currency conversion)
 enrichments:
+  - id: "transaction-id-processing"
+    name: "Transaction ID Processing"
+    description: "Process and validate transaction ID"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#transactionId != null"
+    calculation-config:
+      expression: "#transactionId"
+      result-field: "processedTransactionId"
+    field-mappings:
+      - source-field: "processedTransactionId"
+        target-field: "processedTransactionId"
+        required: true
+
   - id: "currency-conversion"
     name: "Currency Conversion"
     description: "Convert transaction amount to target currency"
@@ -75,6 +89,37 @@ enrichments:
     field-mappings:
       - source-field: "convertedAmount"
         target-field: "convertedAmount"
+        required: true
+
+  # PHASE 4: Advanced enrichment based on validation results
+  - id: "risk-scoring"
+    name: "Risk Score Calculation"
+    description: "Calculate risk score based on validation results and transaction characteristics"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#convertedAmount != null && #transactionType != null"
+    calculation-config:
+      expression: "#transactionType == 'INTERNATIONAL_TRANSFER' ? (#convertedAmount > 500000 ? 0.8 : (#convertedAmount > 100000 ? 0.6 : (#convertedAmount > 50000 ? 0.4 : 0.2))) : (#transactionType == 'DOMESTIC_TRANSFER' ? (#convertedAmount > 1000000 ? 0.6 : (#convertedAmount > 500000 ? 0.4 : (#convertedAmount > 100000 ? 0.3 : 0.1))) : 0.5)"
+      result-field: "riskScore"
+
+    field-mappings:
+      - source-field: "riskScore"
+        target-field: "riskScore"
+        required: true
+
+  - id: "compliance-status"
+    name: "Compliance Status Determination"
+    description: "Determine compliance status based on risk score and regulatory requirements"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#riskScore != null"
+    calculation-config:
+      expression: "#riskScore > 0.7 ? 'HIGH_RISK' : (#riskScore > 0.4 ? 'MEDIUM_RISK' : 'LOW_RISK')"
+      result-field: "complianceStatus"
+
+    field-mappings:
+      - source-field: "complianceStatus"
+        target-field: "complianceStatus"
         required: true
 
 # PHASE 3: Business rules validation (after basic enrichment)
@@ -129,50 +174,7 @@ rules:
         field: "rejectionReason"
         value: "EXCEEDS_REGULATORY_LIMIT"
 
-# PHASE 4: Advanced enrichment based on validation results
-enrichments:
-  - id: "risk-scoring"
-    name: "Risk Score Calculation"
-    description: "Calculate risk score based on validation results and transaction characteristics"
-    type: "calculation-enrichment"
-    enabled: true
-    condition: "#convertedAmount != null && #transactionType != null"
-    calculation-config:
-      expression: "#transactionType == 'INTERNATIONAL_TRANSFER' ? (#convertedAmount > 500000 ? 0.8 : (#convertedAmount > 100000 ? 0.6 : (#convertedAmount > 50000 ? 0.4 : 0.2))) : (#transactionType == 'DOMESTIC_TRANSFER' ? (#convertedAmount > 1000000 ? 0.6 : (#convertedAmount > 500000 ? 0.4 : (#convertedAmount > 100000 ? 0.3 : 0.1))) : 0.5)"
-      result-field: "riskScore"
 
-    field-mappings:
-      - source-field: "riskScore"
-        target-field: "riskScore"
-        required: true
-
-  - id: "compliance-status"
-    name: "Compliance Status Determination"
-    description: "Determine final compliance status based on all validation results"
-    type: "calculation-enrichment"
-    enabled: true
-    condition: "#convertedAmount != null && #riskScore != null"
-    calculation-config:
-      expression: "#convertedAmount > 1000000 ? 'NON_COMPLIANT' : (#convertedAmount >= 500000 && #transactionType == 'INTERNATIONAL_TRANSFER' ? 'PENDING_APPROVAL' : (#riskScore > 0.7 ? 'HIGH_RISK_COMPLIANT' : (#riskScore > 0.4 ? 'MEDIUM_RISK_COMPLIANT' : 'LOW_RISK_COMPLIANT')))"
-      result-field: "complianceStatus"
-
-    field-mappings:
-      - source-field: "complianceStatus"
-        target-field: "complianceStatus"
-        required: true
-
-  - id: "processing-summary"
-    name: "Processing Summary"
-    description: "Create summary of all processing phases"
-    type: "field-enrichment"
-    condition: "true"
-    field-mappings:
-      - source-field: "transactionId"
-        target-field: "processedTransactionId"
-      - source-field: "2025-10-30T13:59:00Z"
-        target-field: "processingTimestamp"
-      - source-field: "SEQUENTIAL_PROCESSING"
-        target-field: "processingMode"
 
 # EXPECTED PROCESSING ORDER (Sequential Mode):
 # 1. data-sources: Load currency rates and compliance limits

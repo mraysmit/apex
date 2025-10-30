@@ -49,7 +49,7 @@ public class EnrichmentCodesValidation extends DemoTestBase {
         logger.info("BEFORE ENRICHMENT:");
         logger.info("  Dataset: {}", testData);
 
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
         assertNotNull(result, "Enrichment result should not be null");
         logger.info("Enrichment processing completed");
 
@@ -85,7 +85,7 @@ public class EnrichmentCodesValidation extends DemoTestBase {
         logger.info("BEFORE ENRICHMENT:");
         logger.info("  Dataset: {}", testData);
 
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
         assertNotNull(result, "Enrichment result should not be null");
         logger.info("Enrichment processing completed");
 
@@ -118,7 +118,7 @@ public class EnrichmentCodesValidation extends DemoTestBase {
         logger.info("Input data: amount={}", testData.get("amount"));
         logger.info("Enrichment condition: #amount > 100 (should MATCH)");
 
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
         assertNotNull(result, "Enrichment result should not be null");
         logger.info("Enrichment processing completed");
 
@@ -148,7 +148,7 @@ public class EnrichmentCodesValidation extends DemoTestBase {
         logger.info("Enrichment condition: #amount > 100 (should MATCH)");
         logger.info("Success code expression: #amount > 1000 ? 'HIGH_VALUE_ENRICHED' : 'NORMAL_VALUE_ENRICHED'");
 
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
         assertNotNull(result, "Enrichment result should not be null");
         logger.info("Enrichment processing completed");
 
@@ -177,7 +177,7 @@ public class EnrichmentCodesValidation extends DemoTestBase {
         logger.info("Enrichment condition: #amount > 100 (should NOT MATCH)");
         logger.info("Error code expression: #amount < 50 ? 'CRITICAL_LOW_AMOUNT' : 'LOW_AMOUNT'");
 
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
         assertNotNull(result, "Enrichment result should not be null");
         logger.info("Enrichment processing completed");
 
@@ -206,7 +206,7 @@ public class EnrichmentCodesValidation extends DemoTestBase {
         logger.info("Enrichment condition: #amount > 0 (should MATCH)");
         logger.info("Calculation expression: #amount * 0.01 (1% fee)");
 
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
         assertNotNull(result, "Enrichment result should not be null");
         logger.info("Enrichment processing completed");
 
@@ -236,7 +236,7 @@ public class EnrichmentCodesValidation extends DemoTestBase {
         logger.info("Enrichment condition: #amount > 0 (should NOT MATCH)");
         logger.info("Calculation expression: #amount * 0.01 (1% fee)");
 
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
         assertNotNull(result, "Enrichment result should not be null");
         logger.info("Enrichment processing completed");
 
@@ -250,4 +250,7 @@ public class EnrichmentCodesValidation extends DemoTestBase {
         logger.info("  - error-code: CALCULATION_ERROR");
     }
 }
+
+
+
 

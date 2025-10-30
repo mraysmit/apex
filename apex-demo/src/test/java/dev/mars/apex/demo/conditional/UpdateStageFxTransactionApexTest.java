@@ -8,7 +8,7 @@ import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -41,7 +41,7 @@ public class UpdateStageFxTransactionApexTest {
 
     private YamlConfigurationLoader yamlLoader;
     private YamlRulesEngineService rulesEngineService;
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
     void setUp() {
@@ -54,7 +54,7 @@ public class UpdateStageFxTransactionApexTest {
         // Initialize enrichment service with correct constructor
         LookupServiceRegistry lookupServiceRegistry = new LookupServiceRegistry();
         ExpressionEvaluatorService expressionEvaluatorService = new ExpressionEvaluatorService();
-        enrichmentService = new EnrichmentService(lookupServiceRegistry, expressionEvaluatorService);
+        enrichmentProcessor = new YamlEnrichmentProcessor(lookupServiceRegistry, expressionEvaluatorService);
 
         logger.info("✅ APEX services initialized successfully");
     }
@@ -78,7 +78,7 @@ public class UpdateStageFxTransactionApexTest {
             logger.info("Testing SWIFT valid NDF with data: {}", testData);
 
             // Execute using enrichment service
-            Object enrichmentResult = enrichmentService.enrichObject(config, testData);
+            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
             assertNotNull(enrichmentResult, "Enrichment result should not be null");
 
             @SuppressWarnings("unchecked")
@@ -108,11 +108,10 @@ public class UpdateStageFxTransactionApexTest {
             YamlRuleConfiguration config = yamlLoader.loadFromFile(
                 "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionMultiFileTest_main.yaml"
             );
-            
-            // Create RulesEngine with enrichment service
+
+            // Create RulesEngine
             RulesEngineConfiguration engineConfig = rulesEngineService.getRuleFactory().createRulesEngineConfiguration(config);
-            RulesEngine engine = new RulesEngine(engineConfig, new SpelExpressionParser(),
-                new ErrorRecoveryService(), new RulePerformanceMonitor(), enrichmentService);
+            RulesEngine engine = new RulesEngine(engineConfig);
 
             // Test 1: USD/EUR transaction
             Map<String, Object> usdEurData = createSwiftTestData("1", "USD", "EUR");
@@ -158,11 +157,10 @@ public class UpdateStageFxTransactionApexTest {
             
             // Test data
             Map<String, Object> testData = createSwiftTestData("1", "USD", "EUR");
-            
-            // Create RulesEngine with enrichment service
+
+            // Create RulesEngine
             RulesEngineConfiguration engineConfig = rulesEngineService.getRuleFactory().createRulesEngineConfiguration(config);
-            RulesEngine enrichedEngine = new RulesEngine(engineConfig, new SpelExpressionParser(),
-                new ErrorRecoveryService(), new RulePerformanceMonitor(), enrichmentService);
+            RulesEngine enrichedEngine = new RulesEngine(engineConfig);
             RuleResult result = enrichedEngine.evaluate(config, testData);
 
             // Validate that cross-file rule resolution worked (enrichments prove this)
@@ -229,3 +227,4 @@ public class UpdateStageFxTransactionApexTest {
         logger.info("✅ {} validation passed", testName);
     }
 }
+

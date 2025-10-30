@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class YamlEnrichmentProcessorCachingTest {
 
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
     private ApexCacheManager cacheManager;
 
     @BeforeEach
@@ -31,7 +31,7 @@ class YamlEnrichmentProcessorCachingTest {
 
         LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
         ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-        enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
     }
 
     @AfterEach
@@ -57,7 +57,7 @@ class YamlEnrichmentProcessorCachingTest {
         // Process enrichments for first time
         Map<String, Object> testData1 = new HashMap<>();
         testData1.put("currencyCode", "USD");
-        Object result1 = enrichmentService.enrichObject(config, testData1);
+        Object result1 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData1);
 
         // After first enrichment, dataset cache should have entries
         int datasetCacheSize = cacheManager.size(ApexCacheManager.DATASET_CACHE);
@@ -67,7 +67,7 @@ class YamlEnrichmentProcessorCachingTest {
         // Process enrichments for second time with different data
         Map<String, Object> testData2 = new HashMap<>();
         testData2.put("currencyCode", "EUR");
-        Object result2 = enrichmentService.enrichObject(config, testData2);
+        Object result2 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData2);
 
         // Dataset cache size should remain the same (reusing cached datasets)
         assertEquals(datasetCacheSize, cacheManager.size(ApexCacheManager.DATASET_CACHE),
@@ -94,7 +94,7 @@ class YamlEnrichmentProcessorCachingTest {
         for (int i = 0; i < 3; i++) {
             Map<String, Object> testData = new HashMap<>();
             testData.put("currencyCode", "USD");
-            enrichmentService.enrichObject(config, testData);
+            enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
         }
 
         // Expression cache should have entries
@@ -113,7 +113,7 @@ class YamlEnrichmentProcessorCachingTest {
 
         Map<String, Object> testData = new HashMap<>();
         testData.put("currencyCode", "USD");
-        enrichmentService.enrichObject(config, testData);
+        enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
 
         // Verify caches have entries
         assertTrue(cacheManager.size(ApexCacheManager.DATASET_CACHE) > 0,
@@ -143,7 +143,7 @@ class YamlEnrichmentProcessorCachingTest {
 
         Map<String, Object> testData = new HashMap<>();
         testData.put("currencyCode", "USD");
-        enrichmentService.enrichObject(config, testData);
+        enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
 
         // Get cache statistics from ApexCacheManager
         int datasetCacheSize = cacheManager.size(ApexCacheManager.DATASET_CACHE);
@@ -169,7 +169,7 @@ class YamlEnrichmentProcessorCachingTest {
         
         Map<String, Object> testData = new HashMap<>();
         testData.put("currencyCode", "USD");
-        enrichmentService.enrichObject(config, testData);
+        enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
 
         // Check dataset cache size
         int datasetCacheSize = cacheManager.size(ApexCacheManager.DATASET_CACHE);
@@ -180,4 +180,7 @@ class YamlEnrichmentProcessorCachingTest {
             "Should have exactly 1 dataset in cache (deduplicated from 2 enrichments)");
     }
 }
+
+
+
 

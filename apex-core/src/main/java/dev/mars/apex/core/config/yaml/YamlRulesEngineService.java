@@ -2,12 +2,6 @@ package dev.mars.apex.core.config.yaml;
 
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.error.ErrorRecoveryService;
-import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -95,13 +89,7 @@ public class YamlRulesEngineService {
             // Use the factory's method which has proper category metadata inheritance
             RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
 
-            // Create EnrichmentService for safe RulesEngine creation (supports all YAML configurations)
-            LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-            ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-            EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
-
-            return new RulesEngine(config, new SpelExpressionParser(), new ErrorRecoveryService(),
-                                 new RulePerformanceMonitor(), enrichmentService);
+            return new RulesEngine(config);
         } catch (Exception e) {
             throw new YamlConfigurationException("Failed to create rules engine with generic architecture", e);
         }
@@ -122,13 +110,7 @@ public class YamlRulesEngineService {
         YamlRuleConfiguration yamlConfig = configLoader.loadFromFile(filePath);
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
 
-        // Create EnrichmentService for safe RulesEngine creation
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-        EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
-
-        RulesEngine engine = new RulesEngine(config, new SpelExpressionParser(), new ErrorRecoveryService(),
-                                           new RulePerformanceMonitor(), enrichmentService);
+        RulesEngine engine = new RulesEngine(config);
 
         LOGGER.info("Successfully created rules engine from file: " + filePath);
         return engine;
@@ -151,13 +133,7 @@ public class YamlRulesEngineService {
         YamlRuleConfiguration yamlConfig = configLoader.loadFromFile(file);
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
 
-        // Create EnrichmentService for safe RulesEngine creation
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-        EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
-
-        RulesEngine engine = new RulesEngine(config, new SpelExpressionParser(), new ErrorRecoveryService(),
-                                           new RulePerformanceMonitor(), enrichmentService);
+        RulesEngine engine = new RulesEngine(config);
 
         LOGGER.info("Successfully created rules engine from file: " + file.getAbsolutePath());
         return engine;
@@ -172,18 +148,12 @@ public class YamlRulesEngineService {
      */
     public RulesEngine createRulesEngineFromClasspath(String resourcePath) throws YamlConfigurationException {
         LOGGER.info("Creating rules engine from classpath resource: " + resourcePath);
-        
+
         YamlRuleConfiguration yamlConfig = configLoader.loadFromClasspath(resourcePath);
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
 
-        // Create EnrichmentService for safe RulesEngine creation
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-        EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+        RulesEngine engine = new RulesEngine(config);
 
-        RulesEngine engine = new RulesEngine(config, new SpelExpressionParser(), new ErrorRecoveryService(),
-                                           new RulePerformanceMonitor(), enrichmentService);
-        
         LOGGER.info("Successfully created rules engine from classpath resource: " + resourcePath);
         return engine;
     }
@@ -201,13 +171,7 @@ public class YamlRulesEngineService {
         YamlRuleConfiguration yamlConfig = configLoader.loadFromStream(inputStream);
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
 
-        // Create EnrichmentService for safe RulesEngine creation
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-        EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
-
-        RulesEngine engine = new RulesEngine(config, new SpelExpressionParser(), new ErrorRecoveryService(),
-                                           new RulePerformanceMonitor(), enrichmentService);
+        RulesEngine engine = new RulesEngine(config);
 
         LOGGER.info("Successfully created rules engine from input stream");
         return engine;
@@ -226,14 +190,8 @@ public class YamlRulesEngineService {
         YamlRuleConfiguration yamlConfig = configLoader.fromYamlString(yamlString);
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
 
-        // Create EnrichmentService for safe RulesEngine creation
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-        EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+        RulesEngine engine = new RulesEngine(config);
 
-        RulesEngine engine = new RulesEngine(config, new SpelExpressionParser(), new ErrorRecoveryService(),
-                                           new RulePerformanceMonitor(), enrichmentService);
-        
         LOGGER.info("Successfully created rules engine from YAML string");
         return engine;
     }
@@ -265,13 +223,7 @@ public class YamlRulesEngineService {
         // Create the final rules engine configuration
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(mergedYamlConfig);
 
-        // Create EnrichmentService for safe RulesEngine creation
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-        EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
-
-        RulesEngine engine = new RulesEngine(config, new SpelExpressionParser(), new ErrorRecoveryService(),
-                                           new RulePerformanceMonitor(), enrichmentService);
+        RulesEngine engine = new RulesEngine(config);
 
         LOGGER.info("Successfully created rules engine from " + filePaths.length + " YAML files");
         return engine;

@@ -63,7 +63,7 @@ public class RuleResultReferencesTest extends DemoTestBase {
             logger.info("Input data: " + inputData);
 
             // Process using real APEX services
-            Object result = enrichmentService.enrichObject(config, inputData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), inputData, config);
             assertNotNull(result, "Enrichment result should not be null");
         
         @SuppressWarnings("unchecked")
@@ -102,7 +102,7 @@ public class RuleResultReferencesTest extends DemoTestBase {
             logger.info("Input data: " + inputData);
 
             // Process using real APEX services
-            Object result = enrichmentService.enrichObject(config, inputData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), inputData, config);
             assertNotNull(result, "Enrichment result should not be null");
 
             @SuppressWarnings("unchecked")
@@ -156,7 +156,7 @@ public class RuleResultReferencesTest extends DemoTestBase {
             inputData.put("customerType", "PREMIUM");  // Should trigger premium-customer-rule
             inputData.put("priority", "HIGH");
 
-            Object result = enrichmentService.enrichObject(config, inputData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), inputData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
 
@@ -195,7 +195,7 @@ public class RuleResultReferencesTest extends DemoTestBase {
             logger.info("Input data: " + inputData);
 
             // Process using real APEX services
-            Object result = enrichmentService.enrichObject(config, inputData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), inputData, config);
             assertNotNull(result, "Enrichment result should not be null");
 
             @SuppressWarnings("unchecked")
@@ -244,7 +244,7 @@ public class RuleResultReferencesTest extends DemoTestBase {
             premiumHighValue.put("customerType", "PREMIUM");
             premiumHighValue.put("priority", "NORMAL");
 
-            Object result1 = enrichmentService.enrichObject(config, premiumHighValue);
+            Object result1 = enrichmentProcessor.processEnrichments(config.getEnrichments(), premiumHighValue, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> enriched1 = (Map<String, Object>) result1;
 
@@ -267,7 +267,7 @@ public class RuleResultReferencesTest extends DemoTestBase {
             standardNormal.put("customerType", "STANDARD");
             standardNormal.put("priority", "NORMAL");
 
-            Object result2 = enrichmentService.enrichObject(config, standardNormal);
+            Object result2 = enrichmentProcessor.processEnrichments(config.getEnrichments(), standardNormal, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> enriched2 = (Map<String, Object>) result2;
 
@@ -289,7 +289,7 @@ public class RuleResultReferencesTest extends DemoTestBase {
             urgentPremium.put("customerType", "PREMIUM");
             urgentPremium.put("priority", "URGENT");
 
-            Object result3 = enrichmentService.enrichObject(config, urgentPremium);
+            Object result3 = enrichmentProcessor.processEnrichments(config.getEnrichments(), urgentPremium, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> enriched3 = (Map<String, Object>) result3;
 
@@ -314,3 +314,6 @@ public class RuleResultReferencesTest extends DemoTestBase {
         }
     }
 }
+
+
+

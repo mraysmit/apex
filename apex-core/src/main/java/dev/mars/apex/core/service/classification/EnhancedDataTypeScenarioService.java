@@ -18,7 +18,6 @@ package dev.mars.apex.core.service.classification;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleFactory;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.service.scenario.DataTypeScenarioService;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import org.slf4j.Logger;
@@ -93,16 +92,6 @@ public class EnhancedDataTypeScenarioService extends DataTypeScenarioService {
         this.contentClassifier = new ContentClassifier();
         this.classificationCache = new ClassificationCache();
         logger.debug("Enhanced DataTypeScenarioService initialized with custom components");
-    }
-
-    public EnhancedDataTypeScenarioService(YamlConfigurationLoader configLoader,
-                                         YamlRuleFactory ruleFactory,
-                                         EnrichmentService enrichmentService) {
-        super(configLoader, ruleFactory, enrichmentService);
-        this.formatDetectors = createDefaultFormatDetectors();
-        this.contentClassifier = new ContentClassifier();
-        this.classificationCache = new ClassificationCache();
-        logger.debug("Enhanced DataTypeScenarioService initialized with all custom components");
     }
     
     /**

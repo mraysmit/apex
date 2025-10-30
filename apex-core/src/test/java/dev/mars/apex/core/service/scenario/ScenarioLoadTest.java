@@ -20,7 +20,7 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlRuleFactory;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,7 +55,7 @@ class ScenarioLoadTest {
     private static final Logger logger = LoggerFactory.getLogger(ScenarioLoadTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
     private YamlRuleConfiguration config;
 
     @BeforeEach
@@ -66,7 +66,7 @@ class ScenarioLoadTest {
         yamlLoader = new YamlConfigurationLoader();
         LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
         ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService(new SpelExpressionParser());
-        enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
 
         // Load real YAML configuration with rules and enrichments
         try {
@@ -104,7 +104,7 @@ class ScenarioLoadTest {
                 testData.put("notional", 1000000.0 + (i * 10000));
 
                 try {
-                    RuleResult result = enrichmentService.enrichObjectWithResult(config.getEnrichments(), testData);
+                    RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(config.getEnrichments(), testData);
                     if (result != null && result.isSuccess()) {
                         successCount++;
                     } else {
@@ -156,7 +156,7 @@ class ScenarioLoadTest {
                         testData.put("notional", 1000000.0 + (index * 50000));
 
                         try {
-                            RuleResult result = enrichmentService.enrichObjectWithResult(config.getEnrichments(), testData);
+                            RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(config.getEnrichments(), testData);
                             return result != null && result.isSuccess();
                         } catch (Exception e) {
                             logger.warn("Enrichment failed for index {}: {}", index, e.getMessage());
@@ -210,7 +210,7 @@ class ScenarioLoadTest {
             for (int i = 0; i < executionCount; i++) {
                 long startTime = System.nanoTime();
                 try {
-                    RuleResult result = enrichmentService.enrichObjectWithResult(config.getEnrichments(), testData);
+                    RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(config.getEnrichments(), testData);
                     if (result != null && result.isSuccess()) {
                         successCount++;
                     }
@@ -247,7 +247,7 @@ class ScenarioLoadTest {
             smallData.put("type", "OTC");
             smallData.put("notional", 1000000.0);
             try {
-                RuleResult result = enrichmentService.enrichObjectWithResult(config.getEnrichments(), smallData);
+                RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(config.getEnrichments(), smallData);
                 if (result != null && result.isSuccess()) {
                     smallDataSuccess++;
                 }
@@ -263,7 +263,7 @@ class ScenarioLoadTest {
                 largeData.put("field_" + i, "value_" + i);
             }
             try {
-                RuleResult result = enrichmentService.enrichObjectWithResult(config.getEnrichments(), largeData);
+                RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(config.getEnrichments(), largeData);
                 if (result != null && result.isSuccess()) {
                     largeDataSuccess++;
                 }

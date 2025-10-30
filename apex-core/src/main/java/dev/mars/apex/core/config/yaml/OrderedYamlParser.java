@@ -90,7 +90,6 @@ public class OrderedYamlParser {
      * @return OrderedYamlConfiguration with preserved section order
      * @throws YamlConfigurationException if parsing fails
      */
-    @SuppressWarnings("unchecked")
     public OrderedYamlConfiguration parseYamlString(String yamlContent, String source) throws YamlConfigurationException {
         try {
             LOGGER.fine("Parsing YAML content with order preservation from: " + source);

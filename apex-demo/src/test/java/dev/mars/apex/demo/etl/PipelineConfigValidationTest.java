@@ -92,7 +92,7 @@ public class PipelineConfigValidationTest extends DemoTestBase {
             YamlRuleConfiguration config = yamlLoader.loadFromFile(configFile.toString());
 
             // Execute actual enrichment operation
-            Object enrichmentResult = enrichmentService.enrichObject(config, customerData);
+            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), customerData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedResult = (Map<String, Object>) enrichmentResult;
 
@@ -138,7 +138,7 @@ public class PipelineConfigValidationTest extends DemoTestBase {
             YamlRuleConfiguration config = yamlLoader.loadFromFile(configFile.toString());
 
             // Execute calculation enrichment
-            Object calculationResult = enrichmentService.enrichObject(config, transactionData);
+            Object calculationResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), transactionData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> calculatedResult = (Map<String, Object>) calculationResult;
 
@@ -191,14 +191,14 @@ public class PipelineConfigValidationTest extends DemoTestBase {
 
             // Process high-value transaction (should trigger all enrichments)
             long startTime1 = System.currentTimeMillis();
-            Object enrichmentResult1 = enrichmentService.enrichObject(config, highValueData);
+            Object enrichmentResult1 = enrichmentProcessor.processEnrichments(config.getEnrichments(), highValueData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> result1 = (Map<String, Object>) enrichmentResult1;
             long duration1 = System.currentTimeMillis() - startTime1;
 
             // Process low-value transaction (should skip some enrichments)
             long startTime2 = System.currentTimeMillis();
-            Object enrichmentResult2 = enrichmentService.enrichObject(config, lowValueData);
+            Object enrichmentResult2 = enrichmentProcessor.processEnrichments(config.getEnrichments(), lowValueData, config);
             @SuppressWarnings("unchecked")
             Map<String, Object> result2 = (Map<String, Object>) enrichmentResult2;
             long duration2 = System.currentTimeMillis() - startTime2;
@@ -372,3 +372,6 @@ public class PipelineConfigValidationTest extends DemoTestBase {
             """;
     }
 }
+
+
+

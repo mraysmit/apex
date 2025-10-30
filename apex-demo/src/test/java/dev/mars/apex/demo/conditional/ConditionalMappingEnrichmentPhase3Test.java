@@ -53,7 +53,7 @@ public class ConditionalMappingEnrichmentPhase3Test extends DemoTestBase {
             logger.info("Testing highest priority rule with data: " + testData);
             
             // Process enrichments
-            Object enrichedData = enrichmentService.enrichObject(config, testData);
+            Object enrichedData = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             
             assertNotNull(enrichedData);
             assertTrue(enrichedData instanceof Map);
@@ -88,7 +88,7 @@ public class ConditionalMappingEnrichmentPhase3Test extends DemoTestBase {
             logger.info("Testing medium priority rule with data: " + testData);
             
             // Process enrichments
-            Object enrichedData = enrichmentService.enrichObject(config, testData);
+            Object enrichedData = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             
             assertNotNull(enrichedData);
             assertTrue(enrichedData instanceof Map);
@@ -123,7 +123,7 @@ public class ConditionalMappingEnrichmentPhase3Test extends DemoTestBase {
             logger.info("Testing other systems rule with data: " + testData);
             
             // Process enrichments
-            Object enrichedData = enrichmentService.enrichObject(config, testData);
+            Object enrichedData = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             
             assertNotNull(enrichedData);
             assertTrue(enrichedData instanceof Map);
@@ -158,7 +158,7 @@ public class ConditionalMappingEnrichmentPhase3Test extends DemoTestBase {
             logger.info("Testing default rule fallback with data: " + testData);
             
             // Process enrichments
-            Object enrichedData = enrichmentService.enrichObject(config, testData);
+            Object enrichedData = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             
             assertNotNull(enrichedData);
             assertTrue(enrichedData instanceof Map);
@@ -177,3 +177,6 @@ public class ConditionalMappingEnrichmentPhase3Test extends DemoTestBase {
         }
     }
 }
+
+
+

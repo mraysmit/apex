@@ -5,7 +5,7 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.model.EnrichmentGroup;
 import dev.mars.apex.core.engine.model.EnrichmentGroupResult;
 import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,14 +23,16 @@ import static org.junit.jupiter.api.Assertions.*;
  * - AND/OR semantics with short-circuiting
  * - Parallel execution
  * - Group references (second-pass flattening)
+ *
+ * Updated to use YamlEnrichmentProcessor directly instead of deprecated EnrichmentService.
  */
 class EnrichmentGroupsEndToEndIntegrationTest {
 
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
     void setUp() {
-        enrichmentService = new EnrichmentService(new LookupServiceRegistry(), new ExpressionEvaluatorService());
+        enrichmentProcessor = new YamlEnrichmentProcessor(new LookupServiceRegistry(), new ExpressionEvaluatorService());
     }
 
     private String yamlConfig() {
@@ -110,7 +112,7 @@ class EnrichmentGroupsEndToEndIntegrationTest {
         // OR with only 'a' present: succeeds on e1, short-circuits before e2
         Map<String, Object> mOr = new HashMap<>();
         mOr.put("a", "A");
-        EnrichmentGroupResult rOr = enrichmentService.processEnrichmentGroup(gOr, mOr, config);
+        EnrichmentGroupResult rOr = enrichmentProcessor.processEnrichmentGroup(gOr, mOr, config);
         assertTrue(rOr.isSuccess(), "OR should succeed when any enrichment succeeds");
         assertEquals(1, rOr.getEnrichmentResults().size(), "OR+short-circuit should evaluate only first success");
         assertEquals("A", rOr.getEnrichmentResults().get(0).getEnrichedData().get("a"));
@@ -119,7 +121,7 @@ class EnrichmentGroupsEndToEndIntegrationTest {
         // AND with only 'a': e1 succeeds, e2 fails; should stop on first failure (second enrichment)
         Map<String, Object> mAnd = new HashMap<>();
         mAnd.put("a", "A");
-        EnrichmentGroupResult rAnd = enrichmentService.processEnrichmentGroup(gAnd, mAnd, config);
+        EnrichmentGroupResult rAnd = enrichmentProcessor.processEnrichmentGroup(gAnd, mAnd, config);
         assertFalse(rAnd.isSuccess(), "AND should fail when a required enrichment fails");
         assertEquals(2, rAnd.getEnrichmentResults().size(), "AND+stop-on-first-failure should stop at failing enrichment");
         assertEquals("ERROR", rAnd.getAggregatedSeverity());
@@ -127,7 +129,7 @@ class EnrichmentGroupsEndToEndIntegrationTest {
         // Parallel OR: runs all regardless of short-circuit, still succeeds if any succeed
         Map<String, Object> mParOr = new HashMap<>();
         mParOr.put("a", "A");
-        EnrichmentGroupResult rParOr = enrichmentService.processEnrichmentGroup(gParOr, mParOr, config);
+        EnrichmentGroupResult rParOr = enrichmentProcessor.processEnrichmentGroup(gParOr, mParOr, config);
         assertTrue(rParOr.isSuccess(), "Parallel OR should succeed when any enrichment succeeds");
         assertEquals(2, rParOr.getEnrichmentResults().size(), "Parallel execution should evaluate all enrichments");
 
@@ -136,7 +138,7 @@ class EnrichmentGroupsEndToEndIntegrationTest {
         mComposite.put("a", "A");
         mComposite.put("b", "B");
         mComposite.put("c", "C");
-        EnrichmentGroupResult rComposite = enrichmentService.processEnrichmentGroup(gComposite, mComposite, config);
+        EnrichmentGroupResult rComposite = enrichmentProcessor.processEnrichmentGroup(gComposite, mComposite, config);
         assertTrue(rComposite.isSuccess(), "Composite group should succeed when referenced base AND also succeeds");
         assertEquals(3, rComposite.getEnrichmentResults().size(), "Composite should include e3 plus base_and's two enrichments");
         // Verify that enriched data across evaluations contains expected copies (order-independent check)
@@ -158,7 +160,7 @@ class EnrichmentGroupsEndToEndIntegrationTest {
         Map<String, Object> mMissingC = new HashMap<>();
         mMissingC.put("a", "A");
         mMissingC.put("b", "B");
-        EnrichmentGroupResult rMissingC = enrichmentService.processEnrichmentGroup(gCompositeParAnd, mMissingC, config);
+        EnrichmentGroupResult rMissingC = enrichmentProcessor.processEnrichmentGroup(gCompositeParAnd, mMissingC, config);
         assertFalse(rMissingC.isSuccess(), "Composite Parallel AND should fail when any required enrichment fails");
         assertEquals(3, rMissingC.getEnrichmentResults().size(), "Parallel execution should evaluate all enrichments in composite");
 
@@ -167,9 +169,10 @@ class EnrichmentGroupsEndToEndIntegrationTest {
         mAll.put("a", "A");
         mAll.put("b", "B");
         mAll.put("c", "C");
-        EnrichmentGroupResult rAll = enrichmentService.processEnrichmentGroup(gCompositeParAnd, mAll, config);
+        EnrichmentGroupResult rAll = enrichmentProcessor.processEnrichmentGroup(gCompositeParAnd, mAll, config);
         assertTrue(rAll.isSuccess(), "Composite Parallel AND should succeed when all required enrichments succeed");
         assertEquals(3, rAll.getEnrichmentResults().size(), "Parallel execution should evaluate all enrichments in composite");
     }
 }
+
 

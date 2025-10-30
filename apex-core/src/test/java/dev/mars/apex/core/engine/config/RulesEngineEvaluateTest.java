@@ -18,15 +18,9 @@ package dev.mars.apex.core.engine.config;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.error.ErrorRecoveryService;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,6 +31,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test class for the new unified evaluate() method in RulesEngine.
  * This tests the Phase 2 implementation of the RuleResult API.
  *
+ * Updated to use standard RulesEngine entry point without deprecated EnrichmentService.
+ *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-09-22
  * @version 1.0
@@ -45,21 +41,14 @@ class RulesEngineEvaluateTest {
 
     private RulesEngine rulesEngine;
     private RulesEngineConfiguration configuration;
-    private EnrichmentService enrichmentService;
 
     @BeforeEach
     void setUp() {
         // Create basic configuration
         configuration = new RulesEngineConfiguration();
-        
-        // Create enrichment service
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-        enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
-        
-        // Create RulesEngine with EnrichmentService
-        rulesEngine = new RulesEngine(configuration, new SpelExpressionParser(),
-                                     new ErrorRecoveryService(), new RulePerformanceMonitor(), enrichmentService);
+
+        // Create RulesEngine
+        rulesEngine = new RulesEngine(configuration);
     }
 
     @Test

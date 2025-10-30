@@ -69,7 +69,7 @@ public class BarrierOptionNestedTest extends DemoTestBase {
 
         // Execute APEX enrichment processing - ALL logic in YAML
         logger.info("Executing APEX enrichment processing...");
-        Object result = enrichmentService.enrichObject(config, barrierOptionData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), barrierOptionData, config);
         logger.info("Enrichment processing completed");
 
         // Validate APEX successfully processed nested structures
@@ -290,3 +290,6 @@ public class BarrierOptionNestedTest extends DemoTestBase {
         logger.info("  - Rebate Amount Validation: CONFIGURED");
     }
 }
+
+
+

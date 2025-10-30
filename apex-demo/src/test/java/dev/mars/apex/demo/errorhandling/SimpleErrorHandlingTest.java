@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 
  * This test follows prompts.txt guidelines:
  * - Simple and focused on the requirement
- * - Tests actual APEX functionality using enrichmentService.enrichObject()
+ * - Tests actual APEX functionality using enrichmentProcessor.processEnrichments()
  * - Validates functional results with specific assertions
  * - Extends DemoTestBase for consistent test setup
  *
@@ -63,7 +63,7 @@ public class SimpleErrorHandlingTest extends DemoTestBase {
         Map<String, Object> validData = new HashMap<>();
         validData.put("amount", 100.0);
 
-        Object result = enrichmentService.enrichObject(config, validData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), validData, config);
         assertNotNull(result, "Result should not be null");
         
         @SuppressWarnings("unchecked")
@@ -91,7 +91,7 @@ public class SimpleErrorHandlingTest extends DemoTestBase {
         Map<String, Object> invalidData = new HashMap<>();
         invalidData.put("amount", -100.0);
 
-        Object result = enrichmentService.enrichObject(config, invalidData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), invalidData, config);
         assertNotNull(result, "Result should not be null for invalid data");
         
         @SuppressWarnings("unchecked")
@@ -116,7 +116,7 @@ public class SimpleErrorHandlingTest extends DemoTestBase {
         Map<String, Object> nullData = new HashMap<>();
         nullData.put("amount", null);
 
-        Object result = enrichmentService.enrichObject(config, nullData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), nullData, config);
         assertNotNull(result, "Result should not be null for null data");
         
         @SuppressWarnings("unchecked")
@@ -127,3 +127,6 @@ public class SimpleErrorHandlingTest extends DemoTestBase {
         logger.info("✅ Null data test completed");
     }
 }
+
+
+

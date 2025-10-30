@@ -4,16 +4,11 @@ import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.engine.RuleEngineService;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.enrichment.EnrichmentService;
-import dev.mars.apex.core.service.error.ErrorRecoveryService;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.util.*;
 
@@ -22,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Comprehensive test suite to prove that rule evaluation errors are properly captured
  * and returned as structured RuleResult objects instead of being lost in stack traces.
- * 
+ *
  * This test covers ALL execution paths that could encounter SpEL evaluation errors:
  * 1. RulesEngine.executeRule() - Single rule execution
  * 2. RulesEngine.executeRulesList() - Multiple rules execution
@@ -30,40 +25,32 @@ import static org.junit.jupiter.api.Assertions.*;
  * 4. RuleEngineService.evaluateRules() - Service layer execution
  * 5. Various severity levels (CRITICAL, WARNING, ERROR)
  * 6. Different types of SpEL errors (missing properties, type mismatches, etc.)
- * 
+ *
+ * Updated to use standard RulesEngine entry point without deprecated EnrichmentService.
+ *
  * @author GitHub Copilot
  * @since 2025-09-26
  */
 @DisplayName("Comprehensive Rule Evaluation Error Handling Tests")
 class RuleEvaluationErrorHandlingComprehensiveTest {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(RuleEvaluationErrorHandlingComprehensiveTest.class);
-    
+
     private RulesEngine rulesEngine;
     private RuleEngineService ruleEngineService;
     private RulesEngineConfiguration configuration;
-    
+
     @BeforeEach
     void setUp() {
         logger.info("Setting up comprehensive rule evaluation error handling tests");
-        
+
         // Create configuration and rules engine with all services
         configuration = new RulesEngineConfiguration();
-        
-        // Create enrichment service
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
         ExpressionEvaluatorService expressionEvaluator = new ExpressionEvaluatorService();
-        EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
-        
-        // Create rules engine with full constructor
-        rulesEngine = new RulesEngine(
-            configuration,
-            new SpelExpressionParser(),
-            new ErrorRecoveryService(),
-            new RulePerformanceMonitor(),
-            enrichmentService
-        );
-        
+
+        // Create rules engine
+        rulesEngine = new RulesEngine(configuration);
+
         // Create rule engine service
         ruleEngineService = new RuleEngineService(expressionEvaluator);
     }

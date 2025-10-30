@@ -64,7 +64,7 @@ public class AdvancedConditionalPatternsTest extends DemoTestBase {
 
             logger.info("Testing high-risk scenario: " + highRiskData);
 
-            Object result = enrichmentService.enrichObject(config, highRiskData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), highRiskData, config);
             assertNotNull(result, "Enrichment result should not be null");
 
             @SuppressWarnings("unchecked")
@@ -106,7 +106,7 @@ public class AdvancedConditionalPatternsTest extends DemoTestBase {
 
             logger.info("Testing high-value scenario: " + highValueData);
 
-            Object result = enrichmentService.enrichObject(config, highValueData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), highValueData, config);
             
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
@@ -140,7 +140,7 @@ public class AdvancedConditionalPatternsTest extends DemoTestBase {
 
             logger.info("Testing standard scenario: " + standardData);
 
-            Object result = enrichmentService.enrichObject(config, standardData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), standardData, config);
             
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
@@ -179,7 +179,7 @@ public class AdvancedConditionalPatternsTest extends DemoTestBase {
 
             logger.info("Testing combined high-risk + high-value scenario: " + combinedData);
 
-            Object result = enrichmentService.enrichObject(config, combinedData);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), combinedData, config);
             
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
@@ -201,4 +201,7 @@ public class AdvancedConditionalPatternsTest extends DemoTestBase {
         }
     }
 }
+
+
+
 

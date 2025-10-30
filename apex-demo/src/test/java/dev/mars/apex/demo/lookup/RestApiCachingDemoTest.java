@@ -123,15 +123,15 @@ public class RestApiCachingDemoTest extends DemoTestBase {
         );
 
         logger.info("First call (cache miss) - expecting ~10 second delay...");
-        logger.debug("DEBUG: About to call enrichmentService.enrichObject for first time...");
+        logger.debug("DEBUG: About to call enrichmentProcessor.enrichObject for first time...");
         long startTime = System.currentTimeMillis();
 
         // First call - should take ~10 seconds (cache miss)
-        Object result1 = enrichmentService.enrichObject(config, testData);
+        Object result1 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
         long firstCallTime = System.currentTimeMillis() - startTime;
         logger.info("First call completed in: {}ms", firstCallTime);
-        logger.debug("DEBUG: First call enrichmentService.enrichObject completed");
+        logger.debug("DEBUG: First call enrichmentProcessor.enrichObject completed");
 
         // Validate first call result
         @SuppressWarnings("unchecked")
@@ -153,15 +153,15 @@ public class RestApiCachingDemoTest extends DemoTestBase {
             "First call should take >= 9500ms (cache miss with 10s delay), was: " + firstCallTime + "ms");
 
         logger.info("Second call (cache hit) - expecting <100ms...");
-        logger.debug("DEBUG: About to call enrichmentService.enrichObject for second time (should be cached)...");
+        logger.debug("DEBUG: About to call enrichmentProcessor.enrichObject for second time (should be cached)...");
         startTime = System.currentTimeMillis();
 
         // Second call - should be very fast (cache hit)
-        Object result2 = enrichmentService.enrichObject(config, testData);
+        Object result2 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
         long secondCallTime = System.currentTimeMillis() - startTime;
         logger.info("Second call completed in: {}ms", secondCallTime);
-        logger.debug("DEBUG: Second call enrichmentService.enrichObject completed");
+        logger.debug("DEBUG: Second call enrichmentProcessor.enrichObject completed");
 
         // Validate second call result
         @SuppressWarnings("unchecked")
@@ -228,7 +228,7 @@ public class RestApiCachingDemoTest extends DemoTestBase {
         long startTime = System.currentTimeMillis();
 
         // First call - should be fast but not cached
-        Object result1 = enrichmentService.enrichObject(config, testData);
+        Object result1 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
         long firstCallTime = System.currentTimeMillis() - startTime;
         logger.info("First call completed in: {}ms", firstCallTime);
@@ -242,7 +242,7 @@ public class RestApiCachingDemoTest extends DemoTestBase {
         startTime = System.currentTimeMillis();
 
         // Second call - should be even faster (cache hit)
-        Object result2 = enrichmentService.enrichObject(config, testData);
+        Object result2 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
         long secondCallTime = System.currentTimeMillis() - startTime;
         logger.info("Second call completed in: {}ms", secondCallTime);
@@ -297,8 +297,8 @@ public class RestApiCachingDemoTest extends DemoTestBase {
             logger.debug("DEBUG: Cache isolation test data: {}", testData);
 
             long startTime = System.currentTimeMillis();
-            logger.debug("DEBUG: About to call enrichmentService.enrichObject for currency: {}", currency);
-            Object result = enrichmentService.enrichObject(config, testData);
+            logger.debug("DEBUG: About to call enrichmentProcessor.enrichObject for currency: {}", currency);
+            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
             long callTime = System.currentTimeMillis() - startTime;
             logger.debug("DEBUG: Call completed for currency: {} in {}ms", currency, callTime);
 
@@ -330,3 +330,6 @@ public class RestApiCachingDemoTest extends DemoTestBase {
         logger.info("Cache isolation test completed successfully");
     }
 }
+
+
+

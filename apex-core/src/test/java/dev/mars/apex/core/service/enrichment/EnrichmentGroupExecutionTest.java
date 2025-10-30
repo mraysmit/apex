@@ -18,11 +18,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class EnrichmentGroupExecutionTest {
 
-    private EnrichmentService enrichmentService;
+    private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
     void setUp() {
-        enrichmentService = new EnrichmentService(new LookupServiceRegistry(), new ExpressionEvaluatorService());
+        enrichmentProcessor = new YamlEnrichmentProcessor(new LookupServiceRegistry(), new ExpressionEvaluatorService());
     }
 
     private String buildYaml() {
@@ -86,7 +86,7 @@ class EnrichmentGroupExecutionTest {
         Map<String, Object> input = new HashMap<>();
         input.put("a", "value-a"); // e1 will succeed; e2 would fail but should not run due to OR+stop-on-first
 
-        EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(gOr, input, config);
+        EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(gOr, input, config);
         assertTrue(result.isSuccess(), "OR group should succeed when first enrichment succeeds");
         assertEquals(1, result.getEnrichmentResults().size(), "Should short-circuit after first success");
     }
@@ -102,7 +102,7 @@ class EnrichmentGroupExecutionTest {
         input.put("a", "value-a"); // e1 succeeds
         // 'b' missing -> e2 fails; AND + stop-on-first should stop at failure
 
-        EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(gAnd, input, config);
+        EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(gAnd, input, config);
         assertFalse(result.isSuccess(), "AND group should fail when a required enrichment fails");
         assertEquals(2, result.getEnrichmentResults().size(), "Should stop at first failure (second enrichment)");
     }
@@ -117,7 +117,7 @@ class EnrichmentGroupExecutionTest {
         Map<String, Object> input = new HashMap<>();
         input.put("a", "value-a"); // e1 succeeds; e2 fails
 
-        EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(gOrPar, input, config);
+        EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(gOrPar, input, config);
         assertTrue(result.isSuccess(), "OR parallel group should succeed when any enrichment succeeds");
         assertEquals(2, result.getEnrichmentResults().size(), "Parallel execution should run all enrichments");
     }
@@ -132,9 +132,10 @@ class EnrichmentGroupExecutionTest {
         Map<String, Object> input = new HashMap<>();
         input.put("a", "value-a"); // e1 succeeds; 'b' missing -> e2 fails
 
-        EnrichmentGroupResult result = enrichmentService.processEnrichmentGroup(gAndPar, input, config);
+        EnrichmentGroupResult result = enrichmentProcessor.processEnrichmentGroup(gAndPar, input, config);
         assertFalse(result.isSuccess(), "AND parallel group should fail when any enrichment fails");
         assertEquals(2, result.getEnrichmentResults().size(), "Parallel execution should run all enrichments");
     }
 }
+
 

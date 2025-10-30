@@ -117,7 +117,7 @@ public class ConditionalExpressionLookupTest extends DemoTestBase {
         testData.put("approach", "real-apex-services");
 
         // Execute APEX enrichment processing - ALL logic in YAML
-        Object result = enrichmentService.enrichObject(config, testData);
+        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
 
         // Validate enrichment results
         assertNotNull(result, "Conditional expression lookup result should not be null");
@@ -146,3 +146,6 @@ public class ConditionalExpressionLookupTest extends DemoTestBase {
         }
     }
 }
+
+
+

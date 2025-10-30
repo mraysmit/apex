@@ -56,7 +56,7 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
         Map<String, Object> dataMissingC = new HashMap<>();
         dataMissingC.put("a", "A");
         dataMissingC.put("b", "B");
-        EnrichmentGroupResult rMissingC = enrichmentService.processEnrichmentGroup(compositeParAnd, dataMissingC, config);
+        EnrichmentGroupResult rMissingC = enrichmentProcessor.processEnrichmentGroup(compositeParAnd, dataMissingC, config);
         assertFalse(rMissingC.isSuccess(), "Composite Parallel AND should fail when a required enrichment fails");
         assertEquals(3, rMissingC.getEnrichmentResults().size(), "Parallel execution should evaluate all enrichments");
 
@@ -65,7 +65,7 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
         dataAll.put("a", "A");
         dataAll.put("b", "B");
         dataAll.put("c", "C");
-        EnrichmentGroupResult rAll = enrichmentService.processEnrichmentGroup(compositeParAnd, dataAll, config);
+        EnrichmentGroupResult rAll = enrichmentProcessor.processEnrichmentGroup(compositeParAnd, dataAll, config);
         assertTrue(rAll.isSuccess(), "Composite Parallel AND should succeed when all required enrichments succeed");
         assertEquals(3, rAll.getEnrichmentResults().size(), "Parallel execution should evaluate all enrichments");
         assertEquals("A", dataAll.get("a_copy"));
@@ -84,7 +84,7 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
         var gAnd = groups.stream().filter(g -> g.getId().equals("base_and")).findFirst().orElse(null);
         assertNotNull(gAnd, "base_and group should exist");
         Map<String,Object> data = new HashMap<>(); data.put("a","A"); data.put("b","B");
-        EnrichmentGroupResult r = enrichmentService.processEnrichmentGroup(gAnd, data, config);
+        EnrichmentGroupResult r = enrichmentProcessor.processEnrichmentGroup(gAnd, data, config);
         assertTrue(r.isSuccess(), "AND should succeed when all enrichments succeed");
         assertEquals(2, r.getEnrichmentResults().size(), "Should evaluate both enrichments");
         assertEquals("A", data.get("a_copy"));
@@ -102,7 +102,7 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
         var gOr = groups.stream().filter(g -> g.getId().equals("base_or")).findFirst().orElse(null);
         assertNotNull(gOr, "base_or group should exist");
         Map<String,Object> data = new HashMap<>(); data.put("a","A");
-        EnrichmentGroupResult r = enrichmentService.processEnrichmentGroup(gOr, data, config);
+        EnrichmentGroupResult r = enrichmentProcessor.processEnrichmentGroup(gOr, data, config);
         assertTrue(r.isSuccess(), "OR should succeed when any enrichment succeeds");
         assertEquals(1, r.getEnrichmentResults().size(), "OR+short-circuit should evaluate only first success");
         assertEquals("A", data.get("a_copy"));
@@ -120,7 +120,7 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
         var gAnd = groups.stream().filter(g -> g.getId().equals("base_and")).findFirst().orElse(null);
         assertNotNull(gAnd, "base_and group should exist");
         Map<String,Object> data = new HashMap<>(); data.put("a","A");
-        EnrichmentGroupResult r = enrichmentService.processEnrichmentGroup(gAnd, data, config);
+        EnrichmentGroupResult r = enrichmentProcessor.processEnrichmentGroup(gAnd, data, config);
         assertFalse(r.isSuccess(), "AND should fail when a required enrichment fails");
         assertEquals(2, r.getEnrichmentResults().size(), "AND+stop-on-first-failure should stop at failing enrichment");
     }
@@ -135,7 +135,7 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
         var gOr = groups.stream().filter(g -> g.getId().equals("base_or")).findFirst().orElse(null);
         assertNotNull(gOr, "base_or group should exist");
         Map<String,Object> data = new HashMap<>(); // No data - both enrichments should fail
-        EnrichmentGroupResult r = enrichmentService.processEnrichmentGroup(gOr, data, config);
+        EnrichmentGroupResult r = enrichmentProcessor.processEnrichmentGroup(gOr, data, config);
         assertFalse(r.isSuccess(), "OR should fail when all enrichments fail");
         assertEquals(2, r.getEnrichmentResults().size(), "OR should evaluate all enrichments when all fail");
     }
@@ -150,7 +150,7 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
         var gOr = groups.stream().filter(g -> g.getId().equals("base_or")).findFirst().orElse(null);
         assertNotNull(gOr, "base_or group should exist");
         Map<String,Object> data = new HashMap<>(); data.put("a","A"); data.put("b","B");
-        EnrichmentGroupResult r = enrichmentService.processEnrichmentGroup(gOr, data, config);
+        EnrichmentGroupResult r = enrichmentProcessor.processEnrichmentGroup(gOr, data, config);
         assertTrue(r.isSuccess(), "OR should pass when any enrichment succeeds");
         assertEquals(1, r.getEnrichmentResults().size(), "OR should short-circuit on first success");
         assertEquals("A", data.get("a_copy"));
@@ -167,7 +167,7 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
         var gComposite = groups.stream().filter(g -> g.getId().equals("composite")).findFirst().orElse(null);
         assertNotNull(gComposite, "composite group should exist");
         Map<String,Object> data = new HashMap<>(); data.put("a","A"); data.put("b","B"); data.put("c","C");
-        EnrichmentGroupResult r = enrichmentService.processEnrichmentGroup(gComposite, data, config);
+        EnrichmentGroupResult r = enrichmentProcessor.processEnrichmentGroup(gComposite, data, config);
         assertTrue(r.isSuccess(), "Composite group should succeed when referenced base AND also succeeds");
         assertEquals(3, r.getEnrichmentResults().size(), "Composite should include e3 plus base_and's two enrichments");
         assertEquals("A", data.get("a_copy"));
@@ -177,4 +177,5 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
     }
 
 }
+
 

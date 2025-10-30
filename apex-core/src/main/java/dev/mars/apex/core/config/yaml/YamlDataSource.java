@@ -17,7 +17,6 @@ package dev.mars.apex.core.config.yaml;
  */
 
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.mars.apex.core.config.datasource.*;
 
