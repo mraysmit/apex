@@ -47,15 +47,32 @@ This folder contains **concrete proof** that APEX has a **fundamental design fla
 // Cannot process mixed YAML configurations
 ```
 
-## 🧪 Test Files
+## 🧪 Test Files (Organized by Purpose)
 
-### Core Demonstration Files (Following Standard Pattern: TestClass.java + TestClass.yaml)
-- **`SequencingFlawDemoTest.java`** + **`SequencingFlawDemoTest.yaml`** - Original tests showing the design flaw
-- **`LoggingSeverityFlawTest.java`** + **`LoggingSeverityFlawTest.yaml`** - Demonstrates logging severity flaw
+### 1. Minimal Examples
+- **`AMinimalSequentialProcessingTest.java`** + **`AMinimalSequentialProcessingTest.yaml`** + **`AMinimalStandardProcessingTest.yaml`** - Minimal demonstration of sequential vs standard processing
 
-### Comprehensive Processor Comparison
-- **`ProcessorComparisonTest.java`** + **`ProcessorComparisonTest.yaml`** - Proves different processors produce different results
-- **`AllProcessorsTest.java`** + **`AllProcessorsTest.yaml`** - Tests ALL processors with the same YAML file
+### 2. Comprehensive Testing
+- **`AllProcessorsTest.java`** + **`AllProcessorsTest.yaml`** - Tests ALL processors with the same YAML file (proves design flaw)
+- **`ComprehensiveValidationTest.java`** - Comprehensive validation scenarios
+
+### 3. Core Infrastructure Tests
+- **`OrderedYamlParserTest.java`** - YAML order preservation validation
+- **`OrderedYamlParserComplexTest.java`** - Complex YAML parsing scenarios
+- **`SequentialYamlProcessorTest.java`** - Sequential processor validation
+
+### 4. Integration Tests
+- **`SequentialProcessingIntegrationTest.java`** - End-to-end integration testing
+- **`DeferredDependencyResolverTest.java`** - Dependency resolution testing
+
+### 5. Business Use Cases
+- **`UseCase1EnrichmentFirstTest.java`** + **`.yaml`** - Enrichment-first processing pattern
+- **`UseCase2ValidationFirstTest.java`** + **`.yaml`** - Validation-first processing pattern
+- **`UseCase3MixedProcessingTest.java`** + **`.yaml`** - Mixed processing pattern
+
+### 6. Problem/Solution Demonstration
+- **`LoggingSeverityFlawTest.java`** + **`LoggingSeverityFlawTest.yaml`** - Demonstrates logging severity problems
+- **`LoggingSeverityFixTest.java`** + **`LoggingSeverityFixTest.yaml`** - Shows logging severity fixes
 
 ## 🎯 Key Test Results
 

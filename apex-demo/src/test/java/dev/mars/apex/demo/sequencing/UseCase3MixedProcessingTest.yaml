@@ -1,0 +1,205 @@
+# ============================================================================
+# USE CASE 3: Mixed Processing
+# ============================================================================
+# Business Scenario: Complex international transaction processing
+# 
+# Developer Intent: Multi-phase processing with interleaved enrichment and validation
+#   1. PHASE 1: Load reference data (currency rates, compliance rules)
+#   2. PHASE 2: Basic enrichment (currency conversion)
+#   3. PHASE 3: Business rules validation (amount limits, compliance)
+#   4. PHASE 4: Advanced enrichment based on validation results (risk scoring)
+#
+# YAML Structure: Alternating sections reflecting complex business flow
+# Processing Mode: sequential (enables complex multi-phase logic)
+# ============================================================================
+
+metadata:
+  id: "use-case-3-mixed-processing"
+  name: "Use Case 3: Mixed Processing"
+  version: "1.0.0"
+  description: "Demonstrates complex multi-phase processing with interleaved enrichment and validation"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-10-30"
+  business-domain: "International Transaction Processing"
+  tags: ["use-case", "mixed-processing", "multi-phase", "sequential-processing"]
+  processing-mode: "sequential"
+
+# PHASE 1: Load reference data (processed first due to YAML order)
+# Note: Using inline lookup-dataset instead of separate data-sources for test compatibility
+
+# PHASE 2: Basic enrichment (currency conversion)
+enrichments:
+  - id: "currency-conversion"
+    name: "Currency Conversion"
+    description: "Convert transaction amount to target currency"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#currency != null && #targetCurrency != null && #currency != #targetCurrency"
+
+    lookup-config:
+      lookup-key: "#currency + '-' + #targetCurrency"
+      lookup-dataset:
+        type: "inline"
+        key-field: "currencyPair"
+        data:
+          - currencyPair: "EUR-USD"
+            rate: 1.18
+            lastUpdated: "2025-10-30T10:00:00Z"
+          - currencyPair: "GBP-USD"
+            rate: 1.33
+            lastUpdated: "2025-10-30T10:00:00Z"
+          - currencyPair: "USD-EUR"
+            rate: 0.85
+            lastUpdated: "2025-10-30T10:00:00Z"
+          - currencyPair: "USD-GBP"
+            rate: 0.75
+            lastUpdated: "2025-10-30T10:00:00Z"
+
+    field-mappings:
+      - source-field: "rate"
+        target-field: "exchangeRate"
+        required: true
+
+  - id: "amount-conversion"
+    name: "Amount Conversion Calculation"
+    description: "Calculate converted amount using exchange rate"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#exchangeRate != null && #amount != null"
+
+    calculation-config:
+      expression: "#amount * #exchangeRate"
+      result-field: "convertedAmount"
+
+    field-mappings:
+      - source-field: "convertedAmount"
+        target-field: "convertedAmount"
+        required: true
+
+# PHASE 3: Business rules validation (after basic enrichment)
+rules:
+  - id: "amount-validation"
+    name: "Transaction Amount Validation"
+    description: "Validate transaction amount against regulatory limits"
+    condition: |
+      #convertedAmount != null && 
+      #transactionType != null &&
+      #convertedAmount <= 1000000
+    message: "Transaction amount {{#convertedAmount}} USD within regulatory limits"
+    severity: "INFO"
+    enabled: true
+    actions:
+      - type: "set-field"
+        field: "amountValidationStatus"
+        value: "PASSED"
+
+  - id: "compliance-check"
+    name: "Compliance Requirements Check"
+    description: "Check if transaction requires additional compliance approval"
+    condition: |
+      #convertedAmount != null && 
+      #convertedAmount >= 500000 &&
+      #transactionType == 'INTERNATIONAL_TRANSFER'
+    message: "High-value international transfer requires compliance approval: {{#convertedAmount}} USD"
+    severity: "WARNING"
+    enabled: true
+    actions:
+      - type: "set-field"
+        field: "requiresApproval"
+        value: true
+      - type: "set-field"
+        field: "approvalType"
+        value: "COMPLIANCE_REVIEW"
+
+  - id: "transaction-rejection"
+    name: "Transaction Rejection Rule"
+    description: "Reject transactions exceeding maximum limits"
+    condition: |
+      #convertedAmount != null && 
+      #convertedAmount > 1000000
+    message: "Transaction rejected: Amount {{#convertedAmount}} USD exceeds maximum limit"
+    severity: "ERROR"
+    enabled: true
+    actions:
+      - type: "set-field"
+        field: "transactionStatus"
+        value: "REJECTED"
+      - type: "set-field"
+        field: "rejectionReason"
+        value: "EXCEEDS_REGULATORY_LIMIT"
+
+# PHASE 4: Advanced enrichment based on validation results
+enrichments:
+  - id: "risk-scoring"
+    name: "Risk Score Calculation"
+    description: "Calculate risk score based on validation results and transaction characteristics"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#convertedAmount != null && #transactionType != null"
+    calculation-config:
+      expression: "#transactionType == 'INTERNATIONAL_TRANSFER' ? (#convertedAmount > 500000 ? 0.8 : (#convertedAmount > 100000 ? 0.6 : (#convertedAmount > 50000 ? 0.4 : 0.2))) : (#transactionType == 'DOMESTIC_TRANSFER' ? (#convertedAmount > 1000000 ? 0.6 : (#convertedAmount > 500000 ? 0.4 : (#convertedAmount > 100000 ? 0.3 : 0.1))) : 0.5)"
+      result-field: "riskScore"
+
+    field-mappings:
+      - source-field: "riskScore"
+        target-field: "riskScore"
+        required: true
+
+  - id: "compliance-status"
+    name: "Compliance Status Determination"
+    description: "Determine final compliance status based on all validation results"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#convertedAmount != null && #riskScore != null"
+    calculation-config:
+      expression: "#convertedAmount > 1000000 ? 'NON_COMPLIANT' : (#convertedAmount >= 500000 && #transactionType == 'INTERNATIONAL_TRANSFER' ? 'PENDING_APPROVAL' : (#riskScore > 0.7 ? 'HIGH_RISK_COMPLIANT' : (#riskScore > 0.4 ? 'MEDIUM_RISK_COMPLIANT' : 'LOW_RISK_COMPLIANT')))"
+      result-field: "complianceStatus"
+
+    field-mappings:
+      - source-field: "complianceStatus"
+        target-field: "complianceStatus"
+        required: true
+
+  - id: "processing-summary"
+    name: "Processing Summary"
+    description: "Create summary of all processing phases"
+    type: "field-enrichment"
+    condition: "true"
+    field-mappings:
+      - source-field: "transactionId"
+        target-field: "processedTransactionId"
+      - source-field: "2025-10-30T13:59:00Z"
+        target-field: "processingTimestamp"
+      - source-field: "SEQUENTIAL_PROCESSING"
+        target-field: "processingMode"
+
+# EXPECTED PROCESSING ORDER (Sequential Mode):
+# 1. data-sources: Load currency rates and compliance limits
+# 2. enrichments (Phase 2): Currency conversion calculations
+# 3. rules (Phase 3): Amount validation and compliance checks
+# 4. enrichments (Phase 4): Risk scoring based on validation results
+#
+# COMPLEX BUSINESS LOGIC FLOW:
+# Input: { amount: 75000.0, currency: "EUR", targetCurrency: "USD", transactionType: "INTERNATIONAL_TRANSFER" }
+# 
+# Phase 1: Load reference data
+#   - Currency rates: EUR→USD = 1.18
+#   - Compliance limits: INTERNATIONAL_TRANSFER max = 1,000,000
+#
+# Phase 2: Basic enrichment
+#   - Convert amount: 75,000 EUR × 1.18 = 88,500 USD
+#   - Set exchangeRate: 1.18
+#
+# Phase 3: Business rules validation
+#   - Amount validation: 88,500 < 1,000,000 → PASSED
+#   - Compliance check: 88,500 < 500,000 → No approval required
+#   - Rejection check: 88,500 < 1,000,000 → Not rejected
+#
+# Phase 4: Advanced enrichment (conditional on Phase 3 results)
+#   - Risk scoring: INTERNATIONAL_TRANSFER + 88,500 → 0.4 (medium risk)
+#   - Compliance status: No approval required + medium risk → "MEDIUM_RISK_COMPLIANT"
+#   - Processing summary: Add metadata and timestamps
+#
+# This complex multi-phase logic is IMPOSSIBLE with fixed processing orders
+# because each phase depends on results from previous phases.

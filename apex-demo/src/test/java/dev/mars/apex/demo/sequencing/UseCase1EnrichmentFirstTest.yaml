@@ -1,0 +1,126 @@
+# ============================================================================
+# USE CASE 1: Enrichment-First Processing
+# ============================================================================
+# Business Scenario: High-value transaction processing with customer tier validation
+# 
+# Developer Intent: 
+#   1. FIRST: Look up customer tier (BRONZE, SILVER, GOLD)
+#   2. SECOND: Validate transaction based on customer tier
+#
+# YAML Structure: enrichments section BEFORE rules section
+# Processing Mode: sequential (respects YAML order)
+# ============================================================================
+
+metadata:
+  id: "use-case-1-enrichment-first"
+  name: "Use Case 1: Enrichment-First Processing"
+  version: "1.0.0"
+  description: "Demonstrates enrichment-first pattern where validation depends on enriched data"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-10-30"
+  business-domain: "Transaction Processing"
+  tags: ["use-case", "enrichment-first", "sequential-processing"]
+  processing-mode: "sequential"
+
+# STEP 1: No separate data-sources section needed for inline lookup data
+
+# STEP 2: ENRICHMENTS FIRST (as per developer intent)
+# This section appears BEFORE rules to express "enrich then validate" logic
+enrichments:
+  - id: "customer-tier-lookup"
+    name: "Customer Tier Lookup"
+    description: "Look up customer tier from inline reference data"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#customerId != null"
+
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "customerId"
+        data:
+          - customerId: "CUST001"
+            customerName: "John Doe"
+            customerTier: "GOLD"
+            accountType: "PREMIUM"
+            creditLimit: 500000
+          - customerId: "CUST002"
+            customerName: "Jane Smith"
+            customerTier: "SILVER"
+            accountType: "STANDARD"
+            creditLimit: 100000
+          - customerId: "CUST003"
+            customerName: "Bob Johnson"
+            customerTier: "BRONZE"
+            accountType: "BASIC"
+            creditLimit: 25000
+
+    field-mappings:
+      - source-field: "customerTier"
+        target-field: "customerTier"
+        required: true
+      - source-field: "accountType"
+        target-field: "accountType"
+        required: false
+      - source-field: "creditLimit"
+        target-field: "creditLimit"
+        required: true
+
+  - id: "transaction-classification"
+    name: "Transaction Classification"
+    description: "Classify transaction based on amount and customer tier"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#customerTier != null && #amount != null"
+
+    calculation-config:
+      expression: "#customerTier == 'GOLD' ? (#amount > 100000 ? 'HIGH_VALUE_GOLD' : 'STANDARD_GOLD') : (#customerTier == 'SILVER' ? (#amount > 50000 ? 'HIGH_VALUE_SILVER' : 'STANDARD_SILVER') : (#customerTier == 'BRONZE' ? (#amount > 10000 ? 'HIGH_VALUE_BRONZE' : 'STANDARD_BRONZE') : 'UNKNOWN'))"
+      result-field: "transactionClass"
+
+    field-mappings:
+      - source-field: "transactionClass"
+        target-field: "transactionClass"
+        required: true
+
+# STEP 3: RULES SECOND (validate using enriched data)
+# This section appears AFTER enrichments to express validation of enriched data
+rules:
+  - id: "tier-based-validation"
+    name: "Tier-Based Transaction Validation"
+    description: "Validate transaction based on customer tier and amount"
+    condition: "#customerTier == 'GOLD' && #amount > 100000 && #amount <= #creditLimit"
+    message: "High-value transaction approved for GOLD customer: {{#customerTier}} tier, amount {{#amount}}"
+    severity: "INFO"
+    enabled: true
+
+  - id: "credit-limit-validation"
+    name: "Credit Limit Validation"
+    description: "Ensure transaction does not exceed customer credit limit"
+    condition: "#amount != null && #creditLimit != null && #amount <= #creditLimit"
+    message: "Transaction within credit limit: {{#amount}} <= {{#creditLimit}}"
+    severity: "INFO"
+    enabled: true
+
+  - id: "insufficient-tier-rejection"
+    name: "Insufficient Tier Rejection"
+    description: "Reject high-value transactions for non-GOLD customers"
+    condition: "#customerTier != null && #customerTier != 'GOLD' && #amount > 100000"
+    message: "High-value transaction rejected: {{#customerTier}} tier insufficient for amount {{#amount}}"
+    severity: "ERROR"
+    enabled: true
+
+# EXPECTED PROCESSING ORDER (Sequential Mode):
+# 1. data-sources: Load customer reference data
+# 2. enrichments: Look up customer tier and classify transaction
+# 3. rules: Validate using enriched customer tier and transaction class
+#
+# BUSINESS LOGIC FLOW:
+# Input: { customerId: "CUST001", amount: 150000.0 }
+# Step 1: Look up customer → customerTier: "GOLD", creditLimit: 500000
+# Step 2: Classify transaction → transactionClass: "HIGH_VALUE_GOLD"
+# Step 3: Validate → APPROVED (GOLD tier + amount within credit limit)
+#
+# This pattern is IMPOSSIBLE with standard processing because rules would
+# execute before enrichments, trying to validate fields that don't exist yet.

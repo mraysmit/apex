@@ -4,8 +4,15 @@
 # Developer Intent: Process enrichments FIRST, then rules
 # YAML Structure: enrichments section appears BEFORE rules section
 
-name: "Processor Comparison Demo"
-description: "Proves different processors produce different results from same YAML"
+metadata:
+  id: "processor-comparison-demo"
+  name: "Processor Comparison Demo"
+  version: "1.0.0"
+  description: "Proves different processors produce different results from same YAML"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-10-30"
+  tags: ["design-flaw", "processor-comparison", "demo"]
 
 # DEVELOPER INTENT: Calculate risk score FIRST
 enrichments:
