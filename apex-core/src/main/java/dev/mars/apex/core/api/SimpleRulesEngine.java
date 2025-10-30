@@ -4,6 +4,12 @@ import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import dev.mars.apex.core.service.error.ErrorRecoveryService;
+import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +45,14 @@ public class SimpleRulesEngine {
     
     public SimpleRulesEngine() {
         this.configuration = new RulesEngineConfiguration();
-        this.engine = new RulesEngine(configuration);
+
+        // Create EnrichmentService for safe RulesEngine creation
+        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
+        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
+        EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+
+        this.engine = new RulesEngine(configuration, new SpelExpressionParser(), new ErrorRecoveryService(),
+                                    new RulePerformanceMonitor(), enrichmentService);
     }
     
     /**

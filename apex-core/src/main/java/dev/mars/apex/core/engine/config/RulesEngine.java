@@ -69,43 +69,14 @@ public class RulesEngine {
 
 
     /**
-     * Create a new RulesEngine with the given configuration.
-     *
-     * @param configuration The configuration for this rules engine
-     */
-    public RulesEngine(RulesEngineConfiguration configuration) {
-        this(configuration, new SpelExpressionParser(), new ErrorRecoveryService(), new RulePerformanceMonitor(), null);
-    }
-
-    /**
-     * Create a new RulesEngine with the given configuration and expression parser.
-     *
-     * @param configuration The configuration for this rules engine
-     * @param parser The expression parser to use
-     */
-    public RulesEngine(RulesEngineConfiguration configuration, ExpressionParser parser) {
-        this(configuration, parser, new ErrorRecoveryService(), new RulePerformanceMonitor(), null);
-    }
-
-    /**
-     * Create a new RulesEngine with the given configuration, expression parser, and error recovery service.
-     *
-     * @param configuration The configuration for this rules engine
-     * @param parser The expression parser to use
-     * @param errorRecoveryService The error recovery service to use for handling evaluation errors
-     */
-    public RulesEngine(RulesEngineConfiguration configuration, ExpressionParser parser, ErrorRecoveryService errorRecoveryService) {
-        this(configuration, parser, errorRecoveryService, new RulePerformanceMonitor(), null);
-    }
-
-    /**
      * Create a new RulesEngine with the given configuration, expression parser, error recovery service, and performance monitor.
+     * This is the primary constructor that supports all APEX features including enrichment processing.
      *
      * @param configuration The configuration for this rules engine
      * @param parser The expression parser to use
      * @param errorRecoveryService The error recovery service to use for handling evaluation errors
      * @param performanceMonitor The performance monitor to use for tracking rule evaluation metrics
-     * @param enrichmentService The enrichment service to use for processing enrichments (optional)
+     * @param enrichmentService The enrichment service to use for processing enrichments (required for YAML with enrichments)
      */
     public RulesEngine(RulesEngineConfiguration configuration, ExpressionParser parser,
                       ErrorRecoveryService errorRecoveryService, RulePerformanceMonitor performanceMonitor,

@@ -1,5 +1,73 @@
 # APEX Entry Point Rationalisation
 
+## 🎯 **The New Simple Interface**
+
+After rationalization, APEX now has a **clean, straightforward entry point** for creating RulesEngine instances:
+
+### **✅ Primary Entry Point: `createRulesEngineFromYamlConfig()`**
+
+The simplest and most direct way to create a RulesEngine:
+
+```java
+/**
+ * Create a rules engine from a YAML configuration using the generic architecture.
+ *
+ * @param yamlConfig The YAML configuration
+ * @return A configured RulesEngine with full enterprise metadata support
+ * @throws YamlConfigurationException if configuration processing fails
+ */
+public RulesEngine createRulesEngineFromYamlConfig(YamlRuleConfiguration yamlConfig) throws YamlConfigurationException {
+    try {
+        // Use the factory's method which has proper category metadata inheritance
+        RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
+        return new RulesEngine(config);
+    } catch (Exception e) {
+        throw new YamlConfigurationException("Failed to create rules engine with generic architecture", e);
+    }
+}
+```
+
+### **📋 Standard Usage Pattern (Most Common)**
+
+For loading from a file, use this **2-step pattern**:
+
+```java
+// Step 1: Load YAML configuration
+YamlConfigurationLoader loader = new YamlConfigurationLoader();
+YamlRuleConfiguration config = loader.loadFromFile("path/to/your/rules.yaml");
+
+// Step 2: Create RulesEngine
+YamlRulesEngineService service = new YamlRulesEngineService();
+RulesEngine engine = service.createRulesEngineFromYamlConfig(config);
+
+// Step 3: Use the engine
+RuleResult result = engine.evaluate(yourData);
+```
+
+### **🚀 Why This Is The Best Entry Point**
+
+**✅ Advantages:**
+- **Core Method**: Foundation that all other methods delegate to
+- **No Redundancy**: Direct path with no wrapper overhead
+- **Separation of Concerns**: Loading and engine creation are separate steps
+- **Flexibility**: You can inspect/modify the config before creating the engine
+- **Clear Dependencies**: Explicit about what you need (YamlRuleConfiguration)
+- **Enterprise Ready**: Full metadata inheritance and category support
+- **Zero Deprecation Warnings**: Clean, future-proof API
+
+### **🎯 Specialized Entry Points (When Needed)**
+
+| **Method** | **Use Case** | **Status** |
+|------------|--------------|------------|
+| `createRulesEngineFromString(String)` | Dynamic YAML from strings | ✅ **Active** |
+| `createRulesEngineFromClasspath(String)` | Loading from JAR resources | ✅ **Active** |
+| `createRulesEngineFromStream(InputStream)` | Loading from streams/URLs | ✅ **Active** |
+| `createRulesEngineFromMultipleFiles(String...)` | Merging multiple YAML files | ✅ **Active** |
+| ~~`createRulesEngineFromFile(File)`~~ | File loading | ❌ **Deprecated** |
+| ~~`createRulesEngineWithGenericArchitecture(String)`~~ | Legacy wrapper | ❌ **Deprecated** |
+
+---
+
 ## Executive Summary
 
 The APEX rules engine has accumulated **too many entry points** due to legacy design decisions and multiple refactorings. This document analyzes the current entry point proliferation and provides a comprehensive rationalisation strategy to simplify the API surface while maintaining essential functionality.

@@ -5,6 +5,11 @@ import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import dev.mars.apex.core.service.enrichment.EnrichmentService;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import dev.mars.apex.core.service.error.ErrorRecoveryService;
+import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,7 +57,12 @@ public class ValidationService {
      */
     public ValidationService(LookupServiceRegistry registry) {
         this.registry = registry;
-        this.rulesEngine = new RulesEngine(new RulesEngineConfiguration());
+        // Create EnrichmentService for safe RulesEngine creation
+        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
+        EnrichmentService enrichmentService = new EnrichmentService(registry, evaluatorService);
+
+        this.rulesEngine = new RulesEngine(new RulesEngineConfiguration(), new SpelExpressionParser(),
+                                         new ErrorRecoveryService(), new RulePerformanceMonitor(), enrichmentService);
         LOGGER.info("ValidationService initialized with default RulesEngine");
     }
 

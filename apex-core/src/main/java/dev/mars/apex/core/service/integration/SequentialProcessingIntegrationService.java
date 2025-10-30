@@ -5,6 +5,11 @@ import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.config.yaml.YamlRuleFactory;
+import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import dev.mars.apex.core.service.error.ErrorRecoveryService;
+import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.io.File;
 import java.io.InputStream;
@@ -185,7 +190,13 @@ public class SequentialProcessingIntegrationService {
         YamlRuleConfiguration processedConfig = result.getYamlRuleConfiguration();
         RulesEngineConfiguration engineConfig = rulesEngineFactory.createRulesEngineConfiguration(processedConfig);
         
-        RulesEngine engine = new RulesEngine(engineConfig);
+        // Create EnrichmentService for safe RulesEngine creation
+        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
+        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
+        EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+
+        RulesEngine engine = new RulesEngine(engineConfig, new SpelExpressionParser(), new ErrorRecoveryService(),
+                                           new RulePerformanceMonitor(), enrichmentService);
         
         LOGGER.info("Successfully created rules engine with sequential processing for: " + source);
         return engine;
@@ -197,7 +208,13 @@ public class SequentialProcessingIntegrationService {
     private RulesEngine createRulesEngineStandard(File file) throws YamlConfigurationException {
         YamlRuleConfiguration yamlConfig = standardConfigLoader.loadFromFile(file);
         RulesEngineConfiguration config = rulesEngineFactory.createRulesEngineConfiguration(yamlConfig);
-        return new RulesEngine(config);
+        // Create EnrichmentService for safe RulesEngine creation
+        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
+        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
+        EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+
+        return new RulesEngine(config, new SpelExpressionParser(), new ErrorRecoveryService(),
+                             new RulePerformanceMonitor(), enrichmentService);
     }
     
     /**
@@ -206,7 +223,13 @@ public class SequentialProcessingIntegrationService {
     private RulesEngine createRulesEngineStandard(String yamlString) throws YamlConfigurationException {
         YamlRuleConfiguration yamlConfig = standardConfigLoader.fromYamlString(yamlString);
         RulesEngineConfiguration config = rulesEngineFactory.createRulesEngineConfiguration(yamlConfig);
-        return new RulesEngine(config);
+        // Create EnrichmentService for safe RulesEngine creation
+        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
+        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
+        EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+
+        return new RulesEngine(config, new SpelExpressionParser(), new ErrorRecoveryService(),
+                             new RulePerformanceMonitor(), enrichmentService);
     }
     
     /**

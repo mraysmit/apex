@@ -25,6 +25,9 @@ import dev.mars.apex.core.config.yaml.YamlRuleFactory;
 import dev.mars.apex.core.service.enrichment.EnrichmentService;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import dev.mars.apex.core.service.error.ErrorRecoveryService;
+import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import dev.mars.apex.core.util.TestAwareLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -560,7 +563,14 @@ public class DataTypeScenarioService {
             }
 
             // Create rules engine and execute
-            RulesEngine engine = new RulesEngine(ruleFactory.createRulesEngineConfiguration(mergedConfig));
+            // Create EnrichmentService for safe RulesEngine creation
+            LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
+            ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
+            EnrichmentService enrichmentService = new EnrichmentService(serviceRegistry, evaluatorService);
+
+            RulesEngine engine = new RulesEngine(ruleFactory.createRulesEngineConfiguration(mergedConfig),
+                                               new SpelExpressionParser(), new ErrorRecoveryService(),
+                                               new RulePerformanceMonitor(), enrichmentService);
 
             // Create facts map
             Map<String, Object> facts = new HashMap<>();
