@@ -81,6 +81,13 @@ public class YamlRuleConfiguration {
     @JsonProperty("error-recovery")
     private YamlErrorRecoveryConfig errorRecovery;
 
+    /**
+     * Section order as it appears in the YAML document.
+     * This field is populated by OrderedYamlParser to enable sequential processing.
+     * Not serialized to YAML - only used internally for execution order.
+     */
+    private List<String> sectionOrder;
+
     // Default constructor
     public YamlRuleConfiguration() {}
     
@@ -322,5 +329,24 @@ public class YamlRuleConfiguration {
         public void setProcessingMode(String processingMode) {
             this.processingMode = processingMode;
         }
+    }
+
+    /**
+     * Get the section order as it appears in the YAML document.
+     *
+     * @return List of section names in document order, or null if not available
+     */
+    public List<String> getSectionOrder() {
+        return sectionOrder;
+    }
+
+    /**
+     * Set the section order from the YAML document.
+     * This is called by YamlConfigurationLoader after parsing with OrderedYamlParser.
+     *
+     * @param sectionOrder List of section names in document order
+     */
+    public void setSectionOrder(List<String> sectionOrder) {
+        this.sectionOrder = sectionOrder;
     }
 }

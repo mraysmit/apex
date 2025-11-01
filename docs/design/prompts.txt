@@ -619,3 +619,100 @@ I have a serious problem with hallucinating non-existent APEX YAML keywords like
 - Governance fields like `compliance-reviewed`, `risk-approved`
 - Metadata fields that "seem logical" but don't exist
 - Any YAML structure not explicitly defined in the APEX specification
+
+---
+
+## **📋 APEX YAML Configuration Requirements - Key Learnings**
+
+### **Required Fields for APEX YAML Sections**
+
+Based on actual APEX validation requirements (from `YamlConfigurationLoader.java`):
+
+#### **Enrichments** (validated at line 1250)
+Required fields:
+- `id` - Unique identifier for the enrichment
+- `name` - Human-readable name for the enrichment
+- `type` - Enrichment type (e.g., `"lookup-enrichment"`)
+- `lookup-config` - Configuration for lookup operations
+  - Must specify either `lookup-service` OR `lookup-dataset`
+  - For inline data: use `lookup-dataset` with `type: "inline"`, `key-field`, and `data` array
+
+Example:
+```yaml
+enrichments:
+  - id: "enrich-customer-tier"
+    name: "Enrich Customer Tier"
+    type: "lookup-enrichment"
+    condition: "#customerId != null"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "customerId"
+        data:
+          - customerId: "CUST001"
+            tier: "GOLD"
+    field-mappings:
+      - source-field: "tier"
+        target-field: "customerTier"
+```
+
+#### **Rules** (validated at line 761)
+Required fields:
+- `id` - Unique identifier for the rule
+- `name` - Human-readable name for the rule
+- `condition` - Expression to evaluate (e.g., `"#customerTier != null"`)
+- `message` - Message to display when rule triggers
+- `severity` - Severity level (`"ERROR"`, `"WARNING"`, `"INFO"`)
+- `priority` - Numeric priority for rule execution order
+
+Example:
+```yaml
+rules:
+  - id: "validate-tier-exists"
+    name: "Validate Tier Exists"
+    condition: "#customerTier != null"
+    message: "Customer tier must be enriched"
+    severity: "ERROR"
+    priority: 1
+```
+
+#### **Rule-Groups**
+Required fields:
+- `id` - Unique identifier for the rule group
+- `name` - Human-readable name for the rule group
+- `operator` - Logic operator (`"AND"` or `"OR"`)
+- `rule-ids` - Array of rule IDs to include in the group
+
+Example:
+```yaml
+rule-groups:
+  - id: "tier-validation-group"
+    name: "Tier Validation Group"
+    operator: "AND"
+    rule-ids:
+      - "validate-tier-exists"
+      - "validate-tier-gold"
+```
+
+#### **Data Sources** (validated at line 961)
+Required fields:
+- `name` - Name of the data source (required even if `id` is present)
+
+### **Best Practices for Test YAML Configurations**
+
+1. **Inline Datasets for Simple Tests**
+   - Embed datasets directly in enrichment's `lookup-config.lookup-dataset`
+   - Simpler than separate `data-sources` section
+   - Better for unit tests and demos
+   - Pattern: `lookup-dataset` → `type: "inline"` → `key-field` → `data` array
+
+2. **Separate Data Sources for Complex Tests**
+   - Use separate `data-sources` section for reusable datasets
+   - Reference via `data-source-id` in lookup-config
+   - Better for integration tests with shared data
+
+3. **Always Validate YAML Before Use**
+   - APEX has strict validation requirements
+   - Missing required fields cause `YamlConfigurationException`
+   - Check validation code in `YamlConfigurationLoader.java` when in doubt

@@ -1,0 +1,29 @@
+metadata:
+  name: "complex-dependency-test"
+  type: "rule-config"
+  processing-mode: "sequential"
+  description: "Test complex dependency resolution with forward references"
+
+rules:
+  - id: "validation-rule"
+    name: "Data Validation"
+    condition: "#enrichedData != null"
+    message: "Data is enriched and valid"
+    severity: "INFO"
+    priority: 1
+
+enrichments:
+  - id: "data-enrichment"
+    name: "Data Enrichment"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "rawData"
+        target-field: "enrichedData"
+
+data-sources:
+  - name: "reference-data"
+    type: "memory"
+    data:
+      - key: "test"
+        value: 150
+

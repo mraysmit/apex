@@ -53,6 +53,7 @@ public class YamlConfigurationLoader {
 
     private final ObjectMapper yamlMapper;
     private final DataSourceResolver dataSourceResolver;
+    private final OrderedYamlParser orderedYamlParser;
 
     /**
      * Constructor that initializes the YAML object mapper and data-source resolver.
@@ -60,6 +61,7 @@ public class YamlConfigurationLoader {
     public YamlConfigurationLoader() {
         this.yamlMapper = createYamlMapper();
         this.dataSourceResolver = new DataSourceResolver();
+        this.orderedYamlParser = new OrderedYamlParser();
     }
 
     /**
@@ -82,7 +84,14 @@ public class YamlConfigurationLoader {
             String rawContent = Files.readString(path);
             String resolvedContent = resolveProperties(rawContent);
 
-            YamlRuleConfiguration config = yamlMapper.readValue(resolvedContent, YamlRuleConfiguration.class);
+            // Use OrderedYamlParser to preserve section order
+            OrderedYamlConfiguration orderedConfig = orderedYamlParser.parseYamlString(resolvedContent, filePath);
+            YamlRuleConfiguration config = orderedConfig.getConfiguration();
+
+            // Copy section order into the configuration
+            List<String> sectionOrder = orderedConfig.getSectionOrder();
+            config.setSectionOrder(sectionOrder);
+            LOGGER.fine("Section order from YAML: " + sectionOrder);
 
             // Process external rule references
             processRuleReferences(config);
@@ -123,7 +132,12 @@ public class YamlConfigurationLoader {
             String rawContent = Files.readString(file.toPath());
             String resolvedContent = resolveProperties(rawContent);
 
-            YamlRuleConfiguration config = yamlMapper.readValue(resolvedContent, YamlRuleConfiguration.class);
+            // Use OrderedYamlParser to preserve section order
+            OrderedYamlConfiguration orderedConfig = orderedYamlParser.parseYamlString(resolvedContent, file.getAbsolutePath());
+            YamlRuleConfiguration config = orderedConfig.getConfiguration();
+
+            // Copy section order into the configuration
+            config.setSectionOrder(orderedConfig.getSectionOrder());
 
             // Process external rule references
             processRuleReferences(config);
@@ -160,7 +174,12 @@ public class YamlConfigurationLoader {
             String rawContent = new String(inputStream.readAllBytes());
             String resolvedContent = resolveProperties(rawContent);
 
-            YamlRuleConfiguration config = yamlMapper.readValue(resolvedContent, YamlRuleConfiguration.class);
+            // Use OrderedYamlParser to preserve section order
+            OrderedYamlConfiguration orderedConfig = orderedYamlParser.parseYamlString(resolvedContent, "<stream>");
+            YamlRuleConfiguration config = orderedConfig.getConfiguration();
+
+            // Copy section order into the configuration
+            config.setSectionOrder(orderedConfig.getSectionOrder());
 
             // Process external rule references
             processRuleReferences(config);
@@ -310,16 +329,18 @@ public class YamlConfigurationLoader {
      * @throws YamlConfigurationException if parsing fails
      */
     public YamlRuleConfiguration fromYamlString(String yamlString) throws YamlConfigurationException {
-        try {
-            // Resolve properties in the YAML string before parsing
-            String resolvedYamlString = resolveProperties(yamlString);
+        // Resolve properties in the YAML string before parsing
+        String resolvedYamlString = resolveProperties(yamlString);
 
-            YamlRuleConfiguration config = yamlMapper.readValue(resolvedYamlString, YamlRuleConfiguration.class);
-            validateConfiguration(config);
-            return config;
-        } catch (IOException e) {
-            throw new YamlConfigurationException("Failed to parse YAML string", e);
-        }
+        // Use OrderedYamlParser to preserve section order
+        OrderedYamlConfiguration orderedConfig = orderedYamlParser.parseYamlString(resolvedYamlString, "<string>");
+        YamlRuleConfiguration config = orderedConfig.getConfiguration();
+
+        // Copy section order into the configuration
+        config.setSectionOrder(orderedConfig.getSectionOrder());
+
+        validateConfiguration(config);
+        return config;
     }
 
     /**

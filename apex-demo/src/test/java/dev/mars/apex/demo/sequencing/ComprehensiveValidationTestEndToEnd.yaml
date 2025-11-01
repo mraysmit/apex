@@ -1,0 +1,38 @@
+metadata:
+  name: "comprehensive-sequential-test"
+  type: "rule-config"
+  processing-mode: "sequential"
+  description: "Complete test of sequential processing"
+
+data-sources:
+  - name: "customer-data"
+    type: "memory"
+    data:
+      - customerId: "CUST001"
+        customerName: "John Doe"
+        customerType: "PREMIUM"
+
+enrichments:
+  - id: "customer-lookup"
+    name: "Customer Lookup"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "customerId"
+        data:
+          - customerId: "CUST001"
+            customerName: "John Doe"
+    field-mappings:
+      - source-field: "customerName"
+        target-field: "customerData"
+
+rules:
+  - id: "customer-validation-rule"
+    name: "Customer Data Validation"
+    condition: "#customerData != null"
+    message: "Customer data is valid"
+    severity: "INFO"
+    priority: 1
+

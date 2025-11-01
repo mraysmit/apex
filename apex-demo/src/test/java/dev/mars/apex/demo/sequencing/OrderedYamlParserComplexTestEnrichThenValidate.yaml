@@ -1,0 +1,56 @@
+metadata:
+  name: "Enrich Then Validate Pattern"
+  type: "rule-config"
+  description: "Demonstrates enrich-then-validate business pattern"
+
+data-sources:
+  - name: "customer-lookup"
+    type: "memory"
+    data:
+      - customerId: "CUST001"
+        customerProfile: "PREMIUM"
+        status: "ACTIVE"
+        marketingOptIn: true
+
+# STEP 1: Enrich customer data first
+enrichments:
+  - id: "enrich-customer-profile"
+    name: "Enrich Customer Profile"
+    type: "lookup-enrichment"
+    condition: "#customerId != null"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "customerId"
+        data:
+          - customerId: "CUST001"
+            status: "ACTIVE"
+    field-mappings:
+      - source-field: "status"
+        target-field: "customerProfile"
+
+  - id: "enrich-customer-preferences"
+    name: "Enrich Customer Preferences"
+    type: "field-enrichment"
+    condition: "#customerProfile != null"
+    field-mappings:
+      - source-field: "customerProfile"
+        target-field: "preferences"
+
+# STEP 2: Validate enriched data second
+rules:
+  - id: "validate-customer-profile"
+    name: "Validate Customer Profile"
+    condition: "#customerProfile != null"
+    message: "Customer profile is valid and active"
+    severity: "INFO"
+    priority: 100
+
+  - id: "validate-customer-preferences"
+    name: "Validate Customer Preferences"
+    condition: "#preferences != null"
+    message: "Customer has valid marketing preferences"
+    severity: "INFO"
+    priority: 200
+

@@ -434,6 +434,22 @@ public class RulesEngine {
             return RuleResult.evaluationFailure(failureMessages, new HashMap<>(), "evaluation", "Null input data");
         }
 
+        // Check if section order is available for sequential processing
+        List<String> sectionOrder = yamlConfig.getSectionOrder();
+        if (sectionOrder != null && !sectionOrder.isEmpty()) {
+            logger.info("Using sequential processing - executing sections in document order: {}", sectionOrder);
+            return evaluateInDocumentOrder(yamlConfig, inputData, sectionOrder);
+        } else {
+            logger.info("Using standard processing - executing sections in hardcoded order");
+            return evaluateInStandardOrder(yamlConfig, inputData);
+        }
+    }
+
+    /**
+     * Evaluate using standard hardcoded order (backward compatible).
+     * This is the original evaluation logic.
+     */
+    private RuleResult evaluateInStandardOrder(YamlRuleConfiguration yamlConfig, Map<String, Object> inputData) {
         List<String> failureMessages = new ArrayList<>();
         Map<String, Object> enrichedData = new HashMap<>(inputData);
         boolean overallSuccess = true;
@@ -520,6 +536,127 @@ public class RulesEngine {
             logger.debug("Full unified evaluation exception details:", e);
             failureMessages.add("Evaluation failed: " + e.getMessage());
             return RuleResult.evaluationFailure(failureMessages, enrichedData, "evaluation", "Evaluation failed");
+        }
+    }
+
+    /**
+     * Evaluate using sequential processing - execute sections in YAML document order.
+     * This respects the developer's intent as expressed through YAML structure.
+     */
+    private RuleResult evaluateInDocumentOrder(YamlRuleConfiguration yamlConfig, Map<String, Object> inputData, List<String> sectionOrder) {
+        List<String> failureMessages = new ArrayList<>();
+        Map<String, Object> enrichedData = new HashMap<>(inputData);
+        boolean overallSuccess = true;
+
+        try {
+            logger.info("Processing {} sections in document order", sectionOrder.size());
+
+            // Process sections in the order they appear in the YAML document
+            for (String section : sectionOrder) {
+                logger.debug("Processing section: {}", section);
+
+                switch (section) {
+                    case "enrichments":
+                        if (enrichmentProcessor != null && yamlConfig.getEnrichments() != null && !yamlConfig.getEnrichments().isEmpty()) {
+                            logger.info("Processing {} enrichments", yamlConfig.getEnrichments().size());
+                            try {
+                                int originalDataSize = enrichedData.size();
+                                Object enrichmentResult = enrichmentProcessor.processEnrichments(
+                                    yamlConfig.getEnrichments(), enrichedData, yamlConfig);
+
+                                if (enrichmentResult instanceof Map) {
+                                    @SuppressWarnings("unchecked")
+                                    Map<String, Object> enrichmentMap = (Map<String, Object>) enrichmentResult;
+
+                                    boolean enrichmentFailed = detectEnrichmentFailures(yamlConfig, enrichmentMap, originalDataSize);
+                                    if (enrichmentFailed) {
+                                        overallSuccess = false;
+                                        failureMessages.add("Required field enrichment failed - check logs for CRITICAL ERROR details");
+                                        logger.warn("Enrichment failed due to required field mapping failures");
+                                    }
+
+                                    enrichedData = enrichmentMap;
+                                    logger.debug("Enrichment completed, enriched data size: {}", enrichedData.size());
+                                } else {
+                                    logger.warn("Enrichment result is not a Map, using original data");
+                                    overallSuccess = false;
+                                    failureMessages.add("Enrichment result format is invalid");
+                                }
+                            } catch (Exception e) {
+                                logger.info("Enrichment processing issue: {}", e.getMessage());
+                                logger.debug("Full enrichment exception details:", e);
+                                overallSuccess = false;
+                                failureMessages.add("Enrichment processing failed: " + e.getMessage());
+                            }
+                        }
+                        break;
+
+                    case "rules":
+                        List<Rule> allRules = configuration.getAllRules();
+                        if (allRules != null && !allRules.isEmpty()) {
+                            logger.info("Processing {} individual rules", allRules.size());
+                            RuleResult ruleResult = executeRulesList(allRules, enrichedData);
+
+                            if (ruleResult.getResultType() == RuleResult.ResultType.ERROR) {
+                                overallSuccess = false;
+                                failureMessages.add("Rule evaluation error: " + ruleResult.getMessage());
+                            }
+                        }
+                        break;
+
+                    case "rule-groups":
+                        List<RuleGroup> allRuleGroups = configuration.getAllRuleGroups();
+                        if (allRuleGroups != null && !allRuleGroups.isEmpty()) {
+                            logger.info("Processing {} rule groups", allRuleGroups.size());
+                            RuleResult ruleGroupResult = executeRuleGroupsList(allRuleGroups, enrichedData);
+
+                            if (ruleGroupResult.getResultType() == RuleResult.ResultType.ERROR) {
+                                overallSuccess = false;
+                                failureMessages.add("Rule group evaluation error: " + ruleGroupResult.getMessage());
+                            }
+                        }
+                        break;
+
+                    case "enrichment-groups":
+                        // TODO: Add enrichment-groups execution when implemented
+                        logger.debug("Enrichment-groups section found but not yet implemented");
+                        break;
+
+                    case "metadata":
+                    case "data-sources":
+                    case "data-source-refs":
+                    case "rule-refs":
+                    case "enrichment-refs":
+                    case "data-sinks":
+                    case "categories":
+                    case "transformations":
+                    case "rule-chains":
+                    case "pipeline":
+                    case "error-recovery":
+                        // These sections are configuration/metadata - not executed
+                        logger.debug("Skipping configuration section: {}", section);
+                        break;
+
+                    default:
+                        logger.warn("Unknown section encountered during sequential processing: {}", section);
+                        break;
+                }
+            }
+
+            // Return comprehensive result
+            if (overallSuccess && failureMessages.isEmpty()) {
+                logger.info("Sequential evaluation completed successfully");
+                return RuleResult.evaluationSuccess(enrichedData, "evaluation", "Sequential evaluation completed successfully");
+            } else {
+                logger.info("Sequential evaluation completed with {} failures", failureMessages.size());
+                return RuleResult.evaluationFailure(failureMessages, enrichedData, "evaluation", "Sequential evaluation completed with failures");
+            }
+
+        } catch (Exception e) {
+            logger.error("Sequential evaluation failed with exception: {}", e.getMessage());
+            logger.debug("Full sequential evaluation exception details:", e);
+            failureMessages.add("Sequential evaluation failed: " + e.getMessage());
+            return RuleResult.evaluationFailure(failureMessages, enrichedData, "evaluation", "Sequential evaluation failed");
         }
     }
 

@@ -1,0 +1,65 @@
+metadata:
+  name: "Complete APEX Configuration"
+  type: "rule-config"
+  version: "2.0"
+  processing-mode: "sequential"
+  description: "Comprehensive test with all YAML section types"
+
+data-sources:
+  - name: "customer-db"
+    type: "memory"
+    data:
+      - customerId: "CUST001"
+        customerName: "John Doe"
+        status: "ACTIVE"
+
+categories:
+  - id: "validation"
+    name: "Data Validation"
+    description: "Customer data validation rules"
+
+enrichments:
+  - id: "enrich-customer"
+    name: "Enrich Customer Data"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "customerId"
+        data:
+          - customerId: "CUST001"
+            customerName: "John Doe"
+            status: "ACTIVE"
+    field-mappings:
+      - source-field: "customerName"
+        target-field: "customerData"
+
+rules:
+  - id: "validate-customer"
+    name: "Validate Customer"
+    category: "validation"
+    condition: "#customerData != null"
+    message: "Customer is valid and active"
+    severity: "INFO"
+    priority: 1
+
+rule-groups:
+  - id: "customer-processing"
+    name: "Customer Processing Group"
+    operator: "AND"
+    rule-ids:
+      - "validate-customer"
+
+enrichment-groups:
+  - id: "customer-enrichment-group"
+    name: "Customer Enrichment Group"
+    operator: "AND"
+    enrichment-ids:
+      - "enrich-customer"
+
+transformations:
+  - id: "normalize-customer"
+    name: "Normalize Customer Data"
+    type: "field-transformation"
+

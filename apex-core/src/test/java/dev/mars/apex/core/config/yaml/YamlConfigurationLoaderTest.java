@@ -133,9 +133,10 @@ class YamlConfigurationLoaderTest {
         YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
             loader.loadFromFile(invalidYamlFile.toString());
         }, "Should throw YamlConfigurationException for invalid YAML");
-        
-        assertTrue(exception.getMessage().contains("Failed to load configuration"), 
-                  "Exception message should indicate loading failure");
+
+        assertTrue(exception.getMessage().contains("YAML") &&
+                  (exception.getMessage().contains("syntax error") || exception.getMessage().contains("parsing error")),
+                  "Exception message should indicate YAML parsing failure");
     }
 
     // ========================================
@@ -165,9 +166,9 @@ class YamlConfigurationLoaderTest {
             YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
                 loader.loadFromStream(emptyStream);
             }, "Should throw exception for empty stream");
-            
-            assertTrue(exception.getMessage().contains("Failed to load configuration"), 
-                      "Exception message should indicate loading failure");
+
+            assertTrue(exception.getMessage().contains("Empty or invalid YAML content"),
+                      "Exception message should indicate empty/invalid YAML");
         } catch (IOException e) {
             fail("IOException should not be thrown during test setup: " + e.getMessage());
         }
@@ -230,9 +231,10 @@ class YamlConfigurationLoaderTest {
         YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
             loader.fromYamlString(invalidYaml);
         }, "Should throw exception for invalid YAML string");
-        
-        assertTrue(exception.getMessage().contains("Failed to parse YAML string"), 
-                  "Exception message should indicate parsing failure");
+
+        assertTrue(exception.getMessage().contains("YAML") &&
+                  (exception.getMessage().contains("syntax error") || exception.getMessage().contains("parsing error")),
+                  "Exception message should indicate YAML parsing failure");
     }
 
     // ========================================

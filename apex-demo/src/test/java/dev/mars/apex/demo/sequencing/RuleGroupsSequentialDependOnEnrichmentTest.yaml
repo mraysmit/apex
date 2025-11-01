@@ -1,0 +1,51 @@
+metadata:
+  name: "Rule Groups Depend on Enrichment"
+  version: "1.0.0"
+  description: "Rule-groups must execute AFTER enrichments in sequential mode"
+
+enrichments:
+  - id: "enrich-customer-data"
+    name: "Enrich Customer Data"
+    type: "lookup-enrichment"
+    condition: "#customerId != null"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "customerId"
+        data:
+          - customerId: "CUST001"
+            tier: "GOLD"
+            creditLimit: 50000
+          - customerId: "CUST002"
+            tier: "SILVER"
+            creditLimit: 25000
+    field-mappings:
+      - source-field: "tier"
+        target-field: "customerTier"
+      - source-field: "creditLimit"
+        target-field: "creditLimit"
+
+rules:
+  - id: "validate-tier"
+    name: "Validate Tier"
+    condition: "#customerTier != null"
+    message: "Customer tier is required"
+    severity: "ERROR"
+    priority: 1
+  - id: "validate-credit-limit"
+    name: "Validate Credit Limit"
+    condition: "#creditLimit != null && #creditLimit > 0"
+    message: "Credit limit must be positive"
+    severity: "ERROR"
+    priority: 2
+
+rule-groups:
+  - id: "customer-validation-group"
+    name: "Customer Validation Group"
+    description: "Validates enriched customer data"
+    operator: "AND"
+    rule-ids:
+      - "validate-tier"
+      - "validate-credit-limit"
+
