@@ -1,7 +1,10 @@
 package dev.mars.apex.core.engine.config;
 
 import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
+import dev.mars.apex.core.config.yaml.YamlConfigurationException;
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.yaml.YamlRuleFactory;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleBase;
@@ -81,16 +84,35 @@ public class RulesEngine {
     private final UnifiedRuleEvaluator unifiedEvaluator;
 
     /**
+     * The YAML configuration used to create this engine (if created via static factory methods).
+     * This is stored to enable the simplified evaluate(Object) method.
+     * Will be null if the engine was created directly via the constructor.
+     */
+    private final YamlRuleConfiguration yamlConfig;
+
+    /**
      * Create a new RulesEngine with the specified configuration.
-     * This is the only constructor for RulesEngine.
+     * This is the public constructor for RulesEngine.
      *
-     * <p>For production code with YAML configurations, use
-     * {@link dev.mars.apex.core.config.yaml.RulesEngineService} instead.</p>
+     * <p>For simpler usage with YAML files, consider using the static factory methods:
+     * {@link #fromFile(String)} or {@link #fromYamlConfig(YamlRuleConfiguration)}.</p>
      *
      * @param configuration The configuration for this rules engine
      */
     public RulesEngine(RulesEngineConfiguration configuration) {
+        this(configuration, null);
+    }
+
+    /**
+     * Private constructor that accepts both configuration and yamlConfig.
+     * Used by static factory methods to store the YAML configuration for simplified evaluate() method.
+     *
+     * @param configuration The configuration for this rules engine
+     * @param yamlConfig The YAML configuration (can be null)
+     */
+    private RulesEngine(RulesEngineConfiguration configuration, YamlRuleConfiguration yamlConfig) {
         this.configuration = configuration;
+        this.yamlConfig = yamlConfig;
         this.parser = new SpelExpressionParser();
         this.errorRecoveryService = new ErrorRecoveryService();
         this.performanceMonitor = new RulePerformanceMonitor();
@@ -107,6 +129,67 @@ public class RulesEngine {
         logger.debug("Using error recovery service: {}", errorRecoveryService.getClass().getSimpleName());
         logger.debug("Using performance monitor: {}", performanceMonitor.getClass().getSimpleName());
         logger.debug("Using enrichment processor: {}", enrichmentProcessor != null ? enrichmentProcessor.getClass().getSimpleName() : "none");
+    }
+
+    // Static Factory Methods
+
+    /**
+     * Create a RulesEngine from a YAML file.
+     * This is the simplest way to create a RulesEngine for most use cases.
+     *
+     * <p><b>Example:</b></p>
+     * <pre>
+     * // Simple 2-line usage
+     * RulesEngine engine = RulesEngine.fromFile("config.yaml");
+     * RuleResult result = engine.evaluate(inputData);
+     * </pre>
+     *
+     * @param filePath The path to the YAML configuration file
+     * @return A configured RulesEngine ready to evaluate rules
+     * @throws YamlConfigurationException if the file cannot be loaded or parsed
+     */
+    public static RulesEngine fromFile(String filePath) throws YamlConfigurationException {
+        logger.info("Creating RulesEngine from file: {}", filePath);
+
+        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        YamlRuleConfiguration yamlConfig = loader.loadFromFile(filePath);
+
+        YamlRuleFactory ruleFactory = new YamlRuleFactory();
+        RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
+
+        return new RulesEngine(config, yamlConfig);
+    }
+
+    /**
+     * Create a RulesEngine from a YamlRuleConfiguration object.
+     * Use this when you need to inspect or modify the YAML configuration before creating the engine.
+     *
+     * <p><b>Example:</b></p>
+     * <pre>
+     * // Advanced usage with config inspection
+     * YamlConfigurationLoader loader = new YamlConfigurationLoader();
+     * YamlRuleConfiguration yamlConfig = loader.loadFromFile("config.yaml");
+     *
+     * // Inspect or modify config if needed
+     * if (yamlConfig.getMetadata() != null) {
+     *     System.out.println("Config version: " + yamlConfig.getMetadata().getVersion());
+     * }
+     *
+     * RulesEngine engine = RulesEngine.fromYamlConfig(yamlConfig);
+     * RuleResult result = engine.evaluate(inputData);
+     * </pre>
+     *
+     * @param yamlConfig The YAML configuration object
+     * @return A configured RulesEngine ready to evaluate rules
+     * @throws YamlConfigurationException if the configuration cannot be processed
+     */
+    public static RulesEngine fromYamlConfig(YamlRuleConfiguration yamlConfig) throws YamlConfigurationException {
+        logger.info("Creating RulesEngine from YamlRuleConfiguration");
+
+        YamlRuleFactory ruleFactory = new YamlRuleFactory();
+        RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
+
+        return new RulesEngine(config, yamlConfig);
     }
 
     /**
@@ -407,6 +490,8 @@ public class RulesEngine {
         return result.isTriggered();
     }
 
+
+
     /**
      * Unified evaluation method that processes both enrichments and rules, returning comprehensive results.
      * This method provides the complete APEX evaluation workflow with enrichment processing followed by rule evaluation.
@@ -693,21 +778,30 @@ public class RulesEngine {
     }
 
     /**
-     * Simplified unified evaluation method that processes both enrichments and rules.
-     * This is a convenience method for when you only have input data and want complete processing.
+     * Simplified evaluation method that uses the stored YAML configuration.
+     * This method is only available when the RulesEngine was created using static factory methods
+     * ({@link #fromFile(String)} or {@link #fromYamlConfig(YamlRuleConfiguration)}).
+     *
+     * <p><b>Example:</b></p>
+     * <pre>
+     * RulesEngine engine = RulesEngine.fromFile("config.yaml");
+     * RuleResult result = engine.evaluate(inputData);
+     * </pre>
      *
      * @param inputData The input data to process
      * @return A comprehensive RuleResult containing success status, enriched data, and failure messages
+     * @throws IllegalStateException if this engine was not created with a YAML configuration
      */
     public RuleResult evaluate(Map<String, Object> inputData) {
-        // This method requires that the RulesEngine was created with a YamlRuleConfiguration
-        // We'll need to extract it from the configuration or require it to be passed
-        logger.warn("evaluate(Map) method called but requires YamlRuleConfiguration - use evaluate(YamlRuleConfiguration, Map) instead");
+        if (this.yamlConfig == null) {
+            throw new IllegalStateException(
+                "Cannot use simplified evaluate(Map) method - this RulesEngine was not created with a YAML configuration. " +
+                "Either use RulesEngine.fromFile() or RulesEngine.fromYamlConfig() to create the engine, " +
+                "or use the explicit evaluate(YamlRuleConfiguration, Map) method instead."
+            );
+        }
 
-        // For now, return a basic result indicating this method needs the YAML config
-        List<String> failureMessages = new ArrayList<>();
-        failureMessages.add("evaluate(Map) method requires YamlRuleConfiguration parameter");
-        return RuleResult.evaluationFailure(failureMessages, inputData, "evaluation", "Missing YAML configuration");
+        return evaluate(this.yamlConfig, inputData);
     }
 
     /**

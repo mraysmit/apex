@@ -131,20 +131,23 @@ class RulesEngineEvaluateTest {
     }
 
     @Test
-    @DisplayName("Test simplified evaluate() method with Map only")
+    @DisplayName("Test simplified evaluate() method throws exception when engine created without YAML config")
     void testSimplifiedEvaluateMethod() {
         Map<String, Object> inputData = new HashMap<>();
         inputData.put("test", "value");
-        
-        RuleResult result = rulesEngine.evaluate(inputData);
-        
-        assertNotNull(result, "Result should not be null");
-        assertFalse(result.isSuccess(), "Should fail without YAML configuration");
-        assertTrue(result.hasFailures(), "Should have failures");
-        assertFalse(result.getFailureMessages().isEmpty(), "Should have failure messages");
-        
-        assertTrue(result.getFailureMessages().get(0).contains("YamlRuleConfiguration"), 
-                  "Should indicate missing YAML configuration");
+
+        // The simplified evaluate(Map) method should throw IllegalStateException
+        // when the engine was not created with a YAML configuration
+        IllegalStateException exception = assertThrows(
+            IllegalStateException.class,
+            () -> rulesEngine.evaluate(inputData),
+            "Should throw IllegalStateException when engine created without YAML config"
+        );
+
+        assertTrue(exception.getMessage().contains("Cannot use simplified evaluate(Map) method"),
+                  "Exception message should indicate the problem");
+        assertTrue(exception.getMessage().contains("RulesEngine.fromFile()"),
+                  "Exception message should suggest using static factory methods");
     }
 
     @Test
