@@ -1,6 +1,5 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.yaml.RulesEngineService;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
@@ -28,14 +27,12 @@ class AMinimalSequentialProcessingTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AMinimalSequentialProcessingTest.class);
 
-    private RulesEngineService rulesEngineService;
     private YamlConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         LOGGER.info("* Setting up MINIMAL SEQUENTIAL PROCESSING test");
 
-        rulesEngineService = new RulesEngineService();
         yamlLoader = new YamlConfigurationLoader();
 
         LOGGER.info("* Sequential processing services initialized");
@@ -48,7 +45,7 @@ class AMinimalSequentialProcessingTest {
 
         String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/AMinimalSequentialProcessingTest.yaml";
         YamlRuleConfiguration config = yamlLoader.loadFromFile(yamlPath);
-        RulesEngine engine = rulesEngineService.createRulesEngineFromFile(new File(yamlPath));
+        RulesEngine engine = RulesEngine.fromFile(yamlPath);
 
         Map<String, Object> testData = new HashMap<>();
         testData.put("customerId", "CUST001");
@@ -84,7 +81,7 @@ class AMinimalSequentialProcessingTest {
 
         String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/AMinimalSequentialProcessingTest.yaml";
         YamlRuleConfiguration config = yamlLoader.loadFromFile(yamlPath);
-        RulesEngine engine = rulesEngineService.createRulesEngineFromFile(new File(yamlPath));
+        RulesEngine engine = RulesEngine.fromFile(yamlPath);
 
         Map<String, Object> testData = new HashMap<>();
         testData.put("customerId", "CUST002");
@@ -120,13 +117,13 @@ class AMinimalSequentialProcessingTest {
         // Sequential mode
         String sequentialPath = "src/test/java/dev/mars/apex/demo/sequencing/AMinimalSequentialProcessingTest.yaml";
         YamlRuleConfiguration sequentialConfig = yamlLoader.loadFromFile(sequentialPath);
-        RulesEngine sequentialEngine = rulesEngineService.createRulesEngineFromFile(new File(sequentialPath));
+        RulesEngine sequentialEngine = RulesEngine.fromFile(sequentialPath);
         RuleResult sequentialResult = sequentialEngine.evaluate(sequentialConfig, new HashMap<>(testData));
 
         // Standard mode
         String standardPath = "src/test/java/dev/mars/apex/demo/sequencing/AMinimalStandardProcessingTest.yaml";
         YamlRuleConfiguration standardConfig = yamlLoader.loadFromFile(standardPath);
-        RulesEngine standardEngine = rulesEngineService.createRulesEngineFromFile(new File(standardPath));
+        RulesEngine standardEngine = RulesEngine.fromFile(standardPath);
         RuleResult standardResult = standardEngine.evaluate(standardConfig, new HashMap<>(testData));
 
         Map<String, Object> sequentialData = sequentialResult.getEnrichedData();

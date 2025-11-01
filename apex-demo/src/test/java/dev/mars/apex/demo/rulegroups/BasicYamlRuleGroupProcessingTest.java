@@ -19,7 +19,6 @@ package dev.mars.apex.demo.rulegroups;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -53,12 +52,10 @@ public class BasicYamlRuleGroupProcessingTest {
     private static final Logger logger = LoggerFactory.getLogger(BasicYamlRuleGroupProcessingTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private YamlRulesEngineService rulesEngineService;
 
     @BeforeEach
     void setUp() {
         this.yamlLoader = new YamlConfigurationLoader();
-        this.rulesEngineService = new YamlRulesEngineService();
     }
     
     @Nested
@@ -72,7 +69,7 @@ public class BasicYamlRuleGroupProcessingTest {
 
             try {
                 // Load using file path following apex-demo pattern
-                RulesEngine engine = rulesEngineService.createRulesEngineFromFile("src/test/java/dev/mars/apex/demo/rulegroups/BasicYamlRuleGroupProcessingTest-combined-config.yaml");
+                RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/rulegroups/BasicYamlRuleGroupProcessingTest-combined-config.yaml");
 
                 RuleGroup ruleGroup = engine.getConfiguration().getRuleGroupById("separate-and-group");
                 assertNotNull(ruleGroup, "Rule group should be found");
@@ -109,10 +106,15 @@ public class BasicYamlRuleGroupProcessingTest {
                 String rulesPath = "src/test/java/dev/mars/apex/demo/rulegroups/BasicYamlRuleGroupProcessingTest-rules.yaml";
                 String ruleGroupsPath = "src/test/java/dev/mars/apex/demo/rulegroups/BasicYamlRuleGroupProcessingTest-rule-groups.yaml";
 
-                RulesEngine engine = rulesEngineService.createRulesEngineFromMultipleFiles(
-                    rulesPath,
-                    ruleGroupsPath
-                );
+                // Manually merge multiple YAML files
+                YamlRuleConfiguration mergedConfig = new YamlRuleConfiguration();
+                for (String filePath : new String[]{rulesPath, ruleGroupsPath}) {
+                    YamlRuleConfiguration partialConfig = yamlLoader.loadFromFileWithoutValidation(filePath);
+                    mergeYamlConfigurations(mergedConfig, partialConfig);
+                }
+                yamlLoader.processReferencesAndValidate(mergedConfig);
+
+                RulesEngine engine = RulesEngine.fromYamlConfig(mergedConfig);
 
                 RuleGroup ruleGroup = engine.getConfiguration().getRuleGroupById("separate-and-mixed-group");
                 assertNotNull(ruleGroup, "Rule group should be found");
@@ -182,7 +184,7 @@ public class BasicYamlRuleGroupProcessingTest {
             // Create RulesEngine and execute the rule group
             RulesEngine engine;
             try {
-                engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+                engine = RulesEngine.fromYamlConfig(config);
             } catch (YamlConfigurationException e) {
                 logError("Failed to create RulesEngine: " + e.getMessage());
                 fail("Failed to create RulesEngine: " + e.getMessage());
@@ -262,7 +264,7 @@ public class BasicYamlRuleGroupProcessingTest {
             // Create RulesEngine and execute the rule group
             RulesEngine engine;
             try {
-                engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+                engine = RulesEngine.fromYamlConfig(config);
             } catch (YamlConfigurationException e) {
                 logError("Failed to create RulesEngine: " + e.getMessage());
                 fail("Failed to create RulesEngine: " + e.getMessage());
@@ -331,7 +333,7 @@ public class BasicYamlRuleGroupProcessingTest {
             // Create RulesEngine and execute the rule group
             RulesEngine engine;
             try {
-                engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+                engine = RulesEngine.fromYamlConfig(config);
             } catch (YamlConfigurationException e) {
                 logError("Failed to create RulesEngine: " + e.getMessage());
                 fail("Failed to create RulesEngine: " + e.getMessage());
@@ -406,7 +408,7 @@ public class BasicYamlRuleGroupProcessingTest {
             // Create RulesEngine and execute the rule group
             RulesEngine engine;
             try {
-                engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+                engine = RulesEngine.fromYamlConfig(config);
             } catch (YamlConfigurationException e) {
                 logError("Failed to create RulesEngine: " + e.getMessage());
                 fail("Failed to create RulesEngine: " + e.getMessage());
@@ -428,6 +430,72 @@ public class BasicYamlRuleGroupProcessingTest {
             logInfo("RuleResult message: " + (result.getMessage() != null ? result.getMessage() : "No message"));
 
             logSuccess("OR group with all false rules executed successfully - group failed as expected");
+        }
+    }
+
+    /**
+     * Helper method to merge YAML configurations (replicates YamlRulesEngineService.mergeYamlConfigurations).
+     */
+    private void mergeYamlConfigurations(YamlRuleConfiguration target, YamlRuleConfiguration source) {
+        // Merge metadata (prefer target if both exist)
+        if (target.getMetadata() == null && source.getMetadata() != null) {
+            target.setMetadata(source.getMetadata());
+        }
+
+        // Merge data sources
+        if (source.getDataSources() != null) {
+            if (target.getDataSources() == null) {
+                target.setDataSources(new java.util.ArrayList<>());
+            }
+            target.getDataSources().addAll(source.getDataSources());
+        }
+
+        // Merge data source references
+        if (source.getDataSourceRefs() != null) {
+            if (target.getDataSourceRefs() == null) {
+                target.setDataSourceRefs(new java.util.ArrayList<>());
+            }
+            target.getDataSourceRefs().addAll(source.getDataSourceRefs());
+        }
+
+        // Merge rule references
+        if (source.getRuleRefs() != null) {
+            if (target.getRuleRefs() == null) {
+                target.setRuleRefs(new java.util.ArrayList<>());
+            }
+            target.getRuleRefs().addAll(source.getRuleRefs());
+        }
+
+        // Merge rules
+        if (source.getRules() != null) {
+            if (target.getRules() == null) {
+                target.setRules(new java.util.ArrayList<>());
+            }
+            target.getRules().addAll(source.getRules());
+        }
+
+        // Merge rule groups
+        if (source.getRuleGroups() != null) {
+            if (target.getRuleGroups() == null) {
+                target.setRuleGroups(new java.util.ArrayList<>());
+            }
+            target.getRuleGroups().addAll(source.getRuleGroups());
+        }
+
+        // Merge enrichments
+        if (source.getEnrichments() != null) {
+            if (target.getEnrichments() == null) {
+                target.setEnrichments(new java.util.ArrayList<>());
+            }
+            target.getEnrichments().addAll(source.getEnrichments());
+        }
+
+        // Merge rule chains
+        if (source.getRuleChains() != null) {
+            if (target.getRuleChains() == null) {
+                target.setRuleChains(new java.util.ArrayList<>());
+            }
+            target.getRuleChains().addAll(source.getRuleChains());
         }
     }
 }

@@ -1,6 +1,5 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.yaml.RulesEngineService;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -33,7 +32,7 @@ class RuleGroupsSequentialBasicTest extends DemoTestBase {
 
         String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/RuleGroupsSequentialBasicTest.yaml";
         YamlRuleConfiguration config = yamlLoader.loadFromFile(yamlPath);
-        RulesEngine engine = rulesEngineService.createRulesEngineFromFile(new File(yamlPath));
+        RulesEngine engine = RulesEngine.fromFile(yamlPath);
 
         assertNotNull(engine, "RulesEngine should be created successfully");
         assertNotNull(config, "Configuration should load successfully");
@@ -72,7 +71,7 @@ class RuleGroupsSequentialBasicTest extends DemoTestBase {
 
         String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/RuleGroupsSequentialMultipleCustomersTest.yaml";
         YamlRuleConfiguration config = yamlLoader.loadFromFile(yamlPath);
-        RulesEngine engine = rulesEngineService.createRulesEngineFromFile(new File(yamlPath));
+        RulesEngine engine = RulesEngine.fromFile(yamlPath);
 
         // Test CUST001 - GOLD tier
         Map<String, Object> testData1 = new HashMap<>();
@@ -111,7 +110,7 @@ class RuleGroupsSequentialBasicTest extends DemoTestBase {
 
         String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/RuleGroupsSequentialDependOnEnrichmentTest.yaml";
         YamlRuleConfiguration config = yamlLoader.loadFromFile(yamlPath);
-        RulesEngine engine = rulesEngineService.createRulesEngineFromFile(new File(yamlPath));
+        RulesEngine engine = RulesEngine.fromFile(yamlPath);
 
         Map<String, Object> testData = new HashMap<>();
         testData.put("customerId", "CUST001");

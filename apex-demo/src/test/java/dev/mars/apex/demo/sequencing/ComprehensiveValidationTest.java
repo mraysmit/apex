@@ -49,7 +49,7 @@ public class ComprehensiveValidationTest extends DemoTestBase {
         assertNotNull(config, "Configuration should be loaded");
 
         // 2. Create RulesEngine
-        RulesEngine engine = rulesEngineService.createRulesEngineFromFile(new File(yamlPath));
+        RulesEngine engine = RulesEngine.fromFile(yamlPath);
         assertNotNull(engine, "RulesEngine should be created");
 
         // 3. Create test data
@@ -95,7 +95,7 @@ public class ComprehensiveValidationTest extends DemoTestBase {
         assertNotNull(config, "Configuration should be loaded");
 
         // 2. Create RulesEngine
-        RulesEngine engine = rulesEngineService.createRulesEngineFromFile(new File(yamlPath));
+        RulesEngine engine = RulesEngine.fromFile(yamlPath);
         assertNotNull(engine, "RulesEngine should be created");
 
         // 3. Create test data

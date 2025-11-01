@@ -18,7 +18,6 @@ package dev.mars.apex.demo.basic;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +39,6 @@ public class ValueThresholdRuleTest {
     private static final Logger logger = LoggerFactory.getLogger(ValueThresholdRuleTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private YamlRulesEngineService rulesEngineService;
 
     @BeforeEach
     void setUp() {
@@ -48,7 +46,6 @@ public class ValueThresholdRuleTest {
 
         // Initialize APEX services
         yamlLoader = new YamlConfigurationLoader();
-        rulesEngineService = new YamlRulesEngineService();
 
         logger.info("✓ APEX services initialized successfully");
     }
@@ -63,8 +60,8 @@ public class ValueThresholdRuleTest {
         assertNotNull(config, "Configuration should be loaded");
         logger.info("✓ Configuration loaded: {} rules", config.getRules().size());
         
-        // Create RulesEngine
-        RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+        // Create RulesEngine using static factory method
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
         assertNotNull(engine, "RulesEngine should be created");
         
         // Get the rule from the configuration

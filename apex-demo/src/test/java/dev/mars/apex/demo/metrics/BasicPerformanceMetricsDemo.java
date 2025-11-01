@@ -21,7 +21,6 @@ import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMetrics;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
@@ -75,9 +74,8 @@ public class BasicPerformanceMetricsDemo extends DemoTestBase {
             "src/test/java/dev/mars/apex/demo/metrics/BasicPerformanceMetricsDemo.yaml");
         assertNotNull(config, "YAML configuration should load successfully");
 
-        // Step 2: Create rules engine using YamlRulesEngineService
-        YamlRulesEngineService rulesEngineService = new YamlRulesEngineService();
-        RulesEngine rulesEngine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+        // Step 2: Create rules engine using static factory method
+        RulesEngine rulesEngine = RulesEngine.fromYamlConfig(config);
         assertNotNull(rulesEngine, "Rules engine should be created successfully");
 
         logger.info("\n" + "=".repeat(60));

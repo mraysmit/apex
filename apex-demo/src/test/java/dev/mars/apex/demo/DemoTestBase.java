@@ -20,7 +20,6 @@ import java.io.File;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.RulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -61,7 +60,6 @@ public abstract class DemoTestBase {
     protected YamlEnrichmentProcessor enrichmentProcessor;
     protected LookupServiceRegistry serviceRegistry;
     protected ExpressionEvaluatorService expressionEvaluator;
-    protected RulesEngineService rulesEngineService;
     protected RulesEngineConfiguration rulesEngineConfiguration;
 
     @BeforeEach
@@ -82,7 +80,6 @@ public abstract class DemoTestBase {
         this.serviceRegistry = new LookupServiceRegistry();
         this.expressionEvaluator = new ExpressionEvaluatorService();
         this.enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, expressionEvaluator);
-        this.rulesEngineService = new RulesEngineService();
         this.rulesEngineConfiguration = new RulesEngineConfiguration();
 
         logger.info("APEX services initialized successfully");
@@ -269,8 +266,8 @@ public abstract class DemoTestBase {
 
     /**
      * Merge multiple YAML files into a single YamlRuleConfiguration for enrichment execution.
-     * Mirrors YamlRulesEngineService.createRulesEngineFromMultipleFiles merge behavior
-     * and additionally merges enrichment-groups. First metadata encountered is retained.
+     * Merges rules, rule-groups, data-sources, queries, and enrichment-groups.
+     * First metadata encountered is retained.
      */
     protected YamlRuleConfiguration mergeYamlConfigsForEnrichment(String... filePaths) throws YamlConfigurationException {
         YamlRuleConfiguration merged = new YamlRuleConfiguration();

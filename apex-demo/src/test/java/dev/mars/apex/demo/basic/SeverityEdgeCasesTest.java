@@ -18,7 +18,6 @@ package dev.mars.apex.demo.basic;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleGroup;
@@ -64,15 +63,13 @@ public class SeverityEdgeCasesTest {
     private static final Logger logger = LoggerFactory.getLogger(SeverityEdgeCasesTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private YamlRulesEngineService rulesEngineService;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up APEX services for severity edge cases testing...");
-        
+
         yamlLoader = new YamlConfigurationLoader();
-        rulesEngineService = new YamlRulesEngineService();
-        
+
         logger.info("✅ APEX services initialized successfully");
     }
 
@@ -94,8 +91,8 @@ public class SeverityEdgeCasesTest {
         logger.info("✅ Configuration loaded: {} rules, {} rule groups",
             config.getRules().size(), config.getRuleGroups().size());
 
-        // Create RulesEngine
-        RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+        // Create RulesEngine using static factory method
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
         assertNotNull(engine, "RulesEngine should be created");
 
         // Test standard severity handling
@@ -183,7 +180,7 @@ public class SeverityEdgeCasesTest {
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
             "src/test/java/dev/mars/apex/demo/basic/SeverityEdgeCasesTest.yaml"
         );
-        RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
         // Test numeric boundary conditions
         testNumericBoundaryConditions(engine);
@@ -306,7 +303,7 @@ public class SeverityEdgeCasesTest {
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
             "src/test/java/dev/mars/apex/demo/basic/SeverityEdgeCasesTest.yaml"
         );
-        RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
         // Test collection edge cases
         testCollectionEdgeCases(engine);

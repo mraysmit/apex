@@ -19,7 +19,6 @@ package dev.mars.apex.demo.rulegroups;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -56,12 +55,10 @@ public class RuleGroupSeverityAggregationTest {
     private static final Logger logger = LoggerFactory.getLogger(RuleGroupSeverityAggregationTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private YamlRulesEngineService rulesEngineService;
 
     @BeforeEach
     void setUp() {
         this.yamlLoader = new YamlConfigurationLoader();
-        this.rulesEngineService = new YamlRulesEngineService();
     }
 
     @Test
@@ -112,7 +109,7 @@ public class RuleGroupSeverityAggregationTest {
         
         try {
             YamlRuleConfiguration config = yamlLoader.fromYamlString(yamlContent);
-            RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
             
             RuleGroup group = engine.getConfiguration().getRuleGroupById("and-mixed-group");
             assertNotNull(group, "Rule group should be found");
@@ -172,7 +169,7 @@ public class RuleGroupSeverityAggregationTest {
         
         try {
             YamlRuleConfiguration config = yamlLoader.fromYamlString(yamlContent);
-            RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
             
             RuleGroup group = engine.getConfiguration().getRuleGroupById("and-all-pass-group");
             assertNotNull(group, "Rule group should be found");
@@ -239,7 +236,7 @@ public class RuleGroupSeverityAggregationTest {
         
         try {
             YamlRuleConfiguration config = yamlLoader.fromYamlString(yamlContent);
-            RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
             
             RuleGroup group = engine.getConfiguration().getRuleGroupById("or-first-match-group");
             assertNotNull(group, "Rule group should be found");
@@ -281,7 +278,7 @@ public class RuleGroupSeverityAggregationTest {
         
         try {
             YamlRuleConfiguration config = yamlLoader.fromYamlString(yamlContent);
-            RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
             
             RuleGroup group = engine.getConfiguration().getRuleGroupById("empty-group");
             assertNotNull(group, "Rule group should be found");

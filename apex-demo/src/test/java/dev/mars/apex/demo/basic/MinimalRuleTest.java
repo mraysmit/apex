@@ -18,7 +18,6 @@ package dev.mars.apex.demo.basic;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
@@ -37,8 +36,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(ColoredTestOutputExtension.class)
 class MinimalRuleTest {
 
-    private final YamlRulesEngineService yamlService = new YamlRulesEngineService();
-
     @Test
     @DisplayName("Test minimal rule execution")
     void testMinimalRule() {
@@ -47,8 +44,8 @@ class MinimalRuleTest {
             YamlConfigurationLoader loader = new YamlConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/MinimalRuleTest.yaml");
 
-            // Create rules engine
-            RulesEngine engine = yamlService.createRulesEngineFromYamlConfig(config);
+            // Create rules engine using static factory method
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
             // Test data - age 20 (should pass)
             Map<String, Object> testData = Map.of("age", 20);

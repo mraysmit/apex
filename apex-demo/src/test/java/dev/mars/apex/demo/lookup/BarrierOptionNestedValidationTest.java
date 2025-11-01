@@ -19,7 +19,6 @@ package dev.mars.apex.demo.lookup;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -76,8 +75,7 @@ public class BarrierOptionNestedValidationTest {
             assertEquals(3, config.getRules().size(), "Should have exactly 3 validation rules");
 
             // Create RulesEngine
-            YamlRulesEngineService rulesEngineService = new YamlRulesEngineService();
-            RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
             assertNotNull(engine, "RulesEngine should be created");
 
             // Get the barrier vs strike validation rule
@@ -126,8 +124,7 @@ public class BarrierOptionNestedValidationTest {
             assertNotNull(config, "Configuration should be loaded");
 
             // Create RulesEngine
-            YamlRulesEngineService rulesEngineService = new YamlRulesEngineService();
-            RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
             assertNotNull(engine, "RulesEngine should be created");
 
             // Get the date consistency validation rule
@@ -174,8 +171,7 @@ public class BarrierOptionNestedValidationTest {
             assertNotNull(config, "Configuration should be loaded");
 
             // Create RulesEngine
-            YamlRulesEngineService rulesEngineService = new YamlRulesEngineService();
-            RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
             assertNotNull(engine, "RulesEngine should be created");
 
             // Get the rebate amount validation rule

@@ -19,7 +19,6 @@ package dev.mars.apex.demo.lookup;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -78,7 +77,6 @@ public class LookupBasicInlineTest {
     private static final Logger logger = LoggerFactory.getLogger(LookupBasicInlineTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private YamlRulesEngineService rulesEngineService;
     private YamlEnrichmentProcessor enrichmentProcessor;
     private YamlRuleConfiguration config;
 
@@ -86,7 +84,6 @@ public class LookupBasicInlineTest {
     void setUp() {
         // Initialize APEX services following established patterns
         yamlLoader = new YamlConfigurationLoader();
-        rulesEngineService = new YamlRulesEngineService();
 
         // Create enrichment service with required dependencies
         LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
@@ -112,8 +109,8 @@ public class LookupBasicInlineTest {
      * Following the established pattern from previous tests
      */
     private RulesEngine createRulesEngineWithEnrichmentService(YamlRuleConfiguration config) throws YamlConfigurationException {
-        // Create basic configuration from YAML using the standard method
-        RulesEngine baseEngine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+        // Create basic configuration from YAML using the static factory method
+        RulesEngine baseEngine = RulesEngine.fromYamlConfig(config);
         RulesEngineConfiguration rulesConfig = baseEngine.getConfiguration();
 
         // Create RulesEngine

@@ -18,7 +18,6 @@ package dev.mars.apex.demo.conditional;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -72,14 +71,12 @@ public class UpdateStageFxTransactionSimplifiedTest {
     private static final Logger logger = LoggerFactory.getLogger(UpdateStageFxTransactionSimplifiedTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private YamlRulesEngineService rulesEngineService;
     private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up APEX services for FX transaction processing tests...");
         this.yamlLoader = new YamlConfigurationLoader();
-        this.rulesEngineService = new YamlRulesEngineService();
 
         // Create enrichment service following the pattern from RulesEngineEvaluateTest
         LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
@@ -366,8 +363,8 @@ public class UpdateStageFxTransactionSimplifiedTest {
      * Following the pattern from RulesEngineEvaluateTest.
      */
     private RulesEngine createRulesEngineWithEnrichmentService(YamlRuleConfiguration config) throws YamlConfigurationException {
-        // Create basic configuration from YAML using the standard method
-        RulesEngine baseEngine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+        // Create basic configuration from YAML using the static factory method
+        RulesEngine baseEngine = RulesEngine.fromYamlConfig(config);
         RulesEngineConfiguration rulesConfig = baseEngine.getConfiguration();
 
         // Create RulesEngine

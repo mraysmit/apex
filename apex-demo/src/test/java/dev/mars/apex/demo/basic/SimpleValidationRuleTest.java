@@ -18,7 +18,6 @@ package dev.mars.apex.demo.basic;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
@@ -38,8 +37,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(ColoredTestOutputExtension.class)
 class SimpleValidationRuleTest {
 
-    private final YamlRulesEngineService yamlService = new YamlRulesEngineService();
-
     @Test
     @DisplayName("Test simple validation rule with valid age")
     void testValidAge() {
@@ -48,8 +45,8 @@ class SimpleValidationRuleTest {
             YamlConfigurationLoader loader = new YamlConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/SimpleValidationRuleTest.yaml");
 
-            // Create rules engine
-            RulesEngine engine = yamlService.createRulesEngineFromYamlConfig(config);
+            // Create rules engine using static factory method
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
             // Test data - age 25 (should pass)
             Map<String, Object> testData = Map.of("age", 25);
@@ -76,8 +73,8 @@ class SimpleValidationRuleTest {
             YamlConfigurationLoader loader = new YamlConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/SimpleValidationRuleTest.yaml");
 
-            // Create rules engine
-            RulesEngine engine = yamlService.createRulesEngineFromYamlConfig(config);
+            // Create rules engine using static factory method
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
             // Test data - age 16 (should not pass)
             Map<String, Object> testData = Map.of("age", 16);
@@ -103,8 +100,8 @@ class SimpleValidationRuleTest {
             YamlConfigurationLoader loader = new YamlConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/SimpleValidationRuleTest.yaml");
 
-            // Create rules engine
-            RulesEngine engine = yamlService.createRulesEngineFromYamlConfig(config);
+            // Create rules engine using static factory method
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
             // Test data - no age field
             Map<String, Object> testData = Map.of("name", "John");

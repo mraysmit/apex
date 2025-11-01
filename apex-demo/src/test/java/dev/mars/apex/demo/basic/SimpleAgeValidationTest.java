@@ -19,7 +19,6 @@ package dev.mars.apex.demo.basic;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
@@ -70,9 +69,8 @@ public class SimpleAgeValidationTest {
             assertEquals("Simple Age Validation", config.getMetadata().getName());
             assertEquals(3, config.getRules().size(), "Should have exactly 3 validation rules");
             
-            // Create RulesEngine
-            YamlRulesEngineService rulesEngineService = new YamlRulesEngineService();
-            RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+            // Create RulesEngine using static factory method
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
             assertNotNull(engine, "RulesEngine should be created");
             
             // Get the age validation rule from the configuration
@@ -115,9 +113,8 @@ public class SimpleAgeValidationTest {
             YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/SimpleAgeValidationTest.yaml");
             assertNotNull(config, "Configuration should be loaded");
             
-            // Create RulesEngine
-            YamlRulesEngineService rulesEngineService = new YamlRulesEngineService();
-            RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+            // Create RulesEngine using static factory method
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
             assertNotNull(engine, "RulesEngine should be created");
             
             // Get the age-too-young rule from the configuration
@@ -160,9 +157,8 @@ public class SimpleAgeValidationTest {
             YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/SimpleAgeValidationTest.yaml");
             assertNotNull(config, "Configuration should be loaded");
             
-            // Create RulesEngine
-            YamlRulesEngineService rulesEngineService = new YamlRulesEngineService();
-            RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+            // Create RulesEngine using static factory method
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
             assertNotNull(engine, "RulesEngine should be created");
             
             // Get the age-required rule from the configuration

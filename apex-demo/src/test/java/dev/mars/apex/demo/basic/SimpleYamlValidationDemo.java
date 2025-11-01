@@ -19,7 +19,6 @@ package dev.mars.apex.demo.basic;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
@@ -66,9 +65,8 @@ public class SimpleYamlValidationDemo {
             logger.info("✓ YAML configuration loaded: {}", config.getMetadata().getName());
             logger.info("  Rules count: {}", config.getRules().size());
             
-            // Step 2: Create rules engine from YAML
-            YamlRulesEngineService yamlService = new YamlRulesEngineService();
-            RulesEngine engine = yamlService.createRulesEngineFromYamlConfig(config);
+            // Step 2: Create rules engine from YAML using static factory method
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
             assertNotNull(engine, "RulesEngine should be created");
             logger.info("✓ Rules engine created successfully");

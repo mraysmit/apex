@@ -17,7 +17,6 @@ package dev.mars.apex.demo.lookup;
 
 import dev.mars.apex.demo.DemoTestBase;
 
-import dev.mars.apex.core.config.yaml.RulesEngineService;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlDataSourceLoader;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
@@ -67,7 +66,6 @@ public class RestApiIntegrationTest extends DemoTestBase {
     private RestApiTestableServer testServer;
     private String baseUrl;
     private int serverPort;
-    private RulesEngineService rulesEngineService;
     private YamlConfigurationLoader yamlLoader;
     private YamlDataSourceLoader dataSourceLoader;
     private YamlEnrichmentProcessor enrichmentProcessor;
@@ -82,9 +80,6 @@ public class RestApiIntegrationTest extends DemoTestBase {
         LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
         ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
         enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
-
-        // Initialize RulesEngineService
-        rulesEngineService = new RulesEngineService();
 
         // Create and start the reusable test server
         testServer = new RestApiTestableServer();
@@ -116,7 +111,7 @@ public class RestApiIntegrationTest extends DemoTestBase {
         assertNotNull(config, "YAML configuration should not be null");
 
         // Create RulesEngine from configuration
-        RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
         assertNotNull(engine, "RulesEngine should be created");
 
         // Test 1a: Valid currency code format

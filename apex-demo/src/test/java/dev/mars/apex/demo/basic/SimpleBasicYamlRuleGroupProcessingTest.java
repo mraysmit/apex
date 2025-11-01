@@ -19,7 +19,6 @@ package dev.mars.apex.demo.basic;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,14 +42,12 @@ class SimpleBasicYamlRuleGroupProcessingTest {
     private static final Logger logger = LoggerFactory.getLogger(SimpleBasicYamlRuleGroupProcessingTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private YamlRulesEngineService rulesEngineService;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up APEX services for simple rule group processing tests...");
 
         this.yamlLoader = new YamlConfigurationLoader();
-        this.rulesEngineService = new YamlRulesEngineService();
 
         logger.info("✓ APEX services initialized successfully");
     }
@@ -74,8 +71,8 @@ class SimpleBasicYamlRuleGroupProcessingTest {
             logger.info("✓ Configuration loaded: {} rules, {} rule groups", 
                 config.getRules().size(), config.getRuleGroups().size());
             
-            // Create RulesEngine
-            RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+            // Create RulesEngine using static factory method
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
             assertNotNull(engine, "RulesEngine should be created");
             
             // Test data (empty for hardcoded rule conditions)
@@ -138,8 +135,8 @@ class SimpleBasicYamlRuleGroupProcessingTest {
             logger.info("✓ Configuration with automatic rule references loaded: {} rules, {} rule groups",
                 config.getRules().size(), config.getRuleGroups().size());
             
-            // Create RulesEngine
-            RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+            // Create RulesEngine using static factory method
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
             assertNotNull(engine, "RulesEngine should be created");
             logger.info("✓ Automatic rule reference resolution successful");
             

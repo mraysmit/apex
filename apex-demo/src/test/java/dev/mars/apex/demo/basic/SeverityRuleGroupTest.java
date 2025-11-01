@@ -18,7 +18,6 @@ package dev.mars.apex.demo.basic;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -65,15 +64,13 @@ public class SeverityRuleGroupTest {
     private static final Logger logger = LoggerFactory.getLogger(SeverityRuleGroupTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private YamlRulesEngineService rulesEngineService;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up APEX services for severity rule group testing...");
-        
+
         yamlLoader = new YamlConfigurationLoader();
-        rulesEngineService = new YamlRulesEngineService();
-        
+
         logger.info("✅ APEX services initialized successfully");
     }
 
@@ -95,8 +92,8 @@ public class SeverityRuleGroupTest {
         logger.info("✅ Configuration loaded: {} rules, {} rule groups", 
             config.getRules().size(), config.getRuleGroups().size());
         
-        // Create RulesEngine
-        RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+        // Create RulesEngine using static factory method
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
         assertNotNull(engine, "RulesEngine should be created");
         
         // Test ERROR-only rule group
@@ -181,7 +178,7 @@ public class SeverityRuleGroupTest {
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
             "src/test/java/dev/mars/apex/demo/basic/SeverityRuleGroupTest.yaml"
         );
-        RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
         // Test ERROR and WARNING mixed in AND group
         testErrorWarningMixedAndGroup(engine);
@@ -266,7 +263,7 @@ public class SeverityRuleGroupTest {
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
             "src/test/java/dev/mars/apex/demo/basic/SeverityRuleGroupTest.yaml"
         );
-        RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
         // Test single rule group
         testSingleRuleGroup(engine);

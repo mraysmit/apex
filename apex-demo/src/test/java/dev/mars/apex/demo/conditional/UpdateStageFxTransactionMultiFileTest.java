@@ -2,7 +2,6 @@ package dev.mars.apex.demo.conditional;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
@@ -39,7 +38,6 @@ public class UpdateStageFxTransactionMultiFileTest {
     private static final Logger logger = LoggerFactory.getLogger(UpdateStageFxTransactionMultiFileTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private YamlRulesEngineService rulesEngineService;
     private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
@@ -48,7 +46,6 @@ public class UpdateStageFxTransactionMultiFileTest {
 
         // Initialize services following working pattern
         yamlLoader = new YamlConfigurationLoader();
-        rulesEngineService = new YamlRulesEngineService();
 
         // Initialize enrichment service with correct constructor
         LookupServiceRegistry lookupServiceRegistry = new LookupServiceRegistry();

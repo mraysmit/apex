@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.rulegroups;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -31,9 +31,9 @@ public class CrossFileRuleGroupReferenceTest extends DemoTestBase {
     @Test
     @DisplayName("Cross-file rule-group reference: composite group references base group from another file")
     void testCrossFileRuleGroupReference() throws YamlConfigurationException {
-        // Create rules engine from multiple files using the new cross-file reference capability
-        YamlRulesEngineService service = new YamlRulesEngineService();
-        RulesEngine engine = service.createRulesEngineFromMultipleFiles(BASE_GROUPS_PATH, COMPOSITE_GROUPS_PATH);
+        // Create rules engine from multiple files using manual merge
+        YamlRuleConfiguration mergedConfig = mergeYamlConfigsForEnrichment(BASE_GROUPS_PATH, COMPOSITE_GROUPS_PATH);
+        RulesEngine engine = RulesEngine.fromYamlConfig(mergedConfig);
         
         assertNotNull(engine, "Rules engine should be created successfully");
         
@@ -82,8 +82,7 @@ public class CrossFileRuleGroupReferenceTest extends DemoTestBase {
     @DisplayName("Verify base group works independently")
     void testBaseGroupIndependently() throws YamlConfigurationException {
         // Test that the base group works on its own
-        YamlRulesEngineService service = new YamlRulesEngineService();
-        RulesEngine engine = service.createRulesEngineFromMultipleFiles(BASE_GROUPS_PATH);
+        RulesEngine engine = RulesEngine.fromFile(BASE_GROUPS_PATH);
         
         RuleGroup baseGroup = engine.getConfiguration().getRuleGroupById("base_validation");
         assertNotNull(baseGroup, "Base group should exist");

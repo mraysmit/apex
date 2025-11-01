@@ -18,7 +18,6 @@ package dev.mars.apex.demo.basic;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
@@ -41,8 +40,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(ColoredTestOutputExtension.class)
 class MinimalYamlValidationTest {
 
-    private final YamlRulesEngineService yamlService = new YamlRulesEngineService();
-
     @Test
     @DisplayName("Test minimal rule functionality with multiple scenarios")
     void testMinimalRuleFunctionality() {
@@ -51,8 +48,8 @@ class MinimalYamlValidationTest {
             YamlConfigurationLoader loader = new YamlConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/MinimalRuleTest.yaml");
 
-            // Create rules engine
-            RulesEngine engine = yamlService.createRulesEngineFromYamlConfig(config);
+            // Create rules engine using static factory method
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
             var rule = engine.getConfiguration().getRuleById("simple-check");
 
             // Test Case 1: Valid scenario (age >= 18, should trigger)

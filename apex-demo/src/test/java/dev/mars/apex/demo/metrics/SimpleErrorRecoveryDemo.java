@@ -17,7 +17,6 @@ package dev.mars.apex.demo.metrics;
  */
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
@@ -72,8 +71,7 @@ public class SimpleErrorRecoveryDemo extends DemoTestBase {
         assertNotNull(config, "YAML configuration should load successfully");
 
         // Step 2: Create rules engine
-        YamlRulesEngineService rulesEngineService = new YamlRulesEngineService();
-        RulesEngine rulesEngine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+        RulesEngine rulesEngine = RulesEngine.fromYamlConfig(config);
         assertNotNull(rulesEngine, "Rules engine should be created successfully");
 
         logger.info("\n" + "=".repeat(60));

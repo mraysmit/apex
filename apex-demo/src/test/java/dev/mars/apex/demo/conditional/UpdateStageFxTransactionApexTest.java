@@ -2,7 +2,7 @@ package dev.mars.apex.demo.conditional;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
+import dev.mars.apex.core.config.yaml.YamlRuleFactory;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -40,7 +40,7 @@ public class UpdateStageFxTransactionApexTest {
     private static final Logger logger = LoggerFactory.getLogger(UpdateStageFxTransactionApexTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private YamlRulesEngineService rulesEngineService;
+    private YamlRuleFactory ruleFactory;
     private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
@@ -49,7 +49,7 @@ public class UpdateStageFxTransactionApexTest {
 
         // Initialize services following DemoTestBase pattern
         yamlLoader = new YamlConfigurationLoader();
-        rulesEngineService = new YamlRulesEngineService();
+        ruleFactory = new YamlRuleFactory();
 
         // Initialize enrichment service with correct constructor
         LookupServiceRegistry lookupServiceRegistry = new LookupServiceRegistry();
@@ -110,7 +110,7 @@ public class UpdateStageFxTransactionApexTest {
             );
 
             // Create RulesEngine
-            RulesEngineConfiguration engineConfig = rulesEngineService.getRuleFactory().createRulesEngineConfiguration(config);
+            RulesEngineConfiguration engineConfig = ruleFactory.createRulesEngineConfiguration(config);
             RulesEngine engine = new RulesEngine(engineConfig);
 
             // Test 1: USD/EUR transaction
@@ -153,13 +153,13 @@ public class UpdateStageFxTransactionApexTest {
                 "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionMultiFileTest_main.yaml"
             );
             
-            RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
             
             // Test data
             Map<String, Object> testData = createSwiftTestData("1", "USD", "EUR");
 
             // Create RulesEngine
-            RulesEngineConfiguration engineConfig = rulesEngineService.getRuleFactory().createRulesEngineConfiguration(config);
+            RulesEngineConfiguration engineConfig = ruleFactory.createRulesEngineConfiguration(config);
             RulesEngine enrichedEngine = new RulesEngine(engineConfig);
             RuleResult result = enrichedEngine.evaluate(config, testData);
 

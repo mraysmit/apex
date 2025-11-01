@@ -18,7 +18,6 @@ package dev.mars.apex.demo.basic;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -61,13 +60,11 @@ public class BasicYamlRuleGroupProcessingATest {
     private static final Logger logger = LoggerFactory.getLogger(BasicYamlRuleGroupProcessingATest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private YamlRulesEngineService rulesEngineService;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up APEX services for basic rule group processing tests...");
         this.yamlLoader = new YamlConfigurationLoader();
-        this.rulesEngineService = new YamlRulesEngineService();
         logger.info(" APEX services initialized successfully");
     }
 
@@ -100,8 +97,8 @@ public class BasicYamlRuleGroupProcessingATest {
             logger.info(" Configuration loaded: {} rules, {} rule groups", 
                 config.getRules().size(), config.getRuleGroups().size());
             
-            // Create RulesEngine
-            RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+            // Create RulesEngine using static factory method
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
             assertNotNull(engine, "RulesEngine should be created");
             
             // Test AND group with true rules (should pass)
@@ -154,8 +151,8 @@ public class BasicYamlRuleGroupProcessingATest {
             logger.info(" Configuration with automatic rule references loaded: {} rules, {} rule groups",
                 config.getRules().size(), config.getRuleGroups().size());
 
-            // Create RulesEngine from the configuration with resolved references
-            RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+            // Create RulesEngine from the configuration with resolved references using static factory method
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
             assertNotNull(engine, "RulesEngine should be created from configuration with resolved references");
 
             // Verify the engine has the expected rules and rule groups
@@ -303,8 +300,8 @@ public class BasicYamlRuleGroupProcessingATest {
 
             assertNotNull(config, "Configuration should be loaded");
 
-            // Create RulesEngine
-            RulesEngine engine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+            // Create RulesEngine using static factory method
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
             assertNotNull(engine, "RulesEngine should be created");
 
             // Test 1: Successful rule group (AND with all true rules)

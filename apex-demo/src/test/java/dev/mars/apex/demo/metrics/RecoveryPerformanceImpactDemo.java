@@ -75,7 +75,7 @@ public class RecoveryPerformanceImpactDemo extends DemoTestBase {
         assertNotNull(config, "Configuration should be loaded");
         
         // Step 2: Create rules engine with performance monitoring
-        RulesEngine rulesEngine = rulesEngineService.createRulesEngineFromYamlConfig(config);
+        RulesEngine rulesEngine = RulesEngine.fromYamlConfig(config);
         assertNotNull(rulesEngine, "Rules engine should be created successfully");
 
         // Step 3: Prepare test scenarios with different failure patterns

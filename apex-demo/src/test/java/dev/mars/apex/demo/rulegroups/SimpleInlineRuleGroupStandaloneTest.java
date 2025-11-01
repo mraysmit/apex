@@ -17,7 +17,6 @@ package dev.mars.apex.demo.rulegroups;
  */
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -38,9 +37,8 @@ public class SimpleInlineRuleGroupStandaloneTest {
         System.out.println("🧪 Testing Simple Inline Rule Group References...");
         
         try {
-            // Create the rules engine
-            YamlRulesEngineService service = new YamlRulesEngineService();
-            RulesEngine rulesEngine = service.createRulesEngineFromFile(
+            // Create the rules engine using static factory method
+            RulesEngine rulesEngine = RulesEngine.fromFile(
                 "src/test/java/dev/mars/apex/demo/rulegroups/SimpleInlineRuleGroupTest-rules.yaml"
             );
             
