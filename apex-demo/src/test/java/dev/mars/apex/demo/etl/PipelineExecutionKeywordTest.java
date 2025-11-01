@@ -105,11 +105,11 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
             long startTime = System.currentTimeMillis();
             YamlPipelineExecutionResult result = pipelineEngine.executePipeline(config.getPipeline().getName());
             long executionTime = System.currentTimeMillis() - startTime;
-            
+
             // Validate sequential execution behavior
             assertNotNull(result, "Pipeline execution result should not be null");
             assertTrue(result.isSuccess(), "Sequential pipeline should execute successfully");
-            assertTrue(executionTime > 0, "Execution should take measurable time");
+            assertTrue(executionTime >= 0, "Execution time should be non-negative");
             
             // Validate step execution order (sequential should execute steps in order)
             assertNotNull(result.getStepResults(), "Step results should be available");

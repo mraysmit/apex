@@ -59,11 +59,18 @@ import java.util.logging.Logger;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-27
  * @version 1.0
+ * @deprecated since 3.0, for removal in 4.0. This specialized processor is redundant - use the universal
+ *             {@link dev.mars.apex.core.engine.config.RulesEngine} instead, which handles enrichments, rules,
+ *             rule-groups, pipelines, and all other YAML content types automatically. Developers should not
+ *             need to know whether YAML contains only enrichments to choose the correct processor.
+ *             <p>Migration: Replace {@code new YamlEnrichmentProcessor(registry, evaluator)} with
+ *             {@code new RulesEngine(config)} and use {@code engine.evaluate(yamlConfig, inputData)}.</p>
  */
 /**
  * Processor for executing YAML-defined enrichment configurations.
  * This class bridges the gap between YAML configuration and runtime enrichment execution.
  */
+@Deprecated(since = "3.0", forRemoval = true)
 public class YamlEnrichmentProcessor {
     
     private static final Logger LOGGER = Logger.getLogger(YamlEnrichmentProcessor.class.getName());

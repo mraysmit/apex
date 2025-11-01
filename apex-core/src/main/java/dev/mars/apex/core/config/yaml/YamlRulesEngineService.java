@@ -83,8 +83,13 @@ public class YamlRulesEngineService {
      * @param yamlConfig The YAML configuration
      * @return A configured RulesEngine with full enterprise metadata support
      * @throws YamlConfigurationException if configuration processing fails
+     * @deprecated since 3.0, for removal in 4.0. This factory method is redundant - developers should use the universal pattern:
+     *             {@code new RulesEngine(ruleFactory.createRulesEngineConfiguration(yamlConfig))} directly.
+     *             This eliminates the need for content-aware service selection and provides a single, universal entry point.
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public RulesEngine createRulesEngineFromYamlConfig(YamlRuleConfiguration yamlConfig) throws YamlConfigurationException {
+        LOGGER.warning("DEPRECATED: createRulesEngineFromYamlConfig() is deprecated. Use new RulesEngine(ruleFactory.createRulesEngineConfiguration(yamlConfig)) instead.");
         try {
             // Use the factory's method which has proper category metadata inheritance
             RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
@@ -101,10 +106,14 @@ public class YamlRulesEngineService {
      * @param filePath The path to the YAML configuration file
      * @return A configured RulesEngine
      * @throws YamlConfigurationException if configuration loading or processing fails
-     * @deprecated Use createRulesEngineWithGenericArchitecture for enhanced features
+     * @deprecated since 3.0, for removal in 4.0. This factory method is redundant - use the universal pattern:
+     *             {@code YamlConfigurationLoader loader = new YamlConfigurationLoader();
+     *             YamlRuleConfiguration yamlConfig = loader.loadFromFile(filePath);
+     *             RulesEngine engine = new RulesEngine(ruleFactory.createRulesEngineConfiguration(yamlConfig));}
      */
-    @Deprecated
+    @Deprecated(since = "3.0", forRemoval = true)
     public RulesEngine createRulesEngineFromFile(String filePath) throws YamlConfigurationException {
+        LOGGER.warning("DEPRECATED: createRulesEngineFromFile(String) is deprecated. Use YamlConfigurationLoader + new RulesEngine() instead.");
         LOGGER.info("Creating rules engine from YAML file (legacy): " + filePath);
 
         YamlRuleConfiguration yamlConfig = configLoader.loadFromFile(filePath);
@@ -198,12 +207,16 @@ public class YamlRulesEngineService {
     
     /**
      * Load and merge multiple YAML configuration files into a single rules engine.
-     * 
+     *
      * @param filePaths Array of file paths to load and merge
      * @return A configured RulesEngine with merged configuration
      * @throws YamlConfigurationException if any configuration loading or processing fails
+     * @deprecated since 3.0, for removal in 4.0. This factory method is redundant - developers should load and merge
+     *             YAML configurations manually, then use the universal pattern: {@code new RulesEngine(config)}.
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public RulesEngine createRulesEngineFromMultipleFiles(String... filePaths) throws YamlConfigurationException {
+        LOGGER.warning("DEPRECATED: createRulesEngineFromMultipleFiles() is deprecated. Load and merge YAML configs manually, then use new RulesEngine().");
         LOGGER.info("Creating rules engine from multiple YAML files: " + String.join(", ", filePaths));
 
         // First, load all YAML files without validation and merge them

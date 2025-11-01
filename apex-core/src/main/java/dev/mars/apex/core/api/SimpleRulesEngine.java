@@ -32,7 +32,13 @@ import java.util.Map;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-27
  * @version 1.0
+ * @deprecated since 3.0, for removal in 4.0. This simplified API is redundant - use
+ *             {@link dev.mars.apex.core.engine.config.RulesEngine} directly. The RulesEngine already provides
+ *             a simple, universal API that handles all YAML content types without requiring specialized wrappers.
+ *             <p>Migration: Replace {@code new SimpleRulesEngine()} with {@code new RulesEngine(config)}
+ *             and use {@code engine.evaluate(yamlConfig, inputData)} directly.</p>
  */
+@Deprecated(since = "3.0", forRemoval = true)
 public class SimpleRulesEngine {
     private final RulesEngineConfiguration configuration;
     private final RulesEngine engine;

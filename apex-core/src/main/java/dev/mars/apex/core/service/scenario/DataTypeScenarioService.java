@@ -59,7 +59,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
+ * @deprecated since 3.0, for removal in 4.0. This specialized service is redundant - use the universal
+ *             {@link dev.mars.apex.core.engine.config.RulesEngine} instead, which handles scenarios, enrichments,
+ *             rules, rule-groups, pipelines, and all other YAML content types automatically. Developers should not
+ *             need to know whether YAML contains scenario definitions to choose the correct service.
+ *             <p>Migration: Replace {@code new DataTypeScenarioService()} with {@code new RulesEngine(config)}
+ *             and use {@code engine.evaluate(yamlConfig, inputData)}.</p>
  */
+@Deprecated(since = "3.0", forRemoval = true)
 public class DataTypeScenarioService {
     
     private static final Logger logger = LoggerFactory.getLogger(DataTypeScenarioService.class);

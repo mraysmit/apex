@@ -34,15 +34,22 @@ import java.util.Map;
 
 /**
  * Data Pipeline Engine for APEX.
- * 
+ *
  * This engine orchestrates data flow from sources through processing to sinks
  * based on YAML configuration. It follows the established APEX pattern of
  * YAML-driven processing with factory-based component creation.
- * 
+ *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
+ * @deprecated since 3.0, for removal in 4.0. This specialized engine is redundant - use the universal
+ *             {@link dev.mars.apex.core.engine.config.RulesEngine} instead, which handles pipelines, enrichments,
+ *             rules, rule-groups, and all other YAML content types automatically. Developers should not need to
+ *             know whether YAML contains pipeline definitions to choose the correct engine.
+ *             <p>Migration: Replace {@code new DataPipelineEngine()} with {@code new RulesEngine(config)}
+ *             and use {@code engine.evaluate(yamlConfig, inputData)}.</p>
  */
+@Deprecated(since = "3.0", forRemoval = true)
 public class DataPipelineEngine {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(DataPipelineEngine.class);
