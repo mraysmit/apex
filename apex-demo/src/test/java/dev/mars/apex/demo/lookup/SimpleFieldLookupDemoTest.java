@@ -349,7 +349,6 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
 
         // Validate that all APEX services are properly initialized
         assertNotNull(yamlLoader, "YAML loader should be initialized");
-        assertNotNull(enrichmentProcessor, "Enrichment service should be initialized");
 
         logger.info("✅ All APEX services properly initialized");
     }

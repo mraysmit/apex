@@ -1,6 +1,7 @@
 package dev.mars.apex.core.engine.config;
 
 import dev.mars.apex.core.engine.model.Category;
+import dev.mars.apex.core.engine.model.EnrichmentGroup;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleBase;
 import dev.mars.apex.core.engine.model.RuleGroup;
@@ -38,11 +39,12 @@ import java.util.logging.Logger;
 /**
  * This class handles the configuration and setup of rules for the Rules Engine.
  * It provides methods for registering rules, creating rule groups, and managing rule relationships.
- * 
- * The configuration maintains three main collections:
+ *
+ * The configuration maintains four main collections:
  * 1. Rules by category - for quick lookup of rules by their category
  * 2. Rules by ID - for quick lookup of individual rules
  * 3. Rule groups by ID - for quick lookup of rule groups
+ * 4. Enrichment groups by ID - for quick lookup of enrichment groups
  */
 public class RulesEngineConfiguration {
     private static final Logger LOGGER = Logger.getLogger(RulesEngineConfiguration.class.getName());
@@ -51,6 +53,7 @@ public class RulesEngineConfiguration {
     private final Map<Category, List<RuleBase>> rulesByCategory = new HashMap<>();
     private final Map<String, Rule> rulesById = new HashMap<>();
     private final Map<String, RuleGroup> ruleGroupsById = new HashMap<>();
+    private final Map<String, EnrichmentGroup> enrichmentGroupsById = new HashMap<>();
 
     // Map to store categories by name for quick lookup
     private final Map<String, Category> categoriesByName = new HashMap<>();
@@ -380,6 +383,35 @@ public class RulesEngineConfiguration {
      */
     public List<RuleGroup> getAllRuleGroups() {
         return new ArrayList<>(ruleGroupsById.values());
+    }
+
+    /**
+     * Register an enrichment group.
+     *
+     * @param group The enrichment group to register
+     */
+    public void registerEnrichmentGroup(EnrichmentGroup group) {
+        enrichmentGroupsById.put(group.getId(), group);
+        LOGGER.fine("Registered enrichment group: " + group.getId());
+    }
+
+    /**
+     * Get an enrichment group by ID.
+     *
+     * @param id The enrichment group ID
+     * @return The enrichment group, or null if not found
+     */
+    public EnrichmentGroup getEnrichmentGroupById(String id) {
+        return enrichmentGroupsById.get(id);
+    }
+
+    /**
+     * Get all registered enrichment groups.
+     *
+     * @return A list of all registered enrichment groups
+     */
+    public List<EnrichmentGroup> getAllEnrichmentGroups() {
+        return new ArrayList<>(enrichmentGroupsById.values());
     }
 
     /**

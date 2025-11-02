@@ -382,7 +382,6 @@ public class UpdateStageFxTransactionTest extends DemoTestBase {
 
         // Additional FX-specific validations
         assertNotNull(yamlLoader, "YAML configuration loader should be initialized for FX processing");
-        assertNotNull(enrichmentProcessor, "Enrichment service should be initialized for FX processing");
 
         logger.info("✅ All APEX services properly initialized for FX transaction processing");
     }

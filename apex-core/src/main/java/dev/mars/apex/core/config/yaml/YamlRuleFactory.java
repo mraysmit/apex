@@ -4,9 +4,11 @@ import dev.mars.apex.core.api.RuleSet;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.Category;
+import dev.mars.apex.core.engine.model.EnrichmentGroup;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.metadata.RuleMetadata;
+import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -154,9 +156,21 @@ public class YamlRuleFactory {
             processRuleGroupReferencesWithGlobalRegistry(yamlConfig, config, ruleGroupsById);
         }
 
+        // Phase 3: Create and register enrichment groups
+        if (yamlConfig.getEnrichmentGroups() != null && !yamlConfig.getEnrichmentGroups().isEmpty()) {
+            LOGGER.info("Creating enrichment groups from YAML configuration");
+            List<EnrichmentGroup> enrichmentGroups = EnrichmentGroupFactory.buildEnrichmentGroups(yamlConfig);
+
+            for (EnrichmentGroup group : enrichmentGroups) {
+                config.registerEnrichmentGroup(group);
+                LOGGER.info("Registered enrichment group: " + group.getId());
+            }
+        }
+
         LOGGER.info("Successfully created RulesEngineConfiguration with " +
-                   config.getAllRules().size() + " rules and " +
-                   config.getAllRuleGroups().size() + " rule groups");
+                   config.getAllRules().size() + " rules, " +
+                   config.getAllRuleGroups().size() + " rule groups, and " +
+                   config.getAllEnrichmentGroups().size() + " enrichment groups");
 
         return config;
     }

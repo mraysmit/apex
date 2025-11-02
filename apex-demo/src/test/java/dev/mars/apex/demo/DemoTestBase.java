@@ -25,15 +25,11 @@ import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 
-import dev.mars.apex.core.service.error.ErrorRecoveryService;
-import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.apex.core.cache.ApexCacheManager;
 import dev.mars.apex.core.service.data.external.database.JdbcTemplateFactory;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
@@ -59,7 +55,6 @@ public abstract class DemoTestBase {
 
     // Real APEX services for testing
     protected YamlConfigurationLoader yamlLoader;
-    protected YamlEnrichmentProcessor enrichmentProcessor;
     protected LookupServiceRegistry serviceRegistry;
     protected ExpressionEvaluatorService expressionEvaluator;
     protected RulesEngineConfiguration rulesEngineConfiguration;
@@ -81,7 +76,6 @@ public abstract class DemoTestBase {
         this.yamlLoader = new YamlConfigurationLoader();
         this.serviceRegistry = new LookupServiceRegistry();
         this.expressionEvaluator = new ExpressionEvaluatorService();
-        this.enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, expressionEvaluator);
         this.rulesEngineConfiguration = new RulesEngineConfiguration();
 
         logger.info("APEX services initialized successfully");
@@ -143,7 +137,6 @@ public abstract class DemoTestBase {
         assertNotNull(yamlLoader, "YamlConfigurationLoader should be initialized");
         assertNotNull(serviceRegistry, "LookupServiceRegistry should be initialized");
         assertNotNull(expressionEvaluator, "ExpressionEvaluatorService should be initialized");
-        assertNotNull(enrichmentProcessor, "YamlEnrichmentProcessor should be initialized");
 
         logger.info("** All APEX services properly initialized");
     }

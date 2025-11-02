@@ -1,11 +1,9 @@
 package dev.mars.apex.demo.enrichmentgroups;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.model.EnrichmentGroup;
-import dev.mars.apex.core.engine.model.EnrichmentGroupResult;
-import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
@@ -13,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,10 +19,9 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Basic YAML Enrichment Group Processing Tests.
  *
- * Mirrors the rule group examples using a combined config and validates:
- * - AND vs OR semantics (with short-circuit)
- * - Composite group via enrichment-group-references
- * - Parallel AND in a composite group (no short-circuit, runs all)
+ * Tests that RulesEngine.evaluate() correctly processes ALL enrichment groups defined in the YAML file.
+ * The YAML contains 4 enrichment groups: base_and, base_or, composite, composite_par_and.
+ * All groups are processed automatically when RulesEngine.evaluate() is called.
  */
 @ExtendWith(ColoredTestOutputExtension.class)
 @DisplayName("Basic YAML Enrichment Group Processing Tests")
@@ -34,9 +30,9 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
     private static final String CONFIG_PATH = "src/test/java/dev/mars/apex/demo/enrichmentgroups/BasicYamlEnrichmentGroupProcessingTest-combined-config.yaml";
 
     @Test
-    @DisplayName("Composite Parallel AND: runs all and aggregates correctly")
-    void testCompositeParallelAnd() {
-        logger.info("Loading enrichment groups combined config for composite parallel AND test");
+    @DisplayName("RulesEngine processes all enrichment groups with all fields present")
+    void testAllEnrichmentGroupsWithAllFields() throws YamlConfigurationException {
+        logger.info("Testing RulesEngine.evaluate() with all enrichment groups and all required fields");
 
         YamlRuleConfiguration config;
         try {
@@ -48,132 +44,139 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
         }
         assertNotNull(config, "Configuration should load successfully");
 
-        List<EnrichmentGroup> groups = EnrichmentGroupFactory.buildEnrichmentGroups(config);
-        EnrichmentGroup compositeParAnd = groups.stream().filter(g -> g.getId().equals("composite_par_and")).findFirst().orElse(null);
-        assertNotNull(compositeParAnd, "Composite parallel AND group should exist");
+        // Create RulesEngine from configuration using static factory method
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
-        // Case 1: Missing 'c' -> e3 fails; all run due to parallel; overall AND fails
-        Map<String, Object> dataMissingC = new HashMap<>();
-        dataMissingC.put("a", "A");
-        dataMissingC.put("b", "B");
-        EnrichmentGroupResult rMissingC = enrichmentProcessor.processEnrichmentGroup(compositeParAnd, dataMissingC, config);
-        assertFalse(rMissingC.isSuccess(), "Composite Parallel AND should fail when a required enrichment fails");
-        assertEquals(3, rMissingC.getEnrichmentResults().size(), "Parallel execution should evaluate all enrichments");
+        // Test data with all required fields
+        Map<String, Object> data = new HashMap<>();
+        data.put("a", "A");
+        data.put("b", "B");
+        data.put("c", "C");
 
-        // Case 2: All present -> success and all run
-        Map<String, Object> dataAll = new HashMap<>();
-        dataAll.put("a", "A");
-        dataAll.put("b", "B");
-        dataAll.put("c", "C");
-        EnrichmentGroupResult rAll = enrichmentProcessor.processEnrichmentGroup(compositeParAnd, dataAll, config);
-        assertTrue(rAll.isSuccess(), "Composite Parallel AND should succeed when all required enrichments succeed");
-        assertEquals(3, rAll.getEnrichmentResults().size(), "Parallel execution should evaluate all enrichments");
-        assertEquals("A", dataAll.get("a_copy"));
-        assertEquals("B", dataAll.get("b_copy"));
-        assertEquals("C", dataAll.get("c_copy"));
+        // Execute - this processes ALL 4 enrichment groups
+        RuleResult result = engine.evaluate(data);
 
+        // Verify overall success
+        assertTrue(result.isSuccess(), "RulesEngine should succeed when all enrichment groups succeed");
+
+        // Get enriched data from result
+        Map<String, Object> enrichedData = result.getEnrichedData();
+
+        // Verify all enrichments were applied
+        assertEquals("A", enrichedData.get("a_copy"), "Enrichment e1 should have copied field 'a'");
+        assertEquals("B", enrichedData.get("b_copy"), "Enrichment e2 should have copied field 'b'");
+        assertEquals("C", enrichedData.get("c_copy"), "Enrichment e3 should have copied field 'c'");
+
+        logger.info("✅ All enrichment groups processed successfully");
     }
 
     @Test
-    @DisplayName("Basic AND group: succeeds when all required fields present")
-    void testBasicAndPass() {
-        YamlRuleConfiguration config;
-        try { config = mergeYamlConfigsForEnrichment(CONFIG_PATH); }
-        catch (YamlConfigurationException e) { fail("YAML load failed: " + e.getMessage()); return; }
-        var groups = EnrichmentGroupFactory.buildEnrichmentGroups(config);
-        var gAnd = groups.stream().filter(g -> g.getId().equals("base_and")).findFirst().orElse(null);
-        assertNotNull(gAnd, "base_and group should exist");
-        Map<String,Object> data = new HashMap<>(); data.put("a","A"); data.put("b","B");
-        EnrichmentGroupResult r = enrichmentProcessor.processEnrichmentGroup(gAnd, data, config);
-        assertTrue(r.isSuccess(), "AND should succeed when all enrichments succeed");
-        assertEquals(2, r.getEnrichmentResults().size(), "Should evaluate both enrichments");
-        assertEquals("A", data.get("a_copy"));
-        assertEquals("B", data.get("b_copy"));
+    @DisplayName("RulesEngine processes all enrichment groups with missing field 'c'")
+    void testAllEnrichmentGroupsWithMissingC() throws YamlConfigurationException {
+        logger.info("Testing RulesEngine.evaluate() with missing field 'c'");
 
+        YamlRuleConfiguration config;
+        try {
+            config = mergeYamlConfigsForEnrichment(CONFIG_PATH);
+        } catch (YamlConfigurationException e) {
+            fail("YAML load failed: " + e.getMessage());
+            return;
+        }
+
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+        // Test data missing field 'c' - this will cause e3 to fail
+        Map<String, Object> data = new HashMap<>();
+        data.put("a", "A");
+        data.put("b", "B");
+        // Missing 'c'
+
+        // Execute - this processes ALL 4 enrichment groups
+        RuleResult result = engine.evaluate(data);
+
+        // Verify overall failure (because composite and composite_par_and groups will fail)
+        assertFalse(result.isSuccess(), "RulesEngine should fail when enrichment groups fail");
+
+        // Get enriched data from result
+        Map<String, Object> enrichedData = result.getEnrichedData();
+
+        // Verify partial enrichments were applied
+        assertEquals("A", enrichedData.get("a_copy"), "Enrichment e1 should have copied field 'a'");
+        assertEquals("B", enrichedData.get("b_copy"), "Enrichment e2 should have copied field 'b'");
+        assertNull(enrichedData.get("c_copy"), "Enrichment e3 should not have copied field 'c' (missing)");
+
+        logger.info("✅ Enrichment groups correctly failed with missing field");
     }
 
     @Test
-    @DisplayName("OR group short-circuits on first success")
-    void testOrShortCircuit() {
-        YamlRuleConfiguration config;
-        try { config = mergeYamlConfigsForEnrichment(CONFIG_PATH); }
-        catch (YamlConfigurationException e) { fail("YAML load failed: " + e.getMessage()); return; }
-        var groups = EnrichmentGroupFactory.buildEnrichmentGroups(config);
-        var gOr = groups.stream().filter(g -> g.getId().equals("base_or")).findFirst().orElse(null);
-        assertNotNull(gOr, "base_or group should exist");
-        Map<String,Object> data = new HashMap<>(); data.put("a","A");
-        EnrichmentGroupResult r = enrichmentProcessor.processEnrichmentGroup(gOr, data, config);
-        assertTrue(r.isSuccess(), "OR should succeed when any enrichment succeeds");
-        assertEquals(1, r.getEnrichmentResults().size(), "OR+short-circuit should evaluate only first success");
-        assertEquals("A", data.get("a_copy"));
-        assertNull(data.get("b_copy"), "OR short-circuit should not produce b_copy");
+    @DisplayName("RulesEngine processes all enrichment groups with only field 'a'")
+    void testAllEnrichmentGroupsWithOnlyA() throws YamlConfigurationException {
+        logger.info("Testing RulesEngine.evaluate() with only field 'a'");
 
+        YamlRuleConfiguration config;
+        try {
+            config = mergeYamlConfigsForEnrichment(CONFIG_PATH);
+        } catch (YamlConfigurationException e) {
+            fail("YAML load failed: " + e.getMessage());
+            return;
+        }
+
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+        // Test data with only field 'a'
+        Map<String, Object> data = new HashMap<>();
+        data.put("a", "A");
+
+        // Execute - this processes ALL 4 enrichment groups
+        RuleResult result = engine.evaluate(data);
+
+        // Verify overall failure (AND groups will fail, OR group might succeed)
+        assertFalse(result.isSuccess(), "RulesEngine should fail when most enrichment groups fail");
+
+        // Get enriched data from result
+        Map<String, Object> enrichedData = result.getEnrichedData();
+
+        // Verify only e1 enrichment was applied
+        assertEquals("A", enrichedData.get("a_copy"), "Enrichment e1 should have copied field 'a'");
+        // Note: b_copy might or might not be present depending on OR group short-circuit behavior
+        assertNull(enrichedData.get("c_copy"), "Enrichment e3 should not have copied field 'c' (missing)");
+
+        logger.info("✅ Enrichment groups correctly processed with partial data");
     }
 
     @Test
-    @DisplayName("AND stop-on-first-failure: stops at failing enrichment")
-    void testAndStopOnFirstFailure() {
-        YamlRuleConfiguration config;
-        try { config = mergeYamlConfigsForEnrichment(CONFIG_PATH); }
-        catch (YamlConfigurationException e) { fail("YAML load failed: " + e.getMessage()); return; }
-        var groups = EnrichmentGroupFactory.buildEnrichmentGroups(config);
-        var gAnd = groups.stream().filter(g -> g.getId().equals("base_and")).findFirst().orElse(null);
-        assertNotNull(gAnd, "base_and group should exist");
-        Map<String,Object> data = new HashMap<>(); data.put("a","A");
-        EnrichmentGroupResult r = enrichmentProcessor.processEnrichmentGroup(gAnd, data, config);
-        assertFalse(r.isSuccess(), "AND should fail when a required enrichment fails");
-        assertEquals(2, r.getEnrichmentResults().size(), "AND+stop-on-first-failure should stop at failing enrichment");
-    }
+    @DisplayName("RulesEngine processes all enrichment groups with no fields")
+    void testAllEnrichmentGroupsWithNoFields() throws YamlConfigurationException {
+        logger.info("Testing RulesEngine.evaluate() with no fields");
 
-    @Test
-    @DisplayName("OR group with all false conditions should fail")
-    void testOrGroupAllFalse() {
         YamlRuleConfiguration config;
-        try { config = mergeYamlConfigsForEnrichment(CONFIG_PATH); }
-        catch (YamlConfigurationException e) { fail("YAML load failed: " + e.getMessage()); return; }
-        var groups = EnrichmentGroupFactory.buildEnrichmentGroups(config);
-        var gOr = groups.stream().filter(g -> g.getId().equals("base_or")).findFirst().orElse(null);
-        assertNotNull(gOr, "base_or group should exist");
-        Map<String,Object> data = new HashMap<>(); // No data - both enrichments should fail
-        EnrichmentGroupResult r = enrichmentProcessor.processEnrichmentGroup(gOr, data, config);
-        assertFalse(r.isSuccess(), "OR should fail when all enrichments fail");
-        assertEquals(2, r.getEnrichmentResults().size(), "OR should evaluate all enrichments when all fail");
-    }
+        try {
+            config = mergeYamlConfigsForEnrichment(CONFIG_PATH);
+        } catch (YamlConfigurationException e) {
+            fail("YAML load failed: " + e.getMessage());
+            return;
+        }
 
-    @Test
-    @DisplayName("OR group with all true conditions should pass")
-    void testOrGroupAllTrue() {
-        YamlRuleConfiguration config;
-        try { config = mergeYamlConfigsForEnrichment(CONFIG_PATH); }
-        catch (YamlConfigurationException e) { fail("YAML load failed: " + e.getMessage()); return; }
-        var groups = EnrichmentGroupFactory.buildEnrichmentGroups(config);
-        var gOr = groups.stream().filter(g -> g.getId().equals("base_or")).findFirst().orElse(null);
-        assertNotNull(gOr, "base_or group should exist");
-        Map<String,Object> data = new HashMap<>(); data.put("a","A"); data.put("b","B");
-        EnrichmentGroupResult r = enrichmentProcessor.processEnrichmentGroup(gOr, data, config);
-        assertTrue(r.isSuccess(), "OR should pass when any enrichment succeeds");
-        assertEquals(1, r.getEnrichmentResults().size(), "OR should short-circuit on first success");
-        assertEquals("A", data.get("a_copy"));
-        assertNull(data.get("b_copy"), "OR short-circuit should not produce b_copy");
-    }
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
-    @Test
-    @DisplayName("Composite (non-parallel) AND: succeeds when all present")
-    void testCompositeNonParallel() {
-        YamlRuleConfiguration config;
-        try { config = mergeYamlConfigsForEnrichment(CONFIG_PATH); }
-        catch (YamlConfigurationException e) { fail("YAML load failed: " + e.getMessage()); return; }
-        var groups = EnrichmentGroupFactory.buildEnrichmentGroups(config);
-        var gComposite = groups.stream().filter(g -> g.getId().equals("composite")).findFirst().orElse(null);
-        assertNotNull(gComposite, "composite group should exist");
-        Map<String,Object> data = new HashMap<>(); data.put("a","A"); data.put("b","B"); data.put("c","C");
-        EnrichmentGroupResult r = enrichmentProcessor.processEnrichmentGroup(gComposite, data, config);
-        assertTrue(r.isSuccess(), "Composite group should succeed when referenced base AND also succeeds");
-        assertEquals(3, r.getEnrichmentResults().size(), "Composite should include e3 plus base_and's two enrichments");
-        assertEquals("A", data.get("a_copy"));
-        assertEquals("B", data.get("b_copy"));
-        assertEquals("C", data.get("c_copy"));
+        // Test data with no fields
+        Map<String, Object> data = new HashMap<>();
 
+        // Execute - this processes ALL 4 enrichment groups
+        RuleResult result = engine.evaluate(data);
+
+        // Verify overall failure (all enrichment groups should fail)
+        assertFalse(result.isSuccess(), "RulesEngine should fail when all enrichment groups fail");
+
+        // Get enriched data from result
+        Map<String, Object> enrichedData = result.getEnrichedData();
+
+        // Verify no enrichments were applied
+        assertNull(enrichedData.get("a_copy"), "No enrichments should be applied");
+        assertNull(enrichedData.get("b_copy"), "No enrichments should be applied");
+        assertNull(enrichedData.get("c_copy"), "No enrichments should be applied");
+
+        logger.info("✅ Enrichment groups correctly failed with no data");
     }
 
 }
