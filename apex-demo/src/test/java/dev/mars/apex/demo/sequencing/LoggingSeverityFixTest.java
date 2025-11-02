@@ -3,11 +3,7 @@ package dev.mars.apex.demo.sequencing;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
-import dev.mars.apex.core.service.data.external.DataSourceResolver;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,23 +27,14 @@ public class LoggingSeverityFixTest {
     private static final Logger logger = LoggerFactory.getLogger(LoggingSeverityFixTest.class);
     
     private YamlConfigurationLoader yamlLoader;
-    private YamlEnrichmentProcessor processor;
-    private YamlEnrichmentProcessor enrichmentProcessor;
     private RulesEngine rulesEngine;
-    
+
     @BeforeEach
     void setUp() {
         logger.info("🔧 Initializing APEX services for logging severity fix verification");
-        
-        // Initialize core services
-        DataSourceResolver dataSourceResolver = new DataSourceResolver();
-        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-        
-        // Initialize YAML loader and processors
+
+        // Initialize YAML loader
         yamlLoader = new YamlConfigurationLoader();
-        processor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
-        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
 
         RulesEngineConfiguration config = new RulesEngineConfiguration();
         rulesEngine = new RulesEngine(config);

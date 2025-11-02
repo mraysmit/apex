@@ -4,9 +4,7 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,7 +32,6 @@ public class UseCase1EnrichmentFirstTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(UseCase1EnrichmentFirstTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
     void setUp() {
@@ -42,11 +39,6 @@ public class UseCase1EnrichmentFirstTest {
 
         // Initialize APEX services for sequential processing following established patterns
         yamlLoader = new YamlConfigurationLoader();
-
-        // Create required dependencies for YamlEnrichmentProcessor
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-        this.enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
 
         LOGGER.info("✅ Sequential processing services initialized");
     }

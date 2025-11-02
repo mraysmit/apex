@@ -20,9 +20,7 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -62,7 +60,6 @@ public class ExternalDataSourceWorkingDemoTest {
     private static final Logger logger = LoggerFactory.getLogger(ExternalDataSourceWorkingDemoTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
     void setUp() {
@@ -70,11 +67,6 @@ public class ExternalDataSourceWorkingDemoTest {
 
         // Initialize APEX services using modern pattern
         yamlLoader = new YamlConfigurationLoader();
-
-        // Create enrichment service with proper dependencies
-        LookupServiceRegistry lookupServiceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService expressionEvaluator = new ExpressionEvaluatorService();
-        enrichmentProcessor = new YamlEnrichmentProcessor(lookupServiceRegistry, expressionEvaluator);
 
         logger.info("✓ APEX services initialized successfully");
     }

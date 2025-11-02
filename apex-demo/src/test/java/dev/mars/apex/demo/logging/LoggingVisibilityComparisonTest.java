@@ -20,9 +20,7 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -62,21 +60,13 @@ class LoggingVisibilityComparisonTest {
     private static final Logger logger = LoggerFactory.getLogger(LoggingVisibilityComparisonTest.class);
     
     private YamlConfigurationLoader yamlLoader;
-    private YamlEnrichmentProcessor processor;
-    private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
     void setUp() {
         logger.info("🔧 Initializing APEX services for logging visibility comparison test");
 
-        // Initialize core services
-        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-
-        // Initialize YAML loader and processors
+        // Initialize YAML loader
         yamlLoader = new YamlConfigurationLoader();
-        processor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
-        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
 
         logger.info("✅ All services initialized for logging visibility comparison test");
     }

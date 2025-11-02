@@ -5,11 +5,7 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.apex.core.api.SimpleRulesEngine;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,24 +30,17 @@ class AllProcessorsTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(AllProcessorsTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private YamlEnrichmentProcessor enrichmentProcessor;
-    private YamlEnrichmentProcessor yamlEnrichmentProcessor;
     private RulesEngineConfiguration rulesEngineConfiguration;
     private SimpleRulesEngine simpleRulesEngine;
 
     @BeforeEach
     void setUp() {
         LOGGER.info("🔧 Initializing ALL APEX processors for comprehensive testing");
-        
+
         yamlLoader = new YamlConfigurationLoader();
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-        
-        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
-        yamlEnrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
         rulesEngineConfiguration = new RulesEngineConfiguration();
         simpleRulesEngine = new SimpleRulesEngine();
-        
+
         LOGGER.info("✅ All processors initialized");
     }
 

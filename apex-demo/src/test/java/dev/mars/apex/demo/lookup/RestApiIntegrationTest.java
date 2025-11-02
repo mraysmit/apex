@@ -19,9 +19,7 @@ import dev.mars.apex.demo.DemoTestBase;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlDataSourceLoader;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -68,7 +66,6 @@ public class RestApiIntegrationTest extends DemoTestBase {
     private int serverPort;
     private YamlConfigurationLoader yamlLoader;
     private YamlDataSourceLoader dataSourceLoader;
-    private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
     void setupRestApiServer() throws IOException {
@@ -77,9 +74,6 @@ public class RestApiIntegrationTest extends DemoTestBase {
         // Initialize APEX services directly
         yamlLoader = new YamlConfigurationLoader();
         dataSourceLoader = new YamlDataSourceLoader();
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
 
         // Create and start the reusable test server
         testServer = new RestApiTestableServer();

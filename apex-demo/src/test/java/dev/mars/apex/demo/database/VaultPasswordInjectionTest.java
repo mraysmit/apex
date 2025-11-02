@@ -19,9 +19,6 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
@@ -107,20 +104,14 @@ class VaultPasswordInjectionTest {
             .withPassword("vaultsecret");
 
     private YamlConfigurationLoader loader;
-    private YamlEnrichmentProcessor enrichmentProcessor;
-    private LookupServiceRegistry serviceRegistry;
-    private ExpressionEvaluatorService expressionEvaluator;
     private DataSourceFactory factory;
     private ExternalDataSource postgresSource;
 
     @BeforeEach
     void setUp() throws Exception {
         logger.info("Setting up Vault Password Injection Test with Testcontainers");
-        
+
         loader = new YamlConfigurationLoader();
-        serviceRegistry = new LookupServiceRegistry();
-        expressionEvaluator = new ExpressionEvaluatorService();
-        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, expressionEvaluator);
         factory = DataSourceFactory.getInstance();
 
         // Get Vault connection details

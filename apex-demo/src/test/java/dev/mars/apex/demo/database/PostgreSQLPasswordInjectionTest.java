@@ -19,9 +19,6 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
@@ -103,18 +100,12 @@ class PostgreSQLPasswordInjectionTest {
             .withPassword("testpass");
 
     private YamlConfigurationLoader loader;
-    private YamlEnrichmentProcessor enrichmentProcessor;
-    private LookupServiceRegistry serviceRegistry;
-    private ExpressionEvaluatorService expressionEvaluator;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up PostgreSQL Password Injection Test with Testcontainers");
-        
+
         loader = new YamlConfigurationLoader();
-        serviceRegistry = new LookupServiceRegistry();
-        expressionEvaluator = new ExpressionEvaluatorService();
-        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, expressionEvaluator);
 
         // Extract database connection details from running PostgreSQL container
         String jdbcUrl = postgres.getJdbcUrl();

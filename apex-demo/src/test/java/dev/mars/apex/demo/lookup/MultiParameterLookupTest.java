@@ -20,9 +20,7 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 
 import org.slf4j.Logger;
@@ -67,16 +65,10 @@ public class MultiParameterLookupTest {
     private static final Logger logger = LoggerFactory.getLogger(MultiParameterLookupTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private YamlEnrichmentProcessor enrichmentProcessor;
-    private LookupServiceRegistry lookupRegistry;
-    private ExpressionEvaluatorService expressionEvaluator;
 
     @BeforeEach
     void setUp() {
         this.yamlLoader = new YamlConfigurationLoader();
-        this.lookupRegistry = new LookupServiceRegistry();
-        this.expressionEvaluator = new ExpressionEvaluatorService();
-        this.enrichmentProcessor = new YamlEnrichmentProcessor(lookupRegistry, expressionEvaluator);
     }
 
     @Test

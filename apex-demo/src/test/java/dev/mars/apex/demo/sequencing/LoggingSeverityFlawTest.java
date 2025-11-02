@@ -5,10 +5,7 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,9 +29,7 @@ class LoggingSeverityFlawTest {
 
     private static final Logger logger = LoggerFactory.getLogger(LoggingSeverityFlawTest.class);
 
-    private YamlEnrichmentProcessor processor;
     private YamlConfigurationLoader yamlLoader;
-    private YamlEnrichmentProcessor enrichmentProcessor;
     private RulesEngine rulesEngine;
 
     @BeforeEach
@@ -43,11 +38,6 @@ class LoggingSeverityFlawTest {
 
         // Initialize required services using correct constructors
         yamlLoader = new YamlConfigurationLoader();
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-
-        processor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
-        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
 
         RulesEngineConfiguration config = new RulesEngineConfiguration();
         rulesEngine = new RulesEngine(config);

@@ -22,9 +22,6 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
@@ -75,18 +72,12 @@ public class TradeTransformerDemoTest {
     private static final Logger logger = LoggerFactory.getLogger(TradeTransformerDemoTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private YamlEnrichmentProcessor enrichmentProcessor;
     private YamlRuleConfiguration config;
 
     @BeforeEach
     void setUp() {
         // Initialize APEX services following established patterns
         yamlLoader = new YamlConfigurationLoader();
-
-        // Create enrichment service with required dependencies
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
         
         try {
             // Load trade transformation configuration
