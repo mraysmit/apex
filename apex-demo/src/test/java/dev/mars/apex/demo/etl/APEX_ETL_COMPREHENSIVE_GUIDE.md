@@ -1,5 +1,20 @@
 # APEX ETL Pipeline Comprehensive Guide
 
+**Version:** 2.0
+**Date:** 2025-11-02
+
+> **⚠️ IMPORTANT API UPDATE (Version 3.0)**
+>
+> **The `DataPipelineEngine` class has been deprecated.** Use `RulesEngine.evaluate()` instead.
+>
+> **Quick Migration:**
+> ```java
+> // OLD: DataPipelineEngine pipelineEngine = new DataPipelineEngine();
+> // NEW: RulesEngine rulesEngine = RulesEngine.fromFile("pipeline.yaml");
+> ```
+>
+> See the [Migration Guide](#migration-guide) section for complete details.
+
 ## Overview
 
 The APEX Rules Engine provides a powerful ETL (Extract, Transform, Load) pipeline system that supports YAML-driven configuration for data processing workflows. This comprehensive guide covers pipeline configuration, error handling, operation resolution, practical demonstrations, and best practices.
@@ -1995,8 +2010,68 @@ The APEX ETL framework includes comprehensive test coverage:
 - **Core Tests**: 4 tests (End-to-end pipelines)
 - **Initialization Tests**: 4 tests (Service setup)
 
+## Migration Guide
+
+### API Changes in Version 3.0
+
+**The `DataPipelineEngine` class is deprecated.** All pipeline execution should now use the universal `RulesEngine.evaluate()` API.
+
+### Before (Deprecated):
+```java
+import dev.mars.apex.core.engine.pipeline.DataPipelineEngine;
+import dev.mars.apex.core.engine.pipeline.YamlPipelineExecutionResult;
+
+DataPipelineEngine pipelineEngine = new DataPipelineEngine();
+pipelineEngine.initialize(config);
+YamlPipelineExecutionResult result = pipelineEngine.executePipeline("my-pipeline");
+
+if (result.isSuccess()) {
+    System.out.println("Success!");
+}
+```
+
+### After (Recommended):
+```java
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
+
+RulesEngine rulesEngine = RulesEngine.fromFile("pipeline.yaml");
+RuleResult result = rulesEngine.evaluate(new HashMap<>());
+
+if (result.getResultType() == RuleResult.ResultType.MATCH) {
+    System.out.println("Success!");
+}
+
+rulesEngine.shutdown();
+```
+
+### Migration Steps
+
+1. Replace `DataPipelineEngine` with `RulesEngine`
+2. Change `executePipeline()` to `evaluate()`
+3. Update result type from `YamlPipelineExecutionResult` to `RuleResult`
+4. Change success checks from `isSuccess()` to `getResultType() == MATCH`
+5. Add `rulesEngine.shutdown()` in cleanup code
+
+### Example Migrations
+
+All test files in `apex-demo/src/test/java/dev/mars/apex/demo/etl/` have been migrated to the new API. Review these files for complete migration examples:
+
+- `SimplePipelineTest.java` - Basic pipeline execution
+- `CsvToH2PipelineTest.java` - CSV to database pipeline
+- `PipelineEtlExecutionTestExtractCsv.java` - CSV extraction
+- And 17 more examples...
+
+### Complete Migration Guide
+
+For comprehensive migration guidance, see:
+- [APEX Data Pipeline Orchestration Guide - Section 18 (Migration Strategy)](../../../../docs/APEX_DATA_PIPELINE_ORCHESTRATION_GUIDE.md#18-migration-strategy)
+
+---
+
 ## Related Documentation
 
-- [APEX YAML Reference](../../docs/APEX_YAML_REFERENCE.md)
-- [Data Sink Framework Design](../../docs/APEX_DATA_PIPELINE_OUTPUT_DESIGN.md)
-- [APEX Core Documentation](../../apex-core/README.md)
+- [APEX YAML Reference](../../../../docs/APEX_YAML_REFERENCE.md)
+- [Data Sink Framework Design](../../../../docs/APEX_DATA_PIPELINE_OUTPUT_DESIGN.md)
+- [APEX Core Documentation](../../../../apex-core/README.md)
+- [APEX Data Pipeline Orchestration Guide](../../../../docs/APEX_DATA_PIPELINE_ORCHESTRATION_GUIDE.md)

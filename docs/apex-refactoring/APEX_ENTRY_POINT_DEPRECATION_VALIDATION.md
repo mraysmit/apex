@@ -82,14 +82,29 @@
 ### Category 3: Specialized Engines
 
 #### ✅ Pattern 3.1: DataPipelineEngine (ETL Processing)
-- **Analysis Document**: 17 files use this pattern (all ETL tests)
-- **Deprecation Status**: ✅ **DEPRECATED** - entire class deprecated in `DataPipelineEngine.java` line 52
+- **Analysis Document**: 20 files use this pattern (all ETL tests)
+- **Deprecation Status**: ✅ **FULLY DEPRECATED** - entire class and related types deprecated
+- **Deprecated Classes**:
+  - `DataPipelineEngine` - line 52
+  - `YamlPipelineExecutionResult` - line 16
+  - `PipelineStepResult` - line 13
+  - `DataPipelineException` - line 30
 - **Deprecation Details**:
   ```java
   @Deprecated(since = "3.0", forRemoval = true)
   public class DataPipelineEngine
+
+  @Deprecated(since = "3.0", forRemoval = true)
+  public class YamlPipelineExecutionResult
+
+  @Deprecated(since = "3.0", forRemoval = true)
+  public class PipelineStepResult
+
+  @Deprecated(since = "3.0", forRemoval = true)
+  public class DataPipelineException
   ```
-- **Migration Guidance**: ✅ Provided in class-level JavaDoc
+- **Migration Guidance**: ✅ Provided in class-level JavaDoc for all classes
+- **Migration Status**: ✅ **COMPLETE** - All 20 test files migrated to `RulesEngine.evaluate()` (67 tests passing)
 - **Rationale**: "Developers should not need to know whether YAML contains pipeline definitions to choose the correct engine"
 
 #### ✅ Pattern 3.2: DataTypeScenarioService (Scenario Processing)

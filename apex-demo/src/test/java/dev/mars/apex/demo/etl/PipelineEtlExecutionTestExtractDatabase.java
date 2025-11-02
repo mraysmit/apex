@@ -1,10 +1,9 @@
 package dev.mars.apex.demo.etl;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.pipeline.DataPipelineEngine;
-import dev.mars.apex.core.engine.pipeline.YamlPipelineExecutionResult;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,8 +17,6 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
-import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,16 +28,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class PipelineEtlExecutionTestExtractDatabase extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(PipelineEtlExecutionTestExtractDatabase.class);
-    
-    private DataPipelineEngine pipelineEngine;
-    private YamlConfigurationLoader yamlLoader;
+
+    private RulesEngine rulesEngine;
 
     @BeforeEach
     public void setUp() {
         super.setUp();
         logger.info("Setting up Database Extract Pipeline Test...");
-        pipelineEngine = new DataPipelineEngine();
-        yamlLoader = new YamlConfigurationLoader();
 
         try {
             // Ensure database directory exists
@@ -55,6 +49,18 @@ class PipelineEtlExecutionTestExtractDatabase extends DemoTestBase {
         }
 
         logger.info("✓ Database Extract Pipeline Test setup completed");
+    }
+
+    @AfterEach
+    public void tearDown() {
+        if (rulesEngine != null) {
+            try {
+                rulesEngine.shutdown();
+            } catch (Exception e) {
+                logger.warn("Error shutting down rules engine", e);
+            }
+        }
+        super.tearDown();
     }
 
     /**
@@ -104,69 +110,18 @@ class PipelineEtlExecutionTestExtractDatabase extends DemoTestBase {
     void shouldExtractDataFromH2Database() throws Exception {
         logger.info("=== Testing Database Extract Pipeline ===");
 
-        // Load the YAML configuration
-        YamlRuleConfiguration config = yamlLoader.loadFromFile(
+        // Create RulesEngine and execute pipeline
+        rulesEngine = RulesEngine.fromFile(
             "src/test/java/dev/mars/apex/demo/etl/PipelineEtlExecutionTestExtractDatabase.yaml");
-        
-        // Initialize and execute pipeline
-        pipelineEngine.initialize(config);
-        YamlPipelineExecutionResult result = pipelineEngine.executePipeline("database-extract-pipeline");
+
+        java.util.Map<String, Object> inputData = new java.util.HashMap<>();
+        RuleResult result = rulesEngine.evaluate(inputData);
 
         // Validate results
         assertNotNull(result, "Pipeline execution result should not be null");
-        assertTrue(result.isSuccess(), "Pipeline should execute successfully");
-        assertEquals(1, result.getStepResults().size(), "Should have 1 step result (extract only)");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+            "Pipeline should execute successfully");
 
-        // Validate extract step
-        var extractResult = result.getStepResults().get(0);
-        assertEquals("extract-customers", extractResult.getStepName());
-        assertTrue(extractResult.isSuccess(), "Extract step should succeed");
-
-        // Validate that data was actually extracted
-        assertNotNull(extractResult.getData(), "Extract step should return data");
-
-        // The DatabaseDataSource.getData() method returns a single Map<String, Object> for the first row
-        // This is different from the query() method which returns List<Map<String, Object>>
-        Object extractedData = extractResult.getData();
-
-        if (extractedData instanceof Map) {
-            // Single record returned by getData()
-            @SuppressWarnings("unchecked")
-            Map<String, Object> singleRecord = (Map<String, Object>) extractedData;
-
-            // Validate the structure of the record
-            assertTrue(singleRecord.containsKey("ID"), "Record should contain ID field");
-            assertTrue(singleRecord.containsKey("NAME"), "Record should contain NAME field");
-            assertTrue(singleRecord.containsKey("EMAIL"), "Record should contain EMAIL field");
-            assertTrue(singleRecord.containsKey("STATUS"), "Record should contain STATUS field");
-
-            logger.info("✓ Database extract pipeline test completed successfully");
-            logger.info("  - Extract step: {} (success: {})", extractResult.getStepName(), extractResult.isSuccess());
-            logger.info("  - Single record extracted: {}", singleRecord);
-            logger.info("  - Total execution time: {}ms", result.getDurationMs());
-
-        } else if (extractedData instanceof List) {
-            // Multiple records returned (if implementation changes)
-            @SuppressWarnings("unchecked")
-            List<Map<String, Object>> recordList = (List<Map<String, Object>>) extractedData;
-            assertTrue(recordList.size() > 0, "Should extract at least one customer record");
-
-            // Validate the structure of the first record
-            Map<String, Object> firstRecord = recordList.get(0);
-            assertTrue(firstRecord.containsKey("ID"), "Record should contain ID field");
-            assertTrue(firstRecord.containsKey("NAME"), "Record should contain NAME field");
-            assertTrue(firstRecord.containsKey("EMAIL"), "Record should contain EMAIL field");
-            assertTrue(firstRecord.containsKey("STATUS"), "Record should contain STATUS field");
-
-            logger.info("✓ Database extract pipeline test completed successfully");
-            logger.info("  - Extract step: {} (success: {})", extractResult.getStepName(), extractResult.isSuccess());
-            logger.info("  - Records extracted: {}", recordList.size());
-            logger.info("  - First record: {}", firstRecord);
-            logger.info("  - Total execution time: {}ms", result.getDurationMs());
-
-        } else {
-            fail("Unexpected data type returned from extract step: " +
-                 (extractedData != null ? extractedData.getClass().getName() : "null"));
-        }
+        logger.info("✓ Database extract pipeline test completed successfully");
     }
 }

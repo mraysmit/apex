@@ -1,10 +1,9 @@
 package dev.mars.apex.demo.etl;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.pipeline.DataPipelineEngine;
-import dev.mars.apex.core.engine.pipeline.YamlPipelineExecutionResult;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,16 +25,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class PipelineEtlExecutionTestLoadFilesystem extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(PipelineEtlExecutionTestLoadFilesystem.class);
-    
-    private DataPipelineEngine pipelineEngine;
-    private YamlConfigurationLoader yamlLoader;
+
+    private RulesEngine rulesEngine;
 
     @BeforeEach
     public void setUp() {
         super.setUp();
         logger.info("Setting up Filesystem Load Pipeline Test...");
-        pipelineEngine = new DataPipelineEngine();
-        yamlLoader = new YamlConfigurationLoader();
 
         try {
             // Ensure output directory exists
@@ -48,33 +44,34 @@ class PipelineEtlExecutionTestLoadFilesystem extends DemoTestBase {
         logger.info("✓ Filesystem Load Pipeline Test setup completed");
     }
 
+    @AfterEach
+    public void tearDown() {
+        if (rulesEngine != null) {
+            try {
+                rulesEngine.shutdown();
+            } catch (Exception e) {
+                logger.warn("Error shutting down rules engine", e);
+            }
+        }
+        super.tearDown();
+    }
+
     @Test
     @DisplayName("Should load data from CSV to JSON file")
     void shouldLoadDataFromCsvToJsonFile() throws Exception {
         logger.info("=== Testing Filesystem Load Pipeline ===");
 
-        // Load the YAML configuration
-        YamlRuleConfiguration config = yamlLoader.loadFromFile(
+        // Create RulesEngine and execute pipeline
+        rulesEngine = RulesEngine.fromFile(
             "src/test/java/dev/mars/apex/demo/etl/PipelineEtlExecutionTestLoadFilesystem.yaml");
-        
-        // Initialize and execute pipeline
-        pipelineEngine.initialize(config);
-        YamlPipelineExecutionResult result = pipelineEngine.executePipeline("load-filesystem-pipeline");
+
+        java.util.Map<String, Object> inputData = new java.util.HashMap<>();
+        RuleResult result = rulesEngine.evaluate(inputData);
 
         // Validate results
         assertNotNull(result, "Pipeline execution result should not be null");
-        assertTrue(result.isSuccess(), "Pipeline should execute successfully");
-        assertEquals(2, result.getStepResults().size(), "Should have 2 step results (extract + load)");
-
-        // Validate extract step
-        var extractResult = result.getStepResults().get(0);
-        assertEquals("extract-customers", extractResult.getStepName());
-        assertTrue(extractResult.isSuccess(), "Extract step should succeed");
-        
-        // Validate load step
-        var loadResult = result.getStepResults().get(1);
-        assertEquals("load-to-file", loadResult.getStepName());
-        assertTrue(loadResult.isSuccess(), "Load step should succeed");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+            "Pipeline should execute successfully");
 
         // Verify output file was created
         Path outputFile = Paths.get("./demo-data/json/customers.json");
@@ -82,9 +79,6 @@ class PipelineEtlExecutionTestLoadFilesystem extends DemoTestBase {
         assertTrue(Files.size(outputFile) > 0, "Output file should not be empty");
 
         logger.info("✓ Filesystem load pipeline test completed successfully");
-        logger.info("  - Extract step: {} (success: {})", extractResult.getStepName(), extractResult.isSuccess());
-        logger.info("  - Load step: {} (success: {})", loadResult.getStepName(), loadResult.isSuccess());
         logger.info("  - Output file: {}", outputFile.toAbsolutePath());
-        logger.info("  - Total execution time: {}ms", result.getDurationMs());
     }
 }

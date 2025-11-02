@@ -1,11 +1,10 @@
 package dev.mars.apex.core.engine.config;
 
+import dev.mars.apex.core.config.datasink.DataSinkConfiguration;
+import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlEnrichment;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRuleFactory;
+import dev.mars.apex.core.config.pipeline.PipelineConfiguration;
+import dev.mars.apex.core.config.yaml.*;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.EnrichmentGroup;
 import dev.mars.apex.core.engine.model.EnrichmentGroupResult;
@@ -14,6 +13,16 @@ import dev.mars.apex.core.engine.model.RuleBase;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleGroupEvaluationResult;
 import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.engine.pipeline.DataPipelineException;
+import dev.mars.apex.core.engine.pipeline.PipelineExecutor;
+import dev.mars.apex.core.engine.pipeline.YamlPipelineExecutionResult;
+import dev.mars.apex.core.service.data.external.DataSink;
+import dev.mars.apex.core.service.data.external.DataSinkException;
+import dev.mars.apex.core.service.data.external.DataSourceException;
+import dev.mars.apex.core.service.data.external.ExternalDataSource;
+import dev.mars.apex.core.service.data.external.factory.DataSinkFactory;
+import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
+import dev.mars.apex.core.service.data.external.manager.ExternalDataSourceManager;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
@@ -96,6 +105,15 @@ public class RulesEngine {
     private final YamlRuleConfiguration yamlConfig;
 
     /**
+     * Pipeline execution components (lazy-initialized when needed).
+     */
+    private final DataSourceFactory dataSourceFactory;
+    private final DataSinkFactory dataSinkFactory;
+    private final Map<String, ExternalDataSource> dataSources;
+    private final Map<String, DataSink> dataSinks;
+    private PipelineExecutor pipelineExecutor; // Lazy-initialized
+
+    /**
      * Create a new RulesEngine with the specified configuration.
      * This is the public constructor for RulesEngine.
      *
@@ -126,6 +144,18 @@ public class RulesEngine {
         // Initialize the unified evaluator with default error recovery configuration
         this.unifiedEvaluator = new UnifiedRuleEvaluator(parser, errorRecoveryService, performanceMonitor, new ErrorRecoveryConfig());
 
+        // Initialize pipeline components
+        this.dataSourceFactory = DataSourceFactory.getInstance();
+        this.dataSinkFactory = DataSinkFactory.getInstance();
+        this.dataSources = new HashMap<>();
+        this.dataSinks = new HashMap<>();
+        this.pipelineExecutor = null; // Lazy-initialized when needed
+
+        // Initialize data sources and sinks if yamlConfig is provided
+        if (yamlConfig != null) {
+            initializePipelineComponents(yamlConfig);
+        }
+
         // Initialize logging context
         LoggingContext.initializeContext();
 
@@ -134,6 +164,124 @@ public class RulesEngine {
         logger.debug("Using error recovery service: {}", errorRecoveryService.getClass().getSimpleName());
         logger.debug("Using performance monitor: {}", performanceMonitor.getClass().getSimpleName());
         logger.debug("Using enrichment processor: {}", enrichmentProcessor != null ? enrichmentProcessor.getClass().getSimpleName() : "none");
+    }
+
+    /**
+     * Initialize pipeline components (data sources and sinks) from YAML configuration.
+     * This method is called during construction if yamlConfig is provided.
+     *
+     * @param yamlConfig The YAML configuration containing data sources and sinks
+     */
+    private void initializePipelineComponents(YamlRuleConfiguration yamlConfig) {
+        try {
+            // Initialize data sources
+            if (yamlConfig.getDataSources() != null && !yamlConfig.getDataSources().isEmpty()) {
+                logger.info("Initializing {} data sources", yamlConfig.getDataSources().size());
+                for (YamlDataSource yamlDataSource : yamlConfig.getDataSources()) {
+                    try {
+                        DataSourceConfiguration config = yamlDataSource.toDataSourceConfiguration();
+                        ExternalDataSource dataSource = dataSourceFactory.createDataSource(config);
+                        dataSources.put(config.getName(), dataSource);
+                        logger.debug("Initialized data source: {}", config.getName());
+                    } catch (DataSourceException e) {
+                        logger.warn("Failed to initialize data source '{}': {}", yamlDataSource.getName(), e.getMessage());
+                    }
+                }
+            }
+
+            // Initialize data sinks
+            if (yamlConfig.getDataSinks() != null && !yamlConfig.getDataSinks().isEmpty()) {
+                logger.info("Initializing {} data sinks", yamlConfig.getDataSinks().size());
+                for (YamlDataSink yamlDataSink : yamlConfig.getDataSinks()) {
+                    try {
+                        DataSinkConfiguration config = yamlDataSink.toDataSinkConfiguration();
+                        DataSink dataSink = dataSinkFactory.createDataSink(config);
+                        dataSinks.put(config.getName(), dataSink);
+                        logger.debug("Initialized data sink: {}", config.getName());
+                    } catch (DataSinkException e) {
+                        logger.warn("Failed to initialize data sink '{}': {}", yamlDataSink.getName(), e.getMessage());
+                    }
+                }
+            }
+
+            logger.info("Pipeline components initialized: {} data sources, {} data sinks",
+                    dataSources.size(), dataSinks.size());
+
+        } catch (Exception e) {
+            logger.warn("Failed to initialize pipeline components: {}", e.getMessage());
+            logger.debug("Pipeline initialization exception details:", e);
+        }
+    }
+
+    /**
+     * Execute a pipeline configuration.
+     *
+     * @param pipeline The pipeline configuration to execute
+     * @param inputData The input data for the pipeline
+     * @return RuleResult indicating success or failure
+     */
+    private RuleResult executePipeline(PipelineConfiguration pipeline, Map<String, Object> inputData) {
+        try {
+            logger.info("Executing pipeline: {}", pipeline.getName());
+
+            // Lazy-initialize pipeline executor
+            if (pipelineExecutor == null) {
+                pipelineExecutor = new PipelineExecutor(new DataSourceManagerAdapter());
+
+                // Add all data sinks to executor
+                for (Map.Entry<String, DataSink> entry : dataSinks.entrySet()) {
+                    pipelineExecutor.addDataSink(entry.getKey(), entry.getValue());
+                }
+            }
+
+            // Execute pipeline
+            YamlPipelineExecutionResult result = pipelineExecutor.execute(pipeline);
+
+            // Convert to RuleResult
+            if (result.isSuccess()) {
+                logger.info("Pipeline '{}' executed successfully in {}ms",
+                        pipeline.getName(), result.getDurationMs());
+                return RuleResult.match("pipeline:" + pipeline.getName(),
+                        "Pipeline executed successfully", SeverityConstants.INFO);
+            } else {
+                logger.error("Pipeline '{}' execution failed: {}", pipeline.getName(), result.getError());
+                return RuleResult.error("pipeline:" + pipeline.getName(),
+                        "Pipeline execution failed: " + result.getError());
+            }
+        } catch (DataPipelineException e) {
+            logger.error("Pipeline execution failed with exception", e);
+            return RuleResult.error("pipeline:" + pipeline.getName(),
+                    "Pipeline execution failed: " + e.getMessage());
+        } catch (Exception e) {
+            logger.error("Unexpected error during pipeline execution", e);
+            return RuleResult.error("pipeline:unknown",
+                    "Pipeline execution failed: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Adapter to provide ExternalDataSourceManager interface to PipelineExecutor.
+     */
+    private class DataSourceManagerAdapter implements ExternalDataSourceManager {
+        @Override
+        public ExternalDataSource getDataSource(String name) {
+            return dataSources.get(name);
+        }
+
+        @Override
+        public void addDataSource(String name, ExternalDataSource dataSource) {
+            dataSources.put(name, dataSource);
+        }
+
+        @Override
+        public void removeDataSource(String name) {
+            dataSources.remove(name);
+        }
+
+        @Override
+        public boolean hasDataSource(String name) {
+            return dataSources.containsKey(name);
+        }
     }
 
     // Static Factory Methods
@@ -935,6 +1083,18 @@ public class RulesEngine {
                         }
                         break;
 
+                    case "pipeline":
+                        if (yamlConfig.getPipeline() != null) {
+                            logger.info("Processing pipeline: {}", yamlConfig.getPipeline().getName());
+                            RuleResult pipelineResult = executePipeline(yamlConfig.getPipeline(), enrichedData);
+
+                            if (pipelineResult.getResultType() == RuleResult.ResultType.ERROR) {
+                                overallSuccess = false;
+                                failureMessages.add("Pipeline execution error: " + pipelineResult.getMessage());
+                            }
+                        }
+                        break;
+
                     case "metadata":
                     case "data-sources":
                     case "data-source-refs":
@@ -944,7 +1104,6 @@ public class RulesEngine {
                     case "categories":
                     case "transformations":
                     case "rule-chains":
-                    case "pipeline":
                     case "error-recovery":
                         // These sections are configuration/metadata - not executed
                         logger.debug("Skipping configuration section: {}", section);
@@ -1061,5 +1220,39 @@ public class RulesEngine {
             result.put("data", object);
             return result;
         }
+    }
+
+    /**
+     * Shutdown the RulesEngine and release all resources.
+     * This method should be called when the engine is no longer needed to properly
+     * clean up data sources, data sinks, and other resources.
+     */
+    public void shutdown() {
+        logger.info("Shutting down RulesEngine");
+
+        // Shutdown data sources
+        for (Map.Entry<String, ExternalDataSource> entry : dataSources.entrySet()) {
+            try {
+                logger.debug("Shutting down data source: {}", entry.getKey());
+                entry.getValue().shutdown();
+            } catch (Exception e) {
+                logger.warn("Error shutting down data source '{}': {}", entry.getKey(), e.getMessage());
+            }
+        }
+
+        // Shutdown data sinks
+        for (Map.Entry<String, DataSink> entry : dataSinks.entrySet()) {
+            try {
+                logger.debug("Shutting down data sink: {}", entry.getKey());
+                entry.getValue().shutdown();
+            } catch (Exception e) {
+                logger.warn("Error shutting down data sink '{}': {}", entry.getKey(), e.getMessage());
+            }
+        }
+
+        dataSources.clear();
+        dataSinks.clear();
+
+        logger.info("RulesEngine shutdown complete");
     }
 }

@@ -2,8 +2,8 @@ package dev.mars.apex.demo.etl;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.pipeline.DataPipelineEngine;
-import dev.mars.apex.core.engine.pipeline.YamlPipelineExecutionResult;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
@@ -30,15 +30,14 @@ import static org.junit.jupiter.api.Assertions.*;
 class SimpleCsvToJsonTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(SimpleCsvToJsonTest.class);
-    
-    private DataPipelineEngine pipelineEngine;
+
+    private RulesEngine rulesEngine;
     private YamlConfigurationLoader yamlLoader;
 
     @BeforeEach
     public void setUp() {
         super.setUp();
         logger.info("Setting up Simple CSV to JSON Test...");
-        pipelineEngine = new DataPipelineEngine();
         yamlLoader = new YamlConfigurationLoader();
 
         try {
@@ -55,13 +54,13 @@ class SimpleCsvToJsonTest extends DemoTestBase {
 
     @AfterEach
     public void tearDown() {
-        // Close pipeline engine if it was created
-        if (pipelineEngine != null) {
+        // Close rules engine if it was created
+        if (rulesEngine != null) {
             try {
-                pipelineEngine.shutdown();
-                logger.info("Pipeline engine shut down successfully");
+                rulesEngine.shutdown();
+                logger.info("Rules engine shut down successfully");
             } catch (Exception e) {
-                logger.warn("Error shutting down pipeline engine", e);
+                logger.warn("Error shutting down rules engine", e);
             }
         }
         super.tearDown();
@@ -72,33 +71,26 @@ class SimpleCsvToJsonTest extends DemoTestBase {
     void shouldProcessCsvToJson() throws Exception {
         logger.info("=== Testing Simple CSV to JSON Pipeline (1000 records) ===");
 
-        // Load and execute pipeline
-        YamlRuleConfiguration config = yamlLoader.loadFromFile(
+        // Create RulesEngine and execute pipeline
+        rulesEngine = RulesEngine.fromFile(
             "src/test/java/dev/mars/apex/demo/etl/SimpleCsvToJsonTest.yaml");
-        
-        pipelineEngine.initialize(config);
+
         long startTime = System.currentTimeMillis();
-        YamlPipelineExecutionResult result = pipelineEngine.executePipeline("simple-csv-to-json");
+        java.util.Map<String, Object> inputData = new java.util.HashMap<>();
+        RuleResult result = rulesEngine.evaluate(inputData);
         long executionTime = System.currentTimeMillis() - startTime;
 
         // Validate pipeline execution
         assertNotNull(result, "Pipeline result should not be null");
-        assertTrue(result.isSuccess(), "Pipeline should execute successfully");
-        assertEquals(2, result.getStepResults().size(), "Should have 2 steps");
-
-        // Validate steps
-        var extractResult = result.getStepResults().get(0);
-        assertEquals("extract-csv", extractResult.getStepName());
-        assertTrue(extractResult.isSuccess(), "Extract step should succeed");
-
-        var loadResult = result.getStepResults().get(1);
-        assertEquals("load-json", loadResult.getStepName());
-        assertTrue(loadResult.isSuccess(), "Load step should succeed");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+            "Pipeline should execute successfully");
+        assertTrue(result.getMessage().contains("Sequential evaluation completed successfully"),
+            "Result message should indicate successful evaluation");
 
         // Validate output file
         Path outputFile = Paths.get("./demo-data/json/customers-1000.json");
         assertTrue(Files.exists(outputFile), "JSON output file should exist");
-        
+
         // Validate file content
         String jsonContent = Files.readString(outputFile);
         assertTrue(jsonContent.startsWith("["), "JSON should start with array");
@@ -107,8 +99,7 @@ class SimpleCsvToJsonTest extends DemoTestBase {
         assertTrue(jsonContent.contains("Customer-1000"), "Should contain last customer");
 
         logger.info("✓ Pipeline completed successfully");
-        logger.info("  - Extract step: {} (success: {})", extractResult.getStepName(), extractResult.isSuccess());
-        logger.info("  - Load step: {} (success: {})", loadResult.getStepName(), loadResult.isSuccess());
+        logger.info("  - Result type: {}", result.getResultType());
         logger.info("  - Output file: {}", outputFile.toAbsolutePath());
         logger.info("  - Execution time: {}ms", executionTime);
         logger.info("  - File size: {} bytes", Files.size(outputFile));

@@ -16,10 +16,10 @@ package dev.mars.apex.demo.etl;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.pipeline.DataPipelineEngine;
-import dev.mars.apex.core.engine.pipeline.YamlPipelineExecutionResult;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,11 +33,11 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * JUnit 5 test for CSV to H2 Pipeline functionality using APEX DataPipelineEngine.
+ * JUnit 5 test for CSV to H2 Pipeline functionality using APEX RulesEngine.
  *
  * PIPELINE VALIDATION CHECKLIST:
  *  Load pipeline YAML configuration with data sources and sinks
- *  Initialize DataPipelineEngine with YAML configuration
+ *  Initialize RulesEngine with YAML configuration
  *  Execute pipeline with extract, load, and audit steps
  *  Validate pipeline execution results and step completion
  *  Verify actual CSV to H2 database processing functionality
@@ -51,6 +51,20 @@ import static org.junit.jupiter.api.Assertions.*;
 public class CsvToH2PipelineTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(CsvToH2PipelineTest.class);
+    private RulesEngine rulesEngine;
+
+    @AfterEach
+    public void tearDown() {
+        if (rulesEngine != null) {
+            try {
+                rulesEngine.shutdown();
+                logger.info("Rules engine shut down successfully");
+            } catch (Exception e) {
+                logger.warn("Error shutting down rules engine", e);
+            }
+        }
+        super.tearDown();
+    }
 
     @Test
     void testCsvToH2PipelineExecution() {
@@ -59,57 +73,26 @@ public class CsvToH2PipelineTest extends DemoTestBase {
         try {
             // Create required directories and sample CSV file
             setupTestData();
-            // Load YAML pipeline configuration from same directory as test
+
+            // Create RulesEngine and execute pipeline
             String yamlPath = "src/test/java/dev/mars/apex/demo/etl/CsvToH2PipelineTest.yaml";
-            YamlRuleConfiguration config = yamlLoader.loadFromFile(yamlPath);
-            assertNotNull(config, "Pipeline configuration should not be null");
+            rulesEngine = RulesEngine.fromFile(yamlPath);
 
-            // Debug logging to understand what's loaded
-            logger.info("Configuration loaded successfully");
-            logger.info("Metadata: " + (config.getMetadata() != null ? config.getMetadata().getName() : "null"));
-            logger.info("Data sources count: " + (config.getDataSources() != null ? config.getDataSources().size() : "null"));
-            logger.info("Data sinks count: " + (config.getDataSinks() != null ? config.getDataSinks().size() : "null"));
-            logger.info("Pipeline object: " + (config.getPipeline() != null ? "present" : "null"));
-
-            if (config.getPipeline() != null) {
-                logger.info("Pipeline name: " + config.getPipeline().getName());
-                logger.info("Pipeline steps count: " + (config.getPipeline().getSteps() != null ? config.getPipeline().getSteps().size() : "null"));
-            }
-
-            assertNotNull(config.getPipeline(), "Pipeline definition should not be null");
-
-            logger.info("✓ Pipeline configuration loaded: " + config.getMetadata().getName());
-
-            // Initialize DataPipelineEngine
-            DataPipelineEngine pipelineEngine = new DataPipelineEngine();
-            pipelineEngine.initialize(config);
-
-            logger.info("✓ DataPipelineEngine initialized successfully");
+            logger.info("✓ RulesEngine initialized successfully");
 
             // Execute the pipeline
-            String pipelineName = config.getPipeline().getName();
-            logger.info("Executing pipeline: " + pipelineName);
-
-            YamlPipelineExecutionResult result = pipelineEngine.executePipeline(pipelineName);
+            java.util.Map<String, Object> inputData = new java.util.HashMap<>();
+            RuleResult result = rulesEngine.evaluate(inputData);
 
             // Validate pipeline execution results
             assertNotNull(result, "Pipeline execution result should not be null");
-            assertTrue(result.isSuccess(), "Pipeline should execute successfully");
-            assertTrue(result.getDurationMs() > 0, "Pipeline should have positive execution time");
-            assertTrue(result.getTotalSteps() > 0, "Pipeline should have executed steps");
+            assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+                "Pipeline should execute successfully");
 
             logger.info("✓ Pipeline executed successfully");
             logger.info("Pipeline Results:");
-            logger.info("  - Success: " + result.isSuccess());
-            logger.info("  - Duration: " + result.getDurationMs() + "ms");
-            logger.info("  - Total Steps: " + result.getTotalSteps());
-            logger.info("  - Successful Steps: " + result.getSuccessfulSteps());
-            logger.info("  - Failed Steps: " + result.getFailedSteps());
-
-            // Validate step execution (audit step is optional and may fail)
-            assertTrue(result.getSuccessfulSteps() >= 2,
-                "At least 2 pipeline steps (extract and load) should execute successfully");
-            assertTrue(result.getFailedSteps() <= 1, "At most 1 optional step should fail");
+            logger.info("  - Result type: " + result.getResultType());
+            logger.info("  - Message: " + result.getMessage());
 
             logger.info(" CSV to H2 pipeline execution test completed successfully");
 

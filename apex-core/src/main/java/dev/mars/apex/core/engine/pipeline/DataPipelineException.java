@@ -18,11 +18,16 @@ package dev.mars.apex.core.engine.pipeline;
 
 /**
  * Exception thrown by the Data Pipeline Engine.
- * 
+ *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @version 1.0
+ * @deprecated since 3.0, for removal in 4.0. This exception is specific to the deprecated
+ *             {@link DataPipelineEngine}. When using {@link dev.mars.apex.core.engine.config.RulesEngine},
+ *             pipeline errors are returned as {@link dev.mars.apex.core.engine.model.RuleResult} with
+ *             {@code ResultType.ERROR} instead of throwing exceptions.
  */
+@Deprecated(since = "3.0", forRemoval = true)
 public class DataPipelineException extends Exception {
     
     private static final long serialVersionUID = 1L;

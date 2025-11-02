@@ -17,8 +17,8 @@ package dev.mars.apex.demo.etl;
  */
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.pipeline.DataPipelineEngine;
-import dev.mars.apex.core.engine.pipeline.YamlPipelineExecutionResult;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
@@ -34,13 +34,13 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * JUnit 5 test for Simple Pipeline functionality using APEX DataPipelineEngine.
- * 
+ * JUnit 5 test for Simple Pipeline functionality using APEX RulesEngine.
+ *
  * This test validates the SimplePipelineTest.yaml configuration file and demonstrates:
  * - YAML configuration parsing and validation
  * - Basic pipeline structure validation
  * - Data source and data sink configuration validation
- * - Pipeline engine initialization
+ * - Pipeline execution via RulesEngine.evaluate()
  * - Simple extract operation testing
  *
  * PIPELINE VALIDATION CHECKLIST:
@@ -49,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * ✅ Validate pipeline definition and steps
  * ✅ Validate data source configuration
  * ✅ Validate data sink configuration
- * ✅ Initialize DataPipelineEngine with configuration
+ * ✅ Execute pipeline via RulesEngine.evaluate()
  * ✅ Test basic pipeline execution (if supported)
  *
  * BUSINESS LOGIC VALIDATION:
@@ -66,9 +66,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SimplePipelineTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(SimplePipelineTest.class);
-    
+
     private YamlRuleConfiguration pipelineConfig;
-    private DataPipelineEngine pipelineEngine;
+    private RulesEngine rulesEngine;
 
     @BeforeEach
     public void setUp() {
@@ -78,13 +78,13 @@ public class SimplePipelineTest extends DemoTestBase {
 
     @AfterEach
     public void tearDown() {
-        // Close pipeline engine if it was created
-        if (pipelineEngine != null) {
+        // Close rules engine if it was created
+        if (rulesEngine != null) {
             try {
-                pipelineEngine.shutdown();
-                logger.info("Pipeline engine shut down successfully");
+                rulesEngine.shutdown();
+                logger.info("Rules engine shut down successfully");
             } catch (Exception e) {
-                logger.warn("Error shutting down pipeline engine", e);
+                logger.warn("Error shutting down rules engine", e);
             }
         }
         super.tearDown();
@@ -277,9 +277,9 @@ public class SimplePipelineTest extends DemoTestBase {
 
     @Test
     @Order(5)
-    @DisplayName("Should initialize DataPipelineEngine with simple configuration")
-    void testInitializeDataPipelineEngine() {
-        logger.info("=== Testing DataPipelineEngine Initialization ===");
+    @DisplayName("Should initialize RulesEngine with simple configuration")
+    void testInitializeRulesEngine() {
+        logger.info("=== Testing RulesEngine Initialization ===");
 
         try {
             // Load configuration if not already loaded
@@ -287,20 +287,18 @@ public class SimplePipelineTest extends DemoTestBase {
                 testLoadSimplePipelineConfiguration();
             }
 
-            // Initialize DataPipelineEngine
-            pipelineEngine = new DataPipelineEngine();
-            assertNotNull(pipelineEngine, "Pipeline engine should be created");
-            
-            pipelineEngine.initialize(pipelineConfig);
-            logger.info("✓ DataPipelineEngine initialized successfully");
+            // Initialize RulesEngine from YAML file
+            rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/etl/SimplePipelineTest.yaml");
+            assertNotNull(rulesEngine, "Rules engine should be created");
 
-            // Validate engine state (if methods are available)
-            // Note: This depends on the actual DataPipelineEngine implementation
-            logger.info("✓ Pipeline engine initialization completed");
+            logger.info("✓ RulesEngine initialized successfully");
+
+            // Validate engine state
+            logger.info("✓ Rules engine initialization completed");
 
         } catch (Exception e) {
-            logger.error("❌ DataPipelineEngine initialization failed: {}", e.getMessage(), e);
-            fail("DataPipelineEngine initialization should succeed: " + e.getMessage());
+            logger.error("❌ RulesEngine initialization failed: {}", e.getMessage(), e);
+            fail("RulesEngine initialization should succeed: " + e.getMessage());
         }
     }
 
@@ -314,33 +312,30 @@ public class SimplePipelineTest extends DemoTestBase {
             // Setup test data first
             setupSimpleTestData();
 
-            // Load configuration and initialize engine if not already done
-            if (pipelineConfig == null) {
-                testLoadSimplePipelineConfiguration();
-            }
-            if (pipelineEngine == null) {
-                testInitializeDataPipelineEngine();
+            // Initialize engine if not already done
+            if (rulesEngine == null) {
+                testInitializeRulesEngine();
             }
 
-            // Execute the simple pipeline
-            String pipelineName = pipelineConfig.getPipeline().getName();
-            logger.info("Executing simple pipeline: {}", pipelineName);
+            // Execute the pipeline via RulesEngine.evaluate()
+            logger.info("Executing pipeline via RulesEngine.evaluate()");
 
-            YamlPipelineExecutionResult result = pipelineEngine.executePipeline(pipelineName);
+            java.util.Map<String, Object> inputData = new java.util.HashMap<>();
+            RuleResult result = rulesEngine.evaluate(inputData);
 
             // Validate execution results
             assertNotNull(result, "Pipeline execution result should not be null");
             logger.info("✓ Pipeline execution completed");
             logger.info("Pipeline Execution Results:");
+            logger.info("  - Result Type: {}", result.getResultType());
+            logger.info("  - Message: {}", result.getMessage());
             logger.info("  - Success: {}", result.isSuccess());
-            logger.info("  - Duration: {}ms", result.getDurationMs());
-            logger.info("  - Total Steps: {}", result.getTotalSteps());
-            logger.info("  - Successful Steps: {}", result.getSuccessfulSteps());
-            logger.info("  - Failed Steps: {}", result.getFailedSteps());
 
-            // Basic validation - pipeline should at least attempt execution
-            assertTrue(result.getTotalSteps() > 0, "Pipeline should have executed at least one step");
-            assertTrue(result.getDurationMs() >= 0, "Pipeline duration should be non-negative");
+            // Basic validation - pipeline should execute successfully
+            assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+                "Pipeline should execute successfully");
+            assertTrue(result.getMessage().contains("Sequential evaluation completed successfully"),
+                "Result message should indicate successful evaluation");
 
             logger.info("✓ Basic pipeline execution test completed");
 

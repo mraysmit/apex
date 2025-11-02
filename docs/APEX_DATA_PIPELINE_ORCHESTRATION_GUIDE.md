@@ -2,9 +2,32 @@
 
 # APEX Pipeline Orchestration Guide
 
-**Version:** 1.0
-**Date:** 2025-09-06
-**Author:** MArk A Ray-Smith Cityline Ltd.
+**Version:** 2.0
+**Date:** 2025-11-02
+**Author:** Mark A Ray-Smith Cityline Ltd.
+
+> **⚠️ IMPORTANT API UPDATE (Version 3.0)**
+>
+> **The `DataPipelineEngine` class has been deprecated** and will be removed in version 4.0.
+>
+> **Use `RulesEngine.evaluate()` instead** - the universal entry point that handles pipelines, enrichments, rules, and all other YAML content types automatically.
+>
+> **Migration Example:**
+> ```java
+> // OLD (Deprecated):
+> DataPipelineEngine pipelineEngine = new DataPipelineEngine();
+> pipelineEngine.initialize(config);
+> YamlPipelineExecutionResult result = pipelineEngine.executePipeline("pipeline-name");
+>
+> // NEW (Recommended):
+> RulesEngine rulesEngine = RulesEngine.fromFile("path/to/pipeline.yaml");
+> RuleResult result = rulesEngine.evaluate(new HashMap<>());
+> rulesEngine.shutdown();
+> ```
+>
+> **Why this change?** Developers should not need to know whether YAML contains pipeline definitions to choose the correct engine. `RulesEngine` provides ONE universal API for all YAML processing.
+>
+> **See Section 18 (Migration Strategy)** for complete migration guidance.
 
 ## Overview
 
@@ -87,8 +110,10 @@ for (Customer customer : customers) {
 
 **Dynamic (YAML-Driven Orchestration):**
 ```java
-// APEX approach - YAML-driven orchestration
-pipelineEngine.executePipeline("customer-etl-pipeline");
+// APEX approach - YAML-driven orchestration (Version 3.0+)
+RulesEngine rulesEngine = RulesEngine.fromFile("customer-etl-pipeline.yaml");
+RuleResult result = rulesEngine.evaluate(new HashMap<>());
+rulesEngine.shutdown();
 ```
 
 ```yaml
@@ -310,23 +335,32 @@ data-sinks:
 
 #### Step 2: Execute the Pipeline
 
+**Recommended API (Version 3.0+):**
 ```java
-// Load configuration
-YamlRuleConfiguration config = YamlConfigurationLoader
-    .loadFromFile("my-first-pipeline.yaml");
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
+import java.util.HashMap;
 
-// Initialize pipeline engine
-DataPipelineEngine pipelineEngine = new DataPipelineEngine();
-pipelineEngine.initialize(config);
+// Create RulesEngine from file
+RulesEngine rulesEngine = RulesEngine.fromFile("my-first-pipeline.yaml");
 
-// Execute pipeline
-YamlPipelineExecutionResult result = pipelineEngine
-    .executePipeline("csv-to-db-pipeline");
+// Execute pipeline via universal evaluate() method
+RuleResult result = rulesEngine.evaluate(new HashMap<>());
 
 // Check results
-System.out.println("Pipeline success: " + result.isSuccess());
-System.out.println("Duration: " + result.getDurationMs() + "ms");
-System.out.println("Steps completed: " + result.getSuccessfulSteps() + "/" + result.getTotalSteps());
+System.out.println("Pipeline success: " + (result.getResultType() == RuleResult.ResultType.MATCH));
+System.out.println("Message: " + result.getMessage());
+
+// Cleanup
+rulesEngine.shutdown();
+```
+
+**Legacy API (Deprecated - for reference only):**
+```java
+// ⚠️ DEPRECATED - Do not use in new code
+DataPipelineEngine pipelineEngine = new DataPipelineEngine();
+pipelineEngine.initialize(config);
+YamlPipelineExecutionResult result = pipelineEngine.executePipeline("csv-to-db-pipeline");
 ```
 
 ### Working Demo
@@ -1658,6 +1692,159 @@ data-sinks:
   - name: "audit-log"
     type: "file-system"
 ```
+
+---
+
+## 18. Migration Strategy
+
+### Overview
+
+**As of APEX Version 3.0**, the `DataPipelineEngine` class and related types have been deprecated in favor of the universal `RulesEngine.evaluate()` API. This section provides complete guidance for migrating existing pipeline code.
+
+### Why Migrate?
+
+**The Problem with Specialized Engines:**
+- Developers had to know YAML content type to choose the correct engine
+- Multiple entry points created confusion and maintenance burden
+- Inconsistent APIs across different YAML types
+
+**The Solution:**
+- **ONE universal entry point**: `RulesEngine.evaluate()`
+- **Content-agnostic processing**: Works with pipelines, enrichments, rules, scenarios
+- **Consistent API**: Same pattern for all YAML processing
+
+### Deprecated Classes
+
+The following classes are deprecated and will be removed in version 4.0:
+
+| Class | Status | Replacement |
+|-------|--------|-------------|
+| `DataPipelineEngine` | ⚠️ Deprecated | `RulesEngine` |
+| `YamlPipelineExecutionResult` | ⚠️ Deprecated | `RuleResult` |
+| `PipelineStepResult` | ⚠️ Deprecated | `RuleResult` |
+| `DataPipelineException` | ⚠️ Deprecated | Error results in `RuleResult` |
+
+### Migration Pattern
+
+#### Before (Deprecated):
+```java
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.pipeline.DataPipelineEngine;
+import dev.mars.apex.core.engine.pipeline.YamlPipelineExecutionResult;
+
+// Load configuration
+YamlRuleConfiguration config = YamlConfigurationLoader
+    .loadFromFile("pipeline.yaml");
+
+// Initialize pipeline engine
+DataPipelineEngine pipelineEngine = new DataPipelineEngine();
+pipelineEngine.initialize(config);
+
+// Execute pipeline
+YamlPipelineExecutionResult result = pipelineEngine
+    .executePipeline("my-pipeline");
+
+// Check results
+if (result.isSuccess()) {
+    System.out.println("Pipeline completed in " + result.getDurationMs() + "ms");
+    System.out.println("Steps: " + result.getSuccessfulSteps() + "/" + result.getTotalSteps());
+
+    // Access step-level data
+    for (PipelineStepResult stepResult : result.getStepResults()) {
+        Object data = stepResult.getData();
+        // Process step data...
+    }
+} else {
+    System.err.println("Pipeline failed: " + result.getError());
+}
+
+// Cleanup
+pipelineEngine.shutdown();
+```
+
+#### After (Recommended):
+```java
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
+import java.util.HashMap;
+import java.util.Map;
+
+// Create RulesEngine from file
+RulesEngine rulesEngine = RulesEngine.fromFile("pipeline.yaml");
+
+// Execute via universal evaluate() method
+Map<String, Object> inputData = new HashMap<>();
+RuleResult result = rulesEngine.evaluate(inputData);
+
+// Check results
+if (result.getResultType() == RuleResult.ResultType.MATCH) {
+    System.out.println("Pipeline completed successfully");
+    System.out.println("Message: " + result.getMessage());
+} else if (result.getResultType() == RuleResult.ResultType.ERROR) {
+    System.err.println("Pipeline failed: " + result.getMessage());
+}
+
+// Cleanup
+rulesEngine.shutdown();
+```
+
+### Key Differences
+
+| Aspect | Old API | New API |
+|--------|---------|---------|
+| **Entry Point** | `DataPipelineEngine.executePipeline()` | `RulesEngine.evaluate()` |
+| **Result Type** | `YamlPipelineExecutionResult` | `RuleResult` |
+| **Success Check** | `result.isSuccess()` | `result.getResultType() == MATCH` |
+| **Error Handling** | Throws `DataPipelineException` | Returns `RuleResult` with ERROR type |
+| **Step-Level Data** | `result.getStepResults().get(i).getData()` | Not available (high-level result only) |
+| **Metrics** | `getDurationMs()`, `getSuccessfulSteps()` | Not available in `RuleResult` |
+
+### Migration Checklist
+
+- [ ] Replace `DataPipelineEngine` with `RulesEngine`
+- [ ] Change `executePipeline()` calls to `evaluate()`
+- [ ] Update result type from `YamlPipelineExecutionResult` to `RuleResult`
+- [ ] Change success checks from `isSuccess()` to `getResultType() == MATCH`
+- [ ] Remove step-level data access (if used)
+- [ ] Update error handling to check `ResultType.ERROR`
+- [ ] Add `rulesEngine.shutdown()` in cleanup code
+- [ ] Update imports
+- [ ] Test thoroughly
+
+### Handling Step-Level Data
+
+**Important Limitation:** The new `RuleResult` API does not provide access to individual step results or extracted data. This is by design to maintain a universal result interface.
+
+**If you need step-level data:**
+1. **Option 1**: Store data in external storage (database, file) during pipeline execution
+2. **Option 2**: Use data sinks to write step results to accessible locations
+3. **Option 3**: Keep using `DataPipelineEngine` until version 4.0 (not recommended)
+
+### Testing Your Migration
+
+After migrating, verify:
+
+1. **Functionality**: Pipeline executes successfully
+2. **Error Handling**: Errors are caught and handled correctly
+3. **Resource Cleanup**: `shutdown()` is called properly
+4. **Performance**: No performance degradation
+5. **Logging**: Appropriate log messages appear
+
+### Example Migration
+
+See the complete migration examples in:
+- `apex-demo/src/test/java/dev/mars/apex/demo/etl/SimplePipelineTest.java`
+- `apex-demo/src/test/java/dev/mars/apex/demo/etl/CsvToH2PipelineTest.java`
+- All other files in `apex-demo/src/test/java/dev/mars/apex/demo/etl/`
+
+These files demonstrate the migration pattern applied to 20 different pipeline test scenarios.
+
+### Support
+
+For migration assistance:
+- Review the deprecation JavaDoc in `DataPipelineEngine.java`
+- Check the test examples in `apex-demo/etl/`
+- Consult the APEX Technical Reference Guide
 
 ---
 

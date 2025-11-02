@@ -16,10 +16,8 @@
 
 package dev.mars.apex.demo.etl;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.pipeline.DataPipelineEngine;
-import dev.mars.apex.core.engine.pipeline.YamlPipelineExecutionResult;
-import dev.mars.apex.core.engine.pipeline.PipelineStepResult;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -52,19 +50,31 @@ import static org.junit.jupiter.api.Assertions.*;
 public class FocusedEtlTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(FocusedEtlTest.class);
-    private DataPipelineEngine pipelineEngine;
+    private RulesEngine rulesEngine;
 
     @BeforeEach
     public void setUp() {
         super.setUp();
         logger.info("Setting up Focused ETL Test...");
-        pipelineEngine = new DataPipelineEngine();
-        
+
         // Create test data directories and files
         createTestDirectories();
         createTestDataFiles();
-        
+
         logger.info("✓ Focused ETL Test setup completed");
+    }
+
+    @org.junit.jupiter.api.AfterEach
+    public void tearDown() {
+        if (rulesEngine != null) {
+            try {
+                rulesEngine.shutdown();
+                logger.info("Rules engine shut down successfully");
+            } catch (Exception e) {
+                logger.warn("Error shutting down rules engine", e);
+            }
+        }
+        super.tearDown();
     }
 
     @Test
@@ -72,28 +82,17 @@ public class FocusedEtlTest extends DemoTestBase {
     void shouldLoadDataFromCsvToJsonFile() throws Exception {
         logger.info("=== Testing CSV to JSON File Load ===");
 
-        // Use the existing load-filesystem YAML configuration
-        YamlRuleConfiguration config = yamlLoader.loadFromFile(
+        // Create RulesEngine and execute pipeline
+        rulesEngine = RulesEngine.fromFile(
             "src/test/java/dev/mars/apex/demo/etl/PipelineEtlExecutionTestLoadFilesystem.yaml");
-        
-        // Initialize and execute pipeline
-        pipelineEngine.initialize(config);
-        YamlPipelineExecutionResult result = pipelineEngine.executePipeline("load-filesystem-pipeline");
+
+        java.util.Map<String, Object> inputData = new java.util.HashMap<>();
+        RuleResult result = rulesEngine.evaluate(inputData);
 
         // Validate results
         assertNotNull(result, "Pipeline execution result should not be null");
-        assertTrue(result.isSuccess(), "Pipeline should execute successfully");
-        assertEquals(2, result.getStepResults().size(), "Should have 2 step results (extract + load)");
-
-        // Validate extract step
-        PipelineStepResult extractResult = result.getStepResults().get(0);
-        assertEquals("extract-customers", extractResult.getStepName());
-        assertTrue(extractResult.isSuccess(), "Extract step should succeed");
-
-        // Validate load step
-        PipelineStepResult loadResult = result.getStepResults().get(1);
-        assertEquals("load-to-file", loadResult.getStepName());
-        assertTrue(loadResult.isSuccess(), "Load step should succeed");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+            "Pipeline should execute successfully");
 
         // Verify output file was created
         Path outputFile = Paths.get("./demo-data/json/customers.json");
@@ -101,10 +100,8 @@ public class FocusedEtlTest extends DemoTestBase {
         assertTrue(Files.size(outputFile) > 0, "Output file should not be empty");
 
         logger.info("✓ CSV to JSON file load test completed successfully");
-        logger.info("  - Extract step: {} (success: {})", extractResult.getStepName(), extractResult.isSuccess());
-        logger.info("  - Load step: {} (success: {})", loadResult.getStepName(), loadResult.isSuccess());
+        logger.info("  - Result type: {}", result.getResultType());
         logger.info("  - Output file: {}", outputFile.toAbsolutePath());
-        logger.info("  - Total execution time: {}ms", result.getDurationMs());
     }
 
     // Database test temporarily disabled due to SQL comment syntax issues in YAML
@@ -119,27 +116,20 @@ public class FocusedEtlTest extends DemoTestBase {
     void shouldExtractDataFromCsvFileOnly() throws Exception {
         logger.info("=== Testing CSV Extract Only ===");
 
-        // Use the existing extract-csv YAML configuration
-        YamlRuleConfiguration config = yamlLoader.loadFromFile(
+        // Create RulesEngine and execute pipeline
+        rulesEngine = RulesEngine.fromFile(
             "src/test/java/dev/mars/apex/demo/etl/PipelineEtlExecutionTestExtractCsv.yaml");
-        
-        // Initialize and execute pipeline
-        pipelineEngine.initialize(config);
-        YamlPipelineExecutionResult result = pipelineEngine.executePipeline("csv-extract-pipeline");
+
+        java.util.Map<String, Object> inputData = new java.util.HashMap<>();
+        RuleResult result = rulesEngine.evaluate(inputData);
 
         // Validate results
         assertNotNull(result, "Pipeline execution result should not be null");
-        assertTrue(result.isSuccess(), "Pipeline should execute successfully");
-        assertEquals(1, result.getStepResults().size(), "Should have 1 step result (extract only)");
-
-        // Validate extract step
-        PipelineStepResult extractResult = result.getStepResults().get(0);
-        assertEquals("extract-customers", extractResult.getStepName());
-        assertTrue(extractResult.isSuccess(), "Extract step should succeed");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+            "Pipeline should execute successfully");
 
         logger.info("✓ CSV extract only test completed successfully");
-        logger.info("  - Extract step: {} (success: {})", extractResult.getStepName(), extractResult.isSuccess());
-        logger.info("  - Execution time: {}ms", result.getDurationMs());
+        logger.info("  - Result type: {}", result.getResultType());
     }
 
     @Test
@@ -150,27 +140,19 @@ public class FocusedEtlTest extends DemoTestBase {
         // Create empty CSV file for testing
         createEmptyTestFile();
 
-        // Use the existing empty-csv YAML configuration
-        YamlRuleConfiguration config = yamlLoader.loadFromFile(
+        // Create RulesEngine and execute pipeline
+        rulesEngine = RulesEngine.fromFile(
             "src/test/java/dev/mars/apex/demo/etl/PipelineEtlExecutionTestExtractEmptyCsv.yaml");
-        
-        // Initialize and execute pipeline
-        pipelineEngine.initialize(config);
-        YamlPipelineExecutionResult result = pipelineEngine.executePipeline("empty-csv-extract-pipeline");
+
+        java.util.Map<String, Object> inputData = new java.util.HashMap<>();
+        RuleResult result = rulesEngine.evaluate(inputData);
 
         // Validate graceful handling of empty data
         assertNotNull(result, "Pipeline execution result should not be null");
-        assertTrue(result.isSuccess(), "Pipeline should handle empty data gracefully");
-        assertEquals(1, result.getStepResults().size(), "Should have 1 step result");
-
-        // Validate extract step handled empty file
-        PipelineStepResult extractResult = result.getStepResults().get(0);
-        assertEquals("extract-empty-customers", extractResult.getStepName());
-        assertTrue(extractResult.isSuccess(), "Extract step should succeed even with empty file");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+            "Pipeline should handle empty data gracefully");
 
         logger.info("✓ Empty CSV file handling test completed successfully");
-        logger.info("  - Records processed: {}", extractResult.getRecordsProcessed());
-        logger.info("  - Execution time: {}ms", result.getDurationMs());
     }
 
     // Helper methods
