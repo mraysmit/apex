@@ -75,7 +75,9 @@ public class LoggingSeverityFixTest {
 
             // Process enrichments with config parameter to create the same context as the original flaw test
             // This will trigger condition evaluation failures that should now be logged as SEVERE
-            processor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+            engine.evaluate(config, testData);
 
             logger.info("✅ Processing completed.");
             logger.info("📊 Check the log output above - you should see:");
@@ -112,8 +114,9 @@ public class LoggingSeverityFixTest {
             logger.info("🔍 Expected: Multiple SEVERE logs (one for each enrichment failure)");
             
             // Process enrichments with config parameter - this should trigger multiple SEVERE logs
-            Object result = processor.processEnrichments(config.getEnrichments(), testData, config);
-            
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            engine.evaluate(config, testData);
+
             logger.info("✅ Processing completed.");
             logger.info("📊 Check the log output above - you should see:");
             logger.info("   ✅ Multiple SEVERE: CRITICAL: Enrichment condition evaluation failed...");

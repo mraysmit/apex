@@ -2,11 +2,11 @@ package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-// Removed unused imports: SequentialYamlRulesEngineService, YamlRuleFactory
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-// Removed unused imports: RulesEngine, RuleResult
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -69,7 +69,9 @@ public class UseCase1EnrichmentFirstTest {
                    testData.get("customerId"), testData.get("amount"));
         
         // Process with enrichment service (demonstrates sequential processing)
-        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult ruleResult = engine.evaluate(config, testData);
+        Object result = ruleResult.getEnrichedData();
         assertNotNull(result, "Enrichment result should not be null");
 
         @SuppressWarnings("unchecked")
@@ -116,7 +118,9 @@ public class UseCase1EnrichmentFirstTest {
         testData.put("amount", 150000.0);
         
         // Test with enrichment service (demonstrates sequential processing)
-        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult ruleResult = engine.evaluate(config, testData);
+        Object result = ruleResult.getEnrichedData();
         assertNotNull(result, "Enrichment result should not be null");
 
         @SuppressWarnings("unchecked")

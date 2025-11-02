@@ -17,6 +17,8 @@
 package dev.mars.apex.demo.conditional;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -90,11 +92,12 @@ public class ConditionalMappingsPhase2Test extends DemoTestBase {
             logger.info("Testing OR condition mapping with data: " + data);
 
             // Process using real APEX services
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), data, config);
-            assertNotNull(result, "Enrichment result should not be null");
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, data);
+            assertNotNull(ruleResult, "Enrichment result should not be null");
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
+            
+            Map<String, Object> enrichedData = ruleResult.getEnrichedData();
 
             // Verify the conditional mapping was applied
             // The first conditional mapping should set result to 'OR_MATCHED'
@@ -127,11 +130,12 @@ public class ConditionalMappingsPhase2Test extends DemoTestBase {
             logger.info("Testing second OR condition mapping with data: " + data);
 
             // Process using real APEX services
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), data, config);
-            assertNotNull(result, "Enrichment result should not be null");
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, data);
+            assertNotNull(ruleResult, "Enrichment result should not be null");
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
+            
+            Map<String, Object> enrichedData = ruleResult.getEnrichedData();
 
             // Verify the conditional mapping was applied
             // The first conditional mapping should set result to 'OR_MATCHED'
@@ -164,11 +168,12 @@ public class ConditionalMappingsPhase2Test extends DemoTestBase {
             logger.info("Testing AND condition mapping with data: " + data);
 
             // Process using real APEX services
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), data, config);
-            assertNotNull(result, "Enrichment result should not be null");
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, data);
+            assertNotNull(ruleResult, "Enrichment result should not be null");
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
+            
+            Map<String, Object> enrichedData = ruleResult.getEnrichedData();
 
             // Verify the conditional mapping was applied
             // The second conditional mapping should set result to 'AND_MATCHED'

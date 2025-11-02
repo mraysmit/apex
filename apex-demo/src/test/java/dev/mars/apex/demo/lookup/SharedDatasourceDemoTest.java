@@ -1,5 +1,8 @@
 package dev.mars.apex.demo.lookup;
 
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 
 /*
@@ -114,7 +117,9 @@ public class SharedDatasourceDemoTest extends DemoTestBase {
         testData.put("approach", "real-apex-services");
 
         // Execute APEX enrichment processing - ALL logic in YAML
-        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
 
         // Validate enrichment results
         assertNotNull(result, "Shared datasource demo result should not be null");

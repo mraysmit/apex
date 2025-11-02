@@ -17,6 +17,8 @@
 package dev.mars.apex.demo.conditional;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -63,11 +65,11 @@ public class RuleResultReferencesTest extends DemoTestBase {
             logger.info("Input data: " + inputData);
 
             // Process using real APEX services
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), inputData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult result = engine.evaluate(config, inputData);
             assertNotNull(result, "Enrichment result should not be null");
-        
-        @SuppressWarnings("unchecked")
-        Map<String, Object> enrichedData = (Map<String, Object>) result;
+
+            Map<String, Object> enrichedData = result.getEnrichedData();
         
             // Verify that high-value rule triggered and processing amount was calculated
             assertTrue(enrichedData.containsKey("processedAmount"), "Should contain processedAmount field");
@@ -102,11 +104,11 @@ public class RuleResultReferencesTest extends DemoTestBase {
             logger.info("Input data: " + inputData);
 
             // Process using real APEX services
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), inputData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult result = engine.evaluate(config, inputData);
             assertNotNull(result, "Enrichment result should not be null");
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
+            Map<String, Object> enrichedData = result.getEnrichedData();
 
             // Validate rule result references are working
 
@@ -156,9 +158,9 @@ public class RuleResultReferencesTest extends DemoTestBase {
             inputData.put("customerType", "PREMIUM");  // Should trigger premium-customer-rule
             inputData.put("priority", "HIGH");
 
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), inputData, config);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult result = engine.evaluate(config, inputData);
+            Map<String, Object> enrichedData = result.getEnrichedData();
 
             // Premium customer should get MEDIUM notification level
             assertEquals("MEDIUM", enrichedData.get("notificationLevel"),
@@ -195,11 +197,11 @@ public class RuleResultReferencesTest extends DemoTestBase {
             logger.info("Input data: " + inputData);
 
             // Process using real APEX services
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), inputData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult result = engine.evaluate(config, inputData);
             assertNotNull(result, "Enrichment result should not be null");
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
+            Map<String, Object> enrichedData = result.getEnrichedData();
 
             // Log what we actually got
             logger.info("Enriched data fields: " + enrichedData.keySet());
@@ -244,9 +246,9 @@ public class RuleResultReferencesTest extends DemoTestBase {
             premiumHighValue.put("customerType", "PREMIUM");
             premiumHighValue.put("priority", "NORMAL");
 
-            Object result1 = enrichmentProcessor.processEnrichments(config.getEnrichments(), premiumHighValue, config);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enriched1 = (Map<String, Object>) result1;
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult result1 = engine.evaluate(config, premiumHighValue);
+            Map<String, Object> enriched1 = result1.getEnrichedData();
 
             // Verify chained enrichments executed correctly
             // processing-group fails (urgent-processing-rule doesn't pass), so serviceLevel = PREMIUM
@@ -267,9 +269,8 @@ public class RuleResultReferencesTest extends DemoTestBase {
             standardNormal.put("customerType", "STANDARD");
             standardNormal.put("priority", "NORMAL");
 
-            Object result2 = enrichmentProcessor.processEnrichments(config.getEnrichments(), standardNormal, config);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enriched2 = (Map<String, Object>) result2;
+            RuleResult result2 = engine.evaluate(config, standardNormal);
+            Map<String, Object> enriched2 = result2.getEnrichedData();
 
             // Verify fallback enrichments executed correctly
             assertEquals("STANDARD", enriched2.get("serviceLevel"),
@@ -289,9 +290,8 @@ public class RuleResultReferencesTest extends DemoTestBase {
             urgentPremium.put("customerType", "PREMIUM");
             urgentPremium.put("priority", "URGENT");
 
-            Object result3 = enrichmentProcessor.processEnrichments(config.getEnrichments(), urgentPremium, config);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enriched3 = (Map<String, Object>) result3;
+            RuleResult result3 = engine.evaluate(config, urgentPremium);
+            Map<String, Object> enriched3 = result3.getEnrichedData();
 
             // Verify complex chaining with multiple conditions
             assertEquals("PREMIUM_PLUS", enriched3.get("serviceLevel"),

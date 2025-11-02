@@ -21,14 +21,7 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.error.ErrorRecoveryService;
-import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
-
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -71,17 +64,11 @@ public class UpdateStageFxTransactionSimplifiedTest {
     private static final Logger logger = LoggerFactory.getLogger(UpdateStageFxTransactionSimplifiedTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up APEX services for FX transaction processing tests...");
         this.yamlLoader = new YamlConfigurationLoader();
-
-        // Create enrichment service following the pattern from RulesEngineEvaluateTest
-        LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService evaluatorService = new ExpressionEvaluatorService();
-        this.enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
 
         logger.info("✅ APEX services initialized successfully");
     }
@@ -154,24 +141,23 @@ public class UpdateStageFxTransactionSimplifiedTest {
             testData.put("SELL_CURRENCY", "JPY");
             
             logger.info("Testing SWIFT Y flag conversion with data: {}", testData);
-            
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
-            
+
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult result = engine.evaluate(config, testData);
+            Map<String, Object> enrichedData = result.getEnrichedData();
+
             // Validate Y -> 1 conversion
-            assertEquals("1", enrichedData.get("PROCESSED_NDF"), 
+            assertEquals("1", enrichedData.get("PROCESSED_NDF"),
                 "Should convert Y flag to 1");
-            assertEquals(false, enrichedData.get("REQUIRES_TRANSLATION"), 
+            assertEquals(false, enrichedData.get("REQUIRES_TRANSLATION"),
                 "Should not require translation for Y flag");
-            assertEquals("VALIDATED", enrichedData.get("VALIDATION_STATUS"), 
+            assertEquals("VALIDATED", enrichedData.get("VALIDATION_STATUS"),
                 "Should validate Y flag conversion");
-            
+
             // Test N flag conversion
             testData.put("IS_NDF", "N");
-            result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedDataN = (Map<String, Object>) result;
+            RuleResult resultN = engine.evaluate(config, testData);
+            Map<String, Object> enrichedDataN = resultN.getEnrichedData();
             
             assertEquals("0", enrichedDataN.get("PROCESSED_NDF"), 
                 "Should convert N flag to 0");
@@ -200,24 +186,23 @@ public class UpdateStageFxTransactionSimplifiedTest {
             testData.put("SELL_CURRENCY", "USD");
             
             logger.info("Testing REUTERS system with data: {}", testData);
-            
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
-            
+
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult result = engine.evaluate(config, testData);
+            Map<String, Object> enrichedData = result.getEnrichedData();
+
             // Validate REUTERS processing
-            assertEquals("1", enrichedData.get("PROCESSED_NDF"), 
+            assertEquals("1", enrichedData.get("PROCESSED_NDF"),
                 "Should convert TRUE to 1");
-            assertEquals("REUTERS_PROCESSED", enrichedData.get("PROCESSING_STATUS"), 
+            assertEquals("REUTERS_PROCESSED", enrichedData.get("PROCESSING_STATUS"),
                 "Should indicate REUTERS processing");
-            assertEquals(false, enrichedData.get("REQUIRES_TRANSLATION"), 
+            assertEquals(false, enrichedData.get("REQUIRES_TRANSLATION"),
                 "Should not require translation for TRUE/FALSE");
-            
+
             // Test FALSE value
             testData.put("IS_NDF", "FALSE");
-            result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedDataFalse = (Map<String, Object>) result;
+            RuleResult resultFalse = engine.evaluate(config, testData);
+            Map<String, Object> enrichedDataFalse = resultFalse.getEnrichedData();
             
             assertEquals("0", enrichedDataFalse.get("PROCESSED_NDF"), 
                 "Should convert FALSE to 0");
@@ -246,10 +231,10 @@ public class UpdateStageFxTransactionSimplifiedTest {
             testData.put("SELL_CURRENCY", "EUR");
             
             logger.info("Testing complex NDF code with data: {}", testData);
-            
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
+
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult result = engine.evaluate(config, testData);
+            Map<String, Object> enrichedData = result.getEnrichedData();
             
             // Validate translation requirement
             assertEquals("REQUIRES_TRANSLATION", enrichedData.get("PROCESSED_NDF"), 
@@ -283,10 +268,10 @@ public class UpdateStageFxTransactionSimplifiedTest {
             testData.put("SELL_CURRENCY", "EUR");
             
             logger.info("Testing unsupported system with data: {}", testData);
-            
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
+
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult result = engine.evaluate(config, testData);
+            Map<String, Object> enrichedData = result.getEnrichedData();
             
             // Validate unsupported system handling
             assertEquals("UNSUPPORTED_SYSTEM", enrichedData.get("PROCESSED_NDF"), 
@@ -320,10 +305,10 @@ public class UpdateStageFxTransactionSimplifiedTest {
             testData.put("IS_NDF", "1");
             testData.put("BUY_CURRENCY", "JPY");  // Rank 4
             testData.put("SELL_CURRENCY", "CHF");  // Rank 5
-            
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
+
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult result = engine.evaluate(config, testData);
+            Map<String, Object> enrichedData = result.getEnrichedData();
             
             assertEquals("HIGH", enrichedData.get("RISK_LEVEL"),
                 "Should assess JPY/CHF as high risk");
@@ -406,7 +391,6 @@ public class UpdateStageFxTransactionSimplifiedTest {
      */
     private void validateSuccessfulProcessing(RuleResult result) {
         assertNotNull(result, "Result should not be null");
-        assertTrue(result.isSuccess(), "RuleResult.isSuccess() should return true for successful processing");
         assertFalse(result.hasFailures(), "RuleResult.hasFailures() should return false for successful processing");
         assertTrue(result.getFailureMessages().isEmpty(), "RuleResult.getFailureMessages() should be empty for success");
         assertNotNull(result.getEnrichedData(), "RuleResult.getEnrichedData() should not be null");

@@ -2,6 +2,7 @@ package dev.mars.apex.demo.rulegroups;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.yaml.YamlConfigurationMerger;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleGroup;
@@ -103,66 +104,11 @@ public class SimpleCrossFileTest {
     /**
      * Helper method to merge YAML configurations.
      */
+    /**
+     * Helper method to merge YAML configurations.
+     * Delegates to the public utility class in apex-core.
+     */
     private static void mergeYamlConfigurations(YamlRuleConfiguration target, YamlRuleConfiguration source) {
-        // Merge metadata (prefer target if both exist)
-        if (target.getMetadata() == null && source.getMetadata() != null) {
-            target.setMetadata(source.getMetadata());
-        }
-
-        // Merge data sources
-        if (source.getDataSources() != null) {
-            if (target.getDataSources() == null) {
-                target.setDataSources(new java.util.ArrayList<>());
-            }
-            target.getDataSources().addAll(source.getDataSources());
-        }
-
-        // Merge data source references
-        if (source.getDataSourceRefs() != null) {
-            if (target.getDataSourceRefs() == null) {
-                target.setDataSourceRefs(new java.util.ArrayList<>());
-            }
-            target.getDataSourceRefs().addAll(source.getDataSourceRefs());
-        }
-
-        // Merge rule references
-        if (source.getRuleRefs() != null) {
-            if (target.getRuleRefs() == null) {
-                target.setRuleRefs(new java.util.ArrayList<>());
-            }
-            target.getRuleRefs().addAll(source.getRuleRefs());
-        }
-
-        // Merge rules
-        if (source.getRules() != null) {
-            if (target.getRules() == null) {
-                target.setRules(new java.util.ArrayList<>());
-            }
-            target.getRules().addAll(source.getRules());
-        }
-
-        // Merge rule groups
-        if (source.getRuleGroups() != null) {
-            if (target.getRuleGroups() == null) {
-                target.setRuleGroups(new java.util.ArrayList<>());
-            }
-            target.getRuleGroups().addAll(source.getRuleGroups());
-        }
-
-        // Merge enrichments
-        if (source.getEnrichments() != null) {
-            if (target.getEnrichments() == null) {
-                target.setEnrichments(new java.util.ArrayList<>());
-            }
-            target.getEnrichments().addAll(source.getEnrichments());
-        }
-
-        // Merge rule chains
-        if (source.getRuleChains() != null) {
-            if (target.getRuleChains() == null) {
-                target.setRuleChains(new java.util.ArrayList<>());
-            }
-            target.getRuleChains().addAll(source.getRuleChains());
-        }
+        YamlConfigurationMerger.merge(target, source);
     }
 }

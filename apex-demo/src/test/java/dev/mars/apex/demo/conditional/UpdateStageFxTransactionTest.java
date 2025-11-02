@@ -16,6 +16,9 @@
 
 package dev.mars.apex.demo.conditional;
 
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
@@ -170,12 +173,12 @@ public class UpdateStageFxTransactionTest extends DemoTestBase {
             logger.debug("Input FX transaction data: {}", testData);
             
             // Execute APEX enrichment processing
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RuleResult result = RulesEngine.fromYamlConfig(config).evaluate(config, testData);
             
             // Validate enrichment results
             assertNotNull(result, "Currency rank enrichment result should not be null");
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
+            
+            Map<String, Object> enrichedData = result.getEnrichedData();
             
             logger.debug("Enriched FX transaction: {}", enrichedData);
             
@@ -217,12 +220,12 @@ public class UpdateStageFxTransactionTest extends DemoTestBase {
             logger.debug("NDF Rule 1 test data: {}", testData);
             
             // Execute APEX enrichment processing
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RuleResult result = RulesEngine.fromYamlConfig(config).evaluate(config, testData);
             
             // Validate results
             assertNotNull(result, "NDF Rule 1 result should not be null");
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
+            
+            Map<String, Object> enrichedData = result.getEnrichedData();
             
             logger.debug("NDF Rule 1 enriched data: {}", enrichedData);
             
@@ -263,12 +266,12 @@ public class UpdateStageFxTransactionTest extends DemoTestBase {
             logger.debug("NDF Rule 2 test data: {}", testData);
             
             // Execute APEX enrichment processing
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RuleResult result = RulesEngine.fromYamlConfig(config).evaluate(config, testData);
             
             // Validate results
             assertNotNull(result, "NDF Rule 2 result should not be null");
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
+            
+            Map<String, Object> enrichedData = result.getEnrichedData();
             
             logger.debug("NDF Rule 2 enriched data: {}", enrichedData);
             
@@ -321,12 +324,12 @@ public class UpdateStageFxTransactionTest extends DemoTestBase {
             logger.debug("Complete workflow test data: {}", testData);
             
             // Execute APEX enrichment processing
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RuleResult result = RulesEngine.fromYamlConfig(config).evaluate(config, testData);
             
             // Validate comprehensive results
             assertNotNull(result, "Complete workflow result should not be null");
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
+            
+            Map<String, Object> enrichedData = result.getEnrichedData();
             
             logger.debug("Complete workflow enriched data: {}", enrichedData);
             

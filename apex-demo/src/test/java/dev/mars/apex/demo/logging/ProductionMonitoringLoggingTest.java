@@ -18,7 +18,8 @@ package dev.mars.apex.demo.logging;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
@@ -111,8 +112,9 @@ class ProductionMonitoringLoggingTest {
             logger.info("🔍 WATCH FOR: SEVERE logs that would trigger production alerts");
             
             // Process enrichments - this will generate SEVERE logs for monitoring
-            processor.processEnrichments(config.getEnrichments(), testData, config);
-            
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            engine.evaluate(config, testData);
+
             logger.info("");
             logger.info("✅ Production processing simulation completed");
             logger.info("📊 MONITORING SYSTEM ANALYSIS:");
@@ -157,8 +159,9 @@ class ProductionMonitoringLoggingTest {
             logger.info("🔍 MONITORING PARSER: Analyzing error message structure...");
             
             // Process enrichments - this will generate structured error messages
-            processor.processEnrichments(config.getEnrichments(), testData, config);
-            
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            engine.evaluate(config, testData);
+
             logger.info("");
             logger.info("✅ Structured error message generation completed");
             logger.info("📊 MONITORING PARSER RESULTS:");
@@ -207,8 +210,9 @@ class ProductionMonitoringLoggingTest {
             logger.info("🔍 INCIDENT RESPONSE TEAM: Analyzing SEVERE logs for quick resolution...");
             
             // Process enrichments - this simulates the incident
-            processor.processEnrichments(config.getEnrichments(), testData, config);
-            
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            engine.evaluate(config, testData);
+
             logger.info("");
             logger.info("✅ Incident simulation completed");
             logger.info("📊 INCIDENT RESPONSE ANALYSIS:");

@@ -1,6 +1,8 @@
 package dev.mars.apex.demo.enrichment;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -86,7 +88,11 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
                 incompleteData.get("transactionId"), incompleteData.get("amount"));
 
             // Use real APEX EnrichmentService to process enrichment failure scenario
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), incompleteData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+            RuleResult ruleResult = engine.evaluate(config, incompleteData);
+
+            Object result = ruleResult.getEnrichedData();
             assertNotNull(result, "Enrichment result should not be null");
 
             // Validate enrichment results - analyze the enriched data
@@ -140,7 +146,11 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
                 lookupData.get("customerId"), lookupData.get("lookupType"));
 
             // Use real APEX EnrichmentService to process external lookup scenario
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), lookupData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+            RuleResult ruleResult = engine.evaluate(config, lookupData);
+
+            Object result = ruleResult.getEnrichedData();
             assertNotNull(result, "External lookup result should not be null");
 
             // Validate enrichment results - analyze the enriched data
@@ -194,7 +204,11 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
                 corruptedData.get("currencyCode"), corruptedData.get("transactionDate"));
 
             // Use real APEX EnrichmentService to process data quality scenario
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), corruptedData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+            RuleResult ruleResult = engine.evaluate(config, corruptedData);
+
+            Object result = ruleResult.getEnrichedData();
             assertNotNull(result, "Data quality result should not be null");
 
             // Validate enrichment results - analyze the enriched data
@@ -249,7 +263,11 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
             logger.info("Processing comprehensive failure recovery scenario...");
 
             // Use real APEX EnrichmentService to process recovery scenario
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), problematicData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+            RuleResult ruleResult = engine.evaluate(config, problematicData);
+
+            Object result = ruleResult.getEnrichedData();
             assertNotNull(result, "Recovery scenario result should not be null");
 
             // Validate enrichment results - analyze the enriched data

@@ -18,7 +18,8 @@ package dev.mars.apex.demo.logging;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.data.external.DataSourceResolver;
@@ -100,8 +101,9 @@ class ConditionEvaluationLoggingTest {
             logger.info("🔍 WATCH FOR: SEVERE logs with 'ERROR: Failed to evaluate OR condition'");
             
             // Process enrichments - this will trigger SEVERE logging for OR condition failures
-            processor.processEnrichments(config.getEnrichments(), testData, config);
-            
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            engine.evaluate(config, testData);
+
             logger.info("✅ Processing completed.");
             logger.info("📊 OR CONDITION LOGGING VERIFICATION:");
             logger.info("   ✅ Check for SEVERE level logs (not WARNING)");
@@ -135,8 +137,9 @@ class ConditionEvaluationLoggingTest {
             logger.info("🔍 WATCH FOR: SEVERE logs with 'ERROR: Failed to evaluate AND condition'");
             
             // Process enrichments - this will trigger SEVERE logging for AND condition failures
-            processor.processEnrichments(config.getEnrichments(), testData, config);
-            
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            engine.evaluate(config, testData);
+
             logger.info("✅ Processing completed.");
             logger.info("📊 AND CONDITION LOGGING VERIFICATION:");
             logger.info("   ✅ Check for SEVERE level logs (not WARNING)");
@@ -170,8 +173,9 @@ class ConditionEvaluationLoggingTest {
             logger.info("🔍 WATCH FOR: SEVERE logs with 'ERROR: Failed to evaluate condition'");
             
             // Process enrichments - this will trigger SEVERE logging for general condition failures
-            processor.processEnrichments(config.getEnrichments(), testData, config);
-            
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            engine.evaluate(config, testData);
+
             logger.info("✅ Processing completed.");
             logger.info("📊 GENERAL CONDITION LOGGING VERIFICATION:");
             logger.info("   ✅ Check for SEVERE level logs (not WARNING)");

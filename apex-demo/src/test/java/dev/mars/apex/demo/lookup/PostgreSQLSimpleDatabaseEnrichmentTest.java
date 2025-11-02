@@ -19,6 +19,8 @@ import dev.mars.apex.demo.DemoTestBase;
  */
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -186,7 +188,9 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
             logger.info("  Customer ID: {}", testData.get("customerId"));
 
             // Execute APEX enrichment processing
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
 
             // Validate enrichment results
             assertNotNull(result, "Customer profile enrichment result should not be null");
@@ -248,7 +252,9 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
                 Map<String, Object> testData = new HashMap<>();
                 testData.put("customerId", customerIds[i]);
 
-                Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+                RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
                 assertNotNull(result, "Result should not be null for " + customerIds[i]);
 
                 @SuppressWarnings("unchecked")
@@ -288,7 +294,9 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
 
             logger.info("Testing with non-existent customer ID: NONEXISTENT");
 
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
             assertNotNull(result, "Result should not be null even for non-existent customer");
 
             @SuppressWarnings("unchecked")
@@ -327,21 +335,27 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
             Map<String, Object> testData1 = new HashMap<>();
             testData1.put("customerId", null);
 
-            Object result1 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData1, config);
+            RulesEngine engine1 = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult1 = engine1.evaluate(config, testData1);
+            Object result1 = ruleResult1.getEnrichedData();
             assertNotNull(result1, "Result should not be null");
 
             // Test with empty customerId (should not trigger enrichment)
             Map<String, Object> testData2 = new HashMap<>();
             testData2.put("customerId", "");
 
-            Object result2 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData2, config);
+            RulesEngine engine2 = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult2 = engine2.evaluate(config, testData2);
+            Object result2 = ruleResult2.getEnrichedData();
             assertNotNull(result2, "Result should not be null");
 
             // Test with valid customerId (should trigger enrichment)
             Map<String, Object> testData3 = new HashMap<>();
             testData3.put("customerId", "CUST001");
 
-            Object result3 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData3, config);
+            RulesEngine engine3 = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult3 = engine3.evaluate(config, testData3);
+            Object result3 = ruleResult3.getEnrichedData();
             assertNotNull(result3, "Result should not be null");
 
             @SuppressWarnings("unchecked")

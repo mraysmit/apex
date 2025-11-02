@@ -18,7 +18,8 @@ package dev.mars.apex.demo.logging;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.data.external.DataSourceResolver;
@@ -101,8 +102,9 @@ class CriticalEnrichmentConditionLoggingTest {
             logger.info("🔍 WATCH FOR: SEVERE logs with 'CRITICAL: Enrichment condition evaluation failed'");
             
             // Process enrichments - this will trigger SEVERE logging for condition failures
-            processor.processEnrichments(config.getEnrichments(), testData, config);
-            
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            engine.evaluate(config, testData);
+
             logger.info("✅ Processing completed.");
             logger.info("📊 LOGGING BEHAVIOR VERIFICATION:");
             logger.info("   ✅ Check the log output above for SEVERE level logs");
@@ -142,8 +144,9 @@ class CriticalEnrichmentConditionLoggingTest {
             logger.info("🔍 WATCH FOR: Multiple SEVERE logs, one for each enrichment failure");
             
             // Process enrichments - this will trigger multiple SEVERE logs
-            processor.processEnrichments(config.getEnrichments(), testData, config);
-            
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            engine.evaluate(config, testData);
+
             logger.info("✅ Processing completed.");
             logger.info("📊 MULTIPLE FAILURE LOGGING VERIFICATION:");
             logger.info("   ✅ Each enrichment failure should be logged separately");

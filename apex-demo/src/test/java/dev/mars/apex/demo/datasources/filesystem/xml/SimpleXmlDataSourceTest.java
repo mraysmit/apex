@@ -15,6 +15,9 @@
  */
 package dev.mars.apex.demo.datasources.filesystem.xml;
 
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 
 import org.junit.jupiter.api.Test;
@@ -71,7 +74,11 @@ public class SimpleXmlDataSourceTest extends DemoTestBase {
             testData.put("employeeId", "E123");
 
             // Process with APEX
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+            RuleResult ruleResult = engine.evaluate(config, testData);
+
+            Object result = ruleResult.getEnrichedData();
             assertNotNull(result, "Enrichment result should not be null");
             
             @SuppressWarnings("unchecked")
@@ -105,7 +112,11 @@ public class SimpleXmlDataSourceTest extends DemoTestBase {
             testData.put("employeeId", "E123");
 
             // Process with APEX
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+            RuleResult ruleResult = engine.evaluate(config, testData);
+
+            Object result = ruleResult.getEnrichedData();
             assertNotNull(result, "Enrichment result should not be null");
             
             @SuppressWarnings("unchecked")
@@ -139,7 +150,11 @@ public class SimpleXmlDataSourceTest extends DemoTestBase {
             testData.put("employeeId", "E123");
 
             // Process with APEX
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+            RuleResult ruleResult = engine.evaluate(config, testData);
+
+            Object result = ruleResult.getEnrichedData();
             assertNotNull(result, "Enrichment result should not be null");
             
             @SuppressWarnings("unchecked")

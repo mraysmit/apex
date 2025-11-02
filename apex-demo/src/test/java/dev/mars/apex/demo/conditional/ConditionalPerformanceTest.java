@@ -17,6 +17,8 @@
 package dev.mars.apex.demo.conditional;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,12 +61,13 @@ public class ConditionalPerformanceTest extends DemoTestBase {
             testData1.put("priority", "NORMAL");
 
             long start1 = System.nanoTime();
-            Object result1 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData1, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult1 = engine.evaluate(config, testData1);
             long time1 = System.nanoTime() - start1;
             double ms1 = time1 / 1_000_000.0;
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enriched1 = (Map<String, Object>) result1;
+            
+            Map<String, Object> enriched1 = ruleResult1.getEnrichedData();
             logger.info("✓ Optimized path (cheap check fails): {}ms", String.format("%.3f", ms1));
             logger.info("  Result: {}", enriched1.get("optimizationLevel"));
 
@@ -76,12 +79,12 @@ public class ConditionalPerformanceTest extends DemoTestBase {
             testData2.put("priority", "NORMAL");
 
             long start2 = System.nanoTime();
-            Object result2 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData2, config);
+            RuleResult ruleResult2 = engine.evaluate(config, testData2);
             long time2 = System.nanoTime() - start2;
             double ms2 = time2 / 1_000_000.0;
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enriched2 = (Map<String, Object>) result2;
+            
+            Map<String, Object> enriched2 = ruleResult2.getEnrichedData();
             logger.info("✓ Unoptimized path (expensive check first): {}ms", String.format("%.3f", ms2));
             logger.info("  Result: {}", enriched2.get("optimizationLevel"));
 
@@ -116,12 +119,13 @@ public class ConditionalPerformanceTest extends DemoTestBase {
             testData.put("priority", "NORMAL");
 
             long start = System.nanoTime();
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
             long elapsed = System.nanoTime() - start;
             double ms = elapsed / 1_000_000.0;
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enriched = (Map<String, Object>) result;
+            
+            Map<String, Object> enriched = ruleResult.getEnrichedData();
 
             logger.info("✓ AND group with early exit: {}ms", String.format("%.3f", ms));
             logger.info("✓ Result: {}", enriched.get("andGroupResult"));
@@ -153,12 +157,13 @@ public class ConditionalPerformanceTest extends DemoTestBase {
             testData.put("priority", "NORMAL");
 
             long start = System.nanoTime();
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
             long elapsed = System.nanoTime() - start;
             double ms = elapsed / 1_000_000.0;
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enriched = (Map<String, Object>) result;
+            
+            Map<String, Object> enriched = ruleResult.getEnrichedData();
 
             logger.info("✓ OR group with first-match-wins: {}ms", String.format("%.3f", ms));
             logger.info("✓ Result: {}", enriched.get("orGroupResult"));
@@ -190,23 +195,24 @@ public class ConditionalPerformanceTest extends DemoTestBase {
             // First evaluation (cache miss)
             logger.info("\n--- First Evaluation (Cache Miss) ---");
             long start1 = System.nanoTime();
-            Object result1 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult1 = engine.evaluate(config, testData);
             long time1 = System.nanoTime() - start1;
             double ms1 = time1 / 1_000_000.0;
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enriched1 = (Map<String, Object>) result1;
+            
+            Map<String, Object> enriched1 = ruleResult1.getEnrichedData();
             logger.info("✓ First evaluation: {}ms", String.format("%.3f", ms1));
 
             // Second evaluation with same data (cache hit)
             logger.info("\n--- Second Evaluation (Cache Hit) ---");
             long start2 = System.nanoTime();
-            Object result2 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RuleResult ruleResult2 = engine.evaluate(config, testData);
             long time2 = System.nanoTime() - start2;
             double ms2 = time2 / 1_000_000.0;
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enriched2 = (Map<String, Object>) result2;
+            
+            Map<String, Object> enriched2 = ruleResult2.getEnrichedData();
             logger.info("✓ Second evaluation: {}ms", String.format("%.3f", ms2));
 
             // Results should be identical

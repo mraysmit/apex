@@ -17,6 +17,8 @@
 package dev.mars.apex.demo.conditional;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -64,11 +66,12 @@ public class AdvancedConditionalPatternsTest extends DemoTestBase {
 
             logger.info("Testing high-risk scenario: " + highRiskData);
 
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), highRiskData, config);
-            assertNotNull(result, "Enrichment result should not be null");
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, highRiskData);
+            assertNotNull(ruleResult, "Enrichment result should not be null");
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
+            
+            Map<String, Object> enrichedData = ruleResult.getEnrichedData();
 
             // Verify multi-stage processing
             assertTrue(enrichedData.containsKey("requiresManualReview"), 
@@ -106,10 +109,11 @@ public class AdvancedConditionalPatternsTest extends DemoTestBase {
 
             logger.info("Testing high-value scenario: " + highValueData);
 
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), highValueData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, highValueData);
             
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
+            
+            Map<String, Object> enrichedData = ruleResult.getEnrichedData();
 
             // Should route to senior approval (high value but not high risk)
             assertEquals("SENIOR_APPROVAL_QUEUE", enrichedData.get("processingQueue"),
@@ -140,10 +144,11 @@ public class AdvancedConditionalPatternsTest extends DemoTestBase {
 
             logger.info("Testing standard scenario: " + standardData);
 
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), standardData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, standardData);
             
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
+            
+            Map<String, Object> enrichedData = ruleResult.getEnrichedData();
 
             // Should route to auto-processing (no special conditions)
             assertEquals("AUTO_PROCESSING_QUEUE", enrichedData.get("processingQueue"),
@@ -179,10 +184,11 @@ public class AdvancedConditionalPatternsTest extends DemoTestBase {
 
             logger.info("Testing combined high-risk + high-value scenario: " + combinedData);
 
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), combinedData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, combinedData);
             
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
+            
+            Map<String, Object> enrichedData = ruleResult.getEnrichedData();
 
             // Should route to executive review (highest priority)
             assertEquals("EXECUTIVE_REVIEW_QUEUE", enrichedData.get("processingQueue"),

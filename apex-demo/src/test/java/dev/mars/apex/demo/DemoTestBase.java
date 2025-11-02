@@ -19,6 +19,7 @@ package dev.mars.apex.demo;
 import java.io.File;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.yaml.YamlConfigurationMerger;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
@@ -211,7 +212,9 @@ public abstract class DemoTestBase {
     protected Object testEnrichment(YamlRuleConfiguration config, Map<String, Object> testData) {
         try {
             logger.info("Testing enrichment with config and test data...");
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
 
             assertNotNull(result, "Enrichment result should not be null");
             logger.info("** Enrichment processing successful");
@@ -279,62 +282,12 @@ public abstract class DemoTestBase {
         return merged;
     }
 
-    // Local merge helper for tests (replicates core merge + enrichment-groups)
+    /**
+     * Helper method to merge YAML configurations for enrichment tests.
+     * Delegates to the public utility class in apex-core.
+     */
     private void mergeYamlForEnrichment(YamlRuleConfiguration target, YamlRuleConfiguration source) {
-        // Metadata: prefer target if already set (first wins)
-        if (target.getMetadata() == null && source.getMetadata() != null) {
-            target.setMetadata(source.getMetadata());
-        }
-        // Data sources
-        if (source.getDataSources() != null) {
-            if (target.getDataSources() == null) target.setDataSources(new java.util.ArrayList<>());
-            target.getDataSources().addAll(source.getDataSources());
-        }
-        // Data source refs
-        if (source.getDataSourceRefs() != null) {
-            if (target.getDataSourceRefs() == null) target.setDataSourceRefs(new java.util.ArrayList<>());
-            target.getDataSourceRefs().addAll(source.getDataSourceRefs());
-        }
-        // Rule refs
-        if (source.getRuleRefs() != null) {
-            if (target.getRuleRefs() == null) target.setRuleRefs(new java.util.ArrayList<>());
-            target.getRuleRefs().addAll(source.getRuleRefs());
-        }
-        // Data sinks
-        if (source.getDataSinks() != null) {
-            if (target.getDataSinks() == null) target.setDataSinks(new java.util.ArrayList<>());
-            target.getDataSinks().addAll(source.getDataSinks());
-        }
-        // Categories
-        if (source.getCategories() != null) {
-            if (target.getCategories() == null) target.setCategories(new java.util.ArrayList<>());
-            target.getCategories().addAll(source.getCategories());
-        }
-        // Rules
-        if (source.getRules() != null) {
-            if (target.getRules() == null) target.setRules(new java.util.ArrayList<>());
-            target.getRules().addAll(source.getRules());
-        }
-        // Rule groups
-        if (source.getRuleGroups() != null) {
-            if (target.getRuleGroups() == null) target.setRuleGroups(new java.util.ArrayList<>());
-            target.getRuleGroups().addAll(source.getRuleGroups());
-        }
-        // Enrichments
-        if (source.getEnrichments() != null) {
-            if (target.getEnrichments() == null) target.setEnrichments(new java.util.ArrayList<>());
-            target.getEnrichments().addAll(source.getEnrichments());
-        }
-        // Enrichment groups (additional to core merge)
-        if (source.getEnrichmentGroups() != null) {
-            if (target.getEnrichmentGroups() == null) target.setEnrichmentGroups(new java.util.ArrayList<>());
-            target.getEnrichmentGroups().addAll(source.getEnrichmentGroups());
-        }
-        // Rule chains
-        if (source.getRuleChains() != null) {
-            if (target.getRuleChains() == null) target.setRuleChains(new java.util.ArrayList<>());
-            target.getRuleChains().addAll(source.getRuleChains());
-        }
+        YamlConfigurationMerger.merge(target, source);
     }
 
     /**

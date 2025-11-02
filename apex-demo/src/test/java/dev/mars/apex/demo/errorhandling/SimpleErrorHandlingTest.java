@@ -17,6 +17,8 @@
 package dev.mars.apex.demo.errorhandling;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
@@ -63,7 +65,13 @@ public class SimpleErrorHandlingTest extends DemoTestBase {
         Map<String, Object> validData = new HashMap<>();
         validData.put("amount", 100.0);
 
-        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), validData, config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+
+        RuleResult ruleResult = engine.evaluate(config, validData);
+
+
+        Object result = ruleResult.getEnrichedData();
         assertNotNull(result, "Result should not be null");
         
         @SuppressWarnings("unchecked")
@@ -91,7 +99,13 @@ public class SimpleErrorHandlingTest extends DemoTestBase {
         Map<String, Object> invalidData = new HashMap<>();
         invalidData.put("amount", -100.0);
 
-        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), invalidData, config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+
+        RuleResult ruleResult = engine.evaluate(config, invalidData);
+
+
+        Object result = ruleResult.getEnrichedData();
         assertNotNull(result, "Result should not be null for invalid data");
         
         @SuppressWarnings("unchecked")
@@ -116,7 +130,13 @@ public class SimpleErrorHandlingTest extends DemoTestBase {
         Map<String, Object> nullData = new HashMap<>();
         nullData.put("amount", null);
 
-        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), nullData, config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+
+        RuleResult ruleResult = engine.evaluate(config, nullData);
+
+
+        Object result = ruleResult.getEnrichedData();
         assertNotNull(result, "Result should not be null for null data");
         
         @SuppressWarnings("unchecked")

@@ -20,6 +20,8 @@ import dev.mars.apex.demo.DemoTestBase;
 
 import dev.mars.apex.demo.util.TestContainerImages;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -166,7 +168,9 @@ public class PostgreSQLSimpleLookupTest extends DemoTestBase {
             logger.info("  Customer ID: {}", testData.get("customerId"));
             
             // Execute APEX enrichment with real PostgreSQL
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
             
             long responseTime = System.currentTimeMillis() - startTime;
             logger.info("Response Time: {}ms", responseTime);
@@ -226,7 +230,9 @@ public class PostgreSQLSimpleLookupTest extends DemoTestBase {
             testData.put("customerId", "CUST000001");
             
             // Execute enrichment
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
             
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;

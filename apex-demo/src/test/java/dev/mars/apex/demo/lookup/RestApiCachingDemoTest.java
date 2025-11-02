@@ -15,6 +15,9 @@
  */
 package dev.mars.apex.demo.lookup;
 
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 
 import org.junit.jupiter.api.*;
@@ -127,7 +130,9 @@ public class RestApiCachingDemoTest extends DemoTestBase {
         long startTime = System.currentTimeMillis();
 
         // First call - should take ~10 seconds (cache miss)
-        Object result1 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+        RulesEngine engine1 = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult1 = engine1.evaluate(config, testData);
+            Object result1 = ruleResult1.getEnrichedData();
 
         long firstCallTime = System.currentTimeMillis() - startTime;
         logger.info("First call completed in: {}ms", firstCallTime);
@@ -157,7 +162,9 @@ public class RestApiCachingDemoTest extends DemoTestBase {
         startTime = System.currentTimeMillis();
 
         // Second call - should be very fast (cache hit)
-        Object result2 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+        RulesEngine engine2 = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult2 = engine2.evaluate(config, testData);
+            Object result2 = ruleResult2.getEnrichedData();
 
         long secondCallTime = System.currentTimeMillis() - startTime;
         logger.info("Second call completed in: {}ms", secondCallTime);
@@ -228,7 +235,9 @@ public class RestApiCachingDemoTest extends DemoTestBase {
         long startTime = System.currentTimeMillis();
 
         // First call - should be fast but not cached
-        Object result1 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+        RulesEngine engine1 = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult1 = engine1.evaluate(config, testData);
+            Object result1 = ruleResult1.getEnrichedData();
 
         long firstCallTime = System.currentTimeMillis() - startTime;
         logger.info("First call completed in: {}ms", firstCallTime);
@@ -242,7 +251,9 @@ public class RestApiCachingDemoTest extends DemoTestBase {
         startTime = System.currentTimeMillis();
 
         // Second call - should be even faster (cache hit)
-        Object result2 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+        RulesEngine engine2 = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult2 = engine2.evaluate(config, testData);
+            Object result2 = ruleResult2.getEnrichedData();
 
         long secondCallTime = System.currentTimeMillis() - startTime;
         logger.info("Second call completed in: {}ms", secondCallTime);
@@ -298,7 +309,9 @@ public class RestApiCachingDemoTest extends DemoTestBase {
 
             long startTime = System.currentTimeMillis();
             logger.debug("DEBUG: About to call enrichmentProcessor.enrichObject for currency: {}", currency);
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
             long callTime = System.currentTimeMillis() - startTime;
             logger.debug("DEBUG: Call completed for currency: {} in {}ms", currency, callTime);
 

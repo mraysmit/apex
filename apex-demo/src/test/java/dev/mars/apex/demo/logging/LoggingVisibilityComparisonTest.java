@@ -18,7 +18,8 @@ package dev.mars.apex.demo.logging;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
@@ -122,8 +123,9 @@ class LoggingVisibilityComparisonTest {
             logger.info("🔍 WATCH THE LOG OUTPUT BELOW - Notice the clear SEVERE logs:");
             
             // Process enrichments - this will demonstrate the improved logging
-            processor.processEnrichments(config.getEnrichments(), testData, config);
-            
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            engine.evaluate(config, testData);
+
             logger.info("");
             logger.info("✅ Processing completed - Review the log output above");
             
@@ -168,8 +170,9 @@ class LoggingVisibilityComparisonTest {
             logger.info("🔍 Each SEVERE log provides full context for easy debugging:");
             
             // Process enrichments - this will demonstrate traceability
-            processor.processEnrichments(config.getEnrichments(), testData, config);
-            
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            engine.evaluate(config, testData);
+
             logger.info("");
             logger.info("✅ TRACEABILITY DEMONSTRATION COMPLETE");
             logger.info("📊 BENEFITS ACHIEVED:");

@@ -1,5 +1,8 @@
 package dev.mars.apex.demo.lookup;
 
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 
 /*
@@ -126,7 +129,9 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
         testData.put("approach", "real-apex-services");
         
         // Execute APEX enrichment processing
-        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
         
         // Validate enrichment results using proper casting pattern
         assertNotNull(result, "H2 custom parameters enrichment result should not be null");
@@ -181,7 +186,9 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
             testData.put("approach", "real-apex-services");
             
             // Execute APEX enrichment processing
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
             
             // Validate enrichment results
             assertNotNull(result, "Custom database initialization result should not be null for " + initializationType);
@@ -224,7 +231,9 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
             testData.put("approach", "real-apex-services");
             
             // Execute APEX enrichment processing
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
             
             // Validate enrichment results
             assertNotNull(result, "Parameter merging result should not be null for " + mergingType);
@@ -267,7 +276,9 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
             testData.put("approach", "real-apex-services");
             
             // Execute APEX enrichment processing
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
             
             // Validate enrichment results
             assertNotNull(result, "Compatibility mode testing result should not be null for " + compatibilityType);

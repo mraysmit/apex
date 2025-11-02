@@ -1,6 +1,8 @@
 package dev.mars.apex.demo.etl;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -92,7 +94,11 @@ public class PipelineConfigValidationTest extends DemoTestBase {
             YamlRuleConfiguration config = yamlLoader.loadFromFile(configFile.toString());
 
             // Execute actual enrichment operation
-            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), customerData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+            RuleResult ruleResult = engine.evaluate(config, customerData);
+
+            Object enrichmentResult = ruleResult.getEnrichedData();
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedResult = (Map<String, Object>) enrichmentResult;
 
@@ -138,7 +144,11 @@ public class PipelineConfigValidationTest extends DemoTestBase {
             YamlRuleConfiguration config = yamlLoader.loadFromFile(configFile.toString());
 
             // Execute calculation enrichment
-            Object calculationResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), transactionData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+            RuleResult ruleResult = engine.evaluate(config, transactionData);
+
+            Object calculationResult = ruleResult.getEnrichedData();
             @SuppressWarnings("unchecked")
             Map<String, Object> calculatedResult = (Map<String, Object>) calculationResult;
 
@@ -191,14 +201,22 @@ public class PipelineConfigValidationTest extends DemoTestBase {
 
             // Process high-value transaction (should trigger all enrichments)
             long startTime1 = System.currentTimeMillis();
-            Object enrichmentResult1 = enrichmentProcessor.processEnrichments(config.getEnrichments(), highValueData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+            RuleResult ruleResult = engine.evaluate(config, highValueData);
+
+            Object enrichmentResult1 = ruleResult.getEnrichedData();
             @SuppressWarnings("unchecked")
             Map<String, Object> result1 = (Map<String, Object>) enrichmentResult1;
             long duration1 = System.currentTimeMillis() - startTime1;
 
             // Process low-value transaction (should skip some enrichments)
             long startTime2 = System.currentTimeMillis();
-            Object enrichmentResult2 = enrichmentProcessor.processEnrichments(config.getEnrichments(), lowValueData, config);
+            RulesEngine engine2 = RulesEngine.fromYamlConfig(config);
+
+            RuleResult ruleResult2 = engine2.evaluate(config, lowValueData);
+
+            Object enrichmentResult2 = ruleResult2.getEnrichedData();
             @SuppressWarnings("unchecked")
             Map<String, Object> result2 = (Map<String, Object>) enrichmentResult2;
             long duration2 = System.currentTimeMillis() - startTime2;

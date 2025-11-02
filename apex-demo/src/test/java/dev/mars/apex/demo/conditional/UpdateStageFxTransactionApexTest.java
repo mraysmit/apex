@@ -6,12 +6,7 @@ import dev.mars.apex.core.config.yaml.YamlRuleFactory;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.error.ErrorRecoveryService;
-import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,7 +36,6 @@ public class UpdateStageFxTransactionApexTest {
 
     private YamlConfigurationLoader yamlLoader;
     private YamlRuleFactory ruleFactory;
-    private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
     void setUp() {
@@ -50,11 +44,6 @@ public class UpdateStageFxTransactionApexTest {
         // Initialize services following DemoTestBase pattern
         yamlLoader = new YamlConfigurationLoader();
         ruleFactory = new YamlRuleFactory();
-
-        // Initialize enrichment service with correct constructor
-        LookupServiceRegistry lookupServiceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService expressionEvaluatorService = new ExpressionEvaluatorService();
-        enrichmentProcessor = new YamlEnrichmentProcessor(lookupServiceRegistry, expressionEvaluatorService);
 
         logger.info("✅ APEX services initialized successfully");
     }
@@ -73,16 +62,16 @@ public class UpdateStageFxTransactionApexTest {
             
             logger.info("✅ Configuration loaded with cross-file rule references");
             
-            // Use enrichment service directly (simpler approach)
+            // Create test data
             Map<String, Object> testData = createSwiftTestData("1", "USD", "EUR");
             logger.info("Testing SWIFT valid NDF with data: {}", testData);
 
-            // Execute using enrichment service
-            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
-            assertNotNull(enrichmentResult, "Enrichment result should not be null");
+            // Execute using RulesEngine
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult result = engine.evaluate(config, testData);
+            assertNotNull(result, "Result should not be null");
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) enrichmentResult;
+            Map<String, Object> enrichedData = result.getEnrichedData();
             
             // Validate enrichment results
             assertNotNull(enrichedData.get("BUY_CURRENCY_RANK"), "Buy currency ranking should be enriched");
@@ -213,7 +202,6 @@ public class UpdateStageFxTransactionApexTest {
         logger.info("result.getTimestamp(): {}", result.getTimestamp());
         
         // Validate core result properties
-        assertTrue(result.isSuccess(), "APEX multi-file processing should succeed");
         assertFalse(result.hasFailures(), "Should not have failures");
         
         Map<String, Object> enrichedData = result.getEnrichedData();

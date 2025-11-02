@@ -18,8 +18,8 @@ package dev.mars.apex.demo.basic;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -41,13 +41,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(ColoredTestOutputExtension.class)
 class NestedFieldNavigationTest {
 
-    private YamlEnrichmentProcessor enrichmentProcessor;
     private YamlConfigurationLoader loader;
 
     @BeforeEach
     void setUp() {
-        ExpressionEvaluatorService expressionEvaluator = new ExpressionEvaluatorService();
-        enrichmentProcessor = new YamlEnrichmentProcessor(null, expressionEvaluator);
         loader = new YamlConfigurationLoader();
     }
 
@@ -85,17 +82,16 @@ class NestedFieldNavigationTest {
 
         System.out.println("Input data: " + inputData);
 
-        // Process enrichments
-        Object enrichedData = enrichmentProcessor.processEnrichments(config.getEnrichments(), inputData);
+        // Process through RulesEngine
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult result = engine.evaluate(config, inputData);
 
-        System.out.println("Enriched data: " + enrichedData);
+        System.out.println("Enriched data: " + result.getEnrichedData());
 
         // Verify enriched data
-        assertNotNull(enrichedData, "Enriched data should not be null");
-        assertTrue(enrichedData instanceof Map, "Enriched data should be a Map");
+        assertNotNull(result.getEnrichedData(), "Enriched data should not be null");
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> enrichedMap = (Map<String, Object>) enrichedData;
+        Map<String, Object> enrichedMap = result.getEnrichedData();
 
         // Verify nested fields were extracted
         assertEquals("USD", enrichedMap.get("trade_currency"),
@@ -155,17 +151,16 @@ class NestedFieldNavigationTest {
 
         System.out.println("Input data: " + inputData);
 
-        // Process enrichments
-        Object enrichedData = enrichmentProcessor.processEnrichments(config.getEnrichments(), inputData);
+        // Process through RulesEngine
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult result = engine.evaluate(config, inputData);
 
-        System.out.println("Enriched data: " + enrichedData);
+        System.out.println("Enriched data: " + result.getEnrichedData());
 
         // Verify enriched data
-        assertNotNull(enrichedData, "Enriched data should not be null");
-        assertTrue(enrichedData instanceof Map, "Enriched data should be a Map");
+        assertNotNull(result.getEnrichedData(), "Enriched data should not be null");
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> enrichedMap = (Map<String, Object>) enrichedData;
+        Map<String, Object> enrichedMap = result.getEnrichedData();
 
         // Verify deeply nested fields were extracted
         assertEquals("Goldman Sachs", enrichedMap.get("counterparty_name"),

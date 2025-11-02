@@ -15,6 +15,9 @@
  */
 package dev.mars.apex.demo.lookup;
 
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 
 import org.junit.jupiter.api.Test;
@@ -110,7 +113,9 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
 
         // Execute APEX enrichment processing - ALL logic in YAML
         logger.debug("Executing APEX enrichment processing...");
-        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
         logger.debug("✓ APEX enrichment processing completed");
 
         // Validate enrichment results
@@ -193,7 +198,9 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
 
             // Execute APEX enrichment processing
             logger.debug("Executing APEX enrichment for {}...", currency);
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
             logger.debug("✓ APEX enrichment completed for {}", currency);
 
             // Validate enrichment results
@@ -254,7 +261,9 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
 
             // Execute APEX enrichment processing
             logger.debug("Executing APEX enrichment for invalid currency {}...", invalidCurrency);
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
             logger.debug("✓ APEX enrichment completed for invalid currency {}", invalidCurrency);
 
             // Validate enrichment results - should not enrich with invalid currency
@@ -304,7 +313,9 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         logger.debug("Expected: Enrichment condition should fail, no lookup should be attempted");
 
         logger.debug("Executing APEX enrichment with null currency...");
-        Object resultNull = enrichmentProcessor.processEnrichments(config.getEnrichments(), testDataNull, config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult ruleResult = engine.evaluate(config, testDataNull);
+        Object resultNull = ruleResult.getEnrichedData();
         logger.debug("✓ APEX enrichment completed with null currency");
 
         assertNotNull(resultNull, "Result should not be null even with null currency");
@@ -331,7 +342,9 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         logger.debug("Expected: Enrichment condition should fail (length = 0), no lookup should be attempted");
 
         logger.debug("Executing APEX enrichment with empty currency...");
-        Object resultEmpty = enrichmentProcessor.processEnrichments(config.getEnrichments(), testDataEmpty, config);
+        RulesEngine engine2 = RulesEngine.fromYamlConfig(config);
+        RuleResult ruleResult2 = engine2.evaluate(config, testDataEmpty);
+        Object resultEmpty = ruleResult2.getEnrichedData();
         logger.debug("✓ APEX enrichment completed with empty currency");
 
         assertNotNull(resultEmpty, "Result should not be null even with empty currency");
@@ -389,7 +402,9 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         logger.debug("Expected: USD should be found in H2 database with name 'US Dollar' and active=true");
 
         logger.debug("Executing APEX enrichment with H2 database lookup for USD...");
-        Object resultValid = enrichmentProcessor.processEnrichments(config.getEnrichments(), testDataValid, config);
+        RulesEngine engine3 = RulesEngine.fromYamlConfig(config);
+        RuleResult ruleResult3 = engine3.evaluate(config, testDataValid);
+        Object resultValid = ruleResult3.getEnrichedData();
         logger.debug("✓ APEX enrichment completed for USD database lookup");
 
         assertNotNull(resultValid, "Result should not be null for valid currency");
@@ -420,7 +435,9 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         logger.debug("Expected: EUR should be found in H2 database with name 'Euro'");
 
         logger.debug("Executing APEX enrichment with H2 database lookup for EUR...");
-        Object resultEUR = enrichmentProcessor.processEnrichments(config.getEnrichments(), testDataEUR, config);
+        RulesEngine engine4 = RulesEngine.fromYamlConfig(config);
+        RuleResult ruleResult4 = engine4.evaluate(config, testDataEUR);
+        Object resultEUR = ruleResult4.getEnrichedData();
         logger.debug("✓ APEX enrichment completed for EUR database lookup");
 
         @SuppressWarnings("unchecked")
@@ -445,7 +462,9 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         logger.debug("Expected: XYZ should NOT be found in H2 database (no matching record)");
 
         logger.debug("Executing APEX enrichment with H2 database lookup for XYZ...");
-        Object resultInvalid = enrichmentProcessor.processEnrichments(config.getEnrichments(), testDataInvalid, config);
+        RulesEngine engine5 = RulesEngine.fromYamlConfig(config);
+        RuleResult ruleResult5 = engine5.evaluate(config, testDataInvalid);
+        Object resultInvalid = ruleResult5.getEnrichedData();
         logger.debug("✓ APEX enrichment completed for XYZ database lookup");
 
         assertNotNull(resultInvalid, "Result should not be null even for invalid currency");
@@ -476,7 +495,9 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         logger.debug("Expected: Enrichment condition should fail, no database lookup should be attempted");
 
         logger.debug("Executing APEX enrichment with null currency (H2 database)...");
-        Object resultNull = enrichmentProcessor.processEnrichments(config.getEnrichments(), testDataNull, config);
+        RulesEngine engine6 = RulesEngine.fromYamlConfig(config);
+        RuleResult ruleResult6 = engine6.evaluate(config, testDataNull);
+        Object resultNull = ruleResult6.getEnrichedData();
         logger.debug("✓ APEX enrichment completed with null currency (H2 database)");
 
         @SuppressWarnings("unchecked")

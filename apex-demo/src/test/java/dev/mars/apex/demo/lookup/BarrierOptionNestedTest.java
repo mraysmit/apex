@@ -18,6 +18,8 @@ package dev.mars.apex.demo.lookup;
 
 import dev.mars.apex.demo.DemoTestBase;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.slf4j.Logger;
@@ -69,7 +71,9 @@ public class BarrierOptionNestedTest extends DemoTestBase {
 
         // Execute APEX enrichment processing - ALL logic in YAML
         logger.info("Executing APEX enrichment processing...");
-        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), barrierOptionData, config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, barrierOptionData);
+            Object result = ruleResult.getEnrichedData();
         logger.info("Enrichment processing completed");
 
         // Validate APEX successfully processed nested structures

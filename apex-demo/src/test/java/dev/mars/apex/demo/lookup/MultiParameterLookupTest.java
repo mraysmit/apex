@@ -18,6 +18,8 @@ package dev.mars.apex.demo.lookup;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
@@ -246,10 +248,11 @@ public class MultiParameterLookupTest {
         try {
             // Load configuration and perform enrichment
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/MultiParameterLookupTest.yaml");
-            Map<String, Object> enrichedResult = new HashMap<>(inputData);
-            
+
             // Apply enrichment using APEX services
-            enrichmentProcessor.processEnrichments(config.getEnrichments(), enrichedResult);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, inputData);
+            Map<String, Object> enrichedResult = ruleResult.getEnrichedData();
 
             // Display results
             logger.info("\nEnrichment Results:");

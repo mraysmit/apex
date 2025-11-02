@@ -4,6 +4,7 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
@@ -56,7 +57,7 @@ class LoggingSeverityFlawTest {
 
     @Test
     @DisplayName("🚨 CRITICAL FLAW: Business logic failure logged as WARNING instead of ERROR")
-    void testBusinessLogicFailureLoggedAsWarning() {
+    void testBusinessLogicFailureLoggedAsWarning() throws Exception {
         System.out.println("=== DEMONSTRATING LOGGING SEVERITY FLAW ===");
 
         // Load YAML with invalid enrichment condition
@@ -79,7 +80,8 @@ class LoggingSeverityFlawTest {
         System.out.println("🚨 PROBLEM: These are business logic failures but logged as WARNING!");
 
         // Process enrichments - this will cause condition evaluation to fail
-        Object result = processor.processEnrichments(config.getEnrichments(), testData, config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult result = engine.evaluate(config, testData);
 
         System.out.println("📊 Processing completed.");
         System.out.println("🔍 Check the log output above - you should see:");
@@ -107,7 +109,7 @@ class LoggingSeverityFlawTest {
 
     @Test
     @DisplayName("🔍 Demonstrate Silent Failure Pattern")
-    void testSilentFailurePattern() {
+    void testSilentFailurePattern() throws Exception {
         System.out.println("=== DEMONSTRATING SILENT FAILURE PATTERN ===");
 
         // Load configuration with enrichments that will fail
@@ -129,7 +131,8 @@ class LoggingSeverityFlawTest {
         System.out.println("🚨 PROBLEM: These failures are logged as WARNING but are actually critical!");
 
         // Process enrichments - this will cause multiple condition evaluation failures
-        Object result = processor.processEnrichments(config.getEnrichments(), testData, config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult result = engine.evaluate(config, testData);
 
         System.out.println("📊 Processing completed.");
         System.out.println("🔍 Check the log output above - you should see multiple:");

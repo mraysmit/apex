@@ -316,88 +316,13 @@ public class YamlRulesEngineService {
      * Merge two YAML rule configurations.
      *
      * This method merges all components from the source configuration into the target configuration.
+     *
+     * @deprecated Use {@link YamlConfigurationMerger#merge(YamlRuleConfiguration, YamlRuleConfiguration)} instead.
+     *             This method is kept for backward compatibility and delegates to the utility class.
      */
+    @Deprecated
     private void mergeYamlConfigurations(YamlRuleConfiguration target, YamlRuleConfiguration source) {
-        // Merge metadata (prefer target if both exist)
-        if (target.getMetadata() == null && source.getMetadata() != null) {
-            target.setMetadata(source.getMetadata());
-        }
-
-        // Merge data sources
-        if (source.getDataSources() != null) {
-            if (target.getDataSources() == null) {
-                target.setDataSources(new ArrayList<>());
-            }
-            target.getDataSources().addAll(source.getDataSources());
-        }
-
-        // Merge data source references
-        if (source.getDataSourceRefs() != null) {
-            if (target.getDataSourceRefs() == null) {
-                target.setDataSourceRefs(new ArrayList<>());
-            }
-            target.getDataSourceRefs().addAll(source.getDataSourceRefs());
-        }
-
-        // Merge rule references
-        if (source.getRuleRefs() != null) {
-            if (target.getRuleRefs() == null) {
-                target.setRuleRefs(new ArrayList<>());
-            }
-            target.getRuleRefs().addAll(source.getRuleRefs());
-        }
-
-        // Merge data sinks
-        if (source.getDataSinks() != null) {
-            if (target.getDataSinks() == null) {
-                target.setDataSinks(new ArrayList<>());
-            }
-            target.getDataSinks().addAll(source.getDataSinks());
-        }
-
-        // Merge categories
-        if (source.getCategories() != null) {
-            if (target.getCategories() == null) {
-                target.setCategories(new ArrayList<>());
-            }
-            target.getCategories().addAll(source.getCategories());
-        }
-
-        // Merge rules
-        if (source.getRules() != null) {
-            if (target.getRules() == null) {
-                target.setRules(new ArrayList<>());
-            }
-            target.getRules().addAll(source.getRules());
-        }
-
-        // Merge rule groups
-        if (source.getRuleGroups() != null) {
-            if (target.getRuleGroups() == null) {
-                target.setRuleGroups(new ArrayList<>());
-            }
-            target.getRuleGroups().addAll(source.getRuleGroups());
-        }
-
-        // Merge enrichments
-        if (source.getEnrichments() != null) {
-            if (target.getEnrichments() == null) {
-                target.setEnrichments(new ArrayList<>());
-            }
-            target.getEnrichments().addAll(source.getEnrichments());
-        }
-
-        // Merge rule chains
-        if (source.getRuleChains() != null) {
-            if (target.getRuleChains() == null) {
-                target.setRuleChains(new ArrayList<>());
-            }
-            target.getRuleChains().addAll(source.getRuleChains());
-        }
-
-        LOGGER.fine("Merged YAML configuration with " +
-                   (source.getRules() != null ? source.getRules().size() : 0) + " rules and " +
-                   (source.getRuleGroups() != null ? source.getRuleGroups().size() : 0) + " rule groups");
+        YamlConfigurationMerger.merge(target, source);
     }
 
     /**

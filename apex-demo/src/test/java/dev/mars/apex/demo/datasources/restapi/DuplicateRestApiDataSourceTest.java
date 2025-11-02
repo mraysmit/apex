@@ -15,6 +15,9 @@
  */
 package dev.mars.apex.demo.datasources.restapi;
 
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import dev.mars.apex.demo.lookup.RestApiTestableServer;
 import dev.mars.apex.core.cache.ApexCacheManager;
@@ -106,7 +109,11 @@ public class DuplicateRestApiDataSourceTest extends DemoTestBase {
             logger.info("📋 Processing enrichments with 2 identical REST API endpoints...");
 
             // Process enrichments - this should create 1 dataset service and reuse it
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+            RuleResult ruleResult = engine.evaluate(config, testData);
+
+            Object result = ruleResult.getEnrichedData();
             assertNotNull(result, "Enrichment result should not be null");
 
             // Get cache statistics
@@ -166,7 +173,13 @@ public class DuplicateRestApiDataSourceTest extends DemoTestBase {
             Map<String, Object> testData = new HashMap<>();
             testData.put("currencyCode", "EUR");
             
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+            
+            RuleResult ruleResult = engine.evaluate(config, testData);
+
+            
+            Object result = ruleResult.getEnrichedData();
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
 
@@ -219,7 +232,11 @@ public class DuplicateRestApiDataSourceTest extends DemoTestBase {
             logger.info("🔄 Processing enrichments...");
 
             // Process with APEX - this should trigger both enrichments
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+            RuleResult ruleResult = engine.evaluate(config, testData);
+
+            Object result = ruleResult.getEnrichedData();
             assertNotNull(result, "Enrichment result should not be null");
 
             @SuppressWarnings("unchecked")

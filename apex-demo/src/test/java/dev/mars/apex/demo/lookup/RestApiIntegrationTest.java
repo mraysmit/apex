@@ -202,7 +202,9 @@ public class RestApiIntegrationTest extends DemoTestBase {
         enrichmentData.put("orderAmount", 2500.00);
         
         // Process through APEX - enrichment only
-        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), enrichmentData, config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, enrichmentData);
+            Object result = ruleResult.getEnrichedData();
         assertNotNull(result, "APEX processing should return enriched result");
         
         @SuppressWarnings("unchecked")
@@ -236,7 +238,9 @@ public class RestApiIntegrationTest extends DemoTestBase {
         unknownCustomerData.put("customerName", "");
         unknownCustomerData.put("orderAmount", 1000.00);
 
-        Object unknownResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), unknownCustomerData, config);
+        RulesEngine engine2 = RulesEngine.fromYamlConfig(config);
+        RuleResult ruleResult2 = engine2.evaluate(config, unknownCustomerData);
+        Object unknownResult = ruleResult2.getEnrichedData();
         @SuppressWarnings("unchecked")
         Map<String, Object> unknownEnriched = (Map<String, Object>) unknownResult;
 
@@ -254,7 +258,9 @@ public class RestApiIntegrationTest extends DemoTestBase {
         existingNameData.put("customerName", "Existing Customer Name");  // Not blank - should not be enriched
         existingNameData.put("orderAmount", 750.00);
 
-        Object existingResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), existingNameData, config);
+        RulesEngine engine3 = RulesEngine.fromYamlConfig(config);
+        RuleResult ruleResult3 = engine3.evaluate(config, existingNameData);
+        Object existingResult = ruleResult3.getEnrichedData();
         @SuppressWarnings("unchecked")
         Map<String, Object> existingEnriched = (Map<String, Object>) existingResult;
 

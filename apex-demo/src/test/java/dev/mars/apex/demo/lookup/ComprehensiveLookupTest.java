@@ -1,5 +1,8 @@
 package dev.mars.apex.demo.lookup;
 
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 
 import org.junit.jupiter.api.Test;
@@ -114,7 +117,9 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             testData.put("customerId", "CUST001");
             testData.put("lookupType", "CUSTOMER_PROFILE");
 
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
             assertNotNull(result, "Simple field lookup should complete successfully");
 
             @SuppressWarnings("unchecked")
@@ -152,7 +157,9 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             testData.put("productId", "PROD001");
             testData.put("lookupType", "CUSTOMER_PRODUCT");
 
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
             assertNotNull(result, "Compound key lookup should complete successfully");
 
             @SuppressWarnings("unchecked")
@@ -189,7 +196,9 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             testData.put("tradeId", "TRD001");
             testData.put("lookupDepth", "DEEP");
 
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
             assertNotNull(result, "Nested field lookup should complete successfully");
 
             @SuppressWarnings("unchecked")
@@ -228,7 +237,9 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             testData.put("currency", "USD");
             testData.put("lookupScope", "COMPREHENSIVE");
 
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
             assertNotNull(result, "Multi-parameter lookup should complete successfully");
 
             @SuppressWarnings("unchecked")
@@ -265,7 +276,9 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             testData.put("fileType", "JSON");
             testData.put("lookupKey", "REFERENCE_DATA");
 
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
             assertNotNull(result, "File-based lookup should complete successfully");
 
             @SuppressWarnings("unchecked")
@@ -303,7 +316,9 @@ public class ComprehensiveLookupTest extends DemoTestBase {
             testData.put("connectionMode", "POOLED");
             testData.put("lookupQuery", "SELECT_BY_ID");
 
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
             assertNotNull(result, "External data source lookup should complete successfully");
 
             @SuppressWarnings("unchecked")

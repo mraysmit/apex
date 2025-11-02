@@ -1,5 +1,8 @@
 package dev.mars.apex.demo.lookup;
 
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 
 /*
@@ -64,7 +67,9 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
             testData.put("region", "US-EAST");
 
             // Execute APEX enrichment processing
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
 
             // Validate enrichment results using proper casting pattern
             assertNotNull(result, "Compound key lookup enrichment result should not be null");
@@ -109,7 +114,9 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
                 testData.put("region", region);
 
                 // Execute APEX enrichment processing
-                Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+                RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
 
                 // Validate enrichment results
                 assertNotNull(result, "Compound key lookup result should not be null for " + customerId + "-" + region);
@@ -146,7 +153,9 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
             testData.put("region", "XX-UNKNOWN");
 
             // Execute APEX enrichment processing
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
 
             // Validate enrichment results - should handle gracefully
             assertNotNull(result, "Result should not be null even for non-existent compound key");

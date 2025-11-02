@@ -1,6 +1,8 @@
 package dev.mars.apex.demo.codes;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,7 +38,7 @@ public class EnrichmentCodesValidationSimple extends DemoTestBase {
      */
     @Test
     @DisplayName("SUCCESS: Enrichment with success code on match")
-    public void testEnrichmentSuccessCodeMappedToField() {
+    public void testEnrichmentSuccessCodeMappedToField() throws Exception {
         logger.info("=== Testing Enrichment Success Code on Match ===");
         logger.info("Scenario: Enrichment condition matches, success code is set");
 
@@ -50,12 +52,19 @@ public class EnrichmentCodesValidationSimple extends DemoTestBase {
         logger.info("BEFORE ENRICHMENT:");
         logger.info("  Dataset: {}", testData);
 
-        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
-        assertNotNull(result, "Enrichment result should not be null");
-        logger.info("Enrichment processing completed");
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> enrichedData = (Map<String, Object>) result;
+
+        RuleResult ruleResult = engine.evaluate(config, testData);
+
+
+        Map<String, Object> enrichedData = ruleResult.getEnrichedData();
+
+
+        assertNotNull(enrichedData, "Enrichment result should not be null");
+
+
+        logger.info("Enrichment processing completed");
 
         // Verify enrichment was applied
         assertEquals(150, enrichedData.get("validated_amount"), "Amount should be enriched");
@@ -74,7 +83,7 @@ public class EnrichmentCodesValidationSimple extends DemoTestBase {
      */
     @Test
     @DisplayName("ERROR: Enrichment with error code on no match")
-    public void testEnrichmentErrorCodeMappedToField() {
+    public void testEnrichmentErrorCodeMappedToField() throws Exception {
         logger.info("=== Testing Enrichment Error Code on No Match ===");
         logger.info("Scenario: Enrichment condition fails, error code is set");
 
@@ -88,12 +97,19 @@ public class EnrichmentCodesValidationSimple extends DemoTestBase {
         logger.info("BEFORE ENRICHMENT:");
         logger.info("  Dataset: {}", testData);
 
-        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
-        assertNotNull(result, "Enrichment result should not be null");
-        logger.info("Enrichment processing completed");
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> enrichedData = (Map<String, Object>) result;
+
+        RuleResult ruleResult = engine.evaluate(config, testData);
+
+
+        Map<String, Object> enrichedData = ruleResult.getEnrichedData();
+
+
+        assertNotNull(enrichedData, "Enrichment result should not be null");
+
+
+        logger.info("Enrichment processing completed");
 
         // Verify enrichment was not applied (condition failed)
         assertNull(enrichedData.get("validated_amount"), "Amount should not be enriched when condition fails");

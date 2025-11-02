@@ -17,6 +17,8 @@ package dev.mars.apex.demo.lookup;
  */
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
@@ -74,7 +76,9 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
             logger.info("  Product ID: {}", testData.get("productId"));
 
             // Execute APEX enrichment processing
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
 
             // Validate enrichment results
             assertNotNull(result, "JSON file lookup result should not be null");
@@ -130,7 +134,9 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
             logger.info("  Product ID: {}", testData.get("productId"));
 
             // Execute APEX enrichment processing
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
 
             // Validate enrichment results
             assertNotNull(result, "JSON file lookup result should not be null");
@@ -186,7 +192,9 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
                 Map<String, Object> testData = new HashMap<>();
                 testData.put("productId", productIds[i]);
 
-                Object result = enrichmentProcessor.processEnrichments(jsonConfig.getEnrichments(), testData, jsonConfig);
+                RulesEngine engine = RulesEngine.fromYamlConfig(jsonConfig);
+        RuleResult ruleResult = engine.evaluate(jsonConfig, testData);
+        Object result = ruleResult.getEnrichedData();
                 assertNotNull(result, "Result should not be null for " + productIds[i]);
 
                 @SuppressWarnings("unchecked")
@@ -229,7 +237,9 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
             logger.info("  Product ID: {}", testData.get("productId"));
 
             // Execute APEX enrichment processing
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
 
             // Validate enrichment results - should handle gracefully
             assertNotNull(result, "Result should not be null even for non-existent product");
@@ -263,21 +273,27 @@ public class FileSystemLookupDemoTest extends DemoTestBase {
             Map<String, Object> testData1 = new HashMap<>();
             testData1.put("productId", null);
 
-            Object result1 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData1, config);
+            RulesEngine engine1 = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult1 = engine1.evaluate(config, testData1);
+            Object result1 = ruleResult1.getEnrichedData();
             assertNotNull(result1, "Result should not be null for null productId");
 
             // Test with empty productId (should not trigger enrichment)
             Map<String, Object> testData2 = new HashMap<>();
             testData2.put("productId", "");
 
-            Object result2 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData2, config);
+            RulesEngine engine2 = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult2 = engine2.evaluate(config, testData2);
+            Object result2 = ruleResult2.getEnrichedData();
             assertNotNull(result2, "Result should not be null for empty productId");
 
             // Test with valid productId (should trigger enrichment)
             Map<String, Object> testData3 = new HashMap<>();
             testData3.put("productId", "PROD001");
 
-            Object result3 = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData3, config);
+            RulesEngine engine3 = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult3 = engine3.evaluate(config, testData3);
+            Object result3 = ruleResult3.getEnrichedData();
             assertNotNull(result3, "Result should not be null for valid productId");
 
             @SuppressWarnings("unchecked")

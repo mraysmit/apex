@@ -2,6 +2,8 @@ package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
@@ -71,7 +73,9 @@ class UseCase2ValidationFirstTest {
         LOGGER.info("📊 Valid Input Data: {}", validData);
 
         // Process with enrichment service (demonstrates sequential processing)
-        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), validData);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult ruleResult = engine.evaluate(config, validData);
+        Object result = ruleResult.getEnrichedData();
         assertNotNull(result, "Enrichment result should not be null");
 
         @SuppressWarnings("unchecked")

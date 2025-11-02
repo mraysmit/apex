@@ -1,6 +1,8 @@
 package dev.mars.apex.demo.enrichment;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -86,7 +88,11 @@ class ComprehensiveFinancialSettlementDemoTest extends DemoTestBase {
             logger.info("Input data: " + settlementData);
             
             // Use real APEX EnrichmentService to process multi-asset settlement
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), settlementData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+            RuleResult ruleResult = engine.evaluate(config, settlementData);
+
+            Object result = ruleResult.getEnrichedData();
             assertNotNull(result, "Multi-asset settlement processing result should not be null");
             
             // Validate the enriched result
@@ -161,7 +167,11 @@ class ComprehensiveFinancialSettlementDemoTest extends DemoTestBase {
             logger.info("Input data: " + crossBorderData);
             
             // Use real APEX EnrichmentService to process cross-border settlement
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), crossBorderData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+            RuleResult ruleResult = engine.evaluate(config, crossBorderData);
+
+            Object result = ruleResult.getEnrichedData();
             assertNotNull(result, "Cross-border settlement processing result should not be null");
             
             // Validate the enriched result
@@ -234,7 +244,11 @@ class ComprehensiveFinancialSettlementDemoTest extends DemoTestBase {
             logger.info("Input data: " + highValueData);
             
             // Use real APEX EnrichmentService to process high-value transactions
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), highValueData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+            RuleResult ruleResult = engine.evaluate(config, highValueData);
+
+            Object result = ruleResult.getEnrichedData();
             assertNotNull(result, "High-value transaction processing result should not be null");
             
             // Validate the enriched result

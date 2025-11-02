@@ -4,9 +4,6 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,7 +35,6 @@ public class UpdateStageFxTransactionMultiFileTest {
     private static final Logger logger = LoggerFactory.getLogger(UpdateStageFxTransactionMultiFileTest.class);
 
     private YamlConfigurationLoader yamlLoader;
-    private YamlEnrichmentProcessor enrichmentProcessor;
 
     @BeforeEach
     void setUp() {
@@ -46,11 +42,6 @@ public class UpdateStageFxTransactionMultiFileTest {
 
         // Initialize services following working pattern
         yamlLoader = new YamlConfigurationLoader();
-
-        // Initialize enrichment service with correct constructor
-        LookupServiceRegistry lookupServiceRegistry = new LookupServiceRegistry();
-        ExpressionEvaluatorService expressionEvaluatorService = new ExpressionEvaluatorService();
-        enrichmentProcessor = new YamlEnrichmentProcessor(lookupServiceRegistry, expressionEvaluatorService);
 
         logger.info("✅ APEX services initialized successfully");
     }
@@ -68,16 +59,16 @@ public class UpdateStageFxTransactionMultiFileTest {
             assertNotNull(config, "Configuration should be loaded from multi-file architecture");
             logger.info("✅ Configuration loaded with cross-file rule references");
             
-            // Use enrichment service directly (simpler approach for multi-file demo)
+            // Create test data
             Map<String, Object> testData = createSwiftTestData("USD", "EUR");
             logger.info("Testing multi-file architecture with data: {}", testData);
 
-            // Execute using enrichment service
-            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
-            assertNotNull(enrichmentResult, "Enrichment result should not be null");
+            // Execute using RulesEngine
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult result = engine.evaluate(config, testData);
+            assertNotNull(result, "Result should not be null");
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) enrichmentResult;
+            Map<String, Object> enrichedData = result.getEnrichedData();
 
             // Validate multi-file architecture results
             validateMultiFileResults(enrichedData, testData);

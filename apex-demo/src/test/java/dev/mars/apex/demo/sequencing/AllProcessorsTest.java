@@ -77,8 +77,10 @@ class AllProcessorsTest {
         LOGGER.info("🎯 Expected (if YAML order respected): riskScore=0.5, riskCategory=MEDIUM_RISK");
         
         try {
-            Object result = yamlEnrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
-            
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
+
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
             
@@ -177,8 +179,10 @@ class AllProcessorsTest {
         LOGGER.info("💰 Input: amount = {}", testData.get("amount"));
         
         try {
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData);
-            
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
+
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
             

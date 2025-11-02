@@ -17,6 +17,8 @@ package dev.mars.apex.demo.database;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
@@ -238,7 +240,9 @@ class VaultPasswordInjectionTest {
         logger.info("  Input data: {}", inputData);
         logger.info("  Testing that Vault-retrieved credentials are properly injected");
         
-        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), inputData);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult ruleResult = engine.evaluate(config, inputData);
+        Object result = ruleResult.getEnrichedData();
         @SuppressWarnings("unchecked")
         Map<String, Object> enrichedData = (Map<String, Object>) result;
         

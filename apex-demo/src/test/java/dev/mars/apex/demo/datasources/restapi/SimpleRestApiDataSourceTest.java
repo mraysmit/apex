@@ -15,6 +15,9 @@
  */
 package dev.mars.apex.demo.datasources.restapi;
 
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import dev.mars.apex.demo.lookup.RestApiTestableServer;
 
@@ -100,7 +103,11 @@ public class SimpleRestApiDataSourceTest extends DemoTestBase {
         logger.info("DEBUG: About to call enrichmentProcessor.enrichObject...");
 
         // Process with APEX
-        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+        RuleResult ruleResult = engine.evaluate(config, testData);
+
+        Object result = ruleResult.getEnrichedData();
         assertNotNull(result, "Enrichment result should not be null");
 
         logger.info("DEBUG: enrichmentProcessor.enrichObject completed");
@@ -145,7 +152,11 @@ public class SimpleRestApiDataSourceTest extends DemoTestBase {
         testData.put("requestId", "REQ123");
 
         // Process with APEX
-        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+        RuleResult ruleResult = engine.evaluate(config, testData);
+
+        Object result = ruleResult.getEnrichedData();
         assertNotNull(result, "Enrichment result should not be null");
 
         @SuppressWarnings("unchecked")
@@ -178,7 +189,11 @@ public class SimpleRestApiDataSourceTest extends DemoTestBase {
         testData.put("requestId", "REQ123");
 
         // Process with APEX
-        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+        RuleResult ruleResult = engine.evaluate(config, testData);
+
+        Object result = ruleResult.getEnrichedData();
         assertNotNull(result, "Enrichment result should not be null");
 
         @SuppressWarnings("unchecked")

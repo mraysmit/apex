@@ -16,6 +16,8 @@
 package dev.mars.apex.demo.conditional;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,9 +52,9 @@ public class UltraSimpleRuleOrTest extends DemoTestBase {
             testData.put("input", "A");
 
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/UltraSimpleRuleOrTest.yaml");
-            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> result = (Map<String, Object>) enrichmentResult;
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Map<String, Object> result = ruleResult.getEnrichedData();
 
             assertEquals("FIRST", result.get("output"), "Should map A to FIRST");
             logger.info("✅ Rule OR A test passed: " + result);
@@ -72,9 +74,9 @@ public class UltraSimpleRuleOrTest extends DemoTestBase {
             testData.put("input", "B");
 
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/UltraSimpleRuleOrTest.yaml");
-            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> result = (Map<String, Object>) enrichmentResult;
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Map<String, Object> result = ruleResult.getEnrichedData();
 
             assertEquals("SECOND", result.get("output"), "Should map B to SECOND");
             logger.info("✅ Rule OR B test passed: " + result);
@@ -94,9 +96,9 @@ public class UltraSimpleRuleOrTest extends DemoTestBase {
             testData.put("input", "C");
 
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/UltraSimpleRuleOrTest.yaml");
-            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> result = (Map<String, Object>) enrichmentResult;
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Map<String, Object> result = ruleResult.getEnrichedData();
 
             assertEquals("THIRD", result.get("output"), "Should map C to THIRD");
             logger.info("✅ Rule OR C test passed: " + result);
@@ -116,9 +118,9 @@ public class UltraSimpleRuleOrTest extends DemoTestBase {
             testData.put("input", "X");
 
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/UltraSimpleRuleOrTest.yaml");
-            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> result = (Map<String, Object>) enrichmentResult;
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Map<String, Object> result = ruleResult.getEnrichedData();
 
             assertNull(result.get("output"), "Should have no output when no rules match");
             logger.info("✅ Rule OR X test passed: " + result);

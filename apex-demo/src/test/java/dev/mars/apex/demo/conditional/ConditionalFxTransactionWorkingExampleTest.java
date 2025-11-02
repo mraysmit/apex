@@ -16,6 +16,8 @@
 package dev.mars.apex.demo.conditional;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -75,12 +77,13 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
             logger.info("Testing SWIFT standard NDF mapping with data: {}", data);
 
             // When: Process through APEX enrichments
-            Object enrichedResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), data, config);
-            assertNotNull(enrichedResult, "Enriched result should not be null");
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, data);
+            assertNotNull(ruleResult, "Enriched result should not be null");
 
             // Cast to Map for validation
-            @SuppressWarnings("unchecked")
-            Map<String, Object> result = (Map<String, Object>) enrichedResult;
+            
+            Map<String, Object> result = ruleResult.getEnrichedData();
 
             // Then: Validate conditional mapping results
             logger.info("✓ Enrichment completed. Validating results...");
@@ -147,11 +150,12 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
             logger.info("Testing SWIFT Y/N flag conversion with data: {}", data);
 
             // When: Process through APEX enrichments
-            Object enrichedResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), data, config);
-            assertNotNull(enrichedResult, "Enriched result should not be null");
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, data);
+            assertNotNull(ruleResult, "Enriched result should not be null");
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> result = (Map<String, Object>) enrichedResult;
+            
+            Map<String, Object> result = ruleResult.getEnrichedData();
 
             // Then: Validate Y flag conversion
             assertEquals("1", result.get("IS_NDF"), "Y flag should be converted to '1'");
@@ -192,11 +196,12 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
             logger.info("Testing REUTERS system-specific mapping with data: {}", data);
 
             // When: Process through APEX enrichments
-            Object enrichedResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), data, config);
-            assertNotNull(enrichedResult, "Enriched result should not be null");
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, data);
+            assertNotNull(ruleResult, "Enriched result should not be null");
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> result = (Map<String, Object>) enrichedResult;
+            
+            Map<String, Object> result = ruleResult.getEnrichedData();
 
             // Then: Validate REUTERS-specific conversion
             assertEquals("1", result.get("IS_NDF"), "REUTERS TRUE should be converted to '1'");
@@ -237,11 +242,12 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
             logger.info("Testing high-value transaction processing with amount: {}", data.get("NOTIONAL_AMOUNT"));
 
             // When: Process through APEX enrichments
-            Object enrichedResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), data, config);
-            assertNotNull(enrichedResult, "Enriched result should not be null");
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, data);
+            assertNotNull(ruleResult, "Enriched result should not be null");
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> result = (Map<String, Object>) enrichedResult;
+            
+            Map<String, Object> result = ruleResult.getEnrichedData();
 
             // Then: Validate high-value processing
             assertEquals("HIGH_VALUE_MANUAL_REVIEW", result.get("SETTLEMENT_INSTRUCTION"),
@@ -288,11 +294,12 @@ public class ConditionalFxTransactionWorkingExampleTest extends DemoTestBase {
             logger.info("Testing comprehensive audit trail with complex data: {}", data);
 
             // When: Process through APEX enrichments
-            Object enrichedResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), data, config);
-            assertNotNull(enrichedResult, "Enriched result should not be null");
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, data);
+            assertNotNull(ruleResult, "Enriched result should not be null");
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> result = (Map<String, Object>) enrichedResult;
+            
+            Map<String, Object> result = ruleResult.getEnrichedData();
 
             // Then: Validate comprehensive audit trail
             logger.info("✓ Enrichment completed. Validating audit trail...");

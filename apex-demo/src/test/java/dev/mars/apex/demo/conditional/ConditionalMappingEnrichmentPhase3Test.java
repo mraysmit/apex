@@ -17,6 +17,8 @@
 package dev.mars.apex.demo.conditional;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,12 +55,14 @@ public class ConditionalMappingEnrichmentPhase3Test extends DemoTestBase {
             logger.info("Testing highest priority rule with data: " + testData);
             
             // Process enrichments
-            Object enrichedData = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
-            
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Map<String, Object> enrichedData = ruleResult.getEnrichedData();
+
             assertNotNull(enrichedData);
             assertTrue(enrichedData instanceof Map);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> resultMap = (Map<String, Object>) enrichedData;
+
+            Map<String, Object> resultMap = enrichedData;
             
             // Should match highest priority rule
             assertEquals("HIGH_PRIORITY_NDF", resultMap.get("IS_NDF"));
@@ -88,12 +92,14 @@ public class ConditionalMappingEnrichmentPhase3Test extends DemoTestBase {
             logger.info("Testing medium priority rule with data: " + testData);
             
             // Process enrichments
-            Object enrichedData = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
-            
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Map<String, Object> enrichedData = ruleResult.getEnrichedData();
+
             assertNotNull(enrichedData);
             assertTrue(enrichedData instanceof Map);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> resultMap = (Map<String, Object>) enrichedData;
+
+            Map<String, Object> resultMap = enrichedData;
             
             // Should match medium priority rule
             assertEquals("N_SWIFT", resultMap.get("IS_NDF"));
@@ -123,12 +129,14 @@ public class ConditionalMappingEnrichmentPhase3Test extends DemoTestBase {
             logger.info("Testing other systems rule with data: " + testData);
             
             // Process enrichments
-            Object enrichedData = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
-            
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Map<String, Object> enrichedData = ruleResult.getEnrichedData();
+
             assertNotNull(enrichedData);
             assertTrue(enrichedData instanceof Map);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> resultMap = (Map<String, Object>) enrichedData;
+
+            Map<String, Object> resultMap = enrichedData;
             
             // Should match other systems rule
             assertEquals("OTHER_SYSTEM_VALUE", resultMap.get("IS_NDF"));
@@ -158,12 +166,14 @@ public class ConditionalMappingEnrichmentPhase3Test extends DemoTestBase {
             logger.info("Testing default rule fallback with data: " + testData);
             
             // Process enrichments
-            Object enrichedData = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
-            
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Map<String, Object> enrichedData = ruleResult.getEnrichedData();
+
             assertNotNull(enrichedData);
             assertTrue(enrichedData instanceof Map);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> resultMap = (Map<String, Object>) enrichedData;
+
+            Map<String, Object> resultMap = enrichedData;
             
             // Should match default rule
             assertEquals("DEFAULT_NDF", resultMap.get("IS_NDF"));

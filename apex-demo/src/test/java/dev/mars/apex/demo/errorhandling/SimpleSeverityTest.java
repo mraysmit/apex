@@ -17,6 +17,8 @@
 package dev.mars.apex.demo.errorhandling;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
@@ -63,7 +65,13 @@ public class SimpleSeverityTest extends DemoTestBase {
         Map<String, Object> lowAmount = new HashMap<>();
         lowAmount.put("amount", 50.0);
 
-        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), lowAmount, config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+
+        RuleResult ruleResult = engine.evaluate(config, lowAmount);
+
+
+        Object result = ruleResult.getEnrichedData();
         assertNotNull(result, "Result should not be null");
         
         @SuppressWarnings("unchecked")
@@ -76,7 +84,13 @@ public class SimpleSeverityTest extends DemoTestBase {
         Map<String, Object> highAmount = new HashMap<>();
         highAmount.put("amount", 1000.0);
 
-        Object highResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), highAmount, config);
+        RulesEngine engine2 = RulesEngine.fromYamlConfig(config);
+
+
+        RuleResult ruleResult2 = engine2.evaluate(config, highAmount);
+
+
+        Object highResult = ruleResult2.getEnrichedData();
         assertNotNull(highResult, "Result should not be null for high amount");
         
         @SuppressWarnings("unchecked")

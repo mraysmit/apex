@@ -3,6 +3,8 @@ package dev.mars.apex.demo.database;
 import dev.mars.apex.demo.DemoTestBase;
 import dev.mars.apex.demo.util.TestContainerImages;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +85,9 @@ public class PostgreSQLSimpleDatabaseConnectivityTest extends DemoTestBase {
             Map<String, Object> testData = new HashMap<>();
             testData.put("id", "1");
 
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
             assertNotNull(result, "Result should not be null");
 
             @SuppressWarnings("unchecked")

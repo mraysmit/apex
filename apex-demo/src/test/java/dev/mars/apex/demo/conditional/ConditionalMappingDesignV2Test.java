@@ -17,7 +17,8 @@ package dev.mars.apex.demo.conditional;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
@@ -52,9 +53,9 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
 
             // Load configuration and process
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingDesignV2Test.yaml");
-            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> result = (Map<String, Object>) enrichmentResult;
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Map<String, Object> result = ruleResult.getEnrichedData();
 
             // Verify rule group results are available
             assertNotNull(result, "Result should not be null");
@@ -86,9 +87,9 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
 
             // Load configuration and process
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingDesignV2Test.yaml");
-            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> result = (Map<String, Object>) enrichmentResult;
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Map<String, Object> result = ruleResult.getEnrichedData();
 
             // Verify rule group results are available
             assertNotNull(result, "Result should not be null");
@@ -120,9 +121,9 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
 
             // Load configuration and process
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingDesignV2Test.yaml");
-            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> result = (Map<String, Object>) enrichmentResult;
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Map<String, Object> result = ruleResult.getEnrichedData();
 
             // Verify rule group results are available
             assertNotNull(result, "Result should not be null");
@@ -154,9 +155,9 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
 
             // Load configuration and process
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingDesignV2Test.yaml");
-            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> result = (Map<String, Object>) enrichmentResult;
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Map<String, Object> result = ruleResult.getEnrichedData();
 
             // Verify rule group results are available
             assertNotNull(result, "Result should not be null");
@@ -188,9 +189,9 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
 
             // Load configuration and process
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/ConditionalMappingDesignV2Test.yaml");
-            Object enrichmentResult = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> result = (Map<String, Object>) enrichmentResult;
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Map<String, Object> result = ruleResult.getEnrichedData();
 
             // Verify rule group results are available
             assertNotNull(result, "Result should not be null");

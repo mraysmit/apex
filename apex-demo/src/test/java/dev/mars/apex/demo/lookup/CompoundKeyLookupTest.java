@@ -15,6 +15,9 @@
  */
 package dev.mars.apex.demo.lookup;
 
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 
 import org.junit.jupiter.api.Test;
@@ -73,7 +76,9 @@ public class CompoundKeyLookupTest extends DemoTestBase {
         testData.put("approach", "real-apex-services");
         
         // Execute APEX enrichment processing - ALL logic in YAML
-        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
         
         // Validate enrichment results
         assertNotNull(result, "Compound key lookup result should not be null");
@@ -149,7 +154,9 @@ public class CompoundKeyLookupTest extends DemoTestBase {
             testData.put("approach", "real-apex-services");
             
             // Execute APEX enrichment processing
-            Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
             
             // Validate enrichment results
             assertNotNull(result, "Compound key lookup result should not be null for " + customerId + "-" + region);
@@ -191,7 +198,9 @@ public class CompoundKeyLookupTest extends DemoTestBase {
         testData.put("approach", "real-apex-services");
 
         // Execute APEX enrichment processing
-        Object result = enrichmentProcessor.processEnrichments(config.getEnrichments(), testData, config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult ruleResult = engine.evaluate(config, testData);
+            Object result = ruleResult.getEnrichedData();
 
         // Validate enrichment results for LATAM customer
         assertNotNull(result, "Compound key lookup result should not be null for CUST006-LATAM");
@@ -241,7 +250,9 @@ public class CompoundKeyLookupTest extends DemoTestBase {
         testDataNullCustomer.put("region", "NA");
         testDataNullCustomer.put("approach", "real-apex-services");
         
-        Object resultNullCustomer = enrichmentProcessor.processEnrichments(config.getEnrichments(), testDataNullCustomer, config);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult ruleResult = engine.evaluate(config, testDataNullCustomer);
+        Object resultNullCustomer = ruleResult.getEnrichedData();
         assertNotNull(resultNullCustomer, "Result should not be null even with null customer ID");
         @SuppressWarnings("unchecked")
         Map<String, Object> enrichedDataNullCustomer = (Map<String, Object>) resultNullCustomer;
@@ -253,7 +264,9 @@ public class CompoundKeyLookupTest extends DemoTestBase {
         testDataNullRegion.put("region", null);
         testDataNullRegion.put("approach", "real-apex-services");
         
-        Object resultNullRegion = enrichmentProcessor.processEnrichments(config.getEnrichments(), testDataNullRegion, config);
+        RulesEngine engine2 = RulesEngine.fromYamlConfig(config);
+        RuleResult ruleResult2 = engine2.evaluate(config, testDataNullRegion);
+        Object resultNullRegion = ruleResult2.getEnrichedData();
         assertNotNull(resultNullRegion, "Result should not be null even with null region");
         @SuppressWarnings("unchecked")
         Map<String, Object> enrichedDataNullRegion = (Map<String, Object>) resultNullRegion;
@@ -263,7 +276,9 @@ public class CompoundKeyLookupTest extends DemoTestBase {
         Map<String, Object> testDataMissing = new HashMap<>();
         testDataMissing.put("approach", "real-apex-services");
         
-        Object resultMissing = enrichmentProcessor.processEnrichments(config.getEnrichments(), testDataMissing, config);
+        RulesEngine engine3 = RulesEngine.fromYamlConfig(config);
+        RuleResult ruleResult3 = engine3.evaluate(config, testDataMissing);
+        Object resultMissing = ruleResult3.getEnrichedData();
         assertNotNull(resultMissing, "Result should not be null even with missing fields");
         @SuppressWarnings("unchecked")
         Map<String, Object> enrichedDataMissing = (Map<String, Object>) resultMissing;
