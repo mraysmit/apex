@@ -16,8 +16,7 @@
 
 package dev.mars.apex.demo.errorhandling;
 
-import dev.mars.apex.core.service.scenario.DataTypeScenarioService;
-import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import dev.mars.apex.demo.DemoTestBase;
@@ -54,18 +53,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SimpleFailurePolicyReviewTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(SimpleFailurePolicyReviewTest.class);
-    
-    private DataTypeScenarioService scenarioService;
 
     @BeforeEach
     public void setUp() {
         super.setUp(); // Call parent setup to initialize APEX services
         logger.info("Setting up flag-for-review failure policy test environment");
-
-        // Initialize scenario service - it creates its own dependencies
-        scenarioService = new DataTypeScenarioService();
-
-        logger.info("✓ Test environment initialized with DataTypeScenarioService");
+        logger.info("✓ Test environment initialized for RulesEngine scenario testing");
     }
 
     @Test
@@ -73,10 +66,8 @@ public class SimpleFailurePolicyReviewTest extends DemoTestBase {
     void testFlagForReviewFailurePolicy() throws Exception {
         logger.info("=== Testing Flag For Review Failure Policy ===");
 
-        // Load flag-for-review policy scenario
-        scenarioService.loadScenarios("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyReviewTest.yaml");
-        ScenarioConfiguration scenario = scenarioService.getScenario("flag-for-review-test");
-        assertNotNull(scenario, "Flag for review scenario should be loaded");
+        // Load flag-for-review policy scenario using RulesEngine
+        RulesEngine engine = RulesEngine.fromScenarioRegistry("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyReviewTest.yaml");
 
         // Create test data that will cause validation stage to fail
         Map<String, Object> invalidData = new HashMap<>();
@@ -84,11 +75,8 @@ public class SimpleFailurePolicyReviewTest extends DemoTestBase {
         // Missing 'amount' and 'customerName' - will cause validation rules to fail
 
         // Execute scenario
-        Object result = scenarioService.processDataWithScenario(invalidData, scenario);
-        assertNotNull(result, "Result should not be null");
-        assertTrue(result instanceof ScenarioExecutionResult, "Result should be ScenarioExecutionResult");
-
-        ScenarioExecutionResult scenarioResult = (ScenarioExecutionResult) result;
+        ScenarioExecutionResult scenarioResult = engine.evaluateScenario("flag-for-review-test", invalidData);
+        assertNotNull(scenarioResult, "Result should not be null");
 
         // Verify flag-for-review policy behavior
         assertFalse(scenarioResult.isTerminated(), "Scenario should not be terminated");
@@ -109,18 +97,15 @@ public class SimpleFailurePolicyReviewTest extends DemoTestBase {
     void testReviewPolicyWithSuccessfulStages() throws Exception {
         logger.info("=== Testing Review Policy with Successful Subsequent Stages ===");
 
-        // Load scenario
-        scenarioService.loadScenarios("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyReviewTest.yaml");
-        ScenarioConfiguration scenario = scenarioService.getScenario("flag-for-review-test");
-        assertNotNull(scenario, "Flag for review scenario should be loaded");
+        // Load scenario using RulesEngine
+        RulesEngine engine = RulesEngine.fromScenarioRegistry("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyReviewTest.yaml");
 
         // Create test data that will cause first stage to fail but others to succeed
         Map<String, Object> mixedData = new HashMap<>();
         mixedData.put("testField", "testValue");
 
         // Execute scenario
-        Object result = scenarioService.processDataWithScenario(mixedData, scenario);
-        ScenarioExecutionResult scenarioResult = (ScenarioExecutionResult) result;
+        ScenarioExecutionResult scenarioResult = engine.evaluateScenario("flag-for-review-test", mixedData);
 
         // Verify review behavior with mixed results
         assertTrue(scenarioResult.requiresReview(), "Scenario should require review");

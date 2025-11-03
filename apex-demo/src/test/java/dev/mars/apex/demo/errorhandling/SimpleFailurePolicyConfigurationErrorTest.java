@@ -1,7 +1,6 @@
 package dev.mars.apex.demo.errorhandling;
 
-import dev.mars.apex.core.service.scenario.DataTypeScenarioService;
-import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import dev.mars.apex.demo.DemoTestBase;
@@ -35,17 +34,11 @@ public class SimpleFailurePolicyConfigurationErrorTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(SimpleFailurePolicyConfigurationErrorTest.class);
 
-    private DataTypeScenarioService scenarioService;
-
     @BeforeEach
     public void setUp() {
         super.setUp(); // Call parent setup to initialize APEX services
         logger.info("Setting up configuration error handling test environment");
-
-        // Initialize scenario service - it creates its own dependencies
-        scenarioService = new DataTypeScenarioService();
-
-        logger.info("✅ Test environment initialized with DataTypeScenarioService");
+        logger.info("✅ Test environment initialized for RulesEngine scenario testing");
     }
 
     @Test
@@ -53,10 +46,8 @@ public class SimpleFailurePolicyConfigurationErrorTest extends DemoTestBase {
     void testMissingFieldMappingsInCalculationEnrichment() throws Exception {
         logger.info("=== Testing Missing Field-Mappings Configuration Error ===");
 
-        // Load configuration error test scenario
-        scenarioService.loadScenarios("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyConfigurationErrorTest.yaml");
-        ScenarioConfiguration scenario = scenarioService.getScenario("config-error-continue-test");
-        assertNotNull(scenario, "Configuration error test scenario should be loaded");
+        // Load configuration error test scenario using RulesEngine
+        RulesEngine engine = RulesEngine.fromScenarioRegistry("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyConfigurationErrorTest.yaml");
 
         // Test data that will trigger validation failure AND configuration error
         Map<String, Object> testData = new HashMap<>();
@@ -64,11 +55,8 @@ public class SimpleFailurePolicyConfigurationErrorTest extends DemoTestBase {
         // Deliberately missing 'amount' and 'customerName' to trigger validation failure
 
         // Execute scenario - this should NOT throw an exception
-        Object resultObj = scenarioService.processDataWithScenario(testData, scenario);
-        assertNotNull(resultObj, "Result should not be null - processing should complete gracefully");
-        assertTrue(resultObj instanceof ScenarioExecutionResult, "Result should be ScenarioExecutionResult");
-
-        ScenarioExecutionResult result = (ScenarioExecutionResult) resultObj;
+        ScenarioExecutionResult result = engine.evaluateScenario("config-error-continue-test", testData);
+        assertNotNull(result, "Result should not be null - processing should complete gracefully");
 
         // Validate that the scenario was not terminated (continue-with-warnings policy)
         assertFalse(result.isTerminated(), "Scenario should not be terminated with continue-with-warnings policy");
@@ -99,21 +87,16 @@ public class SimpleFailurePolicyConfigurationErrorTest extends DemoTestBase {
     void testConfigurationErrorWithTerminatePolicy() throws Exception {
         logger.info("=== Testing Configuration Error with Terminate Policy ===");
 
-        // Load terminate policy scenario
-        scenarioService.loadScenarios("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyConfigurationErrorTest-terminate.yaml");
-        ScenarioConfiguration scenario = scenarioService.getScenario("config-error-terminate-test");
-        assertNotNull(scenario, "Configuration error terminate test scenario should be loaded");
+        // Load terminate policy scenario using RulesEngine
+        RulesEngine engine = RulesEngine.fromScenarioRegistry("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyConfigurationErrorTest-terminate.yaml");
 
         // Test data
         Map<String, Object> testData = new HashMap<>();
         testData.put("tradeId", "TEST-002");
 
         // Execute scenario with terminate policy
-        Object resultObj = scenarioService.processDataWithScenario(testData, scenario);
-        assertNotNull(resultObj, "Result should not be null - processing should complete gracefully");
-        assertTrue(resultObj instanceof ScenarioExecutionResult, "Result should be ScenarioExecutionResult");
-
-        ScenarioExecutionResult result = (ScenarioExecutionResult) resultObj;
+        ScenarioExecutionResult result = engine.evaluateScenario("config-error-terminate-test", testData);
+        assertNotNull(result, "Result should not be null - processing should complete gracefully");
 
         // Validate graceful termination without exceptions
         assertTrue(result.isTerminated(), "Scenario should be terminated due to terminate policy");
@@ -140,21 +123,16 @@ public class SimpleFailurePolicyConfigurationErrorTest extends DemoTestBase {
     void testMultipleConfigurationErrors() throws Exception {
         logger.info("=== Testing Multiple Configuration Errors ===");
 
-        // Load multiple errors scenario
-        scenarioService.loadScenarios("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyConfigurationErrorTest-multiple.yaml");
-        ScenarioConfiguration scenario = scenarioService.getScenario("config-error-multiple-test");
-        assertNotNull(scenario, "Configuration error multiple test scenario should be loaded");
+        // Load multiple errors scenario using RulesEngine
+        RulesEngine engine = RulesEngine.fromScenarioRegistry("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyConfigurationErrorTest-multiple.yaml");
 
         // Test data
         Map<String, Object> testData = new HashMap<>();
         testData.put("tradeId", "TEST-003");
 
         // Execute scenario with multiple configuration errors
-        Object resultObj = scenarioService.processDataWithScenario(testData, scenario);
-        assertNotNull(resultObj, "Result should not be null");
-        assertTrue(resultObj instanceof ScenarioExecutionResult, "Result should be ScenarioExecutionResult");
-
-        ScenarioExecutionResult result = (ScenarioExecutionResult) resultObj;
+        ScenarioExecutionResult result = engine.evaluateScenario("config-error-multiple-test", testData);
+        assertNotNull(result, "Result should not be null");
 
         // Validate graceful handling of multiple errors
         assertFalse(result.isTerminated(), "Should continue with warnings despite multiple errors");

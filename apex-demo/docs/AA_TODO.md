@@ -19,6 +19,8 @@
     - Data flow tracking: input/output snapshots at each execution step
     - Multi-system support: distinguish and query executions by external system (Murex, Calypso, Bloomberg, etc.)
 
-- performance harness 
+- **performance harness** 
 - 
+
+
 - apex config browser with  dependency tree with sub-directory

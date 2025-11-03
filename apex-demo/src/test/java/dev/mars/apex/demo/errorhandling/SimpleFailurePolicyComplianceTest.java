@@ -16,8 +16,7 @@
 
 package dev.mars.apex.demo.errorhandling;
 
-import dev.mars.apex.core.service.scenario.DataTypeScenarioService;
-import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import dev.mars.apex.demo.DemoTestBase;
@@ -35,14 +34,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Simple Failure Policy Compliance Test - demonstrates APEX compliance rule processing.
- * 
+ *
  * This test focuses specifically on compliance stage behavior:
  * - How compliance rules execute after validation and enrichment stages
  * - How compliance checks work with different data conditions
  * - How compliance results are captured and reported
  * - How compliance stages handle various failure policies
  *
- * Uses DataTypeScenarioService to execute compliance scenarios and verifies
+ * Uses RulesEngine to execute compliance scenarios and verifies
  * that compliance processing works correctly under various conditions.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
@@ -54,18 +53,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SimpleFailurePolicyComplianceTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(SimpleFailurePolicyComplianceTest.class);
-    
-    private DataTypeScenarioService scenarioService;
 
     @BeforeEach
     public void setUp() {
         super.setUp(); // Call parent setup to initialize APEX services
         logger.info("Setting up compliance failure policy test environment");
-
-        // Initialize scenario service - it creates its own dependencies
-        scenarioService = new DataTypeScenarioService();
-
-        logger.info("✓ Test environment initialized with DataTypeScenarioService");
+        logger.info("✓ Test environment initialized for RulesEngine scenario testing");
     }
 
     @Test
@@ -73,10 +66,8 @@ public class SimpleFailurePolicyComplianceTest extends DemoTestBase {
     void testComplianceAfterPreviousFailures() throws Exception {
         logger.info("=== Testing Compliance After Previous Stage Failures ===");
 
-        // Load compliance scenario
-        scenarioService.loadScenarios("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyComplianceTest.yaml");
-        ScenarioConfiguration scenario = scenarioService.getScenario("compliance-test");
-        assertNotNull(scenario, "Compliance scenario should be loaded");
+        // Load compliance scenario using RulesEngine
+        RulesEngine engine = RulesEngine.fromScenarioRegistry("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyComplianceTest.yaml");
 
         // Create test data that may cause earlier stages to fail but compliance to proceed
         Map<String, Object> testData = new HashMap<>();
@@ -86,11 +77,8 @@ public class SimpleFailurePolicyComplianceTest extends DemoTestBase {
         // Missing some validation fields but has compliance fields
 
         // Execute scenario
-        Object result = scenarioService.processDataWithScenario(testData, scenario);
-        assertNotNull(result, "Result should not be null");
-        assertTrue(result instanceof ScenarioExecutionResult, "Result should be ScenarioExecutionResult");
-
-        ScenarioExecutionResult scenarioResult = (ScenarioExecutionResult) result;
+        ScenarioExecutionResult scenarioResult = engine.evaluateScenario("compliance-test", testData);
+        assertNotNull(scenarioResult, "Result should not be null");
 
         // Verify compliance executed
         assertFalse(scenarioResult.isTerminated(), "Scenario should not be terminated");
@@ -106,10 +94,8 @@ public class SimpleFailurePolicyComplianceTest extends DemoTestBase {
     void testComplianceWithVariousDataConditions() throws Exception {
         logger.info("=== Testing Compliance with Various Data Conditions ===");
 
-        // Load compliance scenario
-        scenarioService.loadScenarios("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyComplianceTest.yaml");
-        ScenarioConfiguration scenario = scenarioService.getScenario("compliance-test");
-        assertNotNull(scenario, "Compliance scenario should be loaded");
+        // Load compliance scenario using RulesEngine
+        RulesEngine engine = RulesEngine.fromScenarioRegistry("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyComplianceTest.yaml");
 
         // Test with high-value transaction
         Map<String, Object> highValueData = new HashMap<>();
@@ -119,8 +105,7 @@ public class SimpleFailurePolicyComplianceTest extends DemoTestBase {
         highValueData.put("customerTier", "PREMIUM");
 
         // Execute scenario
-        Object result = scenarioService.processDataWithScenario(highValueData, scenario);
-        ScenarioExecutionResult scenarioResult = (ScenarioExecutionResult) result;
+        ScenarioExecutionResult scenarioResult = engine.evaluateScenario("compliance-test", highValueData);
 
         // Verify compliance processing
         assertNotNull(scenarioResult, "Scenario result should not be null");
@@ -135,10 +120,8 @@ public class SimpleFailurePolicyComplianceTest extends DemoTestBase {
     void testComplianceFailurePolicyBehavior() throws Exception {
         logger.info("=== Testing Compliance Failure Policy Behavior ===");
 
-        // Load compliance scenario
-        scenarioService.loadScenarios("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyComplianceTest.yaml");
-        ScenarioConfiguration scenario = scenarioService.getScenario("compliance-test");
-        assertNotNull(scenario, "Compliance scenario should be loaded");
+        // Load compliance scenario using RulesEngine
+        RulesEngine engine = RulesEngine.fromScenarioRegistry("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyComplianceTest.yaml");
 
         // Create test data that may trigger compliance issues
         Map<String, Object> problematicData = new HashMap<>();
@@ -147,8 +130,7 @@ public class SimpleFailurePolicyComplianceTest extends DemoTestBase {
         problematicData.put("amount", 10000000.0);
 
         // Execute scenario
-        Object result = scenarioService.processDataWithScenario(problematicData, scenario);
-        ScenarioExecutionResult scenarioResult = (ScenarioExecutionResult) result;
+        ScenarioExecutionResult scenarioResult = engine.evaluateScenario("compliance-test", problematicData);
 
         // Verify compliance failure handling
         assertNotNull(scenarioResult, "Result should not be null even with compliance issues");

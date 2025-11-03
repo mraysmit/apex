@@ -16,8 +16,7 @@
 
 package dev.mars.apex.demo.errorhandling;
 
-import dev.mars.apex.core.service.scenario.DataTypeScenarioService;
-import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import dev.mars.apex.demo.DemoTestBase;
@@ -54,18 +53,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SimpleFailurePolicyValidationTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(SimpleFailurePolicyValidationTest.class);
-    
-    private DataTypeScenarioService scenarioService;
 
     @BeforeEach
     public void setUp() {
         super.setUp(); // Call parent setup to initialize APEX services
         logger.info("Setting up validation failure policy test environment");
-
-        // Initialize scenario service - it creates its own dependencies
-        scenarioService = new DataTypeScenarioService();
-
-        logger.info("✓ Test environment initialized with DataTypeScenarioService");
+        logger.info("✓ Test environment initialized for RulesEngine scenario testing");
     }
 
     @Test
@@ -73,10 +66,8 @@ public class SimpleFailurePolicyValidationTest extends DemoTestBase {
     void testValidationRuleFailures() throws Exception {
         logger.info("=== Testing Validation Rule Failures ===");
 
-        // Load validation scenario
-        scenarioService.loadScenarios("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyValidationTest.yaml");
-        ScenarioConfiguration scenario = scenarioService.getScenario("validation-test");
-        assertNotNull(scenario, "Validation scenario should be loaded");
+        // Load validation scenario using RulesEngine
+        RulesEngine engine = RulesEngine.fromScenarioRegistry("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyValidationTest.yaml");
 
         // Create test data with missing required fields
         Map<String, Object> invalidData = new HashMap<>();
@@ -84,11 +75,8 @@ public class SimpleFailurePolicyValidationTest extends DemoTestBase {
         // Missing 'amount', 'customerName', 'tradeId' - will cause validation rules to fail
 
         // Execute scenario
-        Object result = scenarioService.processDataWithScenario(invalidData, scenario);
-        assertNotNull(result, "Result should not be null");
-        assertTrue(result instanceof ScenarioExecutionResult, "Result should be ScenarioExecutionResult");
-
-        ScenarioExecutionResult scenarioResult = (ScenarioExecutionResult) result;
+        ScenarioExecutionResult scenarioResult = engine.evaluateScenario("validation-test", invalidData);
+        assertNotNull(scenarioResult, "Result should not be null");
 
         // Verify validation failure behavior
         assertFalse(scenarioResult.isSuccessful(), "Scenario should not be successful due to validation failures");
@@ -105,10 +93,8 @@ public class SimpleFailurePolicyValidationTest extends DemoTestBase {
     void testValidationRulesWithValidData() throws Exception {
         logger.info("=== Testing Validation Rules with Valid Data ===");
 
-        // Load validation scenario
-        scenarioService.loadScenarios("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyValidationTest.yaml");
-        ScenarioConfiguration scenario = scenarioService.getScenario("validation-test");
-        assertNotNull(scenario, "Validation scenario should be loaded");
+        // Load validation scenario using RulesEngine
+        RulesEngine engine = RulesEngine.fromScenarioRegistry("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyValidationTest.yaml");
 
         // Create test data with all required fields
         Map<String, Object> validData = new HashMap<>();
@@ -117,8 +103,7 @@ public class SimpleFailurePolicyValidationTest extends DemoTestBase {
         validData.put("tradeId", "TRADE-12345");
 
         // Execute scenario
-        Object result = scenarioService.processDataWithScenario(validData, scenario);
-        ScenarioExecutionResult scenarioResult = (ScenarioExecutionResult) result;
+        ScenarioExecutionResult scenarioResult = engine.evaluateScenario("validation-test", validData);
 
         // Verify validation success behavior
         assertTrue(scenarioResult.isSuccessful() || scenarioResult.getFailedStages().isEmpty(),
@@ -135,10 +120,8 @@ public class SimpleFailurePolicyValidationTest extends DemoTestBase {
     void testValidationSpelExceptionHandling() throws Exception {
         logger.info("=== Testing Validation SpEL Exception Handling ===");
 
-        // Load validation scenario
-        scenarioService.loadScenarios("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyValidationTest.yaml");
-        ScenarioConfiguration scenario = scenarioService.getScenario("validation-test");
-        assertNotNull(scenario, "Validation scenario should be loaded");
+        // Load validation scenario using RulesEngine
+        RulesEngine engine = RulesEngine.fromScenarioRegistry("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyValidationTest.yaml");
 
         // Create test data that will cause SpEL exceptions
         Map<String, Object> problematicData = new HashMap<>();
@@ -146,8 +129,7 @@ public class SimpleFailurePolicyValidationTest extends DemoTestBase {
         // All required fields missing - will cause SpEL "property not found" exceptions
 
         // Execute scenario
-        Object result = scenarioService.processDataWithScenario(problematicData, scenario);
-        ScenarioExecutionResult scenarioResult = (ScenarioExecutionResult) result;
+        ScenarioExecutionResult scenarioResult = engine.evaluateScenario("validation-test", problematicData);
 
         // Verify SpEL exception handling
         assertNotNull(scenarioResult, "Result should not be null even with SpEL exceptions");

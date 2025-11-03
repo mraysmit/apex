@@ -16,8 +16,7 @@
 
 package dev.mars.apex.demo.errorhandling;
 
-import dev.mars.apex.core.service.scenario.DataTypeScenarioService;
-import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import dev.mars.apex.demo.DemoTestBase;
@@ -54,18 +53,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SimpleFailurePolicyContinueTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(SimpleFailurePolicyContinueTest.class);
-    
-    private DataTypeScenarioService scenarioService;
 
     @BeforeEach
     public void setUp() {
         super.setUp(); // Call parent setup to initialize APEX services
         logger.info("Setting up continue-with-warnings failure policy test environment");
-
-        // Initialize scenario service - it creates its own dependencies
-        scenarioService = new DataTypeScenarioService();
-
-        logger.info("✓ Test environment initialized with DataTypeScenarioService");
+        logger.info("✓ Test environment initialized for RulesEngine scenario testing");
     }
 
     @Test
@@ -73,10 +66,8 @@ public class SimpleFailurePolicyContinueTest extends DemoTestBase {
     void testContinueWithWarningsFailurePolicy() throws Exception {
         logger.info("=== Testing Continue With Warnings Failure Policy ===");
 
-        // Load continue-with-warnings policy scenario
-        scenarioService.loadScenarios("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyContinueTest.yaml");
-        ScenarioConfiguration scenario = scenarioService.getScenario("continue-with-warnings-test");
-        assertNotNull(scenario, "Continue with warnings scenario should be loaded");
+        // Load continue-with-warnings policy scenario using RulesEngine
+        RulesEngine engine = RulesEngine.fromScenarioRegistry("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyContinueTest.yaml");
 
         // Create test data that will cause validation stage to fail
         Map<String, Object> invalidData = new HashMap<>();
@@ -84,11 +75,8 @@ public class SimpleFailurePolicyContinueTest extends DemoTestBase {
         // Missing 'amount' and 'customerName' - will cause validation rules to fail
 
         // Execute scenario
-        Object result = scenarioService.processDataWithScenario(invalidData, scenario);
-        assertNotNull(result, "Result should not be null");
-        assertTrue(result instanceof ScenarioExecutionResult, "Result should be ScenarioExecutionResult");
-
-        ScenarioExecutionResult scenarioResult = (ScenarioExecutionResult) result;
+        ScenarioExecutionResult scenarioResult = engine.evaluateScenario("continue-with-warnings-test", invalidData);
+        assertNotNull(scenarioResult, "Result should not be null");
 
         // Verify continue-with-warnings policy behavior
         assertFalse(scenarioResult.isTerminated(), "Scenario should not be terminated");
@@ -108,18 +96,15 @@ public class SimpleFailurePolicyContinueTest extends DemoTestBase {
     void testContinueWithMultipleFailures() throws Exception {
         logger.info("=== Testing Continue Policy with Multiple Failures ===");
 
-        // Load scenario
-        scenarioService.loadScenarios("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyContinueTest.yaml");
-        ScenarioConfiguration scenario = scenarioService.getScenario("continue-with-warnings-test");
-        assertNotNull(scenario, "Continue with warnings scenario should be loaded");
+        // Load scenario using RulesEngine
+        RulesEngine engine = RulesEngine.fromScenarioRegistry("src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyContinueTest.yaml");
 
         // Create test data that will cause multiple stages to have issues
         Map<String, Object> problematicData = new HashMap<>();
         problematicData.put("testField", "testValue");
 
         // Execute scenario
-        Object result = scenarioService.processDataWithScenario(problematicData, scenario);
-        ScenarioExecutionResult scenarioResult = (ScenarioExecutionResult) result;
+        ScenarioExecutionResult scenarioResult = engine.evaluateScenario("continue-with-warnings-test", problematicData);
 
         // Verify continue behavior with multiple issues
         assertFalse(scenarioResult.isTerminated(), "Scenario should not be terminated");
