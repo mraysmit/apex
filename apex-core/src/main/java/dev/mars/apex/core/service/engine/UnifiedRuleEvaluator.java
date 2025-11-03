@@ -413,17 +413,39 @@ public class UnifiedRuleEvaluator {
 
         rulesLogger.info("Evaluating {} rules", rules.size());
 
+        // Accumulate enrichedData from all rules (even non-matching ones)
+        Map<String, Object> accumulatedEnrichedData = new java.util.HashMap<>();
+
         for (Rule rule : rules) {
             RuleResult result = evaluateRule(rule, context);
 
-            // Return first match or error
+            // Accumulate enrichedData from this rule (field mappings)
+            if (result.getEnrichedData() != null) {
+                accumulatedEnrichedData.putAll(result.getEnrichedData());
+            }
+
+            // Return first match or error (but with accumulated enrichedData)
             if (result.isTriggered() || result.getResultType() == RuleResult.ResultType.ERROR) {
+                // If this result doesn't have all accumulated data, merge it
+                if (accumulatedEnrichedData.size() > (result.getEnrichedData() != null ? result.getEnrichedData().size() : 0)) {
+                    Map<String, Object> mergedData = new java.util.HashMap<>(accumulatedEnrichedData);
+                    if (result.getEnrichedData() != null) {
+                        mergedData.putAll(result.getEnrichedData());
+                    }
+                    // Create new result with merged enrichedData
+                    return new RuleResult(result.getRuleName(), result.getMessage(), result.getSeverity(),
+                                         result.isTriggered(), result.getResultType(), result.getPerformanceMetrics(),
+                                         mergedData, result.getFailureMessages(), result.isSuccess(),
+                                         result.getSuccessCode(), result.getErrorCode(), result.getMapToField());
+                }
                 return result;
             }
         }
 
         rulesLogger.info("No rules matched");
-        return RuleResult.noMatch();
+        // Return noMatch with accumulated enrichedData from all evaluated rules
+        return new RuleResult("no-match", "No matching rules found", "INFO", false, RuleResult.ResultType.NO_MATCH,
+                             null, accumulatedEnrichedData, new java.util.ArrayList<>(), true, null, null, null);
     }
 
     /**
@@ -550,7 +572,7 @@ public class UnifiedRuleEvaluator {
 
             // Store the mapped value in enriched data
             enrichedData.put(fieldName, value);
-            rulesLogger.debug("Applied field mapping: {} = {}", fieldName, value);
+            rulesLogger.info("Applied field mapping: {} = {}", fieldName, value);
         } catch (Exception e) {
             rulesLogger.warn("Error applying field mapping '{}': {}", mapping, e.getMessage());
         }

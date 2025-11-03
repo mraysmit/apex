@@ -181,7 +181,7 @@ public class YamlEnrichmentProcessor {
     
     /**
      * Process a single enrichment on a target object.
-     * 
+     *
      * @param enrichment The YAML enrichment configuration
      * @param targetObject The object to enrich
      * @return The enriched object
@@ -190,26 +190,62 @@ public class YamlEnrichmentProcessor {
         LOGGER.fine("Processing enrichment: " + enrichment.getId() + " (type: " + enrichment.getType() + ")");
 
         // Check if enrichment should be processed
-        if (!shouldProcessEnrichment(enrichment, targetObject)) {
+        boolean conditionMatched = shouldProcessEnrichment(enrichment, targetObject);
+        if (!conditionMatched) {
             LOGGER.fine("Enrichment " + enrichment.getId() + " should not be processed");
+
+            // Phase 4: Evaluate error code when condition doesn't match
+            if (enrichment.getErrorCode() != null) {
+                StandardEvaluationContext context = createEvaluationContext(targetObject);
+                String evaluatedErrorCode = evaluateCode(enrichment.getErrorCode(), context);
+
+                // Apply field mappings with error code
+                if (enrichment.getMapToField() != null) {
+                    applyCodeFieldMappings(enrichment.getMapToField(), context, targetObject, null, evaluatedErrorCode);
+                }
+
+                LOGGER.fine("Enrichment condition not met, error code evaluated: " + evaluatedErrorCode);
+            }
+
             return targetObject;
         }
 
         LOGGER.fine("Enrichment " + enrichment.getId() + " passed conditions, proceeding with processing");
 
+        // Process the enrichment based on type
+        Object result;
         switch (enrichment.getType()) {
             case "lookup-enrichment":
-                return processLookupEnrichment(enrichment, targetObject);
+                result = processLookupEnrichment(enrichment, targetObject);
+                break;
             case "calculation-enrichment":
-                return processCalculationEnrichment(enrichment, targetObject);
+                result = processCalculationEnrichment(enrichment, targetObject);
+                break;
             case "field-enrichment":
-                return processFieldEnrichment(enrichment, targetObject);
+                result = processFieldEnrichment(enrichment, targetObject);
+                break;
             case "conditional-mapping-enrichment":
-                return processConditionalMappingEnrichment(enrichment, targetObject);
+                result = processConditionalMappingEnrichment(enrichment, targetObject);
+                break;
             default:
                 LOGGER.warning("Unknown enrichment type: " + enrichment.getType());
-                return targetObject;
+                result = targetObject;
         }
+
+        // Phase 4: Evaluate success code when enrichment succeeds
+        if (enrichment.getSuccessCode() != null) {
+            StandardEvaluationContext context = createEvaluationContext(result);
+            String evaluatedSuccessCode = evaluateCode(enrichment.getSuccessCode(), context);
+
+            // Apply field mappings with success code
+            if (enrichment.getMapToField() != null) {
+                applyCodeFieldMappings(enrichment.getMapToField(), context, result, evaluatedSuccessCode, null);
+            }
+
+            LOGGER.fine("Enrichment succeeded, success code evaluated: " + evaluatedSuccessCode);
+        }
+
+        return result;
     }
     
     /**
@@ -1648,5 +1684,136 @@ public class YamlEnrichmentProcessor {
             out.add(processEnrichmentGroup(g, targetObject, yamlConfig));
         }
         return out;
+    }
+
+    /**
+     * Evaluate a success or error code expression.
+     * Phase 4 Enhancement: Supports both constant strings and SpEL expressions.
+     *
+     * @param codeExpression The code expression (constant or SpEL starting with #)
+     * @param context The evaluation context for SpEL expressions
+     * @return The evaluated code string, or null if expression is null or evaluation fails
+     */
+    private String evaluateCode(String codeExpression, StandardEvaluationContext context) {
+        if (codeExpression == null || codeExpression.trim().isEmpty()) {
+            return null;
+        }
+
+        try {
+            // Check if it's a SpEL expression (starts with #)
+            if (codeExpression.trim().startsWith("#")) {
+                Expression exp = parser.parseExpression(codeExpression);
+                Object result = exp.getValue(context);
+                return result != null ? result.toString() : null;
+            } else {
+                // It's a constant string
+                return codeExpression;
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error evaluating code expression '" + codeExpression + "': " + e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /**
+     * Apply field mappings for success/error codes to the target object.
+     * Phase 4 Enhancement: Supports generic field mapping using SpEL expressions.
+     *
+     * @param mapToField The field mapping configuration (String or List<String>)
+     * @param context The evaluation context for SpEL expressions
+     * @param targetObject The target object to update with mapped values
+     * @param successCode The evaluated success code (available as #success_code in expressions)
+     * @param errorCode The evaluated error code (available as #error_code in expressions)
+     */
+    private void applyCodeFieldMappings(Object mapToField, StandardEvaluationContext context, Object targetObject,
+                                       String successCode, String errorCode) {
+        if (mapToField == null) {
+            return;
+        }
+
+        try {
+            // Create a new context with success_code and error_code variables
+            StandardEvaluationContext mappingContext = new StandardEvaluationContext(context.getRootObject().getValue());
+
+            // Copy ALL variables from the original context using reflection
+            // This ensures that variables like #notionalValue, #delta, etc. are available in map-to-field expressions
+            try {
+                java.lang.reflect.Field variablesField = StandardEvaluationContext.class.getDeclaredField("variables");
+                variablesField.setAccessible(true);
+                @SuppressWarnings("unchecked")
+                Map<String, Object> originalVariables = (Map<String, Object>) variablesField.get(context);
+                if (originalVariables != null) {
+                    for (Map.Entry<String, Object> entry : originalVariables.entrySet()) {
+                        mappingContext.setVariable(entry.getKey(), entry.getValue());
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.warning("Failed to copy variables from original context: " + e.getMessage());
+                // Fallback: copy only the "this" variable
+                if (context.lookupVariable("this") != null) {
+                    mappingContext.setVariable("this", context.lookupVariable("this"));
+                }
+            }
+
+            // Add/override success_code and error_code variables
+            if (successCode != null) {
+                mappingContext.setVariable("success_code", successCode);
+            }
+            if (errorCode != null) {
+                mappingContext.setVariable("error_code", errorCode);
+            }
+
+            // Handle both single mapping (String) and multiple mappings (List<String>)
+            List<String> mappings = new ArrayList<>();
+            if (mapToField instanceof String) {
+                mappings.add((String) mapToField);
+            } else if (mapToField instanceof List) {
+                List<?> list = (List<?>) mapToField;
+                for (Object item : list) {
+                    if (item instanceof String) {
+                        mappings.add((String) item);
+                    }
+                }
+            }
+
+            // Apply each mapping
+            for (String mapping : mappings) {
+                applyCodeFieldMapping(mapping, mappingContext, targetObject);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error applying field mappings: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Apply a single field mapping expression for success/error codes.
+     * Parses expressions like "fieldName = #success_code" or "status = #amount > 100 ? 'HIGH' : 'LOW'"
+     *
+     * @param mapping The mapping expression
+     * @param context The evaluation context
+     * @param targetObject The target object to update
+     */
+    private void applyCodeFieldMapping(String mapping, StandardEvaluationContext context, Object targetObject) {
+        try {
+            // Parse the mapping: "fieldName = expression"
+            String[] parts = mapping.split("=", 2);
+            if (parts.length != 2) {
+                LOGGER.warning("Invalid field mapping format: " + mapping + ". Expected 'fieldName = expression'");
+                return;
+            }
+
+            String fieldName = parts[0].trim();
+            String expression = parts[1].trim();
+
+            // Evaluate the expression
+            Expression exp = parser.parseExpression(expression);
+            Object value = exp.getValue(context);
+
+            // Store the mapped value in the target object
+            setFieldValue(targetObject, fieldName, value);
+            LOGGER.info("Applied field mapping: " + fieldName + " = " + value);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error applying field mapping '" + mapping + "': " + e.getMessage(), e);
+        }
     }
 }

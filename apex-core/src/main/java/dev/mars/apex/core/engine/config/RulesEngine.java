@@ -1023,6 +1023,11 @@ public class RulesEngine {
                     overallSuccess = false;
                     failureMessages.add("Rule evaluation error: " + ruleResult.getMessage());
                 }
+
+                // Update enriched data with results from rules (field mappings)
+                if (ruleResult.getEnrichedData() != null) {
+                    enrichedData.putAll(ruleResult.getEnrichedData());
+                }
             }
 
             // Phase 2.5: Process enrichment groups if available
@@ -1132,6 +1137,11 @@ public class RulesEngine {
                             if (ruleResult.getResultType() == RuleResult.ResultType.ERROR) {
                                 overallSuccess = false;
                                 failureMessages.add("Rule evaluation error: " + ruleResult.getMessage());
+                            }
+
+                            // Update enriched data with results from rules (field mappings)
+                            if (ruleResult.getEnrichedData() != null) {
+                                enrichedData.putAll(ruleResult.getEnrichedData());
                             }
                         }
                         break;
