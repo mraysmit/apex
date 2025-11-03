@@ -354,19 +354,9 @@ rules:
 **Use this rules configuration in your Java code:**
 
 ```java
-// Load the YAML configuration file
-RulesEngineConfiguration config = YamlConfigurationLoader.load("customer-rules.yaml");
-RulesEngine engine = new RulesEngine(config);
-
-// Prepare your data for evaluation
-Map<String, Object> data = Map.of(
-    "age", 25,
-    "email", "john@example.com",
-    "name", "John Doe"
-);
-
-// Evaluate all rules
-RuleResult result = engine.evaluate(data);
+// ⭐ SIMPLEST (One Line) - For single evaluation
+Map<String, Object> data = Map.of("age", 25, "email", "john@example.com", "name", "John Doe");
+RuleResult result = RulesEngine.fromFile("customer-rules.yaml").evaluate(data);
 
 // Check what happened
 if (result.isSuccess()) {
@@ -374,6 +364,30 @@ if (result.isSuccess()) {
 } else {
     System.out.println("Validation failed:");
     result.getFailureMessages().forEach(System.out::println);
+}
+```
+
+**Alternative: Two-Line Pattern (When Reusing the Engine)**
+
+If you need to evaluate multiple datasets with the same rules, use the two-line pattern to reuse the engine:
+
+```java
+// ✅ EFFICIENT (Two Lines) - Reuse the engine for multiple evaluations
+RulesEngine engine = RulesEngine.fromFile("customer-rules.yaml");
+
+// Evaluate multiple customers with the same rules
+Map<String, Object> customer1 = Map.of("age", 25, "email", "john@example.com", "name", "John Doe");
+RuleResult result1 = engine.evaluate(customer1);
+
+Map<String, Object> customer2 = Map.of("age", 17, "email", "jane@example.com", "name", "Jane Smith");
+RuleResult result2 = engine.evaluate(customer2);
+
+// Check results
+if (result1.isSuccess()) {
+    System.out.println("Customer 1 passed all validations!");
+}
+if (!result2.isSuccess()) {
+    System.out.println("Customer 2 failed: " + result2.getFailureMessages());
 }
 ```
 
@@ -1074,18 +1088,9 @@ enrichments:
 **Use this enrichment configuration:**
 
 ```java
-// Load the enrichment configuration
-RulesEngineConfiguration config = YamlConfigurationLoader.load("customer-enrichment.yaml");
-RulesEngine engine = new RulesEngine(config);
-
-// Prepare your data (notice we only have the status code)
-Map<String, Object> data = Map.of(
-    "name", "John Doe",
-    "statusCode", "A"  // Just the code - enrichment will add more data
-);
-
-// Evaluate (this will run enrichments)
-RuleResult result = engine.evaluate(data);
+// ⭐ SIMPLEST (One Line) - For single evaluation
+Map<String, Object> data = Map.of("name", "John Doe", "statusCode", "A");
+RuleResult result = RulesEngine.fromFile("customer-enrichment.yaml").evaluate(data);
 
 // Access the enriched data
 Map<String, Object> enrichedData = result.getEnrichedData();
@@ -1170,30 +1175,21 @@ enrichments:
 **Using the configuration:**
 
 ```java
-RulesEngineConfiguration config = YamlConfigurationLoader.load("transaction-processing.yaml");
-RulesEngine engine = new RulesEngine(config);
+// ✅ EFFICIENT (Two Lines) - Reuse engine for multiple test cases
+RulesEngine engine = RulesEngine.fromFile("transaction-processing.yaml");
 
 // Test case 1: High-value premium customer
-Map<String, Object> data1 = Map.of(
-    "amount", 15000,
-    "customerType", "PREMIUM"
-);
+Map<String, Object> data1 = Map.of("amount", 15000, "customerType", "PREMIUM");
 RuleResult result1 = engine.evaluate(data1);
 // Result: processingFee = 750, discountRate = 0.10, finalPriority = "IMMEDIATE"
 
 // Test case 2: High-value standard customer
-Map<String, Object> data2 = Map.of(
-    "amount", 15000,
-    "customerType", "STANDARD"
-);
+Map<String, Object> data2 = Map.of("amount", 15000, "customerType", "STANDARD");
 RuleResult result2 = engine.evaluate(data2);
 // Result: processingFee = 750, no discount, finalPriority = "HIGH"
 
 // Test case 3: Low-value premium customer
-Map<String, Object> data3 = Map.of(
-    "amount", 5000,
-    "customerType", "PREMIUM"
-);
+Map<String, Object> data3 = Map.of("amount", 5000, "customerType", "PREMIUM");
 RuleResult result3 = engine.evaluate(data3);
 // Result: no fee, discountRate = 0.10, finalPriority = "ELEVATED"
 ```
@@ -1337,20 +1333,14 @@ rules:
 **Using the combined configuration:**
 
 ```java
-// Load the complete configuration
-RulesEngineConfiguration config = YamlConfigurationLoader.load("customer-complete.yaml");
-RulesEngine engine = new RulesEngine(config);
-
-// Prepare your data
+// ⭐ SIMPLEST (One Line) - For single evaluation
 Map<String, Object> data = Map.of(
     "age", 25,
     "email", "john@example.com",
     "statusCode", "A",           // Will be enriched to add transaction permissions
     "requestedAmount", 5000      // Will be validated against enriched credit limit
 );
-
-// Evaluate (enrichments run first, then rules)
-RuleResult result = engine.evaluate(data);
+RuleResult result = RulesEngine.fromFile("customer-complete.yaml").evaluate(data);
 
 // Check results
 if (result.isSuccess()) {
@@ -6216,10 +6206,8 @@ enrichments:
 Replace service calls with enrichment:
 
 ```java
-// After: YAML dataset enrichment
-RulesEngineConfiguration config = YamlConfigurationLoader.load("config.yaml");
-RulesEngine engine = new RulesEngine(config);
-RuleResult result = engine.evaluate(data); // Enrichment happens automatically
+// After: YAML dataset enrichment (one line!)
+RuleResult result = RulesEngine.fromFile("config.yaml").evaluate(data); // Enrichment happens automatically
 ```
 
 #### Step 5: Test and Validate

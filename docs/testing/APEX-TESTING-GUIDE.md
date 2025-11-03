@@ -38,6 +38,62 @@ See the **[Bootstrap Demos Guide](../APEX_BOOTSTRAP_DEMOS_GUIDE.md)** for detail
 
 ## Quick Start
 
+### Writing Tests with APEX
+
+When writing tests for APEX, use the simplified entry point patterns:
+
+**⭐ SIMPLEST - One-line pattern for test setup:**
+```java
+@Test
+public void testRuleEvaluation() {
+    // Arrange
+    Map<String, Object> testData = Map.of("amount", 1000, "currency", "USD");
+
+    // Act - One line to load config and evaluate
+    RuleResult result = RulesEngine.fromFile("test-config.yaml").evaluate(testData);
+
+    // Assert
+    assertTrue(result.isSuccess());
+    assertEquals("US Dollar", result.getEnrichedData().get("currencyName"));
+}
+```
+
+**✅ REUSABLE - Two-line pattern when testing multiple scenarios:**
+```java
+private RulesEngine engine;
+
+@Before
+public void setUp() {
+    // Create engine once for all tests
+    engine = RulesEngine.fromFile("test-config.yaml");
+}
+
+@Test
+public void testScenario1() {
+    RuleResult result = engine.evaluate(Map.of("scenario", "1"));
+    assertTrue(result.isSuccess());
+}
+
+@Test
+public void testScenario2() {
+    RuleResult result = engine.evaluate(Map.of("scenario", "2"));
+    assertTrue(result.isSuccess());
+}
+
+@After
+public void tearDown() {
+    if (engine != null) {
+        engine.shutdown();
+    }
+}
+```
+
+**Key Benefits for Testing:**
+- **Minimal Setup**: No complex configuration or service initialization
+- **Fast Execution**: Static factory methods are optimized for performance
+- **Clear Intent**: Test code focuses on behavior, not infrastructure
+- **Easy Mocking**: Simple to create test-specific configurations
+
 ### Immediate Test Execution Options
 
 #### **Fast Tests (10-15 seconds)**

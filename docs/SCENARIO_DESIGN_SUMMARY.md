@@ -1,5 +1,28 @@
 # APEX Scenario System - Design & Implementation Summary
 
+> **⚠️ IMPORTANT API UPDATE (Version 3.0)**
+>
+> **The `DataTypeScenarioService` class has been deprecated** and will be removed in version 4.0.
+>
+> **Use `RulesEngine.fromScenarioRegistry()` instead** - the universal entry point that handles scenario-based processing automatically.
+>
+> **Migration Example:**
+> ```java
+> // OLD (Deprecated):
+> DataTypeScenarioService service = new DataTypeScenarioService();
+> service.loadScenarios("config/data-type-scenarios.yaml");
+> ScenarioExecutionResult result = service.processMapData(data);
+>
+> // NEW - SIMPLEST (One Line):
+> RuleResult result = RulesEngine.fromScenarioRegistry("config/data-type-scenarios.yaml").evaluateScenario(data);
+>
+> // NEW - REUSABLE (Two Lines):
+> RulesEngine engine = RulesEngine.fromScenarioRegistry("config/data-type-scenarios.yaml");
+> RuleResult result = engine.evaluateScenario(data);
+> ```
+>
+> **Why this change?** Developers should not need to use different services for different YAML content types. `RulesEngine` provides ONE universal API for all YAML processing including scenarios.
+
 ## Overview
 
 The APEX Scenario system is a sophisticated, production-ready framework for managing complex data processing pipelines through a **three-layer hierarchy** with automatic routing, stage-based execution, and comprehensive failure handling.
@@ -58,8 +81,10 @@ public boolean hasStageConfiguration()
 public List<ScenarioStage> getStagesByExecutionOrder()
 ```
 
-### 2. DataTypeScenarioService
+### 2. DataTypeScenarioService (🔄 DEPRECATED)
 **Location**: `apex-core/src/main/java/dev/mars/apex/core/service/scenario/DataTypeScenarioService.java`
+
+> **⚠️ DEPRECATED** - This service is deprecated as of version 3.0. Use `RulesEngine.fromScenarioRegistry()` instead.
 
 Central service for managing scenarios and automatic routing.
 
@@ -69,13 +94,23 @@ Central service for managing scenarios and automatic routing.
 - Cache scenarios for performance (LinkedHashMap preserves insertion order)
 - Execute stage-based processing
 
-**Key Methods**:
+**Old Methods (Deprecated)**:
 ```java
 public void loadScenarios(String registryPath)
 public ScenarioConfiguration getScenarioForData(Object data)
 public ScenarioConfiguration getScenarioForMapData(Map<String, Object> data)
 public ScenarioExecutionResult processMapData(Map<String, Object> data)
 public ScenarioExecutionResult processDataWithStages(Object data, String scenarioId)
+```
+
+**New Recommended API**:
+```java
+// ⭐ SIMPLEST - One line for single evaluation
+RuleResult result = RulesEngine.fromScenarioRegistry("config/data-type-scenarios.yaml").evaluateScenario(data);
+
+// ✅ REUSABLE - Two lines for multiple evaluations
+RulesEngine engine = RulesEngine.fromScenarioRegistry("config/data-type-scenarios.yaml");
+RuleResult result = engine.evaluateScenario(data);
 ```
 
 ### 3. ScenarioStage
@@ -235,14 +270,55 @@ scenario:
 
 ## Usage Pattern
 
-```java
-// 1. Create service
-DataTypeScenarioService scenarioService = new DataTypeScenarioService();
+### Recommended API (Version 3.0+)
 
-// 2. Load scenarios
+**⭐ SIMPLEST (One Line) - For single evaluation:**
+```java
+// Prepare trade data
+Map<String, Object> tradeData = Map.of(
+    "tradeType", "OTCOption",
+    "region", "US",
+    "notional", 75000000
+);
+
+// Process with automatic scenario routing (one line!)
+RuleResult result = RulesEngine.fromScenarioRegistry("config/scenario-registry.yaml").evaluateScenario(tradeData);
+
+// Check results
+if (result.isSuccess()) {
+    logger.info("Processing successful: {}", result.getMessage());
+} else {
+    logger.error("Processing failed: {}", result.getFailureMessages());
+}
+```
+
+**✅ REUSABLE (Two Lines) - For multiple evaluations:**
+```java
+// Create engine from scenario registry
+RulesEngine engine = RulesEngine.fromScenarioRegistry("config/scenario-registry.yaml");
+
+// Process multiple trades
+for (Map<String, Object> tradeData : trades) {
+    RuleResult result = engine.evaluateScenario(tradeData);
+
+    if (result.isSuccess()) {
+        logger.info("Processing successful: {}", result.getMessage());
+    } else {
+        logger.error("Processing failed: {}", result.getFailureMessages());
+    }
+}
+
+// Cleanup
+engine.shutdown();
+```
+
+### Legacy API (Deprecated - for reference only)
+
+```java
+// ⚠️ DEPRECATED - Do not use in new code
+DataTypeScenarioService scenarioService = new DataTypeScenarioService();
 scenarioService.loadScenarios("config/scenario-registry.yaml");
 
-// 3. Process Map data with automatic routing
 Map<String, Object> tradeData = new HashMap<>();
 tradeData.put("tradeType", "OTCOption");
 tradeData.put("region", "US");
@@ -250,7 +326,6 @@ tradeData.put("notional", 75000000);
 
 ScenarioExecutionResult result = scenarioService.processMapData(tradeData);
 
-// 4. Check results
 if (result.isSuccessful()) {
     logger.info("Processed with scenario: {}", result.getScenarioId());
 } else if (result.isTerminated()) {

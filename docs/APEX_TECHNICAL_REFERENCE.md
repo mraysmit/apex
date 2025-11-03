@@ -91,6 +91,97 @@ This guide follows a logical progression from simple to advanced topics:
 - **Pipeline Orchestration Engine**: YAML-driven data processing workflows
 - **Data Sink Architecture**: Comprehensive output capabilities with database and file sinks
 
+## Entry Points and Static Factory Methods
+
+### Universal Entry Point: RulesEngine
+
+APEX provides **one universal entry point** for all YAML processing: `RulesEngine`. This content-agnostic design means developers don't need to inspect YAML files to choose the correct service - `RulesEngine` handles rules, enrichments, pipelines, scenarios, and all other YAML content types automatically.
+
+### Static Factory Methods
+
+The recommended way to create a `RulesEngine` instance is through static factory methods:
+
+```java
+// ⭐ SIMPLEST - Load from file path
+RulesEngine engine = RulesEngine.fromFile("path/to/config.yaml");
+
+// Load from classpath
+RulesEngine engine = RulesEngine.fromFile("classpath:config/rules.yaml");
+
+// Load scenario registry
+RulesEngine engine = RulesEngine.fromScenarioRegistry("path/to/scenario-registry.yaml");
+
+// Load from pre-loaded configuration (advanced use case)
+YamlConfigurationLoader loader = new YamlConfigurationLoader();
+YamlRuleConfiguration config = loader.loadFromFile("config.yaml");
+RulesEngine engine = RulesEngine.fromYamlConfig(config);
+```
+
+### Usage Patterns
+
+#### One-Line Pattern (Simplest)
+
+For single evaluations, use the one-line pattern with method chaining:
+
+```java
+// ⭐ SIMPLEST - One line for single evaluation
+Map<String, Object> data = Map.of("amount", 1000, "currency", "USD");
+RuleResult result = RulesEngine.fromFile("config.yaml").evaluate(data);
+
+// Check results
+if (result.isSuccess()) {
+    System.out.println("✓ All rules passed!");
+    Map<String, Object> enrichedData = result.getEnrichedData();
+}
+```
+
+#### Two-Line Pattern (Reusable)
+
+When you need to reuse the engine for multiple evaluations or need cleanup:
+
+```java
+// ✅ EFFICIENT - Reuse engine for multiple evaluations
+RulesEngine engine = RulesEngine.fromFile("config.yaml");
+
+// Process multiple items
+for (Map<String, Object> item : items) {
+    RuleResult result = engine.evaluate(item);
+    // Process result...
+}
+
+// Cleanup when done
+engine.shutdown();
+```
+
+#### Advanced Pattern (Config Inspection)
+
+Only use this pattern when you need to inspect or modify the configuration before creating the engine:
+
+```java
+// ⚙️ ADVANCED - Only when you need config inspection/modification
+YamlConfigurationLoader loader = new YamlConfigurationLoader();
+YamlRuleConfiguration config = loader.loadFromFile("config.yaml");
+
+// Inspect or modify configuration
+if (config.getMetadata() != null) {
+    System.out.println("Config version: " + config.getMetadata().getVersion());
+}
+
+// Create engine from modified config
+RulesEngine engine = RulesEngine.fromYamlConfig(config);
+RuleResult result = engine.evaluate(data);
+```
+
+### Pattern Selection Guide
+
+| **Pattern** | **Lines** | **Use Case** | **When to Use** |
+|-------------|-----------|--------------|-----------------|
+| **One-Line** ⭐ | 1 line | Single evaluation | Default choice for most cases |
+| **Two-Line** ✅ | 2 lines | Multiple evaluations | When reusing engine or need cleanup |
+| **Advanced** ⚙️ | 7+ lines | Config inspection | Only when you need to inspect/modify config |
+
+**Bottom Line:** Start with the one-line pattern. Only use the two-line pattern if you need engine reuse. Avoid the advanced pattern unless you have a specific need for config inspection or modification.
+
 ## Scenario-Based Configuration Architecture
 
 ### Technical Overview
@@ -4631,14 +4722,14 @@ public class RulesEngineConfig {
     @Bean
     @Primary
     public RulesEngine primaryRulesEngine() {
-        return YamlConfigurationLoader.load("classpath:rules/primary-rules.yaml")
-            .createEngine();
+        // ⭐ SIMPLEST - Use static factory method
+        return RulesEngine.fromFile("classpath:rules/primary-rules.yaml");
     }
 
     @Bean("validationEngine")
     public RulesEngine validationRulesEngine() {
-        return YamlConfigurationLoader.load("classpath:rules/validation-rules.yaml")
-            .createEngine();
+        // ⭐ SIMPLEST - Use static factory method
+        return RulesEngine.fromFile("classpath:rules/validation-rules.yaml");
     }
 }
 

@@ -10,7 +10,7 @@
 >
 > **The `DataPipelineEngine` class has been deprecated** and will be removed in version 4.0.
 >
-> **Use `RulesEngine.evaluate()` instead** - the universal entry point that handles pipelines, enrichments, rules, and all other YAML content types automatically.
+> **Use `RulesEngine` instead** - the universal entry point that handles pipelines, enrichments, rules, and all other YAML content types automatically.
 >
 > **Migration Example:**
 > ```java
@@ -19,7 +19,10 @@
 > pipelineEngine.initialize(config);
 > YamlPipelineExecutionResult result = pipelineEngine.executePipeline("pipeline-name");
 >
-> // NEW (Recommended):
+> // NEW - SIMPLEST (One Line):
+> RuleResult result = RulesEngine.fromFile("path/to/pipeline.yaml").evaluate(new HashMap<>());
+>
+> // NEW - REUSABLE (Two Lines):
 > RulesEngine rulesEngine = RulesEngine.fromFile("path/to/pipeline.yaml");
 > RuleResult result = rulesEngine.evaluate(new HashMap<>());
 > rulesEngine.shutdown();
@@ -336,11 +339,23 @@ data-sinks:
 #### Step 2: Execute the Pipeline
 
 **Recommended API (Version 3.0+):**
+
+**⭐ SIMPLEST (One Line) - For single pipeline execution:**
 ```java
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import java.util.HashMap;
 
+// Execute pipeline in one line
+RuleResult result = RulesEngine.fromFile("my-first-pipeline.yaml").evaluate(new HashMap<>());
+
+// Check results
+System.out.println("Pipeline success: " + (result.getResultType() == RuleResult.ResultType.MATCH));
+System.out.println("Message: " + result.getMessage());
+```
+
+**✅ REUSABLE (Two Lines) - When you need cleanup or multiple executions:**
+```java
 // Create RulesEngine from file
 RulesEngine rulesEngine = RulesEngine.fromFile("my-first-pipeline.yaml");
 
@@ -1763,6 +1778,25 @@ pipelineEngine.shutdown();
 ```
 
 #### After (Recommended):
+
+**⭐ SIMPLEST (One Line) - For single pipeline execution:**
+```java
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
+import java.util.HashMap;
+
+// Execute pipeline in one line
+RuleResult result = RulesEngine.fromFile("pipeline.yaml").evaluate(new HashMap<>());
+
+// Check results
+if (result.getResultType() == RuleResult.ResultType.MATCH) {
+    System.out.println("Pipeline completed successfully: " + result.getMessage());
+} else if (result.getResultType() == RuleResult.ResultType.ERROR) {
+    System.err.println("Pipeline failed: " + result.getMessage());
+}
+```
+
+**✅ REUSABLE (Two Lines) - When you need cleanup or multiple executions:**
 ```java
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;

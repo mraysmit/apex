@@ -1001,7 +1001,54 @@ rules:
     depends-on: ["currency-enrichment"]
 ```
 
-### 3. Load and Use
+### 3. Use in Your Application
+
+#### Simple One-Line Usage
+
+```java
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
+import java.util.Map;
+
+// ⭐ SIMPLEST - One line to evaluate rules and enrichments
+Map<String, Object> trade = Map.of("notionalCurrency", "USD", "amount", 1000000);
+RuleResult result = RulesEngine.fromFile("config/enrichment-rules.yaml").evaluate(trade);
+
+// Check results
+if (result.isSuccess()) {
+    System.out.println("✓ All validations passed!");
+
+    // Access enriched data
+    Map<String, Object> enrichedData = result.getEnrichedData();
+    System.out.println("Currency: " + enrichedData.get("currencyName"));  // "US Dollar"
+    System.out.println("Symbol: " + enrichedData.get("currencySymbol"));   // "$"
+} else {
+    System.out.println("✗ Validation failed: " + result.getFailureMessages());
+}
+```
+
+#### Reusable Engine Pattern
+
+```java
+// ✅ EFFICIENT - Reuse engine for multiple evaluations
+RulesEngine engine = RulesEngine.fromFile("config/enrichment-rules.yaml");
+
+// Process multiple trades
+List<Map<String, Object>> trades = List.of(
+    Map.of("notionalCurrency", "USD", "amount", 1000000),
+    Map.of("notionalCurrency", "EUR", "amount", 500000),
+    Map.of("notionalCurrency", "GBP", "amount", 750000)
+);
+
+for (Map<String, Object> trade : trades) {
+    RuleResult result = engine.evaluate(trade);
+    if (result.isSuccess()) {
+        System.out.println("Trade enriched: " + result.getEnrichedData().get("currencyName"));
+    }
+}
+```
+
+### 3a. Alternative: External Data Sources
 
 #### External Data Sources
 ```java
@@ -1027,20 +1074,13 @@ List<Object> users = manager.queryWithFailover(DataSourceType.DATABASE, "getAllU
 
 #### Dataset Enrichment
 ```java
-// Load configuration
-YamlConfigurationLoader loader = new YamlConfigurationLoader();
-YamlRuleConfiguration config = loader.loadFromFile("config/enrichment-rules.yaml");
-
-// Create enrichment service
-LookupServiceRegistry registry = new LookupServiceRegistry();
-ExpressionEvaluatorService evaluator = new ExpressionEvaluatorService();
-EnrichmentService service = new EnrichmentService(registry, evaluator);
-
-// Enrich your data
+// ⭐ SIMPLEST (One Line) - Enrich your data automatically
 Map<String, Object> trade = Map.of("notionalCurrency", "USD");
-Object enrichedTrade = service.enrichObject(config, trade);
+RuleResult result = RulesEngine.fromFile("config/enrichment-rules.yaml").evaluate(trade);
 
-// Result: trade now contains currencyName="US Dollar", currencyDecimalPlaces=2
+// Access enriched data
+Map<String, Object> enrichedTrade = result.getEnrichedData();
+// Result: enrichedTrade contains currencyName="US Dollar", currencyDecimalPlaces=2
 ```
 
 ## Use Cases
