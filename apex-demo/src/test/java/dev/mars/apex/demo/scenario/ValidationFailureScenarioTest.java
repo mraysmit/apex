@@ -4,9 +4,7 @@
  */
 package dev.mars.apex.demo.scenario;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import dev.mars.apex.core.service.scenario.DataTypeScenarioService;
+import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import dev.mars.apex.core.service.scenario.StageExecutionResult;
 import dev.mars.apex.demo.DemoTestBase;
@@ -74,22 +72,16 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ValidationFailureScenarioTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(ValidationFailureScenarioTest.class);
-    
-    private DataTypeScenarioService scenarioService;
 
     /**
      * Set up the test environment with APEX services and scenario processing capabilities.
-     * Initializes the DataTypeScenarioService for stage-based scenario execution.
+     * Initializes the RulesEngine for stage-based scenario execution.
      */
     @BeforeEach
     public void setUp() {
         super.setUp(); // Call parent setup to initialize APEX services
         logger.info("Setting up validation failure scenario test environment");
-
-        // Initialize scenario service for stage-based processing with enrichment support
-        scenarioService = new DataTypeScenarioService();
-
-        logger.info("✓ Test environment initialized with DataTypeScenarioService");
+        logger.info("✓ Test environment initialized with RulesEngine");
         logger.info("** All APEX services properly initialized for negative validation testing");
     }
 
@@ -121,14 +113,14 @@ public class ValidationFailureScenarioTest extends DemoTestBase {
         // 2. Load scenario configuration with strict validation rules
         String registryPath = "src/test/java/dev/mars/apex/demo/scenario/" + getClass().getSimpleName() + ".yaml";
         logger.info("✓ STEP 2: Loading validation failure scenario configuration from: {}", registryPath);
-        scenarioService.loadScenarios(registryPath);
+        RulesEngine engine = RulesEngine.fromScenarioRegistry(registryPath);
         logger.info("  - Validation failure scenario configuration loaded successfully");
         logger.info("  - Target scenario: validation-failure-scenario");
 
         // 3. Execute scenario - validation rules should trigger but processing continues
         logger.info("✓ STEP 3: Executing scenario with validation rules designed to trigger");
         long startTime = System.currentTimeMillis();
-        ScenarioExecutionResult result = scenarioService.processDataWithStages(tradeData, "validation-failure-scenario");
+        ScenarioExecutionResult result = engine.evaluateScenario("validation-failure-scenario", tradeData);
         long executionTime = System.currentTimeMillis() - startTime;
 
         logger.info("  - Scenario execution completed: {}", result.getExecutionSummary());

@@ -32,7 +32,13 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
+ * @deprecated This test class tests the deprecated {@link DataTypeScenarioService}.
+ *             The service is being replaced by {@link dev.mars.apex.core.engine.config.RulesEngine}.
+ *             This test specifically validates internal implementation details (stage-based vs legacy processing)
+ *             that don't apply to the new RulesEngine API, which only supports the modern stage-based approach.
+ *             This test will be removed in a future release along with DataTypeScenarioService.
  */
+@Deprecated(since = "1.0.0", forRemoval = true)
 class DataTypeScenarioServiceStageTest {
 
     private DataTypeScenarioService service;

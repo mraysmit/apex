@@ -2661,6 +2661,159 @@ scenario:
       failure-policy: "terminate"  # Strict for production
 ```
 
+### 7.8 Classification-Based Routing
+
+Scenarios can include classification rules to automatically route data to the appropriate scenario based on data characteristics:
+
+```yaml
+metadata:
+  id: "otc-option-us-scenario"
+  name: "OTC Option US Processing"
+  type: "scenario"
+  business-domain: "Trading"
+
+scenario:
+  scenario-id: "otc-option-us"
+  name: "OTC Option US Processing"
+  description: "Processing for US OTC options"
+
+  # Classification rules determine if this scenario applies
+  classification-rules:
+    - condition: "#tradeType == 'OTC_OPTION' && #region == 'US'"
+      description: "US OTC Options"
+    - condition: "#assetClass == 'OPTION' && #jurisdiction == 'US'"
+      description: "US jurisdiction options"
+
+  data-types:
+    - "java.util.Map"
+
+  processing-stages:
+    - stage-name: "us-validation"
+      config-file: "config/us-otc-validation.yaml"
+      execution-order: 1
+      failure-policy: "terminate"
+
+    - stage-name: "us-compliance"
+      config-file: "config/us-compliance-rules.yaml"
+      execution-order: 2
+      failure-policy: "flag-for-review"
+      depends-on: ["us-validation"]
+```
+
+### 7.9 Scenario Registries
+
+Scenario registries organize multiple scenarios for classification-based routing:
+
+```yaml
+metadata:
+  id: "trade-processing-registry"
+  name: "Trade Processing Scenario Registry"
+  type: "scenario-registry"
+  version: "1.0.0"
+  description: "Registry of all trade processing scenarios"
+  created-by: "trading-team@bank.com"
+
+scenarios:
+  # High-priority specific scenarios
+  - config-file: "scenarios/otc-option-us.yaml"
+    priority: 1
+    enabled: true
+
+  - config-file: "scenarios/otc-option-emea.yaml"
+    priority: 2
+    enabled: true
+
+  - config-file: "scenarios/bond-us.yaml"
+    priority: 3
+    enabled: true
+
+  # Generic fallback scenarios
+  - config-file: "scenarios/generic-trade.yaml"
+    priority: 100
+    enabled: true
+```
+
+**Classification Evaluation Order:**
+1. Scenarios are evaluated in priority order (lowest number = highest priority)
+2. First scenario whose classification rules match the data is selected
+3. If no scenario matches, processing fails with "No matching scenario" error
+
+### 7.10 Using Scenarios with RulesEngine API
+
+**Loading a Scenario Registry:**
+
+```java
+// Load scenario registry and all referenced scenario configurations
+RulesEngine engine = RulesEngine.fromScenarioRegistry("config/trade-scenarios-registry.yaml");
+```
+
+**Classification-Based Routing:**
+
+```java
+// Automatically select and execute the matching scenario
+Map<String, Object> tradeData = new HashMap<>();
+tradeData.put("tradeType", "OTC_OPTION");
+tradeData.put("region", "US");
+tradeData.put("notional", 1000000.0);
+
+ScenarioExecutionResult result = engine.evaluateWithClassification(tradeData);
+
+// Check results
+if (result.isSuccess()) {
+    System.out.println("Scenario: " + result.getScenarioId());
+    System.out.println("All stages passed");
+} else {
+    System.out.println("Failures: " + result.getFailures());
+}
+```
+
+**Direct Scenario Execution:**
+
+```java
+// Execute a specific scenario by ID
+ScenarioExecutionResult result = engine.evaluateScenario("otc-option-us", tradeData);
+```
+
+**Accessing Stage Results:**
+
+```java
+// Get results for individual stages
+Map<String, Object> stageResults = result.getStageResults();
+for (Map.Entry<String, Object> entry : stageResults.entrySet()) {
+    System.out.println("Stage: " + entry.getKey());
+    System.out.println("Result: " + entry.getValue());
+}
+
+// Check if specific stage passed
+boolean validationPassed = result.isStageSuccessful("validation");
+```
+
+### 7.11 Migration from DataTypeScenarioService
+
+**Deprecated API (DataTypeScenarioService):**
+
+```java
+// OLD - Deprecated approach
+DataTypeScenarioService scenarioService = new DataTypeScenarioService();
+scenarioService.loadScenarios("config/scenarios-registry.yaml");
+ScenarioExecutionResult result = scenarioService.processMapData(tradeData);
+```
+
+**New API (RulesEngine):**
+
+```java
+// NEW - Recommended approach
+RulesEngine engine = RulesEngine.fromScenarioRegistry("config/scenarios-registry.yaml");
+ScenarioExecutionResult result = engine.evaluateWithClassification(tradeData);
+```
+
+**Benefits of RulesEngine API:**
+- Unified entry point for all APEX processing (rules, enrichments, pipelines, scenarios)
+- Consistent error handling and result types
+- Better integration with other APEX features
+- Improved performance and resource management
+- Modern fluent API design
+
 ---
 
 ## 8. Dataset Definitions

@@ -137,8 +137,13 @@ public class YamlEnrichmentProcessor {
             return targetObject;
         }
 
-        LOGGER.info("Processing " + enrichments.size() + " enrichments for object type: " +
-                   targetObject.getClass().getSimpleName());
+        // Defensive null check for targetObject
+        if (targetObject != null) {
+            LOGGER.info("Processing " + enrichments.size() + " enrichments for object type: " +
+                       targetObject.getClass().getSimpleName());
+        } else {
+            LOGGER.info("Processing " + enrichments.size() + " enrichments for null object");
+        }
         
         // Sort enrichments by priority (lower numbers = higher priority)
         enrichments.sort((e1, e2) -> {
@@ -209,12 +214,19 @@ public class YamlEnrichmentProcessor {
     
     /**
      * Check if an enrichment should be processed based on its condition.
-     * 
+     *
      * @param enrichment The enrichment configuration
-     * @param targetObject The target object
+     * @param targetObject The target object (can be null)
      * @return true if the enrichment should be processed
      */
     private boolean shouldProcessEnrichment(YamlEnrichment enrichment, Object targetObject) {
+        // Defensive null check - fail fast if targetObject is null
+        if (targetObject == null) {
+            LOGGER.warning("Cannot process enrichment '" + enrichment.getId() +
+                          "' - target object is null. Skipping enrichment.");
+            return false;
+        }
+
         LOGGER.fine("Evaluating enrichment: " + enrichment.getId() + " for object type: " +
                    targetObject.getClass().getSimpleName());
 

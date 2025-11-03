@@ -81,6 +81,9 @@ public class YamlRuleConfiguration {
     @JsonProperty("error-recovery")
     private YamlErrorRecoveryConfig errorRecovery;
 
+    @JsonProperty("scenario")
+    private Object scenarioData;
+
     /**
      * Section order as it appears in the YAML document.
      * This field is populated by OrderedYamlParser to enable sequential processing.
@@ -211,7 +214,40 @@ public class YamlRuleConfiguration {
     public void setErrorRecovery(YamlErrorRecoveryConfig errorRecovery) {
         this.errorRecovery = errorRecovery;
     }
-    
+
+    public Object getScenarioData() {
+        return scenarioData;
+    }
+
+    public void setScenarioData(Object scenarioData) {
+        this.scenarioData = scenarioData;
+    }
+
+    /**
+     * Checks if this configuration contains a scenario section.
+     *
+     * @return true if scenario data is present
+     */
+    public boolean hasScenario() {
+        return scenarioData != null;
+    }
+
+    /**
+     * Checks if this configuration contains processing stages within the scenario.
+     *
+     * @return true if scenario has processing-stages defined
+     */
+    @SuppressWarnings("unchecked")
+    public boolean hasProcessingStages() {
+        if (!hasScenario() || !(scenarioData instanceof java.util.Map)) {
+            return false;
+        }
+
+        java.util.Map<String, Object> scenarioMap = (java.util.Map<String, Object>) scenarioData;
+        Object stages = scenarioMap.get("processing-stages");
+        return stages instanceof java.util.List && !((java.util.List<?>) stages).isEmpty();
+    }
+
     /**
      * Metadata about the configuration file.
      */

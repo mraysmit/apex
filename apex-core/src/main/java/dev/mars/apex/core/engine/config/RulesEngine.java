@@ -105,6 +105,13 @@ public class RulesEngine {
     private final YamlRuleConfiguration yamlConfig;
 
     /**
+     * Scenario registry for scenario-based evaluation.
+     * Maps scenario IDs to their configurations.
+     * Will be null if the engine was not created from a scenario registry.
+     */
+    private final Map<String, dev.mars.apex.core.service.scenario.ScenarioConfiguration> scenarioRegistry;
+
+    /**
      * Pipeline execution components (lazy-initialized when needed).
      */
     private final DataSourceFactory dataSourceFactory;
@@ -134,8 +141,22 @@ public class RulesEngine {
      * @param yamlConfig The YAML configuration (can be null)
      */
     private RulesEngine(RulesEngineConfiguration configuration, YamlRuleConfiguration yamlConfig) {
+        this(configuration, yamlConfig, null);
+    }
+
+    /**
+     * Private constructor that accepts configuration, yamlConfig, and scenarioRegistry.
+     * Used by fromScenarioRegistry() static factory method.
+     *
+     * @param configuration The configuration for this rules engine
+     * @param yamlConfig The YAML configuration (can be null)
+     * @param scenarioRegistry The scenario registry (can be null)
+     */
+    private RulesEngine(RulesEngineConfiguration configuration, YamlRuleConfiguration yamlConfig,
+                       Map<String, dev.mars.apex.core.service.scenario.ScenarioConfiguration> scenarioRegistry) {
         this.configuration = configuration;
         this.yamlConfig = yamlConfig;
+        this.scenarioRegistry = scenarioRegistry;
         this.parser = new SpelExpressionParser();
         this.errorRecoveryService = new ErrorRecoveryService();
         this.performanceMonitor = new RulePerformanceMonitor();
@@ -343,6 +364,69 @@ public class RulesEngine {
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
 
         return new RulesEngine(config, yamlConfig);
+    }
+
+    /**
+     * Create a RulesEngine from a scenario registry file.
+     *
+     * <p>This static factory method loads a scenario registry YAML file that contains
+     * multiple scenario definitions. Each scenario in the registry can be evaluated
+     * by ID or through classification-based routing.</p>
+     *
+     * <p><b>Scenario Registry YAML Structure:</b></p>
+     * <pre>
+     * scenario-registry:
+     *   scenarios:
+     *     - scenario-id: "basic-trade-processing"
+     *       config-file: "scenarios/basic-trade-processing.yaml"
+     *     - scenario-id: "complex-trade-processing"
+     *       config-file: "scenarios/complex-trade-processing.yaml"
+     * </pre>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>
+     * // Create engine from scenario registry
+     * RulesEngine engine = RulesEngine.fromScenarioRegistry("registry.yaml");
+     *
+     * // Evaluate specific scenario by ID
+     * ScenarioExecutionResult result = engine.evaluateScenario("basic-trade-processing", data);
+     *
+     * // Or use classification-based routing
+     * ScenarioExecutionResult result = engine.evaluateWithClassification(data);
+     *
+     * // Or use fluent API
+     * ScenarioExecutionResult result = engine.asScenario()
+     *     .evaluate("basic-trade-processing", data);
+     * </pre>
+     *
+     * @param registryPath The path to the scenario registry YAML file
+     * @return A configured RulesEngine ready to evaluate scenarios
+     * @throws YamlConfigurationException if the registry file cannot be loaded or parsed
+     * @since 3.0
+     * @see #evaluateScenario(String, Map)
+     * @see #evaluateWithClassification(Map)
+     * @see #asScenario()
+     */
+    public static RulesEngine fromScenarioRegistry(String registryPath) throws YamlConfigurationException {
+        logger.info("Creating RulesEngine from scenario registry: {}", registryPath);
+
+        // Load scenario registry using ScenarioRegistryLoader
+        ScenarioRegistryLoader loader = new ScenarioRegistryLoader();
+        Map<String, dev.mars.apex.core.service.scenario.ScenarioConfiguration> scenarios = loader.loadRegistry(registryPath);
+
+        if (scenarios == null || scenarios.isEmpty()) {
+            throw new YamlConfigurationException(
+                "Scenario registry is empty or failed to load: " + registryPath
+            );
+        }
+
+        logger.info("Loaded {} scenarios from registry: {}", scenarios.size(), registryPath);
+
+        // Create a minimal RulesEngineConfiguration for scenario-only engine
+        RulesEngineConfiguration config = new RulesEngineConfiguration();
+
+        // Create RulesEngine with scenario registry
+        return new RulesEngine(config, null, scenarios);
     }
 
     /**
@@ -1191,6 +1275,232 @@ public class RulesEngine {
         return evaluate(this.yamlConfig, inputData);
     }
 
+    // ========================================
+    // Scenario Evaluation Methods (Style 1: Direct Methods)
+    // ========================================
+
+    /**
+     * Evaluate a single scenario configuration with the provided input data.
+     *
+     * <p>This method is used when the RulesEngine was created from a single
+     * scenario configuration file (not a registry). It processes the input data
+     * through all stages defined in the scenario configuration.</p>
+     *
+     * <p><b>Usage Example:</b></p>
+     * <pre>
+     * RulesEngine engine = RulesEngine.fromFile("scenario-config.yaml");
+     * Map&lt;String, Object&gt; data = new HashMap&lt;&gt;();
+     * data.put("tradeType", "OTCOption");
+     * data.put("notional", 1000000);
+     *
+     * ScenarioExecutionResult result = engine.evaluateScenario(data);
+     * if (result.isSuccessful()) {
+     *     System.out.println("Scenario executed successfully");
+     * }
+     * </pre>
+     *
+     * @param inputData The input data to process through the scenario stages.
+     *                  Must be a Map containing the data fields required by the scenario.
+     * @return ScenarioExecutionResult containing the results of all stage executions,
+     *         warnings, review flags, and overall execution status
+     * @throws IllegalStateException if the configuration does not contain a scenario
+     * @throws NullPointerException if inputData is null
+     * @since 3.0
+     */
+    public dev.mars.apex.core.service.scenario.ScenarioExecutionResult evaluateScenario(Map<String, Object> inputData) {
+        if (inputData == null) {
+            throw new NullPointerException("Input data cannot be null");
+        }
+
+        if (this.yamlConfig == null) {
+            throw new IllegalStateException(
+                "Cannot use evaluateScenario(Map) method - this RulesEngine was not created with a YAML configuration. " +
+                "Use RulesEngine.fromFile() or RulesEngine.fromYamlConfig() to create the engine."
+            );
+        }
+
+        // Check if YAML configuration contains a scenario
+        if (!this.yamlConfig.hasScenario()) {
+            throw new IllegalStateException(
+                "YAML configuration does not contain a scenario section. " +
+                "Use a scenario configuration file or RulesEngine.fromScenarioRegistry() for scenario evaluation."
+            );
+        }
+
+        logger.info("Evaluating scenario from YAML configuration");
+
+        // Parse scenario configuration from YAML
+        dev.mars.apex.core.service.scenario.ScenarioConfiguration scenario = parseScenarioFromYaml(this.yamlConfig);
+
+        // Create ScenarioStageExecutor and execute stages
+        dev.mars.apex.core.service.scenario.ScenarioStageExecutor executor =
+            new dev.mars.apex.core.service.scenario.ScenarioStageExecutor();
+
+        return executor.executeStages(scenario, inputData);
+    }
+
+    /**
+     * Evaluate a specific scenario by ID from a scenario registry.
+     *
+     * <p>This method is used when the RulesEngine was created from a scenario
+     * registry file containing multiple scenario definitions. It looks up the
+     * scenario by ID and processes the input data through its stages.</p>
+     *
+     * <p><b>Usage Example:</b></p>
+     * <pre>
+     * RulesEngine engine = RulesEngine.fromScenarioRegistry("registry.yaml");
+     * Map&lt;String, Object&gt; data = new HashMap&lt;&gt;();
+     * data.put("tradeType", "OTCOption");
+     *
+     * ScenarioExecutionResult result = engine.evaluateScenario("basic-trade-processing", data);
+     * </pre>
+     *
+     * @param scenarioId The unique identifier of the scenario to evaluate.
+     *                   Must match a scenario-id defined in the registry.
+     * @param inputData The input data to process through the scenario stages.
+     *                  Must be a Map containing the data fields required by the scenario.
+     * @return ScenarioExecutionResult containing the results of all stage executions,
+     *         warnings, review flags, and overall execution status
+     * @throws IllegalArgumentException if scenarioId is not found in the registry
+     * @throws IllegalStateException if the configuration does not contain a scenario registry
+     * @throws NullPointerException if scenarioId or inputData is null
+     * @since 3.0
+     */
+    public dev.mars.apex.core.service.scenario.ScenarioExecutionResult evaluateScenario(String scenarioId, Map<String, Object> inputData) {
+        if (scenarioId == null) {
+            throw new NullPointerException("Scenario ID cannot be null");
+        }
+        if (inputData == null) {
+            throw new NullPointerException("Input data cannot be null");
+        }
+
+        if (this.scenarioRegistry == null) {
+            throw new IllegalStateException(
+                "Cannot use evaluateScenario(String, Map) method - this RulesEngine was not created with a scenario registry. " +
+                "Use RulesEngine.fromScenarioRegistry() to create the engine."
+            );
+        }
+
+        logger.info("Evaluating scenario by ID: {}", scenarioId);
+
+        // Look up scenario from registry
+        dev.mars.apex.core.service.scenario.ScenarioConfiguration scenario = getScenario(scenarioId);
+
+        // Create ScenarioStageExecutor and execute stages
+        dev.mars.apex.core.service.scenario.ScenarioStageExecutor executor =
+            new dev.mars.apex.core.service.scenario.ScenarioStageExecutor();
+
+        return executor.executeStages(scenario, inputData);
+    }
+
+    /**
+     * Automatically select and evaluate the matching scenario based on classification rules.
+     *
+     * <p>This method evaluates the classification rules of all scenarios in the registry
+     * and executes the first scenario whose classification rule matches the input data.
+     * Classification rules are SpEL expressions that evaluate against the input data.</p>
+     *
+     * <p><b>Usage Example:</b></p>
+     * <pre>
+     * // Registry contains scenarios with classification rules like:
+     * // "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'"
+     *
+     * RulesEngine engine = RulesEngine.fromScenarioRegistry("registry.yaml");
+     * Map&lt;String, Object&gt; data = new HashMap&lt;&gt;();
+     * data.put("tradeType", "OTCOption");
+     * data.put("region", "US");
+     *
+     * ScenarioExecutionResult result = engine.evaluateWithClassification(data);
+     * if (result.isSuccessful()) {
+     *     System.out.println("Matched scenario: " + result.getScenarioId());
+     * }
+     * </pre>
+     *
+     * @param inputData The input data to classify and process.
+     *                  Must be a Map containing the data fields used by classification rules.
+     * @return ScenarioExecutionResult containing the results of the matched scenario execution.
+     *         If no scenario matches, returns a result with status indicating no match found.
+     * @throws IllegalStateException if the configuration does not contain a scenario registry
+     * @throws NullPointerException if inputData is null
+     * @since 3.0
+     */
+    public dev.mars.apex.core.service.scenario.ScenarioExecutionResult evaluateWithClassification(Map<String, Object> inputData) {
+        if (inputData == null) {
+            throw new NullPointerException("Input data cannot be null");
+        }
+
+        if (this.scenarioRegistry == null) {
+            throw new IllegalStateException(
+                "Cannot use evaluateWithClassification(Map) method - this RulesEngine was not created with a scenario registry. " +
+                "Use RulesEngine.fromScenarioRegistry() to create the engine."
+            );
+        }
+
+        logger.info("Evaluating scenario using classification-based routing");
+
+        // Find matching scenario based on classification rules
+        dev.mars.apex.core.service.scenario.ScenarioConfiguration scenario = findMatchingScenario(inputData);
+
+        if (scenario == null) {
+            throw new IllegalStateException(
+                "No matching scenario found for the provided input data. " +
+                "Ensure that at least one scenario's classification rule matches the data."
+            );
+        }
+
+        logger.info("Matched scenario: {}", scenario.getScenarioId());
+
+        // Create ScenarioStageExecutor and execute stages
+        dev.mars.apex.core.service.scenario.ScenarioStageExecutor executor =
+            new dev.mars.apex.core.service.scenario.ScenarioStageExecutor();
+
+        return executor.executeStages(scenario, inputData);
+    }
+
+    // ========================================
+    // Fluent API Method (Style 2)
+    // ========================================
+
+    /**
+     * Get a fluent API evaluator for type-safe scenario evaluation.
+     *
+     * <p>This method returns a {@link ScenarioEvaluator} interface that provides
+     * a fluent, type-safe way to evaluate scenarios without requiring casting.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>
+     * // Direct scenario evaluation
+     * ScenarioExecutionResult result = RulesEngine.fromFile("scenario-config.yaml")
+     *     .asScenario()
+     *     .evaluate(data);
+     *
+     * // Registry-based with scenario ID
+     * ScenarioExecutionResult result = RulesEngine.fromScenarioRegistry("registry.yaml")
+     *     .asScenario()
+     *     .evaluate("basic-trade-processing", data);
+     *
+     * // Classification-based routing
+     * ScenarioExecutionResult result = RulesEngine.fromScenarioRegistry("registry.yaml")
+     *     .asScenario()
+     *     .evaluateWithClassification(data);
+     * </pre>
+     *
+     * @return A ScenarioEvaluator instance for fluent scenario evaluation
+     * @throws IllegalStateException if the configuration does not contain scenarios
+     * @since 3.0
+     * @see ScenarioEvaluator
+     */
+    public ScenarioEvaluator asScenario() {
+        if (this.yamlConfig == null && this.scenarioRegistry == null) {
+            throw new IllegalStateException(
+                "Cannot use asScenario() method - this RulesEngine was not created with a scenario configuration or registry. " +
+                "Use RulesEngine.fromFile() or RulesEngine.fromScenarioRegistry() to create the engine."
+            );
+        }
+
+        return new ScenarioEvaluatorImpl(this);
+    }
+
     /**
      * Get the priority value for a severity level.
      * Higher values indicate higher severity.
@@ -1254,5 +1564,277 @@ public class RulesEngine {
         dataSinks.clear();
 
         logger.info("RulesEngine shutdown complete");
+    }
+
+    // ========================================
+    // Internal Scenario Processing Methods
+    // ========================================
+
+    /**
+     * Get a scenario by ID from the scenario registry.
+     *
+     * @param scenarioId The scenario ID to look up
+     * @return The scenario configuration
+     * @throws IllegalArgumentException if scenario not found
+     */
+    private dev.mars.apex.core.service.scenario.ScenarioConfiguration getScenario(String scenarioId) {
+        if (this.scenarioRegistry == null) {
+            throw new IllegalStateException("Scenario registry is not initialized");
+        }
+
+        dev.mars.apex.core.service.scenario.ScenarioConfiguration scenario = this.scenarioRegistry.get(scenarioId);
+
+        if (scenario == null) {
+            throw new IllegalArgumentException(
+                "Scenario not found: " + scenarioId + ". " +
+                "Available scenarios: " + this.scenarioRegistry.keySet()
+            );
+        }
+
+        return scenario;
+    }
+
+    /**
+     * Find the first matching scenario based on classification rules.
+     * Iterates through all scenarios in the registry and evaluates their classification rules
+     * against the provided input data using SpEL expressions.
+     *
+     * @param inputData The input data to match against classification rules
+     * @return The first matching scenario, or null if no match found
+     */
+    private dev.mars.apex.core.service.scenario.ScenarioConfiguration findMatchingScenario(
+            Map<String, Object> inputData) {
+
+        if (this.scenarioRegistry == null || this.scenarioRegistry.isEmpty()) {
+            logger.warn("Scenario registry is empty - no scenarios to match");
+            return null;
+        }
+
+        logger.debug("Evaluating {} scenarios for classification match", this.scenarioRegistry.size());
+
+        for (dev.mars.apex.core.service.scenario.ScenarioConfiguration scenario : this.scenarioRegistry.values()) {
+            if (scenario.hasClassificationRule()) {
+                logger.debug("Evaluating classification rule for scenario: {}", scenario.getScenarioId());
+
+                if (scenario.matchesClassificationRule(inputData)) {
+                    logger.info("Found matching scenario: {} ({})",
+                        scenario.getScenarioId(), scenario.getClassificationRuleDescription());
+                    return scenario;
+                }
+            } else {
+                logger.debug("Scenario {} has no classification rule - skipping", scenario.getScenarioId());
+            }
+        }
+
+        logger.warn("No matching scenario found for input data");
+        return null;
+    }
+
+    /**
+     * Parse scenario configuration from YamlRuleConfiguration.
+     *
+     * @param yamlConfig The YAML configuration containing scenario data
+     * @return Parsed ScenarioConfiguration
+     * @throws IllegalStateException if scenario data is missing or invalid
+     */
+    @SuppressWarnings("unchecked")
+    private dev.mars.apex.core.service.scenario.ScenarioConfiguration parseScenarioFromYaml(
+            dev.mars.apex.core.config.yaml.YamlRuleConfiguration yamlConfig) {
+
+        if (!yamlConfig.hasScenario()) {
+            throw new IllegalStateException("YAML configuration does not contain a scenario section");
+        }
+
+        Object scenarioData = yamlConfig.getScenarioData();
+        if (!(scenarioData instanceof java.util.Map)) {
+            throw new IllegalStateException("Scenario data must be a Map");
+        }
+
+        java.util.Map<String, Object> scenarioMap = (java.util.Map<String, Object>) scenarioData;
+        return parseScenarioConfiguration(scenarioMap);
+    }
+
+    /**
+     * Parse scenario configuration from YAML data map.
+     * Follows the same pattern as DataTypeScenarioService.parseScenarioConfiguration.
+     *
+     * @param scenarioData The scenario data map from YAML
+     * @return Parsed ScenarioConfiguration
+     */
+    @SuppressWarnings("unchecked")
+    private dev.mars.apex.core.service.scenario.ScenarioConfiguration parseScenarioConfiguration(
+            java.util.Map<String, Object> scenarioData) {
+
+        dev.mars.apex.core.service.scenario.ScenarioConfiguration scenario =
+            new dev.mars.apex.core.service.scenario.ScenarioConfiguration();
+
+        scenario.setScenarioId((String) scenarioData.get("scenario-id"));
+        scenario.setName((String) scenarioData.get("name"));
+        scenario.setDescription((String) scenarioData.get("description"));
+
+        // Parse data types (legacy)
+        java.util.List<String> dataTypes = (java.util.List<String>) scenarioData.get("data-types");
+        if (dataTypes != null) {
+            scenario.setDataTypes(dataTypes);
+        }
+
+        // Parse classification rule (modern Map-based routing)
+        java.util.Map<String, Object> classificationRule =
+            (java.util.Map<String, Object>) scenarioData.get("classification-rule");
+        if (classificationRule != null) {
+            String condition = (String) classificationRule.get("condition");
+            String description = (String) classificationRule.get("description");
+
+            if (condition != null) {
+                scenario.setClassificationRuleCondition(condition);
+            }
+            if (description != null) {
+                scenario.setClassificationRuleDescription(description);
+            }
+        }
+
+        // Parse rule configurations (legacy)
+        java.util.List<String> ruleConfigurations =
+            (java.util.List<String>) scenarioData.get("rule-configurations");
+        if (ruleConfigurations != null) {
+            scenario.setRuleConfigurations(ruleConfigurations);
+        }
+
+        // Parse processing stages (modern stage-based configuration)
+        java.util.List<java.util.Map<String, Object>> processingStages =
+            (java.util.List<java.util.Map<String, Object>>) scenarioData.get("processing-stages");
+        if (processingStages != null) {
+            java.util.List<dev.mars.apex.core.service.scenario.ScenarioStage> stages = new java.util.ArrayList<>();
+            for (java.util.Map<String, Object> stageData : processingStages) {
+                dev.mars.apex.core.service.scenario.ScenarioStage stage = parseScenarioStage(stageData);
+                if (stage != null) {
+                    stages.add(stage);
+                }
+            }
+
+            // Preserve classification rule fields when creating stage-based scenario
+            String classificationCondition = scenario.getClassificationRuleCondition();
+            String classificationDescription = scenario.getClassificationRuleDescription();
+            String description = scenario.getDescription();
+
+            scenario = dev.mars.apex.core.service.scenario.ScenarioConfiguration.withStages(
+                scenario.getScenarioId(), scenario.getName(), scenario.getDataTypes(), stages);
+            scenario.setDescription(description);
+            scenario.setClassificationRuleCondition(classificationCondition);
+            scenario.setClassificationRuleDescription(classificationDescription);
+        }
+
+        return scenario;
+    }
+
+    /**
+     * Parse a scenario stage from YAML data.
+     * Follows the same pattern as DataTypeScenarioService.parseScenarioStage.
+     *
+     * @param stageData The stage data map from YAML
+     * @return Parsed ScenarioStage or null if parsing fails
+     */
+    @SuppressWarnings("unchecked")
+    private dev.mars.apex.core.service.scenario.ScenarioStage parseScenarioStage(
+            java.util.Map<String, Object> stageData) {
+
+        try {
+            String stageName = (String) stageData.get("stage-name");
+            String configFile = (String) stageData.get("config-file");
+            Integer executionOrder = (Integer) stageData.get("execution-order");
+            String failurePolicy = (String) stageData.get("failure-policy");
+            Boolean required = (Boolean) stageData.get("required");
+
+            if (stageName == null || configFile == null || executionOrder == null) {
+                logger.warn("Missing required stage fields: stage-name, config-file, or execution-order");
+                return null;
+            }
+
+            dev.mars.apex.core.service.scenario.ScenarioStage stage =
+                new dev.mars.apex.core.service.scenario.ScenarioStage(stageName, configFile, executionOrder);
+
+            if (failurePolicy != null) {
+                stage.setFailurePolicy(failurePolicy);
+            }
+
+            if (required != null) {
+                stage.setRequired(required);
+            }
+
+            // Parse dependencies
+            java.util.List<String> dependsOn = (java.util.List<String>) stageData.get("depends-on");
+            if (dependsOn != null) {
+                for (String dependency : dependsOn) {
+                    stage.addDependency(dependency);
+                }
+            }
+
+            // Parse stage metadata
+            java.util.Map<String, Object> stageMetadata =
+                (java.util.Map<String, Object>) stageData.get("stage-metadata");
+            if (stageMetadata != null) {
+                stage.setStageMetadata(stageMetadata);
+            }
+
+            return stage;
+
+        } catch (Exception e) {
+            logger.error("Error parsing scenario stage: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Private implementation of ScenarioEvaluator interface for fluent API support.
+     *
+     * <p>This inner class provides a type-safe, fluent API for scenario evaluation
+     * by delegating all operations to the parent RulesEngine instance. It eliminates
+     * the need for casting when working with scenarios.</p>
+     *
+     * <p>Instances are created via {@link RulesEngine#asScenario()} and provide
+     * three evaluation modes:</p>
+     * <ul>
+     *   <li>Direct evaluation - for single scenario configurations</li>
+     *   <li>Registry-based evaluation - for specific scenarios by ID</li>
+     *   <li>Classification-based evaluation - for automatic scenario selection</li>
+     * </ul>
+     *
+     * @since 3.0
+     */
+    private static class ScenarioEvaluatorImpl implements ScenarioEvaluator {
+        private final RulesEngine engine;
+
+        /**
+         * Create a new ScenarioEvaluatorImpl wrapping the given RulesEngine.
+         *
+         * @param engine The RulesEngine instance to delegate to
+         */
+        ScenarioEvaluatorImpl(RulesEngine engine) {
+            this.engine = engine;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public dev.mars.apex.core.service.scenario.ScenarioExecutionResult evaluate(Map<String, Object> inputData) {
+            return engine.evaluateScenario(inputData);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public dev.mars.apex.core.service.scenario.ScenarioExecutionResult evaluate(String scenarioId, Map<String, Object> inputData) {
+            return engine.evaluateScenario(scenarioId, inputData);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public dev.mars.apex.core.service.scenario.ScenarioExecutionResult evaluateWithClassification(Map<String, Object> inputData) {
+            return engine.evaluateWithClassification(inputData);
+        }
     }
 }

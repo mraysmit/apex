@@ -4,9 +4,7 @@
  */
 package dev.mars.apex.demo.scenario;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import dev.mars.apex.core.service.scenario.DataTypeScenarioService;
+import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import dev.mars.apex.core.service.scenario.StageExecutionResult;
 import dev.mars.apex.demo.DemoTestBase;
@@ -29,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * coding principles for meaningful functional testing of the APEX rules engine.
  *
  * TESTING APPROACH:
- * - Uses real DataTypeScenarioService for authentic stage-based processing
+ * - Uses RulesEngine for authentic stage-based processing
  * - Creates meaningful test data that exercises actual business logic
  * - Validates stage execution order, dependencies, and failure policies
  * - Tests both positive scenarios (successful processing) and negative scenarios (validation failures)
@@ -87,14 +85,11 @@ public class BasicStageConfigurationTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(BasicStageConfigurationTest.class);
 
-    private DataTypeScenarioService scenarioService;
-
     @BeforeEach
     public void setUp() {
         super.setUp(); // Call parent setup
         logger.info("Setting up stage-based scenario execution test");
-        scenarioService = new DataTypeScenarioService();
-        logger.info("✓ Test environment initialized with DataTypeScenarioService");
+        logger.info("✓ Test environment initialized for RulesEngine scenario testing");
     }
 
     @Test
@@ -111,17 +106,17 @@ public class BasicStageConfigurationTest extends DemoTestBase {
                    tradeData.get("instrumentType"), tradeData.get("currency"),
                    tradeData.get("quantity"), tradeData.get("price"));
 
-        // 2. Load actual scenario configuration from YAML file
+        // 2. Load actual scenario configuration from YAML file using RulesEngine
         String scenarioPath = "src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest.yaml";
         logger.info("✓ STEP 2: Loading scenario configuration from: {}", scenarioPath);
-        scenarioService.loadScenarios(scenarioPath);
+        RulesEngine engine = RulesEngine.fromScenarioRegistry(scenarioPath);
         logger.info("  - Scenario registry loaded successfully");
         logger.info("  - Available scenarios: basic-trade-processing");
 
         // 3. Execute actual stage-based scenario processing
         logger.info("✓ STEP 3: Executing stage-based scenario 'basic-trade-processing'");
         long startTime = System.currentTimeMillis();
-        ScenarioExecutionResult result = scenarioService.processDataWithStages(tradeData, "basic-trade-processing");
+        ScenarioExecutionResult result = engine.evaluateScenario("basic-trade-processing", tradeData);
         long executionTime = System.currentTimeMillis() - startTime;
 
         logger.info("  - Scenario execution completed: {}", result.getExecutionSummary());
@@ -160,17 +155,17 @@ public class BasicStageConfigurationTest extends DemoTestBase {
         logger.info("  - Trade data: {}", tradeData);
         logger.info("  - Expected to trigger: price validation, currency validation rules");
 
-        // 2. Load failing scenario configuration
+        // 2. Load failing scenario configuration using RulesEngine
         String failingRegistryPath = "src/test/java/dev/mars/apex/demo/scenario/" + getClass().getSimpleName() + "-failing-registry.yaml";
         logger.info("✓ STEP 2: Loading failing scenario configuration from: {}", failingRegistryPath);
-        scenarioService.loadScenarios(failingRegistryPath);
+        RulesEngine engine = RulesEngine.fromScenarioRegistry(failingRegistryPath);
         logger.info("  - Failing scenario registry loaded successfully");
         logger.info("  - Target scenario: basic-trade-processing-failing");
 
         // 3. Execute scenario - validation rules should trigger but processing continues
         logger.info("✓ STEP 3: Executing scenario with validation rules that will trigger");
         long startTime = System.currentTimeMillis();
-        ScenarioExecutionResult result = scenarioService.processDataWithStages(tradeData, "basic-trade-processing-failing");
+        ScenarioExecutionResult result = engine.evaluateScenario("basic-trade-processing-failing", tradeData);
         long executionTime = System.currentTimeMillis() - startTime;
 
         logger.info("  - Scenario execution completed: {}", result.getExecutionSummary());
@@ -198,17 +193,17 @@ public class BasicStageConfigurationTest extends DemoTestBase {
         logger.info("  - Invalid trade data: {}", invalidTradeData);
         logger.info("  - Expected issues: missing required fields, invalid values");
 
-        // 2. Load scenario configuration
+        // 2. Load scenario configuration using RulesEngine
         String scenarioPath = "src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest.yaml";
         logger.info("✓ STEP 2: Loading scenario configuration from: {}", scenarioPath);
-        scenarioService.loadScenarios(scenarioPath);
+        RulesEngine engine = RulesEngine.fromScenarioRegistry(scenarioPath);
         logger.info("  - Scenario configuration loaded successfully");
         logger.info("  - Testing failure policies: validation=terminate, enrichment=continue-with-warnings");
 
         // 3. Execute scenario with invalid data
         logger.info("✓ STEP 3: Executing scenario with invalid data to test failure policies");
         long startTime = System.currentTimeMillis();
-        ScenarioExecutionResult result = scenarioService.processDataWithStages(invalidTradeData, "basic-trade-processing");
+        ScenarioExecutionResult result = engine.evaluateScenario("basic-trade-processing", invalidTradeData);
         long executionTime = System.currentTimeMillis() - startTime;
 
         logger.info("  - Scenario execution completed: {}", result.getExecutionSummary());

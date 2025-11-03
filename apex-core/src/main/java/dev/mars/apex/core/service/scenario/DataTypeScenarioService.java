@@ -90,24 +90,35 @@ public class DataTypeScenarioService {
     // Rule factory for creating engines
     private final YamlRuleFactory ruleFactory;
 
+    /**
+     * @deprecated Use {@link RulesEngine#fromScenarioRegistry(String)} instead.
+     */
+    @Deprecated(since = "3.0", forRemoval = true)
     public DataTypeScenarioService() {
         this.configLoader = new YamlConfigurationLoader();
         this.ruleFactory = new YamlRuleFactory();
         this.stageExecutor = new ScenarioStageExecutor(configLoader, ruleFactory);
     }
 
+    /**
+     * @deprecated Use {@link RulesEngine#fromScenarioRegistry(String)} instead.
+     */
+    @Deprecated(since = "3.0", forRemoval = true)
     public DataTypeScenarioService(YamlConfigurationLoader configLoader, YamlRuleFactory ruleFactory) {
         this.configLoader = configLoader != null ? configLoader : new YamlConfigurationLoader();
         this.ruleFactory = ruleFactory != null ? ruleFactory : new YamlRuleFactory();
         this.stageExecutor = new ScenarioStageExecutor(this.configLoader, this.ruleFactory);
     }
-    
+
     /**
      * Loads scenario configurations from a registry YAML file.
      *
      * @param registryPath path to the scenario registry configuration file
      * @throws Exception if configuration loading fails
+     * @deprecated Use {@link RulesEngine#fromScenarioRegistry(String)} instead.
+     *             Example: {@code RulesEngine engine = RulesEngine.fromScenarioRegistry("path/to/registry.yaml");}
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public void loadScenarios(String registryPath) throws Exception {
         logger.info("Loading scenario registry from: {}", registryPath);
 
@@ -191,10 +202,12 @@ public class DataTypeScenarioService {
     
     /**
      * Gets the appropriate scenario configuration for a data record.
-     * 
+     *
      * @param data the data record to route
      * @return scenario configuration or null if no matching scenario found
+     * @deprecated Use {@link RulesEngine#evaluateWithClassification(Map)} for classification-based routing.
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public ScenarioConfiguration getScenarioForData(Object data) {
         if (data == null) {
             return null;
@@ -237,28 +250,34 @@ public class DataTypeScenarioService {
     
     /**
      * Gets a scenario configuration by ID.
-     * 
+     *
      * @param scenarioId the scenario identifier
      * @return scenario configuration or null if not found
+     * @deprecated Use {@link RulesEngine#evaluateScenario(String, Map)} to execute scenarios by ID.
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public ScenarioConfiguration getScenario(String scenarioId) {
         return scenarioCache.get(scenarioId);
     }
-    
+
     /**
      * Gets all available scenario IDs.
-     * 
+     *
      * @return set of scenario identifiers
+     * @deprecated Scenario management is now internal to {@link RulesEngine}.
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public Set<String> getAvailableScenarios() {
         return new HashSet<>(scenarioCache.keySet());
     }
-    
+
     /**
      * Gets all data types that have associated scenarios.
      *
      * @return set of data type names
+     * @deprecated Data type routing is replaced by classification-based routing in {@link RulesEngine}.
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public Set<String> getSupportedDataTypes() {
         return new HashSet<>(dataTypeToScenarios.keySet());
     }
@@ -269,7 +288,9 @@ public class DataTypeScenarioService {
      *
      * @param data the data to process
      * @return processing result (ScenarioExecutionResult for stage-based, RuleResult for legacy)
+     * @deprecated Use {@link RulesEngine#evaluateWithClassification(Map)} for classification-based processing.
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public Object processData(Object data) {
         ScenarioConfiguration scenario = getScenarioForData(data);
         if (scenario == null) {
@@ -287,7 +308,9 @@ public class DataTypeScenarioService {
      * @param data the data to process
      * @param scenario the scenario configuration to use
      * @return processing result (ScenarioExecutionResult for stage-based, RuleResult for legacy)
+     * @deprecated Use {@link RulesEngine#evaluateScenario(String, Map)} to execute specific scenarios.
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public Object processDataWithScenario(Object data, ScenarioConfiguration scenario) {
         if (scenario == null) {
             throw new IllegalArgumentException("Scenario configuration cannot be null");
@@ -312,7 +335,9 @@ public class DataTypeScenarioService {
      * @param scenarioId the scenario ID to use
      * @return stage execution result
      * @throws IllegalArgumentException if scenario not found or doesn't have stage configuration
+     * @deprecated Use {@link RulesEngine#evaluateScenario(String, Map)} which automatically handles stage-based processing.
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public ScenarioExecutionResult processDataWithStages(Object data, String scenarioId) {
         ScenarioConfiguration scenario = getScenario(scenarioId);
         if (scenario == null) {
@@ -570,7 +595,9 @@ public class DataTypeScenarioService {
      *
      * @param data the Map data to classify
      * @return matching scenario or null if no match found
+     * @deprecated Use {@link RulesEngine#evaluateWithClassification(Map)} which handles classification automatically.
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public ScenarioConfiguration getScenarioForMapData(Map<String, Object> data) {
         if (data == null) {
             TestAwareLogger.warn(logger, "Cannot get scenario for null data");
@@ -606,7 +633,10 @@ public class DataTypeScenarioService {
      *
      * @param data the Map data to process
      * @return execution result or error if no scenario matches
+     * @deprecated Use {@link RulesEngine#evaluateWithClassification(Map)} instead.
+     *             Example: {@code ScenarioExecutionResult result = engine.evaluateWithClassification(data);}
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public ScenarioExecutionResult processMapData(Map<String, Object> data) {
         if (data == null) {
             TestAwareLogger.warn(logger, "Cannot process null data");

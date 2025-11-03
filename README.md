@@ -70,11 +70,13 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo
 - **Enterprise Scalability**: Environment-specific infrastructure with shared business logic
 - **Enhanced H2 Support**: Custom H2 parameters directly in YAML configuration for performance tuning and debugging
 
-### Scenario-Based Configuration
+### Scenario-Based Processing (APEX 3.0)
+- **Unified RulesEngine API**: Single entry point for all APEX processing types
+- **Classification-Based Routing**: Automatic scenario selection using SpEL expressions
+- **Multi-Stage Pipelines**: Orchestrate validation, enrichment, and compliance stages
+- **Failure Policies**: Configurable handling (terminate, continue-with-warnings, flag-for-review)
+- **Stage Dependencies**: Define execution order and conditional processing
 - **Centralized Management**: Single registry manages all processing pipelines
-- **Automatic Routing**: Data type detection and rule selection
-- **Lightweight Configuration**: Clean separation of routing logic and business rules
-- **Dependency Management**: Complete YAML dependency chain analysis
 
 ### Financial Services Ready
 - **OTC Derivatives Validation**: Multi-tier validation framework
@@ -87,6 +89,87 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo
 - **Health Monitoring**: Comprehensive system health checks
 - **Caching**: Multi-level caching with circuit breakers
 - **100% Test Coverage**: Comprehensive testing with cross-browser UI support
+
+## RulesEngine API - Universal Entry Point (APEX 3.0)
+
+APEX 3.0 introduces the **RulesEngine** as the unified entry point for all APEX processing types: rules, enrichments, pipelines, and scenarios.
+
+### Quick Start Examples
+
+**Load and Execute Rules:**
+```java
+// Load rules from YAML configuration
+RulesEngine engine = RulesEngine.fromYaml("config/validation-rules.yaml");
+
+// Evaluate rules against data
+Map<String, Object> data = new HashMap<>();
+data.put("amount", 1000000.0);
+data.put("currency", "USD");
+
+RuleResult result = engine.evaluate(data);
+if (result.isSuccess()) {
+    System.out.println("All validations passed");
+}
+```
+
+**Scenario Processing with Classification:**
+```java
+// Load scenario registry
+RulesEngine engine = RulesEngine.fromScenarioRegistry("config/trade-scenarios-registry.yaml");
+
+// Prepare trade data
+Map<String, Object> trade = new HashMap<>();
+trade.put("tradeType", "OTC_OPTION");
+trade.put("region", "US");
+trade.put("notional", 5000000.0);
+
+// Automatic classification and routing
+ScenarioExecutionResult result = engine.evaluateWithClassification(trade);
+
+System.out.println("Matched Scenario: " + result.getScenarioId());
+System.out.println("Validation Stage: " + result.isStageSuccessful("validation"));
+System.out.println("Enrichment Stage: " + result.isStageSuccessful("enrichment"));
+```
+
+**Direct Scenario Execution:**
+```java
+// Execute specific scenario by ID
+ScenarioExecutionResult result = engine.evaluateScenario("otc-option-us", trade);
+
+// Access stage-specific results
+Map<String, Object> stageResults = result.getStageResults();
+for (Map.Entry<String, Object> entry : stageResults.entrySet()) {
+    System.out.println("Stage: " + entry.getKey() + " -> " + entry.getValue());
+}
+```
+
+**Fluent API for Complex Workflows:**
+```java
+RulesEngine engine = RulesEngine.builder()
+    .withYamlConfig("config/rules.yaml")
+    .withEnrichments("config/enrichments.yaml")
+    .withExternalDataSources("config/data-sources.yaml")
+    .build();
+
+RuleResult result = engine.evaluate(data);
+```
+
+### Migration from Legacy APIs
+
+**Old API (Deprecated):**
+```java
+// DataTypeScenarioService - Deprecated in 3.0
+DataTypeScenarioService scenarioService = new DataTypeScenarioService();
+scenarioService.loadScenarios("config/scenarios-registry.yaml");
+ScenarioExecutionResult result = scenarioService.processMapData(data);
+```
+
+**New API (Recommended):**
+```java
+// RulesEngine - Unified API
+RulesEngine engine = RulesEngine.fromScenarioRegistry("config/scenarios-registry.yaml");
+ScenarioExecutionResult result = engine.evaluateWithClassification(data);
+```
 
 ## External Data-Source Reference System
 

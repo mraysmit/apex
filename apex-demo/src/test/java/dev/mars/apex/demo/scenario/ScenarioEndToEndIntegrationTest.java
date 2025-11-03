@@ -16,7 +16,7 @@ package dev.mars.apex.demo.scenario;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.service.scenario.DataTypeScenarioService;
+import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import dev.mars.apex.core.service.scenario.StageExecutionResult;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,13 +50,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class ScenarioEndToEndIntegrationTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ScenarioEndToEndIntegrationTest.class);
-    
-    private DataTypeScenarioService scenarioService;
+
     private Path tempDir;
 
     @BeforeEach
     void setUp() throws IOException {
-        scenarioService = new DataTypeScenarioService();
         tempDir = Files.createTempDirectory("scenario-e2e-test");
     }
 
@@ -163,7 +161,7 @@ class ScenarioEndToEndIntegrationTest {
         // ========================================
         logger.info("\n[EXECUTION] Loading registry and processing data");
 
-        scenarioService.loadScenarios(registryFile.toString());
+        RulesEngine engine = RulesEngine.fromScenarioRegistry(registryFile.toString());
         logger.info("[OK] Registry loaded successfully");
 
         // Create test data that matches classification rule
@@ -220,8 +218,8 @@ class ScenarioEndToEndIntegrationTest {
         // ========================================
         logger.info("\n[ASSERTIONS] Verifying scenario execution");
 
-        ScenarioExecutionResult result = scenarioService.processMapData(tradeData);
-        
+        ScenarioExecutionResult result = engine.evaluateWithClassification(tradeData);
+
         assertNotNull(result, "Scenario execution result should not be null");
         logger.info("[OK] Scenario execution result received");
 

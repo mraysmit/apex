@@ -16,7 +16,7 @@ package dev.mars.apex.demo.scenario;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.service.scenario.DataTypeScenarioService;
+import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,12 +49,10 @@ class ScenarioEndToEndIntegrationComplexTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ScenarioEndToEndIntegrationComplexTest.class);
     private Path tempDir;
-    private DataTypeScenarioService scenarioService;
 
     @BeforeEach
     void setUp() throws IOException {
         tempDir = Files.createTempDirectory("scenario-e2e-complex-test");
-        scenarioService = new DataTypeScenarioService();
     }
 
     @Test
@@ -88,8 +86,8 @@ class ScenarioEndToEndIntegrationComplexTest {
         Files.writeString(tempDir.resolve("bond-validation-rules.yaml"), createBondValidationRulesYaml());
         Files.writeString(tempDir.resolve("bond-enrichment-rules.yaml"), createBondEnrichmentRulesYaml());
 
-        // Load registry
-        scenarioService.loadScenarios(registryFile.toString());
+        // Load registry using RulesEngine
+        RulesEngine engine = RulesEngine.fromScenarioRegistry(registryFile.toString());
         logger.info("[OK] Registry loaded with 2 scenarios");
 
         // TEST 1: OTC Option Trade
@@ -98,7 +96,7 @@ class ScenarioEndToEndIntegrationComplexTest {
         logger.info("=".repeat(80));
 
         Map<String, Object> otcTradeData = createOtcTradeData();
-        testScenarioClassification("OTC Option", otcTradeData, "otc-option-us");
+        testScenarioClassification(engine, "OTC Option", otcTradeData, "otc-option-us");
 
         // TEST 2: Bond Trade
         logger.info("\n" + "=".repeat(80));
@@ -106,14 +104,14 @@ class ScenarioEndToEndIntegrationComplexTest {
         logger.info("=".repeat(80));
 
         Map<String, Object> bondTradeData = createBondTradeData();
-        testScenarioClassification("Bond", bondTradeData, "bond-us");
+        testScenarioClassification(engine, "Bond", bondTradeData, "bond-us");
 
         logger.info("\n" + "=".repeat(80));
         logger.info("[SUCCESS] MULTI-SCENARIO CLASSIFICATION TEST PASSED");
         logger.info("=".repeat(80));
     }
 
-    private void testScenarioClassification(String tradeType, Map<String, Object> tradeData, String expectedScenarioId) {
+    private void testScenarioClassification(RulesEngine engine, String tradeType, Map<String, Object> tradeData, String expectedScenarioId) {
         logger.info("\n[DATA] Input {} trade data:", tradeType);
         logger.info("  - Trade Type: {}", tradeData.get("tradeType"));
         logger.info("  - Asset Class: {}", tradeData.get("assetClass"));
@@ -123,7 +121,7 @@ class ScenarioEndToEndIntegrationComplexTest {
         logger.info("[CLASSIFICATION RULE] Applying classification rule to incoming data");
         logger.info("=".repeat(80));
 
-        ScenarioExecutionResult result = scenarioService.processMapData(tradeData);
+        ScenarioExecutionResult result = engine.evaluateWithClassification(tradeData);
 
         assertNotNull(result, "Scenario execution result should not be null");
         assertEquals(expectedScenarioId, result.getScenarioId(), "Should execute " + expectedScenarioId + " scenario");

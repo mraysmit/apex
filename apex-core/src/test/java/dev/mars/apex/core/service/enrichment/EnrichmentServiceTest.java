@@ -196,15 +196,17 @@ class EnrichmentServiceTest {
     // ========================================
 
     @Test
-    @DisplayName("Should handle null target object")
+    @DisplayName("Should handle null target object gracefully")
     void testEnrichNullTargetObject() {
-        System.out.println("TEST: Triggering intentional error - testing enrichment with null target object");
+        System.out.println("TEST: Testing enrichment with null target object - should return null gracefully");
 
         YamlEnrichment enrichment = createTestEnrichment();
 
-        assertThrows(NullPointerException.class, () -> {
-            enrichmentProcessor.processEnrichment(enrichment, null);
-        }, "Null target object should throw NullPointerException");
+        // After defensive programming fix, null input should return null gracefully
+        // instead of throwing NullPointerException
+        Object result = enrichmentProcessor.processEnrichment(enrichment, null);
+
+        assertNull(result, "Null target object should return null gracefully without throwing exception");
     }
 
     @Test
