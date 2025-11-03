@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Compatible-blue.svg)](https://www.postgresql.org/)
 [![Playground](https://img.shields.io/badge/Playground-Interactive-purple.svg)](http://localhost:8081/playground)
-[![Financial Services](https://img.shields.io/badge/Financial%20Services-Ready-gold.svg)](docs/old/APEX_FINANCIAL_SERVICES_GUIDE.md)
+[![Financial Services](https://img.shields.io/badge/Financial%20Services-Ready-gold.svg)](docs/old/APEX_FINANCIAL_SERVICES_DESIGN.md)
 [![API Docs](https://img.shields.io/badge/API-Swagger-green.svg)](http://localhost:8080/swagger-ui.html)
 
 **Version:** 2.1
@@ -398,7 +398,7 @@ graph TB
 - **[APEX Playground](http://localhost:8081/playground)** - Interactive development environment
 - **[Rules Engine User Guide](docs/APEX_RULES_ENGINE_USER_GUIDE.md)** - Complete user documentation
 - **[Technical Reference](docs/APEX_TECHNICAL_REFERENCE.md)** - Architecture and implementation
-- **[Financial Services Guide](docs/old/APEX_FINANCIAL_SERVICES_GUIDE.md)** - Domain-specific patterns
+- **[Financial Services Guide](docs/old/APEX_FINANCIAL_SERVICES_DESIGN.md)** - Domain-specific patterns
 - **[Bootstrap Demos Guide](docs/APEX_BOOTSTRAP_DEMOS_GUIDE.md)** - 16 comprehensive demonstrations
 - **[REST API Guide](docs/APEX_REST_API_GUIDE.md)** - Complete HTTP API reference
 - **[Data Management Guide](docs/APEX_DATA_MANAGEMENT_GUIDE.md)** - Data integration and management
@@ -406,7 +406,7 @@ graph TB
 ### Quick Reference
 - **Configuration Questions**: [Rules Engine User Guide](docs/APEX_RULES_ENGINE_USER_GUIDE.md)
 - **Implementation Questions**: [Technical Reference](docs/APEX_TECHNICAL_REFERENCE.md)
-- **Financial Services Questions**: [Financial Services Guide](docs/old/APEX_FINANCIAL_SERVICES_GUIDE.md)
+- **Financial Services Questions**: [Financial Services Guide](docs/old/APEX_FINANCIAL_SERVICES_DESIGN.md)
 
 ## Use Cases
 
