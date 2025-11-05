@@ -441,14 +441,15 @@ public class YamlRuleFactory {
         // Extract severity from YAML rule, default to ERROR if not specified
         String severity = yamlRule.getSeverity() != null ? yamlRule.getSeverity() : SeverityConstants.DEFAULT_SEVERITY;
 
-        // Extract error/success codes and field mappings from YAML rule
+        // Extract error/success codes, field mappings, and result field from YAML rule
         String successCode = yamlRule.getSuccessCode();
         String errorCode = yamlRule.getErrorCode();
         Object mapToField = yamlRule.getMapToField();
+        String resultField = yamlRule.getResultField();
 
         Rule createdRule = new Rule(ruleId, categories, name, condition, message, description,
                                    yamlRule.getPriority() != null ? yamlRule.getPriority() : 100,
-                                   severity, metadata, yamlRule.getDefaultValue(), successCode, errorCode, mapToField);
+                                   severity, metadata, yamlRule.getDefaultValue(), successCode, errorCode, mapToField, resultField);
 
         // Apply custom properties if available
         if (yamlRule.getCustomProperties() != null && !yamlRule.getCustomProperties().isEmpty()) {

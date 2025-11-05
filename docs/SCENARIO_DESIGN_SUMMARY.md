@@ -210,16 +210,97 @@ Stage 1 (validation)
     ↓ (success)
 Stage 2 (enrichment) ← depends on Stage 1
     ↓ (success)
-Stage 3 (compliance) ← depends on Stage 2
+Stage 3 (compliance) ← depends on Stage 1 (parallel with enrichment)
     ↓
 Result
 ```
 
+**Key Features**:
+- Stages execute in `executionOrder` sequence
+- Dependencies defined via `depends-on` array
+- Parallel execution when stages share same dependencies
+- Automatic skipping of stages with unsatisfied dependencies
+
 ### Dependency Resolution
 
-- Stages execute in `executionOrder` sequence
-- Stages with `dependsOn` are skipped if dependencies fail
-- Failure policies determine whether to continue or terminate
+**Algorithm**: Dependency-aware execution with topological sorting
+
+**Execution Rules**:
+1. Stages execute in `executionOrder` sequence
+2. Before executing a stage, all dependencies in `depends-on` are checked
+3. If any dependency failed, the stage is **skipped** (tracked in `skippedStages`)
+4. Failure policies determine whether to continue or terminate
+5. Stages with same dependencies can execute in parallel
+
+**Example Dependency Chain**:
+```yaml
+processing-stages:
+  - stage-name: "validation"
+    execution-order: 1
+    failure-policy: "terminate"
+    # No dependencies - always runs first
+
+  - stage-name: "market-data-enrichment"
+    execution-order: 2
+    depends-on: ["validation"]  # Only runs if validation passes
+    failure-policy: "continue-with-warnings"
+
+  - stage-name: "compliance"
+    execution-order: 3
+    depends-on: ["validation"]  # Parallel with enrichment (both depend only on validation)
+    failure-policy: "flag-for-review"
+```
+
+**Dependency Validation**:
+- **Self-referencing detection**: Stages cannot depend on themselves
+- **Circular dependency detection**: Uses DFS with recursion stack to detect cycles (A→B→C→A)
+- **Missing dependency handling**: Stages with non-existent dependencies are skipped gracefully
+- **Clear error messages**: Validation errors indicate specific dependency issues
+
+### Circular Dependency Detection
+
+APEX uses **topological sorting** with DFS to detect circular dependencies:
+
+**Detected Patterns**:
+- Self-referencing: `stage-a` depends on `stage-a`
+- Two-stage cycles: `stage-a` → `stage-b` → `stage-a`
+- Three-stage cycles: `stage-a` → `stage-b` → `stage-c` → `stage-a`
+- Complex multi-path cycles
+
+**Detection Algorithm**:
+```java
+// From ComplexWorkflowExecutor.java
+private void topologicalSort(String stageId, ...) {
+    if (visiting.contains(stageId)) {
+        throw new RuntimeException("Circular dependency detected involving stage: " + stageId);
+    }
+    // ... DFS traversal with recursion stack tracking
+}
+```
+
+**Test Coverage**:
+- `ScenarioStageCircularDependencyTest.java` - Tests all circular dependency patterns
+- `ScenarioStageMissingDependencyTest.java` - Tests missing dependency handling
+
+### Failure Policy Interaction with Dependencies
+
+| Policy | Behavior | Impact on Dependent Stages |
+|--------|----------|---------------------------|
+| `terminate` | Stop processing immediately | All dependent stages are **skipped** |
+| `continue-with-warnings` | Log warnings, continue | Dependent stages **may execute** (stage marked as "successful with warnings") |
+| `flag-for-review` | Mark for review, continue | Dependent stages **may execute** (stage marked as "requires review") |
+
+**Example**:
+```yaml
+- stage-name: "validation"
+  failure-policy: "terminate"  # MUST pass
+  # If validation fails → all dependent stages are skipped
+
+- stage-name: "enrichment"
+  failure-policy: "continue-with-warnings"  # Optional
+  depends-on: ["validation"]
+  # If enrichment fails → compliance can still run (if it doesn't depend on enrichment)
+```
 
 ### Performance Monitoring
 
@@ -228,6 +309,81 @@ Each stage tracks:
 - SLA compliance (from stage metadata)
 - Success/failure status
 - Warnings and errors
+- Dependency satisfaction status
+- Skip reason (if stage was skipped)
+
+---
+
+## Dependency Management
+
+### Two Types of Dependencies
+
+APEX scenarios support **two types of dependencies**:
+
+#### 1. Stage Dependencies (Processing Stages)
+Dependencies between **processing stages within a single scenario** - stages execute in order based on their dependencies.
+
+**YAML Syntax**:
+```yaml
+processing-stages:
+  - stage-name: "validation"
+    execution-order: 1
+    # No dependencies - runs first
+
+  - stage-name: "enrichment"
+    execution-order: 2
+    depends-on: ["validation"]  # Array of stage names
+
+  - stage-name: "compliance"
+    execution-order: 3
+    depends-on: ["validation", "enrichment"]  # Multiple dependencies
+```
+
+**Runtime Behavior**:
+- Before executing a stage, `ScenarioStageExecutor` checks if all dependencies succeeded
+- If any dependency failed, the stage is **skipped** with reason tracked
+- Skipped stages appear in `ScenarioExecutionResult.skippedStages`
+
+#### 2. File Dependencies (Configuration References)
+Dependencies between **YAML configuration files** - scenarios reference other YAML files.
+
+**YAML Keywords**:
+| Keyword | Purpose | Example |
+|---------|---------|---------|
+| `rule-configurations` | References rule config files | `rule-configurations: [validation-rules.yaml]` |
+| `enrichment-refs` | References enrichment files | `enrichment-refs: [market-data-enrichment.yaml]` |
+| `config-files` | References general configs | `config-files: [shared-config.yaml]` |
+| `rule-chains` | References rule chain files | `rule-chains: [chain-1.yaml]` |
+
+**Example**:
+```yaml
+metadata:
+  id: trade-processing-scenario
+  type: scenario
+
+# File-based dependencies
+rule-configurations:
+  - validation-rules.yaml
+  - compliance-rules.yaml
+
+enrichment-refs:
+  - market-data-enrichment.yaml
+  - pricing-enrichment.yaml
+
+scenario:
+  scenario-id: trade-processing
+  processing-stages:
+    - stage-name: validation
+      config-file: validation-rules.yaml  # References file above
+```
+
+### Dependency Graph Analysis
+
+The `YamlDependencyGraph` class analyzes file dependencies:
+- Builds dependency graph from YAML file references
+- Detects circular dependencies using DFS algorithm
+- Provides topological sort for correct loading order
+- Generates visual dependency trees for documentation
 
 ---
 
@@ -240,31 +396,63 @@ scenarios:
     config-file: "scenarios/otc-option-us-scenario.yaml"
     business-domain: "Derivatives Trading"
     owner: "derivatives.team@company.com"
+    risk-category: "High"
 ```
 
-### Scenario File
+### Scenario File (with Dependencies)
 ```yaml
 scenario:
   scenario-id: "otc-option-us"
   name: "OTC Option US Processing"
-  
+  description: "Multi-stage processing for US OTC option trades"
+
   classification-rule:
     condition: "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'"
     description: "US OTC option trades"
-  
+
   processing-stages:
+    # Stage 1: Validation (no dependencies - always runs first)
     - stage-name: "validation"
       config-file: "config/otc-validation-rules.yaml"
       execution-order: 1
-      failure-policy: "terminate"
+      failure-policy: "terminate"  # MUST pass
       required: true
-    
-    - stage-name: "enrichment"
-      config-file: "config/otc-enrichment-rules.yaml"
+      stage-metadata:
+        description: "Validate trade data completeness and correctness"
+        sla-ms: 100
+
+    # Stage 2: Market Data Enrichment (depends on validation)
+    - stage-name: "market-data-enrichment"
+      config-file: "config/market-data-enrichment.yaml"
       execution-order: 2
-      failure-policy: "continue-with-warnings"
+      failure-policy: "continue-with-warnings"  # Optional
       depends-on: ["validation"]
+      stage-metadata:
+        description: "Enrich with market data (prices, volatility)"
+        sla-ms: 500
+
+    # Stage 3: Compliance (depends on validation, parallel with enrichment)
+    - stage-name: "compliance"
+      config-file: "config/compliance-rules.yaml"
+      execution-order: 3
+      failure-policy: "flag-for-review"
+      depends-on: ["validation"]  # Only depends on validation, not enrichment
+      required: true
+      stage-metadata:
+        description: "Apply regulatory compliance rules"
+        sla-ms: 200
 ```
+
+**Execution Flow**:
+1. **Validation** runs first (execution-order: 1, no dependencies)
+   - If fails with `terminate` policy → enrichment and compliance are **skipped**
+   - If passes → continue to stages 2 and 3
+2. **Market-data-enrichment** runs (depends on validation)
+   - Can run in parallel with compliance (both depend only on validation)
+   - If fails with `continue-with-warnings` → compliance still runs
+3. **Compliance** runs (depends on validation)
+   - Can run in parallel with enrichment
+   - If fails with `flag-for-review` → processing completes but flagged
 
 ---
 
@@ -345,15 +533,124 @@ if (result.isSuccessful()) {
 4. **Backward Compatible** - Supports legacy type-based routing
 5. **Production-Ready** - Comprehensive error handling, monitoring, SLA tracking
 6. **Extensible** - Easy to add new stages, failure policies, or routing strategies
+7. **Dependency-Aware** - Topological sorting ensures correct execution order
+8. **Fail-Safe** - Circular dependencies and missing dependencies detected early
+
+---
+
+## Best Practices
+
+### Stage Dependency Design
+
+1. **Use `execution-order`** to define intended sequence (1, 2, 3, ...)
+2. **Use `depends-on`** to enforce actual dependencies between stages
+3. **Set appropriate `failure-policy`** based on stage criticality:
+   - `terminate` for critical stages (validation, authentication)
+   - `continue-with-warnings` for optional stages (enrichment, analytics)
+   - `flag-for-review` for compliance/risk stages
+4. **Mark critical stages as `required: true`**
+5. **Add `stage-metadata`** for monitoring and SLA tracking
+6. **Test circular dependencies** explicitly in your test suite
+7. **Validate missing dependencies** are handled gracefully
+
+### Parallel Execution Optimization
+
+To enable parallel execution of independent stages:
+```yaml
+processing-stages:
+  - stage-name: "validation"
+    execution-order: 1
+
+  # These two stages can run in parallel (both depend only on validation)
+  - stage-name: "market-data-enrichment"
+    execution-order: 2
+    depends-on: ["validation"]
+
+  - stage-name: "compliance-check"
+    execution-order: 2  # Same execution order
+    depends-on: ["validation"]  # Same dependencies
+```
+
+### Error Handling
+
+**Intentional Errors in Tests**:
+When testing error conditions (circular dependencies, missing dependencies), use the `"TEST:"` prefix in logs:
+```java
+logger.info("TEST: Triggering intentional error - Circular dependency");
+```
+
+This makes it clear the error is expected and part of the test design.
+
+---
+
+## Test Coverage
+
+### Core Tests (apex-core)
+
+**Circular Dependency Tests**:
+- `ScenarioStageCircularDependencyTest.java`
+  - Self-referencing stages (A→A)
+  - Two-stage cycles (A→B→A)
+  - Three-stage cycles (A→B→C→A)
+  - Complex multi-path cycles
+
+**Missing Dependency Tests**:
+- `ScenarioStageMissingDependencyTest.java`
+  - Single missing dependency
+  - Multiple missing dependencies
+  - Graceful error handling
+
+**Stage Execution Tests**:
+- `ScenarioStageExecutorTest.java`
+  - Dependency-aware execution
+  - Failure policy enforcement
+  - Performance monitoring
+  - SLA tracking
+
+**Classification Tests**:
+- `ScenarioConfigurationClassificationTest.java`
+  - SpEL-based classification rules
+  - Map-based data routing
+  - Multiple scenario matching
+
+### Demo Tests (apex-demo)
+
+**Real-World Scenarios**:
+- `BasicStageConfigurationTest.java`
+  - Multi-stage processing with dependencies
+  - Failure policy handling
+  - Validation and enrichment stages
+  - Comprehensive result validation
+
+**Business Domain Tests**:
+- `TradeValidationCodesDemo.java`
+  - OTC options trade processing
+  - Error/success codes with field mappings
+  - Real business calculations (Greeks, notional, pricing)
 
 ---
 
 ## Status
 
 **Current Implementation**: Version 3.0 - Production Ready
-- Automatic scenario selection via SpEL classification rules
-- Stage-based processing with dependencies and failure policies
-- Flexible YAML configuration
-- Performance monitoring with SLA tracking
-- Multi-environment support (dev/test/prod)
+
+**Features**:
+- ✅ Automatic scenario selection via SpEL classification rules
+- ✅ Stage-based processing with dependencies and failure policies
+- ✅ Circular dependency detection with topological sorting
+- ✅ Missing dependency handling with graceful skipping
+- ✅ Parallel execution support for independent stages
+- ✅ Flexible YAML configuration
+- ✅ Performance monitoring with SLA tracking
+- ✅ Multi-environment support (dev/test/prod)
+- ✅ Comprehensive test coverage (circular deps, missing deps, failure policies)
+
+**Dependency Features**:
+- ✅ Stage dependencies with `depends-on` array
+- ✅ File dependencies with `rule-configurations`, `enrichment-refs`, etc.
+- ✅ Topological sorting for execution order
+- ✅ DFS-based circular dependency detection
+- ✅ Self-referencing detection
+- ✅ Missing dependency tracking in execution results
+- ✅ Clear error messages for dependency issues
 

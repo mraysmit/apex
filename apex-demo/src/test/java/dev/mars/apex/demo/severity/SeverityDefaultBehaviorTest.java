@@ -81,7 +81,7 @@ public class SeverityDefaultBehaviorTest {
         
         // Load default severity behavior configuration
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/demo/basic/SeverityDefaultBehaviorTest.yaml"
+            "src/test/java/dev/mars/apex/demo/severity/SeverityDefaultBehaviorTest.yaml"
         );
         
         assertNotNull(config, "Configuration should be loaded");
@@ -183,7 +183,7 @@ public class SeverityDefaultBehaviorTest {
 
         // Load configuration
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/demo/basic/SeverityDefaultBehaviorTest.yaml"
+            "src/test/java/dev/mars/apex/demo/severity/SeverityDefaultBehaviorTest.yaml"
         );
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
@@ -282,7 +282,7 @@ public class SeverityDefaultBehaviorTest {
 
         // Load configuration
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/demo/basic/SeverityDefaultBehaviorTest.yaml"
+            "src/test/java/dev/mars/apex/demo/severity/SeverityDefaultBehaviorTest.yaml"
         );
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
 

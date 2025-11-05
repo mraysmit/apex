@@ -66,6 +66,9 @@ public class Rule implements RuleBase {
     private final String errorCode;
     private final Object mapToField;  // String or List<String>
 
+    // Phase 5: Result Field Support - Store rule evaluation result for subsequent rules
+    private final String resultField;
+
     /**
      * Create a new business rule with minimal information.
      * This constructor is provided for compatibility with the legacy Rule class.
@@ -104,6 +107,7 @@ public class Rule implements RuleBase {
         this.successCode = null;
         this.errorCode = null;
         this.mapToField = null;
+        this.resultField = null; // No result field for backward compatibility
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
             .build();
@@ -153,6 +157,7 @@ public class Rule implements RuleBase {
         this.successCode = null;
         this.errorCode = null;
         this.mapToField = null;
+        this.resultField = null; // No result field for backward compatibility
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
             .build();
@@ -227,6 +232,7 @@ public class Rule implements RuleBase {
         this.successCode = null;
         this.errorCode = null;
         this.mapToField = null;
+        this.resultField = null; // No result field for backward compatibility
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
             .build();
@@ -275,6 +281,7 @@ public class Rule implements RuleBase {
         this.successCode = null;
         this.errorCode = null;
         this.mapToField = null;
+        this.resultField = null; // No result field for backward compatibility
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
             .build();
@@ -327,6 +334,7 @@ public class Rule implements RuleBase {
         this.successCode = null;
         this.errorCode = null;
         this.mapToField = null;
+        this.resultField = null; // No result field for backward compatibility
         this.metadata = metadata != null ? metadata : RuleMetadata.builder().createdByUser("system").build();
     }
 
@@ -361,6 +369,7 @@ public class Rule implements RuleBase {
         this.successCode = null;
         this.errorCode = null;
         this.mapToField = null;
+        this.resultField = null; // No result field for backward compatibility
         this.metadata = metadata != null ? metadata : RuleMetadata.builder().createdByUser("system").build();
     }
 
@@ -385,6 +394,33 @@ public class Rule implements RuleBase {
     public Rule(String id, Set<Category> categories, String name, String condition,
                 String message, String description, int priority, String severity,
                 RuleMetadata metadata, Object defaultValue, String successCode, String errorCode, Object mapToField) {
+        this(id, categories, name, condition, message, description, priority, severity,
+             metadata, defaultValue, successCode, errorCode, mapToField, null);
+    }
+
+    /**
+     * Create a new business rule with full metadata support, default value, error/success codes, and result field.
+     * This constructor supports Phase 5 enhancement for storing rule evaluation results.
+     *
+     * @param id The unique identifier of the rule
+     * @param categories The category objects of the rule
+     * @param name The name of the rule
+     * @param condition The SpEL condition that determines if the rule applies
+     * @param message The message to display when the rule applies
+     * @param description The description of what the rule does
+     * @param priority The priority of the rule (lower numbers = higher priority)
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @param metadata The extensible metadata for the rule
+     * @param defaultValue The default value to use for error recovery (null if no default)
+     * @param successCode The code to use when rule succeeds (null if no code)
+     * @param errorCode The code to use when rule fails (null if no code)
+     * @param mapToField Field mapping expressions for enriching data (null if no mapping)
+     * @param resultField Field name where the boolean condition result will be stored (null if no storage)
+     */
+    public Rule(String id, Set<Category> categories, String name, String condition,
+                String message, String description, int priority, String severity,
+                RuleMetadata metadata, Object defaultValue, String successCode, String errorCode,
+                Object mapToField, String resultField) {
         this.uuid = UUID.randomUUID();
         this.id = id;
         this.categories = new HashSet<>(categories);
@@ -398,6 +434,7 @@ public class Rule implements RuleBase {
         this.successCode = successCode;
         this.errorCode = errorCode;
         this.mapToField = mapToField;
+        this.resultField = resultField;
         this.metadata = metadata != null ? metadata : RuleMetadata.builder().createdByUser("system").build();
     }
 
@@ -541,6 +578,16 @@ public class Rule implements RuleBase {
      */
     public Object getMapToField() {
         return mapToField;
+    }
+
+    /**
+     * Get the result field name for this rule.
+     * Phase 5 Enhancement: Returns the field name where the boolean condition result will be stored.
+     *
+     * @return The result field name, or null if no result storage is configured
+     */
+    public String getResultField() {
+        return resultField;
     }
 
     /**

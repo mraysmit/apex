@@ -80,7 +80,7 @@ public class SeverityComprehensiveTest {
         
         // Load comprehensive severity configuration
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/demo/basic/SeverityComprehensiveTest.yaml"
+            "src/test/java/dev/mars/apex/demo/severity/SeverityComprehensiveTest.yaml"
         );
         
         assertNotNull(config, "Configuration should be loaded");
@@ -199,7 +199,7 @@ public class SeverityComprehensiveTest {
 
         // Load configuration
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/demo/basic/SeverityComprehensiveTest.yaml"
+            "src/test/java/dev/mars/apex/demo/severity/SeverityComprehensiveTest.yaml"
         );
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
@@ -289,7 +289,7 @@ public class SeverityComprehensiveTest {
 
         // Load configuration
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/demo/basic/SeverityComprehensiveTest.yaml"
+            "src/test/java/dev/mars/apex/demo/severity/SeverityComprehensiveTest.yaml"
         );
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
 

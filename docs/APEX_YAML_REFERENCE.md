@@ -935,12 +935,99 @@ rules:
 | `message` | Yes | Error/warning message | "Field is required" |
 | `severity` | Yes | ERROR, WARNING, INFO | "ERROR" |
 | `priority` | No | Execution priority (1 = highest) | 1 |
+| `result-field` | No | Field name to store rule result (boolean) | "isHighValue" |
 
 #### Severity Levels
 
 - **ERROR**: Critical validation failure, stops processing
 - **WARNING**: Non-critical issue, processing continues
 - **INFO**: Informational message, no impact on processing
+
+#### Result Field Storage
+
+The `result-field` property allows you to store a rule's boolean evaluation result (true/false) in the facts map and enriched data for use by subsequent rules or enrichments. This enables rule chaining and conditional logic based on previous rule evaluations.
+
+**Key Features:**
+- Stores the rule's boolean result (true = rule matched, false = rule did not match)
+- Result is available to subsequent rules via SpEL expressions (e.g., `#isHighValue`)
+- Supports nested field notation (e.g., `"validation.isHighValue"` creates nested structure)
+- Zero overhead when not configured - only rules with `result-field` store results
+- Results are stored in both the facts map (for SpEL access) and enrichedData (for API consumers)
+
+**Example - Basic Rule Chaining:**
+
+```yaml
+rules:
+  # First rule: Check if trade is high value
+  - id: "check-high-value"
+    name: "Check High Value Trade"
+    condition: "#notionalAmount != null && #notionalAmount > 10000000"
+    message: "Trade is high value"
+    severity: "INFO"
+    result-field: "isHighValue"  # Store result for subsequent rules
+
+  # Second rule: Use the stored result
+  - id: "check-approval-required"
+    name: "Check Approval Required"
+    condition: "#isHighValue == true"  # Access previous rule's result
+    message: "Trade requires approval"
+    severity: "WARNING"
+    result-field: "requiresApproval"
+```
+
+**Example - Nested Field Storage:**
+
+```yaml
+rules:
+  # Store result in nested structure
+  - id: "check-high-value-nested"
+    name: "Check High Value (Nested)"
+    condition: "#notionalAmount > 10000000"
+    message: "High value trade detected"
+    severity: "INFO"
+    result-field: "validation.isHighValue"  # Creates {"validation": {"isHighValue": true}}
+
+  # Access nested result
+  - id: "check-credit-rating"
+    name: "Check Credit Rating"
+    condition: "#validation['isHighValue'] == true && #creditRating != null"
+    message: "Credit check required for high value trades"
+    severity: "WARNING"
+    result-field: "requiresCreditCheck"
+```
+
+**Example - Complex Conditional Logic:**
+
+```yaml
+rules:
+  - id: "check-region"
+    name: "Check APAC Region"
+    condition: "#region == 'APAC'"
+    message: "Trade is in APAC region"
+    severity: "INFO"
+    result-field: "isApacTrade"
+
+  - id: "check-high-value"
+    name: "Check High Value"
+    condition: "#notionalAmount > 10000000"
+    message: "High value trade"
+    severity: "INFO"
+    result-field: "isHighValue"
+
+  - id: "check-complex-approval"
+    name: "Check Complex Approval Logic"
+    condition: "(#isApacTrade == true && #isHighValue == true) || #requiresCreditCheck == true"
+    message: "Complex approval required"
+    severity: "WARNING"
+    result-field: "requiresComplexApproval"
+```
+
+**Best Practices:**
+- Use descriptive field names that clearly indicate what the result represents
+- Use nested notation (e.g., `"validation.isHighValue"`) to organize related results
+- Only configure `result-field` when you need to use the result in subsequent rules
+- Access stored results using SpEL syntax: `#fieldName` or `#nested['fieldName']`
+- Results are boolean values: `true` (rule matched) or `false` (rule did not match)
 
 #### Complex Validation Examples
 

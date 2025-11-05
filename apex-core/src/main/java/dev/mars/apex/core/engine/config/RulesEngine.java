@@ -493,7 +493,15 @@ public class RulesEngine {
      */
     public RuleResult executeRule(Rule rule, Map<String, Object> facts) {
         // Delegate to the unified evaluator for consistent behavior
-        return unifiedEvaluator.evaluateRule(rule, facts);
+        RuleResult result = unifiedEvaluator.evaluateRule(rule, facts);
+
+        // Phase 5: Store result in facts if result-field is configured
+        if (rule.getResultField() != null && !rule.getResultField().trim().isEmpty()) {
+            facts.put(rule.getResultField(), result.isTriggered());
+            logger.debug("Stored rule result in facts: {} = {}", rule.getResultField(), result.isTriggered());
+        }
+
+        return result;
     }
 
     /**

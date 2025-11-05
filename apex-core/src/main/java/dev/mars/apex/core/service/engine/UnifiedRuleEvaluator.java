@@ -136,6 +136,13 @@ public class UnifiedRuleEvaluator {
             Expression exp = parser.parseExpression(rule.getCondition());
             Boolean result = exp.getValue(context, Boolean.class);
 
+            // Phase 5: Store result in context if result-field is configured
+            if (rule.getResultField() != null && !rule.getResultField().trim().isEmpty()) {
+                boolean booleanResult = (result != null && result);
+                context.setVariable(rule.getResultField(), booleanResult);
+                rulesLogger.debug("Stored rule result in context: {} = {}", rule.getResultField(), booleanResult);
+            }
+
             // Complete performance monitoring for successful evaluation
             RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition());
 
@@ -196,21 +203,88 @@ public class UnifiedRuleEvaluator {
      * @return The rule evaluation result
      */
     public RuleResult evaluateRule(Rule rule, Map<String, Object> facts) {
+        rulesLogger.info("Phase 5: evaluateRule(Rule, Map) called for rule: {}", rule != null ? rule.getName() : "null");
+
         if (rule == null) {
             return RuleResult.noRules();
         }
-        
+
         // Check for missing parameters
         Set<String> missingParameters = RuleParameterExtractor.validateParameters(rule, facts);
         if (!missingParameters.isEmpty()) {
             TestAwareLogger.warn(rulesLogger, "Missing parameters for rule '{}': {}", rule.getName(), missingParameters);
             return RuleResult.error(rule.getName(), "Missing parameters: " + missingParameters, rule.getSeverity());
         }
-        
+
         // Create evaluation context
         StandardEvaluationContext context = createEvaluationContext(facts);
-        
-        return evaluateRule(rule, context);
+
+        RuleResult result = evaluateRule(rule, context);
+
+        // Phase 5: Store result in facts and enrichedData if result-field is configured
+        if (rule.getResultField() != null && !rule.getResultField().trim().isEmpty()) {
+            // Store in facts map for subsequent rules to access (flat key)
+            facts.put(rule.getResultField(), result.isTriggered());
+            rulesLogger.info("Phase 5: Stored rule result in facts: {} = {}", rule.getResultField(), result.isTriggered());
+
+            // Also add to enrichedData so it's returned to the caller
+            Map<String, Object> enrichedData = new java.util.HashMap<>(result.getEnrichedData());
+
+            // Support nested field notation (e.g., "validation.isHighValue" creates nested structure)
+            setNestedValue(enrichedData, rule.getResultField(), result.isTriggered());
+
+            // Create new RuleResult with updated enrichedData
+            result = new RuleResult(result.getRuleName(), result.getMessage(), result.getSeverity(),
+                                   result.isTriggered(), result.getResultType(), result.getPerformanceMetrics(),
+                                   enrichedData, result.getFailureMessages(), result.isSuccess(),
+                                   result.getSuccessCode(), result.getErrorCode(), result.getMapToField());
+            rulesLogger.info("Phase 5: Added result-field to enrichedData: {} = {}", rule.getResultField(), result.isTriggered());
+        }
+
+        return result;
+    }
+
+    /**
+     * Sets a value in a map using dot notation to create nested structures.
+     * For example, "validation.isHighValue" will create a nested map structure:
+     * { "validation": { "isHighValue": value } }
+     *
+     * @param map The map to update
+     * @param path The dot-separated path (e.g., "validation.isHighValue")
+     * @param value The value to set
+     */
+    @SuppressWarnings("unchecked")
+    private void setNestedValue(Map<String, Object> map, String path, Object value) {
+        if (path == null || path.trim().isEmpty()) {
+            return;
+        }
+
+        String[] parts = path.split("\\.");
+
+        // If no dots, just set the value directly
+        if (parts.length == 1) {
+            map.put(path, value);
+            return;
+        }
+
+        // Navigate/create nested structure
+        Map<String, Object> current = map;
+        for (int i = 0; i < parts.length - 1; i++) {
+            String part = parts[i];
+            Object existing = current.get(part);
+
+            if (existing instanceof Map) {
+                current = (Map<String, Object>) existing;
+            } else {
+                // Create new nested map
+                Map<String, Object> nested = new java.util.HashMap<>();
+                current.put(part, nested);
+                current = nested;
+            }
+        }
+
+        // Set the final value
+        current.put(parts[parts.length - 1], value);
     }
     
     /**
@@ -451,20 +525,55 @@ public class UnifiedRuleEvaluator {
     /**
      * Evaluate a list of rules against the provided facts map.
      * Convenience method that creates the evaluation context.
+     * Phase 5: Evaluates ALL rules to ensure result-field values are stored for all rules.
      *
      * @param rules The rules to evaluate
      * @param facts The facts to evaluate against
-     * @return The result of the first matching rule, or NO_MATCH
+     * @return The result with accumulated enrichedData from all rules
      */
     public RuleResult evaluateRules(List<Rule> rules, Map<String, Object> facts) {
+        rulesLogger.info("Phase 5: evaluateRules(List<Rule>, Map) called with {} rules", rules != null ? rules.size() : 0);
+
         if (rules == null || rules.isEmpty()) {
             return RuleResult.noRules();
         }
 
-        // Create evaluation context
-        StandardEvaluationContext context = createEvaluationContext(facts);
+        rulesLogger.info("Evaluating {} rules", rules.size());
 
-        return evaluateRules(rules, context);
+        // Accumulate enrichedData from all rules
+        Map<String, Object> accumulatedEnrichedData = new java.util.HashMap<>();
+        RuleResult firstSignificantResult = null; // First error OR first match, whichever comes first
+
+        // Phase 5: Evaluate ALL rules to ensure result-field values are stored
+        for (Rule rule : rules) {
+            // Evaluate each rule individually to ensure result-field storage
+            RuleResult result = evaluateRule(rule, facts);
+
+            // Accumulate enrichedData from this rule (includes result-field values)
+            if (result.getEnrichedData() != null) {
+                accumulatedEnrichedData.putAll(result.getEnrichedData());
+            }
+
+            // Track first significant result (error or match), preserving order
+            if (firstSignificantResult == null) {
+                if (result.getResultType() == RuleResult.ResultType.ERROR || result.isTriggered()) {
+                    firstSignificantResult = result;
+                }
+            }
+        }
+
+        // Return first significant result if any (error or match, whichever came first)
+        if (firstSignificantResult != null) {
+            return new RuleResult(firstSignificantResult.getRuleName(), firstSignificantResult.getMessage(), firstSignificantResult.getSeverity(),
+                                 firstSignificantResult.isTriggered(), firstSignificantResult.getResultType(), firstSignificantResult.getPerformanceMetrics(),
+                                 accumulatedEnrichedData, firstSignificantResult.getFailureMessages(), firstSignificantResult.isSuccess(),
+                                 firstSignificantResult.getSuccessCode(), firstSignificantResult.getErrorCode(), firstSignificantResult.getMapToField());
+        }
+
+        rulesLogger.info("No rules matched");
+        // Return noMatch with accumulated enrichedData from all evaluated rules
+        return new RuleResult("no-match", "No matching rules found", "INFO", false, RuleResult.ResultType.NO_MATCH,
+                             null, accumulatedEnrichedData, new java.util.ArrayList<>(), true, null, null, null);
     }
 
     /**

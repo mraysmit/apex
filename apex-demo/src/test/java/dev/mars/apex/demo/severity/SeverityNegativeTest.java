@@ -83,7 +83,7 @@ public class SeverityNegativeTest {
         
         // Load negative test configuration
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/demo/basic/SeverityNegativeTest.yaml"
+            "src/test/java/dev/mars/apex/demo/severity/SeverityNegativeTest.yaml"
         );
         
         assertNotNull(config, "Configuration should be loaded");
@@ -174,7 +174,7 @@ public class SeverityNegativeTest {
 
         // Load configuration
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/demo/basic/SeverityNegativeTest.yaml"
+            "src/test/java/dev/mars/apex/demo/severity/SeverityNegativeTest.yaml"
         );
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
@@ -255,7 +255,7 @@ public class SeverityNegativeTest {
 
         // Load configuration
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/demo/basic/SeverityNegativeTest.yaml"
+            "src/test/java/dev/mars/apex/demo/severity/SeverityNegativeTest.yaml"
         );
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
 

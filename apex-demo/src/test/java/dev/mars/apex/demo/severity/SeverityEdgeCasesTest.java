@@ -80,7 +80,7 @@ public class SeverityEdgeCasesTest {
 
         // Load edge cases configuration
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/demo/basic/SeverityEdgeCasesTest.yaml"
+            "src/test/java/dev/mars/apex/demo/severity/SeverityEdgeCasesTest.yaml"
         );
 
         assertNotNull(config, "Configuration should be loaded");
@@ -178,7 +178,7 @@ public class SeverityEdgeCasesTest {
 
         // Load configuration
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/demo/basic/SeverityEdgeCasesTest.yaml"
+            "src/test/java/dev/mars/apex/demo/severity/SeverityEdgeCasesTest.yaml"
         );
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
@@ -301,7 +301,7 @@ public class SeverityEdgeCasesTest {
 
         // Load configuration
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/demo/basic/SeverityEdgeCasesTest.yaml"
+            "src/test/java/dev/mars/apex/demo/severity/SeverityEdgeCasesTest.yaml"
         );
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
 

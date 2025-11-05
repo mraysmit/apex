@@ -111,6 +111,10 @@ public class YamlRule {
     @JsonProperty("map-to-field")
     private Object mapToField;  // String or List<String>
 
+    // Phase 5: Result Field Support - Store rule evaluation result for subsequent rules
+    @JsonProperty("result-field")
+    private String resultField;
+
     // Default constructor
     public YamlRule() {
         this.enabled = true; // Default to enabled
@@ -310,6 +314,14 @@ public class YamlRule {
 
     public void setMapToField(Object mapToField) {
         this.mapToField = mapToField;
+    }
+
+    public String getResultField() {
+        return resultField;
+    }
+
+    public void setResultField(String resultField) {
+        this.resultField = resultField;
     }
 
     /**

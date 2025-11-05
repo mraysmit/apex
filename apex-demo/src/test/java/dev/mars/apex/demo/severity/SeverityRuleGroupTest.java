@@ -81,7 +81,7 @@ public class SeverityRuleGroupTest {
         
         // Load rule group mixed severity configuration
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/demo/basic/SeverityRuleGroupTest.yaml"
+            "src/test/java/dev/mars/apex/demo/severity/SeverityRuleGroupTest.yaml"
         );
         
         assertNotNull(config, "Configuration should be loaded");
@@ -176,7 +176,7 @@ public class SeverityRuleGroupTest {
 
         // Load configuration
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/demo/basic/SeverityRuleGroupTest.yaml"
+            "src/test/java/dev/mars/apex/demo/severity/SeverityRuleGroupTest.yaml"
         );
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
@@ -261,7 +261,7 @@ public class SeverityRuleGroupTest {
 
         // Load configuration
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/demo/basic/SeverityRuleGroupTest.yaml"
+            "src/test/java/dev/mars/apex/demo/severity/SeverityRuleGroupTest.yaml"
         );
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
 

@@ -1,0 +1,176 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: RuleResultFieldTest.java (6 test methods)
+# Purpose: Demonstrate result-field feature for storing rule evaluation results
+#          Phase 5 Enhancement: Store boolean condition results for rule chaining
+# Status: ACTIVELY TESTED - Demonstrates result-field pattern
+# ============================================================================
+
+metadata:
+  id: "rule-result-field-test"
+  name: "Rule Result Field Test Configuration"
+  version: "1.0.0"
+  description: "Test configuration for result-field feature (Phase 5)"
+  type: "scenario"
+  author: "APEX Demo Team"
+  created: "2025-11-05"
+  tags: ["result-field", "rule-chaining", "phase-5", "otc-options"]
+
+# ============================================================================
+# RULES: Demonstrate result-field usage patterns
+# ============================================================================
+rules:
+  # Test 1: Basic Rule Chaining
+  # Rule 1 stores its result, Rule 2 uses it
+  - id: "check-high-value"
+    name: "Check High Value Trade"
+    description: "Determine if trade is high value (>10M notional)"
+    condition: "#notionalAmount != null && #notionalAmount > 10000000"
+    severity: "INFO"
+    category: "validation"
+    message: "Trade is high value"
+    result-field: "isHighValue"
+    enabled: true
+
+  - id: "check-approval-required"
+    name: "Check Approval Required"
+    description: "Determine if approval is required based on high value"
+    condition: "#isHighValue == true"
+    severity: "WARNING"
+    category: "validation"
+    message: "Trade requires approval"
+    result-field: "requiresApproval"
+    enabled: true
+
+  # Test 2: Multiple Result Fields
+  # Multiple rules storing different results
+  - id: "check-apac-region"
+    name: "Check APAC Region"
+    description: "Determine if trade is in APAC region"
+    condition: "#region != null && #region == 'APAC'"
+    severity: "INFO"
+    category: "validation"
+    message: "Trade is in APAC region"
+    result-field: "isApacTrade"
+    enabled: true
+
+  - id: "check-credit-rating"
+    name: "Check Credit Rating"
+    description: "Determine if credit check is required (rating below A)"
+    condition: "#creditRating != null && (#creditRating == 'BBB' || #creditRating == 'BB' || #creditRating == 'B')"
+    severity: "WARNING"
+    category: "validation"
+    message: "Credit check required"
+    result-field: "requiresCreditCheck"
+    enabled: true
+
+  # Test 3: Nested Field Storage
+  # Store result in nested object
+  - id: "check-high-value-nested"
+    name: "Check High Value (Nested)"
+    description: "Store high value check in nested validation object"
+    condition: "#notionalAmount != null && #notionalAmount > 10000000"
+    severity: "INFO"
+    category: "validation"
+    message: "High value validation result"
+    result-field: "validation.isHighValue"
+    enabled: true
+
+  # Test 4: Conditional Logic Using Stored Results
+  # Complex condition using multiple stored results
+  - id: "check-complex-approval"
+    name: "Check Complex Approval Logic"
+    description: "Approval required if high value AND credit check needed"
+    condition: "#isHighValue == true && #requiresCreditCheck == true"
+    severity: "ERROR"
+    category: "validation"
+    message: "Complex approval required"
+    result-field: "requiresComplexApproval"
+    enabled: true
+
+  # Test 5: No Overhead - Rules without result-field
+  # These rules don't store results, demonstrating no overhead
+  - id: "check-trade-type"
+    name: "Check Trade Type"
+    description: "Validate trade type (no result storage)"
+    condition: "#tradeType != null"
+    severity: "INFO"
+    category: "validation"
+    message: "Trade type is valid"
+    enabled: true
+
+  - id: "check-counterparty"
+    name: "Check Counterparty"
+    description: "Validate counterparty exists (no result storage)"
+    condition: "#counterparty != null"
+    severity: "INFO"
+    category: "validation"
+    message: "Counterparty is valid"
+    enabled: true
+
+  - id: "check-region"
+    name: "Check Region"
+    description: "Validate region exists (no result storage)"
+    condition: "#region != null"
+    severity: "INFO"
+    category: "validation"
+    message: "Region is valid"
+    enabled: true
+
+# ============================================================================
+# RULE GROUPS: Demonstrate result-field with rule groups
+# ============================================================================
+rule-groups:
+  - id: "high-value-validation-group"
+    name: "High Value Trade Validation Group"
+    description: "Sequential validation for high value trades"
+    operator: "AND"
+    stop-on-first-failure: false
+    rule-refs:
+      - "check-high-value"
+      - "check-approval-required"
+
+  - id: "regional-validation-group"
+    name: "Regional Validation Group"
+    description: "Parallel validation for regional checks"
+    operator: "OR"
+    parallel-execution: true
+    rule-refs:
+      - "check-apac-region"
+      - "check-region"
+
+  - id: "credit-validation-group"
+    name: "Credit Validation Group"
+    description: "Credit and approval validation"
+    operator: "AND"
+    rule-refs:
+      - "check-credit-rating"
+      - "check-complex-approval"
+
+# ============================================================================
+# SCENARIOS: Demonstrate result-field in scenario context
+# ============================================================================
+scenarios:
+  - id: "otc-option-validation"
+    name: "OTC Option Trade Validation"
+    description: "Complete validation workflow for OTC option trades"
+    stages:
+      - id: "initial-validation"
+        name: "Initial Validation Stage"
+        description: "Basic trade validation"
+        rule-group-refs:
+          - "high-value-validation-group"
+      
+      - id: "regional-validation"
+        name: "Regional Validation Stage"
+        description: "Region-specific validation"
+        rule-group-refs:
+          - "regional-validation-group"
+      
+      - id: "credit-validation"
+        name: "Credit Validation Stage"
+        description: "Credit and approval validation"
+        rule-group-refs:
+          - "credit-validation-group"
+
