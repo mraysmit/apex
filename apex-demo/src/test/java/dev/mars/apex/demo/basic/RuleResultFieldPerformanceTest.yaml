@@ -1,0 +1,66 @@
+# Performance Test Configuration for result-field Feature
+# Tests overhead of result-field storage vs baseline rules
+
+metadata:
+  name: "Rule Result Field Performance Test Configuration"
+  version: "1.0.0"
+  description: "Performance validation for result-field feature"
+  type: "rule-config"
+  author: "apex-demo"
+
+rules:
+  # Rules WITH result-field configured
+  - id: "check-high-value"
+    name: "Check High Value Trade"
+    condition: "#notionalAmount != null && #notionalAmount > 10000000"
+    message: "Trade is high value"
+    severity: "INFO"
+    result-field: "isHighValue"
+
+  - id: "check-region"
+    name: "Check Region"
+    condition: "#region != null && (#region == 'APAC' || #region == 'EMEA' || #region == 'AMER')"
+    message: "Valid region"
+    severity: "INFO"
+    result-field: "hasValidRegion"
+
+  - id: "check-counterparty"
+    name: "Check Counterparty"
+    condition: "#counterparty != null && #counterparty.length() > 0"
+    message: "Counterparty present"
+    severity: "INFO"
+    result-field: "hasCounterparty"
+
+  - id: "check-approval-required"
+    name: "Check Approval Required"
+    condition: "#isHighValue == true"
+    message: "Trade requires approval"
+    severity: "WARNING"
+    result-field: "requiresApproval"
+
+  - id: "check-credit-rating"
+    name: "Check Credit Rating"
+    condition: "#creditRating != null && (#creditRating == 'AAA' || #creditRating == 'AA' || #creditRating == 'A')"
+    message: "Good credit rating"
+    severity: "INFO"
+    result-field: "hasGoodCredit"
+
+  # Rules WITHOUT result-field (for baseline comparison)
+  - id: "check-trade-type"
+    name: "Check Trade Type"
+    condition: "#tradeType != null"
+    message: "Trade type present"
+    severity: "INFO"
+
+  - id: "check-amount-positive"
+    name: "Check Amount Positive"
+    condition: "#notionalAmount != null && #notionalAmount > 0"
+    message: "Amount is positive"
+    severity: "INFO"
+
+  - id: "check-region-not-empty"
+    name: "Check Region Not Empty"
+    condition: "#region != null && #region.length() > 0"
+    message: "Region is not empty"
+    severity: "INFO"
+

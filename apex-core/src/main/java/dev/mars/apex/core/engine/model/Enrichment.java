@@ -49,6 +49,7 @@ public class Enrichment {
     private final String successCode;
     private final String errorCode;
     private final Object mapToField;  // String or List<String>
+    private final String resultField;  // Phase 5: Result field support
 
     // Enterprise metadata fields
     private String createdBy;
@@ -81,6 +82,7 @@ public class Enrichment {
         this.successCode = null;
         this.errorCode = null;
         this.mapToField = null;
+        this.resultField = null;
     }
 
     /**
@@ -111,6 +113,7 @@ public class Enrichment {
         this.successCode = null;
         this.errorCode = null;
         this.mapToField = null;
+        this.resultField = null;
     }
 
     /**
@@ -140,6 +143,7 @@ public class Enrichment {
         this.successCode = null;
         this.errorCode = null;
         this.mapToField = null;
+        this.resultField = null;
     }
 
     // Getters
@@ -201,6 +205,10 @@ public class Enrichment {
 
     public Object getMapToField() {
         return mapToField;
+    }
+
+    public String getResultField() {
+        return resultField;
     }
 
     /**

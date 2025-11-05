@@ -951,8 +951,9 @@ The `result-field` property allows you to store a rule's boolean evaluation resu
 - Stores the rule's boolean result (true = rule matched, false = rule did not match)
 - Result is available to subsequent rules via SpEL expressions (e.g., `#isHighValue`)
 - Supports nested field notation (e.g., `"validation.isHighValue"` creates nested structure)
-- Zero overhead when not configured - only rules with `result-field` store results
+- Minimal overhead - only rules with `result-field` configured store results
 - Results are stored in both the facts map (for SpEL access) and enrichedData (for API consumers)
+- Performance impact is negligible for typical business rule scenarios (sub-millisecond overhead)
 
 **Example - Basic Rule Chaining:**
 
@@ -2158,6 +2159,7 @@ field-mappings:
 | `condition` | Yes | When to apply this enrichment |
 | `lookup-config` | Yes | Lookup configuration |
 | `field-mappings` | Yes | How to map lookup results |
+| `result-field` | No | Field name to store lookup success (boolean: true if lookup found data, false otherwise) |
 
 #### Lookup Configuration
 
@@ -2176,6 +2178,104 @@ lookup-config:
   # or
   lookup-key: "#instrumentId.substring(0, 2)"  # Derived key
 ```
+
+#### Enrichment Result Field Storage
+
+The `result-field` property is available for all enrichment types (lookup, field, conditional-mapping) and allows you to store the enrichment's boolean evaluation result in the facts map for use by subsequent enrichments or rules.
+
+**What Gets Stored:**
+- **lookup-enrichment**: `true` if lookup found data, `false` if lookup failed
+- **field-enrichment**: `true` if condition matched, `false` if condition didn't match
+- **conditional-mapping-enrichment**: `true` if any mapping rule matched, `false` if no rules matched
+
+**Example - Lookup Result Field:**
+
+```yaml
+enrichments:
+  - id: "lookup-counterparty"
+    type: "lookup-enrichment"
+    condition: "#counterparty != null"
+    result-field: "counterpartyFound"  # Stores lookup success
+    lookup-config:
+      lookup-key: "#counterparty"
+      lookup-dataset:
+        type: "inline"
+        key-field: "counterpartyId"
+        data:
+          - counterpartyId: "BANK_A"
+            rating: "AAA"
+    field-mappings:
+      - source-field: "rating"
+        target-field: "counterpartyRating"
+
+  # Use the result in a subsequent enrichment
+  - id: "set-default-rating"
+    type: "field-enrichment"
+    condition: "#counterpartyFound == false"  # Only if lookup failed
+    field-mappings:
+      - source-field: "counterpartyRating"
+        target-field: "counterpartyRating"
+        transformation: "'UNRATED'"
+```
+
+**Example - Field Enrichment Result Field:**
+
+```yaml
+enrichments:
+  - id: "check-high-value"
+    type: "field-enrichment"
+    condition: "#notionalAmount > 10000000"
+    result-field: "isHighValue"  # Stores condition result
+    field-mappings:
+      - source-field: "notionalAmount"
+        target-field: "tradeCategory"
+        transformation: "'HIGH_VALUE'"
+
+  # Use the result in a subsequent enrichment
+  - id: "set-approval-required"
+    type: "field-enrichment"
+    condition: "#isHighValue == true"  # Only if high value
+    field-mappings:
+      - source-field: "requiresApproval"
+        target-field: "requiresApproval"
+        transformation: "true"
+```
+
+**Example - Conditional Mapping Result Field:**
+
+```yaml
+enrichments:
+  - id: "classify-risk"
+    type: "conditional-mapping-enrichment"
+    target-field: "riskClass"
+    result-field: "riskClassified"  # Stores whether any rule matched
+    mapping-rules:
+      - id: "high-risk"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#notionalAmount > 10000000"
+        mapping:
+          type: "direct"
+          transformation: "'HIGH'"
+
+  # Use the result in a subsequent enrichment
+  - id: "set-default-risk"
+    type: "field-enrichment"
+    condition: "#riskClassified == false"  # Only if no rule matched
+    field-mappings:
+      - source-field: "riskClass"
+        target-field: "riskClass"
+        transformation: "'NORMAL'"
+```
+
+**Best Practices:**
+- Use descriptive field names that clearly indicate what the result represents
+- Store results when you need to chain enrichments or implement fallback logic
+- Access stored results using SpEL syntax: `#fieldName`
+- Results are boolean values: `true` (success/match) or `false` (failure/no-match)
+- Performance impact is minimal (sub-millisecond overhead per enrichment)
 
 ### 6.2 Calculation Enrichments
 
@@ -2354,6 +2454,7 @@ field-mappings:
 | `condition` | No | When to apply this enrichment (SpEL expression) |
 | `field-mappings` | Yes* | List of field mapping configurations |
 | `conditional-mappings` | Yes* | List of conditional mapping configurations |
+| `result-field` | No | Field name to store condition evaluation result (boolean: true if condition matched, false otherwise) |
 
 *At least one of `field-mappings` or `conditional-mappings` is required.
 
@@ -2500,6 +2601,7 @@ enrichments:
 | `target-field` | Yes | Field where the mapped value will be stored |
 | `mapping-rules` | Yes | List of priority-based mapping rules |
 | `execution-settings` | No | Execution configuration |
+| `result-field` | No | Field name to store mapping success (boolean: true if any rule matched, false otherwise) |
 
 #### Mapping Rule Properties
 

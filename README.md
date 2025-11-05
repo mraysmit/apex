@@ -53,6 +53,8 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo
 
 ### Core Capabilities - Data Validation and Enrichment
 - **Data Validation**: Comprehensive rule-based validation with enterprise-grade error reporting
+- **Rule Chaining**: Store rule evaluation results with `result-field` for use in subsequent rules
+- **Enrichment Chaining**: Store enrichment evaluation results (lookup success, condition match, mapping success) for conditional logic and fallback handling
 - **Data Enrichment**: Multi-source data enrichment with YAML datasets and external lookups
 - **YAML Dataset Enrichment**: Embed reference data directly in configuration files
 - **External Data Integration**: Connect to databases, REST APIs, file systems, and caches

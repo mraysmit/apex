@@ -163,6 +163,12 @@ public class YamlEnrichmentProcessor {
                     LOGGER.fine("Successfully processed enrichment: " + enrichment.getId());
                 } else {
                     LOGGER.fine("Skipping enrichment (condition not met): " + enrichment.getId());
+
+                    // Phase 5: Store result-field for field-enrichment (condition did not match)
+                    if ("field-enrichment".equals(enrichment.getType()) && enrichment.getResultField() != null) {
+                        setFieldValue(enrichedObject, enrichment.getResultField(), false);
+                        LOGGER.info("Phase 5: Stored field-enrichment result in field: " + enrichment.getResultField() + " = false");
+                    }
                 }
             } catch (Exception e) {
                 // CRITICAL: Enrichment processing failure is a serious configuration error
@@ -211,6 +217,12 @@ public class YamlEnrichmentProcessor {
         }
 
         LOGGER.fine("Enrichment " + enrichment.getId() + " passed conditions, proceeding with processing");
+
+        // Phase 5: Store result-field for field-enrichment (condition matched)
+        if ("field-enrichment".equals(enrichment.getType()) && enrichment.getResultField() != null) {
+            setFieldValue(targetObject, enrichment.getResultField(), true);
+            LOGGER.info("Phase 5: Stored field-enrichment result in field: " + enrichment.getResultField() + " = true");
+        }
 
         // Process the enrichment based on type
         Object result;
@@ -367,6 +379,13 @@ public class YamlEnrichmentProcessor {
 
         if (lookupResult == null) {
             LOGGER.fine("Lookup returned null result for key: " + lookupKey + ", applying default values");
+        }
+
+        // Phase 5: Store result-field if configured (boolean indicating lookup success)
+        boolean lookupSucceeded = (lookupResult != null);
+        if (enrichment.getResultField() != null) {
+            setFieldValue(targetObject, enrichment.getResultField(), lookupSucceeded);
+            LOGGER.info("Phase 5: Stored lookup result in field: " + enrichment.getResultField() + " = " + lookupSucceeded);
         }
 
         // 4. Apply field mappings (even if lookup result is null, to apply default values)
@@ -534,11 +553,16 @@ public class YamlEnrichmentProcessor {
         boolean logMatchedRule = executionSettings != null && executionSettings.getLogMatchedRule() != null ?
                                 executionSettings.getLogMatchedRule() : false;
 
+        // Phase 5: Track whether any mapping rule matched
+        boolean anyRuleMatched = false;
+
         // Process rules in priority order
         for (YamlEnrichment.MappingRule rule : mappingRules) {
             try {
                 // Check if rule conditions are met
                 if (evaluateMappingRuleConditions(rule, targetObject)) {
+                    anyRuleMatched = true;  // Phase 5: Track that a rule matched
+
                     if (logMatchedRule) {
                         LOGGER.info("Matched mapping rule: " + rule.getId() + " (priority: " + rule.getPriority() + ")");
                     }
@@ -562,6 +586,12 @@ public class YamlEnrichmentProcessor {
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to process mapping rule '" + rule.getId() + "': " + e.getMessage(), e);
             }
+        }
+
+        // Phase 5: Store result-field if configured (boolean indicating if any mapping matched)
+        if (enrichment.getResultField() != null) {
+            setFieldValue(targetObject, enrichment.getResultField(), anyRuleMatched);
+            LOGGER.info("Phase 5: Stored conditional-mapping result in field: " + enrichment.getResultField() + " = " + anyRuleMatched);
         }
 
         return targetObject;

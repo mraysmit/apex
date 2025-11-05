@@ -108,6 +108,10 @@ public class YamlEnrichment {
     @JsonProperty("map-to-field")
     private Object mapToField;  // String or List<String>
 
+    // Phase 5: Result Field Support for Enrichments
+    @JsonProperty("result-field")
+    private String resultField;
+
     // Enterprise metadata fields for category inheritance
     @JsonProperty("created-by")
     private String createdBy;
@@ -365,6 +369,14 @@ public class YamlEnrichment {
 
     public void setExecutionSettings(ExecutionSettings executionSettings) {
         this.executionSettings = executionSettings;
+    }
+
+    public String getResultField() {
+        return resultField;
+    }
+
+    public void setResultField(String resultField) {
+        this.resultField = resultField;
     }
 
     /**
