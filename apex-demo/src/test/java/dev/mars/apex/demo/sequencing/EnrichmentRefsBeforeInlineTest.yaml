@@ -1,0 +1,81 @@
+metadata:
+  name: "Enrichment-Refs BEFORE Inline Enrichments Test"
+  type: "rule-config"
+  version: "1.0.0"
+  processing-mode: "sequential"
+  description: |
+    CRITICAL TEST: Verify enrichment-refs can appear BEFORE inline enrichments.
+    
+    Expected Processing Order:
+    1. E1-from-ref (enrich-market-data) - from external file
+    2. E2-from-ref (calculate-greeks) - from external file
+    3. E3-inline (enrich-counterparty-data) - inline enrichment
+    4. R1 (validate-market-data-enriched) - depends on E1
+    5. R2 (validate-greeks-calculated) - depends on E2
+    6. R3 (validate-counterparty-enriched) - depends on E3
+    
+    This verifies that:
+    - enrichment-refs can appear FIRST in document (before any inline enrichments)
+    - Placeholder is expanded at correct position (beginning of processing)
+    - Referenced enrichments execute BEFORE inline enrichments
+    - All enrichments execute BEFORE rules
+
+# CRITICAL: enrichment-refs appears FIRST (before any inline enrichments)
+enrichment-refs:
+  - name: "otc-market-enrichments"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-enrichments-otc.yaml"
+    enabled: true
+    description: "Load market data and greeks calculation enrichments FIRST"
+
+# INLINE ENRICHMENT - should execute AFTER referenced enrichments
+enrichments:
+  - id: "enrich-counterparty-data"
+    name: "Enrich Counterparty Data"
+    type: "lookup-enrichment"
+    description: "Lookup counterparty credit information"
+    lookup-config:
+      lookup-key: "#counterparty"
+      lookup-dataset:
+        type: "inline"
+        key-field: "counterparty"
+        data:
+          - counterparty: "HEDGE_FUND_X"
+            creditRating: "AA"
+            creditLimit: 100000000.0
+          - counterparty: "BANK_Y"
+            creditRating: "AAA"
+            creditLimit: 500000000.0
+          - counterparty: "CORP_Z"
+            creditRating: "BBB"
+            creditLimit: 50000000.0
+    field-mappings:
+      - source-field: "creditRating"
+        target-field: "counterpartyCreditRating"
+      - source-field: "creditLimit"
+        target-field: "counterpartyCreditLimit"
+    enabled: true
+
+# RULES - should execute AFTER all enrichments (referenced + inline)
+rules:
+  - id: "validate-market-data-enriched"
+    name: "Validate Market Data Enriched"
+    condition: "#currentSpotPrice != null && #impliedVolatility != null"
+    message: "Market data must be enriched (from external file, executed FIRST)"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "validate-greeks-calculated"
+    name: "Validate Greeks Calculated"
+    condition: "#optionDelta != null"
+    message: "Option greeks must be calculated (from external file, depends on market data)"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "validate-counterparty-enriched"
+    name: "Validate Counterparty Data Enriched"
+    condition: "#counterpartyCreditRating != null && #counterpartyCreditLimit != null"
+    message: "Counterparty data must be enriched (inline, executed AFTER refs)"
+    severity: "ERROR"
+    enabled: true
+
+

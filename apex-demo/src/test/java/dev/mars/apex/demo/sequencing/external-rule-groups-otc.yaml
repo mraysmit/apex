@@ -1,0 +1,60 @@
+metadata:
+  name: "External OTC Rule Groups"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "External rule groups for OTC options trade processing - referenced by main config"
+
+# These rule groups will be loaded via rule-group-refs
+# They should appear in document order at the position of the rule-group-refs placeholder
+
+rule-groups:
+  - id: "trade-validation-group"
+    name: "Trade Validation Group"
+    description: "Group for validating basic trade parameters"
+    operator: "AND"
+    stop-on-first-failure: true
+    priority: 10
+    rule-ids:
+      - "validate-notional-limit-group"
+      - "validate-strike-price-group"
+
+  - id: "risk-validation-group"
+    name: "Risk Validation Group"
+    description: "Group for validating risk metrics and limits"
+    operator: "AND"
+    stop-on-first-failure: false
+    priority: 20
+    rule-ids:
+      - "validate-var-limit-group"
+      - "validate-exposure-limit-group"
+
+# Rules used by the groups above
+rules:
+  - id: "validate-notional-limit-group"
+    name: "Validate Notional Limit (Group)"
+    condition: "#notionalAmount != null && #notionalAmount > 100000000"
+    message: "Notional amount must not exceed $100M (group rule)"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "validate-strike-price-group"
+    name: "Validate Strike Price (Group)"
+    condition: "#strike != null && #strike <= 0"
+    message: "Strike price must be positive (group rule)"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "validate-var-limit-group"
+    name: "Validate VaR Limit (Group)"
+    condition: "#valueAtRisk != null && #valueAtRisk > 5000000"
+    message: "Value at Risk exceeds $5M limit (group rule)"
+    severity: "WARNING"
+    enabled: true
+
+  - id: "validate-exposure-limit-group"
+    name: "Validate Exposure Limit (Group)"
+    condition: "#netExposure != null && #netExposure > 10000000"
+    message: "Net exposure exceeds $10M limit (group rule)"
+    severity: "WARNING"
+    enabled: true
+

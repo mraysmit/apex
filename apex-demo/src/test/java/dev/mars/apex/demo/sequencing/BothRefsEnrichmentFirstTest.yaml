@@ -1,0 +1,59 @@
+metadata:
+  name: "Both Refs - Enrichment-Refs First Test"
+  type: "rule-config"
+  version: "1.0.0"
+  processing-mode: "sequential"
+  description: |
+    CRITICAL TEST: Verify BOTH enrichment-refs AND rule-refs in same file.
+    Enrichment-refs appears FIRST, rule-refs appears SECOND.
+
+    Expected Processing Order:
+    1. E1-from-ref (enrich-market-data) - from external enrichments file
+    2. E2-from-ref (calculate-greeks) - from external enrichments file
+    3. E3-inline (enrich-product-type) - inline enrichment
+    4. R1-from-ref (validate-notional-limit) - from external rules file
+    5. R2-from-ref (validate-strike-price) - from external rules file
+    6. R3-inline (validate-enrichments-complete) - inline rule
+
+    This verifies that:
+    - Both enrichment-refs and rule-refs can coexist in same file
+    - Enrichment-refs expands BEFORE inline enrichments
+    - Rule-refs expands BEFORE inline rules
+    - All enrichments execute BEFORE all rules
+
+# CRITICAL: enrichment-refs appears FIRST
+enrichment-refs:
+  - name: "otc-market-enrichments"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-enrichments-otc.yaml"
+    enabled: true
+    description: "Load OTC enrichments FIRST"
+
+# Inline enrichment - should execute AFTER enrichment-refs
+enrichments:
+  - id: "enrich-product-type"
+    name: "Enrich Product Type"
+    type: "field-enrichment"
+    description: "Set product type to OTC_OPTION"
+    field-mappings:
+      - source-field: "underlying"
+        target-field: "productType"
+        transformation: "'OTC_OPTION'"
+    enabled: true
+
+# CRITICAL: rule-refs appears AFTER enrichments (after enrichment-refs + inline enrichments)
+rule-refs:
+  - name: "otc-validation-rules"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-rules-otc.yaml"
+    enabled: true
+    description: "Load OTC rules AFTER enrichments"
+
+# Inline rule - should execute AFTER rule-refs
+rules:
+  - id: "validate-enrichments-complete"
+    name: "Validate Enrichments Complete"
+    condition: "#currentSpotPrice != null && #optionDelta != null && #productType != null"
+    message: "All enrichments must be complete (inline rule, executed AFTER refs)"
+    severity: "ERROR"
+    enabled: true
+
+

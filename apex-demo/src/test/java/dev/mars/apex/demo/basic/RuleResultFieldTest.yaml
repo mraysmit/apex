@@ -31,7 +31,41 @@ rules:
     category: "validation"
     message: "Trade is high value"
     result-field: "isHighValue"
-    enabled: true 
+    enabled: true
+
+  - id: "check-approval-required"
+    name: "Check Approval Required"
+    description: "Approval required if high value"
+    condition: "#isHighValue == true"
+    severity: "WARNING"
+    category: "validation"
+    message: "Approval required for high value trade"
+    result-field: "requiresApproval"
+    enabled: true
+
+  # Test 2: Multiple Result Fields
+  - id: "check-apac-region"
+    name: "Check APAC Region"
+    description: "Check if trade is in APAC region"
+    condition: "#region != null && #region == 'APAC'"
+    severity: "INFO"
+    category: "validation"
+    message: "Trade is in APAC region"
+    result-field: "isApacTrade"
+    enabled: true
+
+  - id: "check-credit-rating"
+    name: "Check Credit Rating"
+    description: "Check if credit check is required based on rating"
+    condition: "#creditRating != null && (#creditRating == 'BBB' || #creditRating == 'BB')"
+    severity: "WARNING"
+    category: "validation"
+    message: "Credit check required for this rating"
+    result-field: "requiresCreditCheck"
+    enabled: true
+
+  # Test 3: Nested Field Storage
+  - id: "check-high-value-nested"
     name: "Check High Value (Nested)"
     description: "Store high value check in nested validation object"
     condition: "#notionalAmount != null && #notionalAmount > 10000000"

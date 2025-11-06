@@ -1,0 +1,24 @@
+metadata:
+  name: "External OTC Rules"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "External rules for OTC options trade processing - referenced by main config"
+
+# These rules will be loaded via rule-refs
+# They should appear in document order at the position of the rule-refs placeholder
+
+rules:
+  - id: "validate-notional-limit"
+    name: "Validate Notional Limit"
+    condition: "#notionalAmount != null && #notionalAmount > 100000000"
+    message: "Notional amount must not exceed $100M"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "validate-strike-price"
+    name: "Validate Strike Price"
+    condition: "#strike != null && #strike <= 0"
+    message: "Strike price must be positive"
+    severity: "ERROR"
+    enabled: true
+

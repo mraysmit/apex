@@ -1,0 +1,84 @@
+metadata:
+  name: "Rule-Group-Refs Sequential Order Test"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "Test rule-group-refs placeholder expansion in document order"
+
+# YAML Section Order: enrichments → rule-group-refs → rules
+# Expected Processing Order: E1-inline → RG1-from-ref → RG2-from-ref → R1-inline
+
+# Section 1: Inline enrichments (execute first to provide data for rules)
+enrichments:
+  - id: "enrich-market-data"
+    name: "Enrich Market Data"
+    type: "lookup-enrichment"
+    description: "Lookup current market data for the option"
+    lookup-config:
+      lookup-key: "#underlying"
+      lookup-dataset:
+        type: "inline"
+        key-field: "underlying"
+        data:
+          - underlying: "SPX"
+            spotPrice: 4500.0
+            volatility: 18.5
+            riskFreeRate: 4.5
+          - underlying: "NDX"
+            spotPrice: 15000.0
+            volatility: 22.3
+            riskFreeRate: 4.5
+          - underlying: "RUT"
+            spotPrice: 2000.0
+            volatility: 25.1
+            riskFreeRate: 4.5
+    field-mappings:
+      - source-field: "spotPrice"
+        target-field: "currentSpotPrice"
+      - source-field: "volatility"
+        target-field: "impliedVolatility"
+      - source-field: "riskFreeRate"
+        target-field: "riskFreeRate"
+    enabled: true
+
+  - id: "calculate-risk-metrics"
+    name: "Calculate Risk Metrics"
+    type: "calculation-enrichment"
+    description: "Calculate VaR and exposure for validation"
+    condition: "#impliedVolatility != null && #notionalAmount != null"
+    calculation-config:
+      expression: "#notionalAmount * #impliedVolatility * 0.01 * 1.65"
+      result-field: "calculatedVaR"
+    field-mappings:
+      - source-field: "calculatedVaR"
+        target-field: "valueAtRisk"
+    enabled: true
+
+  - id: "calculate-exposure"
+    name: "Calculate Net Exposure"
+    type: "calculation-enrichment"
+    description: "Calculate net exposure (simplified)"
+    condition: "#notionalAmount != null && #currentSpotPrice != null"
+    calculation-config:
+      expression: "#notionalAmount * 0.5"
+      result-field: "calculatedExposure"
+    field-mappings:
+      - source-field: "calculatedExposure"
+        target-field: "netExposure"
+    enabled: true
+
+# Section 2: Rule-group-refs (placeholder - expands to RG1 and RG2 from external file)
+rule-group-refs:
+  - name: "external-rule-groups"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-rule-groups-otc.yaml"
+    enabled: true
+    description: "Load rule groups from external file"
+
+# Section 3: Inline rule (executes after rule groups from refs)
+rules:
+  - id: "validate-complete-processing"
+    name: "Validate Complete Processing"
+    condition: "#valueAtRisk != null && #netExposure != null"
+    message: "All risk metrics should be calculated and validated by rule groups"
+    severity: "INFO"
+    enabled: true
+

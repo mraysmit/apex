@@ -1,0 +1,65 @@
+metadata:
+  name: "Rule-Refs BEFORE Inline Rules Test"
+  type: "rule-config"
+  version: "1.0.0"
+  processing-mode: "sequential"
+  description: |
+    CRITICAL TEST: Verify rule-refs can appear BEFORE inline rules.
+    
+    Expected Processing Order:
+    1. E1-inline (enrich-counterparty-data) - inline enrichment
+    2. R1-from-ref (validate-notional-limit) - from external file
+    3. R2-from-ref (validate-strike-price) - from external file
+    4. R3-inline (validate-counterparty-enriched) - inline rule
+    
+    This verifies that:
+    - rule-refs can appear BEFORE inline rules
+    - Placeholder is expanded at correct position (before inline rules)
+    - Referenced rules execute BEFORE inline rules
+    - All enrichments execute BEFORE all rules
+
+# ENRICHMENTS - should execute FIRST
+enrichments:
+  - id: "enrich-counterparty-data"
+    name: "Enrich Counterparty Data"
+    type: "lookup-enrichment"
+    description: "Lookup counterparty credit information"
+    lookup-config:
+      lookup-key: "#counterparty"
+      lookup-dataset:
+        type: "inline"
+        key-field: "counterparty"
+        data:
+          - counterparty: "HEDGE_FUND_X"
+            creditRating: "AA"
+            creditLimit: 100000000.0
+          - counterparty: "BANK_Y"
+            creditRating: "AAA"
+            creditLimit: 500000000.0
+          - counterparty: "CORP_Z"
+            creditRating: "BBB"
+            creditLimit: 50000000.0
+    field-mappings:
+      - source-field: "creditRating"
+        target-field: "counterpartyCreditRating"
+      - source-field: "creditLimit"
+        target-field: "counterpartyCreditLimit"
+    enabled: true
+
+# CRITICAL: rule-refs appears BEFORE inline rules
+rule-refs:
+  - name: "otc-validation-rules"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-rules-otc.yaml"
+    enabled: true
+    description: "Load OTC validation rules BEFORE inline rules"
+
+# INLINE RULES - should execute AFTER referenced rules
+rules:
+  - id: "validate-counterparty-enriched"
+    name: "Validate Counterparty Data Enriched"
+    condition: "#counterpartyCreditRating != null && #counterpartyCreditLimit != null"
+    message: "Counterparty data must be enriched (inline rule, executed AFTER refs)"
+    severity: "ERROR"
+    enabled: true
+
+

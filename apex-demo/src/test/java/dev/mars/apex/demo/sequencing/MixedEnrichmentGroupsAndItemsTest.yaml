@@ -1,0 +1,112 @@
+metadata:
+  name: "Mixed Enrichment Groups and Items Test"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "Test mixed individual enrichments and enrichment groups in document order"
+
+# YAML Section Order: enrichment-refs → enrichments → enrichment-group-refs → enrichment-groups
+# Expected Processing Order: E1-ref → E2-ref → E3-inline → EG1-ref → EG2-ref → EG3-inline
+
+# Section 1: Enrichment-refs (placeholder - expands to E1 and E2 from external file)
+enrichment-refs:
+  - name: "external-enrichments"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-enrichments-otc.yaml"
+    enabled: true
+    description: "Load individual enrichments from external file"
+
+# Section 2: Inline enrichment (executes after enrichment-refs)
+enrichments:
+  - id: "enrich-counterparty-data"
+    name: "Enrich Counterparty Data"
+    type: "lookup-enrichment"
+    description: "Lookup counterparty credit rating and limits"
+    condition: "#counterparty != null"
+    lookup-config:
+      lookup-key: "#counterparty"
+      lookup-dataset:
+        type: "inline"
+        key-field: "counterparty"
+        data:
+          - counterparty: "HEDGE_FUND_X"
+            creditRating: "AA"
+            creditLimit: 100000000.0
+          - counterparty: "BANK_Y"
+            creditRating: "AAA"
+            creditLimit: 500000000.0
+          - counterparty: "CORP_Z"
+            creditRating: "BBB"
+            creditLimit: 25000000.0
+    field-mappings:
+      - source-field: "creditRating"
+        target-field: "counterpartyCreditRating"
+      - source-field: "creditLimit"
+        target-field: "counterpartyCreditLimit"
+    enabled: true
+
+# Section 3: Enrichment-group-refs (placeholder - expands to EG1 and EG2 from external file)
+enrichment-group-refs:
+  - name: "external-enrichment-groups"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-enrichment-groups-otc.yaml"
+    enabled: true
+    description: "Load enrichment groups from external file"
+
+# Section 4: Inline enrichment group (executes after enrichment-group-refs)
+enrichment-groups:
+  - id: "compliance-enrichment-group"
+    name: "Compliance Enrichment Group"
+    description: "Group for compliance-related enrichments"
+    operator: "AND"
+    stop-on-first-failure: false
+    priority: 30
+    enrichment-ids:
+      - "enrich-regulatory-status"
+      - "calculate-compliance-score"
+
+# Enrichments used by the inline enrichment group
+enrichments:
+  - id: "enrich-regulatory-status"
+    name: "Enrich Regulatory Status"
+    type: "lookup-enrichment"
+    description: "Lookup regulatory status for the trade"
+    condition: "#optionType != null"
+    lookup-config:
+      lookup-key: "#optionType"
+      lookup-dataset:
+        type: "inline"
+        key-field: "optionType"
+        data:
+          - optionType: "CALL"
+            regulatoryStatus: "APPROVED"
+            complianceLevel: "HIGH"
+          - optionType: "PUT"
+            regulatoryStatus: "APPROVED"
+            complianceLevel: "HIGH"
+    field-mappings:
+      - source-field: "regulatoryStatus"
+        target-field: "regulatoryStatus"
+      - source-field: "complianceLevel"
+        target-field: "complianceLevel"
+    enabled: true
+
+  - id: "calculate-compliance-score"
+    name: "Calculate Compliance Score"
+    type: "calculation-enrichment"
+    description: "Calculate compliance score based on credit rating and regulatory status"
+    condition: "#counterpartyCreditRating != null && #regulatoryStatus != null"
+    calculation-config:
+      expression: "100"
+      result-field: "calculatedScore"
+    field-mappings:
+      - source-field: "calculatedScore"
+        target-field: "complianceScore"
+    enabled: true
+
+# Rules to validate all enrichments executed in correct order
+rules:
+  - id: "validate-all-enrichments-executed"
+    name: "Validate All Enrichments Executed"
+    condition: "#currentSpotPrice != null && #optionDelta != null && #counterpartyCreditRating != null && #valueAtRisk != null && #netExposure != null && #complianceScore != null"
+    message: "All enrichments (refs, inline, group-refs, inline-groups) should be executed in document order"
+    severity: "INFO"
+    enabled: true
+

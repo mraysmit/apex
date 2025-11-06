@@ -26,19 +26,34 @@ public class OrderedYamlConfiguration {
     private final YamlRuleConfiguration configuration;
     private final List<String> sectionOrder;
     private final Map<String, Integer> sectionPositions;
-    
+    private final List<ProcessingItem> itemOrder;
+
     /**
-     * Create an ordered YAML configuration.
-     * 
+     * Create an ordered YAML configuration (backward compatibility constructor).
+     *
      * @param configuration The parsed YAML configuration
      * @param sectionOrder The order of sections as they appear in the YAML document
+     * @deprecated Use {@link #OrderedYamlConfiguration(YamlRuleConfiguration, List, List)} instead
      */
+    @Deprecated
     public OrderedYamlConfiguration(YamlRuleConfiguration configuration, List<String> sectionOrder) {
+        this(configuration, sectionOrder, new ArrayList<>());
+    }
+
+    /**
+     * Create an ordered YAML configuration with both section and item order.
+     *
+     * @param configuration The parsed YAML configuration
+     * @param sectionOrder The order of sections as they appear in the YAML document
+     * @param itemOrder The order of individual items as they appear in the YAML document
+     */
+    public OrderedYamlConfiguration(YamlRuleConfiguration configuration, List<String> sectionOrder, List<ProcessingItem> itemOrder) {
         this.configuration = configuration;
         this.sectionOrder = new ArrayList<>(sectionOrder);
         this.sectionPositions = createPositionMap(sectionOrder);
-        
-        LOGGER.fine("Created OrderedYamlConfiguration with " + sectionOrder.size() + " sections");
+        this.itemOrder = new ArrayList<>(itemOrder);
+
+        LOGGER.fine("Created OrderedYamlConfiguration with " + sectionOrder.size() + " sections and " + itemOrder.size() + " items");
     }
     
     /**
@@ -52,11 +67,22 @@ public class OrderedYamlConfiguration {
     
     /**
      * Get the order of sections as they appear in the YAML document.
-     * 
+     *
      * @return Immutable list of section names in document order
      */
     public List<String> getSectionOrder() {
         return Collections.unmodifiableList(sectionOrder);
+    }
+
+    /**
+     * Get the order of individual items as they appear in the YAML document.
+     * This enables item-level sequential processing where items from different
+     * sections can be interleaved in document order.
+     *
+     * @return Immutable list of processing items in document order
+     */
+    public List<ProcessingItem> getItemOrder() {
+        return Collections.unmodifiableList(itemOrder);
     }
     
     /**
@@ -202,6 +228,7 @@ public class OrderedYamlConfiguration {
         return "OrderedYamlConfiguration{" +
                 "sectionOrder=" + sectionOrder +
                 ", populatedSections=" + getPopulatedSections() +
+                ", itemOrder=" + itemOrder.size() + " items" +
                 ", processingMode=" + getProcessingMode() +
                 '}';
     }

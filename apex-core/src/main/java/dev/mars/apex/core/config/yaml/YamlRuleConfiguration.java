@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.mars.apex.core.config.pipeline.PipelineConfiguration;
 
 import java.util.List;
+import java.util.Set;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -90,6 +91,42 @@ public class YamlRuleConfiguration {
      * Not serialized to YAML - only used internally for execution order.
      */
     private List<String> sectionOrder;
+
+    /**
+     * Item-level order as items appear in the YAML document.
+     * This field is populated by OrderedYamlParser to enable item-level sequential processing
+     * where items from different sections can be interleaved in document order.
+     * Not serialized to YAML - only used internally for execution order.
+     */
+    private List<ProcessingItem> itemOrder;
+
+    /**
+     * Track which enrichment IDs came from external references.
+     * Used to expand reference placeholders in item order.
+     * Not serialized to YAML - only used internally for reference tracking.
+     */
+    private Set<String> referencedEnrichmentIds;
+
+    /**
+     * Track which rule IDs came from external references.
+     * Used to expand reference placeholders in item order.
+     * Not serialized to YAML - only used internally for reference tracking.
+     */
+    private Set<String> referencedRuleIds;
+
+    /**
+     * Track which enrichment group IDs came from external references.
+     * Used to expand reference placeholders in item order.
+     * Not serialized to YAML - only used internally for reference tracking.
+     */
+    private Set<String> referencedEnrichmentGroupIds;
+
+    /**
+     * Track which rule group IDs came from external references.
+     * Used to expand reference placeholders in item order.
+     * Not serialized to YAML - only used internally for reference tracking.
+     */
+    private Set<String> referencedRuleGroupIds;
 
     // Default constructor
     public YamlRuleConfiguration() {}
@@ -384,5 +421,106 @@ public class YamlRuleConfiguration {
      */
     public void setSectionOrder(List<String> sectionOrder) {
         this.sectionOrder = sectionOrder;
+    }
+
+    /**
+     * Get the item-level order as items appear in the YAML document.
+     * This enables item-level sequential processing where items from different
+     * sections can be interleaved in document order (e.g., E1 → R1 → E2 → R2).
+     *
+     * @return List of processing items in document order, or null if not available
+     */
+    public List<ProcessingItem> getItemOrder() {
+        return itemOrder;
+    }
+
+    /**
+     * Set the item-level order from the YAML document.
+     * This is called by YamlConfigurationLoader after parsing with OrderedYamlParser.
+     *
+     * @param itemOrder List of processing items in document order
+     */
+    public void setItemOrder(List<ProcessingItem> itemOrder) {
+        this.itemOrder = itemOrder;
+    }
+
+    /**
+     * Get the set of enrichment IDs that came from external references.
+     * Used to expand reference placeholders in item order.
+     *
+     * @return Set of referenced enrichment IDs, or null if not tracked
+     */
+    public Set<String> getReferencedEnrichmentIds() {
+        return referencedEnrichmentIds;
+    }
+
+    /**
+     * Set the enrichment IDs that came from external references.
+     * This is called by YamlConfigurationLoader during reference processing.
+     *
+     * @param referencedEnrichmentIds Set of referenced enrichment IDs
+     */
+    public void setReferencedEnrichmentIds(Set<String> referencedEnrichmentIds) {
+        this.referencedEnrichmentIds = referencedEnrichmentIds;
+    }
+
+    /**
+     * Get the set of rule IDs that came from external references.
+     * Used to expand reference placeholders in item order.
+     *
+     * @return Set of referenced rule IDs, or null if not tracked
+     */
+    public Set<String> getReferencedRuleIds() {
+        return referencedRuleIds;
+    }
+
+    /**
+     * Set the rule IDs that came from external references.
+     * This is called by YamlConfigurationLoader during reference processing.
+     *
+     * @param referencedRuleIds Set of referenced rule IDs
+     */
+    public void setReferencedRuleIds(Set<String> referencedRuleIds) {
+        this.referencedRuleIds = referencedRuleIds;
+    }
+
+    /**
+     * Get the set of enrichment group IDs that came from external references.
+     * Used to expand reference placeholders in item order.
+     *
+     * @return Set of referenced enrichment group IDs, or null if not tracked
+     */
+    public Set<String> getReferencedEnrichmentGroupIds() {
+        return referencedEnrichmentGroupIds;
+    }
+
+    /**
+     * Set the enrichment group IDs that came from external references.
+     * This is called by YamlConfigurationLoader during reference processing.
+     *
+     * @param referencedEnrichmentGroupIds Set of referenced enrichment group IDs
+     */
+    public void setReferencedEnrichmentGroupIds(Set<String> referencedEnrichmentGroupIds) {
+        this.referencedEnrichmentGroupIds = referencedEnrichmentGroupIds;
+    }
+
+    /**
+     * Get the set of rule group IDs that came from external references.
+     * Used to expand reference placeholders in item order.
+     *
+     * @return Set of referenced rule group IDs, or null if not tracked
+     */
+    public Set<String> getReferencedRuleGroupIds() {
+        return referencedRuleGroupIds;
+    }
+
+    /**
+     * Set the rule group IDs that came from external references.
+     * This is called by YamlConfigurationLoader during reference processing.
+     *
+     * @param referencedRuleGroupIds Set of referenced rule group IDs
+     */
+    public void setReferencedRuleGroupIds(Set<String> referencedRuleGroupIds) {
+        this.referencedRuleGroupIds = referencedRuleGroupIds;
     }
 }

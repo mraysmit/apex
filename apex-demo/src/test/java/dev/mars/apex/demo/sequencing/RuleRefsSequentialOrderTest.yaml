@@ -1,0 +1,42 @@
+metadata:
+  name: "Rule-Refs Sequential Order Test"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "Test that rule-refs are expanded at the correct position in document order"
+  processing-mode: "sequential"
+
+# Expected Processing Order:
+# 1. E1 (inline enrichment)
+# 2. R1 (from external file via rule-refs) - validate-notional-limit
+# 3. R2 (from external file via rule-refs) - validate-strike-price
+# 4. R3 (inline rule)
+
+# INLINE ENRICHMENT - should execute FIRST
+enrichments:
+  - id: "enrich-trade-data"
+    name: "Enrich Trade Data"
+    type: "field-enrichment"
+    description: "Copy trade data to enriched fields"
+    field-mappings:
+      - source-field: "notionalAmount"
+        target-field: "enrichedNotional"
+      - source-field: "strike"
+        target-field: "enrichedStrike"
+    enabled: true
+
+# EXTERNAL RULES - should execute SECOND (at this position in document order)
+rule-refs:
+  - name: "otc-validation-rules"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-rules-otc.yaml"
+    enabled: true
+    description: "External OTC validation rules"
+
+# INLINE RULE - should execute THIRD (after external rules)
+rules:
+  - id: "validate-enrichment-completed"
+    name: "Validate Enrichment Completed"
+    condition: "#enrichedNotional != null && #enrichedStrike != null"
+    message: "Trade data must be enriched before validation"
+    severity: "ERROR"
+    enabled: true
+

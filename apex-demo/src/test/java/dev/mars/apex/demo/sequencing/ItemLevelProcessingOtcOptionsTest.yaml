@@ -1,0 +1,76 @@
+metadata:
+  name: "Item-Level Processing - OTC Options Trade Processing"
+  type: "rule-config"
+  processing-mode: "sequential"
+  description: |
+    Tests item-level processing with OTC options trade processing.
+    Demonstrates sequential processing with data dependencies.
+
+    Processing Order (Section-Level with Item Order):
+    1. enrich-counterparty-credit-rating (E1) - Lookup counterparty credit data
+    2. calculate-value-at-risk (E2) - Calculate VaR (depends on E1)
+    3. validate-credit-limit (R1) - Validate trade against credit limit (depends on E1)
+    4. approve-or-reject-trade (R2) - Final approval decision (depends on E2)
+
+# ALL ENRICHMENTS in document order
+# E1 will execute first, E2 will execute second
+enrichments:
+  # ENRICHMENT 1: Lookup counterparty credit rating and limit
+  # This is the first step - provides data for subsequent steps
+  - id: "enrich-counterparty-credit-rating"
+    name: "Lookup Counterparty Credit Rating"
+    type: "lookup-enrichment"
+    condition: "#counterparty != null"
+    lookup-config:
+      lookup-key: "#counterparty"
+      lookup-dataset:
+        type: "inline"
+        key-field: "counterparty"
+        data:
+          - counterparty: "HEDGE_FUND_X"
+            creditRating: "AA"
+            creditLimit: 100000000.0
+            sector: "HEDGE_FUND"
+          - counterparty: "PENSION_FUND_Y"
+            creditRating: "AAA"
+            creditLimit: 200000000.0
+            sector: "PENSION_FUND"
+          - counterparty: "INVESTMENT_BANK_Z"
+            creditRating: "A"
+            creditLimit: 150000000.0
+            sector: "INVESTMENT_BANK"
+    field-mappings:
+      - source-field: "creditRating"
+        target-field: "counterpartyCreditRating"
+      - source-field: "creditLimit"
+        target-field: "counterpartyCreditLimit"
+
+  # ENRICHMENT 2: Calculate Value at Risk
+  # DEPENDS ON E1: Condition checks counterpartyCreditRating != null
+  - id: "calculate-value-at-risk"
+    name: "Calculate Value at Risk"
+    type: "calculation-enrichment"
+    condition: "#counterpartyCreditRating != null"
+    calculation-config:
+      expression: "#notionalAmount * 0.15"
+      result-field: "valueAtRisk"
+
+# ALL RULES in document order
+# R1 will execute first, R2 will execute second
+rules:
+  # RULE 1: Validate trade against credit limit
+  # DEPENDS ON E1: Needs counterpartyCreditRating and counterpartyCreditLimit
+  - id: "validate-credit-limit"
+    name: "Validate Trade Against Credit Limit"
+    condition: "#counterpartyCreditRating != null && #notionalAmount < #counterpartyCreditLimit"
+    message: "Trade within credit limit"
+    severity: "INFO"
+
+  # RULE 2: Final trade approval decision
+  # DEPENDS ON E2: Needs valueAtRisk
+  - id: "approve-or-reject-trade"
+    name: "Final Trade Approval Decision"
+    condition: "#valueAtRisk != null && #valueAtRisk < 10000000"
+    message: "Trade approved - VaR within limits"
+    severity: "INFO"
+

@@ -1087,6 +1087,9 @@ public class RulesEngine {
     /**
      * Evaluate using sequential processing - execute sections in YAML document order.
      * This respects the developer's intent as expressed through YAML structure.
+     *
+     * If item-level order is available, processes individual items in document order.
+     * Otherwise, falls back to section-level processing for backward compatibility.
      */
     private RuleResult evaluateInDocumentOrder(YamlRuleConfiguration yamlConfig, Map<String, Object> inputData, List<String> sectionOrder) {
         List<String> failureMessages = new ArrayList<>();
@@ -1094,11 +1097,36 @@ public class RulesEngine {
         boolean overallSuccess = true;
 
         try {
-            logger.info("Processing {} sections in document order", sectionOrder.size());
+            // Check if item-level order is available
+            List<ProcessingItem> itemOrder = yamlConfig.getItemOrder();
 
-            // Process sections in the order they appear in the YAML document
-            for (String section : sectionOrder) {
-                logger.debug("Processing section: {}", section);
+            if (itemOrder != null && !itemOrder.isEmpty()) {
+                // NEW: Item-level processing
+                logger.info("Processing {} items in document order", itemOrder.size());
+
+                for (ProcessingItem item : itemOrder) {
+                    logger.debug("Processing item: {} ({})", item.getItemId(), item.getSectionType());
+
+                    RuleResult itemResult = processItem(item, yamlConfig, enrichedData);
+
+                    if (itemResult.getResultType() == RuleResult.ResultType.ERROR) {
+                        overallSuccess = false;
+                        failureMessages.add(item.getSectionType() + " '" + item.getItemId() + "' error: " + itemResult.getMessage());
+                    }
+
+                    // Update enriched data with results
+                    if (itemResult.getEnrichedData() != null) {
+                        enrichedData.putAll(itemResult.getEnrichedData());
+                    }
+                }
+            } else {
+                // FALLBACK: Section-level processing (existing code)
+                logger.info("No item order available, falling back to section-level processing");
+                logger.info("Processing {} sections in document order", sectionOrder.size());
+
+                // Process sections in the order they appear in the YAML document
+                for (String section : sectionOrder) {
+                    logger.debug("Processing section: {}", section);
 
                 switch (section) {
                     case "enrichments":
@@ -1216,6 +1244,7 @@ public class RulesEngine {
                         break;
                 }
             }
+            } // End of fallback section-level processing
 
             // Return comprehensive result
             if (overallSuccess && failureMessages.isEmpty()) {
@@ -1232,6 +1261,138 @@ public class RulesEngine {
             failureMessages.add("Sequential evaluation failed: " + e.getMessage());
             return RuleResult.evaluationFailure(failureMessages, enrichedData, "evaluation", "Sequential evaluation failed");
         }
+    }
+
+    /**
+     * Process a single item based on its section type.
+     * This method dispatches to the appropriate processor based on the item's section type.
+     *
+     * @param item The processing item containing section type and item ID
+     * @param yamlConfig The YAML configuration
+     * @param data The data to process
+     * @return RuleResult from processing the item
+     */
+    private RuleResult processItem(ProcessingItem item, YamlRuleConfiguration yamlConfig, Map<String, Object> data) {
+        String sectionType = item.getSectionType();
+        String itemId = item.getItemId();
+
+        switch (sectionType) {
+            case "enrichments":
+                return processEnrichmentItem(itemId, yamlConfig, data);
+            case "rules":
+                return processRuleItem(itemId, yamlConfig, data);
+            case "enrichment-groups":
+                return processEnrichmentGroupItem(itemId, yamlConfig, data);
+            case "rule-groups":
+                return processRuleGroupItem(itemId, yamlConfig, data);
+            case "transformations":
+            case "rule-chains":
+                logger.warn("Section type '{}' not yet supported for item-level processing", sectionType);
+                return RuleResult.noMatch(sectionType + ":" + itemId, "Skipped - not yet supported", SeverityConstants.INFO);
+            default:
+                logger.warn("Unknown section type: {}", sectionType);
+                return RuleResult.error(sectionType + ":" + itemId, "Unknown section type");
+        }
+    }
+
+    /**
+     * Process a single enrichment by ID.
+     *
+     * @param enrichmentId The enrichment ID to process
+     * @param yamlConfig The YAML configuration
+     * @param data The data to enrich
+     * @return RuleResult from processing the enrichment
+     */
+    private RuleResult processEnrichmentItem(String enrichmentId, YamlRuleConfiguration yamlConfig, Map<String, Object> data) {
+        // Find enrichment in yamlConfig.getEnrichments()
+        YamlEnrichment enrichment = findEnrichmentById(yamlConfig, enrichmentId);
+        if (enrichment == null) {
+            logger.warn("Enrichment not found: {}", enrichmentId);
+            return RuleResult.error("enrichment:" + enrichmentId, "Enrichment not found");
+        }
+
+        // Process single enrichment using YamlEnrichmentProcessor.processEnrichmentWithResult()
+        // This method returns RuleResult directly (unlike processEnrichment() which returns Object)
+        return enrichmentProcessor.processEnrichmentWithResult(enrichment, data);
+    }
+
+    /**
+     * Process a single rule by ID.
+     *
+     * @param ruleId The rule ID to process
+     * @param yamlConfig The YAML configuration (unused but kept for consistency)
+     * @param data The data to evaluate
+     * @return RuleResult from processing the rule
+     */
+    private RuleResult processRuleItem(String ruleId, YamlRuleConfiguration yamlConfig, Map<String, Object> data) {
+        // Look up rule in configuration.getRuleById()
+        Rule rule = configuration.getRuleById(ruleId);
+        if (rule == null) {
+            logger.warn("Rule not found: {}", ruleId);
+            return RuleResult.error("rule:" + ruleId, "Rule not found");
+        }
+
+        // Execute single rule using executeRulesList()
+        return executeRulesList(List.of(rule), data);
+    }
+
+    /**
+     * Process a single enrichment group by ID.
+     *
+     * @param groupId The enrichment group ID to process
+     * @param yamlConfig The YAML configuration (unused but kept for consistency)
+     * @param data The data to enrich
+     * @return RuleResult from processing the enrichment group
+     */
+    private RuleResult processEnrichmentGroupItem(String groupId, YamlRuleConfiguration yamlConfig, Map<String, Object> data) {
+        // Look up enrichment group in configuration.getEnrichmentGroupById()
+        EnrichmentGroup group = configuration.getEnrichmentGroupById(groupId);
+        if (group == null) {
+            logger.warn("Enrichment group not found: {}", groupId);
+            return RuleResult.error("enrichment-group:" + groupId, "Enrichment group not found");
+        }
+
+        // Execute single enrichment group using executeEnrichmentGroupsList()
+        return executeEnrichmentGroupsList(List.of(group), data);
+    }
+
+    /**
+     * Process a single rule group by ID.
+     *
+     * @param groupId The rule group ID to process
+     * @param yamlConfig The YAML configuration (unused but kept for consistency)
+     * @param data The data to evaluate
+     * @return RuleResult from processing the rule group
+     */
+    private RuleResult processRuleGroupItem(String groupId, YamlRuleConfiguration yamlConfig, Map<String, Object> data) {
+        // Look up rule group in configuration.getRuleGroupById()
+        RuleGroup group = configuration.getRuleGroupById(groupId);
+        if (group == null) {
+            logger.warn("Rule group not found: {}", groupId);
+            return RuleResult.error("rule-group:" + groupId, "Rule group not found");
+        }
+
+        // Execute single rule group using executeRuleGroupsList()
+        return executeRuleGroupsList(List.of(group), data);
+    }
+
+    /**
+     * Find an enrichment by ID in the configuration.
+     * Similar to existing findRuleById() method in YamlEnrichmentProcessor.
+     *
+     * @param config The YAML configuration
+     * @param enrichmentId The enrichment ID to find
+     * @return The YamlEnrichment if found, null otherwise
+     */
+    private YamlEnrichment findEnrichmentById(YamlRuleConfiguration config, String enrichmentId) {
+        if (config.getEnrichments() != null) {
+            for (YamlEnrichment enrichment : config.getEnrichments()) {
+                if (enrichmentId.equals(enrichment.getId())) {
+                    return enrichment;
+                }
+            }
+        }
+        return null;
     }
 
     /**

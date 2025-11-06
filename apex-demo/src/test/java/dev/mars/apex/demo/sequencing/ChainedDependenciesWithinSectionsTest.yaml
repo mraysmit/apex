@@ -1,15 +1,8 @@
 metadata:
   name: "Chained Dependencies Within Sections Test"
   type: "rule-config"
+  processing-mode: "sequential"
   description: "Tests E1->E2 chaining within enrichments section, then R1->R2 chaining within rules section"
-
-data-sources:
-  - name: "test-data"
-    type: "memory"
-    data:
-      - id: "trade-001"
-        amount: 75000
-        currency: "USD"
 
 # ENRICHMENT CHAIN: E1 -> E2
 # E1 calculates riskScore
@@ -18,9 +11,13 @@ enrichments:
   - id: "calculate-risk-score"
     name: "Calculate Risk Score"
     type: "calculation-enrichment"
+    condition: "#amount != null"
     calculation-config:
-      expression: "#amount / 100000"
+      expression: "#amount / 100000.0"
       result-field: "riskScore"
+    field-mappings:
+      - source-field: "riskScore"
+        target-field: "riskScore"
 
   - id: "determine-approval-level"
     name: "Determine Approval Level"

@@ -93,28 +93,32 @@ public class OrderedYamlParser {
     public OrderedYamlConfiguration parseYamlString(String yamlContent, String source) throws YamlConfigurationException {
         try {
             LOGGER.fine("Parsing YAML content with order preservation from: " + source);
-            
+
             // Step 1: Parse with SnakeYAML to get ordered structure
             Map<String, Object> orderedMap = snakeYaml.load(yamlContent);
             if (orderedMap == null) {
                 throw new YamlConfigurationException("Empty or invalid YAML content in: " + source);
             }
-            
+
             // Step 2: Extract section order from the ordered map
             List<String> sectionOrder = extractSectionOrder(orderedMap);
             LOGGER.fine("Detected section order: " + sectionOrder);
-            
-            // Step 3: Parse with Jackson for full object mapping
+
+            // Step 3: Extract item-level order from the ordered map
+            List<ProcessingItem> itemOrder = extractItemOrder(orderedMap);
+            LOGGER.fine("Detected item order: " + itemOrder.size() + " items");
+
+            // Step 4: Parse with Jackson for full object mapping
             YamlRuleConfiguration config = yamlMapper.readValue(yamlContent, YamlRuleConfiguration.class);
-            
-            // Step 4: Create ordered configuration
-            OrderedYamlConfiguration orderedConfig = new OrderedYamlConfiguration(config, sectionOrder);
-            
-            LOGGER.info("Successfully parsed YAML with preserved order from: " + source + 
-                       " (sections: " + sectionOrder.size() + ")");
-            
+
+            // Step 5: Create ordered configuration with both section and item order
+            OrderedYamlConfiguration orderedConfig = new OrderedYamlConfiguration(config, sectionOrder, itemOrder);
+
+            LOGGER.info("Successfully parsed YAML with preserved order from: " + source +
+                       " (sections: " + sectionOrder.size() + ", items: " + itemOrder.size() + ")");
+
             return orderedConfig;
-            
+
         } catch (org.yaml.snakeyaml.scanner.ScannerException e) {
             throw new YamlConfigurationException("YAML syntax error in " + source + ": " + e.getMessage(), e);
         } catch (org.yaml.snakeyaml.parser.ParserException e) {
@@ -128,13 +132,13 @@ public class OrderedYamlParser {
     
     /**
      * Extract the order of sections as they appear in the YAML document.
-     * 
+     *
      * @param yamlMap Ordered map from SnakeYAML parsing
      * @return List of section names in document order
      */
     private List<String> extractSectionOrder(Map<String, Object> yamlMap) {
         List<String> sectionOrder = new ArrayList<>();
-        
+
         // LinkedHashMap from SnakeYAML preserves insertion order
         for (String key : yamlMap.keySet()) {
             if (KNOWN_SECTIONS.contains(key)) {
@@ -146,8 +150,78 @@ public class OrderedYamlParser {
                 sectionOrder.add(key);
             }
         }
-        
+
         return sectionOrder;
+    }
+
+    /**
+     * Extract item-level order from YAML document.
+     * This captures the order of individual items (enrichments, rules, groups, etc.)
+     * as they appear in the YAML document, enabling item-level sequential processing.
+     *
+     * <p>This method processes list sections (enrichments, rules, enrichment-groups, etc.)
+     * and extracts the ID of each item to create a complete ordering of all processable
+     * items in the document.
+     *
+     * <p>Note: Single-object sections like 'pipeline' are not included in item order
+     * as they are processed at section-level only.
+     *
+     * @param yamlMap Ordered map from SnakeYAML parsing
+     * @return List of processing items in document order
+     */
+    private List<ProcessingItem> extractItemOrder(Map<String, Object> yamlMap) {
+        List<ProcessingItem> itemOrder = new ArrayList<>();
+
+        // Sections that contain lists of items
+        Set<String> LIST_SECTIONS = Set.of(
+            "enrichments", "rules", "enrichment-groups", "rule-groups",
+            "transformations", "rule-chains"
+        );
+
+        // Reference sections that need placeholders for later expansion
+        Set<String> REFERENCE_SECTIONS = Set.of(
+            "enrichment-refs", "rule-refs"
+        );
+
+        // Note: 'pipeline' is currently a single object (not a list) in YamlRuleConfiguration
+        // and is processed at section-level, not item-level. If pipeline becomes a list in
+        // the future (to support multiple pipelines per document), add it to LIST_SECTIONS.
+
+        // LinkedHashMap from SnakeYAML preserves insertion order
+        for (String sectionName : yamlMap.keySet()) {
+            if (!KNOWN_SECTIONS.contains(sectionName)) {
+                continue; // Skip unknown sections
+            }
+
+            Object sectionValue = yamlMap.get(sectionName);
+
+            if (LIST_SECTIONS.contains(sectionName) && sectionValue instanceof List) {
+                // Process list sections (enrichments, rules, etc.)
+                List<?> items = (List<?>) sectionValue;
+                for (Object item : items) {
+                    if (item instanceof Map) {
+                        Map<?, ?> itemMap = (Map<?, ?>) item;
+                        String itemId = (String) itemMap.get("id");
+                        if (itemId != null) {
+                            itemOrder.add(new ProcessingItem(sectionName, itemId));
+                            LOGGER.fine("Found item in order: " + sectionName + " -> " + itemId);
+                        } else {
+                            LOGGER.warning("Item in section '" + sectionName + "' has no ID");
+                        }
+                    }
+                }
+            } else if (REFERENCE_SECTIONS.contains(sectionName) && sectionValue instanceof List) {
+                // Insert placeholder for reference sections
+                // These will be expanded later by YamlConfigurationLoader after loading referenced files
+                itemOrder.add(new ProcessingItem(sectionName, "*"));
+                LOGGER.fine("Added placeholder for reference section: " + sectionName);
+            }
+            // Single-object sections (like 'pipeline') are not included in item order
+            // They are processed at section-level only
+        }
+
+        LOGGER.info("Extracted " + itemOrder.size() + " items in document order");
+        return itemOrder;
     }
     
     /**

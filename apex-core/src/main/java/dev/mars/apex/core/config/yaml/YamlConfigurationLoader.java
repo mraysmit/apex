@@ -88,10 +88,14 @@ public class YamlConfigurationLoader {
             OrderedYamlConfiguration orderedConfig = orderedYamlParser.parseYamlString(resolvedContent, filePath);
             YamlRuleConfiguration config = orderedConfig.getConfiguration();
 
-            // Copy section order into the configuration
+            // Copy section order and item order into the configuration
             List<String> sectionOrder = orderedConfig.getSectionOrder();
             config.setSectionOrder(sectionOrder);
             LOGGER.fine("Section order from YAML: " + sectionOrder);
+
+            List<ProcessingItem> itemOrder = orderedConfig.getItemOrder();
+            config.setItemOrder(itemOrder);
+            LOGGER.fine("Item order from YAML: " + itemOrder.size() + " items");
 
             // Process external rule references
             processRuleReferences(config);
@@ -101,6 +105,9 @@ public class YamlConfigurationLoader {
 
             // Process external data-source references
             processDataSourceReferences(config);
+
+            // Expand reference placeholders in item order
+            expandReferencePlaceholders(config);
 
             validateConfiguration(config);
             LOGGER.info("Successfully loaded configuration: " +
@@ -136,8 +143,9 @@ public class YamlConfigurationLoader {
             OrderedYamlConfiguration orderedConfig = orderedYamlParser.parseYamlString(resolvedContent, file.getAbsolutePath());
             YamlRuleConfiguration config = orderedConfig.getConfiguration();
 
-            // Copy section order into the configuration
+            // Copy section order and item order into the configuration
             config.setSectionOrder(orderedConfig.getSectionOrder());
+            config.setItemOrder(orderedConfig.getItemOrder());
 
             // Process external rule references
             processRuleReferences(config);
@@ -147,6 +155,9 @@ public class YamlConfigurationLoader {
 
             // Process external data-source references
             processDataSourceReferences(config);
+
+            // Expand reference placeholders in item order
+            expandReferencePlaceholders(config);
 
             validateConfiguration(config);
             LOGGER.info("Successfully loaded configuration: " +
@@ -178,8 +189,9 @@ public class YamlConfigurationLoader {
             OrderedYamlConfiguration orderedConfig = orderedYamlParser.parseYamlString(resolvedContent, "<stream>");
             YamlRuleConfiguration config = orderedConfig.getConfiguration();
 
-            // Copy section order into the configuration
+            // Copy section order and item order into the configuration
             config.setSectionOrder(orderedConfig.getSectionOrder());
+            config.setItemOrder(orderedConfig.getItemOrder());
 
             // Process external rule references
             processRuleReferences(config);
@@ -189,6 +201,9 @@ public class YamlConfigurationLoader {
 
             // Process external data-source references
             processDataSourceReferences(config);
+
+            // Expand reference placeholders in item order
+            expandReferencePlaceholders(config);
 
             validateConfiguration(config);
             LOGGER.info("Successfully loaded configuration: " +
@@ -336,8 +351,9 @@ public class YamlConfigurationLoader {
         OrderedYamlConfiguration orderedConfig = orderedYamlParser.parseYamlString(resolvedYamlString, "<string>");
         YamlRuleConfiguration config = orderedConfig.getConfiguration();
 
-        // Copy section order into the configuration
+        // Copy section order and item order into the configuration
         config.setSectionOrder(orderedConfig.getSectionOrder());
+        config.setItemOrder(orderedConfig.getItemOrder());
 
         validateConfiguration(config);
         return config;
@@ -432,6 +448,10 @@ public class YamlConfigurationLoader {
 
         LOGGER.info("Processing " + config.getRuleRefs().size() + " external rule references");
 
+        // Track referenced rule IDs and rule group IDs
+        Set<String> referencedRuleIds = new HashSet<>();
+        Set<String> referencedRuleGroupIds = new HashSet<>();
+
         // Process each rule reference
         for (YamlRuleRef ref : config.getRuleRefs()) {
             if (!ref.isEnabled()) {
@@ -451,8 +471,34 @@ public class YamlConfigurationLoader {
                     if (config.getRules() == null) {
                         config.setRules(new ArrayList<>());
                     }
+
+                    // Track IDs before adding
+                    for (YamlRule rule : referencedConfig.getRules()) {
+                        if (rule.getId() != null) {
+                            referencedRuleIds.add(rule.getId());
+                        }
+                    }
+
                     config.getRules().addAll(referencedConfig.getRules());
                     LOGGER.info("Merged " + referencedConfig.getRules().size() + " rules from: " + ref.getName());
+                }
+
+                // Merge rule groups from referenced file
+                if (referencedConfig.getRuleGroups() != null) {
+                    // Initialize rule groups list if it doesn't exist and we have groups to add
+                    if (config.getRuleGroups() == null) {
+                        config.setRuleGroups(new ArrayList<>());
+                    }
+
+                    // Track IDs before adding
+                    for (YamlRuleGroup group : referencedConfig.getRuleGroups()) {
+                        if (group.getId() != null) {
+                            referencedRuleGroupIds.add(group.getId());
+                        }
+                    }
+
+                    config.getRuleGroups().addAll(referencedConfig.getRuleGroups());
+                    LOGGER.info("Merged " + referencedConfig.getRuleGroups().size() + " rule groups from: " + ref.getName());
                 }
 
                 LOGGER.info("Successfully resolved and merged rules from: " + ref.getName());
@@ -463,7 +509,12 @@ public class YamlConfigurationLoader {
             }
         }
 
-        LOGGER.info("Successfully processed all external rule references");
+        // Store tracked IDs in configuration
+        config.setReferencedRuleIds(referencedRuleIds);
+        config.setReferencedRuleGroupIds(referencedRuleGroupIds);
+
+        LOGGER.info("Successfully processed all external rule references (tracked " +
+                   referencedRuleIds.size() + " rules, " + referencedRuleGroupIds.size() + " rule groups)");
     }
 
     /**
@@ -482,6 +533,10 @@ public class YamlConfigurationLoader {
         }
 
         LOGGER.info("Processing " + config.getEnrichmentRefs().size() + " external enrichment references");
+
+        // Track referenced enrichment IDs and enrichment group IDs
+        Set<String> referencedEnrichmentIds = new HashSet<>();
+        Set<String> referencedEnrichmentGroupIds = new HashSet<>();
 
         // Process each enrichment reference
         for (YamlEnrichmentRef ref : config.getEnrichmentRefs()) {
@@ -502,6 +557,14 @@ public class YamlConfigurationLoader {
                     if (config.getEnrichments() == null) {
                         config.setEnrichments(new ArrayList<>());
                     }
+
+                    // Track IDs before adding
+                    for (YamlEnrichment enrichment : referencedConfig.getEnrichments()) {
+                        if (enrichment.getId() != null) {
+                            referencedEnrichmentIds.add(enrichment.getId());
+                        }
+                    }
+
                     config.getEnrichments().addAll(referencedConfig.getEnrichments());
                     LOGGER.info("Merged " + referencedConfig.getEnrichments().size() + " enrichments from: " + ref.getName());
                 }
@@ -512,6 +575,14 @@ public class YamlConfigurationLoader {
                     if (config.getEnrichmentGroups() == null) {
                         config.setEnrichmentGroups(new ArrayList<>());
                     }
+
+                    // Track IDs before adding
+                    for (YamlEnrichmentGroup group : referencedConfig.getEnrichmentGroups()) {
+                        if (group.getId() != null) {
+                            referencedEnrichmentGroupIds.add(group.getId());
+                        }
+                    }
+
                     config.getEnrichmentGroups().addAll(referencedConfig.getEnrichmentGroups());
                     LOGGER.info("Merged " + referencedConfig.getEnrichmentGroups().size() + " enrichment groups from: " + ref.getName());
                 }
@@ -524,7 +595,76 @@ public class YamlConfigurationLoader {
             }
         }
 
-        LOGGER.info("Successfully processed all external enrichment references");
+        // Store tracked IDs in configuration
+        config.setReferencedEnrichmentIds(referencedEnrichmentIds);
+        config.setReferencedEnrichmentGroupIds(referencedEnrichmentGroupIds);
+
+        LOGGER.info("Successfully processed all external enrichment references (tracked " +
+                   referencedEnrichmentIds.size() + " enrichments, " + referencedEnrichmentGroupIds.size() + " enrichment groups)");
+    }
+
+    /**
+     * Expand reference placeholders in item order.
+     * This replaces "*-refs" placeholders with actual items from referenced files.
+     * Must be called AFTER processRuleReferences() and processEnrichmentReferences().
+     *
+     * @param config Configuration with item order and tracked referenced IDs
+     */
+    private void expandReferencePlaceholders(YamlRuleConfiguration config) {
+        if (config.getItemOrder() == null || config.getItemOrder().isEmpty()) {
+            LOGGER.fine("No item order to expand");
+            return;
+        }
+
+        List<ProcessingItem> expandedOrder = new ArrayList<>();
+        int originalSize = config.getItemOrder().size();
+
+        for (ProcessingItem item : config.getItemOrder()) {
+            String sectionType = item.getSectionType();
+            String itemId = item.getItemId();
+
+            if (sectionType.equals("enrichment-refs") && itemId.equals("*")) {
+                // Expand enrichment references
+                LOGGER.fine("Expanding enrichment-refs placeholder");
+
+                if (config.getReferencedEnrichmentIds() != null) {
+                    for (String enrichmentId : config.getReferencedEnrichmentIds()) {
+                        expandedOrder.add(new ProcessingItem("enrichments", enrichmentId));
+                        LOGGER.fine("  Added enrichment: " + enrichmentId);
+                    }
+                }
+
+                if (config.getReferencedEnrichmentGroupIds() != null) {
+                    for (String groupId : config.getReferencedEnrichmentGroupIds()) {
+                        expandedOrder.add(new ProcessingItem("enrichment-groups", groupId));
+                        LOGGER.fine("  Added enrichment-group: " + groupId);
+                    }
+                }
+            } else if (sectionType.equals("rule-refs") && itemId.equals("*")) {
+                // Expand rule references
+                LOGGER.fine("Expanding rule-refs placeholder");
+
+                if (config.getReferencedRuleIds() != null) {
+                    for (String ruleId : config.getReferencedRuleIds()) {
+                        expandedOrder.add(new ProcessingItem("rules", ruleId));
+                        LOGGER.fine("  Added rule: " + ruleId);
+                    }
+                }
+
+                if (config.getReferencedRuleGroupIds() != null) {
+                    for (String groupId : config.getReferencedRuleGroupIds()) {
+                        expandedOrder.add(new ProcessingItem("rule-groups", groupId));
+                        LOGGER.fine("  Added rule-group: " + groupId);
+                    }
+                }
+            } else {
+                // Keep non-placeholder items as-is
+                expandedOrder.add(item);
+            }
+        }
+
+        config.setItemOrder(expandedOrder);
+        LOGGER.info("Expanded item order from " + originalSize + " to " + expandedOrder.size() + " items");
     }
 
     /**
@@ -658,6 +798,9 @@ public class YamlConfigurationLoader {
 
         // Process external data-source references
         processDataSourceReferences(config);
+
+        // Expand reference placeholders in item order
+        expandReferencePlaceholders(config);
 
         // Validate the complete merged configuration
         validateConfiguration(config);
