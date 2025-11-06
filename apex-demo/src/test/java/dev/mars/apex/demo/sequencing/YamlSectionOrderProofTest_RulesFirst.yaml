@@ -1,0 +1,29 @@
+metadata:
+  name: "PROOF: Rules BEFORE Enrichments"
+  description: "Demonstrates that rules execute FIRST when they appear before enrichments in YAML"
+  version: "1.0.0"
+
+data-sources:
+  - name: "test-data"
+    type: "memory"
+
+# SECTION ORDER: rules BEFORE enrichments
+# Expected execution: rules execute FIRST, then enrichments
+
+rules:
+  - id: "validate-input-amount"
+    name: "Validate Input Amount"
+    condition: "#amount != null && #amount > 0"
+    message: "Input amount is valid"
+    severity: "INFO"
+    priority: 100
+
+enrichments:
+  - id: "calculate-risk-score"
+    name: "Calculate Risk Score"
+    type: "calculation-enrichment"
+    condition: "#customerId != null"
+    calculation-config:
+      expression: "0.5"
+      result-field: "riskScore"
+
