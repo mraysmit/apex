@@ -4,8 +4,9 @@ metadata:
   version: "1.0.0"
   description: "Test mixed individual rules and rule groups in document order"
 
-# YAML Section Order: rule-refs → rules → rule-group-refs → rule-groups
-# Expected Processing Order: R1-ref → R2-ref → R3-inline → RG1-ref → RG2-ref → RG3-inline
+# YAML Section Order: enrichments → rule-refs → rules → rule-groups
+# Expected Processing Order: E1 → E2 → E3 → R1-ref → R2-ref → RG1-ref → RG2-ref → R3-inline → RG3-inline
+# Note: rule-refs loads BOTH individual rules AND rule groups from external files
 
 # First, enrich data for rules to validate
 enrichments:
@@ -61,14 +62,18 @@ enrichments:
         target-field: "netExposure"
     enabled: true
 
-# Section 1: Rule-refs (placeholder - expands to R1 and R2 from external file)
+# Section 1: Rule-refs (placeholder - expands to R1, R2, RG1, RG2 from external files)
 rule-refs:
   - name: "external-rules"
     source: "src/test/java/dev/mars/apex/demo/sequencing/external-rules-otc.yaml"
     enabled: true
     description: "Load individual rules from external file"
+  - name: "external-rule-groups"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-rule-groups-otc.yaml"
+    enabled: true
+    description: "Load rule groups from external file"
 
-# Section 2: Inline rule (executes after rule-refs)
+# Section 2: Inline rules (execute after rule-refs)
 rules:
   - id: "validate-market-data-present"
     name: "Validate Market Data Present"
@@ -77,27 +82,7 @@ rules:
     severity: "ERROR"
     enabled: true
 
-# Section 3: Rule-group-refs (placeholder - expands to RG1 and RG2 from external file)
-rule-group-refs:
-  - name: "external-rule-groups"
-    source: "src/test/java/dev/mars/apex/demo/sequencing/external-rule-groups-otc.yaml"
-    enabled: true
-    description: "Load rule groups from external file"
-
-# Section 4: Inline rule group (executes after rule-group-refs)
-rule-groups:
-  - id: "compliance-validation-group"
-    name: "Compliance Validation Group"
-    description: "Group for compliance-related validations"
-    operator: "AND"
-    stop-on-first-failure: false
-    priority: 30
-    rule-ids:
-      - "validate-regulatory-approval"
-      - "validate-counterparty-approved"
-
-# Rules used by the inline rule group
-rules:
+  # Rules used by the inline rule group
   - id: "validate-regulatory-approval"
     name: "Validate Regulatory Approval"
     condition: "#optionType == null"
@@ -111,4 +96,16 @@ rules:
     message: "Counterparty must be specified and approved"
     severity: "ERROR"
     enabled: true
+
+# Section 3: Inline rule group (executes after inline rules)
+rule-groups:
+  - id: "compliance-validation-group"
+    name: "Compliance Validation Group"
+    description: "Group for compliance-related validations"
+    operator: "AND"
+    stop-on-first-failure: false
+    priority: 30
+    rule-ids:
+      - "validate-regulatory-approval"
+      - "validate-counterparty-approved"
 

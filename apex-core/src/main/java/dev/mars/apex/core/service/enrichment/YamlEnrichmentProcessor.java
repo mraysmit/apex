@@ -275,17 +275,11 @@ public class YamlEnrichmentProcessor {
             return false;
         }
 
-        LOGGER.fine("Evaluating enrichment: " + enrichment.getId() + " for object type: " +
-                   targetObject.getClass().getSimpleName());
-
-
-
         // Check if enrichment is enabled
         if (enrichment.getEnabled() != null && !enrichment.getEnabled()) {
-            LOGGER.fine("Enrichment " + enrichment.getId() + " is disabled");
             return false;
         }
-        
+
         // Check target type if specified (more flexible matching)
         if (enrichment.getTargetType() != null) {
             String targetType = enrichment.getTargetType();
@@ -299,24 +293,16 @@ public class YamlEnrichmentProcessor {
                                 targetType.equals("Trade") && actualSimpleName.contains("Trade");
 
             if (!typeMatches) {
-                LOGGER.fine("Target type mismatch. Expected: " + targetType +
-                           ", Actual: " + actualSimpleName + " (full: " + actualFullName + ")");
                 return false;
-            } else {
-                LOGGER.fine("Target type match successful. Expected: " + targetType +
-                           ", Actual: " + actualSimpleName);
             }
         }
-        
+
         // Evaluate condition if specified
         if (enrichment.getCondition() != null && !enrichment.getCondition().trim().isEmpty()) {
             try {
                 StandardEvaluationContext context = createEvaluationContext(targetObject);
                 Expression conditionExpr = getOrCompileExpression(enrichment.getCondition());
                 Boolean result = conditionExpr.getValue(context, Boolean.class);
-
-                LOGGER.fine("Condition evaluation for " + enrichment.getId() +
-                           ": '" + enrichment.getCondition() + "' = " + result);
 
                 return result != null && result;
             } catch (Exception e) {
@@ -330,7 +316,7 @@ public class YamlEnrichmentProcessor {
                 return false;
             }
         }
-        
+
         return true;
     }
     

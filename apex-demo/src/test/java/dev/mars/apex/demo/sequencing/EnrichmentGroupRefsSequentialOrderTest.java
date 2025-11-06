@@ -16,10 +16,10 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * PRIORITY 2 TEST: Enrichment-Group-Refs Placeholder Expansion in Sequential Mode
- * 
- * This test verifies enrichment-group-refs placeholder expansion:
- * - enrichment-group-refs placeholder is inserted at correct position during YAML parsing
+ * PRIORITY 2 TEST: Enrichment-Refs with Groups Placeholder Expansion in Sequential Mode
+ *
+ * This test verifies enrichment-refs placeholder expansion when loading enrichment groups:
+ * - enrichment-refs placeholder is inserted at correct position during YAML parsing
  * - Placeholder is expanded to actual enrichment groups AFTER reference processing
  * - Referenced enrichment groups execute at the correct position in document order
  * 
@@ -54,9 +54,9 @@ public class EnrichmentGroupRefsSequentialOrderTest {
     }
 
     @Test
-    @DisplayName("enrichment-group-refs placeholder expands at correct position in document order")
+    @DisplayName("enrichment-refs placeholder expands enrichment groups at correct position in document order")
     public void testEnrichmentGroupRefsPlaceholderExpansion() throws Exception {
-        LOGGER.info("=== TESTING: Enrichment-Group-Refs Placeholder Expansion ===");
+        LOGGER.info("=== TESTING: Enrichment-Refs (Groups) Placeholder Expansion ===");
 
         // Arrange
         String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/EnrichmentGroupRefsSequentialOrderTest.yaml";

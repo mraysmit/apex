@@ -1027,9 +1027,15 @@ public class RulesEngine {
                 logger.info("Processing {} individual rules", allRules.size());
                 RuleResult ruleResult = executeRulesList(allRules, enrichedData);
 
+                // Check for ERROR result type OR ERROR severity on matched rules
                 if (ruleResult.getResultType() == RuleResult.ResultType.ERROR) {
                     overallSuccess = false;
                     failureMessages.add("Rule evaluation error: " + ruleResult.getMessage());
+                } else if (ruleResult.isTriggered() &&
+                          SeverityConstants.ERROR.equalsIgnoreCase(ruleResult.getSeverity())) {
+                    overallSuccess = false;
+                    failureMessages.add("Rule validation failed: " + ruleResult.getMessage());
+                    logger.warn("Rule validation failure: {} with ERROR severity", ruleResult.getRuleName());
                 }
 
                 // Update enriched data with results from rules (field mappings)
@@ -1061,9 +1067,15 @@ public class RulesEngine {
                 logger.info("Processing {} rule groups", allRuleGroups.size());
                 RuleResult ruleGroupResult = executeRuleGroupsList(allRuleGroups, enrichedData);
 
+                // Check for ERROR result type OR ERROR severity on matched rule groups
                 if (ruleGroupResult.getResultType() == RuleResult.ResultType.ERROR) {
                     overallSuccess = false;
                     failureMessages.add("Rule group evaluation error: " + ruleGroupResult.getMessage());
+                } else if (ruleGroupResult.isTriggered() &&
+                          SeverityConstants.ERROR.equalsIgnoreCase(ruleGroupResult.getSeverity())) {
+                    overallSuccess = false;
+                    failureMessages.add("Rule group validation failed: " + ruleGroupResult.getMessage());
+                    logger.warn("Rule group validation failure: {} with ERROR severity", ruleGroupResult.getRuleName());
                 }
             }
 
@@ -1109,9 +1121,17 @@ public class RulesEngine {
 
                     RuleResult itemResult = processItem(item, yamlConfig, enrichedData);
 
+                    // Check for ERROR result type OR ERROR severity on matched rules
                     if (itemResult.getResultType() == RuleResult.ResultType.ERROR) {
                         overallSuccess = false;
                         failureMessages.add(item.getSectionType() + " '" + item.getItemId() + "' error: " + itemResult.getMessage());
+                    } else if (itemResult.isTriggered() &&
+                              SeverityConstants.ERROR.equalsIgnoreCase(itemResult.getSeverity())) {
+                        // Rule matched with ERROR severity - this is a validation failure
+                        overallSuccess = false;
+                        failureMessages.add(item.getSectionType() + " '" + item.getItemId() + "' validation failed: " + itemResult.getMessage());
+                        logger.warn("Validation failure: {} '{}' triggered with {} severity: {}",
+                                   item.getSectionType(), item.getItemId(), itemResult.getSeverity(), itemResult.getMessage());
                     }
 
                     // Update enriched data with results
@@ -1170,9 +1190,15 @@ public class RulesEngine {
                             logger.info("Processing {} individual rules", allRules.size());
                             RuleResult ruleResult = executeRulesList(allRules, enrichedData);
 
+                            // Check for ERROR result type OR ERROR severity on matched rules
                             if (ruleResult.getResultType() == RuleResult.ResultType.ERROR) {
                                 overallSuccess = false;
                                 failureMessages.add("Rule evaluation error: " + ruleResult.getMessage());
+                            } else if (ruleResult.isTriggered() &&
+                                      SeverityConstants.ERROR.equalsIgnoreCase(ruleResult.getSeverity())) {
+                                overallSuccess = false;
+                                failureMessages.add("Rule validation failed: " + ruleResult.getMessage());
+                                logger.warn("Rule validation failure: {} with ERROR severity", ruleResult.getRuleName());
                             }
 
                             // Update enriched data with results from rules (field mappings)
@@ -1188,9 +1214,15 @@ public class RulesEngine {
                             logger.info("Processing {} rule groups", allRuleGroups.size());
                             RuleResult ruleGroupResult = executeRuleGroupsList(allRuleGroups, enrichedData);
 
+                            // Check for ERROR result type OR ERROR severity on matched rule groups
                             if (ruleGroupResult.getResultType() == RuleResult.ResultType.ERROR) {
                                 overallSuccess = false;
                                 failureMessages.add("Rule group evaluation error: " + ruleGroupResult.getMessage());
+                            } else if (ruleGroupResult.isTriggered() &&
+                                      SeverityConstants.ERROR.equalsIgnoreCase(ruleGroupResult.getSeverity())) {
+                                overallSuccess = false;
+                                failureMessages.add("Rule group validation failed: " + ruleGroupResult.getMessage());
+                                logger.warn("Rule group validation failure: {} with ERROR severity", ruleGroupResult.getRuleName());
                             }
                         }
                         break;

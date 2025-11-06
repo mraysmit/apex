@@ -211,7 +211,8 @@ class UnifiedRuleEvaluatorTest {
 
         // Then
         assertNotNull(result, "Result should not be null");
-        assertEquals(RuleResult.ResultType.ERROR, result.getResultType());
+        // Missing parameters should return NO_MATCH (rule doesn't apply), not ERROR
+        assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType());
         assertTrue(result.getMessage().contains("Missing parameters"),
                   "Error message should indicate missing parameters");
     }

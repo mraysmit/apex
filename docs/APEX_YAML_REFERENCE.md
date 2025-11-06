@@ -1440,6 +1440,39 @@ Rule Groups allow you to organize related rules and apply logical operators (AND
 
 APEX supports two approaches for referencing rules in rule groups: **`rule-ids`** (simple) and **`rule-references`** (advanced).
 
+> **⚠️ CRITICAL: Inline Rule Definitions Not Supported**
+>
+> Rule groups do **NOT** support inline rule definitions. Rules must be defined in the `rules` section and referenced by ID in rule groups.
+>
+> **❌ INCORRECT (Inline Definitions):**
+> ```yaml
+> rule-groups:
+>   - id: "my-rule-group"
+>     rules:  # ❌ NOT SUPPORTED!
+>       - id: "my-rule"
+>         condition: "#value > 100"
+>         message: "Value too high"
+> ```
+>
+> **✅ CORRECT (Reference by ID):**
+> ```yaml
+> # Define rules in the rules section
+> rules:
+>   - id: "my-rule"
+>     condition: "#value > 100"
+>     message: "Value too high"
+>     severity: "ERROR"
+>
+> # Reference rules in rule groups
+> rule-groups:
+>   - id: "my-rule-group"
+>     operator: "AND"
+>     rule-ids:
+>       - "my-rule"
+> ```
+>
+> **Why This Design?** Rules are designed to be reusable across multiple rule groups. Defining rules once in the `rules` section and referencing them by ID promotes reusability and maintainability.
+
 #### 5.2.1 Simple Approach: `rule-ids`
 
 Use `rule-ids` for straightforward rule grouping with automatic sequencing:
@@ -2671,6 +2704,42 @@ scenario:
 ## Enrichment Groups Section
 
 Enrichment groups compose individual enrichments into reusable, ordered collections with AND/OR semantics, optional short-circuiting, and optional parallel execution. This mirrors Rule Groups, but operates on `enrichments` instead of `rules`.
+
+> **⚠️ CRITICAL: Inline Enrichment Definitions Not Supported**
+>
+> Enrichment groups do **NOT** support inline enrichment definitions. Enrichments must be defined in the `enrichments` section and referenced by ID in enrichment groups.
+>
+> **❌ INCORRECT (Inline Definitions):**
+> ```yaml
+> enrichment-groups:
+>   - id: "my-enrichment-group"
+>     enrichments:  # ❌ NOT SUPPORTED!
+>       - id: "my-enrichment"
+>         type: "field-enrichment"
+>         field-mappings:
+>           - source-field: "sourceField"
+>             target-field: "targetField"
+> ```
+>
+> **✅ CORRECT (Reference by ID):**
+> ```yaml
+> # Define enrichments in the enrichments section
+> enrichments:
+>   - id: "my-enrichment"
+>     type: "field-enrichment"
+>     field-mappings:
+>       - source-field: "sourceField"
+>         target-field: "targetField"
+>
+> # Reference enrichments in enrichment groups
+> enrichment-groups:
+>   - id: "my-enrichment-group"
+>     operator: "AND"
+>     enrichment-ids:
+>       - "my-enrichment"
+> ```
+>
+> **Why This Design?** Enrichments are designed to be reusable across multiple enrichment groups. Defining enrichments once in the `enrichments` section and referencing them by ID promotes reusability and maintainability.
 
 Example:
 

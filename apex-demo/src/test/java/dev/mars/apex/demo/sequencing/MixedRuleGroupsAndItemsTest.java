@@ -17,26 +17,27 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * PRIORITY 2 TEST: Mixed Rule Groups and Items in Sequential Mode
- * 
+ *
  * This test verifies complex interleaving of rules and rule groups:
- * - rule-refs expands BEFORE inline rules
- * - rule-group-refs expands BEFORE inline rule groups
+ * - rule-refs expands to BOTH individual rules AND rule groups
+ * - Inline rules execute AFTER rule-refs
+ * - Inline rule groups execute AFTER inline rules
  * - All items execute in document order
- * 
+ *
  * Test Scenario: OTC Options Trade Processing
- * 
+ *
  * Expected Processing Order:
  * 1. Enrichments execute first (to provide data for rules)
  * 2. R1-from-ref: validate-notional-limit (from external-rules-otc.yaml)
  * 3. R2-from-ref: validate-strike-price (from external-rules-otc.yaml)
- * 4. R3-inline: validate-market-data-present (inline rule)
- * 5. RG1-from-ref: trade-validation-group (from external-rule-groups-otc.yaml)
- * 6. RG2-from-ref: risk-validation-group (from external-rule-groups-otc.yaml)
+ * 4. RG1-from-ref: trade-validation-group (from external-rule-groups-otc.yaml)
+ * 5. RG2-from-ref: risk-validation-group (from external-rule-groups-otc.yaml)
+ * 6. R3-inline: validate-market-data-present (inline rule)
  * 7. RG3-inline: compliance-validation-group (inline rule group)
- * 
+ *
  * This proves:
  * - Individual rules and rule groups can coexist
- * - Refs expand before inline items for both rules and groups
+ * - rule-refs loads both rules AND rule groups
  * - Complex interleaving works correctly
  */
 public class MixedRuleGroupsAndItemsTest {

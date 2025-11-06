@@ -1,0 +1,97 @@
+# UNUSUAL ORDER TEST: Rules Before Enrichments
+#
+# This YAML file has rules BEFORE enrichments (reverse of typical order).
+# This is unusual but valid - rules validate input data before enrichment.
+#
+# Expected Processing Order:
+# R1-ref → R2-ref → R3-inline → RG1-ref → RG2-ref → RG3-inline → E1-ref → E2-ref → E3-inline → EG1-ref → EG2-ref → EG3-inline
+
+metadata:
+  name: "Rules Before Enrichments Test"
+  description: "Unusual but valid order - rules execute before enrichments"
+  version: "1.0"
+
+# PHASE 1: Load external rules (R1, R2) and rule groups (RG1, RG2)
+rule-refs:
+  - name: "external-rules"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-rules-otc.yaml"
+  - name: "external-rule-groups"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-rule-groups-otc.yaml"
+
+# PHASE 2: Inline rule (R3)
+rules:
+  - id: "validate-product-type"
+    name: "Validate Product Type"
+    condition: "#optionType == null || (#optionType != 'CALL' && #optionType != 'PUT')"
+    message: "Product type must be CALL or PUT"
+    severity: "ERROR"
+    enabled: true
+
+# PHASE 3: Inline rule group (RG3)
+rule-groups:
+  - id: "input-validation-group"
+    name: "Input Validation Group"
+    description: "Validates input data before enrichment"
+    execution-mode: "sequential"
+    stop-on-first-failure: false
+    rules:
+      - id: "validate-required-fields"
+        name: "Validate Required Fields"
+        condition: "#underlying != null && #counterparty != null && #notionalAmount != null && #strike != null && #optionType != null"
+        message: "All required input fields present"
+        severity: "INFO"
+        enabled: true
+
+# PHASE 4: Load external enrichments (E1, E2) and enrichment groups (EG1, EG2)
+enrichment-refs:
+  - name: "external-enrichments"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-enrichments-otc.yaml"
+  - name: "external-enrichment-groups"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-enrichment-groups-otc.yaml"
+
+# PHASE 5: Inline enrichments (E3, E4)
+enrichments:
+  - id: "enrich-counterparty-data"
+    name: "Enrich Counterparty Data"
+    type: "lookup-enrichment"
+    condition: "#counterparty != null"
+    lookup-config:
+      lookup-key: "#counterparty"
+      lookup-dataset:
+        type: "inline"
+        key-field: "counterparty"
+        data:
+          - counterparty: "HEDGE_FUND_X"
+            counterpartyRating: "A+"
+            creditLimit: 500000000
+          - counterparty: "BANK_Y"
+            counterpartyRating: "AA"
+            creditLimit: 1000000000
+          - counterparty: "CORP_Z"
+            counterpartyRating: "BBB"
+            creditLimit: 200000000
+    field-mappings:
+      - source-field: "counterpartyRating"
+        target-field: "counterpartyRating"
+      - source-field: "creditLimit"
+        target-field: "creditLimit"
+    enabled: true
+
+  - id: "enrich-product-category"
+    name: "Enrich Product Category"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "optionType"
+        target-field: "productCategory"
+        transformation: "#optionType == 'CALL' ? 'EQUITY_CALL_OPTION' : 'EQUITY_PUT_OPTION'"
+
+# PHASE 6: Inline enrichment group (EG3) - references enrichment defined above
+enrichment-groups:
+  - id: "product-enrichment-group"
+    name: "Product Enrichment Group"
+    description: "Enriches product-specific data"
+    operator: "AND"
+    stop-on-first-failure: false
+    enrichment-ids:
+      - "enrich-product-category"
+

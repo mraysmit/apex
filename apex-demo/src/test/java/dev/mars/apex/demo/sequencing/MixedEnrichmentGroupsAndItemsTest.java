@@ -17,26 +17,27 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * PRIORITY 2 TEST: Mixed Enrichment Groups and Items in Sequential Mode
- * 
+ *
  * This test verifies complex interleaving of enrichments and enrichment groups:
- * - enrichment-refs expands BEFORE inline enrichments
- * - enrichment-group-refs expands BEFORE inline enrichment groups
+ * - enrichment-refs expands to BOTH individual enrichments AND enrichment groups
+ * - Inline enrichments execute AFTER enrichment-refs
+ * - Inline enrichment groups execute AFTER inline enrichments
  * - All items execute in document order
- * 
+ *
  * Test Scenario: OTC Options Trade Processing
- * 
+ *
  * Expected Processing Order:
  * 1. E1-from-ref: enrich-market-data (from external-enrichments-otc.yaml)
  * 2. E2-from-ref: calculate-greeks (from external-enrichments-otc.yaml)
- * 3. E3-inline: enrich-counterparty-data (inline enrichment)
- * 4. EG1-from-ref: market-data-enrichment-group (from external-enrichment-groups-otc.yaml)
- * 5. EG2-from-ref: risk-metrics-enrichment-group (from external-enrichment-groups-otc.yaml)
+ * 3. EG1-from-ref: market-data-enrichment-group (from external-enrichment-groups-otc.yaml)
+ * 4. EG2-from-ref: risk-metrics-enrichment-group (from external-enrichment-groups-otc.yaml)
+ * 5. E3-inline: enrich-counterparty-data (inline enrichment)
  * 6. EG3-inline: compliance-enrichment-group (inline enrichment group)
  * 7. R1: validate-all-enrichments-executed
- * 
+ *
  * This proves:
  * - Individual enrichments and enrichment groups can coexist
- * - Refs expand before inline items for both enrichments and groups
+ * - enrichment-refs loads both enrichments AND enrichment groups
  * - Complex interleaving works correctly
  */
 public class MixedEnrichmentGroupsAndItemsTest {

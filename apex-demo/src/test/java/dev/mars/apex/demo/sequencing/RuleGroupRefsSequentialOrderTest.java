@@ -16,10 +16,10 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * PRIORITY 2 TEST: Rule-Group-Refs Placeholder Expansion in Sequential Mode
- * 
- * This test verifies rule-group-refs placeholder expansion:
- * - rule-group-refs placeholder is inserted at correct position during YAML parsing
+ * PRIORITY 2 TEST: Rule-Refs with Groups Placeholder Expansion in Sequential Mode
+ *
+ * This test verifies rule-refs placeholder expansion when loading rule groups:
+ * - rule-refs placeholder is inserted at correct position during YAML parsing
  * - Placeholder is expanded to actual rule groups AFTER reference processing
  * - Referenced rule groups execute at the correct position in document order
  * 
@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - RG1 and RG2 would execute after R1
  * 
  * WITH the fix:
- * - rule-group-refs placeholder is expanded at correct position
+ * - rule-refs placeholder is expanded at correct position
  * - Order is: E1 → E2 → E3 → RG1 → RG2 → R1 (CORRECT!)
  * - All rule groups execute before inline rule
  */
@@ -56,9 +56,9 @@ public class RuleGroupRefsSequentialOrderTest {
     }
 
     @Test
-    @DisplayName("rule-group-refs placeholder expands at correct position in document order")
+    @DisplayName("rule-refs placeholder expands rule groups at correct position in document order")
     public void testRuleGroupRefsPlaceholderExpansion() throws Exception {
-        LOGGER.info("=== TESTING: Rule-Group-Refs Placeholder Expansion ===");
+        LOGGER.info("=== TESTING: Rule-Refs (Groups) Placeholder Expansion ===");
 
         // Arrange
         String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/RuleGroupRefsSequentialOrderTest.yaml";

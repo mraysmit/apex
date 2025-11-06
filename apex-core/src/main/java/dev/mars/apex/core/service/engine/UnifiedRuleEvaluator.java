@@ -213,7 +213,8 @@ public class UnifiedRuleEvaluator {
         Set<String> missingParameters = RuleParameterExtractor.validateParameters(rule, facts);
         if (!missingParameters.isEmpty()) {
             TestAwareLogger.warn(rulesLogger, "Missing parameters for rule '{}': {}", rule.getName(), missingParameters);
-            return RuleResult.error(rule.getName(), "Missing parameters: " + missingParameters, rule.getSeverity());
+            // Return NO_MATCH instead of ERROR - missing parameters mean the rule doesn't apply to this data
+            return RuleResult.noMatch(rule.getName(), "Missing parameters: " + missingParameters, rule.getSeverity());
         }
 
         // Create evaluation context

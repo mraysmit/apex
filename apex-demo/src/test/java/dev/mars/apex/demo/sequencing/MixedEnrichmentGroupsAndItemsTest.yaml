@@ -4,17 +4,22 @@ metadata:
   version: "1.0.0"
   description: "Test mixed individual enrichments and enrichment groups in document order"
 
-# YAML Section Order: enrichment-refs → enrichments → enrichment-group-refs → enrichment-groups
-# Expected Processing Order: E1-ref → E2-ref → E3-inline → EG1-ref → EG2-ref → EG3-inline
+# YAML Section Order: enrichment-refs → enrichments → enrichment-groups
+# Expected Processing Order: E1-ref → E2-ref → EG1-ref → EG2-ref → E3-inline → EG3-inline
+# Note: enrichment-refs loads BOTH individual enrichments AND enrichment groups from external files
 
-# Section 1: Enrichment-refs (placeholder - expands to E1 and E2 from external file)
+# Section 1: Enrichment-refs (placeholder - expands to E1, E2, EG1, EG2 from external files)
 enrichment-refs:
   - name: "external-enrichments"
     source: "src/test/java/dev/mars/apex/demo/sequencing/external-enrichments-otc.yaml"
     enabled: true
     description: "Load individual enrichments from external file"
+  - name: "external-enrichment-groups"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-enrichment-groups-otc.yaml"
+    enabled: true
+    description: "Load enrichment groups from external file"
 
-# Section 2: Inline enrichment (executes after enrichment-refs)
+# Section 2: Inline enrichments (executes after enrichment-refs)
 enrichments:
   - id: "enrich-counterparty-data"
     name: "Enrich Counterparty Data"
@@ -43,27 +48,7 @@ enrichments:
         target-field: "counterpartyCreditLimit"
     enabled: true
 
-# Section 3: Enrichment-group-refs (placeholder - expands to EG1 and EG2 from external file)
-enrichment-group-refs:
-  - name: "external-enrichment-groups"
-    source: "src/test/java/dev/mars/apex/demo/sequencing/external-enrichment-groups-otc.yaml"
-    enabled: true
-    description: "Load enrichment groups from external file"
-
-# Section 4: Inline enrichment group (executes after enrichment-group-refs)
-enrichment-groups:
-  - id: "compliance-enrichment-group"
-    name: "Compliance Enrichment Group"
-    description: "Group for compliance-related enrichments"
-    operator: "AND"
-    stop-on-first-failure: false
-    priority: 30
-    enrichment-ids:
-      - "enrich-regulatory-status"
-      - "calculate-compliance-score"
-
-# Enrichments used by the inline enrichment group
-enrichments:
+  # Enrichments used by the inline enrichment group
   - id: "enrich-regulatory-status"
     name: "Enrich Regulatory Status"
     type: "lookup-enrichment"
@@ -100,6 +85,18 @@ enrichments:
       - source-field: "calculatedScore"
         target-field: "complianceScore"
     enabled: true
+
+# Section 3: Inline enrichment group (executes after inline enrichments)
+enrichment-groups:
+  - id: "compliance-enrichment-group"
+    name: "Compliance Enrichment Group"
+    description: "Group for compliance-related enrichments"
+    operator: "AND"
+    stop-on-first-failure: false
+    priority: 30
+    enrichment-ids:
+      - "enrich-regulatory-status"
+      - "calculate-compliance-score"
 
 # Rules to validate all enrichments executed in correct order
 rules:
