@@ -59,21 +59,21 @@ enrichments:
 rules:
   - id: "validate-market-data-enriched"
     name: "Validate Market Data Enriched"
-    condition: "#currentSpotPrice != null && #impliedVolatility != null"
+    condition: "#currentSpotPrice == null || #impliedVolatility == null"
     message: "Market data must be enriched (from external file, executed FIRST)"
     severity: "ERROR"
     enabled: true
 
   - id: "validate-greeks-calculated"
     name: "Validate Greeks Calculated"
-    condition: "#optionDelta != null"
+    condition: "#optionDelta == null"
     message: "Option greeks must be calculated (from external file, depends on market data)"
     severity: "ERROR"
     enabled: true
 
   - id: "validate-counterparty-enriched"
     name: "Validate Counterparty Data Enriched"
-    condition: "#counterpartyCreditRating != null && #counterpartyCreditLimit != null"
+    condition: "#counterpartyCreditRating == null || #counterpartyCreditLimit == null"
     message: "Counterparty data must be enriched (inline, executed AFTER refs)"
     severity: "ERROR"
     enabled: true

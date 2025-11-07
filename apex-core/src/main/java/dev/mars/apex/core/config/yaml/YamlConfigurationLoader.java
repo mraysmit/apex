@@ -465,18 +465,28 @@ public class YamlConfigurationLoader {
                 // Load the referenced rule file
                 YamlRuleConfiguration referencedConfig = loadRuleFile(ref.getSource());
 
+                // Check if external file has BOTH rules and rule-groups
+                boolean hasRules = referencedConfig.getRules() != null && !referencedConfig.getRules().isEmpty();
+                boolean hasRuleGroups = referencedConfig.getRuleGroups() != null && !referencedConfig.getRuleGroups().isEmpty();
+
                 // Merge rules from referenced file
-                if (referencedConfig.getRules() != null) {
+                if (hasRules) {
                     // Initialize rules list if it doesn't exist and we have rules to add
                     if (config.getRules() == null) {
                         config.setRules(new ArrayList<>());
                     }
 
-                    // Track IDs before adding
-                    for (YamlRule rule : referencedConfig.getRules()) {
-                        if (rule.getId() != null) {
-                            referencedRuleIds.add(rule.getId());
+                    // Track IDs ONLY if there are NO rule-groups
+                    // When groups exist, rules are DEFINITIONS ONLY
+                    if (!hasRuleGroups) {
+                        for (YamlRule rule : referencedConfig.getRules()) {
+                            if (rule.getId() != null) {
+                                referencedRuleIds.add(rule.getId());
+                            }
                         }
+                        LOGGER.info("Tracked " + referencedConfig.getRules().size() + " rule IDs for execution (no groups present)");
+                    } else {
+                        LOGGER.info("Skipped tracking rule IDs (rule-groups present - rules are definitions only)");
                     }
 
                     config.getRules().addAll(referencedConfig.getRules());
@@ -484,13 +494,13 @@ public class YamlConfigurationLoader {
                 }
 
                 // Merge rule groups from referenced file
-                if (referencedConfig.getRuleGroups() != null) {
+                if (hasRuleGroups) {
                     // Initialize rule groups list if it doesn't exist and we have groups to add
                     if (config.getRuleGroups() == null) {
                         config.setRuleGroups(new ArrayList<>());
                     }
 
-                    // Track IDs before adding
+                    // Track group IDs for execution
                     for (YamlRuleGroup group : referencedConfig.getRuleGroups()) {
                         if (group.getId() != null) {
                             referencedRuleGroupIds.add(group.getId());
@@ -551,18 +561,51 @@ public class YamlConfigurationLoader {
                 // Load the referenced enrichment file
                 YamlRuleConfiguration referencedConfig = loadRuleFile(ref.getSource());
 
+                // Check if external file has enrichments and/or enrichment-groups
+                boolean hasEnrichments = referencedConfig.getEnrichments() != null && !referencedConfig.getEnrichments().isEmpty();
+                boolean hasEnrichmentGroups = referencedConfig.getEnrichmentGroups() != null && !referencedConfig.getEnrichmentGroups().isEmpty();
+
+                // Collect enrichment IDs that are referenced by enrichment-groups
+                Set<String> referencedByGroups = new HashSet<>();
+                if (hasEnrichmentGroups) {
+                    for (YamlEnrichmentGroup group : referencedConfig.getEnrichmentGroups()) {
+                        if (group.getEnrichmentIds() != null) {
+                            referencedByGroups.addAll(group.getEnrichmentIds());
+                        }
+                    }
+                    LOGGER.fine("Found " + referencedByGroups.size() + " enrichment IDs referenced by groups: " + referencedByGroups);
+                }
+
                 // Merge enrichments from referenced file
-                if (referencedConfig.getEnrichments() != null) {
+                if (hasEnrichments) {
                     // Initialize enrichments list if it doesn't exist and we have enrichments to add
                     if (config.getEnrichments() == null) {
                         config.setEnrichments(new ArrayList<>());
                     }
 
-                    // Track IDs before adding
+                    // Track enrichment IDs that are NOT referenced by any enrichment-group
+                    // Enrichments referenced by groups are definitions only (executed by the group)
+                    // Enrichments NOT referenced by groups execute directly
+                    int trackedCount = 0;
+                    int skippedCount = 0;
                     for (YamlEnrichment enrichment : referencedConfig.getEnrichments()) {
                         if (enrichment.getId() != null) {
-                            referencedEnrichmentIds.add(enrichment.getId());
+                            if (!referencedByGroups.contains(enrichment.getId())) {
+                                // Not referenced by any group - track for direct execution
+                                referencedEnrichmentIds.add(enrichment.getId());
+                                trackedCount++;
+                            } else {
+                                // Referenced by a group - skip tracking (definition only)
+                                skippedCount++;
+                            }
                         }
+                    }
+
+                    if (hasEnrichmentGroups) {
+                        LOGGER.info("Tracked " + trackedCount + " standalone enrichments for execution, " +
+                                   "skipped " + skippedCount + " enrichments (referenced by groups - definitions only)");
+                    } else {
+                        LOGGER.info("Tracked " + trackedCount + " enrichment IDs for execution (no groups present)");
                     }
 
                     config.getEnrichments().addAll(referencedConfig.getEnrichments());
@@ -570,13 +613,13 @@ public class YamlConfigurationLoader {
                 }
 
                 // Merge enrichment groups from referenced file
-                if (referencedConfig.getEnrichmentGroups() != null) {
+                if (hasEnrichmentGroups) {
                     // Initialize enrichment groups list if it doesn't exist and we have groups to add
                     if (config.getEnrichmentGroups() == null) {
                         config.setEnrichmentGroups(new ArrayList<>());
                     }
 
-                    // Track IDs before adding
+                    // Track group IDs for execution
                     for (YamlEnrichmentGroup group : referencedConfig.getEnrichmentGroups()) {
                         if (group.getId() != null) {
                             referencedEnrichmentGroupIds.add(group.getId());

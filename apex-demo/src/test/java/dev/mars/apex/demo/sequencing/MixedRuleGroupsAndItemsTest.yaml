@@ -77,8 +77,8 @@ rule-refs:
 rules:
   - id: "validate-market-data-present"
     name: "Validate Market Data Present"
-    condition: "#currentSpotPrice == null || #impliedVolatility == null"
-    message: "Market data must be present for option pricing"
+    condition: "#optionType != null && #optionType == 'CALL' && #strike != null && #strike < 4600"
+    message: "Mid-strike CALL options require market data validation"
     severity: "ERROR"
     enabled: true
 
@@ -92,8 +92,8 @@ rules:
 
   - id: "validate-counterparty-approved"
     name: "Validate Counterparty Approved"
-    condition: "#counterparty == null"
-    message: "Counterparty must be specified and approved"
+    condition: "#optionType != null && #optionType == 'PUT' && #strike != null && #strike <= 2000"
+    message: "Low-strike PUT options require counterparty approval"
     severity: "ERROR"
     enabled: true
 

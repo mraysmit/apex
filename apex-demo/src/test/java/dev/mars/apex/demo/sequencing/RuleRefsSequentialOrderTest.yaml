@@ -35,7 +35,7 @@ rule-refs:
 rules:
   - id: "validate-enrichment-completed"
     name: "Validate Enrichment Completed"
-    condition: "#enrichedNotional != null && #enrichedStrike != null"
+    condition: "#enrichedNotional == null || #enrichedStrike == null"
     message: "Trade data must be enriched before validation"
     severity: "ERROR"
     enabled: true

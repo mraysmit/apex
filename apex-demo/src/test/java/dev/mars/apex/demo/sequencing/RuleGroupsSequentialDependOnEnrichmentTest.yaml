@@ -29,13 +29,13 @@ enrichments:
 rules:
   - id: "validate-tier"
     name: "Validate Tier"
-    condition: "#customerTier != null"
+    condition: "#customerTier == null"
     message: "Customer tier is required"
     severity: "ERROR"
     priority: 1
   - id: "validate-credit-limit"
     name: "Validate Credit Limit"
-    condition: "#creditLimit != null && #creditLimit > 0"
+    condition: "#creditLimit == null || #creditLimit <= 0"
     message: "Credit limit must be positive"
     severity: "ERROR"
     priority: 2

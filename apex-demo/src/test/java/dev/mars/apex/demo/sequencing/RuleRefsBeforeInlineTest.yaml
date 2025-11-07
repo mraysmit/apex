@@ -57,7 +57,7 @@ rule-refs:
 rules:
   - id: "validate-counterparty-enriched"
     name: "Validate Counterparty Data Enriched"
-    condition: "#counterpartyCreditRating != null && #counterpartyCreditLimit != null"
+    condition: "#counterpartyCreditRating == null || #counterpartyCreditLimit == null"
     message: "Counterparty data must be enriched (inline rule, executed AFTER refs)"
     severity: "ERROR"
     enabled: true

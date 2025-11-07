@@ -1,0 +1,8 @@
+name: "Test 3: Minimal Enrichment-Group Test"
+description: "Minimal test to verify enrichment-groups can execute lookup enrichments"
+
+# Load external file with enrichment-group
+enrichment-refs:
+  - name: "external-minimal"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/test3-external.yaml"
+

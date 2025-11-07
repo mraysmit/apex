@@ -51,7 +51,7 @@ rule-refs:
 rules:
   - id: "validate-enrichments-complete"
     name: "Validate Enrichments Complete"
-    condition: "#currentSpotPrice != null && #optionDelta != null && #productType != null"
+    condition: "#currentSpotPrice == null || #optionDelta == null || #productType == null"
     message: "All enrichments must be complete (inline rule, executed AFTER refs)"
     severity: "ERROR"
     enabled: true

@@ -1,0 +1,35 @@
+name: "Test 2: External File with Groups"
+description: "External file with BOTH enrichments and enrichment-groups"
+
+# enrichment-groups section: Controls EXECUTION
+# This section defines HOW and WHEN enrichments execute
+enrichment-groups:
+  - id: "group1"
+    name: "Group 1"
+    operator: "AND"
+    enrichment-ids:
+      - "e1"
+      - "e2"
+
+# enrichments section: DEFINITION ONLY
+# This section defines WHAT enrichments do
+# These should NOT execute individually when groups exist
+enrichments:
+  - id: "e1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('e1', 'value-e1')"
+      result-field: "valueE1"
+    field-mappings:
+      - source-field: "valueE1"
+        target-field: "valueE1"
+
+  - id: "e2"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('e2', 'value-e2')"
+      result-field: "valueE2"
+    field-mappings:
+      - source-field: "valueE2"
+        target-field: "valueE2"
+

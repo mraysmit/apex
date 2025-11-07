@@ -27,7 +27,7 @@ enrichments:
 rules:
   - id: "validate-tier-exists"
     name: "Validate Tier Exists"
-    condition: "#customerTier != null"
+    condition: "#customerTier == null"
     message: "Customer tier must be enriched"
     severity: "ERROR"
     priority: 1

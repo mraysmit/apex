@@ -1,0 +1,28 @@
+name: "Test 2: Enrichment-Groups ONLY Guarantee"
+description: "Proves that ONLY enrichment-groups execute (not individual enrichments)"
+
+# Position 1: Inline enrichment BEFORE enrichment-refs
+enrichments:
+  - id: "inline-before"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('inline-before', 'value-before')"
+      result-field: "valueBefore"
+    field-mappings:
+      - source-field: "valueBefore"
+        target-field: "valueBefore"
+
+# Position 2: Reference to external file with BOTH enrichments and enrichment-groups
+# ONLY enrichment-groups should execute
+enrichment-refs:
+  - name: "external-with-groups"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/test2-external.yaml"
+
+# Position 3: Rule AFTER enrichment-refs
+rules:
+  - id: "inline-after"
+    name: "Inline After Rule"
+    condition: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('inline-after', false)"
+    message: "This rule records execution order"
+    severity: "INFO"
+

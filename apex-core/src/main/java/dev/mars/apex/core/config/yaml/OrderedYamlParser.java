@@ -35,8 +35,14 @@ public class OrderedYamlParser {
     // Known YAML section names in APEX
     private static final Set<String> KNOWN_SECTIONS = Set.of(
         "metadata", "data-sources", "data-source-refs", "rule-refs", "enrichment-refs",
-        "data-sinks", "categories", "rules", "rule-groups", "enrichments", 
+        "data-sinks", "categories", "rules", "rule-groups", "enrichments",
         "enrichment-groups", "transformations", "rule-chains", "pipeline", "error-recovery"
+    );
+
+    // Sections that support numbered suffixes (e.g., enrichments-1, enrichments-2)
+    private static final Set<String> NUMBERED_SUFFIX_SECTIONS = Set.of(
+        "enrichments", "rules", "enrichment-groups", "rule-groups",
+        "transformations", "rule-chains"
     );
     
     private final ObjectMapper yamlMapper;
@@ -131,6 +137,42 @@ public class OrderedYamlParser {
     }
     
     /**
+     * Normalize section name by removing numeric suffix.
+     * Examples: "enrichments-1" -> "enrichments", "rules-2" -> "rules"
+     *
+     * @param sectionName Section name (possibly with numeric suffix)
+     * @return Normalized section name without suffix
+     */
+    private String normalizeSectionName(String sectionName) {
+        if (sectionName == null) {
+            return null;
+        }
+
+        // Check if section name ends with "-<number>"
+        if (sectionName.matches(".*-\\d+$")) {
+            String baseName = sectionName.replaceAll("-\\d+$", "");
+            // Only normalize if the base name is a known section that supports numbering
+            if (NUMBERED_SUFFIX_SECTIONS.contains(baseName)) {
+                LOGGER.fine("Normalized section name: " + sectionName + " -> " + baseName);
+                return baseName;
+            }
+        }
+
+        return sectionName;
+    }
+
+    /**
+     * Check if a section name is a known section (with or without numeric suffix).
+     *
+     * @param sectionName Section name to check
+     * @return true if known section, false otherwise
+     */
+    private boolean isKnownSection(String sectionName) {
+        String normalized = normalizeSectionName(sectionName);
+        return KNOWN_SECTIONS.contains(normalized);
+    }
+
+    /**
      * Extract the order of sections as they appear in the YAML document.
      *
      * @param yamlMap Ordered map from SnakeYAML parsing
@@ -141,7 +183,7 @@ public class OrderedYamlParser {
 
         // LinkedHashMap from SnakeYAML preserves insertion order
         for (String key : yamlMap.keySet()) {
-            if (KNOWN_SECTIONS.contains(key)) {
+            if (isKnownSection(key)) {
                 sectionOrder.add(key);
                 LOGGER.fine("Found section in order: " + key);
             } else {

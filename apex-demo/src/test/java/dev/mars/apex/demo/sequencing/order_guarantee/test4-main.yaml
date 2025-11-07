@@ -1,0 +1,57 @@
+name: "Test 4: Standalone Enrichments with Groups"
+description: "Proves enrichments NOT referenced by groups execute directly"
+
+# Enrichments: Mix of standalone and grouped
+enrichments:
+  # Standalone enrichment (NOT referenced by any group)
+  - id: "standalone-1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('standalone-1', 'value-s1')"
+      result-field: "valueS1"
+    field-mappings:
+      - source-field: "valueS1"
+        target-field: "valueS1"
+    enabled: true
+
+  # Grouped enrichment (referenced by group-A)
+  - id: "grouped-1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('grouped-1', 'value-g1')"
+      result-field: "valueG1"
+    field-mappings:
+      - source-field: "valueG1"
+        target-field: "valueG1"
+    enabled: true
+
+  # Standalone enrichment (NOT referenced by any group)
+  - id: "standalone-2"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('standalone-2', 'value-s2')"
+      result-field: "valueS2"
+    field-mappings:
+      - source-field: "valueS2"
+        target-field: "valueS2"
+    enabled: true
+
+  # Grouped enrichment (referenced by group-A)
+  - id: "grouped-2"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('grouped-2', 'value-g2')"
+      result-field: "valueG2"
+    field-mappings:
+      - source-field: "valueG2"
+        target-field: "valueG2"
+    enabled: true
+
+# Enrichment group that references grouped-1 and grouped-2
+enrichment-groups:
+  - id: "group-A"
+    name: "Group A"
+    operator: "AND"
+    enrichment-ids:
+      - "grouped-1"
+      - "grouped-2"
